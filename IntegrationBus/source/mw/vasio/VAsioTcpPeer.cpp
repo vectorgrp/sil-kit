@@ -329,12 +329,6 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
 void VAsioTcpPeer::SendIbMsg(SerializedMessage buffer)
 {
-    //auto sendBuffer = buffer.ReleaseStorage();
-    //if (sendBuffer.size() > std::numeric_limits<uint32_t>::max())
-    //    throw std::runtime_error{"Message is too large"};
-
-    //    *reinterpret_cast<uint32_t*>(sendBuffer.data()) = static_cast<uint32_t>(sendBuffer.size());
-
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
 
     _sendingQueue.push(buffer.ReleaseStorage());
@@ -479,11 +473,7 @@ void VAsioTcpPeer::DispatchBuffer()
         memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
         //ensure buffer does not contain data from contiguous messages
         _msgBuffer.resize(msgSize);
-        //MessageBuffer msgBuffer{std::move(_msgBuffer)};
         SerializedMessage message{std::move(_msgBuffer)};
-        //drop message size by adjusting internal read position:
-        //(void)ExtractMessageSize(msgBuffer); 
-        //msgBuffer.SetFormatVersion(GetProtocolVersion());
         message.SetProtocolVersion(GetProtocolVersion());
         _ibConnection->OnSocketData(this, std::move(message));
 

@@ -119,7 +119,7 @@ auto VAsioTcpPeer::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 
 void VAsioTcpPeer::SetProtocolVersion(ProtocolVersion v)
 {
-        _protocolVersion= std::move(v);
+    _protocolVersion = std::move(v);
 }
 
 auto VAsioTcpPeer::GetProtocolVersion() const -> ProtocolVersion

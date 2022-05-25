@@ -6,7 +6,6 @@
 namespace ib {
 namespace sim {
 namespace eth {
-using namespace ib::sim::eth;
 
 ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetFrame& msg)
 {

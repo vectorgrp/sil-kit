@@ -34,8 +34,8 @@ class SerializedMessage
 public: //defaulted CTors
 	SerializedMessage(SerializedMessage&&) = default;
 	SerializedMessage& operator=(SerializedMessage&&) = default;
-	SerializedMessage(const SerializedMessage&) = delete;
-	SerializedMessage& operator=(const SerializedMessage&) = delete;
+	SerializedMessage(const SerializedMessage&) = default;
+	SerializedMessage& operator=(const SerializedMessage&) = default;
 
 public: // Sending a SerializedMessage: from T to binary blob
 	template<typename MessageT>
@@ -53,6 +53,8 @@ public: // Receiving a SerializedMessage: from binary blob to IbMessage<T>
 
 	template<typename ApiMessageT>
 	auto Deserialize() -> ApiMessageT;
+	template<typename ApiMessageT>
+	auto Deserialize() const -> ApiMessageT;
 
 	auto GetMessageKind() const -> VAsioMsgKind;
 	auto GetRegistryKind() const -> RegistryMessageKind;
@@ -85,6 +87,8 @@ SerializedMessage::SerializedMessage(const MessageT& message)
     _registryKind = registryMessageKind<MessageT>();
     WriteNetworkHeaders();
     Serialize(_buffer, message);
+    //Ensure we can directly Deserialize in unit tests by reading the header in again
+    ReadNetworkHeaders();
 }
 
 template <typename MessageT>
@@ -92,9 +96,11 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
 {
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
-    _buffer.SetFormatVersion(version);
+    _buffer.SetProtocolVersion(version);
     WriteNetworkHeaders();
     Serialize(_buffer, message);
+    //Ensure we can directly Deserialize in unit tests by reading the header in again
+    ReadNetworkHeaders();
 }
 
 template <typename MessageT>
@@ -106,6 +112,8 @@ SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress en
     _registryKind = registryMessageKind<MessageT>();
     WriteNetworkHeaders();
     Serialize(_buffer, message);
+    //Ensure we can directly Deserialize in unit tests by reading the header in again
+    ReadNetworkHeaders();
 }
 
 template <typename ApiMessageT>
@@ -113,6 +121,14 @@ auto SerializedMessage::Deserialize() -> ApiMessageT
 {
     ApiMessageT value{};
     AdlDeserialize(_buffer, value);
+    return value;
+}
+template <typename ApiMessageT>
+auto SerializedMessage::Deserialize() const -> ApiMessageT
+{
+    auto bufferCopy = _buffer;
+    ApiMessageT value{};
+    AdlDeserialize(bufferCopy, value);
     return value;
 }
 

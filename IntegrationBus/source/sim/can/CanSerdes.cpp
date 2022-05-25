@@ -8,8 +8,6 @@ namespace ib {
 namespace sim {
 namespace can {
 
-using namespace ib::sim::can;
-
 ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameEvent& msg)
 {
     buffer << msg.transmitId
@@ -105,7 +103,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanSetControlle
 
 using namespace ib::mw;
 // when changing any of the datatypes, add transparent compatibility code here,
-// based on the buffer.GetFormatVersion()
+// based on the buffer.GetProtocolVersion()
 
 //////////////////////////////////////////////////////////////////////
 // Serialize

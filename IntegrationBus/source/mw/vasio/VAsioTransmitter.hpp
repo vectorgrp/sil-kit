@@ -11,6 +11,8 @@
 #include "IIbServiceEndpoint.hpp"
 #include "traits/IbMsgTraits.hpp"
 
+#include "SerializedMessage.hpp"
+
 namespace ib {
 namespace mw {
 

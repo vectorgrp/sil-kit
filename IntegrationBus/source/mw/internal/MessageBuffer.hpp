@@ -49,16 +49,9 @@ public:
     // ----------------------------------------
     // Public methods for backward compatibility.
 
-    ProtocolVersion _formatVersion{CurrentProtocolVersion()};
     //! Set the format version to use for ser/des.
-    void SetFormatVersion(ProtocolVersion version)
-    {
-        _formatVersion = version;
-    }
-    auto GetFormatVersion() -> ProtocolVersion
-    {
-        return _formatVersion;
-    }
+    inline void SetProtocolVersion(ProtocolVersion version);
+    inline auto GetProtocolVersion() -> ProtocolVersion;
 
 
 public:
@@ -197,6 +190,7 @@ public:
 private:
     // ----------------------------------------
     // private members
+    ProtocolVersion _protocolVersion{CurrentProtocolVersion()};
     std::vector<uint8_t> _storage;
     std::size_t _wPos{0u};
     std::size_t _rPos{0u};
@@ -471,6 +465,15 @@ inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string,std::string
     }
     updatedMsg = std::move(tmp);
     return *this;
+}
+
+inline void MessageBuffer::SetProtocolVersion(ProtocolVersion version)
+{
+    _protocolVersion = version;
+}
+inline auto MessageBuffer::GetProtocolVersion() -> ProtocolVersion
+{
+    return _protocolVersion;
 }
     
 } // mw

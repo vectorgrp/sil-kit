@@ -161,7 +161,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Particip
 // Helper  for ProtocolVersion{3,0}
 void DeserializeCompat(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
-    if (buffer.GetFormatVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
         //need legacy support here, convert old format to current one
         protocol_3_0::ParticipantAnnouncementReply oldReply;
@@ -236,7 +236,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, SubscriptionAcknowledge&
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
 {
 
-    if (buffer.GetFormatVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
         //need legacy support here, convert old format to current one
         protocol_3_0::ParticipantAnnouncement oldAnnouncement{};
@@ -246,7 +246,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
         oldUri.acceptorUris = announcement.peerInfo.acceptorUris;
         buffer << oldAnnouncement;
     }
-    else if (buffer.GetFormatVersion() == CurrentProtocolVersion())
+    else if (buffer.GetProtocolVersion() == CurrentProtocolVersion())
     {
         buffer
             << announcement.messageHeader
@@ -261,7 +261,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
     //Backward compatibility
-    if (buffer.GetFormatVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
         //need legacy support here, convert old format to current one
         protocol_3_0::ParticipantAnnouncement oldAnnouncement;
@@ -287,7 +287,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
 {
     //Backward compatibility
-    if (buffer.GetFormatVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
         // the ParticipantAnnouncementReply was extended for proto v3.1
         protocol_3_0::ParticipantAnnouncementReply oldReply;
@@ -309,12 +309,12 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
     //Backward compatibility
-    if (buffer.GetFormatVersion() != CurrentProtocolVersion())
+    if (buffer.GetProtocolVersion() != CurrentProtocolVersion())
     {
         // Backward compatibility here is tricky. When connecting to a VAsioRegistry
         // we already negotiated a ProtocolVersion via the KnownParticipants message.
         // In all other cases we do not know the ProtocolVersion a priori here
-        if (buffer.GetFormatVersion() == ProtocolVersion{0,0})
+        if (buffer.GetProtocolVersion() == ProtocolVersion{0,0})
         {
             //Ok, uninitialized ProtocolVersion implies that we have a connection between two, non-registry peers
             //Let's guess the version based on the buffer size
@@ -330,7 +330,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
                 reply = maybeReply;
             } catch(...) {
                 //fall through to the backward compatible code
-                buffer.SetFormatVersion({3,0});
+                buffer.SetProtocolVersion({3,0});
                 DeserializeCompat(buffer, reply);
             }
         }
@@ -348,7 +348,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants& participants)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetFormatVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
         // the VAsioPeerInfo/PeerUri changed, and as such the vector in KnownParticipants
         protocol_3_0::KnownParticipants oldAnnouncement;

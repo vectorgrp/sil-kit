@@ -13,7 +13,7 @@ namespace sim {
 namespace data {
     bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs)
     {
-        return lhs.data  ==rhs.data
+        return lhs.data == rhs.data
             && lhs.timestamp == rhs.timestamp;
     }
 }

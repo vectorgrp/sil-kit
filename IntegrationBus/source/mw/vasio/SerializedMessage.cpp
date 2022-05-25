@@ -58,7 +58,7 @@ auto SerializedMessage::GetEndpointAddress() const -> EndpointAddress
 
 void SerializedMessage::SetProtocolVersion(ProtocolVersion version)
 {
-    _buffer.SetFormatVersion(version);
+    _buffer.SetProtocolVersion(version);
 }
 
 auto SerializedMessage::PeekRegistryMessageHeader() const -> RegistryMsgHeader
