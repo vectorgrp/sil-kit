@@ -1,17 +1,15 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#pragma once
+#include "ServiceSerdes.hpp"
 
-#include "MessageBuffer.hpp"
 #include "InternalSerdes.hpp"
 #include "ServiceDescriptor.hpp"
-
-#include "ServiceDatatypes.hpp"
 
 namespace ib {
 namespace mw {
 
-// ServiceDescriptor
+
+// ServiceDescriptor encoding is here, because it pulls in IbConfiguration 
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ib::mw::ServiceDescriptor& msg)
 {
@@ -43,8 +41,8 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
         ;
     return buffer;
 }
-
 namespace service {
+
 // ParticipantDiscoveryEvent
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ParticipantDiscoveryEvent& msg)
@@ -84,6 +82,26 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
         >> updatedMsg.serviceDescriptor
         ;
     return buffer;
+}
+
+void Serialize(MessageBuffer& buffer, const ParticipantDiscoveryEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+void Serialize(MessageBuffer& buffer, const ServiceDiscoveryEvent& msg)
+{
+    buffer << msg;
+    return;
+}
+
+void Deserialize(MessageBuffer& buffer, ParticipantDiscoveryEvent& out)
+{
+    buffer >> out;
+}
+void Deserialize(MessageBuffer& buffer, ServiceDiscoveryEvent& out)
+{
+    buffer >> out;
 }
 } // namespace service
 } // namespace mw

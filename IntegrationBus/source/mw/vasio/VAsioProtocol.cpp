@@ -18,8 +18,8 @@
 #include "SerdesMwLogging.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesMwService.hpp"
 
+#include "InternalSerdes.hpp"
 
 namespace {
 // Unpack messages which has alreayd unpacked header members
@@ -174,14 +174,6 @@ void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, mw::service::ParticipantDiscoveryEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, mw::service::ServiceDiscoveryEvent& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 
 //////////////////////////////////////////////////////////////////////
 // Serializers
@@ -202,16 +194,6 @@ void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCall& msg)
     return;
 }
 void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCallResponse& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const service::ParticipantDiscoveryEvent& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const service::ServiceDiscoveryEvent& msg)
 {
     buffer << msg;
     return;

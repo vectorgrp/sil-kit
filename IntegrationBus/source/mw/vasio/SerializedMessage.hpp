@@ -13,7 +13,6 @@
 #include "SerdesMwLogging.hpp"
 #include "SerdesSimData.hpp"
 #include "SerdesSimRpc.hpp"
-#include "SerdesMwService.hpp"
 
 // Component specific Serialize/Deserialize functions
 #include "CanSerdes.hpp"
@@ -22,6 +21,7 @@
 #include "FlexraySerdes.hpp"
 #include "InternalSerdes.hpp"
 #include "SyncSerdes.hpp"
+#include "ServiceSerdes.hpp"
 
 namespace ib {
 namespace mw {

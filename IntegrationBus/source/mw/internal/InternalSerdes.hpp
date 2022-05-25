@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
+
+#include "EndpointAddress.hpp"
 
 namespace ib {
 namespace mw {

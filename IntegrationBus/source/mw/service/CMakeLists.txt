@@ -5,6 +5,9 @@ add_library(IbMwService STATIC
     ServiceDiscovery.cpp
     SpecificDiscoveryStore.cpp
     SpecificDiscoveryStore.hpp
+
+    ServiceSerdes.hpp
+    ServiceSerdes.cpp
 )
 
 target_include_directories(IbMwService
@@ -27,3 +30,5 @@ target_link_libraries(IbMwService
 add_vib_test(TestMwServiceDiscovery
     SOURCES ServiceDiscoveryTest.cpp 
     LIBS IbMwService IbMwMockParticipant IbUuid)
+
+add_vib_test(Test_ServiceSerdes SOURCES ServiceSerdesTest.cpp LIBS IbMwService)

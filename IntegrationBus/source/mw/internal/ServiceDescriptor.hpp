@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #pragma once
 #include <string>
 #include <cassert>
@@ -6,6 +7,7 @@
 
 #include "ServiceConfigKeys.hpp"
 #include "Configuration.hpp"
+#include "EndpointAddress.hpp"
 
 namespace ib {
 namespace mw {

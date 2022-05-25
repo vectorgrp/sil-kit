@@ -9,7 +9,6 @@ add_library(IbMwVAsio STATIC
     SerdesCompat.hpp
     SerdesCompat.cpp
     SerdesMwVAsio.hpp
-    SerdesMwService.hpp
     SerdesSimData.hpp
     SerdesSimRpc.hpp
     IbLink.hpp
@@ -68,5 +67,4 @@ add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsi
 
 # XXX linking against IbInternal is required because VAsioProtocolVersion.hpp pulls in EndpointAddress.hpp indirectly
 add_vib_test(TestMwVAsio_SerdesSimData SOURCES SerdesSimDataTest.cpp LIBS IbInternal)
-add_vib_test(TestMwVAsio_SerdesMwService SOURCES SerdesMwServiceTest.cpp LIBS IbMwService)
 add_vib_test(TestMwVAsio_SerdesMwVAsio SOURCES SerdesMwVAsioTest.cpp LIBS IbMwVAsio)

@@ -20,8 +20,6 @@
 #include "ib/sim/rpc/fwd_decl.hpp"
 #include "ib/mw/sync/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"
-//concrete
-#include "ServiceDatatypes.hpp"
 
 // SerDes helpers to reduce boiler plate and encapsulate the VAsio's network wire format
 
@@ -71,8 +69,6 @@ void Deserialize(MessageBuffer& buffer, logging::LogMsg& out);
 void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out);
 void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCall& out);
 void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out);
-void Deserialize(MessageBuffer& buffer, service::ParticipantDiscoveryEvent& out);
-void Deserialize(MessageBuffer& buffer, service::ServiceDiscoveryEvent& out);
 
 // Serializers for complete network packets (including size,type kind and service index members)
 
@@ -80,8 +76,6 @@ void Serialize(MessageBuffer& buffer,const logging::LogMsg& msg);
 void Serialize(MessageBuffer& buffer,const sim::data::DataMessageEvent& msg);
 void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCall& msg);
 void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCallResponse& msg);
-void Serialize(MessageBuffer& buffer,const service::ParticipantDiscoveryEvent& msg);
-void Serialize(MessageBuffer& buffer,const service::ServiceDiscoveryEvent& msg);
 
 }//mw
 }//ib

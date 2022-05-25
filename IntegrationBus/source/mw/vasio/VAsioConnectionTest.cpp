@@ -1,9 +1,21 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+//XXX fowards required for TestDataTypes because of  IbMsgTraits
+#include "ib/sim/can/fwd_decl.hpp"
+#include "ib/sim/eth/fwd_decl.hpp"
+#include "ib/sim/fr/fwd_decl.hpp"
+#include "ib/sim/lin/fwd_decl.hpp"
+#include "ib/sim/data/fwd_decl.hpp"
+#include "ib/sim/rpc/fwd_decl.hpp"
+#include "ib/mw/sync/fwd_decl.hpp"
+#include "ib/mw/logging/fwd_decl.hpp"
+#include "ServiceDatatypes.hpp"
+
 #include "VAsioProtocol.hpp"
 #include "TestDataTypes.hpp" // must be included before VAsioConnection
 
 #include "IVAsioPeer.hpp"
 #include "IIbMessageReceiver.hpp"
+
 #include "VAsioConnection.hpp"
 #include "MockParticipant.hpp" // for DummyLogger
 

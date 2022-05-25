@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SerdesMwService.hpp"
+#include "ServiceSerdes.hpp"
 
 #include "gtest/gtest.h"
 
@@ -27,8 +27,8 @@ TEST(MwVAsioSerdes, Mw_Service)
 
     ib::mw::service::ParticipantDiscoveryEvent out{};
     
-    buffer << in;
-    buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
     EXPECT_EQ(in, out);
     //ensure that sensible values are present
