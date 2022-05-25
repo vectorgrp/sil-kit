@@ -18,6 +18,7 @@ inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion;
 inline auto to_header(ProtocolVersion version);
 inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string;
 inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion;
+inline bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 
 //////////////////////////////////////////////////////////////////////
 //  Inline Implementations
@@ -62,6 +63,24 @@ auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> 
 
     return {"Unknown version range"};
 }
+
+bool ProtocolVersionSupported(const RegistryMsgHeader& header)
+{
+    const auto version = from_header(header);
+    if(version == ProtocolVersion{3, 0})
+    {
+        //3.99.21: bumped version to be explicitly incompatible with prior releases (MVP3, CANoe16)
+        return true;
+    }
+    else if (version == ProtocolVersion{3,1})
+    {
+        //3.99.23: bumped version to test backwards compatibility with removed VAsioPeerUri in ParticipantAnnouncement
+        return true;
+    }
+    // NB: Add your explicit backward compatibility here, ensure that Serialize/Deserialize can handle the ProtocolVersion transparently.
+
+    return false;
+ }
 
 } // mw
 } // namespace ib

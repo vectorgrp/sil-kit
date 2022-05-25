@@ -4,11 +4,12 @@ find_package(Threads REQUIRED)
 add_library(IbMwVAsio STATIC
     VAsioConnection.hpp
     VAsioConnection.cpp
-    VAsioProtocol.hpp
-    VAsioProtocol.cpp
-    SerdesCompat.hpp
-    SerdesCompat.cpp
-    SerdesMwVAsio.hpp
+
+
+    VAsioProtocolVersion.hpp
+    VAsioSerdes.hpp
+    VAsioSerdes.cpp
+
     IbLink.hpp
     IVAsioPeer.hpp
     VAsioDatatypes.hpp
@@ -20,8 +21,13 @@ add_library(IbMwVAsio STATIC
     VAsioTcpPeer.hpp
     VAsioTcpPeer.cpp
     VAsioTransmitter.hpp
+
     Uri.hpp
     Uri.cpp
+
+    SerializedMessageTraits.hpp
+    SerializedMessage.hpp
+    SerializedMessage.cpp
 )
 
 target_link_libraries(IbMwVAsio
@@ -63,5 +69,4 @@ endif()
 
 add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwMockParticipant)
 
-# XXX linking against IbInternal is required because VAsioProtocolVersion.hpp pulls in EndpointAddress.hpp indirectly
-add_vib_test(TestMwVAsio_SerdesMwVAsio SOURCES SerdesMwVAsioTest.cpp LIBS IbMwVAsio)
+add_vib_test(Test_VAsioSerdes SOURCES VAsioSerdesTest.cpp LIBS IbMwVAsio)

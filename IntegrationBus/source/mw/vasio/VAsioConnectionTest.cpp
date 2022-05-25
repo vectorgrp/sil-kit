@@ -10,7 +10,7 @@
 #include "ib/mw/logging/fwd_decl.hpp"
 #include "ServiceDatatypes.hpp" //concrete, no forwards
 
-#include "VAsioProtocol.hpp"
+#include "ProtocolVersion.hpp"
 #include "TestDataTypes.hpp" // must be included before VAsioConnection
 
 #include "IVAsioPeer.hpp"

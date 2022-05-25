@@ -14,6 +14,7 @@
 #include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "ProtocolVersion.hpp"
 
 #include "asio.hpp"
 

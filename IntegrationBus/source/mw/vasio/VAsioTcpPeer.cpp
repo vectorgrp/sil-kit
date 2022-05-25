@@ -484,7 +484,7 @@ void VAsioTcpPeer::DispatchBuffer()
         //drop message size by adjusting internal read position:
         //(void)ExtractMessageSize(msgBuffer); 
         //msgBuffer.SetFormatVersion(GetProtocolVersion());
-        message.SetProtocolVerison(GetProtocolVersion());
+        message.SetProtocolVersion(GetProtocolVersion());
         _ibConnection->OnSocketData(this, std::move(message));
 
         // keep trailing data in the buffer

@@ -4,7 +4,6 @@
 
 #include <sstream>
 
-#include "VAsioProtocol.hpp"
 #include "IVAsioPeer.hpp"
 #include <type_traits>
 

@@ -16,7 +16,6 @@
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/wrapped_tuple.hpp"
 
-#include "VAsioProtocol.hpp"
 #include "IbLink.hpp"
 #include "IVAsioPeer.hpp"
 #include "VAsioReceiver.hpp"

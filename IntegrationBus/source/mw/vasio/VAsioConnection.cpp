@@ -1,6 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "VAsioConnection.hpp"
+#include "VAsioProtocolVersion.hpp"
+
+#include "SerializedMessage.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -388,7 +391,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
 
     // after negotiating the Version, we can safely deserialize the remaining message
     //ParticipantAnnouncement announcement;
-    buffer.SetProtocolVerison(from->GetProtocolVersion());
+    buffer.SetProtocolVersion(from->GetProtocolVersion());
     auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
     // XXX lots of error potential, should be handled transparently in the peer
     //buffer.SetFormatVersion(from->GetProtocolVersion());

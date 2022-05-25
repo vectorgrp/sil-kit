@@ -1,4 +1,4 @@
-#include "SerdesMwVAsio.hpp"
+#include "VAsioSerdes.hpp"
 
 #include <chrono>
 
@@ -52,30 +52,6 @@ auto MakePeerInfo() -> VAsioPeerInfo
 	return in;
 }
 
-TEST(MwVAsioSerdes, vasio_RegistryMsgHeader)
-{
-	MessageBuffer buffer;
-	RegistryMsgHeader in{};
-	RegistryMsgHeader out{};
-
-	buffer << in;
-	buffer >> out;
-
-	EXPECT_EQ(in, out);
-}
-
-TEST(MwVAsioSerdes, vasio_peerUri)
-{
-	MessageBuffer buffer;
-	VAsioPeerInfo in = MakePeerInfo();
-	VAsioPeerInfo out{};
-
-	buffer << in;
-	buffer >> out;
-	
-	EXPECT_EQ(in, out);
-}
-
 TEST(MwVAsioSerdes, vasio_participantAnouncement)
 {
 	MessageBuffer buffer;
@@ -84,8 +60,10 @@ TEST(MwVAsioSerdes, vasio_participantAnouncement)
 	in.messageHeader = RegistryMsgHeader{};
 	in.peerInfo = MakePeerInfo();
 
-	buffer << in;
-	buffer >> out;
+	ASSERT_NE(in.messageHeader.versionHigh, 0);
+	ASSERT_EQ(in.peerInfo.participantName, "Test");
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
 	EXPECT_EQ(in, out);
 }
@@ -106,8 +84,8 @@ TEST(MwVAsioSerdes, vasio_VasioMsgSubscribers)
 	VAsioMsgSubscriber in = MakeSubscriber();
 	VAsioMsgSubscriber out{};
 
-	buffer << in;
-	buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
 	EXPECT_EQ(in, out);
 }
@@ -121,8 +99,8 @@ TEST(MwVAsioSerdes, vasio_participantAnouncementReply)
 		in.subscribers.push_back(MakeSubscriber());
 	}
 
-	buffer << in;
-	buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
 	EXPECT_EQ(in, out);
 }
@@ -143,8 +121,8 @@ TEST(MwVAsioSerdes, vasio_knownParticipants)
 		in.peerInfos.emplace_back(std::move(vpi));
 	}
 
-	buffer << in;
-	buffer >> out;
+    Serialize(buffer, in);
+    Deserialize(buffer, out);
 
 	EXPECT_EQ(in, out);
 }
