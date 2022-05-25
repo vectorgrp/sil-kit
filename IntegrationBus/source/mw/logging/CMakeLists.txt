@@ -14,6 +14,9 @@ add_library(IbMwLogging STATIC
     Logger.cpp
     #string formatting for VIB types
     VibFmtFormatters.hpp
+
+    LoggingSerdes.hpp
+    LoggingSerdes.cpp
 )
 ################################################################################
 # Thirdparty -- Logging
@@ -66,3 +69,4 @@ add_vib_test(TestMwLoggingLogger
     SOURCES LoggerTest.cpp 
     LIBS IbMwLogging IbMwMockParticipant
 )
+add_vib_test(Test_LoggingSerdes SOURCES LoggingSerdesTest.cpp LIBS IbMwLogging )

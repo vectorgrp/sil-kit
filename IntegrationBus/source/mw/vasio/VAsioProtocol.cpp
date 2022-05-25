@@ -14,14 +14,12 @@
 
 // message buffer Serdes
 #include "SerdesMwVAsio.hpp"
-
-#include "SerdesMwLogging.hpp"
 #include "SerdesSimData.hpp"
 
 #include "InternalSerdes.hpp"
 
 namespace {
-// Unpack messages which has alreayd unpacked header members
+// Unpack messages which has already unpacked header members
 using namespace ib::mw;
 template<typename MessageT>
 auto Unpack(MessageBuffer& buffer) -> MessageT
@@ -157,10 +155,6 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header)
 // Services for established connections
 ////////////////////////////////////////////////////////////////////////////////
 
-void Deserialize(MessageBuffer& buffer, mw::logging::LogMsg& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
@@ -169,11 +163,6 @@ void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out)
 //////////////////////////////////////////////////////////////////////
 // Serializers
 //////////////////////////////////////////////////////////////////////
-void Serialize(MessageBuffer& buffer, const logging::LogMsg& msg)
-{
-    buffer << msg;
-    return;
-}
 void Serialize(MessageBuffer& buffer, const sim::data::DataMessageEvent& msg)
 {
     buffer << msg;

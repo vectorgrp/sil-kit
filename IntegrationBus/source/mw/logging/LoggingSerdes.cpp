@@ -1,14 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#pragma once
+#include "LoggingSerdes.hpp"
 
-#include "MessageBuffer.hpp"
-
-#include "ib/mw/logging/LoggingDatatypes.hpp"
 
 namespace ib {
 namespace mw {
 namespace logging {
+using ib::mw::MessageBuffer;
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const SourceLoc& sourceLoc)
 {
@@ -46,6 +44,16 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, LogMsg& msg)
 }
 
 
+void Serialize(MessageBuffer& buffer, const LogMsg& msg)
+{
+    buffer << msg;
+    return;
+}
+
+void Deserialize(MessageBuffer& buffer, LogMsg& out)
+{
+    buffer >> out;
+}
 } // namespace logging
 } // namespace mw
 } // namespace ib
