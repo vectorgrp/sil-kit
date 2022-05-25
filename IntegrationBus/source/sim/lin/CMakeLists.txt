@@ -40,4 +40,4 @@ add_vib_test(TestSimLin
         IbTracing
         IbMwMockNullConnection
 )
-add_vib_test(TestLin_Serdes  SOURCES LinSerdesTest.cpp LIBS IbInternal IbSimLin)
+add_vib_test(TestSimLin_Serdes  SOURCES LinSerdesTest.cpp LIBS IbInternal IbSimLin)

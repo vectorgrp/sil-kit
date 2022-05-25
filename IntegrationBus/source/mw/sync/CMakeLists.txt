@@ -52,4 +52,4 @@ add_vib_test(TestMwWatchDog
     SOURCES WatchDogTest.cpp
     LIBS IbMwSync
 )
-add_vib_test(Test_SyncSerdes SOURCES SyncSerdesTest.cpp LIBS IbMwSync IbInternal)
+add_vib_test(TestMwSync_Serdes SOURCES SyncSerdesTest.cpp LIBS IbMwSync IbInternal)

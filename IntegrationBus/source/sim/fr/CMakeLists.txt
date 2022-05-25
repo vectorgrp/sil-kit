@@ -38,4 +38,4 @@ add_vib_test(TestSimFlexrayController
         IbConfiguration
         IbMwMockNullConnection
 )
-add_vib_test(Test_FlexraySerdes SOURCES FlexraySerdesTest.cpp LIBS IbInternal IbSimFlexray)
+add_vib_test(TestSimFlexray_Serdes SOURCES FlexraySerdesTest.cpp LIBS IbInternal IbSimFlexray)

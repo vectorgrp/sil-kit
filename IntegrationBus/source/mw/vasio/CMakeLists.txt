@@ -69,4 +69,4 @@ endif()
 
 add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwMockParticipant)
 
-add_vib_test(Test_VAsioSerdes SOURCES VAsioSerdesTest.cpp LIBS IbMwVAsio)
+add_vib_test(TestMwVAsio_Serdes  SOURCES VAsioSerdesTest.cpp LIBS IbMwVAsio)

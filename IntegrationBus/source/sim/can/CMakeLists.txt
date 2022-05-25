@@ -43,4 +43,4 @@ add_vib_test(TestSimCanController
         IbMwMockNullConnection
 )
 
-add_vib_test(TestCan_CanSerdes  SOURCES CanSerdesTest.cpp LIBS IbInternal IbSimCan)
+add_vib_test(TestSimCan_Serdes  SOURCES CanSerdesTest.cpp LIBS IbInternal IbSimCan)

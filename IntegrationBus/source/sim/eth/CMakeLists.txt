@@ -38,4 +38,4 @@ add_vib_test(TestSimEthController
         IbTracing
         IbMwMockNullConnection
 )
-add_vib_test(Test_EthernetSerdes  SOURCES EthernetSerdesTest.cpp LIBS IbSimEthernet)
+add_vib_test(TestSimEthernet_Serdes  SOURCES EthernetSerdesTest.cpp LIBS IbSimEthernet)

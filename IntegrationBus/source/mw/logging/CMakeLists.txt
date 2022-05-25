@@ -69,4 +69,4 @@ add_vib_test(TestMwLoggingLogger
     SOURCES LoggerTest.cpp 
     LIBS IbMwLogging IbMwMockParticipant
 )
-add_vib_test(Test_LoggingSerdes SOURCES LoggingSerdesTest.cpp LIBS IbMwLogging )
+add_vib_test(TestMwLogging_Serdes SOURCES LoggingSerdesTest.cpp LIBS IbMwLogging )

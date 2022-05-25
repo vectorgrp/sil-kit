@@ -31,4 +31,4 @@ add_vib_test(TestMwServiceDiscovery
     SOURCES ServiceDiscoveryTest.cpp 
     LIBS IbMwService IbMwMockParticipant IbUuid)
 
-add_vib_test(Test_ServiceSerdes SOURCES ServiceSerdesTest.cpp LIBS IbMwService)
+add_vib_test(TestMwService_Serdes SOURCES ServiceSerdesTest.cpp LIBS IbMwService)

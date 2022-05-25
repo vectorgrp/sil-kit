@@ -37,4 +37,4 @@ add_vib_test(TestSimRpc
         IbInternal
         IbMwMockNullConnection
 )
-add_vib_test(Test_RpcSerdes SOURCES RpcSerdesTest.cpp LIBS IbInternal IbSimRpc)
+add_vib_test(TestSimRpc_Serdes SOURCES RpcSerdesTest.cpp LIBS IbInternal IbSimRpc)
