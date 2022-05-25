@@ -20,7 +20,9 @@ Register callbacks for state transitions
 
 To be notified about transitions of the ParticipantState, a ParticipantStatusHandler has to be registered. The
 :cpp:class:`ParticipantStatus<ib::mw::sync::ParticipantStatus>` contains the new ParticipantState and further details 
-about the transition such as the name of the participant, the reason for the status change and timing information::
+about the transition such as the name of the participant, the reason for the status change and timing information:
+
+.. code-block:: c++
 
   // Register ParticipantStatusHandler to receive ParticipantStatus updates from all participants.
   auto participantStatusHandler =
@@ -29,7 +31,9 @@ about the transition such as the name of the participant, the reason for the sta
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->RegisterParticipantStatusHandler(participantStatusHandler);
 
-Last but not least a SystemStateHandler can be registered to get informed about system state transitions::
+Last but not least a SystemStateHandler can be registered to get informed about system state transitions:
+
+.. code-block:: c++
 
   // Register SystemStateHandler to receive SystemState transitions.
   auto systemStateHandler =
@@ -38,6 +42,31 @@ Last but not least a SystemStateHandler can be registered to get informed about 
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 
+Register callbacks for new network connections to and disconnects from other participants
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A :cpp:class:`ParticipantConnectedHandler` and :cpp:class:`ParticipantDisconnectedHandler` can be registered.
+They report the name of any other participant connecting and disconnecting from the participant:
+
+.. code-block:: c++
+
+  auto* systemMonitor = participant->GetSystemMonitor();
+
+  auto participantConnectedHandler = [](const std::string& participantName) { ... };
+  systemMonitor->SetParticipantConnectedHandler(participantConnectedHandler);
+
+  auto participantDisconnectedHandler = [](const std::string& participantName) { ... };
+  systemMonitor->SetParticipantDisconnectedHandler(participantConnectedHandler);
+
+Additionally, there is a function which checks if a participant identified by it's name is connected or not:
+
+.. code-block:: c++
+
+  auto* systemMonitor = participant->GetSystemMonitor();
+  if (systemMonitor->IsParticipantConnected("SomeParticipant"))
+  {
+    // things to do only if the other participant is connected
+  }
 
 API and Data Type Reference
 --------------------------------------------------

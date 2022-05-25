@@ -4,6 +4,7 @@
 
 #include <map>
 #include <memory>
+#include <unordered_set>
 
 #include "ib/mw/sync/ISystemMonitor.hpp"
 
@@ -48,6 +49,11 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg) override;
 
+    void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) override;
+    void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) override;
+
+    auto IsParticipantConnected(const std::string& participantName) const -> bool override;
+
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
@@ -65,6 +71,18 @@ public:
     inline auto InvalidTransitionCount() const -> unsigned int;
 
     void UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants);
+
+    /*! \brief Invokes the handler set by \ref SetParticipantConnectedHandler
+     *
+     * @param participantName The name of participant that connected
+     */
+    void OnParticipantConnected(const std::string& participantName);
+
+    /*! \brief Invokes the handler set by \ref SetParticipantDisconnectedHandler
+     *
+     * @param participantName The name of participant that disconnected
+     */
+    void OnParticipantDisconnected(const std::string& participantName);
 
 private:
     // ----------------------------------------
@@ -91,6 +109,10 @@ private:
 
     std::vector<ParticipantStatusHandlerT> _participantStatusHandlers;
     std::vector<SystemStateHandlerT> _systemStateHandlers;
+
+    ParticipantConnectedHandler _participantConnectedHandler;
+    ParticipantDisconnectedHandler _participantDisconnectedHandler;
+    std::unordered_set<std::string> _connectedParticipantNames;
 };
 
 // ================================================================================

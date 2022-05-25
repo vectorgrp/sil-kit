@@ -157,6 +157,15 @@ add_vib_test(FTestServiceDiscoveryPerf
       ${itest_extra_libs}
 )
 
+add_vib_test(ITestSystemMonitor
+    SOURCES
+      SystemMonitorITest.cpp
+    LIBS
+      IbMwParticipant
+      IbSimTestHarness
+      ${itest_extra_libs}
+)
+
 add_vib_test(FTestPubSubPerf
     SOURCES
       PubSubPerfFTest.cpp

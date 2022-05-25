@@ -108,6 +108,10 @@ public:
     MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
     MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantName));
+
+    MOCK_METHOD(void, SetParticipantConnectedHandler, (ParticipantConnectedHandler handler), (override));
+    MOCK_METHOD(void, SetParticipantDisconnectedHandler, (ParticipantDisconnectedHandler handler), (override));
+    MOCK_METHOD(bool, IsParticipantConnected, (const std::string& participantName), (const, override));
 };
 
 class MockSystemController : public sync::ISystemController {

@@ -175,6 +175,48 @@ void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const s
     }
 }
 
+void SystemMonitor::SetParticipantConnectedHandler(ParticipantConnectedHandler handler)
+{
+    _participantConnectedHandler = std::move(handler);
+}
+
+void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler)
+{
+    _participantDisconnectedHandler = std::move(handler);
+}
+
+auto SystemMonitor::IsParticipantConnected(const std::string& participantName) const -> bool
+{
+    const auto it = _connectedParticipantNames.find(participantName);
+    return it != _connectedParticipantNames.end();
+}
+
+void SystemMonitor::OnParticipantConnected(const std::string& participantName)
+{
+    // Add the participant name to the set of connected participant names
+    _connectedParticipantNames.emplace(participantName);
+    // Call the handler if set
+    if (_participantConnectedHandler)
+    {
+        _participantConnectedHandler(participantName);
+    }
+}
+
+void SystemMonitor::OnParticipantDisconnected(const std::string& participantName)
+{
+    // Remove the participant name from the set of connected participant names
+    auto it = _connectedParticipantNames.find(participantName);
+    if (it != _connectedParticipantNames.end())
+    {
+        _connectedParticipantNames.erase(it);
+    }
+    // Call the handler if set
+    if (_participantDisconnectedHandler)
+    {
+        _participantDisconnectedHandler(participantName);
+    }
+}
+
 bool SystemMonitor::AllParticipantsInState(sync::ParticipantState state) const
 {
     return std::all_of(begin(_participantStatus), end(_participantStatus), [state](auto&& kv) {

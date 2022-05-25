@@ -34,6 +34,9 @@ protected:
     {
         MOCK_METHOD1(SystemStateHandler, void(SystemState));
         MOCK_METHOD1(ParticipantStatusHandler, void(ParticipantStatus));
+
+        MOCK_METHOD(void, ParticipantConnectedHandler, (const std::string &), (const));
+        MOCK_METHOD(void, ParticipantDisconnectedHandler, (const std::string &), (const));
     };
 
 protected:
@@ -874,6 +877,34 @@ TEST_F(SystemMonitorTest, detect_initialized_after_invalid)
 
     SetParticipantStatus(3, ParticipantState::Initialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::Initialized);
+}
+
+TEST_F(SystemMonitorTest, check_on_partitipant_connected_triggers_callback)
+{
+    monitor.SetParticipantConnectedHandler([this](const std::string &participantName) {
+        callbacks.ParticipantConnectedHandler(participantName);
+    });
+
+    const auto participantName = "test participant";
+    EXPECT_CALL(callbacks, ParticipantConnectedHandler(participantName));
+
+    EXPECT_FALSE(monitor.IsParticipantConnected(participantName));
+    monitor.OnParticipantConnected(participantName);
+    EXPECT_TRUE(monitor.IsParticipantConnected(participantName));
+}
+
+TEST_F(SystemMonitorTest, check_on_partitipant_disconnected_triggers_callback)
+{
+    monitor.SetParticipantDisconnectedHandler([this](const std::string &participantName) {
+        callbacks.ParticipantDisconnectedHandler(participantName);
+    });
+
+    const auto participantName = "test participant";
+    EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(participantName));
+
+    EXPECT_FALSE(monitor.IsParticipantConnected(participantName));
+    monitor.OnParticipantDisconnected(participantName);
+    EXPECT_FALSE(monitor.IsParticipantConnected(participantName));
 }
 
 } // anonymous namespace for test

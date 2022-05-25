@@ -14,12 +14,12 @@ Compatibility with 3.99.23
 
 - Application binary interface (ABI): No
 - Application software interface (API): No
-- Middleware network protocol (VAsio): 
+- Middleware network protocol (VAsio):
 
 
 Changed
 ~~~~~~~
-- Added ib_InterfaceId to structs of C-API: 
+- Added ib_InterfaceId to structs of C-API:
 
   + ib_Can_Frame
   + ib_Flexray_ControllerConfig
@@ -33,24 +33,24 @@ Changed
   + ib_Rpc_DiscoveryResultList
 
 - Changed type of ib_CanErrorState:
-  
+
   - ``IntegrationBus/include/ib/capi/Can.h``
 
-    + old: 
+    + old:
     .. code-block:: c++
 
       typedef int ib_Can_ErrorState;
 
-    + new: 
+    + new:
     .. code-block:: c++
 
       typedef int32_t ib_Can_ErrorState;
 
 - Changed pass by value semantic in C-API handlers:
-  
+
   - ``IntegrationBus/include/ib/capi/Can.h``
 
-    + old: 
+    + old:
     .. code-block:: c++
 
       typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
@@ -58,7 +58,7 @@ Changed
       typedef void (*ib_Can_ErrorStateChangeHandler_t)(void* context, ib_Can_Controller* controller,
                                                   ib_Can_ErrorStateChangeEvent errorStateChangeEvent);
 
-    + new: 
+    + new:
     .. code-block:: c++
 
       typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
@@ -68,7 +68,7 @@ Changed
 
   - ``IntegrationBus/include/ib/capi/Ethernet.h``
 
-    + old: 
+    + old:
     .. code-block:: c++
 
       typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
@@ -76,7 +76,7 @@ Changed
       typedef void (*ib_Ethernet_BitrateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
         ib_Ethernet_BitrateChangeEvent bitrateChangeEvent);
 
-    + new: 
+    + new:
     .. code-block:: c++
 
       typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
@@ -86,28 +86,28 @@ Changed
 
   - ``IntegrationBus/include/ib/capi/Ethernet.h``
 
-    + old: 
+    + old:
     .. code-block:: c++
 
       typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
         const char* participantName, ib_ParticipantStatus status);
 
-    + new: 
+    + new:
     .. code-block:: c++
 
       typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
         const char* participantName, ib_ParticipantStatus* status);
 
 - Changed ib_Ethernet_Frame C-API:
-  
+
   - ``IntegrationBus/include/ib/capi/Ethernet.h``
 
-    + old: 
+    + old:
     .. code-block:: c++
 
       typedef ib_ByteVector ib_Ethernet_Frame;
 
-    + new: 
+    + new:
     .. code-block:: c++
 
       typedef struct
@@ -117,10 +117,10 @@ Changed
         } ib_Ethernet_Frame;
 
 - Changed ib_Flexray_ControllerConfig C-API:
-  
+
   - ``IntegrationBus/include/ib/capi/Flexray.h``
 
-    + old: 
+    + old:
     .. code-block:: c++
 
       struct ib_Flexray_ControllerConfig
@@ -129,7 +129,7 @@ Changed
             ib_Flexray_NodeParameters nodeParams;
             ...
 
-    + new: 
+    + new:
     .. code-block:: c++
 
       struct ib_Flexray_ControllerConfig
@@ -139,7 +139,27 @@ Changed
             ib_Flexray_NodeParameters* nodeParams;
             ...
 
+Added
+~~~~~
 
+- ``IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp``
+
+  Added methods which allow users to obtain information about connected participants.
+
+  .. code-block:: c++
+
+    class ISystemMonitor
+    {
+    public:
+        ...
+        using ParticipantConnectedHandler = std::function<void(const std::string& participantName)>;
+        using ParticipantDisconnectedHandler = std::function<void(const std::string& participantName)>;
+        ...
+        virtual void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) = 0;
+        virtual void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) = 0;
+        virtual auto IsParticipantConnected(const std::string& participantName) const -> bool = 0;
+        ...
+    };
 
 
 [3.99.23] - 25-05-2022
@@ -239,13 +259,13 @@ Removed
       };
 
   - Removed deprecated PcapFile and PcapPipe config fields in EthernetControllers section. Use UseTraceSinks instead.
-  
+
   - Removed MacAddress config fields in EthernetControllers section.
 
 Fixed
 ~~~~~~~
-        
-  - Removed bug that allowed for multiple parallel SimTask-Handle triggers without a call to CompleteSimulationTask when using ParticipantController::RunAsync 
+
+  - Removed bug that allowed for multiple parallel SimTask-Handle triggers without a call to CompleteSimulationTask when using ParticipantController::RunAsync
 
 
 [3.99.22] - 2022-05-17

@@ -93,6 +93,12 @@ struct MockConnection
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> /*callback*/) {}
     void NotifyShutdown() {}
+
+    void RegisterMessageReceiver(
+        std::function<void(ib::mw::IVAsioPeer* /*peer*/, ib::mw::ParticipantAnnouncement)> /*callback*/)
+    {
+    }
+
     void RegisterPeerShutdownCallback(std::function<void(ib::mw::IVAsioPeer* peer)> /*callback*/) {}
 
     void Test_SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)

@@ -555,6 +555,14 @@ auto Participant<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
 
         controller = CreateInternalController<sync::SystemMonitor>("SystemMonitor", mw::ServiceType::InternalController,
                                                            std::move(supplementalData));
+
+        _ibConnection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
+            controller->OnParticipantConnected(peer->GetInfo().participantName);
+        });
+
+        _ibConnection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
+            controller->OnParticipantDisconnected(peer->GetInfo().participantName);
+        });
     }
     return controller;
 }
