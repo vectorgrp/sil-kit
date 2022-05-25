@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <chrono>
+#include <string>
 
 #include <cstdint>
 

@@ -10,7 +10,6 @@ add_library(IbMwVAsio STATIC
     SerdesCompat.cpp
     SerdesMwVAsio.hpp
     SerdesSimData.hpp
-    SerdesSimRpc.hpp
     IbLink.hpp
     IVAsioPeer.hpp
     VAsioDatatypes.hpp

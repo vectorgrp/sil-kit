@@ -11,6 +11,9 @@ add_library(IbSimRpc STATIC
     RpcServerInternal.cpp
     RpcDiscoverer.hpp
     RpcDiscoverer.cpp
+
+    RpcSerdes.hpp
+    RpcSerdes.cpp
 )
 
 target_include_directories(IbSimRpc
@@ -34,3 +37,4 @@ add_vib_test(TestSimRpc
         IbInternal
         IbMwMockNullConnection
 )
+add_vib_test(Test_RpcSerdes SOURCES RpcSerdesTest.cpp LIBS IbInternal IbSimRpc)

@@ -12,13 +12,13 @@
 
 #include "SerdesMwLogging.hpp"
 #include "SerdesSimData.hpp"
-#include "SerdesSimRpc.hpp"
 
 // Component specific Serialize/Deserialize functions
 #include "CanSerdes.hpp"
 #include "LinSerdes.hpp"
 #include "EthernetSerdes.hpp"
 #include "FlexraySerdes.hpp"
+#include "RpcSerdes.hpp"
 #include "InternalSerdes.hpp"
 #include "SyncSerdes.hpp"
 #include "ServiceSerdes.hpp"

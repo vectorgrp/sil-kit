@@ -12,13 +12,7 @@
 #include "VAsioProtocolVersion.hpp"
 
 //fowards
-#include "ib/sim/can/fwd_decl.hpp"
-#include "ib/sim/eth/fwd_decl.hpp"
-#include "ib/sim/fr/fwd_decl.hpp"
-#include "ib/sim/lin/fwd_decl.hpp"
 #include "ib/sim/data/fwd_decl.hpp"
-#include "ib/sim/rpc/fwd_decl.hpp"
-#include "ib/mw/sync/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"
 
 // SerDes helpers to reduce boiler plate and encapsulate the VAsio's network wire format
@@ -67,15 +61,11 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 // VAsioMsgKind, EndpointId, and EndpointAddress members have been extracted.
 void Deserialize(MessageBuffer& buffer, logging::LogMsg& out);
 void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out);
-void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCall& out);
-void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out);
 
 // Serializers for complete network packets (including size,type kind and service index members)
 
 void Serialize(MessageBuffer& buffer,const logging::LogMsg& msg);
 void Serialize(MessageBuffer& buffer,const sim::data::DataMessageEvent& msg);
-void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCall& msg);
-void Serialize(MessageBuffer& buffer,const sim::rpc::FunctionCallResponse& msg);
 
 }//mw
 }//ib

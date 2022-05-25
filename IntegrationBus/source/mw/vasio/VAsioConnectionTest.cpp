@@ -8,7 +8,7 @@
 #include "ib/sim/rpc/fwd_decl.hpp"
 #include "ib/mw/sync/fwd_decl.hpp"
 #include "ib/mw/logging/fwd_decl.hpp"
-#include "ServiceDatatypes.hpp"
+#include "ServiceDatatypes.hpp" //concrete, no forwards
 
 #include "VAsioProtocol.hpp"
 #include "TestDataTypes.hpp" // must be included before VAsioConnection

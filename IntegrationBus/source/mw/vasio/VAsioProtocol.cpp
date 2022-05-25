@@ -17,7 +17,6 @@
 
 #include "SerdesMwLogging.hpp"
 #include "SerdesSimData.hpp"
-#include "SerdesSimRpc.hpp"
 
 #include "InternalSerdes.hpp"
 
@@ -166,14 +165,6 @@ void Deserialize(MessageBuffer& buffer, sim::data::DataMessageEvent& out)
 {
     out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
 }
-void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCall& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
-void Deserialize(MessageBuffer& buffer, sim::rpc::FunctionCallResponse& out)
-{
-    out = Unpack<std::remove_reference_t<decltype(out)>>(buffer);
-}
 
 //////////////////////////////////////////////////////////////////////
 // Serializers
@@ -188,16 +179,5 @@ void Serialize(MessageBuffer& buffer, const sim::data::DataMessageEvent& msg)
     buffer << msg;
     return;
 }
-void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCall& msg)
-{
-    buffer << msg;
-    return;
-}
-void Serialize(MessageBuffer& buffer, const sim::rpc::FunctionCallResponse& msg)
-{
-    buffer << msg;
-    return;
-}
-
 } // namespace mw
 } // namespace ib
