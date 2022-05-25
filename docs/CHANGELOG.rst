@@ -5,11 +5,11 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.X]
+[3.99.24] - unreleased
 ----------------------
 
 
-Compatibility with 3.99.22
+Compatibility with 3.99.23
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Application binary interface (ABI): No
@@ -139,6 +139,25 @@ Changed
             ib_Flexray_NodeParameters* nodeParams;
             ...
 
+
+
+
+[3.99.23] - 25-05-2022
+----------------------
+
+Refactored Bus System and further Service (data message, rpc) APIs
+
+Compatibility with 3.99.22
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (VAsio): Yes
+
+
+Changed
+~~~~~~~
+
 - ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp``
       
       The two members direction and userContext were moved from the CanFrame to the CanFrameEvent
@@ -227,6 +246,7 @@ Fixed
 ~~~~~~~
         
   - Removed bug that allowed for multiple parallel SimTask-Handle triggers without a call to CompleteSimulationTask when using ParticipantController::RunAsync 
+
 
 [3.99.22] - 2022-05-17
 ----------------------
