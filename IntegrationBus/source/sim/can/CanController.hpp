@@ -2,21 +2,21 @@
 
 #pragma once
 
-#include "ib/mw/fwd_decl.hpp"
+#include <tuple>
+#include <vector>
+#include <map>
+#include <mutex>
 
 #include "ib/sim/can/ICanController.hpp"
+#include "ib/mw/fwd_decl.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
 #include "IIbToCanController.hpp"
 #include "IParticipantInternal.hpp"
-#include "IIbServiceEndpoint.hpp"
-#include "IReplayDataController.hpp"
 #include "ITraceMessageSource.hpp"
-
 #include "ParticipantConfiguration.hpp"
 
-#include <tuple>
-#include <vector>
+#include "SimBehavior.hpp"
 
 namespace ib {
 namespace sim {
@@ -25,9 +25,7 @@ namespace can {
 class CanController
     : public ICanController
     , public IIbToCanController
-    , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
-    , public tracing::IReplayDataController
     , public mw::IIbServiceEndpoint
 {
 public:
@@ -37,17 +35,18 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
+    // Deletions because of mutex that cannot be copied
     CanController() = delete;
-    CanController(const CanController&) = default;
-    CanController(CanController&&) = default;
-    CanController(mw::IParticipantInternal* participant, const ib::cfg::CanController& config,
-                  mw::sync::ITimeProvider* timeProvider, ICanController* facade = nullptr);
+    CanController(const CanController&) = delete;
+    CanController(CanController&&) = delete;
+    CanController(mw::IParticipantInternal* participant, ib::cfg::CanController config,
+                   mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    CanController& operator=(CanController& other) = default;
-    CanController& operator=(CanController&& other) = default;
+    CanController& operator=(CanController& other) = delete;
+    CanController& operator=(CanController&& other) = delete;
 
 public:
     // ----------------------------------------
@@ -63,74 +62,108 @@ public:
 
     auto SendFrame(const CanFrame& msg, void* userContext = nullptr) -> CanTxId override;
 
-    void AddFrameHandler(FrameHandler handler, DirectionMask directionMask = (DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) override;
+    HandlerId AddFrameHandler(FrameHandler handler,
+                              DirectionMask directionMask = (DirectionMask)TransmitDirection::RX
+                                                            | (DirectionMask)TransmitDirection::TX) override;
+    void RemoveFrameHandler(HandlerId handlerId) override;
 
-    void AddStateChangeHandler(StateChangeHandler handler) override;
-    void AddErrorStateChangeHandler(ErrorStateChangeHandler handler) override;
-    void AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted
-        | (CanTransmitStatusMask)CanTransmitStatus::Canceled
-        | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
-        | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) override;
+    HandlerId AddStateChangeHandler(StateChangeHandler handler) override;
+    void RemoveStateChangeHandler(HandlerId handlerId) override;
+
+    HandlerId AddErrorStateChangeHandler(ErrorStateChangeHandler handler) override;
+    void RemoveErrorStateChangeHandler(HandlerId handlerId) override;
+
+    HandlerId AddFrameTransmitHandler(
+        FrameTransmitHandler handler,
+        CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted
+                                           | (CanTransmitStatusMask)CanTransmitStatus::Canceled
+                                           | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
+                                           | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) override;
+    void RemoveFrameTransmitHandler(HandlerId handlerId) override;
 
     // IIbToCanController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) override;
 
-    //ITimeConsumer
-    void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
-
-    // ITraceMessageSource
+    //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
-
-    // IReplayDataProvider
-    void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+
 public:
     // ----------------------------------------
-    // Public interface methods
+    // Public methods
+
+    void RegisterServiceDiscovery();
+
+    // Expose the simulated/trivial mode for unit tests
+    void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
+    void SetTrivialBehavior();
 
 private:
     // ----------------------------------------
     // private data types
-    //template<typename MsgT>
-    //using CallbackVector = std::vector<CallbackT<MsgT>>;
+
+    template <typename MsgT>
+    using FilterT = std::function<bool(const MsgT& msg)>;
+
+    template <typename MsgT>
+    struct FilteredCallback
+    {
+        CallbackT<MsgT> callback;
+        FilterT<MsgT> filter;
+    };
+
     template<typename MsgT>
-    using CallbackVector = std::vector<std::tuple<CallbackT<MsgT>, std::function<bool(const MsgT& msg)>>>;
+    using CallbackMap = std::map<HandlerId, FilteredCallback<MsgT>>;
 
 private:
     // ----------------------------------------
     // private methods
-    template<typename MsgT>
-    void RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
+    void ChangeControllerMode(CanControllerState state);
 
     template<typename MsgT>
+    HandlerId RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
+
+    template <typename MsgT>
+    void RemoveHandler(HandlerId handlerId);
+
+    template <typename MsgT>
     void CallHandlers(const MsgT& msg);
+
+    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
+    auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
 
     inline auto MakeTxId() -> CanTxId;
 
-    // Replay
-    void ReplaySend(const extensions::IReplayMessage* replayMessage);
-    void ReplayReceive(const extensions::IReplayMessage* replayMessage);
+    template <typename MsgT>
+    inline void SendIbMessage(MsgT&& msg);
 
 private:
     // ----------------------------------------
     // private members
-    ::ib::mw::IParticipantInternal* _participant{nullptr};
+    mw::IParticipantInternal* _participant;
     cfg::CanController _config;
+    SimBehavior _simulationBehavior;
     mw::ServiceDescriptor _serviceDescriptor;
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    ICanController* _facade{nullptr};
+    extensions::Tracer _tracer;
 
     CanTxId _canTxId = 0;
+    CanControllerState _controllerState = CanControllerState::Uninit;
+    CanErrorState _errorState = CanErrorState::NotAvailable;
+    CanConfigureBaudrate _baudRate = { 0, 0 };
 
     std::tuple<
-        CallbackVector<CanFrameEvent>,
-        CallbackVector<CanFrameTransmitEvent>
+        CallbackMap<CanFrameEvent>,
+        CallbackMap<CanStateChangeEvent>,
+        CallbackMap<CanErrorStateChangeEvent>,
+        CallbackMap<CanFrameTransmitEvent>
     > _callbacks;
 
-    extensions::Tracer _tracer;
+    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ================================================================================

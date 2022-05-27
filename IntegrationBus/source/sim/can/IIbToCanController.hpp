@@ -16,8 +16,8 @@ namespace can {
  *  Used by the Participant, implemented by the CanController
  */
 class IIbToCanController
-    : public mw::IIbReceiver<CanFrameEvent>
-    , public mw::IIbSender<CanFrameEvent>
+    : public mw::IIbReceiver<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
+    , public mw::IIbSender<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
 {
 };
 

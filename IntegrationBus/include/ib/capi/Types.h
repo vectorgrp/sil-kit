@@ -73,6 +73,8 @@ typedef uint8_t ib_Direction;
 #define ib_Direction_Receive        ((ib_Direction) 2)
 #define ib_Direction_SendReceive    ((ib_Direction) 3)
 
+typedef uint64_t ib_HandlerId;
+
 IB_END_DECLS
 
 #pragma pack(pop)

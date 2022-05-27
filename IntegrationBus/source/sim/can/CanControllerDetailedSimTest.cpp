@@ -9,7 +9,7 @@
 
 #include "MockParticipant.hpp"
 
-#include "CanControllerProxy.hpp"
+#include "CanController.hpp"
 #include "CanDatatypesUtils.hpp"
 
 namespace {
@@ -38,7 +38,7 @@ public:
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanSetControllerMode&));
 };
 
-class CanControllerProxyCallbacks
+class CanControllerCallbacks
 {
 public:
     MOCK_METHOD2(FrameHandler, void(ICanController*, CanFrameEvent));
@@ -47,12 +47,14 @@ public:
     MOCK_METHOD2(FrameTransmitHandler, void(ICanController*, CanFrameTransmitEvent));
 };
 
-TEST(CanControllerProxyTest, send_can_message)
+TEST(CanControllerDetailedSimTest, send_can_message)
 {
     EndpointAddress controllerAddress = { 3, 8 };
+    EndpointAddress busSimAddress = {19, 8};
 
     MockParticipant mockParticipant;
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     CanFrameEvent testFrameEvent{};
@@ -64,19 +66,20 @@ TEST(CanControllerProxyTest, send_can_message)
     canController.SendFrame(testFrameEvent.frame);
 }
 
-TEST(CanControllerProxyTest, receive_can_message)
+TEST(CanControllerDetailedSimTest, receive_can_message)
 {
     using namespace std::placeholders;
 
     EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = { 19 ,8 };
+    EndpointAddress busSimAddress = { 19, 8 };
 
     MockParticipant mockParticipant;
-    CanControllerProxyCallbacks callbackProvider;
+    CanControllerCallbacks callbackProvider;
 
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
-    canController.AddFrameHandler(std::bind(&CanControllerProxyCallbacks::FrameHandler, &callbackProvider, _1, _2));
+    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.direction = ib::sim::TransmitDirection::RX;
@@ -84,18 +87,21 @@ TEST(CanControllerProxyTest, receive_can_message)
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
 
-    CanControllerProxy canControllerProxy(&mockParticipant);
-    canControllerProxy.SetServiceDescriptor(from_endpointAddress(busSimAddress));
-    canController.ReceiveIbMessage(&canControllerProxy, testFrameEvent);
+    CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+
+    canController.ReceiveIbMessage(&canControllerFrom, testFrameEvent);
 }
 
-TEST(CanControllerProxyTest, start_stop_sleep_reset)
+TEST(CanControllerDetailedSimTest, start_stop_sleep_reset)
 {
     EndpointAddress controllerAddress = { 3, 8 };
+    EndpointAddress busSimAddress = {19, 8};
 
     MockParticipant mockParticipant;
 
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     CanSetControllerMode startCommand = { {0, 0}, CanControllerState::Started };
@@ -118,13 +124,15 @@ TEST(CanControllerProxyTest, start_stop_sleep_reset)
     canController.Reset();
 }
 
-TEST(CanControllerProxyTest, set_baudrate)
+TEST(CanControllerDetailedSimTest, set_baudrate)
 {
-    EndpointAddress controllerAddress = { 3, 8 };
+    EndpointAddress controllerAddress = {3, 8};
+    EndpointAddress busSimAddress = {19, 8};
 
     MockParticipant mockParticipant;
 
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     CanConfigureBaudrate baudrate1 = { 3000, 0 };
@@ -139,21 +147,22 @@ TEST(CanControllerProxyTest, set_baudrate)
     canController.SetBaudRate(baudrate2.baudRate, baudrate2.fdBaudRate);
 }
 
-TEST(CanControllerProxyTest, receive_new_controller_state)
+TEST(CanControllerDetailedSimTest, receive_new_controller_state)
 {
     using namespace std::placeholders;
 
     EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = { 19 ,8 };
+    EndpointAddress busSimAddress = {19, 8};
 
     MockParticipant mockParticipant;
 
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    CanControllerProxyCallbacks callbackProvider;
-    canController.AddStateChangeHandler(std::bind(&CanControllerProxyCallbacks::StateChangeHandler, &callbackProvider, _1, _2));
-    canController.AddErrorStateChangeHandler(std::bind(&CanControllerProxyCallbacks::ErrorStateChangeHandler, &callbackProvider, _1, _2));
+    CanControllerCallbacks callbackProvider;
+    canController.AddStateChangeHandler(std::bind(&CanControllerCallbacks::StateChangeHandler, &callbackProvider, _1, _2));
+    canController.AddErrorStateChangeHandler(std::bind(&CanControllerCallbacks::ErrorStateChangeHandler, &callbackProvider, _1, _2));
 
     EXPECT_CALL(callbackProvider, StateChangeHandler(&canController, CanStateChangeEvent{ 0ns, CanControllerState::Started }))
         .Times(1);
@@ -163,38 +172,40 @@ TEST(CanControllerProxyTest, receive_new_controller_state)
 
     CanControllerStatus controllerStatus{};
 
-    CanControllerProxy canControllerProxy(&mockParticipant);
-    canControllerProxy.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+    CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveIbMessage(&canControllerProxy, controllerStatus);
+    canController.ReceiveIbMessage(&canControllerFrom, controllerStatus);
 
     // only stateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveIbMessage(&canControllerProxy, controllerStatus);
+    canController.ReceiveIbMessage(&canControllerFrom, controllerStatus);
 
     // only errorStateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::ErrorActive;
-    canController.ReceiveIbMessage(&canControllerProxy, controllerStatus);
+    canController.ReceiveIbMessage(&canControllerFrom, controllerStatus);
 }
 
-TEST(CanControllerProxyTest, receive_ack)
+TEST(CanControllerDetailedSimTest, receive_ack)
 {
     using namespace std::placeholders;
 
     EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = { 19 ,8 };
+    EndpointAddress busSimAddress = {19, 8};
 
     MockParticipant mockParticipant;
 
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    CanControllerProxyCallbacks callbackProvider;
-    canController.AddFrameTransmitHandler(std::bind(&CanControllerProxyCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
+    CanControllerCallbacks callbackProvider;
+    canController.AddFrameTransmitHandler(std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
 
     CanFrame msg;
     auto txId1 = canController.SendFrame(msg);
@@ -209,10 +220,11 @@ TEST(CanControllerProxyTest, receive_ack)
     EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, ack2))
         .Times(1);
 
-    CanControllerProxy canControllerProxy(&mockParticipant);
-    canControllerProxy.SetServiceDescriptor(from_endpointAddress(busSimAddress));
-    canController.ReceiveIbMessage(&canControllerProxy, ack1);
-    canController.ReceiveIbMessage(&canControllerProxy, ack2);
+    CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+
+    canController.ReceiveIbMessage(&canControllerFrom, ack1);
+    canController.ReceiveIbMessage(&canControllerFrom, ack2);
 }
 
 /*! \brief Ensure that the proxy does not generate an Ack
@@ -221,26 +233,28 @@ TEST(CanControllerProxyTest, receive_ack)
 *   CanTransmitAcknowledges are generated by the Network Simulator. Therefore,
 *   the controller proxies must not generate acks on their own.
 */
-TEST(CanControllerProxyTest, must_not_generate_ack)
+TEST(CanControllerDetailedSimTest, must_not_generate_ack)
 {
     using namespace std::placeholders;
 
     EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = { 19 ,8 };
+    EndpointAddress busSimAddress = {19, 8};
 
     MockParticipant mockParticipant;
-    CanControllerProxyCallbacks callbackProvider;
+    CanControllerCallbacks callbackProvider;
 
-    CanControllerProxy canController(&mockParticipant);
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     CanFrameEvent msg{};
     EXPECT_CALL(mockParticipant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanFrameTransmitEvent&>()))
         .Times(0);
 
-    CanControllerProxy canControllerProxy(&mockParticipant);
-    canController.SetServiceDescriptor(from_endpointAddress(busSimAddress));
-    canController.ReceiveIbMessage(&canControllerProxy, msg);
+    CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+
+    canController.ReceiveIbMessage(&canControllerFrom, msg);
 }
 
 } // anonymous namespace

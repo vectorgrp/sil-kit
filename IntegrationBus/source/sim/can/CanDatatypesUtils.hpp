@@ -19,7 +19,6 @@ bool operator==(const CanConfigureBaudrate& lhs, const CanConfigureBaudrate& rhs
 bool operator==(const CanStateChangeEvent& lhs, const CanStateChangeEvent& rhs);
 bool operator==(const CanErrorStateChangeEvent& lhs, const CanErrorStateChangeEvent& rhs);
 
-
 }
 }
 }

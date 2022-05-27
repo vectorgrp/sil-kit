@@ -12,6 +12,10 @@ CAN Service API
 .. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<ib::sim::can::ICanController::AddStateChangeHandler>`
 .. |AddErrorStateChangeHandler| replace:: :cpp:func:`AddErrorStateChangeHandler()<ib::sim::can::ICanController::AddErrorStateChangeHandler>`
 .. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::can::ICanController::AddFrameHandler>`
+.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<ib::sim::can::ICanController::RemoveFrameTransmitHandler>`
+.. |RemoveStateChangeHandler| replace:: :cpp:func:`RemoveStateChangeHandler()<ib::sim::can::ICanController::RemoveStateChangeHandler>`
+.. |RemoveErrorStateChangeHandler| replace:: :cpp:func:`RemoveErrorStateChangeHandler()<ib::sim::can::ICanController::RemoveErrorStateChangeHandler>`
+.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<ib::sim::can::ICanController::RemoveFrameHandler>`
 .. |Start| replace:: :cpp:func:`Start()<ib::sim::can::ICanController::Start>`
 .. |Stop| replace:: :cpp:func:`Stop()<ib::sim::can::ICanController::Stop>`
 .. |Reset| replace:: :cpp:func:`Reset()<ib::sim::can::ICanController::Reset>`
@@ -33,10 +37,7 @@ CAN Service API
 .. |TransmitQueueFull| replace:: :cpp:enumerator:`CanTransmitStatus::TransmitQueueFull<ib::sim::can::TransmitQueueFull>`
 .. |DuplicatedTransmitId| replace:: :cpp:enumerator:`CanTransmitStatus::DuplicatedTransmitId<ib::sim::can::DuplicatedTransmitId>`
 
-.. || replace:: 
-.. || replace:: 
-.. || replace:: 
-.. || replace:: 
+.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
 
 .. contents::
    :local:
@@ -141,6 +142,16 @@ rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
    Both |SetBaudRate| and |Start|  should not be called earlier than in the participant controller's
    :cpp:func:`init handler<ib::mw::synd::IParticipantController::SetInitHandler()>`. Otherwise, it is not guaranteed 
    that all participants are already connected, which can cause the call to have no effect.
+
+Managing the handlers
+~~~~~~~~~~~~~~~~~~~~~
+
+Adding a handler will return a |HandlerId| which can be used to remove the handler via:
+
+- |RemoveFrameTransmitHandler|  
+- |RemoveStateChangeHandler|
+- |RemoveErrorStateChangeHandler|
+- |RemoveFrameHandler|
 
 Message Tracing
 ~~~~~~~~~~~~~~~

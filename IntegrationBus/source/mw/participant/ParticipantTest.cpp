@@ -7,7 +7,7 @@
 #include "gtest/gtest.h"
 
 #include "NullConnectionParticipant.hpp"
-#include "CanControllerFacade.hpp"
+#include "CanController.hpp"
 #include "MockParticipantConfiguration.hpp"
 #include "ParticipantConfiguration.hpp"
 
@@ -58,7 +58,7 @@ TEST_F(ParticipantTest, make_basic_controller)
         CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestParticipant", false);
 
     auto* canController = participant->CreateCanController("CAN1");
-    auto basicCanController = dynamic_cast<ib::sim::can::CanControllerFacade*>(canController);
+    auto basicCanController = dynamic_cast<ib::sim::can::CanController*>(canController);
 
     EXPECT_NE(basicCanController, nullptr);
 }

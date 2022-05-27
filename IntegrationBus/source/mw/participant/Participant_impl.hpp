@@ -5,8 +5,6 @@
 #include <chrono>
 
 #include "CanController.hpp"
-#include "CanControllerProxy.hpp"
-#include "CanControllerFacade.hpp"
 #include "EthController.hpp"
 #include "EthControllerProxy.hpp"
 #include "EthControllerFacade.hpp"
@@ -255,9 +253,13 @@ auto Participant<IbConnectionT>::CreateCanController(const std::string& canonica
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeCan;
 
-    return CreateController<ib::cfg::CanController, can::CanControllerFacade>(
+    auto controller = CreateController<ib::cfg::CanController, can::CanController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
         _timeProvider.get());
+
+    controller->RegisterServiceDiscovery();
+    
+    return controller;
 }
 
 

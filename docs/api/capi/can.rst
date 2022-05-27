@@ -19,6 +19,10 @@ Can Controller
 .. doxygenfunction:: ib_Can_Controller_AddFrameHandler
 .. doxygenfunction:: ib_Can_Controller_AddStateChangeHandler
 .. doxygenfunction:: ib_Can_Controller_AddErrorStateChangeHandler
+.. doxygenfunction:: ib_Can_Controller_RemoveFrameTransmitHandler
+.. doxygenfunction:: ib_Can_Controller_RemoveFrameHandler
+.. doxygenfunction:: ib_Can_Controller_RemoveStateChangeHandler
+.. doxygenfunction:: ib_Can_Controller_RemoveErrorStateChangeHandler
 
 Data Structures
 ~~~~~~~~~~~~~~~

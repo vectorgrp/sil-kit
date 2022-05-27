@@ -16,9 +16,80 @@ Compatibility with 3.99.23
 - Application software interface (API): No
 - Middleware network protocol (VAsio):
 
+Added
+~~~~~
+
+- ``IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp``
+
+  Added methods which allow users to obtain information about connected participants.
+
+  .. code-block:: c++
+
+    class ISystemMonitor
+    {
+    public:
+        ...
+        using ParticipantConnectedHandler = std::function<void(const std::string& participantName)>;
+        using ParticipantDisconnectedHandler = std::function<void(const std::string& participantName)>;
+        ...
+        virtual void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) = 0;
+        virtual void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) = 0;
+        virtual auto IsParticipantConnected(const std::string& participantName) const -> bool = 0;
+        ...
+    };
+
+- CAN: Added functionality to remove handlers:
+
+  - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
+
+    .. code-block:: c++
+
+      virtual void RemoveFrameHandler(HandlerId handlerId) = 0;
+      virtual void RemoveFrameTransmitHandler(HandlerId handlerId) = 0;
+      virtual void RemoveStateChangeHandler(HandlerId handlerId) = 0;
+      virtual void RemoveErrorStateChangeHandler(HandlerId handlerId) = 0;
+      
+  - ``IntegrationBus/include/ib/capi/Can.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Can_Controller_RemoveFrameHandler_t)(ib_Can_Controller* controller, 
+            ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Can_Controller_RemoveFrameTransmitHandler_t)(ib_Can_Controller* controller,
+            ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Can_Controller_RemoveStateChangeHandler_t)(ib_Can_Controller* controller,
+            ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Can_Controller_RemoveErrorStateChangeHandler_t)(ib_Can_Controller* controller,
+            ib_HandlerId handlerId);
 
 Changed
 ~~~~~~~
+
+- CAN simuations behavior w/wo NetSim harmonized: 
+
+  Without NetSim, the ICanController methods Reset, Start, Stop and Sleep now also trigger the 
+  StateChangeHandlers on the calling participant, without any effect on the actual controller logic.
+
+- CAN: Adding a handler now returns a HandlerId. In the C-API, the HandlerId is obtaind by an out parameter:
+
+  - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId AddFrameHandler(...) = 0;
+      virtual HandlerId AddFrameTransmitHandler(...) = 0;
+      virtual HandlerId AddStateChangeHandler(...) = 0;
+      virtual HandlerId AddErrorStateChangeHandler(...) = 0;
+      
+  - ``IntegrationBus/include/ib/capi/Can.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Can_Controller_AddFrameHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Can_Controller_AddFrameTransmitHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Can_Controller_AddStateChangeHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Can_Controller_AddErrorStateChangeHandler_t)(... , ib_HandlerId* outHandlerId);
+
 - Added ib_InterfaceId to structs of C-API:
 
   + ib_Can_Frame
@@ -138,29 +209,6 @@ Changed
             ib_Flexray_ClusterParameters* clusterParams;
             ib_Flexray_NodeParameters* nodeParams;
             ...
-
-Added
-~~~~~
-
-- ``IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp``
-
-  Added methods which allow users to obtain information about connected participants.
-
-  .. code-block:: c++
-
-    class ISystemMonitor
-    {
-    public:
-        ...
-        using ParticipantConnectedHandler = std::function<void(const std::string& participantName)>;
-        using ParticipantDisconnectedHandler = std::function<void(const std::string& participantName)>;
-        ...
-        virtual void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) = 0;
-        virtual void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) = 0;
-        virtual auto IsParticipantConnected(const std::string& participantName) const -> bool = 0;
-        ...
-    };
-
 
 [3.99.23] - 25-05-2022
 ----------------------

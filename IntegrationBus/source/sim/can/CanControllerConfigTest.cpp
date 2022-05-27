@@ -9,16 +9,16 @@
 
 #include "NullConnectionParticipant.hpp"
 
-#include "CanControllerFacade.hpp"
+#include "CanController.hpp"
 
 namespace {
 using namespace ib::mw;
 using namespace ib::sim::can;
 
-class CanControllerFacadeTest : public testing::Test
+class CanControllerConfigTest : public testing::Test
 {
 public:
-    CanControllerFacadeTest(){};
+    CanControllerConfigTest(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
@@ -38,7 +38,7 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantCo
     return mockConfig;
 }
 
-TEST(CanControllerFacadeTest, create_controller_unconfigured)
+TEST(CanControllerConfigTest, create_controller_unconfigured)
 {
     auto controllerName = "Controller";
     auto expectedNetworkName = "Controller";
@@ -48,13 +48,13 @@ TEST(CanControllerFacadeTest, create_controller_unconfigured)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<CanControllerFacade*>(participant->CreateCanController(controllerName));
+        dynamic_cast<CanController*>(participant->CreateCanController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(CanControllerFacadeTest, create_controller_configured_no_network)
+TEST(CanControllerConfigTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -64,14 +64,13 @@ TEST(CanControllerFacadeTest, create_controller_configured_no_network)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller =
-        dynamic_cast<CanControllerFacade*>(participant->CreateCanController(controllerName, networkName));
+    auto controller = dynamic_cast<CanController*>(participant->CreateCanController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(CanControllerFacadeTest, create_controller_configured_with_network)
+TEST(CanControllerConfigTest, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";
@@ -81,8 +80,7 @@ TEST(CanControllerFacadeTest, create_controller_configured_with_network)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller =
-        dynamic_cast<CanControllerFacade*>(participant->CreateCanController(controllerName, networkName));
+    auto controller = dynamic_cast<CanController*>(participant->CreateCanController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

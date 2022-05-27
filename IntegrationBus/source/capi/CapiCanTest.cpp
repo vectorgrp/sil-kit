@@ -50,16 +50,20 @@ namespace {
     class MockCanController : public ib::sim::can::ICanController
     {
     public:
-        MOCK_METHOD2(SetBaudRate, void(uint32_t rate, uint32_t fdRate));
-        MOCK_METHOD0(Reset, void());
-        MOCK_METHOD0(Start, void());
-        MOCK_METHOD0(Stop, void());
-        MOCK_METHOD0(Sleep, void());
-        MOCK_METHOD2(SendFrame, CanTxId(const CanFrame&, void*));
-        MOCK_METHOD2(AddFrameHandler, void(FrameHandler, ib::sim::DirectionMask));
-        MOCK_METHOD1(AddStateChangeHandler, void(StateChangeHandler));
-        MOCK_METHOD1(AddErrorStateChangeHandler, void(ErrorStateChangeHandler));
-        MOCK_METHOD2(AddFrameTransmitHandler, void(FrameTransmitHandler, CanTransmitStatusMask));
+        MOCK_METHOD(void, SetBaudRate, (uint32_t rate, uint32_t fdRate));
+        MOCK_METHOD(void, Reset, ());
+        MOCK_METHOD(void, Start, ());
+        MOCK_METHOD(void, Stop, ());
+        MOCK_METHOD(void, Sleep, ());
+        MOCK_METHOD(CanTxId,SendFrame, (const CanFrame&, void*));
+        MOCK_METHOD(ib::sim::HandlerId, AddFrameHandler, (FrameHandler, ib::sim::DirectionMask));
+        MOCK_METHOD(void, RemoveFrameHandler, (ib::sim::HandlerId));
+        MOCK_METHOD(ib::sim::HandlerId, AddStateChangeHandler, (StateChangeHandler));
+        MOCK_METHOD(void, RemoveStateChangeHandler, (ib::sim::HandlerId));
+        MOCK_METHOD(ib::sim::HandlerId, AddErrorStateChangeHandler, (ErrorStateChangeHandler));
+        MOCK_METHOD(void, RemoveErrorStateChangeHandler, (ib::sim::HandlerId));
+        MOCK_METHOD(ib::sim::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler, CanTransmitStatusMask));
+        MOCK_METHOD(void, RemoveFrameTransmitHandler, (ib::sim::HandlerId));
     };
 
     void FrameTransmitHandler(void* /*context*/, ib_Can_Controller* /*controller*/, ib_Can_FrameTransmitEvent* /*ack*/)
@@ -98,8 +102,9 @@ namespace {
     {
 
         ib_ReturnCode returnCode;
-
         MockParticipant mockParticipant;
+        ib_HandlerId handlerId;
+
         EXPECT_CALL(mockParticipant, CreateCanController("ControllerName", "NetworkName")).Times(testing::Exactly(1));
         ib_Can_Controller* testParam;
         returnCode = ib_Can_Controller_Create(&testParam, (ib_Participant*)&mockParticipant, "ControllerName",
@@ -129,20 +134,42 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddFrameHandler(testing::_, testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Can_Controller_AddFrameHandler((ib_Can_Controller*)&mockController, NULL, &FrameHandler, ib_Direction_SendReceive);
+        returnCode = ib_Can_Controller_AddFrameHandler((ib_Can_Controller*)&mockController, NULL, &FrameHandler,
+                                                       ib_Direction_SendReceive, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveFrameHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_RemoveFrameHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddStateChangeHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Can_Controller_AddStateChangeHandler((ib_Can_Controller*)&mockController, NULL, &StateChangeHandler);
+        returnCode = ib_Can_Controller_AddStateChangeHandler((ib_Can_Controller*)&mockController, NULL,
+                                                             &StateChangeHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveStateChangeHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_RemoveStateChangeHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddErrorStateChangeHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Can_Controller_AddErrorStateChangeHandler((ib_Can_Controller*)&mockController, NULL, &ErrorStateChangeHandler);
+        returnCode = ib_Can_Controller_AddErrorStateChangeHandler((ib_Can_Controller*)&mockController, NULL,
+                                                                  &ErrorStateChangeHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveErrorStateChangeHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_RemoveErrorStateChangeHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddFrameTransmitHandler(testing::_, testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Can_Controller_AddFrameTransmitHandler((ib_Can_Controller*)&mockController, NULL, &FrameTransmitHandler, ib_Can_TransmitStatus_Transmitted);
+        returnCode =
+            ib_Can_Controller_AddFrameTransmitHandler((ib_Can_Controller*)&mockController, NULL, &FrameTransmitHandler,
+                                                      ib_Can_TransmitStatus_Transmitted, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveFrameTransmitHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Can_Controller_RemoveFrameTransmitHandler((ib_Can_Controller*)&mockController, 0);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
     }
 
     TEST_F(CapiCanTest, can_controller_send_frame_no_flags)
@@ -195,6 +222,7 @@ namespace {
     {
 
         ib_ReturnCode returnCode;
+        ib_HandlerId handlerId;
 
         returnCode = ib_Can_Controller_SetBaudRate(nullptr, 123, 456);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
@@ -215,24 +243,56 @@ namespace {
         returnCode = ib_Can_Controller_SendFrame((ib_Can_Controller*)&mockController, nullptr, NULL);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Can_Controller_AddFrameHandler(nullptr, NULL, &FrameHandler, ib_Direction_SendReceive);
+
+        returnCode =
+            ib_Can_Controller_AddFrameHandler(nullptr, NULL, &FrameHandler, ib_Direction_SendReceive, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Can_Controller_AddFrameHandler((ib_Can_Controller*)&mockController, NULL, nullptr, ib_Direction_SendReceive);
+        returnCode = ib_Can_Controller_AddFrameHandler((ib_Can_Controller*)&mockController, NULL, nullptr,
+                                                       ib_Direction_SendReceive, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_AddFrameHandler((ib_Can_Controller*)&mockController, NULL, &FrameHandler,
+                                                       ib_Direction_SendReceive, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Can_Controller_AddStateChangeHandler(nullptr, NULL, &StateChangeHandler);
+
+        returnCode = ib_Can_Controller_AddStateChangeHandler(nullptr, NULL, &StateChangeHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Can_Controller_AddStateChangeHandler((ib_Can_Controller*)&mockController, NULL, nullptr);
+        returnCode =
+            ib_Can_Controller_AddStateChangeHandler((ib_Can_Controller*)&mockController, NULL, nullptr, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_AddStateChangeHandler((ib_Can_Controller*)&mockController, NULL,
+                                                             &StateChangeHandler, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Can_Controller_AddErrorStateChangeHandler(nullptr, NULL, &ErrorStateChangeHandler);
+
+        returnCode = ib_Can_Controller_AddErrorStateChangeHandler(nullptr, NULL, &ErrorStateChangeHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Can_Controller_AddErrorStateChangeHandler((ib_Can_Controller*)&mockController, NULL, nullptr);
+        returnCode = ib_Can_Controller_AddErrorStateChangeHandler((ib_Can_Controller*)&mockController, NULL, nullptr,
+                                                                  &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_AddErrorStateChangeHandler((ib_Can_Controller*)&mockController, NULL,
+                                                                  &ErrorStateChangeHandler, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Can_Controller_AddFrameTransmitHandler(nullptr, NULL, &FrameTransmitHandler, ib_Can_TransmitStatus_Canceled);
+
+        returnCode = ib_Can_Controller_AddFrameTransmitHandler(nullptr, NULL, &FrameTransmitHandler,
+                                                               ib_Can_TransmitStatus_Canceled, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Can_Controller_AddFrameTransmitHandler((ib_Can_Controller*)&mockController, NULL, nullptr, ib_Can_TransmitStatus_Canceled);
+        returnCode = ib_Can_Controller_AddFrameTransmitHandler((ib_Can_Controller*)&mockController, NULL, nullptr,
+                                                               ib_Can_TransmitStatus_Canceled, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_AddFrameTransmitHandler(
+            (ib_Can_Controller*)&mockController, NULL, &FrameTransmitHandler, ib_Can_TransmitStatus_Canceled, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+
+        returnCode = ib_Can_Controller_RemoveFrameHandler(nullptr, handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_RemoveFrameTransmitHandler(nullptr, handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_RemoveStateChangeHandler(nullptr, handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Can_Controller_RemoveErrorStateChangeHandler(nullptr, handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     }
 

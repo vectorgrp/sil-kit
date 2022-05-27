@@ -22,8 +22,6 @@
 
 #include "IIbToCanSimulator.hpp"
 #include "IIbToCanController.hpp"
-#include "IIbToCanControllerProxy.hpp"
-#include "IIbToCanControllerFacade.hpp"
 
 #include "IIbToEthSimulator.hpp"
 #include "IIbToEthController.hpp"
@@ -363,8 +361,6 @@ private:
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,
-        ControllerMap<sim::can::IIbToCanControllerProxy>,
-        ControllerMap<sim::can::IIbToCanControllerFacade>,
         ControllerMap<sim::eth::IIbToEthController>,
         ControllerMap<sim::eth::IIbToEthControllerProxy>,
         ControllerMap<sim::eth::IIbToEthControllerFacade>,

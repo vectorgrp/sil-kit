@@ -1,14 +1,16 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbSimCan STATIC
-    CanController.cpp
-    CanController.hpp
-    CanControllerProxy.cpp
-    CanControllerProxy.hpp
     CanDatatypesUtils.cpp
     CanDatatypesUtils.hpp
-
-    CanControllerFacade.cpp
-    CanControllerFacade.hpp
+    CanController.cpp
+    CanController.hpp
+    ISimBehavior.hpp
+    SimBehavior.cpp
+    SimBehavior.hpp
+    SimBehaviorDetailed.cpp
+    SimBehaviorDetailed.hpp
+    SimBehaviorTrivial.cpp
+    SimBehaviorTrivial.hpp
 )
 
 target_include_directories(IbSimCan
@@ -26,9 +28,11 @@ target_link_libraries(IbSimCan
 
 add_vib_test(TestSimCanController
     SOURCES 
-        CanControllerTest.cpp 
-        CanControllerProxyTest.cpp 
-        CanControllerFacadeTest.cpp
+        #CanControllerTest.cpp 
+        #CanControllerProxyTest.cpp 
+        CanControllerConfigTest.cpp
+        CanControllerDetailedSimTest.cpp 
+        CanControllerTrivialSimTest.cpp
     LIBS 
         IbSimCan 
         IbMwMockParticipant

@@ -39,107 +39,165 @@ ib_ReturnCode ib_Can_Controller_Create(ib_Can_Controller** outController, ib_Par
 }
 
 ib_ReturnCode ib_Can_Controller_AddFrameHandler(ib_Can_Controller* controller, void* context,
-                                                ib_Can_FrameHandler_t callback, ib_Direction directionMask)
+                                                ib_Can_FrameHandler_t callback, ib_Direction directionMask,
+                                                ib_HandlerId* outHandlerId)
 {
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(callback);
-  CAPI_ENTER
-  {
-    auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-    canController->AddFrameHandler(
-      [context, controller, callback](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanFrameEvent& cppCanFrameEvent)
-      {
-        ib_Can_Frame frame{};
-        frame.id = cppCanFrameEvent.frame.canId;
-        uint32_t flags = 0;
-        flags |= cppCanFrameEvent.frame.flags.ide ? ib_Can_FrameFlag_ide : 0;
-        flags |= cppCanFrameEvent.frame.flags.rtr ? ib_Can_FrameFlag_rtr : 0;
-        flags |= cppCanFrameEvent.frame.flags.fdf ? ib_Can_FrameFlag_fdf : 0;
-        flags |= cppCanFrameEvent.frame.flags.brs ? ib_Can_FrameFlag_brs : 0;
-        flags |= cppCanFrameEvent.frame.flags.esi ? ib_Can_FrameFlag_esi : 0;
-        frame.flags = flags;
-        frame.dlc = cppCanFrameEvent.frame.dlc;
-        frame.data = { (uint8_t*)cppCanFrameEvent.frame.dataField.data(), (uint32_t)cppCanFrameEvent.frame.dataField.size() };
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(callback);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        *outHandlerId = (ib_HandlerId)canController->AddFrameHandler(
+            [context, controller, callback](ib::sim::can::ICanController* /*ctrl*/,
+                                            const ib::sim::can::CanFrameEvent& cppCanFrameEvent) {
+                ib_Can_Frame frame{};
+                frame.id = cppCanFrameEvent.frame.canId;
+                uint32_t flags = 0;
+                flags |= cppCanFrameEvent.frame.flags.ide ? ib_Can_FrameFlag_ide : 0;
+                flags |= cppCanFrameEvent.frame.flags.rtr ? ib_Can_FrameFlag_rtr : 0;
+                flags |= cppCanFrameEvent.frame.flags.fdf ? ib_Can_FrameFlag_fdf : 0;
+                flags |= cppCanFrameEvent.frame.flags.brs ? ib_Can_FrameFlag_brs : 0;
+                flags |= cppCanFrameEvent.frame.flags.esi ? ib_Can_FrameFlag_esi : 0;
+                frame.flags = flags;
+                frame.dlc = cppCanFrameEvent.frame.dlc;
+                frame.data = {(uint8_t*)cppCanFrameEvent.frame.dataField.data(),
+                              (uint32_t)cppCanFrameEvent.frame.dataField.size()};
 
-        ib_Can_FrameEvent frameEvent{};
-        frameEvent.interfaceId = ib_InterfaceIdentifier_CanFrameEvent;
-        frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
-        frameEvent.interfaceId = ib_InterfaceIdentifier_CanFrameEvent;
-        frameEvent.frame = &frame;
-        frameEvent.userContext = cppCanFrameEvent.userContext;
+                ib_Can_FrameEvent frameEvent{};
+                frameEvent.interfaceId = ib_InterfaceIdentifier_CanFrameEvent;
+                frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
+                frameEvent.interfaceId = ib_InterfaceIdentifier_CanFrameEvent;
+                frameEvent.frame = &frame;
+                frameEvent.userContext = cppCanFrameEvent.userContext;
 
-        callback(context, controller, &frameEvent);
-      }, directionMask);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+                callback(context, controller, &frameEvent);
+            },
+            directionMask);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Can_Controller_AddFrameTransmitHandler(ib_Can_Controller* controller, void* context, ib_Can_FrameTransmitHandler_t callback, ib_Can_TransmitStatus statusMask)
+ib_ReturnCode ib_Can_Controller_RemoveFrameHandler(ib_Can_Controller* controller, ib_HandlerId handlerId)
 {
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(callback);
-  CAPI_ENTER
-  {
-    auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-    canController->AddFrameTransmitHandler(
-      [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanFrameTransmitEvent& cppFrameTransmitEvent)
-      {
-        ib_Can_FrameTransmitEvent frameTransmitEvent{};
-        frameTransmitEvent.interfaceId = ib_InterfaceIdentifier_CanFrameTransmitEvent;
-        frameTransmitEvent.userContext = cppFrameTransmitEvent.userContext;
-        frameTransmitEvent.timestamp = cppFrameTransmitEvent.timestamp.count();
-        frameTransmitEvent.status = (ib_Can_TransmitStatus)cppFrameTransmitEvent.status;
-        callback(context, controller, &frameTransmitEvent);
-      }, static_cast<ib::sim::can::CanTransmitStatusMask>(statusMask));
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        canController->RemoveFrameHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Can_Controller_AddFrameTransmitHandler(ib_Can_Controller* controller, void* context,
+                                                        ib_Can_FrameTransmitHandler_t callback,
+                                                        ib_Can_TransmitStatus statusMask, ib_HandlerId* outHandlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(callback);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        *outHandlerId = (ib_HandlerId)canController->AddFrameTransmitHandler(
+            [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/,
+                                            const ib::sim::can::CanFrameTransmitEvent& cppFrameTransmitEvent) {
+                ib_Can_FrameTransmitEvent frameTransmitEvent{};
+                frameTransmitEvent.interfaceId = ib_InterfaceIdentifier_CanFrameTransmitEvent;
+                frameTransmitEvent.userContext = cppFrameTransmitEvent.userContext;
+                frameTransmitEvent.timestamp = cppFrameTransmitEvent.timestamp.count();
+                frameTransmitEvent.status = (ib_Can_TransmitStatus)cppFrameTransmitEvent.status;
+                callback(context, controller, &frameTransmitEvent);
+            },
+            static_cast<ib::sim::can::CanTransmitStatusMask>(statusMask));
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Can_Controller_RemoveFrameTransmitHandler(ib_Can_Controller* controller, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        canController->RemoveFrameTransmitHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 ib_ReturnCode ib_Can_Controller_AddStateChangeHandler(ib_Can_Controller* controller, void* context,
-                                                      ib_Can_StateChangeHandler_t callback)
+                                                      ib_Can_StateChangeHandler_t callback, ib_HandlerId* outHandlerId)
 {
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(callback);
-  CAPI_ENTER
-  {
-    auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-    canController->AddStateChangeHandler(
-        [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/,
-                                        const ib::sim::can::CanStateChangeEvent cppStateChangeEvent)
-      {
-        ib_Can_StateChangeEvent stateChangeEvent;
-        stateChangeEvent.interfaceId = ib_InterfaceIdentifier_CanStateChangeEvent;
-        stateChangeEvent.timestamp = cppStateChangeEvent.timestamp.count();
-        stateChangeEvent.state = (ib_Can_ControllerState)cppStateChangeEvent.state;
-        callback(context, controller, &stateChangeEvent);
-      });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(callback);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        *outHandlerId = (ib_HandlerId)canController->AddStateChangeHandler(
+            [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/,
+                                            const ib::sim::can::CanStateChangeEvent cppStateChangeEvent) {
+                ib_Can_StateChangeEvent stateChangeEvent;
+                stateChangeEvent.interfaceId = ib_InterfaceIdentifier_CanStateChangeEvent;
+                stateChangeEvent.timestamp = cppStateChangeEvent.timestamp.count();
+                stateChangeEvent.state = (ib_Can_ControllerState)cppStateChangeEvent.state;
+        		callback(context, controller, &stateChangeEvent);
+            });
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* controller, void* context, ib_Can_ErrorStateChangeHandler_t callback)
+ib_ReturnCode ib_Can_Controller_RemoveStateChangeHandler(ib_Can_Controller* controller, ib_HandlerId handlerId)
 {
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(callback);
-  CAPI_ENTER
-  {
-    auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-    canController->AddErrorStateChangeHandler(
-        [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/,
-                                        const ib::sim::can::CanErrorStateChangeEvent cppErrorStateChangeEvent)
-      {
-        ib_Can_ErrorStateChangeEvent errorStateChangeEvent;
-        errorStateChangeEvent.interfaceId = ib_InterfaceIdentifier_CanErrorStateChangeEvent;
-        errorStateChangeEvent.timestamp = cppErrorStateChangeEvent.timestamp.count();
-        errorStateChangeEvent.errorState = (ib_Can_ErrorState)cppErrorStateChangeEvent.errorState;
-        callback(context, controller, &errorStateChangeEvent);
-      });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        canController->RemoveStateChangeHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* controller, void* context,
+                                                           ib_Can_ErrorStateChangeHandler_t callback,
+                                                           ib_HandlerId* outHandlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(callback);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        *outHandlerId = (ib_HandlerId)canController->AddErrorStateChangeHandler(
+            [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/,
+                                            const ib::sim::can::CanErrorStateChangeEvent cppErrorStateChangeEvent) {
+                ib_Can_ErrorStateChangeEvent errorStateChangeEvent;
+                errorStateChangeEvent.interfaceId = ib_InterfaceIdentifier_CanErrorStateChangeEvent;
+                errorStateChangeEvent.timestamp = cppErrorStateChangeEvent.timestamp.count();
+                errorStateChangeEvent.errorState = (ib_Can_ErrorState)cppErrorStateChangeEvent.errorState;
+        		callback(context, controller, &errorStateChangeEvent);
+            });
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Can_Controller_RemoveErrorStateChangeHandler(ib_Can_Controller* controller, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
+        canController->RemoveErrorStateChangeHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 ib_ReturnCode ib_Can_Controller_SetBaudRate(ib_Can_Controller* controller, uint32_t rate, uint32_t fdRate)

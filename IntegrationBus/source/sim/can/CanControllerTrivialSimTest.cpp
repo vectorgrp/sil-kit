@@ -56,13 +56,13 @@ public:
     MOCK_METHOD2(FrameTransmitHandler, void(ICanController*, CanFrameTransmitEvent));
 };
 
-class CanControllerTest : public testing::Test
+class CanControllerTrivialSimTest : public testing::Test
 {
 public:
-    CanControllerTest() {};
+    CanControllerTrivialSimTest() {};
 };
 
-TEST(CanControllerTest, send_can_message)
+TEST(CanControllerTrivialSimTest, send_can_message)
 {
     MockParticipant mockParticipant;
 
@@ -87,7 +87,7 @@ TEST(CanControllerTest, send_can_message)
     canController.SendFrame(testFrameEvent.frame);
 }
 
-TEST(CanControllerTest, receive_can_message)
+TEST(CanControllerTrivialSimTest, receive_can_message)
 {
     using namespace std::placeholders;
 
@@ -110,14 +110,13 @@ TEST(CanControllerTest, receive_can_message)
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
     canController.ReceiveIbMessage(&canControllerPlaceholder, testFrameEvent);
 }
 
-TEST(CanControllerTest, receive_can_message_rx_filter1)
+TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
 {
     using namespace std::placeholders;
 
@@ -129,16 +128,15 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
     CanControllerCallbacks callbackProvider;
     ib::cfg::CanController cfg;
     CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
+    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2),
+                                  (ib::sim::DirectionMask)ib::sim::TransmitDirection::RX);
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.frame.canId = 16;
     testFrameEvent.direction = ib::sim::TransmitDirection::RX;
     testFrameEvent.userContext = (void*)1234;
 
-    EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
-        .Times(1);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent)).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
@@ -146,7 +144,7 @@ TEST(CanControllerTest, receive_can_message_rx_filter1)
 }
 
 
-TEST(CanControllerTest, receive_can_message_rx_filter2)
+TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter2)
 {
     using namespace std::placeholders;
 
@@ -159,7 +157,8 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
 
     ib::cfg::CanController cfg;
     CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
+    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2),
+                                  (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.frame.canId = 16;
@@ -167,14 +166,13 @@ TEST(CanControllerTest, receive_can_message_rx_filter2)
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(0);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
     canController.ReceiveIbMessage(&canControllerPlaceholder, testFrameEvent);
 }
 
-TEST(CanControllerTest, receive_can_message_tx_filter1)
+TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
 {
     using namespace std::placeholders;
 
@@ -186,7 +184,8 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
     ib::cfg::CanController cfg;
     
     CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2), (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
+    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2),
+                                  (ib::sim::DirectionMask)ib::sim::TransmitDirection::TX);
 
     CanFrameEvent testFrameEvent{};
     testFrameEvent.transmitId = 1;
@@ -203,7 +202,7 @@ TEST(CanControllerTest, receive_can_message_tx_filter1)
 }
 
 
-TEST(CanControllerTest, receive_can_message_tx_filter2)
+TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter2)
 {
     using namespace std::placeholders;
 
@@ -236,7 +235,7 @@ TEST(CanControllerTest, receive_can_message_tx_filter2)
  *   ControllerModes are not supported by the CanController. This feature requires
  *   the usage of a proper CanBusSimulator and CanControllerProxies.
  */
-TEST(CanControllerTest, start_stop_sleep_reset)
+TEST(CanControllerTrivialSimTest, start_stop_sleep_reset)
 {
     MockParticipant mockParticipant;
     ib::cfg::CanController cfg;
@@ -258,7 +257,7 @@ TEST(CanControllerTest, start_stop_sleep_reset)
 *   BaudRate is not supported by the CanController. This feature requires
 *   the usage of a proper CanBusSimulator and CanControllerProxies.
 */
-TEST(CanControllerTest, set_baudrate)
+TEST(CanControllerTrivialSimTest, set_baudrate)
 {
     MockParticipant mockParticipant;
     ib::cfg::CanController cfg;
@@ -271,7 +270,7 @@ TEST(CanControllerTest, set_baudrate)
     canController.SetBaudRate(3000, 500000);
 }
 
-TEST(CanControllerTest, receive_ack)
+TEST(CanControllerTrivialSimTest, receive_ack)
 {
     using namespace std::placeholders;
 
@@ -296,8 +295,42 @@ TEST(CanControllerTest, receive_ack)
     ASSERT_NE(txId1, txId2);
 }
 
+TEST(CanControllerTrivialSimTest, add_remove_handler)
+{
+    using namespace std::placeholders;
 
-TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
+    MockParticipant mockParticipant;
+    CanControllerCallbacks callbackProvider;
+
+    CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
+
+    const int numHandlers = 10;
+    std::vector<ib::sim::HandlerId> handlerIds;
+    for (int i = 0; i < numHandlers; i++)
+    {
+        handlerIds.push_back(canController.AddFrameTransmitHandler(
+            std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2)));
+    }
+    
+    CanFrame msg{};
+    CanFrameTransmitEvent expectedAck{0, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr};
+
+    EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, CanTransmitAckWithouthTransmitIdMatcher(expectedAck)))
+        .Times(numHandlers);
+
+    auto txId1 = canController.SendFrame(msg);
+    for (auto&& handlerId : handlerIds)
+    {
+        canController.RemoveFrameTransmitHandler(handlerId);
+    }
+    
+    // All handlers removed, no further calls should appear.
+    auto txId2 = canController.SendFrame(msg);
+
+    ASSERT_NE(txId1, txId2);
+}
+
+TEST(CanControllerTrivialSimTest, DISABLED_cancontroller_uses_tracing)
 {
     using namespace ib::extensions;
 
@@ -312,7 +345,7 @@ TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
         .WillByDefault(testing::Return(now));
 
 
-    auto controller = CanController(&participant, cfg, participant.GetTimeProvider());
+    CanController controller(&participant, cfg, participant.GetTimeProvider());
     controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     controller.AddSink(&traceSink);
 
@@ -334,7 +367,7 @@ TEST(CanControllerTest, DISABLED_cancontroller_uses_tracing)
         Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, testFrameEvent.frame))
         .Times(1);
 
-    CanController canControllerPlaceholder(&participant, cfg, participant.GetTimeProvider());
+    CanController canControllerPlaceholder(&participant, {}, participant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(otherAddress));
     controller.ReceiveIbMessage(&canControllerPlaceholder, testFrameEvent);
 }

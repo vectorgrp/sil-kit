@@ -9,7 +9,7 @@
 #include "IParticipantInternal.hpp"
 #include "ib/sim/can/all.hpp"
 #include "ib/sim/can/CanDatatypes.hpp"
-#include "CanControllerFacade.hpp"
+#include "CanController.hpp"
 
 #include "ib/mw/sync/all.hpp"
 #include "ib/util/functional.hpp"
@@ -39,7 +39,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto systemCtrl = senderCom->GetSystemController();
 
     auto* senderParticipant = senderCom->GetParticipantController();
-    auto* senderCan = dynamic_cast<ib::sim::can::CanControllerFacade*>(senderCom->CreateCanController("CAN1"));
+    auto* senderCan = dynamic_cast<ib::sim::can::CanController*>(senderCom->CreateCanController("CAN1"));
     senderCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
@@ -50,7 +50,8 @@ TEST(TargetedMessagingITest, targeted_messaging)
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
             if (now == 0ms)
             {
-                ib::sim::can::CanFrameEvent msg;
+                ib::sim::can::CanFrameEvent msg{};
+                msg.direction = ib::sim::TransmitDirection::RX;
                 msg.frame.canId = 42;
                 senderCom->SendIbMessage(senderCan, "TargetReceiver", msg);
             }

@@ -1,188 +1,272 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "CanController.hpp"
+#include "ib/mw/logging/ILogger.hpp"
 
-#include <algorithm>
+#include "IServiceDiscovery.hpp"
+#include "ServiceDatatypes.hpp"
+#include "CanController.hpp"
 
 namespace ib {
 namespace sim {
 namespace can {
 
-
-CanController::CanController(mw::IParticipantInternal* participant, 
-                             const ib::cfg::CanController& config,
-                             mw::sync::ITimeProvider* timeProvider,
-                             ICanController* facade)
-    : _participant{participant}
+CanController::CanController(mw::IParticipantInternal* participant, ib::cfg::CanController config,
+                             mw::sync::ITimeProvider* timeProvider)
+    : _participant(participant)
     , _config{config}
-    , _timeProvider{timeProvider}
-    , _facade{facade}
+    , _simulationBehavior{participant, this, timeProvider}
 {
-    if (_facade == nullptr)
-    {
-        _facade = this;
-    }
 }
 
-void CanController::SetBaudRate(uint32_t /*rate*/, uint32_t /*fdRate*/)
+//------------------------
+// Trivial or detailed
+//------------------------
+
+void CanController::RegisterServiceDiscovery()
 {
+    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
+    disc->RegisterServiceDiscoveryHandler([this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
+                                                 const mw::ServiceDescriptor& remoteServiceDescriptor) {
+        // Check if discovered service is a network simulator (if none is known)
+        if (_simulationBehavior.IsTrivial())
+        {
+            // Check if received descriptor has a matching simulated link
+            if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+                && IsRelevantNetwork(remoteServiceDescriptor))
+            {
+                _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
+            }
+        }
+        else
+        {
+            if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
+                && IsRelevantNetwork(remoteServiceDescriptor))
+            {
+                _simulationBehavior.SetTrivialBehavior();
+            }
+        }
+    });
+}
+
+// For testing purposes
+void CanController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+{
+    _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
+}
+void CanController::SetTrivialBehavior()
+{
+    _simulationBehavior.SetTrivialBehavior();
+}
+
+auto CanController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    // NetSim announces ServiceType::Link 
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
+}
+
+auto CanController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+{
+    return _simulationBehavior.AllowReception(from);
+}
+
+template <typename MsgT>
+void CanController::SendIbMessage(MsgT&& msg)
+{
+    _simulationBehavior.SendIbMessage(std::move(msg));
+}
+
+//------------------------
+// Public API + Helpers
+//------------------------
+
+void CanController::SetBaudRate(uint32_t rate, uint32_t fdRate)
+{
+    _baudRate.baudRate = rate;
+    _baudRate.fdBaudRate = fdRate;
+
+    SendIbMessage(_baudRate);
 }
 
 void CanController::Reset()
 {
+    CanSetControllerMode mode;
+    mode.flags.cancelTransmitRequests = 1;
+    mode.flags.resetErrorHandling = 1;
+    mode.mode = CanControllerState::Uninit;
+
+    SendIbMessage(mode);
 }
 
 void CanController::Start()
 {
+    ChangeControllerMode(CanControllerState::Started);
 }
 
 void CanController::Stop()
 {
+    ChangeControllerMode(CanControllerState::Stopped);
 }
 
 void CanController::Sleep()
 {
+    ChangeControllerMode(CanControllerState::Sleep);
+}
+
+void CanController::ChangeControllerMode(CanControllerState state)
+{
+    CanSetControllerMode mode;
+    mode.flags.cancelTransmitRequests = 0;
+    mode.flags.resetErrorHandling = 0;
+    mode.mode = state;
+
+    SendIbMessage(mode);
 }
 
 auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTxId
 {
-    auto now = _timeProvider->Now();
-    // ignore the user's API calls if we're configured for replay
-    //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
-    //{
-    //    return 0;
-    //}
-
     CanFrameEvent canFrameEvent{};
     canFrameEvent.frame = frame;
-    canFrameEvent.userContext = userContext;
-    canFrameEvent.direction = TransmitDirection::TX;
     canFrameEvent.transmitId = MakeTxId();
-    canFrameEvent.timestamp = now;
+    canFrameEvent.userContext = userContext;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, now, canFrameEvent);
-    // has to be called before SendIbMessage because of thread change
-    CallHandlers(canFrameEvent);
-
-    _participant->SendIbMessage(this, canFrameEvent);
-
-    // instantly call transmit acknowledge
-    CanFrameTransmitEvent ack{};
-    ack.canId = frame.canId;
-    ack.status = CanTransmitStatus::Transmitted;
-    ack.transmitId = canFrameEvent.transmitId;
-    ack.userContext = userContext;
-    ack.timestamp = now;
-    CallHandlers(ack);
-
+    SendIbMessage(canFrameEvent);
     return canFrameEvent.transmitId;
 }
 
-void CanController::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
+//------------------------
+// ReceiveIbMessage
+//------------------------
+
+void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanFrameEvent& msg)
 {
-    std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& msg) {
-        return ((DirectionMask)msg.direction & (DirectionMask)directionMask) != 0;
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
+    CallHandlers(msg);
+}
+
+void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanFrameTransmitEvent& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    CallHandlers(msg);
+}
+
+void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    if (_controllerState != msg.controllerState)
+    {
+        _controllerState = msg.controllerState;
+        CallHandlers(CanStateChangeEvent{ msg.timestamp, msg.controllerState });
+    }
+    if (_errorState != msg.errorState)
+    {
+        _errorState = msg.errorState;
+        CallHandlers(CanErrorStateChangeEvent{ msg.timestamp, msg.errorState });
+    }
+}
+
+//------------------------
+// Handlers
+//------------------------
+
+HandlerId CanController::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
+{
+    std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& frameEvent) {
+        return (((DirectionMask)frameEvent.direction & (DirectionMask)directionMask)) != 0;
     };
-    RegisterHandler(handler, std::move(filter));
+    return RegisterHandler(handler, std::move(filter));
+}
+void CanController::RemoveFrameHandler(HandlerId handlerId)
+{
+    RemoveHandler<CanFrameEvent>(handlerId);
 }
 
-void CanController::AddStateChangeHandler(StateChangeHandler /*handler*/)
+HandlerId CanController::AddStateChangeHandler(StateChangeHandler handler)
 {
+    return RegisterHandler(handler);
+}
+void CanController::RemoveStateChangeHandler(HandlerId handlerId)
+{
+    RemoveHandler<CanStateChangeEvent>(handlerId);
 }
 
-void CanController::AddErrorStateChangeHandler(ErrorStateChangeHandler /*handler*/)
+HandlerId CanController::AddErrorStateChangeHandler(ErrorStateChangeHandler handler)
 {
+    return RegisterHandler(handler);
+}
+void CanController::RemoveErrorStateChangeHandler(HandlerId handlerId)
+{
+    RemoveHandler<CanErrorStateChangeEvent>(handlerId);
 }
 
-void CanController::AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask)
+HandlerId CanController::AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask)
 {
-    std::function<bool(const CanFrameTransmitEvent& )> filter = [statusMask](const CanFrameTransmitEvent& ack) {
-        return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0; 
+    std::function<bool(const CanFrameTransmitEvent&)> filter = [statusMask](const CanFrameTransmitEvent& ack) {
+        return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0;
     };
-    RegisterHandler(handler, filter);
+    return RegisterHandler(handler, filter);
 }
-
-template<typename MsgT>
-void CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
+void CanController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    auto handler_tuple = std::make_tuple(handler, filter);
-    handlers.push_back(handler_tuple);
+    RemoveHandler<CanFrameTransmitEvent>(handlerId);
 }
 
-void CanController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const CanFrameEvent& canFrameEvent)
+template <typename MsgT>
+HandlerId CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
 {
-    // ignore messages that do not originate from the replay scheduler 
-    //if (tracing::IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
-    //{
-    //    return;
-    //}
-    
-    auto msgCopy = canFrameEvent;
-    msgCopy.direction = TransmitDirection::RX;
-    CallHandlers(msgCopy);
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
 
-    _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), std::move(msgCopy));
+    static uint64_t handlerId = 0;
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+    handlersMap.emplace(handlerId, FilteredCallback<MsgT>{handler, filter});
+    return handlerId++;
 }
 
-template<typename MsgT>
+template <typename MsgT>
+void CanController::RemoveHandler(HandlerId handlerId)
+{
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+
+    auto handlerToRemove = handlersMap.find(handlerId);
+    if (handlerToRemove == handlersMap.end())
+    {
+        _participant->GetLogger()->Warn("RemoveHandler failed: Unknown HandlerId.");
+    }
+    else
+    {
+        handlersMap.erase(handlerId);
+    }
+}
+
+template <typename MsgT>
 void CanController::CallHandlers(const MsgT& msg)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    for (auto&& handlerTuple : handlers)
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlers = std::get<CallbackMap<MsgT>>(_callbacks);
+    for (auto&& filteredCallback : handlers)
     {
-        auto filter = std::get<std::function<bool(const MsgT& msg)>>(handlerTuple);
-        auto handler = std::get<CallbackT<MsgT>>(handlerTuple);
-        if (!filter || filter(msg))
+        if (!filteredCallback.second.filter || filteredCallback.second.filter(msg))
         {
-            handler(_facade, msg);
+            filteredCallback.second.callback(this, msg);
         }
     }
 }
-
-void CanController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
-{
-    _timeProvider = timeProvider;
-}
-
-void CanController::ReplayMessage(const extensions::IReplayMessage* replayMessage)
-{
-    using namespace ib::tracing;
-    switch (replayMessage->GetDirection())
-    {
-    case ib::sim::TransmitDirection::TX:
-        //if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Send))
-        //{
-        //    ReplaySend(replayMessage);
-        //}
-        break;
-    case ib::sim::TransmitDirection::RX:
-        //if (IsReplayEnabledFor(_config.replay, cfg::Replay::Direction::Receive))
-        //{
-        //    ReplayReceive(replayMessage);
-        //}
-        break;
-    default:
-        throw std::runtime_error("CanReplayController: replay message has undefined Direction");
-        break;
-    }
-}
-
-void CanController::ReplaySend(const extensions::IReplayMessage* replayMessage)
-{
-    // need to copy the message here.
-    // will throw if invalid message type.
-    auto msg = dynamic_cast<const sim::can::CanFrameEvent&>(*replayMessage);
-    SendFrame(std::move(msg.frame));
-}
-
-void CanController::ReplayReceive(const extensions::IReplayMessage* replayMessage)
-{
-    static tracing::ReplayServiceDescriptor replayService;
-    auto msg = dynamic_cast<const sim::can::CanFrameEvent&>(*replayMessage);
-    ReceiveIbMessage(&replayService, msg);
-}
-
 
 } // namespace can
 } // namespace sim

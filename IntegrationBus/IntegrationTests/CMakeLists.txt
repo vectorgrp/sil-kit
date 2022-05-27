@@ -40,6 +40,14 @@ add_vib_test(ITestThreeCanController
         ${itest_extra_libs}
 )
 
+add_vib_test(ITestCanControllerThreadSafety
+    SOURCES
+      CanControllerThreadSafetyITest.cpp
+    LIBS
+        IntegrationBus
+        IbCfgMockParticipantConfiguration
+)
+
 add_vib_test(ITestThreeEthController
     SOURCES
       ThreeEthControllerITest.cpp

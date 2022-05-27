@@ -160,11 +160,15 @@ int main(int argc, char* argv[])
     const char* canController2Name = "CAN2";
     returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name, canNetworkName);
 
+    ib_HandlerId frameTransmitHandlerId;
     ib_Can_Controller_AddFrameTransmitHandler(
         canController, (void*)&transmitContext, &FrameTransmitHandler,
-        ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull);
+        ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull,
+        &frameTransmitHandlerId);
 
-    ib_Can_Controller_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, ib_Direction_SendReceive);
+    ib_HandlerId frameHandlerId;
+    ib_Can_Controller_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, ib_Direction_SendReceive,
+                                      &frameHandlerId);
 
     ib_Participant_GetLogger(&logger, participant);
 
