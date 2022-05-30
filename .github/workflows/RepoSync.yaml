@@ -9,8 +9,6 @@ jobs:
     environment: SyncRemoteRepoEnv
     
     steps:
-      - run: git tag -d v3.99.24
-    
       - uses: actions/checkout@v1
 
       - uses: ./.github/actions/repo-sync
