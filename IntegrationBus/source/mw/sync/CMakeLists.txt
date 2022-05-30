@@ -42,6 +42,10 @@ target_link_libraries(IbMwSync
         IbConfiguration
 )
 
+add_vib_test(TestMwLifecycleService
+    SOURCES LifecycleServiceTest.cpp 
+    LIBS IbMwSync IbMwMockParticipant
+)
 add_vib_test(TestMwParticipantController 
     SOURCES ParticipantControllerTest.cpp 
     LIBS IbMwSync IbMwMockParticipant
