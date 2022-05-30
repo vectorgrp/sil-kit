@@ -299,7 +299,7 @@ Data Message Demo
            File name of the ParticipantConfiguraiton to be used; 
            use ``IbConfig_DemoDataMessage.json`` for an example configuration.
          <ParticipantName> 
-           The name of the participant within the simulation; must either be ``Publisher1``, ``Publisher2``, ``Subscriber1`` or 
+           The name of the participant within the simulation; must either be ``PubSub1``, ``PubSub2``, ``Subscriber1`` or 
            ``Subscriber2``.
          [domainId] 
            Domain id of the registry to connect to; defaults to 42 (optional).
@@ -308,7 +308,7 @@ Data Message Demo
       -  .. parsed-literal:: 
 
             # Creates a FlexRay Process for Node 0 in the default domain 42:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher1
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub1
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -316,10 +316,10 @@ Data Message Demo
             |SystemMonitor|
 
             # Publisher 1:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher1
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub1
 
             # Publisher 2:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher2
+            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub2
             
             # Subscriber 1:
             |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Subscriber1
@@ -328,7 +328,7 @@ Data Message Demo
             |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Subscriber2
 
             # System Controller:
-            |SystemController| Publisher 1 Publisher2 Subscriber1 Subscriber2
+            |SystemController| PubSub1 PubSub2 Subscriber1 Subscriber2
    *  -  Notes
       -  Any combination of publishers or subscribers is applicable for this demo.
 
