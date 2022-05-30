@@ -5,16 +5,17 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.24] - unreleased
+[3.99.24] - 2022-05-30
 ----------------------
 
+Refactored Bus System and further Service (CAN, Ethernet, FlexRay, Participant, ...) APIs
 
 Compatibility with 3.99.23
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Application binary interface (ABI): No
 - Application software interface (API): No
-- Middleware network protocol (VAsio):
+- Middleware network protocol (VAsio): No
 
 Added
 ~~~~~
@@ -65,7 +66,7 @@ Added
 Changed
 ~~~~~~~
 
-- CAN simuations behavior w/wo NetSim harmonized: 
+- CAN simuations behavior with and without NetSim harmonized: 
 
   Without NetSim, the ICanController methods Reset, Start, Stop and Sleep now also trigger the 
   StateChangeHandlers on the calling participant, without any effect on the actual controller logic.
