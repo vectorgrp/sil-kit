@@ -17,10 +17,10 @@ struct ParticipantCommand
 {
     //! The different kinds of a ParticipantCommand
     enum class Kind : uint8_t {
-        Invalid, //!< An invalid command
-        Initialize, //!< The initialize command
-        Reinitialize, //!< The reinitialize command
-        Shutdown //!< The shutdown command
+        Invalid = 0, //!< An invalid command
+        Initialize = 1, //!< The initialize command
+        Reinitialize = 2, //!< The reinitialize command
+        Shutdown = 3 //!< The shutdown command
     };
 
     ParticipantId participant; //!< The specific participant that receives this command.
@@ -31,17 +31,18 @@ struct SystemCommand
 {
     //! The different kinds of a SystemCommand
     enum class Kind : uint8_t {
-        Invalid, //!< An invalid command
-        Run, //!< The run command
-        Stop, //!< The stop command
-        Shutdown, //!< The shutdown command
-        PrepareColdswap, //!< The prepare coldswap command
-        ExecuteColdswap //!< The execute coldswap command
+        Invalid = 0, //!< An invalid command
+        Run = 1, //!< The run command
+        Stop = 2, //!< The stop command
+        Shutdown = 3, //!< The shutdown command
+        PrepareColdswap = 4, //!< The prepare coldswap command
+        ExecuteColdswap = 5 //!< The execute coldswap command
     };
 
     Kind kind; //!< The kind of system command that is sent.
 };
 
+// note: always increase number (never reuse old ones!)
 enum class ParticipantState : uint8_t {
     Invalid = 0, //!< An invalid participant state
     Idle = 1, //!< The idle state
@@ -70,22 +71,24 @@ struct ParticipantStatus
     std::chrono::system_clock::time_point refreshTime; //!< The refresh time.
 };
 
+// note: always increase number (never reuse old ones!)
 enum class SystemState : uint8_t {
-    Invalid, //!< An invalid system state
-    Idle, //!< The idle state
-    Initializing, //!< The initializing state
-    Initialized, //!< The initialized state
-    Running, //!< The running state
-    Paused, //!< The paused state
-    Stopping, //!< The stopping state
-    Stopped, //!< The stopped state
-    ColdswapPrepare, //!< The ColdswapPrepare state
-    ColdswapReady, //!< The ColdswapReady state
-    ColdswapPending, //!< The ColdswapPending state
-    ColdswapDone, //!< The ColdswapDone state
-    Error, //!< The error state
-    ShuttingDown, //!< The shutting down state
-    Shutdown //!< The shutdown state
+    Invalid = 0, //!< An invalid system state
+    Idle = 1, //!< The idle state
+    Initializing = 2, //!< The initializing state
+    Initialized = 3, //!< The initialized state
+    Running = 4, //!< The running state
+    Paused = 5, //!< The paused state
+    Stopping = 6, //!< The stopping state
+    Stopped = 7, //!< The stopped state
+    ColdswapPrepare = 8, //!< The ColdswapPrepare state
+    ColdswapReady = 9, //!< The ColdswapReady state
+    ColdswapPending = 10, //!< The ColdswapPending state
+    ColdswapDone = 11, //!< The ColdswapDone state
+    Error = 12, //!< The error state
+    ShuttingDown = 13, //!< The shutting down state
+    Shutdown = 14, //!< The shutdown state
+    Reinitializing = 15 //!< The reinitializing state
 };
 
 struct ExpectedParticipants

@@ -113,6 +113,8 @@ std::string to_string(SystemState state)
         return "ShuttingDown";
     case SystemState::Shutdown:
         return "Shutdown";
+    case SystemState::Reinitializing:
+        return "Reinitializing";
     }
     throw ib::TypeConversionError{};
 }
