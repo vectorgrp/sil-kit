@@ -59,6 +59,11 @@ const std::string controllerTypeTimeSyncService = "TimeSyncService";
 // misc / legacy controllers
 const std::string controllerTypeOther = "Other";
 
+// Lifecycle & TimeSync
+const std::string lifecycleHasCoordinatedStart = "LifecycleHasCoordinatedStart";
+const std::string lifecycleHasCoordinatedStop = "LifecycleHasCoordinatedStop";
+const std::string timeSyncActive = "TimeSyncActive";
+
 } // namespace service
 } // namespace mw
 } // namespace ib

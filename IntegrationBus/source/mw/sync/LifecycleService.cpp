@@ -53,6 +53,12 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     _hasCoordinatedSimulationStop = hasCoordinatedSimulationStop;
     _isRequiredParticipant = isRequiredParticipant;
 
+    // Update ServiceDescriptor
+    _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::lifecycleHasCoordinatedStart,
+                                               std::to_string(hasCoordinatedSimulationStart));
+    _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::lifecycleHasCoordinatedStop,
+                                               std::to_string(hasCoordinatedSimulationStop));
+
     // Publish services
     auto serviceDiscovery = _participant->GetServiceDiscovery();
     serviceDiscovery->NotifyServiceCreated(GetServiceDescriptor());

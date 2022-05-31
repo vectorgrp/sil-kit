@@ -394,16 +394,6 @@ void TimeSyncService::CompleteSimulationTask()
     _timeSyncPolicy->RequestNextStep();
 }
 
-//void TimeSyncService::ChangeState(ParticipantState newState, std::string reason)
-//{
-//    _status.state = newState;
-//    _status.enterReason = reason;
-//    _status.enterTime = std::chrono::system_clock::now();
-//    _status.refreshTime = _status.enterTime;
-//
-//    SendIbMessage(_status);
-//}
-
 //! \brief Create a time provider that caches the current simulation time.
 void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
 {
@@ -415,6 +405,7 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
     try
     {
         _timeSyncPolicy = MakeTimeSyncPolicy(isSynchronized);
+        _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::timeSyncActive, std::to_string(isSynchronized));
         ResetTime();
     }
     catch (const std::exception& e)
