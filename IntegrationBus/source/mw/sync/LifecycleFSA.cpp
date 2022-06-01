@@ -9,6 +9,7 @@ LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleServ
     : _parentService(parentService)
     , _logger(logger)
 {
+    _invalidState = std::make_shared<InvalidState>(this);
     _initializedState = std::make_shared<InitializedState>(this);
     _runningState = std::make_shared<RunningState>(this);
     _pausedState = std::make_shared<PausedState>(this);
@@ -18,6 +19,8 @@ LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleServ
     _shuttingDownState = std::make_shared<ShuttingDownState>(this);
     _shutDownState = std::make_shared<ShutdownState>(this);
     _errorState = std::make_shared<ErrorState>(this);
+
+    _currentState = _invalidState.get();
 }
 
 void LifecycleManagement::SetState(State* state, std::string message)
@@ -30,6 +33,11 @@ void LifecycleManagement::SetStateError(std::string reason)
 {
     SetState(GetErrorState(), reason);
     _currentState->Error(std::move(reason));
+}
+
+State* LifecycleManagement::GetInvalidState()
+{
+    return _invalidState.get();
 }
 
 State* LifecycleManagement::GetOperationalState()
@@ -135,8 +143,8 @@ void State::ShutdownHandleDone(std::string reason)
 
 void State::AbortSimulation(std::string reason)
 {
-    _context->SetState(_context->GetShuttingDownState(), std::move(reason));
-    _context->Shutdown(std::move(reason));
+    _context->SetState(_context->GetStoppedState(), reason);
+    _context->Shutdown(std::move(reason)); // Separate "Aborted" State?
 }
 
 void State::Error(std::string reason)
@@ -160,6 +168,17 @@ void State::InvalidStateTransition(std::string transitionName, bool triggerError
     {
         _context->GetLogger()->Warn(ss.str());
     }
+}
+
+// InvalidState
+std::string InvalidState::toString()
+{
+    return "Invalid";
+}
+
+auto InvalidState::GetParticipantState() -> ParticipantState
+{
+    return ParticipantState::Invalid;
 }
 
 // InitializedState
@@ -219,7 +238,7 @@ auto RunningState::GetParticipantState() -> ParticipantState
 // PausedState
 void PausedState::PauseSimulation(std::string reason)
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
 void PausedState::ContinueSimulation(std::string reason)
@@ -254,6 +273,17 @@ void StoppingState::StopNotifyUser(std::string reason)
 void StoppingState::StopHandleDone(std::string reason)
 {
     _context->SetState(_context->GetStoppedState(), std::move(reason));
+    if (_abortRequested)
+    {
+        _abortRequested = false;
+        _context->Shutdown("Received SystemCommand::AbortSimulation during callback.");
+    }
+}
+
+void StoppingState::AbortSimulation(std::string reason)
+{
+    _abortRequested = true;
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 auto StoppingState::toString() -> std::string
@@ -290,6 +320,11 @@ void StoppedState::ShutdownNotifyUser(std::string reason)
     _context->HandleShutdown(std::move(reason));
 }
 
+void StoppedState::AbortSimulation(std::string reason)
+{
+    _context->Shutdown(std::move(reason)); // Separate "Aborted" State?
+}
+
 auto StoppedState::toString() -> std::string
 {
     return "Stopped";
@@ -308,7 +343,22 @@ void ReinitializingState::ReinitializeNotifyUser(std::string reason)
 
 void ReinitializingState::ReinitializeHandleDone(std::string reason)
 {
-    _context->SetState(_context->GetInitializedState(), std::move(reason));
+    if (_abortRequested)
+    {
+        _context->SetState(_context->GetStoppedState(), std::move(reason));
+        _abortRequested = false;
+        _context->Shutdown("Received SystemCommand::AbortSimulation during callback.");
+    }
+    else
+    {
+        _context->SetState(_context->GetInitializedState(), std::move(reason));
+    }
+}
+
+void ReinitializingState::AbortSimulation(std::string reason)
+{
+    _abortRequested = true;
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 auto ReinitializingState::toString() -> std::string
@@ -332,6 +382,11 @@ void ShuttingDownState::ShutdownHandleDone(std::string reason)
     _context->SetState(_context->GetShutdownState(), std::move(reason));
 }
 
+void ShuttingDownState::AbortSimulation(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+}
+
 auto ShuttingDownState::toString() -> std::string
 {
     return "ShuttingDown";
@@ -349,6 +404,11 @@ void ShutdownState::ShutdownNotifyUser(std::string reason)
 }
 
 void ShutdownState::ShutdownHandleDone(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+}
+
+void ShutdownState::AbortSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
@@ -419,8 +479,7 @@ void ErrorState::ShutdownHandleDone(std::string reason)
 
 void ErrorState::AbortSimulation(std::string reason)
 {
-    _context->SetState(_context->GetShuttingDownState(), std::move(reason));
-    _context->HandleShutdown(std::move(reason));
+    _context->Shutdown(std::move(reason));
 }
 
 void ErrorState::Error(std::string reason)

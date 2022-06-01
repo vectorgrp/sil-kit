@@ -120,6 +120,7 @@ public:
     MOCK_METHOD(void, Reinitialize, (const std::string& participantId), (const, override));
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());
+    MOCK_CONST_METHOD0(AbortSimulation, void());
     MOCK_CONST_METHOD0(Shutdown, void());
     MOCK_CONST_METHOD0(PrepareColdswap, void());
     MOCK_CONST_METHOD0(ExecuteColdswap, void());

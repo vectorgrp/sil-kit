@@ -42,7 +42,7 @@ public:
 protected:
     void InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason);
 
-    protected:
+protected:
     LifecycleManagement* _context;
 };
 
@@ -60,7 +60,7 @@ public:
     virtual bool Shutdown(std::string reason) = 0; // shutdown successful?
     virtual void Reinitialize(std::string reason) = 0;
     virtual void Error(std::string reason) = 0;
-    virtual void AbortSimulation(std::string reason) = 0;
+    virtual bool AbortSimulation(std::string reason) = 0; // Abort->Shutdown successful?
 };
 
 class LifecycleManagement 
@@ -86,7 +86,6 @@ public:
     bool Shutdown(std::string reason) override 
     {
         _currentState->ShutdownNotifyUser(reason);
-        _currentState->ShutdownHandleDone(std::move(reason));  
         return (_currentState != GetErrorState());
     }
     void Reinitialize(std::string reason) override
@@ -95,7 +94,11 @@ public:
         _currentState->ReinitializeHandleDone(std::move(reason));
     }
     void Error(std::string reason) override { _currentState->Error(std::move(reason)); }
-    void AbortSimulation(std::string reason) override { _currentState->AbortSimulation(std::move(reason)); }
+    bool AbortSimulation(std::string reason) override 
+    { 
+        _currentState->AbortSimulation(std::move(reason));
+        return (_currentState != GetErrorState());
+    }
 
 public:
     void HandleReinitialize(std::string reason)
@@ -141,6 +144,7 @@ public:
     void SetState(State* state, std::string message);
     void SetStateError(std::string reason);
 
+    State* GetInvalidState();
     State* GetOperationalState();
     State* GetErrorState();
 
@@ -156,6 +160,7 @@ public:
     logging::ILogger* GetLogger();
 
 private:
+    std::shared_ptr<State> _invalidState;
     std::shared_ptr<State> _operationalState;
     std::shared_ptr<State> _errorState;
 
@@ -172,6 +177,31 @@ private:
     LifecycleService* _parentService;
 
     logging::ILogger* _logger;
+};
+
+class InvalidState
+    : public State
+{
+public:
+    InvalidState(LifecycleManagement* context)
+        : State(context)
+    {
+    }
+
+    //void RunSimulation(std::string reason) override;
+    //void PauseSimulation(std::string reason) override;
+    //void ContinueSimulation(std::string reason) override;
+    //void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
+    //void ReinitializeHandleDone(std::string reason) override;
+    //void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
+    //void AbortSimulation(std::string reason) override; // use default
+    //void Error(State* lastState) override; // use default
+
+    auto toString() -> std::string override;
+    auto GetParticipantState() -> ParticipantState override;
 };
 
 class InitializedState
@@ -192,7 +222,7 @@ public:
     void ReinitializeHandleDone(std::string reason) override;
     //void ShutdownNotifyUser(std::string reason) override;
     //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    //void AbortSimulation(std::string reason) override; // use default
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
@@ -217,7 +247,7 @@ public:
     //void ReinitializeHandled(std::string reason) override;
     //void ShutdownNotifyUser(std::string reason) override;
     //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    //void AbortSimulation(std::string reason) override; // use default
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
@@ -243,7 +273,7 @@ public:
     //void ReinitializeHandled(std::string reason) override;
     //void ShutdownNotifyUser(std::string reason) override;
     //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    //void AbortSimulation(std::string reason) override; // use default
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
@@ -268,11 +298,14 @@ public:
     //void ReinitializeHandled(std::string reason) override;
     //void ShutdownNotifyUser(std::string reason) override;
     //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    void AbortSimulation(std::string reason) override; // use default
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
+
+private:
+    bool _abortRequested = false;
 };
 
 class StoppedState 
@@ -293,7 +326,7 @@ public:
     //void ReinitializeHandled(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
     //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    void AbortSimulation(std::string reason) override;
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
@@ -318,11 +351,14 @@ public:
     void ReinitializeHandleDone(std::string reason) override;
     //void ShutdownNotifyUser(std::string reason) override;
     //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    void AbortSimulation(std::string reason) override; // use default
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
+
+private:
+    bool _abortRequested = false;
 };
 
 class ShuttingDownState 
@@ -343,7 +379,7 @@ public:
     //void ReinitializeHandled(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
     void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    void AbortSimulation(std::string reason) override;
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
@@ -368,7 +404,7 @@ public:
     //void ReinitializeHandled(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
     void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation() override; // use default
+    void AbortSimulation(std::string reason) override;
     //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;

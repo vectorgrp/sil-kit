@@ -48,6 +48,11 @@ void SystemController::ExecuteColdswap() const
     SendSystemCommand(SystemCommand::Kind::ExecuteColdswap);
 }
 
+void SystemController::AbortSimulation() const
+{
+    SendSystemCommand(SystemCommand::Kind::AbortSimulation);
+}
+
 void SystemController::SetRequiredParticipants(const std::vector<std::string>& participantNames)
 {
     ExpectedParticipants expectedParticipants{participantNames};

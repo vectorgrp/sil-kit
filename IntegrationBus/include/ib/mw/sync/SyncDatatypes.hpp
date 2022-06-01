@@ -36,7 +36,8 @@ struct SystemCommand
         Stop = 2, //!< The stop command
         Shutdown = 3, //!< The shutdown command
         PrepareColdswap = 4, //!< The prepare coldswap command
-        ExecuteColdswap = 5 //!< The execute coldswap command
+        ExecuteColdswap = 5, //!< The execute coldswap command
+        AbortSimulation = 6 //!< The abort simulation command
     };
 
     Kind kind; //!< The kind of system command that is sent.

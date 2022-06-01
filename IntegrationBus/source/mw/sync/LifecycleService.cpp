@@ -114,9 +114,15 @@ void LifecycleService::ReportError(std::string errorMsg)
 {
     _logger->Error(errorMsg);
 
+    // If the lifecycle is not executing, log message and skip further error handling
+    if (State() == ParticipantState::Invalid)
+    {
+        return;
+    }
+
     if (State() == ParticipantState::Shutdown)
     {
-        _logger->Warn("ParticipantController::ReportError() was called in terminal state ParticipantState::Shutdown; "
+        _logger->Warn("LifecycleService::ReportError() was called in terminal state ParticipantState::Shutdown; "
                       "transition to ParticipantState::Error is ignored.");
         return;
     }
@@ -217,6 +223,22 @@ void LifecycleService::TriggerReinitializeHandle(std::string)
     }
 }
 
+void LifecycleService::AbortSimulation(std::string reason)
+{
+    auto success = _lifecycleManagement->AbortSimulation(reason);
+    if (success)
+    {
+        try
+        {
+            _finalStatePromise.set_value(State());
+        }
+        catch (std::future_error e)
+        {
+            // NOP - received shutdown multiple times
+        }
+    }
+}
+
 auto LifecycleService::State() const -> ParticipantState
 {
     return _status.state;
@@ -259,7 +281,7 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
         // TODO this should be handled as a late joining scenario instead of an error...
         std::stringstream msg;
         msg << "Received SystemCommand::" << command.kind
-            << " before ParticipantController::ExecuteLifecycleSyncTime(...) or ExecuteLifecycleNoSyncTime(...) was called."
+            << " before LifecycleService::ExecuteLifecycleSyncTime(...) or ExecuteLifecycleNoSyncTime(...) was called."
             << " Origin of current command was " << from->GetServiceDescriptor();
         ReportError(msg.str());
         return;
@@ -299,6 +321,11 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
     case SystemCommand::Kind::Shutdown:
         Shutdown("Received SystemCommand::Shutdown");
         return;
+
+    case SystemCommand::Kind::AbortSimulation:
+        AbortSimulation("Received SystemCommand::AbortSimulation");
+        return;
+
         // TODO Remove below ASAP
     case SystemCommand::Kind::PrepareColdswap: 
     case SystemCommand::Kind::ExecuteColdswap: 

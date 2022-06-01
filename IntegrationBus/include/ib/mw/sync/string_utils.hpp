@@ -151,6 +151,8 @@ std::string to_string(SystemCommand::Kind command)
         return "PrepareColdswap";
     case SystemCommand::Kind::ExecuteColdswap:
         return "ExecuteColdswap";
+    case SystemCommand::Kind::AbortSimulation:
+        return "AbortSimulation";
     }
     throw ib::TypeConversionError{};
 }

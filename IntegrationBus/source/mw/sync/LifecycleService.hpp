@@ -95,6 +95,7 @@ private:
 
     void Shutdown(std::string reason);
     void Reinitialize(std::string reason);
+    void AbortSimulation(std::string reason);
 
 private:
     // ----------------------------------------

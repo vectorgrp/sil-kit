@@ -175,7 +175,10 @@ public:
             _controller->PrepareColdswap();
             return;
         case SystemCommand::Kind::ExecuteColdswap:
-            _controller->ExecuteColdswap();
+            _controller->ExecuteColdswap(); 
+            return;
+        case SystemCommand::Kind::AbortSimulation: 
+            _controller->AbortSimulation();
             return;
         }
     }

@@ -78,6 +78,15 @@ public:
     */
     virtual void ExecuteColdswap() const = 0;
 
+    /*! \brief Send \ref SystemCommand::Kind::AbortSimulation to all participants
+    *
+    *  The abort simulation command signals all participants to terminate their
+    *  lifecycle, regardless of their current state.
+    *
+    *  The command is allowed at any time.
+    */
+    virtual void AbortSimulation() const = 0;
+
     /*! \brief Set the names of all synchronized participants
     *
     *  Set the list of synchronized participant.
