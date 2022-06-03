@@ -5,6 +5,15 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.xx] - 2022-05-
+----------------------
+
+Removed
+~~~~~~~
+- The ``vib-config-tool`` has been deprecated and was now finally removed.
+  Since the configuration format has been completely reworked, this tool is no longer necessary.
+  
+
 [3.99.24] - 2022-05-30
 ----------------------
 
