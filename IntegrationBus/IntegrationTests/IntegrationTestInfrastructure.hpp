@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ib/extensions/CreateExtension.hpp"
+#include "ib/vendor/CreateIbRegistry.hpp"
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"
 #include "MockParticipantConfiguration.hpp"
@@ -53,7 +53,7 @@ private:
 
     void RunRegistry(uint32_t domainId)
     {
-        _registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+        _registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
         _registry->ProvideDomain(domainId);
     }
 
@@ -91,7 +91,7 @@ private:
         });
     }
 
-    std::unique_ptr<ib::extensions::IIbRegistry> _registry;
+    std::unique_ptr<ib::vendor::IIbRegistry> _registry;
 
     struct SystemMaster
     {

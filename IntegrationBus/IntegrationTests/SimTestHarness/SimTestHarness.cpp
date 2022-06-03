@@ -6,7 +6,7 @@
 #include <chrono>
 
 #include "ib/mw/sync/string_utils.hpp"
-#include "ib/extensions/CreateExtension.hpp"
+#include "ib/vendor/CreateIbRegistry.hpp"
 
 #include "MockParticipantConfiguration.hpp"
 
@@ -141,7 +141,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 {
 
     // start registry
-    _registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+    _registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
     _registry->ProvideDomain(_domainId);
 
     // configure and add participants

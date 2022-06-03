@@ -21,13 +21,6 @@ add_library(IbExtensions STATIC
     #   MDF4 (private)
     IbExtensionImpl/CreateMdf4Tracing.cpp
     IbExtensionImpl/CreateMdf4Tracing.hpp
-    #   IbRegistry  headers, the implementation is linked inside of
-    #   IntegrationBus target
-    #      for IDE:
-    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/IIbRegistry.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/CreateExtension.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../include/ib/extensions/ExtensionError.hpp
-    IbExtensionImpl/IIbRegistry.hpp
 )
 
 target_include_directories(IbExtensions

@@ -56,30 +56,13 @@ add_library(IntegrationBus ${ibLibType}
     "capi/CapiUtils.cpp"
     "capi/CapiImpl.h"
     IbForceIncludes.cpp
+    CreateIbRegistry.cpp
 )
 
 
 if(IB_BUILD_STATIC)
     target_compile_definitions(IntegrationBus PUBLIC -D IB_BUILD_STATIC=1)
 endif()
-
-# Published extension implementations follow here for the extension loading
-# side of the code. The actual shared library code might reside
-# anywhere.
-# Note to future self:
-#    It would be desirable to have the extension loading code inside of the
-#    IbExtension target. However, this causes problems when exporting the
-#    IntegrationBus target, as it would transitively export the private
-#    IbExtension library and other internal dependencies.
-
-target_sources(IntegrationBus
-    PRIVATE
-    #for IDE:
-    ${CMAKE_CURRENT_LIST_DIR}/../include/ib/extensions/IIbRegistry.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/../include/ib/extensions/CreateExtension.hpp
-    # implementations accessible via the public API
-    extensions/IbExtensionImpl/CreateIbRegistry.cpp
-)
 
 if (MSVC)
     target_sources(IntegrationBus PRIVATE IntegrationBus.rc)

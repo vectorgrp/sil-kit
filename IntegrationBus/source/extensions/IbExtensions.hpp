@@ -9,7 +9,7 @@
 #include <functional>
 
 #include "ParticipantConfiguration.hpp"
-#include "ib/extensions/ExtensionError.hpp"
+#include "ib/exception.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 
 #include "IIbExtension.hpp"

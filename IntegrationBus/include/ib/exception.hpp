@@ -38,4 +38,12 @@ public:
     using std::runtime_error::runtime_error;
 };
 
+ namespace extensions {
+//! \brief ExtensionError is thrown when an extension could not be loaded
+class ExtensionError : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+}//end namespace extensions
+
 } // namespace ib

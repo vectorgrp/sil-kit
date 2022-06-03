@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.xx] - 2022-05-
+[3.99.25] - 2022-06-
 ----------------------
 
 Removed
@@ -13,7 +13,28 @@ Removed
 - The ``vib-config-tool`` has been deprecated and was now finally removed.
   Since the configuration format has been completely reworked, this tool is no longer necessary.
 - The ``IbLauncher`` utility has been deprecated and was now finally removed.
-  
+
+Changed
+~~~~~~~
+- The IbRegistry shared library is no longer necessary.
+  An instance of IIbRegistry can now be created directly using :cpp:func:`CreateRegistry()<ib::mw::CreateRegistry`.
+  This is an implementation detail specific to the VAsio based VIB.
+  The namespace of the factory function and the location of the headers were changed to reflect this:
+   
+  + old:
+        
+  .. code-block:: c++
+
+    //ib/extensions/CreateIbRegistry.hpp
+    ib::extensions::CreateIbRegistry()
+    
+  + new:
+  .. code-block:: c++
+
+    //ib/vendor/CreateIbRegistry.hpp
+    ib::vendor::CreateIbRegistry()
+
+  The binary packages no longer contain an `IntegrationBus-NonRedistributable` directory.
 
 [3.99.24] - 2022-05-30
 ----------------------

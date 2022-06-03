@@ -6,7 +6,9 @@
 
 #include "ib/mw/logging/fwd_decl.hpp"
 
-namespace ib { namespace extensions {
+namespace ib {
+namespace vendor {
+inline namespace vector {
 
 //! \brief Dedicated IB registry for the VAsio middleware.
 //         This is a loadable runtime extension that is non-redistributable.
@@ -25,5 +27,6 @@ public:
 };
 
 
-}//end namespace extensions
+}//end namespace vector
+}//end namespace vendor
 }//end namespace ib

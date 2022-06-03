@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "ib/extensions/CreateExtension.hpp"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"

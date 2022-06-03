@@ -11,7 +11,7 @@
 #include "ib/sim/all.hpp"
 #include "ib/mw/sync/all.hpp"
 
-#include "ib/extensions/CreateExtension.hpp"
+#include "ib/vendor/CreateIbRegistry.hpp"
 
 using namespace ib::mw;
 using namespace ib::mw::sync;
@@ -350,10 +350,9 @@ int main(int argc, char** argv)
 
     try
     {
-        using namespace ib::extensions;
-        std::unique_ptr<IIbRegistry> registry;
+        std::unique_ptr<ib::vendor::IIbRegistry> registry;
         // TODO use new config
-        registry = ib::extensions::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString("{}"));
+        registry = ib::vendor::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString("{}"));
         registry->ProvideDomain(benchmark.domainId);
 
         std::vector<size_t> messageCounts;

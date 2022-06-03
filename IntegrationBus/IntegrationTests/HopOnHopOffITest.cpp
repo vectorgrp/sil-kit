@@ -11,10 +11,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/extensions/CreateExtension.hpp"
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
+#include "ib/vendor/CreateIbRegistry.hpp"
 #include "ib/sim/all.hpp"
 
 #include "MockParticipantConfiguration.hpp"
@@ -239,7 +239,7 @@ protected:
     {
         try
         {
-            registry = ib::extensions::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+            registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
             registry->ProvideDomain(domainId);
         }
         catch (const ib::ConfigurationError& error)
@@ -381,7 +381,7 @@ protected:
 
 protected:
     std::vector<std::string> syncParticipantNames;
-    std::unique_ptr<ib::extensions::IIbRegistry> registry;
+    std::unique_ptr<ib::vendor::IIbRegistry> registry;
     SystemMaster systemMaster;
     std::vector<std::thread> syncParticipantThreads;
     std::vector<std::thread> asyncParticipantThreads;

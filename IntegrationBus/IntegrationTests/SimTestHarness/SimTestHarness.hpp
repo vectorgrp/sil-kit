@@ -13,7 +13,7 @@
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/sync/all.hpp"
-#include "ib/extensions/IIbRegistry.hpp"
+#include "ib/vendor/IIbRegistry.hpp"
 
 namespace ib { namespace test {
 //forward
@@ -65,7 +65,7 @@ private:
     const uint32_t _domainId;
     std::unique_ptr<SimSystemController> _simSystemController;
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;
-    std::unique_ptr<ib::extensions::IIbRegistry> _registry;
+    std::unique_ptr<ib::vendor::IIbRegistry> _registry;
 };
 
 

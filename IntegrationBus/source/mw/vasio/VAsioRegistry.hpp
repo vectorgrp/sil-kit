@@ -5,14 +5,14 @@
 
 #include "VAsioConnection.hpp"
 #include "ib/mw/logging/ILogger.hpp"
-#include "ib/extensions/IIbRegistry.hpp"
+#include "ib/vendor/IIbRegistry.hpp"
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {
 namespace mw {
 
 class VAsioRegistry
-    : public ib::extensions::IIbRegistry
+    : public ib::vendor::IIbRegistry
 {
 public:
     VAsioRegistry() = delete;
