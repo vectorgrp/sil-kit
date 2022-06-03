@@ -125,8 +125,8 @@ public:
         switch (_controller.State())
         {
         case ParticipantState::Invalid: // [[fallthrough]]
-        case ParticipantState::Idle: // [[fallthrough]]
-        case ParticipantState::Initializing: // [[fallthrough]]
+        case ParticipantState::ControllersCreated: // [[fallthrough]]
+        case ParticipantState::CommunicationReady: // [[fallthrough]]
         case ParticipantState::Initialized: return;
         case ParticipantState::Paused: // [[fallthrough]]
         case ParticipantState::Running: CheckDistributedTimeAdvanceGrant(); return;

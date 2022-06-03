@@ -17,17 +17,29 @@ namespace sync {
 class ILifecycleService
 {
 public:
+    using CommunicationReadyHandlerT = std::function<void()>;
     using ReinitializeHandlerT = std::function<void()>;
     using StopHandlerT = std::function<void()>;
     using ShutdownHandlerT = std::function<void()>;
 
 public:
-    /*! \brief Register a callback to perform initialization.
+    /*! \brief Register a callback that is executed once communication with 
+     * controllers is possible.
      *
-     * The handler is called when an \ref ParticipantCommand::Kind::Initialize
-     * or \ref ParticipantCommand::Kind::Reinitialize has been received.
-     * The callback is executed in the context of the middleware
-     * thread that received the command.
+     * The handler is called after \ref SystemCommand::Kind::CommunicationReady
+     * was received.
+     * TODO fill in on which thread this is executed.
+     * After the handler has been processed, the participant
+     * switches to the \ref ParticipantState::Initialized state.
+     */
+    
+    virtual void SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) = 0;
+
+    
+    /*! \brief Register a callback to perform reinitialization.
+     *
+     * The handler is called when an \ref ParticipantCommand::Kind::Reinitialize has been received.
+     * TODO fill in on which thread this is executed.
      * After the handler has been processed, the participant
      * switches to the \ref ParticipantState::Initialized state.
      */

@@ -45,10 +45,10 @@ std::string to_string(ParticipantState state)
     {
     case ParticipantState::Invalid:
         return "Invalid";
-    case ParticipantState::Idle:
-        return "Idle";
-    case ParticipantState::Initializing:
-        return "Initializing";
+    case ParticipantState::ControllersCreated:
+        return "ControllersCreated";
+    case ParticipantState::CommunicationReady:
+        return "CommunicationReady";
     case ParticipantState::Initialized:
         return "Initialized";
     case ParticipantState::Running:
@@ -85,10 +85,10 @@ std::string to_string(SystemState state)
     {
     case SystemState::Invalid:
         return "Invalid";
-    case SystemState::Idle:
-        return "Idle";
-    case SystemState::Initializing:
-        return "Initializing";
+    case SystemState::ControllersCreated:
+        return "ControllersCreated";
+    case SystemState::CommunicationReady:
+        return "CommunicationReady";
     case SystemState::Initialized:
         return "Initialized";
     case SystemState::Running:
@@ -153,6 +153,10 @@ std::string to_string(SystemCommand::Kind command)
         return "ExecuteColdswap";
     case SystemCommand::Kind::AbortSimulation:
         return "AbortSimulation";
+    case SystemCommand::Kind::EstablishCommunication:
+        return "EstablishCommunication";
+    case SystemCommand::Kind::CommunicationReady:
+        return "CommunicationReady";
     }
     throw ib::TypeConversionError{};
 }

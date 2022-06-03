@@ -71,10 +71,10 @@ public:
         //std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
-        case ib::mw::sync::SystemState::Idle:
+        case ib::mw::sync::SystemState::ControllersCreated:
             InitializeAll();
             return;
-        case ib::mw::sync::SystemState::Initialized:
+        case ib::mw::sync::SystemState::ReadyToRun:
             _controller->Run();
             return;
         case ib::mw::sync::SystemState::Running:

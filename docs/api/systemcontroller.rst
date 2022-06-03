@@ -29,7 +29,7 @@ Initiate state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first transition performed by the system controller, usually when
-:cpp:enumerator:`SystemState::Idle<ib::mw::sync::Idle>` is reached,
+:cpp:enumerator:`SystemState::ControllersCreated<ib::mw::sync::Idle>` is reached,
 is accomplished by initializing all participants::
 
   // Initialize a participant by providing its name.

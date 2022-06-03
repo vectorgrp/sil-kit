@@ -102,7 +102,7 @@ protected:
     {
         switch (newState)
         {
-        case SystemState::Idle:
+        case SystemState::ControllersCreated:
             for (auto&& name : syncParticipantNames)
             {
                 if (name == systemMasterName)

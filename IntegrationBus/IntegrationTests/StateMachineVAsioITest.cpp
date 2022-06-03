@@ -115,19 +115,19 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
 
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid      )).Times(0);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Idle         )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initializing )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initialized  )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running      )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping     )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped      )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown     )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error        )).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid            )).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ControllersCreated )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationReady )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Initialized        )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running            )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping           )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped            )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown       )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown           )).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error              )).Times(0);
 
     // Perform the actual test
-    auto stateReached = SetTargetState(ParticipantState::Idle);
+    auto stateReached = SetTargetState(ParticipantState::ControllersCreated);
     auto finalState = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 

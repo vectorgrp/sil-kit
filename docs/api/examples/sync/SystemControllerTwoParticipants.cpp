@@ -16,9 +16,9 @@ auto systemStateHandler =
     [systemController, ibConfig](SystemState state) {
         switch (state)
         {
-        case SystemState::Idle:
+        case SystemState::ControllersCreated:
             // ------------------------------------------------------------
-            // Transition from SystemState::Idle to SystemState::Initialized:
+            // Transition from SystemState::ControllersCreated to SystemState::Initialized:
             systemController->Initialize(participantName1);
             systemController->Initialize(participantName2);
 
@@ -41,7 +41,7 @@ systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 // ------------------------------------------------------------
 // Start of the simulation.
 
-// ParticipantController needs to call Run or RunAsync for a transition to ParticipantState::Idle.
+// ParticipantController needs to call Run or RunAsync for a transition to ParticipantState::ControllersCreated.
 // For more information about the use of the Participant Controller refer to the corresponding section.
 auto* participantController1 = participant1->GetParticipantController();
 auto* participantController2 = participant2->GetParticipantController();
@@ -56,7 +56,7 @@ participantController2->SetSimulationTask(
 auto status1 = participantController1->RunAsync();
 auto status2 = participantController2->RunAsync();
 
-// As soon as all participants are in ParticipantState::Idle, the system transitions to SystemState::Idle
+// As soon as all participants are in ParticipantState::ControllersCreated, the system transitions to SystemState::ControllersCreated
 // and the systemController calls Run() to start the simulation.
 std::this_thread::sleep_for(5s); //give the system some time to run
 // ------------------------------------------------------------

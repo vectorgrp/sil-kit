@@ -106,8 +106,8 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         switch (_controller.State())
         {
         case ParticipantState::Invalid:      // [[fallthrough]]
-        case ParticipantState::Idle:         // [[fallthrough]]
-        case ParticipantState::Initializing: // [[fallthrough]]
+        case ParticipantState::ControllersCreated:         // [[fallthrough]]
+        case ParticipantState::CommunicationReady: // [[fallthrough]]
         case ParticipantState::Initialized:
             return;
         case ParticipantState::Paused:       // [[fallthrough]]
@@ -346,7 +346,7 @@ auto ParticipantController::RunAsync() -> std::future<ParticipantState>
     }
 
     _isRunning = true;
-    ChangeState(ParticipantState::Idle, "ParticipantController::Run() was called");
+    ChangeState(ParticipantState::ControllersCreated, "ParticipantController::Run() was called");
     return _finalStatePromise.get_future();
 }
 
@@ -390,7 +390,7 @@ void ParticipantController::Continue()
 
 void ParticipantController::Initialize(const ParticipantCommand& command, std::string reason)
 {
-    ChangeState(ParticipantState::Initializing, reason);
+    ChangeState(ParticipantState::CommunicationReady, reason);
     if (_initHandler)
     {
         try
@@ -600,7 +600,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
     // we cannot flush this change from the SystemController's history because
     // this could happen before the command has been received by the participant,
     // thus missing the command.
-    if (command.kind == SystemCommand::Kind::ExecuteColdswap && (State() == ParticipantState::Invalid || State() == ParticipantState::Idle))
+    if (command.kind == SystemCommand::Kind::ExecuteColdswap && (State() == ParticipantState::Invalid || State() == ParticipantState::ControllersCreated))
     {
         return;
     }

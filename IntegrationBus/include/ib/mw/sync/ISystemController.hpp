@@ -13,7 +13,7 @@ class ISystemController
 public:
     /*! \brief Send \ref ParticipantCommand::Kind::Initialize to a specific participant
      *
-     *  The command is only allowed if the participant is in ParticipantState::Idle.
+     *  The command is only allowed if the participant is in ParticipantState::ControllersCreated.
      *
      *  \param participantName identifies the participant to be initialized
      *

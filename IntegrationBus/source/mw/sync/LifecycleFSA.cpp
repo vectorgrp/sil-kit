@@ -10,6 +10,8 @@ LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleServ
     , _logger(logger)
 {
     _invalidState = std::make_shared<InvalidState>(this);
+    _controllersCreatedState = std::make_shared<ControllersCreatedState>(this);
+    _communicationReadyState = std::make_shared<CommunicationReadyState>(this);
     _initializedState = std::make_shared<InitializedState>(this);
     _runningState = std::make_shared<RunningState>(this);
     _pausedState = std::make_shared<PausedState>(this);
@@ -48,6 +50,16 @@ State* LifecycleManagement::GetOperationalState()
 State* LifecycleManagement::GetErrorState()
 {
     return _errorState.get();
+}
+
+State* LifecycleManagement::GetControllersCreatedState()
+{
+    return _controllersCreatedState.get();
+}
+
+State* LifecycleManagement::GetCommunicationReadyState()
+{
+    return _communicationReadyState.get();
 }
 
 State* LifecycleManagement::GetInitializedState()
@@ -96,6 +108,21 @@ logging::ILogger* LifecycleManagement::GetLogger()
 }
 
 // State
+void State::EstablishCommunication(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+
+void State::CommunicationReadyNotifyUser(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+
+void State::CommunicationReadyHandleDone(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+
 void State::RunSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -179,6 +206,47 @@ std::string InvalidState::toString()
 auto InvalidState::GetParticipantState() -> ParticipantState
 {
     return ParticipantState::Invalid;
+}
+
+
+// ControllersCreatedState
+void ControllersCreatedState::EstablishCommunication(std::string reason)
+{
+    // Resolve waitforme
+    // set shared_future
+    // await all queued futures
+    _context->SetState(_context->GetCommunicationReadyState(), std::move(reason));
+}
+
+auto ControllersCreatedState::toString() -> std::string
+{
+    return "ControllersCreated";
+}
+
+auto ControllersCreatedState::GetParticipantState() -> ParticipantState
+{
+    return ParticipantState::ControllersCreated;
+}
+
+// CommunicationReadyState
+void CommunicationReadyState::CommunicationReadyNotifyUser(std::string reason)
+{
+    _context->HandleCommunicationReady(std::move(reason));
+}
+
+void CommunicationReadyState::CommunicationReadyHandleDone(std::string reason)
+{
+    _context->SetState(_context->GetInitializedState(), std::move(reason));
+}
+
+auto CommunicationReadyState::toString() -> std::string
+{
+    return "CommunicationReady";
+}
+
+auto CommunicationReadyState::GetParticipantState() -> ParticipantState
+{
+    return ParticipantState::CommunicationReady;
 }
 
 // InitializedState

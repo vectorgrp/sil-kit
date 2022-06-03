@@ -231,16 +231,16 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
 
     switch (newStatus.state)
     {
-    case sync::ParticipantState::Idle:
+    case sync::ParticipantState::ControllersCreated:
         if (is_any_of(oldState, {sync::ParticipantState::Invalid, sync::ParticipantState::ColdswapShutdown}))
             return;
 
-    case sync::ParticipantState::Initializing:
-        if (is_any_of(oldState, {sync::ParticipantState::Idle, sync::ParticipantState::Error, sync::ParticipantState::Stopped, sync::ParticipantState::ColdswapIgnored}))
+    case sync::ParticipantState::CommunicationReady:
+        if (is_any_of(oldState, {sync::ParticipantState::ControllersCreated, sync::ParticipantState::Error, sync::ParticipantState::Stopped, sync::ParticipantState::ColdswapIgnored}))
             return;
 
     case sync::ParticipantState::Initialized:
-        if (oldState == sync::ParticipantState::Initializing)
+        if (oldState == sync::ParticipantState::CommunicationReady)
             return;
 
     case sync::ParticipantState::Running:
@@ -314,10 +314,10 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
 {
     switch (newStatus.state)
     {
-    case sync::ParticipantState::Idle:
+    case sync::ParticipantState::ControllersCreated:
         if (SystemState() == sync::SystemState::ColdswapPending)
         {
-            if (AllParticipantsInState({sync::ParticipantState::Idle, sync::ParticipantState::ColdswapIgnored}))
+            if (AllParticipantsInState({sync::ParticipantState::ControllersCreated, sync::ParticipantState::ColdswapIgnored}))
             {
                 SetSystemState(sync::SystemState::ColdswapDone);
             }
@@ -325,20 +325,20 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
         }
         else
         {
-            if (AllParticipantsInState(sync::ParticipantState::Idle))
-                SetSystemState(sync::SystemState::Idle);
-            else if (AllParticipantsInState({sync::ParticipantState::Idle, sync::ParticipantState::Initializing, sync::ParticipantState::Initialized}))
-                SetSystemState(sync::SystemState::Initializing);
+            if (AllParticipantsInState(sync::ParticipantState::ControllersCreated))
+                SetSystemState(sync::SystemState::ControllersCreated);
+            else if (AllParticipantsInState({sync::ParticipantState::ControllersCreated, sync::ParticipantState::CommunicationReady, sync::ParticipantState::Initialized}))
+                SetSystemState(sync::SystemState::CommunicationReady);
         }
         return;
 
-    case sync::ParticipantState::Initializing:
-        if (AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Idle}) // regular start
-            || AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Stopped, sync::ParticipantState::Error}) // re-initialization after one run
-            || AllParticipantsInState({sync::ParticipantState::Initializing, sync::ParticipantState::Idle, sync::ParticipantState::ColdswapIgnored}) // after coldswap
+    case sync::ParticipantState::CommunicationReady:
+        if (AllParticipantsInState({sync::ParticipantState::CommunicationReady, sync::ParticipantState::ControllersCreated}) // regular start
+            || AllParticipantsInState({sync::ParticipantState::CommunicationReady, sync::ParticipantState::Stopped, sync::ParticipantState::Error}) // re-initialization after one run
+            || AllParticipantsInState({sync::ParticipantState::CommunicationReady, sync::ParticipantState::ControllersCreated, sync::ParticipantState::ColdswapIgnored}) // after coldswap
             )
         {
-            SetSystemState(sync::SystemState::Initializing);
+            SetSystemState(sync::SystemState::CommunicationReady);
         }
         return;
 
@@ -390,7 +390,7 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
         return;
 
     case sync::ParticipantState::ShuttingDown:
-        if (AllParticipantsInState({sync::ParticipantState::ShuttingDown, sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::Idle, sync::ParticipantState::Initialized}))
+        if (AllParticipantsInState({sync::ParticipantState::ShuttingDown, sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::ControllersCreated, sync::ParticipantState::Initialized}))
             SetSystemState(sync::SystemState::ShuttingDown);
 
     case sync::ParticipantState::Shutdown:

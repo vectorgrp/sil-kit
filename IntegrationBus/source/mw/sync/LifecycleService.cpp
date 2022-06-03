@@ -30,6 +30,10 @@ LifecycleService::LifecycleService(IParticipantInternal* participant,
     (void)healthCheckConfig;
 }
 
+void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandlerT handler)
+{
+    _commReadyHandler = std::move(handler);
+}
 
 void LifecycleService::SetReinitializeHandler(ReinitializeHandlerT handler)
 {
@@ -214,6 +218,14 @@ void LifecycleService::Reinitialize(std::string reason)
     }
 }
 
+void LifecycleService::TriggerCommunicationReadyHandle(std::string)
+{
+    if (_commReadyHandler)
+    {
+        _commReadyHandler();
+    }
+}
+
 void LifecycleService::TriggerReinitializeHandle(std::string)
 {
     if (_reinitializeHandler)
@@ -290,6 +302,14 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
     switch (command.kind)
     {
     case SystemCommand::Kind::Invalid: break;
+
+    case SystemCommand::Kind::EstablishCommunication:
+        _lifecycleManagement->AllControllersAvailable("Received SystemCommand::Kind::EstablishCommunication");
+        break;
+
+    case SystemCommand::Kind::CommunicationReady:
+        _lifecycleManagement->AllCommunicationReady("Received SystemCommand::Kind::CommunicationReady");
+        break;
 
     case SystemCommand::Kind::Run:
         if (!_hasCoordinatedSimulationStart)

@@ -18,7 +18,7 @@ struct ParticipantCommand
     //! The different kinds of a ParticipantCommand
     enum class Kind : uint8_t {
         Invalid = 0, //!< An invalid command
-        Initialize = 1, //!< The initialize command
+        Initialize = 1, //!< The initialize command // TODO will be removed
         Reinitialize = 2, //!< The reinitialize command
         Shutdown = 3 //!< The shutdown command
     };
@@ -37,7 +37,9 @@ struct SystemCommand
         Shutdown = 3, //!< The shutdown command
         PrepareColdswap = 4, //!< The prepare coldswap command
         ExecuteColdswap = 5, //!< The execute coldswap command
-        AbortSimulation = 6 //!< The abort simulation command
+        AbortSimulation = 6, //!< The abort simulation command
+        CommunicationReady = 7, //!< The communication ready command
+        EstablishCommunication = 8  //!< The establish communication command
     };
 
     Kind kind; //!< The kind of system command that is sent.
@@ -46,8 +48,8 @@ struct SystemCommand
 // note: always increase number (never reuse old ones!)
 enum class ParticipantState : uint8_t {
     Invalid = 0, //!< An invalid participant state
-    Idle = 1, //!< The idle state
-    Initializing = 2, //!< The initializing state
+    ControllersCreated = 1, //!< The controllers created state
+    CommunicationReady = 2, //!< The communication ready state
     Initialized = 3, //!< The initialized state
     Running = 4, //!< The running state
     Paused = 5, //!< The paused state
@@ -75,8 +77,8 @@ struct ParticipantStatus
 // note: always increase number (never reuse old ones!)
 enum class SystemState : uint8_t {
     Invalid = 0, //!< An invalid system state
-    Idle = 1, //!< The idle state
-    Initializing = 2, //!< The initializing state
+    ControllersCreated = 1, //!< The controllers created state
+    CommunicationReady = 2, //!< The communication ready state
     Initialized = 3, //!< The initialized state
     Running = 4, //!< The running state
     Paused = 5, //!< The paused state

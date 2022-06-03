@@ -196,7 +196,7 @@ TEST_F(ParticipantControllerTest, must_set_simtask_before_calling_run)
     EXPECT_EQ(controller.State(), ParticipantState::Error);
 }
 
-TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
+TEST_F(ParticipantControllerTest, calling_run_announces_controllers_created_state)
 {
     ParticipantController controller(&participant, testParticipants[0], true, healthCheckConfig); 
     controller.AddSynchronizedParticipants(ExpectedParticipants{ testParticipants });
@@ -206,11 +206,11 @@ TEST_F(ParticipantControllerTest, calling_run_announces_idle_state)
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
         .Times(1);
     controller.RunAsync();
 
-    EXPECT_EQ(controller.State(), ParticipantState::Idle);
+    EXPECT_EQ(controller.State(), ParticipantState::ControllersCreated);
 }
 
 TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
@@ -223,7 +223,7 @@ TEST_F(ParticipantControllerTest, refreshstatus_must_not_modify_other_fields)
 
     EXPECT_EQ(controller.State(), ParticipantState::Invalid);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
         .Times(2);
     controller.RunAsync();
 
@@ -256,11 +256,11 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
     controller.SetSimulationTask(bind_method(&callbacks, &Callbacks::SimTask));
 
     // Run() --> Idle
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ControllersCreated))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Cmd::Initialize --> Initializing --> Initialized
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initializing))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::CommunicationReady))).Times(1);
     EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
     controller.ReceiveIbMessage(&masterId, ParticipantCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Initialize});
     EXPECT_EQ(controller.State(), ParticipantState::Initialized);
@@ -310,7 +310,7 @@ TEST_F(ParticipantControllerTest, force_shutdown)
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
     // Run() --> Idle
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ControllersCreated))).Times(1);
     auto finalState = controller.RunAsync();
 
     // Stop() --> Stopping --> Call StopHandler() --> Stopped
@@ -343,7 +343,7 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     controller.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
     // Run() --> Idle
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Idle))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ControllersCreated))).Times(1);
     auto finalState = controller.RunAsync();
 
     // ForceShutdown() --> Log::Error --> don't change state, don't call shutdown handlers
@@ -353,7 +353,7 @@ TEST_F(ParticipantControllerTest, force_shutdown_is_ignored_if_not_stopped)
     controller.ForceShutdown("I really, really quit!");
 
     // command shall be ignored. State shall be unchanged
-    EXPECT_EQ(controller.State(), ParticipantState::Idle);
+    EXPECT_EQ(controller.State(), ParticipantState::ControllersCreated);
     ASSERT_EQ(finalState.wait_for(1ms), std::future_status::timeout);
 }
 
