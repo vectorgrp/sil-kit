@@ -12,6 +12,7 @@ target_sources(IbUtil INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/UuidRandom.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Optional.hpp
     ${CMAKE_CURRENT_LIST_DIR}/CommandlineParser.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/Hash.hpp
 )
 
 target_include_directories(IbUtil
@@ -47,3 +48,10 @@ target_include_directories(IbUuid
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
+add_library(IbHash STATIC
+   Hash.cpp
+   Hash.hpp
+)
+target_include_directories(IbHash
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)

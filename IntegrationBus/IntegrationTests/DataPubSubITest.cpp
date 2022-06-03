@@ -30,7 +30,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_delayed_default_handler)
 }
 
 // One publisher participant, one subscriber participant
-TEST_F(DataPubSubITest, test_1pub_1sub_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -120,7 +120,7 @@ DataSubscribers:
 }
 
 // Large messages
-TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -134,11 +134,14 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync_vasio)
 }
 
 // Two publishers/subscribers with same topic on one participant
-TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
-
+    // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
+    // so only one call of the newSourceDiscoveryHandler is expected
+    const uint32_t numNewSouceDiscoveries = 1; 
+    
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"Pub1",
                        {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
@@ -153,15 +156,15 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync_vasio)
     }
     pubsubs.push_back({"Sub1",
                        {},
-                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
-                        {"SubCtrl2", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
+                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, numNewSouceDiscoveries, expectedDataUnordered, {}, {}},
+                        {"SubCtrl2", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, numNewSouceDiscoveries, expectedDataUnordered, {}, {}}}});
 
     RunSyncTest(pubsubs);
 }
 
 
 // 100 topics on one publisher/subscriber participant
-TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -187,7 +190,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync_vasio)
 
 
 // One publisher participant, two subscribers participants on same topic
-TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_2sub_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -201,10 +204,13 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync_vasio)
 }
 
 // Two publisher participants, one subscriber participant on same topic: Expect all to arrive but arbitrary reception order
-TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
+TEST_F(DataPubSubITest, test_2pub_1sub_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
+    // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
+    // so only one call of the newSourceDiscoveryHandler is expected
+    const uint32_t numNewSouceDiscoveries = 1; 
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
@@ -215,16 +221,30 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync_vasio)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
     }
-    pubsubs.push_back({ "Sub1", {}, {{"SubCtrl1", "TopicA",  {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}} });
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSouceDiscoveries,
+                         expectedDataUnordered,
+                         {},
+                         {}}}});
 
     RunSyncTest(pubsubs);
 }
 
 // Seven participants, multiple topics
-TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
+TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
+    // PubCtrl1 on Pub1,2,3 have the same Topic, mediatype and labels,
+    // so only one call of the newSourceDiscoveryHandler is expected
+    const uint32_t numNewSouceDiscoveries = 1; 
 
     std::vector<PubSubParticipant> pubsubs;
     
@@ -239,7 +259,18 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
     }
-    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToPublish * 3, 3,  expectedDataUnordered, {}, {}}} });
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToPublish * 3,
+                         numNewSouceDiscoveries,
+                         expectedDataUnordered,
+                         {},
+                         {}}}});
     pubsubs.push_back({"Sub2", {}, {{"SubCtrl1", "TopicB", {"B"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
     pubsubs.push_back({"Sub3", {}, {{"SubCtrl1", "TopicC", {"C"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
     pubsubs.push_back({"Sub4", {}, {{"SubCtrl1", "TopicD", {"D"}, {}, defaultMsgSize, numMsgToReceive, 1, {}, {}}}});
@@ -248,7 +279,7 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync_vasio)
 }
 
 // Wrong topic -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -261,7 +292,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync_vasio)
 }
 
 // Matching labels
-TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_label_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -274,7 +305,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_vasio)
 }
 
 // Wrong label value -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -287,7 +318,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_vasio)
 }
 
 // Wrong mediatype -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -300,7 +331,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync_vasio)
 }
 
 // Wildcard mediatype on subscriber
-TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -317,7 +348,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync_vasio)
 //-----------------------
 
 // Check for incoming labels
-TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
+TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
@@ -337,7 +368,7 @@ TEST_F(DataPubSubITest, test_2pub_1sub_expectlabels_sync_vasio)
 }
 
 // Use specific handlers and no default handler
-TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync_vasio)
+TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish * 3;
@@ -387,6 +418,9 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
+    // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
+    // so only one call of the newSourceDiscoveryHandler is expected
+    const uint32_t numNewSouceDiscoveries = 1; 
 
     std::vector<PubSubParticipant> pubsubs;
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
@@ -398,8 +432,26 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
     pubsubs.push_back({"PubSub1",
                        {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
                         {"PubCtrl2", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
-                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}},
-                        {"SubCtrl2", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 2, expectedDataUnordered, {}, {}}}});
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSouceDiscoveries,
+                         expectedDataUnordered,
+                         {},
+                         {}},
+                        {"SubCtrl2",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSouceDiscoveries,
+                         expectedDataUnordered,
+                         {},
+                         {}}}});
 
     RunSyncTest(pubsubs);
 }
@@ -409,7 +461,7 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
 //-----------------------------------------------------
 
 // Async with history: Wait for publication before starting the subscriber
-TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_async_history)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -423,7 +475,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_vasio)
 }
 
 // Async with history and specific data handler
-TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler_vasio)
+TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -438,6 +490,76 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler_vasio)
 
     RunAsyncTest(publishers, subscribers);
 }
+
+// Async rejoin
+TEST_F(DataPubSubITest, test_1pub_1sub_async_rejoin)
+{
+    const uint32_t numMsgToPublish = 1;
+    const uint32_t numSpecificDataHandlers = 10;
+    const uint32_t numRejoins = 10;
+    const uint32_t numMsgToReceive = numSpecificDataHandlers * numMsgToPublish;
+    
+    std::vector<PubSubParticipant> publishers;
+    publishers.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
+
+    std::vector<PubSubParticipant> subscribers;
+    std::vector<SpecificDataHandlerInfo> specificDataHandlers;
+    for (uint32_t i = 0; i < numSpecificDataHandlers; i++)
+    {
+        specificDataHandlers.push_back({{"A"}, {}});
+    }
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    expectedDataUnordered.reserve(numMsgToReceive);
+    for (uint32_t d = 0; d < numMsgToReceive; d++)
+    {
+        // Receive the same blob several times (once from every publisher)
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, 0));
+    }
+    subscribers.push_back({"Sub1",
+                           {},
+                           {{"SubCtrl1",
+                             "TopicA",
+                             {"A"},
+                             {},
+                             defaultMsgSize,
+                             numMsgToReceive,
+                             1,
+                             expectedDataUnordered,
+                             {},
+                             specificDataHandlers}}});
+    
+    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+
+    _testSystem.SetupRegistryAndSystemMaster(domainId, false, {});
+    RunParticipants(subscribers, domainId, false);
+    for (auto& s : subscribers)
+    {
+        s.WaitForCreateParticipant();
+    }
+
+    for (uint32_t i = 0; i < numRejoins; i++)
+    {
+        // Start publishers
+        RunParticipants(publishers, domainId, false);
+        for (auto& p : publishers)
+        {
+            p.WaitForAllSent();
+        }
+        // Publishers are done after AllSent, join the thread to destruct and disconnect publishers
+        _pubSubThreads.at(_pubSubThreads.size() - 1).join();
+        if (i < numRejoins - 1)
+        {
+            // Recreate publisher
+            publishers.clear();
+            publishers.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
+        }
+    }
+
+    // Subscriber internally waits for receptions
+    JoinPubSubThreads();
+    ShutdownSystem();
+}
+
 
 #endif
 

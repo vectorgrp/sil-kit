@@ -25,6 +25,7 @@ target_link_libraries(IbMwSync
     PUBLIC 
         IbInterface
         IbUtil
+        IbHash
         IbSetThreadName
         IbInternal
     PRIVATE 

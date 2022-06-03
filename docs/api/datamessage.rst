@@ -62,8 +62,23 @@ explicit data handlers instead of the default handler. The latter will not be in
 availabe. Note that the wildcard patters for DataSubscribers also apply to labels / media type given to
 |AddExplicitDataMessageHandler|: An empty string in a label value or the media type is a wildcard.
 
-If the labels / media type of DataPublishers are unknown beforehand, this information can be obtained by another 
-handler on the DataSubscriber that notifies about new DataPublishers on its topic.
+Source discovery
+~~~~~~~~~~~~~~~~
+
+If the labels / media type of DataPublishers are unknown beforehand, this information can be obtained by a  
+handler on the DataSubscriber that notifies about new DataPublishers on its topic. Note that the source discovery
+handler will only be invoked once per uniqe set of media type and labels, even if this set is used by multiple data 
+publishers.
+
+.. code-block:: cpp
+
+    auto newDataPublisherHandler = [](IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource)
+    {
+        // handle new sources, e.g. by adding an explicit handler for this set of media type and labels:
+        subscriber->AddExplicitDataMessageHandler(dataHandler, mediaType, labels);
+    });
+    auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", "", {}, defaultDataHandler, 
+                                                         newDataPublisherHandler);
 
 History
 ~~~~~~~

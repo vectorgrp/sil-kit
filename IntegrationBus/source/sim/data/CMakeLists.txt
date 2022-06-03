@@ -23,18 +23,19 @@ target_link_libraries(IbSimDataMessage
             IbSetThreadName
             IbInternal
             IbConfiguration
+            IbHash
 )
 
 add_vib_test(TestSimDataPublisher 
     SOURCES DataPublisherTest.cpp 
-    LIBS IbSimDataMessage IbMwMockParticipant IbInternal
+    LIBS IbSimDataMessage IbMwMockParticipant IbInternal 
 )
 add_vib_test(TestSimDataSubscriber 
     SOURCES DataSubscriberTest.cpp 
-    LIBS IbSimDataMessage IbMwMockParticipant IbInternal
+    LIBS IbSimDataMessage IbMwMockParticipant IbInternal 
 )
 add_vib_test(TestPubSubMatching
     SOURCES PubSubMatchingTest.cpp 
-    LIBS IbSimDataMessage IbInternal
+    LIBS IbSimDataMessage IbHash
 )
 add_vib_test(TestSimData_Serdes SOURCES DataSerdesTest.cpp LIBS IbSimDataMessage IbInternal)

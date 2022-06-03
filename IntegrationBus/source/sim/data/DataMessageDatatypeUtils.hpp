@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "Hash.hpp"
 
 namespace ib {
 namespace sim {
@@ -27,6 +28,26 @@ struct SpecificDataHandler
     std::map<std::string, std::string> labels;
     DataMessageHandlerT specificDataHandler;
     std::set<DataSubscriberInternal*> registeredInternalSubscribers;
+};
+
+
+struct SourceInfo
+{
+    std::string mediaType;
+    std::map<std::string, std::string> labels;
+
+    bool operator==(const SourceInfo& other) const
+    {
+        return other.mediaType == mediaType && std::equal(other.labels.begin(), other.labels.end(), labels.begin());
+    }
+    struct HashFunction
+    {
+        size_t operator()(const SourceInfo& s) const { 
+            auto hMediaType = ib::util::hash::Hash(s.mediaType);
+            auto hLabels = ib::util::hash::Hash(s.labels);
+            return ib::util::hash::HashCombine(hMediaType, hLabels);
+        }
+    };
 };
 
 } // namespace data

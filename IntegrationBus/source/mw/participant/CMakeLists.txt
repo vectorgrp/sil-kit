@@ -16,6 +16,7 @@ target_link_libraries(IbMwParticipant
         IbUtil
         IbSetThreadName
         IbUuid
+        IbHash
         IbMwSync
         IbSimCan
         IbSimEthernet

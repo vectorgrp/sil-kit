@@ -27,8 +27,7 @@ void DataSubscriber::RegisterServiceDiscovery()
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
         [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
                const ib::mw::ServiceDescriptor& serviceDescriptor) {
-            if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
-            {
+
                 auto getVal = [serviceDescriptor](std::string key) {
                     std::string tmp;
                     if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
@@ -47,36 +46,57 @@ void DataSubscriber::RegisterServiceDiscovery()
                 if (topic == _topic && MatchMediaType(_mediaType, pubMediaType) &&
                     MatchLabels(_labels, publisherLabels))
                 {
-                    // NB: The internal subscriber carries its publisher's information
-                    // that AssignSpecificDataHandlers() needs to check matching between 
-                    // user given mediaType/labels and the publisher's mediaType/labels.
-                    AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
+                    std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
-                    if (_newDataSourceHandler)
+                    if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
                     {
-                        _newDataSourceHandler(this, { _timeProvider->Now(), topic, pubMediaType, publisherLabels });
+                        // NB: The internal subscriber carries its publisher's information
+                        // that AssignSpecificDataHandlers() needs to check matching between
+                        // user given mediaType/labels and the publisher's mediaType/labels.
+                        AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
+                        
+                        if (_newDataSourceHandler)
+                        {
+                            // Prevent multiple calls to _newDataSourceHandler for same set of 
+                            // pubMediaType, labelsStr (topic is always the same)
+                            SourceInfo sourceInfo{pubMediaType, publisherLabels};
+                            auto it = _announcedDataSources.find(sourceInfo);
+                            if (it == _announcedDataSources.end())
+                            {
+                                _announcedDataSources.emplace(sourceInfo);
+                                _newDataSourceHandler(this,
+                                                      {_timeProvider->Now(), topic, pubMediaType, publisherLabels});
+                            }
+                        }
+                        // NB: Try to assign specific handlers here as _internalSubscibers has changed
+                        AssignSpecificDataHandlers();
                     }
-                    // NB: Try to assign specific handlers here as _internalSubscibers has changed
-                    AssignSpecificDataHandlers();
+                    else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                    {
+                        RemoveInternalSubscriber(pubUUID);
+                    }
                 }
-            }
+            
         }, mw::service::controllerTypeDataPublisher, _topic);
 }
 
 void DataSubscriber::SetDefaultDataMessageHandler(DataMessageHandlerT callback)
 {
+    std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
+
     _defaultDataHandler = callback;
-    for (auto* internalSubscriber : _internalSubscibers)
+    for (auto internalSubscriber : _internalSubscribers)
     {
-        internalSubscriber->SetDefaultDataMessageHandler(callback);
+        internalSubscriber.second->SetDefaultDataMessageHandler(callback);
     }
 }
-
 
 void DataSubscriber::AddExplicitDataMessageHandler(DataMessageHandlerT specificDataHandler,
                                                    const std::string& mediaType,
                                                    const std::map<std::string, std::string>& labels)
 {
+    std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
+
     _specificDataHandling.push_back({ _specificDataHandlerId++, mediaType, labels, specificDataHandler, {} });
     // NB: Try to assign specific handlers here as _specificDataHandling has changed
     AssignSpecificDataHandlers();
@@ -84,19 +104,19 @@ void DataSubscriber::AddExplicitDataMessageHandler(DataMessageHandlerT specificD
 
 void DataSubscriber::AssignSpecificDataHandlers()
 {
-    for (auto* internalSubscriber : _internalSubscibers)
+    for (auto internalSubscriber : _internalSubscribers)
     {
         for (auto& dataHandling : _specificDataHandling)
         {
             // Register a specificDataHandler only once per internalSubscriber
-            auto it = dataHandling.registeredInternalSubscribers.find(internalSubscriber);
+            auto it = dataHandling.registeredInternalSubscribers.find(internalSubscriber.second);
             if (it == dataHandling.registeredInternalSubscribers.end())
             {
-                if (MatchMediaType(dataHandling.mediaType, internalSubscriber->GetMediaType()) &&
-                    MatchLabels(dataHandling.labels, internalSubscriber->GetLabels()))
+                if (MatchMediaType(dataHandling.mediaType, internalSubscriber.second->GetMediaType())
+                    && MatchLabels(dataHandling.labels, internalSubscriber.second->GetLabels()))
                 {
-                    dataHandling.registeredInternalSubscribers.insert(internalSubscriber);
-                    internalSubscriber->RegisterSpecificDataHandlerInternal(dataHandling.specificDataHandler);
+                    dataHandling.registeredInternalSubscribers.insert(internalSubscriber.second);
+                    internalSubscriber.second->RegisterSpecificDataHandlerInternal(dataHandling.specificDataHandler);
                 }
             }
         }
@@ -109,7 +129,25 @@ void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, const std
     auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_participant->CreateDataSubscriberInternal(
         _topic, pubUUID, joinedMediaType, publisherLabels, _defaultDataHandler, this));
     
-    _internalSubscibers.push_back(internalSubscriber);
+    _internalSubscribers.emplace(pubUUID, internalSubscriber);
+}
+
+void DataSubscriber::RemoveInternalSubscriber(const std::string& pubUUID)
+{
+    auto internalSubscriber = _internalSubscribers.find(pubUUID);
+    if (internalSubscriber != _internalSubscribers.end())
+    {
+        for (auto& dataHandling : _specificDataHandling)
+        {
+            auto it = dataHandling.registeredInternalSubscribers.find(internalSubscriber->second);
+            if (it != dataHandling.registeredInternalSubscribers.end())
+            {
+                dataHandling.registeredInternalSubscribers.erase(it);
+            }
+        }
+        _internalSubscribers.erase(pubUUID);
+    }
+    // TODO: Actual controller is still alive, need to remove controller added via CreateDataSubscriberInternal
 }
 
 void DataSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)

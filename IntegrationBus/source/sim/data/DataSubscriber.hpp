@@ -4,6 +4,9 @@
 
 #include <vector>
 #include <future>
+#include <unordered_map>
+#include <unordered_set>
+#include <mutex>
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/data/IDataSubscriber.hpp"
@@ -40,6 +43,8 @@ public:
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
                                const std::map<std::string, std::string>& publisherLabels);
 
+    void RemoveInternalSubscriber(const std::string& pubUUID);
+
     //ib::mw::sync::ITimeConsumer
     void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
     
@@ -59,11 +64,15 @@ private:
 
     mw::ServiceDescriptor _serviceDescriptor{};
 
-    std::vector<DataSubscriberInternal*> _internalSubscibers;
+    std::unordered_map<std::string, DataSubscriberInternal*> _internalSubscribers;
     uint64_t _specificDataHandlerId{ 0 };
     std::vector<SpecificDataHandler> _specificDataHandling;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::IParticipantInternal* _participant{nullptr};
+
+    std::unordered_set<SourceInfo, SourceInfo::HashFunction> _announcedDataSources;
+
+    mutable std::recursive_mutex _internalSubscribersMx;
 };
 
 // ================================================================================

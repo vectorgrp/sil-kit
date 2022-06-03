@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "SystemController.hpp"
+#include "Hash.hpp"
 
 namespace ib {
 namespace mw {
@@ -13,12 +14,12 @@ SystemController::SystemController(IParticipantInternal* participant)
 
 void SystemController::Initialize(const std::string& participantName) const
 {
-    SendParticipantCommand(hash(participantName), ParticipantCommand::Kind::Initialize);
+    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Initialize);
 }
 
 void SystemController::ReInitialize(const std::string& participantName) const
 {
-    SendParticipantCommand(hash(participantName), ParticipantCommand::Kind::ReInitialize);
+    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::ReInitialize);
 }
 
 void SystemController::Run() const

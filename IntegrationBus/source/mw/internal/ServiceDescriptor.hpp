@@ -8,21 +8,10 @@
 #include "ServiceConfigKeys.hpp"
 #include "Configuration.hpp"
 #include "EndpointAddress.hpp"
+#include "Hash.hpp"
 
 namespace ib {
 namespace mw {
-
-inline uint64_t hash(const std::string& s)
-{
-    //DJB2 from dj bernstein
-    // documented in http://www.cse.yorku.ca/~oz/hash.html
-    uint64_t hash = 5381;
-    for (auto c : s)
-    {
-        hash = (hash << 5) + hash + c; // hash * 33 + c 
-    }
-    return hash;
-}
 
 typedef std::map<std::string, std::string> SupplementalData;
 
@@ -65,7 +54,7 @@ public:
     std::string GetParticipantName() const { return _participantName; }
     void SetParticipantName(std::string val) 
     {
-        _participantId = hash(val);
+        _participantId = ib::util::hash::Hash(val);
         _participantName = std::move(val);
     }
 

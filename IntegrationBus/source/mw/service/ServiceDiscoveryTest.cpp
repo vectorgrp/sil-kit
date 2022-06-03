@@ -14,7 +14,6 @@
 
 #include "UuidRandom.hpp" //for random strings
 
-
 #include "MockParticipant.hpp"
 
 namespace {
@@ -97,7 +96,7 @@ TEST(ServiceDescriptor, portable_hash_function)
     std::set<uint64_t> hashes;
     for (const auto& s: testStrings)
     {
-        hashes.insert(ib::mw::hash(s));
+        hashes.insert(ib::util::hash::Hash(s));
     }
     ASSERT_EQ(hashes.size(), testStrings.size()) << "The test strings need unique 64-bit hashes";
 }

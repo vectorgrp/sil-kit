@@ -107,7 +107,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     std::string participantName = "TestUnit";
-    ParticipantCommand initCommand{hash(participantName), ParticipantCommand::Kind::Initialize};
+    ParticipantCommand initCommand{ib::util::hash::Hash(participantName), ParticipantCommand::Kind::Initialize};
 
     EXPECT_CALL(callbacks, InitHandler(initCommand.participant, initCommand.kind)).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);

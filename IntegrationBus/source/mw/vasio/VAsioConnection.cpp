@@ -212,7 +212,7 @@ VAsioConnection::VAsioConnection(ib::cfg::ParticipantConfiguration config, std::
     , _localAcceptor{_ioContext}
 {
     RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
-    _hashToParticipantName.insert(std::pair<uint64_t, std::string>(hash(_participantName), _participantName));
+    _hashToParticipantName.insert(std::pair<uint64_t, std::string>(ib::util::hash::Hash(_participantName), _participantName));
 }
 
 VAsioConnection::~VAsioConnection()
@@ -506,7 +506,7 @@ void VAsioConnection::SendParticipantAnnoucementReply(IVAsioPeer* peer)
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
 {
-  const auto result = _hashToParticipantName.insert({ hash(participantName), participantName });
+  const auto result = _hashToParticipantName.insert({ ib::util::hash::Hash(participantName), participantName });
   if (result.second == false)
   {
     _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.", participantName);
@@ -573,7 +573,8 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         peerId.SetParticipantName(peerUri.participantName);
         peer->SetServiceDescriptor(peerId);
 
-        const auto result = _hashToParticipantName.insert({ hash(peerUri.participantName), peerUri.participantName });
+        const auto result =
+            _hashToParticipantName.insert({ib::util::hash::Hash(peerUri.participantName), peerUri.participantName});
         if (result.second == false)
         {
             assert(false);

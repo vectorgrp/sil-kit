@@ -204,6 +204,9 @@ protected:
         std::vector<DataPublisherInfo> dataPublishers;
         std::unique_ptr<IParticipant> participant;
 
+        // Common
+        std::promise<void> participantCreatedPromise;
+
         // Sub
         std::promise<void> allDiscoveredPromise;
         bool allDiscovered{false};
@@ -267,10 +270,15 @@ protected:
             }
         }
 
+        void WaitForCreateParticipant()
+        {
+            auto futureStatus = participantCreatedPromise.get_future().wait_for(communicationTimeout);
+            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting participant creation timed out";
+        }
         void WaitForAllSent()
         {
             auto futureStatus = allSentPromise.get_future().wait_for(communicationTimeout);
-            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting transmission timed";
+            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting transmission timed out";
         }
         void WaitForAllReceived()
         {
@@ -290,6 +298,8 @@ protected:
         try
         {
             participant.participant = ib::CreateParticipant(participant.config, participant.name, domainId, sync);
+
+            participant.participantCreatedPromise.set_value();
 
             // Already set the promise if no reception/discovery is expected
             participant.PrepareAllReceivedPromise();
@@ -370,7 +380,7 @@ protected:
                                             return dp.allSent;
                                         }))
                     {
-                        std::this_thread::sleep_for(100ms);
+                        //std::this_thread::sleep_for(10ms);
                         publishTask();
                     }
                     participant.allSentPromise.set_value();
@@ -414,7 +424,10 @@ protected:
     {
         for (auto&& thread : _pubSubThreads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
     }
 

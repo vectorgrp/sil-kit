@@ -68,7 +68,7 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
     : _participantName{ participantName }
     , _isSynchronized{ isSynchronized }
     , _participantConfig{ participantConfig }
-    , _participantId{hash(participantName)}
+    , _participantId{util::hash::Hash(participantName)}
     , _ibConnection{ _participantConfig, participantName, _participantId }
 {
     std::string logParticipantNotice; //!< We defer logging the notice until the logger is created
