@@ -73,8 +73,6 @@ add_subdirectory(Utilities)
 if(IB_BUILD_DEMOS)
     add_subdirectory(Demos)
 endif()
-# Include the Python-implemented launcher tool for testing and installation
-add_subdirectory(Launcher)
 # Include automated documentation with doxygen and sphinx
 add_subdirectory(docs)
 
@@ -117,7 +115,6 @@ if(IB_INSTALL_SOURCE)
     )
     install(
         DIRECTORY
-            ${CMAKE_CURRENT_SOURCE_DIR}/Launcher
             ${CMAKE_CURRENT_SOURCE_DIR}/docs
         DESTINATION ${INSTALL_SOURCE_DIR}
     )

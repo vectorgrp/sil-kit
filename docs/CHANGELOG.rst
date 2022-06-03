@@ -12,6 +12,7 @@ Removed
 ~~~~~~~
 - The ``vib-config-tool`` has been deprecated and was now finally removed.
   Since the configuration format has been completely reworked, this tool is no longer necessary.
+- The ``IbLauncher`` utility has been deprecated and was now finally removed.
   
 
 [3.99.24] - 2022-05-30
