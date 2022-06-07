@@ -1,11 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
-auto participant1 = ib::CreateParticipant(ibConfig, participantName1, domainId);
-auto participant2 = ib::CreateParticipant(ibConfig, participantName2, domainId);
+auto participant1 = ib::CreateParticipant(ibConfig, participantName1, domainId, true);
+auto participant2 = ib::CreateParticipant(ibConfig, participantName2, domainId, true);
 
 auto* systemController = participant1->GetSystemController();
 auto* systemMonitor = participant1->GetSystemMonitor();
+
+// Tell the SystemController to expect the two synchronized participants
+systemController->SetRequiredParticipants({participantName1, participantName2});
 
 // Register SystemStateHandler to trigger the commands of the System Controller in the correct system states.
 // For more information about the use of the System Monitor refer to the corresponding section.

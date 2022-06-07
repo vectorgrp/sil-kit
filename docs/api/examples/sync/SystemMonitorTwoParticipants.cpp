@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
-auto participant1 = ib::CreateParticipant(ibConfig, participantName1, domainId);
-auto participant2 = ib::CreateParticipant(ibConfig, participantName2, domainId);
+auto participant1 = ib::CreateParticipant(ibConfig, participantName1, domainId, true);
+auto participant2 = ib::CreateParticipant(ibConfig, participantName2, domainId, true);
 
 auto* systemMonitor = participant1->GetSystemMonitor();
 

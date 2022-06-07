@@ -18,10 +18,11 @@ To create an |IParticipant| you have to include the
 factory function::
 
     auto config = ib::cfg::ParticipantConfigurationFromFile("your_config.json");
-    auto participant = ib::CreateParticipant(config, "ParticipantName", domainId);
+    auto participant = ib::CreateParticipant(config, "ParticipantName", domainId, true);
 
 To take part in the simulation, the Participant needs to be initialized with a proper
-configuration, a participant name and a domain ID.
+configuration, a participant name and a domain ID. The forth parameter isSynchronized is temporary and will be removed
+in the future.
 
 .. _sec:iparticipant-api:
 
