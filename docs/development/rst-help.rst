@@ -1,5 +1,5 @@
 !!! How to write reStructuredText?
-==============================
+==================================
 
 First of all, some links to the documentation of the libraries which are used to generate this documentation:
 
@@ -15,7 +15,7 @@ And the `ReST sphinx Memo <https://rest-sphinx-memo.readthedocs.io/en/latest/ReS
 
 
 !!! The toctree-directive
----------------------
+-------------------------
 
 * The toctree-directive is the most important thing, especially in the index.rst and looks like this::
 
@@ -43,7 +43,7 @@ For more information about the toctree, you can read this:
 
 
 !!! Basic .rst Syntax
------------------
+---------------------
 
 * Commentaries::
 
@@ -75,7 +75,7 @@ For more information about the toctree, you can read this:
 
 
 !!! Breathe to Sphinx bridge
-------------------------
+----------------------------
 
 To add a doxygen class called 'namespace::Thingy' to the Sphinx documentation, you add to the \*.rst file the following piece of text::
 

@@ -174,8 +174,8 @@ command line tool.
 Currently, replaying a trace file is only supported on a participant and the controller the trace file was created on.
 This limitation might be changed in the future.
 
-Replaying
-^^^^^^^^^^
+Replaying a trace file
+^^^^^^^^^^^^^^^^^^^^^^
 The replaying of a trace file is enabled by specifying a :ref:`trace source<sec:cfg-participant-tracesource>` and
 adding a :ref:`replay<sec:cfg-participant-replay>` configuration block to a controller.
 The replay block establishes a link to the trace source, but also controls how
@@ -538,7 +538,7 @@ Registered user callbacks are served with Replay Messages if the configured dire
 .. _sec:replay-architecture:
 
 !!! Architecture
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 The trace and replay mechanism is an extension to the existing :cpp:class:`IParticipant<ib::mw::IParticipant>`, and consists of several parts:
 
@@ -558,7 +558,7 @@ Controllers supporting replay implement the *IReplayDataController* interface,
 which allows injecting traced messages into live simulations.
 
 !!! Tracing
-^^^^^^^
+^^^^^^^^^^^
 The architecture of the tracing facility is shown in :ref:`the following
 figure<figure:tracing>`.
 The Participant takes care of configuring controllers with their trace sinks upon
@@ -598,8 +598,8 @@ information like the original VIB configuration, the transmission direction of a
 The meta data is used by the *ReplayScheduler* to find an appropriate replay channel in a given input trace file and attach this trace data
 source to a *ReplayController*.
 
-Replaying
-^^^^^^^^^^
+Replaying Architecture
+^^^^^^^^^^^^^^^^^^^^^^
 When a replay configuration is active, a *ReplayScheduler* is instantiated.
 Based on the configuration it creates replay controllers, configures them,
 and attaches them to a trace file with a matching logical data stream, known as a replay channel.

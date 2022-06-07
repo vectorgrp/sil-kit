@@ -1,5 +1,5 @@
 FlexRay C API
--------
+-------------
 
 .. contents::
    :local:
@@ -67,8 +67,6 @@ Data Structures
 .. doxygenstruct:: ib_Flexray_SymbolEvent
    :members:
 .. doxygenstruct:: ib_Flexray_CycleStartEvent
-   :members:
-.. doxygenstruct:: ib_Flexray_ControllerStatus
    :members:
 .. doxygenstruct:: ib_Flexray_PocStatusEvent
    :members:

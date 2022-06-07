@@ -1,5 +1,5 @@
 LIN C API
--------
+---------
 
 .. contents::
    :local:
@@ -68,12 +68,3 @@ Enumerations and Typedefs
 .. doxygentypedef:: ib_Lin_FrameStatusHandler_t
 .. doxygentypedef:: ib_Lin_GoToSleepHandler_t
 .. doxygentypedef:: ib_Lin_WakeupHandler_t
-
-The Logger API can be used to write log messages.
-
-.. doxygenfunction:: ib_Participant_GetLogger
-.. doxygenfunction:: ib_Logger_Log
-
-Enumerations and Typedefs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib_LoggingLevel

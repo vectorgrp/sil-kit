@@ -53,7 +53,7 @@ IbRegistry
 .. _sec:util-system-controller:
 
 IbSystemController
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :widths: 17 205
@@ -75,6 +75,7 @@ IbSystemController
          -d, --domain <domainId>                      The domain ID which is used by the Integration Bus. Defaults to 42.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
          -c, --configuration <configuration>          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+
          <participantName1>, <participantName2>, ...  Names of participants to wait for before starting simulation.
 
    *  -  Usage Example
@@ -91,7 +92,7 @@ IbSystemController
 .. _sec:util-system-controller-interactive:
 
 IbSystemControllerInteractive
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :widths: 17 205
@@ -112,7 +113,9 @@ IbSystemControllerInteractive
          -d, --domain <domainId>                      The domain ID which is used by the Integration Bus. Defaults to 42.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
          -c, --configuration  <configuration>         Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
+
          <participantName1>, <participantName2>, ...  Names of participants that are required for the simulation (e.g. synchronized paricipants).
+
    *  -  Usage Example
       -  .. code-block:: powershell
 
@@ -126,7 +129,7 @@ IbSystemControllerInteractive
 .. _sec:util-system-monitor:
 
 IbSystemMonitor
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. list-table::
    :widths: 17 205

@@ -1,5 +1,5 @@
 DataMessage C API
--------
+-----------------
 
 .. contents::
    :local:

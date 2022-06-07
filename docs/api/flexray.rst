@@ -236,8 +236,8 @@ Data Structures
   :members:
 .. doxygenstruct:: ib::sim::fr::FlexraySymbolEvent
   :members:
-.. doxygentypedef:: ib::sim::fr::FlexraySymbolTransmitEvent
-.. doxygentypedef:: ib::sim::fr::FlexrayWakeupEvent
+.. doxygenstruct:: ib::sim::fr::FlexraySymbolTransmitEvent
+.. doxygenstruct:: ib::sim::fr::FlexrayWakeupEvent
 .. doxygenstruct:: ib::sim::fr::FlexrayPocStatusEvent
   :members:
 .. doxygenstruct:: ib::sim::fr::FlexrayCycleStartEvent

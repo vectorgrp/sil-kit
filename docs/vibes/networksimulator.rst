@@ -69,7 +69,7 @@ The LIN simulation has the following features:
 
 
 Command Line Interface
-------------------
+----------------------
 
 .. code-block:: 
 
@@ -83,6 +83,8 @@ Command Line Interface
     -c, --participant-configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
     <configuration>: Path and filename of the Network Simulator configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
+
+.. _sec:networksimulator-configuration:
 
 Configuration
 ------------------

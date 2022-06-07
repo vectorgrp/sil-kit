@@ -27,10 +27,10 @@ CAN Service API
 .. |CanStateChangeEvent| replace:: :cpp:class:`CanStateChangeEvent<ib::sim::can::CanStateChangeEvent>`
 .. |CanErrorStateChangeEvent| replace:: :cpp:class:`CanErrorStateChangeEvent<ib::sim::can::CanErrorStateChangeEvent>`
 
-.. |CanControllerState| replace:: :cpp:class:`CanControllerState<ib::sim::can::CanControllerState>`
-.. |CanErrorState| replace:: :cpp:class:`CanErrorState<ib::sim::can::CanErrorState>`
+.. |CanControllerState| replace:: :cpp:enum:`CanControllerState<ib::sim::can::CanControllerState>`
+.. |CanErrorState| replace:: :cpp:enum:`CanErrorState<ib::sim::can::CanErrorState>`
 .. |CanFrameFlags| replace:: :cpp:class:`CanFrame::CanFrameFlags<ib::sim::can::CanFrame::CanFrameFlags>`
-.. |CanTransmitStatus| replace:: :cpp:class:`CanTransmitStatus<ib::sim::can::CanTransmitStatus>`
+.. |CanTransmitStatus| replace:: :cpp:enum:`CanTransmitStatus<ib::sim::can::CanTransmitStatus>`
 
 .. |Transmitted| replace:: :cpp:enumerator:`CanTransmitStatus::Transmitted<ib::sim::can::Transmitted>`
 .. |Canceled| replace:: :cpp:enumerator:`CanTransmitStatus::Canceled<ib::sim::can::Canceled>`

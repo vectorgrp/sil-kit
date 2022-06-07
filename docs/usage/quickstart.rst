@@ -2,7 +2,7 @@
 Quick Start
 ===============
 
-.. |Participant| replace:: :ref:`Participant<sec:participant-factory>`
+.. |Participant| replace:: :ref:`Participant<sec:iparticipant-api>`
 
 .. contents::
    :local:
@@ -40,7 +40,7 @@ Terminology
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
- * - :ref:`Simulation Time <sec:cfg-time-sync>`
+ * - :ref:`Simulation Time <sec:sim-synchronization:>`
    - The simulated time within a simulation as it is perceived by a participant. Participants might be synchronized or
      unsynchronized.
 

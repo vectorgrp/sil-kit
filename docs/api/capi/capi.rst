@@ -84,3 +84,13 @@ State Handling and Synchronization
   systemmonitor
 
 
+The Logger API 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Logger API can be used to write log messages.
+
+.. doxygenfunction:: ib_Participant_GetLogger
+.. doxygenfunction:: ib_Logger_Log
+
+Enumerations and Typedefs
+-------------------------
+.. doxygentypedef:: ib_LoggingLevel

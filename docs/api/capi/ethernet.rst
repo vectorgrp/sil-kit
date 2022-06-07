@@ -50,7 +50,7 @@ Enumerations and Typedefs
 .. doxygentypedef:: ib_Ethernet_TransmitStatus
 .. doxygentypedef:: ib_Ethernet_State
 .. doxygentypedef:: ib_Ethernet_Bitrate
-.. doxygentypedef:: ib_Ethernet_Frame
+.. doxygenstruct:: ib_Ethernet_Frame
 
 .. doxygentypedef:: ib_Ethernet_Controller
 

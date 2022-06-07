@@ -39,7 +39,7 @@ master_doc = 'contents'
 # ones.
 extensions = [ 
     #'sphinx_rtd_theme',
-    'sphinx.ext.autosectionlabel',
+    #'sphinx.ext.autosectionlabel',
     "breathe" ]
 
 # For automatic creation of labels per section

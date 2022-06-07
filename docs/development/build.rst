@@ -1,12 +1,12 @@
-====================================
+======================================
 !!! Getting Started as a VIB Developer
-====================================
+======================================
 
 .. contents::
 
 
 !!! Build Prerequisites
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 To get started developing you'll need the following prerequisites:
  - `Git`_
  - C++ compiler (Visual Studio 2015/2017, GCC, Clang)
@@ -22,7 +22,7 @@ For generating the documentation, you will require:
 
 
 !!! Build Configuration
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 The VIB build system is based on CMake and can be customized at configuration time.
 The following options are available:
 
@@ -41,7 +41,7 @@ In general, the options can be combined and set using the cmake-gui, your IDE, o
 
 
 !!! Building Documentation
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You will need to set the IB_BUILD_DOCS option::
     
@@ -55,7 +55,7 @@ Refer to :doc:`rst-help` for guidelines on formatting the documentation.
 
 
 !!! Packaging
-~~~~~~~~~
+~~~~~~~~~~~~~
 VIB uses CPack to generate the release distributions in ZIP form.
 It can be packaged using the *package* target::
     
@@ -89,10 +89,8 @@ Its contents are as follows:
      - Html documentation
 
 
-.. _sec:build-demos:
-
 !!! Building the Demos
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 Building the demos from within the source tree is straight forward: 
 just build the  ``Demos`` CMake target.
@@ -107,7 +105,7 @@ in the ``IntegrationBus-Demos/CMakeLists.txt`` directory.
 
 
 !!! Architecture
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Have a look at our :ref:`architecture overview <base-architecture>`.
 

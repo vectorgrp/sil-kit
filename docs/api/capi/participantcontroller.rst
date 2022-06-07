@@ -1,5 +1,5 @@
 Participant Controller C API
--------
+----------------------------
 
 .. contents::
    :local:

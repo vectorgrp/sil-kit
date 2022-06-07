@@ -29,6 +29,7 @@ Changed
     ib::extensions::CreateIbRegistry()
     
   + new:
+
   .. code-block:: c++
 
     //ib/vendor/CreateIbRegistry.hpp
@@ -140,11 +141,13 @@ Changed
   - ``IntegrationBus/include/ib/capi/Can.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef int ib_Can_ErrorState;
 
     + new:
+
     .. code-block:: c++
 
       typedef int32_t ib_Can_ErrorState;
@@ -154,6 +157,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Can.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
@@ -162,6 +166,7 @@ Changed
                                                   ib_Can_ErrorStateChangeEvent errorStateChangeEvent);
 
     + new:
+
     .. code-block:: c++
 
       typedef void (*ib_Can_StateChangeHandler_t)(void* context, ib_Can_Controller* controller,
@@ -172,6 +177,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Ethernet.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
@@ -180,6 +186,7 @@ Changed
         ib_Ethernet_BitrateChangeEvent bitrateChangeEvent);
 
     + new:
+
     .. code-block:: c++
 
       typedef void (*ib_Ethernet_StateChangeHandler_t)(void* context, ib_Ethernet_Controller* controller,
@@ -190,12 +197,14 @@ Changed
   - ``IntegrationBus/include/ib/capi/Ethernet.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
         const char* participantName, ib_ParticipantStatus status);
 
     + new:
+
     .. code-block:: c++
 
       typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
@@ -206,11 +215,13 @@ Changed
   - ``IntegrationBus/include/ib/capi/Ethernet.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef ib_ByteVector ib_Ethernet_Frame;
 
     + new:
+
     .. code-block:: c++
 
       typedef struct
@@ -224,6 +235,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Flexray.h``
 
     + old:
+
     .. code-block:: c++
 
       struct ib_Flexray_ControllerConfig
@@ -233,6 +245,7 @@ Changed
             ...
 
     + new:
+
     .. code-block:: c++
 
       struct ib_Flexray_ControllerConfig
@@ -263,6 +276,7 @@ Changed
       The two members direction and userContext were moved from the CanFrame to the CanFrameEvent
 
       + old: 
+
       .. code-block:: c++
 
         struct CanFrame
@@ -273,6 +287,7 @@ Changed
             };
 
       + new: 
+
       .. code-block:: c++
 
         struct CanFrameEvent
@@ -293,6 +308,7 @@ Removed
   - ``IntegrationBus/include/ib/sim/eth/EthernetDatatypes.hpp``
 
     + old: 
+
     .. code-block:: c++
 
       struct EthernetTagControlInformation;
@@ -331,6 +347,7 @@ Removed
       void EthernetFrame::SetRawFrame(const std::vector<uint8_t>&);
 
     + new:
+
     .. code-block:: c++
 
       struct EthernetFrame
@@ -369,6 +386,7 @@ Removed
   ``IB_SPRINT_NAME`` were removed as well.
 
       + old: 
+
     .. code-block:: c++
           
         ib::version::SprintName()
@@ -378,6 +396,7 @@ Removed
     The convenience function in the C-API to append a ``TxBufferConfig`` was removed. 
 
     + old: 
+
     .. code-block:: c++
 
       typedef ib_ReturnCode (*ib_FlexRay_Append_TxBufferConfig_t)(ib_FlexRay_ControllerConfig** controllerConfig, 
@@ -388,11 +407,13 @@ Changed
 - The IbRegistry utility changed the configuration parameter from positional parameter to option parameter.
 
   + old: 
+
   .. code-block:: powershell
 
     ./IbRegistry IbConfig_DemoCan.json
 
   + new: 
+
   .. code-block:: powershell
 
     ./IbRegistry -c IbConfig_DemoCan.json
@@ -402,6 +423,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/FlexRay.h``
 
     + old: 
+
     .. code-block:: c++
 
       struct ib_FlexRay_ControllerConfig {
@@ -410,6 +432,7 @@ Changed
       };
 
     + new: 
+
     .. code-block:: c++
 
       struct ib_FlexRay_ControllerConfig {
@@ -420,6 +443,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Lin.h``
 
     + old: 
+
     .. code-block:: c++
 
       struct ib_Lin_ControllerConfig {
@@ -428,6 +452,7 @@ Changed
       };
 
     + new: 
+
     .. code-block:: c++
 
       struct ib_Lin_ControllerConfig {
@@ -438,6 +463,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Rpc.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef struct ib_Rpc_DiscoveryResultList
@@ -447,6 +473,7 @@ Changed
       } ib_Rpc_DiscoveryResultList;
 
     + new: 
+
     .. code-block:: c++
 
       typedef struct ib_Rpc_DiscoveryResultList
@@ -459,6 +486,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Types.h``
 
     + old:
+
     .. code-block:: c++
 
       typedef struct ib_KeyValueList
@@ -474,6 +502,7 @@ Changed
       } ib_StringList;
 
     + new:
+
     .. code-block:: c++
 
       typedef struct ib_KeyValueList
@@ -494,11 +523,13 @@ Changed
   - ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp``
 
     + old:
+
     .. code-block:: c++
 
       struct CanReceiveFlags
 
     + new:
+
     .. code-block:: c++
 
       struct CanFrameFlags
@@ -510,6 +541,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/lin/LinDatatypes.hpp``
 
     + old:
+
     .. code-block:: c++
       
       ChecksumModel
@@ -524,6 +556,7 @@ Changed
       ControllerStatus
 
     + new:
+
     .. code-block:: c++
       
       LinChecksumModel
@@ -543,6 +576,7 @@ Changed
   - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
 
     + old
+
     .. code-block:: c++
 
       class IParticipant
@@ -551,6 +585,7 @@ Changed
           auto DiscoverRpcServers(..., RpcExchangeFormat exchangeFormat, ...) -> ...
 
     + new
+
     .. code-block:: c++
 
       class IParticipant
@@ -561,6 +596,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/rpc/RpcDatatypes.hpp``
 
     + old
+
     .. code-block:: c++
 
       struct RpcExchangeFormat { ... };
@@ -569,6 +605,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/rpc/string_utils.hpp``
 
     + old
+
     .. code-block:: c++
 
       to_string(const RpcExchangeFormat&) -> std::string;
@@ -577,6 +614,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/InterfaceIdentifiers.h``
 
     + old
+
     .. code-block:: c++
 
       #define ib_InterfaceIdentifier_RpcExchangeFormat ...
@@ -584,6 +622,7 @@ Changed
   - ``IntegrationBus/include/ib/capi/Rpc.h``
 
     + old
+
     .. code-block:: c++
 
       typedef struct { ... } ib_Rpc_ExchangeFormat;
@@ -598,6 +637,7 @@ Changed
       ``...TransmitEvent`` and ``Add...Handler`` naming scheme
 
     + old:
+
     .. code-block:: c++
 
       ib_FlexRay_Message
@@ -623,6 +663,7 @@ Changed
       ib_FlexRay_Controller_RegisterCycleStartHandler
 
     + new:
+
     .. code-block:: c++
 
       ib_Flexray_FrameEvent
@@ -665,6 +706,7 @@ Changed
       ``...TransmitEvent`` and ``Add...Handler`` naming scheme
 
     + old
+
     .. code-block:: c++
 
       FrMessage
@@ -675,6 +717,7 @@ Changed
       PocStatus
 
     + new
+
     .. code-block:: c++
 
       FlexrayFrameEvent
@@ -692,6 +735,7 @@ Changed
       ``...TransmitEvent`` and ``Add...Handler`` naming scheme
 
     + old
+
     .. code-block:: c++
 
       class IFrController
@@ -707,6 +751,7 @@ Changed
         RegisterCycleStartHandler
 
     + new
+
     .. code-block:: c++
 
       class IFlexrayController
@@ -729,12 +774,14 @@ Changed
     The handler typedefs were renamed to be in line with the corresponding ``C++`` API
 
     + old
+
     .. code-block:: c++
 
       typedef void (*ib_Rpc_CallHandler_t)(void* context, ib_Rpc_Server* server, ib_Rpc_CallHandle* callHandle, const ib_ByteVector* argumentData);
       typedef void (*ib_Rpc_ResultHandler_t)(void* context, ib_Rpc_Client* client, ib_Rpc_CallHandle* callHandle, ib_Rpc_CallStatus callStatus, const ib_ByteVector* returnData);
 
     + new
+
     .. code-block:: c++
 
       typedef void (*ib_Rpc_CallHandler_t)(void* context, ib_Rpc_Server* server, const ib_Rpc_CallEvent* event);
@@ -743,6 +790,7 @@ Changed
     The former ``rpcChannel`` was renamed to ``functionName`` which should better reflect it's meaning:
 
     + old
+
     .. code-block:: c++
 
       typedef struct ib_Rpc_DiscoveryResult
@@ -753,6 +801,7 @@ Changed
       } ib_Rpc_DiscoveryResult;
 
     + new
+
     .. code-block:: c++
 
       typedef struct ib_Rpc_DiscoveryResult
@@ -769,6 +818,7 @@ Changed
     The typedef ``CallReturnHandler`` was renamed to ``CallResultHandler`` and the arguments besides the ``IRpcClient*`` were combined into an event structure:
 
     + old
+
     .. code-block:: c++
 
       using CallReturnHandler = std::function<void(ib::sim::rpc::IRpcClient* client,
@@ -777,6 +827,7 @@ Changed
                                                    const std::vector<uint8_t>& returnData)>;
 
     + new
+
     .. code-block:: c++
 
       struct RpcCallResultEvent
@@ -792,6 +843,7 @@ Changed
     The typedef ``CallProcessor`` was renamed to ``CallHandler``.
 
     + old
+
     .. code-block:: c++
 
       using CallProcessor = std::function<void(ib::sim::rpc::IRpcServer* server,
@@ -799,6 +851,7 @@ Changed
                                                const std::vector<uint8_t>& argumentData)>;
 
     + new
+
     .. code-block:: c++
 
       struct RpcCallEvent
@@ -841,6 +894,7 @@ Added
     New interface identifier for wakeup events
 
     + new:
+
     .. code-block:: c++
 
       #define ib_InterfaceIdentifier_FlexrayWakeupEvent ...
@@ -850,6 +904,7 @@ Added
     New datatype for wakeup events
 
     + new
+
     .. code-block:: c++
 
       struct FlexrayWakeupEvent { ... };
@@ -861,6 +916,7 @@ Added
     Functions to set the handler for an existing RPC client and server:
 
     + new
+
     .. code-block:: c++
 
       ib_ReturnCode ib_Rpc_Server_SetCallHandler(ib_Rpc_Server* self, void* context, ib_Rpc_CallHandler_t handler);
@@ -869,6 +925,7 @@ Added
     Event structures that are used instead of the individual parameters of the handler callbacks:
 
     + new
+
     .. code-block:: c++
 
       typedef struct {
@@ -891,6 +948,7 @@ Added
     Added interface identifiers for the newly introduced event structures.
 
     + new
+
     .. code-block:: c++
 
       #define ib_InterfaceIdentifier_RpcCallEvent ...
@@ -927,6 +985,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
 
     + old:
+
     .. code-block:: c++
 
       using FrameStatusHandler = std::function<void(ILinController*, const LinFrame&, FrameStatus, std::chrono::nanoseconds timestamp)>;
@@ -939,6 +998,7 @@ Changed
       ILinController::RegisterFrameResponseUpdateHandler(FrameResponseUpdateHandler); 
 
     + new:
+
     .. code-block:: c++
 
       using FrameStatusHandler = std::function<void(ILinController*, const LinFrameStatusEvent& frameStatusEvent)>;
@@ -953,16 +1013,19 @@ Changed
   - ``IntegrationBus/include/ib/sim/lin/LinDatatypes.hpp`` (C++-Api)
 
     + old: 
+
     .. code-block:: c++
     
       struct Frame {...};
 
     + new:
+
     .. code-block:: c++
 
       struct LinFrame {...};
 
     + added:
+
     .. code-block:: c++
     
       struct LinFrameStatusEvent
@@ -988,6 +1051,7 @@ Changed
     - Data types
 
       + added:
+
       .. code-block:: c++
 
         struct ib_Lin_FrameStatusEvent
@@ -1014,6 +1078,7 @@ Changed
     - Handlers
 
       + old: 
+
       .. code-block:: c++
       
         typedef void (*ib_Lin_FrameStatusHandler_t)(void* context, ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
@@ -1024,6 +1089,7 @@ Changed
         typedef void (*ib_Lin_WakeupHandler_t)(void* context, ib_Lin_Controller* controller);
                            
       + new:
+
       .. code-block:: c++
         
         typedef void (*ib_Lin_FrameStatusHandler_t)(void* context, ib_Lin_Controller* controller,
@@ -1039,6 +1105,7 @@ Changed
     - Methods
 
       + old: 
+
       .. code-block:: c++
       
         typedef ib_ReturnCode(*ib_Lin_Controller_RegisterFrameStatusHandler_t)(ib_Lin_Controller* controller, void* context,
@@ -1055,6 +1122,7 @@ Changed
   
 
       + new:
+
       .. code-block:: c++
       
         typedef ib_ReturnCode(*ib_Lin_Controller_AddFrameStatusHandler_t)(ib_Lin_Controller* controller, void* context,
@@ -1074,6 +1142,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
 
     + old:
+
     .. code-block:: c++
 
       using ReceiveMessageHandler    = CallbackT<CanMessage>;
@@ -1088,6 +1157,7 @@ Changed
       ICanController::SendMessage(const CanMessage& msg, void* userContext = nullptr) -> CanTxId;
 
     + new:
+
     .. code-block:: c++
 
       using FrameHandler             = CallbackT<CanFrameEvent>;
@@ -1104,6 +1174,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/can/CanDatatypes.hpp`` (C++-Api)
 
     + old: 
+
     .. code-block:: c++
 
       struct CanMessage
@@ -1118,6 +1189,7 @@ Changed
       struct CanTransmitAcknowledge {...};
 
     + new:
+
     .. code-block:: c++
 
       struct CanFrame
@@ -1129,6 +1201,7 @@ Changed
       struct CanFrameTransmitEvent {...};
 
     + added:
+
     .. code-block:: c++
       
       struct CanFrameEvent
@@ -1155,6 +1228,7 @@ Changed
     - Data types
 
       + old: 
+
       .. code-block:: c++
       
         struct ib_Can_Frame
@@ -1168,6 +1242,7 @@ Changed
         struct ib_Can_TransmitAcknowledge{...};
       
       + new:
+
       .. code-block:: c++
       
         struct ib_Can_Frame
@@ -1181,6 +1256,7 @@ Changed
         struct ib_Can_FrameTransmitEvent{...};
       
       + added:
+
       .. code-block:: c++
 
         struct ib_Can_StateChangeEvent
@@ -1200,6 +1276,7 @@ Changed
     - Handlers
 
       + old: 
+
       .. code-block:: c++
       
         typedef void (*ib_Can_TransmitStatusHandler_t)(void* context, ib_Can_Controller* controller, 
@@ -1215,6 +1292,7 @@ Changed
           ib_Can_ErrorState errorState);
 
       + new:
+
       .. code-block:: c++
 
         typedef void (*ib_Can_FrameTransmitHandler_t)(void* context, ib_Can_Controller* controller,
@@ -1232,6 +1310,7 @@ Changed
     - Methods
 
       + old: 
+
       .. code-block:: c++
 
         typedef ib_ReturnCode (*ib_Can_Controller_RegisterTransmitStatusHandler_t)(
@@ -1250,6 +1329,7 @@ Changed
           void* context, ib_Can_ErrorStateChangedHandler_t handler);
 
       + new:
+
       .. code-block:: c++
       
         typedef ib_ReturnCode (*ib_Can_Controller_AddFrameTransmitHandler_t)(
@@ -1277,12 +1357,14 @@ Changed
   - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
   
     + old:
+
     .. code-block:: c++
 
       IParticipant::CreateEthController(const std::string& canonicalName, const std::string& networkName)
       IParticipant::CreateEthController(const std::string& canonicalName) -> sim::eth::IEthController*;
 
     + new:
+
     .. code-block:: c++
 
       IParticipant::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
@@ -1291,6 +1373,7 @@ Changed
   - ``IntegrationBus/include/ib/sim/eth/IEthController.hpp``
 
     + old:
+
     .. code-block:: c++
 
       using ReceiveMessageHandler = CallbackT<EthMessage>;
@@ -1305,6 +1388,7 @@ Changed
       IEthController::SendFrame(EthFrame msg) -> EthTxId;
 
     + new:
+
     .. code-block:: c++
 
       using FrameHandler         = CallbackT<EthernetFrameEvent>;
@@ -1324,6 +1408,7 @@ Changed
     Additional data types follow in *added*.
 
     + old: 
+
     .. code-block:: c++
 
       EthMac
@@ -1340,6 +1425,7 @@ Changed
       EthSetMode
 
     + new:
+
     .. code-block:: c++
 
       EthernetMac
@@ -1356,6 +1442,7 @@ Changed
       EthernetSetMode
 
     + added:
+
     .. code-block:: c++
       
       struct EthernetStateChangeEvent
@@ -1377,18 +1464,21 @@ Changed
     - Data types
 
       + old: 
+
       .. code-block:: c++
       
         ib_Ethernet_Message
         ib_Ethernet_TransmitAcknowledge
       
       + new:
+
       .. code-block:: c++
       
         ib_Ethernet_FrameEvent
         ib_Ethernet_FrameTransmitEvent
       
       + added:
+
       .. code-block:: c++
 
 
@@ -1411,6 +1501,7 @@ Changed
     - Handlers
 
       + old: 
+
       .. code-block:: c++
       
         typedef void (*ib_Ethernet_ReceiveMessageHandler_t)(void* context, ib_Ethernet_Controller* controller, 
@@ -1426,6 +1517,7 @@ Changed
             uint32_t bitrate);
       
       + new:
+
       .. code-block:: c++
       
         typedef void (*ib_Ethernet_FrameHandler_t)(void* context, ib_Ethernet_Controller* controller, 
@@ -1443,6 +1535,7 @@ Changed
     - Methods
 
       + old: 
+
       .. code-block:: c++
 
         typedef ib_ReturnCode(*ib_Ethernet_Controller_RegisterReceiveMessageHandler_t)(
@@ -1471,6 +1564,7 @@ Changed
           void* userContext);
 
       + new:
+
       .. code-block:: c++
       
         typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameHandler_t)(
@@ -1501,6 +1595,7 @@ Removed
   - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
 
       + old: 
+
       .. code-block:: c++
 
         ILinController::SendFrame(LinFrame frame, FrameResponseType responseType, std::chrono::nanoseconds timestamp);
@@ -1509,6 +1604,7 @@ Removed
   - ``IntegrationBus/include/ib/capi/Lin.h``
 
       + old: 
+
       .. code-block:: c++
 
         typedef ib_ReturnCode (*ib_Lin_Controller_SendFrameWithTimestamp_t)(ib_Lin_Controller* controller, const ib_Lin_Frame* frame,
@@ -1522,6 +1618,7 @@ Removed
   - ``IntegrationBus/include/ib/sim/can/ICanController.hpp``
 
       + old: 
+
       .. code-block:: c++
 
         ICanController::SendMessage(CanMessage&& msg, void* userContext = nullptr) -> CanTxId;
@@ -1531,6 +1628,7 @@ Removed
   - ``IntegrationBus/include/ib/sim/eth/IEthController.hpp``
 
       + old: 
+
       .. code-block:: c++
 
         IEthController::SendFrame(EthFrame msg, std::chrono::nanoseconds timestamp) -> EthTxId;
@@ -1647,7 +1745,7 @@ Fixed
   <details>
   <summary>Complete list of changes to the C API (click to expand)</summary>
 
-.. code-block:: c++
+.. code-block:: 
 
   --- IntegrationBus/include/ib/capi/InterfaceIdentifiers.h
 
@@ -1821,27 +1919,27 @@ Changed
       typedef void (*ib_Data_NewDataSourceHandler_t)(void* context, ib_Data_Subscriber* subscriber, const char* topic,
                                                       const char* mediaType, const ib_KeyValueList* labels);
     + new:
-
+    
     The new DataMessageEvent now contains a timestamp with the send time set by the DataPublisher. 
     Formerly, the reception callback only contained the raw data. The information about a new DataPublisher in the 
     NewDataPublisherHandlerT now is bundeled in a stuct called 'NewDataPublisherEvent' also containing a reception
     timestamp.
 
-    .. code-block:: c++
+      .. code-block:: c++
 
-      // Cpp-API
-      using DataMessageHandlerT =
-      std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+        // Cpp-API
+        using DataMessageHandlerT =
+        std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+        
+        using NewDataPublisherHandlerT =
+        std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
       
-      using NewDataPublisherHandlerT =
-      std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
+        // C-API
+        typedef void (*ib_Data_DataMessageHandler_t)(void* context, ib_Data_Subscriber* subscriber, 
+                                                    const ib_Data_DataMessageEvent* dataMessageEvent);
       
-      // C-API
-      typedef void (*ib_Data_DataMessageHandler_t)(void* context, ib_Data_Subscriber* subscriber, 
-                                                  const ib_Data_DataMessageEvent* dataMessageEvent);
-      
-      typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscriber* subscriber,
-                                                        const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
+        typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscriber* subscriber,
+                                                          const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
 
 - The header ``EndpointAddress.hpp``, ``IReplay.hpp``, ``ITraceMessageSink.hpp``, ``ITraceMessageSource.hpp`` and
   ``TraceMessage.hpp`` are now internal headers.
@@ -2135,7 +2233,7 @@ Changed
   <details>
   <summary>Complete List of changes to the C API (click to expand)</summary>
 
-.. code-block:: c++
+.. code-block::
 
   --- IntegrationBus/include/ib/capi/Types.h
 
@@ -2525,6 +2623,7 @@ Changed
        IbRegistry Configuration.json 42
 
     + new: 
+
     .. code-block:: sh
 
        IbRegistry --domain 42 Configuration.json
@@ -2538,6 +2637,7 @@ Changed
        IbSystemController  42 participant1 participant2 ...
 
     + new: 
+
     .. code-block:: sh
 
        IbSystemController  --domain 42 participant1 participant2 ...
@@ -3059,8 +3159,7 @@ Changed
   This middleware will be removed in the future.
   The middleware specific `CreateFastRtpsComAdapter` API has been
   marked as deprecated for a long time.
-  Users should adopt the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`,
-  refer to :ref:`sec:mwcfg-enable-vasio` for instructions.
+  Users should adopt the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`.
 - C-API for ethernet was refactored and improved (VIB-489).
 - C-API for CAN was refactored and internal integrity checks and unit tests
   added (VIB-464 VIB-465 VIB-466 VIB-460 VIB-462).
@@ -3649,8 +3748,7 @@ Changed
 - The NetworkSimulator configuration syntax was changed. The network simulator
   definition was moved from the SimulationSetup level, down to the participant
   that previously only referred to the network simulator by name.
-  For backward compatibility the old configuration syntax is still supported,
-  refer to :ref:`sec:cfg-network-simulators`.
+  For backward compatibility the old configuration syntax is still supported.
   (AFTMAGT-277).
 
   + old:
@@ -3786,8 +3884,7 @@ Added
 - New optional configuration section for extension-related settings,
   cf. :doc:`../configuration/extension-configuration`. Its only property
   is the list of extension search path hints, which allows to configure
-  the additional search paths for shared library extensions loaded by the VIB,
-  e.g. the :doc:`vibes/vibregistry`.
+  the additional search paths for shared library extensions loaded by the VIB.
 
 - New configuration mechanism for IB message tracing.
   It supersedes the previous Ethernet and PCAP specicic configuration, please
@@ -4134,10 +4231,10 @@ Added
 ~~~~~
 - Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
 - Documentation for the Participant Controller API: :doc:`api/participantcontroller` (AFTMAGT-206).
-- Documentation for the IO Port services: :doc:`api/io` (AFTMAGT-201).
-- Documented Generic Messages API: :doc:`api/genericmessage` (AFTMAGT-204).
+- Documentation for the IO Port services (AFTMAGT-201).
+- Documented Generic Messages API: (AFTMAGT-204).
 - Documented the simulation state machine and synchronization types: :doc:`simulation/simulation`
-- Added docs for the ComAdapter: :doc:`api/comadapter`
+- Added docs for the ComAdapter:
 - Added quick start guide: :doc:`usage/quickstart`
 - Elaborate the user APIs and overview pages: :doc:`api/api`
 - Add docs for :doc:`api/systemcontroller` (AFTMAGT-242).

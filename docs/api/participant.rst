@@ -14,7 +14,7 @@ to a simulation is established and the configured participant joins the simulati
 Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
-:ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the :ref:`Participant API<sec:participant-factory>`
+:ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the Participant API
 factory function::
 
     auto config = ib::cfg::ParticipantConfigurationFromFile("your_config.json");
@@ -27,7 +27,7 @@ in the future.
 .. _sec:iparticipant-api:
 
 The IParticipant API
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 The instantiated |IParticipant| can then be used to access the other services
 of the VIB.

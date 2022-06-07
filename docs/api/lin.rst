@@ -36,7 +36,7 @@ LIN Service API
 .. |LinFrameResponse| replace:: :cpp:class:`LinFrameResponse<ib::sim::lin::LinFrameResponse>`
 .. |LinFrame| replace:: :cpp:class:`LinFrame<ib::sim::lin::LinFrame>`
 
-.. |LinControllerMode| replace:: :cpp:class:`LinControllerMode<ib::sim::lin::LinControllerMode>`
+.. |LinControllerMode| replace:: :cpp:enum:`LinControllerMode<ib::sim::lin::LinControllerMode>`
 .. |LinControllerMode_Master| replace:: :cpp:enumerator:`LinControllerMode::Master<ib::sim::lin::Master>`
 .. |LinControllerMode_Slave| replace:: :cpp:enumerator:`LinControllerMode::Slave<ib::sim::lin::Slave>`
 
@@ -45,7 +45,7 @@ LIN Service API
 
 .. |LinFrameResponseMode_Rx| replace:: :cpp:enumerator:`LinFrameResponseMode::Rx<ib::sim::lin::Rx>`
 
-.. |LinFrameStatus| replace:: :cpp:class:`LinFrameStatus<ib::sim::lin::LinFrameStatus>`
+.. |LinFrameStatus| replace:: :cpp:enum:`LinFrameStatus<ib::sim::lin::LinFrameStatus>`
 .. |LinFrameStatus_LIN_TX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<ib::sim::lin::LIN_TX_ERROR>`
 .. |LinFrameStatus_LIN_RX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_ERROR<ib::sim::lin::LIN_RX_ERROR>`
 .. |LinFrameStatus_LIN_RX_NO_RESPONSE| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_NO_RESPONSE<ib::sim::lin::LIN_RX_NO_RESPONSE>`

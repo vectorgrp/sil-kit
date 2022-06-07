@@ -1,5 +1,5 @@
 Can C API
--------
+----------
 
 .. contents::
    :local:

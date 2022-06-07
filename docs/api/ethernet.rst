@@ -15,7 +15,7 @@ Ethernet Service API
 .. |EthernetFrame| replace:: :cpp:class:`EthernetFrame<ib::sim::eth::EthernetFrame>`
 .. |EthernetFrameEvent| replace:: :cpp:class:`EthernetFrameEvent<ib::sim::eth::EthernetFrameEvent>`
 .. |EthernetFrameTransmitEvent| replace:: :cpp:class:`EthernetFrameTransmitEvent<ib::sim::eth::EthernetFrameTransmitEvent>`
-.. |EthernetTransmitStatus| replace:: :cpp:class:`EthernetTransmitStatus<ib::sim::eth::EthernetTransmitStatus>`
+.. |EthernetTransmitStatus| replace:: :cpp:enum:`EthernetTransmitStatus<ib::sim::eth::EthernetTransmitStatus>`
 
 .. |Transmitted| replace:: :cpp:enumerator:`EthernetTransmitStatus::Transmitted<ib::sim::eth::Transmitted>`
 .. |ControllerInactive| replace:: :cpp:enumerator:`EthernetTransmitStatus::ControllerInactive<ib::sim::eth::ControllerInactive>`
@@ -122,8 +122,8 @@ Switches
 ________
 
 An Ethernet controller should be connected to a switch for a valid simulation. For further details, refer to 
-:ref:`simulating Ethernet switches<vibes/networksimulator:Ethernet>` and the 
-:ref:`Network Simulator configuration<vibes/networksimulator:Configuration>`.
+:ref:`simulating Ethernet switches<sec:networksimulator-configuration>` and the 
+:ref:`Network Simulator configuration<sec:networksimulator-configuration>`.
 
 Receive State Change Events
 ___________________________
@@ -148,6 +148,8 @@ When sending frames, the |EthernetTransmitStatus| of the |EthernetFrameTransmitE
 - |LinkDown|: |Activate| has been called but the link to another Ethernet Controller has not yet been established.
 - |Dropped|: Indicates a transmit queue overflow.
 - |InvalidFrameFormat|: The Ethernet frame is invalid, e.g. too small or too large.
+
+.. _sec:api-ethernet-tracing:
 
 Message Tracing
 ~~~~~~~~~~~~~~~
@@ -238,7 +240,7 @@ Ethernet Controller API
 Data Structures
 ~~~~~~~~~~~~~~~
 
-.. doxygenclass:: ib::sim::eth::EthernetFrame
+.. doxygenstruct:: ib::sim::eth::EthernetFrame
    :members:
 .. doxygenstruct:: ib::sim::eth::EthernetFrameEvent
    :members:
