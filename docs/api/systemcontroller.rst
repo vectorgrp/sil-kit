@@ -16,6 +16,15 @@ Each participant has access to the system controller and is able to initiate a n
 But the simpler alternative is rather that one participant is solely responsible for using
 the System Controller, so that no erroneous state changes occur and the transitions remain clear.
 
+.. admonition:: Note
+
+  The VIB provides a utility called :ref:`IbSystemController<sec:util-system-controller>`, that provides a basic implementation that can be used to start
+  a simulation. In most cases this utility can be used and no own implementation is needed.
+
+Before the system controller can be used to initiate state transisitions, 
+:cpp:func:`SetRequiredParticipants()<ib::mw::sync::ISystemController::SetRequiredParticipants()>` must be called with 
+the expected set of synchronized participants within the simulation.
+
 Initiate state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

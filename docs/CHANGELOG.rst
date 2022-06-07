@@ -17,7 +17,7 @@ Removed
 Changed
 ~~~~~~~
 - The IbRegistry shared library is no longer necessary.
-  An instance of IIbRegistry can now be created directly using :cpp:func:`CreateRegistry()<ib::mw::CreateRegistry`.
+  An instance of IIbRegistry can now be created directly using :cpp:func:`CreateRegistry()<ib::vendor::CreateRegistry>`.
   This is an implementation detail specific to the VAsio based VIB.
   The namespace of the factory function and the location of the headers were changed to reflect this:
    
