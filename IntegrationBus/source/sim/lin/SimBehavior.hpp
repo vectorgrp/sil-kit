@@ -10,25 +10,33 @@
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-#include "ib/sim/can/CanDatatypes.hpp"
+#include "ib/sim/lin/LinDatatypes.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace lin {
 
-class CanController;
+class LinController;
 
 class SimBehavior : public ISimBehavior
 {
 public:
-    SimBehavior(mw::IParticipantInternal* participant, CanController* canController,
+    SimBehavior(mw::IParticipantInternal* participant, LinController* linController,
                        mw::sync::ITimeProvider* timeProvider);
 
     auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(CanConfigureBaudrate&& msg) override;
-    void SendIbMessage(CanSetControllerMode&& msg) override;
-    void SendIbMessage(CanFrameEvent&& msg) override;
+
+    void SendIbMessage(LinSendFrameRequest&& sendFrameRequest) override;
+    void SendIbMessage(LinTransmission&& transmission) override;
+    void SendIbMessage(LinControllerConfig&& controllerConfig) override;
+    void SendIbMessage(LinSendFrameHeaderRequest&& header) override;
+    void SendIbMessage(LinFrameResponseUpdate&& frameResponseUpdate) override;
+    void SendIbMessage(LinControllerStatusUpdate&& statusUpdate) override;
+
+    void GoToSleep() override;
+    void Wakeup() override;
+    auto CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame) -> LinFrameStatus override;
 
     void SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink);
     void SetTrivialBehavior();
@@ -45,6 +53,6 @@ private:
     ISimBehavior* _currentBehavior;
 };
 
-} // namespace can
+} // namespace lin
 } // namespace sim
 } // namespace ib

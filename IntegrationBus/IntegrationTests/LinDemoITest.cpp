@@ -384,7 +384,7 @@ auto MakeControllerConfig(const std::string& participantName)
     return config;
 }
 
-TEST_F(NetworkSimulatorITest, netsim_lin_simulation)
+TEST_F(SimTestHarnessITest, lin_demo)
 {
     // Create required setup
     SetupFromParticipantList({"LinMaster", "LinSlave"});

@@ -2,94 +2,97 @@
 
 #include "LinController.hpp"
 
-#include <cassert>
-#include <algorithm>
 #include <iostream>
+#include <chrono>
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
+#include "IServiceDiscovery.hpp"
+#include "ServiceDatatypes.hpp"
 
 namespace ib {
 namespace sim {
 namespace lin {
 
-namespace {
-
-inline auto ToFrameResponseMode(LinFrameResponseType responseType) -> LinFrameResponseMode
-{
-    switch (responseType) {
-    case LinFrameResponseType::MasterResponse:
-        return LinFrameResponseMode::TxUnconditional;
-    case LinFrameResponseType::SlaveResponse:
-        return LinFrameResponseMode::Rx;
-    case LinFrameResponseType::SlaveToSlave:
-        return LinFrameResponseMode::Unused;
-    }
-    return LinFrameResponseMode::Unused;
-}
-
-inline auto ToTxFrameStatus(LinFrameStatus status) -> LinFrameStatus
-{
-    switch (status)
-    {
-    case LinFrameStatus::LIN_RX_BUSY:
-        return LinFrameStatus::LIN_TX_BUSY;
-    case LinFrameStatus::LIN_RX_ERROR:
-        return LinFrameStatus::LIN_TX_ERROR;
-    case LinFrameStatus::LIN_RX_NO_RESPONSE:
-        return LinFrameStatus::LIN_RX_NO_RESPONSE;
-    case LinFrameStatus::LIN_RX_OK:
-        return LinFrameStatus::LIN_TX_OK;
-    default:
-        return status;
-    }
-}
-
-inline auto ToTracingDir(LinFrameStatus status) -> ib::sim::TransmitDirection
-{
-    switch (status)
-    {
-    case LinFrameStatus::LIN_RX_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_BUSY: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_OK: 
-        return ib::sim::TransmitDirection::RX;
-    case LinFrameStatus::LIN_TX_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_BUSY: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_OK: 
-        return ib::sim::TransmitDirection::TX;
-    default:
-        //if invalid status given, failsafe to send.
-        return ib::sim::TransmitDirection::TX;
-    }
-}
-template <class CallbackRangeT, typename... Args>
-void CallHandlers(CallbackRangeT& callbacks, const Args&... args)
-{
-    for (auto& callback : callbacks)
-    {
-        callback(args...);
-    }
-}
-
-} // namespace anonymous
-
-LinController::LinController(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, ILinController* facade)
+LinController::LinController(mw::IParticipantInternal* participant, ib::cfg::LinController config,
+                               mw::sync::ITimeProvider* timeProvider)
     : _participant{participant}
+    , _config{config}
     , _logger{participant->GetLogger()}
-    , _timeProvider{timeProvider}
-    , _facade{facade}
+    , _simulationBehavior{participant, this, timeProvider}
 {
-    if (_facade == nullptr)
-    {
-        _facade = this;
-    }
+
 }
+
+//------------------------
+// Trivial or detailed
+//------------------------
+
+void LinController::RegisterServiceDiscovery()
+{
+    _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+        [this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
+                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
+            // check if discovered service is a network simulator (if none is known)
+            if (_simulationBehavior.IsTrivial())
+            {
+                // check if received descriptor has a matching simulated link
+                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+                    && IsRelevantNetwork(remoteServiceDescriptor))
+                {
+                    SetDetailedBehavior(remoteServiceDescriptor);
+                }
+            }
+            else
+            {
+                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
+                    && IsRelevantNetwork(remoteServiceDescriptor))
+                
+                {
+                    SetTrivialBehavior();
+                }
+            }
+        });
+}
+
+void LinController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+{
+    _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
+}
+void LinController::SetTrivialBehavior()
+{
+    _simulationBehavior.SetTrivialBehavior();
+}
+
+auto LinController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+{
+    return _simulationBehavior.AllowReception(from);
+}
+
+auto LinController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
+}
+
+template <typename MsgT>
+void LinController::SendIbMessage(MsgT&& msg)
+{
+    // Detailed: Distribute IbMessage
+    // Trivial: 
+    //   LinSendFrameRequest: Call SetFrameResponse and SendFrameHeader
+    //   LinSendFrameHeaderRequest: Send a LinTansmission based on the cached responses and self-deliver LinFrameStatusEvent
+    //   Other: Distribute IbMessage
+    _simulationBehavior.SendIbMessage(std::move(msg));
+}
+
+//------------------------
+// Public API + Helpers
+//------------------------
 
 void LinController::Init(LinControllerConfig config)
 {
-    auto& node = GetLinNode(_serviceDescriptor.to_endpointAddress());
+    auto& node = GetThisLinNode();
     node.controllerMode = config.controllerMode;
     node.controllerStatus = LinControllerStatus::Operational;
     node.UpdateResponses(config.frameResponses, _logger);
@@ -106,8 +109,17 @@ auto LinController::Status() const noexcept -> LinControllerStatus
 
 void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 {
-    SetFrameResponse(frame, ToFrameResponseMode(responseType));
-    SendFrameHeader(frame.id);
+    if (_controllerMode != LinControllerMode::Master)
+    {
+        std::string errorMsg{"LinController::SendFrame() must only be called in master mode!"};
+        _logger->Error(errorMsg);
+        throw std::runtime_error{errorMsg};
+    }
+
+    LinSendFrameRequest sendFrame;
+    sendFrame.frame = frame;
+    sendFrame.responseType = responseType;
+    SendIbMessage(sendFrame);
 }
 
 void LinController::SendFrameHeader(LinIdT linId)
@@ -118,60 +130,9 @@ void LinController::SendFrameHeader(LinIdT linId)
         _logger->Error(errorMsg);
         throw std::runtime_error{errorMsg};
     }
-
-    // we answer the call immediately based on the cached responses
-    // setup a reply
-    LinTransmission transmission;
-    transmission.frame.id = linId;
-    transmission.timestamp = _timeProvider->Now();
-
-    auto numResponses = 0;
-    for (auto&& node : _linNodes)
-    {
-        if (node.controllerMode == LinControllerMode::Inactive)
-            continue;
-        if (node.controllerStatus != LinControllerStatus::Operational)
-            continue;
-
-        auto& response = node.responses[linId];
-        if (response.responseMode == LinFrameResponseMode::TxUnconditional)
-        {
-            transmission.frame = response.frame;
-            numResponses++;
-        }
-    }
-
-    if (numResponses == 0)
-    {
-        transmission.status = LinFrameStatus::LIN_RX_NO_RESPONSE;
-    }
-    else if (numResponses == 1)
-    {
-        transmission.status = LinFrameStatus::LIN_RX_OK;
-    }
-    else if (numResponses > 1)
-    {
-        transmission.status = LinFrameStatus::LIN_RX_ERROR;
-    }
-
-    // Dispatch the LIN transmission to all connected nodes
-    SendIbMessage(transmission);
-
-    // Dispatch the LIN transmission to our own callbacks
-    LinFrameResponseMode masterResponseMode =
-        GetLinNode(_serviceDescriptor.to_endpointAddress()).responses[linId].responseMode;
-    LinFrameStatus masterFrameStatus = transmission.status;
-    if (masterResponseMode == LinFrameResponseMode::TxUnconditional)
-    {
-        masterFrameStatus = ToTxFrameStatus(masterFrameStatus);
-    }
-
-    _tracer.Trace(ToTracingDir(masterFrameStatus), transmission.timestamp, transmission.frame);
-
-    // dispatch the reply locally...
-    CallHandlers(_frameStatusHandler, this,
-                 LinFrameStatusEvent{transmission.timestamp, transmission.frame, masterFrameStatus});
-
+    LinSendFrameHeaderRequest header;
+    header.id = linId;
+    SendIbMessage(header);
 }
 
 void LinController::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
@@ -186,8 +147,7 @@ void LinController::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
 
 void LinController::SetFrameResponses(std::vector<LinFrameResponse> responses)
 {
-    auto& node = GetLinNode(_serviceDescriptor.to_endpointAddress());
-    node.UpdateResponses(responses, _logger);
+    GetThisLinNode().UpdateResponses(responses, _logger);
 
     LinFrameResponseUpdate frameResponseUpdate;
     frameResponseUpdate.frameResponses = std::move(responses);
@@ -198,19 +158,16 @@ void LinController::GoToSleep()
 {
     if (_controllerMode != LinControllerMode::Master)
     {
-        std::string errorMsg{"LinController::GoToSleep() must only be called in master mode!"};
+        std::string errorMsg{"LinController::GoToSleep() must not be called for slaves or uninitialized masters!"};
         _logger->Error(errorMsg);
         throw ib::StateError{errorMsg};
     }
 
-    LinTransmission gotosleepTx;
-    gotosleepTx.frame = GoToSleepFrame();
-    gotosleepTx.status = LinFrameStatus::LIN_RX_OK;
+    // Detailed: Send LinSendFrameRequest with GoToSleep-Frame and set LinControllerStatus::SleepPending. BusSim will trigger LinTransmission.
+    // Trivial: Directly send LinTransmission with GoToSleep-Frame and call GoToSleepInternal() on this controller.
+    _simulationBehavior.GoToSleep();
 
-    SendIbMessage(gotosleepTx);
-
-    // For trivial simulations we go directly to Sleep state.
-    GoToSleepInternal();
+    _controllerStatus = LinControllerStatus::Sleep;
 }
 
 void LinController::GoToSleepInternal()
@@ -227,167 +184,14 @@ void LinController::Wakeup()
         throw ib::StateError{errorMsg};
     }
 
-    // Send to others with direction=RX
-    LinWakeupPulse pulse{ _timeProvider->Now(), TransmitDirection::RX }; 
-    SendIbMessage(pulse);
-    // No self delivery: directly call handlers with direction=TX
-    CallHandlers(_wakeupHandler, this, LinWakeupEvent{ pulse.timestamp, TransmitDirection::TX});
-    WakeupInternal();
+    // Detailed: Send LinWakeupPulse and call WakeupInternal()
+    // Trivial: Send LinWakeupPulse and call WakeupInternal(), self-deliver LinWakeupPulse with TX
+    _simulationBehavior.Wakeup();
 }
 
 void LinController::WakeupInternal()
 {
     SetControllerStatus(LinControllerStatus::Operational);
-}
-
-void LinController::AddFrameStatusHandler(FrameStatusHandler handler)
-{
-    _frameStatusHandler.emplace_back(std::move(handler));
-}
-
-void LinController::AddGoToSleepHandler(GoToSleepHandler handler)
-{
-    _goToSleepHandler.emplace_back(std::move(handler));
-}
-
-void LinController::AddWakeupHandler(WakeupHandler handler)
-{
-    _wakeupHandler.emplace_back(std::move(handler));
-}
-
-void LinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
-{
-    _frameResponseUpdateHandler.emplace_back(std::move(handler));
-}
-
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg)
-{
-    auto& frame = msg.frame;
-
-
-    if (frame.dataLength > 8)
-    {
-        _logger->Warn(
-            "LinController received transmission with payload length {} from {{{}, {}}}",
-            static_cast<unsigned int>(frame.dataLength),
-            from->GetServiceDescriptor().GetParticipantName(),
-            from->GetServiceDescriptor().GetServiceName());
-        return;
-    }
-
-    if (frame.id >= 64)
-    {
-        _logger->Warn(
-            "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
-            frame.id,
-            from->GetServiceDescriptor().GetParticipantName(),
-            from->GetServiceDescriptor().GetServiceName());
-        return;
-    }
-
-    if (_controllerStatus != LinControllerStatus::Operational)
-    {
-        _logger->Warn(
-            "LinController received transmission with LIN ID {} while controller is in {} mode. Message is ignored.",
-            static_cast<unsigned int>(frame.id),
-            to_string(_controllerStatus)
-        );
-        return;
-    }
-
-    switch (_controllerMode)
-    {
-    case LinControllerMode::Inactive:
-        return;
-
-    case LinControllerMode::Master:
-        _logger->Warn("LinController in MasterMode received a transmission from {{{}, {}}}. This indicates an erroneous setup as there should be only one LIN master!",
-            from->GetServiceDescriptor().GetParticipantName(),
-            from->GetServiceDescriptor().GetServiceName());
-        //[[fallthrough]]
-
-    case LinControllerMode::Slave:
-
-        auto& thisLinNode = GetLinNode(_serviceDescriptor.to_endpointAddress());
-        switch (thisLinNode.responses[frame.id].responseMode)
-        {
-        case LinFrameResponseMode::Unused:
-            break;
-        case LinFrameResponseMode::Rx:
-        {
-            const auto msgStatus = VeriyChecksum(frame, msg.status);
-            if (msgStatus == LinFrameStatus::LIN_RX_OK)
-            {
-                _tracer.Trace(ib::sim::TransmitDirection::RX, _timeProvider->Now(), frame);
-            }
-
-            CallHandlers(_frameStatusHandler, this, LinFrameStatusEvent{ msg.timestamp, frame, msgStatus });
-            break;
-        }
-        case LinFrameResponseMode::TxUnconditional:
-            // Transmissions are always sent with LinFrameStatus::RX_xxx so we have to
-            // convert the status to a TX_xxx if we sent this frame.
-            if (msg.status == LinFrameStatus::LIN_RX_OK)
-            {
-                _tracer.Trace(ib::sim::TransmitDirection::TX, _timeProvider->Now(), frame);
-            }
-            CallHandlers(_frameStatusHandler, this,
-                         LinFrameStatusEvent{msg.timestamp, frame, ToTxFrameStatus(msg.status)});
-            break;
-        }
-
-        // Dispatch GoToSleep frames
-        if (frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data)
-        {
-            _tracer.Trace(ToTracingDir(msg.status), _timeProvider->Now(), frame);
-            CallHandlers(_goToSleepHandler, this, LinGoToSleepEvent{ _timeProvider->Now() });
-        }
-    }
-}
-
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LinWakeupPulse& msg)
-{
-    CallHandlers(_wakeupHandler, this, LinWakeupEvent{ msg.timestamp, msg.direction});
-}
-
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg)
-{
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
-
-    linNode.controllerMode = msg.controllerMode;
-    linNode.controllerStatus = LinControllerStatus::Operational;
-    linNode.UpdateResponses(msg.frameResponses, _logger);
-
-    for (auto& response : msg.frameResponses)
-    {
-        CallHandlers(
-            _frameResponseUpdateHandler, this,
-            LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
-    }
-}
-
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg)
-{
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
-    linNode.controllerStatus = msg.status;
-}
-
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg)
-{
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
-    linNode.UpdateResponses(msg.frameResponses, _logger);
-
-    for (auto& response : msg.frameResponses)
-    {
-        CallHandlers(
-            _frameResponseUpdateHandler, this,
-            LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
-    }
-}
-
-void LinController::SetTimeProvider(mw::sync::ITimeProvider* timeProvider)
-{
-    _timeProvider = timeProvider;
 }
 
 void LinController::SetControllerStatus(LinControllerStatus status)
@@ -412,32 +216,10 @@ void LinController::SetControllerStatus(LinControllerStatus status)
     SendIbMessage(msg);
 }
 
-auto LinController::VeriyChecksum(const LinFrame& frame, LinFrameStatus status) -> LinFrameStatus
-{
-    if (status != LinFrameStatus::LIN_RX_OK)
-        return status;
+//------------------------
+// Node bookkeeping
+//------------------------
 
-    auto& node = GetLinNode(_serviceDescriptor.to_endpointAddress());
-    auto& expectedFrame = node.responses[frame.id].frame;
-
-    if (expectedFrame.dataLength != frame.dataLength || expectedFrame.checksumModel != frame.checksumModel)
-    {
-        return LinFrameStatus::LIN_RX_ERROR;
-    }
-
-    return status;
-}
-
-
-template <typename MsgT>
-void LinController::SendIbMessage(MsgT&& msg)
-{
-    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
-}
-
-// ================================================================================
-//  LinController::LinNode
-// ================================================================================
 void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responses_, mw::logging::ILogger* logger)
 {
     for (auto&& response : responses_)
@@ -452,6 +234,209 @@ void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> respo
     }
 }
 
+auto LinController::GetThisLinNode() -> LinNode&
+{
+    return GetLinNode(_serviceDescriptor.to_endpointAddress());
+}
+
+auto LinController::GetLinNode(mw::EndpointAddress addr) -> LinNode&
+{
+    auto iter = std::lower_bound(_linNodes.begin(), _linNodes.end(), addr,
+                                 [](const LinNode& lhs, const mw::EndpointAddress& address) {
+                                     return lhs.ibAddress < address;
+                                 });
+    if (iter == _linNodes.end() || iter->ibAddress != addr)
+    {
+        LinNode node;
+        node.ibAddress = addr;
+        iter = _linNodes.insert(iter, node);
+    }
+    return *iter;
+}
+
+void LinController::CallLinFrameStatusEventHandler(const LinFrameStatusEvent& msg)
+{
+    // Trivial: Used to dispatch the LinFrameStatusEvent locally
+    CallHandlers(msg);
+}
+
+auto LinController::GetResponse(LinIdT id) -> std::pair<int, LinFrame>
+{
+    LinFrame responseFrame;
+
+    auto numResponses = 0;
+    for (auto&& node : _linNodes)
+    {
+        if (node.controllerMode == LinControllerMode::Inactive)
+            continue;
+        if (node.controllerStatus != LinControllerStatus::Operational)
+            continue;
+
+        auto& response = node.responses[id];
+        if (response.responseMode == LinFrameResponseMode::TxUnconditional)
+        {
+            responseFrame = response.frame;
+            numResponses++;
+        }
+    }
+
+    return {numResponses, responseFrame};
+}
+
+//------------------------
+// ReceiveIbMessage
+//------------------------
+
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    auto& frame = msg.frame;
+
+    if (frame.dataLength > 8)
+    {
+        _logger->Warn(
+            "LinController received transmission with payload length {} from {{{}, {}}}",
+            static_cast<unsigned int>(frame.dataLength),
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
+        return;
+    }
+
+    if (frame.id >= 64)
+    {
+        _logger->Warn(
+            "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
+            frame.id,
+            from->GetServiceDescriptor().GetParticipantName(),
+            from->GetServiceDescriptor().GetServiceName());
+        return;
+    }
+
+    if (_controllerMode == LinControllerMode::Inactive)
+        _logger->Warn("Inactive LinController received a transmission.");
+
+    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, frame);
+
+    bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
+
+    // Detailed: Just use msg.status
+    // Trivial: Evaluate status using cached response
+    const LinFrameStatus msgStatus = _simulationBehavior.CalcFrameStatus(msg, isGoToSleepFrame);
+
+    // Dispatch frame to handlers
+    if (msgStatus != LinFrameStatus::LIN_RX_NO_RESPONSE)
+    {
+        CallHandlers(LinFrameStatusEvent{msg.timestamp, frame, msgStatus});
+    }
+
+    // Dispatch GoToSleep frames to dedicated handlers
+    if (isGoToSleepFrame)
+    {
+        // only call GoToSleepHandlers for slaves, i.e., not for the master that issued the GoToSleep command.
+        if (_controllerMode == LinControllerMode::Slave)
+        {
+            CallHandlers(LinGoToSleepEvent{msg.timestamp});
+        }
+    }
+}
+
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    CallHandlers(LinWakeupEvent{msg.timestamp, msg.direction});
+}
+
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg)
+{
+    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
+    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
+    // NOTE: only self-delivered messages are rejected
+    if (from->GetServiceDescriptor() == _serviceDescriptor)
+        return;
+
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
+    linNode.controllerMode = msg.controllerMode;
+    linNode.controllerStatus = LinControllerStatus::Operational;
+    linNode.UpdateResponses(msg.frameResponses, _logger);
+
+    for (auto& response : msg.frameResponses)
+    {
+        CallHandlers(LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
+    }
+}
+
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg)
+{
+    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
+    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
+    // NOTE: only self-delivered messages are rejected
+    if (from->GetServiceDescriptor() == _serviceDescriptor) 
+        return;
+
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
+    linNode.UpdateResponses(msg.frameResponses, _logger);
+
+    for (auto& response : msg.frameResponses)
+    {
+        CallHandlers(LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
+    }
+}
+
+void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg)
+{
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
+    linNode.controllerStatus = msg.status;
+}
+
+//------------------------
+// Handlers
+//------------------------
+
+void LinController::AddFrameStatusHandler(FrameStatusHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+void LinController::AddGoToSleepHandler(GoToSleepHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+void LinController::AddWakeupHandler(WakeupHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+void LinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+
+template <typename MsgT>
+void LinController::AddHandler(CallbackT<MsgT>&& handler)
+{
+    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
+    handlers.push_back(std::forward<CallbackT<MsgT>>(handler));
+}
+
+template <typename MsgT>
+void LinController::CallHandlers(const MsgT& msg)
+{
+    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
+    for (auto&& handler : handlers)
+    {
+        handler(this, msg);
+    }
+}
 
 } // namespace lin
 } // namespace sim

@@ -1,18 +1,18 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "CanController.hpp"
+#include "EthController.hpp"
 #include "SimBehavior.hpp"
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace eth {
 
-class CanController;
+class EthController;
 
-SimBehavior::SimBehavior(mw::IParticipantInternal* participant, CanController* canController,
+SimBehavior::SimBehavior(mw::IParticipantInternal* participant, EthController* ethController,
                     mw::sync::ITimeProvider* timeProvider)
-    : _trivial{participant, canController, timeProvider}
-    , _detailed{participant, canController, canController->GetServiceDescriptor()}
+    : _trivial{participant, ethController, timeProvider}
+    , _detailed{participant, ethController, ethController->GetServiceDescriptor()}
 {
     _currentBehavior = &_trivial;
 }
@@ -28,17 +28,19 @@ void SimBehavior::SendIbMessageImpl(MsgT&& msg)
     _currentBehavior->SendIbMessage(std::forward<MsgT>(msg));
 }
 
-void SimBehavior::SendIbMessage(CanConfigureBaudrate&& msg)
+void SimBehavior::SendIbMessage(EthernetFrameEvent&& msg) 
+{ 
+    SendIbMessageImpl(std::move(msg)); 
+}
+
+void SimBehavior::SendIbMessage(EthernetSetMode&& msg)
 {
     SendIbMessageImpl(std::move(msg));
 }
-void SimBehavior::SendIbMessage(CanSetControllerMode&& msg)
+
+void SimBehavior::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(std::move(msg));
-}
-void SimBehavior::SendIbMessage(CanFrameEvent&& msg)
-{
-    SendIbMessageImpl(std::move(msg));
+    _currentBehavior->OnReceiveAck(msg);
 }
 
 void SimBehavior::SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink)
@@ -62,6 +64,6 @@ auto SimBehavior::IsDetailed() const -> bool
 }
 
 
-} // namespace can
+} // namespace eth
 } // namespace sim
 } // namespace ib

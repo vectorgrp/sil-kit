@@ -27,14 +27,13 @@ void CanController::RegisterServiceDiscovery()
     mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler([this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
                                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
-        // Check if discovered service is a network simulator (if none is known)
         if (_simulationBehavior.IsTrivial())
         {
             // Check if received descriptor has a matching simulated link
             if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
+                SetDetailedBehavior(remoteServiceDescriptor);
             }
         }
         else
@@ -42,13 +41,12 @@ void CanController::RegisterServiceDiscovery()
             if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
-                _simulationBehavior.SetTrivialBehavior();
+                SetTrivialBehavior();
             }
         }
     });
 }
 
-// For testing purposes
 void CanController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
 {
     _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
@@ -60,7 +58,7 @@ void CanController::SetTrivialBehavior()
 
 auto CanController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
-    // NetSim announces ServiceType::Link 
+    // NetSim uses ServiceType::Link and the simulated networkName
     return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
            && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
@@ -187,7 +185,7 @@ HandlerId CanController::AddFrameHandler(FrameHandler handler, DirectionMask dir
     std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& frameEvent) {
         return (((DirectionMask)frameEvent.direction & (DirectionMask)directionMask)) != 0;
     };
-    return RegisterHandler(handler, std::move(filter));
+    return AddHandler(handler, std::move(filter));
 }
 void CanController::RemoveFrameHandler(HandlerId handlerId)
 {
@@ -196,7 +194,7 @@ void CanController::RemoveFrameHandler(HandlerId handlerId)
 
 HandlerId CanController::AddStateChangeHandler(StateChangeHandler handler)
 {
-    return RegisterHandler(handler);
+    return AddHandler(handler);
 }
 void CanController::RemoveStateChangeHandler(HandlerId handlerId)
 {
@@ -205,7 +203,7 @@ void CanController::RemoveStateChangeHandler(HandlerId handlerId)
 
 HandlerId CanController::AddErrorStateChangeHandler(ErrorStateChangeHandler handler)
 {
-    return RegisterHandler(handler);
+    return AddHandler(handler);
 }
 void CanController::RemoveErrorStateChangeHandler(HandlerId handlerId)
 {
@@ -217,7 +215,7 @@ HandlerId CanController::AddFrameTransmitHandler(FrameTransmitHandler handler, C
     std::function<bool(const CanFrameTransmitEvent&)> filter = [statusMask](const CanFrameTransmitEvent& ack) {
         return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0;
     };
-    return RegisterHandler(handler, filter);
+    return AddHandler(handler, filter);
 }
 void CanController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
@@ -225,7 +223,7 @@ void CanController::RemoveFrameTransmitHandler(HandlerId handlerId)
 }
 
 template <typename MsgT>
-HandlerId CanController::RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
+HandlerId CanController::AddHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
 {
     std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
 

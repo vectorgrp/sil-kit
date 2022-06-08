@@ -1,16 +1,16 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "CanController.hpp"
+#include "EthController.hpp"
 #include "SimBehaviorDetailed.hpp"
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace eth {
 
-SimBehaviorDetailed::SimBehaviorDetailed(mw::IParticipantInternal* participant, CanController* canController,
+SimBehaviorDetailed::SimBehaviorDetailed(mw::IParticipantInternal* participant, EthController* ethController,
                                        const mw::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(canController)}
+    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(ethController)}
     , _parentServiceDescriptor{&serviceDescriptor}
 {
 }
@@ -20,17 +20,33 @@ void SimBehaviorDetailed::SendIbMessageImpl(MsgT&& msg)
 {
     _participant->SendIbMessage(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
-void SimBehaviorDetailed::SendIbMessage(CanConfigureBaudrate&& msg)
+
+void SimBehaviorDetailed::SendIbMessage(EthernetFrameEvent&& msg)
+{
+    // We keep a copy until the transmission was acknowledged before tracing the message
+    _transmittedMessages[msg.transmitId] = msg.frame;
+
+    SendIbMessageImpl(msg);
+}
+
+void SimBehaviorDetailed::SendIbMessage(EthernetSetMode&& msg)
 {
     SendIbMessageImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(CanSetControllerMode&& msg)
+
+void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(msg);
-}
-void SimBehaviorDetailed::SendIbMessage(CanFrameEvent&& msg)
-{
-    SendIbMessageImpl(msg);
+    // Detailed Sim: Check if frame originates from this controller to trace the correct direction
+    auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
+    if (transmittedMsg != _transmittedMessages.end())
+    {
+        if (msg.status == EthernetTransmitStatus::Transmitted)
+        {
+            _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, transmittedMsg->second);
+        }
+
+        _transmittedMessages.erase(msg.transmitId);
+    }
 }
 
 auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool 
@@ -48,6 +64,6 @@ void SimBehaviorDetailed::SetSimulatedLink(const mw::ServiceDescriptor& simulate
     _simulatedLink = simulatedLink;
 }
 
-} // namespace can
+} // namespace eth
 } // namespace sim
 } // namespace ib

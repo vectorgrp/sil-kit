@@ -2,15 +2,13 @@
 add_library(IbSimLin STATIC
     LinController.cpp
     LinController.hpp
-
-    LinControllerProxy.cpp
-    LinControllerProxy.hpp
-
-    LinControllerReplay.cpp
-    LinControllerReplay.hpp
-
-    LinControllerFacade.hpp
-    LinControllerFacade.cpp
+    
+    ISimBehavior.hpp
+    SimBehavior.cpp
+    SimBehavior.hpp
+    SimBehaviorDetailed.cpp
+    SimBehaviorDetailed.hpp
+    SimBehaviorTrivial.cpp
 
     LinSerdes.hpp
     LinSerdes.cpp
@@ -31,9 +29,9 @@ target_link_libraries(IbSimLin
 add_vib_test(TestSimLin
     SOURCES
         LinTestUtils.hpp
-        LinControllerTest.cpp
-        LinControllerProxyTest.cpp
-        LinControllerFacadeTest.cpp
+        LinControllerDetailedSimTest.cpp
+        LinControllerTrivialSimTest.cpp
+        LinControllerConfigTest.cpp
     LIBS
         IbSimLin
         IbMwMockParticipant

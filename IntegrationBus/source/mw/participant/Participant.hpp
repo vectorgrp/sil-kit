@@ -25,17 +25,12 @@
 
 #include "IIbToEthSimulator.hpp"
 #include "IIbToEthController.hpp"
-#include "IIbToEthControllerProxy.hpp"
-#include "IIbToEthControllerFacade.hpp"
 
 #include "IIbToLinSimulator.hpp"
 #include "IIbToLinController.hpp"
-#include "IIbToLinControllerProxy.hpp"
-#include "IIbToLinControllerFacade.hpp"
 
 #include "IIbToFlexrayBusSimulator.hpp"
-#include "IIbToFlexrayControllerProxy.hpp"
-#include "IIbToFlexrayControllerFacade.hpp"
+#include "IIbToFlexrayController.hpp"
 
 #include "IIbToDataPublisher.hpp"
 #include "IIbToDataSubscriber.hpp"
@@ -366,13 +361,8 @@ private:
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,
         ControllerMap<sim::eth::IIbToEthController>,
-        ControllerMap<sim::eth::IIbToEthControllerProxy>,
-        ControllerMap<sim::eth::IIbToEthControllerFacade>,
-        ControllerMap<sim::fr::IIbToFlexrayControllerProxy>,
-        ControllerMap<sim::fr::IIbToFlexrayControllerFacade>,
+        ControllerMap<sim::fr::IIbToFlexrayController>,
         ControllerMap<sim::lin::IIbToLinController>,
-        ControllerMap<sim::lin::IIbToLinControllerProxy>,
-        ControllerMap<sim::lin::IIbToLinControllerFacade>,
         ControllerMap<sim::data::IIbToDataPublisher>,
         ControllerMap<sim::data::IIbToDataSubscriber>,
         ControllerMap<sim::data::IIbToDataSubscriberInternal>,

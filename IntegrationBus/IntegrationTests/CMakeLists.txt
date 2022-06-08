@@ -40,7 +40,7 @@ add_vib_test(ITestThreeCanController
         ${itest_extra_libs}
 )
 
-add_vib_test(ITestCanControllerThreadSafety
+add_vib_test(FTestCanControllerThreadSafety
     SOURCES
       CanControllerThreadSafetyITest.cpp
     LIBS

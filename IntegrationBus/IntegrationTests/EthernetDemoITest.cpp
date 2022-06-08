@@ -20,7 +20,7 @@ using namespace ib::cfg;
 using namespace ib::sim;
 
 
-TEST_F(NetworkSimulatorITest, netsim_ethernet_simulation)
+TEST_F(SimTestHarnessITest, ethernet_demo)
 {
     //Create a simulation setup with 2 participants 
     SetupFromParticipantList({"EthernetReader", "EthernetWriter"});
@@ -154,8 +154,8 @@ TEST_F(NetworkSimulatorITest, netsim_ethernet_simulation)
     auto ok = _simTestHarness->Run(5s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
 
-    EXPECT_FALSE(receivedLinkUp) << " LinkUp is not part of trivial simulation";
-    EXPECT_FALSE(receivedLinkDown) << "LinkDown sis not part of trivial simulation";
+    EXPECT_TRUE(receivedLinkUp) << " Trivial simulation should receive the LinkUp on Activate()";
+    EXPECT_FALSE(receivedLinkDown) << "Trivial simulation should not receive LinkDown";
     EXPECT_TRUE(receivedMessage) << "Acknowledged Send must result in a receive";
     EXPECT_TRUE(receivedAckTransmitted) << "Sending  a message must produce an acknowledge";
     EXPECT_FALSE(receivedAckDropped) << "Sending too fast has no effect on trivial simulation ";

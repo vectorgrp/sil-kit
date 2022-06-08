@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "EthControllerProxy.hpp"
+#include "EthController.hpp"
 
 #include <chrono>
 #include <functional>
@@ -42,19 +42,13 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
-    void SendIbMessage(const IIbServiceEndpoint* from, EthernetFrameEvent&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
-
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameTransmitEvent&));
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetStatus&));
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetSetMode&));
 };
 
-class EthernetControllerProxyTest : public testing::Test
+class EthernetControllerDetailedSimTest : public testing::Test
 {
 protected:
     struct Callbacks
@@ -66,31 +60,31 @@ protected:
     };
 
 protected:
-    EthernetControllerProxyTest()
-        : proxy(&participant, _config)
-        , proxyFrom(&participant, _config)
+    EthernetControllerDetailedSimTest()
+        : controller(&participant, cfg, participant.GetTimeProvider())
+        , controllerBusSim(&participant, cfg, participant.GetTimeProvider())
     {
-        proxy.SetServiceDescriptor(from_endpointAddress(proxyAddress));
+        controller.SetDetailedBehavior(from_endpointAddress(busSimAddress));
+        controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-        proxy.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::FrameHandler));
-        proxy.AddFrameTransmitHandler(ib::util::bind_method(&callbacks, &Callbacks::FrameTransmitHandler));
-        proxy.AddBitrateChangeHandler(ib::util::bind_method(&callbacks, &Callbacks::BitrateChangedHandler));
-        proxy.AddStateChangeHandler(ib::util::bind_method(&callbacks, &Callbacks::StateChangeHandler));
+        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::FrameHandler));
+        controller.AddFrameTransmitHandler(ib::util::bind_method(&callbacks, &Callbacks::FrameTransmitHandler));
+        controller.AddBitrateChangeHandler(ib::util::bind_method(&callbacks, &Callbacks::BitrateChangedHandler));
+        controller.AddStateChangeHandler(ib::util::bind_method(&callbacks, &Callbacks::StateChangeHandler));
 
-        proxyFrom.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+        controllerBusSim.SetServiceDescriptor(from_endpointAddress(busSimAddress));
     }
 
 protected:
-    const EndpointAddress proxyAddress = {3, 8};
-    const EndpointAddress controllerAddress = {7, 8};
-    const EndpointAddress otherControllerAddress = { 7, 125 };
+    const EndpointAddress controllerAddress = {3, 8};
+    const EndpointAddress busSimAddress = {7, 8};
 
     MockParticipant participant;
     Callbacks callbacks;
 
-    ib::cfg::EthernetController _config;
-    EthControllerProxy proxy;
-    EthControllerProxy proxyFrom;
+    ib::cfg::EthernetController cfg;
+    EthController controller;
+    EthController controllerBusSim;
 };
 
 /*! \brief EthControllerProxy must keep track of state and generates EthernetSetMode messages when necessary
@@ -108,63 +102,75 @@ protected:
 *   - call Deactivate() again
 *     - CHECK that NO EthSetMessage is sent
 */
-TEST_F(EthernetControllerProxyTest, keep_track_of_state)
+TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
 {
     EthernetSetMode Activate{ EthernetMode::Active };
     EthernetSetMode Deactivate{ EthernetMode::Inactive };
 
-    EXPECT_CALL(participant, SendIbMessage(&proxy, Activate))
+    EXPECT_CALL(participant, SendIbMessage(&controller, Activate))
         .Times(1);
 
-    EXPECT_CALL(participant, SendIbMessage(&proxy, Deactivate))
+    EXPECT_CALL(participant, SendIbMessage(&controller, Deactivate))
         .Times(1);
 
-    proxy.Deactivate();
-    proxy.Activate();
-    proxy.ReceiveIbMessage(&proxyFrom, EthernetStatus{ 0ns, EthernetState::LinkUp, 17 });
-    proxy.Activate();
-    proxy.Deactivate();
-    proxy.ReceiveIbMessage(&proxyFrom, EthernetStatus{ 0ns, EthernetState::Inactive, 0 });
-    proxy.Deactivate();
+    controller.Deactivate();
+    controller.Activate();
+    controller.ReceiveIbMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::LinkUp, 17 });
+    controller.Activate();
+    controller.Deactivate();
+    controller.ReceiveIbMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::Inactive, 0 });
+    controller.Deactivate();
 }
 
 
-TEST_F(EthernetControllerProxyTest, send_eth_message)
+TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
 {
     const auto now = 12345ns;
-    EXPECT_CALL(participant, SendIbMessage_proxy(&proxy, AnEthMessageWith(now)))
+    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(now)))
         .Times(1);
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
 
     EthernetFrameEvent msg{};
     msg.timestamp = now;
-    proxy.SendFrameEvent(msg);
+    controller.SendFrameEvent(msg);
+}
+
+/*! \brief SendFrame must not invoke the TimeProvider and triggers SendIbMessage on the participant
+ */
+TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
+{
+    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(0ns))).Times(1);
+
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
+
+    EthernetFrame frame{};
+    controller.SendFrame(frame);
 }
 
 
 /*! \brief Passing an EthernetFrameEvent to an EthControllerProxy must trigger the registered callback
  */
-TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_message)
+TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
 {
     EthernetFrameEvent msg;
 
-    EXPECT_CALL(callbacks, FrameHandler(&proxy, msg))
+    EXPECT_CALL(callbacks, FrameHandler(&controller, msg))
         .Times(1);
 
-    proxy.ReceiveIbMessage(&proxyFrom, msg);
+    controller.ReceiveIbMessage(&controllerBusSim, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllerProxy must trigger the registered callback
  */
-TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_ack)
+TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
 {
     EthernetFrameTransmitEvent expectedAck{ 17,  EthernetMac{}, 42ms, EthernetTransmitStatus::Transmitted };
 
-    EXPECT_CALL(callbacks, FrameTransmitHandler(&proxy, expectedAck))
+    EXPECT_CALL(callbacks, FrameTransmitHandler(&controller, expectedAck))
         .Times(1);
 
-    proxy.ReceiveIbMessage(&proxyFrom, expectedAck);
+    controller.ReceiveIbMessage(&controllerBusSim, expectedAck);
 }
 
 /*! \brief EthControllerProxy must not generate Acks
@@ -173,7 +179,7 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_receive_ack)
  *   The EthControllerProxy is used in conjunction with a Network Simulator, which is
  *   responsible for Ack generation.
  */
-TEST_F(EthernetControllerProxyTest, must_not_generate_ack)
+TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
 {
     EthernetFrameEvent msg;
     msg.transmitId = 17;
@@ -181,7 +187,7 @@ TEST_F(EthernetControllerProxyTest, must_not_generate_ack)
     EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const EthernetFrameTransmitEvent&>()))
         .Times(0);
 
-    proxy.ReceiveIbMessage(&proxyFrom, msg);
+    controller.ReceiveIbMessage(&controllerBusSim, msg);
 }
 
 /*! \brief EthControllerProxy must trigger bitrate changed callbacks when necessary
@@ -196,19 +202,19 @@ TEST_F(EthernetControllerProxyTest, must_not_generate_ack)
 *   - Check that the callback is executed
 *   - Deliver an EthernetStatus with the same bitrate again 0 directly to the EthControllerProxy; this should NOT trigger the callback
 */
-TEST_F(EthernetControllerProxyTest, trigger_callback_on_bitrate_change)
+TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_bitrate_change)
 {
-    EXPECT_CALL(callbacks, BitrateChangedHandler(&proxy, EthernetBitrateChangeEvent{ 0ns, 100 }))
+    EXPECT_CALL(callbacks, BitrateChangedHandler(&controller, EthernetBitrateChangeEvent{ 0ns, 100 }))
         .Times(1);
-    EXPECT_CALL(callbacks, BitrateChangedHandler(&proxy, Ne<EthernetBitrateChangeEvent>(EthernetBitrateChangeEvent{ 0ns, 100 })))
+    EXPECT_CALL(callbacks, BitrateChangedHandler(&controller, Ne<EthernetBitrateChangeEvent>(EthernetBitrateChangeEvent{ 0ns, 100 })))
         .Times(0);
 
     EthernetStatus newStatus = { 0ns, EthernetState::Inactive, 0 };
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
 
     newStatus.bitrate = 100;
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
 }
 
 /*! \brief EthControllerProxy must trigger state changed callbacks when necessary
@@ -228,30 +234,30 @@ TEST_F(EthernetControllerProxyTest, trigger_callback_on_bitrate_change)
 *   - Deliver an EthernetStatus with Inactive directly to the EthControllerProxy
 *      -> this should trigger the callback
 */
-TEST_F(EthernetControllerProxyTest, trigger_callback_on_state_change)
+TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_state_change)
 {
     InSequence executionSequence;
-    EXPECT_CALL(callbacks, StateChangeHandler(&proxy, eth::EthernetStateChangeEvent{ 0ns, EthernetState::LinkUp }))
+    EXPECT_CALL(callbacks, StateChangeHandler(&controller, eth::EthernetStateChangeEvent{ 0ns, EthernetState::LinkUp }))
         .Times(1);
-    EXPECT_CALL(callbacks, StateChangeHandler(&proxy, eth::EthernetStateChangeEvent{ 0ns, EthernetState::LinkDown }))
+    EXPECT_CALL(callbacks, StateChangeHandler(&controller, eth::EthernetStateChangeEvent{ 0ns, EthernetState::LinkDown }))
         .Times(1);
-    EXPECT_CALL(callbacks, StateChangeHandler(&proxy, eth::EthernetStateChangeEvent{ 0ns, EthernetState::Inactive }))
+    EXPECT_CALL(callbacks, StateChangeHandler(&controller, eth::EthernetStateChangeEvent{ 0ns, EthernetState::Inactive }))
         .Times(1);
 
 
     EthernetStatus newStatus = { 0ns, EthernetState::Inactive, 0 };
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::LinkUp;
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::LinkDown;
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::Inactive;
-    proxy.ReceiveIbMessage(&proxyFrom, newStatus);
+    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
 }
 
 

@@ -461,11 +461,16 @@ TEST_F(LinITest, sync_lin_simulation)
 
     // 4x acks with TX_OK for id 16,17,18,19 on master
     EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 4); 
-    // Only id 16 is valid for slave and received with LIN_RX_OK and given data
-    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 1);
+
+    // LIN_RX_OK for Id 16 and GoToSleep-Frame
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);
+    // Id 16 is valid for slave and received with LIN_RX_OK and given data
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].id, 16);
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][0].data, (std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6}));
-    
+    // GoToSleep-Frame with fixed id=60 and first byte to 0
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].id, 60);
+    EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK][1].data[0], 0);
+
     // id 17: sent with LinFrameResponseMode::Unused and should not trigger the reception callback for slaves
     // id 18: LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
     // id 19: dataLength does not match with master --> Receive with LIN_RX_ERROR

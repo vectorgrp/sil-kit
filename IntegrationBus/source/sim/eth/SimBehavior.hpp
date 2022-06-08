@@ -10,25 +10,25 @@
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-#include "ib/sim/can/CanDatatypes.hpp"
+#include "ib/sim/eth/EthernetDatatypes.hpp"
 #include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace eth {
 
-class CanController;
+class EthController;
 
 class SimBehavior : public ISimBehavior
 {
 public:
-    SimBehavior(mw::IParticipantInternal* participant, CanController* canController,
+    SimBehavior(mw::IParticipantInternal* participant, EthController* ethController,
                        mw::sync::ITimeProvider* timeProvider);
 
     auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(CanConfigureBaudrate&& msg) override;
-    void SendIbMessage(CanSetControllerMode&& msg) override;
-    void SendIbMessage(CanFrameEvent&& msg) override;
+    void SendIbMessage(EthernetFrameEvent&& msg) override;
+    void SendIbMessage(EthernetSetMode&& msg) override;
+    void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
 
     void SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink);
     void SetTrivialBehavior();
@@ -45,6 +45,6 @@ private:
     ISimBehavior* _currentBehavior;
 };
 
-} // namespace can
+} // namespace eth
 } // namespace sim
 } // namespace ib

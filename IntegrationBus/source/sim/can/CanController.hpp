@@ -126,7 +126,7 @@ private:
     void ChangeControllerMode(CanControllerState state);
 
     template<typename MsgT>
-    HandlerId RegisterHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
+    HandlerId AddHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
 
     template <typename MsgT>
     void RemoveHandler(HandlerId handlerId);
@@ -145,7 +145,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    mw::IParticipantInternal* _participant;
+    mw::IParticipantInternal* _participant = nullptr;
     cfg::CanController _config;
     SimBehavior _simulationBehavior;
     mw::ServiceDescriptor _serviceDescriptor;

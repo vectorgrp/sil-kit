@@ -38,26 +38,32 @@ namespace lin {
 class ILinController
 {
 public:
+
+    /*! \brief Generic LIN callback method
+    */
+    template <typename MsgT>
+    using CallbackT = std::function<void(ILinController* controller, const MsgT& msg)>;
+
     /*! Callback type to indicate the end of a LIN LinFrame transmission.
      *  Cf., \ref AddFrameStatusHandler(FrameStatusHandler);
      */
-    using FrameStatusHandler = std::function<void(ILinController*, const LinFrameStatusEvent& frameStatusEvent)>;
-    
+    using FrameStatusHandler = CallbackT<LinFrameStatusEvent>;
+
     /*! Callback type to indicate that a go-to-sleep frame has been received.
      *  Cf., \ref AddGoToSleepHandler(GoToSleepHandler);
      */
-    using GoToSleepHandler = std::function<void(ILinController*, const LinGoToSleepEvent& goToSleepEvent)>;
+    using GoToSleepHandler = CallbackT<LinGoToSleepEvent>;
 
     /*! Callback type to indicate that a wakeup pulse has been received.
      *  Cf., \ref AddWakeupHandler(WakeupHandler);
      */
-    using WakeupHandler = std::function<void(ILinController*, const LinWakeupEvent& wakeupEvent)>;
+    using WakeupHandler = CallbackT<LinWakeupEvent>;
 
     /*! Callback type to indicate that a frame response update has been received.
      *  Cf., \ref AddFrameResponseUpdateHandler(WakeupHandler);
      */
-    using FrameResponseUpdateHandler = std::function<void(ILinController*, const LinFrameResponseUpdateEvent& frameResponseUpdateEvent)>;
-    
+    using FrameResponseUpdateHandler = CallbackT<LinFrameResponseUpdateEvent>;
+
 public:
     virtual ~ILinController() = default;
 
@@ -160,7 +166,7 @@ public:
      * ReceiveMessageHandler. For LIN slaves the confirmation varied
      * for simple simulation and VIBE simulation.</em>
      */
-    virtual void AddFrameStatusHandler(FrameStatusHandler) = 0;
+    virtual void AddFrameStatusHandler(FrameStatusHandler handler) = 0;
 
     /*! \brief The GoToSleepHandler is called whenever a go-to-sleep frame
      * was received.

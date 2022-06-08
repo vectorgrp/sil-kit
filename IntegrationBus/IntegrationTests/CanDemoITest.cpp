@@ -18,7 +18,7 @@ using namespace ib::cfg;
 using namespace ib::sim;
 using namespace ib::sim::can;
 
-TEST_F(NetworkSimulatorITest, netsim_can_simulation)
+TEST_F(SimTestHarnessITest, can_demo)
 {
     //Create a simulation setup with 2 participants and the netsim
     SetupFromParticipantList({"CanReader", "CanWriter", "CanMonitor"});
@@ -160,7 +160,7 @@ TEST_F(NetworkSimulatorITest, netsim_can_simulation)
           }
           EXPECT_EQ(frameEvent.direction, ib::sim::TransmitDirection::RX);
 
-          EXPECT_EQ(frameEvent.frame.canId, 123);
+          EXPECT_EQ(frameEvent.frame.canId, 123u);
           EXPECT_EQ(frameEvent.userContext, _simTestHarness->GetParticipant("CanWriter")->Participant())
             << "frameEvent.frame.userContext is mangled!";
           if (messageCount++ == 10)

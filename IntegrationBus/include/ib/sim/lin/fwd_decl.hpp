@@ -17,6 +17,8 @@ struct LinControllerConfig;
 struct LinControllerStatusUpdate;
 struct LinFrameResponseUpdate;
 
+struct LinFrameStatusEvent;
+
 class ILinController;
 
 } // namespace lin

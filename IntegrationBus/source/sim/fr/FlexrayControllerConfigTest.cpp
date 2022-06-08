@@ -9,16 +9,16 @@
 
 #include "NullConnectionParticipant.hpp"
 
-#include "LinControllerFacade.hpp"
+#include "FlexrayController.hpp"
 
 namespace {
 using namespace ib::mw;
-using namespace ib::sim::lin;
+using namespace ib::sim::fr;
 
-class LinControllerFacadeTest : public testing::Test
+class FlexrayControllerConfigTest : public testing::Test
 {
 public:
-    LinControllerFacadeTest(){};
+    FlexrayControllerConfigTest(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
@@ -26,19 +26,19 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantCo
     auto mockConfig =
         std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::LinController controllerNoNetworkCfg;
+    ib::cfg::FlexrayController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
-    mockConfig->linControllers.push_back(controllerNoNetworkCfg);
+    mockConfig->flexrayControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::LinController controllerWithNetworkCfg;
+    ib::cfg::FlexrayController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
-    mockConfig->linControllers.push_back(controllerWithNetworkCfg);
+    mockConfig->flexrayControllers.push_back(controllerWithNetworkCfg);
 
     return mockConfig;
 }
 
-TEST(LinControllerFacadeTest, create_controller_unconfigured)
+TEST(FlexrayControllerConfigTest, create_controller_unconfigured)
 {
     auto controllerName = "Controller";
     auto expectedNetworkName = "Controller";
@@ -47,14 +47,13 @@ TEST(LinControllerFacadeTest, create_controller_unconfigured)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller =
-        dynamic_cast<LinControllerFacade*>(participant->CreateLinController(controllerName));
+    auto controller = dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(LinControllerFacadeTest, create_controller_configured_no_network)
+TEST(FlexrayControllerConfigTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -64,13 +63,14 @@ TEST(LinControllerFacadeTest, create_controller_configured_no_network)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<LinControllerFacade*>(participant->CreateLinController(controllerName, networkName));
+    auto controller =
+        dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(LinControllerFacadeTest, create_controller_configured_with_network)
+TEST(FlexrayControllerConfigTest, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";
@@ -80,7 +80,8 @@ TEST(LinControllerFacadeTest, create_controller_configured_with_network)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<LinControllerFacade*>(participant->CreateLinController(controllerName, networkName));
+    auto controller =
+        dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

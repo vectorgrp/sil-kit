@@ -2,25 +2,18 @@
 
 #pragma once
 
-
-#include <algorithm>
 #include <memory>
-#include <tuple>
 #include <unordered_map>
-#include <vector>
 
 #include "ib/sim/lin/ILinController.hpp"
+#include "ib/mw/fwd_decl.hpp"
 #include "ib/mw/sync/ITimeConsumer.hpp"
 
-#include "ib/mw/fwd_decl.hpp"
-#include "ib/sim/datatypes.hpp"
-
-#include "IIbToLinController.hpp"
 #include "IParticipantInternal.hpp"
-#include "IIbServiceEndpoint.hpp"
 #include "ITraceMessageSource.hpp"
-
 #include "ParticipantConfiguration.hpp"
+#include "IIbToLinController.hpp"
+#include "SimBehavior.hpp"
 
 namespace ib {
 namespace sim {
@@ -29,7 +22,6 @@ namespace lin {
 class LinController
     : public ILinController
     , public IIbToLinController
-    , public mw::sync::ITimeConsumer
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
 {
@@ -43,7 +35,8 @@ public:
     LinController() = delete;
     LinController(const LinController&) = default;
     LinController(LinController&&) = default;
-    LinController(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, ILinController* facade = nullptr);
+    LinController(mw::IParticipantInternal* participant, cfg::LinController config,
+                   mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -57,7 +50,7 @@ public:
     //
     // ILinController
     void Init(LinControllerConfig config) override;
-    auto Status() const noexcept -> LinControllerStatus override;
+    auto Status() const noexcept->LinControllerStatus override;
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinIdT linId) override;
@@ -74,91 +67,100 @@ public:
     void AddWakeupHandler(WakeupHandler handler) override;
     void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
-     // IIbToLinController
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
-     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
+    // IIbToLinController
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
 
-     //ib::mw::sync::ITimeConsumer
-     void SetTimeProvider(mw::sync::ITimeProvider* timeProvider) override;
+public:
+    // ----------------------------------------
+    // Public inline interface methods
 
-    // ITraceMessageSource
+    //ITraceMessageSource
     inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
-private:
+public:
     // ----------------------------------------
-    // private data types
+    // Public methods
+    void SetControllerStatus(LinControllerStatus status);
+
     struct LinNode
     {
-        mw::EndpointAddress           ibAddress;
-        LinControllerMode                controllerMode{LinControllerMode::Inactive};
-        LinControllerStatus              controllerStatus{LinControllerStatus::Unknown};
+        mw::EndpointAddress ibAddress{};
+        LinControllerMode controllerMode{LinControllerMode::Inactive};
+        LinControllerStatus controllerStatus{LinControllerStatus::Unknown};
         std::array<LinFrameResponse, 64> responses;
 
         void UpdateResponses(std::vector<LinFrameResponse> responses_, mw::logging::ILogger* logger);
     };
+    auto GetResponse(LinIdT id) -> std::pair<int, LinFrame>;
+    auto GetThisLinNode() -> LinNode&;
+    auto GetLinNode(mw::EndpointAddress addr) -> LinNode&;
+
+    void CallLinFrameStatusEventHandler(const LinFrameStatusEvent& msg);
+
+
+    void RegisterServiceDiscovery();
+    // Expose the simulated/trivial mode for unit tests
+    void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
+    void SetTrivialBehavior();
 
 private:
     // ----------------------------------------
     // private methods
-    void SetControllerStatus(LinControllerStatus status);
-    auto VeriyChecksum(const LinFrame& frame, LinFrameStatus status) -> LinFrameStatus;
+
+    template <typename MsgT>
+    void AddHandler(CallbackT<MsgT>&& handler);
+
+    template <typename MsgT>
+    void CallHandlers(const MsgT& msg);
 
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
 
-    inline auto GetLinNode(mw::EndpointAddress addr) -> LinNode&;
+    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
+    auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
 
 private:
     // ----------------------------------------
     // private members
     mw::IParticipantInternal* _participant;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    cfg::LinController _config;
     mw::logging::ILogger* _logger;
-    mw::sync::ITimeProvider* _timeProvider{ nullptr };
-    ILinController* _facade{ nullptr };
+    SimBehavior _simulationBehavior;
+    ::ib::mw::ServiceDescriptor _serviceDescriptor;
 
     LinControllerMode   _controllerMode{LinControllerMode::Inactive};
     LinControllerStatus _controllerStatus{LinControllerStatus::Unknown};
 
-    std::vector<LinNode> _linNodes;
+    template <typename MsgT>
+    using CallbackVector = std::vector<CallbackT<MsgT>>;
 
-    std::vector<FrameStatusHandler>         _frameStatusHandler;
-    std::vector<GoToSleepHandler>           _goToSleepHandler;
-    std::vector<WakeupHandler>              _wakeupHandler;
-    std::vector<FrameResponseUpdateHandler> _frameResponseUpdateHandler;
-
+    std::tuple<CallbackVector<LinFrameStatusEvent>, 
+               CallbackVector<LinGoToSleepEvent>, 
+               CallbackVector<LinWakeupEvent>, 
+               CallbackVector<LinFrameResponseUpdateEvent>>
+        _callbacks;
+    
     extensions::Tracer _tracer;
+
+    std::vector<LinNode> _linNodes;
 };
 
-// ================================================================================
+// ==================================================================
 //  Inline Implementations
-// ================================================================================
-auto LinController::GetLinNode(mw::EndpointAddress addr) -> LinNode&
-{
-    auto iter = std::lower_bound(_linNodes.begin(), _linNodes.end(), addr,
-        [](const LinNode& lhs, const mw::EndpointAddress& address) { return lhs.ibAddress < address; }
-    );
-    if (iter == _linNodes.end() || iter->ibAddress != addr)
-    {
-        LinNode node;
-        node.ibAddress = addr;
-        iter = _linNodes.insert(iter, node);
-    }
-    return *iter;
-}
+// ==================================================================
 
 void LinController::AddSink(extensions::ITraceMessageSink* sink)
 {
-    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
+    _tracer.AddSink(mw::EndpointAddress{}, *sink);
 }
-
 void LinController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
@@ -170,4 +172,3 @@ auto LinController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
 } // namespace lin
 } // namespace sim
 } // namespace ib
-

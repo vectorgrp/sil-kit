@@ -63,10 +63,10 @@ inline auto Log() -> ThreadSafeLogger
 }
 
 
-class NetworkSimulatorITest : public testing::Test
+class SimTestHarnessITest : public testing::Test
 {
 protected: //CTor and operators
-  NetworkSimulatorITest() = default;
+  SimTestHarnessITest() = default;
 
   auto TestHarness() -> SimTestHarness&
   {
@@ -80,7 +80,6 @@ protected: //CTor and operators
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, domainId, true);
 
   }
-
 
 protected:// members
   std::unique_ptr<SimTestHarness> _simTestHarness;

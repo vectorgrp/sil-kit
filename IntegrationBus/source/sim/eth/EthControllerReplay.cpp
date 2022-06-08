@@ -68,10 +68,18 @@ void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const
     _controller.ReceiveIbMessage(from, msg);
 }
 
-// ib::mw::sync::ITimeConsumer
-void EthControllerReplay::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
+void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameTransmitEvent& /*msg*/)
 {
-    _controller.SetTimeProvider(timeProvider);
+}
+
+void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetStatus& /*msg*/)
+{
+}
+
+// ib::mw::sync::ITimeConsumer
+void EthControllerReplay::SetTimeProvider(ib::mw::sync::ITimeProvider* /*timeProvider*/)
+{
+    //_controller.SetTimeProvider(timeProvider);
 }
 
 // ITraceMessageSource

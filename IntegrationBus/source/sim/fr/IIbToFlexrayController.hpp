@@ -10,11 +10,11 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-/*! \brief IIbToFlexrayControllerProxy interface
+/*! \brief IIbToFlexrayController interface
  *
- *  Used by the Participant, implemented by the FlexrayControllerProxy
+ *  Used by the Participant, implemented by the FlexrayController
  */
-class IIbToFlexrayControllerProxy
+class IIbToFlexrayController
     : public mw::IIbReceiver<FlexrayFrameEvent, FlexrayFrameTransmitEvent, FlexraySymbolEvent,
                              FlexraySymbolTransmitEvent, FlexrayCycleStartEvent, FlexrayPocStatusEvent>
     , public mw::IIbSender<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,

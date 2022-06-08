@@ -46,6 +46,8 @@ public:
 
     // IIbToEthController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // ib::mw::sync::ITimeConsumer
     void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;

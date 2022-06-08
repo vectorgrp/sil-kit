@@ -2,26 +2,27 @@
 
 #pragma once
 
-#include "IIbToCanController.hpp"
+#include "IIbToEthController.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
 
 #include "ISimBehavior.hpp"
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace eth {
 
-class CanController;
+class EthController;
 
 class SimBehaviorDetailed : public ISimBehavior
 {
 public:
-    SimBehaviorDetailed(mw::IParticipantInternal* participant, CanController* canController,
+    SimBehaviorDetailed(mw::IParticipantInternal* participant, EthController* ethController,
                        const mw::ServiceDescriptor& serviceDescriptor);
 
-    void SendIbMessage(CanConfigureBaudrate&& msg) override;
-    void SendIbMessage(CanSetControllerMode&& msg) override;
-    void SendIbMessage(CanFrameEvent&& msg) override;
+    void SendIbMessage(EthernetFrameEvent&& msg) override;
+    void SendIbMessage(EthernetSetMode&& msg) override;
+    void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
     
     auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
 
@@ -35,9 +36,11 @@ private:
     const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
     const mw::ServiceDescriptor* _parentServiceDescriptor{nullptr};
     mw::ServiceDescriptor _simulatedLink;
+    extensions::Tracer _tracer;
+    std::map<EthernetTxId, EthernetFrame> _transmittedMessages;
 };
 
 
-} // namespace can
+} // namespace eth
 } // namespace sim
 } // namespace ib

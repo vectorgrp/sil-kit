@@ -2,13 +2,17 @@
 add_library(IbSimEthernet STATIC
     EthController.cpp
     EthController.hpp
-    EthControllerProxy.cpp
-    EthControllerProxy.hpp
     EthControllerReplay.hpp
     EthControllerReplay.cpp
-    EthControllerFacade.cpp
-    EthControllerFacade.hpp
-
+    
+    ISimBehavior.hpp
+    SimBehavior.cpp
+    SimBehavior.hpp
+    SimBehaviorDetailed.cpp
+    SimBehaviorDetailed.hpp
+    SimBehaviorTrivial.cpp
+    SimBehaviorTrivial.hpp
+    
     EthernetSerdes.hpp
     EthernetSerdes.cpp
 )
@@ -29,9 +33,9 @@ target_include_directories(IbSimEthernet
 
 add_vib_test(TestSimEthController
     SOURCES 
-        EthControllerTest.cpp
-        EthControllerProxyTest.cpp
-        EthControllerFacadeTest.cpp
+        EthControllerTrivialSimTest.cpp
+        EthControllerDetailedSimTest.cpp
+        EthControllerConfigTest.cpp
     LIBS
         IbSimEthernet
         IbMwMockParticipant

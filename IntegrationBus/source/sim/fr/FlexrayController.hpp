@@ -8,12 +8,11 @@
 #include <tuple>
 #include <vector>
 
-#include "IIbToFlexrayControllerFacade.hpp"
+#include "IIbToFlexrayController.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
 #include "ITraceMessageSource.hpp"
 
-#include "FlexrayControllerProxy.hpp"
 #include "ParticipantConfiguration.hpp"
 
 namespace ib {
@@ -25,9 +24,9 @@ namespace fr {
  * Acts as a proxy to the controllers implemented and simulated by the Network Simulator. For operation
  * without a Network Simulator cf. FrController.
  */
-class FlexrayControllerFacade
+class FlexrayController
     : public IFlexrayController
-    , public IIbToFlexrayControllerFacade
+    , public IIbToFlexrayController
     , public extensions::ITraceMessageSource
     , public mw::IIbServiceEndpoint
 {
@@ -38,14 +37,17 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    FlexrayControllerFacade() = delete;
-    FlexrayControllerFacade(FlexrayControllerFacade&&) = default;
-    FlexrayControllerFacade(mw::IParticipantInternal* participant, cfg::FlexrayController config, mw::sync::ITimeProvider* timeProvider);
+    FlexrayController() = delete;
+    FlexrayController(const FlexrayController&) = default;
+    FlexrayController(FlexrayController&&) = default;
+    FlexrayController(mw::IParticipantInternal* participant, cfg::FlexrayController config,
+                      mw::sync::ITimeProvider* /*timeProvider*/);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FlexrayControllerFacade& operator=(FlexrayControllerFacade&& other) = default;
+    FlexrayController& operator=(FlexrayController& other) = default;
+    FlexrayController& operator=(FlexrayController&& other) = default;
 
 public:
     // ----------------------------------------
@@ -82,7 +84,7 @@ public:
     void AddSymbolTransmitHandler(SymbolTransmitHandler handler) override;
     void AddCycleStartHandler(CycleStartHandler handler) override;
 
-    // IIbToFlexrayControllerFacade
+    // IIbToFlexrayController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
@@ -91,34 +93,92 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
 
     // ITraceMessageSource
-    void AddSink(extensions::ITraceMessageSink* sink) override;
+    inline void AddSink(extensions::ITraceMessageSink* sink) override;
 
     // IIbServiceEndpoint
-    void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+
+public:
+    // ----------------------------------------
+    // Public  methods
+    //
+    void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
+
+    void RegisterServiceDiscovery();
+
+private:
+    void WarnOverride(const std::string& parameterName);
 
 private:
     // ----------------------------------------
-    // Private helper methods
-    //
-    auto AllowForwardToProxy(const IIbServiceEndpoint* from) const -> bool;
-    auto IsNetworkSimulated() const -> bool;
+    // private data types
+    template<typename MsgT>
+    using CallbackVector = std::vector<CallbackT<MsgT>>;
+
+private:
+    // ----------------------------------------
+    // private methods
+    template<typename MsgT>
+    void AddHandler(CallbackT<MsgT> handler);
+
+    template<typename MsgT>
+    void CallHandlers(const MsgT& msg);
+
+    template<typename MsgT>
+    inline void SendIbMessage(MsgT&& msg);
+
+    // Check, which config parameters are configurable
+    bool IsClusterParametersConfigurable();
+    bool IsNodeParametersConfigurable();
+    bool IsTxBufferConfigsConfigurable();
+
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
+    auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
 
 private:
     // ----------------------------------------
     // private members
     mw::IParticipantInternal* _participant = nullptr;
-    mw::ServiceDescriptor _serviceDescriptor;
-    cfg::FlexrayController _config;
+    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    std::vector<FlexrayTxBufferConfig> _bufferConfigs;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;
 
-    IFlexrayController* _currentController;
-    std::unique_ptr<FlexrayControllerProxy> _flexrayControllerProxy;
+    std::tuple<
+        CallbackVector<FlexrayFrameEvent>,
+        CallbackVector<FlexrayFrameTransmitEvent>,
+        CallbackVector<FlexraySymbolEvent>,
+        CallbackVector<FlexraySymbolTransmitEvent>,
+        CallbackVector<FlexrayCycleStartEvent>,
+        CallbackVector<FlexrayPocStatusEvent>,
+        CallbackVector<FlexrayWakeupEvent>
+    > _callbacks;
 
+    extensions::Tracer _tracer;
+
+    cfg::FlexrayController _config;
 };
+
+
+// ==================================================================
+//  Inline Implementations
+// ==================================================================
+void FlexrayController::AddSink(extensions::ITraceMessageSink* sink)
+{
+    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
+}
+
+void FlexrayController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+{
+    _serviceDescriptor = serviceDescriptor;
+}
+
+auto FlexrayController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+{
+    return _serviceDescriptor;
+}
 } // namespace fr
-} // namespace sim
+} // SimModels
 } // namespace ib

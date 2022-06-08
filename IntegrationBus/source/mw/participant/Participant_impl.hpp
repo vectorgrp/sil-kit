@@ -6,15 +6,9 @@
 
 #include "CanController.hpp"
 #include "EthController.hpp"
-#include "EthControllerProxy.hpp"
-#include "EthControllerFacade.hpp"
-#include "EthControllerReplay.hpp"
-#include "FlexrayControllerProxy.hpp"
-#include "FlexrayControllerFacade.hpp"
+#include "FlexrayController.hpp"
 #include "LinController.hpp"
-#include "LinControllerReplay.hpp"
-#include "LinControllerProxy.hpp"
-#include "LinControllerFacade.hpp"
+//#include "LinControllerReplay.hpp"
 #include "DataPublisher.hpp"
 #include "DataSubscriber.hpp"
 #include "DataSubscriberInternal.hpp"
@@ -280,9 +274,12 @@ auto Participant<IbConnectionT>::CreateEthernetController(const std::string& can
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeEthernet;
 
-    return CreateController<ib::cfg::EthernetController, eth::EthControllerFacade>(
+    auto controller = CreateController<ib::cfg::EthernetController, eth::EthController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
         _timeProvider.get());
+
+    controller->RegisterServiceDiscovery();
+    return controller;
 }
 
 template <class IbConnectionT>
@@ -301,9 +298,12 @@ auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& cano
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexray;
 
-    return CreateController<ib::cfg::FlexrayController, fr::FlexrayControllerFacade>(
+    auto controller = CreateController<ib::cfg::FlexrayController, fr::FlexrayController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
         _timeProvider.get());
+
+    controller->RegisterServiceDiscovery();
+    return controller;
 }
 
 template <class IbConnectionT>
@@ -322,9 +322,13 @@ auto Participant<IbConnectionT>::CreateLinController(const std::string& canonica
     mw::SupplementalData supplementalData;
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLin;
 
-    return CreateController<ib::cfg::LinController, lin::LinControllerFacade>(
+    auto controller = CreateController<ib::cfg::LinController, lin::LinController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
         _timeProvider.get());
+
+    controller->RegisterServiceDiscovery();
+
+    return controller;
 }
 
 template <class IbConnectionT>

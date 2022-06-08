@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "IIbToCanController.hpp"
+#include "IIbToEthController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 
@@ -10,33 +10,34 @@
 
 namespace ib {
 namespace sim {
-namespace can {
+namespace eth {
 
-class CanController;
+class EthController;
 
 class SimBehaviorTrivial : public ISimBehavior
 {
 public:
 
-    SimBehaviorTrivial(mw::IParticipantInternal* participant, CanController* canController,
+    SimBehaviorTrivial(mw::IParticipantInternal* participant, EthController* ethController,
                       mw::sync::ITimeProvider* timeProvider);
 
     auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(CanConfigureBaudrate&& /*baudRate*/) override;
-    void SendIbMessage(CanSetControllerMode&& mode) override;
-    void SendIbMessage(CanFrameEvent&& canFrameEvent) override;
+    void SendIbMessage(EthernetFrameEvent&& ethFrameEvent) override;
+    void SendIbMessage(EthernetSetMode&& ethFrameEvent) override;
+
+    void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
 
 private:
     template <typename MsgT>
     void ReceiveIbMessage(const MsgT& msg);
 
     mw::IParticipantInternal* _participant{nullptr};
-    ICanController* _parentController{nullptr};
+    IEthernetController* _parentController{nullptr};
     const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;
 };
 
-} // namespace can
+} // namespace eth
 } // namespace sim
 } // namespace ib

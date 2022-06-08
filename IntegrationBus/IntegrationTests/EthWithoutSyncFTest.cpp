@@ -9,7 +9,7 @@
 #include "ib/sim/all.hpp"
 
 #include "EthDatatypeUtils.hpp"
-#include "EthControllerFacade.hpp"
+#include "EthController.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -52,12 +52,10 @@ protected:
             ib::sim::eth::EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
             frameEvent.frame = ib::sim::eth::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
-            frameEvent.timestamp = 1s;
             frameEvent.transmitId = index + 1;
 
             auto& ethack = _testFrames[index].expectedAck;
             ethack.sourceMac = sourceMac;
-            ethack.timestamp = 1s;
             ethack.transmitId = index + 1;
         }
     }
@@ -69,7 +67,7 @@ protected:
         
         auto participant =
             ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId, false);
-        auto* controller = dynamic_cast<ib::sim::eth::EthControllerFacade*>(participant->CreateEthernetController("ETH1"));
+        auto* controller = dynamic_cast<ib::sim::eth::EthController*>(participant->CreateEthernetController("ETH1"));
 
         controller->AddFrameTransmitHandler(
             [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameTransmitEvent& ack) {
@@ -129,6 +127,9 @@ protected:
         ethWriterThread.join();
         for (auto&& message : _testFrames)
         {
+            // Without sync: Do not test the timestamps
+            message.receivedFrameEvent.timestamp = 0ns;
+            message.receivedAck.timestamp = 0ns;
             EXPECT_EQ(message.expectedFrameEvent, message.receivedFrameEvent);
             EXPECT_EQ(message.expectedAck, message.receivedAck);
         }

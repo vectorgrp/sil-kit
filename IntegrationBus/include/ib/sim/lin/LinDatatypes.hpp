@@ -298,8 +298,8 @@ struct LinGoToSleepEvent
 */
 struct LinFrameResponseUpdateEvent
 {
-    const std::string& senderID; //!< String identifier of the controller providing the update.
-    const LinFrameResponse& frameResponse; //!< The frameResponse of the update.
+    std::string senderID; //!< String identifier of the controller providing the update.
+    LinFrameResponse frameResponse; //!< The frameResponse of the update.
 };
 
 // ================================================================================

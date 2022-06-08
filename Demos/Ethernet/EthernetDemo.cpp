@@ -213,12 +213,11 @@ int main(int argc, char** argv)
             {
                 participantController->SetSimulationTask(
                     [ethernetController, WriterMacAddr, destinationAddress = BroadcastMacAddr](
-                        std::chrono::nanoseconds now,
-                                                                    std::chrono::nanoseconds /*duration*/) {
+                        std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
                         SendFrame(ethernetController, WriterMacAddr, destinationAddress);
-                        std::this_thread::sleep_for(1s);
+                        std::this_thread::sleep_for(100ms);
                     });
             }
             else
@@ -227,7 +226,7 @@ int main(int argc, char** argv)
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
-                        std::this_thread::sleep_for(1s);
+                        std::this_thread::sleep_for(100ms);
                     });
             }
 

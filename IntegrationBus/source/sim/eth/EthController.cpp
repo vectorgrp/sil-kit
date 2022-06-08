@@ -1,64 +1,111 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "EthController.hpp"
-#include "PcapSink.hpp"
-
 #include "ib/mw/logging/ILogger.hpp"
 
-#include <algorithm>
+#include "IServiceDiscovery.hpp"
+#include "ServiceDatatypes.hpp"
 
-namespace {
-    auto GetSourceMac(const ib::sim::eth::EthernetFrame& frame) -> ib::sim::eth::EthernetMac
-    {
-        ib::sim::eth::EthernetMac source{};
-        std::copy(frame.raw.begin() + sizeof(ib::sim::eth::EthernetMac), frame.raw.begin() + 2 * sizeof(ib::sim::eth::EthernetMac), source.begin());
-
-        return source;
-    }
-}
 
 namespace ib {
 namespace sim {
 namespace eth {
 
-EthController::EthController(mw::IParticipantInternal* participant, cfg::EthernetController /*config*/,
-                             mw::sync::ITimeProvider* timeProvider, IEthernetController* facade)
-    : _participant{participant}
-    , _timeProvider{timeProvider}
-    , _facade{facade}
+EthController::EthController(mw::IParticipantInternal* participant, cfg::EthernetController config,
+                               mw::sync::ITimeProvider* timeProvider)
+    : _participant(participant)
+    , _config{config}
+    , _simulationBehavior{participant, this, timeProvider}
 {
-    if (facade == nullptr)
-    {
-        _facade = this;
-    }
 }
+
+//------------------------
+// Trivial or detailed
+//------------------------
+
+void EthController::RegisterServiceDiscovery()
+{
+    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
+    disc->RegisterServiceDiscoveryHandler(
+        [this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
+                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
+            if (_simulationBehavior.IsTrivial())
+            {
+                // Check if received descriptor has a matching simulated link
+                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+                    && IsRelevantNetwork(remoteServiceDescriptor))
+                {
+                    SetDetailedBehavior(remoteServiceDescriptor);
+                }
+            }
+            else
+            {
+                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
+                    && IsRelevantNetwork(remoteServiceDescriptor))
+                {
+                    SetTrivialBehavior();
+                }
+            }
+        });
+}
+
+void EthController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+{
+    _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
+}
+void EthController::SetTrivialBehavior()
+{
+    _simulationBehavior.SetTrivialBehavior();
+}
+
+auto EthController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+{
+    // NetSim uses ServiceType::Link and the simulated networkName
+    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+           && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
+}
+
+auto EthController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+{
+    return _simulationBehavior.AllowReception(from);
+}
+
+template <typename MsgT>
+void EthController::SendIbMessage(MsgT&& msg)
+{
+    _simulationBehavior.SendIbMessage(std::move(msg));
+}
+
+//------------------------
+// Public API + Helpers
+//------------------------
 
 void EthController::Activate()
 {
-    // only supported when using a Network Simulator --> implement in EthControllerProxy
+    // Check if the Controller has already been activated
+    if (_ethState != EthernetState::Inactive)
+        return;
+
+    EthernetSetMode msg { EthernetMode::Active };
+    SendIbMessage(msg);
 }
 
 void EthController::Deactivate()
 {
-    // only supported when using a Network Simulator --> implement in EthControllerProxy
+    // Check if the Controller has already been deactivated
+    if (_ethState == EthernetState::Inactive)
+        return;
+
+    EthernetSetMode msg{ EthernetMode::Inactive };
+    SendIbMessage(msg);
 }
 
 auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     auto txId = MakeTxId();
-
     msg.transmitId = txId;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, msg.frame);
-
-    _participant->SendIbMessage(this, std::move(msg));
-
-    EthernetFrameTransmitEvent ack;
-    ack.timestamp = msg.timestamp;
-    ack.transmitId = msg.transmitId;
-    ack.sourceMac = GetSourceMac(msg.frame);
-    ack.status = EthernetTransmitStatus::Transmitted;
-    CallHandlers(ack);
+    SendIbMessage(std::move(msg));
 
     return txId;
 }
@@ -66,45 +113,89 @@ auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
 {
     EthernetFrameEvent msg{};
-    msg.timestamp = _timeProvider->Now();
     msg.frame = std::move(frame);
-
     return SendFrameEvent(std::move(msg));
 }
 
-void EthController::AddFrameHandler(FrameHandler handler)
-{
-    RegisterHandler(handler);
-}
+//------------------------
+// ReceiveIbMessage
+//------------------------
 
-void EthController::AddFrameTransmitHandler(FrameTransmitHandler handler)
+void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
-    RegisterHandler(handler);
-}
+    if (!AllowReception(from))
+    {
+        return;
+    }
 
-void EthController::AddStateChangeHandler(StateChangeHandler /*handler*/)
-{
-    // only supported when using a Network Simulator --> implement in EthControllerProxy
-}
-
-void EthController::AddBitrateChangeHandler(BitrateChangeHandler /*handler*/)
-{
-    // only supported when using a Network Simulator --> implement in EthControllerProxy
-}
-
-
-void EthController::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameEvent& msg)
-{
-    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg.frame);
+    _tracer.Trace(ib::sim::TransmitDirection::RX,
+        msg.timestamp, msg.frame);
 
     CallHandlers(msg);
 }
 
+void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    _simulationBehavior.OnReceiveAck(msg);
+    CallHandlers(msg);
+}
+
+void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    // In case we are in early startup, ensure we tell our participants the bit rate first
+    // and the state later.
+    if (msg.bitrate != _ethBitRate)
+    {
+        _ethBitRate = msg.bitrate;
+        CallHandlers(EthernetBitrateChangeEvent{ msg.timestamp, msg.bitrate });
+    }
+
+    if (msg.state != _ethState)
+    {
+        _ethState = msg.state;
+        CallHandlers(EthernetStateChangeEvent{ msg.timestamp, msg.state });
+    }
+}
+
+//------------------------
+// Handlers
+//------------------------
+
+void EthController::AddFrameHandler(FrameHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+void EthController::AddFrameTransmitHandler(FrameTransmitHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+void EthController::AddStateChangeHandler(StateChangeHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
+void EthController::AddBitrateChangeHandler(BitrateChangeHandler handler)
+{
+    AddHandler(std::move(handler));
+}
+
 template<typename MsgT>
-void EthController::RegisterHandler(CallbackT<MsgT> handler)
+void EthController::AddHandler(CallbackT<MsgT>&& handler)
 {
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.push_back(handler);
+    handlers.push_back(std::forward<CallbackT<MsgT>>(handler));
 }
 
 
@@ -114,14 +205,11 @@ void EthController::CallHandlers(const MsgT& msg)
     auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
     for (auto&& handler : handlers)
     {
-        handler(_facade, msg);
+        handler(this, msg);
     }
 }
 
-void EthController::SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
-{
-    _timeProvider = timeProvider;
-}
+
 } // namespace eth
 } // namespace sim
 } // namespace ib

@@ -75,19 +75,14 @@ void SetSourceMac(EthernetFrame& frame, const EthernetMac& source)
 class MockParticipant : public DummyParticipant
 {
 public:
-    void SendIbMessage(const IIbServiceEndpoint* from, EthernetFrameEvent&& msg) override
-    {
-        SendIbMessage_proxy(from, msg);
-    }
 
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
-    MOCK_METHOD2(SendIbMessage_proxy, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameTransmitEvent&));
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetStatus&));
     MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetSetMode&));
 };
 
-class EthernetControllerTest : public testing::Test
+class EthernetControllerTrivialSimTest : public testing::Test
 {
 protected:
     struct Callbacks
@@ -99,9 +94,9 @@ protected:
     };
 
 protected:
-    EthernetControllerTest()
-        : controller(&participant, _config, participant.GetTimeProvider())
-        , controllerOther(&participant, _config, participant.GetTimeProvider())
+    EthernetControllerTrivialSimTest()
+        : controller(&participant, cfg, participant.GetTimeProvider())
+        , controllerOther(&participant, cfg, participant.GetTimeProvider())
     {
         controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
@@ -119,36 +114,21 @@ protected:
     MockParticipant participant;
     Callbacks callbacks;
 
-    ib::cfg::EthernetController _config;
+    ib::cfg::EthernetController cfg;
     EthController controller;
     EthController controllerOther;
 };
 
-
-TEST_F(EthernetControllerTest, send_eth_message)
-{
-    const auto now = 12345ns;
-    EXPECT_CALL(participant, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
-        .Times(1);
-
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
-
-    EthernetFrameEvent msg;
-    SetSourceMac(msg.frame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
-    msg.timestamp = now;
-    controller.SendFrameEvent(msg);
-}
-
-//! \brief using the new SendFrame API must invoke the TimeProvider
-TEST_F(EthernetControllerTest, send_eth_frame)
+/*! \brief SendFrame must invoke the TimeProvider and triggers SendIbMessage on the participant
+*/
+TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
 {
     ON_CALL(participant.mockTimeProvider.mockTime, Now())
         .WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
-    EXPECT_CALL(participant, SendIbMessage_proxy(&controller, AnEthMessageWith(now)))
-        .Times(1);
-
+    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(now))).Times(1);
+    EXPECT_CALL(callbacks, MessageAck(&controller, _)).Times(1);
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
 
     EthernetFrame frame{};
@@ -158,7 +138,7 @@ TEST_F(EthernetControllerTest, send_eth_frame)
 
 /*! \brief Passing an EthernetFrameEvent to an EthControllers must trigger the registered callback
  */
-TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
+TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_message)
 {
     EthernetFrameEvent msg;
     SetSourceMac(msg.frame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
@@ -172,20 +152,22 @@ TEST_F(EthernetControllerTest, trigger_callback_on_receive_message)
 /*! \brief Passing an Ack to an EthControllers must trigger the registered callback, if
  *         it sent a message with corresponding transmit ID and source MAC
  */
-TEST_F(EthernetControllerTest, trigger_callback_on_receive_ack)
+TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
 {
     EthernetFrameEvent msg{};
     SetSourceMac(msg.frame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
 
+    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(0ns))).Times(1);
     EthernetFrameTransmitEvent ack{ 0, EthernetMac{ 1, 2, 3, 4, 5, 6 }, 0ms, EthernetTransmitStatus::Transmitted };
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
+    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
 
     controller.SendFrameEvent(msg);
 }
 
 
-TEST_F(EthernetControllerTest, DISABLED_ethcontroller_uses_tracing)
+TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
 {
 #if (0)
     using namespace ib::extensions;

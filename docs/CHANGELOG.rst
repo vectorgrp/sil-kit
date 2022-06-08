@@ -16,6 +16,15 @@ Removed
 
 Changed
 ~~~~~~~
+
+- Internal refactoring of Bus Controllers to harmonize behavior w/wo bus simulator.
+    
+    - LIN: When the controller receives a GoToSleep-frame, the ``FrameStatusHandler`` is always called (previously 
+    only with bus simulator).
+
+    - Ethernet: ``Activate()`` and ``Deactivate()`` now tigger the ``StateChangeHandler`` (previously only with bus
+    simulator).
+    
 - The IbRegistry shared library is no longer necessary.
   An instance of IIbRegistry can now be created directly using :cpp:func:`CreateRegistry()<ib::vendor::CreateRegistry>`.
   This is an implementation detail specific to the VAsio based VIB.

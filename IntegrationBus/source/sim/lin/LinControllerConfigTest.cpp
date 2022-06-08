@@ -9,16 +9,16 @@
 
 #include "NullConnectionParticipant.hpp"
 
-#include "EthControllerFacade.hpp"
+#include "LinController.hpp"
 
 namespace {
 using namespace ib::mw;
-using namespace ib::sim::eth;
+using namespace ib::sim::lin;
 
-class EthernetControllerFacadeTest : public testing::Test
+class LinControllerConfigTest : public testing::Test
 {
 public:
-    EthernetControllerFacadeTest(){};
+    LinControllerConfigTest(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
@@ -26,19 +26,19 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantCo
     auto mockConfig =
         std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::EthernetController controllerNoNetworkCfg;
+    ib::cfg::LinController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
-    mockConfig->ethernetControllers.push_back(controllerNoNetworkCfg);
+    mockConfig->linControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::EthernetController controllerWithNetworkCfg;
+    ib::cfg::LinController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
-    mockConfig->ethernetControllers.push_back(controllerWithNetworkCfg);
+    mockConfig->linControllers.push_back(controllerWithNetworkCfg);
 
     return mockConfig;
 }
 
-TEST(EthernetControllerFacadeTest, create_controller_unconfigured)
+TEST(LinControllerConfigTest, create_controller_unconfigured)
 {
     auto controllerName = "Controller";
     auto expectedNetworkName = "Controller";
@@ -48,13 +48,13 @@ TEST(EthernetControllerFacadeTest, create_controller_unconfigured)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<EthControllerFacade*>(participant->CreateEthernetController(controllerName));
+        dynamic_cast<LinController*>(participant->CreateLinController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(EthernetControllerFacadeTest, create_controller_configured_no_network)
+TEST(LinControllerConfigTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -64,14 +64,13 @@ TEST(EthernetControllerFacadeTest, create_controller_configured_no_network)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller =
-        dynamic_cast<EthControllerFacade*>(participant->CreateEthernetController(controllerName, networkName));
+    auto controller = dynamic_cast<LinController*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(EthernetControllerFacadeTest, create_controller_configured_with_network)
+TEST(LinControllerConfigTest, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";
@@ -81,8 +80,7 @@ TEST(EthernetControllerFacadeTest, create_controller_configured_with_network)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller =
-        dynamic_cast<EthControllerFacade*>(participant->CreateEthernetController(controllerName, networkName));
+    auto controller = dynamic_cast<LinController*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

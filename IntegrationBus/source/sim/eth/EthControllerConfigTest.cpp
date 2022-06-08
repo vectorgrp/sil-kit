@@ -9,16 +9,16 @@
 
 #include "NullConnectionParticipant.hpp"
 
-#include "FlexrayControllerFacade.hpp"
+#include "EthController.hpp"
 
 namespace {
 using namespace ib::mw;
-using namespace ib::sim::fr;
+using namespace ib::sim::eth;
 
-class FlexrayControllerFacadeTest : public testing::Test
+class EthernetControllerConfigTest : public testing::Test
 {
 public:
-    FlexrayControllerFacadeTest(){};
+    EthernetControllerConfigTest(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
@@ -26,19 +26,19 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantCo
     auto mockConfig =
         std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
 
-    ib::cfg::FlexrayController controllerNoNetworkCfg;
+    ib::cfg::EthernetController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
-    mockConfig->flexrayControllers.push_back(controllerNoNetworkCfg);
+    mockConfig->ethernetControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::FlexrayController controllerWithNetworkCfg;
+    ib::cfg::EthernetController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
-    mockConfig->flexrayControllers.push_back(controllerWithNetworkCfg);
+    mockConfig->ethernetControllers.push_back(controllerWithNetworkCfg);
 
     return mockConfig;
 }
 
-TEST(FlexrayControllerFacadeTest, create_controller_unconfigured)
+TEST(EthernetControllerConfigTest, create_controller_unconfigured)
 {
     auto controllerName = "Controller";
     auto expectedNetworkName = "Controller";
@@ -47,13 +47,14 @@ TEST(FlexrayControllerFacadeTest, create_controller_unconfigured)
 
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
-    auto controller = dynamic_cast<FlexrayControllerFacade*>(participant->CreateFlexrayController(controllerName));
+    auto controller =
+        dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(FlexrayControllerFacadeTest, create_controller_configured_no_network)
+TEST(EthernetControllerConfigTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -64,13 +65,13 @@ TEST(FlexrayControllerFacadeTest, create_controller_configured_no_network)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<FlexrayControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
+        dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(FlexrayControllerFacadeTest, create_controller_configured_with_network)
+TEST(EthernetControllerConfigTest, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";
@@ -81,7 +82,7 @@ TEST(FlexrayControllerFacadeTest, create_controller_configured_with_network)
     auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
 
     auto controller =
-        dynamic_cast<FlexrayControllerFacade*>(participant->CreateFlexrayController(controllerName, networkName));
+        dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
     EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);

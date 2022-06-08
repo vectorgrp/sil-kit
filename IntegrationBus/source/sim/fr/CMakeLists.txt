@@ -1,14 +1,11 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbSimFlexray STATIC
-    FlexrayControllerProxy.cpp
-    FlexrayControllerProxy.hpp
+    FlexrayController.cpp
+    FlexrayController.hpp
     FlexrayDatatypeUtils.cpp
     FlexrayDatatypeUtils.hpp
     Validation.cpp
     Validation.hpp
-
-    FlexrayControllerFacade.hpp
-    FlexrayControllerFacade.cpp
 
     FlexraySerdes.hpp
     FlexraySerdes.cpp
@@ -29,8 +26,8 @@ target_link_libraries(IbSimFlexray
 add_vib_test(TestSimFlexrayValidation SOURCES ValidationTest.cpp LIBS IbSimFlexray)
 add_vib_test(TestSimFlexrayController
     SOURCES
-        FlexrayControllerProxyTest.cpp
-        FlexrayControllerFacadeTest.cpp
+        FlexrayControllerTest.cpp
+        FlexrayControllerConfigTest.cpp
     LIBS 
         IbSimFlexray
         IbMwMockParticipant
