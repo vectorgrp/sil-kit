@@ -61,9 +61,9 @@ void SerializedMessage::SetProtocolVersion(ProtocolVersion version)
     _buffer.SetProtocolVersion(version);
 }
 
-auto SerializedMessage::PeekRegistryMessageHeader() const -> RegistryMsgHeader
+auto SerializedMessage::GetRegistryMessageHeader() const -> RegistryMsgHeader
 {
-    return ib::mw::PeekRegistryMessageHeader(_buffer);
+    return _registryMessageHeader;
 }
 
 void SerializedMessage::WriteNetworkHeaders()
@@ -88,6 +88,17 @@ void SerializedMessage::ReadNetworkHeaders()
     {
         //optional registry kind tag
         _registryKind = ExtractRegistryMessageKind(_buffer);
+        switch(_registryKind)
+        {
+        case RegistryMessageKind::ParticipantAnnouncement:
+        case RegistryMessageKind::ParticipantAnnouncementReply:
+        case RegistryMessageKind::KnownParticipants:
+            // all handshake messages contain a header
+            _registryMessageHeader = PeekRegistryMessageHeader(_buffer);
+            break;
+        case RegistryMessageKind::Invalid:
+            throw ProtocolError("SerializedMessage: ReadNetworkHeaders() encountered RegistryMessageKind::Invalid");
+        }
     }
     if (IsMwOrSim(_messageKind))
     {

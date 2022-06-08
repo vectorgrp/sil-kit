@@ -22,8 +22,8 @@ struct RegistryMsgHeader
     uint16_t versionHigh;
     uint16_t versionLow;
     RegistryMsgHeader()
-        :versionHigh{(uint16_t)std::get<0>(CurrentProtocolVersion())}
-        ,versionLow{(uint16_t)std::get<1>(CurrentProtocolVersion())}
+        :versionHigh{CurrentProtocolVersion().major}
+        ,versionLow{CurrentProtocolVersion().minor}
     {
     }
 };

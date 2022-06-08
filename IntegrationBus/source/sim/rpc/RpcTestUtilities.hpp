@@ -16,6 +16,8 @@
 #include <iostream>
 #include <typeinfo>
 
+#include "ProtocolVersion.hpp"
+
 namespace ib {
 namespace sim {
 namespace rpc {
@@ -24,7 +26,7 @@ namespace test {
 struct MockConnection
 {
     MockConnection(ib::cfg::ParticipantConfiguration /*config*/, std::string /*participantName*/,
-                   ib::mw::ParticipantId /*participantId*/)
+                   ib::mw::ParticipantId /*participantId*/, ib::mw::ProtocolVersion)
     {
     }
 

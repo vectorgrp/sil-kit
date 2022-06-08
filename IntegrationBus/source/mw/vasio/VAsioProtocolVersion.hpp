@@ -6,6 +6,7 @@
 #include <tuple>
 #include <cstdint>
 #include <string>
+#include <ostream>
 
 #include "VAsioDatatypes.hpp" //for RegistryMsgHeader
 #include "MessageBuffer.hpp" //for ProtocolVersion
@@ -20,6 +21,8 @@ inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHead
 inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion;
 inline bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 
+inline auto operator<<(std::ostream& out, const ProtocolVersion& header) -> std::ostream&;
+
 //////////////////////////////////////////////////////////////////////
 //  Inline Implementations
 //////////////////////////////////////////////////////////////////////
@@ -31,16 +34,16 @@ auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion
 auto to_header(ProtocolVersion version)
 {
 	RegistryMsgHeader header;
-	header.versionHigh = static_cast<decltype(header.versionHigh)>(std::get<0>(version));
-	header.versionLow = static_cast<decltype(header.versionLow)>(std::get<1>(version));
+	header.versionHigh = version.major;
+	header.versionLow = version.minor;
 	return header;
 }
 
 //! Map ProtocolVersion ranges to VIB distribution releases
 auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
 {
-     const auto version = from_header(registryMsgHeader);
-    if (std::get<0>(version) == 1)
+    const auto version = from_header(registryMsgHeader);
+    if (version.major == 1)
     {
         return {"< v2.0.0"};
     }
@@ -82,5 +85,10 @@ bool ProtocolVersionSupported(const RegistryMsgHeader& header)
     return false;
  }
 
+inline auto operator<<(std::ostream& out, const ProtocolVersion& header) -> std::ostream&
+{
+    out << static_cast<int>(header.major) << "." << static_cast<int>(header.minor);
+    return out;
+}
 } // mw
 } // namespace ib

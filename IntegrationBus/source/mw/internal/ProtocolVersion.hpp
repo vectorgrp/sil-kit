@@ -7,11 +7,29 @@ namespace mw {
 
 // The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
 
-using ProtocolVersion = std::tuple<int, int>;
+struct ProtocolVersion
+{
+    uint16_t major;
+    uint16_t minor;
+};
+//////////////////////////////////////////////////////////////////////
+// Inline implementations
+//////////////////////////////////////////////////////////////////////
 
 inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion
 {
     return {3, 1};
+}
+
+inline bool operator==(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
+{
+    return lhs.major == rhs.major
+        && lhs.minor == rhs.minor
+        ;
+}
+inline bool operator!=(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
+{
+    return !(lhs == rhs);
 }
 
 } // namespace mw

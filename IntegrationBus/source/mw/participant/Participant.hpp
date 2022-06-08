@@ -55,11 +55,14 @@
 // IbMwService
 #include "ServiceDiscovery.hpp"
 
+#include "ProtocolVersion.hpp"
+
 // Add connection types here and make sure they are instantiated in Participant.cpp
 #if defined(IB_MW_HAVE_VASIO)
 #   include "VAsioConnection.hpp"
 #endif
 
+#include "ProtocolVersion.hpp"
 
 namespace ib {
 namespace mw {
@@ -78,7 +81,8 @@ public:
     Participant(const Participant&) = default;
     Participant(Participant&&) = default;
     Participant(cfg::ParticipantConfiguration participantConfig,
-               const std::string& participantName, bool isSynchronized);
+               const std::string& participantName, bool isSynchronized,
+        ProtocolVersion version = CurrentProtocolVersion());
 
 public:
     // ----------------------------------------

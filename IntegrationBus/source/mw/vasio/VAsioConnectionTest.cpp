@@ -206,22 +206,28 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
 
 }
 
-TEST_F(VAsioConnectionTest, unsupported_version_reply_should_throw)
+TEST_F(VAsioConnectionTest, unsupported_version_reply_from_registry_should_throw)
 {
     ParticipantAnnouncementReply reply{};
     reply.remoteHeader.versionHigh = 1;
     reply.remoteHeader.versionLow = 1;
     reply.status = ParticipantAnnouncementReply::Status::Failed;
 
+    // a failed connection to a registry is fatal
+    _from._peerInfo.participantId = VAsioConnection::RegistryParticipantId;
+
     SerializedMessage message(reply);
     EXPECT_THROW(
         _connection.OnSocketData(&_from, std::move(message)),
         ib::ProtocolError);
 }
-TEST_F(VAsioConnectionTest, supported_version_reply_must_not_throw)
+
+TEST_F(VAsioConnectionTest, supported_version_reply_from_registry_must_not_throw)
 {
     ParticipantAnnouncementReply reply{};
     reply.status = ParticipantAnnouncementReply::Status::Success;
+
+    _from._peerInfo.participantId = VAsioConnection::RegistryParticipantId;
 
     SerializedMessage message(reply);
     EXPECT_NO_THROW(

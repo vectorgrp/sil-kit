@@ -6,7 +6,6 @@ namespace ib {
 namespace sim {
 namespace rpc {
 
-using namespace ib::sim::rpc;
 ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CallUUID& msg)
 {
     buffer << msg.ab << msg.cd;

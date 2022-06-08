@@ -9,6 +9,8 @@ add_library(IbMwVAsio STATIC
     VAsioProtocolVersion.hpp
     VAsioSerdes.hpp
     VAsioSerdes.cpp
+    VAsioSerdes_Protocol30.hpp
+    VAsioSerdes_Protocol30.cpp
 
     IbLink.hpp
     IVAsioPeer.hpp
@@ -71,3 +73,8 @@ add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsi
 
 add_vib_test(TestMwVAsio_Serdes  SOURCES VAsioSerdesTest.cpp LIBS IbMwVAsio)
 add_vib_test(TestMwVAsio_SerializedMessage  SOURCES SerializedMessageTest.cpp LIBS IbMwVAsio)
+
+# Testing interoperability between different protocol versions requires testing on a higher level:
+# We instantiate a complete Participant<VAsioConnection> with a specific version
+# and do integration tests here
+add_vib_test(ITest_ParticipantVersion  SOURCES ParticipantVersionTest.cpp LIBS IbMwParticipant IbSimTestHarness)

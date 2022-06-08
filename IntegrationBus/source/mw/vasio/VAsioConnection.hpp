@@ -33,6 +33,7 @@
 
 #include "asio.hpp"
 
+#include "ProtocolVersion.hpp"
 #include "SerializedMessage.hpp"
 
 namespace ib {
@@ -49,7 +50,8 @@ public:
     // Constructors and Destructor
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
-    VAsioConnection(ib::cfg::ParticipantConfiguration config, std::string participantName, ParticipantId participantId);
+    VAsioConnection(ib::cfg::ParticipantConfiguration config, std::string participantName,
+        ParticipantId participantId, ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection();
 
 public:
@@ -143,6 +145,8 @@ public:
 
     void NotifyShutdown();
 
+public: //members
+    static constexpr const ParticipantId RegistryParticipantId { 0 };
 private:
 
     template<typename AcceptorT, typename EndpointT>
@@ -223,7 +227,7 @@ private:
     void SendParticipantAnnouncement(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
 
-    void SendParticipantAnnoucementReply(IVAsioPeer* peer);
+    void SendParticipantAnnouncementReply(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer);
 
     void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
@@ -433,6 +437,7 @@ private:
     std::map<uint64_t, std::string> _hashToParticipantName;
 
     // unit testing support
+    ProtocolVersion _version;
     friend class VAsioConnectionTest;
 };
 

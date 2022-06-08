@@ -61,7 +61,7 @@ public: // Receiving a SerializedMessage: from binary blob to IbMessage<T>
 	auto GetRemoteIndex() const -> EndpointId;
 	auto GetEndpointAddress() const -> EndpointAddress;
 	void SetProtocolVersion(ProtocolVersion version);
-	auto PeekRegistryMessageHeader() const -> RegistryMsgHeader;
+	auto GetRegistryMessageHeader() const -> RegistryMsgHeader;
 
 private:
 	void WriteNetworkHeaders();
@@ -73,6 +73,8 @@ private:
 	// For simMsg
 	EndpointAddress _endpointAddress{};
 	EndpointId _remoteIndex{0};
+	// For registry messages
+	RegistryMsgHeader _registryMessageHeader;
 
 	MessageBuffer _buffer;
 };

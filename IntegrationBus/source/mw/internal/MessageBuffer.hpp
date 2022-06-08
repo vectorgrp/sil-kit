@@ -49,6 +49,10 @@ public:
     // ----------------------------------------
     // Public methods for backward compatibility.
 
+    // peek into raw data, e.g. for retrieving headers without modifying the buffer
+    inline auto PeekData() const  -> ib::util::vector_view<const uint8_t>;
+    inline auto ReadPos() const -> size_t;
+
     //! Set the format version to use for ser/des.
     inline void SetProtocolVersion(ProtocolVersion version);
     inline auto GetProtocolVersion() -> ProtocolVersion;
@@ -475,6 +479,16 @@ inline auto MessageBuffer::GetProtocolVersion() -> ProtocolVersion
 {
     return _protocolVersion;
 }
-    
+ 
+
+inline auto MessageBuffer::PeekData() const  -> ib::util::vector_view<const uint8_t>
+{
+    return ib::util::make_vector_view(_storage);
+}
+inline auto MessageBuffer::ReadPos() const -> size_t
+{
+    return _rPos;
+}
+
 } // mw
 } // namespace ib

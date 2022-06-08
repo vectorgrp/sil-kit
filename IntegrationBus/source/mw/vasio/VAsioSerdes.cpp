@@ -6,13 +6,13 @@
 #include "Uri.hpp"
 #include "InternalSerdes.hpp"
 #include "ProtocolVersion.hpp"
+#include "VAsioProtocolVersion.hpp" // from_header(ProtcolVersion)
 
-
+// Backward compatibility:
+#include "VAsioSerdes_Protocol30.hpp"
 
 namespace ib {
 namespace mw {
-
-// required for protocol_3_0:: and current 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RegistryMsgHeader& header)
 {
     buffer << header.preambel
@@ -26,156 +26,6 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, RegistryMsgHeader& heade
            >> header.versionHigh
            >> header.versionLow;
     return buffer;
-}
-
-// Backward compatible serdes with ProtocolVersion{3,0}
-namespace protocol_3_0
-{
-//these two structures were merged for v3.1
-struct VAsioPeerInfo
-{
-    std::string participantName;
-    ib::mw::ParticipantId participantId;
-    std::string acceptorHost;
-    uint16_t acceptorPort;
-};
-
-struct VAsioPeerUri
-{
-    std::string participantName;
-    ib::mw::ParticipantId participantId;
-    std::vector<std::string> acceptorUris;
-};
-
-struct ParticipantAnnouncement
-{
-    ib::mw::RegistryMsgHeader messageHeader; //not changed
-    VAsioPeerInfo peerInfo;
-    //!< additional field as of VIB >3.4.1, will be ignored by older participants
-    VAsioPeerUri peerUri;
-};
-
-struct ParticipantAnnouncementReply
-{
-    std::vector<ib::mw::VAsioMsgSubscriber> subscribers;
-};
-
-struct KnownParticipants
-{
-    ib::mw::RegistryMsgHeader messageHeader;
-    std::vector<VAsioPeerInfo> peerInfos;
-    //!< additional field as of VIB >3.4.1, will be ignored by older participants
-    std::vector<VAsioPeerUri> peerUris;
-};
-
-// Actual Serdes Code
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const VAsioPeerInfo& peerInfo)
-{
-    buffer << peerInfo.participantName
-           << peerInfo.participantId
-           << peerInfo.acceptorHost
-           << peerInfo.acceptorPort;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
-{
-    buffer >> peerInfo.participantName
-           >> peerInfo.participantId
-           >> peerInfo.acceptorHost
-           >> peerInfo.acceptorPort;
-    return buffer;
-}
-
-//SerDes v3.1
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const VAsioPeerUri& peerUri)
-{
-    buffer << peerUri.participantName
-           << peerUri.participantId
-           << peerUri.acceptorUris
-           ;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, VAsioPeerUri& peerUri)
-{
-    buffer >> peerUri.participantName
-           >> peerUri.participantId
-           >> peerUri.acceptorUris
-        ;
-    return buffer;
-}
-
-
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
-{
-    buffer << announcement.messageHeader
-        << announcement.peerInfo
-        << announcement.peerUri
-        ;
-
-    return buffer;
-}
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ParticipantAnnouncement& announcement)
-{
-    buffer >> announcement.messageHeader
-        >> announcement.peerInfo
-        >> announcement.peerUri
-        ;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const KnownParticipants& participants)
-{
-    buffer << participants.messageHeader
-        << participants.peerInfos
-        << participants.peerUris;
-    return buffer;
-}
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, KnownParticipants& participants)
-{
-    buffer >> participants.messageHeader
-        >> participants.peerInfos;
-    if (buffer.RemainingBytesLeft() > 0)
-    {
-        buffer >> participants.peerUris;
-    }
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
-{
-    buffer << reply.subscribers;
-    return buffer;
-}
-
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
-{
-    buffer >> reply.subscribers;
-    return buffer;
-}
-
-} //protocol_3_0
-
-
-// Helper  for ProtocolVersion{3,0}
-void DeserializeCompat(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
-{
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
-    {
-        //need legacy support here, convert old format to current one
-        protocol_3_0::ParticipantAnnouncementReply oldReply;
-        reply.remoteHeader.versionHigh = 3;
-        reply.remoteHeader.versionHigh = 0;
-        // Status was not part of  < v3.1
-        reply.status = ParticipantAnnouncementReply::Status::Success;
-        // subscribers is the same
-        buffer >> oldReply;
-        for(const auto& subscriber: oldReply.subscribers)
-        {
-            reply.subscribers.push_back(subscriber);
-        }
-    }
 }
 
 
@@ -235,18 +85,14 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, SubscriptionAcknowledge&
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
 {
-
+    // ParticipantAnnouncement is the first message sent during a handshake.
+    // so we need to extract its version information for ser/des here.
+    buffer.SetProtocolVersion(from_header(announcement.messageHeader));
     if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
-        //need legacy support here, convert old format to current one
-        protocol_3_0::ParticipantAnnouncement oldAnnouncement{};
-        auto& oldUri = oldAnnouncement.peerUri;
-        oldUri.participantName = announcement.peerInfo.participantName;
-        oldUri.participantId = announcement.peerInfo.participantId;
-        oldUri.acceptorUris = announcement.peerInfo.acceptorUris;
-        buffer << oldAnnouncement;
+        SerializeV30(buffer, announcement);
     }
-    else if (buffer.GetProtocolVersion() == CurrentProtocolVersion())
+    else
     {
         buffer
             << announcement.messageHeader
@@ -263,15 +109,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncement&
     //Backward compatibility
     if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
-        //need legacy support here, convert old format to current one
-        protocol_3_0::ParticipantAnnouncement oldAnnouncement;
-        buffer >> oldAnnouncement;
-        announcement.messageHeader = oldAnnouncement.messageHeader;
-        auto& info = announcement.peerInfo;
-        auto& oldUri = oldAnnouncement.peerUri;
-        info.participantName = oldUri.participantName;
-        info.participantId = oldUri.participantId;
-        info.acceptorUris = oldUri.acceptorUris;
+        DeserializeV30(buffer, announcement);
     }
     else
     {
@@ -289,13 +127,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
     //Backward compatibility
     if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
-        // the ParticipantAnnouncementReply was extended for proto v3.1
-        protocol_3_0::ParticipantAnnouncementReply oldReply;
-        for(const auto& subscriber: reply.subscribers)
-        {
-            oldReply.subscribers.push_back(subscriber);
-        }
-        buffer << oldReply;
+        SerializeV30(buffer, reply);
     }
     else
     {
@@ -309,31 +141,10 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
     //Backward compatibility
-    if (buffer.GetProtocolVersion() != CurrentProtocolVersion())
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
-        // Backward compatibility here is tricky. When connecting to a VAsioRegistry
-        // we already negotiated a ProtocolVersion via the KnownParticipants message.
-        // In all other cases we do not know the ProtocolVersion a priori here
-        if (buffer.GetProtocolVersion() == ProtocolVersion{0,0})
-        {
-            //Ok, uninitialized ProtocolVersion implies that we have a connection between two, non-registry peers
-            //Let's guess the version based on the buffer size
-            auto bufferCopy = buffer;
-            try {
-                // Try the current version, this contains a remoteHeader field which should be more future proof
-                ParticipantAnnouncementReply maybeReply;
-                bufferCopy 
-                    >> maybeReply.remoteHeader
-                    >> maybeReply.status
-                    >> maybeReply.subscribers
-                    ;
-                reply = maybeReply;
-            } catch(...) {
-                //fall through to the backward compatible code
-                buffer.SetProtocolVersion({3,0});
-                DeserializeCompat(buffer, reply);
-            }
-        }
+        buffer.SetProtocolVersion({3,0});
+        DeserializeV30(buffer, reply);
     }
     else
     {
@@ -350,24 +161,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants&
     //Backward compatibility with legacy peers
     if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
-        // the VAsioPeerInfo/PeerUri changed, and as such the vector in KnownParticipants
-        protocol_3_0::KnownParticipants oldAnnouncement;
-        oldAnnouncement.messageHeader.versionHigh = 3;
-        oldAnnouncement.messageHeader.versionLow = 0;
-
-        for(auto newPeerInfo: participants.peerInfos)
-        {
-            //we only copy the peer Uris, the peerInfo 'acceptorHost' and 'acceptorPort'
-            // were only used as fallback if the URIs were not set.
-            protocol_3_0::VAsioPeerUri oldPeerUri;
-            oldPeerUri.acceptorUris = newPeerInfo.acceptorUris;
-            oldPeerUri.participantId = newPeerInfo.participantId;
-            oldPeerUri.participantName = newPeerInfo.participantName;
-            oldAnnouncement.peerUris.emplace_back(std::move(oldPeerUri));
-        }
-        
-        // serialize old
-        buffer << oldAnnouncement;
+        SerializeV30(buffer, participants);
     }
     else
     {
@@ -379,9 +173,17 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants&
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& participants)
 {
-    buffer >> participants.messageHeader
-        >> participants.peerInfos
-        ;
+    //Backward compatibility with legacy peers
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    {
+        DeserializeV30(buffer, participants);
+    }
+    else
+    {
+        buffer >> participants.messageHeader
+            >> participants.peerInfos
+            ;
+    }
     return buffer;
 }
 
@@ -411,12 +213,18 @@ auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind
     return kind;
 }
 
-auto PeekRegistryMessageHeader(const MessageBuffer& buffer) -> RegistryMsgHeader
+auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader
 {
-    // we do not want change buffer's internal state, so we copy it, since we do not have dedicated peek methods on it
-    auto bufferCopy = buffer;
+    //read only the header into a new MessageBuffer
+    auto data = buffer.PeekData();
+    const auto readPos = buffer.ReadPos();
+    std::vector<uint8_t> rawHeader;
+    rawHeader.resize(sizeof(RegistryMsgHeader));
+    memcpy(rawHeader.data(), (data.data() + readPos), sizeof(RegistryMsgHeader));
+
+    MessageBuffer headerBuffer(std::move(rawHeader));
     RegistryMsgHeader header;
-    bufferCopy >> header;
+    headerBuffer >> header;
     return header;
 }
 

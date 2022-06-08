@@ -7,7 +7,6 @@ namespace ib {
 namespace sim {
 namespace lin {
 
-using namespace ib::sim::lin;
 ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrame& frame)
 {
     buffer

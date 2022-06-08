@@ -7,6 +7,8 @@
 
 namespace ib {
 namespace mw {
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // Early Protocol Handshake and Initial Service Subscription
 // VAsioMsgKind: IbRegistryMessage
@@ -19,7 +21,7 @@ auto ExtractMessageKind(MessageBuffer& buffer) -> VAsioMsgKind;
 // Extract the registry message kind tag (third element for handshake messages)
 auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind;
 
-auto PeekRegistryMessageHeader(const MessageBuffer& buffer) -> RegistryMsgHeader;
+auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader;
 auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId;
 auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
 
@@ -36,6 +38,7 @@ void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
 void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
+
 
 } // mw
 } // namespace ib

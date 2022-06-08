@@ -64,12 +64,12 @@ struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> :
 
 template <class IbConnectionT>
 Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participantConfig,
-                                      const std::string& participantName, bool isSynchronized)
+                                      const std::string& participantName, bool isSynchronized, ProtocolVersion version)
     : _participantName{ participantName }
     , _isSynchronized{ isSynchronized }
     , _participantConfig{ participantConfig }
     , _participantId{util::hash::Hash(participantName)}
-    , _ibConnection{ _participantConfig, participantName, _participantId }
+    , _ibConnection{ _participantConfig, participantName, _participantId, version}
 {
     std::string logParticipantNotice; //!< We defer logging the notice until the logger is created
     if (!_participantConfig.participantName.empty() && _participantConfig.participantName != participantName)

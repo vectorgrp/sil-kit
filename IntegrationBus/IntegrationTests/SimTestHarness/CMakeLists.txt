@@ -1,5 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbSimTestHarness
+    SimSystemController.hpp
     SimTestHarness.hpp
     SimTestHarness.cpp
 )
