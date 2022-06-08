@@ -19,7 +19,7 @@ Configuration
 The Participant Configuration File
 =======================================
 
-Simulation participants of the Vector Integration Bus can be configured via a JSON/YAML file, often
+Simulation participants of the Vector Integration Bus can be configured via a YAML/JSON file, often
 referred to as *participant configuration*, ``IbConfig.json``, or ``IbConfig.yaml``. A configuration file is optional, 
 it is intended to be used to configure behavior and connections of a simulation participant that was distributed in 
 binary form.
@@ -30,49 +30,44 @@ Configuration parameters that are specified within the participant configuration
 programmatically defined values, i.e. the ``ParticipantName`` field of the participant configuration overrides the 
 participant name that is provided through the API of the Vector Integration Bus when the participant is created. 
 
-An ``IbConfig.json`` begins with some general information about the configuration file itself, followed by several 
+An ``IbConfig.yaml`` begins with some general information about the configuration file itself, followed by several 
 subsections for the different services of the Vector Integration Bus.
 
-The outline of a IbConfig.json file is as follows:
+The outline of a IbConfig.yaml file is as follows:
 
-.. code-block:: javascript
+.. code-block:: yaml
                 
-    {
-        "$schema": "./ParticipantConfiguration.schema.json",
-        "schemaVersion": 1
-
-        "Description": "Sample configuration for CAN Demonstrator",
-    
-        "ParticipantName": "Participant1",
-    
-        "CanControllers": [...],
-    
-        "LinControllers": [...],
-    
-        "FlexrayControllers": [...],
-    
-        "EthernetControllers": [...],
-    
-        "DataPublishers": [...],
-    
-        "DataSubscribers": [...],
-    
-        "RpcClients": [...],
-    
-        "RpcServers": [...],
-    
-        "Logging": [...],
-    
-        "HealthCheck": [...],
-    
-        "Tracing": [...],
-    
-        "Extensions": [...],
-    
-        "Middleware": {
-            ...
-        }
-    }
+    ---
+    "$schema": "./ParticipantConfiguration.schema.json"
+    schemaVersion: 1
+    Description: Sample configuration for CAN Demonstrator
+    ParticipantName: Participant1
+    CanControllers:
+    - ...
+    LinControllers: 
+    - ...
+    FlexrayControllers: 
+    - ...
+    EthernetControllers: 
+    - ...
+    DataPublishers: 
+    - ...
+    DataSubscribers: 
+    - ...
+    RpcClients: 
+    - ...
+    RpcServers: 
+    - ...
+    Logging: 
+    - ...
+    HealthCheck: 
+    - ...
+    Tracing: 
+    - ...
+    Extensions: 
+    - ...
+    Middleware: 
+    - ...
 
 
 Configuration Options

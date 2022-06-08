@@ -17,7 +17,7 @@ To create an |IParticipant| you have to include the
 :ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the Participant API
 factory function::
 
-    auto config = ib::cfg::ParticipantConfigurationFromFile("your_config.json");
+    auto config = ib::cfg::ParticipantConfigurationFromFile("your_config.yaml");
     auto participant = ib::CreateParticipant(config, "ParticipantName", domainId, true);
 
 To take part in the simulation, the Participant needs to be initialized with a proper

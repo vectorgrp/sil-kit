@@ -24,21 +24,16 @@ Multiple sinks can be configured at the same time. For example, to send log
 messages with log level Debug or higher to a remote logger and write Trace level
 logs to a file, the following configuration could be used:
 
-.. code-block:: javascript
+.. code-block:: yaml
 
-  "Logging": {
-      "Sinks": [
-          {
-              "Type": "Remote",
-              "Level": "Debug"
-          },
-          {
-              "Type": "File",
-              "Level": "Trace"
-              "LogName": "ParticipantLog"
-          }
-      ]
-  }
+    Logging:
+      Sinks:
+      - Type: Remote
+        Level: Debug
+      - Type: File
+        Level: Trace
+        LogName: ParticipantLog
+
 
 
 .. _sec:cfg-participant-logger:

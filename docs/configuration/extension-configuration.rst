@@ -18,15 +18,12 @@ Configuration
 --------------------
 
 
-.. code-block:: javascript
+.. code-block:: yaml
 
-    "Extensions": {
-        "SearchPathHints": [
-            "ENV:XYZ"
-            "../extensions",
-            ...
-        ]
-    }
+    Extensions:
+      SearchPathHints:
+      - ENV:XYZ
+      - "../extensions"
 
 
 .. list-table:: Extension Configuration

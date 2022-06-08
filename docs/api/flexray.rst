@@ -36,10 +36,10 @@ to :cpp:enumerator:`FlexrayPocState::Ready<ib::sim::fr::FlexrayPocState::Ready>`
 The :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>` consists of global
 :cpp:class:`FlexrayClusterParameters<ib::sim::fr::FlexrayClusterParameters>` and node-specific
 :cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>`, which are both best set
-in the JSON config (see config section :ref:`FlexrayControllers<sec:cfg-participant-flexray>`).
+in the participant configuration (see config section :ref:`FlexrayControllers<sec:cfg-participant-flexray>`).
 Furthermore, the :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>`
 contains one or more :cpp:class:`FlexrayTxBufferConfig<ib::sim::fr::FlexrayTxBufferConfig>` instances,
-which can either be specified in the JSON config or added manually at
+which can either be specified in the participant configuration or added manually at
 runtime. TxBuffers are used to initiate a transmission from one FlexRay
 controller to another.
 
@@ -47,7 +47,7 @@ The following example configures a FlexRay controller with two
 :cpp:class:`FlexrayTxBufferConfig<ib::sim::fr::FlexrayTxBufferConfig>` instances specifying two
 :cpp:class:`FlexrayFrameEvent<ib::sim::fr::FlexrayFrameEvent>` instances, which will be sent during simulation. The
 :cpp:class:`FlexrayClusterParameters<ib::sim::fr::FlexrayClusterParameters>` and the
-:cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>` are assumed to be set in the JSON config::
+:cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>` are assumed to be set in the participant configuration::
 
     std::vector<FlexrayTxBufferConfig> bufferConfigs;
     FlexrayTxBufferConfig txConfig;

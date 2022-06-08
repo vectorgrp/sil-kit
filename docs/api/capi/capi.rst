@@ -17,10 +17,10 @@ VIB Entry Point and API Organization
 The main entry point of the C API is the function to obtain a ib_Participant::
 
     ib_Participant* participant = NULL;
-    const char* jsonString = "{ ... }";
+    const char* configString = "{ ... }";
     const char* participantName = "CanWriter";
     const char* domainId = "1";
-    ib_ReturnCode result = ib_Participant_Create(&participant, jsonString,
+    ib_ReturnCode result = ib_Participant_Create(&participant, configString,
                                                             participantName, domainId, ib_False);
 
 All further services of the C API of the IntegrationBus are requested through this Participant.

@@ -28,26 +28,20 @@ running on localhost listening on Port 8500. These values can be changed via the
 */Middleware/Registry* section, e.g.:
 
 
-.. code-block:: javascript
+.. code-block:: yaml
 
-    {
-        ...
-        "Middleware": {
-            "Registry": {
-                "Hostname": "remotehost",
-                "Port": 14014,
-                "Logging": {
-                    ...
-                },
-                "ConnectAttempts": 1
-            },
-            "TcpNoDelay": false,
-            "TcpQuickAck": false,
-            "TcpSendBufferSize": 1024,
-            "TcpReceiveBufferSize": 1024
-            }
-        }
-    }
+    Middleware:
+      Registry:
+        Hostname: remotehost
+        Port: 14014
+        Logging:
+          #...
+        ConnectAttempts: 1
+      TcpNoDelay: false
+      TcpQuickAck: false
+      TcpSendBufferSize: 1024
+      TcpReceiveBufferSize: 1024
+
 
 .. list-table:: VAsio Configuration
    :widths: 15 85

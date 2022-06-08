@@ -25,31 +25,21 @@ at least one trace sink has to be defined in a *TraceSinks* block of the Tracing
 *UseTraceSinks* field has to be defined in a service instance that references the
 trace sink by name:
 
-.. code-block:: javascript
+.. code-block:: yaml
 
-    "CanControllers": [
-        {
-            "Name": "CanCtrl",
-            "UseTraceSinks": [
-                "SinkForCan"
-            ]
-        }
-    ],
-
-    "Tracing": {
-        "TraceSinks": [
-            {
-                "Name": "EthSink",
-                "OutputPath": "some/path/EthTraceOputput.pcap",
-                "Type": "PcapFile"
-            },
-            {
-                "Name": "SinkForCan",
-                "OutputPath": "other path/CAN1.mdf4",
-                "Type": "Mdf4File"
-            }
-        ]
-    }
+    ---
+    CanControllers:
+    - Name: CanCtrl
+      UseTraceSinks:
+      - SinkForCan
+    Tracing:
+      TraceSinks:
+      - Name: EthSink
+        OutputPath: some/path/EthTraceOputput.pcap
+        Type: PcapFile
+      - Name: SinkForCan
+        OutputPath: other path/CAN1.mdf4
+        Type: Mdf4File
 
 Multiple controllers can refer to a sink by name. However, each sink definition
 in a TraceSinks block must have a unique name.
@@ -76,15 +66,13 @@ TraceSink
 The TraceSink configuration is part of the tracing section of the :doc:`participant
 configuration<configuration>`.
 
-.. code-block:: javascript
+.. code-block:: yaml
   
-  "TraceSinks": [
-      {
-          "Name": "MyPcapSink",
-          "Type":  "PcapFile",
-          "OutputPath": "Filesystem/Path/MyTrace.pcap"
-      }
-  ]
+    TraceSinks:
+    - Name: MyPcapSink
+      Type: PcapFile
+      OutputPath: Filesystem/Path/MyTrace.pcap
+
 
 It allows to trace the VIB simulation messages into binary files.
 
@@ -114,34 +102,24 @@ must be set to configure message replaying.
 At least one trace source has to be defined in a *TraceSources* block of
 the participant, and a *Replay* block has to be defined in a service instance:
 
-.. code-block:: javascript
+.. code-block:: yaml
 
-    "CanControllers": [
-        {
-            "Name": "CanCtrl",
-            "Replay": {
-                "Direction": "Send",
-                "UseTraceSource": "Source1",
-                "MdfChannel": {}
-            }
-        }
-    ],
+    ---
+    CanControllers:
+    - Name: CanCtrl
+      Replay:
+        Direction: Send
+        UseTraceSource: Source1
+        MdfChannel: {}
+    Tracing:
+      TraceSources:
+      - Name: EthSource1
+        InputPath: some/path/EthTraceOputput.pcap
+        Type: PcapFile
+      - Name: Source1
+        OutputPath: other path/CAN1.mdf4
+        Type: Mdf4File
 
-    "Tracing":
-    {
-        "TraceSources": [
-            {
-                "Name": "EthSource1",
-                "InputPath": "some/path/EthTraceOputput.pcap",
-                "Type": "PcapFile"
-            },
-            {
-                "Name": "Source1",
-                "OutputPath": "other path/CAN1.mdf4",
-                "Type": "Mdf4File"
-            }
-        ]
-    }
 
 
 
@@ -153,15 +131,13 @@ TraceSource
 The TraceSource configuration is part of the tracing section of the :doc:`participant
 configuration<configuration>`.
 
-.. code-block:: javascript
+.. code-block:: yaml
   
-  "TraceSources": [
-      {
-          "Name": "Source1",
-          "Type":  "PcapFile",
-          "InputPath": "Filesystem/Path/MyTrace.pcap"
-      }
-  ]
+    TraceSources:
+    - Name: Source1
+      Type: PcapFile
+      InputPath: Filesystem/Path/MyTrace.pcap
+
 
 This specifies a trace data source for replaying VIB simulation messages during
 live simulations.

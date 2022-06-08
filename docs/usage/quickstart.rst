@@ -83,22 +83,21 @@ We'll create a simple, self-contained VIB application that uses :doc:`Data Messa
 to exchange user-defined data among its participants.
 The messages are exchanged using a publish / subscribe pattern.
 
-To use the VIB, you first have to create a valid configuration.  This can either
-be done by loading an existing :ref:`JSON file<sec:ibconfig-json>` or by using
-the ConfigBuilder to create one programmatically.
+To use the VIB, you first have to create a valid configuration.  This can 
+be done by loading an existing :ref:`YAML file<sec:ibconfig-json>`.
 
-We use a configuration file ``simple.json`` for creating our simulation.
+We use a configuration file ``simple.yaml`` for creating our simulation.
 The file will be loaded by our application and from helper :doc:`utilities`::
 
-    auto config = Config::FromJsonFile("simple.json")
+    auto config = ib::cfg::ParticipantConfigurationFromFile("simple.yaml")
 
 
 The configuration file itself contains an empty JSON object, that later on can be used to configure our simulation participants 
 without recompiling it.
 
 .. literalinclude::
-   sample_vib/simple.json
-   :language: javascript
+   sample_vib/simple.yaml
+   :language: yaml
 
 The application will run two participants concurrently, each in their own thread.
 One thread will act as a publisher by sending a test string to its subscribers:
@@ -165,7 +164,7 @@ The final simulation setup can be run through the following commands:
       ./SampleVib.exe
 
 The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>`
-:download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.json<sample_vib/simple.json>`
+:download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.yaml<sample_vib/simple.yaml>`
 
 
 Further Reading

@@ -86,7 +86,7 @@ typedef struct
 * based on the given configuration options.
 *
 * \param outParticipant The pointer through which the simulation participant will be returned (out parameter).
-* \param config Configuration of the participant passed as JSON string
+* \param config Configuration of the participant passed as YAML/JSON string
 * \param participantName Name of the participant
 * \param cDomainId ID of the domain/simulation to join
 *

@@ -125,7 +125,7 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
     // Participant1 (Publisher)
     // ------------------------
 
-    auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", "json", {"KeyA", "ValA"}, 1);
+    auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", "application/json", {"KeyA", "ValA"}, 1);
     publisher->Publish(user_data);
 
     // Participant2 (Subscriber)

@@ -89,62 +89,42 @@ Command Line Interface
 Configuration
 ------------------
 
-The VIBE Network Simulator can be configured via two json/YAML config files: the 
+The VIBE Network Simulator can be configured via two YAML/JSON config files: the 
 :doc:`participant configuration <../configuration/configuration>`, as used for every simulation participant, and the 
 network simulator configuration as described in the following. The network simulator configuration tells the 
 network simulator which networks to  simulate and with which properties.
 
-The outline of a network simulation configuration file (in json format) is as follows:
+The outline of a network simulation configuration file (in YAML format) is as follows:
 
-.. code-block:: javascript
+.. code-block:: yaml
                 
-    {
-        "$schema": "./ParticipantConfiguration.schema.json",
-    
-        "SchemaVersion": 1,
-        "Description": "Sample configuration for VIBE Network Simulator",
-    
-        "SimulatedNetworks": [
-            {
-                "Name": "CAN1",
-                "Type": "CAN"
-            },
-            {
-                "Name": "Ethernet1",
-                "Type": "Ethernet"
-            },
-            {
-                "Name": "Ethernet2",
-                "Type": "Ethernet"
-            },
-            {
-                "Name": "FlexRay1",
-                "Type": "FlexRay"
-            },
-            {
-                "Name": "LIN1",
-                "Type": "LIN"
-            }
-        ]
+    ---
+    "$schema": "./ParticipantConfiguration.schema.json"
+    SchemaVersion: 1
+    Description: Sample configuration for VIBE Network Simulator
+    SimulatedNetworks:
+    - Name: CAN1
+      Type: CAN
+    - Name: Ethernet1
+      Type: Ethernet
+    - Name: Ethernet2
+      Type: Ethernet
+    - Name: FlexRay1
+      Type: FlexRay
+    - Name: LIN1
+      Type: LIN
+    Switches:
+    - Name: Switch1
+      Ports:
+      - Name: Port1
+        VlanIds:
+        - 1
+        Network: ETH1_Link1
+      - Name: Port2
+        VlanIds:
+        - 1
+        Network: ETH1_Link2
 
-        "Switches": [
-            {
-                "Name": "Switch1",
-                "Ports": [
-                    {
-                        "Name": "Port1",
-                        "VlanIds": [1],
-                        "Network": "ETH1_Link1"
-                    },
-                    {
-                        "Name": "Port2",
-                        "VlanIds": [1],
-                        "Network": "ETH1_Link2"
-                    }
-                ]
-            },
-        ]
-    }
 
 
 Configuration Options

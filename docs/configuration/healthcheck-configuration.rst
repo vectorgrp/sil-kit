@@ -20,12 +20,11 @@ of each simulation task.
 Configuration
 ========================================
 
-.. code-block:: javascript
+.. code-block:: yaml
 
-  "HealthCheck": {
-      "SoftResponseTimeout": 500,
-      "HardResponseTimeout": 1000
-  }
+    HealthCheck:
+      SoftResponseTimeout: 500
+      HardResponseTimeout: 1000
 
 .. list-table:: HealthCheck Configuration
    :widths: 15 85

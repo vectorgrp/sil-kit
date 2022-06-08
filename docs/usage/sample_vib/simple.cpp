@@ -69,7 +69,7 @@ void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 
 int main(int argc, char** argv)
 {
-    auto config = ib::cfg::ParticipantConfigurationFromFile("simple.json");
+    auto config = ib::cfg::ParticipantConfigurationFromFile("simple.yaml");
     std::thread publisher{publisher_main, config};
     std::thread subscriber{subscriber_main, config};
 

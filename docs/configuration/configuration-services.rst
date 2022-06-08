@@ -16,14 +16,12 @@ The configuration of the single services is fully optional.
 CanControllers
 =============================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "CanControllers": [
-      {
-          "Name": "CAN1",
-          "Network": "CAN1"
-      }
-  ]
+    CanControllers:
+    - Name: CAN1
+      Network: CAN1
+
 
 .. list-table:: CanController Configuration
    :widths: 15 85
@@ -48,14 +46,12 @@ CanControllers
 LinControllers
 =============================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "LinControllers": [
-      {
-          "Name": "Lin1",
-          "Network": "Lin1"
-      }
-  ]
+    LinControllers:
+    - Name: Lin1
+      Network: Lin1
+
 
 .. list-table:: LinController Configuration
    :widths: 15 85
@@ -81,18 +77,15 @@ LinControllers
 EthernetControllers
 =============================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "EthernetControllers": [
-      {
-          "Name": "ETH1",
-          "Network": "Ethernet1"
-      },
-      {
-          "Name": "ETH2",
-          "UseTraceSinks": ["MyPcapSink"]
-      }
-  ]
+     EthernetControllers:
+     - Name: ETH1
+       Network: Ethernet1
+     - Name: ETH2
+       UseTraceSinks:
+       - MyPcapSink
+
 
 
 .. list-table:: Ethernet Controller Configuration
@@ -119,22 +112,15 @@ EthernetControllers
 FlexrayControllers
 ==================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "FlexrayControllers": [
-      {
-          "Name": "FlexRay1",
-          "Network": "PowerTrainCluster1",
-          "ClusterParameters": {
-              "gColdstartAttempts": 8,
-              ...
-          },
-          "NodeParameters": {
-              "pChannels": "AB",
-              ...
-          }
-      }
-  ]
+    FlexrayControllers:
+    - Name: FlexRay1
+      Network: PowerTrainCluster1
+      ClusterParameters:
+        gColdstartAttempts: 8
+      NodeParameters:
+        pChannels: AB
 
 
 .. list-table:: FlexRay Controller Configuration
@@ -166,9 +152,9 @@ FlexrayControllers
 DataPublishers
 =============================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "DataPublishers": []
+  DataPublishers: []
 
 
 .. list-table:: DataPublisher Configuration
@@ -185,9 +171,9 @@ DataPublishers
 DataSubscribers
 =============================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "DataSubscribers": []
+  DataSubscribers: []
 
 
 .. list-table:: DataSubscriber Configuration
@@ -205,9 +191,9 @@ RpcServers
 =============================
 
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "RpcServers": []
+  RpcServers: []
 
 
 .. list-table:: RPC Server Configuration
@@ -225,9 +211,9 @@ RpcServers
 RpcClients
 =============================
 
-.. code-block:: javascript
+.. code-block:: yaml
     
-  "DataPublishers": []
+  DataPublishers: []
 
 
 .. list-table:: RPC Clients Configuration

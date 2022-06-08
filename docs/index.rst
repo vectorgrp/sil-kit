@@ -16,7 +16,7 @@ automotive applications. For this, the Vector Integration Bus provides:
   * Event based synchronization according to lower bound event time
 
 * State handling to control and observe execution of the simulated system
-* An optional participant configuration JSON/Yaml file to configure simulation participants behavior even after
+* An optional participant configuration YAML/JSON file to configure simulation participants behavior even after
   compile time
 
 

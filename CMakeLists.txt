@@ -99,6 +99,7 @@ if(IB_INSTALL_SOURCE)
             PATTERN *.hpp
             PATTERN *.hpp.in
             PATTERN *.json
+            PATTERN *.yaml
             PATTERN *.cmake
             PATTERN *.cmake.in
             PATTERN CMakeLists.txt
