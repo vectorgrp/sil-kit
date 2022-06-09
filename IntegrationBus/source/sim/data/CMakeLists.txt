@@ -23,7 +23,7 @@ target_link_libraries(IbSimDataMessage
             IbSetThreadName
             IbInternal
             IbConfiguration
-            IbHash
+            IbUtil
 )
 
 add_vib_test(TestSimDataPublisher 
@@ -36,6 +36,6 @@ add_vib_test(TestSimDataSubscriber
 )
 add_vib_test(TestPubSubMatching
     SOURCES PubSubMatchingTest.cpp 
-    LIBS IbSimDataMessage IbHash
+    LIBS IbSimDataMessage IbUtil
 )
 add_vib_test(TestSimData_Serdes SOURCES DataSerdesTest.cpp LIBS IbSimDataMessage IbInternal)

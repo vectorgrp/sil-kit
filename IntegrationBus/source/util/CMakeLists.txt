@@ -47,11 +47,3 @@ add_library(IbUuid STATIC
 target_include_directories(IbUuid
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
-
-add_library(IbHash STATIC
-   Hash.cpp
-   Hash.hpp
-)
-target_include_directories(IbHash
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-)
