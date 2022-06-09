@@ -534,43 +534,53 @@ int main(int argc, char** argv)
     FlexrayNode_SetStartupDelay(frNode, 0);
   }
 
-  returnCode = ib_Flexray_Controller_AddPocStatusHandler(controller, frNode, &FlexrayNode_PocStatusHandler);
+  ib_HandlerId pocStatusHandlerId;
+  returnCode =
+      ib_Flexray_Controller_AddPocStatusHandler(controller, frNode, &FlexrayNode_PocStatusHandler, &pocStatusHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddPocStatusHandler => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  returnCode = ib_Flexray_Controller_AddFrameHandler(controller, frNode, &ReceiveFrame);
+  ib_HandlerId frameHandlerId;
+  returnCode = ib_Flexray_Controller_AddFrameHandler(controller, frNode, &ReceiveFrame, &frameHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddFrameHandler => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(controller, frNode, &ReceiveFrameTransmit);
+  ib_HandlerId frameTransmitHandlerId;
+  returnCode =
+      ib_Flexray_Controller_AddFrameTransmitHandler(controller, frNode, &ReceiveFrameTransmit, &frameTransmitHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddFrameTransmitHandler => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  returnCode = ib_Flexray_Controller_AddWakeupHandler(controller, frNode, &FlexrayNode_WakeupHandler);
+  ib_HandlerId wakeupHandlerId;
+  returnCode = ib_Flexray_Controller_AddWakeupHandler(controller, frNode, &FlexrayNode_WakeupHandler, &wakeupHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddWakeupHandler => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  returnCode = ib_Flexray_Controller_AddSymbolHandler(controller, frNode, &ReceiveSymbol);
+  ib_HandlerId symbolHandlerId;
+  returnCode = ib_Flexray_Controller_AddSymbolHandler(controller, frNode, &ReceiveSymbol, &symbolHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddSymbolHandler => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(controller, frNode, &ReceiveSymbolTransmit);
+  ib_HandlerId symbolTransmitHandlerId;
+  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(controller, frNode, &ReceiveSymbolTransmit,
+                                                              &symbolTransmitHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddSymbolTransmitHandler => %s\n", ib_GetLastErrorString());
     return 2;
   }
-  returnCode = ib_Flexray_Controller_AddCycleStartHandler(controller, frNode, &ReceiveCycleStart);
+  ib_HandlerId cycleStartHandlerId;
+  returnCode = ib_Flexray_Controller_AddCycleStartHandler(controller, frNode, &ReceiveCycleStart, &cycleStartHandlerId);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Flexray_Controller_AddCycleStartHandler => %s\n", ib_GetLastErrorString());

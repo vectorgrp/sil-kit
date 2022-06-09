@@ -35,7 +35,6 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    // Deletions because of mutex that cannot be copied
     CanController() = delete;
     CanController(const CanController&) = delete;
     CanController(CanController&&) = delete;
@@ -117,9 +116,6 @@ private:
         FilterT<MsgT> filter;
     };
 
-    template<typename MsgT>
-    using CallbackMap = std::map<HandlerId, FilteredCallback<MsgT>>;
-
 private:
     // ----------------------------------------
     // private methods
@@ -129,10 +125,10 @@ private:
     HandlerId AddHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
 
     template <typename MsgT>
-    void RemoveHandler(HandlerId handlerId);
+    void CallHandlers(const MsgT& msg);
 
     template <typename MsgT>
-    void CallHandlers(const MsgT& msg);
+    void RemoveHandler(HandlerId handlerId);
 
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
@@ -155,6 +151,9 @@ private:
     CanControllerState _controllerState = CanControllerState::Uninit;
     CanErrorState _errorState = CanErrorState::NotAvailable;
     CanConfigureBaudrate _baudRate = { 0, 0 };
+
+    template <typename MsgT>
+    using CallbackMap = std::map<HandlerId, FilteredCallback<MsgT>>;
 
     std::tuple<
         CallbackMap<CanFrameEvent>,

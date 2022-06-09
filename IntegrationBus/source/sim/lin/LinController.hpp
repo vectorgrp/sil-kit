@@ -3,7 +3,7 @@
 #pragma once
 
 #include <memory>
-#include <unordered_map>
+#include <map>
 
 #include "ib/sim/lin/ILinController.hpp"
 #include "ib/mw/fwd_decl.hpp"
@@ -33,16 +33,16 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     LinController() = delete;
-    LinController(const LinController&) = default;
-    LinController(LinController&&) = default;
+    LinController(const LinController&) = delete;
+    LinController(LinController&&) = delete;
     LinController(mw::IParticipantInternal* participant, cfg::LinController config,
                    mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    LinController& operator=(LinController& other) = default;
-    LinController& operator=(LinController&& other) = default;
+    LinController& operator=(LinController& other) = delete;
+    LinController& operator=(LinController&& other) = delete;
 
 public:
     // ----------------------------------------
@@ -62,10 +62,15 @@ public:
     void Wakeup() override;
     void WakeupInternal() override;
 
-    void AddFrameStatusHandler(FrameStatusHandler handler) override;
-    void AddGoToSleepHandler(GoToSleepHandler handler) override;
-    void AddWakeupHandler(WakeupHandler handler) override;
-    void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
+    HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;
+    HandlerId AddGoToSleepHandler(GoToSleepHandler handler) override;
+    HandlerId AddWakeupHandler(WakeupHandler handler) override;
+    HandlerId AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
+
+    void RemoveFrameStatusHandler(HandlerId handlerId) override;
+    void RemoveGoToSleepHandler(HandlerId handlerId) override;
+    void RemoveWakeupHandler(HandlerId handlerId) override;
+    void RemoveFrameResponseUpdateHandler(HandlerId handlerId) override;
 
     // IIbToLinController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg) override;
@@ -116,10 +121,13 @@ private:
     // private methods
 
     template <typename MsgT>
-    void AddHandler(CallbackT<MsgT>&& handler);
+    HandlerId AddHandler(CallbackT<MsgT>&& handler);
 
     template <typename MsgT>
     void CallHandlers(const MsgT& msg);
+
+    template <typename MsgT>
+    void RemoveHandler(HandlerId handlerId);
 
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
@@ -140,17 +148,19 @@ private:
     LinControllerStatus _controllerStatus{LinControllerStatus::Unknown};
 
     template <typename MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT>>;
+    using CallbackMap = std::map<HandlerId, CallbackT<MsgT>>;
 
-    std::tuple<CallbackVector<LinFrameStatusEvent>, 
-               CallbackVector<LinGoToSleepEvent>, 
-               CallbackVector<LinWakeupEvent>, 
-               CallbackVector<LinFrameResponseUpdateEvent>>
+    std::tuple<CallbackMap<LinFrameStatusEvent>, 
+               CallbackMap<LinGoToSleepEvent>, 
+               CallbackMap<LinWakeupEvent>, 
+               CallbackMap<LinFrameResponseUpdateEvent>>
         _callbacks;
     
     extensions::Tracer _tracer;
 
     std::vector<LinNode> _linNodes;
+
+    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ==================================================================

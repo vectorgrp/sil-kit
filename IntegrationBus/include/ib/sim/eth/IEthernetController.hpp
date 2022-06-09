@@ -70,8 +70,16 @@ public:
      *
      * The handler is called when the controller receives a new
      * Ethernet message.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddFrameHandler(FrameHandler handler) = 0;
+    virtual HandlerId AddFrameHandler(FrameHandler handler) = 0;
+
+    /*! \brief Remove a FrameHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveFrameHandler(HandlerId handlerId) = 0;
 
     /*! \brief Register a callback for Ethernet transmit acknowledgments
      *
@@ -82,8 +90,16 @@ public:
      * NB: Full support in VIBE Ethernet simulation. In simple
      * simulation, all messages are immediately positively
      * acknowledged by a receiving controller.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
+    virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
+
+    /*! \brief Remove a FrameTransmitHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveFrameTransmitHandler(HandlerId handlerId) = 0;
 
     /*! \brief Register a callback for changes of the controller state
      *
@@ -95,8 +111,16 @@ public:
      * call to Deactivate().
      *
      * NB: Only supported in VIBE Ethernet simulation.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddStateChangeHandler(StateChangeHandler handler) = 0;
+    virtual HandlerId AddStateChangeHandler(StateChangeHandler handler) = 0;
+
+    /*! \brief Remove a StateChangeHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveStateChangeHandler(HandlerId handlerId) = 0;
 
     /*! \brief Register a callback for changes of the link bit rate
      *
@@ -105,8 +129,16 @@ public:
      * successfully established, or the controller was deactivated.
      *
      * NB: Only supported in VIBE Ethernet simulation.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddBitrateChangeHandler(BitrateChangeHandler handler) = 0;
+    virtual HandlerId AddBitrateChangeHandler(BitrateChangeHandler handler) = 0;
+
+    /*! \brief Remove a BitrateChangeHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveBitrateChangeHandler(HandlerId handlerId) = 0;
 
     /*! \brief Send an Ethernet frame with the time provider's
     * current time.

@@ -220,7 +220,6 @@ namespace {
 
     TEST_F(CapiCanTest, can_controller_nullpointer_params)
     {
-
         ib_ReturnCode returnCode;
         ib_HandlerId handlerId;
 

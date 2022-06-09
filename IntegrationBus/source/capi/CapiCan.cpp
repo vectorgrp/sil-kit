@@ -1,7 +1,6 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
 #include <string>
-//#include <iostream>
 #include <algorithm>
 #include <map>
 #include <mutex>

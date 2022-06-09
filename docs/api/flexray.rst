@@ -2,22 +2,69 @@
 FlexRay Service API
 ===================
 
+.. Macros for docs use
+.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
+.. |CreateFlexrayController| replace:: :cpp:func:`CreateFlexrayController<ib::mw::IParticipant::CreateFlexrayController()>`
+.. |IFlexrayController| replace:: :cpp:class:`IFlexrayController<ib::sim::fr::IFlexrayController>`
+
+.. |FlexrayControllerConfig| replace:: :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>`
+.. |Configure| replace:: :cpp:func:`Configure()<ib::sim::fr::IFlexrayController::Configure>`
+
+.. |FlexrayPocState_Ready| replace:: :cpp:enumerator:`FlexrayPocState::Ready<ib::sim::fr::FlexrayPocState::Ready>`
+.. |FlexrayPocState_Wakeup| replace:: :cpp:enumerator:`FlexrayPocState::Wakeup<ib::sim::fr::FlexrayPocState::Wakeup>`
+
+.. |FlexrayClusterParameters| replace:: :cpp:class:`FlexrayClusterParameters<ib::sim::fr::FlexrayClusterParameters>`
+.. |FlexrayNodeParameters| replace:: :cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>`
+.. |FlexrayTxBufferConfig| replace:: :cpp:class:`FlexrayTxBufferConfig<ib::sim::fr::FlexrayTxBufferConfig>`
+
+.. |FlexrayFrameEvent| replace:: :cpp:class:`FlexrayFrameEvent<ib::sim::fr::FlexrayFrameEvent>`
+.. |FlexrayPocStatusEvent| replace:: :cpp:class:`FlexrayPocStatusEvent<ib::sim::fr::FlexrayPocStatusEvent>`
+
+.. |Wakeup| replace:: :cpp:func:`Wakeup()<ib::sim::fr::IFlexrayController::Wakeup>`
+.. |AllowColdstart| replace:: :cpp:func:`AllowColdstart()<ib::sim::fr::IFlexrayController::AllowColdstart>`
+.. |Run| replace:: :cpp:func:`Run()<ib::sim::fr::IFlexrayController::Run>`
+.. |UpdateTxBuffer| replace:: :cpp:func:`UpdateTxBuffer()<ib::sim::fr::IFlexrayController::UpdateTxBuffer>`
+
+.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::fr::IFlexrayController::AddFrameHandler>`
+.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<ib::sim::fr::IFlexrayController::AddFrameTransmitHandler>`
+.. |AddWakeupHandler| replace:: :cpp:func:`AddWakeupHandler()<ib::sim::fr::IFlexrayController::AddWakeupHandler>`
+.. |AddPocStatusHandler| replace:: :cpp:func:`AddPocStatusHandler()<ib::sim::fr::IFlexrayController::AddPocStatusHandler>`
+.. |AddSymbolHandler| replace:: :cpp:func:`AddSymbolHandler()<ib::sim::fr::IFlexrayController::AddSymbolHandler>`
+.. |AddSymbolTransmitHandler| replace:: :cpp:func:`AddSymbolTransmitHandler()<ib::sim::fr::IFlexrayController::AddSymbolTransmitHandler>`
+.. |AddCycleStartHandler| replace:: :cpp:func:`AddCycleStartHandler()<ib::sim::fr::IFlexrayController::AddCycleStartHandler>`
+
+.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<ib::sim::fr::IFlexrayController::RemoveFrameHandler>`
+.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<ib::sim::fr::IFlexrayController::RemoveFrameTransmitHandler>`
+.. |RemoveWakeupHandler| replace:: :cpp:func:`RemoveWakeupHandler()<ib::sim::fr::IFlexrayController::RemoveWakeupHandler>`
+.. |RemovePocStatusHandler| replace:: :cpp:func:`RemovePocStatusHandler()<ib::sim::fr::IFlexrayController::RemovePocStatusHandler>`
+.. |RemoveSymbolHandler| replace:: :cpp:func:`RemoveSymbolHandler()<ib::sim::fr::IFlexrayController::RemoveSymbolHandler>`
+.. |RemoveSymbolTransmitHandler| replace:: :cpp:func:`RemoveSymbolTransmitHandler()<ib::sim::fr::IFlexrayController::RemoveSymbolTransmitHandler>`
+.. |RemoveCycleStartHandler| replace:: :cpp:func:`RemoveCycleStartHandler()<ib::sim::fr::IFlexrayController::RemoveCycleStartHandler>`
+
+.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
 
 .. contents::
    :local:
    :depth: 3
-
 
 .. highlight:: cpp
 
 Using the FlexRay Controller
 ----------------------------
 
+The FlexRay Service API provides an FlexRay bus abstraction through the |IFlexrayController| interface.
+A FlexRay controller is created by calling |CreateFlexrayController| given a controller name and (optional) network 
+name::
+
+  auto* flexrayController = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
+  
+FlexRay controllers will only communicate within the same network. If no network name is provided, the controller name
+will be used as the network name.
+
 .. admonition:: Note
 
   The FlexRay service needs a detailed simulation based on the :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`.
   Because of the intrinsic complexity within FlexRay, no trivial simulation exists.
-
 
 Initialization
 ~~~~~~~~~~~~~~
@@ -28,26 +75,18 @@ it must be configured, and then a Startup phase must take place at the beginning
 Configuration
 _____________
 
-The configuration is performed by setting up a :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>` and passing it to
-:cpp:func:`IFlexrayController::Configure()<ib::sim::fr::IFlexrayController::Configure>`. Furthermore,
-:cpp:func:`IFlexrayController::Configure()<ib::sim::fr::IFlexrayController::Configure>` switches the controller
-to :cpp:enumerator:`FlexrayPocState::Ready<ib::sim::fr::FlexrayPocState::Ready>` signaling that it is ready for startup.
+The configuration is performed by setting up a |FlexrayControllerConfig| and passing it to |Configure|.
+Furthermore, |Configure| switches the controller to |FlexrayPocState_Ready| signaling that it is ready for startup.
 
-The :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>` consists of global
-:cpp:class:`FlexrayClusterParameters<ib::sim::fr::FlexrayClusterParameters>` and node-specific
-:cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>`, which are both best set
-in the participant configuration (see config section :ref:`FlexrayControllers<sec:cfg-participant-flexray>`).
-Furthermore, the :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>`
-contains one or more :cpp:class:`FlexrayTxBufferConfig<ib::sim::fr::FlexrayTxBufferConfig>` instances,
-which can either be specified in the participant configuration or added manually at
-runtime. TxBuffers are used to initiate a transmission from one FlexRay
-controller to another.
+The |FlexrayControllerConfig| consists of global |FlexrayClusterParameters| and node-specific |FlexrayNodeParameters|,
+which are both best set in the participant configuration (see config section 
+:ref:`FlexrayControllers<sec:cfg-participant-flexray>`). Furthermore, the |FlexrayControllerConfig| contains one or 
+more |FlexrayTxBufferConfig| instances, which can either be specified in the participant configuration or added 
+manually at runtime. TxBuffers are used to initiate a transmission from one FlexRay controller to another.
 
-The following example configures a FlexRay controller with two
-:cpp:class:`FlexrayTxBufferConfig<ib::sim::fr::FlexrayTxBufferConfig>` instances specifying two
-:cpp:class:`FlexrayFrameEvent<ib::sim::fr::FlexrayFrameEvent>` instances, which will be sent during simulation. The
-:cpp:class:`FlexrayClusterParameters<ib::sim::fr::FlexrayClusterParameters>` and the
-:cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>` are assumed to be set in the participant configuration::
+The following example configures a FlexRay controller with two |FlexrayTxBufferConfig| instances specifying two
+|FlexrayFrameEvent| instances, which will be sent during simulation. The |FlexrayClusterParameters| and the
+|FlexrayNodeParameters| are assumed to be set in the participant configuration::
 
     std::vector<FlexrayTxBufferConfig> bufferConfigs;
     FlexrayTxBufferConfig txConfig;
@@ -71,26 +110,22 @@ The following example configures a FlexRay controller with two
 
     flexrayController->Configure(controllerConfig);
 
-Note that :cpp:func:`IFlexrayController::Configure()<ib::sim::fr::IFlexrayController::Configure>`
-should be called in the InitHandler of a ParticipantController.
+Note that |Configure| should be called in the InitHandler of a ParticipantController.
 
 Startup
 _______
 
 At least two FlexRay controllers are always required for a successful startup in a FlexRay cluster.
-The two participants responsible for startup are also called coldstart nodes. The "leading"
-coldstart node (normally the first node that is in :cpp:enumerator:`FlexrayPocState::Ready<ib::sim::fr::FlexrayPocState::Ready>`)
-has to send the :cpp:func:`IFlexrayController::Wakeup()<ib::sim::fr::IFlexrayController::Wakeup>` command
-to the other "following" coldstart node(s)::
+The two participants responsible for startup are also called coldstart nodes. The "leading" coldstart node 
+(normally the first node that is in |FlexrayPocState_Ready|) has to send the |Wakeup| command to the other 
+"following" coldstart node(s)::
 
   leadingColdStartNode->Wakeup();
   // The leading controllers FlexrayPocState will change from
   // Ready to Wakeup triggering the PocStatusHandler.
 
-The response of the following cold startnode must be the
-:cpp:func:`IFlexrayController::AllowColdstart()<ib::sim::fr::IFlexrayController::AllowColdstart>` and
-:cpp:func:`IFlexrayController::Run()<ib::sim::fr::IFlexrayController::Run>` command
-that can be send in the WakeupHandler callback::
+The response of the following cold startnode must be the |AllowColdstart| and |Run| command that can be send in the 
+WakeupHandler callback::
 
   void WakeupHandler(IFlexrayController* controller, const FlexraySymbolEvent& symbol)
   {
@@ -99,8 +134,7 @@ that can be send in the WakeupHandler callback::
   }
 
 Finally, the leading coldstart node has also to respond by sending the same commands after
-the FlexrayPocState state changed from :cpp:enumerator:`FlexrayPocState::Wakeup<ib::sim::fr::FlexrayPocState::Wakeup>` to
-:cpp:enumerator:`FlexrayPocState::Ready<ib::sim::fr::FlexrayPocState::Ready>`::
+the FlexrayPocState state changed from |FlexrayPocState_Wakeup| to |FlexrayPocState_Ready|::
     
   if (oldState == FlexrayPocState::Wakeup
       && newState == FlexrayPocState::Ready)
@@ -110,15 +144,13 @@ the FlexrayPocState state changed from :cpp:enumerator:`FlexrayPocState::Wakeup<
   }
 
 Note that the leading coldstart node must send these commands in the next FlexRay cycle and not
-directly in a registered handler like the ControllerStateHandler.
+directly in a handler like the PocStatusHandler.
 
 Tx Buffer Update (Sending FlexRay Messages)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In each FlexRay cycle, data can be sent by using the
-:cpp:func:`IFlexrayController::UpdateTxBuffer()<ib::sim::fr::IFlexrayController::UpdateTxBuffer>`.
-For this, an existing txBufferIndex, a payload and the
-payloadDataValid flag must be provided::
+In each FlexRay cycle, data can be sent by using the |UpdateTxBuffer|. For this, an existing txBufferIndex, 
+a payload and the payloadDataValid flag must be provided::
 
   std::string payloadString{"FlexRay message"};
 
@@ -132,9 +164,9 @@ payloadDataValid flag must be provided::
   controller->UpdateTxBuffer(update);
 
 To be notified for the success or failure of the transmission, a FrameTransmitHandler should
-be registered::
+be added::
   
-  // Register FrameTransmitHandler to receive FlexRay transmit events from other FlexRay controllers.
+  // Add FrameTransmitHandler to receive FlexRay transmit events from other FlexRay controllers.
   auto frameTransmitHandler =
       [](IFlexrayController*, const FlexrayFrameTransmitEvent& ack) {};
   flexrayController->AddFrameTransmitHandler(frameTransmitHandler);
@@ -142,33 +174,29 @@ be registered::
 Receiving FlexRay Messages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To receive data from other FlexRay controller, a FrameHandler must be registered,
-which is called by the FlexRay controller whenever a :cpp:class:`FlexrayFrameEvent<ib::sim::fr::FlexrayFrameEvent>`
-is received::
+To receive data from other FlexRay controller, a ``FrameHandler`` must be added via |AddFrameHandler|, which is called 
+by the FlexRay controller whenever a |FlexrayFrameEvent| is received::
 
-  // Register FrameHandler to receive FlexRay messages from other FlexRay controller.
+  // Add FrameHandler to receive FlexRay messages from other FlexRay controller.
   auto frameHandler =
       [](IFlexrayController*, const FlexrayFrameEvent& msg) {};
   flexrayController->AddFrameHandler(frameHandler);
 
 .. admonition:: Note
 
-  For a successful Startup, also the PocStatusHandler, the WakeupHandler, the SymbolHandler
-  and the SymbolTransmitHandler should be registered to invoke the different necessary commands.
+  For a successful Startup, also the ``PocStatusHandler``, the ``WakeupHandler``, the ``SymbolHandler``
+  and the ``SymbolTransmitHandler`` should be added to invoke the different necessary commands.
 
 .. _sec:poc-status-changes:
 
 Receiving POC status changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The protocol operation control (POC) status is a structure consisting of
-status variables, substates and flags. It is modelled by the
-:cpp:class:`FlexrayPocStatusEvent<ib::sim::fr::FlexrayPocStatusEvent>` structure.
-Updates to the controller's POC status can be monitored using handlers
-registered with a call to
-:cpp:func:`IFlexrayController::RegisterPocStatusHandler()<ib::sim::fr::IFlexrayController::AddPocStatusHandler>`::
+The protocol operation control (POC) status is a structure consisting of status variables, substates and flags. It is 
+modelled by the |FlexrayPocStatusEvent| structure. Updates to the controller's POC status can be monitored using 
+handlers added with a call to |AddPocStatusHandler|::
     
-    //Register a FlexrayPocStatusEvent handler, and handle status changes
+    // Add a FlexrayPocStatusEvent handler, and handle status changes
     flexrayController->AddPocStatusHandler([&oldPoc](IFlexrayController* ctrl, const FlexrayPocStatusEvent& poc) {
         // we might get called even if poc.state was not changed
         if (poc.state != oldPoc.state)
@@ -202,7 +230,20 @@ registered with a call to
         oldPoc = poc
     });
 
-The handler will be invoked whenever the controller's FlexrayPocStatusEvent is updated.
+The handler will be invoked whenever the controller's POC status is updated.
+
+Managing the event handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adding a handler will return a |HandlerId| which can be used to remove the handler via:
+
+- |RemoveFrameHandler|
+- |RemoveFrameTransmitHandler|
+- |RemoveWakeupHandler|
+- |RemovePocStatusHandler|
+- |RemoveSymbolHandler|
+- |RemoveSymbolTransmitHandler|
+- |RemoveCycleStartHandler|
 
 Message Tracing
 ~~~~~~~~~~~~~~~

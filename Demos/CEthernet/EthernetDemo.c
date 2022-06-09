@@ -188,8 +188,11 @@ int main(int argc, char* argv[])
     returnCode = ib_Ethernet_Controller_Create(&ethernetController1, participant, "ETH0", "Ethernet1");
     returnCode = ib_Ethernet_Controller_Create(&ethernetController2, participant, "ETH1", "Ethernet1");
 
-    ib_Ethernet_Controller_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler);
-    ib_Ethernet_Controller_AddFrameHandler(ethernetController2, NULL, &FrameHandler);
+    ib_HandlerId frameTransmitHandlerId;
+    ib_Ethernet_Controller_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler,
+                                                   &frameTransmitHandlerId);
+    ib_HandlerId frameHandlerId;
+    ib_Ethernet_Controller_AddFrameHandler(ethernetController2, NULL, &FrameHandler, &frameHandlerId);
 
     for (int i = 0; i < 10; i ++) 
     {

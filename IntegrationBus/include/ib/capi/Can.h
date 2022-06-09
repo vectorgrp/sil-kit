@@ -285,7 +285,7 @@ typedef ib_ReturnCode(*ib_Can_Controller_SetBaudRate_t)(ib_Can_Controller* contr
 * \param controller The Can controller for which the callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on transmit acknowledge.
-* \param outHandlerId The handler identifier that can be used to unregister the callback.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddFrameTransmitHandler(ib_Can_Controller* controller, void* context,
                                                                           ib_Can_FrameTransmitHandler_t handler,
@@ -297,7 +297,7 @@ typedef ib_ReturnCode (*ib_Can_Controller_AddFrameTransmitHandler_t)(ib_Can_Cont
                                                                      ib_Can_TransmitStatus statusMask,
                                                                      ib_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Can_FrameTransmitHandler_t by id on this controller 
+/*! \brief  Remove a \ref ib_Can_FrameTransmitHandler_t by ib_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
@@ -316,7 +316,7 @@ typedef ib_ReturnCode (*ib_Can_Controller_RemoveFrameTransmitHandler_t)(ib_Can_C
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
 * \param directionMask A bit mask defining the transmit direction of the messages (rx/tx)
-* \param outHandlerId The handler identifier that can be used to unregister the callback.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddFrameHandler(ib_Can_Controller* controller, void* context,
                                                                   ib_Can_FrameHandler_t handler,
@@ -326,7 +326,7 @@ IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddFrameHandler(ib_Can_Control
 typedef ib_ReturnCode (*ib_Can_Controller_AddFrameHandler_t)(ib_Can_Controller* controller, void* context,
                                                              ib_Can_FrameHandler_t handler, ib_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Can_FrameHandler_t by id on this controller 
+/*! \brief  Remove a \ref ib_Can_FrameHandler_t by ib_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
@@ -348,7 +348,7 @@ typedef ib_ReturnCode (*ib_Can_Controller_RemoveFrameHandler_t)(ib_Can_Controlle
 * \param controller The Can controller for which the state change callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on state change.
-* \param outHandlerId The handler identifier that can be used to unregister the callback.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddStateChangeHandler(ib_Can_Controller* controller, void* context,
                                                                         ib_Can_StateChangeHandler_t handler,
@@ -358,7 +358,7 @@ typedef ib_ReturnCode (*ib_Can_Controller_AddStateChangeHandler_t)(ib_Can_Contro
                                                                    ib_Can_StateChangeHandler_t handler,
                                                                    ib_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Can_StateChangeHandler_t by id on this controller 
+/*! \brief  Remove a \ref ib_Can_StateChangeHandler_t by ib_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
@@ -381,7 +381,7 @@ typedef ib_ReturnCode (*ib_Can_Controller_RemoveStateChangeHandler_t)(ib_Can_Con
 * \param controller The Can controller for which the error state callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on error state change.
-* \param outHandlerId The handler identifier that can be used to unregister the callback.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* controller,
                                                                              void* context,
@@ -391,7 +391,8 @@ IntegrationBusAPI ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_
 typedef ib_ReturnCode (*ib_Can_Controller_AddErrorStateChangeHandler_t)(ib_Can_Controller* controller, void* context,
                                                                         ib_Can_ErrorStateChangeHandler_t handler,
                                                                         ib_HandlerId* outHandlerId);
-/*! \brief  Remove a \ref ib_Can_ErrorStateChangeHandler_t by id on this controller 
+
+/*! \brief  Remove a \ref ib_Can_ErrorStateChangeHandler_t by ib_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */

@@ -2,8 +2,8 @@
 add_library(IbSimEthernet STATIC
     EthController.cpp
     EthController.hpp
-    EthControllerReplay.hpp
-    EthControllerReplay.cpp
+    #EthControllerReplay.hpp
+    #EthControllerReplay.cpp
     
     ISimBehavior.hpp
     SimBehavior.cpp

@@ -71,14 +71,16 @@ ib_ReturnCode ib_Ethernet_Controller_Deactivate(ib_Ethernet_Controller* controll
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(ib_Ethernet_Controller* controller, void* context, ib_Ethernet_FrameHandler_t handler)
+ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(ib_Ethernet_Controller* controller, void* context,
+                                                     ib_Ethernet_FrameHandler_t handler, ib_HandlerId* outHandlerId)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
+  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
   CAPI_ENTER
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
-    cppController->AddFrameHandler(
+    *outHandlerId = cppController->AddFrameHandler(
       [handler, context, controller](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameEvent& cppFrameEvent)
       {
         auto& cppFrame = cppFrameEvent.frame;
@@ -98,14 +100,29 @@ ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(ib_Ethernet_Controller* con
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Ethernet_Controller_AddFrameTransmitHandler(ib_Ethernet_Controller* controller, void* context, ib_Ethernet_FrameTransmitHandler_t handler)
+ib_ReturnCode ib_Ethernet_Controller_RemoveFrameHandler(ib_Ethernet_Controller* controller, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
+        cppController->RemoveFrameHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Ethernet_Controller_AddFrameTransmitHandler(ib_Ethernet_Controller* controller, void* context,
+                                                             ib_Ethernet_FrameTransmitHandler_t handler,
+                                                             ib_HandlerId* outHandlerId)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
+  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
   CAPI_ENTER
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
-    cppController->AddFrameTransmitHandler(
+    *outHandlerId = cppController->AddFrameTransmitHandler(
       [handler, context, controller](ib::sim::eth::IEthernetController* , const ib::sim::eth::EthernetFrameTransmitEvent& ack)
       {
         std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
@@ -146,15 +163,30 @@ ib_ReturnCode ib_Ethernet_Controller_AddFrameTransmitHandler(ib_Ethernet_Control
   }
   CAPI_LEAVE
 }
+ib_ReturnCode ib_Ethernet_Controller_RemoveFrameTransmitHandler(ib_Ethernet_Controller* controller,
+                                                                ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
+        cppController->RemoveFrameTransmitHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
 
-ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(ib_Ethernet_Controller* controller, void* context, ib_Ethernet_StateChangeHandler_t handler)
+ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(ib_Ethernet_Controller* controller, void* context,
+                                                           ib_Ethernet_StateChangeHandler_t handler,
+                                                           ib_HandlerId* outHandlerId)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
+  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
   CAPI_ENTER
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
-    cppController->AddStateChangeHandler(
+    *outHandlerId = cppController->AddStateChangeHandler(
       [handler, context, controller](ib::sim::eth::IEthernetController* , const ib::sim::eth::EthernetStateChangeEvent& stateChangeEvent)
       {
         ib_Ethernet_StateChangeEvent cStateChangeEvent;
@@ -167,15 +199,30 @@ ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(ib_Ethernet_Controlle
   }
   CAPI_LEAVE
 }
+ib_ReturnCode ib_Ethernet_Controller_RemoveStateChangeHandler(ib_Ethernet_Controller* controller,
+                                                              ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
+        cppController->RemoveStateChangeHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
 
-ib_ReturnCode ib_Ethernet_Controller_AddBitrateChangeHandler(ib_Ethernet_Controller* controller, void* context, ib_Ethernet_BitrateChangeHandler_t handler)
+ib_ReturnCode ib_Ethernet_Controller_AddBitrateChangeHandler(ib_Ethernet_Controller* controller, void* context,
+                                                             ib_Ethernet_BitrateChangeHandler_t handler,
+                                                             ib_HandlerId* outHandlerId)
 {
   ASSERT_VALID_POINTER_PARAMETER(controller);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
+  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
   CAPI_ENTER
   {
     auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
-    cppController->AddBitrateChangeHandler(
+      *outHandlerId = cppController->AddBitrateChangeHandler(
       [handler, context, controller](ib::sim::eth::IEthernetController* , const ib::sim::eth::EthernetBitrateChangeEvent& bitrateChangeEvent)
       {
             ib_Ethernet_BitrateChangeEvent cBitrateChangeEvent;
@@ -188,6 +235,18 @@ ib_ReturnCode ib_Ethernet_Controller_AddBitrateChangeHandler(ib_Ethernet_Control
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
+}
+ib_ReturnCode ib_Ethernet_Controller_RemoveBitrateChangeHandler(ib_Ethernet_Controller* controller,
+                                                                ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::eth::IEthernetController*>(controller);
+        cppController->RemoveBitrateChangeHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 ib_ReturnCode ib_Ethernet_Controller_SendFrame(ib_Ethernet_Controller* controller, ib_Ethernet_Frame* frame, void* userContext)

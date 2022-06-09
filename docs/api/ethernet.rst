@@ -8,9 +8,14 @@ Ethernet Service API
 .. |IEthernetController| replace:: :cpp:class:`IEthernetController<ib::sim::eth::IEthernetController>`
 .. |Activate| replace:: :cpp:func:`Activate()<ib::sim::eth::IEthernetController::Activate>`
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<ib::sim::eth::IEthernetController::SendFrame>`
+
 .. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<ib::sim::eth::IEthernetController::AddFrameTransmitHandler>`
 .. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<ib::sim::eth::IEthernetController::AddStateChangeHandler>`
 .. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::eth::IEthernetController::AddFrameHandler>`
+
+.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<ib::sim::eth::IEthernetController::RemoveFrameTransmitHandler>`
+.. |RemoveStateChangeHandler| replace:: :cpp:func:`RemoveStateChangeHandler()<ib::sim::eth::IEthernetController::RemoveStateChangeHandler>`
+.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<ib::sim::eth::IEthernetController::RemoveFrameHandler>`
 
 .. |EthernetFrame| replace:: :cpp:class:`EthernetFrame<ib::sim::eth::EthernetFrame>`
 .. |EthernetFrameEvent| replace:: :cpp:class:`EthernetFrameEvent<ib::sim::eth::EthernetFrameEvent>`
@@ -22,6 +27,8 @@ Ethernet Service API
 .. |LinkDown| replace:: :cpp:enumerator:`EthernetTransmitStatus::LinkDown<ib::sim::eth::LinkDown>`
 .. |Dropped| replace:: :cpp:enumerator:`EthernetTransmitStatus::Dropped<ib::sim::eth::Dropped>`
 .. |InvalidFrameFormat| replace:: :cpp:enumerator:`EthernetTransmitStatus::InvalidFrameFormat<ib::sim::eth::InvalidFrameFormat>`
+
+.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
 
 .. contents::
    :local:
@@ -108,6 +115,15 @@ an Ethernet frame is received::
     // Handle frameEvent
   };
   ethernetController->AddFrameHandler(frameHandler);
+
+Managing the event handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adding a handler will return a |HandlerId| which can be used to remove the handler via:
+
+- |RemoveFrameHandler|
+- |RemoveFrameTransmitHandler|  
+- |RemoveStateChangeHandler|
 
 Usage with the VIBE NetworkSimulator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

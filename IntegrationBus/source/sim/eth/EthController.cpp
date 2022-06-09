@@ -171,44 +171,82 @@ void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Ether
 // Handlers
 //------------------------
 
-void EthController::AddFrameHandler(FrameHandler handler)
+HandlerId EthController::AddFrameHandler(FrameHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void EthController::RemoveFrameHandler(HandlerId handlerId)
+{
+    RemoveHandler<EthernetFrameEvent>(handlerId);
 }
 
-void EthController::AddFrameTransmitHandler(FrameTransmitHandler handler)
+HandlerId EthController::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void EthController::RemoveFrameTransmitHandler(HandlerId handlerId)
+{
+    RemoveHandler<EthernetFrameTransmitEvent>(handlerId);
 }
 
-void EthController::AddStateChangeHandler(StateChangeHandler handler)
+HandlerId EthController::AddStateChangeHandler(StateChangeHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void EthController::RemoveStateChangeHandler(HandlerId handlerId)
+{
+    RemoveHandler<EthernetStateChangeEvent>(handlerId);
 }
 
-void EthController::AddBitrateChangeHandler(BitrateChangeHandler handler)
+HandlerId EthController::AddBitrateChangeHandler(BitrateChangeHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void EthController::RemoveBitrateChangeHandler(HandlerId handlerId)
+{
+    RemoveHandler<EthernetBitrateChangeEvent>(handlerId);
 }
 
-template<typename MsgT>
-void EthController::AddHandler(CallbackT<MsgT>&& handler)
+template <typename MsgT>
+HandlerId EthController::AddHandler(CallbackT<MsgT>&& handler)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.push_back(std::forward<CallbackT<MsgT>>(handler));
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    static uint64_t handlerId = 0;
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+    handlersMap.emplace(handlerId, std::forward<CallbackT<MsgT>>(handler));
+    return handlerId++;
 }
 
-
-template<typename MsgT>
+template <typename MsgT>
 void EthController::CallHandlers(const MsgT& msg)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlers = std::get<CallbackMap<MsgT>>(_callbacks);
     for (auto&& handler : handlers)
     {
-        handler(this, msg);
+        handler.second(this, msg);
     }
 }
 
+template <typename MsgT>
+void EthController::RemoveHandler(HandlerId handlerId)
+{
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+
+    auto handlerToRemove = handlersMap.find(handlerId);
+    if (handlerToRemove == handlersMap.end())
+    {
+        _participant->GetLogger()->Warn("RemoveHandler failed: Unknown HandlerId.");
+    }
+    else
+    {
+        handlersMap.erase(handlerId);
+    }
+}
 
 } // namespace eth
 } // namespace sim

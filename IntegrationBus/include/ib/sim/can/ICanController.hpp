@@ -126,12 +126,12 @@ public:
      * The registered handler is called when the controller receives a
      * new CanFrame.
      * 
-     * \return Returns a \ref HandlerId that can be used to unregister the callback.
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddFrameHandler(FrameHandler handler,
                                       DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) = 0;
 
-    /*! \brief Remove a FrameHandler by id on this controller 
+    /*! \brief Remove a FrameHandler by HandlerId on this controller 
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -147,11 +147,11 @@ public:
      * NB: Only supported in VIBE simulation. In simple simulation,
      * the handler is never called.
      * 
-     * \return Returns a \ref HandlerId that can be used to unregister the callback.
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddStateChangeHandler(StateChangeHandler handler) = 0;
 
-    /*! \brief Remove a StateChangeHandler by id on this controller 
+    /*! \brief Remove a StateChangeHandler by HandlerId on this controller 
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -167,11 +167,11 @@ public:
      * NB: Only supported in VIBE simulation. In simple simulation,
      * the handler is never called.
      * 
-     * \return Returns a \ref HandlerId that can be used to unregister the callback.
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddErrorStateChangeHandler(ErrorStateChangeHandler handler) = 0;
 
-    /*! \brief Remove an ErrorStateChangeHandler by id on this controller 
+    /*! \brief Remove an ErrorStateChangeHandler by HandlerId on this controller 
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -182,7 +182,7 @@ public:
      * The registered handler is called when a CAN message was
      * successfully transmitted on the bus or when an error occurred.
      *
-     * \return Returns a \ref HandlerId that can be used to unregister the callback.
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      * 
      * NB: Full support in VIBE simulation. In simple simulation, all
      * messages are automatically positively acknowledged.
@@ -193,7 +193,7 @@ public:
             | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
             | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) = 0;
 
-    /*! \brief Remove a FrameTransmitHandler by id on this controller 
+    /*! \brief Remove a FrameTransmitHandler by HandlerId on this controller 
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */

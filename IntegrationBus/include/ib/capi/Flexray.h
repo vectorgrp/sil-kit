@@ -549,8 +549,6 @@ typedef void (*ib_Flexray_SymbolTransmitHandler_t)(void* context, ib_Flexray_Con
 
 /*! Callback type to indicate that a new FlexRay cycle did start.
   *  Cf. \ref AddCycleStartHandler();
-  *
-  *  NB: Only supported in VIBE simulation.
   */
 typedef void (*ib_Flexray_CycleStartHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_CycleStartEvent* cycleStart);
 
@@ -601,35 +599,87 @@ IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_ExecuteCmd(ib_Flexray_Cont
 
 typedef ib_ReturnCode (*ib_Flexray_Controller_ExecuteCmd_t)(ib_Flexray_Controller* controller, ib_Flexray_ChiCommand cmd);
 
-//! \brief Receive a FlexRay message from the given controller.
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddFrameHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_FrameHandler_t handler);
+/*! \brief Receive a FlexRay message from the given controller.
+ *
+ * \param controller The FlexRay controller for which the callback should be registered.
+ * \param context The user provided context pointer, that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddFrameHandler(ib_Flexray_Controller* controller, void* context,
+                                                                      ib_Flexray_FrameHandler_t handler,
+                                                                      ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_FrameHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameHandler_t)(ib_Flexray_Controller* controller, void* context,
+                                                                 ib_Flexray_FrameHandler_t handler,
+                                                                 ib_HandlerId* outHandlerId);
 
-//! \brief Notification that a FlexRay message has been successfully sent.
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddFrameTransmitHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_FrameTransmitHandler_t handler);
+/*! \brief Notification that a FlexRay message has been successfully sent.
+ *
+ * \param controller The FlexRay controller for which the callback should be registered.
+ * \param context The user provided context pointer, that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddFrameTransmitHandler(ib_Flexray_Controller* controller,
+                                                                              void* context,
+                                                                              ib_Flexray_FrameTransmitHandler_t handler,
+                                                                              ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameTransmitHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_FrameTransmitHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameTransmitHandler_t)(ib_Flexray_Controller* controller,
+                                                                         void* context,
+                                                                         ib_Flexray_FrameTransmitHandler_t handler,
+                                                                         ib_HandlerId* outHandlerId);
 
-//! \brief Notification that a wakeup has been received.
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddWakeupHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_WakeupHandler_t handler);
+/*! \brief Notification that a wakeup has been received.
+ *
+ * \param controller The FlexRay controller for which the callback should be registered.
+ * \param context The user provided context pointer, that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddWakeupHandler(ib_Flexray_Controller* controller, void* context,
+                                                                       ib_Flexray_WakeupHandler_t handler,
+                                                                       ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddWakeupHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_WakeupHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddWakeupHandler_t)(ib_Flexray_Controller* controller, void* context,
+                                                                  ib_Flexray_WakeupHandler_t handler,
+                                                                  ib_HandlerId* outHandlerId);
 
-//! \brief Notification that the POC status has changed.
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddPocStatusHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_PocStatusHandler_t handler);
+/*! \brief Notification that the POC status has changed.
+ *
+ * \param controller The FlexRay controller for which the callback should be registered.
+ * \param context The user provided context pointer, that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddPocStatusHandler(ib_Flexray_Controller* controller,
+                                                                          void* context,
+                                                                          ib_Flexray_PocStatusHandler_t handler,
+                                                                          ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddPocStatusHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_PocStatusHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddPocStatusHandler_t)(ib_Flexray_Controller* controller, void* context,
+                                                                     ib_Flexray_PocStatusHandler_t handler,
+                                                                     ib_HandlerId* outHandlerId);
 
 /*! \brief Notification that the controller has received a symbol.
   *
   * This callback is primarily intended for tracing. There is no need to react on it.
   * The symbols relevant for interaction trigger also an additional callback,
   * e.g., \ref WakeupHandler.
+  *
+  * \param controller The FlexRay controller for which the callback should be registered.
+  * \param context The user provided context pointer, that is reobtained in the callback.
+  * \param handler The handler to be called.
+  * \param outHandlerId The handler identifier that can be used to remove the callback.
   */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddSymbolHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_SymbolHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddSymbolHandler(ib_Flexray_Controller* controller, void* context,
+                                                                       ib_Flexray_SymbolHandler_t handler,
+                                                                       ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_SymbolHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolHandler_t)(ib_Flexray_Controller* controller, void* context,
+                                                                  ib_Flexray_SymbolHandler_t handler,
+                                                                  ib_HandlerId* outHandlerId);
 
 /*! \brief Notification that the controller has sent a symbol.
   *
@@ -637,18 +687,36 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolHandler_t)(ib_Flexray_Con
   * Currently, the following SymbolPatterns can occur:
   *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus, if the bus is idle.
   *  - Run() will cause the transmission of FlexraySymbolPattern::CasMts if configured to coldstart the bus.
+  *
+  * \param controller The FlexRay controller for which the callback should be registered.
+  * \param context The user provided context pointer, that is reobtained in the callback.
+  * \param handler The handler to be called.
+  * \param outHandlerId The handler identifier that can be used to remove the callback.
   */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddSymbolTransmitHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_SymbolTransmitHandler_t handler);
+IntegrationBusAPI ib_ReturnCode
+ib_Flexray_Controller_AddSymbolTransmitHandler(ib_Flexray_Controller* controller, void* context,
+                                               ib_Flexray_SymbolTransmitHandler_t handler, ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolTransmitHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_SymbolTransmitHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolTransmitHandler_t)(ib_Flexray_Controller* controller,
+                                                                          void* context,
+                                                                          ib_Flexray_SymbolTransmitHandler_t handler,
+                                                                          ib_HandlerId* outHandlerId);
 
 /*! \brief Notification that a new FlexRay cycle did start.
-  *
-  *  NB: Only supported in VIBE simulation.
-  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddCycleStartHandler(ib_Flexray_Controller* controller, void* context, ib_Flexray_CycleStartHandler_t handler);
+ *
+ * \param controller The FlexRay controller for which the callback should be registered.
+ * \param context The user provided context pointer, that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddCycleStartHandler(ib_Flexray_Controller* controller,
+                                                                           void* context,
+                                                                           ib_Flexray_CycleStartHandler_t handler,
+                                                                           ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddCycleStartHandler_t)(ib_Flexray_Controller* controller, void* context, ib_Flexray_CycleStartHandler_t handler);
+typedef ib_ReturnCode (*ib_Flexray_Controller_AddCycleStartHandler_t)(ib_Flexray_Controller* controller, void* context,
+                                                                      ib_Flexray_CycleStartHandler_t handler,
+                                                                      ib_HandlerId* outHandlerId);
 
 IB_END_DECLS
 

@@ -576,6 +576,47 @@ TEST_F(LinControllerTrivialSimTest, wake_up_internal_uninitialized)
     EXPECT_THROW(controller.WakeupInternal(), ib::StateError);
 }
 
+TEST_F(LinControllerTrivialSimTest, add_remove_handler)
+{
+    // Configure Slave
+    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    LinFrameResponse response;
+
+    response.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4);
+    response.responseMode = LinFrameResponseMode::Rx;
+    config.frameResponses.push_back(response);
+
+    controller.Init(config);
+    const int numHandlers = 10;
+    std::vector<ib::sim::HandlerId> handlerIds;
+    for (int i = 0; i < numHandlers; i++)
+    {
+        handlerIds.push_back(controller.AddFrameStatusHandler(frameStatusHandler));
+    }
+
+    // Receive LinTransmission
+    LinTransmission transmission;
+
+    // Expect LIN_RX_OK
+    transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1, 2, 3, 4, 0, 0, 0, 0});
+    transmission.status = LinFrameStatus::LIN_RX_OK;
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_OK))
+        .Times(numHandlers);
+
+    controller.ReceiveIbMessage(&controller2, transmission);
+
+    for (auto&& handlerId : handlerIds)
+    {
+        controller.RemoveFrameStatusHandler(handlerId);
+    }
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_OK))
+        .Times(0);
+    controller.ReceiveIbMessage(&controller2, transmission);
+}
+
+
 
 ////////////
 // Tracing

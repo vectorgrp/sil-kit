@@ -436,12 +436,29 @@ typedef ib_ReturnCode(*ib_Lin_Controller_WakeupInternal_t)(ib_Lin_Controller* co
  * TxCompleteHandler while an RX was handled using
  * ReceiveMessageHandler. For Lin slaves the confirmation varied
  * for simple simulation and VIBE simulation.</em>
+ *
+ * \param controller The LIN controller for which the callback should be registered.
+ * \param context The user provided context pointer that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_AddFrameStatusHandler(ib_Lin_Controller* controller, void* context,
-                                                                             ib_Lin_FrameStatusHandler_t handler);
+                                                                        ib_Lin_FrameStatusHandler_t handler,
+                                                                        ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode(*ib_Lin_Controller_AddFrameStatusHandler_t)(ib_Lin_Controller* controller, void* context,
-                                                                             ib_Lin_FrameStatusHandler_t handler);
+typedef ib_ReturnCode (*ib_Lin_Controller_AddFrameStatusHandler_t)(ib_Lin_Controller* controller, void* context,
+                                                                   ib_Lin_FrameStatusHandler_t handler,
+                                                                   ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Lin_FrameStatusHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_RemoveFrameStatusHandler(ib_Lin_Controller* controller,
+                                                                           ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Lin_Controller_RemoveFrameStatusHandler_t)(ib_Lin_Controller* controller,
+                                                                      ib_HandlerId handlerId);
 
 /*! \brief The GoToSleepHandler is called whenever a go-to-sleep frame
  * was received.
@@ -456,24 +473,57 @@ typedef ib_ReturnCode(*ib_Lin_Controller_AddFrameStatusHandler_t)(ib_Lin_Control
  * treated like every other frame, i.e. the ib_Lin_FrameStatusHandler is
  * only called for Lin ID 0x3C if configured as
  * ib_Lin_FrameResponseMode_Rx.
+ * 
+ * \param controller The LIN controller for which the callback should be registered.
+ * \param context The user provided context pointer that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_AddGoToSleepHandler(ib_Lin_Controller* controller, void* context,
-                                                                           ib_Lin_GoToSleepHandler_t handler);
+                                                                      ib_Lin_GoToSleepHandler_t handler,
+                                                                      ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode(*ib_Lin_Controller_AddGoToSleepHandler_t)(ib_Lin_Controller* controller, void* context,
-                                                                           ib_Lin_GoToSleepHandler_t handler);
+typedef ib_ReturnCode (*ib_Lin_Controller_AddGoToSleepHandler_t)(ib_Lin_Controller* controller, void* context,
+                                                                 ib_Lin_GoToSleepHandler_t handler,
+                                                                 ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Lin_GoToSleepHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_RemoveGoToSleepHandler(ib_Lin_Controller* controller,
+                                                                         ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Lin_Controller_RemoveGoToSleepHandler_t)(ib_Lin_Controller* controller,
+                                                                    ib_HandlerId handlerId);
 
 /*! \brief The WakeupHandler is called whenever a wake up pulse is received
  *
  * Note: The Lin controller does not automatically enter
  * operational mode on wake up pulse detection. I.e.,
  * WakeInternal() must be called manually.
+ * 
+ * \param controller The LIN controller for which the callback should be registered.
+ * \param context The user provided context pointer that is reobtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
 IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_AddWakeupHandler(ib_Lin_Controller* controller, void* context,
-                                                                        ib_Lin_WakeupHandler_t handler);
+                                                                   ib_Lin_WakeupHandler_t handler,
+                                                                   ib_HandlerId* outHandlerId);
 
 typedef ib_ReturnCode(*ib_Lin_Controller_AddWakeupHandler_t)(ib_Lin_Controller* controller, void* context,
-                                                                        ib_Lin_WakeupHandler_t handler);
+                                                             ib_Lin_WakeupHandler_t handler,
+                                                             ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Lin_WakeupHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Lin_Controller_RemoveWakeupHandler(ib_Lin_Controller* controller,
+                                                                      ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Lin_Controller_RemoveWakeupHandler_t)(ib_Lin_Controller* controller, ib_HandlerId handlerId);
 
 IB_END_DECLS
 

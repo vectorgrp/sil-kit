@@ -143,8 +143,8 @@ rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
    :cpp:func:`init handler<ib::mw::synd::IParticipantController::SetInitHandler()>`. Otherwise, it is not guaranteed 
    that all participants are already connected, which can cause the call to have no effect.
 
-Managing the handlers
-~~~~~~~~~~~~~~~~~~~~~
+Managing the event handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adding a handler will return a |HandlerId| which can be used to remove the handler via:
 

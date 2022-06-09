@@ -165,8 +165,16 @@ public:
      * TxCompleteHandler while an RX was handled using
      * ReceiveMessageHandler. For LIN slaves the confirmation varied
      * for simple simulation and VIBE simulation.</em>
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddFrameStatusHandler(FrameStatusHandler handler) = 0;
+    virtual HandlerId AddFrameStatusHandler(FrameStatusHandler handler) = 0;
+
+    /*! \brief Remove a FrameStatusHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveFrameStatusHandler(HandlerId handlerId) = 0;
 
     /*! \brief The GoToSleepHandler is called whenever a go-to-sleep frame
      * was received.
@@ -181,24 +189,48 @@ public:
      * treated like every other frame, i.e. the FrameStatusHandler is
      * only called for LIN ID 0x3C if configured as
      * LinFrameResponseMode::Rx.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddGoToSleepHandler(GoToSleepHandler handler) = 0;
+    virtual HandlerId AddGoToSleepHandler(GoToSleepHandler handler) = 0;
+
+    /*! \brief Remove a GoToSleepHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveGoToSleepHandler(HandlerId handlerId) = 0;
 
     /*! \brief The WakeupHandler is called whenever a wake up pulse is received
      *
      * Note: The LIN controller does not automatically enter
      * operational mode on wake up pulse detection. I.e.,
      * WakeInternal() must be called manually.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddWakeupHandler(WakeupHandler handler) = 0;
+    virtual HandlerId AddWakeupHandler(WakeupHandler handler) = 0;
+
+    /*! \brief Remove a WakeupHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveWakeupHandler(HandlerId handlerId) = 0;
 
     /*! \brief The FrameResponseUpdateHandler provides direct access
      * to the LinFrameResponse configuration of other LIN controllers.
      *
      * NB: This callback is mainly for diagnostic purposes and is NOT
      * needed for regular LIN controller operation.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) = 0;
+    virtual HandlerId AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) = 0;
+
+    /*! \brief Remove a FrameResponseUpdateHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveFrameResponseUpdateHandler(HandlerId handlerId) = 0;
 };
 
 } // namespace lin

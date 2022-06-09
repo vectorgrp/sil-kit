@@ -8,14 +8,144 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.25] - 2022-06-
 ----------------------
 
+Added
+~~~~~
+
+- LIN: Added functionality to remove handlers:
+
+  - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId RemoveFrameStatusHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveGoToSleepHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveWakeupHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveFrameResponseUpdateHandler(HandlerId handlerId) = 0;
+      
+  - ``IntegrationBus/include/ib/capi/Lin.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Lin_Controller_RemoveFrameStatusHandler_t)(ib_Lin_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Lin_Controller_RemoveGoToSleepHandler_t)(ib_Lin_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Lin_Controller_RemoveWakeupHandler_t)(ib_Lin_Controller* controller, ib_HandlerId handlerId);
+
+- Ethernet: Added functionality to remove handlers:
+
+  - ``IntegrationBus/include/ib/sim/eth/IEthernetController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId RemoveFrameHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveStateChangeHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveFrameTransmitHandler(HandlerId handlerId) = 0;
+      
+  - ``IntegrationBus/include/ib/capi/Ethernet.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveFrameHandler_t)(ib_Ethernet_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveStateChangeHandler_t)(ib_Ethernet_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveFrameTransmitHandler_t)(ib_Ethernet_Controller* controller, ib_HandlerId handlerId);
+
+- Flexray: Added functionality to remove handlers:
+
+  - ``IntegrationBus/include/ib/sim/fr/IFlexrayController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId RemoveFrameHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveFrameTransmitHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveWakeupHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemovePocStatusHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveSymbolHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveSymbolTransmitHandler(HandlerId handlerId) = 0;
+      virtual HandlerId RemoveCycleStartHandler(HandlerId handlerId) = 0;
+
+  - ``IntegrationBus/include/ib/capi/Flexray.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameTransmitHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveWakeupHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemovePocStatusHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolTransmitHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveCycleStartHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId);
+
 Removed
 ~~~~~~~
+
 - The ``vib-config-tool`` has been deprecated and was now finally removed.
   Since the configuration format has been completely reworked, this tool is no longer necessary.
 - The ``IbLauncher`` utility has been deprecated and was now finally removed.
 
 Changed
 ~~~~~~~
+
+- LIN: Adding a handler now returns a HandlerId. In the C-API, the HandlerId is obtaind by an out parameter:
+
+  - ``IntegrationBus/include/ib/sim/lin/ILinController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId AddFrameStatusHandler(...) = 0;
+      virtual HandlerId AddGoToSleepHandler(...) = 0;
+      virtual HandlerId AddWakeupHandler(...) = 0;
+      virtual HandlerId AddFrameResponseUpdateHandler(...) = 0;
+      
+  - ``IntegrationBus/include/ib/capi/Lin.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Lin_Controller_AddFrameStatusHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Lin_Controller_AddGoToSleepHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Lin_Controller_AddWakeupHandler_t)(... , ib_HandlerId* outHandlerId);
+
+- Ethernet: Adding a handler now returns a HandlerId. In the C-API, the HandlerId is obtaind by an out parameter:
+
+  - ``IntegrationBus/include/ib/sim/eth/IEthernetController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId AddFrameHandler(...) = 0;
+      virtual HandlerId AddStateChangeHandler(...) = 0;
+      virtual HandlerId AddFrameTransmitHandler(...) = 0;
+      
+  - ``IntegrationBus/include/ib/capi/Ethernet.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Ethernet_Controller_AddFrameHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Ethernet_Controller_AddStateChangeHandler_t)(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(... , ib_HandlerId* outHandlerId);
+
+- Flexray: Adding a handler now returns a HandlerId. In the C-API, the HandlerId is obtaind by an out parameter:
+
+  - ``IntegrationBus/include/ib/sim/fr/IFlexrayController.hpp``
+
+    .. code-block:: c++
+
+      virtual HandlerId AddFrameHandler(...) = 0;
+      virtual HandlerId AddFrameTransmitHandler(...) = 0;
+      virtual HandlerId AddWakeupHandler(...) = 0;
+      virtual HandlerId AddPocStatusHandler(...) = 0;
+      virtual HandlerId AddSymbolHandler(...) = 0;
+      virtual HandlerId AddSymbolTransmitHandler(...) = 0;
+      virtual HandlerId AddCycleStartHandler(...) = 0;
+
+  - ``IntegrationBus/include/ib/capi/Flexray.h``
+
+    .. code-block:: c++
+
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameHandler(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameTransmitHandler(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddWakeupHandler(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddPocStatusHandler(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolHandler(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolTransmitHandler(... , ib_HandlerId* outHandlerId);
+      typedef ib_ReturnCode (*ib_Flexray_Controller_AddCycleStartHandler(... , ib_HandlerId* outHandlerId);
 
 - Internal refactoring of Bus Controllers to harmonize behavior w/wo bus simulator.
     

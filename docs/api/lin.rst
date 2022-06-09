@@ -22,6 +22,11 @@ LIN Service API
 .. |AddWakeupHandler| replace:: :cpp:type:`AddWakeupHandler()<ib::sim::lin::ILinController::AddWakeupHandler>`
 .. |AddFrameResponseUpdateHandler| replace:: :cpp:type:`AddFrameResponseUpdateHandler()<ib::sim::lin::ILinController::AddFrameResponseUpdateHandler>`
 
+.. |RemoveFrameStatusHandler| replace:: :cpp:type:`RemoveFrameStatusHandler()<ib::sim::lin::ILinController::RemoveFrameStatusHandler>`
+.. |RemoveGoToSleepHandler| replace:: :cpp:type:`RemoveGoToSleepHandler()<ib::sim::lin::ILinController::RemoveGoToSleepHandler>`
+.. |RemoveWakeupHandler| replace:: :cpp:type:`RemoveWakeupHandler()<ib::sim::lin::ILinController::RemoveWakeupHandler>`
+.. |RemoveFrameResponseUpdateHandler| replace:: :cpp:type:`RemoveFrameResponseUpdateHandler()<ib::sim::lin::ILinController::RemoveFrameResponseUpdateHandler>`
+
 .. |FrameStatusHandler| replace:: :cpp:type:`FrameStatusHandler<ib::sim::lin::ILinController::FrameStatusHandler>`
 .. |GoToSleepHandler| replace:: :cpp:type:`GoToSleepHandler<ib::sim::lin::ILinController::GoToSleepHandler>`
 .. |WakeupHandler| replace:: :cpp:type:`WakeupHandler<ib::sim::lin::ILinController::WakeupHandler>`
@@ -49,6 +54,8 @@ LIN Service API
 .. |LinFrameStatus_LIN_TX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<ib::sim::lin::LIN_TX_ERROR>`
 .. |LinFrameStatus_LIN_RX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_ERROR<ib::sim::lin::LIN_RX_ERROR>`
 .. |LinFrameStatus_LIN_RX_NO_RESPONSE| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_NO_RESPONSE<ib::sim::lin::LIN_RX_NO_RESPONSE>`
+
+.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
 
 .. contents::
    :local:
@@ -215,6 +222,16 @@ will deliver a |LinFrameStatusEvent| as follows::
     If the frame response provided by the |LinFrame| does not match both expected dataLength and checksumModel, or if 
     more than one slave provided a response, the |LinFrameStatus_LIN_RX_ERROR| will be used. If no LIN slave provides a 
     frame response, the |LinFrameStatus_LIN_RX_NO_RESPONSE| will be used.
+
+Managing the event handlers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Adding a handler will return a |HandlerId| which can be used to remove the handler via:
+
+- |RemoveFrameStatusHandler|
+- |RemoveGoToSleepHandler|
+- |RemoveWakeupHandler|
+- |RemoveFrameResponseUpdateHandler|
 
 Message Tracing
 ~~~~~~~~~~~~~~~

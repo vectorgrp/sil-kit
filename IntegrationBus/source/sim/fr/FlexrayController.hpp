@@ -7,6 +7,7 @@
 
 #include <tuple>
 #include <vector>
+#include <mutex>
 
 #include "IIbToFlexrayController.hpp"
 #include "IParticipantInternal.hpp"
@@ -38,16 +39,16 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     FlexrayController() = delete;
-    FlexrayController(const FlexrayController&) = default;
-    FlexrayController(FlexrayController&&) = default;
+    FlexrayController(const FlexrayController&) = delete;
+    FlexrayController(FlexrayController&&) = delete;
     FlexrayController(mw::IParticipantInternal* participant, cfg::FlexrayController config,
                       mw::sync::ITimeProvider* /*timeProvider*/);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    FlexrayController& operator=(FlexrayController& other) = default;
-    FlexrayController& operator=(FlexrayController&& other) = default;
+    FlexrayController& operator=(FlexrayController& other) = delete;
+    FlexrayController& operator=(FlexrayController&& other) = delete;
 
 public:
     // ----------------------------------------
@@ -76,13 +77,21 @@ public:
     void AllSlots() override;
     void Wakeup() override;
 
-    void AddFrameHandler(FrameHandler handler) override;
-    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
-    void AddWakeupHandler(WakeupHandler handler) override;
-    void AddPocStatusHandler(PocStatusHandler handler) override;
-    void AddSymbolHandler(SymbolHandler handler) override;
-    void AddSymbolTransmitHandler(SymbolTransmitHandler handler) override;
-    void AddCycleStartHandler(CycleStartHandler handler) override;
+    HandlerId AddFrameHandler(FrameHandler handler) override;
+    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    HandlerId AddWakeupHandler(WakeupHandler handler) override;
+    HandlerId AddPocStatusHandler(PocStatusHandler handler) override;
+    HandlerId AddSymbolHandler(SymbolHandler handler) override;
+    HandlerId AddSymbolTransmitHandler(SymbolTransmitHandler handler) override;
+    HandlerId AddCycleStartHandler(CycleStartHandler handler) override;
+
+    void RemoveFrameHandler(HandlerId handlerId) override;
+    void RemoveFrameTransmitHandler(HandlerId handlerId) override;
+    void RemoveWakeupHandler(HandlerId handlerId) override;
+    void RemovePocStatusHandler(HandlerId handlerId) override;
+    void RemoveSymbolHandler(HandlerId handlerId) override;
+    void RemoveSymbolTransmitHandler(HandlerId handlerId) override;
+    void RemoveCycleStartHandler(HandlerId handlerId) override;
 
     // IIbToFlexrayController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
@@ -112,18 +121,15 @@ private:
 
 private:
     // ----------------------------------------
-    // private data types
-    template<typename MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT>>;
-
-private:
-    // ----------------------------------------
     // private methods
-    template<typename MsgT>
-    void AddHandler(CallbackT<MsgT> handler);
+    template <typename MsgT>
+    HandlerId AddHandler(CallbackT<MsgT>&& handler);
 
-    template<typename MsgT>
+    template <typename MsgT>
     void CallHandlers(const MsgT& msg);
+
+    template <typename MsgT>
+    void RemoveHandler(HandlerId handlerId);
 
     template<typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
@@ -140,27 +146,29 @@ private:
     // ----------------------------------------
     // private members
     mw::IParticipantInternal* _participant = nullptr;
+    cfg::FlexrayController _config;
     ::ib::mw::ServiceDescriptor _serviceDescriptor;
     std::vector<FlexrayTxBufferConfig> _bufferConfigs;
+    extensions::Tracer _tracer;
 
     bool _simulatedLinkDetected = false;
     mw::ServiceDescriptor _simulatedLink;
 
+    template <typename MsgT>
+    using CallbackMap = std::map<HandlerId, CallbackT<MsgT>>;
+
     std::tuple<
-        CallbackVector<FlexrayFrameEvent>,
-        CallbackVector<FlexrayFrameTransmitEvent>,
-        CallbackVector<FlexraySymbolEvent>,
-        CallbackVector<FlexraySymbolTransmitEvent>,
-        CallbackVector<FlexrayCycleStartEvent>,
-        CallbackVector<FlexrayPocStatusEvent>,
-        CallbackVector<FlexrayWakeupEvent>
+        CallbackMap<FlexrayFrameEvent>,
+        CallbackMap<FlexrayFrameTransmitEvent>,
+        CallbackMap<FlexraySymbolEvent>,
+        CallbackMap<FlexraySymbolTransmitEvent>,
+        CallbackMap<FlexrayCycleStartEvent>,
+        CallbackMap<FlexrayPocStatusEvent>,
+        CallbackMap<FlexrayWakeupEvent>
     > _callbacks;
 
-    extensions::Tracer _tracer;
-
-    cfg::FlexrayController _config;
+    mutable std::recursive_mutex _callbacksMx;
 };
-
 
 // ==================================================================
 //  Inline Implementations

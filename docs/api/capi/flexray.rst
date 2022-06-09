@@ -31,7 +31,7 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 
 .. doxygenfunction:: ib_Flexray_Controller_ExecuteCmd
 
-**The following set of functions can be used to register event handlers to the controller:**
+**The following set of functions can be used to add and remove event handlers on the controller:**
 
 .. doxygenfunction:: ib_Flexray_Controller_AddFrameHandler
 .. doxygenfunction:: ib_Flexray_Controller_AddFrameTransmitHandler
@@ -40,6 +40,13 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 .. doxygenfunction:: ib_Flexray_Controller_AddSymbolHandler
 .. doxygenfunction:: ib_Flexray_Controller_AddSymbolTransmitHandler
 .. doxygenfunction:: ib_Flexray_Controller_AddCycleStartHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemoveFrameHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemoveFrameTransmitHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemoveWakeupHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemovePocStatusHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemoveSymbolHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemoveSymbolTransmitHandler
+.. doxygenfunction:: ib_Flexray_Controller_RemoveCycleStartHandler
 
 Data Structures
 ~~~~~~~~~~~~~~~

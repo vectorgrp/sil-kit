@@ -51,8 +51,6 @@ public:
 
     /*! Callback type to indicate that a new FlexRay cycle did start.
      *  Cf. \ref AddCycleStartHandler();
-     *
-     *  NB: Only supported in VIBE simulation.
      */
     using CycleStartHandler = CallbackT<FlexrayCycleStartEvent>;
 
@@ -85,72 +83,120 @@ public:
     virtual void UpdateTxBuffer(const FlexrayTxBufferUpdate& update) = 0;
 
     /*! \brief Send the FlexrayChiCommand::RUN
-    *
-    *  NB: Only supported in VIBE simulation. In simple simulation, this command
-    *  simply sends a dummy symbol to emulate the control flow at startup amd
-    *  calls the ControllerStateHandler with FlexrayPocState::NormalActive.
     */
     virtual void Run() = 0;
 
     /*! \brief Send the FlexrayChiCommand::DEFERRED_HALT
-    *
-    *  NB: Only supported in VIBE simulation.
     */
     virtual void DeferredHalt() = 0;
 
     /*! \brief Send the FlexrayChiCommand::FREEZE
-    *
-    *  NB: Only supported in VIBE simulation.
     */
     virtual void Freeze() = 0;
 
     /*! \brief Send the FlexrayChiCommand::ALLOW_COLDSTART
-    *
-    *  NB: Only supported in VIBE simulation.
     */
     virtual void AllowColdstart() = 0;
 
     /*! \brief Send the FlexrayChiCommand::ALL_SLOTS
-    *
-    *  NB: Only supported in VIBE simulation.
     */
     virtual void AllSlots() = 0;
 
     //! \brief Send the FlexrayChiCommand::WAKEUP
     virtual void Wakeup() = 0;
 
-    //! \brief Receive a FlexRay message from a different controller.
-    virtual void AddFrameHandler(FrameHandler handler) = 0;
-    //! \brief Notification that a FlexRay message has been successfully sent.
-    virtual void AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
-    //! \brief Notification that a wakeup has been received.
-    virtual void AddWakeupHandler(WakeupHandler handler) = 0;
-    //! \brief Notification that the POC status has changed.
-    virtual void AddPocStatusHandler(PocStatusHandler handler) = 0;
+    /*! \brief Receive a FlexRay message from a different controller.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddFrameHandler(FrameHandler handler) = 0;
 
+    /*! \brief Remove a FrameHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveFrameHandler(HandlerId handlerId) = 0;
+
+    /*! \brief Notification that a FlexRay message has been successfully sent.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
+
+    /*! \brief Remove a FrameTransmitHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveFrameTransmitHandler(HandlerId handlerId) = 0;
+
+    /*! \brief Notification that a wakeup has been received.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddWakeupHandler(WakeupHandler handler) = 0;
+
+    /*! \brief Remove a WakeupHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveWakeupHandler(HandlerId handlerId) = 0;
+
+    /*! \brief Notification that the POC status has changed.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddPocStatusHandler(PocStatusHandler handler) = 0;
+
+    /*! \brief Remove a PocStatusHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemovePocStatusHandler(HandlerId handlerId) = 0;
 
     /*! \brief Notification that the controller has received a symbol.
-    *
-    * This callback is primarily intended for tracing. There is no need to react on it.
-    * The symbols relevant for interaction trigger also an additional callback,
-    * e.g., \ref WakeupHandler.
-    */
-    virtual void AddSymbolHandler(SymbolHandler handler) = 0;
+     *
+     * This callback is primarily intended for tracing. There is no need to react on it.
+     * The symbols relevant for interaction trigger also an additional callback,
+     * e.g., \ref WakeupHandler.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddSymbolHandler(SymbolHandler handler) = 0;
+
+    /*! \brief Remove a SymbolHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveSymbolHandler(HandlerId handlerId) = 0;
 
     /*! \brief Notification that the controller has sent a symbol.
-    *
-    * This callback is primarily intended for tracing. There is no need to react on it.
-    * Currently, the following SymbolPatterns can occur:
-    *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus, if the bus is idle.
-    *  - Run() will cause the transmission of FlexraySymbolPattern::CasMts if configured to coldstart the bus.
-    */
-    virtual void AddSymbolTransmitHandler(SymbolTransmitHandler handler) = 0;
+     *
+     * This callback is primarily intended for tracing. There is no need to react on it.
+     * Currently, the following SymbolPatterns can occur:
+     *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus, if the bus is idle.
+     *  - Run() will cause the transmission of FlexraySymbolPattern::CasMts if configured to coldstart the bus.
+     * 
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddSymbolTransmitHandler(SymbolTransmitHandler handler) = 0;
+
+    /*! \brief Remove a SymbolTransmitHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveSymbolTransmitHandler(HandlerId handlerId) = 0;
 
     /*! \brief Notification that a new FlexRay cycle did start.
-    *
-    *  NB: Only supported in VIBE simulation.
-    */
-    virtual void AddCycleStartHandler(CycleStartHandler handler) = 0;
+     *
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual HandlerId AddCycleStartHandler(CycleStartHandler handler) = 0;
+
+    /*! \brief Remove a CycleStartHandler by HandlerId on this controller 
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveCycleStartHandler(HandlerId handlerId) = 0;
 };
 
 } // namespace fr

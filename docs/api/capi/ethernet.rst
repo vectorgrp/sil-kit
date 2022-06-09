@@ -13,16 +13,29 @@ The Ethernet API consists of two main parts:
 Ethernet Controller
 ~~~~~~~~~~~~~~~~~~~
 
-An Ethernet controller can interact with the corresponding Ethernet bus and send Ethernet frames.
+**An Ethernet controller is created with the following function:**
 
 .. doxygenfunction:: ib_Ethernet_Controller_Create
+
+**It's status can be controlled with the functions:**
+
 .. doxygenfunction:: ib_Ethernet_Controller_Activate
 .. doxygenfunction:: ib_Ethernet_Controller_Deactivate
+
+**The Ethernet controller can send Ethernet frames with:**
+
+.. doxygenfunction:: ib_Ethernet_Controller_SendFrame
+
+**The following set of functions can be used to add and remove event handlers on the controller:**
+
 .. doxygenfunction:: ib_Ethernet_Controller_AddFrameHandler
 .. doxygenfunction:: ib_Ethernet_Controller_AddFrameTransmitHandler
 .. doxygenfunction:: ib_Ethernet_Controller_AddStateChangeHandler
 .. doxygenfunction:: ib_Ethernet_Controller_AddBitrateChangeHandler
-.. doxygenfunction:: ib_Ethernet_Controller_SendFrame
+.. doxygenfunction:: ib_Ethernet_Controller_RemoveFrameHandler
+.. doxygenfunction:: ib_Ethernet_Controller_RemoveFrameTransmitHandler
+.. doxygenfunction:: ib_Ethernet_Controller_RemoveStateChangeHandler
+.. doxygenfunction:: ib_Ethernet_Controller_RemoveBitrateChangeHandler
 
 Ethernet Frame
 ~~~~~~~~~~~~~~

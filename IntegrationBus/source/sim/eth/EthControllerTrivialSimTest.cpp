@@ -166,6 +166,57 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
     controller.SendFrameEvent(msg);
 }
 
+/*! \brief Multiple handlers added and removed
+ */
+TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
+{
+    EthController testController{&participant, cfg, participant.GetTimeProvider()};
+
+    const int numHandlers = 10;
+    std::vector<ib::sim::HandlerId> handlerIds;
+    for (int i = 0; i < numHandlers; i++)
+    {
+        handlerIds.push_back(testController.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage)));
+    }
+
+    EthernetFrameEvent msg;
+    SetSourceMac(msg.frame, EthernetMac{0, 0, 0, 0, 0, 0});
+    EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(numHandlers);
+    testController.ReceiveIbMessage(&controllerOther, msg);
+
+    for (auto&& handlerId : handlerIds)
+    {
+        testController.RemoveFrameHandler(handlerId);
+    }
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(0);
+    testController.ReceiveIbMessage(&controllerOther, msg);
+}
+
+/*! \brief Removed handler in handler
+ */
+TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
+{
+    EthController testController{&participant, cfg, participant.GetTimeProvider()};
+
+    auto handlerIdToRemove =
+        testController.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+
+    auto testHandler = [handlerIdToRemove](eth::IEthernetController* ctrl, const eth::EthernetFrameEvent&) {
+        ctrl->RemoveFrameHandler(handlerIdToRemove);
+    };
+    testController.AddFrameHandler(testHandler);
+
+    EthernetFrameEvent msg;
+    SetSourceMac(msg.frame, EthernetMac{0, 0, 0, 0, 0, 0});
+    EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(1);
+    // Calls testHandler and Callbacks::ReceiveMessage, the latter is removed in testHandler 
+    testController.ReceiveIbMessage(&controllerOther, msg);
+    EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(0);
+    // Call testHandler again, handlerIdToRemove is invalid now but should only result in a warning
+    testController.ReceiveIbMessage(&controllerOther, msg);
+}
+
 
 TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
 {

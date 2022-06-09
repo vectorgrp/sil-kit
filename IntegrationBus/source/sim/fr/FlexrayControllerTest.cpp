@@ -549,4 +549,34 @@ TEST_F(FlexrayControllerTest, call_cyclestart_handler)
     controller.ReceiveIbMessage(&controllerBusSim, cycleStart);
 }
 
+/*! \brief Multiple handlers added and removed
+ */
+TEST_F(FlexrayControllerTest, add_remove_handler)
+{
+    const int numHandlers = 10;
+    std::vector<ib::sim::HandlerId> handlerIds;
+    for (int i = 0; i < numHandlers; i++)
+    {
+        handlerIds.push_back(controller.AddFrameHandler(bind_method(&callbacks, &Callbacks::MessageHandler)));
+    }
+
+    FlexrayFrameEvent message;
+    message.timestamp = 17ns;
+    message.channel = FlexrayChannel::A;
+    message.frame.header.frameId = 13;
+    message.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
+    message.frame.payload = referencePayload;
+
+    EXPECT_CALL(callbacks, MessageHandler(&controller, message)).Times(numHandlers);
+    controller.ReceiveIbMessage(&controllerBusSim, message);
+
+    for (auto&& handlerId : handlerIds)
+    {
+        controller.RemoveFrameHandler(handlerId);
+    }
+
+    EXPECT_CALL(callbacks, MessageHandler(&controller, message)).Times(0);
+    controller.ReceiveIbMessage(&controllerBusSim, message);
+}
+
 } // namespace

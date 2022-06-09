@@ -34,16 +34,16 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     EthController() = delete;
-    EthController(const EthController&) = default;
-    EthController(EthController&&) = default;
+    EthController(const EthController&) = delete;
+    EthController(EthController&&) = delete;
     EthController(mw::IParticipantInternal* participant, cfg::EthernetController config,
                    mw::sync::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    EthController& operator=(EthController& other) = default;
-    EthController& operator=(EthController&& other) = default;
+    EthController& operator=(EthController& other) = delete;
+    EthController& operator=(EthController&& other) = delete;
 
 public:
     // ----------------------------------------
@@ -55,10 +55,15 @@ public:
 
     auto SendFrame(EthernetFrame frame) -> EthernetTxId override;
 
-    void AddFrameHandler(FrameHandler handler) override;
-    void AddFrameTransmitHandler(FrameTransmitHandler handler) override;
-    void AddStateChangeHandler(StateChangeHandler handler) override;
-    void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
+    HandlerId AddFrameHandler(FrameHandler handler) override;
+    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    HandlerId AddStateChangeHandler(StateChangeHandler handler) override;
+    HandlerId AddBitrateChangeHandler(BitrateChangeHandler handler) override;
+
+    void RemoveFrameHandler(HandlerId handlerId) override;
+    void RemoveFrameTransmitHandler(HandlerId handlerId) override;
+    void RemoveStateChangeHandler(HandlerId handlerId) override;
+    void RemoveBitrateChangeHandler(HandlerId handlerId) override;
 
     // IIbToEthController
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
@@ -88,10 +93,13 @@ private:
     // private methods
 
     template<typename MsgT>
-    void AddHandler(CallbackT<MsgT>&& handler);
+    HandlerId AddHandler(CallbackT<MsgT>&& handler);
 
     template<typename MsgT>
     void CallHandlers(const MsgT& msg);
+
+    template <typename MsgT>
+    void RemoveHandler(HandlerId handlerId);
 
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
@@ -113,18 +121,19 @@ private:
     EthernetTxId _ethernetTxId = 0;
     EthernetState _ethState = EthernetState::Inactive;
     uint32_t _ethBitRate = 0;
+    extensions::Tracer _tracer;
 
-    template< typename MsgT>
-    using CallbackVector = std::vector<CallbackT<MsgT>>;
+    template <typename MsgT>
+    using CallbackMap = std::map<HandlerId, CallbackT<MsgT>>;
 
     std::tuple<
-        CallbackVector<EthernetFrameEvent>,
-        CallbackVector<EthernetFrameTransmitEvent>,
-        CallbackVector<EthernetStateChangeEvent>,
-        CallbackVector<EthernetBitrateChangeEvent>
+        CallbackMap<EthernetFrameEvent>,
+        CallbackMap<EthernetFrameTransmitEvent>,
+        CallbackMap<EthernetStateChangeEvent>,
+        CallbackMap<EthernetBitrateChangeEvent>
     > _callbacks;
 
-    extensions::Tracer _tracer;
+    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ================================================================================

@@ -201,14 +201,15 @@ ib_ReturnCode ib_Lin_Controller_WakeupInternal(ib_Lin_Controller* controller)
 }
 
 ib_ReturnCode ib_Lin_Controller_AddFrameStatusHandler(ib_Lin_Controller* controller, void* context,
-                                                          ib_Lin_FrameStatusHandler_t handler)
+                                                      ib_Lin_FrameStatusHandler_t handler, ib_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->AddFrameStatusHandler(
+        *outHandlerId = (ib_HandlerId)linController->AddFrameStatusHandler(
             [handler, context, controller](
                 ib::sim::lin::ILinController* /*ctrl*/, const ib::sim::lin::LinFrameStatusEvent& cppFrameStatusEvent) 
             {
@@ -231,15 +232,28 @@ ib_ReturnCode ib_Lin_Controller_AddFrameStatusHandler(ib_Lin_Controller* control
     CAPI_LEAVE
 }
 
+ib_ReturnCode ib_Lin_Controller_RemoveFrameStatusHandler(ib_Lin_Controller* controller, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
+        cppController->RemoveFrameStatusHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 ib_ReturnCode ib_Lin_Controller_AddGoToSleepHandler(ib_Lin_Controller* controller, void* context,
-                                                        ib_Lin_GoToSleepHandler_t handler)
+                                                    ib_Lin_GoToSleepHandler_t handler, ib_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->AddGoToSleepHandler(
+        *outHandlerId = (ib_HandlerId)linController->AddGoToSleepHandler(
             [handler, context, controller](ib::sim::lin::ILinController* /*ctrl*/,
                                            const ib::sim::lin::LinGoToSleepEvent& cppGoToSleepEvent) {
                 ib_Lin_GoToSleepEvent goToSleepEvent{ib_InterfaceIdentifier_LinGoToSleepEvent,
@@ -251,15 +265,28 @@ ib_ReturnCode ib_Lin_Controller_AddGoToSleepHandler(ib_Lin_Controller* controlle
     CAPI_LEAVE
 }
 
+ib_ReturnCode ib_Lin_Controller_RemoveGoToSleepHandler(ib_Lin_Controller* controller, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
+        cppController->RemoveGoToSleepHandler(handlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 ib_ReturnCode ib_Lin_Controller_AddWakeupHandler(ib_Lin_Controller* controller, void* context,
-                                                     ib_Lin_WakeupHandler_t handler)
+                                                 ib_Lin_WakeupHandler_t handler, ib_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        linController->AddWakeupHandler(
+        *outHandlerId = (ib_HandlerId)linController->AddWakeupHandler(
             [handler, context, controller](ib::sim::lin::ILinController* /*ctrl*/,
                                            const ib::sim::lin::LinWakeupEvent& cppWakeupEvent) {
                 ib_Lin_WakeupEvent wakeupEvent{ib_InterfaceIdentifier_LinWakeupEvent,
@@ -267,6 +294,18 @@ ib_ReturnCode ib_Lin_Controller_AddWakeupHandler(ib_Lin_Controller* controller, 
                                                (ib_Direction)cppWakeupEvent.direction};
                 handler(context, controller, &wakeupEvent);
         });
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Lin_Controller_RemoveWakeupHandler(ib_Lin_Controller* controller, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    CAPI_ENTER
+    {
+        auto cppController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
+        cppController->RemoveWakeupHandler(handlerId);
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

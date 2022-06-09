@@ -503,16 +503,21 @@ int main(int argc, char* argv[])
         Schedule_Create(&masterSchedule, tasks, 6);
 
         ib_Participant_SetInitHandler(participant, NULL, &Master_InitCallback);
-        ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus);
-        ib_Lin_Controller_AddWakeupHandler(linController, NULL, &Master_WakeupHandler);
+        ib_HandlerId frameStatusHandlerId;
+        ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus, &frameStatusHandlerId);
+        ib_HandlerId wakeupHandlerId;
+        ib_Lin_Controller_AddWakeupHandler(linController, NULL, &Master_WakeupHandler, &wakeupHandlerId);
         ib_Participant_SetSimulationTask(participant, NULL, &Master_SimTask);
     }
     else
     {
         ib_Participant_SetInitHandler(participant, NULL, &Slave_InitCallback);
-        ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler);
-        ib_Lin_Controller_AddGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler);
-        ib_Lin_Controller_AddWakeupHandler(linController, NULL, &Slave_WakeupHandler);
+        ib_HandlerId frameStatusHandlerId;
+        ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler, &frameStatusHandlerId);
+        ib_HandlerId goToSleepHandlerId;
+        ib_Lin_Controller_AddGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler, &goToSleepHandlerId);
+        ib_HandlerId wakeupHandlerId;
+        ib_Lin_Controller_AddWakeupHandler(linController, NULL, &Slave_WakeupHandler, &wakeupHandlerId);
         ib_Participant_SetSimulationTask(participant, NULL, &Slave_SimTask);
     }
 

@@ -285,57 +285,113 @@ void FlexrayController::SendIbMessage(MsgT&& msg)
 // Handlers
 //------------------------
 
-void FlexrayController::AddFrameHandler(FrameHandler handler)
+HandlerId FlexrayController::AddFrameHandler(FrameHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemoveFrameHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexrayFrameEvent>(handlerId);
 }
 
-void FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler)
+HandlerId FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemoveFrameTransmitHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexrayFrameTransmitEvent>(handlerId);
 }
 
-void FlexrayController::AddWakeupHandler(WakeupHandler handler)
+HandlerId FlexrayController::AddWakeupHandler(WakeupHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemoveWakeupHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexrayWakeupEvent>(handlerId);
 }
 
-void FlexrayController::AddPocStatusHandler(PocStatusHandler handler)
+HandlerId FlexrayController::AddPocStatusHandler(PocStatusHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemovePocStatusHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexrayPocStatusEvent>(handlerId);
 }
 
-void FlexrayController::AddSymbolHandler(SymbolHandler handler)
+HandlerId FlexrayController::AddSymbolHandler(SymbolHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemoveSymbolHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexraySymbolEvent>(handlerId);
 }
 
-void FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler)
+HandlerId FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemoveSymbolTransmitHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexraySymbolTransmitEvent>(handlerId);
 }
 
-void FlexrayController::AddCycleStartHandler(CycleStartHandler handler)
+HandlerId FlexrayController::AddCycleStartHandler(CycleStartHandler handler)
 {
-    AddHandler(handler);
+    return AddHandler(std::move(handler));
+}
+void FlexrayController::RemoveCycleStartHandler(HandlerId handlerId)
+{
+    RemoveHandler<FlexrayCycleStartEvent>(handlerId);
 }
 
-template<typename MsgT>
-void FlexrayController::AddHandler(CallbackT<MsgT> handler)
+template <typename MsgT>
+HandlerId FlexrayController::AddHandler(CallbackT<MsgT>&& handler)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.push_back(handler);
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    static uint64_t handlerId = 0;
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+    handlersMap.emplace(handlerId, std::forward<CallbackT<MsgT>>(handler));
+    return handlerId++;
 }
 
-template<typename MsgT>
+template <typename MsgT>
 void FlexrayController::CallHandlers(const MsgT& msg)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlers = std::get<CallbackMap<MsgT>>(_callbacks);
     for (auto&& handler : handlers)
     {
-        handler(this, msg);
+        handler.second(this, msg);
     }
 }
+
+template <typename MsgT>
+void FlexrayController::RemoveHandler(HandlerId handlerId)
+{
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+
+    auto handlerToRemove = handlersMap.find(handlerId);
+    if (handlerToRemove == handlersMap.end())
+    {
+        _participant->GetLogger()->Warn("RemoveHandler failed: Unknown HandlerId.");
+    }
+    else
+    {
+        handlersMap.erase(handlerId);
+    }
+}
+
+//
+
+
 
 } // namespace fr
 } // SimModels

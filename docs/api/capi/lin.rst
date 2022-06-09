@@ -19,11 +19,14 @@ Lin Controller
 
 .. doxygenfunction:: ib_Lin_Controller_Init
 
-**The following set of functions can be used to register event handlers on the controller:**
+**The following set of functions can be used to add and remove event handlers on the controller:**
 
 .. doxygenfunction:: ib_Lin_Controller_AddFrameStatusHandler
 .. doxygenfunction:: ib_Lin_Controller_AddGoToSleepHandler
 .. doxygenfunction:: ib_Lin_Controller_AddWakeupHandler
+.. doxygenfunction:: ib_Lin_Controller_RemoveFrameStatusHandler
+.. doxygenfunction:: ib_Lin_Controller_RemoveGoToSleepHandler
+.. doxygenfunction:: ib_Lin_Controller_RemoveWakeupHandler
 
 **The following functions operate on a configured controller:**
 

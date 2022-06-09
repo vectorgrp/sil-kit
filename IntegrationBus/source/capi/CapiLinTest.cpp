@@ -23,10 +23,15 @@ namespace {
         MOCK_METHOD0(GoToSleepInternal, void());
         MOCK_METHOD0(Wakeup, void());
         MOCK_METHOD0(WakeupInternal, void());
-        MOCK_METHOD1(AddFrameStatusHandler, void(FrameStatusHandler));
-        MOCK_METHOD1(AddGoToSleepHandler, void(GoToSleepHandler));
-        MOCK_METHOD1(AddWakeupHandler, void(WakeupHandler));
-        MOCK_METHOD1(AddFrameResponseUpdateHandler, void(FrameResponseUpdateHandler));
+
+        MOCK_METHOD(ib::sim::HandlerId, AddFrameStatusHandler, (FrameStatusHandler));
+        MOCK_METHOD(void, RemoveFrameStatusHandler, (ib::sim::HandlerId));
+        MOCK_METHOD(ib::sim::HandlerId, AddGoToSleepHandler, (GoToSleepHandler));
+        MOCK_METHOD(void, RemoveGoToSleepHandler, (ib::sim::HandlerId));
+        MOCK_METHOD(ib::sim::HandlerId, AddWakeupHandler, (WakeupHandler));
+        MOCK_METHOD(void, RemoveWakeupHandler, (ib::sim::HandlerId));
+        MOCK_METHOD(ib::sim::HandlerId, AddFrameResponseUpdateHandler, (FrameResponseUpdateHandler));
+        MOCK_METHOD(void, RemoveFrameResponseUpdateHandler, (ib::sim::HandlerId));
     };
 
     void CFrameStatusHandler(void* /*context*/, ib_Lin_Controller* /*controller*/,
@@ -49,13 +54,14 @@ namespace {
 
     TEST_F(CapiLinTest, lin_controller_function_mapping)
     {
-        ib_ReturnCode          returnCode;
-        auto                   cMockController = (ib_Lin_Controller*)&mockController;
-        ib_Lin_Frame            frame;
-        ib_Lin_FrameResponse    frameResponses[1] = {ib_Lin_FrameResponse{}};
+        ib_ReturnCode returnCode;
+        auto cMockController = (ib_Lin_Controller*)&mockController;
+        ib_Lin_Frame frame;
+        ib_Lin_FrameResponse frameResponses[1] = {ib_Lin_FrameResponse{}};
         frameResponses[0].frame = &frame;
-        auto                   cfg = ib_Lin_ControllerConfig{};
+        auto cfg = ib_Lin_ControllerConfig{};
         ib_Lin_ControllerStatus status;
+        ib_HandlerId handlerId;
 
         EXPECT_CALL(mockController, Init(testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Lin_Controller_Init(cMockController, &cfg);
@@ -98,30 +104,42 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddFrameStatusHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Lin_Controller_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler);
+        returnCode =
+            ib_Lin_Controller_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveFrameStatusHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Lin_Controller_RemoveFrameStatusHandler((ib_Lin_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddGoToSleepHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Lin_Controller_AddGoToSleepHandler(cMockController, nullptr, &CGoToSleepHandler);
+        returnCode = ib_Lin_Controller_AddGoToSleepHandler(cMockController, nullptr, &CGoToSleepHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveGoToSleepHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Lin_Controller_RemoveGoToSleepHandler((ib_Lin_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, AddWakeupHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Lin_Controller_AddWakeupHandler(cMockController, nullptr, &CWakeupHandler);
+        returnCode = ib_Lin_Controller_AddWakeupHandler(cMockController, nullptr, &CWakeupHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockController, RemoveWakeupHandler(0)).Times(testing::Exactly(1));
+        returnCode = ib_Lin_Controller_RemoveWakeupHandler((ib_Lin_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
 
-
     TEST_F(CapiLinTest, lin_controller_nullpointer_params)
     {
-
-        ib_ReturnCode          returnCode;
-        auto                   cMockParticipant = (ib_Participant*)&mockParticipant;
-        auto                   cMockController = (ib_Lin_Controller*)&mockController;
-        ib_Lin_Controller*      linController;
-        ib_Lin_Frame            frame;
+        ib_HandlerId handlerId;
+        ib_ReturnCode returnCode;
+        auto cMockParticipant = (ib_Participant*)&mockParticipant;
+        auto cMockController = (ib_Lin_Controller*)&mockController;
+        ib_Lin_Controller* linController;
+        ib_Lin_Frame frame;
         ib_Lin_ControllerStatus status;
-        auto                   cfg = ib_Lin_ControllerConfig{};
-        ib_Lin_FrameResponse    frameResponses[1] = {ib_Lin_FrameResponse{}};
+        auto cfg = ib_Lin_ControllerConfig{};
+        ib_Lin_FrameResponse frameResponses[1] = {ib_Lin_FrameResponse{}};
 
         returnCode = ib_Lin_Controller_Create(&linController, nullptr, "lin", "lin");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
@@ -172,19 +190,26 @@ namespace {
         returnCode = ib_Lin_Controller_WakeupInternal(nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Lin_Controller_AddFrameStatusHandler(nullptr, nullptr, &CFrameStatusHandler);
+        returnCode = ib_Lin_Controller_AddFrameStatusHandler(nullptr, nullptr, &CFrameStatusHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_AddFrameStatusHandler(cMockController, nullptr, nullptr);
+        returnCode = ib_Lin_Controller_AddFrameStatusHandler(cMockController, nullptr, nullptr, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-        returnCode = ib_Lin_Controller_AddGoToSleepHandler(nullptr, nullptr, &CGoToSleepHandler);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_AddGoToSleepHandler(cMockController, nullptr, nullptr);
+        returnCode =
+            ib_Lin_Controller_AddFrameStatusHandler(cMockController, nullptr, &CFrameStatusHandler, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Lin_Controller_AddWakeupHandler(nullptr, nullptr, &CWakeupHandler);
+        returnCode = ib_Lin_Controller_AddGoToSleepHandler(nullptr, nullptr, &CGoToSleepHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Lin_Controller_AddWakeupHandler(cMockController, nullptr, nullptr);
+        returnCode = ib_Lin_Controller_AddGoToSleepHandler(cMockController, nullptr, nullptr, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Lin_Controller_AddGoToSleepHandler(cMockController, nullptr, &CGoToSleepHandler, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Lin_Controller_AddWakeupHandler(nullptr, nullptr, &CWakeupHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Lin_Controller_AddWakeupHandler(cMockController, nullptr, nullptr, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode = ib_Lin_Controller_AddWakeupHandler(cMockController, nullptr, &CWakeupHandler, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     }
 

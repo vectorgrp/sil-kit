@@ -400,43 +400,83 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinCo
 // Handlers
 //------------------------
 
-void LinController::AddFrameStatusHandler(FrameStatusHandler handler)
+HandlerId LinController::AddFrameStatusHandler(FrameStatusHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void LinController::RemoveFrameStatusHandler(HandlerId handlerId)
+{
+    RemoveHandler<LinFrameStatusEvent>(handlerId);
 }
 
-void LinController::AddGoToSleepHandler(GoToSleepHandler handler)
+HandlerId LinController::AddGoToSleepHandler(GoToSleepHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void LinController::RemoveGoToSleepHandler(HandlerId handlerId)
+{
+    RemoveHandler<LinGoToSleepEvent>(handlerId);
 }
 
-void LinController::AddWakeupHandler(WakeupHandler handler)
+HandlerId LinController::AddWakeupHandler(WakeupHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
+}
+void LinController::RemoveWakeupHandler(HandlerId handlerId)
+{
+    RemoveHandler<LinWakeupEvent>(handlerId);
 }
 
-void LinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+HandlerId LinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
 {
-    AddHandler(std::move(handler));
+    return AddHandler(std::move(handler));
 }
-
+void LinController::RemoveFrameResponseUpdateHandler(HandlerId handlerId)
+{
+    RemoveHandler<LinFrameResponseUpdateEvent>(handlerId);
+}
 
 template <typename MsgT>
-void LinController::AddHandler(CallbackT<MsgT>&& handler)
+HandlerId LinController::AddHandler(CallbackT<MsgT>&& handler)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
-    handlers.push_back(std::forward<CallbackT<MsgT>>(handler));
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    static uint64_t handlerId = 0;
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+    handlersMap.emplace(handlerId, std::forward<CallbackT<MsgT>>(handler));
+    return handlerId++;
 }
 
 template <typename MsgT>
 void LinController::CallHandlers(const MsgT& msg)
 {
-    auto&& handlers = std::get<CallbackVector<MsgT>>(_callbacks);
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlers = std::get<CallbackMap<MsgT>>(_callbacks);
     for (auto&& handler : handlers)
     {
-        handler(this, msg);
+        handler.second(this, msg);
     }
 }
+
+template <typename MsgT>
+void LinController::RemoveHandler(HandlerId handlerId)
+{
+    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+
+    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
+
+    auto handlerToRemove = handlersMap.find(handlerId);
+    if (handlerToRemove == handlersMap.end())
+    {
+        _participant->GetLogger()->Warn("RemoveHandler failed: Unknown HandlerId.");
+    }
+    else
+    {
+        handlersMap.erase(handlerId);
+    }
+}
+
 
 } // namespace lin
 } // namespace sim

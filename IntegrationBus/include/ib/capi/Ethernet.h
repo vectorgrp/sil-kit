@@ -176,19 +176,20 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_Deactivate_t)(ib_Ethernet_Controll
 * \param controller The Ethernet controller for which the message callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
 * \see ib::sim::eth::IEthernetController::AddFrameHandler
+* 
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(
-  ib_Ethernet_Controller* controller, 
-  void* context, 
-  ib_Ethernet_FrameHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddFrameHandler(ib_Ethernet_Controller* controller,
+                                                                       void* context,
+                                                                       ib_Ethernet_FrameHandler_t handler,
+                                                                       ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameHandler_t)(
-  ib_Ethernet_Controller* controller, 
-  void* context,
-  ib_Ethernet_FrameHandler_t handler);
+typedef ib_ReturnCode (*ib_Ethernet_Controller_AddFrameHandler_t)(ib_Ethernet_Controller* controller, void* context,
+                                                                  ib_Ethernet_FrameHandler_t handler,
+                                                                  ib_HandlerId* outHandlerId);
 
 /*! \brief Register a callback for Ethernet transmit acknowledgments
 *
@@ -203,19 +204,19 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameHandler_t)(
 * \param controller The Ethernet controller for which the message acknowledge callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
 * \see ib::sim::eth::IEthernetController::AddFrameTransmitHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddFrameTransmitHandler(
-  ib_Ethernet_Controller* controller,
-  void* context,
-  ib_Ethernet_FrameTransmitHandler_t handler);
+IntegrationBusAPI ib_ReturnCode
+ib_Ethernet_Controller_AddFrameTransmitHandler(ib_Ethernet_Controller* controller, void* context,
+                                               ib_Ethernet_FrameTransmitHandler_t handler, ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(
-  ib_Ethernet_Controller* controller,
-  void* context,
-  ib_Ethernet_FrameTransmitHandler_t handler);
+typedef ib_ReturnCode (*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(ib_Ethernet_Controller* controller,
+                                                                          void* context,
+                                                                          ib_Ethernet_FrameTransmitHandler_t handler,
+                                                                          ib_HandlerId* outHandlerId);
 
 /*! \brief Register a callback for changes of the controller state
 *
@@ -231,19 +232,20 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(
 * \param controller The Ethernet controller for which the message acknowledge callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
 * \see ib::sim::eth::IEthernetController::AddStateChangeHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(
-  ib_Ethernet_Controller* controller, 
-  void* context,
-  ib_Ethernet_StateChangeHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddStateChangeHandler(ib_Ethernet_Controller* controller,
+                                                                             void* context,
+                                                                             ib_Ethernet_StateChangeHandler_t handler,
+                                                                             ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_AddStateChangeHandler_t)(
-  ib_Ethernet_Controller* controller,
-  void* context,
-  ib_Ethernet_StateChangeHandler_t handler);
+typedef ib_ReturnCode (*ib_Ethernet_Controller_AddStateChangeHandler_t)(ib_Ethernet_Controller* controller,
+                                                                        void* context,
+                                                                        ib_Ethernet_StateChangeHandler_t handler,
+                                                                        ib_HandlerId* outHandlerId);
 
 /*! \brief Register a callback for changes of the link bit rate
 *
@@ -256,19 +258,19 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_AddStateChangeHandler_t)(
 * \param controller The Ethernet controller for which the bitrate change callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on change.
+* \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
 * \see ib::sim::eth::IEthernetController::AddBitrateChangeHandler
 */
-IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_AddBitrateChangeHandler(
-  ib_Ethernet_Controller* controller, 
-  void* context,
-  ib_Ethernet_BitrateChangeHandler_t handler);
+IntegrationBusAPI ib_ReturnCode
+ib_Ethernet_Controller_AddBitrateChangeHandler(ib_Ethernet_Controller* controller, void* context,
+                                               ib_Ethernet_BitrateChangeHandler_t handler, ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode(*ib_Ethernet_Controller_AddBitrateChangeHandler_t)(
-  ib_Ethernet_Controller* controller, 
-  void* context,
-  ib_Ethernet_BitrateChangeHandler_t handler);
+typedef ib_ReturnCode (*ib_Ethernet_Controller_AddBitrateChangeHandler_t)(ib_Ethernet_Controller* controller,
+                                                                          void* context,
+                                                                          ib_Ethernet_BitrateChangeHandler_t handler,
+                                                                          ib_HandlerId* outHandlerId);
 
 /*! \brief Send an Ethernet frame
 *

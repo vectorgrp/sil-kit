@@ -30,13 +30,20 @@ public:
   MOCK_METHOD0(AllowColdstart, void());
   MOCK_METHOD0(AllSlots, void());
   MOCK_METHOD0(Wakeup, void());
-  MOCK_METHOD1(AddFrameHandler, void(FrameHandler handler));
-  MOCK_METHOD1(AddFrameTransmitHandler, void(FrameTransmitHandler handler));
-  MOCK_METHOD1(AddWakeupHandler, void(WakeupHandler handler));
-  MOCK_METHOD1(AddPocStatusHandler, void(PocStatusHandler handler));
-  MOCK_METHOD1(AddSymbolHandler, void(SymbolHandler handler));
-  MOCK_METHOD1(AddSymbolTransmitHandler, void(SymbolTransmitHandler handler));
-  MOCK_METHOD1(AddCycleStartHandler, void(CycleStartHandler handler));
+  MOCK_METHOD(ib::sim::HandlerId, AddFrameHandler, (FrameHandler));
+  MOCK_METHOD(void, RemoveFrameHandler, (ib::sim::HandlerId));
+  MOCK_METHOD(ib::sim::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler));
+  MOCK_METHOD(void, RemoveFrameTransmitHandler, (ib::sim::HandlerId));
+  MOCK_METHOD(ib::sim::HandlerId, AddWakeupHandler, (WakeupHandler));
+  MOCK_METHOD(void, RemoveWakeupHandler, (ib::sim::HandlerId));
+  MOCK_METHOD(ib::sim::HandlerId, AddPocStatusHandler, (PocStatusHandler));
+  MOCK_METHOD(void, RemovePocStatusHandler, (ib::sim::HandlerId));
+  MOCK_METHOD(ib::sim::HandlerId, AddSymbolHandler, (SymbolHandler));
+  MOCK_METHOD(void, RemoveSymbolHandler, (ib::sim::HandlerId));
+  MOCK_METHOD(ib::sim::HandlerId, AddSymbolTransmitHandler, (SymbolTransmitHandler));
+  MOCK_METHOD(void, RemoveSymbolTransmitHandler, (ib::sim::HandlerId));
+  MOCK_METHOD(ib::sim::HandlerId, AddCycleStartHandler, (CycleStartHandler));
+  MOCK_METHOD(void, RemoveCycleStartHandler, (ib::sim::HandlerId));
 };
 
 class CapiFlexrayTest : public testing::Test
@@ -109,6 +116,8 @@ TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
   ib_Flexray_ClusterParameters clusterParameters;
   ib_Flexray_NodeParameters nodeParameters;
   ib_Flexray_ControllerConfig cfg;
+  ib_HandlerId handlerId;
+
   memset(&cfg, 0, sizeof(cfg));
   cfg.clusterParams = &clusterParameters;
   cfg.nodeParams = &nodeParameters;
@@ -118,31 +127,38 @@ TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddFrameHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddFrameHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::FrameHandler);
+  returnCode = ib_Flexray_Controller_AddFrameHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                     &Callbacks::FrameHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddFrameTransmitHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::FrameTransmitHandler);
+  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                             &Callbacks::FrameTransmitHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddWakeupHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddWakeupHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::WakeupHandler);
+  returnCode = ib_Flexray_Controller_AddWakeupHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                      &Callbacks::WakeupHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddPocStatusHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddPocStatusHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::PocStatusHandler);
+  returnCode = ib_Flexray_Controller_AddPocStatusHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                         &Callbacks::PocStatusHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddSymbolHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddSymbolHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::SymbolHandler);
+  returnCode = ib_Flexray_Controller_AddSymbolHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                      &Callbacks::SymbolHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddSymbolTransmitHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::SymbolTransmitHandler);
+  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                              &Callbacks::SymbolTransmitHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, AddCycleStartHandler(testing::_)).Times(testing::Exactly(1));
-  returnCode = ib_Flexray_Controller_AddCycleStartHandler((ib_Flexray_Controller*)&mockController, NULL, &Callbacks::CycleStartHandler);
+  returnCode = ib_Flexray_Controller_AddCycleStartHandler((ib_Flexray_Controller*)&mockController, NULL,
+                                                          &Callbacks::CycleStartHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
   EXPECT_CALL(mockController, Run()).Times(testing::Exactly(1));
@@ -177,6 +193,8 @@ TEST_F(CapiFlexrayTest, fr_controller_nullpointer_params)
   ib_Flexray_ClusterParameters clusterParameters;
   ib_Flexray_NodeParameters nodeParameters;
   ib_Flexray_ControllerConfig cfg;
+  ib_HandlerId handlerId;
+
   memset(&cfg, 0, sizeof(cfg));
   cfg.clusterParams = &clusterParameters;
   cfg.nodeParams = &nodeParameters;
@@ -209,39 +227,56 @@ TEST_F(CapiFlexrayTest, fr_controller_nullpointer_params)
   returnCode = ib_Flexray_Controller_ExecuteCmd(nullptr, ib_Flexray_ChiCommand_RUN);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-  returnCode = ib_Flexray_Controller_AddFrameHandler(nullptr, NULL, &Callbacks::FrameHandler);
+  returnCode = ib_Flexray_Controller_AddFrameHandler(nullptr, NULL, &Callbacks::FrameHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddFrameHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddFrameHandler(cController, NULL, nullptr, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(nullptr, NULL, &Callbacks::FrameTransmitHandler);
-  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddFrameHandler(cController, NULL, &Callbacks::FrameHandler, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-  returnCode = ib_Flexray_Controller_AddWakeupHandler(nullptr, NULL, &Callbacks::WakeupHandler);
+  returnCode =
+      ib_Flexray_Controller_AddFrameTransmitHandler(nullptr, NULL, &Callbacks::FrameTransmitHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddWakeupHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(cController, NULL, nullptr, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-  returnCode = ib_Flexray_Controller_AddPocStatusHandler(nullptr, NULL, &Callbacks::PocStatusHandler);
-  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddPocStatusHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(cController, NULL, &Callbacks::FrameTransmitHandler, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-  returnCode = ib_Flexray_Controller_AddSymbolHandler(nullptr, NULL, &Callbacks::SymbolHandler);
+  returnCode = ib_Flexray_Controller_AddWakeupHandler(nullptr, NULL, &Callbacks::WakeupHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddSymbolHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddWakeupHandler(cController, NULL, nullptr, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(nullptr, NULL, &Callbacks::SymbolTransmitHandler);
-  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddWakeupHandler(cController, NULL, &Callbacks::WakeupHandler, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-  returnCode = ib_Flexray_Controller_AddCycleStartHandler(nullptr, NULL, &Callbacks::CycleStartHandler);
+  returnCode = ib_Flexray_Controller_AddPocStatusHandler(nullptr, NULL, &Callbacks::PocStatusHandler, &handlerId);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-  returnCode = ib_Flexray_Controller_AddCycleStartHandler(cController, NULL, nullptr);
+  returnCode = ib_Flexray_Controller_AddPocStatusHandler(cController, NULL, nullptr, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_Flexray_Controller_AddPocStatusHandler(cController, NULL, &Callbacks::PocStatusHandler, nullptr);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+  returnCode = ib_Flexray_Controller_AddSymbolHandler(nullptr, NULL, &Callbacks::SymbolHandler, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_Flexray_Controller_AddSymbolHandler(cController, NULL, nullptr, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_Flexray_Controller_AddSymbolHandler(cController, NULL, &Callbacks::SymbolHandler, nullptr);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+  returnCode =
+      ib_Flexray_Controller_AddSymbolTransmitHandler(nullptr, NULL, &Callbacks::SymbolTransmitHandler, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(cController, NULL, nullptr, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode =
+      ib_Flexray_Controller_AddSymbolTransmitHandler(cController, NULL, &Callbacks::SymbolTransmitHandler, nullptr);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+  returnCode = ib_Flexray_Controller_AddCycleStartHandler(nullptr, NULL, &Callbacks::CycleStartHandler, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_Flexray_Controller_AddCycleStartHandler(cController, NULL, nullptr, &handlerId);
+  EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+  returnCode = ib_Flexray_Controller_AddCycleStartHandler(cController, NULL, &Callbacks::CycleStartHandler, nullptr);
   EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 }
 
