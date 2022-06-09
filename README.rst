@@ -60,6 +60,12 @@ There are also two IB specific options:
        integration tests. The tests are based on the google test framework,
        which is bundled with the Integration Bus.
 
+    3. IB_BUILD_DEMOS=OFF (default: ON) disables the generation of demo
+       applications for the Integration Bus.
+
+    4. IB_BUILD_UTILITIES=OFF (default: ON) disables the generation of utility tools
+       (registry, system controller and system monitor).
+
 E.g., if you want to build the Integration Bus with documentation enabled,
 call cmake in your build directory as follows::
        

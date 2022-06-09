@@ -30,6 +30,10 @@ The following options are available:
 
  * - IB_BUILD_TESTS
    - Build the test cases
+ * - IB_BUILD_UTILITIES
+   - Build the utility tools like the system controller or system monitor.
+ * - IB_BUILD_DEMOS
+   - Build the demo applications
  * - IB_BUILD_DOCS
    - Build the documentation using doxygen and sphinx
  * - IB_INSTALL_SOURCE

@@ -83,5 +83,7 @@ target_compile_definitions(IbExtensions
     IB_EXTENSION_OS="${extension_os}"
 )
 
-add_subdirectory(Tests)
+if(IB_BUILD_TESTS)
+    add_subdirectory(Tests)
+endif()
 

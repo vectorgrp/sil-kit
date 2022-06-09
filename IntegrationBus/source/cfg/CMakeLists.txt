@@ -53,4 +53,6 @@ add_vib_test(TestMwCfgYamlValidator
     LIBS IbConfiguration yaml-cpp
 )
 
-add_subdirectory(mock)
+if(IB_BUILD_TESTS)
+    add_subdirectory(mock)
+endif()

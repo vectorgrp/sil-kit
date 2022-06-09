@@ -48,7 +48,9 @@ include(CTest)
 
 add_subdirectory(include)
 add_subdirectory(source)
-add_subdirectory(IntegrationTests)
+if(IB_BUILD_TESTS)
+    add_subdirectory(IntegrationTests)
+endif()
 
 set(_DEPLOY_CMAKE_DIR  ${INSTALL_LIB_DIR}/cmake/IntegrationBus/)
 
