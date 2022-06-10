@@ -5,7 +5,7 @@ add_subdirectory(mw)
 add_subdirectory(sim)
 add_subdirectory(util)
 add_subdirectory(extensions)
-add_subdirectory(capi)
+# add_subdirectory(capi) // TODO reactivate as part of VIB-779 (Add C-API for New Lifecycle)
 
 # Encode the current GIT and version infos into version_macros.hpp
 # If this file is present in the current source directory we assume
@@ -41,20 +41,21 @@ if(IB_BUILD_STATIC)
     set(ibLibType STATIC)
 endif()
 
+# // TODO reactivate as part of VIB-779 (Add C-API for New Lifecycle)
 add_library(IntegrationBus ${ibLibType}
     IntegrationBus.hpp
     IntegrationBus.cpp
-    "capi/TypeConversion.hpp"
-    "capi/CapiParticipant.cpp"
-    "capi/CapiCan.cpp"
-    "capi/CapiEthernet.cpp"
-    "capi/CapiFlexray.cpp"
-    "capi/CapiLogger.cpp"
-    "capi/CapiLin.cpp"
-    "capi/CapiDataPubSub.cpp"
-    "capi/CapiRpc.cpp"
-    "capi/CapiUtils.cpp"
-    "capi/CapiImpl.h"
+#     "capi/TypeConversion.hpp"
+#     "capi/CapiParticipant.cpp"
+#     "capi/CapiCan.cpp"
+#     "capi/CapiEthernet.cpp"
+#     "capi/CapiFlexray.cpp"
+#     "capi/CapiLogger.cpp"
+#     "capi/CapiLin.cpp"
+#     "capi/CapiDataPubSub.cpp"
+#     "capi/CapiRpc.cpp"
+#     "capi/CapiUtils.cpp"
+#     "capi/CapiImpl.h"
     IbForceIncludes.cpp
     CreateIbRegistry.cpp
 )
