@@ -96,7 +96,7 @@ int main(int argc, char** argv)
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
 
         // Set an Init Handler
         auto* lifecycleService = participant->GetLifecycleService();

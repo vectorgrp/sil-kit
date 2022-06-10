@@ -66,7 +66,7 @@ protected:
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
         
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId, false);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId);
         auto* controller = dynamic_cast<ib::sim::eth::EthController*>(participant->CreateEthernetController("ETH1"));
 
         controller->AddFrameTransmitHandler(
@@ -97,7 +97,7 @@ protected:
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId, false);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId);
         auto* controller = participant->CreateEthernetController("ETH1");
 
         controller->AddFrameHandler(

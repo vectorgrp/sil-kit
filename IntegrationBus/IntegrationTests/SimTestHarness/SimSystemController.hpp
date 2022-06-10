@@ -18,7 +18,7 @@ public:
     SimSystemController(const std::vector<std::string>& syncParticipantNames, uint32_t domainId) : _syncParticipantNames{syncParticipantNames}
     {
         _participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId, false);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId);
 
         _controller = _participant->GetSystemController();
         _controller->SetRequiredParticipants(_syncParticipantNames);

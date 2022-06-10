@@ -139,7 +139,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, true);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
 
             auto* lifecycleService = participant.participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -171,7 +171,7 @@ protected:
                         participant.simtimePassedPromise.set_value();
                     }
                 });
-            auto finalStateFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+            auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
             finalStateFuture.get();
         }
         catch (const ib::ConfigurationError& error)
@@ -194,7 +194,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", topic, mediaType, {},
@@ -262,7 +262,7 @@ protected:
         try
         {
             systemMaster.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId, false);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId);
 
             systemMaster.systemController = systemMaster.participant->GetSystemController();
             systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();

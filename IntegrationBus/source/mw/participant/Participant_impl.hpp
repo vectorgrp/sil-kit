@@ -58,40 +58,6 @@ struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> :
 
 } // namespace anonymous
 
-// TODO to be removed
-template <class IbConnectionT>
-Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participantConfig,
-                                      const std::string& participantName, bool isSynchronized, ProtocolVersion version)
-    : _participantName{ participantName }
-    , _participantConfig{ participantConfig }
-    , _participantId{util::hash::Hash(participantName)}
-    , _ibConnection{ _participantConfig, participantName, _participantId, version}
-{
-    std::string logParticipantNotice; //!< We defer logging the notice until the logger is created
-    if (!_participantConfig.participantName.empty() && _participantConfig.participantName != participantName)
-    {
-        logParticipantNotice = fmt::format(
-            "The provided participant name '{}' differs from the configured name '{}'. The latter will be used.",
-            _participantName, _participantConfig.participantName);
-        _participantName = _participantConfig.participantName;
-    }
-    // NB: do not create the _logger in the initializer list. If participantName is empty,
-    //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig.logging);
-    _ibConnection.SetLogger(_logger.get());
-
-    _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {}, Middleware: {}",
-                  _participantName, version::String(), "VAsio");
-
-    //set up default time provider used for controller instantiation
-    _timeProvider = std::make_shared<sync::WallclockProvider>(1ms);
-
-    if (!logParticipantNotice.empty())
-    {
-        _logger->Info(logParticipantNotice);
-    }
-}
-
 template <class IbConnectionT>
 Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participantConfig,
                                         const std::string& participantName, ProtocolVersion version)

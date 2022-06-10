@@ -64,8 +64,6 @@ protected:
         }
     };
 
-
-
     void AsyncCanWriterThread(TestParticipant& participant, uint32_t domainId)
     {
         static uint32_t increasingCanId = 0;
@@ -73,7 +71,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
             participant.canController = participant.participant->CreateCanController("Can");
 
             while (runAsync)
@@ -107,7 +105,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, false);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
             participant.canController = participant.participant->CreateCanController("Can");
 
             auto frameHandler = [&participant](ICanController*, const CanFrameEvent& /*msg*/) {

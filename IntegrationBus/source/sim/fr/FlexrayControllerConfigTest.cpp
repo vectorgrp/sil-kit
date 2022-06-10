@@ -45,7 +45,7 @@ TEST(FlexrayControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
@@ -61,7 +61,7 @@ TEST(FlexrayControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName, networkName));
@@ -78,7 +78,7 @@ TEST(FlexrayControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName, networkName));

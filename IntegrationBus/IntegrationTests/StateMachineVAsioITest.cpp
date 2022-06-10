@@ -78,7 +78,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Setup Participant for TestController
     auto participant =
-        CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController", false);
+        CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController");
    
     participant->joinIbDomain(domainId);
     auto systemController = participant->GetSystemController();
@@ -90,7 +90,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup Participant for Test Unit
-    auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit", true);
+    auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit");
     participantTestUnit->joinIbDomain(domainId);
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -129,7 +129,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::ControllersCreated);
-    auto finalState = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+    auto finalState = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::ReadyToRun);

@@ -302,7 +302,7 @@ int main(int argc, char** argv)
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
-        auto participant = ib::CreateParticipant(configuration, participantName, domainId, false);
+        auto participant = ib::CreateParticipant(configuration, participantName, domainId);
 
         auto systemMonitor = participant->GetSystemMonitor();
         auto systemController = participant->GetSystemController();

@@ -308,7 +308,7 @@ protected:
         try
         {
             participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfigurationWithLogging(ib::mw::logging::Level::Info),
-                                                                     participant.name, domainId, sync);
+                                                                     participant.name, domainId);
 
             // Create Clients
             for (auto& c : participant.rpcClients)
@@ -378,7 +378,7 @@ protected:
                     }
                     participant.CheckAllCalledPromise();
                 });
-                auto finalStateFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+                auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
                 finalStateFuture.get();
             }
             else

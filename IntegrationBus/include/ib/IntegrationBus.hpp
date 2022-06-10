@@ -18,7 +18,6 @@ namespace ib {
 *
 * \param config Configuration of the participant
 * \param participantName Name of the participant
-* \param isSynchronized Simulation time synchronization
 * \param domainId ID of the domain
 * \return Instance of the communication adapter
 *
@@ -27,11 +26,6 @@ namespace ib {
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.
 */
-[[deprecated ("CreateParticipant with an isSynchronized flag and ParticipantController is deprecated. Use the new lifecycle concept instead.")]] 
-IntegrationBusAPI auto CreateParticipant(
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig, const std::string& participantName,
-    const uint32_t domainId, bool isSynchronized) -> std::unique_ptr<mw::IParticipant>;
-
 IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const uint32_t domainId)
     -> std::unique_ptr<mw::IParticipant>;

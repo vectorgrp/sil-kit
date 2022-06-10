@@ -136,7 +136,7 @@ int main(int argc, char** argv)
 
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
 
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, runSync);
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
 
         auto* logger = participant->GetLogger();
         auto* canController = participant->CreateCanController("CAN1");

@@ -35,7 +35,7 @@ protected:
     void CreateParticipantFromConfiguration(std::shared_ptr<IParticipantConfiguration> cfg)
     {
         auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
-        (void)ib::mw::CreateNullConnectionParticipantImpl(cfg, participantConfig.participantName, false);
+        (void)ib::mw::CreateNullConnectionParticipantImpl(cfg, participantConfig.participantName);
     }
 };
 

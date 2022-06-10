@@ -80,7 +80,7 @@ protected:
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId, false);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId);
         auto* controller = participant->CreateCanController("CAN1");
 
         controller->AddFrameTransmitHandler(
@@ -112,7 +112,7 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId, false);
+        auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(

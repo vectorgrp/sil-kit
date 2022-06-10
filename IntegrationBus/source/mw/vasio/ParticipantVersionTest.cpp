@@ -23,7 +23,7 @@ namespace {
 using namespace ib::mw;
 auto MakeParticipant(std::string participantName, ProtocolVersion version) -> std::shared_ptr<IParticipantInternal>
 {
-    return std::make_shared<Participant<VAsioConnection>>(ib::cfg::ParticipantConfiguration{}, participantName, true,
+    return std::make_shared<Participant<VAsioConnection>>(ib::cfg::ParticipantConfiguration{}, participantName,
                                                           version);
 }
 

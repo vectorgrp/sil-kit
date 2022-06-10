@@ -183,7 +183,7 @@ int main(int argc, char** argv)
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, runSync);
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
         auto* ethernetController = participant->CreateEthernetController("Eth1");
 
         ethernetController->AddFrameHandler(&FrameHandler);

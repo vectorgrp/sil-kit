@@ -80,7 +80,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     {
         auto& participant = kv.second;
         auto* lifecycleService = participant->Participant()->GetLifecycleService();
-        participant->_result = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+        participant->_result = lifecycleService->ExecuteLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), true, true);
     }
 
     // wait until simulation is finished or timeout is reached
@@ -145,7 +145,7 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     participant->_name = participantName;
 
     participant->_participant =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _domainId, true);
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _domainId);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

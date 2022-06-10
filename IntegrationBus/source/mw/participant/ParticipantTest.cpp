@@ -27,15 +27,15 @@ protected:
 // TODO: Fix
 TEST_F(ParticipantTest, throw_on_empty_participant_name)
 {
-    EXPECT_THROW(CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), "", false),
+    EXPECT_THROW(CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), ""),
                  ib::ConfigurationError);
 }
 
 TEST_F(ParticipantTest, support_nullptr_in_IParticipantConfiguration)
 {
-    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(nullptr, "TestParticipant", false));
+    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(nullptr, "TestParticipant"));
     EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(std::make_shared<ib::cfg::IParticipantConfiguration>(),
-                                                       "TestParticipant", false));
+                                                       "TestParticipant"));
 }
 
 TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
@@ -47,7 +47,7 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 
 
     auto participant =
-        CreateNullConnectionParticipantImpl(mockConfig, "TestParticipant", false);
+        CreateNullConnectionParticipantImpl(mockConfig, "TestParticipant");
     auto comParticipantName = participant->GetParticipantName();
     EXPECT_EQ(participant->GetParticipantName(), configuredParticipantName);
 }
@@ -55,7 +55,7 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 TEST_F(ParticipantTest, make_basic_controller)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestParticipant", false);
+        CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestParticipant");
 
     auto* canController = participant->CreateCanController("CAN1");
     auto basicCanController = dynamic_cast<ib::sim::can::CanController*>(canController);

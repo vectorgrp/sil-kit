@@ -51,7 +51,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
     // Create the first participant and register the connect and disconnect callbacks
     auto&& firstParticipant =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), firstParticipantName, domainId, false);
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), firstParticipantName, domainId);
 
     auto* firstSystemMonitor = firstParticipant->GetSystemMonitor();
     firstSystemMonitor->SetParticipantConnectedHandler([this](const std::string& participantName) {
@@ -67,7 +67,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
         // Create the second participant which should trigger the callbacks of the first
         auto&& secondParticipant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), secondParticipantName, domainId, false);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), secondParticipantName, domainId);
 
         auto* secondSystemMonitor = secondParticipant->GetSystemMonitor();
         secondSystemMonitor->SetParticipantConnectedHandler([this](const std::string& participantName) {
@@ -85,7 +85,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
             // Create the third participant which should trigger the callbacks of the first and second
             auto&& thirdParticipant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), thirdParticipantName, domainId, false);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), thirdParticipantName, domainId);
 
             EXPECT_TRUE(firstSystemMonitor->IsParticipantConnected(thirdParticipantName));
             EXPECT_TRUE(secondSystemMonitor->IsParticipantConnected(thirdParticipantName));

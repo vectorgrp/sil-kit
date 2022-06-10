@@ -45,7 +45,7 @@ TEST(EthernetControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName));
@@ -62,7 +62,7 @@ TEST(EthernetControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
@@ -79,7 +79,7 @@ TEST(EthernetControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));

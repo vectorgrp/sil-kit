@@ -42,11 +42,11 @@ struct NullConnection
 } // anonymous namespace
     
 auto CreateNullConnectionParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                        const std::string& participantName, bool isSynchronized)
+                                        const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>
 {
     auto&& cfg = ib::mw::ValidateAndSanitizeConfig(participantConfig, participantName);
-    return std::make_unique<Participant<NullConnection>>(std::move(cfg), participantName, isSynchronized);
+    return std::make_unique<Participant<NullConnection>>(std::move(cfg), participantName);
 }
 
 } // namespace mw

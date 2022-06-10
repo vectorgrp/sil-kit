@@ -306,7 +306,7 @@ int main(int argc, char** argv) try
     auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
     std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-    auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
+    auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1");

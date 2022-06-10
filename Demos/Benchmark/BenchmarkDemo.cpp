@@ -289,7 +289,7 @@ void ParticipantsThread(
     uint32_t participantIndex,
     size_t& messageCounter)
 {
-    auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.domainId, true);
+    auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.domainId);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
    
@@ -377,7 +377,7 @@ int main(int argc, char** argv)
                 threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark,  participantName, participantIndex, std::ref(counter));
             }
 
-            auto participant = ib::CreateParticipant(participantConfiguration, "SystemController", benchmark.domainId, false);
+            auto participant = ib::CreateParticipant(participantConfiguration, "SystemController", benchmark.domainId);
             auto controller = participant->GetSystemController();
             auto monitor = participant->GetSystemMonitor();
 

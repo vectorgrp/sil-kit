@@ -297,7 +297,7 @@ protected:
     {
         try
         {
-            participant.participant = ib::CreateParticipant(participant.config, participant.name, domainId, sync);
+            participant.participant = ib::CreateParticipant(participant.config, participant.name, domainId);
 
             participant.participantCreatedPromise.set_value();
 
@@ -369,7 +369,7 @@ protected:
                         participant.CheckAllSentPromise();
                     }
                 });
-                auto finalStateFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+                auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
                 finalStateFuture.get();
             }
             else

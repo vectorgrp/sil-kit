@@ -45,7 +45,7 @@ TEST(LinControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<LinController*>(participant->CreateLinController(controllerName));
@@ -62,7 +62,7 @@ TEST(LinControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<LinController*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
@@ -78,7 +78,7 @@ TEST(LinControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant", false);
+    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<LinController*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();

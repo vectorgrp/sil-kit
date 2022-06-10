@@ -53,7 +53,7 @@ public:
     {
         std::string participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
-            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName, true);
+            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName);
 
         _participant->joinIbDomain(domainId);
 
@@ -76,7 +76,7 @@ public:
     void RunAsync()
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        _simulationFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+        _simulationFuture = lifecycleService->ExecuteLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), true, true);
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -118,7 +118,7 @@ public:
         , _testSize{testSize}
     {
         _participant = ib::mw::CreateParticipantImpl(
-            ib::cfg::MockParticipantConfiguration(), participantName, true);
+            ib::cfg::MockParticipantConfiguration(), participantName);
         _participant->joinIbDomain(domainId);
 
         _systemController = _participant->GetSystemController();
@@ -153,7 +153,7 @@ public:
     std::future<ParticipantState> RunAsync() const
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        return lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
+        return lifecycleService->ExecuteLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), true, true);
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)

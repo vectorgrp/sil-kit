@@ -9,7 +9,7 @@ namespace ib {
 namespace mw {
 
 auto CreateNullConnectionParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                        const std::string& participantName, bool isSynchronized)
+                                        const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>;
 
 } // namespace mw

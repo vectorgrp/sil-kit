@@ -60,7 +60,7 @@ private:
     void RunSystemMaster(uint32_t domainId, const std::vector<std::string>& requiredParticipantNames)
     {
         _systemMaster.participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", domainId, false);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", domainId);
 
         _systemMaster.systemController = _systemMaster.participant->GetSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();

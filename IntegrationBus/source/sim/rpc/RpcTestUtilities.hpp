@@ -132,11 +132,11 @@ struct MockConnection
 using MockConnectionParticipant = ib::mw::Participant<MockConnection>;
 
 inline auto MakeMockConnectionParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                          const std::string& participantName, bool isSynchronized)
+                                          const std::string& participantName)
     -> std::unique_ptr<MockConnectionParticipant>
 {
     auto&& cfg = ib::mw::ValidateAndSanitizeConfig(participantConfig, participantName);
-    return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName, isSynchronized);
+    return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName);
 }
 
 struct FixedTimeProvider : ib::mw::sync::ITimeProvider
@@ -164,7 +164,7 @@ class RpcTestBase : public testing::Test
 {
 public:
     RpcTestBase()
-        : participant(MakeMockConnectionParticipant(MakeParticipantConfiguration(), "RpcClientTest", false))
+        : participant(MakeMockConnectionParticipant(MakeParticipantConfiguration(), "RpcClientTest"))
     {
     }
 

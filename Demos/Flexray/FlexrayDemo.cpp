@@ -291,7 +291,7 @@ int main(int argc, char** argv)
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
         auto* controller = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();

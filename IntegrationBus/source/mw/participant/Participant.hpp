@@ -77,8 +77,6 @@ public:
     Participant(const Participant&) = default;
     Participant(Participant&&) = default;
     Participant(cfg::ParticipantConfiguration participantConfig, const std::string& participantName,
-                bool isSynchronized, ProtocolVersion version = CurrentProtocolVersion());
-    Participant(cfg::ParticipantConfiguration participantConfig, const std::string& participantName,
                 ProtocolVersion version = CurrentProtocolVersion());
 
 public:

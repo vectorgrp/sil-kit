@@ -44,11 +44,11 @@ TEST_F(ServiceDiscoveryITest, discover_services)
     registry->ProvideDomain(domainId);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId, false);
+    auto&& publisher =  ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId);
 
     // Subscriber that monitors the services
     auto&& subscriber =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId, false);
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -134,10 +134,10 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
     registry->ProvideDomain(domainId);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId, false);
+    auto&& publisher = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId);
 
     // Subscriber that monitors the services
-    auto&& subscriber = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId, false);
+    auto&& subscriber = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId);
 
     // Services
     const auto topic = "Topic";
