@@ -63,7 +63,6 @@ template <class IbConnectionT>
 Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participantConfig,
                                       const std::string& participantName, bool isSynchronized, ProtocolVersion version)
     : _participantName{ participantName }
-    , _isSynchronized{ isSynchronized }
     , _participantConfig{ participantConfig }
     , _participantId{util::hash::Hash(participantName)}
     , _ibConnection{ _participantConfig, participantName, _participantId, version}
@@ -146,13 +145,12 @@ void Participant<IbConnectionT>::onIbDomainJoined()
     // Create the participants trace message sinks as declared in the configuration.
     //_traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, participant);
 
-    // NB: Create the participantController directly for synchronized participants.
-    if (_isSynchronized)
-    {
-        auto* participantController =
-            static_cast<sync::ParticipantController*>(GetParticipantController());
-        _timeProvider = participantController->GetTimeProvider();
-    }
+    // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
+    auto* lifecycleService = GetLifecycleService();
+
+    auto* timeSyncService = dynamic_cast<mw::sync::TimeSyncService*>(lifecycleService->GetTimeSyncService());
+
+    _timeProvider = timeSyncService->GetTimeProvider();
     _logger->Info("Time provider: {}", _timeProvider->TimeProviderName());
 
     //// Enable replaying mechanism.
@@ -568,22 +566,6 @@ void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& functionN
 {
     sim::rpc::RpcDiscoverer rpcDiscoverer{GetServiceDiscovery()};
     handler(rpcDiscoverer.GetMatchingRpcServers(functionName, mediaType, labels));
-}
-
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::GetParticipantController() -> sync::IParticipantController*
-{
-    auto* controller = GetController<sync::ParticipantController>("default", "ParticipantController");
-    if (!controller)
-    {
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeParticipantController;
-        controller = CreateInternalController<sync::ParticipantController>(
-            "ParticipantController", mw::ServiceType::InternalController, std::move(supplementalData), true,
-            _participantName, _isSynchronized, _participantConfig.healthCheck);
-    }
-
-    return controller;
 }
 
 template <class IbConnectionT>

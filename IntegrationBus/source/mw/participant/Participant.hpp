@@ -151,7 +151,6 @@ public:
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override;
     auto GetLogger() -> logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
-    auto IsSynchronized() const -> bool override { return _isSynchronized; }
 
     void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
     void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim, const std::vector<std::string>& networkNames) override;
@@ -353,7 +352,6 @@ private:
     // ----------------------------------------
     // private members
     std::string _participantName;
-    bool _isSynchronized{ false };
     const ib::cfg::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 

@@ -390,7 +390,6 @@ public:
     void FlushSendBuffers() override {}
     void ExecuteDeferred(std::function<void()> /*callback*/) override {}
     auto GetParticipantName() const -> const std::string& override { return _name; }
-    auto IsSynchronized() const -> bool override { return _isSynchronized; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
     void joinIbDomain(uint32_t ) override {}
@@ -398,7 +397,6 @@ public:
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
     const std::string _name = "MockParticipant";
-    bool _isSynchronized{ false };
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
     MockLifecycleService mockLifecycleService;

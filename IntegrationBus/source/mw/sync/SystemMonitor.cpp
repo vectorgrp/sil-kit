@@ -73,24 +73,6 @@ void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& e
                 handler(_systemState);
         }
     }
-
-    // Add expected participants in sync policy of timeSyncService
-    // if this participant is synchronized and found in expectedNames
-    if (_participant->IsSynchronized())
-    {
-        auto&& nameIter =
-            std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), _participant->GetParticipantName());
-        if (nameIter != _expectedParticipants.names.end())
-        {
-            auto* lifecycleService = dynamic_cast<ib::mw::sync::LifecycleService*>(_participant->GetLifecycleService());
-            if (lifecycleService)
-            {
-                auto* timeSyncService =
-                    dynamic_cast<ib::mw::sync::TimeSyncService*>(lifecycleService->GetTimeSyncService());
-                timeSyncService->AddSynchronizedParticipants(expectedParticipants);
-            }
-        }
-    }
 }
 
 
