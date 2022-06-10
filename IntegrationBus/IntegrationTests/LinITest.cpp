@@ -380,10 +380,10 @@ TEST_F(LinITest, sync_lin_simulation)
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
-        //participantController->SetInitHandler([participantName, linController](auto /*initCmd*/) {
+        lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
-        //    });
+            });
 
         auto master = std::make_unique<LinMaster>(participant, linController);
 
@@ -406,9 +406,9 @@ TEST_F(LinITest, sync_lin_simulation)
 
 
         auto config = MakeControllerConfig(participantName);
-        //participantController->SetInitHandler([config, participantName, linController](auto /*initCmd*/) {
+        lifecycleService->SetCommunicationReadyHandler([config, participantName, linController]() {
             linController->Init(config);
-        //  });
+          });
 
         auto slave = std::make_unique<LinSlave>(participant, linController);
         linController->AddFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));

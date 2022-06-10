@@ -53,10 +53,10 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
         
-        //participantController->SetInitHandler([ethernetController](auto) {
+        lifecycleService->SetCommunicationReadyHandler([ethernetController]() {
             Log() << "---   EthernetWriter: Init called, setting baud rate and starting";
             ethernetController->Activate();
-        //});
+        });
 
         ethernetController->AddBitrateChangeHandler([&](auto, eth::EthernetBitrateChangeEvent bitrateChangeEvent) {
           linkBitrate = bitrateChangeEvent.bitrate;
@@ -129,10 +129,10 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
           readerTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         });
 
-        //participantController->SetInitHandler([ethernetController](auto) {
+        lifecycleService->SetCommunicationReadyHandler([ethernetController]() {
             Log() << "---   EthernetReader: Init called, setting baud rate and starting";
             ethernetController->Activate();
-        //});
+        });
 
         ethernetController->AddFrameHandler(
             [&readerTime, &receivedMessage, &frame, &receiveCount, &lifecycleService](auto, const auto& netsimMessage) {

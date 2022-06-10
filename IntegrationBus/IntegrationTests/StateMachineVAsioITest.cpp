@@ -37,7 +37,7 @@ class VAsioNetworkITest : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(InitHandler, void(ib::mw::ParticipantId, ParticipantCommand::Kind));
+        MOCK_METHOD0(CommunicationReadyHandler, void());
         MOCK_METHOD0(StopHandler, void());
         MOCK_METHOD0(ShutdownHandler, void());
         MOCK_METHOD1(ParticipantStateHandler, void(ParticipantState)); // Helper to only check for status.state; no longer part of the API
@@ -95,9 +95,9 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    //participantController->SetInitHandler([&callbacks = callbacks](ParticipantCommand initCommand) {
-    //    callbacks.InitHandler(initCommand.participant, initCommand.kind);
-    //});
+    lifecycleService->SetCommunicationReadyHandler([&callbacks = callbacks]() {
+        callbacks.CommunicationReadyHandler();
+    });
     timeSyncService->SetSimulationTask([](auto /*now*/, auto /*duration*/) {
     });
 
@@ -111,7 +111,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     std::string participantName = "TestUnit";
     ParticipantCommand initCommand{ib::util::hash::Hash(participantName), ParticipantCommand::Kind::Initialize};
 
-    EXPECT_CALL(callbacks, InitHandler(initCommand.participant, initCommand.kind)).Times(1);
+    EXPECT_CALL(callbacks, CommunicationReadyHandler()).Times(1);
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
 

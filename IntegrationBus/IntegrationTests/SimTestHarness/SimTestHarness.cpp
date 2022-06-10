@@ -159,8 +159,8 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     timeSyncService->SetSimulationTask([name = participant->Name()](auto, auto) {
     });
 
-    //partCtrl->SetInitHandler([name = participantName](auto){
-    //});
+    lifecycleService->SetCommunicationReadyHandler([name = participantName]() {
+    });
 
     _simParticipants[participantName] = std::move(participant);
 }

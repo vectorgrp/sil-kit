@@ -102,8 +102,8 @@ int main(int argc, char** argv)
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-        lifecycleService->SetReinitializeHandler([&participantName]() {
-            std::cout << "Reinitializing " << participantName << std::endl;
+        lifecycleService->SetCommunicationReadyHandler([&participantName]() {
+            std::cout << "Communication ready for " << participantName << std::endl;
         });
         lifecycleService->SetStopHandler([]() {
             std::cout << "Stopping..." << std::endl;

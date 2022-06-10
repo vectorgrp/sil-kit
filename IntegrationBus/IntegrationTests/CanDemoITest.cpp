@@ -48,7 +48,8 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanWriter";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& participantController = participant->GetLifecycleService()->GetTimeSyncService();
+      auto&& lifecycleService = participant->GetLifecycleService();
+      auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
       canController->AddFrameTransmitHandler([&](auto, const can::CanFrameTransmitEvent& frameTransmitEvent) {
@@ -73,13 +74,13 @@ TEST_F(SimTestHarnessITest, can_demo)
         }
       });
 
-      //participantController->SetInitHandler([canController, participantName](auto) {
+      lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << "---   " << participantName << ": Init called, setting baud rate and starting";
         canController->SetBaudRate(10'000, 1'000'000);
         canController->Start();
-      //});
+      });
 
-      participantController->SetSimulationTask(
+      timeSyncService->SetSimulationTask(
       [participant, &msg, canController] (auto now) {
         //Cause transmit queue overrun
         if (now == 0ms)
@@ -135,11 +136,11 @@ TEST_F(SimTestHarnessITest, can_demo)
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
-      //participantController->SetInitHandler([canController, participantName](auto) {
+      lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << participantName << ": Init called, setting baud rate and starting";
         canController->SetBaudRate(10'000, 1'000'000);
         canController->Start();
-      //});
+      });
 
       timeSyncService->SetSimulationTask([canController, &msg, &receiveTime](auto now) {
         receiveTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -187,14 +188,14 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanMonitor";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& participantController = participant->GetLifecycleService()->GetTimeSyncService();
+      auto&& lifecycleService = participant->GetLifecycleService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
-      //participantController->SetInitHandler([canController, participantName](auto) {
+      lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << participantName << ": Init called, setting baud rate and starting";
         canController->SetBaudRate(10'000, 1'000'000);
         canController->Start();
-      //});
+      });
 
       canController->AddErrorStateChangeHandler([&](auto, const can::CanErrorStateChangeEvent& errorStateChangeEvent) {
         if (errorStateChangeEvent.errorState == can::CanErrorState::ErrorActive)

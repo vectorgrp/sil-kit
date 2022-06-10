@@ -397,14 +397,14 @@ TEST_F(SimTestHarnessITest, lin_demo)
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
-        //participantController->SetInitHandler([participantName, linController](auto) {
+        lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
 
             Log() << "Initializing " << participantName;
 
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
 
-        //    });
+            });
 
         auto master = std::make_unique<LinMaster>(participant, linController);
 
@@ -432,13 +432,13 @@ TEST_F(SimTestHarnessITest, lin_demo)
 
 
         auto config = MakeControllerConfig(participantName);
-        //participantController->SetInitHandler([config, participantName, linController](auto) {
+        lifecycleService->SetCommunicationReadyHandler([config, participantName, linController]() {
 
             Log() << " Initializing " << participantName;
 
             linController->Init(config);
 
-        //  });
+          });
 
         auto slave = std::make_unique<LinSlave>(participant, linController);
         linController->AddFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));

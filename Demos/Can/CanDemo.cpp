@@ -76,13 +76,6 @@ void SendFrame(ICanController* controller, logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
-void InitializeController(ICanController* canController, const std::string& participantName)
-{
-    std::cout << "Initializing " << participantName << std::endl;
-    canController->SetBaudRate(10'000, 1'000'000);
-    canController->Start();
-}
-
 /**************************************************************************************************
  * Main Function
  **************************************************************************************************/
@@ -162,9 +155,10 @@ int main(int argc, char** argv)
             auto* lifecycleService = participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
             // Set an Init Handler
-            InitializeController(canController, participantName);
-            lifecycleService->SetReinitializeHandler([canController, &participantName]() {
-                InitializeController(canController, participantName);
+            lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
+                std::cout << "Initializing " << participantName << std::endl;
+                canController->SetBaudRate(10'000, 1'000'000);
+                canController->Start();
             });
 
             // Set a Stop Handler

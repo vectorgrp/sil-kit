@@ -120,12 +120,6 @@ void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& fro
     std::cout << "<< ETH Frame sent with transmitId=" << transmitId << std::endl;
 }
 
-void InitializeController(eth::IEthernetController* ethController, const std::string& participantName)
-{
-    std::cout << "Initializing " << participantName << std::endl;
-    ethController->Activate();
-}
-
 /**************************************************************************************************
  * Main Function
  **************************************************************************************************/
@@ -200,8 +194,7 @@ int main(int argc, char** argv)
             auto* lifecycleService = participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
             // Set an Init Handler
-            InitializeController(ethernetController, participantName);
-            lifecycleService->SetReinitializeHandler([ethernetController, &participantName]() {
+            lifecycleService->SetCommunicationReadyHandler([&participantName, ethernetController]() {
                 std::cout << "Initializing " << participantName << std::endl;
                 ethernetController->Activate();
             });
