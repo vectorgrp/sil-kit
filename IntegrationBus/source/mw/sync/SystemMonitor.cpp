@@ -2,7 +2,8 @@
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
-#include "ParticipantController.hpp"
+#include "LifecycleService.hpp"
+#include "TimeSyncService.hpp"
 
 #include <algorithm>
 #include <ctime>
@@ -73,7 +74,7 @@ void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& e
         }
     }
 
-    // Add expected participants in sync policy of participantController
+    // Add expected participants in sync policy of timeSyncService
     // if this participant is synchronized and found in expectedNames
     if (_participant->IsSynchronized())
     {
@@ -81,10 +82,12 @@ void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& e
             std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), _participant->GetParticipantName());
         if (nameIter != _expectedParticipants.names.end())
         {
-            auto* participantController = dynamic_cast<ib::mw::sync::ParticipantController*>(_participant->GetParticipantController());
-            if (participantController)
+            auto* lifecycleService = dynamic_cast<ib::mw::sync::LifecycleService*>(_participant->GetLifecycleService());
+            if (lifecycleService)
             {
-                participantController->AddSynchronizedParticipants(expectedParticipants);
+                auto* timeSyncService =
+                    dynamic_cast<ib::mw::sync::TimeSyncService*>(lifecycleService->GetTimeSyncService());
+                timeSyncService->AddSynchronizedParticipants(expectedParticipants);
             }
         }
     }

@@ -13,7 +13,6 @@ struct SystemCommand;
 struct ParticipantStatus;
 struct ExpectedParticipants;
 
-class IParticipantController;
 class ILifecycleService;
 class ITimeSyncService;
 

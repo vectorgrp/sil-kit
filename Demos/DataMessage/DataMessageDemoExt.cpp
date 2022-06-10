@@ -99,36 +99,29 @@ int main(int argc, char** argv)
         auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
 
         // Set an Init Handler
-        auto&& participantController = participant->GetParticipantController();
-        participantController->SetInitHandler([&participantName](auto /*initCmd*/) {
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-            std::cout << "Initializing " << participantName << std::endl;
-
+        lifecycleService->SetReinitializeHandler([&participantName]() {
+            std::cout << "Reinitializing " << participantName << std::endl;
         });
-
-        // Set a Stop Handler
-        participantController->SetStopHandler([]() {
-
+        lifecycleService->SetStopHandler([]() {
             std::cout << "Stopping..." << std::endl;
-
         });
 
-        // Set a Shutdown Handler
-        participantController->SetShutdownHandler([]() {
-
+        lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutting down..." << std::endl;
-
         });
 
         const std::string mediaType{ ib::util::serdes::sil::MediaTypeData() };
 
-        participantController->SetPeriod(1s);
+        timeSyncService->SetPeriod(1s);
         if (participantName == "Publisher1")
         {
             std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
             auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -142,7 +135,7 @@ int main(int argc, char** argv)
             std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
             auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -158,14 +151,15 @@ int main(int argc, char** argv)
                                                       {{"KeyA", ""}, {"KeyB", ""}});
             subscriber->AddExplicitDataMessageHandler(SpecificDataHandlerForPub2, mediaType, {{"KeyC", ""}});
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                 });
         }
 
-        auto finalState = participantController->Run();
+        auto lifecycleFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+        auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

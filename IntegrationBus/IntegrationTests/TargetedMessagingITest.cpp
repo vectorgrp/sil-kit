@@ -38,13 +38,15 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto systemCtrl = senderCom->GetSystemController();
 
-    auto* senderParticipant = senderCom->GetParticipantController();
+    auto* senderLifecycleService = senderCom->GetLifecycleService();
+    auto* senderTimeSyncService = senderLifecycleService->GetTimeSyncService();
+
     auto* senderCan = dynamic_cast<ib::sim::can::CanController*>(senderCom->CreateCanController("CAN1"));
     senderCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
-    senderParticipant->SetPeriod(1ms);
-    senderParticipant->SetSimulationTask(
+    senderTimeSyncService->SetPeriod(1ms);
+    senderTimeSyncService->SetSimulationTask(
         [&systemCtrl, &senderCan, &senderCom](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
@@ -61,9 +63,12 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto* receiverCom =
         dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("TargetReceiver")->Participant());
-    auto* receiverParticipant = receiverCom->GetParticipantController();
-    receiverParticipant->SetPeriod(1ms);
-    receiverParticipant->SetSimulationTask([](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
+    auto* receiverLifecycleService = receiverCom->GetLifecycleService();
+    auto* receiverTimeSyncService = receiverLifecycleService->GetTimeSyncService();
+
+    receiverTimeSyncService->SetPeriod(1ms);
+    receiverTimeSyncService->SetSimulationTask(
+        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
     });
 
     auto* receiverCan = receiverCom->CreateCanController("CAN1");
@@ -78,9 +83,10 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto* otherReceiverCom =
         dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("OtherReceiver")->Participant());
-    auto* otherReceiverParticipant = otherReceiverCom->GetParticipantController();
-    otherReceiverParticipant->SetPeriod(1ms);
-    otherReceiverParticipant->SetSimulationTask(
+    auto* otherLifecycleService = otherReceiverCom->GetLifecycleService();
+    auto* otherTimeSyncService = otherLifecycleService->GetTimeSyncService();
+    otherTimeSyncService->SetPeriod(1ms);
+    otherTimeSyncService->SetSimulationTask(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {});
 
     auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1");

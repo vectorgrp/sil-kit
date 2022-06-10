@@ -71,23 +71,23 @@ protected:
                 }
             });
 
-        auto* participantController = participant->Participant()->GetParticipantController();
-        participantController->SetSimulationTask(
-            [this, canController, participantController](auto, auto)
-            {
-                EXPECT_EQ(participantController->State(), sync::ParticipantState::Running);
-                if (numSent < testMessages.size())
-                {
-                    const auto& message = testMessages.at(numSent);
-                    CanFrame msg;
-                    msg.canId = 1;
-                    msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
-                    msg.dlc = msg.dataField.size();
+        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-                    canController->SendFrame(std::move(msg));
-                    numSent++;
-                    std::this_thread::sleep_for(100ms);
-                }
+        timeSyncService->SetSimulationTask([this, canController, lifecycleService](auto, auto) {
+            EXPECT_EQ(lifecycleService->State(), sync::ParticipantState::Running);
+            if (numSent < testMessages.size())
+            {
+                const auto& message = testMessages.at(numSent);
+                CanFrame msg;
+                msg.canId = 1;
+                msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
+                msg.dlc = msg.dataField.size();
+
+                canController->SendFrame(std::move(msg));
+                numSent++;
+                std::this_thread::sleep_for(100ms);
+            }
         });
     }
 

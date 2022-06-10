@@ -48,7 +48,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanWriter";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& participantController = participant->GetParticipantController();
+      auto&& participantController = participant->GetLifecycleService()->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
       canController->AddFrameTransmitHandler([&](auto, const can::CanFrameTransmitEvent& frameTransmitEvent) {
@@ -73,11 +73,11 @@ TEST_F(SimTestHarnessITest, can_demo)
         }
       });
 
-      participantController->SetInitHandler([canController, participantName](auto) {
+      //participantController->SetInitHandler([canController, participantName](auto) {
         Log() << "---   " << participantName << ": Init called, setting baud rate and starting";
         canController->SetBaudRate(10'000, 1'000'000);
         canController->Start();
-      });
+      //});
 
       participantController->SetSimulationTask(
       [participant, &msg, canController] (auto now) {
@@ -131,16 +131,17 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanReader";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& participantController = participant->GetParticipantController();
+      auto&& lifecycleService = participant->GetLifecycleService();
+      auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
-      participantController->SetInitHandler([canController, participantName](auto) {
+      //participantController->SetInitHandler([canController, participantName](auto) {
         Log() << participantName << ": Init called, setting baud rate and starting";
         canController->SetBaudRate(10'000, 1'000'000);
         canController->Start();
-      });
+      //});
 
-      participantController->SetSimulationTask([canController, &msg, &receiveTime](auto now) {
+      timeSyncService->SetSimulationTask([canController, &msg, &receiveTime](auto now) {
         receiveTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         //Cause a collision
         if (now == 10ms)
@@ -151,7 +152,7 @@ TEST_F(SimTestHarnessITest, can_demo)
         });
 
       canController->AddFrameHandler(
-        [&, participantController](auto, const can::CanFrameEvent& frameEvent)
+        [&](auto, const can::CanFrameEvent& frameEvent)
         {
           if (frameEvent.userContext == nullptr)
           {
@@ -165,7 +166,7 @@ TEST_F(SimTestHarnessITest, can_demo)
             << "frameEvent.frame.userContext is mangled!";
           if (messageCount++ == 10)
           {
-            participantController->Stop("Test done");
+            lifecycleService->Stop("Test done");
             Log() << "---    CanReader: Sending Stop from";
           }
           result = true;
@@ -186,14 +187,14 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanMonitor";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& participantController = participant->GetParticipantController();
+      auto&& participantController = participant->GetLifecycleService()->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
-      participantController->SetInitHandler([canController, participantName](auto) {
+      //participantController->SetInitHandler([canController, participantName](auto) {
         Log() << participantName << ": Init called, setting baud rate and starting";
         canController->SetBaudRate(10'000, 1'000'000);
         canController->Start();
-      });
+      //});
 
       canController->AddErrorStateChangeHandler([&](auto, const can::CanErrorStateChangeEvent& errorStateChangeEvent) {
         if (errorStateChangeEvent.errorState == can::CanErrorState::ErrorActive)

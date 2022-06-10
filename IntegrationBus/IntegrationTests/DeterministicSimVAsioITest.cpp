@@ -58,11 +58,12 @@ public:
         _participant->joinIbDomain(domainId);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
-        auto&& participantController = _participant->GetParticipantController();
+        auto* lifecycleService = _participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto* publisher = _participant->CreateDataPublisher("PubCtrl1", topicName, {}, {}, 0);
 
-        participantController->SetPeriod(period);
-        participantController->SetSimulationTask(
+        timeSyncService->SetPeriod(period);
+        timeSyncService->SetSimulationTask(
             [this, publisher](const nanoseconds now, nanoseconds /*duration*/) {
 
             if (_messageIndex < _testSize)
@@ -74,8 +75,8 @@ public:
 
     void RunAsync()
     {
-        auto&& participantController = _participant->GetParticipantController();
-        _simulationFuture = participantController->RunAsync();
+        auto* lifecycleService = _participant->GetLifecycleService();
+        _simulationFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -129,7 +130,8 @@ public:
             this->OnSystemStateChanged(newState);
         });
 
-        auto&& participantController = _participant->GetParticipantController();
+        auto* lifecycleService = _participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
@@ -139,8 +141,8 @@ public:
                     ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
                 });
         }
-        participantController->SetPeriod(period);
-        participantController->SetSimulationTask(
+        timeSyncService->SetPeriod(period);
+        timeSyncService->SetSimulationTask(
             [this](const nanoseconds now, nanoseconds /*duration*/) {
 
             _currentTick = now;
@@ -150,8 +152,8 @@ public:
 
     std::future<ParticipantState> RunAsync() const
     {
-        auto&& participantController = _participant->GetParticipantController();
-        return participantController->RunAsync();
+        auto* lifecycleService = _participant->GetLifecycleService();
+        return lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)

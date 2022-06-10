@@ -94,26 +94,28 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
         auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
 
-        auto&& participantController = participant->GetParticipantController();
-        participantController->SetInitHandler([&participantName](auto /*initCmd*/) {
-            std::cout << "Initializing " << participantName << std::endl;
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+
+        lifecycleService->SetReinitializeHandler([&participantName]() {
+            std::cout << "Reinitializing " << participantName << std::endl;
         });
-        participantController->SetStopHandler([]() {
+        lifecycleService->SetStopHandler([]() {
             std::cout << "Stopping..." << std::endl;
         });
 
-        participantController->SetShutdownHandler([]() {
+        lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutting down..." << std::endl;
         });
 
-        participantController->SetPeriod(1s);
+        timeSyncService->SetPeriod(1s);
         if (participantName == "PubSub1")
         {
             auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaTypeA, labelsEmpty, 0);
             auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", "Topic2", mediaTypeA, labelsEmpty, 0);
             participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -129,7 +131,7 @@ int main(int argc, char** argv)
             auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", "Topic3", mediaTypeA, labelsEmpty, 0);
             participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -143,7 +145,7 @@ int main(int argc, char** argv)
             participant->CreateDataSubscriber("SubCtrl1", "Topic1", mediaTypeAll, labelsEmpty, ReceiveMessage);
             participant->CreateDataSubscriber("SubCtrl2", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -155,7 +157,7 @@ int main(int argc, char** argv)
             participant->CreateDataSubscriber("SubCtrl1", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
             participant->CreateDataSubscriber("SubCtrl2", "Topic3", mediaTypeB, labelsEmpty, ReceiveMessage);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -163,10 +165,8 @@ int main(int argc, char** argv)
                 });
         }
 
-        //auto finalStateFuture = participantController->RunAsync();
-        //auto finalState = finalStateFuture.get();
-
-        auto finalState = participantController->Run();
+        auto lifecycleFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+        auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

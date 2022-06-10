@@ -69,8 +69,9 @@ protected:
             EXPECT_EQ(reinterpret_cast<void*>(ctrl), ack.userContext);
         });
 
-        auto* participantController = writer->Participant()->GetParticipantController();
-        participantController->SetSimulationTask(
+        auto* lifecycleService = writer->Participant()->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        timeSyncService->SetSimulationTask(
             [this, controller](auto, auto)
             {
                 if (numSent < testMessages.size())

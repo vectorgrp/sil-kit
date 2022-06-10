@@ -5,7 +5,6 @@
 #include <iostream>
 #include <chrono>
 
-#include "ib/mw/sync/IParticipantController.hpp"
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/sim/lin/string_utils.hpp"
 

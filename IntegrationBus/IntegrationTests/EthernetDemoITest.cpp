@@ -49,13 +49,14 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         /////////////////////////////////////////////////////////////////////////
         auto&& simParticipant = _simTestHarness->GetParticipant("EthernetWriter");
         auto&& participant = simParticipant->Participant();
-        auto&& participantController = participant->GetParticipantController();
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
         
-        participantController->SetInitHandler([ethernetController](auto) {
+        //participantController->SetInitHandler([ethernetController](auto) {
             Log() << "---   EthernetWriter: Init called, setting baud rate and starting";
             ethernetController->Activate();
-        });
+        //});
 
         ethernetController->AddBitrateChangeHandler([&](auto, eth::EthernetBitrateChangeEvent bitrateChangeEvent) {
           linkBitrate = bitrateChangeEvent.bitrate;
@@ -84,7 +85,7 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         });
 
 
-        participantController->SetSimulationTask(
+        timeSyncService->SetSimulationTask(
           [ethernetController, &sendCount, &frame](auto now) {
             // Send while link is down
             if (now == 10ms)
@@ -120,20 +121,21 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         /////////////////////////////////////////////////////////////////////////
         auto&& simParticipant = _simTestHarness->GetParticipant("EthernetReader");
         auto&& participant = simParticipant->Participant();
-        auto&& participantController = participant->GetParticipantController();
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController2", "ETH1");
 
-        participantController->SetSimulationTask([&](auto now ) {
+        timeSyncService->SetSimulationTask([&](auto now) {
           readerTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         });
 
-        participantController->SetInitHandler([ethernetController](auto) {
+        //participantController->SetInitHandler([ethernetController](auto) {
             Log() << "---   EthernetReader: Init called, setting baud rate and starting";
             ethernetController->Activate();
-        });
+        //});
 
         ethernetController->AddFrameHandler(
-            [&readerTime, &receivedMessage, &frame, &receiveCount, participantController](auto, const auto& netsimMessage) {
+            [&readerTime, &receivedMessage, &frame, &receiveCount, &lifecycleService](auto, const auto& netsimMessage) {
             if (readerTime < 55ms)
             {
               // ignore the messages from the Queue-overflow attempt and LinkUp
@@ -144,7 +146,7 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
             if (receiveCount++ == 10)
             {
                 receivedMessage = true;
-                participantController->Stop("Test done");
+                lifecycleService->Stop("Test done");
                 Log() << "---    EthernetReader: Sending Stop ";
             }
         });

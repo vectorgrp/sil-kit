@@ -394,23 +394,24 @@ TEST_F(SimTestHarnessITest, lin_demo)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& participantController = participant->GetParticipantController();
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
-        participantController->SetInitHandler([participantName, linController](auto) {
+        //participantController->SetInitHandler([participantName, linController](auto) {
 
             Log() << "Initializing " << participantName;
 
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
 
-            });
+        //    });
 
         auto master = std::make_unique<LinMaster>(participant, linController);
 
         linController->AddFrameStatusHandler(util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
         linController->AddWakeupHandler(util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
-        participantController->SetSimulationTask(
+        timeSyncService->SetSimulationTask(
             [master = master.get(), participantName](auto now) {
 
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -425,18 +426,19 @@ TEST_F(SimTestHarnessITest, lin_demo)
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto&& participantController = participant->GetParticipantController();
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
 
         auto config = MakeControllerConfig(participantName);
-        participantController->SetInitHandler([config, participantName, linController](auto) {
+        //participantController->SetInitHandler([config, participantName, linController](auto) {
 
             Log() << " Initializing " << participantName;
 
             linController->Init(config);
 
-          });
+        //  });
 
         auto slave = std::make_unique<LinSlave>(participant, linController);
         linController->AddFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
@@ -446,7 +448,7 @@ TEST_F(SimTestHarnessITest, lin_demo)
         //to validate the inputs
         slave->_controllerConfig = config;
 
-        participantController->SetSimulationTask(
+        timeSyncService->SetSimulationTask(
             [slave = slave.get()](auto now) {
 
                 Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";

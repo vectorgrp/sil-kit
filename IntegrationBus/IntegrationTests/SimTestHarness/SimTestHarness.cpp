@@ -79,8 +79,8 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     for (auto& kv : _simParticipants)
     {
         auto& participant = kv.second;
-        auto* participantController = participant->Participant()->GetParticipantController();
-        participant->_result = participantController->RunAsync();
+        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+        participant->_result = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
     }
 
     // wait until simulation is finished or timeout is reached
@@ -154,12 +154,13 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
-    auto* partCtrl = participant->Participant()->GetParticipantController();
-    partCtrl->SetSimulationTask([name = participant->Name()](auto, auto) {
+    auto* lifecycleService = participant->Participant()->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    timeSyncService->SetSimulationTask([name = participant->Name()](auto, auto) {
     });
 
-    partCtrl->SetInitHandler([name = participantName](auto){
-    });
+    //partCtrl->SetInitHandler([name = participantName](auto){
+    //});
 
     _simParticipants[participantName] = std::move(participant);
 }

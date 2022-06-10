@@ -359,16 +359,17 @@ protected:
 
             if (sync)
             {
-                IParticipantController* participantController = participant.participant->GetParticipantController();
-                participantController->SetPeriod(1s);
-                participantController->SetSimulationTask([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
+                auto* lifecycleService = participant.participant->GetLifecycleService();
+                auto* timeSyncService = lifecycleService->GetTimeSyncService();
+                timeSyncService->SetPeriod(1s);
+                timeSyncService->SetSimulationTask([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
                     if (!participant.dataPublishers.empty())
                     {
                         publishTask();
                         participant.CheckAllSentPromise();
                     }
                 });
-                auto finalStateFuture = participantController->RunAsync();
+                auto finalStateFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
                 finalStateFuture.get();
             }
             else

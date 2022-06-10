@@ -46,11 +46,14 @@ protected:
             const auto controllerName = "PubCtrl" + std::to_string(i);
             (void)publisher->CreateDataPublisher(controllerName, topic, {}, {}, 0); 
         }
+
         auto logger = publisher->GetLogger();
-        auto&& participantController = publisher->GetParticipantController();
-        participantController->SetSimulationTask([&logger, &participantController](auto, auto) {
+        auto* lifecycleService = publisher->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+
+        timeSyncService->SetSimulationTask([&logger, &lifecycleService](auto, auto) {
             logger->Info("::::::::::: Sending STOP");
-            participantController->Stop("Test complete");
+            lifecycleService->Stop("Test complete");
         });
     
         auto makeSubscriber = [&](auto subscriberName)

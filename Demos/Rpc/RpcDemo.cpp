@@ -104,24 +104,19 @@ int main(int argc, char** argv)
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
 
-        auto&& participantController = participant->GetParticipantController();
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-        auto initializedPromise = std::promise<void>{};
-
-        participantController->SetInitHandler([&initializedPromise, &participantName](auto /*initCmd*/) {
-            std::cout << "Initializing " << participantName << std::endl;
-            initializedPromise.set_value();
-        });
-        participantController->SetStopHandler([]() {
+        lifecycleService->SetStopHandler([]() {
             std::cout << "Stopping..." << std::endl;
         });
-        participantController->SetShutdownHandler([]() {
+        lifecycleService->SetShutdownHandler([]() {
             std::cout << "Shutting down..." << std::endl;
         });
 
-        participantController->SetPeriod(1s);
+        timeSyncService->SetPeriod(1s);
         if (participantName == "Client")
         {
             std::string clientAFunctionName = "Add100";
@@ -136,14 +131,28 @@ int main(int argc, char** argv)
             auto clientB =
                 participant->CreateRpcClient("ClientCtrl2", "Sort", mediaTypeClientB, labelsClientB, &CallReturn);
 
-            participantController->SetSimulationTask(
-                [clientA, clientB](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            RpcDiscoveryResultHandler discoveryResultsHandler =
+                [](const std::vector<RpcDiscoveryResult>& discoveryResults) {
+                    std::cout << ">> Found remote RpcServers:" << std::endl;
+                    for (const auto& entry : discoveryResults)
+                    {
+                        std::cout << "   " << entry << std::endl;
+                    }
+                };
+
+            timeSyncService->SetSimulationTask(
+                [clientA, clientB, &participant, &discoveryResultsHandler](std::chrono::nanoseconds now,
+                                                                           std::chrono::nanoseconds /*duration*/) {
+                    if (now == 0ms) 
+                    {
+                        participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
+                    }
 
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     Call(clientA);
                     Call(clientB);
-            });
+                });
         }
         else // "Server"
         {
@@ -155,7 +164,7 @@ int main(int argc, char** argv)
             std::map<std::string, std::string> labelsServerB{{"KeyC", "ValC"}, {"KeyD", "ValD"}};
             participant->CreateRpcServer("ServerCtrl2", "Sort", mediaTypeServerB, labelsServerB, &RemoteFunc_Sort);
 
-            participantController->SetSimulationTask(
+            timeSyncService->SetSimulationTask(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
 
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -164,20 +173,8 @@ int main(int argc, char** argv)
             });
         }
 
-        auto futureState = participantController->RunAsync();
-
-        initializedPromise.get_future().wait();
-        RpcDiscoveryResultHandler discoveryResultsHandler =
-            [](const std::vector<RpcDiscoveryResult>& discoveryResults) {
-                std::cout << ">> Found remote RpcServers:" << std::endl;
-                for (const auto& entry : discoveryResults)
-                {
-                    std::cout << "   " << entry << std::endl;
-                }
-            };
-        participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
-
-        auto finalState = futureState.get();
+        auto lifecycleFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+        auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

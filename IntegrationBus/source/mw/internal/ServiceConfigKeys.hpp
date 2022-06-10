@@ -47,7 +47,6 @@ const std::string controllerTypeRpcServerInternal = "RpcServerInternal";
 const std::string supplKeyRpcServerInternalClientUUID = "rpc::serverinternal::clientUUID";
 
 // Internal types
-const std::string controllerTypeParticipantController = "ParticipantController";
 const std::string controllerTypeLoggerSender = "LoggerSender";
 const std::string controllerTypeLoggerReceiver = "LoggerReceiver";
 const std::string controllerTypeServiceDiscovery = "ServiceDiscovery";

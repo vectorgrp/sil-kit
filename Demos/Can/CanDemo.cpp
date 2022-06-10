@@ -76,6 +76,13 @@ void SendFrame(ICanController* controller, logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
+void InitializeController(ICanController* canController, const std::string& participantName)
+{
+    std::cout << "Initializing " << participantName << std::endl;
+    canController->SetBaudRate(10'000, 1'000'000);
+    canController->Start();
+}
+
 /**************************************************************************************************
  * Main Function
  **************************************************************************************************/
@@ -152,48 +159,46 @@ int main(int argc, char** argv)
 
         if (runSync)
         {
-            auto* participantController = participant->GetParticipantController();
+            auto* lifecycleService = participant->GetLifecycleService();
+            auto* timeSyncService = lifecycleService->GetTimeSyncService();
             // Set an Init Handler
-            participantController->SetInitHandler([canController, &participantName](auto /*initCmd*/) {
-                std::cout << "Initializing " << participantName << std::endl;
-                canController->SetBaudRate(10'000, 1'000'000);
-                canController->Start();
+            InitializeController(canController, participantName);
+            lifecycleService->SetReinitializeHandler([canController, &participantName]() {
+                InitializeController(canController, participantName);
             });
 
             // Set a Stop Handler
-            participantController->SetStopHandler([]() {
+            lifecycleService->SetStopHandler([]() {
                 std::cout << "Stopping..." << std::endl;
             });
 
             // Set a Shutdown Handler
-            participantController->SetShutdownHandler([]() {
+            lifecycleService->SetShutdownHandler([]() {
                 std::cout << "Shutting down..." << std::endl;
             });
 
-            participantController->SetPeriod(5ms);
+            timeSyncService->SetPeriod(5ms);
             if (participantName == "CanWriter")
             {
-                participantController->SetSimulationTask(
+                timeSyncService->SetSimulationTask(
                     [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
                                                               std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         SendFrame(canController, logger);
                         std::this_thread::sleep_for(sleepTimePerTick);
                     });
-
-                // This process will disconnect and reconnect during a coldswap
-                participantController->EnableColdswap();
             }
             else
             {
-                participantController->SetSimulationTask(
+                timeSyncService->SetSimulationTask(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         std::this_thread::sleep_for(sleepTimePerTick);
                     });
             }
 
-            auto finalState = participantController->Run();
+            auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+            auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;

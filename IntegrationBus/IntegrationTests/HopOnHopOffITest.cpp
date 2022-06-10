@@ -141,8 +141,9 @@ protected:
             participant.participant =
                 ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId, true);
 
-            IParticipantController* participantController;
-            participantController = participant.participant->GetParticipantController();
+            auto* lifecycleService = participant.participant->GetLifecycleService();
+            auto* timeSyncService = lifecycleService->GetTimeSyncService();
+
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
 				"TestSubscriber", topic, mediaType, {},
@@ -160,8 +161,8 @@ protected:
                 },
                 nullptr);
 
-            participantController->SetPeriod(1s);
-            participantController->SetSimulationTask(
+            timeSyncService->SetPeriod(1s);
+            timeSyncService->SetSimulationTask(
                 [&participant, this](std::chrono::nanoseconds now) {
                     participant.publisher->Publish(std::vector<uint8_t>{participant.id});
                     if (!participant.simtimePassed && now > simtimeToPass)
@@ -170,7 +171,7 @@ protected:
                         participant.simtimePassedPromise.set_value();
                     }
                 });
-            auto finalStateFuture = participantController->RunAsync();
+            auto finalStateFuture = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
             finalStateFuture.get();
         }
         catch (const ib::ConfigurationError& error)

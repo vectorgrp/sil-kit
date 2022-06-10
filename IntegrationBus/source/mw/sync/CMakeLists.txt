@@ -4,8 +4,6 @@ add_library(IbMwSync
     LifecycleFSA.cpp
     LifecycleService.hpp
     LifecycleService.cpp
-    ParticipantController.hpp
-    ParticipantController.cpp
     SyncDatatypeUtils.hpp
     SyncDatatypeUtils.cpp
     SystemController.hpp
@@ -44,10 +42,6 @@ target_link_libraries(IbMwSync
 
 add_vib_test(TestMwLifecycleService
     SOURCES LifecycleServiceTest.cpp 
-    LIBS IbMwSync IbMwMockParticipant
-)
-add_vib_test(TestMwParticipantController 
-    SOURCES ParticipantControllerTest.cpp 
     LIBS IbMwSync IbMwMockParticipant
 )
 add_vib_test(TestMwSystemController 

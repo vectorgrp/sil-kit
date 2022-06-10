@@ -42,7 +42,6 @@
 
 #include "IIbToSystemMonitor.hpp"
 #include "IIbToSystemController.hpp"
-#include "IIbToParticipantController.hpp"
 #include "IIbToLifecycleService.hpp"
 #include "IIbToTimeSyncService.hpp"
 
@@ -145,7 +144,6 @@ public:
                             const std::map<std::string, std::string>& labels,
                             sim::rpc::RpcDiscoveryResultHandler handler) override;
 
-    auto GetParticipantController() -> sync::IParticipantController* override;
     auto GetLifecycleService() -> sync::ILifecycleService* override;
     auto CreateTimeSyncService(sync::LifecycleService* service) -> sync::TimeSyncService* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
@@ -379,7 +377,6 @@ private:
         ControllerMap<logging::IIbToLogMsgSender>,
         ControllerMap<logging::IIbToLogMsgReceiver>,
         ControllerMap<sync::IIbToLifecycleService>,
-        ControllerMap<sync::IIbToParticipantController>,
         ControllerMap<sync::IIbToSystemMonitor>,
         ControllerMap<sync::IIbToSystemController>,
         ControllerMap<sync::IIbToTimeSyncService>,

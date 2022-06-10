@@ -120,6 +120,12 @@ void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& fro
     std::cout << "<< ETH Frame sent with transmitId=" << transmitId << std::endl;
 }
 
+void InitializeController(eth::IEthernetController* ethController, const std::string& participantName)
+{
+    std::cout << "Initializing " << participantName << std::endl;
+    ethController->Activate();
+}
+
 /**************************************************************************************************
  * Main Function
  **************************************************************************************************/
@@ -191,27 +197,29 @@ int main(int argc, char** argv)
 
         if (runSync)
         {
-            auto* participantController = participant->GetParticipantController();
+            auto* lifecycleService = participant->GetLifecycleService();
+            auto* timeSyncService = lifecycleService->GetTimeSyncService();
             // Set an Init Handler
-            participantController->SetInitHandler([&participantName, ethernetController](auto /*initCmd*/) {
+            InitializeController(ethernetController, participantName);
+            lifecycleService->SetReinitializeHandler([ethernetController, &participantName]() {
                 std::cout << "Initializing " << participantName << std::endl;
                 ethernetController->Activate();
             });
 
             // Set a Stop Handler
-            participantController->SetStopHandler([]() {
+            lifecycleService->SetStopHandler([]() {
                 std::cout << "Stopping..." << std::endl;
             });
 
             // Set a Shutdown Handler
-            participantController->SetShutdownHandler([]() {
+            lifecycleService->SetShutdownHandler([]() {
                 std::cout << "Shutting down..." << std::endl;
             });
 
-            participantController->SetPeriod(1ms);
+            timeSyncService->SetPeriod(1ms);
             if (participantName == "EthernetWriter")
             {
-                participantController->SetSimulationTask(
+                timeSyncService->SetSimulationTask(
                     [ethernetController, WriterMacAddr, destinationAddress = BroadcastMacAddr](
                         std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
@@ -222,7 +230,7 @@ int main(int argc, char** argv)
             }
             else
             {
-                participantController->SetSimulationTask(
+                timeSyncService->SetSimulationTask(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
@@ -230,10 +238,8 @@ int main(int argc, char** argv)
                     });
             }
 
-            //auto finalStateFuture = participantController->RunAsync();
-            //auto finalState = finalStateFuture.get();
-
-            auto finalState = participantController->Run();
+            auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+            auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;

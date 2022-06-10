@@ -290,7 +290,8 @@ void ParticipantsThread(
     size_t& messageCounter)
 {
     auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.domainId, true);
-    auto&& participantController = participant->GetParticipantController();
+    auto* lifecycleService = participant->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
    
    auto publisher = participant->CreateDataPublisher("PubCtrl1", "Topic", {}, {}, 0);
    participant->CreateDataSubscriber("SubCtrl1", "Topic", {}, {}, [&messageCounter](auto*, auto&) {
@@ -299,12 +300,12 @@ void ParticipantsThread(
     });
 
     const auto isVerbose = participantIndex == 0;
-    participantController->SetSimulationTask(
+   timeSyncService->SetSimulationTask(
         [=, &publisher](std::chrono::nanoseconds now) {
 
         if (now > benchmark.simulationDuration)
         {
-            participantController->Stop("Simulation done");
+            lifecycleService->Stop("Simulation done");
         }
 
         if (isVerbose)
@@ -322,7 +323,7 @@ void ParticipantsThread(
         PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
     });
 
-    participantController->Run();
+    lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
 }
 
 /**************************************************************************************************

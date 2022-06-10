@@ -18,7 +18,6 @@
 #include "RpcDiscoverer.hpp"
 
 #include "LifecycleService.hpp"
-#include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
 #include "LogMsgSender.hpp"

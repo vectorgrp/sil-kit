@@ -70,9 +70,9 @@ protected:
             callbacks.AckHandler(ack);
             numAcked++;
         });
-        auto* participantController = 
-            participant->Participant()->GetParticipantController();
-        participantController->SetSimulationTask(
+        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        timeSyncService->SetSimulationTask(
             [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
                 if (numSent < testMessages.size())
                 {

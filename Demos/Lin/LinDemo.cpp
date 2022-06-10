@@ -307,34 +307,35 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
     auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
-    auto* participantController = participant->GetParticipantController();
+    auto* lifecycleService = participant->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1");
 
     // Set a Stop and Shutdown Handler
-    participantController->SetStopHandler([]() { std::cout << "Stopping..." << std::endl; });
-    participantController->SetShutdownHandler([]() { std::cout << "Shutting down..." << std::endl; });
-    participantController->SetPeriod(1ms);
+    lifecycleService->SetStopHandler([]() {
+        std::cout << "Stopping..." << std::endl;
+    });
+    lifecycleService->SetShutdownHandler([]() {
+        std::cout << "Shutting down..." << std::endl;
+    });
+    timeSyncService->SetPeriod(1ms);
 
     LinMaster master{linController};
     LinSlave slave;
 
     if (participantName == "LinMaster")
     {
-        participantController->SetInitHandler([&participantName, linController](auto /*initCmd*/) {
+        std::cout << "Initializing " << participantName << std::endl;
 
-            std::cout << "Initializing " << participantName << std::endl;
-
-            LinControllerConfig config;
-            config.controllerMode = LinControllerMode::Master;
-            config.baudRate = 20'000;
-            linController->Init(config);
-
-            });
+        LinControllerConfig config;
+        config.controllerMode = LinControllerMode::Master;
+        config.baudRate = 20'000;
+        linController->Init(config);
 
         linController->AddFrameStatusHandler(util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
         linController->AddWakeupHandler(util::bind_method(&master, &LinMaster::WakeupHandler));
 
-        participantController->SetSimulationTask(
+        timeSyncService->SetSimulationTask(
             [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
 
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -346,68 +347,65 @@ int main(int argc, char** argv) try
     }
     else
     {
-        participantController->SetInitHandler([&participantName, linController](auto /*initCmd*/) {
+        std::cout << "Initializing " << participantName << std::endl;
 
-            std::cout << "Initializing " << participantName << std::endl;
+        // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
+        LinFrameResponse response_16;
+        response_16.frame.id = 16;
+        response_16.frame.checksumModel = LinChecksumModel::Classic;
+        response_16.frame.dataLength = 6;
+        response_16.responseMode = LinFrameResponseMode::Rx;
 
-            // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
-            LinFrameResponse response_16;
-            response_16.frame.id = 16;
-            response_16.frame.checksumModel = LinChecksumModel::Classic;
-            response_16.frame.dataLength = 6;
-            response_16.responseMode = LinFrameResponseMode::Rx;
+        // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
+        //  - This LinFrameResponseMode::Unused causes the controller to ignore
+        //    this message and not trigger a callback. This is also the default.
+        LinFrameResponse response_17;
+        response_17.frame.id = 17;
+        response_17.frame.checksumModel = LinChecksumModel::Classic;
+        response_17.frame.dataLength = 6;
+        response_17.responseMode = LinFrameResponseMode::Unused;
 
-            // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
-            //  - This LinFrameResponseMode::Unused causes the controller to ignore
-            //    this message and not trigger a callback. This is also the default.
-            LinFrameResponse response_17;
-            response_17.frame.id = 17;
-            response_17.frame.checksumModel = LinChecksumModel::Classic;
-            response_17.frame.dataLength = 6;
-            response_17.responseMode = LinFrameResponseMode::Unused;
+        // Configure LIN Controller to receive LIN ID 18
+        //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
+        LinFrameResponse response_18;
+        response_18.frame.id = 18;
+        response_18.frame.checksumModel = LinChecksumModel::Classic;
+        response_18.frame.dataLength = 8;
+        response_18.responseMode = LinFrameResponseMode::Rx;
 
-            // Configure LIN Controller to receive LIN ID 18
-            //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
-            LinFrameResponse response_18;
-            response_18.frame.id = 18;
-            response_18.frame.checksumModel = LinChecksumModel::Classic;
-            response_18.frame.dataLength = 8;
-            response_18.responseMode = LinFrameResponseMode::Rx;
-
-            // Configure LIN Controller to receive LIN ID 19
-            //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
-            LinFrameResponse response_19;
-            response_19.frame.id = 19;
-            response_19.frame.checksumModel = LinChecksumModel::Enhanced;
-            response_19.frame.dataLength = 1;
-            response_19.responseMode = LinFrameResponseMode::Rx;
+        // Configure LIN Controller to receive LIN ID 19
+        //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
+        LinFrameResponse response_19;
+        response_19.frame.id = 19;
+        response_19.frame.checksumModel = LinChecksumModel::Enhanced;
+        response_19.frame.dataLength = 1;
+        response_19.responseMode = LinFrameResponseMode::Rx;
 
 
-            // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
-            LinFrameResponse response_34;
-            response_34.frame.id = 34;
-            response_34.frame.checksumModel = LinChecksumModel::Enhanced;
-            response_34.frame.dataLength = 6;
-            response_34.frame.data = std::array<uint8_t, 8>{3,4,3,4,3,4,3,4};
-            response_34.responseMode = LinFrameResponseMode::TxUnconditional;
+        // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
+        LinFrameResponse response_34;
+        response_34.frame.id = 34;
+        response_34.frame.checksumModel = LinChecksumModel::Enhanced;
+        response_34.frame.dataLength = 6;
+        response_34.frame.data = std::array<uint8_t, 8>{3,4,3,4,3,4,3,4};
+        response_34.responseMode = LinFrameResponseMode::TxUnconditional;
 
-            LinControllerConfig config;
-            config.controllerMode = LinControllerMode::Slave;
-            config.baudRate = 20'000;
-            config.frameResponses.push_back(response_16);
-            config.frameResponses.push_back(response_17);
-            config.frameResponses.push_back(response_18);
-            config.frameResponses.push_back(response_19);
-            config.frameResponses.push_back(response_34);
+        LinControllerConfig config;
+        config.controllerMode = LinControllerMode::Slave;
+        config.baudRate = 20'000;
+        config.frameResponses.push_back(response_16);
+        config.frameResponses.push_back(response_17);
+        config.frameResponses.push_back(response_18);
+        config.frameResponses.push_back(response_19);
+        config.frameResponses.push_back(response_34);
 
-            linController->Init(config);
-            });
+        linController->Init(config);
 
         linController->AddFrameStatusHandler(util::bind_method(&slave, &LinSlave::FrameStatusHandler));
         linController->AddGoToSleepHandler(util::bind_method(&slave, &LinSlave::GoToSleepHandler));
         linController->AddWakeupHandler(util::bind_method(&slave, &LinSlave::WakeupHandler));
 
-        participantController->SetSimulationTask(
+        timeSyncService->SetSimulationTask(
             [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
 
                 std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
@@ -417,10 +415,8 @@ int main(int argc, char** argv) try
             });
     }
 
-    auto finalStateFuture = participantController->RunAsync();
-    auto finalState = finalStateFuture.get();
-
-    //auto finalState = participantController->Run();
+    auto lifecycleFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+    auto finalState = lifecycleFuture.get();
 
     std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
     std::cout << "Press enter to stop the process..." << std::endl;

@@ -92,17 +92,19 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     // Setup Participant for Test Unit
     auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit", true);
     participantTestUnit->joinIbDomain(domainId);
-    auto participantController = participantTestUnit->GetParticipantController();
+    auto* lifecycleService = participantTestUnit->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    participantController->SetInitHandler([&callbacks = callbacks](ParticipantCommand initCommand) {
-        callbacks.InitHandler(initCommand.participant, initCommand.kind);
+    //participantController->SetInitHandler([&callbacks = callbacks](ParticipantCommand initCommand) {
+    //    callbacks.InitHandler(initCommand.participant, initCommand.kind);
+    //});
+    timeSyncService->SetSimulationTask([](auto /*now*/, auto /*duration*/) {
     });
-    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
 
-    participantController->SetStopHandler([&callbacks = callbacks]() {
+    lifecycleService->SetStopHandler([&callbacks = callbacks]() {
         callbacks.StopHandler();
     });
-    participantController->SetShutdownHandler([&callbacks = callbacks]() {
+    lifecycleService->SetShutdownHandler([&callbacks = callbacks]() {
         callbacks.ShutdownHandler();
     });
 
@@ -126,7 +128,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::Idle);
-    auto finalState = participantController->RunAsync();
+    auto finalState = lifecycleService->ExecuteLifecycleNoSyncTime(false, false);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Initialized);

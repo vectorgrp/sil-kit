@@ -7,7 +7,8 @@
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/IParticipantController.hpp"
+#include "ib/mw/sync/ILifecycleService.hpp"
+#include "ib/mw/sync/ITimeSyncService.hpp"
 #include "ib/mw/sync/ISystemController.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 
@@ -77,35 +78,48 @@ public:
 };
 
 
-class MockParticipantController : public sync::IParticipantController {
+class MockLifecycleService : public sync::ILifecycleService {
 public:
-    MOCK_METHOD1(SetInitHandler, void(InitHandlerT));
-    MOCK_METHOD1(SetStopHandler, void(StopHandlerT));
-    MOCK_METHOD1(SetShutdownHandler, void(ShutdownHandlerT));
-    MOCK_METHOD1(SetSimulationTask, void(SimTaskT task));
-    MOCK_METHOD1(SetSimulationTaskAsync, void(SimTaskT task));
-    MOCK_METHOD0(CompleteSimulationTask, void());
-    MOCK_METHOD1(SetSimulationTask, void(std::function<void(std::chrono::nanoseconds now)>));
-    MOCK_METHOD0(EnableColdswap, void());
-    MOCK_METHOD1(SetPeriod, void(std::chrono::nanoseconds period));
-    MOCK_METHOD0(Run, sync::ParticipantState());
-    MOCK_METHOD0(RunAsync, std::future<sync::ParticipantState>());
-    MOCK_METHOD1(ReportError, void(std::string errorMsg));
-    MOCK_METHOD1(Pause, void(std::string reason));
-    MOCK_METHOD0(Continue, void());
-    MOCK_METHOD1(Stop, void(std::string reason));
-    MOCK_CONST_METHOD0(State,  sync::ParticipantState());
-    MOCK_CONST_METHOD0(Status, sync::ParticipantStatus&());
-    MOCK_METHOD0(RefreshStatus, void());
-    MOCK_CONST_METHOD0(Now, std::chrono::nanoseconds());
-    MOCK_METHOD0(LogCurrentPerformanceStats, void());
-    MOCK_METHOD1(ForceShutdown, void(std::string reason));
+    MOCK_METHOD(void, SetReinitializeHandler, (ReinitializeHandlerT), (override));
+    MOCK_METHOD(void, SetStopHandler, (StopHandlerT), (override));
+    MOCK_METHOD(void, SetShutdownHandler, (ShutdownHandlerT), (override));
+    MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleNoSyncTime,
+                (bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop, bool isRequiredParticipant),
+                (override));
+    MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleNoSyncTime,
+                (bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop), (override));
+    MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleWithSyncTime,
+                (sync::ITimeSyncService * timeSyncService, bool hasCoordinatedSimulationStart,
+                 bool hasCoordinatedSimulationStop, bool isRequiredParticipant),
+                (override));
+    MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleWithSyncTime,
+                (sync::ITimeSyncService * timeSyncService, bool hasCoordinatedSimulationStart,
+                 bool hasCoordinatedSimulationStop),
+                (override));
+    MOCK_METHOD(void, ReportError, (std::string /*errorMsg*/), (override));
+    MOCK_METHOD(void, Pause, (std::string /*reason*/), (override));
+    MOCK_METHOD(void, Continue, (), (override));
+    MOCK_METHOD(void, Stop, (std::string /*reason*/), (override));
+    MOCK_METHOD(sync::ParticipantState, State, (), (override, const));
+    MOCK_METHOD(sync::ParticipantStatus&, Status, (), (override, const));
+    MOCK_METHOD(sync::ITimeSyncService*, GetTimeSyncService, (), (override, const));
+};
+
+class MockTimeSyncService : public sync::ITimeSyncService
+{
+public:
+    MOCK_METHOD(void, SetSimulationTask, (SimTaskT task), (override));
+    MOCK_METHOD(void, SetSimulationTaskAsync, (SimTaskT task), (override));
+    MOCK_METHOD(void, CompleteSimulationTask, (), (override));
+    MOCK_METHOD(void, SetSimulationTask, (std::function<void(std::chrono::nanoseconds now)>), (override));
+    MOCK_METHOD(void, SetPeriod, (std::chrono::nanoseconds period), (override));
+    MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };
 
 class MockSystemMonitor : public sync::ISystemMonitor {
 public:
-    MOCK_METHOD1(RegisterSystemStateHandler, void(SystemStateHandlerT));
-    MOCK_METHOD1(RegisterParticipantStatusHandler, void(ParticipantStatusHandlerT));
+    MOCK_METHOD(void, RegisterSystemStateHandler, (SystemStateHandlerT));
+    MOCK_METHOD(void, RegisterParticipantStatusHandler, (ParticipantStatusHandlerT));
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
     MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantName));
 
@@ -248,9 +262,8 @@ public:
                             const std::map<std::string, std::string>& /*labels*/,
                             sim::rpc::RpcDiscoveryResultHandler /*handler*/) override{};
 
-    auto GetParticipantController() -> sync::IParticipantController* override { return &mockParticipantController; }
-    //TODO FIXME
-    auto GetLifecycleService() -> sync::ILifecycleService* override { return nullptr; };
+    auto GetLifecycleService() -> sync::ILifecycleService* override { return &mockLifecycleService; }
+    // TODO mock this?
     auto CreateTimeSyncService(sync::LifecycleService*) -> sync::TimeSyncService* override { return nullptr; };
     auto GetSystemMonitor() -> sync::ISystemMonitor* override { return &mockSystemMonitor; }
     auto GetSystemController() -> sync::ISystemController* override { return &mockSystemController; }
@@ -388,7 +401,8 @@ public:
     bool _isSynchronized{ false };
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
-    MockParticipantController mockParticipantController;
+    MockLifecycleService mockLifecycleService;
+    MockTimeSyncService mockTimeSyncService;
     MockSystemController mockSystemController;
     MockSystemMonitor mockSystemMonitor;
     MockServiceDiscovery mockServiceDiscovery;

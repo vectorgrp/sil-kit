@@ -293,7 +293,8 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
         auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId, true);
         auto* controller = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
-        auto* participantController = participant->GetParticipantController();
+        auto* lifecycleService = participant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         std::vector<fr::FlexrayTxBufferConfig> bufferConfigs;
 
@@ -366,7 +367,7 @@ int main(int argc, char** argv)
         controller->AddSymbolTransmitHandler(&ReceiveMessage<fr::FlexraySymbolTransmitEvent>);
         controller->AddCycleStartHandler(&ReceiveMessage<fr::FlexrayCycleStartEvent>);
 
-        participantController->SetSimulationTask(
+        timeSyncService->SetSimulationTask(
             [&frNode](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                 
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -376,10 +377,8 @@ int main(int argc, char** argv)
                 
         });
 
-        //auto finalStateFuture = participantController->RunAsync();
-        //auto finalState = finalStateFuture.get();
-
-        auto finalState = participantController->Run();
+        auto lifecycleFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+        auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

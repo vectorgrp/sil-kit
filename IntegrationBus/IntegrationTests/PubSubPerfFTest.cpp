@@ -44,20 +44,20 @@ protected:
         subLogger->Info(">>> Created Subscriber participant");
 
         int receptionCount = 0;
-        auto&& subParticipantController = subscriber->GetParticipantController();
+        auto* subLifecycleService = subscriber->GetLifecycleService();
         for (auto i = 0; i < numberOfTopics; i++)
         {
             const auto controllerName = "Sub-" + std::to_string(i);
             const auto topic = "TopicName-" + std::to_string(i);
             (void)subscriber->CreateDataSubscriber(
                 controllerName, topic, "", {},
-                [&receptionCount, subLogger, numberOfTopics, subParticipantController](
+                [&receptionCount, subLogger, numberOfTopics, &subLifecycleService](
                     ib::sim::data::IDataSubscriber* /*subscriber*/, const ib::sim::data::DataMessageEvent& /*data*/) {
                     receptionCount++;
                     if (receptionCount == numberOfTopics)
                     {
                         subLogger->Info(">>> Reception complete");
-                        subParticipantController->Stop("Reception complete");
+                        subLifecycleService->Stop("Reception complete");
                     }
                 });
         }
@@ -77,8 +77,9 @@ protected:
             const auto topic = "TopicName-" + std::to_string(i);
             pubController.push_back(publisher->CreateDataPublisher(controllerName, topic, "", {}, 0));
         }
-        auto&& participantController = publisher->GetParticipantController();
-        participantController->SetSimulationTask(
+        auto* lifecycleService = publisher->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        timeSyncService->SetSimulationTask(
             [&allPublished, testData, pubController, pubLogger](auto, auto) {
                 if (!allPublished)
                 {
