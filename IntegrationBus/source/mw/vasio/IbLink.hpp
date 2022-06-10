@@ -93,6 +93,7 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, con
 template <class MsgT>
 void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
 {
+    DispatchIbMessage(&_vasioTransmitter, from, msg);
     for (auto&& receiver : _localReceivers)
     {
         auto* receiverId = dynamic_cast<const IIbServiceEndpoint*>(receiver);
@@ -103,7 +104,6 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
         }
         DispatchIbMessage(receiver, from, msg);
     }
-    DispatchIbMessage(&_vasioTransmitter, from, msg);
 }
 
 // Dispatcher for outgoing IbMessages
