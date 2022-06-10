@@ -68,7 +68,7 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& task) override;
 
     // Used to propagate sync participants from monitor
-    void AddSynchronizedParticipants(const ExpectedParticipants& participantNames);
+    void AddExpectedParticipants(const ExpectedParticipants& participantNames);
 
     // Used by Policies
     template <class MsgT>
@@ -105,8 +105,12 @@ private:
     std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
 
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
+    ExpectedParticipants _expectedParticipants;
 
     bool _isRunning{false};
+
+    bool _isSynchronized;
+    bool _timeSyncConfigured{false};
 
     SimTaskT _simTask;
     std::future<void> _asyncResult;

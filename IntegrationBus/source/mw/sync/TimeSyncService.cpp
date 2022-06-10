@@ -34,8 +34,8 @@ public:
     {
         if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
         {
-            const std::string errorMessage{"Participant " + otherParticipantName + " already known."};
-            throw std::runtime_error{errorMessage};
+            // ignore already known participants
+            return;
         }
         NextSimTask task;
         task.timePoint = -1ns;
@@ -236,6 +236,30 @@ TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleSer
 
     _timeProvider = std::make_shared<ParticipantTimeProvider>();
     _timeConfiguration = std::make_shared<TimeConfiguration>();
+
+    //std::function<void(ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor&)>;
+    participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const ServiceDescriptor& descriptor) {
+        if (descriptor.GetServiceType() == ServiceType::InternalController)
+        {
+            std::string controllerType;
+            descriptor.GetSupplementalDataItem(service::controllerType, controllerType);
+            if (controllerType == service::controllerTypeTimeSyncService)
+            {
+                std::string timeSyncActive;
+                descriptor.GetSupplementalDataItem(service::timeSyncActive, timeSyncActive);
+                if (timeSyncActive == "1")
+                {
+                    auto descriptorParticipantName = descriptor.GetParticipantName();
+                    if (descriptorParticipantName == _participant->GetParticipantName())
+                    {
+                        // ignore self
+                        return;
+                    }
+                    _timeConfiguration->SynchronizedParticipantAdded(descriptorParticipantName);
+                }
+            }
+        }
+    });
 }
 
 void TimeSyncService::ReportError(const std::string& errorMsg)
@@ -248,34 +272,25 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
                       "transition to ParticipantState::Error is ignored.");
         return;
     }
-    _lifecycleService->ChangeState(ParticipantState::Error, std::move(errorMsg));
+    _lifecycleService->ChangeState(ParticipantState::Error, errorMsg);
 }
 
-void TimeSyncService::AddSynchronizedParticipants(const ExpectedParticipants& expectedParticipants)
-{
-    //if (_isSynchronized)
-    {
-        // TODO check this - seems odd...
-        auto&& nameIter =
-            std::find(expectedParticipants.names.begin(), expectedParticipants.names.end(), _lifecycleService->Status().participantName);
-        if (nameIter == expectedParticipants.names.end())
-        {
-            std::stringstream strs;
-            strs << "Synchronized participant " << _lifecycleService->Status().participantName
-                 << " not found in expected participants.";
-            throw std::runtime_error{strs.str()};
-        }
 
-        // Add sync participants
-        for (auto&& name : expectedParticipants.names)
+
+// TODO improve
+// TODO limitation: currently assumes that all expected participants are also synchronized - needs to be fixed upon time concept overhaul
+void TimeSyncService::AddExpectedParticipants(const ExpectedParticipants& expectedParticipants)
+{
+    _expectedParticipants = expectedParticipants;
+    // Add sync participants
+    for (auto&& name : expectedParticipants.names)
+    {
+        // Exclude this participant
+        if (name == _participant->GetParticipantName())
         {
-            // Exclude this participant
-            if (name == _participant->GetParticipantName())
-            {
-                continue;
-            }
-            _timeConfiguration->SynchronizedParticipantAdded(name);
+            continue;
         }
+        _timeConfiguration->SynchronizedParticipantAdded(name);
     }
 }
 
@@ -312,6 +327,7 @@ void TimeSyncService::SetPeriod(std::chrono::nanoseconds period)
 
 auto TimeSyncService::MakeTimeSyncPolicy(bool isSynchronized) -> std::shared_ptr<ITimeSyncPolicy>
 {
+    _timeSyncConfigured = true;
     if (isSynchronized)
     {
         // TODO FIXME get on shared pointer?
@@ -360,7 +376,7 @@ void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Nex
 
 void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint*, const SystemCommand& command)
 {
-    if (command.kind == SystemCommand::Kind::Run)
+    if (command.kind == SystemCommand::Kind::Run && _timeSyncConfigured)
     {
         assert(_timeSyncPolicy);
         _timeSyncPolicy->RequestInitialStep();
@@ -398,6 +414,7 @@ void TimeSyncService::CompleteSimulationTask()
 //! \brief Create a time provider that caches the current simulation time.
 void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
 {
+    _isSynchronized = isSynchronized;
     if (_timeSyncPolicy != nullptr)
     {
         return;
@@ -406,7 +423,7 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
     try
     {
         _timeSyncPolicy = MakeTimeSyncPolicy(isSynchronized);
-        _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::timeSyncActive, std::to_string(isSynchronized));
+        _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::timeSyncActive, (isSynchronized) ? "1" : "0");
         ResetTime();
     }
     catch (const std::exception& e)
