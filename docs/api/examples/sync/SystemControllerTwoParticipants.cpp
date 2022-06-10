@@ -18,14 +18,14 @@ auto systemStateHandler =
         {
         case SystemState::ControllersCreated:
             // ------------------------------------------------------------
-            // Transition from SystemState::ControllersCreated to SystemState::Initialized:
+            // Transition from SystemState::ControllersCreated to SystemState::ReadyToRun:
             systemController->Initialize(participantName1);
             systemController->Initialize(participantName2);
 
             return;
-        case SystemState::Initialized:
+        case SystemState::ReadyToRun:
             // ------------------------------------------------------------
-            // Transition from SystemState::Initialized to SystemState::Running:
+            // Transition from SystemState::ReadyToRun to SystemState::Running:
             systemController->Run();
             return;
         case SystemState::Stopped:

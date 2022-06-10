@@ -49,7 +49,7 @@ TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
     ParticipantStatus out{};
 
     in.participantName = "Name";
-    in.state = ParticipantState::Initialized;
+    in.state = ParticipantState::ReadyToRun;
     in.enterReason = "Finished initialization";
     in.enterTime = nowUs;
     in.refreshTime = nowUs;

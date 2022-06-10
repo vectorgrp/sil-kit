@@ -9,6 +9,7 @@
 #include <future>
 
 #include "ib/mw/logging/ILogger.hpp"
+#include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 
 using namespace std::chrono_literals;
@@ -68,11 +69,17 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     serviceDiscovery->NotifyServiceCreated(GetServiceDescriptor());
     serviceDiscovery->NotifyServiceCreated(_timeSyncService->GetServiceDescriptor());
 
+    _participant->GetSystemMonitor()->RegisterSystemStateHandler([&](auto systemState) {
+        this->NewSystemState(systemState);
+    });
+
     _isRunning = true;
     _lifecycleManagement->InitLifecycleManagement("LifecycleService::ExecuteLifecycle() was called.");
     if (!hasCoordinatedSimulationStart)
     {
-        _lifecycleManagement->Run("LifecycleService::ExecuteLifecycle() was called without start coordination.");
+        // Skip state guarantees if start is uncoordinated
+        _lifecycleManagement->SkipSetupPhase(
+            "LifecycleService::ExecuteLifecycle() was called without start coordination.");
     }
     return _finalStatePromise.get_future();
 }
@@ -303,14 +310,6 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
     {
     case SystemCommand::Kind::Invalid: break;
 
-    case SystemCommand::Kind::EstablishCommunication:
-        _lifecycleManagement->AllControllersAvailable("Received SystemCommand::Kind::EstablishCommunication");
-        break;
-
-    case SystemCommand::Kind::CommunicationReady:
-        _lifecycleManagement->AllCommunicationReady("Received SystemCommand::Kind::CommunicationReady");
-        break;
-
     case SystemCommand::Kind::Run:
         if (!_hasCoordinatedSimulationStart)
         {
@@ -364,12 +363,21 @@ void LifecycleService::ChangeState(ParticipantState newState, std::string reason
     _status.enterTime = std::chrono::system_clock::now();
     _status.refreshTime = _status.enterTime;
 
+    std::stringstream ss;
+    ss << "New ParticipantState: " << newState << "; reason: " << _status.enterReason << std::endl;
+    _logger->Info(ss.str());
+
     SendIbMessage(_status);
 }
 
 void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
 {
     _timeSyncService = timeSyncService;
+}
+
+void LifecycleService::NewSystemState(SystemState systemState)
+{
+    _lifecycleManagement->NewSystemState(systemState);
 }
 
 } // namespace sync

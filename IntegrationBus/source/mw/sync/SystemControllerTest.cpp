@@ -63,15 +63,6 @@ TEST_F(SystemControllerTest, configure_serviceDescriptor)
     EXPECT_EQ(controller.GetServiceDescriptor(), from_endpointAddress(addr));
 }
 
-TEST_F(SystemControllerTest, send_initialize)
-{
-    std::string name = "Participant";
-    auto nameHash = util::hash::Hash(name);
-    ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::Initialize};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
-    controller.Initialize(name);
-}
-
 TEST_F(SystemControllerTest, send_reinitialize)
 {
     std::string name = "Participant";

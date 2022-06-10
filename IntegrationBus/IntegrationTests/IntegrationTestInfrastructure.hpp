@@ -75,7 +75,7 @@ private:
                     _systemMaster.systemController->Initialize(name);
                 }
                 break;
-            case SystemState::Initialized: _systemMaster.systemController->Run(); break;
+            case SystemState::ReadyToRun: _systemMaster.systemController->Run(); break;
             case SystemState::Stopped: _systemMaster.systemController->Shutdown(); break;
             case SystemState::Error: _systemMaster.systemController->Shutdown(); break;
             default: break;

@@ -61,7 +61,7 @@ public:
         case SystemState::ControllersCreated:
             InitializeAllParticipants();
             return;
-        case SystemState::Initialized:
+        case SystemState::ReadyToRun:
             std::cout << "Sending SystemCommand::Run" << std::endl;
             _controller->Run();
             return;
@@ -121,11 +121,7 @@ public:
 
     void InitializeAllParticipants()
     {
-        for (auto&& name : _expectedParticipantNames)
-        {
-            std::cout << "Sending ParticipantCommand::Init to participant \"" << name << "\"" << std::endl;
-            _controller->Initialize(name);
-        }
+        std::cout << "All required participants have finished creating their controllers." << std::endl;
     }
 
     void Stop()
@@ -275,7 +271,7 @@ int main(int argc, char** argv)
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
-        auto participant = ib::CreateParticipant(configuration, participantName, domainId, false);
+        auto participant = ib::CreateParticipant(configuration, participantName, domainId);
 
         IbController ibController(participant.get(), configuration, expectedParticipantNames);
 

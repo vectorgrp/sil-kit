@@ -111,7 +111,7 @@ protected:
             }
             break;
 
-        case SystemState::Initialized:
+        case SystemState::ReadyToRun:
             systemMaster.systemController->Run();
             break;
 

@@ -126,8 +126,9 @@ public:
         {
         case ParticipantState::Invalid: // [[fallthrough]]
         case ParticipantState::ControllersCreated: // [[fallthrough]]
-        case ParticipantState::CommunicationReady: // [[fallthrough]]
-        case ParticipantState::Initialized: return;
+        case ParticipantState::CommunicationInitializing: // [[fallthrough]]
+        case ParticipantState::CommunicationInitialized: // [[fallthrough]]
+        case ParticipantState::ReadyToRun: return;
         case ParticipantState::Paused: // [[fallthrough]]
         case ParticipantState::Running: CheckDistributedTimeAdvanceGrant(); return;
         case ParticipantState::Stopping: // [[fallthrough]]

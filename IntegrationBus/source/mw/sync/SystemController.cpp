@@ -12,9 +12,9 @@ SystemController::SystemController(IParticipantInternal* participant)
 {
 }
 
-void SystemController::Initialize(const std::string& participantName) const
+void SystemController::Initialize(const std::string&) const
 {
-    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Initialize);
+    //SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Initialize);
 }
 
 void SystemController::Reinitialize(const std::string& participantName) const

@@ -86,6 +86,7 @@ class LifecycleServiceTest : public testing::Test
 protected:
     struct Callbacks
     {
+        MOCK_METHOD(void, CommunicationReadyHandler, ());
         MOCK_METHOD(void, ReinitializeHandler, ());
         MOCK_METHOD(void, StopHandler, ());
         MOCK_METHOD(void, ShutdownHandler, ());
@@ -108,6 +109,16 @@ protected:
 
 };
 
+// will forward lifecycle with coordination up to 
+// ParticipantState::ReadyToRun & SystemState::ReadyToRun
+void PrepareLifecycle(LifecycleService* lifecycleService)
+{
+    lifecycleService->NewSystemState(SystemState::ControllersCreated);
+    lifecycleService->NewSystemState(SystemState::CommunicationInitializing);
+    lifecycleService->NewSystemState(SystemState::CommunicationInitialized);
+    lifecycleService->NewSystemState(SystemState::ReadyToRun);
+}
+
 TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
 {
     LifecycleService lifecycleService(&participant, healthCheckConfig);
@@ -118,17 +129,31 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
     auto descriptor = from_endpointAddress(addr);
     lifecycleService.SetServiceDescriptor(descriptor);
 
+    lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetReinitializeHandler(bind_method(&callbacks, &Callbacks::ReinitializeHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
-
+    
+    EXPECT_CALL(callbacks, CommunicationReadyHandler())
+        .Times(1);
     EXPECT_CALL(callbacks, StopHandler())
         .Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler())
         .Times(1);
 
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
     EXPECT_CALL(participant, 
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService,
+                              AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, 
+                SendIbMessage(&lifecycleService,
+                              AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant, 
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -154,6 +179,7 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
 
 TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
 {
+    // Intended state order: Create, ..., start, stop, reinitialize, create, start, stop, shutdown
     LifecycleService lifecycleService(&participant, healthCheckConfig);
     MockTimeSync mockTimeSync(&participant, &lifecycleService, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -162,10 +188,13 @@ TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
     auto descriptor = from_endpointAddress(addr);
     lifecycleService.SetServiceDescriptor(descriptor);
 
+    lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetReinitializeHandler(bind_method(&callbacks, &Callbacks::ReinitializeHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
-
+    
+    EXPECT_CALL(callbacks, CommunicationReadyHandler())
+        .Times(2);
     EXPECT_CALL(callbacks, StopHandler())
         .Times(2);
     EXPECT_CALL(callbacks, ReinitializeHandler())
@@ -174,7 +203,18 @@ TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
         .Times(1);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(2);
+    EXPECT_CALL(participant, 
+                SendIbMessage(&lifecycleService,
+                              AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(2);
+    EXPECT_CALL(participant, 
+                SendIbMessage(&lifecycleService,
+                              AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(2);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(2);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -199,11 +239,19 @@ TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ControllersCreated);
+    lifecycleService.NewSystemState(SystemState::ControllersCreated);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::CommunicationInitializing);
+    lifecycleService.NewSystemState(SystemState::CommunicationInitializing);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::CommunicationInitialized);
+    lifecycleService.NewSystemState(SystemState::CommunicationInitialized);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
+    lifecycleService.NewSystemState(SystemState::ReadyToRun);
     // run, pause & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
+    // transitions to own state must not fail
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Pause("Test");
@@ -213,13 +261,15 @@ TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
     lifecycleService.ReceiveIbMessage(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
-    // stopping again should work -> NOP
+    // transitions to own state must not fail
     lifecycleService.ReceiveIbMessage(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
     // reinitialize
     ParticipantCommand reinitializeCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Reinitialize};
     lifecycleService.ReceiveIbMessage(&masterId, reinitializeCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ControllersCreated);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop again
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
@@ -245,7 +295,16 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -258,7 +317,8 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run, pause & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -292,7 +352,16 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
         .Times(0);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -302,7 +371,8 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -335,7 +405,16 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_reinitialize)
         .Times(1);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(2);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(2);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(2);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(2);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -354,7 +433,8 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_reinitialize)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -369,7 +449,8 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_reinitialize)
     // recover via reinitialize
     ParticipantCommand reinitializeCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Reinitialize};
     lifecycleService.ReceiveIbMessage(&masterId, reinitializeCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // break it again
     lifecycleService.ReceiveIbMessage(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
@@ -403,7 +484,16 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
         .WillRepeatedly(Throw(std::runtime_error("ShutdownCallbackException")));
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -425,7 +515,8 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -455,7 +546,16 @@ TEST_F(LifecycleServiceTest, Abort_Initialized)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant,
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopped)))
@@ -467,7 +567,8 @@ TEST_F(LifecycleServiceTest, Abort_Initialized)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
     lifecycleService.ReceiveIbMessage(&masterId, abortCommand);
@@ -485,7 +586,16 @@ TEST_F(LifecycleServiceTest, Abort_Running)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -501,6 +611,8 @@ TEST_F(LifecycleServiceTest, Abort_Running)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -522,7 +634,16 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -541,7 +662,8 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Initialized);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -573,9 +695,18 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
                 lifecycleService.ReceiveIbMessage(&masterId, abortCommand);
                 EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopping);
             }));
-
+    
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -594,6 +725,8 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -613,7 +746,16 @@ TEST_F(LifecycleServiceTest, Abort_Stop)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -632,6 +774,8 @@ TEST_F(LifecycleServiceTest, Abort_Stop)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -661,9 +805,18 @@ TEST_F(LifecycleServiceTest, Abort_Reinitializing)
         lifecycleService.ReceiveIbMessage(&masterId, abortCommand);
         EXPECT_EQ(lifecycleService.State(), ParticipantState::Reinitializing);
     }));
-    
+
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -685,6 +838,8 @@ TEST_F(LifecycleServiceTest, Abort_Reinitializing)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -717,7 +872,16 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
             }));
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -736,6 +900,8 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -757,7 +923,16 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
     EXPECT_CALL(participant, 
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
@@ -776,6 +951,8 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
         .Times(1);
 
     lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
@@ -801,7 +978,16 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     EXPECT_CALL(participant,
-                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Initialized)))
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ControllersCreated)))
+        .Times(0);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(0);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(0);
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(0);
     EXPECT_CALL(participant,
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))

@@ -269,7 +269,7 @@ void SystemStateHandler(ISystemController* controller, SystemState newState, con
         }
         break;
 
-    case SystemState::Initialized:
+    case SystemState::ReadyToRun:
         controller->Run();
         break;
 

@@ -37,9 +37,7 @@ struct SystemCommand
         Shutdown = 3, //!< The shutdown command
         PrepareColdswap = 4, //!< The prepare coldswap command
         ExecuteColdswap = 5, //!< The execute coldswap command
-        AbortSimulation = 6, //!< The abort simulation command
-        CommunicationReady = 7, //!< The communication ready command
-        EstablishCommunication = 8  //!< The establish communication command
+        AbortSimulation = 6 //!< The abort simulation command
     };
 
     Kind kind; //!< The kind of system command that is sent.
@@ -48,21 +46,23 @@ struct SystemCommand
 // note: always increase number (never reuse old ones!)
 enum class ParticipantState : uint8_t {
     Invalid = 0, //!< An invalid participant state
-    ControllersCreated = 1, //!< The controllers created state
-    CommunicationReady = 2, //!< The communication ready state
-    Initialized = 3, //!< The initialized state
-    Running = 4, //!< The running state
-    Paused = 5, //!< The paused state
-    Stopping = 6, //!< The stopping state
-    Stopped = 7, //!< The stopped state
-    ColdswapPrepare = 8, //!< The ColdswapPrepare state
-    ColdswapReady = 9, //!< The ColdswapReady state
-    ColdswapShutdown = 10, //!< The ColdswapShutdown state
-    ColdswapIgnored = 11, //!< The ColdswapIgnored state
-    Error = 12, //!< The error state
-    ShuttingDown = 13, //!< The shutting down state
-    Shutdown = 14, //!< The shutdown state
-    Reinitializing = 15  //!< The reinitializing state
+    ControllersCreated = 10, //!< The controllers created state
+    CommunicationInitializing = 20, //!< The communication initializing state
+    CommunicationInitialized = 30, //!< The communication initialized state
+    ReadyToRun = 40, //!< The initialized state
+    Running = 50, //!< The running state
+    Paused = 60, //!< The paused state
+    Stopping = 70, //!< The stopping state
+    Stopped = 80, //!< The stopped state
+    Error = 90, //!< The error state
+    ShuttingDown = 100, //!< The shutting down state
+    Shutdown = 110, //!< The shutdown state
+    Reinitializing = 120,  //!< The reinitializing state
+
+    ColdswapPrepare = 200, //!< The ColdswapPrepare state
+    ColdswapReady = 210, //!< The ColdswapReady state
+    ColdswapShutdown = 220, //!< The ColdswapShutdown state
+    ColdswapIgnored = 230 //!< The ColdswapIgnored state
 };
 
 struct ParticipantStatus
@@ -77,21 +77,23 @@ struct ParticipantStatus
 // note: always increase number (never reuse old ones!)
 enum class SystemState : uint8_t {
     Invalid = 0, //!< An invalid system state
-    ControllersCreated = 1, //!< The controllers created state
-    CommunicationReady = 2, //!< The communication ready state
-    Initialized = 3, //!< The initialized state
-    Running = 4, //!< The running state
-    Paused = 5, //!< The paused state
-    Stopping = 6, //!< The stopping state
-    Stopped = 7, //!< The stopped state
-    ColdswapPrepare = 8, //!< The ColdswapPrepare state
-    ColdswapReady = 9, //!< The ColdswapReady state
-    ColdswapPending = 10, //!< The ColdswapPending state
-    ColdswapDone = 11, //!< The ColdswapDone state
-    Error = 12, //!< The error state
-    ShuttingDown = 13, //!< The shutting down state
-    Shutdown = 14, //!< The shutdown state
-    Reinitializing = 15 //!< The reinitializing state
+    ControllersCreated = 10, //!< The controllers created state
+    CommunicationInitializing = 20, //!< The communication initializing state
+    CommunicationInitialized = 30, //!< The communication initialized state
+    ReadyToRun = 40, //!< The initialized state
+    Running = 50, //!< The running state
+    Paused = 60, //!< The paused state
+    Stopping = 70, //!< The stopping state
+    Stopped = 80, //!< The stopped state
+    Error = 90, //!< The error state
+    ShuttingDown = 100, //!< The shutting down state
+    Shutdown = 110, //!< The shutdown state
+    Reinitializing = 120, //!< The reinitializing state
+
+    ColdswapPrepare = 200, //!< The ColdswapPrepare state
+    ColdswapReady = 210, //!< The ColdswapReady state
+    ColdswapPending = 220, //!< The ColdswapPending state
+    ColdswapDone = 230 //!< The ColdswapDone state
 };
 
 struct ExpectedParticipants

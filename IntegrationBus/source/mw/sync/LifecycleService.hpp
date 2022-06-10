@@ -88,6 +88,8 @@ public:
 
     void SetTimeSyncService(TimeSyncService* timeSyncService);
 
+    void NewSystemState(SystemState systemState);
+
 
 private:
     // ----------------------------------------

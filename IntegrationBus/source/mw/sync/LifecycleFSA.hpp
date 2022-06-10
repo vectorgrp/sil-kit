@@ -21,15 +21,13 @@ public:
 public:
     virtual ~State() = default;
 
-    virtual void EstablishCommunication(std::string reason);
-    virtual void CommunicationReadyNotifyUser(std::string reason);
-    virtual void CommunicationReadyHandleDone(std::string reason);
-
     virtual void RunSimulation(std::string reason);
     virtual void PauseSimulation(std::string reason);
     virtual void ContinueSimulation(std::string reason);
+
     virtual void StopNotifyUser(std::string reason);
     virtual void StopHandleDone(std::string reason);
+
     virtual void ReinitializeNotifyUser(std::string reason);
     virtual void ReinitializeHandleDone(std::string reason);
     virtual void ShutdownNotifyUser(std::string reason);
@@ -45,6 +43,7 @@ public:
 
 protected:
     void InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason);
+    bool IsAnyOf(SystemState state, std::initializer_list<SystemState> stateList);
 
 protected:
     LifecycleManagement* _context;
@@ -57,8 +56,8 @@ public:
 
 public:
     virtual void InitLifecycleManagement(std::string reason) = 0;
-    virtual void AllControllersAvailable(std::string reason) = 0;
-    virtual void AllCommunicationReady(std::string reason) = 0;
+    virtual void SkipSetupPhase(std::string reason) = 0;
+    virtual void NewSystemState(SystemState systemState) = 0;
     virtual void Run(std::string reason) = 0;
     virtual void Pause(std::string reason) = 0;
     virtual void Continue(std::string reason) = 0;
@@ -76,16 +75,19 @@ public:
     LifecycleManagement(logging::ILogger* logger, LifecycleService* parentService);
 
     void InitLifecycleManagement(std::string reason) override 
-    { 
+    {
         _currentState = GetControllersCreatedState(); 
-        _parentService->ChangeState(_currentState->GetParticipantState(), std::move(reason));
+        _parentService->ChangeState(GetControllersCreatedState()->GetParticipantState(), std::move(reason));
     }
-    void AllControllersAvailable(std::string reason) { _currentState->EstablishCommunication(std::move(reason)); }
-    void AllCommunicationReady(std::string reason) 
-    { 
-        _currentState->CommunicationReadyNotifyUser(std::move(reason));
-        _currentState->CommunicationReadyHandleDone("Finished CommunicationReady execution.");
+    void SkipSetupPhase(std::string reason) override 
+    {
+        _currentState->NewSystemState(SystemState::ControllersCreated);
+        _currentState->NewSystemState(SystemState::CommunicationInitializing);
+        _currentState->NewSystemState(SystemState::CommunicationInitialized);
+        _currentState->NewSystemState(SystemState::ReadyToRun);
+        _currentState->RunSimulation(std::move(reason)); 
     }
+    void NewSystemState(SystemState systemState) override { _currentState->NewSystemState(systemState); }
     void Run(std::string reason) override { _currentState->RunSimulation(std::move(reason)); }
     void Pause(std::string reason) override { _currentState->PauseSimulation(std::move(reason)); }
     void Continue(std::string reason) override { _currentState->ContinueSimulation(std::move(reason)); }
@@ -123,7 +125,9 @@ public:
         {
             // Switch to error state if handle triggers error
             SetStateError("Exception during CommunicationReadyHandle execution.");
+            return;
         }
+        SetState(GetReadyToRunState(), std::move(reason));
     }
 
     void HandleReinitialize(std::string reason)
@@ -174,8 +178,9 @@ public:
     State* GetErrorState();
 
     State* GetControllersCreatedState();
-    State* GetCommunicationReadyState();
-    State* GetInitializedState();
+    State* GetCommunicationInitializingState();
+    State* GetCommunicationInitializedState();
+    State* GetReadyToRunState();
     State* GetRunningState();
     State* GetPausedState();
     State* GetStoppingState();
@@ -192,8 +197,9 @@ private:
     std::shared_ptr<State> _errorState;
 
     std::shared_ptr<State> _controllersCreatedState;
-    std::shared_ptr<State> _communicationReadyState;
-    std::shared_ptr<State> _initializedState;
+    std::shared_ptr<State> _communicationInitializingState;
+    std::shared_ptr<State> _communicationInitializedState;
+    std::shared_ptr<State> _readyToRunState;
     std::shared_ptr<State> _runningState;
     std::shared_ptr<State> _pausedState;
     std::shared_ptr<State> _stoppingState;
@@ -217,18 +223,6 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandleDone(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
-
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
 };
@@ -241,77 +235,65 @@ public:
         : State(context)
     {
     }
-    
-    void EstablishCommunication(std::string reason) override;
-    //void CommunicationReadyNotifyUser(std::string reason) override;
-    //void CommunicationReadyHandleDone(std::string reason) override;
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandleDone(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
+
+    void NewSystemState(SystemState systemState) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
 };
 
-class CommunicationReadyState 
+class CommunicationInitializingState 
     : public State
 {
 public:
-    CommunicationReadyState(LifecycleManagement* context)
+    CommunicationInitializingState(LifecycleManagement* context)
         : State(context)
     {
     }
 
-    //void EstablishCommunication(std::string reason) override;
-    void CommunicationReadyNotifyUser(std::string reason) override;
-    void CommunicationReadyHandleDone(std::string reason) override;
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandleDone(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
+    void NewSystemState(SystemState systemState) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
 };
 
-class InitializedState
+class CommunicationInitializedState 
     : public State
 {
 public:
-    InitializedState(LifecycleManagement* context)
+    CommunicationInitializedState(LifecycleManagement* context)
         : State(context)
     {
     }
+
+    void NewSystemState(SystemState systemState) override;
+
+    auto toString() -> std::string override;
+    auto GetParticipantState() -> ParticipantState override;
+};
+
+class ReadyToRunState
+    : public State
+{
+public:
+    ReadyToRunState(LifecycleManagement* context)
+        : State(context)
+        , _isSystemReadyToRun(false)
+        , _receivedRunCommand(false)
+    {
+    }
+
+    void NewSystemState(SystemState systemState) override;
 
     void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    void ReinitializeHandleDone(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
+    void AbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
+
+private: 
+    bool _isSystemReadyToRun;
+    bool _receivedRunCommand;
 };
 
 class RunningState 
@@ -327,13 +309,6 @@ public:
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
     void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -349,17 +324,9 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
     void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    //void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -374,17 +341,9 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
     void StopNotifyUser(std::string reason) override;
     void StopHandleDone(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
+    void AbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -402,17 +361,12 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
     void StopNotifyUser(std::string reason) override;
     void StopHandleDone(std::string reason) override;
     void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandled(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
+
     void AbortSimulation(std::string reason) override;
-    //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -427,17 +381,10 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
     void ReinitializeNotifyUser(std::string reason) override;
     void ReinitializeHandleDone(std::string reason) override;
-    //void ShutdownNotifyUser(std::string reason) override;
-    //void ShutdownHandleDone(std::string reason) override;
-    void AbortSimulation(std::string reason) override; // use default
-    //void Error(State* lastState) override; // use default
+
+    void AbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -455,17 +402,10 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandled(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
     void ShutdownHandleDone(std::string reason) override;
+
     void AbortSimulation(std::string reason) override;
-    //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -480,17 +420,10 @@ public:
     {
     }
 
-    //void RunSimulation(std::string reason) override;
-    //void PauseSimulation(std::string reason) override;
-    //void ContinueSimulation(std::string reason) override;
-    //void StopNotifyUser(std::string reason) override;
-    //void HandleStop(std::string reason) override;
-    //void ReinitializeNotifyUser(std::string reason) override;
-    //void ReinitializeHandled(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
     void ShutdownHandleDone(std::string reason) override;
+
     void AbortSimulation(std::string reason) override;
-    //void Error(State* lastState) override; // use default
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;

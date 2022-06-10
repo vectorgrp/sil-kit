@@ -11,8 +11,9 @@ LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleServ
 {
     _invalidState = std::make_shared<InvalidState>(this);
     _controllersCreatedState = std::make_shared<ControllersCreatedState>(this);
-    _communicationReadyState = std::make_shared<CommunicationReadyState>(this);
-    _initializedState = std::make_shared<InitializedState>(this);
+    _communicationInitializingState = std::make_shared<CommunicationInitializingState>(this);
+    _communicationInitializedState = std::make_shared<CommunicationInitializedState>(this);
+    _readyToRunState = std::make_shared<ReadyToRunState>(this);
     _runningState = std::make_shared<RunningState>(this);
     _pausedState = std::make_shared<PausedState>(this);
     _stoppingState = std::make_shared<StoppingState>(this);
@@ -57,14 +58,19 @@ State* LifecycleManagement::GetControllersCreatedState()
     return _controllersCreatedState.get();
 }
 
-State* LifecycleManagement::GetCommunicationReadyState()
+State* LifecycleManagement::GetCommunicationInitializingState()
 {
-    return _communicationReadyState.get();
+    return _communicationInitializingState.get();
 }
 
-State* LifecycleManagement::GetInitializedState()
+State* LifecycleManagement::GetCommunicationInitializedState()
 {
-    return _initializedState.get();
+    return _communicationInitializedState.get();
+}
+
+State* LifecycleManagement::GetReadyToRunState()
+{
+    return _readyToRunState.get();
 }
 
 State* LifecycleManagement::GetRunningState()
@@ -108,21 +114,6 @@ logging::ILogger* LifecycleManagement::GetLogger()
 }
 
 // State
-void State::EstablishCommunication(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void State::CommunicationReadyNotifyUser(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void State::CommunicationReadyHandleDone(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
 void State::RunSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -179,6 +170,13 @@ void State::Error(std::string reason)
     _context->SetStateError(std::move(reason));
 }
 
+void State::NewSystemState(SystemState systemState)
+{
+    std::stringstream ss;
+    ss << toString() << " received new systemState '" << systemState << "'";
+    _context->GetLogger()->Info(ss.str());
+}
+
 void State::InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason)
 {
     std::stringstream ss;
@@ -197,6 +195,13 @@ void State::InvalidStateTransition(std::string transitionName, bool triggerError
     }
 }
 
+bool State::IsAnyOf(SystemState state, std::initializer_list<SystemState> stateList)
+{
+    return std::any_of(begin(stateList), end(stateList), [=](auto candidate) {
+        return candidate == state;
+    });
+}
+
 // InvalidState
 std::string InvalidState::toString()
 {
@@ -210,12 +215,15 @@ auto InvalidState::GetParticipantState() -> ParticipantState
 
 
 // ControllersCreatedState
-void ControllersCreatedState::EstablishCommunication(std::string reason)
+void ControllersCreatedState::NewSystemState(SystemState systemState)
 {
-    // Resolve waitforme
-    // set shared_future
-    // await all queued futures
-    _context->SetState(_context->GetCommunicationReadyState(), std::move(reason));
+    if (IsAnyOf(systemState, {SystemState::ControllersCreated, SystemState::CommunicationInitializing,
+                              SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
+    {
+        std::stringstream ss;
+        ss << "New SystemState '" << systemState << "' received" << std::endl;
+        _context->SetState(_context->GetCommunicationInitializingState(), ss.str());
+    }
 }
 
 auto ControllersCreatedState::toString() -> std::string
@@ -228,46 +236,113 @@ auto ControllersCreatedState::GetParticipantState() -> ParticipantState
     return ParticipantState::ControllersCreated;
 }
 
-// CommunicationReadyState
-void CommunicationReadyState::CommunicationReadyNotifyUser(std::string reason)
+// CommunicationInitializingState
+void CommunicationInitializingState::NewSystemState(SystemState systemState)
 {
-    _context->HandleCommunicationReady(std::move(reason));
+    if (IsAnyOf(systemState, {SystemState::CommunicationInitializing, SystemState::CommunicationInitialized,
+                              SystemState::ReadyToRun, SystemState::Running}))
+    {
+        // TODO Resolve waitforme
+        // 1. TODO set shared_future
+        // 2. TODO await all queued futures
+        std::stringstream ss;
+        ss << "New SystemState '" << systemState << "' received" << std::endl;
+        _context->SetState(_context->GetCommunicationInitializedState(), ss.str());
+    }
+    else
+    {
+        _context->GetLogger()->Warn("Received illegal new system state in state '{}'", this->toString());
+    }
 }
 
-void CommunicationReadyState::CommunicationReadyHandleDone(std::string reason)
+auto CommunicationInitializingState::toString() -> std::string
 {
-    _context->SetState(_context->GetInitializedState(), std::move(reason));
+    return "CommunicationInitializing";
 }
 
-auto CommunicationReadyState::toString() -> std::string
+auto CommunicationInitializingState::GetParticipantState() -> ParticipantState
 {
-    return "CommunicationReady";
+    return ParticipantState::CommunicationInitializing;
 }
 
-auto CommunicationReadyState::GetParticipantState() -> ParticipantState
+// CommunicationInitializedState
+void CommunicationInitializedState::NewSystemState(SystemState systemState)
 {
-    return ParticipantState::CommunicationReady;
+    if (IsAnyOf(systemState, {SystemState::CommunicationInitialized,
+                              SystemState::ReadyToRun, SystemState::Running}))
+    {
+        std::stringstream ss;
+        ss << "New SystemState '" << systemState << "' received" << std::endl;
+        // Next state is set by context (Error or Initialized)
+        _context->HandleCommunicationReady(ss.str());
+    }
 }
 
-// InitializedState
-void InitializedState::RunSimulation(std::string reason)
+auto CommunicationInitializedState::toString() -> std::string
 {
-    _context->SetState(_context->GetRunningState(), std::move(reason));
+    return "CommunicationInitialized";
 }
 
-void InitializedState::ReinitializeHandleDone(std::string reason)
+auto CommunicationInitializedState::GetParticipantState() -> ParticipantState
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    return ParticipantState::CommunicationInitialized;
 }
 
-std::string InitializedState::toString()
+// ReadyToRunState
+void ReadyToRunState::NewSystemState(SystemState systemState)
 {
-    return "Initialized";
+    // TODO how would this be reset upon reinitialize?
+    if (IsAnyOf(systemState, {SystemState::ReadyToRun, SystemState::Running}))
+    {
+        if (_receivedRunCommand)
+        {
+            std::stringstream ss;
+            ss << "Received SystemCommand::Run and SystemState::" << systemState << std::endl;
+            _receivedRunCommand = false;
+            _context->SetState(_context->GetRunningState(), ss.str());
+
+        }
+        else
+        {
+            _isSystemReadyToRun = true;
+        }
+    }
+    else
+    {
+        _isSystemReadyToRun = false;
+    }
 }
 
-auto InitializedState::GetParticipantState() -> ParticipantState
+void ReadyToRunState::RunSimulation(std::string reason)
 {
-    return ParticipantState::Initialized;
+    if (_isSystemReadyToRun)
+    {
+        _isSystemReadyToRun = false;
+        _context->SetState(_context->GetRunningState(), std::move(reason));
+        return;
+    }
+    else
+    {
+        _receivedRunCommand = true;
+        return;
+    }
+}
+
+void ReadyToRunState::AbortSimulation(std::string reason)
+{
+    _receivedRunCommand = false;
+    _isSystemReadyToRun = false;
+    State::AbortSimulation(std::move(reason));
+}
+
+std::string ReadyToRunState::toString()
+{
+    return "ReadyToRun";
+}
+
+auto ReadyToRunState::GetParticipantState() -> ParticipantState
+{
+    return ParticipantState::ReadyToRun;
 }
 
 // RunningState
@@ -419,7 +494,7 @@ void ReinitializingState::ReinitializeHandleDone(std::string reason)
     }
     else
     {
-        _context->SetState(_context->GetInitializedState(), std::move(reason));
+        _context->SetState(_context->GetControllersCreatedState(), std::move(reason));
     }
 }
 

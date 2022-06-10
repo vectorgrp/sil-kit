@@ -261,9 +261,9 @@ TEST_F(ParticipantControllerTest, run_async_with_synctype_distributedtimequantum
 
     // Cmd::Initialize --> Initializing --> Initialized
     EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::CommunicationReady))).Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Initialized))).Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::ReadyToRun))).Times(1);
     controller.ReceiveIbMessage(&masterId, ParticipantCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Initialize});
-    EXPECT_EQ(controller.State(), ParticipantState::Initialized);
+    EXPECT_EQ(controller.State(), ParticipantState::ReadyToRun);
 
     // Cmd::Run --> Running --> Call SimTask()
     EXPECT_CALL(participant, SendIbMessage(&controller, AParticipantStatusWithState(ParticipantState::Running))).Times(1);

@@ -168,7 +168,7 @@ private:
         {
             InitializeAllParticipants();
         }
-        else if (newState == SystemState::Initialized)
+        else if (newState == SystemState::ReadyToRun)
         {
             _systemController->Run();
         }

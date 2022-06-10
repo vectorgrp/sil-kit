@@ -108,7 +108,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         case ParticipantState::Invalid:      // [[fallthrough]]
         case ParticipantState::ControllersCreated:         // [[fallthrough]]
         case ParticipantState::CommunicationReady: // [[fallthrough]]
-        case ParticipantState::Initialized:
+        case ParticipantState::ReadyToRun:
             return;
         case ParticipantState::Paused:       // [[fallthrough]]
         case ParticipantState::Running:
@@ -411,7 +411,7 @@ void ParticipantController::Initialize(const ParticipantCommand& command, std::s
     }
 
     _timeSyncPolicy->Initialize();
-    ChangeState(ParticipantState::Initialized, std::move(reason));
+    ChangeState(ParticipantState::ReadyToRun, std::move(reason));
 }
 
 void ParticipantController::Stop(std::string reason)
@@ -629,7 +629,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
         break;
 
     case SystemCommand::Kind::Run:
-        if (State() == ParticipantState::Initialized)
+        if (State() == ParticipantState::ReadyToRun)
         {
             ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
             _waitTimeMonitor.StartMeasurement();
