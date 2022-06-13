@@ -97,7 +97,6 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IParticipantInternal* _participant{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
     logging::ILogger* _logger{nullptr};
 

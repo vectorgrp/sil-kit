@@ -17,8 +17,7 @@ namespace mw {
 namespace sync {
 
 SystemMonitor::SystemMonitor(IParticipantInternal* participant)
-    : _participant{participant}
-    , _logger{participant->GetLogger()}
+    : _logger{participant->GetLogger()}
 {
 }
 
