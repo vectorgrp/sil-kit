@@ -19,7 +19,8 @@ struct ParticipantCommand
     enum class Kind : uint8_t {
         Invalid, //!< An invalid command
         Initialize, //!< The initialize command
-        Reinitialize //!< The reinitialize command
+        Reinitialize, //!< The reinitialize command
+        Shutdown //!< The shutdown command
     };
 
     ParticipantId participant; //!< The specific participant that receives this command.
@@ -56,7 +57,8 @@ enum class ParticipantState : uint8_t {
     ColdswapIgnored, //!< The ColdswapIgnored state
     Error, //!< The error state
     ShuttingDown, //!< The shutting down state
-    Shutdown //!< The shutdown state
+    Shutdown, //!< The shutdown state
+    Reinitializing  //!< The reinitializing state
 };
 
 struct ParticipantStatus

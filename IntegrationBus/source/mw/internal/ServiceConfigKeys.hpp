@@ -53,6 +53,8 @@ const std::string controllerTypeLoggerReceiver = "LoggerReceiver";
 const std::string controllerTypeServiceDiscovery = "ServiceDiscovery";
 const std::string controllerTypeSystemMonitor = "SystemMonitor";
 const std::string controllerTypeSystemController = "SystemController";
+const std::string controllerTypeLifecycleService = "LifecycleService";
+const std::string controllerTypeTimeSyncService = "TimeSyncService";
 
 // misc / legacy controllers
 const std::string controllerTypeOther = "Other";

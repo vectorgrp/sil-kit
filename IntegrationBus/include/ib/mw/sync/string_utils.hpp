@@ -73,6 +73,8 @@ std::string to_string(ParticipantState state)
         return "ShuttingDown";
     case ParticipantState::Shutdown:
         return "Shutdown";
+    case ParticipantState::Reinitializing:
+        return "Reinitializing";
     }
     throw ib::TypeConversionError{};
 }
@@ -125,6 +127,8 @@ std::string to_string(ParticipantCommand::Kind command)
         return "Initialize";
     case ParticipantCommand::Kind::Reinitialize:
         return "Reinitialize";
+    case ParticipantCommand::Kind::Shutdown:
+        return "Shutdown";
     }
     throw ib::TypeConversionError{};
 }

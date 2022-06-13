@@ -43,6 +43,8 @@
 #include "IIbToSystemMonitor.hpp"
 #include "IIbToSystemController.hpp"
 #include "IIbToParticipantController.hpp"
+#include "IIbToLifecycleService.hpp"
+#include "IIbToTimeSyncService.hpp"
 
 #include "ITraceMessageSink.hpp"
 #include "ITraceMessageSource.hpp"
@@ -143,6 +145,8 @@ public:
                             sim::rpc::RpcDiscoveryResultHandler handler) override;
 
     auto GetParticipantController() -> sync::IParticipantController* override;
+    auto GetLifecycleService() -> sync::ILifecycleService* override;
+    auto CreateTimeSyncService(sync::LifecycleService* service) -> sync::TimeSyncService* override;
     auto GetSystemMonitor() -> sync::ISystemMonitor* override;
     auto GetSystemController() -> sync::ISystemController* override;
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override;
@@ -325,17 +329,19 @@ private:
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
     auto CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
+                          const mw::SupplementalData& supplementalData, bool publishService, Arg&&... arg) -> ControllerT*;
 
     //!< Internal controller creation, explicit network argument for ConfigT without network
     template <class ConfigT, class ControllerT, typename... Arg>
     auto CreateController(const ConfigT& config, const std::string& network, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
+                          const mw::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+        -> ControllerT*;
 
     //!< Internal controller creation, expects config.network
     template <class ConfigT, class ControllerT, typename... Arg>
     auto CreateController(const ConfigT& config, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, Arg&&... arg) -> ControllerT*;
+                          const mw::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+        -> ControllerT*;
 
 
     template<class IIbToSimulatorT>
@@ -371,9 +377,11 @@ private:
         ControllerMap<sim::rpc::IIbToRpcServerInternal>,
         ControllerMap<logging::IIbToLogMsgSender>,
         ControllerMap<logging::IIbToLogMsgReceiver>,
+        ControllerMap<sync::IIbToLifecycleService>,
         ControllerMap<sync::IIbToParticipantController>,
         ControllerMap<sync::IIbToSystemMonitor>,
         ControllerMap<sync::IIbToSystemController>,
+        ControllerMap<sync::IIbToTimeSyncService>,
         ControllerMap<service::ServiceDiscovery>
     > _controllers;
 

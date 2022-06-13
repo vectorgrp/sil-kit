@@ -34,6 +34,10 @@ namespace mw {
 namespace service {
 class IServiceDiscovery;
 } //service
-}//mw
+namespace sync {
+class LifecycleService;
+class TimeSyncService;
+} //sync
+} //mw
 } // namespace ib
 

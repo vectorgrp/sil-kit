@@ -1,5 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbMwSync
+    LifecycleService.hpp
+    LifecycleService.cpp
     ParticipantController.hpp
     ParticipantController.cpp
     SyncDatatypeUtils.hpp
@@ -11,6 +13,8 @@ add_library(IbMwSync
     WatchDog.hpp
     WatchDog.cpp
     TimeProvider.hpp
+    TimeSyncService.hpp
+    TimeSyncService.cpp
 
     SyncSerdes.hpp
     SyncSerdes.cpp

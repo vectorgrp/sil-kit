@@ -248,6 +248,9 @@ public:
                             sim::rpc::RpcDiscoveryResultHandler /*handler*/) override{};
 
     auto GetParticipantController() -> sync::IParticipantController* override { return &mockParticipantController; }
+    //TODO FIXME
+    auto GetLifecycleService() -> sync::ILifecycleService* override { return nullptr; };
+    auto CreateTimeSyncService(sync::LifecycleService*) -> sync::TimeSyncService* override { return nullptr; };
     auto GetSystemMonitor() -> sync::ISystemMonitor* override { return &mockSystemMonitor; }
     auto GetSystemController() -> sync::ISystemController* override { return &mockSystemController; }
 

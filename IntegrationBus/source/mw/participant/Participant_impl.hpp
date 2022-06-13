@@ -16,6 +16,8 @@
 #include "RpcServer.hpp"
 #include "RpcServerInternal.hpp"
 #include "RpcDiscoverer.hpp"
+
+#include "LifecycleService.hpp"
 #include "ParticipantController.hpp"
 #include "SystemController.hpp"
 #include "SystemMonitor.hpp"
@@ -23,6 +25,7 @@
 #include "LogMsgReceiver.hpp"
 #include "Logger.hpp"
 #include "TimeProvider.hpp"
+#include "TimeSyncService.hpp"
 #include "ServiceDiscovery.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "YamlParser.hpp"
@@ -155,7 +158,7 @@ void Participant<IbConnectionT>::SetupRemoteLogging()
             supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerReceiver;
 
             CreateInternalController<logging::LogMsgReceiver>("LogMsgReceiver", mw::ServiceType::InternalController,
-                                                      std::move(supplementalData), logger);
+                                                      std::move(supplementalData), true, logger);
         }
 
         auto sinkIter = std::find_if(_participantConfig.logging.sinks.begin(), _participantConfig.logging.sinks.end(),
@@ -167,7 +170,7 @@ void Participant<IbConnectionT>::SetupRemoteLogging()
             supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerSender;
 
             auto&& logMsgSender = CreateInternalController<logging::LogMsgSender>(
-                "LogMsgSender", mw::ServiceType::InternalController, std::move(supplementalData));
+                "LogMsgSender", mw::ServiceType::InternalController, std::move(supplementalData), true);
 
             logger->RegisterRemoteLogging([logMsgSender](logging::LogMsg logMsg) {
 
@@ -248,7 +251,7 @@ auto Participant<IbConnectionT>::CreateCanController(const std::string& canonica
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeCan;
 
     auto controller = CreateController<ib::cfg::CanController, can::CanController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider.get());
 
     controller->RegisterServiceDiscovery();
@@ -275,7 +278,7 @@ auto Participant<IbConnectionT>::CreateEthernetController(const std::string& can
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeEthernet;
 
     auto controller = CreateController<ib::cfg::EthernetController, eth::EthController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider.get());
 
     controller->RegisterServiceDiscovery();
@@ -299,7 +302,7 @@ auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& cano
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexray;
 
     auto controller = CreateController<ib::cfg::FlexrayController, fr::FlexrayController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider.get());
 
     controller->RegisterServiceDiscovery();
@@ -323,7 +326,7 @@ auto Participant<IbConnectionT>::CreateLinController(const std::string& canonica
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLin;
 
     auto controller = CreateController<ib::cfg::LinController, lin::LinController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), controllerConfig,
+        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider.get());
 
     controller->RegisterServiceDiscovery();
@@ -354,8 +357,8 @@ auto Participant<IbConnectionT>::CreateDataSubscriberInternal(const std::string&
     std::string network = linkName;
 
     return CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriberInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), topic,
-        mediaType, publisherLabels, defaultHandler, parent);
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        topic, mediaType, publisherLabels, defaultHandler, parent);
 }
 
 template <class IbConnectionT>
@@ -382,8 +385,8 @@ auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonica
     supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::DataPublisher, ib::sim::data::DataPublisher>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(), controllerConfig.topic.value(),
-        mediaType, labels, network);
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        controllerConfig.topic.value(), mediaType, labels, network);
 
     _ibConnection.SetHistoryLengthForLink(network, history, controller);
 
@@ -415,7 +418,7 @@ auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonic
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
 
     auto controller = CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriber>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
         controllerConfig.topic.value(), mediaType, labels, defaultDataHandler, newDataSourceHandler);
 
     controller->RegisterServiceDiscovery();
@@ -449,7 +452,7 @@ auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& func
     supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
     return CreateController<ib::cfg::RpcServer, sim::rpc::RpcServerInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
         functionName, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
@@ -474,7 +477,7 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
     supplementalData[ib::mw::service::supplKeyRpcClientUUID] = network;
 
     auto controller = CreateController<ib::cfg::RpcClient, ib::sim::rpc::RpcClient>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
         controllerConfig.functionName.value(), mediaType, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
@@ -510,7 +513,7 @@ auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalNam
     supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::RpcServer, sim::rpc::RpcServer>(
-        controllerConfig, network, mw::ServiceType::Controller, supplementalData, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, supplementalData, true, _timeProvider.get(),
         controllerConfig.functionName.value(), mediaType, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
@@ -543,12 +546,54 @@ auto Participant<IbConnectionT>::GetParticipantController() -> sync::IParticipan
         mw::SupplementalData supplementalData;
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeParticipantController;
         controller = CreateInternalController<sync::ParticipantController>(
-            "ParticipantController", mw::ServiceType::InternalController, std::move(supplementalData), _participantName,
-            _isSynchronized, _participantConfig.healthCheck);
+            "ParticipantController", mw::ServiceType::InternalController, std::move(supplementalData), true,
+            _participantName, _isSynchronized, _participantConfig.healthCheck);
     }
 
     return controller;
 }
+
+template <class IbConnectionT>
+auto Participant<IbConnectionT>::CreateTimeSyncService(sync::LifecycleService* service) -> sync::TimeSyncService*
+{
+    auto* timeSyncService =
+        GetController<sync::TimeSyncService>("default", ib::mw::service::controllerTypeTimeSyncService);
+
+    if (timeSyncService)
+    {
+        throw std::runtime_error("Tried to instantiate TimeSyncService multiple times!");
+    }
+    // TODO check _isSynchronized!
+
+    mw::SupplementalData timeSyncSupplementalData;
+    timeSyncSupplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeTimeSyncService;
+
+    timeSyncService = CreateInternalController<sync::TimeSyncService>(
+        ib::mw::service::controllerTypeTimeSyncService, mw::ServiceType::InternalController,
+        std::move(timeSyncSupplementalData), false, service, _participantConfig.healthCheck);
+
+    return timeSyncService;
+}
+
+template <class IbConnectionT>
+auto Participant<IbConnectionT>::GetLifecycleService() -> sync::ILifecycleService*
+{
+    auto* lifecycleService =
+        GetController<sync::LifecycleService>("default", ib::mw::service::controllerTypeLifecycleService);
+
+    if (!lifecycleService)
+    {
+        mw::SupplementalData lifecycleSupplementalData;
+        lifecycleSupplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLifecycleService;
+
+        lifecycleService = CreateInternalController<sync::LifecycleService>(
+            ib::mw::service::controllerTypeLifecycleService, mw::ServiceType::InternalController,
+            std::move(lifecycleSupplementalData), false,
+            _participantConfig.healthCheck);
+    }
+    return lifecycleService;
+}
+
 
 template <class IbConnectionT>
 auto Participant<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
@@ -560,7 +605,7 @@ auto Participant<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeSystemMonitor;
 
         controller = CreateInternalController<sync::SystemMonitor>("SystemMonitor", mw::ServiceType::InternalController,
-                                                           std::move(supplementalData));
+                                                                   std::move(supplementalData), true);
 
         _ibConnection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
             controller->OnParticipantConnected(peer->GetInfo().participantName);
@@ -583,7 +628,7 @@ auto Participant<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDisco
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeServiceDiscovery;
 
         controller = CreateInternalController<service::ServiceDiscovery>(
-            "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData), _participantName);
+            "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData), true, _participantName);
         
         _ibConnection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticpantRemoval(peer->GetInfo().participantName);
@@ -602,7 +647,7 @@ auto Participant<IbConnectionT>::GetSystemController() -> sync::ISystemControlle
         supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeSystemController;
 
         return CreateInternalController<sync::SystemController>("SystemController", mw::ServiceType::InternalController,
-                                                        std::move(supplementalData));
+                                                                std::move(supplementalData), true);
     }
     return controller;
 }
@@ -1220,36 +1265,39 @@ auto Participant<IbConnectionT>::GetController(const std::string& networkName, c
 }
 
 template <class IbConnectionT>
-template<class ControllerT, typename... Arg>
-auto Participant<IbConnectionT>::CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
-                                                 const mw::SupplementalData& supplementalData,
-                                                 Arg&&... arg) -> ControllerT*
+template <class ControllerT, typename... Arg>
+auto Participant<IbConnectionT>::CreateInternalController(const std::string& serviceName,
+                                                          const mw::ServiceType serviceType,
+                                                          const mw::SupplementalData& supplementalData,
+                                                          const bool publishService, Arg&&... arg) -> ControllerT*
 {
     cfg::InternalController config;
     config.name = serviceName;
     config.network = "default";
 
-    return CreateController<cfg::InternalController, ControllerT>(
-        config, serviceType, supplementalData, std::forward<Arg>(arg)...);
+    return CreateController<cfg::InternalController, ControllerT>(config, serviceType, supplementalData, publishService, 
+                                                                  std::forward<Arg>(arg)...);
 }
 
 template <class IbConnectionT>
 template <class ConfigT, class ControllerT, typename... Arg>
 auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const mw::ServiceType serviceType,
-                                                  const mw::SupplementalData& supplementalData, Arg&&... arg)
-    -> ControllerT*
+                                                  const mw::SupplementalData& supplementalData,
+                                                  const bool publishService,
+                                                  Arg&&... arg) -> ControllerT*
 {
     assert(config.network.has_value());
     return CreateController<ConfigT, ControllerT>(config, *config.network, serviceType, supplementalData,
-                                                  std::forward<Arg>(arg)...);
+                                                  publishService, std::forward<Arg>(arg)...);
 }
 
 template <class IbConnectionT>
 template <class ConfigT, class ControllerT, typename... Arg>
 auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const std::string& network,
                                                   const mw::ServiceType serviceType,
-                                                  const mw::SupplementalData& supplementalData, Arg&&... arg)
-    -> ControllerT*
+                                                  const mw::SupplementalData& supplementalData,
+                                                  const bool publishService,
+                                                  Arg&&... arg) -> ControllerT*
 {
     if (config.name == "")
     {
@@ -1291,8 +1339,10 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const s
     //{
     //    AddTraceSinksToSource(traceSource, config);
     //}
-
-    GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());
+    if (publishService)
+    {
+        GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());
+    }
     return controllerPtr;
 }
 

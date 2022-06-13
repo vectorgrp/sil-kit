@@ -172,6 +172,8 @@ public:
                                          sim::rpc::RpcCallHandler handler, sim::rpc::IRpcServer* parent)
         -> ib::sim::rpc::RpcServerInternal* = 0;
 
+    virtual auto CreateTimeSyncService(mw::sync::LifecycleService* service) -> sync::TimeSyncService* = 0;
+
 protected:
     std::atomic<EndpointId> _localEndpointId{ 0 };
 };
