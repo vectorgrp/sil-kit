@@ -9,7 +9,10 @@ namespace ib {
 namespace mw {
 
 auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                     const std::string& participantName, bool isSynchronized)
+                           const std::string& participantName, bool isSynchronized)
+    -> std::unique_ptr<IParticipantInternal>;
+auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                           const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>;
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,

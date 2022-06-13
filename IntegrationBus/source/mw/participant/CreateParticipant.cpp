@@ -8,12 +8,12 @@
 namespace ib {
 namespace mw {
 
-auto CreateVAsioParticipantImpl(cfg::ParticipantConfiguration participantConfig,
-                                          const std::string& participantName, bool isSynchronized)
-    -> std::unique_ptr<IParticipantInternal>
+auto CreateVAsioParticipantImpl(cfg::ParticipantConfiguration participantConfig, const std::string& participantName,
+                                bool isSynchronized) -> std::unique_ptr<IParticipantInternal>
 {
 #if defined(IB_MW_HAVE_VASIO)
-    return std::make_unique<Participant<VAsioConnection>>(std::move(participantConfig), participantName, isSynchronized);
+    return std::make_unique<Participant<VAsioConnection>>(std::move(participantConfig), participantName,
+                                                          isSynchronized);
 #else
     std::cout << "ERROR: CreateVasioParticipantImpl(): IntegrationBus was compiled without \"IB_MW_HAVE_VASIO\""
               << std::endl;
@@ -21,13 +21,28 @@ auto CreateVAsioParticipantImpl(cfg::ParticipantConfiguration participantConfig,
 #endif
 }
 
+auto CreateVAsioParticipantImpl(cfg::ParticipantConfiguration participantConfig, const std::string& participantName)
+    -> std::unique_ptr<IParticipantInternal>
+{
+    return std::make_unique<Participant<VAsioConnection>>(std::move(participantConfig), participantName);
+}
+
 auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                     const std::string& participantName, bool isSynchronized)
+                           const std::string& participantName, bool isSynchronized)
     -> std::unique_ptr<IParticipantInternal>
 {
     auto&& cfg = ValidateAndSanitizeConfig(participantConfig, participantName);
 
     return CreateVAsioParticipantImpl(std::move(cfg), participantName, isSynchronized);
+}
+
+auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                           const std::string& participantName)
+    -> std::unique_ptr<IParticipantInternal>
+{
+    auto&& cfg = ValidateAndSanitizeConfig(participantConfig, participantName);
+
+    return CreateVAsioParticipantImpl(std::move(cfg), participantName);
 }
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
