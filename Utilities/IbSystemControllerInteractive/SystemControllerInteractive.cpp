@@ -195,6 +195,8 @@ public:
             return;
         case ParticipantCommand::Kind::Reinitialize:
             _controller->Reinitialize(participantName);
+        case ParticipantCommand::Kind::Shutdown:
+            _controller->Shutdown();
         }
     }
 
