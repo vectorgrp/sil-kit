@@ -76,9 +76,16 @@ public:
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
 
+
+public:
+    void TriggerReinitializeHandle(std::string reason);
+    void TriggerStopHandle(std::string reason);
+    void TriggerShutdownHandle(std::string reason);
+
     void ChangeState(ParticipantState newState, std::string reason);
 
     void SetTimeSyncService(TimeSyncService* timeSyncService);
+
 
 private:
     // ----------------------------------------

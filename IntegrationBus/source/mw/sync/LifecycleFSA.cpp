@@ -103,32 +103,32 @@ void State::ContinueSimulation(std::string reason)
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::StopSimulation(std::string reason)
+void State::StopNotifyUser(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::StopHandled(std::string reason)
+void State::StopHandleDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::ReinitializeSimulation(std::string reason)
+void State::ReinitializeNotifyUser(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::ReinitializeHandled(std::string reason)
+void State::ReinitializeHandleDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::ShutdownSimulation(std::string reason)
+void State::ShutdownNotifyUser(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::ShutdownHandled(std::string reason)
+void State::ShutdownHandleDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
@@ -168,7 +168,7 @@ void InitializedState::RunSimulation(std::string reason)
     _context->SetState(_context->GetRunningState(), std::move(reason));
 }
 
-void InitializedState::ReinitializeHandled(std::string reason)
+void InitializedState::ReinitializeHandleDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
@@ -199,9 +199,11 @@ void RunningState::ContinueSimulation(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void RunningState::StopSimulation(std::string reason)
+void RunningState::StopNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetStoppingState(), std::move(reason));
+    _context->SetState(_context->GetStoppingState(), reason);
+    // Context will set next state
+    _context->HandleStop(std::move(reason));
 }
 
 auto RunningState::toString() -> std::string
@@ -225,9 +227,11 @@ void PausedState::ContinueSimulation(std::string reason)
     _context->SetState(_context->GetRunningState(), std::move(reason));
 }
 
-void PausedState::StopSimulation(std::string reason)
+void PausedState::StopNotifyUser(std::string reason)
 {
     _context->SetState(_context->GetStoppingState(), std::move(reason));
+    // Context will set next state
+    _context->HandleStop(std::move(reason));
 }
 
 auto PausedState::toString() -> std::string
@@ -241,12 +245,13 @@ auto PausedState::GetParticipantState() -> ParticipantState
 }
 
 // StoppingState
-void StoppingState::StopSimulation(std::string reason)
+void StoppingState::StopNotifyUser(std::string reason)
 {
+    // NOP
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void StoppingState::StopHandled(std::string reason)
+void StoppingState::StopHandleDone(std::string reason)
 {
     _context->SetState(_context->GetStoppedState(), std::move(reason));
 }
@@ -262,19 +267,27 @@ auto StoppingState::GetParticipantState() -> ParticipantState
 }
 
 // StoppedState
-void StoppedState::StopHandled(std::string reason)
+void StoppedState::StopNotifyUser(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void StoppedState::ReinitializeSimulation(std::string reason)
+void StoppedState::StopHandleDone(std::string reason)
 {
-    _context->SetState(_context->GetReinitializingState(), std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void StoppedState::ShutdownSimulation(std::string reason)
+void StoppedState::ReinitializeNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetShuttingDownState(), std::move(reason));
+    _context->SetState(_context->GetReinitializingState(), reason);
+    // Context will set next state
+    _context->HandleReinitialize(std::move(reason));
+}
+
+void StoppedState::ShutdownNotifyUser(std::string reason)
+{
+    _context->SetState(_context->GetShuttingDownState(), reason);
+    _context->HandleShutdown(std::move(reason));
 }
 
 auto StoppedState::toString() -> std::string
@@ -288,12 +301,12 @@ auto StoppedState::GetParticipantState() -> ParticipantState
 }
 
 // ReinitializingState
-void ReinitializingState::ReinitializeSimulation(std::string reason)
+void ReinitializingState::ReinitializeNotifyUser(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ReinitializingState::ReinitializeHandled(std::string reason)
+void ReinitializingState::ReinitializeHandleDone(std::string reason)
 {
     _context->SetState(_context->GetInitializedState(), std::move(reason));
 }
@@ -309,12 +322,12 @@ auto ReinitializingState::GetParticipantState() -> ParticipantState
 }
 
 // ShuttingDownState
-void ShuttingDownState::ShutdownSimulation(std::string reason)
+void ShuttingDownState::ShutdownNotifyUser(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ShuttingDownState::ShutdownHandled(std::string reason)
+void ShuttingDownState::ShutdownHandleDone(std::string reason)
 {
     _context->SetState(_context->GetShutdownState(), std::move(reason));
 }
@@ -330,7 +343,12 @@ auto ShuttingDownState::GetParticipantState() -> ParticipantState
 }
 
 // ShutdownState
-void ShutdownState::ShutdownHandled(std::string reason)
+void ShutdownState::ShutdownNotifyUser(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+}
+
+void ShutdownState::ShutdownHandleDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
@@ -349,61 +367,60 @@ auto ShutdownState::GetParticipantState() -> ParticipantState
 void ErrorState::RunSimulation(std::string reason)
 {
     // TODO think about error recovery
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void ErrorState::PauseSimulation(std::string reason)
 {
     // TODO think about error recovery
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void ErrorState::ContinueSimulation(std::string reason)
 {
     // TODO think about error recovery
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ErrorState::StopSimulation(std::string reason)
+void ErrorState::StopNotifyUser(std::string reason)
 {
     // TODO think about error recovery
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ErrorState::StopHandled(std::string reason)
+void ErrorState::StopHandleDone(std::string reason)
 {
     // TODO think about error recovery
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ErrorState::ReinitializeSimulation(std::string reason)
+void ErrorState::ReinitializeNotifyUser(std::string reason)
 {
     // TODO think about error recovery
     _context->SetState(_context->GetReinitializingState(), std::move(reason));
+    _context->HandleReinitialize(std::move(reason));
 }
 
-void ErrorState::ReinitializeHandled(std::string reason)
+void ErrorState::ReinitializeHandleDone(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void ErrorState::ShutdownSimulation(std::string reason)
+void ErrorState::ShutdownNotifyUser(std::string reason)
 {
-    // TODO think about error recovery
-    _context->SetState(_context->GetShutdownState(), std::move(reason));
+    _context->SetState(_context->GetShuttingDownState(), std::move(reason));
+    _context->HandleShutdown(std::move(reason));
 }
 
-void ErrorState::ShutdownHandled(std::string reason)
+void ErrorState::ShutdownHandleDone(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
 void ErrorState::AbortSimulation(std::string reason)
 {
-    // TODO think about error recovery
-    _context->SetState(_context->GetShutdownState(), std::move(reason));
+    _context->SetState(_context->GetShuttingDownState(), std::move(reason));
+    _context->HandleShutdown(std::move(reason));
 }
 
 void ErrorState::Error(std::string reason)

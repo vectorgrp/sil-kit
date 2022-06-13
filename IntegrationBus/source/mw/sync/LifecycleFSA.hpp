@@ -24,12 +24,12 @@ public:
     virtual void RunSimulation(std::string reason);
     virtual void PauseSimulation(std::string reason);
     virtual void ContinueSimulation(std::string reason);
-    virtual void StopSimulation(std::string reason);
-    virtual void StopHandled(std::string reason);
-    virtual void ReinitializeSimulation(std::string reason);
-    virtual void ReinitializeHandled(std::string reason);
-    virtual void ShutdownSimulation(std::string reason);
-    virtual void ShutdownHandled(std::string reason);
+    virtual void StopNotifyUser(std::string reason);
+    virtual void StopHandleDone(std::string reason);
+    virtual void ReinitializeNotifyUser(std::string reason);
+    virtual void ReinitializeHandleDone(std::string reason);
+    virtual void ShutdownNotifyUser(std::string reason);
+    virtual void ShutdownHandleDone(std::string reason);
     
     virtual void AbortSimulation(std::string reason);
     virtual void Error(std::string reason);
@@ -57,11 +57,8 @@ public:
     virtual void Pause(std::string reason) = 0;
     virtual void Continue(std::string reason) = 0;
     virtual void Stop(std::string reason) = 0;
-    virtual void StopHandled(std::string reason) = 0;
-    virtual void Shutdown(std::string reason) = 0;
-    virtual void ShutdownHandled(std::string reason) = 0;
+    virtual bool Shutdown(std::string reason) = 0; // shutdown successful?
     virtual void Reinitialize(std::string reason) = 0;
-    virtual void ReinitializeHandled(std::string reason) = 0;
     virtual void Error(std::string reason) = 0;
     virtual void AbortSimulation(std::string reason) = 0;
 };
@@ -80,14 +77,65 @@ public:
     void Run(std::string reason) override { _currentState->RunSimulation(std::move(reason)); }
     void Pause(std::string reason) override { _currentState->PauseSimulation(std::move(reason)); }
     void Continue(std::string reason) override { _currentState->ContinueSimulation(std::move(reason)); }
-    void Stop(std::string reason) override { _currentState->StopSimulation(std::move(reason)); }
-    void StopHandled(std::string reason) override { _currentState->StopHandled(std::move(reason)); }
-    void Shutdown(std::string reason) override { _currentState->ShutdownSimulation(std::move(reason)); }
-    void ShutdownHandled(std::string reason) override { _currentState->ShutdownHandled(std::move(reason)); }
-    void Reinitialize(std::string reason) override { _currentState->ReinitializeSimulation(std::move(reason)); }
-    void ReinitializeHandled(std::string reason) override { _currentState->ReinitializeHandled(std::move(reason)); }
+    void Stop(std::string reason) override 
+    { 
+        _currentState->StopNotifyUser(reason);
+        // Could be Stopping or Error state
+        _currentState->StopHandleDone("Finished StopHandle execution.");
+    }
+    bool Shutdown(std::string reason) override 
+    {
+        _currentState->ShutdownNotifyUser(reason);
+        _currentState->ShutdownHandleDone(std::move(reason));  
+        return (_currentState != GetErrorState());
+    }
+    void Reinitialize(std::string reason) override
+    {
+        _currentState->ReinitializeNotifyUser(reason);
+        _currentState->ReinitializeHandleDone(std::move(reason));
+    }
     void Error(std::string reason) override { _currentState->Error(std::move(reason)); }
     void AbortSimulation(std::string reason) override { _currentState->AbortSimulation(std::move(reason)); }
+
+public:
+    void HandleReinitialize(std::string reason)
+    {
+        try
+        {
+            _parentService->TriggerReinitializeHandle(std::move(reason));
+        }
+        catch (const std::exception&)
+        {
+            // Switch to error state if handle triggers error
+            SetStateError("Exception during StopHandle execution.");
+        }
+    }
+
+    void HandleStop(std::string reason)
+    {
+        try
+        {
+            _parentService->TriggerStopHandle(std::move(reason));
+        }
+        catch (const std::exception&)
+        {
+            // Switch to error state if handle triggers error
+            SetStateError("Exception during StopHandle execution.");
+        }
+    }
+
+    void HandleShutdown(std::string reason) 
+    {
+        try
+        {
+            _parentService->TriggerShutdownHandle(std::move(reason));
+            _currentState->ShutdownHandleDone("Finished ShutdownHandle execution.");
+        }
+        catch (const std::exception& e)
+        {
+            _currentState->ShutdownHandleDone("Exception during ShutdownHandle execution - shutting down anyway.");
+        }
+    }
 
     // Internal state handling
     void SetState(State* state, std::string message);
@@ -138,12 +186,12 @@ public:
     void RunSimulation(std::string reason) override;
     //void PauseSimulation(std::string reason) override;
     //void ContinueSimulation(std::string reason) override;
-    //void StopSimulation(std::string reason) override;
-    //void StopHandled(std::string reason) override;
-    //void ReinitializeSimulation(std::string reason) override;
-    void ReinitializeHandled(std::string reason) override;
-    //void ShutdownSimulation(std::string reason) override;
-    //void ShutdownHandled(std::string reason) override;
+    //void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
+    void ReinitializeHandleDone(std::string reason) override;
+    //void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -163,12 +211,12 @@ public:
     void RunSimulation(std::string reason) override;
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
-    void StopSimulation(std::string reason) override;
-    //void StopHandled(std::string reason) override;
-    //void ReinitializeSimulation(std::string reason) override;
+    void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
     //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownSimulation(std::string reason) override;
-    //void ShutdownHandled(std::string reason) override;
+    //void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -189,12 +237,12 @@ public:
     //void RunSimulation(std::string reason) override;
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
-    void StopSimulation(std::string reason) override;
-    //void StopHandled(std::string reason) override;
-    //void ReinitializeSimulation(std::string reason) override;
+    void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
     //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownSimulation(std::string reason) override;
-    //void ShutdownHandled(std::string reason) override;
+    //void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -214,12 +262,12 @@ public:
     //void RunSimulation(std::string reason) override;
     //void PauseSimulation(std::string reason) override;
     //void ContinueSimulation(std::string reason) override;
-    void StopSimulation(std::string reason) override;
-    void StopHandled(std::string reason) override;
-    //void ReinitializeSimulation(std::string reason) override;
+    void StopNotifyUser(std::string reason) override;
+    void StopHandleDone(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
     //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownSimulation(std::string reason) override;
-    //void ShutdownHandled(std::string reason) override;
+    //void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -239,12 +287,12 @@ public:
     //void RunSimulation(std::string reason) override;
     //void PauseSimulation(std::string reason) override;
     //void ContinueSimulation(std::string reason) override;
-    //void StopSimulation(std::string reason) override;
-    void StopHandled(std::string reason) override;
-    void ReinitializeSimulation(std::string reason) override;
+    void StopNotifyUser(std::string reason) override;
+    void StopHandleDone(std::string reason) override;
+    void ReinitializeNotifyUser(std::string reason) override;
     //void ReinitializeHandled(std::string reason) override;
-    void ShutdownSimulation(std::string reason) override;
-    //void ShutdownHandled(std::string reason) override;
+    void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -264,12 +312,12 @@ public:
     //void RunSimulation(std::string reason) override;
     //void PauseSimulation(std::string reason) override;
     //void ContinueSimulation(std::string reason) override;
-    //void StopSimulation(std::string reason) override;
-    //void StopHandled(std::string reason) override;
-    void ReinitializeSimulation(std::string reason) override;
-    void ReinitializeHandled(std::string reason) override;
-    //void ShutdownSimulation(std::string reason) override;
-    //void ShutdownHandled(std::string reason) override;
+    //void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    void ReinitializeNotifyUser(std::string reason) override;
+    void ReinitializeHandleDone(std::string reason) override;
+    //void ShutdownNotifyUser(std::string reason) override;
+    //void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -289,12 +337,12 @@ public:
     //void RunSimulation(std::string reason) override;
     //void PauseSimulation(std::string reason) override;
     //void ContinueSimulation(std::string reason) override;
-    //void StopSimulation(std::string reason) override;
-    //void StopHandled(std::string reason) override;
-    //void ReinitializeSimulation(std::string reason) override;
+    //void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
     //void ReinitializeHandled(std::string reason) override;
-    void ShutdownSimulation(std::string reason) override;
-    void ShutdownHandled(std::string reason) override;
+    void ShutdownNotifyUser(std::string reason) override;
+    void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -314,12 +362,12 @@ public:
     //void RunSimulation(std::string reason) override;
     //void PauseSimulation(std::string reason) override;
     //void ContinueSimulation(std::string reason) override;
-    //void StopSimulation(std::string reason) override;
-    //void StopHandled(std::string reason) override;
-    //void ReinitializeSimulation(std::string reason) override;
+    //void StopNotifyUser(std::string reason) override;
+    //void HandleStop(std::string reason) override;
+    //void ReinitializeNotifyUser(std::string reason) override;
     //void ReinitializeHandled(std::string reason) override;
-    //void ShutdownSimulation(std::string reason) override;
-    void ShutdownHandled(std::string reason) override;
+    void ShutdownNotifyUser(std::string reason) override;
+    void ShutdownHandleDone(std::string reason) override;
     //void AbortSimulation() override; // use default
     //void Error(State* lastState) override; // use default
 
@@ -339,12 +387,12 @@ public:
     void RunSimulation(std::string reason) override;
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
-    void StopSimulation(std::string reason) override;
-    void StopHandled(std::string reason) override;
-    void ReinitializeSimulation(std::string reason) override;
-    void ReinitializeHandled(std::string reason) override;
-    void ShutdownSimulation(std::string reason) override;
-    void ShutdownHandled(std::string reason) override;
+    void StopNotifyUser(std::string reason) override;
+    void StopHandleDone(std::string reason) override;
+    void ReinitializeNotifyUser(std::string reason) override;
+    void ReinitializeHandleDone(std::string reason) override;
+    void ShutdownNotifyUser(std::string reason) override;
+    void ShutdownHandleDone(std::string reason) override;
     void AbortSimulation(std::string reason) override; 
     void Error(std::string reason) override; 
     

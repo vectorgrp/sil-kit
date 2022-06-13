@@ -59,12 +59,10 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     serviceDiscovery->NotifyServiceCreated(_timeSyncService->GetServiceDescriptor());
 
     _isRunning = true;
-    _lifecycleManagement->InitLifecycleManagement("LifecycleService::ExecuteLifecycle() was called");
-    //ChangeState(ParticipantState::Initialized, "LifecycleService::ExecuteLifecycle() was called");
+    _lifecycleManagement->InitLifecycleManagement("LifecycleService::ExecuteLifecycle() was called.");
     if (!hasCoordinatedSimulationStart)
     {
-        _lifecycleManagement->Run("LifecycleService::ExecuteLifecycle() was called without start coordination");
-        //ChangeState(ParticipantState::Running, "LifecycleService::ExecuteLifecycle() was called without start coordination");
+        _lifecycleManagement->Run("LifecycleService::ExecuteLifecycle() was called without start coordination.");
     }
     return _finalStatePromise.get_future();
 }
@@ -154,35 +152,6 @@ void LifecycleService::Continue()
 void LifecycleService::Stop(std::string reason)
 {
     _lifecycleManagement->Stop(reason);
-    //ChangeState(ParticipantState::Stopping, reason);
-
-    if (_stopHandler)
-    {
-        try
-        {
-            _stopHandler();
-            // The handler can report an error, which overrules the default transition to ParticipantState::Stopped
-            if (State() != ParticipantState::Error)
-            {
-                reason += " and StopHandler completed successfully";
-                _lifecycleManagement->StopHandled(std::move(reason));
-                //ChangeState(ParticipantState::Stopped, std::move(reason));
-            }
-        }
-        catch (const std::exception& e)
-        {
-            reason += " and StopHandler threw exception: ";
-            reason += e.what();
-            _lifecycleManagement->StopHandled(std::move(reason));
-            //ChangeState(ParticipantState::Stopped, std::move(reason));
-        }
-    }
-    else
-    {
-        reason += " and no StopHandler registered";
-        _lifecycleManagement->StopHandled(std::move(reason));
-        //ChangeState(ParticipantState::Stopped, reason);
-    }
 
     if (!_hasCoordinatedSimulationStop) 
     {
@@ -190,71 +159,58 @@ void LifecycleService::Stop(std::string reason)
     }
 }
 
+void LifecycleService::TriggerStopHandle(std::string)
+{
+    if (_stopHandler)
+    {
+        _stopHandler();
+    }
+}
+
 void LifecycleService::Shutdown(std::string reason)
 {
-    _lifecycleManagement->Shutdown(reason);
-    //ChangeState(ParticipantState::ShuttingDown, reason);
-
-    if (_shutdownHandler)
+    auto success = _lifecycleManagement->Shutdown(reason);
+    if (success)
     {
         try
         {
-            _shutdownHandler();
-            reason += " and ShutdownHandler completed";
-            _lifecycleManagement->ShutdownHandled(std::move(reason));
-            //ChangeState(ParticipantState::Shutdown, std::move(reason));
+            _finalStatePromise.set_value(State());
         }
-        catch (const std::exception& e)
+        catch (std::future_error e)
         {
-            reason += " and ShutdownHandler threw exception: ";
-            reason += e.what();
-            _lifecycleManagement->ShutdownHandled(std::move(reason));
-            //ChangeState(ParticipantState::Shutdown, std::move(reason));
+            // NOP - received shutdown multiple times
         }
     }
-    else
-    {
-        reason += " and no ShutdownHandler was registered";
-        _lifecycleManagement->ShutdownHandled(std::move(reason));
-        //ChangeState(ParticipantState::Shutdown, std::move(reason));
-    }
-
-    _finalStatePromise.set_value(State());
 }
+
+void LifecycleService::TriggerShutdownHandle(std::string)
+{
+    if (_shutdownHandler)
+    {
+        _shutdownHandler();
+    }
+}
+
 
 void LifecycleService::Reinitialize(std::string reason)
 {
     _lifecycleManagement->Reinitialize(reason);
-    //ChangeState(ParticipantState::Reinitializing, reason);
 
+    if (!_hasCoordinatedSimulationStart)
+    {
+        _lifecycleManagement->Run("LifecycleService::Reinitialize() was called without start coordination.");
+    }
+}
+
+void LifecycleService::TriggerReinitializeHandle(std::string)
+{
     if (_reinitializeHandler)
     {
-        try
-        {
-            // TODO trigger reinitialize callback on another thread
-            _reinitializeHandler();
-            reason += " and ReinitializeHandler completed";
-            _timeSyncService->ResetTime();
-            _lifecycleManagement->ReinitializeHandled(std::move(reason));
-            //ChangeState(ParticipantState::Initialized, std::move(reason));
-        }
-        catch (const std::exception& e)
-        {
-            reason += " and ReinitializeHandler threw exception: ";
-            reason += e.what();
-            _lifecycleManagement->Error(std::move(reason));
-            //ChangeState(ParticipantState::Error, std::move(reason));
-        }
+        _reinitializeHandler();
+        _timeSyncService->ResetTime();
     }
-    else
-    {
-        reason += " and no ReinitializeHandler was registered";
-        _lifecycleManagement->ReinitializeHandled(std::move(reason));
-        //ChangeState(ParticipantState::Initialized, std::move(reason));
-    }
-
-    _timeSyncService->ResetTime();
 }
+
 auto LifecycleService::State() const -> ParticipantState
 {
     return _status.state;
@@ -271,7 +227,7 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, cons
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
     
-    if ((State() == ParticipantState::Stopped || State() == ParticipantState::Error) && _hasCoordinatedSimulationStop)
+    if (_hasCoordinatedSimulationStop)
     {
         if (command.kind == ParticipantCommand::Kind::Reinitialize)
         {
