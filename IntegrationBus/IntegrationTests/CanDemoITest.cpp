@@ -52,7 +52,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
-      canController->AddFrameTransmitHandler([&](auto, const can::CanFrameTransmitEvent& frameTransmitEvent) {
+      canController->AddFrameTransmitHandler([&, participant](auto, const can::CanFrameTransmitEvent& frameTransmitEvent) {
         if (frameTransmitEvent.status == can::CanTransmitStatus::Transmitted)
         {
           receivedTransmitted = true;
