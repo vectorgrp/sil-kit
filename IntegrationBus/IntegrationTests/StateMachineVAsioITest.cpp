@@ -50,20 +50,30 @@ protected:
     {
         _targetState = state;
         _targetStatePromise = std::promise<void>{};
-        return _targetStatePromise.get_future();
+        auto future = _targetStatePromise.get_future();
+        if (_currentState == state) 
+        {
+            // If we are already in the correct state, we have to set the promise immediately.
+            // This happens if the ParticipantStateHandler is triggered before setting up the 
+            // expectation here.
+            _targetStatePromise.set_value();
+        }
+        return future;
     }
 
     void ParticipantStateHandler(const ParticipantState& state)
     {
         callbacks.ParticipantStateHandler(state);
+        _currentState = state;
 
-        if (state == _targetState)
+        if (_currentState == _targetState)
             _targetStatePromise.set_value();
     }
 
 protected:
     ParticipantState _targetState{ParticipantState::Invalid};
     std::promise<void> _targetStatePromise;
+    ParticipantState _currentState;
 
     Callbacks callbacks;
 };
@@ -71,21 +81,22 @@ protected:
 TEST_F(VAsioNetworkITest, vasio_state_machine)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
-    std::vector<std::string> syncParticipantNames{ "TestUnit" };
+    std::vector<std::string> syncParticipantNames{"TestUnit"};
+
+    ParticipantStatus currentStatus;
 
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(domainId);
 
     // Setup Participant for TestController
-    auto participant =
-        CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController");
-   
+    auto participant = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController");
+
     participant->joinIbDomain(domainId);
     auto systemController = participant->GetSystemController();
     systemController->SetRequiredParticipants(syncParticipantNames);
     auto monitor = participant->GetSystemMonitor();
-    monitor->RegisterParticipantStatusHandler([this](ParticipantStatus status)
-    {
+    monitor->RegisterParticipantStatusHandler([&currentStatus, this](ParticipantStatus status) {
+        currentStatus = status;
         this->ParticipantStateHandler(status.state);
     });
 
@@ -114,17 +125,17 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, StopHandler()).Times(1);
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
 
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid                    )).Times(0);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ControllersCreated         )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitializing  )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitialized   )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ReadyToRun                 )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running                    )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping                   )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped                    )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown               )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown                   )).Times(1);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error                      )).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ControllersCreated)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitializing)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitialized)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ReadyToRun)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ShuttingDown)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Shutdown)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::ControllersCreated);
