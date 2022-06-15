@@ -83,8 +83,6 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
-    ParticipantStatus currentStatus;
-
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(domainId);
 
@@ -95,8 +93,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto systemController = participant->GetSystemController();
     systemController->SetRequiredParticipants(syncParticipantNames);
     auto monitor = participant->GetSystemMonitor();
-    monitor->RegisterParticipantStatusHandler([&currentStatus, this](ParticipantStatus status) {
-        currentStatus = status;
+    monitor->RegisterParticipantStatusHandler([this](ParticipantStatus status) {
         this->ParticipantStateHandler(status.state);
     });
 
