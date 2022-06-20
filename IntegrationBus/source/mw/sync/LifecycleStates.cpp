@@ -1,117 +1,11 @@
-#include "LifecycleFSA.hpp"
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
+
+#include "LifecycleStates.hpp"
+#include "LifecycleManagement.hpp"
 
 namespace ib {
 namespace mw {
 namespace sync {
-
-// LifecycleManagement
-LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleService* parentService)
-    : _parentService(parentService)
-    , _logger(logger)
-{
-    _invalidState = std::make_shared<InvalidState>(this);
-    _controllersCreatedState = std::make_shared<ControllersCreatedState>(this);
-    _communicationInitializingState = std::make_shared<CommunicationInitializingState>(this);
-    _communicationInitializedState = std::make_shared<CommunicationInitializedState>(this);
-    _readyToRunState = std::make_shared<ReadyToRunState>(this);
-    _runningState = std::make_shared<RunningState>(this);
-    _pausedState = std::make_shared<PausedState>(this);
-    _stoppingState = std::make_shared<StoppingState>(this);
-    _stoppedState = std::make_shared<StoppedState>(this);
-    _reinitializingState = std::make_shared<ReinitializingState>(this);
-    _shuttingDownState = std::make_shared<ShuttingDownState>(this);
-    _shutDownState = std::make_shared<ShutdownState>(this);
-    _errorState = std::make_shared<ErrorState>(this);
-
-    _currentState = _invalidState.get();
-}
-
-void LifecycleManagement::SetState(State* state, std::string message)
-{
-    _currentState = state;
-    _parentService->ChangeState(_currentState->GetParticipantState(), std::move(message));
-}
-
-void LifecycleManagement::SetStateError(std::string reason)
-{
-    SetState(GetErrorState(), reason);
-    _currentState->Error(std::move(reason));
-}
-
-State* LifecycleManagement::GetInvalidState()
-{
-    return _invalidState.get();
-}
-
-State* LifecycleManagement::GetOperationalState()
-{
-    return _operationalState.get();
-}
-
-State* LifecycleManagement::GetErrorState()
-{
-    return _errorState.get();
-}
-
-State* LifecycleManagement::GetControllersCreatedState()
-{
-    return _controllersCreatedState.get();
-}
-
-State* LifecycleManagement::GetCommunicationInitializingState()
-{
-    return _communicationInitializingState.get();
-}
-
-State* LifecycleManagement::GetCommunicationInitializedState()
-{
-    return _communicationInitializedState.get();
-}
-
-State* LifecycleManagement::GetReadyToRunState()
-{
-    return _readyToRunState.get();
-}
-
-State* LifecycleManagement::GetRunningState()
-{
-    return _runningState.get();
-}
-
-State* LifecycleManagement::GetPausedState()
-{
-    return _pausedState.get();
-}
-
-State* LifecycleManagement::GetStoppingState()
-{
-    return _stoppingState.get();
-}
-
-State* LifecycleManagement::GetStoppedState()
-{
-    return _stoppedState.get();
-}
-
-State* LifecycleManagement::GetReinitializingState()
-{
-    return _reinitializingState.get();
-}
-
-State* LifecycleManagement::GetShuttingDownState()
-{
-    return _shuttingDownState.get();
-}
-
-State* LifecycleManagement::GetShutdownState()
-{
-    return _shutDownState.get();
-}
-
-logging::ILogger* LifecycleManagement::GetLogger()
-{
-    return _logger;
-}
 
 // State
 void State::RunSimulation(std::string reason)
@@ -134,7 +28,7 @@ void State::StopNotifyUser(std::string reason)
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::StopHandleDone(std::string reason)
+void State::StopHandlerDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
@@ -154,27 +48,27 @@ void State::ShutdownNotifyUser(std::string reason)
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::ShutdownHandleDone(std::string reason)
+void State::ShutdownHandlerDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
 void State::AbortSimulation(std::string reason)
 {
-    _context->SetState(_context->GetStoppedState(), reason);
-    _context->Shutdown(std::move(reason)); // Separate "Aborted" State?
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), reason);
+    _lifecycleManager->Shutdown(std::move(reason));
 }
 
 void State::Error(std::string reason)
 {
-    _context->SetStateError(std::move(reason));
+    _lifecycleManager->SetStateError(std::move(reason));
 }
 
 void State::NewSystemState(SystemState systemState)
 {
     std::stringstream ss;
     ss << toString() << " received new systemState '" << systemState << "'";
-    _context->GetLogger()->Info(ss.str());
+    _lifecycleManager->GetLogger()->Info(ss.str());
 }
 
 void State::InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason)
@@ -187,11 +81,11 @@ void State::InvalidStateTransition(std::string transitionName, bool triggerError
 
     if (triggerErrorState)
     {
-        _context->Error(ss.str());
+        _lifecycleManager->Error(ss.str());
     }
     else
     {
-        _context->GetLogger()->Warn(ss.str());
+        _lifecycleManager->GetLogger()->Warn(ss.str());
     }
 }
 
@@ -213,27 +107,26 @@ auto InvalidState::GetParticipantState() -> ParticipantState
     return ParticipantState::Invalid;
 }
 
-
 // ControllersCreatedState
-void ControllersCreatedState::NewSystemState(SystemState systemState)
+void ServicesCreatedState::NewSystemState(SystemState systemState)
 {
-    if (IsAnyOf(systemState, {SystemState::ControllersCreated, SystemState::CommunicationInitializing,
+    if (IsAnyOf(systemState, {SystemState::ServicesCreated, SystemState::CommunicationInitializing,
                               SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
     {
         std::stringstream ss;
-        ss << "New SystemState '" << systemState << "' received" << std::endl;
-        _context->SetState(_context->GetCommunicationInitializingState(), ss.str());
+        ss << "New SystemState '" << systemState << "' received";
+        _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializingState(), ss.str());
     }
 }
 
-auto ControllersCreatedState::toString() -> std::string
+auto ServicesCreatedState::toString() -> std::string
 {
-    return "ControllersCreated";
+    return "ServicesCreated";
 }
 
-auto ControllersCreatedState::GetParticipantState() -> ParticipantState
+auto ServicesCreatedState::GetParticipantState() -> ParticipantState
 {
-    return ParticipantState::ControllersCreated;
+    return ParticipantState::ServicesCreated;
 }
 
 // CommunicationInitializingState
@@ -247,11 +140,11 @@ void CommunicationInitializingState::NewSystemState(SystemState systemState)
         // 2. TODO await all queued futures
         std::stringstream ss;
         ss << "New SystemState '" << systemState << "' received" << std::endl;
-        _context->SetState(_context->GetCommunicationInitializedState(), ss.str());
+        _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), ss.str());
     }
     else
     {
-        _context->GetLogger()->Warn("Received illegal new system state in state '{}'", this->toString());
+        _lifecycleManager->GetLogger()->Warn("Received illegal new system state in state '{}'", this->toString());
     }
 }
 
@@ -268,13 +161,12 @@ auto CommunicationInitializingState::GetParticipantState() -> ParticipantState
 // CommunicationInitializedState
 void CommunicationInitializedState::NewSystemState(SystemState systemState)
 {
-    if (IsAnyOf(systemState, {SystemState::CommunicationInitialized,
-                              SystemState::ReadyToRun, SystemState::Running}))
+    if (IsAnyOf(systemState, {SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
     {
         std::stringstream ss;
-        ss << "New SystemState '" << systemState << "' received" << std::endl;
+        ss << "New SystemState '" << systemState << "' received";
         // Next state is set by context (Error or Initialized)
-        _context->HandleCommunicationReady(ss.str());
+        _lifecycleManager->HandleCommunicationReady(ss.str());
     }
 }
 
@@ -297,10 +189,9 @@ void ReadyToRunState::NewSystemState(SystemState systemState)
         if (_receivedRunCommand)
         {
             std::stringstream ss;
-            ss << "Received SystemCommand::Run and SystemState::" << systemState << std::endl;
+            ss << "Received SystemCommand::Run and SystemState::" << systemState;
             _receivedRunCommand = false;
-            _context->SetState(_context->GetRunningState(), ss.str());
-
+            _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), ss.str());
         }
         else
         {
@@ -318,7 +209,7 @@ void ReadyToRunState::RunSimulation(std::string reason)
     if (_isSystemReadyToRun)
     {
         _isSystemReadyToRun = false;
-        _context->SetState(_context->GetRunningState(), std::move(reason));
+        _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), std::move(reason));
         return;
     }
     else
@@ -353,7 +244,7 @@ void RunningState::RunSimulation(std::string reason)
 
 void RunningState::PauseSimulation(std::string reason)
 {
-    _context->SetState(_context->GetPausedState(), std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetPausedState(), std::move(reason));
 }
 
 void RunningState::ContinueSimulation(std::string reason)
@@ -363,9 +254,9 @@ void RunningState::ContinueSimulation(std::string reason)
 
 void RunningState::StopNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetStoppingState(), reason);
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), reason);
     // Context will set next state
-    _context->HandleStop(std::move(reason));
+    _lifecycleManager->HandleStop(std::move(reason));
 }
 
 auto RunningState::toString() -> std::string
@@ -386,14 +277,14 @@ void PausedState::PauseSimulation(std::string reason)
 
 void PausedState::ContinueSimulation(std::string reason)
 {
-    _context->SetState(_context->GetRunningState(), std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), std::move(reason));
 }
 
 void PausedState::StopNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetStoppingState(), std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), std::move(reason));
     // Context will set next state
-    _context->HandleStop(std::move(reason));
+    _lifecycleManager->HandleStop(std::move(reason));
 }
 
 auto PausedState::toString() -> std::string
@@ -413,13 +304,13 @@ void StoppingState::StopNotifyUser(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void StoppingState::StopHandleDone(std::string reason)
+void StoppingState::StopHandlerDone(std::string reason)
 {
-    _context->SetState(_context->GetStoppedState(), std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), std::move(reason));
     if (_abortRequested)
     {
         _abortRequested = false;
-        _context->Shutdown("Received SystemCommand::AbortSimulation during callback.");
+        _lifecycleManager->Shutdown("Received SystemCommand::AbortSimulation during callback.");
     }
 }
 
@@ -445,27 +336,27 @@ void StoppedState::StopNotifyUser(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void StoppedState::StopHandleDone(std::string reason)
+void StoppedState::StopHandlerDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void StoppedState::ReinitializeNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetReinitializingState(), reason);
+    _lifecycleManager->SetState(_lifecycleManager->GetReinitializingState(), reason);
     // Context will set next state
-    _context->HandleReinitialize(std::move(reason));
+    _lifecycleManager->HandleReinitialize(std::move(reason));
 }
 
 void StoppedState::ShutdownNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetShuttingDownState(), reason);
-    _context->HandleShutdown(std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), reason);
+    _lifecycleManager->HandleShutdown(std::move(reason));
 }
 
 void StoppedState::AbortSimulation(std::string reason)
 {
-    _context->Shutdown(std::move(reason)); // Separate "Aborted" State?
+    _lifecycleManager->Shutdown(std::move(reason));
 }
 
 auto StoppedState::toString() -> std::string
@@ -488,13 +379,13 @@ void ReinitializingState::ReinitializeHandleDone(std::string reason)
 {
     if (_abortRequested)
     {
-        _context->SetState(_context->GetStoppedState(), std::move(reason));
+        _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), std::move(reason));
         _abortRequested = false;
-        _context->Shutdown("Received SystemCommand::AbortSimulation during callback.");
+        _lifecycleManager->Shutdown("Received SystemCommand::AbortSimulation during callback.");
     }
     else
     {
-        _context->SetState(_context->GetControllersCreatedState(), std::move(reason));
+        _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
     }
 }
 
@@ -520,9 +411,9 @@ void ShuttingDownState::ShutdownNotifyUser(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ShuttingDownState::ShutdownHandleDone(std::string reason)
+void ShuttingDownState::ShutdownHandlerDone(std::string reason)
 {
-    _context->SetState(_context->GetShutdownState(), std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetShutdownState(), std::move(reason));
 }
 
 void ShuttingDownState::AbortSimulation(std::string reason)
@@ -546,7 +437,7 @@ void ShutdownState::ShutdownNotifyUser(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ShutdownState::ShutdownHandleDone(std::string reason)
+void ShutdownState::ShutdownHandlerDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
@@ -569,39 +460,33 @@ auto ShutdownState::GetParticipantState() -> ParticipantState
 // ErrorState
 void ErrorState::RunSimulation(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void ErrorState::PauseSimulation(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void ErrorState::ContinueSimulation(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void ErrorState::StopNotifyUser(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ErrorState::StopHandleDone(std::string reason)
+void ErrorState::StopHandlerDone(std::string reason)
 {
-    // TODO think about error recovery
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void ErrorState::ReinitializeNotifyUser(std::string reason)
 {
-    // TODO think about error recovery
-    _context->SetState(_context->GetReinitializingState(), std::move(reason));
-    _context->HandleReinitialize(std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetReinitializingState(), std::move(reason));
+    _lifecycleManager->HandleReinitialize(std::move(reason));
 }
 
 void ErrorState::ReinitializeHandleDone(std::string reason)
@@ -611,23 +496,24 @@ void ErrorState::ReinitializeHandleDone(std::string reason)
 
 void ErrorState::ShutdownNotifyUser(std::string reason)
 {
-    _context->SetState(_context->GetShuttingDownState(), std::move(reason));
-    _context->HandleShutdown(std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), std::move(reason));
+    _lifecycleManager->HandleShutdown(std::move(reason));
 }
 
-void ErrorState::ShutdownHandleDone(std::string reason)
+void ErrorState::ShutdownHandlerDone(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
 void ErrorState::AbortSimulation(std::string reason)
 {
-    _context->Shutdown(std::move(reason));
+    _lifecycleManager->Shutdown(std::move(reason));
 }
 
 void ErrorState::Error(std::string reason)
 {
-    _context->GetLogger()->Warn("Received error transition within error state. Original reason: " + std::move(reason));
+    _lifecycleManager->GetLogger()->Warn("Received error transition within error state. Original reason: "
+                                         + std::move(reason));
 }
 
 auto ErrorState::toString() -> std::string
@@ -639,6 +525,7 @@ auto ErrorState::GetParticipantState() -> ParticipantState
 {
     return ParticipantState::Error;
 }
+
 
 } // namespace sync
 } // namespace mw

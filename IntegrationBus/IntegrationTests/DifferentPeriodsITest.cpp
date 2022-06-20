@@ -166,7 +166,7 @@ public:
 private:
     void OnSystemStateChanged(SystemState newState)
     {
-        if (newState == SystemState::ControllersCreated)
+        if (newState == SystemState::ServicesCreated)
         {
             InitializeAllParticipants();
         }

@@ -58,7 +58,7 @@ public:
     {
         switch (newState)
         {
-        case SystemState::ControllersCreated:
+        case SystemState::ServicesCreated:
             InitializeAllParticipants();
             return;
         case SystemState::ReadyToRun:

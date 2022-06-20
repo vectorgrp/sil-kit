@@ -114,24 +114,24 @@ TEST_F(SystemMonitorTest, init_with_state_invalid)
 TEST_F(SystemMonitorTest, detect_system_controllers_created)
 {
     RegisterSystemHandler();
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ControllersCreated)).Times(1);
+    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ServicesCreated)).Times(1);
 
-    SetParticipantStatus(1, ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ControllersCreated);
+    SetParticipantStatus(1, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ServicesCreated);
 
-    SetParticipantStatus(2, ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::ControllersCreated);
+    SetParticipantStatus(2, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::ServicesCreated);
 
-    SetParticipantStatus(3, ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::ControllersCreated);
+    SetParticipantStatus(3, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::ServicesCreated);
 
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
 TEST_F(SystemMonitorTest, detect_system_communication_initializing)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
 
     RegisterSystemHandler();
 
@@ -139,11 +139,11 @@ TEST_F(SystemMonitorTest, detect_system_communication_initializing)
         .Times(1);
     SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::CommunicationInitializing);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     SetParticipantStatus(2, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::CommunicationInitializing);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     SetParticipantStatus(3, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::CommunicationInitializing);
@@ -153,7 +153,7 @@ TEST_F(SystemMonitorTest, detect_system_communication_initializing)
 
 TEST_F(SystemMonitorTest, detect_system_communication_initialized)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
 
     RegisterSystemHandler();
@@ -176,7 +176,7 @@ TEST_F(SystemMonitorTest, detect_system_communication_initialized)
 
 TEST_F(SystemMonitorTest, detect_system_readyToRun)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitialized);
@@ -201,7 +201,7 @@ TEST_F(SystemMonitorTest, detect_system_readyToRun)
 
 TEST_F(SystemMonitorTest, detect_system_running)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -228,7 +228,7 @@ TEST_F(SystemMonitorTest, detect_system_running)
 
 TEST_F(SystemMonitorTest, detect_system_pause)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -254,7 +254,7 @@ TEST_F(SystemMonitorTest, detect_system_pause)
 
 TEST_F(SystemMonitorTest, detect_multiple_paused_clients)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -289,7 +289,7 @@ TEST_F(SystemMonitorTest, detect_multiple_paused_clients)
 // TODO does not make sense
 TEST_F(SystemMonitorTest, DISABLED_detect_system_stopping)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -308,7 +308,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_system_stopping)
 
 TEST_F(SystemMonitorTest, detect_system_stopped)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -350,7 +350,7 @@ TEST_F(SystemMonitorTest, detect_system_stopped)
 // TODO clarify, what should happen here
 TEST_F(SystemMonitorTest, DISABLED_detect_reinitializing_after_stopped)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -370,14 +370,14 @@ TEST_F(SystemMonitorTest, DISABLED_detect_reinitializing_after_stopped)
 
 TEST_F(SystemMonitorTest, detect_controllers_com_initialized_after_stopped)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
     SetAllParticipantStates(ParticipantState::Running);
     SetAllParticipantStates(ParticipantState::Stopped);
     SetAllParticipantStates(ParticipantState::Reinitializing);
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitialized);
@@ -403,7 +403,7 @@ TEST_F(SystemMonitorTest, detect_controllers_com_initialized_after_stopped)
 
 TEST_F(SystemMonitorTest, detect_shuttingdown)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -425,7 +425,7 @@ TEST_F(SystemMonitorTest, detect_shuttingdown)
 
 TEST_F(SystemMonitorTest, detect_shutdown)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -456,8 +456,8 @@ TEST_F(SystemMonitorTest, detect_shutdown)
 
 TEST_F(SystemMonitorTest, detect_error_from_controllers_created)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     RegisterSystemHandler();
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Error))
@@ -472,7 +472,7 @@ TEST_F(SystemMonitorTest, detect_error_from_controllers_created)
 
 TEST_F(SystemMonitorTest, detect_error_from_initializing)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitialized);
@@ -490,7 +490,7 @@ TEST_F(SystemMonitorTest, detect_error_from_initializing)
 
 TEST_F(SystemMonitorTest, detect_error_from_initialized)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -509,7 +509,7 @@ TEST_F(SystemMonitorTest, detect_error_from_initialized)
 
 TEST_F(SystemMonitorTest, detect_error_from_running)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -529,7 +529,7 @@ TEST_F(SystemMonitorTest, detect_error_from_running)
 
 TEST_F(SystemMonitorTest, detect_error_from_paused)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -553,7 +553,7 @@ TEST_F(SystemMonitorTest, detect_error_from_paused)
 
 TEST_F(SystemMonitorTest, detect_error_from_stopping)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -577,7 +577,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopping)
 
 TEST_F(SystemMonitorTest, detect_error_from_stopped)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -598,7 +598,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopped)
 
 TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
     SetAllParticipantStates(ParticipantState::ReadyToRun);
@@ -637,8 +637,8 @@ TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
 // TODO clarify, what should happen here
 TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_error)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     SetParticipantStatus(1, ParticipantState::Error);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
@@ -652,17 +652,17 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_error)
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Reinitializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::Reinitializing);
 
-    SetParticipantStatus(1, ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    SetParticipantStatus(1, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
 TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
 {
-    SetAllParticipantStates(ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    SetAllParticipantStates(ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     SetParticipantStatus(1, ParticipantState::Error);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Error);
@@ -691,7 +691,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_invalid)
     // as the whole system is not idle yet. The SystemMonitor must be able to recover
     // from such erroneous state transitions.
 
-    SetParticipantStatus(1, ParticipantState::ControllersCreated);
+    SetParticipantStatus(1, ParticipantState::ServicesCreated);
     SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
 
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
@@ -700,8 +700,8 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_invalid)
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitializing))
         .Times(1);
 
-    SetParticipantStatus(2, ParticipantState::ControllersCreated);
-    SetParticipantStatus(3, ParticipantState::ControllersCreated);
+    SetParticipantStatus(2, ParticipantState::ServicesCreated);
+    SetParticipantStatus(3, ParticipantState::ServicesCreated);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitializing);
 }
 
@@ -710,13 +710,13 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initialized_after_invalid)
 {
     // Test that the monitor recovers from seemingly erroneous state transitions.
 
-    SetParticipantStatus(1, ParticipantState::ControllersCreated);
+    SetParticipantStatus(1, ParticipantState::ServicesCreated);
     SetParticipantStatus(1, ParticipantState::CommunicationInitializing);
     SetParticipantStatus(1, ParticipantState::CommunicationInitialized);
     SetParticipantStatus(1, ParticipantState::ReadyToRun);
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
 
-    SetParticipantStatus(2, ParticipantState::ControllersCreated);
+    SetParticipantStatus(2, ParticipantState::ServicesCreated);
     SetParticipantStatus(2, ParticipantState::CommunicationInitializing);
     SetParticipantStatus(2, ParticipantState::CommunicationInitialized);
     SetParticipantStatus(2, ParticipantState::ReadyToRun);
@@ -728,8 +728,8 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initialized_after_invalid)
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::CommunicationInitialized))
         .Times(1);
 
-    SetParticipantStatus(3, ParticipantState::ControllersCreated);
-    EXPECT_EQ(monitor.SystemState(), SystemState::ControllersCreated);
+    SetParticipantStatus(3, ParticipantState::ServicesCreated);
+    EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
 
     SetParticipantStatus(3, ParticipantState::CommunicationInitializing);
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitializing);

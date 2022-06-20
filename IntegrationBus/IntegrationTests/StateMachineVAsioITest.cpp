@@ -123,7 +123,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
 
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Invalid)).Times(0);
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ControllersCreated)).Times(1);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ServicesCreated)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitializing)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitialized)).Times(1);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ReadyToRun)).Times(1);
@@ -135,7 +135,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Error)).Times(0);
 
     // Perform the actual test
-    auto stateReached = SetTargetState(ParticipantState::ControllersCreated);
+    auto stateReached = SetTargetState(ParticipantState::ServicesCreated);
     auto finalState = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 

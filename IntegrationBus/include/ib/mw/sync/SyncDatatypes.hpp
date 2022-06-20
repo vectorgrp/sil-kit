@@ -46,7 +46,7 @@ struct SystemCommand
 // note: always increase number (never reuse old ones!)
 enum class ParticipantState : uint8_t {
     Invalid = 0, //!< An invalid participant state
-    ControllersCreated = 10, //!< The controllers created state
+    ServicesCreated = 10, //!< The controllers created state
     CommunicationInitializing = 20, //!< The communication initializing state
     CommunicationInitialized = 30, //!< The communication initialized state
     ReadyToRun = 40, //!< The initialized state
@@ -77,7 +77,7 @@ struct ParticipantStatus
 // note: always increase number (never reuse old ones!)
 enum class SystemState : uint8_t {
     Invalid = 0, //!< An invalid system state
-    ControllersCreated = 10, //!< The controllers created state
+    ServicesCreated = 10, //!< The controllers created state
     CommunicationInitializing = 20, //!< The communication initializing state
     CommunicationInitialized = 30, //!< The communication initialized state
     ReadyToRun = 40, //!< The initialized state

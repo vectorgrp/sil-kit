@@ -106,7 +106,7 @@ struct DistributedTimeQuantumPolicy : ParticipantController::ITimeSyncPolicy
         switch (_controller.State())
         {
         case ParticipantState::Invalid:      // [[fallthrough]]
-        case ParticipantState::ControllersCreated:         // [[fallthrough]]
+        case ParticipantState::ServicesCreated:         // [[fallthrough]]
         case ParticipantState::CommunicationReady: // [[fallthrough]]
         case ParticipantState::ReadyToRun:
             return;
@@ -346,7 +346,7 @@ auto ParticipantController::RunAsync() -> std::future<ParticipantState>
     }
 
     _isRunning = true;
-    ChangeState(ParticipantState::ControllersCreated, "ParticipantController::Run() was called");
+    ChangeState(ParticipantState::ServicesCreated, "ParticipantController::Run() was called");
     return _finalStatePromise.get_future();
 }
 
@@ -600,7 +600,7 @@ void ParticipantController::ReceiveIbMessage(const IIbServiceEndpoint* from, con
     // we cannot flush this change from the SystemController's history because
     // this could happen before the command has been received by the participant,
     // thus missing the command.
-    if (command.kind == SystemCommand::Kind::ExecuteColdswap && (State() == ParticipantState::Invalid || State() == ParticipantState::ControllersCreated))
+    if (command.kind == SystemCommand::Kind::ExecuteColdswap && (State() == ParticipantState::Invalid || State() == ParticipantState::ServicesCreated))
     {
         return;
     }

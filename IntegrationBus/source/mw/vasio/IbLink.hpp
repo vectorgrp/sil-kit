@@ -93,6 +93,9 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, con
 template <class MsgT>
 void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
 {
+    // NB: Messages must be dispatched to remote receivers first. 
+    // Otherwise, messages that may be produced during the internal dispatch will be dispatched to remote receivers first.
+    // As a result, the messages may be delivered in the wrong order (possibly even reversed)
     DispatchIbMessage(&_vasioTransmitter, from, msg);
     for (auto&& receiver : _localReceivers)
     {

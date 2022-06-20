@@ -262,7 +262,7 @@ void SystemStateHandler(ISystemController* controller, SystemState newState, con
 {
     switch (newState)
     {
-    case SystemState::ControllersCreated:
+    case SystemState::ServicesCreated:
         for (auto&& name : expectedParticipants)
         {
             controller->Initialize(name);

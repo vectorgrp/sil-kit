@@ -45,8 +45,8 @@ std::string to_string(ParticipantState state)
     {
     case ParticipantState::Invalid:
         return "Invalid";
-    case ParticipantState::ControllersCreated:
-        return "ControllersCreated";
+    case ParticipantState::ServicesCreated:
+        return "ServicesCreated";
     case ParticipantState::CommunicationInitializing:
         return "CommunicationInitializing";
     case ParticipantState::CommunicationInitialized:
@@ -87,8 +87,8 @@ std::string to_string(SystemState state)
     {
     case SystemState::Invalid:
         return "Invalid";
-    case SystemState::ControllersCreated:
-        return "ControllersCreated";
+    case SystemState::ServicesCreated:
+        return "ServicesCreated";
     case SystemState::CommunicationInitializing:
         return "CommunicationInitializing";
     case SystemState::CommunicationInitialized:

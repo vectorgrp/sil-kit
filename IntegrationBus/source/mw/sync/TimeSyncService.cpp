@@ -125,7 +125,7 @@ public:
         switch (_controller.State())
         {
         case ParticipantState::Invalid: // [[fallthrough]]
-        case ParticipantState::ControllersCreated: // [[fallthrough]]
+        case ParticipantState::ServicesCreated: // [[fallthrough]]
         case ParticipantState::CommunicationInitializing: // [[fallthrough]]
         case ParticipantState::CommunicationInitialized: // [[fallthrough]]
         case ParticipantState::ReadyToRun: return;
@@ -237,7 +237,6 @@ TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleSer
     _timeProvider = std::make_shared<ParticipantTimeProvider>();
     _timeConfiguration = std::make_shared<TimeConfiguration>();
 
-    //std::function<void(ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor&)>;
     participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const ServiceDescriptor& descriptor) {
         if (descriptor.GetServiceType() == ServiceType::InternalController)
         {
@@ -278,7 +277,7 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
 
 
 // TODO improve
-// TODO limitation: currently assumes that all expected participants are also synchronized - needs to be fixed upon time concept overhaul
+// TODO FIXME limitation: currently assumes that all expected participants are also synchronized - needs to be fixed upon time concept overhaul
 void TimeSyncService::AddExpectedParticipants(const ExpectedParticipants& expectedParticipants)
 {
     _expectedParticipants = expectedParticipants;
@@ -359,7 +358,6 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
 
 void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
-    // TODO FIXME VIB-551
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
 

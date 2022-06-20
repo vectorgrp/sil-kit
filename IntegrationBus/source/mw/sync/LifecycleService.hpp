@@ -79,10 +79,10 @@ public:
 
 
 public:
-    void TriggerCommunicationReadyHandle(std::string reason);
+    void TriggerCommunicationReadyHandler(std::string reason);
     void TriggerReinitializeHandle(std::string reason);
-    void TriggerStopHandle(std::string reason);
-    void TriggerShutdownHandle(std::string reason);
+    void TriggerStopHandler(std::string reason);
+    void TriggerShutdownHandler(std::string reason);
 
     void ChangeState(ParticipantState newState, std::string reason);
 

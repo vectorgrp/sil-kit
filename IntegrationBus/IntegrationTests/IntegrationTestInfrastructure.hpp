@@ -69,7 +69,7 @@ private:
         _systemMaster.systemMonitor->RegisterSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
             switch (newState)
             {
-            case SystemState::ControllersCreated:
+            case SystemState::ServicesCreated:
                 for (auto&& name : requiredParticipantNames)
                 {
                     _systemMaster.systemController->Initialize(name);

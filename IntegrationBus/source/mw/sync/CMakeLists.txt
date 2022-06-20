@@ -1,7 +1,10 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbMwSync
-    LifecycleFSA.hpp
-    LifecycleFSA.cpp
+    ILifecycleStates.hpp
+    LifecycleManagement.hpp
+    LifecycleManagement.cpp
+    LifecycleStates.hpp
+    LifecycleStates.cpp
     LifecycleService.hpp
     LifecycleService.cpp
     SyncDatatypeUtils.hpp

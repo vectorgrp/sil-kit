@@ -71,7 +71,7 @@ public:
         //std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
-        case ib::mw::sync::SystemState::ControllersCreated:
+        case ib::mw::sync::SystemState::ServicesCreated:
             InitializeAll();
             return;
         case ib::mw::sync::SystemState::ReadyToRun:

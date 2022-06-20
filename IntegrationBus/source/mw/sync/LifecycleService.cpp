@@ -3,7 +3,7 @@
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
-#include "LifecycleFSA.hpp"
+#include "LifecycleManagement.hpp"
 
 #include <cassert>
 #include <future>
@@ -66,7 +66,7 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
 
     // Publish services
     auto serviceDiscovery = _participant->GetServiceDiscovery();
-    serviceDiscovery->NotifyServiceCreated(GetServiceDescriptor());
+    serviceDiscovery->NotifyServiceCreated(_serviceDescriptor);
     serviceDiscovery->NotifyServiceCreated(_timeSyncService->GetServiceDescriptor());
 
     _participant->GetSystemMonitor()->RegisterSystemStateHandler([&](auto systemState) {
@@ -74,12 +74,12 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     });
 
     _isRunning = true;
-    _lifecycleManagement->InitLifecycleManagement("LifecycleService::ExecuteLifecycle() was called.");
+    _lifecycleManagement->InitLifecycleManagement("LifecycleService::ExecuteLifecycle... was called.");
     if (!hasCoordinatedSimulationStart)
     {
         // Skip state guarantees if start is uncoordinated
         _lifecycleManagement->SkipSetupPhase(
-            "LifecycleService::ExecuteLifecycle() was called without start coordination.");
+            "LifecycleService::ExecuteLifecycle... was called without start coordination.");
     }
     return _finalStatePromise.get_future();
 }
@@ -137,9 +137,8 @@ void LifecycleService::ReportError(std::string errorMsg)
                       "transition to ParticipantState::Error is ignored.");
         return;
     }
-    // TODO error message lost
+
     _lifecycleManagement->Error(std::move(errorMsg));
-    //ChangeState(ParticipantState::Error, std::move(errorMsg));
 }
 
 void LifecycleService::Pause(std::string reason)
@@ -154,7 +153,6 @@ void LifecycleService::Pause(std::string reason)
     _pauseDonePromise = decltype(_pauseDonePromise){};
     _timeSyncService->SetPaused(_pauseDonePromise.get_future());
     _lifecycleManagement->Pause(reason);
-    //ChangeState(ParticipantState::Paused, std::move(reason));
 }
 
 void LifecycleService::Continue()
@@ -168,7 +166,6 @@ void LifecycleService::Continue()
     }
 
     _lifecycleManagement->Continue("Pause finished");
-    //ChangeState(ParticipantState::Running, "Pause finished");
     _pauseDonePromise.set_value();
 }
 
@@ -182,7 +179,7 @@ void LifecycleService::Stop(std::string reason)
     }
 }
 
-void LifecycleService::TriggerStopHandle(std::string)
+void LifecycleService::TriggerStopHandler(std::string)
 {
     if (_stopHandler)
     {
@@ -204,9 +201,14 @@ void LifecycleService::Shutdown(std::string reason)
             // NOP - received shutdown multiple times
         }
     }
+    else
+    {
+        _logger->Warn("lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
+                      std::move(reason));
+    }
 }
 
-void LifecycleService::TriggerShutdownHandle(std::string)
+void LifecycleService::TriggerShutdownHandler(std::string)
 {
     if (_shutdownHandler)
     {
@@ -225,7 +227,7 @@ void LifecycleService::Reinitialize(std::string reason)
     }
 }
 
-void LifecycleService::TriggerCommunicationReadyHandle(std::string)
+void LifecycleService::TriggerCommunicationReadyHandler(std::string)
 {
     if (_commReadyHandler)
     {
@@ -270,7 +272,6 @@ auto LifecycleService::Status() const -> const ParticipantStatus&
 
 void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
-    // TODO FIXME VIB-551
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
     
@@ -320,7 +321,6 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
         else
         {
             _lifecycleManagement->Run("Received SystemCommand::Run");
-            //ChangeState(ParticipantState::Running, "Received SystemCommand::Run");
             return;
         }
         break;
@@ -333,7 +333,6 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
                 "Received SystemCommand::Stop, but ignored it because coordinatedSimulationStop was not set.");
             return;
         }
-        //_logger->Warn("Ignored the received SystemCommand::Stop, because the participant state is already ParticipantState::Stopped");
         Stop("Received SystemCommand::Stop");
         return;
 
@@ -345,7 +344,7 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
         AbortSimulation("Received SystemCommand::AbortSimulation");
         return;
 
-        // TODO Remove below ASAP
+    // TODO Remove legacy code (VIB-790)
     case SystemCommand::Kind::PrepareColdswap: 
     case SystemCommand::Kind::ExecuteColdswap: 
     default: break;
@@ -364,7 +363,7 @@ void LifecycleService::ChangeState(ParticipantState newState, std::string reason
     _status.refreshTime = _status.enterTime;
 
     std::stringstream ss;
-    ss << "New ParticipantState: " << newState << "; reason: " << _status.enterReason << std::endl;
+    ss << "New ParticipantState: " << newState << "; reason: " << _status.enterReason;
     _logger->Info(ss.str());
 
     SendIbMessage(_status);

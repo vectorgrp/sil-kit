@@ -231,12 +231,12 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
     // TODO needs to be fixed
     switch (newStatus.state)
     {
-    case sync::ParticipantState::ControllersCreated:
+    case sync::ParticipantState::ServicesCreated:
         if (is_any_of(oldState, {sync::ParticipantState::Invalid, sync::ParticipantState::Reinitializing}))
             return;
 
     case sync::ParticipantState::CommunicationInitializing:
-        if (is_any_of(oldState, {sync::ParticipantState::ControllersCreated}))
+        if (is_any_of(oldState, {sync::ParticipantState::ServicesCreated}))
             return;
 
     case sync::ParticipantState::CommunicationInitialized:
@@ -306,15 +306,15 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
 {
     switch (newStatus.state)
     {
-    case sync::ParticipantState::ControllersCreated:
+    case sync::ParticipantState::ServicesCreated:
         //TODO fixme! requiredState?!
-        if (AllParticipantsInState({sync::ParticipantState::ControllersCreated,
+        if (AllParticipantsInState({sync::ParticipantState::ServicesCreated,
                                     sync::ParticipantState::CommunicationInitializing,
                                     sync::ParticipantState::CommunicationInitialized,
                                     sync::ParticipantState::ReadyToRun, 
                                     sync::ParticipantState::Running}))
         {
-            SetSystemState(sync::SystemState::ControllersCreated);
+            SetSystemState(sync::SystemState::ServicesCreated);
         }
         return;
         // TODO FIXME
@@ -368,7 +368,7 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
 
     // TODO double check this behavior!
     case sync::ParticipantState::ShuttingDown:
-        if (AllParticipantsInState({sync::ParticipantState::ShuttingDown, sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::ControllersCreated, sync::ParticipantState::ReadyToRun}))
+        if (AllParticipantsInState({sync::ParticipantState::ShuttingDown, sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::ServicesCreated, sync::ParticipantState::ReadyToRun}))
             SetSystemState(sync::SystemState::ShuttingDown);
         return;
 
