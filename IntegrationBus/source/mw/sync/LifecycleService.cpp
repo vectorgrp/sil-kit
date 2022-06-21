@@ -196,7 +196,7 @@ void LifecycleService::Shutdown(std::string reason)
         {
             _finalStatePromise.set_value(State());
         }
-        catch (std::future_error e)
+        catch (const std::future_error&)
         {
             // NOP - received shutdown multiple times
         }
@@ -253,7 +253,7 @@ void LifecycleService::AbortSimulation(std::string reason)
         {
             _finalStatePromise.set_value(State());
         }
-        catch (std::future_error e)
+        catch (const std::future_error&)
         {
             // NOP - received shutdown multiple times
         }
