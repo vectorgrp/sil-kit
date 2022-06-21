@@ -111,11 +111,9 @@ typedef ib_ReturnCode (*ib_Participant_Destroy_t)(ib_Participant* participant);
 /*! \brief  The handler to be called on initialization
  *
  * \param context The user provided context passed in \ref ib_Participant_SetInitHandler
- * \param participant The simulation participant receiving the (re-)initialization command
- * \param command The \ref ib_ParticipantCommand that triggered the initialization
+ * \param participant The simulation participant entering the initialized state
  */
-typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* participant,
-    ib_ParticipantCommand* command);
+typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* participant);
 /*! \brief Register a callback to perform initialization
  *
  * The handler is called when an \ref ib_ParticipantCommand_Kind_Initialize

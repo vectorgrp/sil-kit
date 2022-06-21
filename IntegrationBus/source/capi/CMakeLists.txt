@@ -4,7 +4,6 @@ add_vib_test(TestCapiEthernet SOURCES CapiEthernetTest.cpp LIBS IbSimEthernet Ib
 add_vib_test(TestCapiFlexray SOURCES CapiFlexrayTest.cpp LIBS IbSimFlexray IbMwMockParticipant IntegrationBus)
 add_vib_test(TestCapiData SOURCES CapiDataTest.cpp LIBS IbMwMockParticipant IntegrationBus)
 add_vib_test(TestCapiRpc SOURCES CapiRpcTest.cpp LIBS IbSimRpc IbMwMockParticipant IntegrationBus)
-
 add_vib_test(TestCapiLogger SOURCES CapiLoggerTest.cpp LIBS IbMwLogging IntegrationBus)
 
 add_vib_test(TestCapiIntegrationBus SOURCES CapiIntegrationBusTest.cpp LIBS IbMwMockParticipant IntegrationBus)

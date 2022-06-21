@@ -13,6 +13,8 @@
 
 namespace {
     using namespace ib::mw::sync;
+    using testing::Return;
+    using testing::ByMove;
     using ib::mw::test::DummyParticipant;
 
     void Create_StringList(ib_StringList** outStringList, const char** strings, uint32_t numStrings)
@@ -57,8 +59,7 @@ namespace {
 
 	};
 
-    void InitCallback(void* /*context*/, ib_Participant* /*participant*/,
-        ib_ParticipantCommand* /*command*/) {}
+    void InitCallback(void* /*context*/, ib_Participant* /*participant*/) {}
     void StopCallback(void* /*context*/, ib_Participant* /*participant*/) {}
     void ShutdownCallback(void* /*context*/, ib_Participant* /*participant*/) {}
     void SystemStateHandler(void* /*context*/, ib_Participant* /*participant*/, ib_SystemState /*state*/) {}
@@ -201,27 +202,63 @@ namespace {
         // required for MockSystemMonitor::ParticipantStatus
         testing::DefaultValue<const ib::mw::sync::ParticipantStatus&>::Set(ib::mw::sync::ParticipantStatus());
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, SetInitHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Participant_SetInitHandler((ib_Participant*)&mockParticipant, NULL, &InitCallback);
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            SetCommunicationReadyHandler(testing::_)
+        ).Times(testing::Exactly(1));
+
+        returnCode = ib_Participant_SetInitHandler(
+            (ib_Participant*)&mockParticipant,
+            nullptr,
+            &InitCallback);
+
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, SetStopHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Participant_SetStopHandler((ib_Participant*)&mockParticipant, NULL, &StopCallback);
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            SetStopHandler(testing::_)
+        ).Times(testing::Exactly(1));
+
+        returnCode = ib_Participant_SetStopHandler(
+            (ib_Participant*)&mockParticipant,
+            nullptr,
+            &StopCallback);
+
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, SetShutdownHandler(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Participant_SetShutdownHandler((ib_Participant*)&mockParticipant, NULL, &ShutdownCallback);
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            SetShutdownHandler(testing::_)
+        ).Times(testing::Exactly(1));
+        returnCode = ib_Participant_SetShutdownHandler(
+            (ib_Participant*)&mockParticipant,
+            nullptr,
+            &ShutdownCallback);
+
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, Run()).Times(testing::Exactly(1));
-        ib_ParticipantState outParticipantState;
-        returnCode = ib_Participant_Run((ib_Participant*)&mockParticipant, &outParticipantState);
+        std::promise<ParticipantState> state;
+        state.set_value(ParticipantState::Shutdown);
+
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            ExecuteLifecycleWithSyncTime(testing::_, true, true)
+        ).Times(testing::Exactly(1))
+            .WillOnce(Return(ByMove(state.get_future())));
+
+
+        ib_ParticipantState outParticipantState{ib_ParticipantState_Invalid};
+        returnCode = ib_Participant_Run((ib_Participant*)&mockParticipant,
+            &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, RunAsync()).Times(testing::Exactly(1));
+        state = std::promise<ParticipantState> {}; // reset state
+        state.set_value(ParticipantState::Shutdown);
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            ExecuteLifecycleWithSyncTime(testing::_, true, true)
+        ).Times(testing::Exactly(1))
+            .WillOnce(Return(ByMove(state.get_future())));
         returnCode = ib_Participant_RunAsync((ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
+        state = std::promise<ParticipantState> {}; // reset state
+        state.set_value(ParticipantState::Shutdown);
         returnCode = ib_Participant_RunAsync((ib_Participant*)&mockParticipant); // Second call should fail
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -245,11 +282,15 @@ namespace {
         returnCode = ib_Participant_RunSimulation((ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, Pause(testing::_)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            Pause(testing::_)
+        ).Times(testing::Exactly(1));
         returnCode = ib_Participant_Pause((ib_Participant*)&mockParticipant, "dummy");
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, Continue()).Times(testing::Exactly(1));
+        EXPECT_CALL(mockParticipant.mockLifecycleService,
+            Continue()
+        ).Times(testing::Exactly(1));
         returnCode = ib_Participant_Continue((ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

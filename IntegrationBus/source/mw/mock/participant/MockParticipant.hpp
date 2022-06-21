@@ -162,6 +162,8 @@ class DummyParticipant : public IParticipantInternal
 public:
     DummyParticipant()
     {
+        ON_CALL(mockLifecycleService, GetTimeSyncService)
+            .WillByDefault(testing::Return(&mockTimeSyncService));
     }
 
     auto CreateCanController(const std::string& /*canonicalName*/, const std::string & /*networkName*/)

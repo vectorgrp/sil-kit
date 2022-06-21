@@ -26,20 +26,24 @@ namespace {
         returnCode = ib_Participant_SetPeriod(nullptr, 1000);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_SetSimulationTask(nullptr, NULL, &SimTask);
+        returnCode = ib_Participant_SetSimulationTask(nullptr, nullptr, &SimTask);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Participant_SetSimulationTask((ib_Participant*)&mockParticipant, NULL, nullptr);
+        returnCode = ib_Participant_SetSimulationTask((ib_Participant*)&mockParticipant, nullptr, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
     }
 
     TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
     {
         ib_ReturnCode returnCode;
-        EXPECT_CALL(mockParticipant.mockParticipantController, SetPeriod(testing::_)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockParticipant.mockTimeSyncService,
+            SetPeriod(testing::_)
+        ).Times(testing::Exactly(1));
         returnCode = ib_Participant_SetPeriod((ib_Participant*)&mockParticipant, 1000);
 
-        EXPECT_CALL(mockParticipant.mockParticipantController, SetSimulationTask(testing::Matcher<ib::mw::sync::IParticipantController::SimTaskT>(testing::_))).Times(testing::Exactly(1));
-        returnCode = ib_Participant_SetSimulationTask((ib_Participant*)&mockParticipant, NULL, &SimTask);
+        EXPECT_CALL(mockParticipant.mockTimeSyncService,
+            SetSimulationTask(testing::Matcher<ib::mw::sync::ITimeSyncService::SimTaskT>(testing::_))
+        ).Times(testing::Exactly(1));
+        returnCode = ib_Participant_SetSimulationTask((ib_Participant*)&mockParticipant, nullptr, &SimTask);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
     }
 
