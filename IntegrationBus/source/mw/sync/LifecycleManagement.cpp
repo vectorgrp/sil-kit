@@ -23,7 +23,6 @@ LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleServ
     _pausedState = std::make_shared<PausedState>(this);
     _stoppingState = std::make_shared<StoppingState>(this);
     _stoppedState = std::make_shared<StoppedState>(this);
-    _reinitializingState = std::make_shared<ReinitializingState>(this);
     _shuttingDownState = std::make_shared<ShuttingDownState>(this);
     _shutDownState = std::make_shared<ShutdownState>(this);
     _errorState = std::make_shared<ErrorState>(this);
@@ -79,10 +78,9 @@ bool LifecycleManagement::Shutdown(std::string reason)
     return (_currentState != GetErrorState());
 }
 
-void LifecycleManagement::Reinitialize(std::string reason)
+void LifecycleManagement::Restart(std::string reason)
 {
-    _currentState->ReinitializeNotifyUser(reason);
-    _currentState->ReinitializeHandleDone(std::move(reason));
+    _currentState->Restart(std::move(reason));
 }
 
 void LifecycleManagement::Error(std::string reason)
@@ -202,11 +200,6 @@ ILifecycleState* LifecycleManagement::GetStoppingState()
 ILifecycleState* LifecycleManagement::GetStoppedState()
 {
     return _stoppedState.get();
-}
-
-ILifecycleState* LifecycleManagement::GetReinitializingState()
-{
-    return _reinitializingState.get();
 }
 
 ILifecycleState* LifecycleManagement::GetShuttingDownState()

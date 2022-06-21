@@ -18,7 +18,6 @@ class ILifecycleService
 {
 public:
     using CommunicationReadyHandlerT = std::function<void()>;
-    using ReinitializeHandlerT = std::function<void()>;
     using StopHandlerT = std::function<void()>;
     using ShutdownHandlerT = std::function<void()>;
 
@@ -34,16 +33,6 @@ public:
      */
     
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) = 0;
-
-    
-    /*! \brief Register a callback to perform reinitialization.
-     *
-     * The handler is called when an \ref ParticipantCommand::Kind::Reinitialize has been received.
-     * TODO fill in on which thread this is executed.
-     * After the handler has been processed, the participant
-     * switches to the \ref ParticipantState::Initialized state.
-     */
-    virtual void SetReinitializeHandler(ReinitializeHandlerT handler) = 0;
 
     /*! \brief Register a callback that is executed on simulation stop.
      *

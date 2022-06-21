@@ -31,8 +31,8 @@ public:
     virtual void StopNotifyUser(std::string reason) override;
     virtual void StopHandlerDone(std::string reason) override;
 
-    virtual void ReinitializeNotifyUser(std::string reason) override;
-    virtual void ReinitializeHandleDone(std::string reason) override;
+    virtual void Restart(std::string reason) override;
+
     virtual void ShutdownNotifyUser(std::string reason) override;
     virtual void ShutdownHandlerDone(std::string reason) override;
 
@@ -188,33 +188,15 @@ public:
 
     void StopNotifyUser(std::string reason) override;
     void StopHandlerDone(std::string reason) override;
-    void ReinitializeNotifyUser(std::string reason) override;
+
+    void Restart(std::string reason) override;
+
     void ShutdownNotifyUser(std::string reason) override;
 
     void AbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
-};
-
-class ReinitializingState : public State
-{
-public:
-    ReinitializingState(LifecycleManagement* lifecycleManager)
-        : State(lifecycleManager)
-    {
-    }
-
-    void ReinitializeNotifyUser(std::string reason) override;
-    void ReinitializeHandleDone(std::string reason) override;
-
-    void AbortSimulation(std::string reason) override;
-
-    auto toString() -> std::string override;
-    auto GetParticipantState() -> ParticipantState override;
-
-private:
-    bool _abortRequested = false;
 };
 
 class ShuttingDownState : public State
@@ -264,8 +246,7 @@ public:
     void ContinueSimulation(std::string reason) override;
     void StopNotifyUser(std::string reason) override;
     void StopHandlerDone(std::string reason) override;
-    void ReinitializeNotifyUser(std::string reason) override;
-    void ReinitializeHandleDone(std::string reason) override;
+    void Restart(std::string reason) override;
     void ShutdownNotifyUser(std::string reason) override;
     void ShutdownHandlerDone(std::string reason) override;
     void AbortSimulation(std::string reason) override;

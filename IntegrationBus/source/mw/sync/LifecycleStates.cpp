@@ -33,12 +33,7 @@ void State::StopHandlerDone(std::string reason)
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::ReinitializeNotifyUser(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void State::ReinitializeHandleDone(std::string reason)
+void State::Restart(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
@@ -341,11 +336,9 @@ void StoppedState::StopHandlerDone(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void StoppedState::ReinitializeNotifyUser(std::string reason)
+void StoppedState::Restart(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetReinitializingState(), reason);
-    // Context will set next state
-    _lifecycleManager->HandleReinitialize(std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), reason);
 }
 
 void StoppedState::ShutdownNotifyUser(std::string reason)
@@ -367,42 +360,6 @@ auto StoppedState::toString() -> std::string
 auto StoppedState::GetParticipantState() -> ParticipantState
 {
     return ParticipantState::Stopped;
-}
-
-// ReinitializingState
-void ReinitializingState::ReinitializeNotifyUser(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ReinitializingState::ReinitializeHandleDone(std::string reason)
-{
-    if (_abortRequested)
-    {
-        _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), std::move(reason));
-        _abortRequested = false;
-        _lifecycleManager->Shutdown("Received SystemCommand::AbortSimulation during callback.");
-    }
-    else
-    {
-        _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
-    }
-}
-
-void ReinitializingState::AbortSimulation(std::string reason)
-{
-    _abortRequested = true;
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-auto ReinitializingState::toString() -> std::string
-{
-    return "Reinitializing";
-}
-
-auto ReinitializingState::GetParticipantState() -> ParticipantState
-{
-    return ParticipantState::Reinitializing;
 }
 
 // ShuttingDownState
@@ -483,15 +440,9 @@ void ErrorState::StopHandlerDone(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void ErrorState::ReinitializeNotifyUser(std::string reason)
+void ErrorState::Restart(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetReinitializingState(), std::move(reason));
-    _lifecycleManager->HandleReinitialize(std::move(reason));
-}
-
-void ErrorState::ReinitializeHandleDone(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
 }
 
 void ErrorState::ShutdownNotifyUser(std::string reason)

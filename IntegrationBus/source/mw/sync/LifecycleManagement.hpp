@@ -28,7 +28,7 @@ public:
     virtual void Continue(std::string reason) = 0;
     virtual void Stop(std::string reason) = 0;
     virtual bool Shutdown(std::string reason) = 0; // shutdown successful?
-    virtual void Reinitialize(std::string reason) = 0;
+    virtual void Restart(std::string reason) = 0;
     virtual void Error(std::string reason) = 0;
     virtual bool AbortSimulation(std::string reason) = 0; // Abort->Shutdown successful?
 };
@@ -47,25 +47,12 @@ public:
     void Continue(std::string reason) override;
     void Stop(std::string reason) override;
     bool Shutdown(std::string reason) override;
-    void Reinitialize(std::string reason) override;
+    void Restart(std::string reason) override;
     void Error(std::string reason) override;
     bool AbortSimulation(std::string reason) override;
 
 public:
     void HandleCommunicationReady(std::string reason);
-
-    void HandleReinitialize(std::string reason)
-    {
-        try
-        {
-            _parentService->TriggerReinitializeHandle(std::move(reason));
-        }
-        catch (const std::exception&)
-        {
-            // Switch to error state if handle triggers error
-            SetStateError("Exception during StopHandle execution.");
-        }
-    }
 
     void HandleStop(std::string reason);
 
@@ -87,7 +74,6 @@ public:
     ILifecycleState* GetPausedState();
     ILifecycleState* GetStoppingState();
     ILifecycleState* GetStoppedState();
-    ILifecycleState* GetReinitializingState();
     ILifecycleState* GetShuttingDownState();
     ILifecycleState* GetShutdownState();
 
@@ -106,7 +92,6 @@ private:
     std::shared_ptr<ILifecycleState> _pausedState;
     std::shared_ptr<ILifecycleState> _stoppingState;
     std::shared_ptr<ILifecycleState> _stoppedState;
-    std::shared_ptr<ILifecycleState> _reinitializingState;
     std::shared_ptr<ILifecycleState> _shuttingDownState;
     std::shared_ptr<ILifecycleState> _shutDownState;
 

@@ -40,7 +40,6 @@ public:
     // Public Methods
     // ILifecycleService
     void SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) override;
-    void SetReinitializeHandler(ReinitializeHandlerT handler) override;
     void SetStopHandler(StopHandlerT handler) override;
     void SetShutdownHandler(ShutdownHandlerT handler) override;
 
@@ -80,7 +79,6 @@ public:
 
 public:
     void TriggerCommunicationReadyHandler(std::string reason);
-    void TriggerReinitializeHandle(std::string reason);
     void TriggerStopHandler(std::string reason);
     void TriggerShutdownHandler(std::string reason);
 
@@ -98,7 +96,7 @@ private:
                           bool isRequiredParticipant) -> std::future<ParticipantState>;
 
     void Shutdown(std::string reason);
-    void Reinitialize(std::string reason);
+    void Restart(std::string reason);
     void AbortSimulation(std::string reason);
 
 private:
@@ -121,7 +119,6 @@ private:
     std::promise<ParticipantState> _finalStatePromise;
 
     CommunicationReadyHandlerT _commReadyHandler;
-    ReinitializeHandlerT _reinitializeHandler;
     StopHandlerT _stopHandler;
     ShutdownHandlerT _shutdownHandler;
     std::future<void> _asyncResult;

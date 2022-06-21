@@ -18,8 +18,8 @@ public:
     virtual void StopNotifyUser(std::string reason) = 0;
     virtual void StopHandlerDone(std::string reason) = 0;
 
-    virtual void ReinitializeNotifyUser(std::string reason) = 0;
-    virtual void ReinitializeHandleDone(std::string reason) = 0;
+    virtual void Restart(std::string reason) = 0;
+
     virtual void ShutdownNotifyUser(std::string reason) = 0;
     virtual void ShutdownHandlerDone(std::string reason) = 0;
 

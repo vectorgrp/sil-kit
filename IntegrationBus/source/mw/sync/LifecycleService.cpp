@@ -36,11 +36,6 @@ void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandlerT h
     _commReadyHandler = std::move(handler);
 }
 
-void LifecycleService::SetReinitializeHandler(ReinitializeHandlerT handler)
-{
-    _reinitializeHandler = std::move(handler);
-}
-
 void LifecycleService::SetStopHandler(StopHandlerT handler)
 {
     _stopHandler = std::move(handler);
@@ -217,13 +212,13 @@ void LifecycleService::TriggerShutdownHandler(std::string)
 }
 
 
-void LifecycleService::Reinitialize(std::string reason)
+void LifecycleService::Restart(std::string reason)
 {
-    _lifecycleManagement->Reinitialize(reason);
+    _lifecycleManagement->Restart(reason);
 
     if (!_hasCoordinatedSimulationStart)
     {
-        _lifecycleManagement->Run("LifecycleService::Reinitialize() was called without start coordination.");
+        _lifecycleManagement->Run("LifecycleService::Restart() was called without start coordination.");
     }
 }
 
@@ -232,15 +227,6 @@ void LifecycleService::TriggerCommunicationReadyHandler(std::string)
     if (_commReadyHandler)
     {
         _commReadyHandler();
-    }
-}
-
-void LifecycleService::TriggerReinitializeHandle(std::string)
-{
-    if (_reinitializeHandler)
-    {
-        _reinitializeHandler();
-        _timeSyncService->ResetTime();
     }
 }
 
@@ -279,7 +265,7 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, cons
     {
         if (command.kind == ParticipantCommand::Kind::Reinitialize)
         {
-            Reinitialize(std::string{"Received ParticipantCommand::"} + to_string(command.kind));
+            Restart(std::string{"Received ParticipantCommand::"} + to_string(command.kind));
         }
         else if (command.kind == ParticipantCommand::Kind::Shutdown)
         {
