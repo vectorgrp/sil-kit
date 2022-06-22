@@ -150,112 +150,66 @@ ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant, voi
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_Run(ib_Participant* participant,
-                                           ib_ParticipantState*      outParticipantState)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_OUT_PARAMETER(outParticipantState);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* lifecycleService = cppParticipant->GetLifecycleService();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
-
-    // Emulate the old API that was always synchronized and with states
-    auto finalState = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
-    finalState.wait();
-    *outParticipantState = static_cast<ib_ParticipantState>(finalState.get());
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
+// Lifecycle async execution
+static std::map<ib_Participant*, std::future<ib::mw::sync::ParticipantState>> sRunAsyncFuturePerParticipant;
 
 ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant,
-    ib_ParticipantState* outParticipantState)
+    ib_Bool isRequiredParticipant)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStart);
   ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStop);
   ASSERT_VALID_BOOL_PARAMETER(isRequiredParticipant);
-  ASSERT_VALID_OUT_PARAMETER(outParticipantState);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* lifecycleService = cppParticipant->GetLifecycleService();
 
-    // Emulate the old API that was always synchronized and with states
-    auto finalState = lifecycleService->ExecuteLifecycleNoSyncTime(
+    sRunAsyncFuturePerParticipant[participant] =
+        lifecycleService->ExecuteLifecycleNoSyncTime(
             hasCoordinatedSimulationStart == ib_True,
             hasCoordinatedSimulationStop == ib_True,
-            isRequiredParticipant == ib_True
-    );
+            isRequiredParticipant == ib_True);
 
-    finalState.wait();
-    *outParticipantState = static_cast<ib_ParticipantState>(finalState.get());
+
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
+
 
 ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant,
-    ib_ParticipantState* outParticipantState)
+    ib_Bool isRequiredParticipant)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStart);
   ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStop);
   ASSERT_VALID_BOOL_PARAMETER(isRequiredParticipant);
-  ASSERT_VALID_OUT_PARAMETER(outParticipantState);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* lifecycleService = cppParticipant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    // Emulate the old API that was always synchronized and with states
-    auto finalState = lifecycleService->ExecuteLifecycleWithSyncTime(
+    sRunAsyncFuturePerParticipant[participant] =
+        lifecycleService->ExecuteLifecycleWithSyncTime(
             timeSyncService,
             hasCoordinatedSimulationStart == ib_True,
             hasCoordinatedSimulationStop == ib_True,
-            isRequiredParticipant == ib_True
-    );
+            isRequiredParticipant == ib_True);
 
-    finalState.wait();
-    *outParticipantState = static_cast<ib_ParticipantState>(finalState.get());
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
-static std::map<ib_Participant*, std::future<ib::mw::sync::ParticipantState>> sRunAsyncFuturePerParticipant;
-ib_ReturnCode ib_Participant_RunAsync(ib_Participant* participant)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  CAPI_ENTER
-  {
-    if (sRunAsyncFuturePerParticipant.find(participant) != sRunAsyncFuturePerParticipant.end())
-    {
-      ib_error_string = "ib_Participant_RunAsync has already been called for participant";
-      return ib_ReturnCode_BADPARAMETER;
-    }
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* lifecycleService = cppParticipant->GetLifecycleService();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
-    sRunAsyncFuturePerParticipant[participant] =
-        lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Participant_WaitForRunAsyncToComplete(ib_Participant* participant,
+ib_ReturnCode ib_Participant_WaitForLifecycleToComplete(ib_Participant* participant,
                                                                  ib_ParticipantState*      outParticipantState)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);

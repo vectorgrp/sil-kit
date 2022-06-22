@@ -182,51 +182,6 @@ typedef ib_ReturnCode(*ib_Participant_SetShutdownHandler_t)(ib_Participant* part
     void* context, ib_ParticipantShutdownHandler_t handler);
 
 
-/*! \brief Start the blocking run operation
- *
- * Executes simulation until shutdown is received. The simulation
- * task is executed in the context of the calling thread.
- *
- * \param participant The simulation participant to start running
- * \param outParticipantState Pointer for storing the final participant state (out parameter)
- * 
- */
-IntegrationBusAPI ib_ReturnCode ib_Participant_Run(
-    ib_Participant* participant, ib_ParticipantState* outParticipantState);
-
-typedef ib_ReturnCode (*ib_Participant_Run_t)(
-    ib_Participant* participant, ib_ParticipantState* outParticipantState);
-
-/*! \brief Start the non blocking run operation, returns immediately
- *
- * Executes simulation until shutdown is received. The simulation
- * task is executed in the context of the middleware thread that
- * receives the grant or tick.
- *
- * NB: RunAsync() cannot be used with
- * \ref ib::cfg::TimeSync::SyncPolicy::Strict,
- * which will inherently lead to a deadlock!
- *
- * \param participant The simulation participant to start running
- */
-IntegrationBusAPI ib_ReturnCode ib_Participant_RunAsync(ib_Participant* participant);
-
-typedef ib_ReturnCode (*ib_Participant_RunAsync_t)(ib_Participant* participant);
-
-/*! \brief Wait for to asynchronous run operation to complete and return the final participant state
- *
- * Blocks until the simulation is shutdown. Prior to this method,
- * \ref ib_Participant_RunAsync has to be called.
- *
- * \param participant The simulation participant to wait for completing the asynchronous run operation
- * \param outParticipantState Pointer for storing the final participant state (out parameter)
- */
-IntegrationBusAPI ib_ReturnCode ib_Participant_WaitForRunAsyncToComplete(
-    ib_Participant* participant, ib_ParticipantState* outParticipantState);
-
-typedef ib_ReturnCode (*ib_Participant_WaitForRunAsyncToComplete_t)(
-    ib_Participant* participant, ib_ParticipantState* outParticipantState);
-
 typedef ib_ReturnCode (*ib_Participant_SetPeriod_t)(ib_Participant* participant,
                                                               ib_NanosecondsTime period);
 /*! \brief Set the simulation duration to be requested
@@ -241,7 +196,7 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_SetPeriod(ib_Participant* partici
 
 /*! \brief The handler to be called if the simulation task is due
  *
- * \param context The user provided context passed in \ref ib_Participant_RunAsync
+ * \param context The user provided context passed in \ref ib_Participant_SetSimulationTask
  * \param participant The simulation participant
  * \param now The current simulation time
  */
@@ -426,12 +381,12 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_SetRequiredParticipants(
     ib_Participant* participant, const ib_StringList* requiredParticipantNames);
 
 /*! \brief Start the lifecycle with the given parameters without simulation time synchronization.
+*  Requires a call to ib_Participant_WaitForLifecycleToComplete to retrieve the final state.
 * 
 * \param participant the instance of the participant.
 * \param hasCoordinatedSimulationStart the participant shall take part in the coordinated startup.
 * \param hasCoordinatedSimulationStop the participant shall take part in the coordinated shutdown.
 * \param isRequiredParticipant this participant is required for the simulation run to begin simulation.
-* \param outParticipantState the final state of the participant when the lifecycle finished.
 * 
 */
 
@@ -439,15 +394,13 @@ typedef ib_ReturnCode (*ib_Participant_ExecuteLifecycleNoSyncTime_t)(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant,
-    ib_ParticipantState* outParticipantState);
+    ib_Bool isRequiredParticipant);
 
 IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant,
-    ib_ParticipantState* outParticipantState);
+    ib_Bool isRequiredParticipant);
 
 /*! \brief Start the lifecycle with the given parameters with simulation time synchronization.
 * 
@@ -462,15 +415,28 @@ typedef ib_ReturnCode (*ib_Participant_ExecuteLifecycleWithSyncTime_t)(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant,
-    ib_ParticipantState* outParticipantState);
+    ib_Bool isRequiredParticipant);
 
 IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant,
-    ib_ParticipantState* outParticipantState);
+    ib_Bool isRequiredParticipant);
+
+
+/*! \brief Wait for to asynchronous run operation to complete and return the final participant state
+ *
+ * Blocks until the simulation is shutdown. Prior to this method,
+ * \ref ib_Participant_ExecuteLifecycle{With,No}Sync has to be called.
+ *
+ * \param participant The simulation participant to wait for completing the asynchronous run operation
+ * \param outParticipantState Pointer for storing the final participant state (out parameter)
+ */
+IntegrationBusAPI ib_ReturnCode ib_Participant_WaitForLifecycleToComplete(
+    ib_Participant* participant, ib_ParticipantState* outParticipantState);
+
+typedef ib_ReturnCode (*ib_Participant_WaitForRunLifecycleToComplete_t)(
+    ib_Participant* participant, ib_ParticipantState* outParticipantState);
 IB_END_DECLS
 
 #pragma pack(pop)

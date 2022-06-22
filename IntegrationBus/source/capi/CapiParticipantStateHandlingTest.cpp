@@ -83,24 +83,31 @@ namespace {
         returnCode = ib_Participant_SetShutdownHandler((ib_Participant*)&mockParticipant, NULL, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+        // ExecuteLifecycleNoSyncTime
         ib_ParticipantState outParticipantState;
-        returnCode = ib_Participant_Run(nullptr, &outParticipantState);
+        returnCode = ib_Participant_ExecuteLifecycleNoSyncTime(nullptr,
+            ib_False, ib_False, ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_Run((ib_Participant*)&mockParticipant, nullptr);
+
+        returnCode = ib_Participant_ExecuteLifecycleNoSyncTime((ib_Participant*)&mockParticipant,
+            0xcd, ib_False, ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_RunAsync(nullptr);
+        // ExecuteLifecycleWithSyncTime
+        returnCode = ib_Participant_ExecuteLifecycleWithSyncTime(nullptr,
+            ib_False, ib_False, ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_WaitForRunAsyncToComplete(nullptr, &outParticipantState);
+        returnCode = ib_Participant_ExecuteLifecycleWithSyncTime((ib_Participant*)&mockParticipant,
+            0xcd, ib_False, ib_False);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_WaitForRunAsyncToComplete((ib_Participant*)&mockParticipant, nullptr);
+        // WaitForLifecycleToComplete
+        returnCode = ib_Participant_WaitForLifecycleToComplete(nullptr, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        // Expect error when not calling RunAsync with a valid ib_Participant before
-        returnCode = ib_Participant_WaitForRunAsyncToComplete((ib_Participant*)&mockParticipant, &outParticipantState);
+        returnCode = ib_Participant_WaitForLifecycleToComplete((ib_Participant*)&mockParticipant, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_Participant_Initialize(nullptr, nullptr);
@@ -198,6 +205,7 @@ namespace {
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_mapping)
     {
         ib_ReturnCode returnCode;
+        auto* cParticipant = (ib_Participant*)&mockParticipant;
 
         // required for MockSystemMonitor::ParticipantStatus
         testing::DefaultValue<const ib::mw::sync::ParticipantStatus&>::Set(ib::mw::sync::ParticipantStatus());
@@ -207,7 +215,7 @@ namespace {
         ).Times(testing::Exactly(1));
 
         returnCode = ib_Participant_SetInitHandler(
-            (ib_Participant*)&mockParticipant,
+            cParticipant,
             nullptr,
             &InitCallback);
 
@@ -218,7 +226,7 @@ namespace {
         ).Times(testing::Exactly(1));
 
         returnCode = ib_Participant_SetStopHandler(
-            (ib_Participant*)&mockParticipant,
+            cParticipant,
             nullptr,
             &StopCallback);
 
@@ -228,39 +236,47 @@ namespace {
             SetShutdownHandler(testing::_)
         ).Times(testing::Exactly(1));
         returnCode = ib_Participant_SetShutdownHandler(
-            (ib_Participant*)&mockParticipant,
+            cParticipant,
             nullptr,
             &ShutdownCallback);
 
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
+        ///////////////////////////////////////////////
+        // Lifecycle tests
+        ///////////////////////////////////////////////
+
+        using testing::_;
+        ib_ParticipantState outParticipantState{ib_ParticipantState_Invalid};
         std::promise<ParticipantState> state;
         state.set_value(ParticipantState::Shutdown);
 
         EXPECT_CALL(mockParticipant.mockLifecycleService,
-            ExecuteLifecycleWithSyncTime(testing::_, true, true)
+            ExecuteLifecycleWithSyncTime(_, _, _, _)
         ).Times(testing::Exactly(1))
             .WillOnce(Return(ByMove(state.get_future())));
 
 
-        ib_ParticipantState outParticipantState{ib_ParticipantState_Invalid};
-        returnCode = ib_Participant_Run((ib_Participant*)&mockParticipant,
-            &outParticipantState);
+        returnCode = ib_Participant_ExecuteLifecycleWithSyncTime(
+            cParticipant, ib_False, ib_False, ib_False);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        returnCode = ib_Participant_WaitForLifecycleToComplete(cParticipant, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         state = std::promise<ParticipantState> {}; // reset state
         state.set_value(ParticipantState::Shutdown);
+
         EXPECT_CALL(mockParticipant.mockLifecycleService,
-            ExecuteLifecycleWithSyncTime(testing::_, true, true)
+            ExecuteLifecycleNoSyncTime(_, _, _)
         ).Times(testing::Exactly(1))
             .WillOnce(Return(ByMove(state.get_future())));
-        returnCode = ib_Participant_RunAsync((ib_Participant*)&mockParticipant);
-        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        state = std::promise<ParticipantState> {}; // reset state
-        state.set_value(ParticipantState::Shutdown);
-        returnCode = ib_Participant_RunAsync((ib_Participant*)&mockParticipant); // Second call should fail
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_ExecuteLifecycleNoSyncTime(
+            cParticipant, ib_False, ib_False, ib_False);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        returnCode = ib_Participant_WaitForLifecycleToComplete(cParticipant, &outParticipantState);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         ib_SystemState systemState;
         EXPECT_CALL(mockParticipant.mockSystemMonitor, SystemState()).Times(testing::Exactly(1));
