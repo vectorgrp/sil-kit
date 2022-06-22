@@ -2,15 +2,14 @@
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4100 5105 4204)
+#pragma warning(disable : 5105 4204)
 #include "windows.h"
 #   define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+#define UNUSED_ARG(X) (void)(X)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,6 +74,9 @@ char* participantName;
 
 void NewDataSourceHandler(void* context, ib_Data_Subscriber* cbDataSubscriber, const ib_Data_NewDataPublisherEvent* newDataPublisherEvent)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbDataSubscriber);
+
     printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", newDataPublisherEvent->topic, newDataPublisherEvent->mediaType);
     for (uint32_t i = 0; i < newDataPublisherEvent->labels->numLabels; i++)
     {
@@ -86,6 +88,9 @@ void NewDataSourceHandler(void* context, ib_Data_Subscriber* cbDataSubscriber, c
 
 void SpecificDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_Data_DataMessageEvent* dataMessageEvent)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(subscriber);
+
     receiveCount += 1;
     printf("<< [SpecificDataHandler] Data received: ");
 
@@ -99,6 +104,9 @@ void SpecificDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib
 
 void DefaultDataHandler(void* context, ib_Data_Subscriber* subscriber, const ib_Data_DataMessageEvent* dataMessageEvent)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(subscriber);
+
     receiveCount += 1;
     printf("<< [DefaultDataHandler] Data received: ");
 
@@ -286,7 +294,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

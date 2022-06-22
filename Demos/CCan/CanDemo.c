@@ -9,15 +9,13 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
-#pragma warning(disable : 4100 5105)
 #include "windows.h"
 #   define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+#define UNUSED_ARG(X) (void)(X)
 
 char* LoadFile(char const* path)
 {
@@ -64,6 +62,9 @@ TransmitContext transmitContext;
 
 void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct ib_Can_FrameTransmitEvent* cAck)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(controller);
+
     TransmitContext* tc = (TransmitContext*)cAck->userContext;
     char buffer[256];
     sprintf(buffer, ">> %i for CAN Message with transmitId=%i, timestamp=%" PRIu64 "\n", cAck->status, tc->someInt,
@@ -73,6 +74,8 @@ void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct i
 
 void FrameHandler(void* context, ib_Can_Controller* controller, ib_Can_FrameEvent* frameEvent)
 {
+    UNUSED_ARG(controller);
+
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
     char buffer[512];
@@ -185,7 +188,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

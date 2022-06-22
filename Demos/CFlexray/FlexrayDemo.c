@@ -10,15 +10,13 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
-#pragma warning(disable: 4100)
 #include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+#define UNUSED_ARG(X) (void)(X)
 
 void AbortOnFailedAllocation(const char* failedAllocStrucName)
 {
@@ -128,36 +126,54 @@ void print_flexrayframetransmitevent(FILE* out, const ib_Flexray_FrameTransmitEv
 
 void ReceiveFrame(void* context, ib_Flexray_Controller* controller, const ib_Flexray_FrameEvent* message)
 {
+  UNUSED_ARG(context);
+  UNUSED_ARG(controller);
+
   fprintf(stdout, ">> ");
   print_flexrayframeevent(stdout, message);
 }
 
 void ReceiveFrameTransmit(void* context, ib_Flexray_Controller* controller, const ib_Flexray_FrameTransmitEvent* message)
 {
+  UNUSED_ARG(context);
+  UNUSED_ARG(controller);
+
   fprintf(stdout, ">> ");
   print_flexrayframetransmitevent(stdout, message);
 }
 
 void ReceiveWakeup(void* context, ib_Flexray_Controller* controller, const ib_Flexray_WakeupEvent* message)
 {
+  UNUSED_ARG(context);
+  UNUSED_ARG(controller);
+
   fprintf(stdout, ">> ");
   fprintf(stdout, "FlexrayWakeupEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
 void ReceiveSymbol(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolEvent* message)
 {
+  UNUSED_ARG(context);
+  UNUSED_ARG(controller);
+
   fprintf(stdout, ">> ");
   fprintf(stdout, "FlexraySymbolEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
 void ReceiveSymbolTransmit(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolTransmitEvent* message)
 {
+  UNUSED_ARG(context);
+  UNUSED_ARG(controller);
+
   fprintf(stdout, ">> ");
   fprintf(stdout, "FlexraySymbolTransmitEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
 void ReceiveCycleStart(void* context, ib_Flexray_Controller* controller, const ib_Flexray_CycleStartEvent* message)
 {
+  UNUSED_ARG(context);
+  UNUSED_ARG(controller);
+
   fprintf(stdout, ">> ");
   fprintf(stdout, "FlexrayCycleStartEvent cycleCounter=%d\n", message->cycleCounter);
 }
@@ -247,6 +263,8 @@ void FlexrayNode_DoAction(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
 
 void FlexrayNode_PocReady(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
 {
+  UNUSED_ARG(now);
+
   switch (flexrayNode->_busState)
   {
   case MasterState_PerformWakeup:
@@ -265,6 +283,8 @@ void FlexrayNode_PocReady(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
 
 void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
 {
+  UNUSED_ARG(now);
+
   if (flexrayNode->_controllerConfig->numBufferConfigs == 0)
     return;
 
@@ -317,6 +337,8 @@ void FlexrayNode_ReconfigureTxBuffers(struct FlexrayNode* flexrayNode)
 
 void FlexrayNode_PocStatusHandler(void* context, ib_Flexray_Controller* controller, const ib_Flexray_PocStatusEvent* pocStatus)
 {
+  UNUSED_ARG(controller);
+
   FlexrayNode* flexrayNode = (FlexrayNode*)context;
   printf(">> POC=%d freeze=%d wakeupStatus=%d slotMode=%d T=%" PRIu64 "\n", pocStatus->state, pocStatus->freeze, pocStatus->wakeupStatus,  pocStatus->slotMode, pocStatus->timestamp);
 
@@ -331,6 +353,8 @@ void FlexrayNode_PocStatusHandler(void* context, ib_Flexray_Controller* controll
 
 void FlexrayNode_WakeupHandler(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolEvent* symbol)
 {
+  UNUSED_ARG(context);
+
   printf(">> WAKEUP! (%d)\n", symbol->pattern);
   ib_Flexray_Controller_ExecuteCmd(controller, ib_Flexray_ChiCommand_ALLOW_COLDSTART);
   ib_Flexray_Controller_ExecuteCmd(controller, ib_Flexray_ChiCommand_RUN);
@@ -338,6 +362,8 @@ void FlexrayNode_WakeupHandler(void* context, ib_Flexray_Controller* controller,
 
 void FlexrayNode_SimulationTask(void* context, ib_Participant* participant, ib_NanosecondsTime time)
 {
+  UNUSED_ARG(participant);
+
   FlexrayNode* node = (FlexrayNode*)context;
   uint64_t nowMs = time / 1000000ULL;
   printf("now=%" PRIu64 "ms\n", nowMs);
@@ -595,11 +621,17 @@ int main(int argc, char** argv)
   }
 
   ib_ParticipantState finalState;
-  returnCode = ib_Participant_Run(participant, &finalState);
+  returnCode = ib_Participant_ExecuteLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
-    printf("ib_Participant_Run => %s\n", ib_GetLastErrorString());
+    printf("ib_Participant_ExecuteLifecycleWithSyncTime => %s\n", ib_GetLastErrorString());
     return 2;
+  }
+  returnCode = ib_Participant_WaitForLifecycleToComplete(participant, &finalState);
+  if (returnCode != ib_ReturnCode_SUCCESS)
+  {
+    printf("ib_Participant_WaitForLifecycleToComplete => %s\n", ib_GetLastErrorString());
+    return 3;
   }
   printf("Simulation stopped. Final State: %d\n", finalState);
   printf("Press enter to stop the process...\n");
@@ -613,7 +645,3 @@ int main(int argc, char** argv)
       free(jsonString);
   }
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

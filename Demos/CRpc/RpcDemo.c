@@ -2,15 +2,14 @@
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
-#pragma warning(disable : 4100 5105 4204)
+#pragma warning(disable : 5105 4204)
 #include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+#define UNUSED_ARG(X) (void)(X)
 
 #include "ib/capi/IntegrationBus.h"
 #include <stdio.h>
@@ -82,6 +81,8 @@ void PrintByteVector(const ib_ByteVector* data)
 
 void CallHandler(void* context, ib_Rpc_Server* cbServer, const ib_Rpc_CallEvent* event)
 {
+    UNUSED_ARG(context);
+
     receiveCallCount += 1;
     uint8_t* tmp = (uint8_t*)malloc(event->argumentData.size * sizeof(uint8_t));
     if (tmp == NULL)
@@ -103,6 +104,9 @@ void CallHandler(void* context, ib_Rpc_Server* cbServer, const ib_Rpc_CallEvent*
 
 void CallReturnHandler(void* context, ib_Rpc_Client* cbClient, const ib_Rpc_CallResultEvent* event)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbClient);
+
     if (event->callStatus == ib_Rpc_CallStatus_SUCCESS)
     {
         printf("[client] Call returned: ");
@@ -116,6 +120,8 @@ void CallReturnHandler(void* context, ib_Rpc_Client* cbClient, const ib_Rpc_Call
 
 void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* discoveryResults)
 {
+    UNUSED_ARG(context);
+
     for (uint32_t i = 0; i < discoveryResults->numResults; i++)
     {
         printf("Discovered RpcServer with functionName=\"%s\", mediaType=\"%s\", labels={",
@@ -264,7 +270,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

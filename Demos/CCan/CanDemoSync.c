@@ -10,15 +10,13 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
-#pragma warning(disable: 4100 5105)
 #include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+#define UNUSED_ARG(X) (void)(X)
 
 char* LoadFile(char const* path)
 {
@@ -73,10 +71,12 @@ typedef struct {
 } SimTaskContext;
 SimTaskContext simTaskContext;
 
-void InitCallback(void* context, ib_Participant* cbParticipant, struct ib_ParticipantCommand* command)
+void InitCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
-    printf(">> InitCallback of kind=%i with context=%i\n", command->kind, tc->someInt);
+    printf(">> InitCallback of with context=%i\n", tc->someInt);
 
     /* Set baud rate and start the controllers. We omitted the return value check for brevity.*/
     (void)ib_Can_Controller_SetBaudRate(canController, 10000u, 1000000u);
@@ -87,24 +87,29 @@ void InitCallback(void* context, ib_Participant* cbParticipant, struct ib_Partic
 
 void StopCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(cbParticipant);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> StopCallback with context=%i\n", tc->someInt);
 }
 
 void ShutdownCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(cbParticipant);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
 }
 
 void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct ib_Can_FrameTransmitEvent* cAck)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(controller);
     //TransmitContext* tc = (TransmitContext*) cAck->userContext;
     printf(">> %i for CAN Message with timestamp=%"PRIu64"\n", cAck->status, cAck->timestamp);
 }
 
 void FrameHandler(void* context, ib_Can_Controller* controller, ib_Can_FrameEvent* frameEvent)
 {
+    UNUSED_ARG(controller);
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
     printf(">> CAN frameEvent: canId=%i timestamp=%"PRIu64" ",
@@ -153,6 +158,7 @@ void SendFrame()
 
 void SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime now)
 {
+    UNUSED_ARG(cbParticipant);
     SimTaskContext* tc = (SimTaskContext*)context;
     printf(">> Simulation task now=%"PRIu64" with context=%i\n", now, tc->someInt);
 
@@ -215,14 +221,21 @@ int main(int argc, char* argv[])
     ib_Participant_SetPeriod(participant, 1000000);
     ib_Participant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
 
-    // Non-Blocking variant 
-    ib_Participant_RunAsync(participant);
+    ib_ReturnCode result;
+    result = ib_Participant_ExecuteLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
+    if(result != ib_ReturnCode_SUCCESS)
+    {
+        printf("Error: ib_Participant_ExecuteLifecycleWithSyncTime failed: %s\n", ib_GetLastErrorString());
+        exit(1);
+    }
     ib_ParticipantState outFinalParticipantState;
-    ib_Participant_WaitForRunAsyncToComplete(participant, &outFinalParticipantState);
+    result = ib_Participant_WaitForLifecycleToComplete(participant, &outFinalParticipantState);
+    if(result != ib_ReturnCode_SUCCESS)
+    {
+        printf("Error: ib_Participant_WaitForLifecycleToComplete failed: %s\n", ib_GetLastErrorString());
+        exit(1);
+    }
 
-    // Blocking variant 
-    // ib_ParticipantState outFinalParticipantState;
-    //ib_ParticipantState finalState = ib_Participant_Run(participant, &outFinalParticipantState);
 
     ib_Participant_Destroy(participant);
     if (jsonString)
@@ -232,7 +245,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

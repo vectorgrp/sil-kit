@@ -13,11 +13,11 @@
 #include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+
+#define UNUSED_ARG(X) (void)(X)
 
 void AbortOnFailedAllocation(const char* failedAllocStrucName)
 {
@@ -167,15 +167,21 @@ ib_NanosecondsTime        slaveNow;
 
 void StopCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
     printf("Stopping...\n");
 }
 void ShutdownCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
     printf("Shutting down...\n");
 }
 
-void Master_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_ParticipantCommand* command)
+void Master_InitCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
     printf("Initializing LinMaster\n");
     controllerConfig = (ib_Lin_ControllerConfig*)malloc(sizeof(ib_Lin_ControllerConfig));
     if (controllerConfig == NULL)
@@ -204,12 +210,16 @@ void Master_doAction(ib_NanosecondsTime now)
 
 void Master_SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime now)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
     printf("now%"PRIu64"ms\n", now / 1000000);
     Master_doAction(now);
 }
 
 void Master_ReceiveFrameStatus(void* context, ib_Lin_Controller* controller, const ib_Lin_FrameStatusEvent* frameStatusEvent)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(controller);
 
     switch (frameStatusEvent->status)
     {
@@ -232,6 +242,8 @@ void Master_ReceiveFrameStatus(void* context, ib_Lin_Controller* controller, con
 
 void Master_WakeupHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_WakeupEvent* wakeUpEvent)
 {
+    UNUSED_ARG(context);
+
     ib_Lin_ControllerStatus status;
     ib_Lin_Controller_Status(controller, &status);
 
@@ -248,6 +260,7 @@ void Master_WakeupHandler(void* context, ib_Lin_Controller* controller, const ib
 
 void Master_SendFrame_16(ib_NanosecondsTime now)
 {
+    UNUSED_ARG(now);
     ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 16;
@@ -262,6 +275,7 @@ void Master_SendFrame_16(ib_NanosecondsTime now)
 
 void Master_SendFrame_17(ib_NanosecondsTime now)
 {
+    UNUSED_ARG(now);
     ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 17;
@@ -276,6 +290,7 @@ void Master_SendFrame_17(ib_NanosecondsTime now)
 
 void Master_SendFrame_18(ib_NanosecondsTime now)
 {
+    UNUSED_ARG(now);
     ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 18;
@@ -290,6 +305,7 @@ void Master_SendFrame_18(ib_NanosecondsTime now)
 
 void Master_SendFrame_19(ib_NanosecondsTime now)
 {
+    UNUSED_ARG(now);
     ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 19;
@@ -304,6 +320,7 @@ void Master_SendFrame_19(ib_NanosecondsTime now)
 
 void Master_SendFrame_34(ib_NanosecondsTime now)
 {
+    UNUSED_ARG(now);
     ib_Lin_Frame frame;
     frame.interfaceId = ib_InterfaceIdentifier_LinFrame;
     frame.id = 34;
@@ -316,12 +333,16 @@ void Master_SendFrame_34(ib_NanosecondsTime now)
 
 void Master_GoToSleep(ib_NanosecondsTime now)
 {
+    UNUSED_ARG(now);
     printf("<< Sending Go-To-Sleep Command and entering sleep state\n");
     ib_Lin_Controller_GoToSleep(linController);
 }
 
-void Slave_InitCallback(void* context, ib_Participant* cbParticipant, struct ib_ParticipantCommand* command)
+void Slave_InitCallback(void* context, ib_Participant* cbParticipant)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
+
     printf("Initializing LinSlave\n");
 
     // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
@@ -420,6 +441,9 @@ void Slave_DoAction(ib_NanosecondsTime now)
 
 void Slave_SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsTime now)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(cbParticipant);
+
     printf("now=%"PRIu64"ms\n", now / 1000000);
     Slave_DoAction(now);
     SleepMs(500);
@@ -427,6 +451,9 @@ void Slave_SimTask(void* context, ib_Participant* cbParticipant, ib_NanosecondsT
 
 void Slave_FrameStatusHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_FrameStatusEvent* frameStatusEvent)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(controller);
+
     ib_Lin_Frame* frame = frameStatusEvent->frame;
     printf(">> lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d timestamp=%"PRIu64"ms\n", frame->id,
            frame->checksumModel, frame->dataLength, frame->data[0], frame->data[1], frame->data[2], frame->data[3],
@@ -441,6 +468,7 @@ void Slave_WakeupPulse(ib_NanosecondsTime now)
 
 void Slave_GoToSleepHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_GoToSleepEvent* goToSleepEvent)
 {
+    UNUSED_ARG(context);
     printf("LIN Slave received go-to-sleep command @%" PRIu64 "ms; entering sleep mode.\n",
            goToSleepEvent->timestamp / 1000000);
     // wakeup in 10 ms
@@ -450,6 +478,7 @@ void Slave_GoToSleepHandler(void* context, ib_Lin_Controller* controller, const 
 
 void Slave_WakeupHandler(void* context, ib_Lin_Controller* controller, const ib_Lin_WakeupEvent* wakeUpEvent)
 {
+    UNUSED_ARG(context);
     printf(">> LIN Slave received wakeup pulse @%" PRIu64 "ms; direction=%d; entering normal operation mode.\n",
            wakeUpEvent->timestamp / 1000000, wakeUpEvent->direction);
 
@@ -522,7 +551,19 @@ int main(int argc, char* argv[])
     }
 
     ib_ParticipantState outFinalParticipantState;
-    returnCode = ib_Participant_Run(participant, &outFinalParticipantState);
+    returnCode = ib_Participant_ExecuteLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
+    if(returnCode != ib_ReturnCode_SUCCESS)
+    {
+        printf("Error: ib_Participant_ExecuteLifecycleWithSyncTime failed: %s\n", ib_GetLastErrorString());
+        exit(1);
+    }
+
+    returnCode = ib_Participant_WaitForLifecycleToComplete(participant, &outFinalParticipantState);
+    if(returnCode != ib_ReturnCode_SUCCESS)
+    {
+        printf("Error: ib_Participant_WaitForLifecycleToComplete failed: %s\n", ib_GetLastErrorString());
+        exit(1);
+    }
 
     printf("Simulation stopped. Final State:%d\n", outFinalParticipantState);
 
@@ -539,7 +580,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

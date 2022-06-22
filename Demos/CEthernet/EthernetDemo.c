@@ -9,15 +9,14 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
-#pragma warning(disable: 4100 5105 4204)
+#pragma warning(disable: 5105 4204)
 #include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <unistd.h>
 #define SleepMs(X) usleep((X)*1000)
 #endif
+#define UNUSED_ARG(X) (void)(X)
 
 char* LoadFile(char const* path)
 {
@@ -88,6 +87,9 @@ TransmitContext transmitContext;
 void FrameTransmitHandler(void* context, ib_Ethernet_Controller* controller,
                           struct ib_Ethernet_FrameTransmitEvent* frameTransmitEvent)
 {
+    UNUSED_ARG(context);
+    UNUSED_ARG(controller);
+
     TransmitContext* tc = (TransmitContext*)frameTransmitEvent->userContext;
     printf(">> %i for Ethernet frame with transmitId=%i, timestamp=%" PRIu64 "\n", frameTransmitEvent->status,
            tc->someInt, frameTransmitEvent->timestamp);
@@ -95,6 +97,8 @@ void FrameTransmitHandler(void* context, ib_Ethernet_Controller* controller,
 
 void FrameHandler(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_FrameEvent* frameEvent)
 {
+    UNUSED_ARG(controller);
+
     TransmitContext* txContext = (TransmitContext*)(context);
     unsigned int i;
     printf(">> Ethernet FrameEvent: timestamp=%" PRIu64 "\n", frameEvent->timestamp);
@@ -208,7 +212,3 @@ int main(int argc, char* argv[])
 
     return EXIT_SUCCESS;
 }
-
-#ifndef WIN32
-#pragma GCC diagnostic pop
-#endif

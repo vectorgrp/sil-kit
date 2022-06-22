@@ -97,19 +97,22 @@ endfunction(make_ib_demo)
 #######################################################################################################################
 # Add the actual demo projects
 #######################################################################################################################
+# C++ Demos
 add_subdirectory(Can)
-#add_subdirectory(CCan)
-#add_subdirectory(CFlexray)
-#add_subdirectory(CEthernet)
-#add_subdirectory(CLin)
-#add_subdirectory(CData)
-#add_subdirectory(CRpc)
 add_subdirectory(Ethernet)
 add_subdirectory(Flexray)
 add_subdirectory(Lin)
 add_subdirectory(DataMessage)
 add_subdirectory(Rpc)
 add_subdirectory(Benchmark)
+
+# C-API Demos
+add_subdirectory(CCan)
+add_subdirectory(CFlexray)
+add_subdirectory(CEthernet)
+add_subdirectory(CLin)
+add_subdirectory(CData)
+add_subdirectory(CRpc)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################
