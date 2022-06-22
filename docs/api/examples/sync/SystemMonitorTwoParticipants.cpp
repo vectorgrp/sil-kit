@@ -18,40 +18,46 @@ systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 
 
 // ------------------------------------------------------------
-// Transition from Invalid to ControllersCreated.
+// Transition from Invalid to ServicesCreated.
 
-// ParticipantController needs to call Run or RunAsync for a transition to ParticipantState::ControllersCreated.
-// For more information about the use of the Participant Controller refer to the corresponding section.
-auto* participantController1 = participant1->GetParticipantController();
-auto* participantController2 = participant2->GetParticipantController();
+// LifecycleService needs to call ExecuteLifecycleWithSyncTime or ExecuteLifecycleNoSyncTime for a transition to ParticipantState::ServicesCreated.
+// For more information about the use of the life cycle service and time synchronization service refer to the corresponding section.
+auto* lifecycleService1 = participant1 -> GetLifecycleService();
+auto* timeSyncService1 = lifecycleService1 -> GetTimeSynchrService();
+auto* lifecycleService2 = participant2 -> GetLifecycleService();
+auto* timeSyncService2 = lifecycleService2 -> GetTimeSynchrService();
 
-participantController1->SetSimulationTask([](now, duration) {});
-participantController2->SetSimulationTask([](now, duration) {});
+timeSyncService1->SetSimulationTask(
+    [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}
+);
+timeSyncService2->SetSimulationTask(
+  [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}
+);
 
-participantController1->Run();
+lifecycleService1 -> ExecuteLifecycleWithSyncTime(timeSyncService1, true, true);
 
-// The call of Run() leads to a participant state transition from Invalid to ControllersCreated
+// The call of Run() leads to a participant state transition from Invalid to ServicesCreated
 // and will trigger the callback of the ParticipantStatusHandler:
 participantStatusHandler(participantStatus);
 // with:
 //  - participantStatus.participantName == participantName1
-//  - participantStatus.state == ParticipantState::ControllersCreated
-//  - participantStatus.reason = "ParticipantController::Run() was called"
+//  - participantStatus.state == ParticipantState::ServicesCreated
+//  - participantStatus.reason = "LifecycleService::ExecuteLifecycle... was called"
 //  - participantStatus.enterTime == enter time_point
 //  - participantStatus.refreshTime == enter time_point
 
-participantController2->Run();
+lifecycleService2 -> ExecuteLifecycleWithSyncTime(timeSyncService2, true, true);
 
 // The call of Run() by the second participant again triggers
 // the callback of the ParticipantStatusHandler:
 participantStatusHandler(participantStatus);
 // with:
 //  - participantStatus.participantName == participantName2
-//  - participantStatus.state == ParticipantState::ControllersCreated
-//  - participantStatus.reason = "ParticipantController::Run() was called"
+//  - participantStatus.state == ParticipantState::ServicesCreated
+//  - participantStatus.reason = "LifecycleService::ExecuteLifecycle... was called"
 //  - participantStatus.enterTime == enter time_point
 //  - participantStatus.refreshTime == enter time_point
 
-// Since all participants are now in ParticipantState::ControllersCreated,
-// the callback of the SystemStateHandler is triggered with SystemState::ControllersCreated:
+// Since all participants are now in ParticipantState::ServicesCreated,
+// the callback of the SystemStateHandler is triggered with SystemState::ServicesCreated:
 systemStateHandler(state);

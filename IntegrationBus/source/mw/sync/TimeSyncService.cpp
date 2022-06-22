@@ -191,7 +191,7 @@ private:
 //! \brief  A caching time provider: we update its internal state whenever the controller's
 //          simulation time changes.
 // This ensures that the our time provider is available even after
-// the ParticipantController gets destructed.
+// the TimeSyncService gets destructed.
 struct ParticipantTimeProvider : public sync::ITimeProvider
 {
     std::chrono::nanoseconds _now;

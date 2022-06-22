@@ -103,7 +103,7 @@ The following example configures a LIN controller as a LIN slave with a baud rat
 
     linController->Init(slaveConfig);
 
-Note that |Init| should be called in the InitHandler of a ParticipantController.
+Note that |Init| should be called in the CommunicationReadyHandler of the LifecycleService.
 
 Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

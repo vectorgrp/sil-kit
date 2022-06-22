@@ -60,19 +60,30 @@ public:
      */
     virtual void SetShutdownHandler(ShutdownHandlerT handler) = 0;
 
-    /*! \brief Start non blocking operation, returns immediately.
+    /*! \brief Start non blocking operation without virtual time synchronization, returns immediately.
      *
-     * Executes simulation until shutdown is received. The simulation
+     * Executes simulation without virtual time synchronization until shutdown is received. The simulation
      * task is executed in the context of the middleware thread that
      * receives the grant or tick.
      *
      * \return Future that will hold the final state of the participant
-     * once the ParticipantController finishes operation.
+     * once the LifecycleService finishes operation.
      */
     virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
                                             bool isRequiredParticipant) -> std::future<ParticipantState> = 0;
     virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
         -> std::future<ParticipantState> = 0;
+
+    
+    /*! \brief Start non blocking operation with virtual time synchronization, returns immediately.
+     *
+     * Executes simulation with virtual time synchronization until shutdown is received. The simulation
+     * task is executed in the context of the middleware thread that
+     * receives the grant or tick.
+     *
+     * \return Future that will hold the final state of the participant
+     * once the LifecycleService finishes operation.
+     */
     virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
                                               bool hasCoordinatedSimulationStop, bool isRequiredParticipant)
         -> std::future<ParticipantState> = 0;

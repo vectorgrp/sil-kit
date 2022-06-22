@@ -41,20 +41,22 @@ systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 // ------------------------------------------------------------
 // Start of the simulation.
 
-// ParticipantController needs to call Run or RunAsync for a transition to ParticipantState::ServicesCreated.
-// For more information about the use of the Participant Controller refer to the corresponding section.
-auto* participantController1 = participant1->GetParticipantController();
-auto* participantController2 = participant2->GetParticipantController();
+// LifecycleService needs to call ExecuteLifecycleWithSyncTime or ExecuteLifecycleNoSyncTime for a transition to ParticipantState::ServicesCreated.
+// For more information about the use of the life cycle service and time synchronization service refer to the corresponding section.
+auto* lifecycleService1 = participant1 -> GetLifecycleService();
+auto* timeSyncService1 = lifecycleService1 -> GetTimeSynchrService();
+auto* lifecycleService2 = participant2 -> GetLifecycleService();
+auto* timeSyncService2 = lifecycleService2 -> GetTimeSynchrService();
 
-participantController1->SetSimulationTask(
+timeSyncService1->SetSimulationTask(
     [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}
 );
-participantController2->SetSimulationTask(
+timeSyncService2->SetSimulationTask(
   [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}
 );
 
-auto status1 = participantController1->RunAsync();
-auto status2 = participantController2->RunAsync();
+auto status1 = lifecycleService1 -> ExecuteLifecycleWithSyncTime(timeSyncService1, true, true);
+auto status2 = lifecycleService2 -> ExecuteLifecycleWithSyncTime(timeSyncService2, true, true);
 
 // As soon as all participants are in ParticipantState::ServicesCreated, the system transitions to SystemState::ServicesCreated
 // and the systemController calls Run() to start the simulation.

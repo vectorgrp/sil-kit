@@ -330,6 +330,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
     _knownSimulators.push_back(participantConfig.name);
 
     // when using the participant time provider we have exact, absolute time stamps of simulated time
+    // TODO replace participantController
     const bool useAbsoluteTimestamps = participantConfig.participantController.has_value();
 
 

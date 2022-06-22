@@ -457,7 +457,7 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
 }
 
 //-----------------------------------------------------
-// Async tests: No participantController/SimulationTask
+// Async tests: No TimeSyncService/SimulationTask
 //-----------------------------------------------------
 
 // Async with history: Wait for publication before starting the subscriber

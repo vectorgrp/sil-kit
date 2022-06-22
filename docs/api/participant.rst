@@ -36,9 +36,9 @@ of the VIB.
 
     Services must NOT be created in callbacks. E.g., it is an error to call
     CreateCanController() in the registered callbacks for
-    :cpp:func:`InitHandler<ib::mw::sync::IParticipantController::SetInitHandler()>`
+    :cpp:func:`CommunicationReadyHandler<ib::mw::sync::ILifecycleService::CommunicationReadyHandler()>`
     or even
-    :cpp:func:`SimTask<ib::mw::sync::IParticipantController::SetSimulationTask()>`.
+    :cpp:func:`SimTask<ib::mw::sync::ITimeSyncService::SetSimulationTask()>`.
 
 
 .. doxygenclass:: ib::mw::IParticipant

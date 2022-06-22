@@ -110,7 +110,7 @@ The following example configures a FlexRay controller with two |FlexrayTxBufferC
 
     flexrayController->Configure(controllerConfig);
 
-Note that |Configure| should be called in the InitHandler of a ParticipantController.
+Note that |Configure| should be called in the CommunicationReadyHandler of the LifecycleService.
 
 Startup
 _______

@@ -13,11 +13,12 @@ const auto domainId = 42;
 
 void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 {
-    auto participant = ib::CreateParticipant(config, "PublisherParticipant", domainId, true);
+    auto participant = ib::CreateParticipant(config, "PublisherParticipant", domainId);
     auto* publisher = participant->CreateDataPublisher("DataService");
-    auto* participantCtrl = participant->GetParticipantController();
+    auto* lifecycleService = participant->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    participantCtrl->SetSimulationTask([publisher](std::chrono::nanoseconds now) {
+    timeSyncService->SetSimulationTask([publisher](std::chrono::nanoseconds now) {
         static auto msgIdx = 0;
 
         //generate some random data
@@ -30,7 +31,7 @@ void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     //run the simulation main loop forever
     try
     {
-        auto result = participantCtrl->Run();
+        auto result = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
         std::cout << "Publisher: result: " << result << std::endl;
     }
     catch (const std::exception& e)
@@ -41,9 +42,10 @@ void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 
 void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 {
-    auto participant = ib::CreateParticipant(config, "SubscriberParticipant", domainId, true);
+    auto participant = ib::CreateParticipant(config, "SubscriberParticipant", domainId);
     auto* subscriber = participant->CreateDataSubscriber("DataService");
-    auto* participantCtrl = participant->GetParticipantController();
+    auto* lifecycleService = participant->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     //Register callback for reception of messages
     subscriber->SetDefaultDataMessageHandler(
@@ -52,13 +54,13 @@ void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
             std::cout << " <- Received data=\"" << message << "\"" << std::endl;
         });
 
-    participantCtrl->SetSimulationTask([](std::chrono::nanoseconds) {
+    timeSyncService->SetSimulationTask([](std::chrono::nanoseconds) {
         //simulation task must be defined, even an empty one
     });
 
     try
     {
-        auto result = participantCtrl->Run();
+        auto result = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
         std::cout << "Subscriber: result: " << result << std::endl;
     }
     catch (const std::exception& e)

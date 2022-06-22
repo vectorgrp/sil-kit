@@ -59,7 +59,8 @@ management.
 .. toctree::
   :maxdepth: 1
 
-  participantcontroller
+  lifecycleService
+  timeSyncService
   systemcontroller
   systemmonitor
 

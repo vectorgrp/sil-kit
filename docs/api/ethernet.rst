@@ -132,7 +132,7 @@ Initialization
 ______________
 
 If used within a simulated Ethernet network, the Ethernet controller first has to call |Activate| before being able to
-send frames. Note that |Activate| can be called in the InitHandler of a ParticipantController.
+send frames. Note that |Activate| can be called in the CommunicationReadyHandler of a LifecycleService.
 
 Switches
 ________

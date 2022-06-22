@@ -274,7 +274,7 @@ TEST_F(RpcITest, test_1_participant_selfdelivery_same_functionname)
 }
 
 //-----------------------------------------------------
-// Async tests: No participantController/SimulationTask
+// Async tests: No TimeSyncService/SimulationTask
 //-----------------------------------------------------
 
 // Async: Start servers first, call with delay to ensure reception

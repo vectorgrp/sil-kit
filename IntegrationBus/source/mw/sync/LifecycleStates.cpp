@@ -102,7 +102,7 @@ auto InvalidState::GetParticipantState() -> ParticipantState
     return ParticipantState::Invalid;
 }
 
-// ControllersCreatedState
+// ServicesCreatedState
 void ServicesCreatedState::NewSystemState(SystemState systemState)
 {
     if (IsAnyOf(systemState, {SystemState::ServicesCreated, SystemState::CommunicationInitializing,

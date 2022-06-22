@@ -543,7 +543,7 @@ Registered user callbacks are served with Replay Messages if the configured dire
 The trace and replay mechanism is an extension to the existing :cpp:class:`IParticipant<ib::mw::IParticipant>`, and consists of several parts:
 
 To have a consistent time base during the simulation and throughout the participant, an instance of :cpp:class:`ITimeProvider<ib::sim::sync::ITimeProvider>` is used.
-It gives access to the current simulation time, or as a fallback the wall-clock time if no participant controller is configured.
+It gives access to the current simulation time, or as a fallback the wall-clock time if no time synchronization service is configured.
 
 The actual data flow of messages during tracing is achieved by the  *ITraceMessageSource* and *ITraceMessageSinks* interfaces.
 A controller implementing the *ITraceMessageSource* allows attaching
@@ -563,7 +563,7 @@ The architecture of the tracing facility is shown in :ref:`the following
 figure<figure:tracing>`.
 The Participant takes care of configuring controllers with their trace sinks upon
 creation.
-If the Participant has a participant controller, then the virtual simulation time will be used in a time provider instance.
+If the Participant has a time synchronization service, then the virtual simulation time will be used in a time provider instance.
 This time provider is used to get the current time stamp when messages are pushed to a trace sink.
 
 

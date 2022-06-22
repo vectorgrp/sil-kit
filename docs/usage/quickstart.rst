@@ -29,8 +29,8 @@ Terminology
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services, e.g.,
      a :doc:`CAN Controller<../api/can>` or a :doc:`DataPublisher<../api/datamessage>`. A special service is the
-     :doc:`Participant Controller<../api/participantcontroller>`, which
-     provides state handling and time synchronization.
+     :doc:`Life Cycle Service<../api/lifecycleService>`, which
+     provides state handling and access to the time synchronization service.
  * - :doc:`Configuration<../configuration/configuration>`
    - The optional participant configuration file allows to easily configure a participant and its interconnection within the 
      simulation. It can be used to change a participants behavior without needing to recompile its sources.
@@ -111,7 +111,7 @@ One thread will act as a publisher by sending a test string to its subscribers:
 First, the configured middleware domain is joined by creating a participant ``PublisherParticipant``.
 Creating the Participant properly initializes the VIB library and allows to instantiate
 :doc:`Services<../api/api>` and offers access to the
-:doc:`Participant Controller<../api/participantcontroller>`.
+:doc:`Life Cycle Service<../api/lifecycleService>`.
 
 Next, we create a :cpp:class:`publisher<ib::sim::data::IDataPublisher>` for the ``DataService`` topic.
 This allows sending data through its :cpp:func:`Publish()<ib::sim::generic::IGenericPublisher::Publish()>`
@@ -120,12 +120,8 @@ method, when we are in an active simulation.
 The actual simulation is performed in the simulation task. The simulation task
 is a callback that is executed by the VIB runtime whenever the the simulation
 time of the VIB is advanced. This callback has to be registered with the
-participant controller's
-:cpp:func:`SetSimulationTask()<ib::mw::sync::IParticipantController::SetSimulationTask()>`.
-
-To start the runtime and perform the actual simulation work in the current thread,
-the blocking :cpp:func:`Run()<ib::mw::sync::IParticipantController::Run()>`
-method must be invoked.
+time synchronization service's
+:cpp:func:`SetSimulationTask()<ib::mw::sync::ITimeSyncService::SetSimulationTask()>`.
 
 The subscriber runs in its own thread, too:
 

@@ -139,8 +139,8 @@ rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
 
 .. admonition:: Note
 
-   Both |SetBaudRate| and |Start|  should not be called earlier than in the participant controller's
-   :cpp:func:`init handler<ib::mw::synd::IParticipantController::SetInitHandler()>`. Otherwise, it is not guaranteed 
+   Both |SetBaudRate| and |Start|  should not be called earlier than in the life cycle service's
+   :cpp:func:`communication ready handler<ib::mw::synd::ILifecycleService::SetCommunicationReadyHandler()>`. Otherwise, it is not guaranteed 
    that all participants are already connected, which can cause the call to have no effect.
 
 Managing the event handlers
