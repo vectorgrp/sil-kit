@@ -393,32 +393,6 @@ ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant)
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_PrepareColdswap(ib_Participant* participant)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* systemController = cppParticipant->GetSystemController();
-    systemController->PrepareColdswap();
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Participant_ExecuteColdswap(ib_Participant* participant)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* systemController = cppParticipant->GetSystemController();
-    systemController->ExecuteColdswap();
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
 ib_ReturnCode ib_Participant_SetRequiredParticipants(ib_Participant* participant,
                                                      const ib_StringList* requiredParticipantNames)
 {

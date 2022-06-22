@@ -55,29 +55,6 @@ public:
      */
     virtual void Shutdown() const = 0;
 
-    /*! \brief Send \ref SystemCommand::Kind::PrepareColdswap to all participants
-    *
-    *  The coldswap process is used to restart a simulation but allow
-    *  to swap out one or more participants. The PrepareColdswap()
-    *  command brings the system into a safe state such that the actual
-    *  coldswap can be performed without loss of data.
-    * 
-    *  The command is only allowed if system is in
-    *  SystemState::Stopped or SystemState::Error.
-    */
-    virtual void PrepareColdswap() const = 0;
-
-    /*! \brief Send \ref SystemCommand::Kind::ExecuteColdswap to all participants
-    *
-    *  The coldswap process is used to restart a simulation but allow
-    *  to swap out one or more participants. Once the system is ready
-    *  to perform a coldswap, the actual coldswap can be initiated with
-    *  the ExecuteColdswap() command.
-    *
-    *  The command is only allowed if system is in SystemState::ColdswapReady
-    */
-    virtual void ExecuteColdswap() const = 0;
-
     /*! \brief Send \ref SystemCommand::Kind::AbortSimulation to all participants
     *
     *  The abort simulation command signals all participants to terminate their

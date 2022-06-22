@@ -148,12 +148,6 @@ namespace {
         returnCode = ib_Participant_Continue(nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_PrepareColdswap(nullptr);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-        returnCode = ib_Participant_ExecuteColdswap(nullptr);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
         ib_ParticipantState participantState;
         returnCode = ib_Participant_GetParticipantState(nullptr, nullptr, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
@@ -338,14 +332,6 @@ namespace {
 
         EXPECT_CALL(mockParticipant.mockSystemController, Stop()).Times(testing::Exactly(1));
         returnCode = ib_Participant_StopSimulation((ib_Participant*)&mockParticipant);
-        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
-
-        EXPECT_CALL(mockParticipant.mockSystemController, PrepareColdswap()).Times(testing::Exactly(1));
-        returnCode = ib_Participant_PrepareColdswap((ib_Participant*)&mockParticipant);
-        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
-
-        EXPECT_CALL(mockParticipant.mockSystemController, ExecuteColdswap()).Times(testing::Exactly(1));
-        returnCode = ib_Participant_ExecuteColdswap((ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockParticipant.mockSystemController, Shutdown()).Times(testing::Exactly(1));

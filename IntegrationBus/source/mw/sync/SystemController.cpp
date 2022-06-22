@@ -37,17 +37,6 @@ void SystemController::Shutdown() const
     SendSystemCommand(SystemCommand::Kind::Shutdown);
 }
 
-void SystemController::PrepareColdswap() const
-{
-    SendSystemCommand(SystemCommand::Kind::PrepareColdswap);
-}
-
-void SystemController::ExecuteColdswap() const
-{
-    _participant->FlushSendBuffers();
-    SendSystemCommand(SystemCommand::Kind::ExecuteColdswap);
-}
-
 void SystemController::AbortSimulation() const
 {
     SendSystemCommand(SystemCommand::Kind::AbortSimulation);

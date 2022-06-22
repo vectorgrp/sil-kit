@@ -35,8 +35,6 @@ struct SystemCommand
         Run = 1, //!< The run command
         Stop = 2, //!< The stop command
         Shutdown = 3, //!< The shutdown command
-        PrepareColdswap = 4, //!< The prepare coldswap command
-        ExecuteColdswap = 5, //!< The execute coldswap command
         AbortSimulation = 6 //!< The abort simulation command
     };
 
@@ -58,11 +56,6 @@ enum class ParticipantState : uint8_t {
     ShuttingDown = 100, //!< The shutting down state
     Shutdown = 110, //!< The shutdown state
     Reinitializing = 120,  //!< The reinitializing state
-
-    ColdswapPrepare = 200, //!< The ColdswapPrepare state
-    ColdswapReady = 210, //!< The ColdswapReady state
-    ColdswapShutdown = 220, //!< The ColdswapShutdown state
-    ColdswapIgnored = 230 //!< The ColdswapIgnored state
 };
 
 struct ParticipantStatus
@@ -89,11 +82,6 @@ enum class SystemState : uint8_t {
     ShuttingDown = 100, //!< The shutting down state
     Shutdown = 110, //!< The shutdown state
     Reinitializing = 120, //!< The reinitializing state
-
-    ColdswapPrepare = 200, //!< The ColdswapPrepare state
-    ColdswapReady = 210, //!< The ColdswapReady state
-    ColdswapPending = 220, //!< The ColdswapPending state
-    ColdswapDone = 230 //!< The ColdswapDone state
 };
 
 struct ExpectedParticipants

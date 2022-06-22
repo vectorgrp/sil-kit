@@ -329,10 +329,6 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
     case SystemCommand::Kind::AbortSimulation:
         AbortSimulation("Received SystemCommand::AbortSimulation");
         return;
-
-    // TODO Remove legacy code (VIB-790)
-    case SystemCommand::Kind::PrepareColdswap: 
-    case SystemCommand::Kind::ExecuteColdswap: 
     default: break;
     }
 

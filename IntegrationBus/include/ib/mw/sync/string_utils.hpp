@@ -61,14 +61,6 @@ std::string to_string(ParticipantState state)
         return "Stopping";
     case ParticipantState::Stopped:
         return "Stopped";
-    case ParticipantState::ColdswapPrepare:
-        return "ColdswapPrepare";
-    case ParticipantState::ColdswapReady:
-        return "ColdswapReady";
-    case ParticipantState::ColdswapShutdown:
-        return "ColdswapShutdown";
-    case ParticipantState::ColdswapIgnored:
-        return "ColdswapIgnored";
     case ParticipantState::Error:
         return "Error";
     case ParticipantState::ShuttingDown:
@@ -103,14 +95,6 @@ std::string to_string(SystemState state)
         return "Stopping";
     case SystemState::Stopped:
         return "Stopped";
-    case SystemState::ColdswapPrepare:
-        return "ColdswapPrepare";
-    case SystemState::ColdswapReady:
-        return "ColdswapReady";
-    case SystemState::ColdswapPending:
-        return "ColdswapPending";
-    case SystemState::ColdswapDone:
-        return "ColdswapDone";
     case SystemState::Error:
         return "Error";
     case SystemState::ShuttingDown:
@@ -151,10 +135,6 @@ std::string to_string(SystemCommand::Kind command)
         return "Stop";
     case SystemCommand::Kind::Shutdown:
         return "Shutdown";
-    case SystemCommand::Kind::PrepareColdswap:
-        return "PrepareColdswap";
-    case SystemCommand::Kind::ExecuteColdswap:
-        return "ExecuteColdswap";
     case SystemCommand::Kind::AbortSimulation:
         return "AbortSimulation";
     }

@@ -93,18 +93,4 @@ TEST_F(SystemControllerTest, send_shutdown)
     controller.Shutdown();
 }
 
-TEST_F(SystemControllerTest, send_preparecoldswap)
-{
-    SystemCommand cmd{SystemCommand::Kind::PrepareColdswap};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
-    controller.PrepareColdswap();
-}
-    
-TEST_F(SystemControllerTest, send_executecoldswap)
-{
-    SystemCommand cmd{SystemCommand::Kind::ExecuteColdswap};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
-    controller.ExecuteColdswap();
-}
-
 } // anonymous namespace for test

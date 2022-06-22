@@ -35,10 +35,6 @@ sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
         return SystemCommand::Kind::Stop;
     else if (cmdString == "Shutdown")
         return SystemCommand::Kind::Shutdown;
-    else if (cmdString == "PrepareColdswap")
-        return SystemCommand::Kind::PrepareColdswap;
-    else if (cmdString == "ExecuteColdswap")
-        return SystemCommand::Kind::ExecuteColdswap;
 
     throw ib::TypeConversionError{};
 }
@@ -147,7 +143,7 @@ public:
             }
 
             std::cerr << "Invalid command: '" << cmdName << "'" << std::endl;
-            std::cout << "Available system commands: 'Run', 'Stop', 'Shutdown', 'PrepareColdswap', 'ExecuteColdswap'" << std::endl;
+            std::cout << "Available system commands: 'Run', 'Stop', 'Shutdown'" << std::endl;
             std::cout << "Available participant commands: 'Initialize <participantName>', 'Restart <participantName>'" << std::endl;
             std::cout << "Command 'Exit' ends the process" << std::endl;
             std::cout << "> ";
@@ -170,12 +166,6 @@ public:
             return;
         case SystemCommand::Kind::Shutdown:
             _controller->Shutdown();
-            return;
-        case SystemCommand::Kind::PrepareColdswap:
-            _controller->PrepareColdswap();
-            return;
-        case SystemCommand::Kind::ExecuteColdswap:
-            _controller->ExecuteColdswap(); 
             return;
         case SystemCommand::Kind::AbortSimulation: 
             _controller->AbortSimulation();

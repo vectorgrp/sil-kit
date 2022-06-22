@@ -42,8 +42,6 @@ public:
     void Run() const override;
     void Stop() const override;
     void Shutdown() const override;
-    void PrepareColdswap() const override;
-    void ExecuteColdswap() const override;
     void AbortSimulation() const override;
     void SetRequiredParticipants(const std::vector<std::string>& participantNames) override;
 

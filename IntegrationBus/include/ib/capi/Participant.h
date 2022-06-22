@@ -40,10 +40,6 @@ typedef int8_t ib_ParticipantState;
 #define ib_ParticipantState_Paused                ((ib_ParticipantState) 5)   //!< The paused state
 #define ib_ParticipantState_Stopping              ((ib_ParticipantState) 6)   //!< The stopping state
 #define ib_ParticipantState_Stopped               ((ib_ParticipantState) 7)   //!< The stopped state
-#define ib_ParticipantState_ColdswapPrepare       ((ib_ParticipantState) 8)   //!< The ColdswapPrepare state
-#define ib_ParticipantState_ColdswapReady         ((ib_ParticipantState) 9)   //!< The ColdswapReady state
-#define ib_ParticipantState_ColdswapShutdown      ((ib_ParticipantState) 10)  //!< The ColdswapShutdown state
-#define ib_ParticipantState_ColdswapIgnored       ((ib_ParticipantState) 11)  //!< The ColdswapIgnored state
 #define ib_ParticipantState_Error                 ((ib_ParticipantState) 12)  //!< The error state
 #define ib_ParticipantState_ShuttingDown          ((ib_ParticipantState) 13)  //!< The shutting down state
 #define ib_ParticipantState_Shutdown              ((ib_ParticipantState) 14)  //!< The shutdown state
@@ -57,10 +53,6 @@ typedef int8_t ib_SystemState;
 #define ib_SystemState_Paused                ((ib_SystemState) 5)   //!< The paused state
 #define ib_SystemState_Stopping              ((ib_SystemState) 6)   //!< The stopping state
 #define ib_SystemState_Stopped               ((ib_SystemState) 7)   //!< The stopped state
-#define ib_SystemState_ColdswapPrepare       ((ib_SystemState) 8)   //!< The ColdswapPrepare state
-#define ib_SystemState_ColdswapReady         ((ib_SystemState) 9)   //!< The ColdswapReady state
-#define ib_SystemState_ColdswapPending       ((ib_SystemState) 10)  //!< The ColdswapPending state
-#define ib_SystemState_ColdswapDone          ((ib_SystemState) 11)  //!< The ColdswapDone state
 #define ib_SystemState_Error                 ((ib_SystemState) 12)  //!< The error state
 #define ib_SystemState_ShuttingDown          ((ib_SystemState) 13)  //!< The shutting down state
 #define ib_SystemState_Shutdown              ((ib_SystemState) 14)  //!< The shutdown state
@@ -310,28 +302,6 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_Continue(ib_Participant* particip
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant);
 
-/*! \brief Send \ref the PrepareColdswap command to all participants
-*
-*  The coldswap process is used to restart a simulation but allow
-*  to swap out one or more participants. The PrepareColdswap()
-*  command brings the system into a safe state such that the actual
-*  coldswap can be performed without loss of data.
-* 
-*  The command is only allowed if system is in
-*  ib_SystemState_Stopped or ib_SystemState_Error.
-*/
-IntegrationBusAPI ib_ReturnCode ib_Participant_PrepareColdswap(ib_Participant* participant);
-
-/*! \brief Send \ref the ExecuteColdswap command to all participants
-*
-*  The coldswap process is used to restart a simulation but allow
-*  to swap out one or more participants. Once the system is ready
-*  to perform a coldswap, the actual coldswap can be initiated with
-*  the ExecuteColdswap() command.
-*
-*  The command is only allowed if system is in ib_SystemState_ColdswapReady
-*/
-IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteColdswap(ib_Participant* participant);
 
 /*! \brief Get the current participant state of the participant given by participantName
   */
