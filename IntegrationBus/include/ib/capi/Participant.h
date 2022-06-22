@@ -425,6 +425,52 @@ typedef ib_ReturnCode (*ib_Participant_RegisterParticipantStatusHandler_t)(ib_Pa
 IntegrationBusAPI ib_ReturnCode ib_Participant_SetRequiredParticipants(
     ib_Participant* participant, const ib_StringList* requiredParticipantNames);
 
+/*! \brief Start the lifecycle with the given parameters without simulation time synchronization.
+* 
+* \param participant the instance of the participant.
+* \param hasCoordinatedSimulationStart the participant shall take part in the coordinated startup.
+* \param hasCoordinatedSimulationStop the participant shall take part in the coordinated shutdown.
+* \param isRequiredParticipant this participant is required for the simulation run to begin simulation.
+* \param outParticipantState the final state of the participant when the lifecycle finished.
+* 
+*/
+
+typedef ib_ReturnCode (*ib_Participant_ExecuteLifecycleNoSyncTime_t)(
+    ib_Participant* participant,
+    ib_Bool hasCoordinatedSimulationStart,
+    ib_Bool hasCoordinatedSimulationStop,
+    ib_Bool isRequiredParticipant,
+    ib_ParticipantState* outParticipantState);
+
+IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
+    ib_Participant* participant,
+    ib_Bool hasCoordinatedSimulationStart,
+    ib_Bool hasCoordinatedSimulationStop,
+    ib_Bool isRequiredParticipant,
+    ib_ParticipantState* outParticipantState);
+
+/*! \brief Start the lifecycle with the given parameters with simulation time synchronization.
+* 
+* \param participant the instance of the participant.
+* \param hasCoordinatedSimulationStart the participant shall take part in the coordinated startup.
+* \param hasCoordinatedSimulationStop the participant shall take part in the coordinated shutdown.
+* \param isRequiredParticipant this participant is required for the simulation run to begin simulation.
+* \param outParticipantState the final state of the participant when the lifecycle finished.
+*/
+
+typedef ib_ReturnCode (*ib_Participant_ExecuteLifecycleWithSyncTime_t)(
+    ib_Participant* participant,
+    ib_Bool hasCoordinatedSimulationStart,
+    ib_Bool hasCoordinatedSimulationStop,
+    ib_Bool isRequiredParticipant,
+    ib_ParticipantState* outParticipantState);
+
+IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(
+    ib_Participant* participant,
+    ib_Bool hasCoordinatedSimulationStart,
+    ib_Bool hasCoordinatedSimulationStop,
+    ib_Bool isRequiredParticipant,
+    ib_ParticipantState* outParticipantState);
 IB_END_DECLS
 
 #pragma pack(pop)

@@ -58,6 +58,14 @@ IB_BEGIN_DECLS
     return ib_ReturnCode_BADPARAMETER;                        \
   }
 
+#define ASSERT_VALID_BOOL_PARAMETER(b)                        \
+  if (!(b == ib_True || b == ib_False))                        \
+  {                                                           \
+    ib_error_string =                                         \
+        "The parameter '" #b "' is not a valid ib_Bool.";     \
+    return ib_ReturnCode_BADPARAMETER;                        \
+  }
+
 extern thread_local std::string ib_error_string;
 
 IB_END_DECLS
