@@ -102,9 +102,9 @@ ib_ReturnCode ib_Participant_SetInitHandler(ib_Participant* participant, void* c
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* stateService = cppParticipant->GetLifecycleService();
+    auto* lifecycleService = cppParticipant->GetLifecycleService();
 
-    stateService->SetCommunicationReadyHandler(
+    lifecycleService->SetCommunicationReadyHandler(
       [handler, context, participant]() {
           handler(context, participant);
       });
@@ -121,9 +121,9 @@ ib_ReturnCode ib_Participant_SetStopHandler(ib_Participant* participant, void* c
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* stateService = cppParticipant->GetLifecycleService();
+    auto* lifecycleService = cppParticipant->GetLifecycleService();
 
-    stateService->SetStopHandler(
+    lifecycleService->SetStopHandler(
       [handler, context, participant]() {
           handler(context, participant);
       });
@@ -139,9 +139,9 @@ ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant, voi
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* stateService = cppParticipant->GetLifecycleService();
+    auto* lifecycleService = cppParticipant->GetLifecycleService();
 
-    stateService->SetShutdownHandler(
+    lifecycleService->SetShutdownHandler(
       [handler, context, participant]() {
           handler(context, participant);
       });
@@ -159,7 +159,7 @@ ib_ReturnCode ib_Participant_Run(ib_Participant* participant,
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* lifecycleService = cppParticipant->GetLifecycleService();
-    auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     // Emulate the old API that was always synchronized and with states
     auto finalState = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
@@ -183,7 +183,7 @@ ib_ReturnCode ib_Participant_RunAsync(ib_Participant* participant)
     }
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* lifecycleService = cppParticipant->GetLifecycleService();
-    auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
     sRunAsyncFuturePerParticipant[participant] =
         lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
     return ib_ReturnCode_SUCCESS;
@@ -236,8 +236,8 @@ ib_ReturnCode ib_Participant_SetSimulationTask(ib_Participant* participant, void
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipantInternal*>(participant);
-    auto* syncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
-    syncService->SetSimulationTask(
+    auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+    timeSyncService->SetSimulationTask(
       [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
           handler(context, participant, static_cast<ib_NanosecondsTime>(now.count()));
       });
@@ -253,8 +253,8 @@ ib_ReturnCode ib_Participant_SetSimulationTaskAsync(ib_Participant* participant,
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* syncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
-    syncService->SetSimulationTaskAsync(
+    auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+    timeSyncService->SetSimulationTaskAsync(
       [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
           handler(context, participant, static_cast<ib_NanosecondsTime>(now.count()));
       });
@@ -269,8 +269,8 @@ ib_ReturnCode ib_Participant_CompleteSimulationTask(ib_Participant* participant)
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    auto* syncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
-    syncService->CompleteSimulationTask();
+    auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+    timeSyncService->CompleteSimulationTask();
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
