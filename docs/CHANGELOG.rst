@@ -5,6 +5,63 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.26] - unreleased
+----------------------
+
+Added
+~~~~~
+- the new ILifeCycleService is now exposed on the C-API:
+  added the new :cpp:func:`ib_Participant_ExecuteLifecycleWithTime` and
+  :cpp:func:`ib_Participant_ExecuteLifecycleNoSyncTime` functions
+Changed
+~~~~~~~
+- C-API: renamed the `ib_Participant_WaitForAsyncRunToComplete` to 
+  `ib_Participant_WaitForLifecycleToComplete`.
+- C-API:  the participant Init handler no longer has a command parameter:
+
+  + old:
+
+  .. code-block:: c
+
+    typedef void (*ib_ParticipantInitHandler_t)(void* context,
+                      ib_Participant* participant,
+                      ib_ParticipantCommand* command);
+
+  + new:
+
+  .. code-block:: c
+
+    typedef void (*ib_ParticipantInitHandler_t)(void* context,
+                      ib_Participant* participant); 
+
+
+Removed
+~~~~~~~
+- C-API: the  `ib_Participant_RunAsync` is superseded by the
+  `ib_Participant_ExecuteLifeCycle...` functions.
+- C-API: the `ib_Participant_Run` function was removed.
+  Use the new asynchronous `ib_Participant_ExecuteLifecycleWithSyncTime` or the
+  `ib_Participant_ExecuteLifecycleNoSyncTime` as replacement. For Example:
+
+  + old:
+        
+  .. code-block:: c
+
+    ib_ReturnCode returnCode = ib_Participant_Run(participant);
+
+  + new:
+
+  .. code-block:: c
+
+    ib_ReturnCode returnCode = ib_Participant_ExecuteLifecycleNoSyncTime(
+                                   participant, ib_False, ib_False, ib_False);
+    // error check ommited
+    ib_ParticipantState outParticipantState;
+    returnCode = ib_Participant_WaitForLifecycleToComplete(participant,
+                    &outParticipantState);
+
+
+
 [3.99.25] - 2022-06-13
 ----------------------
 
