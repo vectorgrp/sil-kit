@@ -13,6 +13,4 @@ in the C API but directly provided through the ib_Participant.
 .. doxygenfunction:: ib_Participant_RunSimulation
 .. doxygenfunction:: ib_Participant_StopSimulation
 .. doxygenfunction:: ib_Participant_Shutdown
-.. doxygenfunction:: ib_Participant_PrepareColdswap
-.. doxygenfunction:: ib_Participant_ExecuteColdswap
 .. doxygenfunction:: ib_Participant_SetRequiredParticipants
