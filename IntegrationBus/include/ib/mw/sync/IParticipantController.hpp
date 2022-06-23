@@ -24,7 +24,7 @@ public:
     /*! \brief Register a callback to perform initialization.
      *
      * The handler is called when an \ref ParticipantCommand::Kind::Initialize
-     * or \ref ParticipantCommand::Kind::Reinitialize has been received.
+     * or \ref ParticipantCommand::Kind::Restart has been received.
      * The callback is executed in the context of the middleware
      * thread that received the command.
      * After the handler has been processed, the participant

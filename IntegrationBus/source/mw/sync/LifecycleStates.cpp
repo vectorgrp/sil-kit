@@ -178,7 +178,7 @@ auto CommunicationInitializedState::GetParticipantState() -> ParticipantState
 // ReadyToRunState
 void ReadyToRunState::NewSystemState(SystemState systemState)
 {
-    // TODO how would this be reset upon reinitialize?
+    // TODO how would this be reset upon restart?
     if (IsAnyOf(systemState, {SystemState::ReadyToRun, SystemState::Running}))
     {
         if (_receivedRunCommand)

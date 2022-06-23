@@ -17,9 +17,9 @@ void SystemController::Initialize(const std::string&) const
     //SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Initialize);
 }
 
-void SystemController::Reinitialize(const std::string& participantName) const
+void SystemController::Restart(const std::string& participantName) const
 {
-    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Reinitialize);
+    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Restart);
 }
 
 void SystemController::Run() const

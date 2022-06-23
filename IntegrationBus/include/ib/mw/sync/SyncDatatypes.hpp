@@ -19,7 +19,7 @@ struct ParticipantCommand
     enum class Kind : uint8_t {
         Invalid = 0, //!< An invalid command
         Initialize = 1, //!< The initialize command // TODO will be removed
-        Reinitialize = 2, //!< The reinitialize command
+        Restart = 2, //!< The restart command
         Shutdown = 3 //!< The shutdown command
     };
 

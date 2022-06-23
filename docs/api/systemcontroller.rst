@@ -53,11 +53,11 @@ the :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>` command::
   systemController->Stop();
 
 If the system is in :cpp:enumerator:`SystemState::Stopped<ib::mw::sync::Stopped>`, participants can either
-be reinitialize or the system can be shut down::
+be restart or the system can be shut down::
 
-  // Reinitialize a participant by providing its name.
+  // Restart a participant by providing its name.
   auto* systemController = participant->GetSystemController();
-  systemController->Reinitialize(participant.name);
+  systemController->Restart(participant.name);
 
   // Shut down all participants.
   auto* systemController = participant->GetSystemController();

@@ -119,13 +119,13 @@ namespace {
         returnCode = ib_Participant_Initialize(nullptr, "test");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_Reinitialize((ib_Participant*)&mockParticipant, nullptr);
+        returnCode = ib_Participant_Restart((ib_Participant*)&mockParticipant, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_Reinitialize(nullptr, nullptr);
+        returnCode = ib_Participant_Restart(nullptr, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_Reinitialize(nullptr, "test");
+        returnCode = ib_Participant_Restart(nullptr, "test");
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_Participant_RunSimulation(nullptr);
@@ -291,7 +291,7 @@ namespace {
         returnCode = ib_Participant_Initialize((ib_Participant*)&mockParticipant, "participant");
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        returnCode = ib_Participant_Reinitialize((ib_Participant*)&mockParticipant, "participant");
+        returnCode = ib_Participant_Restart((ib_Participant*)&mockParticipant, "participant");
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockParticipant.mockSystemController, Run()).Times(testing::Exactly(1));

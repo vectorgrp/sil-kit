@@ -175,9 +175,9 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
+TEST_F(LifecycleServiceTest, start_restart_stop_coordinated)
 {
-    // Intended state order: Create, ..., start, stop, reinitialize, create, start, stop, shutdown
+    // Intended state order: Create, ..., start, stop, restart, create, start, stop, shutdown
     LifecycleService lifecycleService(&participant, healthCheckConfig);
     MockTimeSync mockTimeSync(&participant, &lifecycleService, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -256,9 +256,9 @@ TEST_F(LifecycleServiceTest, start_reinitialize_stop_coordinated)
     // transitions to own state must not fail
     lifecycleService.ReceiveIbMessage(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
-    // reinitialize
-    ParticipantCommand reinitializeCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Reinitialize};
-    lifecycleService.ReceiveIbMessage(&masterId, reinitializeCommand);
+    // restart
+    ParticipantCommand restartCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Restart};
+    lifecycleService.ReceiveIbMessage(&masterId, restartCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ServicesCreated);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -377,7 +377,7 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
-TEST_F(LifecycleServiceTest, error_handling_error_recovery_reinitialize)
+TEST_F(LifecycleServiceTest, error_handling_error_recovery_restart)
 {
     LifecycleService lifecycleService(&participant, healthCheckConfig);
     MockTimeSync mockTimeSync(&participant, &lifecycleService, healthCheckConfig);
@@ -431,9 +431,9 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_reinitialize)
     ParticipantCommand shutdownCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Shutdown};
     lifecycleService.ReceiveIbMessage(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
-    // recover via reinitialize
-    ParticipantCommand reinitializeCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Reinitialize};
-    lifecycleService.ReceiveIbMessage(&masterId, reinitializeCommand);
+    // recover via restart
+    ParticipantCommand restartCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Restart};
+    lifecycleService.ReceiveIbMessage(&masterId, restartCommand);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // break it again

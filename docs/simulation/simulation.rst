@@ -157,7 +157,7 @@ If a participant temporarily cannot advance the simulation, e.g., because a debu
 
 A simulation run is finished by issuing the system command :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>`. 
 A callback registered via :cpp:func:`SetStopHandler()<ib::mw::sync::IParticipantController::SetStopHandler()>` can be used to perform a collection of simulation results. 
-Once all participants have successfully executed their StopHandler and the system is in state :cpp:enumerator:`Stopped<ib::mw::sync::SystemState::Stopped>`, a |SystemController| can either end the simulation via :cpp:func:`Shutdown()<ib::mw::sync::ISystemController::Shutdown()>` or prepare it via :cpp:func:`Reinitialize()<ib::mw::sync::ISystemController::Reinitialize()>` for another simulation run. 
+Once all participants have successfully executed their StopHandler and the system is in state :cpp:enumerator:`Stopped<ib::mw::sync::SystemState::Stopped>`, a |SystemController| can either end the simulation via :cpp:func:`Shutdown()<ib::mw::sync::ISystemController::Shutdown()>` or prepare it via :cpp:func:`Restart()<ib::mw::sync::ISystemController::Restart()>` for another simulation run. 
 In the latter case, simulation time is reset to zero.
 
 Whenever a participant encounters an error from which it cannot recover, it switches to the :cpp:enumerator:`Error<ib::mw::sync::ParticipantState::Error>` state to indicate this situation to the system. 

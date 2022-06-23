@@ -131,8 +131,8 @@ std::string to_string(ParticipantCommand::Kind command)
         return "Invalid";
     case ParticipantCommand::Kind::Initialize: 
         return "Initialize";
-    case ParticipantCommand::Kind::Reinitialize:
-        return "Reinitialize";
+    case ParticipantCommand::Kind::Restart:
+        return "Restart";
     case ParticipantCommand::Kind::Shutdown:
         return "Shutdown";
     }

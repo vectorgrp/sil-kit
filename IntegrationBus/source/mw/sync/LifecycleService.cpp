@@ -263,7 +263,7 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, cons
     
     if (_hasCoordinatedSimulationStop)
     {
-        if (command.kind == ParticipantCommand::Kind::Reinitialize)
+        if (command.kind == ParticipantCommand::Kind::Restart)
         {
             Restart(std::string{"Received ParticipantCommand::"} + to_string(command.kind));
         }

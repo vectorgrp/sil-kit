@@ -60,8 +60,8 @@ in the middleware's worker thread::
            switch(initCommand.kind) {
            case ParticipantCommand::Kind::Initialize:
                std::cout << "Initialize" << std::endl; break;
-           case ParticipantCommand::Kind::Reinitialize:
-               std::cout << "Re-intializing" << std::endl; break;
+           case ParticipantCommand::Kind::Restart:
+               std::cout << "Restarting" << std::endl; break;
            }
        }
     );

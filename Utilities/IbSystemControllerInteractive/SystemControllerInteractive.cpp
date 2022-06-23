@@ -75,8 +75,8 @@ sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString
         return ParticipantCommand::Kind::Invalid;
     else if (cmdString == "Initialize")
         return ParticipantCommand::Kind::Initialize;
-    else if (cmdString == "Reinitialize")
-        return ParticipantCommand::Kind::Reinitialize;
+    else if (cmdString == "Restart")
+        return ParticipantCommand::Kind::Restart;
 
     throw ib::TypeConversionError{};
 }
@@ -148,7 +148,7 @@ public:
 
             std::cerr << "Invalid command: '" << cmdName << "'" << std::endl;
             std::cout << "Available system commands: 'Run', 'Stop', 'Shutdown', 'PrepareColdswap', 'ExecuteColdswap'" << std::endl;
-            std::cout << "Available participant commands: 'Initialize <participantName>', 'Reinitialize <participantName>'" << std::endl;
+            std::cout << "Available participant commands: 'Initialize <participantName>', 'Restart <participantName>'" << std::endl;
             std::cout << "Command 'Exit' ends the process" << std::endl;
             std::cout << "> ";
         }
@@ -193,8 +193,8 @@ public:
         case ParticipantCommand::Kind::Initialize:
             _controller->Initialize(participantName);
             return;
-        case ParticipantCommand::Kind::Reinitialize:
-            _controller->Reinitialize(participantName);
+        case ParticipantCommand::Kind::Restart:
+            _controller->Restart(participantName);
         case ParticipantCommand::Kind::Shutdown:
             _controller->Shutdown();
         }
