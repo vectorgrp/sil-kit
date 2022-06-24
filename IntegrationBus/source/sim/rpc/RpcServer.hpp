@@ -8,7 +8,7 @@
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/rpc/IRpcServer.hpp"
 #include "ib/sim/rpc/IRpcCallHandle.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ITimeConsumer.hpp"
 
 #include "IIbToRpcServer.hpp"
 #include "IParticipantInternal.hpp"

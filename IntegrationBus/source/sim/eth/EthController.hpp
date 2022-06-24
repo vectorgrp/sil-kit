@@ -7,7 +7,7 @@
 
 #include "ib/sim/eth/IEthernetController.hpp"
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ITimeConsumer.hpp"
 
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"

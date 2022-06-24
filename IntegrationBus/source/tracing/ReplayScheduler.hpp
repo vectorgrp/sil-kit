@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-#include "ib/mw/sync/ITimeProvider.hpp"
+#include "ITimeProvider.hpp"
 #include "ib/mw/IParticipant.hpp"
 #include "ib/cfg/fwd_decl.hpp"
 

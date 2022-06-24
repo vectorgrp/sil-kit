@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ITimeConsumer.hpp"
 
 #include "IIbToDataSubscriberInternal.hpp"
 #include "IParticipantInternal.hpp"

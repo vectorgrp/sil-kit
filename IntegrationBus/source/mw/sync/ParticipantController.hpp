@@ -7,7 +7,7 @@
 #include <map>
 
 #include "ib/mw/sync/IParticipantController.hpp"
-#include "ib/mw/sync/ITimeProvider.hpp"
+#include "ITimeProvider.hpp"
 
 #include "ParticipantConfiguration.hpp"
 #include "PerformanceMonitor.hpp"

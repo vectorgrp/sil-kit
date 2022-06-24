@@ -7,7 +7,7 @@
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/data/IDataPublisher.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ITimeConsumer.hpp"
 
 #include "IIbToDataPublisher.hpp"
 #include "IParticipantInternal.hpp"

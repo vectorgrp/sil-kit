@@ -5,8 +5,7 @@
 #include <chrono>
 #include <string>
 
-#include "ib/mw/sync/ITimeProvider.hpp"
-
+#include "ITimeProvider.hpp"
 #include "Timer.hpp"
 #include "SynchronizedHandlers.hpp"
 

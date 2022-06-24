@@ -9,7 +9,7 @@
 
 #include "ib/sim/can/ICanController.hpp"
 #include "ib/mw/fwd_decl.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ITimeConsumer.hpp"
 
 #include "IIbToCanController.hpp"
 #include "IParticipantInternal.hpp"

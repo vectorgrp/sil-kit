@@ -2,21 +2,19 @@
 
 #pragma once
 
-#include "ib/mw/sync/ITimeProvider.hpp"
+#include <vector>
+#include <iostream>
+#include <typeinfo>
 
+#include "ITimeProvider.hpp"
 #include "CreateParticipant.hpp"
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
-
-#include <vector>
+#include "ProtocolVersion.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include <iostream>
-#include <typeinfo>
-
-#include "ProtocolVersion.hpp"
 
 namespace ib {
 namespace sim {

@@ -10,7 +10,7 @@
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/data/IDataSubscriber.hpp"
-#include "ib/mw/sync/ITimeConsumer.hpp"
+#include "ITimeConsumer.hpp"
 
 #include "IIbToDataSubscriber.hpp"
 #include "IParticipantInternal.hpp"
