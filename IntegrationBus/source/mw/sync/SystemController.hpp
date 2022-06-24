@@ -41,7 +41,7 @@ public:
     void Restart(const std::string& participantName) const override;
     void Run() const override;
     void Stop() const override;
-    void Shutdown() const override;
+    void Shutdown(const std::string& participantName) const override;
     void AbortSimulation() const override;
     void SetRequiredParticipants(const std::vector<std::string>& participantNames) override;
 

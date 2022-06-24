@@ -145,7 +145,7 @@ public:
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());
     MOCK_CONST_METHOD0(AbortSimulation, void());
-    MOCK_CONST_METHOD0(Shutdown, void());
+    MOCK_METHOD(void, Shutdown, (const std::string&), (const, override));
     MOCK_METHOD((void), SetRequiredParticipants, (const std::vector<std::string>& participantNames));
 };
 

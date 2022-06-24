@@ -152,7 +152,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Shutdown);
-    systemController->Shutdown();
+    systemController->Shutdown(participantName);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     ASSERT_EQ(finalState.wait_for(5s), std::future_status::ready);

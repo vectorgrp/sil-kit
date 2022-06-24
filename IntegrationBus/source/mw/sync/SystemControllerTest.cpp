@@ -86,11 +86,4 @@ TEST_F(SystemControllerTest, send_stop)
     controller.Stop();
 }
     
-TEST_F(SystemControllerTest, send_shutdown)
-{
-    SystemCommand cmd{SystemCommand::Kind::Shutdown};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
-    controller.Shutdown();
-}
-
 } // anonymous namespace for test

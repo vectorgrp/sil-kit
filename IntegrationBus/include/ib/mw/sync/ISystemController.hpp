@@ -52,8 +52,9 @@ public:
      *
      *  The command is only allowed if system is in
      *  SystemState::Stopped or SystemState::Error.
+     *  \param participantName identifies the participant to be initialized
      */
-    virtual void Shutdown() const = 0;
+    virtual void Shutdown(const std::string& participantName) const = 0;
 
     /*! \brief Send \ref SystemCommand::Kind::AbortSimulation to all participants
     *

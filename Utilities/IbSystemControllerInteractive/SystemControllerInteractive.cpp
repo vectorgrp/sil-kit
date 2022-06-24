@@ -33,8 +33,6 @@ sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
         return SystemCommand::Kind::Run;
     else if (cmdString == "Stop")
         return SystemCommand::Kind::Stop;
-    else if (cmdString == "Shutdown")
-        return SystemCommand::Kind::Shutdown;
 
     throw ib::TypeConversionError{};
 }
@@ -73,6 +71,8 @@ sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString
         return ParticipantCommand::Kind::Initialize;
     else if (cmdString == "Restart")
         return ParticipantCommand::Kind::Restart;
+    else if (cmdString == "Shutdown")
+        return ParticipantCommand::Kind::Shutdown;
 
     throw ib::TypeConversionError{};
 }
@@ -130,7 +130,17 @@ public:
                 cmdStream >> participantName;
                 if (participantName.empty())
                 {
-                    throw ib::TypeConversionError{};
+                    if(participantCommand == ParticipantCommand::Kind::Shutdown)
+                    {
+                        for(auto&& name: _expectedParticipantNames)
+                        {
+                            SendCommand(participantCommand, name);
+                        }
+                    }
+                    else
+                    {
+                        throw ib::TypeConversionError{"Participant command requrires a participant name"};
+                    }
                 }
 
                 SendCommand(participantCommand, participantName);
@@ -164,9 +174,6 @@ public:
         case SystemCommand::Kind::Stop:
             _controller->Stop();
             return;
-        case SystemCommand::Kind::Shutdown:
-            _controller->Shutdown();
-            return;
         case SystemCommand::Kind::AbortSimulation: 
             _controller->AbortSimulation();
             return;
@@ -186,7 +193,7 @@ public:
         case ParticipantCommand::Kind::Restart:
             _controller->Restart(participantName);
         case ParticipantCommand::Kind::Shutdown:
-            _controller->Shutdown();
+            _controller->Shutdown(participantName);
         }
     }
 

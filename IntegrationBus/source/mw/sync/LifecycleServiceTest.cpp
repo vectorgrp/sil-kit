@@ -819,7 +819,9 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
     lifecycleService.ReceiveIbMessage(&masterId, stopCommand);
-    SystemCommand shutdownCommand{SystemCommand::Kind::Shutdown};
+    ParticipantCommand shutdownCommand;
+    shutdownCommand.participant = descriptor.GetParticipantId();
+    shutdownCommand.kind=ParticipantCommand::Kind::Shutdown;
     lifecycleService.ReceiveIbMessage(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
@@ -870,9 +872,6 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
     lifecycleService.ReceiveIbMessage(&masterId, stopCommand);
-    SystemCommand shutdownCommand{SystemCommand::Kind::Shutdown};
-    lifecycleService.ReceiveIbMessage(&masterId, shutdownCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
     lifecycleService.ReceiveIbMessage(&masterId, abortCommand);

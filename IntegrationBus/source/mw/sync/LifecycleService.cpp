@@ -322,10 +322,6 @@ void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Sy
         Stop("Received SystemCommand::Stop");
         return;
 
-    case SystemCommand::Kind::Shutdown:
-        Shutdown("Received SystemCommand::Shutdown");
-        return;
-
     case SystemCommand::Kind::AbortSimulation:
         AbortSimulation("Received SystemCommand::AbortSimulation");
         return;

@@ -385,9 +385,9 @@ ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant)
   ASSERT_VALID_POINTER_PARAMETER(participant);
   CAPI_ENTER
   {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+    auto cppParticipant = reinterpret_cast<ib::mw::IParticipantInternal*>(participant);
     auto* systemController = cppParticipant->GetSystemController();
-    systemController->Shutdown();
+    systemController->Shutdown(cppParticipant->GetParticipantName());
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE

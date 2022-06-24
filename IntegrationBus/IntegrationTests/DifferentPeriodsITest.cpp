@@ -51,9 +51,9 @@ public:
     Publisher(const uint32_t domainId, const uint32_t publisherIndex, const uint32_t numMessages, std::chrono::nanoseconds period)
         : _numMessages{numMessages}
     {
-        std::string participantName = "Publisher" + std::to_string(publisherIndex);
+        _participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
-            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName);
+            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), _participantName);
 
         _participant->joinIbDomain(domainId);
 
@@ -108,6 +108,7 @@ private:
     uint32_t _messageIndex{0u};
     uint32_t _numMessages{0u};
     std::future<ParticipantState> _simulationFuture;
+    std::string _participantName;
 };
 
 class Subscriber
@@ -119,6 +120,7 @@ public:
         , _messageIndexes(publisherCount, 0u)
         , _numMessages{numMessages}
         , _syncParticipantNames { syncParticipantNames }
+        , _participantName{participantName}
     {
         _participant = ib::mw::CreateParticipantImpl(
             ib::cfg::MockParticipantConfiguration(), participantName);
@@ -175,7 +177,7 @@ private:
         }
         else if (newState == SystemState::Stopped)
         {
-            _systemController->Shutdown();
+            _systemController->Shutdown(_participantName);
         }
     }
 
@@ -240,6 +242,7 @@ private:
     ISystemMonitor* _monitor{nullptr};
 
     std::chrono::nanoseconds _currentTime{0ns};
+    std::string _participantName;
 };
 
 class DifferentPeriodsITest : public testing::Test

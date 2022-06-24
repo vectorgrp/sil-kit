@@ -274,7 +274,10 @@ void SystemStateHandler(ISystemController* controller, SystemState newState, con
         break;
 
     case SystemState::Stopped:
-        controller->Shutdown();
+        for (auto&& name : expectedParticipants)
+        {
+            controller->Shutdown(name);
+        }
         break;
 
     default:

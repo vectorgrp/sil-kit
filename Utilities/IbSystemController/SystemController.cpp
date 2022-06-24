@@ -81,8 +81,11 @@ public:
             }
             else
             {
-                std::cout << "Sending SystemCommand::Shutdown" << std::endl;
-                _controller->Shutdown();
+                std::cout << "Sending ParticipantCommand::Shutdown" << std::endl;
+                for(auto&& name: _expectedParticipantNames)
+                {
+                    _controller->Shutdown(name);
+                }
             }
             return;
 
@@ -143,7 +146,10 @@ public:
         {
             std::cerr << "IB is not Running. Terminating Process without Stopping." << std::endl;
             std::cout << "Sending SystemCommand::Shutdown" << std::endl;
-            _controller->Shutdown();
+            for(auto&& name: _expectedParticipantNames)
+            {
+                _controller->Shutdown(name);
+            }
             std::this_thread::sleep_for(1s);
             return;
         }

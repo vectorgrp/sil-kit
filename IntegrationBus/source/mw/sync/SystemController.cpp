@@ -32,9 +32,9 @@ void SystemController::Stop() const
     SendSystemCommand(SystemCommand::Kind::Stop);
 }
 
-void SystemController::Shutdown() const
+void SystemController::Shutdown(const std::string& participantName) const
 {
-    SendSystemCommand(SystemCommand::Kind::Shutdown);
+    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Shutdown);
 }
 
 void SystemController::AbortSimulation() const

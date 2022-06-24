@@ -51,9 +51,9 @@ public:
     Publisher(const uint32_t domainId, const uint32_t publisherIndex, const uint32_t testSize)
         : _testSize{testSize}
     {
-        std::string participantName = "Publisher" + std::to_string(publisherIndex);
+        _participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
-            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), participantName);
+            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), _participantName);
 
         _participant->joinIbDomain(domainId);
 
@@ -107,6 +107,7 @@ private:
     uint32_t _messageIndex{0u};
     uint32_t _testSize{0u};
     std::future<ParticipantState> _simulationFuture;
+    std::string  _participantName;
 };
 
 class Subscriber
@@ -116,6 +117,7 @@ public:
         : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _testSize{testSize}
+        , _participantName{participantName}
     {
         _participant = ib::mw::CreateParticipantImpl(
             ib::cfg::MockParticipantConfiguration(), participantName);
@@ -173,7 +175,7 @@ private:
         }
         else if (newState == SystemState::Stopped)
         {
-            _systemController->Shutdown();
+            _systemController->Shutdown(_participantName);
         }
     }
 
@@ -240,6 +242,7 @@ private:
     uint32_t _testSize{0u};
 
     nanoseconds _currentTick{0ns};
+    std::string _participantName;
 };
 
 class DeterministicSimVAsioITest : public testing::Test

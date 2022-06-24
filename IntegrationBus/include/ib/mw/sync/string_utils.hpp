@@ -133,8 +133,6 @@ std::string to_string(SystemCommand::Kind command)
         return "Run";
     case SystemCommand::Kind::Stop:
         return "Stop";
-    case SystemCommand::Kind::Shutdown:
-        return "Shutdown";
     case SystemCommand::Kind::AbortSimulation:
         return "AbortSimulation";
     }

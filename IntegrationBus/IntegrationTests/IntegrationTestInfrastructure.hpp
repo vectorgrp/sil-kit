@@ -21,7 +21,7 @@ public:
     {
         std::stringstream ss;
         ss << "Something went wrong: " << error.what() << std::endl;
-        _systemMaster.systemController->Shutdown();
+        _systemMaster.systemController->Shutdown("SystemMaster");
         FAIL() << ss.str();
     }
     
@@ -76,8 +76,8 @@ private:
                 }
                 break;
             case SystemState::ReadyToRun: _systemMaster.systemController->Run(); break;
-            case SystemState::Stopped: _systemMaster.systemController->Shutdown(); break;
-            case SystemState::Error: _systemMaster.systemController->Shutdown(); break;
+            case SystemState::Stopped: _systemMaster.systemController->Shutdown("SystemMaster"); break;
+            case SystemState::Error: _systemMaster.systemController->Shutdown("SystemMaster"); break;
             default: break;
             }
         });
@@ -85,7 +85,7 @@ private:
         _systemMaster.systemMonitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
             switch (newStatus.state)
             {
-            case ParticipantState::Error: _systemMaster.systemController->Shutdown(); break;
+            case ParticipantState::Error: _systemMaster.systemController->Shutdown("SystemMaster"); break;
             default: break;
             }
         });

@@ -334,7 +334,7 @@ namespace {
         returnCode = ib_Participant_StopSimulation((ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockSystemController, Shutdown()).Times(testing::Exactly(1));
+        EXPECT_CALL(mockParticipant.mockSystemController, Shutdown(testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Participant_Shutdown((ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

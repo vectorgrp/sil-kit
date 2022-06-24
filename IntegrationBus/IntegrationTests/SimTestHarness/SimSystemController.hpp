@@ -78,7 +78,10 @@ public:
         case ib::mw::sync::SystemState::Running:
             return;
         case ib::mw::sync::SystemState::Stopped:
-            _controller->Shutdown();
+            for (const auto& name : _syncParticipantNames)
+            {
+                _controller->Shutdown(name);
+            }
             return;
         default:
             return;

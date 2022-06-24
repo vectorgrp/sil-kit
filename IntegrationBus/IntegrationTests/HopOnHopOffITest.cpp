@@ -28,8 +28,6 @@ using namespace ib::cfg;
 using namespace ib::sim::data;
 
 const std::string systemMasterName{"SystemMaster"};
-const std::string pubName{"Pub"};
-const std::string subName{"Sub"};
 const std::string topic{"Topic"};
 const std::string mediaType{ "A" };
 static size_t numParticipants;
@@ -105,8 +103,6 @@ protected:
         case SystemState::ServicesCreated:
             for (auto&& name : syncParticipantNames)
             {
-                if (name == systemMasterName)
-                    continue;
                 systemMaster.systemController->Initialize(name);
             }
             break;
@@ -116,11 +112,19 @@ protected:
             break;
 
         case SystemState::Stopped:
-            systemMaster.systemController->Shutdown();
+            for (auto&& name : syncParticipantNames)
+            {
+                systemMaster.systemController->Shutdown(name);
+            }
+            systemMaster.systemController->Shutdown(systemMasterName);
             break;
 
         case SystemState::Error:
-            systemMaster.systemController->Shutdown();
+            for (auto&& name : syncParticipantNames)
+            {
+                systemMaster.systemController->Shutdown(name);
+            }
+            systemMaster.systemController->Shutdown(systemMasterName);
             break;
 
         default:
@@ -130,7 +134,11 @@ protected:
 
     void ShutdownAndFailTest(const std::string& reason)
     {
-        systemMaster.systemController->Shutdown();
+
+        for (auto&& name : syncParticipantNames)
+        {
+            systemMaster.systemController->Shutdown(name);
+        }
         FAIL() << reason;
     }
 
@@ -455,11 +463,15 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
             p.ResetReception();
         for (auto& p : asyncParticipants)
             p.ResetReception();
-
     }
 
     // Stop sync participants
-    systemMaster.systemController->Shutdown();
+    for (auto&& name : syncParticipantNames)
+    {
+        systemMaster.systemController->Shutdown(name);
+    }
+    systemMaster.systemController->Shutdown(systemMasterName);
+
     StopSyncParticipants();
 
     ShutdownSystem();
