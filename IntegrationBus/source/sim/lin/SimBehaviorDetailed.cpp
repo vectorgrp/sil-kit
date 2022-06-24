@@ -66,7 +66,7 @@ void SimBehaviorDetailed::GoToSleep()
 void SimBehaviorDetailed::Wakeup()
 {
     // Send without direction, netsim will distribute with correct directions
-    LinWakeupPulse pulse;
+    LinWakeupPulse pulse{};
     SendIbMessageImpl(pulse);
     _parentController->WakeupInternal();
 }
