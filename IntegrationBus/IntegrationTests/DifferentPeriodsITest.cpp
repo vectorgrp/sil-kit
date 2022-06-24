@@ -177,7 +177,10 @@ private:
         }
         else if (newState == SystemState::Stopped)
         {
-            _systemController->Shutdown(_participantName);
+            for(auto&& name: _syncParticipantNames)
+            {
+                _systemController->Shutdown(name);
+            }
         }
     }
 

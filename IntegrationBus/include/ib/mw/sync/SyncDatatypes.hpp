@@ -34,7 +34,6 @@ struct SystemCommand
         Invalid = 0, //!< An invalid command
         Run = 1, //!< The run command
         Stop = 2, //!< The stop command
-        //Shutdown = 3, //!< The shutdown command
         AbortSimulation = 6 //!< The abort simulation command
     };
 

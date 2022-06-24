@@ -75,9 +75,23 @@ private:
                     _systemMaster.systemController->Initialize(name);
                 }
                 break;
-            case SystemState::ReadyToRun: _systemMaster.systemController->Run(); break;
-            case SystemState::Stopped: _systemMaster.systemController->Shutdown("SystemMaster"); break;
-            case SystemState::Error: _systemMaster.systemController->Shutdown("SystemMaster"); break;
+            case SystemState::ReadyToRun:
+                _systemMaster.systemController->Run();
+                break;
+            case SystemState::Stopped:
+                for (auto&& name : requiredParticipantNames)
+                {
+                    _systemMaster.systemController->Shutdown(name);
+                }
+                _systemMaster.systemController->Shutdown("SystemMaster");
+                break;
+            case SystemState::Error:
+                for (auto&& name : requiredParticipantNames)
+                {
+                    _systemMaster.systemController->Shutdown(name);
+                }
+                _systemMaster.systemController->Shutdown("SystemMaster");
+                break;
             default: break;
             }
         });

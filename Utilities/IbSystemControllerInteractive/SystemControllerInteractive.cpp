@@ -153,8 +153,10 @@ public:
             }
 
             std::cerr << "Invalid command: '" << cmdName << "'" << std::endl;
-            std::cout << "Available system commands: 'Run', 'Stop', 'Shutdown'" << std::endl;
-            std::cout << "Available participant commands: 'Initialize <participantName>', 'Restart <participantName>'" << std::endl;
+            std::cout << "Available system commands: 'Run', 'Stop'" << std::endl;
+            std::cout << "Available participant commands: 'Initialize <participantName>',"
+                << " 'Restart <participantName>', 'Shutdown <participantname>'"
+                << std::endl;
             std::cout << "Command 'Exit' ends the process" << std::endl;
             std::cout << "> ";
         }

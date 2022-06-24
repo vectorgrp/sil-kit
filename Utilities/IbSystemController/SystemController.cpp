@@ -82,7 +82,7 @@ public:
             else
             {
                 std::cout << "Sending ParticipantCommand::Shutdown" << std::endl;
-                for(auto&& name: _expectedParticipantNames)
+                for (auto&& name: _expectedParticipantNames)
                 {
                     _controller->Shutdown(name);
                 }
@@ -146,7 +146,7 @@ public:
         {
             std::cerr << "IB is not Running. Terminating Process without Stopping." << std::endl;
             std::cout << "Sending SystemCommand::Shutdown" << std::endl;
-            for(auto&& name: _expectedParticipantNames)
+            for (auto&& name: _expectedParticipantNames)
             {
                 _controller->Shutdown(name);
             }

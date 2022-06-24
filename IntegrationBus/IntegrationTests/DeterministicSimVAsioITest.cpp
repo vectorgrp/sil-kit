@@ -175,7 +175,10 @@ private:
         }
         else if (newState == SystemState::Stopped)
         {
-            _systemController->Shutdown(_participantName);
+            for(auto&& name: syncParticipantNames)
+            {
+                _systemController->Shutdown(name);
+            }
         }
     }
 
@@ -204,6 +207,10 @@ private:
         catch (std::runtime_error& /*error*/)
         {
             std::cout << "ERROR: Received message does not match the expected format" << std::endl;
+            for(auto&& name: syncParticipantNames)
+            {
+                _systemController->Shutdown(name);
+            }
             _systemController->Stop();
             return;
         }
@@ -229,6 +236,10 @@ private:
         if (sumOfIndexes == _testSize * _publisherCount)
         {
             _systemController->Stop();
+            for(auto&& name: syncParticipantNames)
+            {
+                _systemController->Shutdown(name);
+            }
         }
     }
 
