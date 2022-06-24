@@ -5,6 +5,7 @@
 #include <functional>
 
 #include "CanDatatypes.hpp"
+#include "ib/util/HandlerId.hpp"
 
 namespace ib {
 namespace sim {

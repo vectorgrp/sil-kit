@@ -93,7 +93,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto systemController = participant->GetSystemController();
     systemController->SetRequiredParticipants(syncParticipantNames);
     auto monitor = participant->GetSystemMonitor();
-    monitor->RegisterParticipantStatusHandler([this](ParticipantStatus status) {
+    monitor->AddParticipantStatusHandler([this](ParticipantStatus status) {
         this->ParticipantStateHandler(status.state);
     });
 

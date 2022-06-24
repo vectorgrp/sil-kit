@@ -37,25 +37,27 @@ public:
 
     void SetDefaultDataMessageHandler(DataMessageHandlerT callback) override;
 
-    void AddExplicitDataMessageHandler(DataMessageHandlerT callback, const std::string& mediaType,
-                                       const std::map<std::string, std::string>& labels) override;
+    auto AddExplicitDataMessageHandler(DataMessageHandlerT dataMessageHandler, const std::string& mediaType,
+                                       const std::map<std::string, std::string>& labels) -> HandlerId override;
 
-    void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
-                               const std::map<std::string, std::string>& publisherLabels);
+    void RemoveExplicitDataMessageHandler(HandlerId handlerId) override;
 
-    void RemoveInternalSubscriber(const std::string& pubUUID);
-
-    //ib::mw::sync::ITimeConsumer
-    void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
+    // ib::mw::sync::ITimeConsumer
+    inline void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
     
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
 private:
+    void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
+        const std::map<std::string, std::string>& publisherLabels);
 
-    void AssignSpecificDataHandlers();
+    void RemoveInternalSubscriber(const std::string& pubUUID);
 
+    void AddExplicitDataHandlersToInternalSubscribers();
+
+private:
     std::string _topic;
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
@@ -64,9 +66,10 @@ private:
 
     mw::ServiceDescriptor _serviceDescriptor{};
 
+    std::underlying_type_t<HandlerId> _nextExplicitDataMessageHandlerId = 0;
     std::unordered_map<std::string, DataSubscriberInternal*> _internalSubscribers;
-    uint64_t _specificDataHandlerId{ 0 };
-    std::vector<SpecificDataHandler> _specificDataHandling;
+    std::vector<ExplicitDataMessageHandlerInfo> _explicitDataMessageHandlers;
+
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::IParticipantInternal* _participant{nullptr};
 
@@ -78,6 +81,11 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
+void DataSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)
+{
+    _timeProvider = provider;
+}
 
 void DataSubscriber::SetServiceDescriptor(const ib::mw::ServiceDescriptor& serviceDescriptor)
 {

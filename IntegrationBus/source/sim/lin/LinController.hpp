@@ -15,6 +15,8 @@
 #include "IIbToLinController.hpp"
 #include "SimBehavior.hpp"
 
+#include "SynchronizedHandlers.hpp"
+
 namespace ib {
 namespace sim {
 namespace lin {
@@ -121,13 +123,13 @@ private:
     // private methods
 
     template <typename MsgT>
-    HandlerId AddHandler(CallbackT<MsgT>&& handler);
+    HandlerId AddHandler(CallbackT<MsgT> handler);
+
+    template <typename MsgT>
+    auto RemoveHandler(HandlerId handlerId) -> bool;
 
     template <typename MsgT>
     void CallHandlers(const MsgT& msg);
-
-    template <typename MsgT>
-    void RemoveHandler(HandlerId handlerId);
 
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
@@ -148,19 +150,18 @@ private:
     LinControllerStatus _controllerStatus{LinControllerStatus::Unknown};
 
     template <typename MsgT>
-    using CallbackMap = std::map<HandlerId, CallbackT<MsgT>>;
+    using CallbacksT = util::SynchronizedHandlers<CallbackT<MsgT>>;
 
-    std::tuple<CallbackMap<LinFrameStatusEvent>, 
-               CallbackMap<LinGoToSleepEvent>, 
-               CallbackMap<LinWakeupEvent>, 
-               CallbackMap<LinFrameResponseUpdateEvent>>
-        _callbacks;
-    
+    std::tuple<
+        CallbacksT<LinFrameStatusEvent>,
+        CallbacksT<LinGoToSleepEvent>,
+        CallbacksT<LinWakeupEvent>,
+        CallbacksT<LinFrameResponseUpdateEvent>
+    > _callbacks;
+
     extensions::Tracer _tracer;
 
     std::vector<LinNode> _linNodes;
-
-    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ==================================================================

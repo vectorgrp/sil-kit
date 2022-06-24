@@ -117,21 +117,18 @@ int main(int argc, char** argv)
         auto* logger = participant->GetLogger();
         auto* systemMonitor = participant->GetSystemMonitor();
 
-        systemMonitor->RegisterParticipantStatusHandler(
-            [logger](const sync::ParticipantStatus& status) {
-                std::stringstream buffer;
-                buffer
-                    << "New ParticipantState: " << status.participantName << " is " << status.state
-                    << ",\tReason: " << status.enterReason;
-                logger->Info(buffer.str());
-            });
+        systemMonitor->AddParticipantStatusHandler([logger](const sync::ParticipantStatus& status) {
+            std::stringstream buffer;
+            buffer << "New ParticipantState: " << status.participantName << " is " << status.state
+                   << ",\tReason: " << status.enterReason;
+            logger->Info(buffer.str());
+        });
 
-        systemMonitor->RegisterSystemStateHandler(
-            [logger](sync::SystemState state) {
-                std::stringstream buffer;
-                buffer << "New SystemState: " << state;
-                logger->Info(buffer.str());
-            });
+        systemMonitor->AddSystemStateHandler([logger](sync::SystemState state) {
+            std::stringstream buffer;
+            buffer << "New SystemState: " << state;
+            logger->Info(buffer.str());
+        });
 
         std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
         std::cin.ignore();

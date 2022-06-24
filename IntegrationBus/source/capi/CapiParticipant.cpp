@@ -468,34 +468,52 @@ ib_ReturnCode ib_Participant_GetSystemState(ib_SystemState* outParticipantState,
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Participant* participant, void* context, ib_SystemStateHandler_t handler)
+ib_ReturnCode ib_Participant_AddSystemStateHandler(ib_Participant* participant, void* context, ib_SystemStateHandler_t handler, ib_HandlerId* outHandlerId)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
+  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* systemMonitor = cppParticipant->GetSystemMonitor();
 
-    systemMonitor->RegisterSystemStateHandler(
+    auto cppHandlerId = systemMonitor->AddSystemStateHandler(
       [handler, context, participant](ib::mw::sync::SystemState systemState) {
           handler(context, participant, (ib_SystemState)systemState);
       });
+    *outHandlerId = static_cast<ib_HandlerId>(cppHandlerId);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* participant, void* context, ib_ParticipantStatusHandler_t handler)
+ib_ReturnCode ib_Participant_RemoveSystemStateHandler(ib_Participant* participant, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto* cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+
+        systemMonitor->RemoveSystemStateHandler(static_cast<ib::util::HandlerId>(handlerId));
+
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Participant_AddParticipantStatusHandler(ib_Participant* participant, void* context, ib_ParticipantStatusHandler_t handler, ib_HandlerId* outHandlerId)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_HANDLER_PARAMETER(handler);
+  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* systemMonitor = cppParticipant->GetSystemMonitor();
 
-    systemMonitor->RegisterParticipantStatusHandler(
+    auto cppHandlerId = systemMonitor->AddParticipantStatusHandler(
       [handler, context, participant](ib::mw::sync::ParticipantStatus cppStatus) {
             ib_ParticipantStatus cStatus;
             cStatus.interfaceId = ib_InterfaceIdentifier_ParticipantStatus;
@@ -506,9 +524,25 @@ ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* pa
             cStatus.refreshTime = std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.refreshTime.time_since_epoch()).count();
           handler(context, participant, cppStatus.participantName.c_str(), &cStatus);
       });
+    *outHandlerId = static_cast<ib_HandlerId>(cppHandlerId);
     return ib_ReturnCode_SUCCESS;
   }
   CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Participant_RemoveParticipantStatusHandler(ib_Participant* participant, ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto* cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+
+        systemMonitor->RemoveParticipantStatusHandler(static_cast<ib::util::HandlerId>(handlerId));
+
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
 }
 
 }

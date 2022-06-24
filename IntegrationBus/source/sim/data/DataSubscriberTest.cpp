@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "DataSubscriberInternal.hpp"
+#include "DataSubscriber.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -9,7 +9,10 @@
 
 #include "MockParticipant.hpp"
 
+#include "DataPublisher.hpp"
 #include "DataMessageDatatypeUtils.hpp"
+
+#include "YamlParser.hpp"
 
 namespace {
 
@@ -21,46 +24,208 @@ using namespace ib;
 using namespace ib::mw;
 using namespace ib::sim::data;
 
+using ::ib::mw::test::DummyParticipant;
+
+class MockParticipant : public DummyParticipant
+{
+public:
+    MOCK_METHOD(sim::data::DataSubscriberInternal*, CreateDataSubscriberInternal,
+                (const std::string& /*topic*/, const std::string& /*linkName*/, const std::string& /*mediaType*/,
+                 (const std::map<std::string, std::string>&)/*publisherLabels*/,
+                 sim::data::DataMessageHandlerT /*callback*/, sim::data::IDataSubscriber* /*parent*/),
+                (override));
+};
+
 class DataSubscriberTest : public ::testing::Test
 {
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(ReceiveData, void(IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
+        MOCK_METHOD(void, ReceiveDataDefault, (IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
+        MOCK_METHOD(void, ReceiveDataExplicitA, (IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
+        MOCK_METHOD(void, ReceiveDataExplicitB, (IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
+
+        MOCK_METHOD(void, NewDataPublisher, (IDataSubscriber*, const NewDataPublisherEvent& newDataPublisherEvent));
     };
 
 protected:
     DataSubscriberTest()
-        : subscriber{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
-        , subscriberOther{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr }
+        : subscriber{&participant,
+                     participant.GetTimeProvider(),
+                     topic,
+                     mediaType,
+                     labels,
+                     ib::util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault),
+                     ib::util::bind_method(&callbacks, &Callbacks::NewDataPublisher)}
+        , publisher{&participant, participant.GetTimeProvider(), topic, mediaType, labels, publisherUuid}
     {
-        subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
-        subscriber.SetDefaultDataMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
-
-        subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
-        subscriberOther.SetDefaultDataMessageHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveData));
+        subscriber.SetServiceDescriptor(from_endpointAddress(subscriberEndpointAddress));
+        SetupPublisherServiceDescriptor(publisher, publisherUuid, publisherEndpointAddress);
     }
 
+private:
+    void SetupPublisherServiceDescriptor(DataPublisher& dataPublisher, const std::string& uuid,
+                                         const EndpointAddress& endpointAddress)
+    {
+        auto publisherServiceDescriptor = from_endpointAddress(endpointAddress);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherTopic, topic);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherMediaType, mediaType);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherPubLabels,
+                                                           labelsSerialized);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherPubUUID, uuid);
+        dataPublisher.SetServiceDescriptor(publisherServiceDescriptor);
+    }
 
 protected:
-    const EndpointAddress endpointAddress{4, 5};
-    const EndpointAddress otherEndpointAddress{5, 7};
+    ServiceDescriptor MakePublisherServiceDescriptor(const std::string& uuid, const EndpointAddress& endpointAddress)
+    {
+        auto publisherServiceDescriptor = from_endpointAddress(endpointAddress);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherTopic, topic);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherMediaType, mediaType);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherPubLabels,
+                                                           labelsSerialized);
+        publisherServiceDescriptor.SetSupplementalDataItem(mw::service::supplKeyDataPublisherPubUUID, uuid);
+        return publisherServiceDescriptor;
+    }
 
-    ib::mw::test::DummyParticipant participant;
-    Callbacks                     callbacks;
-    DataSubscriberInternal        subscriber;
-    DataSubscriberInternal        subscriberOther;
+protected:
+    const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
+
+    const EndpointAddress subscriberEndpointAddress{4, 5};
+
+    const EndpointAddress publisherEndpointAddress{6, 7};
+    const std::string publisherUuid{"pubUUID"};
+
+    const EndpointAddress publisher2EndpointAddress{8, 9};
+    const std::string publisher2Uuid{"pubUUID-2"};
+
+    const std::string topic{"Topic"};
+    const std::string mediaType{};
+    const std::map<std::string, std::string> labels;
+    const std::string labelsSerialized{ib::cfg::Serialize<std::map<std::string, std::string>>(labels)};
+
+    Callbacks callbacks;
+    MockParticipant participant;
+    DataSubscriber subscriber;
+    DataPublisher publisher;
 };
 
-TEST_F(DataSubscriberTest, trigger_callback)
+struct CreateSubscriberInternalMock
 {
+    MockParticipant* participant;
+    std::unique_ptr<DataSubscriberInternal> dataSubscriberInternal;
+
+    auto operator()(const std::string& topic, const std::string& /*linkName*/, const std::string& mediaType,
+                    const std::map<std::string, std::string>& labels, sim::data::DataMessageHandlerT defaultHandler,
+                    sim::data::IDataSubscriber* parent) -> DataSubscriberInternal*
+    {
+        dataSubscriberInternal = std::make_unique<DataSubscriberInternal>(
+            participant, participant->GetTimeProvider(), topic, mediaType, labels, std::move(defaultHandler), parent);
+        return dataSubscriberInternal.get();
+    }
+};
+
+TEST_F(DataSubscriberTest, add_remove_explicit_message_handler_through_data_subscriber)
+{
+    // ------------------------------------------------------------------------------------------------------
+    // Register the subscriber with the service discovery and extract the discovery handler
+    // ------------------------------------------------------------------------------------------------------
+
+    // will contain the handler created by the DataSubscriber upon registering with the service discovery
+    ib::mw::service::ServiceDiscoveryHandlerT serviceDiscoveryHandler;
+
+    EXPECT_CALL(participant.mockServiceDiscovery,
+                RegisterSpecificServiceDiscoveryHandler(testing::_, mw::service::controllerTypeDataPublisher, topic))
+        .Times(1)
+        .WillOnce(testing::Invoke([&serviceDiscoveryHandler](ib::mw::service::ServiceDiscoveryHandlerT handler,
+                                                             const std::string& /*controllerTypeName*/,
+                                                             const std::string& /*supplDataValue*/) {
+            serviceDiscoveryHandler = std::move(handler);
+        }));
+
+    subscriber.RegisterServiceDiscovery();
+    ASSERT_TRUE(serviceDiscoveryHandler);
+
+    // ------------------------------------------------------------------------------------------------------
+    // Fake the call to the extracted service discovery handler for the two publishers
+    // ------------------------------------------------------------------------------------------------------
+
+    CreateSubscriberInternalMock createSubscriberInternalMock{&participant, {}};
+
+    // hook up the call to create an internal subscriber
+    EXPECT_CALL(participant,
+                CreateDataSubscriberInternal(topic, testing::_, mediaType, labels, testing::_, &subscriber))
+        .Times(2)
+        .WillRepeatedly(std::ref(createSubscriberInternalMock));
+
+    using ib::mw::service::ServiceDiscoveryEvent;
+
+    // create the initial internal subscriber for publisher
+    serviceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, publisher.GetServiceDescriptor());
+    const auto subscriberInternal = std::move(createSubscriberInternalMock.dataSubscriberInternal);
+    ASSERT_TRUE(subscriberInternal);
+
+    // ------------------------------------------------------------------------------------------------------
+    // Send messages and trigger the default / explicit message handler(s)
+    // ------------------------------------------------------------------------------------------------------
+
     const DataMessageEvent msg{0ns, {0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u}};
 
-    EXPECT_CALL(callbacks, ReceiveData(nullptr, msg))
-        .Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataDefault(&subscriber, msg)).Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
+    subscriberInternal->ReceiveIbMessage(&publisher, msg);
 
-    subscriber.ReceiveIbMessage(&subscriberOther, msg);
+    const auto handlerIdA = subscriber.AddExplicitDataMessageHandler(
+        ib::util::bind_method(&callbacks, &Callbacks::ReceiveDataExplicitA), mediaType, labels);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(&subscriber, msg)).Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
+    subscriberInternal->ReceiveIbMessage(&publisher, msg);
+
+    const auto handlerIdB = subscriber.AddExplicitDataMessageHandler(
+        ib::util::bind_method(&callbacks, &Callbacks::ReceiveDataExplicitB), mediaType, labels);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(&subscriber, msg)).Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
+    subscriberInternal->ReceiveIbMessage(&publisher, msg);
+
+    // create the second internal subscriber for publisher
+    serviceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
+                            MakePublisherServiceDescriptor(publisher2Uuid, publisher2EndpointAddress));
+    const auto subscriberInternal2 = std::move(createSubscriberInternalMock.dataSubscriberInternal);
+    ASSERT_TRUE(subscriberInternal2);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(&subscriber, msg)).Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
+    subscriberInternal2->ReceiveIbMessage(&publisher, msg);
+
+    subscriber.RemoveExplicitDataMessageHandler(handlerIdA);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
+    subscriberInternal->ReceiveIbMessage(&publisher, msg);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
+    subscriberInternal2->ReceiveIbMessage(&publisher, msg);
+
+    subscriber.RemoveExplicitDataMessageHandler(handlerIdB);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(&subscriber, msg)).Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
+    subscriberInternal->ReceiveIbMessage(&publisher, msg);
+
+    EXPECT_CALL(callbacks, ReceiveDataDefault(&subscriber, msg)).Times(1);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
+    subscriberInternal2->ReceiveIbMessage(&publisher, msg);
 }
-
 
 } // anonymous namespace

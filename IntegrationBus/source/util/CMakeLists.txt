@@ -1,20 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 add_library(IbUtil INTERFACE)
 
-target_sources(IbUtil INTERFACE 
-    ${CMAKE_CURRENT_LIST_DIR}/PerformanceMonitor.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/bind.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/conditional.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/for_each.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/tuple_tools/predicative_get.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/Timer.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/SetThreadName.hpp 
-    ${CMAKE_CURRENT_LIST_DIR}/UuidRandom.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/Optional.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/CommandlineParser.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/Hash.hpp
-)
-
 target_include_directories(IbUtil
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )

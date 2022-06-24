@@ -243,7 +243,7 @@ ib_ReturnCode ib_Flexray_Controller_RemoveFrameHandler(ib_Flexray_Controller* co
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveFrameHandler(handlerId);
+        cppController->RemoveFrameHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -294,7 +294,7 @@ ib_ReturnCode ib_Flexray_Controller_RemoveFrameTransmitHandler(ib_Flexray_Contro
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveFrameTransmitHandler(handlerId);
+        cppController->RemoveFrameTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -329,7 +329,7 @@ ib_ReturnCode ib_Flexray_Controller_RemoveWakeupHandler(ib_Flexray_Controller* c
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveWakeupHandler(handlerId);
+        cppController->RemoveWakeupHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -372,7 +372,7 @@ ib_ReturnCode ib_Flexray_Controller_RemovePocStatusHandler(ib_Flexray_Controller
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemovePocStatusHandler(handlerId);
+        cppController->RemovePocStatusHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -407,7 +407,7 @@ ib_ReturnCode ib_Flexray_Controller_RemoveSymbolHandler(ib_Flexray_Controller* c
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveSymbolHandler(handlerId);
+        cppController->RemoveSymbolHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -444,7 +444,7 @@ ib_ReturnCode ib_Flexray_Controller_RemoveSymbolTransmitHandler(ib_Flexray_Contr
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveSymbolTransmitHandler(handlerId);
+        cppController->RemoveSymbolTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -479,7 +479,7 @@ ib_ReturnCode ib_Flexray_Controller_RemoveCycleStartHandler(ib_Flexray_Controlle
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveCycleStartHandler(handlerId);
+        cppController->RemoveCycleStartHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

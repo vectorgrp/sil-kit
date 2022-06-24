@@ -37,14 +37,16 @@ public:
     MOCK_METHOD1(Publish, void(std::vector<uint8_t> data));
     virtual void Publish(const uint8_t* /*data*/, std::size_t /*size*/){};
 };
+
 class MockDataSubscriber : public ib::sim::data::IDataSubscriber
 {
 public:
     MOCK_METHOD1(SetDefaultDataMessageHandler, void(DataMessageHandlerT callback));
-    MOCK_METHOD((void), AddExplicitDataMessageHandler,
+    MOCK_METHOD((ib::util::HandlerId), AddExplicitDataMessageHandler,
                 ((DataMessageHandlerT callback), const std::string& mediaType,
                  (const std::map<std::string, std::string>& labels)),
                 (override));
+    MOCK_METHOD(void, RemoveExplicitDataMessageHandler, (ib::util::HandlerId handlerId), (override));
 };
 
 class MockParticipant : public ib::mw::test::DummyParticipant
@@ -170,10 +172,18 @@ TEST_F(CapiDataTest, data_subscriber_function_mapping)
                                                           &DefaultDataHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
+    ib_HandlerId handlerId;
+
     EXPECT_CALL(mockDataSubscriber, AddExplicitDataMessageHandler(testing::_, mediaType, testing::_))
         .Times(testing::Exactly(1));
     returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, nullptr,
-                                                                  &DefaultDataHandler, mediaType, labelList);
+                                                                  &DefaultDataHandler, mediaType, labelList,
+                                                                  &handlerId);
+    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+    EXPECT_CALL(mockDataSubscriber, RemoveExplicitDataMessageHandler(testing::_)).Times(testing::Exactly(1));
+    returnCode = ib_Data_Subscriber_RemoveExplicitDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber,
+                                                                     handlerId);
     EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 }
 
@@ -247,22 +257,39 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
     returnCode = ib_Data_Subscriber_SetDefaultDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+    constexpr ib_HandlerId defaultHanderId = 0xCAFECAFE;
+    ib_HandlerId handlerId = defaultHanderId;
+
     returnCode =
         ib_Data_Subscriber_SetDefaultDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+    handlerId = defaultHanderId;
     returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler,
-                                                                  mediaType, labelList);
+                                                                  mediaType, labelList, &handlerId);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(handlerId, defaultHanderId);
 
+    handlerId = defaultHanderId;
     returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr, mediaType, labelList);
+        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr, mediaType, labelList, &handlerId);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(handlerId, defaultHanderId);
 
+    handlerId = defaultHanderId;
     returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, nullptr, labelList);
+        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, nullptr, labelList, &handlerId);
     EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(handlerId, defaultHanderId);
 
+    handlerId = defaultHanderId;
+    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
+        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, mediaType, labelList, nullptr);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(handlerId, defaultHanderId);
+
+    returnCode = ib_Data_Subscriber_RemoveExplicitDataMessageHandler(nullptr, (ib_HandlerId)0);
+    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 }
 
 TEST_F(CapiDataTest, data_publisher_publish)

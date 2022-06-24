@@ -6,6 +6,8 @@
 #include <string>
 #include <functional>
 
+#include "ib/util/HandlerId.hpp"
+
 namespace ib {
 namespace mw {
 namespace sync {
@@ -25,8 +27,18 @@ public:
 
     using NextSimStepHandlerT = std::function<void(std::chrono::nanoseconds now,
         std::chrono::nanoseconds duration)>;
-    //! \brief Register a handler that is executed when the next simulation step is started.
-    virtual void RegisterNextSimStepHandler(NextSimStepHandlerT) = 0;
+
+    /*! \brief Register a handler that is executed when the next simulation step is started.
+     *
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     */
+    virtual auto AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId = 0;
+
+    /*! \brief Remove NextSimStepHandlerT by HandlerId on this time provider.
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveNextSimStepHandler(HandlerId handlerId) = 0;
 };
 
 

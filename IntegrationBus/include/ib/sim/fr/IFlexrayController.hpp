@@ -6,6 +6,7 @@
 #include <functional>
 
 #include "FlexrayDatatypes.hpp"
+#include "ib/util/HandlerId.hpp"
 
 namespace ib {
 namespace sim {

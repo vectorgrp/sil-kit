@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <ib/mw/sync/ITimeProvider.hpp>
+#include "ib/mw/sync/ITimeProvider.hpp"
 
 #include "CreateParticipant.hpp"
 #include "Participant.hpp"
@@ -149,7 +149,9 @@ struct FixedTimeProvider : ib::mw::sync::ITimeProvider
         return name;
     };
 
-    void RegisterNextSimStepHandler(NextSimStepHandlerT) override {}
+    HandlerId AddNextSimStepHandler(NextSimStepHandlerT) override { return {}; }
+
+    void RemoveNextSimStepHandler(HandlerId) override {}
 
     std::chrono::nanoseconds now;
 };

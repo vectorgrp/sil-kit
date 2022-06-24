@@ -22,7 +22,5 @@ enum class TransmitDirection : uint8_t
 };
 using DirectionMask = uint8_t;
 
-using HandlerId = uint64_t;
-
 } // namespace sim
 } // namespace ib

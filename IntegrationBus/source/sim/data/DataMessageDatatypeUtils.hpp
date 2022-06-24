@@ -3,10 +3,12 @@
 #pragma once
 
 #include <ostream>
-#include <set>
+#include <unordered_map>
 #include <memory>
 
 #include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "ib/util/HandlerId.hpp"
+
 #include "Hash.hpp"
 
 namespace ib {
@@ -21,13 +23,13 @@ bool MatchMediaType(const std::string& subMediaType, const std::string& pubMedia
 
 bool MatchLabels(const std::map<std::string, std::string>& innerSet, const std::map<std::string, std::string>& outerSet);
 
-struct SpecificDataHandler
+struct ExplicitDataMessageHandlerInfo
 {
-    uint64_t id;
+    HandlerId id;
     std::string mediaType;
     std::map<std::string, std::string> labels;
-    DataMessageHandlerT specificDataHandler;
-    std::set<DataSubscriberInternal*> registeredInternalSubscribers;
+    DataMessageHandlerT explicitDataMessageHandler;
+    std::unordered_map<DataSubscriberInternal*, HandlerId> registeredInternalSubscribers;
 };
 
 

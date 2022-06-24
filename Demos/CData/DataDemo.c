@@ -228,6 +228,8 @@ int main(int argc, char* argv[])
                                                subLabelList, (void*)&transmitContext, &DefaultDataHandler,
                                                (void*)&transmitContext, &NewDataSourceHandler);
 
+        ib_HandlerId handlerId;
+
         // This redirects publications by dataPublisher2 (label {"KeyA", "ValA"}, {"KeyB", "ValB"})
         // to the SpecificDataHandler (empty value is wildcard)
         ib_KeyValueList* specificLabelList;
@@ -235,7 +237,7 @@ int main(int argc, char* argv[])
         ib_KeyValuePair specificLabels[2] = { {"KeyA", ""}, {"KeyB", ""} };
         Create_Labels(&specificLabelList, specificLabels, numSubLabels);
         ib_Data_Subscriber_AddExplicitDataMessageHandler(dataSubscriber, (void*)&transmitContext, &SpecificDataHandler,
-														 subMediaType, specificLabelList);
+														 subMediaType, specificLabelList, &handlerId);
 
         if (returnCode)
         {

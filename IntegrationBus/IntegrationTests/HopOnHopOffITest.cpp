@@ -269,13 +269,13 @@ protected:
 
             systemMaster.systemController->SetRequiredParticipants(syncParticipantNames);
 
-            systemMaster.systemMonitor->RegisterSystemStateHandler(
-                [this](SystemState newState) { SystemStateHandler(newState); });
+            systemMaster.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
+                SystemStateHandler(newState);
+            });
 
-            systemMaster.systemMonitor->RegisterParticipantStatusHandler(
-                [this](const ParticipantStatus& newStatus) {
-                    ParticipantStatusHandler(newStatus);
-                });
+            systemMaster.systemMonitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
+                ParticipantStatusHandler(newStatus);
+            });
         }
         catch (const ib::ConfigurationError& error)
         {

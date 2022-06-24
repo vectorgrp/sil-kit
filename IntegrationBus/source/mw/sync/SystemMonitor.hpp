@@ -11,6 +11,7 @@
 #include "IIbToSystemMonitor.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"
+#include "SynchronizedHandlers.hpp"
 
 namespace ib {
 namespace mw {
@@ -30,18 +31,21 @@ public:
     // Constructors, Destructor, and Assignment
     SystemMonitor() = default;
     SystemMonitor(IParticipantInternal* participant);
-    SystemMonitor(const SystemMonitor& other) = default;
-    SystemMonitor(SystemMonitor&& other) = default;
-    SystemMonitor& operator=(const SystemMonitor& other) = default;
-    SystemMonitor& operator=(SystemMonitor&& other) = default;
+    SystemMonitor(const SystemMonitor& other) = delete;
+    SystemMonitor(SystemMonitor&& other) = delete;
+    SystemMonitor& operator=(const SystemMonitor& other) = delete;
+    SystemMonitor& operator=(SystemMonitor&& other) = delete;
 
 public:
     // ----------------------------------------
     // Public Interface Methods
 
     // ISystemMonitor
-    void RegisterSystemStateHandler(SystemStateHandlerT handler) override;
-    void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) override;
+    auto AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId override;
+    void RemoveSystemStateHandler(HandlerId handlerId) override;
+
+    auto AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId override;
+    void RemoveParticipantStatusHandler(HandlerId handlerId) override;
 
     auto SystemState() const -> sync::SystemState override;
     auto ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus& override;
@@ -106,8 +110,8 @@ private:
 
     unsigned int _invalidTransitionCount{0u};
 
-    std::vector<ParticipantStatusHandlerT> _participantStatusHandlers;
-    std::vector<SystemStateHandlerT> _systemStateHandlers;
+    util::SynchronizedHandlers<ParticipantStatusHandlerT> _participantStatusHandlers;
+    util::SynchronizedHandlers<SystemStateHandlerT> _systemStateHandlers;
 
     ParticipantConnectedHandler _participantConnectedHandler;
     ParticipantDisconnectedHandler _participantDisconnectedHandler;

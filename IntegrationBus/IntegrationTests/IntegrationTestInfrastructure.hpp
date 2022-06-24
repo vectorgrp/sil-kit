@@ -66,7 +66,7 @@ private:
         _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();
         _systemMaster.systemController->SetRequiredParticipants(requiredParticipantNames);
 
-        _systemMaster.systemMonitor->RegisterSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
+        _systemMaster.systemMonitor->AddSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
             switch (newState)
             {
             case SystemState::ServicesCreated:
@@ -82,7 +82,7 @@ private:
             }
         });
 
-        _systemMaster.systemMonitor->RegisterParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
+        _systemMaster.systemMonitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
             switch (newStatus.state)
             {
             case ParticipantState::Error: _systemMaster.systemController->Shutdown(); break;

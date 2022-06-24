@@ -345,28 +345,69 @@ typedef void (*ib_SystemStateHandler_t)(void* context, ib_Participant* participa
     ib_SystemState state);
 
 /*! \brief Register a callback for ::SystemState changes
-  *
-  * If the current SystemState is not \ref ib_SystemState_Invalid,
-  * the handler will be called immediately.
-  */
-IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterSystemStateHandler(ib_Participant* participant,
-  void* context, ib_SystemStateHandler_t handler);
+ *
+ * If the current SystemState is not \ref ib_SystemState_Invalid,
+ * the handler will be called immediately.
+ *
+ * \param participant The simulation participant
+ * \param context The user context pointer made available to the handler
+ * \param handler The handler to be called to be called when the ::SystemState changes
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Participant_AddSystemStateHandler(ib_Participant* participant,
+                                                                     void* context,
+                                                                     ib_SystemStateHandler_t handler,
+                                                                     ib_HandlerId* outHandlerId);
 
+typedef ib_ReturnCode (*ib_Participant_AddSystemStateHandler_t)(ib_Participant* participant,
+                                                                void* context,
+                                                                ib_SystemStateHandler_t handler,
+                                                                ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_SystemStateHandler_t by ib_HandlerId on this participant
+ *
+ * \param participant The simulation participant
+ * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Participant_RemoveSystemStateHandler(ib_Participant* participant,
+                                                                        ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Participant_RemoveSystemStateHandler_t)(ib_Participant* participant,
+                                                                   ib_HandlerId handlerId);
 
 typedef void (*ib_ParticipantStatusHandler_t)(void* context, ib_Participant* participant,
     const char* participantName, ib_ParticipantStatus* status);
 
 /*! \brief Register a callback for status changes of participants.
-  *
-  * The handler will be called immediately for any participant that is
-  * not in \ref ib_ParticipantState_Invalid.
-  *
-  */
-IntegrationBusAPI ib_ReturnCode ib_Participant_RegisterParticipantStatusHandler(ib_Participant* participant,
-  void* context, ib_ParticipantStatusHandler_t handler);
+ *
+ * The handler will be called immediately for any participant that is
+ * not in \ref ib_ParticipantState_Invalid.
+ *
+ * \param participant The simulation participant
+ * \param context The user context pointer made available to the handler
+ * \param handler The handler to be called to be called when the ::SystemState changes
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Participant_AddParticipantStatusHandler(ib_Participant* participant,
+                                                                           void* context,
+                                                                           ib_ParticipantStatusHandler_t handler,
+                                                                           ib_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Participant_RegisterParticipantStatusHandler_t)(ib_Participant* participant, void* context,
-                                                                           ib_ParticipantStatusHandler_t handler);
+typedef ib_ReturnCode (*ib_Participant_AddParticipantStatusHandler_t)(ib_Participant* participant,
+                                                                      void* context,
+                                                                      ib_ParticipantStatusHandler_t handler,
+                                                                      ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_ParticipantStatusHandler_t by ib_HandlerId on this participant
+ *
+ * \param participant The simulation participant
+ * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+ */
+IntegrationBusAPI ib_ReturnCode ib_Participant_RemoveParticipantStatusHandler(ib_Participant* participant,
+                                                                              ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Participant_RemoveParticipantStatusHandler_t)(ib_Participant* participant,
+                                                                         ib_HandlerId handlerId);
 
 /*! \brief Set the names of the participants that are required for the simulation
   *

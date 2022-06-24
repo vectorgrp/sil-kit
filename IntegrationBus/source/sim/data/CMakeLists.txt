@@ -30,9 +30,13 @@ add_vib_test(TestSimDataPublisher
     SOURCES DataPublisherTest.cpp 
     LIBS IbSimDataMessage IbMwMockParticipant IbInternal 
 )
-add_vib_test(TestSimDataSubscriber 
-    SOURCES DataSubscriberTest.cpp 
+add_vib_test(TestSimDataSubscriber
+    SOURCES DataSubscriberTest.cpp
     LIBS IbSimDataMessage IbMwMockParticipant IbInternal 
+)
+add_vib_test(TestSimDataSubscriberInternal
+    SOURCES DataSubscriberInternalTest.cpp
+    LIBS IbSimDataMessage IbMwMockParticipant IbInternal
 )
 add_vib_test(TestPubSubMatching
     SOURCES PubSubMatchingTest.cpp 

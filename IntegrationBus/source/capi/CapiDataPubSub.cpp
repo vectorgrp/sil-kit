@@ -146,17 +146,19 @@ ib_ReturnCode ib_Data_Subscriber_SetDefaultDataMessageHandler(ib_Data_Subscriber
 ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(ib_Data_Subscriber* self, void* context,
                                                                ib_Data_DataMessageHandler_t dataHandler,
                                                                const char* mediaType,
-                                                               const ib_KeyValueList* labels)
+                                                               const ib_KeyValueList* labels,
+                                                               ib_HandlerId * outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
     ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
     CAPI_ENTER
     {
         auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
-        cppSubscriber->AddExplicitDataMessageHandler(
+        auto cppHandlerId = cppSubscriber->AddExplicitDataMessageHandler(
             [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
                                          const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
                 auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
@@ -172,6 +174,20 @@ ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(ib_Data_Subscribe
 
                 dataHandler(context, cSubscriber, &cDataMessageEvent);
             }, mediaType, cppLabels);
+        *outHandlerId = static_cast<ib_HandlerId>(cppHandlerId);
+        return ib_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+ib_ReturnCode ib_Data_Subscriber_RemoveExplicitDataMessageHandler(ib_Data_Subscriber* self,
+                                                                  ib_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    CAPI_ENTER
+    {
+        auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
+        cppSubscriber->RemoveExplicitDataMessageHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

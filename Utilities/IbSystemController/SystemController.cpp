@@ -42,16 +42,12 @@ public:
         _controller->SetRequiredParticipants(expectedParticipantNames);
 
         _monitor = participant->GetSystemMonitor();
-        _monitor->RegisterSystemStateHandler(
-            [this](SystemState newState) {
-                this->OnSystemStateChanged(newState);
-            }
-        );
-        _monitor->RegisterParticipantStatusHandler(
-            [this](const ParticipantStatus& newStatus) {
-                this->OnParticipantStatusChanged(newStatus);
-            }
-        );
+        _monitor->AddSystemStateHandler([this](SystemState newState) {
+            this->OnSystemStateChanged(newState);
+        });
+        _monitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
+            this->OnParticipantStatusChanged(newStatus);
+        });
     }
 
     void OnSystemStateChanged(SystemState newState)

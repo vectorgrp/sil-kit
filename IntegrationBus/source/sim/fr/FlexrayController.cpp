@@ -289,110 +289,114 @@ HandlerId FlexrayController::AddFrameHandler(FrameHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemoveFrameHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexrayFrameEvent>(handlerId);
+    if (!RemoveHandler<FlexrayFrameEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveFrameHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId FlexrayController::AddFrameTransmitHandler(FrameTransmitHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexrayFrameTransmitEvent>(handlerId);
+    if (!RemoveHandler<FlexrayFrameTransmitEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveFrameTransmitHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId FlexrayController::AddWakeupHandler(WakeupHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemoveWakeupHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexrayWakeupEvent>(handlerId);
+    if (!RemoveHandler<FlexrayWakeupEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveWakeupHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId FlexrayController::AddPocStatusHandler(PocStatusHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemovePocStatusHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexrayPocStatusEvent>(handlerId);
+    if (!RemoveHandler<FlexrayPocStatusEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemovePocStatusHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId FlexrayController::AddSymbolHandler(SymbolHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemoveSymbolHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexraySymbolEvent>(handlerId);
+    if (!RemoveHandler<FlexraySymbolEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveSymbolHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId FlexrayController::AddSymbolTransmitHandler(SymbolTransmitHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemoveSymbolTransmitHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexraySymbolTransmitEvent>(handlerId);
+    if (!RemoveHandler<FlexraySymbolTransmitEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveSymbolTransmitHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId FlexrayController::AddCycleStartHandler(CycleStartHandler handler)
 {
     return AddHandler(std::move(handler));
 }
+
 void FlexrayController::RemoveCycleStartHandler(HandlerId handlerId)
 {
-    RemoveHandler<FlexrayCycleStartEvent>(handlerId);
+    if (!RemoveHandler<FlexrayCycleStartEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveCycleStartHandler failed: Unknown HandlerId.");
+    }
 }
 
 template <typename MsgT>
-HandlerId FlexrayController::AddHandler(CallbackT<MsgT>&& handler)
+HandlerId FlexrayController::AddHandler(CallbackT<MsgT> handler)
 {
-    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
+    auto& callbacks = std::get<CallbacksT<MsgT>>(_callbacks);
+    return callbacks.Add(std::move(handler));
+}
 
-    static uint64_t handlerId = 0;
-    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
-    handlersMap.emplace(handlerId, std::forward<CallbackT<MsgT>>(handler));
-    return handlerId++;
+template <typename MsgT>
+auto FlexrayController::RemoveHandler(HandlerId handlerId) -> bool
+{
+    auto& callbacks = std::get<CallbacksT<MsgT>>(_callbacks);
+    return callbacks.Remove(handlerId);
 }
 
 template <typename MsgT>
 void FlexrayController::CallHandlers(const MsgT& msg)
 {
-    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
-
-    auto&& handlers = std::get<CallbackMap<MsgT>>(_callbacks);
-    for (auto&& handler : handlers)
-    {
-        handler.second(this, msg);
-    }
+    auto& callbacks = std::get<CallbacksT<MsgT>>(_callbacks);
+    callbacks.InvokeAll(this, msg);
 }
-
-template <typename MsgT>
-void FlexrayController::RemoveHandler(HandlerId handlerId)
-{
-    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
-
-    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
-
-    auto handlerToRemove = handlersMap.find(handlerId);
-    if (handlerToRemove == handlersMap.end())
-    {
-        _participant->GetLogger()->Warn("RemoveHandler failed: Unknown HandlerId.");
-    }
-    else
-    {
-        handlersMap.erase(handlerId);
-    }
-}
-
-//
-
-
 
 } // namespace fr
-} // SimModels
+} // namespace sim
 } // namespace ib

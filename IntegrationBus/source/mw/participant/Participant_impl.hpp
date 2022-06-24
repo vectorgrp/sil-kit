@@ -134,8 +134,7 @@ void Participant<IbConnectionT>::onIbDomainJoined()
 
     // Ensure shutdowns are cleanly handled.
     auto&& monitor = GetSystemMonitor();
-    monitor->RegisterSystemStateHandler([&conn = GetIbConnection()](auto newState)
-    {
+    monitor->AddSystemStateHandler([&conn = GetIbConnection()](auto newState) {
         if (newState == sync::SystemState::ShuttingDown)
         {
             conn.NotifyShutdown();

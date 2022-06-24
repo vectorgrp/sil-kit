@@ -52,7 +52,7 @@ Life Cycle Management
 =====================
 
 The |ProductName| provides life cycle management for individual participants and the overall simulation.
-The following first introduces means to observe and control the life cycle. 
+The following first introduces means to observe and control the life cycle.
 Afterwards, the life cycle of synchronized participants and the life cycle of the overall simulation are introduced.
 
 Life Cycle Control
@@ -66,7 +66,7 @@ The following introduces the three components that can affect and observe the in
 **Life cycle service:**
 The |LifecycleServiceAPI| interface allows each participant to access various functions related to its life cycle.
 Users can register callbacks that trigger once a participant reaches certain states.
-Available callbacks are :cpp:func:`SetCommunicationReadyHandler()<ib::mw::sync::ILifecycleService::SetCommunicationReadyHandler()>`, :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>`, and :cpp:func:`SetShutdownHandler()<ib::mw::sync::ILifecycleService::SetShutdownHandler()>`. 
+Available callbacks are :cpp:func:`SetCommunicationReadyHandler()<ib::mw::sync::ILifecycleService::SetCommunicationReadyHandler()>`, :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>`, and :cpp:func:`SetShutdownHandler()<ib::mw::sync::ILifecycleService::SetShutdownHandler()>`.
 Further, the life cycle service provides access to the |TimeSyncServiceAPI| interface (see below).
 Once all needed controllers are registered and, if need be, the time synchronization service was retrieved and configured, the participant's life cycle (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`) can be published by either calling |ExecuteLifecycleNoSyncTime| or |ExecuteLifecycleWithSyncTime|.
 
@@ -82,8 +82,8 @@ In addition, the step length of each simulation step can be set via :cpp:func:`I
 
 **System monitor:**
 To observe the state transitions of other participants, users first need to retrieve the |SystemMonitorAPI| interface via :cpp:func:`GetSystemMonitor()<ib::mw::IParticipant::GetSystemMonitor()>`.
-Afterwards, they can register a participant status callback via :cpp:func:`RegisterParticipantStatusHandler()<ib::mw::sync::ISystemMonitor::RegisterParticipantStatusHandler()>`
-In addition, users can register a callback for changes of the overall system state via :cpp:func:`RegisterSystemStateHandler()<ib::mw::sync::ISystemMonitor::RegisterSystemStateHandler()>`.
+Afterwards, they can register a participant status callback via :cpp:func:`AddParticipantStatusHandler()<ib::mw::sync::ISystemMonitor::AddParticipantStatusHandler()>`
+In addition, users can register a callback for changes of the overall system state via :cpp:func:`AddSystemStateHandler()<ib::mw::sync::ISystemMonitor::AddSystemStateHandler()>`.
 The system state corresponds to the earliest state of all required participants.
 For example, two Participants A and B are required. A is in state :cpp:enumerator:`ReadyToRun<ib::mw::sync::ParticipantState::ReadyToRun>` and B is in :cpp:enumerator:`Running<ib::mw::sync::ParticipantState::Running>`, then the system state would be :cpp:enumerator:`ReadyToRun<ib::mw::sync::SystemState::ReadyToRun>` (as Running follows ReadyToRun).
 
@@ -115,12 +115,12 @@ For all phases, the |LifecycleService| or |TimeSyncService| allow setting callba
 
    : |ProductName| participant state machine.
 
-A participant enters the distributed state machine by either calling |ExecuteLifecycleNoSyncTime| or |ExecuteLifecycleWithSyncTime|. 
-This will cause the |LifecycleService| to anounce its state as :cpp:enumerator:`ServicesCreated<ib::mw::sync::ParticipantState::ServicesCreated>`, indicating that all services were created and announced to other participants. 
+A participant enters the distributed state machine by either calling |ExecuteLifecycleNoSyncTime| or |ExecuteLifecycleWithSyncTime|.
+This will cause the |LifecycleService| to anounce its state as :cpp:enumerator:`ServicesCreated<ib::mw::sync::ParticipantState::ServicesCreated>`, indicating that all services were created and announced to other participants.
 
 A participant that uses the life cycle service may choose to coordinate its state with other participants from the start of the life cycle until the simulation is running.
 In that case, they will align their participant state based on the current system state until they reach :cpp:enumerator:`CommunicationInitialized<ib::mw::sync::ParticipantState::CommunicationInitialized>`.
-Once the system state also changes to CommunicationInitialized, the communication between all participants via :cpp:class:`DataPublisher<ib::sim::data::IDataPublisher>` and :cpp:class:`DataSubscriber<ib::sim::data::IDataSubscriber>` is possible. 
+Once the system state also changes to CommunicationInitialized, the communication between all participants via :cpp:class:`DataPublisher<ib::sim::data::IDataPublisher>` and :cpp:class:`DataSubscriber<ib::sim::data::IDataSubscriber>` is possible.
 This information is propagated to the user if they registered the callback via :cpp:func:`SetCommunicationReadyHandler()<ib::mw::sync::ILifecycleService::SetCommunicationReadyHandler()>`.
 Once the callback is finished, the participant state changes to :cpp:enumerator:`ReadyToRun<ib::mw::sync::ParticipantState::ReadyToRun>`.
 The participant will wait for the system state to change to :cpp:enumerator:`ReadyToRun<ib::mw::sync::SystemState::ReadyToRun>` and until it receives a :cpp:func:`Run()<ib::mw::sync::ISystemController::Run()>` to progress.
@@ -136,19 +136,19 @@ They still receive the CommunicationReady callback before changing to :cpp:enume
 Participants that use the virtual time synchronization repeatedly execute their registered SimTask while advancement of time is handled by the middleware implementation.
 If a participant temporarily cannot advance the simulation, e.g., because a debugger is attached to investigate its internal state, a participant can be put into the :cpp:enumerator:`Paused<ib::mw::sync::ParticipantState::Paused>` state.
 
-It is also possible to coordinate the state with other participants after the running phase of the simulation. 
-Those participants stop their simulation run once they receive the system command :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>`. 
-A callback registered via :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>` can be used to perform a collection of simulation results. 
-Once all participants have successfully executed their StopHandler and the system is in state :cpp:enumerator:`Stopped<ib::mw::sync::SystemState::Stopped>`, a |SystemController| can either end the simulation via :cpp:func:`Shutdown()<ib::mw::sync::ISystemController::Shutdown()>` or restart it via :cpp:func:`Restart()<ib::mw::sync::ISystemController::Restart()>`. 
+It is also possible to coordinate the state with other participants after the running phase of the simulation.
+Those participants stop their simulation run once they receive the system command :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>`.
+A callback registered via :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>` can be used to perform a collection of simulation results.
+Once all participants have successfully executed their StopHandler and the system is in state :cpp:enumerator:`Stopped<ib::mw::sync::SystemState::Stopped>`, a |SystemController| can either end the simulation via :cpp:func:`Shutdown()<ib::mw::sync::ISystemController::Shutdown()>` or restart it via :cpp:func:`Restart()<ib::mw::sync::ISystemController::Restart()>`.
 In the latter case, simulation time is reset to zero and the participant returns to the :cpp:enumerator:`ServicesCreated<ib::mw::sync::ParticipantState::ServicesCreated>` state.
 
 Participants that do not coordinate their state after the simulation need to be stopped manually via :cpp:func:`Stop()<ib::mw::sync::ILifecycleService::Stop()>`.
-They also enter Stopping, call the :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>` and go to Stopped afterwards. 
+They also enter Stopping, call the :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>` and go to Stopped afterwards.
 Instead of waiting for further instructions, they directly transition to the ShuttingDown state, call the :cpp:func:`SetShutdownHandler()<ib::mw::sync::ILifecycleService::SetShutdownHandler()>` and transition to the Shutdown state.
 
 Whenever a participant encounters an error from which it cannot recover, it switches to the :cpp:enumerator:`Error<ib::mw::sync::ParticipantState::Error>` state to indicate this situation to the system. 
-Users can manually trigger a transition to the error state and provide more information about the cause by calling :cpp:func:`ReportError()<ib::mw::sync::ILifecycleService::ReportError()>`. 
-In some situations, a life cycle service automatically enters the error state, e.g., when an uncaught exception is thrown in a callback. 
+Users can manually trigger a transition to the error state and provide more information about the cause by calling :cpp:func:`ReportError()<ib::mw::sync::ILifecycleService::ReportError()>`.
+In some situations, a life cycle service automatically enters the error state, e.g., when an uncaught exception is thrown in a callback.
 A participant can only recover from the :cpp:enumerator:`Error<ib::mw::sync::ParticipantState::Error>` state in two ways: Shutdown or Restart (althrough the latter is only possible for coordinated participants).
 
 .. _subsec:sim-lifecycle:

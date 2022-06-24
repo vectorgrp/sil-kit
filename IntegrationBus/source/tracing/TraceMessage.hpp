@@ -9,6 +9,8 @@
 #include "ib/sim/lin/LinDatatypes.hpp"
 #include "ib/sim/fr/FlexrayDatatypes.hpp"
 
+#include <stdexcept>
+
 namespace ib {
 namespace extensions {
 

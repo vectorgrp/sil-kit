@@ -16,6 +16,8 @@
 
 #include "ParticipantConfiguration.hpp"
 
+#include "SynchronizedHandlers.hpp"
+
 namespace ib {
 namespace sim {
 namespace fr {
@@ -123,13 +125,13 @@ private:
     // ----------------------------------------
     // private methods
     template <typename MsgT>
-    HandlerId AddHandler(CallbackT<MsgT>&& handler);
+    HandlerId AddHandler(CallbackT<MsgT> handler);
+
+    template <typename MsgT>
+    auto RemoveHandler(HandlerId handlerId) -> bool;
 
     template <typename MsgT>
     void CallHandlers(const MsgT& msg);
-
-    template <typename MsgT>
-    void RemoveHandler(HandlerId handlerId);
 
     template<typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
@@ -155,19 +157,17 @@ private:
     mw::ServiceDescriptor _simulatedLink;
 
     template <typename MsgT>
-    using CallbackMap = std::map<HandlerId, CallbackT<MsgT>>;
+    using CallbacksT = util::SynchronizedHandlers<CallbackT<MsgT>>;
 
     std::tuple<
-        CallbackMap<FlexrayFrameEvent>,
-        CallbackMap<FlexrayFrameTransmitEvent>,
-        CallbackMap<FlexraySymbolEvent>,
-        CallbackMap<FlexraySymbolTransmitEvent>,
-        CallbackMap<FlexrayCycleStartEvent>,
-        CallbackMap<FlexrayPocStatusEvent>,
-        CallbackMap<FlexrayWakeupEvent>
+        CallbacksT<FlexrayFrameEvent>,
+        CallbacksT<FlexrayFrameTransmitEvent>,
+        CallbacksT<FlexraySymbolEvent>,
+        CallbacksT<FlexraySymbolTransmitEvent>,
+        CallbacksT<FlexrayCycleStartEvent>,
+        CallbacksT<FlexrayPocStatusEvent>,
+        CallbacksT<FlexrayWakeupEvent>
     > _callbacks;
-
-    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ==================================================================
@@ -188,5 +188,5 @@ auto FlexrayController::GetServiceDescriptor() const -> const mw::ServiceDescrip
     return _serviceDescriptor;
 }
 } // namespace fr
-} // SimModels
+} // namespace sim
 } // namespace ib

@@ -202,7 +202,7 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 
     const std::string& TimeProviderName() const  override { return _name; }
 
-    void RegisterNextSimStepHandler(NextSimStepHandlerT handler)  override
+    void AddNextSimStepHandler(NextSimStepHandlerT handler)  override
     {
         _handlers.emplace_back(std::move(handler));
     }

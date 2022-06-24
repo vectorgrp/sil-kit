@@ -23,12 +23,10 @@ public:
         _controller = _participant->GetSystemController();
         _controller->SetRequiredParticipants(_syncParticipantNames);
         _monitor = _participant->GetSystemMonitor();
-        _monitor->RegisterSystemStateHandler(
-            std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1)
-        );
-        _monitor->RegisterParticipantStatusHandler(
-            std::bind(&SimSystemController::OnParticipantStatusChanged, this, std::placeholders::_1)
-        );
+        _monitor->AddSystemStateHandler(
+            std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1));
+        _monitor->AddParticipantStatusHandler(
+            std::bind(&SimSystemController::OnParticipantStatusChanged, this, std::placeholders::_1));
     }
 
     ~SimSystemController()

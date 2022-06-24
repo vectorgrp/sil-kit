@@ -125,8 +125,7 @@ public:
         _systemController->SetRequiredParticipants(syncParticipantNames);
 
         _monitor = _participant->GetSystemMonitor();
-        _monitor->RegisterSystemStateHandler(
-            [this](SystemState newState) {
+        _monitor->AddSystemStateHandler([this](SystemState newState) {
             this->OnSystemStateChanged(newState);
         });
 

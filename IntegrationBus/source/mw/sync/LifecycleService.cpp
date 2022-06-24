@@ -64,7 +64,7 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     serviceDiscovery->NotifyServiceCreated(_serviceDescriptor);
     serviceDiscovery->NotifyServiceCreated(_timeSyncService->GetServiceDescriptor());
 
-    _participant->GetSystemMonitor()->RegisterSystemStateHandler([&](auto systemState) {
+    _participant->GetSystemMonitor()->AddSystemStateHandler([&](auto systemState) {
         this->NewSystemState(systemState);
     });
 

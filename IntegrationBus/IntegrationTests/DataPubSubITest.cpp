@@ -381,7 +381,7 @@ TEST_F(DataPubSubITest, test_3pub_1sub_specificHandlers_sync)
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
     for (uint8_t d = 0; d < numMsgToPublish; d++)
     {
-        // First specificDataHandler receives by both publishers, so numMsgToPublish * 3 in total
+        // First explicitDataMessageHandler receives by both publishers, so numMsgToPublish * 3 in total
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));

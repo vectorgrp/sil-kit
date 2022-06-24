@@ -8,15 +8,60 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.26] - unreleased
 ----------------------
 
+Compatibility with 3.99.25
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): XXX
+- Application software interface (API): XXX
+- Middleware network protocol (VAsio): XXX
+
 Added
 ~~~~~
+
 - the new ILifeCycleService is now exposed on the C-API:
   added the new :cpp:func:`ib_Participant_ExecuteLifecycleWithTime` and
   :cpp:func:`ib_Participant_ExecuteLifecycleNoSyncTime` functions
+
+- Added functionality to remove handlers:
+
+  - ``IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp``
+
+    .. code-block:: c++
+
+      virtual void RemoveSystemStateHandler(HandlerId) = 0;
+      virtual void RemoveParticipantStatusHandler(HandlerId) = 0;
+
+  - ``IntegrationBus/include/ib/mw/sync/ITimeProvider.hpp``
+
+    .. code-block:: c++
+
+      virtual void RemoveNextSimStepHandler(HandlerId) = 0;
+
+  - ``IntegrationBus/include/ib/sim/data/IDataSubscriber.hpp``
+
+    .. code-block:: c++
+
+      virtual void RemoveExplicitDataMessageHandler(HandlerId) = 0;
+
+  - ``IntegrationBus/include/ib/capi/Participant.h``
+
+    .. code-block:: c++
+
+      ib_ReturnCode ib_Participant_RemoveSystemStateHandler(ib_Participant* participant, ib_HandlerId handlerId);
+      ib_ReturnCode ib_Participant_RemoveParticipantStatusHandler(ib_Participant* participant, ib_HandlerId handlerId);
+
+  - ``IntegrationBus/include/ib/capi/DataPubSub.h``
+
+    .. code-block:: c++
+
+      ib_ReturnCode ib_Data_Subscriber_RemoveExplicitDataMessageHandler(ib_Can_Controller* controller, ib_HandlerId handlerId);
+
 Changed
 ~~~~~~~
-- C-API: renamed the `ib_Participant_WaitForAsyncRunToComplete` to 
+
+- C-API: renamed the `ib_Participant_WaitForAsyncRunToComplete` to
   `ib_Participant_WaitForLifecycleToComplete`.
+
 - C-API:  the participant Init handler no longer has a command parameter:
 
   + old:
@@ -32,19 +77,54 @@ Changed
   .. code-block:: c
 
     typedef void (*ib_ParticipantInitHandler_t)(void* context,
-                      ib_Participant* participant); 
+                      ib_Participant* participant);
 
+- Methods adding handlers now return a ``HandlerId``:
+
+  - ``IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp``
+
+    .. code-block:: c++
+
+      virtual auto AddSystemStateHandler(SystemStateHandlerT) -> HandlerId = 0;
+      virtual auto AddParticipantStatusHandler(ParticipantStatusHandlerT) -> HandlerId = 0;
+
+  - ``IntegrationBus/include/ib/mw/sync/ITimeProvider.hpp``
+
+    .. code-block:: c++
+
+      virtual auto AddNextSimStepHandler(NextSimStepHandlerT) -> HandlerId = 0;
+
+  - ``IntegrationBus/include/ib/sim/data/IDataSubscriber.hpp``
+
+    .. code-block:: c++
+
+      virtual auto AddExplicitDataMessageHandler(...) -> HandlerId = 0;
+
+  - ``IntegrationBus/include/ib/capi/Participant.h``
+
+    .. code-block:: c++
+
+      ib_ReturnCode ib_Participant_AddSystemStateHandler(..., ib_HandlerId* outHandlerId);
+      ib_ReturnCode ib_Participant_AddParticipantStatusHandler(..., ib_HandlerId* outHandlerId);
+
+  - ``IntegrationBus/include/ib/capi/DataPubSub.h``
+
+    .. code-block:: c++
+
+      ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(..., ib_HandlerId* outHandlerId);
 
 Removed
 ~~~~~~~
+
 - C-API: the  `ib_Participant_RunAsync` is superseded by the
   `ib_Participant_ExecuteLifeCycle...` functions.
+
 - C-API: the `ib_Participant_Run` function was removed.
   Use the new asynchronous `ib_Participant_ExecuteLifecycleWithSyncTime` or the
   `ib_Participant_ExecuteLifecycleNoSyncTime` as replacement. For Example:
 
   + old:
-        
+
   .. code-block:: c
 
     ib_ReturnCode returnCode = ib_Participant_Run(participant);
@@ -59,8 +139,6 @@ Removed
     ib_ParticipantState outParticipantState;
     returnCode = ib_Participant_WaitForLifecycleToComplete(participant,
                     &outParticipantState);
-
-
 
 [3.99.25] - 2022-06-13
 ----------------------

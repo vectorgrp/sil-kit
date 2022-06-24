@@ -1,11 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-#include <vector>
-#include <mutex>
+
+#include <chrono>
+#include <string>
 
 #include "ib/mw/sync/ITimeProvider.hpp"
+
 #include "Timer.hpp"
+#include "SynchronizedHandlers.hpp"
 
 namespace ib {
 namespace mw {
@@ -15,39 +18,40 @@ class WallclockProvider : public ITimeProvider
 {
 public:
     WallclockProvider(std::chrono::nanoseconds tickPeriod)
-        :_tickPeriod{tickPeriod}
+        : _tickPeriod{tickPeriod}
     {
     }
 
-    inline auto Now() const -> std::chrono::nanoseconds;
-    inline auto TimeProviderName() const -> const std::string&;
-    inline void RegisterNextSimStepHandler(NextSimStepHandlerT handler);
+    inline auto Now() const -> std::chrono::nanoseconds override;
+    inline auto TimeProviderName() const -> const std::string& override;
+    inline HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override;
+    inline void RemoveNextSimStepHandler(HandlerId handlerId) override;
+
 private:
-    std::vector<NextSimStepHandlerT> _handlers;
+    util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
     const std::string _name{"WallclockProvider"};
     std::chrono::nanoseconds _tickPeriod{0};
     util::Timer _timer;
-    std::mutex _mx;
 };
 
 //////////////////////////////////////////////////////////////////////
 // Inline Implementations
 /////////////////////////////////////////////////////////////////////
 
-void WallclockProvider::RegisterNextSimStepHandler(NextSimStepHandlerT simStepHandler)
+HandlerId WallclockProvider::AddNextSimStepHandler(NextSimStepHandlerT simStepHandler)
 {
-    {
-        std::unique_lock<std::mutex> lock{_mx};
-        _handlers.emplace_back(std::move(simStepHandler));
-    }
+    const auto handlerId = _handlers.Add(std::move(simStepHandler));
 
     _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
-        std::unique_lock<std::mutex> lock{_mx};
-        for (const auto& handler : _handlers)
-        {
-            handler(now, _tickPeriod);
-        }
+        _handlers.InvokeAll(now, _tickPeriod);
     });
+
+    return handlerId;
+}
+
+void WallclockProvider::RemoveNextSimStepHandler(HandlerId handlerId)
+{
+    _handlers.Remove(handlerId);
 }
 
 auto WallclockProvider::Now() const -> std::chrono::nanoseconds
@@ -56,11 +60,11 @@ auto WallclockProvider::Now() const -> std::chrono::nanoseconds
     return now;
 }
 
-auto WallclockProvider::TimeProviderName() const -> const std::string& 
+auto WallclockProvider::TimeProviderName() const -> const std::string&
 {
-    return _name; 
+    return _name;
 }
 
-} //end sync
-} //end mw
-} //end ib
+} // namespace sync
+} // namespace mw
+} // namespace ib

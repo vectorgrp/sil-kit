@@ -23,6 +23,7 @@
 #include "TimeProvider.hpp"
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
+#include "SynchronizedHandlers.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -67,12 +68,17 @@ public:
         return _name;
     }
 
-    void RegisterNextSimStepHandler(NextSimStepHandlerT handler) override
+    HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override
     {
-        _handlers.emplace_back(std::move(handler));
+        return _handlers.Add(std::move(handler));
     }
 
-    std::vector<NextSimStepHandlerT> _handlers;
+    void RemoveNextSimStepHandler(HandlerId handlerId) override
+    {
+        _handlers.Remove(handlerId);
+    }
+
+    util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
     const std::string _name = "MockTimeProvider";
     mutable MockTime mockTime;
 };
@@ -118,8 +124,12 @@ public:
 
 class MockSystemMonitor : public sync::ISystemMonitor {
 public:
-    MOCK_METHOD(void, RegisterSystemStateHandler, (SystemStateHandlerT));
-    MOCK_METHOD(void, RegisterParticipantStatusHandler, (ParticipantStatusHandlerT));
+    MOCK_METHOD(HandlerId, AddSystemStateHandler, (SystemStateHandlerT));
+    MOCK_METHOD(void, RemoveSystemStateHandler, (HandlerId));
+
+    MOCK_METHOD(HandlerId, AddParticipantStatusHandler, (ParticipantStatusHandlerT));
+    MOCK_METHOD(void, RemoveParticipantStatusHandler, (HandlerId));
+
     MOCK_CONST_METHOD0(SystemState,  sync::SystemState());
     MOCK_CONST_METHOD1(ParticipantStatus, const sync::ParticipantStatus&(const std::string& participantName));
 

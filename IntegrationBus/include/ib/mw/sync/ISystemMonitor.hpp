@@ -7,6 +7,7 @@
 #include <string>
 
 #include "SyncDatatypes.hpp"
+#include "ib/util/HandlerId.hpp"
 
 namespace ib {
 namespace mw {
@@ -16,12 +17,12 @@ class ISystemMonitor
 {
 public:
     /*! Callback type to indicate that a ::SystemState has been received.
-    *  Cf., \ref RegisterSystemStateHandler(SystemStateHandlerT);
+    *  Cf., \ref AddSystemStateHandler(SystemStateHandlerT);
     */
     using SystemStateHandlerT = std::function<void(SystemState)>;
 
     /*! Callback type to indicate that a ParticipantStatus has been received.
-    *  Cf., \ref RegisterParticipantStatusHandler(ParticipantStatusHandlerT);
+    *  Cf., \ref AddParticipantStatusHandler(ParticipantStatusHandlerT);
     */
     using ParticipantStatusHandlerT = std::function<void(const ParticipantStatus&)>;
 
@@ -40,16 +41,31 @@ public:
      *
      * If the current SystemState is not \ref SystemState::Invalid,
      * the handler will be called immediately.
+     *
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void RegisterSystemStateHandler(SystemStateHandlerT handler) = 0;
+    virtual auto AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId = 0;
+
+    /*! \brief Remove a SystemStateHandlerT by HandlerId on this monitor
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveSystemStateHandler(HandlerId handlerId) = 0;
 
     /*! \brief Register a callback for \ref ParticipantStatus changes
      *
      * The handler will be called immediately for any participant that is
      * not in \ref ParticipantState::Invalid.
      *
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler) = 0;
+    virtual auto AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId = 0;
+
+    /*! \brief Remove a ParticipantStatusHandlerT by HandlerId on this monitor
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveParticipantStatusHandler(HandlerId handlerId) = 0;
 
     //! \brief Get the current ::SystemState
     virtual auto SystemState() const -> sync::SystemState = 0;

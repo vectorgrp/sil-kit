@@ -63,6 +63,8 @@ namespace {
     void StopCallback(void* /*context*/, ib_Participant* /*participant*/) {}
     void ShutdownCallback(void* /*context*/, ib_Participant* /*participant*/) {}
     void SystemStateHandler(void* /*context*/, ib_Participant* /*participant*/, ib_SystemState /*state*/) {}
+    void ParticipantStatusHandler(void* /*context*/, ib_Participant* /*participant*/,
+                                  const char* /*participantName*/, ib_ParticipantStatus* /*status*/) {}
 
     TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_params)
     {
@@ -184,14 +186,38 @@ namespace {
         returnCode = ib_Participant_GetSystemState(nullptr, (ib_Participant*)&mockParticipant);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
+        ib_HandlerId handlerId;
+
         // NOTE 2nd parameter 'context' is optional and may be nullptr
-        returnCode = ib_Participant_RegisterSystemStateHandler(nullptr, nullptr, nullptr);
+        returnCode = ib_Participant_AddSystemStateHandler(nullptr, nullptr, nullptr, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_RegisterSystemStateHandler(nullptr, nullptr, &SystemStateHandler);
+        returnCode = ib_Participant_AddSystemStateHandler(nullptr, nullptr, &SystemStateHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_RegisterSystemStateHandler((ib_Participant*)&mockParticipant, nullptr, nullptr);
+        returnCode = ib_Participant_AddSystemStateHandler((ib_Participant*)&mockParticipant, nullptr, nullptr, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_AddSystemStateHandler((ib_Participant*)&mockParticipant, nullptr, &SystemStateHandler, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_RemoveSystemStateHandler(nullptr, (ib_HandlerId)0);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        // NOTE 2nd parameter 'context' is optional and may be nullptr
+        returnCode = ib_Participant_AddParticipantStatusHandler(nullptr, nullptr, nullptr, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_AddParticipantStatusHandler(nullptr, nullptr, &ParticipantStatusHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_AddParticipantStatusHandler((ib_Participant*)&mockParticipant, nullptr, nullptr, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_AddParticipantStatusHandler((ib_Participant*)&mockParticipant, nullptr, &ParticipantStatusHandler, nullptr);
+        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+
+        returnCode = ib_Participant_RemoveParticipantStatusHandler(nullptr, (ib_HandlerId)0);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         returnCode = ib_Participant_SetRequiredParticipants(nullptr, participantNames);
@@ -324,6 +350,24 @@ namespace {
 
         EXPECT_CALL(mockParticipant.mockSystemController, Shutdown()).Times(testing::Exactly(1));
         returnCode = ib_Participant_Shutdown((ib_Participant*)&mockParticipant);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        ib_HandlerId handlerId;
+
+        EXPECT_CALL(mockParticipant.mockSystemMonitor, AddSystemStateHandler(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Participant_AddSystemStateHandler((ib_Participant*)&mockParticipant, nullptr, &SystemStateHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockParticipant.mockSystemMonitor, RemoveSystemStateHandler(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Participant_RemoveSystemStateHandler((ib_Participant*)&mockParticipant, handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockParticipant.mockSystemMonitor, AddParticipantStatusHandler(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Participant_AddParticipantStatusHandler((ib_Participant*)&mockParticipant, nullptr, &ParticipantStatusHandler, &handlerId);
+        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockParticipant.mockSystemMonitor, RemoveParticipantStatusHandler(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Participant_RemoveParticipantStatusHandler((ib_Participant*)&mockParticipant, handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockParticipant.mockSystemController, SetRequiredParticipants(testing::_)).Times(testing::Exactly(1));

@@ -309,8 +309,8 @@ int main(int argc, char** argv)
         auto systemMonitor = participant->GetSystemMonitor();
         auto systemController = participant->GetSystemController();
         systemController->SetRequiredParticipants(expectedParticipantNames);
-        systemMonitor->RegisterParticipantStatusHandler(&ReportParticipantStatus);
-        systemMonitor->RegisterSystemStateHandler(&ReportSystemState);
+        systemMonitor->AddParticipantStatusHandler(&ReportParticipantStatus);
+        systemMonitor->AddSystemStateHandler(&ReportSystemState);
 
         InteractiveSystemController interactiveSystemController(participant->GetSystemController(), configuration, participantName, expectedParticipantNames);
         interactiveSystemController.RunInteractiveLoop();

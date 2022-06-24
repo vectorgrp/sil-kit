@@ -15,6 +15,8 @@
 #include "IIbToEthController.hpp"
 #include "SimBehavior.hpp"
 
+#include "SynchronizedHandlers.hpp"
+
 namespace ib {
 namespace sim {
 namespace eth {
@@ -92,14 +94,14 @@ private:
     // ----------------------------------------
     // private methods
 
-    template<typename MsgT>
-    HandlerId AddHandler(CallbackT<MsgT>&& handler);
-
-    template<typename MsgT>
-    void CallHandlers(const MsgT& msg);
+    template <typename MsgT>
+    HandlerId AddHandler(CallbackT<MsgT> handler);
 
     template <typename MsgT>
-    void RemoveHandler(HandlerId handlerId);
+    auto RemoveHandler(HandlerId handlerId) -> bool;
+
+    template <typename MsgT>
+    void CallHandlers(const MsgT& msg);
 
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
@@ -108,7 +110,6 @@ private:
 
     template <typename MsgT>
     inline void SendIbMessage(MsgT&& msg);
-
 
 private:
     // ----------------------------------------
@@ -124,16 +125,14 @@ private:
     extensions::Tracer _tracer;
 
     template <typename MsgT>
-    using CallbackMap = std::map<HandlerId, CallbackT<MsgT>>;
+    using CallbacksT = util::SynchronizedHandlers<CallbackT<MsgT>>;
 
     std::tuple<
-        CallbackMap<EthernetFrameEvent>,
-        CallbackMap<EthernetFrameTransmitEvent>,
-        CallbackMap<EthernetStateChangeEvent>,
-        CallbackMap<EthernetBitrateChangeEvent>
+        CallbacksT<EthernetFrameEvent>,
+        CallbacksT<EthernetFrameTransmitEvent>,
+        CallbacksT<EthernetStateChangeEvent>,
+        CallbacksT<EthernetBitrateChangeEvent>
     > _callbacks;
-
-    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ================================================================================

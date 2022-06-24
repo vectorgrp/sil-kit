@@ -68,37 +68,49 @@ void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& e
         }
         if (oldSystemState != _systemState)
         {
-            for (auto&& handler : _systemStateHandlers)
-                handler(_systemState);
+            _systemStateHandlers.InvokeAll(_systemState);
         }
     }
 }
 
-
-
-void SystemMonitor::RegisterSystemStateHandler(SystemStateHandlerT handler)
+auto SystemMonitor::AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId
 {
-    _systemStateHandlers.emplace_back(std::move(handler));
-
     if (_systemState != sync::SystemState::Invalid)
     {
-        auto&& newHandler = _systemStateHandlers[_systemStateHandlers.size() - 1];
-        newHandler(_systemState);
+        handler(_systemState);
     }
+
+    return _systemStateHandlers.Add(std::move(handler));
 }
 
-void SystemMonitor::RegisterParticipantStatusHandler(ParticipantStatusHandlerT handler)
+void SystemMonitor::RemoveSystemStateHandler(HandlerId handlerId)
 {
-    _participantStatusHandlers.emplace_back(std::move(handler));
+    if (!_systemStateHandlers.Remove(handlerId))
+    {
+        _logger->Warn("RemoveSystemStateHandler failed: Unknown HandlerId.");
+    }
 
-    auto&& newHandler = _participantStatusHandlers[_participantStatusHandlers.size() - 1];
+}
+
+auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId
+{
     for (auto&& kv : _participantStatus)
     {
         auto&& participantStatus = kv.second;
         if (participantStatus.state == sync::ParticipantState::Invalid)
             continue;
 
-        newHandler(participantStatus);
+        handler(participantStatus);
+    }
+
+    return _participantStatusHandlers.Add(std::move(handler));
+}
+
+void SystemMonitor::RemoveParticipantStatusHandler(HandlerId handlerId)
+{
+    if (!_participantStatusHandlers.Remove(handlerId))
+    {
+        _logger->Warn("RemoveParticipantStatusHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -139,9 +151,8 @@ void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const s
     // On new participant state
     if (oldParticipantState != newParticipantStatus.state)
     {
-        // Fire status / state handler
-        for (auto&& handler : _participantStatusHandlers)
-            handler(newParticipantStatus);
+        // Fire status / state handlers
+        _participantStatusHandlers.InvokeAll(newParticipantStatus);
 
         // Propagate the system state for known participants, ignore otherwise
         auto&& nameIter = std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), participantName);
@@ -152,8 +163,7 @@ void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const s
 
             if (oldSystemState != _systemState)
             {
-                for (auto&& handler : _systemStateHandlers)
-                    handler(_systemState);
+                _systemStateHandlers.InvokeAll(_systemState);
             }
         }
     }

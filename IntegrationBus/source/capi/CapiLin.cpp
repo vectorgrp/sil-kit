@@ -238,7 +238,7 @@ ib_ReturnCode ib_Lin_Controller_RemoveFrameStatusHandler(ib_Lin_Controller* cont
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        cppController->RemoveFrameStatusHandler(handlerId);
+        cppController->RemoveFrameStatusHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -271,7 +271,7 @@ ib_ReturnCode ib_Lin_Controller_RemoveGoToSleepHandler(ib_Lin_Controller* contro
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        cppController->RemoveGoToSleepHandler(handlerId);
+        cppController->RemoveGoToSleepHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -305,7 +305,7 @@ ib_ReturnCode ib_Lin_Controller_RemoveWakeupHandler(ib_Lin_Controller* controlle
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<ib::sim::lin::ILinController*>(controller);
-        cppController->RemoveWakeupHandler(handlerId);
+        cppController->RemoveWakeupHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

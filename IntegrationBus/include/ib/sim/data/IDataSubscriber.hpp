@@ -3,6 +3,7 @@
 #pragma once
 
 #include "DataMessageDatatypes.hpp"
+#include "ib/util/HandlerId.hpp"
 
 namespace ib {
 namespace sim {
@@ -28,11 +29,18 @@ public:
      * must match, an empty string in the value of a label given here is a wildcard. Likewise, the 
      * mediaType must match the one given by a DataPublisher. An empty string in the 
      * mediaType provided here also is a wildcard.
+     *
+     * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual void AddExplicitDataMessageHandler(DataMessageHandlerT callback,
+    virtual auto AddExplicitDataMessageHandler(DataMessageHandlerT callback,
                                                const std::string& mediaType,
-                                               const std::map<std::string, std::string>& labels) = 0;
-    
+                                               const std::map<std::string, std::string>& labels) -> HandlerId = 0;
+
+    /*! \brief Remove a explicit DataMessageHandlerT by HandlerId on this controller.
+     *
+     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+     */
+    virtual void RemoveExplicitDataMessageHandler(HandlerId handlerId) = 0;
 };
 
 // ================================================================================

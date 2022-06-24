@@ -8,6 +8,7 @@
 #include "gmock/gmock.h"
 
 #include "ib/sim/can/string_utils.hpp"
+#include "ib/util/HandlerId.hpp"
 
 #include "MockParticipant.hpp"
 #include "MockTraceSink.hpp"
@@ -305,7 +306,7 @@ TEST(CanControllerTrivialSimTest, add_remove_handler)
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
 
     const int numHandlers = 10;
-    std::vector<ib::sim::HandlerId> handlerIds;
+    std::vector<HandlerId> handlerIds;
     for (int i = 0; i < numHandlers; i++)
     {
         handlerIds.push_back(canController.AddFrameTransmitHandler(

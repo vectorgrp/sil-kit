@@ -18,6 +18,8 @@
 
 #include "SimBehavior.hpp"
 
+#include "SynchronizedHandlers.hpp"
+
 namespace ib {
 namespace sim {
 namespace can {
@@ -114,6 +116,14 @@ private:
     {
         CallbackT<MsgT> callback;
         FilterT<MsgT> filter;
+
+        void operator()(ICanController* controller, const MsgT& msg) const
+        {
+            if (!filter || filter(msg))
+            {
+                callback(controller, msg);
+            }
+        }
     };
 
 private:
@@ -121,14 +131,14 @@ private:
     // private methods
     void ChangeControllerMode(CanControllerState state);
 
-    template<typename MsgT>
-    HandlerId AddHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter = nullptr);
+    template <typename MsgT>
+    HandlerId AddHandler(CallbackT<MsgT> handler, FilterT<MsgT> filter = nullptr);
+
+    template <typename MsgT>
+    bool RemoveHandler(HandlerId handlerId);
 
     template <typename MsgT>
     void CallHandlers(const MsgT& msg);
-
-    template <typename MsgT>
-    void RemoveHandler(HandlerId handlerId);
 
     auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
@@ -153,16 +163,14 @@ private:
     CanConfigureBaudrate _baudRate = { 0, 0 };
 
     template <typename MsgT>
-    using CallbackMap = std::map<HandlerId, FilteredCallback<MsgT>>;
+    using FilteredCallbacks = util::SynchronizedHandlers<FilteredCallback<MsgT>>;
 
     std::tuple<
-        CallbackMap<CanFrameEvent>,
-        CallbackMap<CanStateChangeEvent>,
-        CallbackMap<CanErrorStateChangeEvent>,
-        CallbackMap<CanFrameTransmitEvent>
+        FilteredCallbacks<CanFrameEvent>,
+        FilteredCallbacks<CanStateChangeEvent>,
+        FilteredCallbacks<CanErrorStateChangeEvent>,
+        FilteredCallbacks<CanFrameTransmitEvent>
     > _callbacks;
-
-    mutable std::recursive_mutex _callbacksMx;
 };
 
 // ================================================================================

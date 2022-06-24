@@ -135,12 +135,24 @@ typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultDataMessageHandler_t)(ib_Da
 */
 IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(
     ib_Data_Subscriber* self, void* context, ib_Data_DataMessageHandler_t dataHandler, const char* mediaType,
-    const ib_KeyValueList* labels);
+    const ib_KeyValueList* labels, ib_HandlerId* outHandlerId);
 
 typedef ib_ReturnCode (*ib_Data_Subscriber_AddExplicitDataMessageHandler_t)(ib_Data_Subscriber* self, void* context,
                                                                             ib_Data_DataMessageHandler_t dataHandler,
                                                                             const char* mediaType,
-                                                                            const ib_KeyValueList* labels);
+                                                                            const ib_KeyValueList* labels,
+                                                                            ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Data_DataMessageHandler_t by ib_HandlerId on this subscriber
+*
+* \param self The subscriber for which the explicit handler should be removed.
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_RemoveExplicitDataMessageHandler(ib_Data_Subscriber* self,
+                                                                                    ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Data_Subscriber_RemoveExplicitDataMessageHandler_t)(ib_Data_Subscriber* self,
+                                                                               ib_HandlerId handlerId);
 
 IB_END_DECLS
 

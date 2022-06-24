@@ -84,7 +84,7 @@ ib_ReturnCode ib_Can_Controller_RemoveFrameHandler(ib_Can_Controller* controller
     CAPI_ENTER
     {
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-        canController->RemoveFrameHandler(handlerId);
+        canController->RemoveFrameHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -122,7 +122,7 @@ ib_ReturnCode ib_Can_Controller_RemoveFrameTransmitHandler(ib_Can_Controller* co
     CAPI_ENTER
     {
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-        canController->RemoveFrameTransmitHandler(handlerId);
+        canController->RemoveFrameTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -157,7 +157,7 @@ ib_ReturnCode ib_Can_Controller_RemoveStateChangeHandler(ib_Can_Controller* cont
     CAPI_ENTER
     {
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-        canController->RemoveStateChangeHandler(handlerId);
+        canController->RemoveStateChangeHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -173,7 +173,7 @@ ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* co
     CAPI_ENTER
     {
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-        *outHandlerId = (ib_HandlerId)canController->AddErrorStateChangeHandler(
+        auto cppHandlerId = canController->AddErrorStateChangeHandler(
             [callback, context, controller](ib::sim::can::ICanController* /*ctrl*/,
                                             const ib::sim::can::CanErrorStateChangeEvent cppErrorStateChangeEvent) {
                 ib_Can_ErrorStateChangeEvent errorStateChangeEvent;
@@ -182,6 +182,7 @@ ib_ReturnCode ib_Can_Controller_AddErrorStateChangeHandler(ib_Can_Controller* co
                 errorStateChangeEvent.errorState = (ib_Can_ErrorState)cppErrorStateChangeEvent.errorState;
         		callback(context, controller, &errorStateChangeEvent);
             });
+        *outHandlerId = static_cast<ib_HandlerId>(cppHandlerId);
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -193,7 +194,7 @@ ib_ReturnCode ib_Can_Controller_RemoveErrorStateChangeHandler(ib_Can_Controller*
     CAPI_ENTER
     {
         auto canController = reinterpret_cast<ib::sim::can::ICanController*>(controller);
-        canController->RemoveErrorStateChangeHandler(handlerId);
+        canController->RemoveErrorStateChangeHandler(static_cast<ib::util::HandlerId>(handlerId));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

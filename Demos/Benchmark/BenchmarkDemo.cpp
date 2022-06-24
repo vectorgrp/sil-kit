@@ -383,11 +383,11 @@ int main(int argc, char** argv)
 
             controller->SetRequiredParticipants(participantNames);
 
-            monitor->RegisterSystemStateHandler([controller, participantNames](SystemState newState) {
+            monitor->AddSystemStateHandler([controller, participantNames](SystemState newState) {
                 SystemStateHandler(controller, newState, participantNames);
             });
 
-            monitor->RegisterParticipantStatusHandler([controller](const ParticipantStatus& newStatus) {
+            monitor->AddParticipantStatusHandler([controller](const ParticipantStatus& newStatus) {
                 ParticipantStatusHandler(controller, newStatus);
             });
 

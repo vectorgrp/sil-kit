@@ -182,88 +182,81 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanCo
 
 HandlerId CanController::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
-    std::function<bool(const CanFrameEvent&)> filter = [directionMask](const CanFrameEvent& frameEvent) {
+    auto filter = FilterT<CanFrameEvent>{[directionMask](const CanFrameEvent& frameEvent) {
         return (((DirectionMask)frameEvent.direction & (DirectionMask)directionMask)) != 0;
-    };
-    return AddHandler(handler, std::move(filter));
+    }};
+    return AddHandler(std::move(handler), std::move(filter));
 }
+
 void CanController::RemoveFrameHandler(HandlerId handlerId)
 {
-    RemoveHandler<CanFrameEvent>(handlerId);
+    if (!RemoveHandler<CanFrameEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveFrameHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId CanController::AddStateChangeHandler(StateChangeHandler handler)
 {
-    return AddHandler(handler);
+    return AddHandler(std::move(handler));
 }
+
 void CanController::RemoveStateChangeHandler(HandlerId handlerId)
 {
-    RemoveHandler<CanStateChangeEvent>(handlerId);
+    if (!RemoveHandler<CanStateChangeEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveStateChangeHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId CanController::AddErrorStateChangeHandler(ErrorStateChangeHandler handler)
 {
-    return AddHandler(handler);
+    return AddHandler(std::move(handler));
 }
+
 void CanController::RemoveErrorStateChangeHandler(HandlerId handlerId)
 {
-    RemoveHandler<CanErrorStateChangeEvent>(handlerId);
+    if (!RemoveHandler<CanErrorStateChangeEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveErrorStateChangeHandler failed: Unknown HandlerId.");
+    }
 }
 
 HandlerId CanController::AddFrameTransmitHandler(FrameTransmitHandler handler, CanTransmitStatusMask statusMask)
 {
-    std::function<bool(const CanFrameTransmitEvent&)> filter = [statusMask](const CanFrameTransmitEvent& ack) {
+    auto filter = FilterT<CanFrameTransmitEvent>{[statusMask](const CanFrameTransmitEvent& ack) {
         return ((CanTransmitStatusMask)ack.status & (CanTransmitStatusMask)statusMask) != 0;
-    };
-    return AddHandler(handler, filter);
+    }};
+    return AddHandler(std::move(handler), std::move(filter));
 }
+
 void CanController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
-    RemoveHandler<CanFrameTransmitEvent>(handlerId);
+    if (!RemoveHandler<CanFrameTransmitEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveFrameTransmitHandler failed: Unknown HandlerId.");
+    }
 }
 
 template <typename MsgT>
-HandlerId CanController::AddHandler(CallbackT<MsgT> handler, std::function<bool(const MsgT& msg)> filter)
+HandlerId CanController::AddHandler(CallbackT<MsgT> handler, FilterT<MsgT> filter)
 {
-    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
-
-    static uint64_t handlerId = 0;
-    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
-    handlersMap.emplace(handlerId, FilteredCallback<MsgT>{handler, filter});
-    return handlerId++;
+    auto& callbacks = std::get<FilteredCallbacks<MsgT>>(_callbacks);
+    return callbacks.Add(std::move(handler), std::move(filter));
 }
 
 template <typename MsgT>
-void CanController::RemoveHandler(HandlerId handlerId)
+bool CanController::RemoveHandler(HandlerId handlerId)
 {
-    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
-
-    auto&& handlersMap = std::get<CallbackMap<MsgT>>(_callbacks);
-
-    auto handlerToRemove = handlersMap.find(handlerId);
-    if (handlerToRemove == handlersMap.end())
-    {
-        _participant->GetLogger()->Warn("RemoveHandler failed: Unknown HandlerId.");
-    }
-    else
-    {
-        handlersMap.erase(handlerId);
-    }
+    auto& callbacks = std::get<FilteredCallbacks<MsgT>>(_callbacks);
+    return callbacks.Remove(handlerId);
 }
 
 template <typename MsgT>
 void CanController::CallHandlers(const MsgT& msg)
 {
-    std::unique_lock<decltype(_callbacksMx)> lock(_callbacksMx);
-
-    auto&& handlers = std::get<CallbackMap<MsgT>>(_callbacks);
-    for (auto&& filteredCallback : handlers)
-    {
-        if (!filteredCallback.second.filter || filteredCallback.second.filter(msg))
-        {
-            filteredCallback.second.callback(this, msg);
-        }
-    }
+    auto& callbacks = std::get<FilteredCallbacks<MsgT>>(_callbacks);
+    callbacks.InvokeAll(this, msg);
 }
 
 } // namespace can

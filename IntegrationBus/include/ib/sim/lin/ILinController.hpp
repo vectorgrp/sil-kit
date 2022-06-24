@@ -6,6 +6,7 @@
 #include <string>
 
 #include "LinDatatypes.hpp"
+#include "ib/util/HandlerId.hpp"
 
 namespace ib {
 namespace sim {

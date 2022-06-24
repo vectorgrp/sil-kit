@@ -2,6 +2,7 @@
 
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
+#include "SynchronizedHandlers.hpp"
 
 #include <cassert>
 #include <future>
@@ -196,13 +197,12 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 {
     std::chrono::nanoseconds _now;
     const std::string _name{"ParticipantTimeProvider"};
-    std::vector<NextSimStepHandlerT> _handlers;
+    util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
 
     auto SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
     {
         // tell our users about the next simulation step
-        for (auto& handler : _handlers)
-            handler(now, duration);
+        _handlers.InvokeAll(now, duration);
         _now = now;
     }
 
@@ -210,9 +210,14 @@ struct ParticipantTimeProvider : public sync::ITimeProvider
 
     const std::string& TimeProviderName() const override { return _name; }
 
-    void RegisterNextSimStepHandler(NextSimStepHandlerT handler) override
+    auto AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId override
     {
-        _handlers.emplace_back(std::move(handler));
+        return _handlers.Add(std::move(handler));
+    }
+
+    void RemoveNextSimStepHandler(HandlerId handlerId) override
+    {
+        _handlers.Remove(handlerId);
     }
 };
 

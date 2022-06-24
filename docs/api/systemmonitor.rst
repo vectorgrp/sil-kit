@@ -29,7 +29,7 @@ about the transition such as the name of the participant, the reason for the sta
       [](sync::ParticipantStatus status) {};
 
   auto* systemMonitor = participant->GetSystemMonitor();
-  systemMonitor->RegisterParticipantStatusHandler(participantStatusHandler);
+  systemMonitor->AddParticipantStatusHandler(participantStatusHandler);
 
 Last but not least a SystemStateHandler can be registered to get informed about system state transitions:
 
@@ -40,7 +40,7 @@ Last but not least a SystemStateHandler can be registered to get informed about 
       [](sync::SystemState state) {};
 
   auto* systemMonitor = participant->GetSystemMonitor();
-  systemMonitor->RegisterSystemStateHandler(systemStateHandler);
+  systemMonitor->AddSystemStateHandler(systemStateHandler);
 
 Register callbacks for new network connections to and disconnects from other participants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

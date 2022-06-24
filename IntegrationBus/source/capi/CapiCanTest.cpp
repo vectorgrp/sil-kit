@@ -100,6 +100,7 @@ namespace {
 
     TEST_F(CapiCanTest, can_controller_function_mapping)
     {
+        using ib::util::HandlerId;
 
         ib_ReturnCode returnCode;
         MockParticipant mockParticipant;
@@ -138,7 +139,7 @@ namespace {
                                                        ib_Direction_SendReceive, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, RemoveFrameHandler(0)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, RemoveFrameHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_RemoveFrameHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
@@ -147,7 +148,7 @@ namespace {
                                                              &StateChangeHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, RemoveStateChangeHandler(0)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, RemoveStateChangeHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_RemoveStateChangeHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
@@ -156,7 +157,7 @@ namespace {
                                                                   &ErrorStateChangeHandler, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, RemoveErrorStateChangeHandler(0)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, RemoveErrorStateChangeHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_RemoveErrorStateChangeHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
@@ -166,7 +167,7 @@ namespace {
                                                       ib_Can_TransmitStatus_Transmitted, &handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, RemoveFrameTransmitHandler(0)).Times(testing::Exactly(1));
+        EXPECT_CALL(mockController, RemoveFrameTransmitHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
         returnCode = ib_Can_Controller_RemoveFrameTransmitHandler((ib_Can_Controller*)&mockController, 0);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 

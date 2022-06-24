@@ -8,6 +8,7 @@
 #include "IIbToDataSubscriberInternal.hpp"
 #include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
+#include "SynchronizedHandlers.hpp"
 
 namespace ib {
 namespace sim {
@@ -26,7 +27,9 @@ public:
 
     void SetDefaultDataMessageHandler(DataMessageHandlerT handler);
 
-    void RegisterSpecificDataHandlerInternal(DataMessageHandlerT handler);
+    auto AddExplicitDataMessageHandler(DataMessageHandlerT handler) -> HandlerId;
+
+    void RemoveExplicitDataMessageHandler(HandlerId handlerId);
 
     //! \brief Accepts messages originating from IB communications.
     void ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessageEvent& dataMessageEvent) override;
@@ -48,10 +51,10 @@ private:
     std::string _mediaType;
     std::map<std::string, std::string> _labels;
     DataMessageHandlerT _defaultHandler;
-    IDataSubscriber* _parent{nullptr};
+    util::SynchronizedHandlers<DataMessageHandlerT> _explicitDataMessageHandlers;
 
+    IDataSubscriber* _parent{nullptr};
     mw::ServiceDescriptor _serviceDescriptor{};
-    std::vector<DataMessageHandlerT> _specificHandlers;
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     mw::IParticipantInternal* _participant{nullptr};
 };

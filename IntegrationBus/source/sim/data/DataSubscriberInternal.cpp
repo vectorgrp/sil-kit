@@ -17,7 +17,7 @@ DataSubscriberInternal::DataSubscriberInternal(mw::IParticipantInternal* partici
     : _topic{topic}
     , _mediaType{mediaType}
     , _labels{labels}
-    , _defaultHandler{defaultHandler}
+    , _defaultHandler{std::move(defaultHandler)}
     , _parent{parent}
     , _timeProvider{timeProvider}
     , _participant{participant}
@@ -30,9 +30,14 @@ void DataSubscriberInternal::SetDefaultDataMessageHandler(DataMessageHandlerT ha
     _defaultHandler = std::move(handler);
 }
 
-void DataSubscriberInternal::RegisterSpecificDataHandlerInternal(DataMessageHandlerT handler)
+auto DataSubscriberInternal::AddExplicitDataMessageHandler(DataMessageHandlerT handler) -> HandlerId
 {
-    _specificHandlers.push_back(handler);
+    return _explicitDataMessageHandlers.Add(std::move(handler));
+}
+
+void DataSubscriberInternal::RemoveExplicitDataMessageHandler(HandlerId handlerId)
+{
+    _explicitDataMessageHandlers.Remove(handlerId);
 }
 
 void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
@@ -45,18 +50,7 @@ void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from
 
 void DataSubscriberInternal::ReceiveMessage(const DataMessageEvent& dataMessageEvent)
 {
-    bool anySpecificHandlerExecuted{false};
-    if (!_specificHandlers.empty())
-    {
-        for (auto handler : _specificHandlers)
-        {
-            if (handler)
-            {
-                handler(_parent, dataMessageEvent);
-                anySpecificHandlerExecuted = true;
-            }
-        }
-    }
+    const auto anySpecificHandlerExecuted = _explicitDataMessageHandlers.InvokeAll(_parent, dataMessageEvent);
 
     if (_defaultHandler && !anySpecificHandlerExecuted)
     {
