@@ -191,6 +191,16 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_AddFrameHandler_t)(ib_Ethernet_Co
                                                                   ib_Ethernet_FrameHandler_t handler,
                                                                   ib_HandlerId* outHandlerId);
 
+/*! \brief  Remove a \ref ib_Ethernet_FrameHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RemoveFrameHandler(ib_Ethernet_Controller* controller,
+                                                                          ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveFrameHandler_t)(ib_Ethernet_Controller* controller,
+                                                                     ib_HandlerId handlerId);
+
 /*! \brief Register a callback for Ethernet transmit acknowledgments
 *
 * The handler is called when a previously sent message was
@@ -217,6 +227,16 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_AddFrameTransmitHandler_t)(ib_Eth
                                                                           void* context,
                                                                           ib_Ethernet_FrameTransmitHandler_t handler,
                                                                           ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Ethernet_FrameTransmitHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RemoveFrameTransmitHandler(ib_Ethernet_Controller* controller,
+                                                                                  ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveFrameTransmitHandler_t)(ib_Ethernet_Controller* controller,
+                                                                             ib_HandlerId handlerId);
 
 /*! \brief Register a callback for changes of the controller state
 *
@@ -247,6 +267,17 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_AddStateChangeHandler_t)(ib_Ether
                                                                         ib_Ethernet_StateChangeHandler_t handler,
                                                                         ib_HandlerId* outHandlerId);
 
+/*! \brief  Remove a \ref ib_Ethernet_StateChangeHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RemoveStateChangeHandler(ib_Ethernet_Controller* controller,
+                                                                                ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveStateChangeHandler_t)(ib_Ethernet_Controller* controller,
+                                                                           ib_HandlerId handlerId);
+
+
 /*! \brief Register a callback for changes of the link bit rate
 *
 * The handler is called when the bit rate of the connected link
@@ -271,6 +302,15 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_AddBitrateChangeHandler_t)(ib_Eth
                                                                           void* context,
                                                                           ib_Ethernet_BitrateChangeHandler_t handler,
                                                                           ib_HandlerId* outHandlerId);
+/*! \brief  Remove a \ref ib_Ethernet_BitrateChangeHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Ethernet_Controller_RemoveBitrateChangeHandler(ib_Ethernet_Controller* controller,
+                                                                                  ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveBitrateChangeHandler_t)(ib_Ethernet_Controller* controller,
+                                                                             ib_HandlerId handlerId);
 
 /*! \brief Send an Ethernet frame
 *

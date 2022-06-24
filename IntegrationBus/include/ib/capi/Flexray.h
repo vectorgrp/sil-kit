@@ -614,6 +614,16 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameHandler_t)(ib_Flexray_Cont
                                                                  ib_Flexray_FrameHandler_t handler,
                                                                  ib_HandlerId* outHandlerId);
 
+/*! \brief  Remove a \ref ib_Flexray_FrameHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveFrameHandler(ib_Flexray_Controller* controller,
+                                                                         ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameHandler_t)(ib_Flexray_Controller* controller,
+                                                                    ib_HandlerId handlerId);
+
 /*! \brief Notification that a FlexRay message has been successfully sent.
  *
  * \param controller The FlexRay controller for which the callback should be registered.
@@ -631,6 +641,16 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameTransmitHandler_t)(ib_Flex
                                                                          ib_Flexray_FrameTransmitHandler_t handler,
                                                                          ib_HandlerId* outHandlerId);
 
+/*! \brief  Remove a \ref ib_Flexray_FrameTransmitHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveFrameTransmitHandler(ib_Flexray_Controller* controller,
+                                                                                 ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameTransmitHandler_t)(ib_Flexray_Controller* controller,
+                                                                            ib_HandlerId handlerId);
+
 /*! \brief Notification that a wakeup has been received.
  *
  * \param controller The FlexRay controller for which the callback should be registered.
@@ -645,6 +665,16 @@ IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddWakeupHandler(ib_Flexra
 typedef ib_ReturnCode (*ib_Flexray_Controller_AddWakeupHandler_t)(ib_Flexray_Controller* controller, void* context,
                                                                   ib_Flexray_WakeupHandler_t handler,
                                                                   ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Flexray_WakeupHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveWakeupHandler(ib_Flexray_Controller* controller,
+                                                                          ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveWakeupHandler_t)(ib_Flexray_Controller* controller,
+                                                                     ib_HandlerId handlerId);
 
 /*! \brief Notification that the POC status has changed.
  *
@@ -661,6 +691,16 @@ IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddPocStatusHandler(ib_Fle
 typedef ib_ReturnCode (*ib_Flexray_Controller_AddPocStatusHandler_t)(ib_Flexray_Controller* controller, void* context,
                                                                      ib_Flexray_PocStatusHandler_t handler,
                                                                      ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Flexray_PocStatusHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemovePocStatusHandler(ib_Flexray_Controller* controller,
+                                                                             ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemovePocStatusHandler_t)(ib_Flexray_Controller* controller,
+                                                                        ib_HandlerId handlerId);
 
 /*! \brief Notification that the controller has received a symbol.
   *
@@ -680,6 +720,16 @@ IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddSymbolHandler(ib_Flexra
 typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolHandler_t)(ib_Flexray_Controller* controller, void* context,
                                                                   ib_Flexray_SymbolHandler_t handler,
                                                                   ib_HandlerId* outHandlerId);
+
+/*! \brief  Remove a \ref ib_Flexray_SymbolHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveSymbolHandler(ib_Flexray_Controller* controller,
+                                                                          ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolHandler_t)(ib_Flexray_Controller* controller,
+                                                                     ib_HandlerId handlerId);
 
 /*! \brief Notification that the controller has sent a symbol.
   *
@@ -702,6 +752,16 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolTransmitHandler_t)(ib_Fle
                                                                           ib_Flexray_SymbolTransmitHandler_t handler,
                                                                           ib_HandlerId* outHandlerId);
 
+/*! \brief  Remove a \ref ib_Flexray_SymbolTransmitHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveSymbolTransmitHandler(ib_Flexray_Controller* controller,
+                                                                                  ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolTransmitHandler_t)(ib_Flexray_Controller* controller,
+                                                                             ib_HandlerId handlerId);
+
 /*! \brief Notification that a new FlexRay cycle did start.
  *
  * \param controller The FlexRay controller for which the callback should be registered.
@@ -717,6 +777,17 @@ IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddCycleStartHandler(ib_Fl
 typedef ib_ReturnCode (*ib_Flexray_Controller_AddCycleStartHandler_t)(ib_Flexray_Controller* controller, void* context,
                                                                       ib_Flexray_CycleStartHandler_t handler,
                                                                       ib_HandlerId* outHandlerId);
+
+
+/*! \brief  Remove a \ref ib_Flexray_CycleStartHandler_t by ib_HandlerId on this controller 
+*
+* \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+*/
+IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveCycleStartHandler(ib_Flexray_Controller* controller,
+                                                                              ib_HandlerId handlerId);
+
+typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveCycleStartHandler_t)(ib_Flexray_Controller* controller,
+                                                                         ib_HandlerId handlerId);
 
 IB_END_DECLS
 
