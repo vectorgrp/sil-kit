@@ -43,14 +43,14 @@ directory and configure cmake::
 3. Customize the Build
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It is often helpful to specify a directory, where the build should be
+It is often helpful to specify a directory where the build should be
 installed. With cmake, this can be configured via the variable
 CMAKE_INSTALL_PREFIX. E.g., to installed the integration bus into a folder
 called "install" next to the build folder, run cmake as follows::
 
     cmake -DCMAKE_INSTALL_PREFIX=../install ..
 
-There are also two IB specific options:
+There are also specific options to toggle details of the build:
 
     1. IB_BUILD_DOCS=ON (default: OFF) generates html documentation using
        Doxygen and Sphinx. Both must be installed beforehand. Sphinx is a Python
