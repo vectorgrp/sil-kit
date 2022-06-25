@@ -204,6 +204,14 @@ void ReadyToRunState::RunSimulation(std::string reason)
     if (_isSystemReadyToRun)
     {
         _isSystemReadyToRun = false;
+
+        if (!_lifecycleManager->GetService()->IsTimeSyncActive())
+        {
+            _lifecycleManager->HandleStarting(std::move(reason));
+            // state transition handled by lifecycle manager - could be running or error
+            return;
+        }
+
         _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), std::move(reason));
         return;
     }

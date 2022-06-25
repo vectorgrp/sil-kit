@@ -109,6 +109,22 @@ void LifecycleManagement::HandleCommunicationReady(std::string reason)
     SetState(GetReadyToRunState(), std::move(reason));
 }
 
+void LifecycleManagement::HandleStarting(std::string reason)
+{
+    try
+    {
+        _parentService->TriggerStartingHandler(
+            "Transition to ParticipantState::Running imminent and virtual timeSync inactive.");
+    }
+    catch (const std::exception&)
+    {
+        // Switch to error state if handle triggers error
+        SetStateError("Exception during CommunicationReadyHandle execution.");
+        return;
+    }
+    SetState(GetRunningState(), std::move(reason));
+}
+
 void LifecycleManagement::HandleStop(std::string reason)
 {
     try
@@ -217,6 +233,10 @@ logging::ILogger* LifecycleManagement::GetLogger()
     return _logger;
 }
 
+LifecycleService* LifecycleManagement::GetService()
+{
+    return _parentService;
+}
 
 } // namespace sync
 } // namespace mw

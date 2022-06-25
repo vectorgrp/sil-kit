@@ -87,6 +87,7 @@ protected:
     struct Callbacks
     {
         MOCK_METHOD(void, CommunicationReadyHandler, ());
+        MOCK_METHOD(void, StartingHandler, ());
         MOCK_METHOD(void, StopHandler, ());
         MOCK_METHOD(void, ShutdownHandler, ());
         MOCK_METHOD(void, SimTask, (std::chrono::nanoseconds));
@@ -129,10 +130,13 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
+    lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
     
     EXPECT_CALL(callbacks, CommunicationReadyHandler())
+        .Times(1);
+    EXPECT_CALL(callbacks, StartingHandler())
         .Times(1);
     EXPECT_CALL(callbacks, StopHandler())
         .Times(1);
@@ -187,10 +191,13 @@ TEST_F(LifecycleServiceTest, start_restart_stop_coordinated)
     lifecycleService.SetServiceDescriptor(descriptor);
 
     lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
+    lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
     
     EXPECT_CALL(callbacks, CommunicationReadyHandler())
+        .Times(2);
+    EXPECT_CALL(callbacks, StartingHandler())
         .Times(2);
     EXPECT_CALL(callbacks, StopHandler())
         .Times(2);
@@ -509,7 +516,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_Initialized)
+TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
 {
     LifecycleService lifecycleService(&participant, healthCheckConfig);
     MockTimeSync mockTimeSync(&participant, &lifecycleService, healthCheckConfig);
@@ -912,5 +919,84 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
     lifecycleService.ReceiveIbMessage(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 }
+
+TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
+{
+    LifecycleService lifecycleService(&participant, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &lifecycleService, healthCheckConfig);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
+    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
+
+    lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
+    EXPECT_CALL(callbacks, StartingHandler())
+        .Times(1)
+        .WillRepeatedly(Throw(std::runtime_error("StartingException")));
+
+    auto descriptor = from_endpointAddress(addr);
+    lifecycleService.SetServiceDescriptor(descriptor);
+
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::ReadyToRun)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
+        .Times(1);
+
+    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
+    // run
+    SystemCommand runCommand{SystemCommand::Kind::Run};
+    lifecycleService.ReceiveIbMessage(&masterId, runCommand);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
+}
+
+TEST_F(LifecycleServiceTest, no_starting_callback_call_if_timesync_active)
+{
+    LifecycleService lifecycleService(&participant, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &lifecycleService, healthCheckConfig);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
+    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
+
+    lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
+    EXPECT_CALL(callbacks, StartingHandler())
+        .Times(0);
+
+    auto descriptor = from_endpointAddress(addr);
+    lifecycleService.SetServiceDescriptor(descriptor);
+
+    EXPECT_CALL(participant,
+                SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService,
+                                           AParticipantStatusWithState(ParticipantState::ReadyToRun)))
+        .Times(1);
+    EXPECT_CALL(participant, SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
+        .Times(1);
+
+    auto* timeSyncService = lifecycleService.GetTimeSyncService();
+    lifecycleService.ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+    PrepareLifecycle(&lifecycleService);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
+    // run
+    SystemCommand runCommand{SystemCommand::Kind::Run};
+    lifecycleService.ReceiveIbMessage(&masterId, runCommand);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
+}
+
 
 } // namespace

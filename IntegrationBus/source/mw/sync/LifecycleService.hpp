@@ -40,6 +40,7 @@ public:
     // Public Methods
     // ILifecycleService
     void SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) override;
+    void SetStartingHandler(StartingHandlerT handler) override;
     void SetStopHandler(StopHandlerT handler) override;
     void SetShutdownHandler(ShutdownHandlerT handler) override;
 
@@ -79,6 +80,7 @@ public:
 
 public:
     void TriggerCommunicationReadyHandler(std::string reason);
+    void TriggerStartingHandler(std::string reason);
     void TriggerStopHandler(std::string reason);
     void TriggerShutdownHandler(std::string reason);
 
@@ -87,6 +89,8 @@ public:
     void SetTimeSyncService(TimeSyncService* timeSyncService);
 
     void NewSystemState(SystemState systemState);
+
+    bool IsTimeSyncActive();
 
 
 private:
@@ -115,10 +119,12 @@ private:
     bool _isRunning{false};
     ParticipantStatus _status;
     std::shared_ptr<ILifecycleManagement> _lifecycleManagement;
+    bool _timeSyncActive = false;
 
     std::promise<ParticipantState> _finalStatePromise;
 
     CommunicationReadyHandlerT _commReadyHandler;
+    StartingHandlerT _startingHandler;
     StopHandlerT _stopHandler;
     ShutdownHandlerT _shutdownHandler;
     std::future<void> _asyncResult;

@@ -87,6 +87,7 @@ public:
 class MockLifecycleService : public sync::ILifecycleService {
 public:
     MOCK_METHOD(void, SetCommunicationReadyHandler, (CommunicationReadyHandlerT), (override));
+    MOCK_METHOD(void, SetStartingHandler, (StartingHandlerT), (override));
     MOCK_METHOD(void, SetStopHandler, (StopHandlerT), (override));
     MOCK_METHOD(void, SetShutdownHandler, (ShutdownHandlerT), (override));
     MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleNoSyncTime,

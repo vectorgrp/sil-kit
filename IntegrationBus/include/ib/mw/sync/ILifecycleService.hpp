@@ -18,6 +18,7 @@ class ILifecycleService
 {
 public:
     using CommunicationReadyHandlerT = std::function<void()>;
+    using StartingHandlerT = std::function<void()>;
     using StopHandlerT = std::function<void()>;
     using ShutdownHandlerT = std::function<void()>;
 
@@ -25,14 +26,24 @@ public:
     /*! \brief Register a callback that is executed once communication with 
      * controllers is possible.
      *
-     * The handler is called after \ref SystemCommand::Kind::CommunicationReady
-     * was received.
+     * The handler is called after \ref SystemState::CommunicationReady
+     * is reached.
      * TODO fill in on which thread this is executed.
      * After the handler has been processed, the participant
-     * switches to the \ref ParticipantState::Initialized state.
+     * switches to the \ref ParticipantState::ReadyToRun state.
      */
-    
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) = 0;
+
+    /*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters ParticipantState::Run.
+     *
+     * This handler is triggered just before the participant changes to ParticipantState::Running.
+     * It is only triggered if the participant does NOT use virtual time synchronization.
+     * It does not block other participants from changing to ParticipantState::Running and should only be used for lightweight operations such as starting timers.
+     * TODO fill in on which thread this is executed.
+     * After the handler has been processed, the participant
+     * switches to the \ref ParticipantState::Running state.
+     */
+    virtual void SetStartingHandler(StartingHandlerT handler) = 0;
 
     /*! \brief Register a callback that is executed on simulation stop.
      *

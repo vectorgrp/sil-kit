@@ -36,6 +36,11 @@ void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandlerT h
     _commReadyHandler = std::move(handler);
 }
 
+void LifecycleService::SetStartingHandler(StartingHandlerT handler)
+{
+    _startingHandler = std::move(handler);
+}
+
 void LifecycleService::SetStopHandler(StopHandlerT handler)
 {
     _stopHandler = std::move(handler);
@@ -82,6 +87,7 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
 auto LifecycleService::ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
                                 bool isRequiredParticipant) -> std::future<ParticipantState>
 {
+    _timeSyncActive = false;
     _timeSyncService->InitializeTimeSyncPolicy(false);
 
     return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop, isRequiredParticipant);
@@ -103,6 +109,7 @@ auto LifecycleService::ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncSe
         throw std::runtime_error("Failed to validate the provided timeSyncService pointer.");
     }
 
+    _timeSyncActive = true;
     _timeSyncService->InitializeTimeSyncPolicy(true);
 
     return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop, isRequiredParticipant);
@@ -174,14 +181,6 @@ void LifecycleService::Stop(std::string reason)
     }
 }
 
-void LifecycleService::TriggerStopHandler(std::string)
-{
-    if (_stopHandler)
-    {
-        _stopHandler();
-    }
-}
-
 void LifecycleService::Shutdown(std::string reason)
 {
     auto success = _lifecycleManagement->Shutdown(reason);
@@ -203,15 +202,6 @@ void LifecycleService::Shutdown(std::string reason)
     }
 }
 
-void LifecycleService::TriggerShutdownHandler(std::string)
-{
-    if (_shutdownHandler)
-    {
-        _shutdownHandler();
-    }
-}
-
-
 void LifecycleService::Restart(std::string reason)
 {
     _lifecycleManagement->Restart(reason);
@@ -227,6 +217,30 @@ void LifecycleService::TriggerCommunicationReadyHandler(std::string)
     if (_commReadyHandler)
     {
         _commReadyHandler();
+    }
+}
+
+void LifecycleService::TriggerStartingHandler(std::string)
+{
+    if (_startingHandler)
+    {
+        _startingHandler();
+    }
+}
+
+void LifecycleService::TriggerStopHandler(std::string)
+{
+    if (_stopHandler)
+    {
+        _stopHandler();
+    }
+}
+
+void LifecycleService::TriggerShutdownHandler(std::string)
+{
+    if (_shutdownHandler)
+    {
+        _shutdownHandler();
     }
 }
 
@@ -355,6 +369,11 @@ void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
 void LifecycleService::NewSystemState(SystemState systemState)
 {
     _lifecycleManagement->NewSystemState(systemState);
+}
+
+bool LifecycleService::IsTimeSyncActive()
+{
+    return _timeSyncActive;
 }
 
 } // namespace sync

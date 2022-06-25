@@ -53,7 +53,7 @@ public:
 
 public:
     void HandleCommunicationReady(std::string reason);
-
+    void HandleStarting(std::string reason);
     void HandleStop(std::string reason);
 
     void HandleShutdown(std::string reason);
@@ -78,6 +78,8 @@ public:
     ILifecycleState* GetShutdownState();
 
     logging::ILogger* GetLogger();
+
+    LifecycleService* GetService();
 
 private:
     std::shared_ptr<ILifecycleState> _invalidState;
