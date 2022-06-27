@@ -89,17 +89,6 @@ namespace {
         returnCode = ib_Participant_SetShutdownHandler((ib_Participant*)&mockParticipant, NULL, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        // ExecuteLifecycleNoSyncTime
-        ib_ParticipantState outParticipantState;
-        returnCode = ib_Participant_StartLifecycleNoSyncTime(nullptr,
-            ib_False, ib_False, ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-
-        returnCode = ib_Participant_StartLifecycleNoSyncTime((ib_Participant*)&mockParticipant,
-            0xcd, ib_False, ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
         // ExecuteLifecycleWithSyncTime
         returnCode = ib_Participant_StartLifecycleWithSyncTime(nullptr,
             ib_False, ib_False, ib_False);
@@ -110,6 +99,7 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         // WaitForLifecycleToComplete
+        ib_ParticipantState outParticipantState;
         returnCode = ib_Participant_WaitForLifecycleToComplete(nullptr, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -291,13 +281,13 @@ namespace {
         state.set_value(ParticipantState::Shutdown);
 
         EXPECT_CALL(mockParticipant.mockLifecycleService,
-            StartLifecycleNoSyncTime(_, _)
+            StartLifecycleNoSyncTime(_)
         ).Times(testing::Exactly(1))
             .WillOnce(Return(ByMove(state.get_future())));
 
 
         returnCode = ib_Participant_StartLifecycleNoSyncTime(
-            cParticipant, ib_False, ib_False, ib_False);
+            cParticipant, ib_StartOptions_None);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
         returnCode = ib_Participant_WaitForLifecycleToComplete(cParticipant, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);

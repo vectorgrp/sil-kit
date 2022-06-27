@@ -7,12 +7,60 @@
 #include <string>
 
 #include "ib/mw/sync/ITimeSyncService.hpp"
+#include "ib/capi/Participant.h"
+#include "ib/exception.hpp"
 
 #include "SyncDatatypes.hpp"
 
 namespace ib {
 namespace mw {
 namespace sync {
+
+//!<  StartOptions encode the options provided to StartLifecycleWithSyncTime
+//!   and StartLifecycleNoSyncTime methods.
+enum struct StartOptions: ib_StartOptions
+{
+    None = ib_StartOptions_None,
+    CoordinatedStart = ib_StartOptions_CoordinatedStart,
+    CoordinatedStop = ib_StartOptions_CoordinatedStop,
+};
+
+//!< Testing if an enum option is set.
+inline bool operator&(StartOptions lhs, StartOptions rhs)
+{
+    using BitsT = std::underlying_type_t<StartOptions>;
+    const auto lval = static_cast<BitsT>(lhs);
+    const auto rval = static_cast<BitsT>(rhs);
+    return (lval & rval) > 0;
+}
+//!< Adding an option to the StartOptions object on the left hand side of the expression
+inline StartOptions operator|(StartOptions lhs, StartOptions rhs)
+{
+    using BitsT = std::underlying_type_t<StartOptions>;
+    const BitsT validBits = ib_StartOptions_None 
+        | ib_StartOptions_CoordinatedStart
+        | ib_StartOptions_CoordinatedStop
+    ;
+    const auto lval = static_cast<BitsT>(lhs);
+    const auto rval = static_cast<BitsT>(rhs);
+    auto checkValueRange = [validBits](const auto value) {
+        // prevent invalid enum flag combinations, by excluding unknown
+        // flag bits
+        if((value & ~validBits) != 0)
+        {
+            throw ib::TypeConversionError{"StartOptions contain invalid enum values"};
+        }
+    };
+    checkValueRange(lval);
+    checkValueRange(rval);
+    return static_cast<StartOptions>(lval | rval);
+}
+
+inline StartOptions operator|=(StartOptions lhs, StartOptions rhs)
+{
+    auto ops = lhs | rhs;
+    return ops;
+}
 
 class ILifecycleService
 {
@@ -80,7 +128,7 @@ public:
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto StartLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+    virtual auto StartLifecycleNoSyncTime(StartOptions startOptions)
         -> std::future<ParticipantState> = 0;
 
     

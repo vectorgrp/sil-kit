@@ -155,23 +155,17 @@ static std::map<ib_Participant*, std::future<ib::mw::sync::ParticipantState>> sR
 
 ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
     ib_Participant* participant,
-    ib_Bool hasCoordinatedSimulationStart,
-    ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant)
+    ib_StartOptions cOptions)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStart);
-  ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStop);
-  ASSERT_VALID_BOOL_PARAMETER(isRequiredParticipant);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* lifecycleService = cppParticipant->GetLifecycleService();
 
+    auto cppOpts = static_cast<ib::mw::sync::StartOptions>(cOptions);
     sRunAsyncFuturePerParticipant[participant] =
-        lifecycleService->StartLifecycleNoSyncTime(
-            hasCoordinatedSimulationStart == ib_True,
-            hasCoordinatedSimulationStop == ib_True);
+        lifecycleService->StartLifecycleNoSyncTime(cppOpts);
 
 
     return ib_ReturnCode_SUCCESS;

@@ -35,3 +35,8 @@
 #    endif
 #endif  
 
+// Utilities for more readable definitions
+#ifndef BIT 
+#    define BIT(X) (1 << (X))
+#endif
+
