@@ -17,6 +17,7 @@ Compatibility with 3.99.25
 
 Added
 ~~~~~
+- IbSystemControllerInteractive: Added ``Abort`` as possible input
 
 - the new ILifeCycleService is now exposed on the C-API:
   added the new :cpp:func:`ib_Participant_ExecuteLifecycleWithTime` and
@@ -139,6 +140,38 @@ Changed
     - ``IParticipantController::Now(...) -> ITimeSyncService::Now(...)``
     - ``IParticipantController::SetPeriod(...) -> ITimeSyncService::SetPeriod(...)``
     
+- ISystemController: 
+  - Shutdown is now a participant command
+  
+    - ``IntegrationBus/include/ib/mw/sync/ISystemController.hpp``
+  
+      + old (life cycle execution):
+    
+        .. code-block:: c++
+    
+          virtual void Shutdown() const = 0;
+          
+      + new (life cycle execution):
+    
+        .. code-block:: c++
+  
+          virtual void Shutdown(const std::string& participantName) const = 0;
+  
+  - Renamed reinitialize to restart
+  
+    - ``IntegrationBus/include/ib/mw/sync/ISystemController.hpp``
+  
+      + old (life cycle execution):
+    
+        .. code-block:: c++
+    
+          virtual void Reinitialize(const std::string& participantName) const = 0;
+          
+      + new (life cycle execution):
+    
+        .. code-block:: c++
+  
+          virtual void Restart(const std::string& participantName) const = 0;
 
 - C-API: renamed the `ib_Participant_WaitForAsyncRunToComplete` to
   `ib_Participant_WaitForLifecycleToComplete`.
@@ -227,6 +260,10 @@ Changed
 
 Removed
 ~~~~~~~
+- ISystemController: Removed ``ISystemController::Initialize(const std::string& participantName) const`` 
+  without replacement (initialization is perfomed automatically in the new life cycle concept)
+
+- IbSystemControllerInteractive: Removed ``Initialize`` as possible input
 
 - C-API: the  `ib_Participant_RunAsync` is superseded by the
   `ib_Participant_ExecuteLifeCycle...` functions.
