@@ -34,12 +34,8 @@ The first transition performed by the system controller, usually when
 :cpp:enumerator:`SystemState::ServicesCreated<ib::mw::sync::ServicesCreated>` is reached,
 is accomplished by initializing all participants::
 
-  // Initialize a participant by providing its name.
-  auto* systemController = participant->GetSystemController();
-  systemController->Initialize(participant.name);
-
 After all participants are successfully initialized and the system is in
-:cpp:enumerator:`SystemState::Initialized<ib::mw::sync::Initialized>`, the next transition can be initiated
+:cpp:enumerator:`SystemState::ReadyToRun<ib::mw::sync::ReadyToRun>`, the next transition can be initiated
 by calling the :cpp:func:`Run()<ib::mw::sync::ISystemController::Run()>` command::
 
   // Initiate state transition from Idle to Running for all participants.

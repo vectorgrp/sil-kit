@@ -133,7 +133,6 @@ public:
 
 class MockSystemController : public sync::ISystemController {
 public:
-    MOCK_METHOD(void, Initialize, (const std::string& participantId), (const, override));
     MOCK_METHOD(void, Restart, (const std::string& participantId), (const, override));
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());

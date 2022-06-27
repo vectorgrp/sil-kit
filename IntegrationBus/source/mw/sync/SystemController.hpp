@@ -37,7 +37,6 @@ public:
     // ----------------------------------------
     // Public Methods
     // ISystemController
-    void Initialize(const std::string& participantName) const override;
     void Restart(const std::string& participantName) const override;
     void Run() const override;
     void Stop() const override;

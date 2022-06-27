@@ -167,11 +167,7 @@ public:
 private:
     void OnSystemStateChanged(SystemState newState)
     {
-        if (newState == SystemState::ServicesCreated)
-        {
-            InitializeAllParticipants();
-        }
-        else if (newState == SystemState::ReadyToRun)
+        if (newState == SystemState::ReadyToRun)
         {
             _systemController->Run();
         }
@@ -181,14 +177,6 @@ private:
             {
                 _systemController->Shutdown(name);
             }
-        }
-    }
-
-    void InitializeAllParticipants()
-    {
-        for (auto&& name : _syncParticipantNames)
-        {
-            _systemController->Initialize(name);
         }
     }
 

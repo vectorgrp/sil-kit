@@ -316,23 +316,6 @@ ib_ReturnCode ib_Participant_Continue(ib_Participant* participant)
     CAPI_LEAVE
 }
 
-// SystemController related functions
-ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char* participantName)
-{
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_POINTER_PARAMETER(participantName);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    std::string name{ participantName };
-    auto* systemController = cppParticipant->GetSystemController();
-
-    systemController->Initialize(name);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
 ib_ReturnCode ib_Participant_Restart(ib_Participant* participant, const char* participantName)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);

@@ -35,16 +35,6 @@ public:
         _participant.reset();
     }
 
-    void InitializeAll()
-    {
-        for (const auto& name : _syncParticipantNames)
-        {
-            //std::cout << "SimTestHarness: Sending ParticipantCommand::Init to participant \""
-            //    << name << "\"" << std::endl;
-            _controller->Initialize(name);
-        }
-    }
-
     void OnParticipantStatusChanged(ib::mw::sync::ParticipantStatus status)
     {
         if (_isShuttingDown)
@@ -69,9 +59,6 @@ public:
         //std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
-        case ib::mw::sync::SystemState::ServicesCreated:
-            InitializeAll();
-            return;
         case ib::mw::sync::SystemState::ReadyToRun:
             _controller->Run();
             return;

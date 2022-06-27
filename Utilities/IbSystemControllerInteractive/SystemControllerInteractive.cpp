@@ -69,8 +69,6 @@ sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString
 {
     if (cmdString == "Invalid")
         return ParticipantCommand::Kind::Invalid;
-    else if (cmdString == "Initialize")
-        return ParticipantCommand::Kind::Initialize;
     else if (cmdString == "Restart")
         return ParticipantCommand::Kind::Restart;
     else if (cmdString == "Shutdown")
@@ -190,9 +188,6 @@ public:
         switch (participantCommand)
         {
         case ParticipantCommand::Kind::Invalid:
-            return;
-        case ParticipantCommand::Kind::Initialize:
-            _controller->Initialize(participantName);
             return;
         case ParticipantCommand::Kind::Restart:
             _controller->Restart(participantName);

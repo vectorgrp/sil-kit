@@ -105,15 +105,6 @@ namespace {
         returnCode = ib_Participant_WaitForLifecycleToComplete((ib_Participant*)&mockParticipant, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_Initialize(nullptr, nullptr);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-        returnCode = ib_Participant_Initialize((ib_Participant*)&mockParticipant, nullptr);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-        returnCode = ib_Participant_Initialize(nullptr, "test");
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
         returnCode = ib_Participant_Restart((ib_Participant*)&mockParticipant, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -299,9 +290,6 @@ namespace {
         ib_ParticipantState participantState;
         EXPECT_CALL(mockParticipant.mockSystemMonitor, ParticipantStatus(testing::_)).Times(testing::Exactly(1));
         returnCode = ib_Participant_GetParticipantState(&participantState, (ib_Participant*)&mockParticipant, "participant");
-        EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
-
-        returnCode = ib_Participant_Initialize((ib_Participant*)&mockParticipant, "participant");
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
         returnCode = ib_Participant_Restart((ib_Participant*)&mockParticipant, "participant");

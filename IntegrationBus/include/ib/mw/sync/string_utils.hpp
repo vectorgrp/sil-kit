@@ -113,8 +113,6 @@ std::string to_string(ParticipantCommand::Kind command)
     {
     case ParticipantCommand::Kind::Invalid:
         return "Invalid";
-    case ParticipantCommand::Kind::Initialize: 
-        return "Initialize";
     case ParticipantCommand::Kind::Restart:
         return "Restart";
     case ParticipantCommand::Kind::Shutdown:

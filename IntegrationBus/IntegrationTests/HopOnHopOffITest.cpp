@@ -100,13 +100,6 @@ protected:
     {
         switch (newState)
         {
-        case SystemState::ServicesCreated:
-            for (auto&& name : syncParticipantNames)
-            {
-                systemMaster.systemController->Initialize(name);
-            }
-            break;
-
         case SystemState::ReadyToRun:
             systemMaster.systemController->Run();
             break;

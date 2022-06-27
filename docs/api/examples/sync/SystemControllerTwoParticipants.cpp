@@ -16,13 +16,6 @@ auto systemStateHandler =
     [systemController, ibConfig](SystemState state) {
         switch (state)
         {
-        case SystemState::ServicesCreated:
-            // ------------------------------------------------------------
-            // Transition from SystemState::ServicesCreated to SystemState::ReadyToRun:
-            systemController->Initialize(participantName1);
-            systemController->Initialize(participantName2);
-
-            return;
         case SystemState::ReadyToRun:
             // ------------------------------------------------------------
             // Transition from SystemState::ReadyToRun to SystemState::Running:

@@ -69,12 +69,6 @@ private:
         _systemMaster.systemMonitor->AddSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
             switch (newState)
             {
-            case SystemState::ServicesCreated:
-                for (auto&& name : requiredParticipantNames)
-                {
-                    _systemMaster.systemController->Initialize(name);
-                }
-                break;
             case SystemState::ReadyToRun:
                 _systemMaster.systemController->Run();
                 break;
