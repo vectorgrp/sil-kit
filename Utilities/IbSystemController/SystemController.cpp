@@ -54,9 +54,6 @@ public:
     {
         switch (newState)
         {
-        case SystemState::ServicesCreated:
-            InitializeAllParticipants();
-            return;
         case SystemState::ReadyToRun:
             std::cout << "Sending SystemCommand::Run" << std::endl;
             _controller->Run();
@@ -65,27 +62,10 @@ public:
             return;
 
         case SystemState::Stopped:
-            if (_performRestart)
+            std::cout << "Sending ParticipantCommand::Shutdown" << std::endl;
+            for (auto&& name: _expectedParticipantNames)
             {
-                _performRestart = false;
-
-                std::cout << "Restarting in ";
-                for (int i = 3; i > 0; i--)
-                {
-                    std::cout << i << "... ";
-                    std::this_thread::sleep_for(1s);
-                }
-                std::cout << std::endl;
-                
-                InitializeAllParticipants();
-            }
-            else
-            {
-                std::cout << "Sending ParticipantCommand::Shutdown" << std::endl;
-                for (auto&& name: _expectedParticipantNames)
-                {
-                    _controller->Shutdown(name);
-                }
+                _controller->Shutdown(name);
             }
             return;
 
@@ -118,22 +98,11 @@ public:
         }
     }
 
-    void InitializeAllParticipants()
-    {
-        std::cout << "All required participants have finished creating their controllers." << std::endl;
-    }
-
     void Stop()
     {
         std::cout << "Sending SystemCommand::Stop" << std::endl;
         _stopInitiated = true;
         _controller->Stop();
-    }
-
-    void StopAndRestart()
-    {
-        _performRestart = true;
-        Stop();
     }
 
     void Shutdown()
@@ -168,7 +137,6 @@ private:
     std::shared_ptr<ib::cfg::IParticipantConfiguration> _ibConfig;
     std::vector<std::string> _expectedParticipantNames;
     bool _stopInitiated{false};
-    bool _performRestart{false};
     std::promise<bool> _shutdownPromise;
 
     ISystemController* _controller;
@@ -276,16 +244,6 @@ int main(int argc, char** argv)
         auto participant = ib::CreateParticipant(configuration, participantName, domainId);
 
         IbController ibController(participant.get(), configuration, expectedParticipantNames);
-
-        // Set numRestarts to values larger than zero to test the restart functionality.
-        int numRestarts = 0;
-        for (int i = numRestarts; i > 0; i--)
-        {
-            std::cout << "Press enter to restart the Integration Bus..." << std::endl;
-            std::cin.ignore();
-
-            ibController.StopAndRestart();
-        }
 
         std::cout << "Press enter to shutdown the Integration Bus..." << std::endl;
         std::cin.ignore();
