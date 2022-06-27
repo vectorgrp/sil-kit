@@ -80,8 +80,6 @@ public:
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
-                                            bool isRequiredParticipant) -> std::future<ParticipantState> = 0;
     virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
         -> std::future<ParticipantState> = 0;
 
@@ -95,9 +93,6 @@ public:
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
-                                              bool hasCoordinatedSimulationStop, bool isRequiredParticipant)
-        -> std::future<ParticipantState> = 0;
     virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
                                               bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> = 0;
 
@@ -153,10 +148,8 @@ public:
     */
     virtual auto Status() const -> const ParticipantStatus& = 0;
 
-    // TODO FIXME Move elsewhere!
-    ////! \brief Experimental API - Not final yet.
-    //virtual void LogCurrentPerformanceStats() = 0;
-    //
+    /*! \brief Return the  ITimeSyncService for the current ILifecycleService.
+    */
     virtual auto GetTimeSyncService() const -> ITimeSyncService* = 0;
 };
 

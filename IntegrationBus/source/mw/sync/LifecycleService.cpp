@@ -51,12 +51,13 @@ void LifecycleService::SetShutdownHandler(ShutdownHandlerT handler)
     _shutdownHandler = std::move(handler);
 }
 
-auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
-                                        bool isRequiredParticipant) -> std::future<ParticipantState>
+auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+    -> std::future<ParticipantState>
 {
+    _timeSyncService->InitializeTimeSyncPolicy(_timeSyncActive);
+
     _hasCoordinatedSimulationStart = hasCoordinatedSimulationStart;
     _hasCoordinatedSimulationStop = hasCoordinatedSimulationStop;
-    _isRequiredParticipant = isRequiredParticipant;
 
     // Update ServiceDescriptor
     _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::lifecycleHasCoordinatedStart,
@@ -84,25 +85,17 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     return _finalStatePromise.get_future();
 }
 
-auto LifecycleService::ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
-                                bool isRequiredParticipant) -> std::future<ParticipantState>
-{
-    _timeSyncActive = false;
-    _timeSyncService->InitializeTimeSyncPolicy(false);
-
-    return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop, isRequiredParticipant);
-}
-
 auto LifecycleService::ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
     -> std::future<ParticipantState>
 {
-    return ExecuteLifecycleNoSyncTime(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop, false);
+    _timeSyncActive = false;
+
+    return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop);
 }
 
 auto LifecycleService::ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
                                                     bool hasCoordinatedSimulationStart,
-                                                    bool hasCoordinatedSimulationStop, bool isRequiredParticipant)
-    -> std::future<ParticipantState>
+                                                    bool hasCoordinatedSimulationStop) -> std::future<ParticipantState>
 {
     if (_timeSyncService != timeSyncService)
     {
@@ -110,17 +103,8 @@ auto LifecycleService::ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncSe
     }
 
     _timeSyncActive = true;
-    _timeSyncService->InitializeTimeSyncPolicy(true);
 
-    return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop, isRequiredParticipant);
-}
-
-auto LifecycleService::ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
-                                                    bool hasCoordinatedSimulationStart,
-                                                    bool hasCoordinatedSimulationStop) -> std::future<ParticipantState>
-{
-    return ExecuteLifecycleWithSyncTime(timeSyncService, hasCoordinatedSimulationStart, hasCoordinatedSimulationStop,
-                                        false);
+    return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop);
 }
 
 void LifecycleService::ReportError(std::string errorMsg)

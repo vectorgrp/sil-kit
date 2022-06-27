@@ -171,8 +171,7 @@ ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
     sRunAsyncFuturePerParticipant[participant] =
         lifecycleService->ExecuteLifecycleNoSyncTime(
             hasCoordinatedSimulationStart == ib_True,
-            hasCoordinatedSimulationStop == ib_True,
-            isRequiredParticipant == ib_True);
+            hasCoordinatedSimulationStop == ib_True);
 
 
     return ib_ReturnCode_SUCCESS;
@@ -201,8 +200,7 @@ ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(
         lifecycleService->ExecuteLifecycleWithSyncTime(
             timeSyncService,
             hasCoordinatedSimulationStart == ib_True,
-            hasCoordinatedSimulationStop == ib_True,
-            isRequiredParticipant == ib_True);
+            hasCoordinatedSimulationStop == ib_True);
 
     return ib_ReturnCode_SUCCESS;
   }

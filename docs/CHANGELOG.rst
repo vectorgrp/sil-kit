@@ -90,14 +90,7 @@ Changed
     
         .. code-block:: c++
   
-        virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
-                                                bool isRequiredParticipant) -> std::future<ParticipantState> = 0;
-  
           virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
-            -> std::future<ParticipantState> = 0;
-    
-        virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
-                                                  bool hasCoordinatedSimulationStop, bool isRequiredParticipant)
               -> std::future<ParticipantState> = 0;
     
           // corresponds to former functionality of RunAsync()

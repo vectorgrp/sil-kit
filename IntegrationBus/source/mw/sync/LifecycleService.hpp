@@ -46,12 +46,7 @@ public:
 
     auto GetTimeSyncService() const -> ITimeSyncService* override;
 
-    auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
-                                    bool isRequiredParticipant) -> std::future<ParticipantState> override;
     auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
-        -> std::future<ParticipantState> override;
-    auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
-                                      bool hasCoordinatedSimulationStop, bool isRequiredParticipant)
         -> std::future<ParticipantState> override;
     auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
                                       bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> override;
@@ -96,8 +91,8 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    auto ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
-                          bool isRequiredParticipant) -> std::future<ParticipantState>;
+    auto ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+        -> std::future<ParticipantState>;
 
     void Shutdown(std::string reason);
     void Restart(std::string reason);
@@ -114,7 +109,6 @@ private:
 
     bool _hasCoordinatedSimulationStart = false;
     bool _hasCoordinatedSimulationStop = false;
-    bool _isRequiredParticipant = false;
 
     bool _isRunning{false};
     ParticipantStatus _status;

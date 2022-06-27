@@ -276,7 +276,7 @@ namespace {
         state.set_value(ParticipantState::Shutdown);
 
         EXPECT_CALL(mockParticipant.mockLifecycleService,
-            ExecuteLifecycleWithSyncTime(_, _, _, _)
+            ExecuteLifecycleWithSyncTime(_, _, _)
         ).Times(testing::Exactly(1))
             .WillOnce(Return(ByMove(state.get_future())));
 
@@ -291,7 +291,7 @@ namespace {
         state.set_value(ParticipantState::Shutdown);
 
         EXPECT_CALL(mockParticipant.mockLifecycleService,
-            ExecuteLifecycleNoSyncTime(_, _, _)
+            ExecuteLifecycleNoSyncTime(_, _)
         ).Times(testing::Exactly(1))
             .WillOnce(Return(ByMove(state.get_future())));
 
