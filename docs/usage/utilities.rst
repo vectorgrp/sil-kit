@@ -101,7 +101,7 @@ IbSystemControllerInteractive
    *  -  Abstract
       -  This variant of the system controller allows sending system commands
          manually via a command line interface. A user can enter commands on
-         standard input: "Run", "Stop", "Shutdown"
+         standard input: "Run", "Stop", "Abort", "Shutdown <ParticipantName>, Restart <ParticipantName>"
    *  -  Source location
       -  ``Utilities/IbSystemControllerInteractive``
    *  -  Requirements

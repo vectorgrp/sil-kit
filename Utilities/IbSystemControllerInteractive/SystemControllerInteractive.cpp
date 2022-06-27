@@ -33,6 +33,8 @@ sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
         return SystemCommand::Kind::Run;
     else if (cmdString == "Stop")
         return SystemCommand::Kind::Stop;
+    else if (cmdString == "Abort" || cmdString == "AbortSimulation")
+        return SystemCommand::Kind::AbortSimulation;
 
     throw ib::TypeConversionError{};
 }
@@ -153,7 +155,7 @@ public:
             }
 
             std::cerr << "Invalid command: '" << cmdName << "'" << std::endl;
-            std::cout << "Available system commands: 'Run', 'Stop'" << std::endl;
+            std::cout << "Available system commands: 'Run', 'Stop', 'Abort'" << std::endl;
             std::cout << "Available participant commands: 'Initialize <participantName>',"
                 << " 'Restart <participantName>', 'Shutdown <participantname>'"
                 << std::endl;
