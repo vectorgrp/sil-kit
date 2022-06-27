@@ -384,7 +384,7 @@ int main(int argc, char** argv)
             auto controller = participant->GetSystemController();
             auto monitor = participant->GetSystemMonitor();
 
-            controller->SetRequiredParticipants(participantNames);
+            controller->SetWorkflowConfiguration({participantNames});
 
             monitor->AddSystemStateHandler([controller, participantNames](SystemState newState) {
                 SystemStateHandler(controller, newState, participantNames);

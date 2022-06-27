@@ -79,6 +79,37 @@ Changed
     typedef void (*ib_ParticipantInitHandler_t)(void* context,
                       ib_Participant* participant);
 
+- SetRequiredParticipants changed to SetWorkflowConfiguration. The new struct currently has the required participants as its sole member.
+
+
+      + old:
+
+        .. code-block:: c++
+
+            virtual void SetRequiredParticipants(const std::vector<std::string>& participantNames) = 0;
+
+    + new:
+
+        .. code-block:: c++
+
+            virtual void SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration) = 0;
+
+    - ``IntegrationBus/include/ib/capi/Participant.h``:
+
+      + old:
+
+        .. code-block:: c
+
+            typedef ib_ReturnCode(*ib_Participant_SetRequiredParticipants_t)(
+                ib_Participant* participant, const ib_StringList* requiredParticipantNames);
+
+    + new:
+
+        .. code-block:: c
+
+            typedef ib_ReturnCode (*ib_Participant_SetWorkflowConfiguration_t)(
+                ib_Participant* participant, const ib_WorkflowConfiguration* workflowConfigration);
+		
 - Methods adding handlers now return a ``HandlerId``:
 
   - ``IntegrationBus/include/ib/mw/sync/ISystemMonitor.hpp``
@@ -294,10 +325,9 @@ Changed
 - Internal refactoring of Bus Controllers to harmonize behavior w/wo bus simulator.
     
     - LIN: When the controller receives a GoToSleep-frame, the ``FrameStatusHandler`` is always called (previously 
-    only with bus simulator).
-
+      only with bus simulator).
     - Ethernet: ``Activate()`` and ``Deactivate()`` now tigger the ``StateChangeHandler`` (previously only with bus
-    simulator).
+      simulator).
     
 - The IbRegistry shared library is no longer necessary.
   An instance of IIbRegistry can now be created directly using :cpp:func:`CreateRegistry()<ib::vendor::CreateRegistry>`.

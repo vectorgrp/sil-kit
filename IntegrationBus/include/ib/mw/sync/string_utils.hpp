@@ -24,7 +24,7 @@ inline std::string to_string(SystemCommand::Kind command);
 inline std::string to_string(const ParticipantCommand& command);
 inline std::string to_string(const SystemCommand& command);
 inline std::string to_string(const ParticipantStatus& status);
-inline std::string to_string(const ExpectedParticipants& participantNames);
+inline std::string to_string(const WorkflowConfiguration& participantNames);
 
 inline std::ostream& operator<<(std::ostream& out, ParticipantState state);
 inline std::ostream& operator<<(std::ostream& out, SystemState state);
@@ -34,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const SystemCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status);
-inline std::ostream& operator<<(std::ostream& out, const ExpectedParticipants& participantNames);
+inline std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflowConfiguration);
 
 // ================================================================================
 //  Inline Implementations
@@ -239,19 +239,22 @@ std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)
     return out;
 }
 
-std::string to_string(const ExpectedParticipants& participants)
+std::string to_string(const WorkflowConfiguration& participants)
 {
     std::stringstream outStream;
     outStream << participants;
     return outStream.str();
 }
 
-std::ostream& operator<<(std::ostream& out, const ExpectedParticipants& participants)
+std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflowConfiguration)
 {
-    out << "sync::ExpectedParticipants{";
-    for (auto&& p : participants.names)
+    out << "sync::WorkflowConfiguration{requiredParticipantNames=";
+    bool first = true;
+    for (auto&& p : workflowConfiguration.requiredParticipantNames)
     {
-        out << p << ", ";
+        if (!first) out << ", ";
+        out << p;
+        first = false;
     }
     out << "}";
 

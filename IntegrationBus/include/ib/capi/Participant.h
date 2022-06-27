@@ -44,6 +44,7 @@ typedef int8_t ib_ParticipantState;
 #define ib_ParticipantState_ShuttingDown          ((ib_ParticipantState) 13)  //!< The shutting down state
 #define ib_ParticipantState_Shutdown              ((ib_ParticipantState) 14)  //!< The shutdown state
 
+//!< The state of a system, deduced by states of the required participants.
 typedef int8_t ib_SystemState;
 #define ib_SystemState_Invalid               ((ib_SystemState) 0)   //!< An invalid participant state
 #define ib_SystemState_Idle                  ((ib_SystemState) 1)   //!< The idle state
@@ -71,6 +72,14 @@ typedef struct
     ib_NanosecondsWallclockTime enterTime; //!< The enter time of the participant.
     ib_NanosecondsWallclockTime refreshTime; //!< The refresh time.
 } ib_ParticipantStatus;
+
+//!< Details about a status change of a participant.
+typedef struct
+{
+    ib_InterfaceIdentifier interfaceId;
+    ib_StringList* requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
+
+} ib_WorkflowConfiguration;
 
 /*! \brief Join the IB simulation with the domainId as a participant.
 *
@@ -106,6 +115,7 @@ typedef ib_ReturnCode (*ib_Participant_Destroy_t)(ib_Participant* participant);
  * \param participant The simulation participant entering the initialized state
  */
 typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* participant);
+
 /*! \brief Register a callback to perform initialization
  *
  * The handler is called when an \ref ib_ParticipantCommand_Kind_Initialize
@@ -131,6 +141,7 @@ typedef ib_ReturnCode(*ib_Participant_SetInitHandler_t)(ib_Participant* particip
  * \param participant The simulation participant receiving the stop command
  */
 typedef void (*ib_ParticipantStopHandler_t)(void* context, ib_Participant* participant);
+
 /*! \brief Register a callback that is executed on simulation stop
  *
  * The handler is called when a \ref SystemCommand::Kind::Stop has been
@@ -155,6 +166,7 @@ typedef ib_ReturnCode(*ib_Participant_SetStopHandler_t)(ib_Participant* particip
  * \param participant The simulation participant receiving the shutdown command
  */
 typedef void (*ib_ParticipantShutdownHandler_t)(void* context, ib_Participant* participant);
+
 /*! \brief Register a callback that is executed on simulation shutdown.
  *
  * The handler is called when the \ref SystemCommand::Kind::Shutdown
@@ -173,9 +185,6 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant
 typedef ib_ReturnCode(*ib_Participant_SetShutdownHandler_t)(ib_Participant* participant,
     void* context, ib_ParticipantShutdownHandler_t handler);
 
-
-typedef ib_ReturnCode (*ib_Participant_SetPeriod_t)(ib_Participant* participant,
-                                                              ib_NanosecondsTime period);
 /*! \brief Set the simulation duration to be requested
  *
  * Can only be used with time quantum synchronization.
@@ -183,8 +192,9 @@ typedef ib_ReturnCode (*ib_Participant_SetPeriod_t)(ib_Participant* participant,
  * \param participant The simulation participant
  * \param period The cycle time of the simulation task
  */
-IntegrationBusAPI ib_ReturnCode ib_Participant_SetPeriod(ib_Participant* participant,
-                                                                    ib_NanosecondsTime        period);
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetPeriod(ib_Participant* participant, ib_NanosecondsTime period);
+
+typedef ib_ReturnCode (*ib_Participant_SetPeriod_t)(ib_Participant* participant, ib_NanosecondsTime period);
 
 /*! \brief The handler to be called if the simulation task is due
  *
@@ -249,6 +259,8 @@ typedef ib_ReturnCode(*ib_Participant_CompleteSimulationTask_t)(ib_Participant* 
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char* participantName);
 
+typedef ib_ReturnCode (*ib_Participant_Initialize_t)(ib_Participant* participant, const char* participantName);
+
 /*! \brief Send \ref the Restart command to a specific participant
   *
   *  The command is only allowed if the participant is in the
@@ -264,17 +276,23 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_Initialize(ib_Participant* partic
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Restart(ib_Participant* participant, const char* participantName);
 
+typedef ib_ReturnCode (*ib_Participant_Restart_t)(ib_Participant* participant, const char* participantName);
+
 /*! \brief Send \ref the Run command to all participants
   *
   *  The command is only allowed if system is in state ib_SystemState_Initialized.
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_RunSimulation(ib_Participant* participant);
 
+typedef ib_ReturnCode (*ib_Participant_RunSimulation_t)(ib_Participant* participant);
+
 /*! \brief Send \ref the Stop command to all participants
   *
   *  The command is only allowed if system is in ib_SystemState_Running.
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_StopSimulation(ib_Participant* participant);
+
+typedef ib_ReturnCode (*ib_Participant_StopSimulation_t)(ib_Participant* participant);
 
 /*! \brief Pause execution of the participant
   *
@@ -288,12 +306,16 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_StopSimulation(ib_Participant* pa
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Pause(ib_Participant* participant, const char* reason);
 
+typedef ib_ReturnCode (*ib_Participant_Pause_t)(ib_Participant* participant, const char* reason);
+
 /*! \brief Switch back to \ref ib_ParticipantState_Running
   * after having paused.
   *
   * Precondition: State() == \ref ib_ParticipantState_Paused
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Continue(ib_Participant* participant);
+
+typedef ib_ReturnCode (*ib_Participant_Continue_t)(ib_Participant* participant);
 
 /*! \brief Send \ref the Shutdown command to all participants
   *
@@ -302,14 +324,20 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_Continue(ib_Participant* particip
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant);
 
+typedef ib_ReturnCode(*ib_Participant_Shutdown_t)(ib_Participant* participant);
 
 /*! \brief Get the current participant state of the participant given by participantName
   */
 IntegrationBusAPI ib_ReturnCode ib_Participant_GetParticipantState(ib_ParticipantState* outParticipantState,
   ib_Participant* participant, const char* participantName);
 
+typedef ib_ReturnCode (*ib_Participant_GetParticipantState_t)(ib_ParticipantState* outParticipantState,
+  ib_Participant* participant, const char* participantName);
+
 //! \brief Get the current ::SystemState
 IntegrationBusAPI ib_ReturnCode ib_Participant_GetSystemState(ib_SystemState* outSystemState, ib_Participant* participant);
+
+typedef ib_ReturnCode (*ib_Participant_GetSystemState_t)(ib_SystemState* outSystemState, ib_Participant* participant);
 
 typedef void (*ib_SystemStateHandler_t)(void* context, ib_Participant* participant,
     ib_SystemState state);
@@ -328,7 +356,6 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_AddSystemStateHandler(ib_Particip
                                                                      void* context,
                                                                      ib_SystemStateHandler_t handler,
                                                                      ib_HandlerId* outHandlerId);
-
 typedef ib_ReturnCode (*ib_Participant_AddSystemStateHandler_t)(ib_Participant* participant,
                                                                 void* context,
                                                                 ib_SystemStateHandler_t handler,
@@ -379,17 +406,20 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_RemoveParticipantStatusHandler(ib
 typedef ib_ReturnCode (*ib_Participant_RemoveParticipantStatusHandler_t)(ib_Participant* participant,
                                                                          ib_HandlerId handlerId);
 
-/*! \brief Set the names of the participants that are required for the simulation
+/*! \brief Configures details of the simulation workflow regarding lifecycle and participant coordination.
   *
   * Only these participants are taken into account to define the system state.
   * Further, the simulation time propagation also relies on the required participants.
-  * This information is distributed to other participants, so it only has to be set by a
+  * This information is distributed to other participants, so it must only be set once by a single 
   * single member of the simulation.
   *
-  * \param requiredParticipantNames The list of required participant names
+  * \param workflowConfigration The desired configuration, currently containing a list of required participants
   */
-IntegrationBusAPI ib_ReturnCode ib_Participant_SetRequiredParticipants(
-    ib_Participant* participant, const ib_StringList* requiredParticipantNames);
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetWorkflowConfiguration(
+    ib_Participant* participant, const ib_WorkflowConfiguration* workflowConfigration);
+
+typedef ib_ReturnCode (*ib_Participant_SetWorkflowConfiguration_t)(
+    ib_Participant* participant, const ib_WorkflowConfiguration* workflowConfigration);
 
 /*! \brief Start the lifecycle with the given parameters without simulation time synchronization.
 *  Requires a call to ib_Participant_WaitForLifecycleToComplete to retrieve the final state.
@@ -400,14 +430,12 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_SetRequiredParticipants(
 * \param isRequiredParticipant this participant is required for the simulation run to begin simulation.
 * 
 */
+IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(ib_Participant* participant,
+                                                                          ib_Bool hasCoordinatedSimulationStart,
+                                                                          ib_Bool hasCoordinatedSimulationStop,
+                                                                          ib_Bool isRequiredParticipant);
 
 typedef ib_ReturnCode (*ib_Participant_ExecuteLifecycleNoSyncTime_t)(
-    ib_Participant* participant,
-    ib_Bool hasCoordinatedSimulationStart,
-    ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant);
-
-IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
@@ -421,19 +449,16 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
 * \param isRequiredParticipant this participant is required for the simulation run to begin simulation.
 * \param outParticipantState the final state of the participant when the lifecycle finished.
 */
+IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(ib_Participant* participant,
+                                                                            ib_Bool hasCoordinatedSimulationStart,
+                                                                            ib_Bool hasCoordinatedSimulationStop,
+                                                                            ib_Bool isRequiredParticipant);
 
 typedef ib_ReturnCode (*ib_Participant_ExecuteLifecycleWithSyncTime_t)(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
     ib_Bool isRequiredParticipant);
-
-IntegrationBusAPI ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(
-    ib_Participant* participant,
-    ib_Bool hasCoordinatedSimulationStart,
-    ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant);
-
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state
  *

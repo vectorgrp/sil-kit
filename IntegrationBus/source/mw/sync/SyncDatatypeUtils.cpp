@@ -27,9 +27,9 @@ bool operator==(const SystemCommand& lhs, const SystemCommand& rhs)
     return lhs.kind == rhs.kind;
 }
 
-bool operator==(const ExpectedParticipants& lhs, const ExpectedParticipants& rhs)
+bool operator==(const WorkflowConfiguration& lhs, const WorkflowConfiguration& rhs)
 {
-    return lhs.names == rhs.names;
+    return lhs.requiredParticipantNames == rhs.requiredParticipantNames;
 }
 
 }

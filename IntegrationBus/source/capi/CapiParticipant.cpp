@@ -393,18 +393,18 @@ ib_ReturnCode ib_Participant_Shutdown(ib_Participant* participant)
   CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Participant_SetRequiredParticipants(ib_Participant* participant,
-                                                     const ib_StringList* requiredParticipantNames)
+ib_ReturnCode ib_Participant_SetWorkflowConfiguration(ib_Participant* participant,
+                                                      const ib_WorkflowConfiguration* workflowConfigration)
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
-    ASSERT_VALID_POINTER_PARAMETER(requiredParticipantNames);
+    ASSERT_VALID_POINTER_PARAMETER(workflowConfigration);
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
         auto* systemController = cppParticipant->GetSystemController();
         std::vector<std::string> cppNames;
-        assign(cppNames, requiredParticipantNames);
-        systemController->SetRequiredParticipants(cppNames);
+        assign(cppNames, workflowConfigration->requiredParticipantNames);
+        systemController->SetWorkflowConfiguration({cppNames});
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

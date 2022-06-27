@@ -170,7 +170,7 @@ private:
         sync::SystemCommand,
         sync::ParticipantCommand,
         sync::ParticipantStatus,
-        sync::ExpectedParticipants,
+        sync::WorkflowConfiguration,
         sim::data::DataMessageEvent,
         sim::rpc::FunctionCall,
         sim::rpc::FunctionCallResponse,

@@ -42,11 +42,10 @@ void SystemController::AbortSimulation() const
     SendSystemCommand(SystemCommand::Kind::AbortSimulation);
 }
 
-void SystemController::SetRequiredParticipants(const std::vector<std::string>& participantNames)
+void SystemController::SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration)
 {
-    ExpectedParticipants expectedParticipants{participantNames};
     //  Distribute to SystemMonitors (including self delivery) 
-    _participant->SendIbMessage(this, std::move(expectedParticipants));
+    _participant->SendIbMessage(this, std::move(workflowConfiguration));
 }
 
 } // namespace sync

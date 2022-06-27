@@ -83,9 +83,10 @@ enum class SystemState : uint8_t {
     Reinitializing = 120, //!< The reinitializing state
 };
 
-struct ExpectedParticipants
+//! \brief Details of the simulation workflow regarding lifecycle and participant coordination.
+struct WorkflowConfiguration
 {
-    std::vector<std::string> names;
+    std::vector<std::string> requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
 };
 
 } // namespace sync

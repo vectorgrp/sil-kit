@@ -58,7 +58,6 @@ public:
 
     void SetPeriod(std::chrono::nanoseconds period) override;
 
-
     auto Now() const -> std::chrono::nanoseconds override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
@@ -66,9 +65,6 @@ public:
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& task) override;
-
-    // Used to propagate sync participants from monitor
-    void AddExpectedParticipants(const ExpectedParticipants& participantNames);
 
     // Used by Policies
     template <class MsgT>
@@ -105,7 +101,7 @@ private:
     std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
 
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
-    ExpectedParticipants _expectedParticipants;
+    std::vector<std::string> _requiredParticipants;
 
     bool _isRunning{false};
 

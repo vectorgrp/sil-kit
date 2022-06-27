@@ -902,7 +902,7 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::WorkflowConfiguration& msg)
 {
     SendIbMessageImpl(from, msg);
 }
@@ -1189,7 +1189,7 @@ void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, c
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ExpectedParticipants& msg)
+void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::WorkflowConfiguration& msg)
 {
     SendIbMessageImpl(from, targetParticipantName, msg);
 }

@@ -43,7 +43,7 @@ public:
     void Stop() const override;
     void Shutdown(const std::string& participantName) const override;
     void AbortSimulation() const override;
-    void SetRequiredParticipants(const std::vector<std::string>& participantNames) override;
+    void SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration) override;
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;

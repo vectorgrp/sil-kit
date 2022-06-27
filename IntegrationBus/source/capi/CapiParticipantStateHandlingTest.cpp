@@ -52,10 +52,14 @@ namespace {
         {
             uint32_t numNames = 2;
             const char* names[2] = {"Participant1", "Participant2"};
-            Create_StringList(&participantNames, names, numNames);
+            workflowConfiguration = (ib_WorkflowConfiguration*)malloc(sizeof(ib_WorkflowConfiguration));
+            if (workflowConfiguration != NULL)
+            {
+                Create_StringList(&workflowConfiguration->requiredParticipantNames, names, numNames);
+            }
         }
 
-        ib_StringList* participantNames;
+        ib_WorkflowConfiguration* workflowConfiguration;
 
 	};
 
@@ -214,10 +218,10 @@ namespace {
         returnCode = ib_Participant_RemoveParticipantStatusHandler(nullptr, (ib_HandlerId)0);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_SetRequiredParticipants(nullptr, participantNames);
+        returnCode = ib_Participant_SetWorkflowConfiguration(nullptr, workflowConfiguration);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_SetRequiredParticipants((ib_Participant*)&mockParticipant, nullptr);
+        returnCode = ib_Participant_SetWorkflowConfiguration((ib_Participant*)&mockParticipant, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
     }
@@ -356,8 +360,8 @@ namespace {
         returnCode = ib_Participant_RemoveParticipantStatusHandler((ib_Participant*)&mockParticipant, handlerId);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockParticipant.mockSystemController, SetRequiredParticipants(testing::_)).Times(testing::Exactly(1));
-        returnCode = ib_Participant_SetRequiredParticipants((ib_Participant*)&mockParticipant, participantNames);
+        EXPECT_CALL(mockParticipant.mockSystemController, SetWorkflowConfiguration(testing::_)).Times(testing::Exactly(1));
+        returnCode = ib_Participant_SetWorkflowConfiguration((ib_Participant*)&mockParticipant, workflowConfiguration);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
 
     }

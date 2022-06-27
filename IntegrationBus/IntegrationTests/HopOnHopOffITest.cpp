@@ -275,7 +275,7 @@ protected:
             systemMaster.systemController = systemMaster.participant->GetSystemController();
             systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();
 
-            systemMaster.systemController->SetRequiredParticipants(syncParticipantNames);
+            systemMaster.systemController->SetWorkflowConfiguration({syncParticipantNames});
 
             systemMaster.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
                 SystemStateHandler(newState);

@@ -146,7 +146,7 @@ public:
     MOCK_CONST_METHOD0(Stop, void());
     MOCK_CONST_METHOD0(AbortSimulation, void());
     MOCK_METHOD(void, Shutdown, (const std::string&), (const, override));
-    MOCK_METHOD((void), SetRequiredParticipants, (const std::vector<std::string>& participantNames));
+    MOCK_METHOD((void), SetWorkflowConfiguration, (const ib::mw::sync::WorkflowConfiguration& workflowConfiguration));
 };
 
 class MockServiceDiscovery : public service::IServiceDiscovery
@@ -331,7 +331,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& /*msg*/)  override{}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantCommand& /*msg*/)  override{}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::SystemCommand& /*msg*/)  override{}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ExpectedParticipants& /*msg*/)  override{}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const sync::WorkflowConfiguration& /*msg*/)  override{}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, logging::LogMsg&& /*msg*/)  override{}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const logging::LogMsg& /*msg*/)  override{}
@@ -387,7 +387,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantStatus& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ParticipantCommand& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::SystemCommand& /*msg*/) override {}
-    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::ExpectedParticipants& /*msg*/) override {}
+    void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const sync::WorkflowConfiguration& /*msg*/) override {}
 
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, logging::LogMsg&& /*msg*/) override {}
     void SendIbMessage(const IIbServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const logging::LogMsg& /*msg*/) override {}

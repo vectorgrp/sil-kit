@@ -12,7 +12,7 @@ namespace sync {
 
 class IIbToSystemController
     : public mw::IIbReceiver<>
-    , public mw::IIbSender<ParticipantCommand, SystemCommand, ExpectedParticipants>
+    , public mw::IIbSender<ParticipantCommand, SystemCommand, WorkflowConfiguration>
 {
 };
 

@@ -21,48 +21,40 @@ SystemMonitor::SystemMonitor(IParticipantInternal* participant)
 {
 }
 
-const ib::mw::sync::ExpectedParticipants& SystemMonitor::GetExpectedParticipants() const
-{
-    return _expectedParticipants;
-}
-
 void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/,
-                                     const sync::ExpectedParticipants& expectedParticipants)
+                                     const sync::WorkflowConfiguration& workflowConfiguration)
 {
-    UpdateExpectedParticipantNames(expectedParticipants);
+    UpdateRequiredParticipantNames(workflowConfiguration.requiredParticipantNames);
 }
 
-void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants)
+void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames)
 {
     // Prevent calling this method more than once
-    if (!_expectedParticipants.names.empty())
+    if (!_requiredParticipantNames.empty())
     {
         throw std::runtime_error{"Expected participant names are already set."};
     }
 
-    _expectedParticipants.names = expectedParticipants.names;
+    _requiredParticipantNames = requiredParticipantNames;
 
-    bool anyParticipantStateReceived = false;
+    bool allRequiredParticipantsKnown = true;
     // Init new participants in status map
-    for (auto&& name : _expectedParticipants.names)
+    for (auto&& name : _requiredParticipantNames)
     {
         auto&& statusIter = _participantStatus.find(name);
         if (statusIter == _participantStatus.end())
         {
             _participantStatus[name] = sync::ParticipantStatus{};
             _participantStatus[name].state = sync::ParticipantState::Invalid;
-        }
-        else
-        {
-            anyParticipantStateReceived = true;
+            allRequiredParticipantsKnown = false;
         }
     }
 
-    // Update / propagate the system state in case ParticipantStatus have been received already
-    if (anyParticipantStateReceived)
+    // Update / propagate the system state in case status updated for all required participants have been received already
+    if (allRequiredParticipantsKnown)
     {
         auto oldSystemState = _systemState;
-        for (auto&& name : _expectedParticipants.names)
+        for (auto&& name : _requiredParticipantNames)
         {
             UpdateSystemState(_participantStatus[name]);
         }
@@ -72,7 +64,6 @@ void SystemMonitor::UpdateExpectedParticipantNames(const ExpectedParticipants& e
         }
     }
 }
-
 auto SystemMonitor::AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId
 {
     if (_systemState != sync::SystemState::Invalid)
@@ -154,17 +145,12 @@ void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const s
         // Fire status / state handlers
         _participantStatusHandlers.InvokeAll(newParticipantStatus);
 
-        // Propagate the system state for known participants, ignore otherwise
-        auto&& nameIter = std::find(_expectedParticipants.names.begin(), _expectedParticipants.names.end(), participantName);
-        if (nameIter != _expectedParticipants.names.end())
+        auto oldSystemState = _systemState;
+        // Update the system state for required participants, others are ignored
+        UpdateSystemState(newParticipantStatus);
+        if (oldSystemState != _systemState)
         {
-            auto oldSystemState = _systemState;
-            UpdateSystemState(newParticipantStatus);
-
-            if (oldSystemState != _systemState)
-            {
-                _systemStateHandlers.InvokeAll(_systemState);
-            }
+            _systemStateHandlers.InvokeAll(_systemState);
         }
     }
 }
@@ -211,18 +197,11 @@ void SystemMonitor::OnParticipantDisconnected(const std::string& participantName
     }
 }
 
-bool SystemMonitor::AllParticipantsInState(sync::ParticipantState state) const
+bool SystemMonitor::AllRequiredParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const
 {
-    return std::all_of(begin(_participantStatus), end(_participantStatus), [state](auto&& kv) {
-        return kv.second.state == state;
-    });
-}
-
-bool SystemMonitor::AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const
-{
-    for (auto&& participantStatus : _participantStatus)
+    for (auto&& name : _requiredParticipantNames)
     {
-        bool isAcceptedState = std::any_of(begin(acceptedStates), end(acceptedStates), [participantState = participantStatus.second.state](auto acceptedState) {
+        bool isAcceptedState = std::any_of(begin(acceptedStates), end(acceptedStates), [participantState = _participantStatus.at(name).state](auto acceptedState) {
             return participantState == acceptedState;
         });
         if (!isAcceptedState)
@@ -238,7 +217,6 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
         return std::any_of(begin(stateList), end(stateList), [=](auto candidate) { return candidate == state; });
     };
 
-    // TODO needs to be fixed
     switch (newStatus.state)
     {
     case sync::ParticipantState::ServicesCreated:
@@ -314,76 +292,90 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
 
 void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
 {
+    auto&& nameIter = std::find(_requiredParticipantNames.begin(), _requiredParticipantNames.end(), newStatus.participantName);
+    if (nameIter == _requiredParticipantNames.end())
+    {
+        return;
+    }
+
     switch (newStatus.state)
     {
     case sync::ParticipantState::ServicesCreated:
-        //TODO fixme! requiredState?!
-        if (AllParticipantsInState({sync::ParticipantState::ServicesCreated,
-                                    sync::ParticipantState::CommunicationInitializing,
-                                    sync::ParticipantState::CommunicationInitialized,
-                                    sync::ParticipantState::ReadyToRun, 
-                                    sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::ServicesCreated,
+                                            sync::ParticipantState::CommunicationInitializing,
+                                            sync::ParticipantState::CommunicationInitialized,
+                                            sync::ParticipantState::ReadyToRun, 
+                                            sync::ParticipantState::Running}))
         {
             SetSystemState(sync::SystemState::ServicesCreated);
         }
         return;
-        // TODO FIXME
+
     case sync::ParticipantState::CommunicationInitializing:
-        if (AllParticipantsInState({sync::ParticipantState::CommunicationInitializing,
-                                    sync::ParticipantState::CommunicationInitialized,
-                                    sync::ParticipantState::ReadyToRun, 
-                                    sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::CommunicationInitializing,
+                                            sync::ParticipantState::CommunicationInitialized,
+                                            sync::ParticipantState::ReadyToRun, 
+                                            sync::ParticipantState::Running}))
         {
             SetSystemState(sync::SystemState::CommunicationInitializing);
         }
         return;
+
     case sync::ParticipantState::CommunicationInitialized:
-        if (AllParticipantsInState({sync::ParticipantState::CommunicationInitialized,
-                                    sync::ParticipantState::ReadyToRun, 
-                                    sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::CommunicationInitialized,
+                                            sync::ParticipantState::ReadyToRun, 
+                                            sync::ParticipantState::Running}))
         {
             SetSystemState(sync::SystemState::CommunicationInitialized);
         }
         return;
+
     case sync::ParticipantState::ReadyToRun:
-        if (AllParticipantsInState({sync::ParticipantState::ReadyToRun, 
-                                    sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::ReadyToRun, 
+                                            sync::ParticipantState::Running}))
         {
             SetSystemState(sync::SystemState::ReadyToRun);
         }
         return;
 
     case sync::ParticipantState::Running:
-        if (AllParticipantsInState({sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::Running}))
         {
             SetSystemState(sync::SystemState::Running);
         }
         return;
 
     case sync::ParticipantState::Paused:
-        if (AllParticipantsInState({sync::ParticipantState::Paused, sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::Paused, 
+                                            sync::ParticipantState::Running}))
             SetSystemState(sync::SystemState::Paused);
         return;
 
-    // TODO double check this behavior!
     case sync::ParticipantState::Stopping:
-        if (AllParticipantsInState({sync::ParticipantState::Stopping, sync::ParticipantState::Stopped, sync::ParticipantState::Paused, sync::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::Stopping, 
+                                            sync::ParticipantState::Stopped,
+                                            sync::ParticipantState::Paused, 
+                                            sync::ParticipantState::Running}))
             SetSystemState(sync::SystemState::Stopping);
         return;
 
     case sync::ParticipantState::Stopped:
-        if (AllParticipantsInState(sync::ParticipantState::Stopped))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::Stopped}))
             SetSystemState(sync::SystemState::Stopped);
         return;
 
-    // TODO double check this behavior!
     case sync::ParticipantState::ShuttingDown:
-        if (AllParticipantsInState({sync::ParticipantState::ShuttingDown, sync::ParticipantState::Shutdown, sync::ParticipantState::Stopped, sync::ParticipantState::Error, sync::ParticipantState::ServicesCreated, sync::ParticipantState::ReadyToRun}))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::ShuttingDown, 
+                                            sync::ParticipantState::Shutdown,
+                                            sync::ParticipantState::Stopped, 
+                                            sync::ParticipantState::Error,
+                                            sync::ParticipantState::ServicesCreated, 
+                                            sync::ParticipantState::ReadyToRun}))
             SetSystemState(sync::SystemState::ShuttingDown);
         return;
 
     case sync::ParticipantState::Shutdown:
-        if (AllParticipantsInState(sync::ParticipantState::Shutdown))
+        if (AllRequiredParticipantsInState({sync::ParticipantState::Shutdown}))
             SetSystemState(sync::SystemState::Shutdown);
         return;
 

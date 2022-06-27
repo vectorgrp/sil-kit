@@ -10,6 +10,7 @@
 #include "ib/capi/IntegrationBus.h"
 
 #ifdef WIN32
+#pragma warning(disable : 5105)
 #include "windows.h"
 #define SleepMs(X) Sleep(X)
 #else

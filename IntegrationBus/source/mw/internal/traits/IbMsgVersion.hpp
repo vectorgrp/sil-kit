@@ -21,7 +21,7 @@ DefineIbMsgTrait_Version(ib::mw::logging::LogMsg, 1);
 DefineIbMsgTrait_Version(ib::mw::sync::ParticipantCommand, 1);
 DefineIbMsgTrait_Version(ib::mw::sync::SystemCommand, 1);
 DefineIbMsgTrait_Version(ib::mw::sync::ParticipantStatus, 1);
-DefineIbMsgTrait_Version(ib::mw::sync::ExpectedParticipants, 1);
+DefineIbMsgTrait_Version(ib::mw::sync::WorkflowConfiguration, 1);
 DefineIbMsgTrait_Version(ib::mw::sync::NextSimTask, 1);
 DefineIbMsgTrait_Version(ib::sim::data::DataMessageEvent, 1);
 DefineIbMsgTrait_Version(ib::sim::rpc::FunctionCall, 1);

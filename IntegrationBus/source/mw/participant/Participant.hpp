@@ -193,7 +193,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const sync::SystemCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::ExpectedParticipants& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const sync::WorkflowConfiguration& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, logging::LogMsg&& msg) override;
@@ -247,7 +247,7 @@ public:
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantCommand& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::SystemCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ExpectedParticipants& msg) override;
+    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::WorkflowConfiguration& msg) override;
 
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const logging::LogMsg& msg) override;
     void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, logging::LogMsg&& msg) override;

@@ -21,7 +21,7 @@ public:
             ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId);
 
         _controller = _participant->GetSystemController();
-        _controller->SetRequiredParticipants(_syncParticipantNames);
+        _controller->SetWorkflowConfiguration({_syncParticipantNames});
         _monitor = _participant->GetSystemMonitor();
         _monitor->AddSystemStateHandler(
             std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1));

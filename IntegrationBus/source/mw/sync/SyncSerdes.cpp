@@ -69,19 +69,19 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ib::mw::
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ib::mw::sync::ExpectedParticipants& participants)
+inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+                                         const ib::mw::sync::WorkflowConfiguration& workflowConfiguration)
 {
-    buffer << participants.names;
+    buffer << workflowConfiguration.requiredParticipantNames;
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ib::mw::sync::ExpectedParticipants& participants)
+inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
+                                         ib::mw::sync::WorkflowConfiguration& workflowConfiguration)
 {
-    buffer >> participants.names;
+    buffer >> workflowConfiguration.requiredParticipantNames;
     return buffer;
 }
-
-
 
 void Serialize(ib::mw::MessageBuffer& buffer, const ParticipantCommand& msg)
 {
@@ -98,7 +98,7 @@ void Serialize(ib::mw::MessageBuffer& buffer, const ParticipantStatus& msg)
     buffer << msg;
     return;
 }
-void Serialize(ib::mw::MessageBuffer& buffer, const ExpectedParticipants& msg)
+void Serialize(ib::mw::MessageBuffer& buffer, const WorkflowConfiguration& msg)
 {
     buffer << msg;
     return;
@@ -121,7 +121,7 @@ void Deserialize(ib::mw::MessageBuffer& buffer, ParticipantStatus& out)
 {
     buffer >> out;
 }
-void Deserialize(ib::mw::MessageBuffer& buffer, ExpectedParticipants& out)
+void Deserialize(ib::mw::MessageBuffer& buffer, WorkflowConfiguration& out)
 {
     buffer >> out;
 }

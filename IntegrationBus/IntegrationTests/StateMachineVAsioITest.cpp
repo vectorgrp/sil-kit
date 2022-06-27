@@ -91,7 +91,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     participant->joinIbDomain(domainId);
     auto systemController = participant->GetSystemController();
-    systemController->SetRequiredParticipants(syncParticipantNames);
+    systemController->SetWorkflowConfiguration({syncParticipantNames});
     auto monitor = participant->GetSystemMonitor();
     monitor->AddParticipantStatusHandler([this](ParticipantStatus status) {
         this->ParticipantStateHandler(status.state);

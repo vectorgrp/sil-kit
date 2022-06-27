@@ -127,7 +127,7 @@ public:
         _participant->joinIbDomain(domainId);
 
         _systemController = _participant->GetSystemController();
-        _systemController->SetRequiredParticipants(_syncParticipantNames);
+        _systemController->SetWorkflowConfiguration({_syncParticipantNames});
 
         _monitor = _participant->GetSystemMonitor();
         _monitor->AddSystemStateHandler([this](SystemState newState) {

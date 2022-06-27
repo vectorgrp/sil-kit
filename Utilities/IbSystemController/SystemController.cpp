@@ -39,7 +39,7 @@ public:
         , _expectedParticipantNames{expectedParticipantNames}
     {
         _controller = participant->GetSystemController();
-        _controller->SetRequiredParticipants(expectedParticipantNames);
+        _controller->SetWorkflowConfiguration({expectedParticipantNames});
 
         _monitor = participant->GetSystemMonitor();
         _monitor->AddSystemStateHandler([this](SystemState newState) {

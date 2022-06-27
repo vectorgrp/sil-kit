@@ -65,11 +65,16 @@ public:
     */
     virtual void AbortSimulation() const = 0;
 
-    /*! \brief Set the names of all synchronized participants
+    /*! \brief Configures details of the simulation workflow regarding lifecycle and participant coordination.
     *
-    *  Set the list of synchronized participant.
+    * Only the required participant defined in the \ref WorkflowConfiguration are taken into account to define the 
+    * system state. Further, the simulation time propagation also relies on the required participants.
+    * The \ref WorkflowConfiguration is distributed to other participants, so it must only be set once by a single 
+    * member of the simulation.
+    * 
+    *  \param workflowConfiguration The desired configuration, currently containing a list of required participants
     */
-    virtual void SetRequiredParticipants(const std::vector<std::string>& participantNames) = 0;
+    virtual void SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration) = 0;
 };
 
 } // namespace sync

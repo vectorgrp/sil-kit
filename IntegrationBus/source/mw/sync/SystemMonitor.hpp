@@ -51,7 +51,7 @@ public:
     auto ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus& override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ExpectedParticipants& msg) override;
+    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::WorkflowConfiguration& msg) override;
 
     void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) override;
     void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) override;
@@ -66,15 +66,13 @@ public:
     // ----------------------------------------
     // Other Public Methods
 
-    const sync::ExpectedParticipants& GetExpectedParticipants() const;
-
     /*! \brief Get the current transition violation count
      *
      * \return The number of detected invalid participant state transitions.
      */
     inline auto InvalidTransitionCount() const -> unsigned int;
 
-    void UpdateExpectedParticipantNames(const ExpectedParticipants& expectedParticipants);
+    void UpdateRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames);
 
     /*! \brief Invokes the handler set by \ref SetParticipantConnectedHandler
      *
@@ -91,8 +89,7 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    bool AllParticipantsInState(sync::ParticipantState state) const;
-    bool AllParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
+    bool AllRequiredParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
     void ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
     void UpdateSystemState(const sync::ParticipantStatus& newStatus);
 
@@ -104,7 +101,7 @@ private:
     mw::ServiceDescriptor _serviceDescriptor{};
     logging::ILogger* _logger{nullptr};
 
-    ExpectedParticipants _expectedParticipants{};
+    std::vector<std::string> _requiredParticipantNames{};
     std::map<std::string, sync::ParticipantStatus> _participantStatus;
     sync::SystemState _systemState{sync::SystemState::Invalid};
 

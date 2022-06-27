@@ -22,7 +22,7 @@ DefineIbMsgTrait_SerdesName(ib::mw::logging::LogMsg, "LOGMSG" );
 DefineIbMsgTrait_SerdesName(ib::mw::sync::ParticipantCommand, "PARTICIPANTCOMMAND" );
 DefineIbMsgTrait_SerdesName(ib::mw::sync::SystemCommand, "SYSTEMCOMMAND" );
 DefineIbMsgTrait_SerdesName(ib::mw::sync::ParticipantStatus, "PARTICIPANTSTATUS" );
-DefineIbMsgTrait_SerdesName(ib::mw::sync::ExpectedParticipants, "EXPECTEDPARTICIPANTS" );
+DefineIbMsgTrait_SerdesName(ib::mw::sync::WorkflowConfiguration, "WORKFLOWCONFIGURATION" );
 DefineIbMsgTrait_SerdesName(ib::mw::sync::NextSimTask, "NEXTSIMTASK" );
 DefineIbMsgTrait_SerdesName(ib::sim::data::DataMessageEvent, "DATAMESSAGEEVENT" );
 DefineIbMsgTrait_SerdesName(ib::sim::rpc::FunctionCall, "FUNCTIONCALL" );

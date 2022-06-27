@@ -64,7 +64,7 @@ private:
 
         _systemMaster.systemController = _systemMaster.participant->GetSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();
-        _systemMaster.systemController->SetRequiredParticipants(requiredParticipantNames);
+        _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
 
         _systemMaster.systemMonitor->AddSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
             switch (newState)

@@ -279,25 +279,6 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
     _lifecycleService->ChangeState(ParticipantState::Error, errorMsg);
 }
 
-
-
-// TODO improve
-// TODO FIXME limitation: currently assumes that all expected participants are also synchronized - needs to be fixed upon time concept overhaul
-void TimeSyncService::AddExpectedParticipants(const ExpectedParticipants& expectedParticipants)
-{
-    _expectedParticipants = expectedParticipants;
-    // Add sync participants
-    for (auto&& name : expectedParticipants.names)
-    {
-        // Exclude this participant
-        if (name == _participant->GetParticipantName())
-        {
-            continue;
-        }
-        _timeConfiguration->SynchronizedParticipantAdded(name);
-    }
-}
-
 auto TimeSyncService::State() const -> ParticipantState
 {
     return _lifecycleService->Status().state;

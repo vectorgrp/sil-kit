@@ -11,7 +11,7 @@ namespace mw {
 namespace sync {
 
 class IIbToSystemMonitor
-    : public mw::IIbReceiver<ParticipantStatus, ExpectedParticipants>
+    : public mw::IIbReceiver<ParticipantStatus, WorkflowConfiguration>
     , public mw::IIbSender<>
 {
 };

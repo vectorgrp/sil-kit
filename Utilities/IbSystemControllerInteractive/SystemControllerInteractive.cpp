@@ -307,7 +307,7 @@ int main(int argc, char** argv)
 
         auto systemMonitor = participant->GetSystemMonitor();
         auto systemController = participant->GetSystemController();
-        systemController->SetRequiredParticipants(expectedParticipantNames);
+        systemController->SetWorkflowConfiguration({expectedParticipantNames});
         systemMonitor->AddParticipantStatusHandler(&ReportParticipantStatus);
         systemMonitor->AddSystemStateHandler(&ReportSystemState);
 

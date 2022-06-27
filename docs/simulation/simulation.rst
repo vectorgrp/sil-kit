@@ -159,7 +159,7 @@ Simulation-wide Life Cycle (System State)
 The life cycle of the overall simulation is derived from the states of a defined set of participants.
 Changes to the system state can be observed via the SystemMonitor.
 
-The set of participants that define the system state must be defined via :cpp:func:`ISystemController::SetRequiredParticipants()<ib::mw::sync::ISystemController::SetRequiredParticipants()>` before the simulation is started (see :ref:`above<subsubsec:sim-lifecycle-systemController>` for details).
+The set of participants that define the system state must be defined via :cpp:func:`ISystemController::SetWorkflowConfiguration()<ib::mw::sync::ISystemController::SetWorkflowConfiguration()>` before the simulation is started (see :ref:`above<subsubsec:sim-lifecycle-systemController>` for details).
 The system state is defined as follows:
 1. If any required participant is not available, the system state is Invalid.
 2. If all required participants are in the same state, the system state will also be in this state. For example, if all required participants are in the state :cpp:enumerator:`Running<ib::mw::sync::ParticipantState::Running>`, the system state is :cpp:enumerator:`Running<ib::mw::sync::SystemState::Running>` too.

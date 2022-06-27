@@ -8,7 +8,7 @@ auto* systemController = participant1->GetSystemController();
 auto* systemMonitor = participant1->GetSystemMonitor();
 
 // Tell the SystemController to expect the two synchronized participants
-systemController->SetRequiredParticipants({participantName1, participantName2});
+systemController->SetWorkflowConfiguration({participantName1, participantName2});
 
 // Register SystemStateHandler to trigger the commands of the System Controller in the correct system states.
 // For more information about the use of the System Monitor refer to the corresponding section.

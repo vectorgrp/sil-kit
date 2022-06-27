@@ -11,7 +11,7 @@ struct NextSimTask;
 struct ParticipantCommand;
 struct SystemCommand;
 struct ParticipantStatus;
-struct ExpectedParticipants;
+struct WorkflowConfiguration;
 
 class ILifecycleService;
 class ITimeSyncService;
