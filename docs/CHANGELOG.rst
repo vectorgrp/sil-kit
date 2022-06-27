@@ -58,6 +58,94 @@ Added
 
 Changed
 ~~~~~~~
+- Replaced the participant controller with a life cycle service and a time synchronization service (see documentation for details)
+  
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+
+    + old:
+  
+      .. code-block:: c++
+  
+        virtual auto GetParticipantController() -> sync::IParticipantController* = 0;
+    + new:
+  
+      .. code-block:: c++
+  
+        virtual auto GetLifecycleService() -> sync::ILifecycleService* = 0;
+
+  - The life cycle service comprises methods related to the state control and observation of a participant
+  
+  - ``IParticipantController::Run()`` was removed
+  - ``IParticipantController::RunAsync()`` has two successors
+  
+    - ``IntegrationBus/include/ib/mw/sync/ILifecycleService.hpp``
+  
+      + old (life cycle execution):
+    
+        .. code-block:: c++
+    
+          virtual auto IParticipantController::RunAsync() -> std::future<ParticipantState> = 0;
+          
+      + new (life cycle execution):
+    
+        .. code-block:: c++
+  
+        virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop,
+                                                bool isRequiredParticipant) -> std::future<ParticipantState> = 0;
+  
+          virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+            -> std::future<ParticipantState> = 0;
+    
+        virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
+                                                  bool hasCoordinatedSimulationStop, bool isRequiredParticipant)
+              -> std::future<ParticipantState> = 0;
+    
+          // corresponds to former functionality of RunAsync()
+          virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
+                                                  bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> = 0;
+  
+      + old (callbacks):
+    
+        .. code-block:: c++
+    
+          virtual void IParticipantController::InitHandler(InitHandlerT handler) = 0;
+          
+      + new (callbacks):
+    
+        .. code-block:: c++
+  
+          virtual void ILifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) = 0;
+          
+          // New: indicates transition to ParticipantState::Running for participants without time synchronization
+          virtual void SetStartingHandler(StartingHandlerT handler) = 0;
+
+    - Moved methods
+    
+      + ``IParticipantController::SetStartingHandler(...) -> ILifecycleService::SetStartingHandler(...)``
+      + ``IParticipantController::SetStopHandler(...) -> ILifecycleService::SetStopHandler(...)``
+      + ``IParticipantController::SetShutdownHandler(...) -> ILifecycleService::SetShutdownHandler(...)``
+      + ``IParticipantController::ReportError(...) -> ILifecycleService::ReportError(...)``
+      + ``IParticipantController::Pause(...) -> ILifecycleService::Pause(...)``
+      + ``IParticipantController::Continue(...) -> ILifecycleService::Continue(...)``
+      + ``IParticipantController::Stop(...) -> ILifecycleService::Stop(...)``
+      + ``IParticipantController::State(...) -> ILifecycleService::State(...)``
+      + ``IParticipantController::Status(...) -> ILifecycleService::Status(...)``
+
+  - The time synchronization service is retrievable via the life cycle service
+  - ``IntegrationBus/include/ib/mw/sync/ILifecycleService.hpp``
+      .. code-block:: c++
+        
+        virtual auto GetTimeSyncService() const -> ITimeSyncService* = 0;
+
+  - Moved methods (The time synchronization service methods are unchanged compared to the methods of IParticipantController)
+  
+    - ``IParticipantController::SetSimulationTask(...) -> ITimeSyncService::SetSimulationTask(...)``
+    - ``IParticipantController::SetSimulationTaskAsync(...) -> ITimeSyncService::SetSimulationTaskAsync(...)``
+    - ``IParticipantController::CompleteSimulationTask(...) -> ITimeSyncService::CompleteSimulationTask(...)``
+    - ``IParticipantController::SetPeriod(...) -> ITimeSyncService::SetPeriod(...)``
+    - ``IParticipantController::Now(...) -> ITimeSyncService::Now(...)``
+    - ``IParticipantController::SetPeriod(...) -> ITimeSyncService::SetPeriod(...)``
+    
 
 - C-API: renamed the `ib_Participant_WaitForAsyncRunToComplete` to
   `ib_Participant_WaitForLifecycleToComplete`.

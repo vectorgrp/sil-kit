@@ -12,7 +12,7 @@ Life Cycle Service
 
 .. highlight:: cpp
 
-The lifecycle service is the main interface to model a member of a simulation.
+The life cycle service is the main interface to model a member of a simulation.
 It provides access to the  :cpp:class:`time synchronization service <ib::mw::sync::ITimeSyncService>`, register callbacks for state changes, query the participant's state and issue commands to change the state.
 For an overview of a participant's state and its relation to the simulation
 refer to the :ref:`participant life cycle section<sec:sim-lifecycle-syncParticipants>`.
@@ -123,11 +123,11 @@ Usage Example
 --------------
 The following example is based on the ``IbCanDemo`` source code which is
 distributed with the VIB, and slightly adapted for clarity.
-It demonstrates how to setup a lifecycle service and register callbacks
+It demonstrates how to setup a life cycle service and register callbacks
 to monitor participant state changes.
 
 To demonstrate how to properly initialize other services, a can controller is 
-initialized within the ``CommunicationReady`` callback of the lifecycle service.
+initialized within the ``CommunicationReady`` callback of the life cycle service.
 This is the recommended way to set up controllers before first use.
 
 .. literalinclude:: 
