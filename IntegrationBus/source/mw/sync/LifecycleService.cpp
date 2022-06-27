@@ -85,7 +85,7 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     return _finalStatePromise.get_future();
 }
 
-auto LifecycleService::ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+auto LifecycleService::StartLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
     -> std::future<ParticipantState>
 {
     _timeSyncActive = false;

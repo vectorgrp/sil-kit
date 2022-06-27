@@ -46,7 +46,7 @@ public:
 
     auto GetTimeSyncService() const -> ITimeSyncService* override;
 
-    auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+    auto StartLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
         -> std::future<ParticipantState> override;
     auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
                                       bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> override;

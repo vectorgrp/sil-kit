@@ -153,7 +153,7 @@ ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant, voi
 // Lifecycle async execution
 static std::map<ib_Participant*, std::future<ib::mw::sync::ParticipantState>> sRunAsyncFuturePerParticipant;
 
-ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
+ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,
@@ -169,7 +169,7 @@ ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
     auto* lifecycleService = cppParticipant->GetLifecycleService();
 
     sRunAsyncFuturePerParticipant[participant] =
-        lifecycleService->ExecuteLifecycleNoSyncTime(
+        lifecycleService->StartLifecycleNoSyncTime(
             hasCoordinatedSimulationStart == ib_True,
             hasCoordinatedSimulationStop == ib_True);
 
@@ -180,7 +180,7 @@ ib_ReturnCode ib_Participant_ExecuteLifecycleNoSyncTime(
 }
 
 
-ib_ReturnCode ib_Participant_ExecuteLifecycleWithSyncTime(
+ib_ReturnCode ib_Participant_StartLifecycleWithSyncTime(
     ib_Participant* participant,
     ib_Bool hasCoordinatedSimulationStart,
     ib_Bool hasCoordinatedSimulationStop,

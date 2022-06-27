@@ -90,7 +90,7 @@ public:
     MOCK_METHOD(void, SetStartingHandler, (StartingHandlerT), (override));
     MOCK_METHOD(void, SetStopHandler, (StopHandlerT), (override));
     MOCK_METHOD(void, SetShutdownHandler, (ShutdownHandlerT), (override));
-    MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleNoSyncTime,
+    MOCK_METHOD(std::future<sync::ParticipantState>, StartLifecycleNoSyncTime,
                 (bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop), (override));
     MOCK_METHOD(std::future<sync::ParticipantState>, ExecuteLifecycleWithSyncTime,
                 (sync::ITimeSyncService * timeSyncService, bool hasCoordinatedSimulationStart,

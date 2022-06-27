@@ -173,7 +173,7 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(false, false);
+    lifecycleService.StartLifecycleNoSyncTime(false, false);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Stop("");
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
@@ -237,7 +237,7 @@ TEST_F(LifecycleServiceTest, start_restart_stop_coordinated)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ServicesCreated);
     lifecycleService.NewSystemState(SystemState::ServicesCreated);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::CommunicationInitializing);
@@ -315,7 +315,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run, pause & stop
@@ -368,7 +368,7 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop
@@ -424,7 +424,7 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_restart)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop
@@ -499,7 +499,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
@@ -547,7 +547,7 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
     EXPECT_CALL(participant, SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // Abort right away
@@ -591,7 +591,7 @@ TEST_F(LifecycleServiceTest, Abort_Running)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
@@ -642,7 +642,7 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
@@ -705,7 +705,7 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
@@ -754,7 +754,7 @@ TEST_F(LifecycleServiceTest, Abort_Stop)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
@@ -818,7 +818,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
@@ -871,7 +871,7 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
                 SendIbMessage(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.ExecuteLifecycleNoSyncTime(true, true);
+    lifecycleService.StartLifecycleNoSyncTime(true, true);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause

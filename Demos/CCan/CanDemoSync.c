@@ -223,10 +223,10 @@ int main(int argc, char* argv[])
     ib_Participant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
 
     ib_ReturnCode result;
-    result = ib_Participant_ExecuteLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
+    result = ib_Participant_StartLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
     if(result != ib_ReturnCode_SUCCESS)
     {
-        printf("Error: ib_Participant_ExecuteLifecycleWithSyncTime failed: %s\n", ib_GetLastErrorString());
+        printf("Error: ib_Participant_StartLifecycleWithSyncTime failed: %s\n", ib_GetLastErrorString());
         exit(1);
     }
     ib_ParticipantState outFinalParticipantState;

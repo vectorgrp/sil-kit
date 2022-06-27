@@ -621,10 +621,10 @@ int main(int argc, char** argv)
   }
 
   ib_ParticipantState finalState;
-  returnCode = ib_Participant_ExecuteLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
+  returnCode = ib_Participant_StartLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
-    printf("ib_Participant_ExecuteLifecycleWithSyncTime => %s\n", ib_GetLastErrorString());
+    printf("ib_Participant_StartLifecycleWithSyncTime => %s\n", ib_GetLastErrorString());
     return 2;
   }
   returnCode = ib_Participant_WaitForLifecycleToComplete(participant, &finalState);
