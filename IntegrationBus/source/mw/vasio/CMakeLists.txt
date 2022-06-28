@@ -72,6 +72,7 @@ add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsi
 
 add_vib_test(TestMwVAsio_Serdes  SOURCES VAsioSerdesTest.cpp LIBS IbMwVAsio)
 add_vib_test(TestMwVAsio_SerializedMessage  SOURCES SerializedMessageTest.cpp LIBS IbMwVAsio)
+add_vib_test(TestMwVAsio_Uri  SOURCES UriTest.cpp LIBS IbMwVAsio)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version

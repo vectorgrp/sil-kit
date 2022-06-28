@@ -35,14 +35,17 @@ public:
     Uri& operator=(const Uri&) = default;
 public:
     // public static methods
-    static auto parse(const std::string& uriStr) -> Uri;
+    static auto Parse(std::string uriStr) -> Uri;
 public:
     // public methods
     auto EncodedString() const -> const std::string&;
+    auto Scheme() const -> const std::string&;
     auto Host() const -> const std::string&;
     auto Port() const -> uint16_t;
+    //!< Path currently returns everything after the '/', including queries and fragments
     auto Path() const -> const std::string&;
     auto Type() const -> UriType;
+    void SetType(UriType newType);
 
 private:
     // private ctor
@@ -50,8 +53,9 @@ private:
 private:
     // private members
     UriType _type{ UriType::Undefined };
+    std::string _scheme;
     std::string _host;
-    uint16_t _port;
+    uint16_t _port{0};
     std::string _path;
     std::string _uriString;
 };
