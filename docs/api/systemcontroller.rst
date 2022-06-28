@@ -30,15 +30,17 @@ required participants within the simulation.
 Initiate state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The first transition performed by the system controller, usually when
-:cpp:enumerator:`SystemState::ServicesCreated<ib::mw::sync::ServicesCreated>` is reached,
-is accomplished by initializing all participants::
+After the required participants are set and the participants called 
+:cpp:func:`ExecuteLifecycleNoTimeSync<ib::mw::sync::ILifecycleService::ExecuteLifecycleNoTimeSync()>` or 
+:cpp:func:`ExecuteLifecycleWithTimeSync<ib::mw::sync::ILifecycleService::ExecuteLifecycleWithTimeSync()>`, 
+the participant states will progress automatically either to :cpp:enumerator:`ParticipantState::ReadyToRun<ib::mw::sync::ReadyToRun>` 
+(for coordinated participants) or :cpp:enumerator:`ParticipantState::Running<ib::mw::sync::Running>`  (for non-coordinated participants).
 
-After all participants are successfully initialized and the system is in
-:cpp:enumerator:`SystemState::ReadyToRun<ib::mw::sync::ReadyToRun>`, the next transition can be initiated
+Once all required participants reached at least :cpp:enumerator:`ParticipantState::ReadyToRun<ib::mw::sync::ReadyToRun>` 
+(and therefore the system is in :cpp:enumerator:`SystemState::ReadyToRun<ib::mw::sync::ReadyToRun>`, the next transition can be initiated
 by calling the :cpp:func:`Run()<ib::mw::sync::ISystemController::Run()>` command::
 
-  // Initiate state transition from Idle to Running for all participants.
+  // Initiate state transition from ReadyToRun to Running for all coordinated participants.
   auto* systemController = participant->GetSystemController();
   systemController->Run();
 
@@ -46,7 +48,7 @@ After all participants are successfully running and the system is in
 :cpp:enumerator:`SystemState::Running<ib::mw::sync::Running>`, the simulation can be stopped by calling
 the :cpp:func:`Stop()<ib::mw::sync::ISystemController::Stop()>` command::
 
-  // Initiate state transition from Running to Stopped for all participants.
+  // Initiate state transition from Running to Stopped for all coordinated participants.
   auto* systemController = participant->GetSystemController();
   systemController->Stop();
 

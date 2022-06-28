@@ -18,8 +18,8 @@ struct ParticipantCommand
     //! The different kinds of a ParticipantCommand
     enum class Kind : uint8_t {
         Invalid = 0, //!< An invalid command
-        Restart = 2, //!< The restart command
-        Shutdown = 3 //!< The shutdown command
+        Restart = 1, //!< The restart command
+        Shutdown = 2 //!< The shutdown command
     };
 
     ParticipantId participant; //!< The specific participant that receives this command.

@@ -249,18 +249,6 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_CompleteSimulationTask(ib_Partici
 
 typedef ib_ReturnCode(*ib_Participant_CompleteSimulationTask_t)(ib_Participant* participant);
 
-/*! \brief Send \ref the Initialize command to a specific participant
-  *
-  *  The command is only allowed if the participant is in ib_ParticipantState_Idle.
-  *
-  *  \param participantName identifies the participant to be initialized
-  *
-  *  NB: Parametrization is yet to be determined.
-  */
-IntegrationBusAPI ib_ReturnCode ib_Participant_Initialize(ib_Participant* participant, const char* participantName);
-
-typedef ib_ReturnCode (*ib_Participant_Initialize_t)(ib_Participant* participant, const char* participantName);
-
 /*! \brief Send \ref the Restart command to a specific participant
   *
   *  The command is only allowed if the participant is in the
