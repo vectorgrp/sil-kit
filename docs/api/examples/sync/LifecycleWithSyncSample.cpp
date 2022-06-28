@@ -44,5 +44,5 @@ if (participantName == "CanWriter")
 	});
 }
 
-auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
 auto finalState = finalStateFuture.get();

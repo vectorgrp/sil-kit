@@ -20,8 +20,8 @@ Added
 - IbSystemControllerInteractive: Added ``Abort`` as possible input
 
 - the new ILifeCycleService is now exposed on the C-API:
-  added the new :cpp:func:`ib_Participant_ExecuteLifecycleWithTime` and
-  :cpp:func:`ib_Participant_ExecuteLifecycleNoSyncTime` functions
+  added the new :cpp:func:`ib_Participant_StartLifecycleWithTime` and
+  :cpp:func:`ib_Participant_StartLifecycleNoSyncTime` functions
 
 - Added functionality to remove handlers:
 
@@ -91,11 +91,11 @@ Changed
     
         .. code-block:: c++
   
-          virtual auto ExecuteLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+          virtual auto StartLifecycleNoSyncTime(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
               -> std::future<ParticipantState> = 0;
     
           // corresponds to former functionality of RunAsync()
-          virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
+          virtual auto StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
                                                   bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> = 0;
   
       + old (callbacks):
@@ -266,11 +266,11 @@ Removed
 - IbSystemControllerInteractive: Removed ``Initialize`` as possible input
 
 - C-API: the  `ib_Participant_RunAsync` is superseded by the
-  `ib_Participant_ExecuteLifeCycle...` functions.
+  `ib_Participant_StartLifecycle...` functions.
 
 - C-API: the `ib_Participant_Run` function was removed.
-  Use the new asynchronous `ib_Participant_ExecuteLifecycleWithSyncTime` or the
-  `ib_Participant_ExecuteLifecycleNoSyncTime` as replacement. For Example:
+  Use the new asynchronous `ib_Participant_StartLifecycleWithSyncTime` or the
+  `ib_Participant_StartLifecycleNoSyncTime` as replacement. For Example:
 
   + old:
 
@@ -282,7 +282,7 @@ Removed
 
   .. code-block:: c
 
-    ib_ReturnCode returnCode = ib_Participant_ExecuteLifecycleNoSyncTime(
+    ib_ReturnCode returnCode = ib_Participant_StartLifecycleNoSyncTime(
                                    participant, ib_False, ib_False, ib_False);
     // error check ommited
     ib_ParticipantState outParticipantState;

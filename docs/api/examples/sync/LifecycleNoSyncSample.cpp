@@ -30,5 +30,5 @@ lifecycleService->SetShutdownHandler([]() {
 	std::cout << "Shutting down..." << std::endl;
 });
 
-auto finalStateFuture = lifecycleService->ExecuteLifecycleNoTimeSync(true, true);
+auto finalStateFuture = lifecycleService->StartLifecycleNoTimeSync(true, true);
 auto finalState = finalStateFuture.get();

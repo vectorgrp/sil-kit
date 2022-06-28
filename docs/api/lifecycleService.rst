@@ -32,10 +32,10 @@ Participants can synchronize their time with other participants (see :ref:`synch
 
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
     (...)
-    lifecycleService->ExecuteLifecycleWithTimeSync(...);
+    lifecycleService->StartLifecycleWithTimeSync(...);
 
 Alternatively, participants can run asynchronously (regarding the time synchronization)::
-    lifecycleService->ExecuteLifecycleNoTimeSync(...);
+    lifecycleService->StartLifecycleNoTimeSync(...);
 
 The other callbacks, which are triggered on state transitions, are always executed
 in the middleware's worker thread::
@@ -96,7 +96,7 @@ ReportError is also called when the invocation of a registered handler throws an
 
 To stop a particular participant, use the :cpp:func:`Stop()<ib::mw::sync::ILifecycleService::Stop()>`
 method.
-This will exit the :cpp:func:`ExecuteLifecycleNoTimeSync<ib::mw::sync::ILifecycleService::ExecuteLifecycleNoTimeSync()>` (or :cpp:func:`ExecuteLifecycleWithTimeSync<ib::mw::sync::ILifecycleService::ExecuteLifecycleWithTimeSync()>`) loop,
+This will exit the :cpp:func:`StartLifecycleNoTimeSync<ib::mw::sync::ILifecycleService::StartLifecycleNoTimeSync()>` (or :cpp:func:`StartLifecycleWithTimeSync<ib::mw::sync::ILifecycleService::StartLifecycleWithTimeSync()>`) loop,
 call a registered StopHandler and switch to
 the :cpp:enumerator:`Stopped<ib::mw::sync::Stopped>` state.
 

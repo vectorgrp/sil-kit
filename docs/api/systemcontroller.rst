@@ -31,8 +31,8 @@ Initiate state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After the required participants are set and the participants called 
-:cpp:func:`ExecuteLifecycleNoTimeSync<ib::mw::sync::ILifecycleService::ExecuteLifecycleNoTimeSync()>` or 
-:cpp:func:`ExecuteLifecycleWithTimeSync<ib::mw::sync::ILifecycleService::ExecuteLifecycleWithTimeSync()>`, 
+:cpp:func:`StartLifecycleNoTimeSync<ib::mw::sync::ILifecycleService::StartLifecycleNoTimeSync()>` or 
+:cpp:func:`StartLifecycleWithTimeSync<ib::mw::sync::ILifecycleService::StartLifecycleWithTimeSync()>`, 
 the participant states will progress automatically either to :cpp:enumerator:`ParticipantState::ReadyToRun<ib::mw::sync::ReadyToRun>` 
 (for coordinated participants) or :cpp:enumerator:`ParticipantState::Running<ib::mw::sync::Running>`  (for non-coordinated participants).
 

@@ -31,7 +31,7 @@ void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     //run the simulation main loop forever
     try
     {
-        auto result = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+        auto result = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
         std::cout << "Publisher: result: " << result << std::endl;
     }
     catch (const std::exception& e)
@@ -60,7 +60,7 @@ void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 
     try
     {
-        auto result = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+        auto result = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
         std::cout << "Subscriber: result: " << result << std::endl;
     }
     catch (const std::exception& e)

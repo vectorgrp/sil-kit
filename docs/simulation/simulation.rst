@@ -12,8 +12,8 @@ Simulation
 .. |SystemControllerAPI| replace:: :cpp:class:`ISystemController<ib::mw::sync::ISystemController>`
 .. |SystemMonitorAPI| replace:: :cpp:class:`ISystemMonitor<ib::mw::sync::ISystemMonitor>`
 .. |CompleteSimulationTask| replace:: :cpp:func:`CompleteSimulationTask()<ib::mw::sync::ITimeSyncService::CompleteSimulationTask()>`
-.. |ExecuteLifecycleNoSyncTime| replace:: :cpp:func:`ExecuteLifecycleNoSyncTime()<ib::mw::sync::ILifecycleService::ExecuteLifecycleNoSyncTime()>`
-.. |ExecuteLifecycleWithSyncTime| replace:: :cpp:func:`ExecuteLifecycleWithSyncTime()<ib::mw::sync::ILifecycleService::ExecuteLifecycleWithSyncTime()>`
+.. |StartLifecycleNoSyncTime| replace:: :cpp:func:`StartLifecycleNoSyncTime()<ib::mw::sync::ILifecycleService::StartLifecycleNoSyncTime()>`
+.. |StartLifecycleWithSyncTime| replace:: :cpp:func:`StartLifecycleWithSyncTime()<ib::mw::sync::ILifecycleService::StartLifecycleWithSyncTime()>`
 
 .. 
   Section references 
@@ -68,7 +68,7 @@ The |LifecycleServiceAPI| interface allows each participant to access various fu
 Users can register callbacks that trigger once a participant reaches certain states.
 Available callbacks are :cpp:func:`SetCommunicationReadyHandler()<ib::mw::sync::ILifecycleService::SetCommunicationReadyHandler()>`, :cpp:func:`SetStopHandler()<ib::mw::sync::ILifecycleService::SetStopHandler()>`, and :cpp:func:`SetShutdownHandler()<ib::mw::sync::ILifecycleService::SetShutdownHandler()>`.
 Further, the life cycle service provides access to the |TimeSyncServiceAPI| interface (see below).
-Once all needed controllers are registered and, if need be, the time synchronization service was retrieved and configured, the participant's life cycle (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`) can be published by either calling |ExecuteLifecycleNoSyncTime| or |ExecuteLifecycleWithSyncTime|.
+Once all needed controllers are registered and, if need be, the time synchronization service was retrieved and configured, the participant's life cycle (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`) can be published by either calling |StartLifecycleNoSyncTime| or |StartLifecycleWithSyncTime|.
 
 .. _subsubsec:sim-lifecycle-timeSyncService:
 
@@ -115,7 +115,7 @@ For all phases, the |LifecycleService| or |TimeSyncService| allow setting callba
 
    : |ProductName| participant state machine.
 
-A participant enters the distributed state machine by either calling |ExecuteLifecycleNoSyncTime| or |ExecuteLifecycleWithSyncTime|.
+A participant enters the distributed state machine by either calling |StartLifecycleNoSyncTime| or |StartLifecycleWithSyncTime|.
 This will cause the |LifecycleService| to anounce its state as :cpp:enumerator:`ServicesCreated<ib::mw::sync::ParticipantState::ServicesCreated>`, indicating that all services were created and announced to other participants.
 
 A participant that uses the life cycle service may choose to coordinate its state with other participants from the start of the life cycle until the simulation is running.
