@@ -16,8 +16,8 @@ IB_BEGIN_DECLS
 //!< The kind of participant command that is sent.
 typedef int8_t ib_ParticipantCommand_Kind;
 #define ib_ParticipantCommand_Kind_Invalid      ((ib_ParticipantCommand_Kind) 0) //!< An invalid command
-#define ib_ParticipantCommand_Kind_Initialize   ((ib_ParticipantCommand_Kind) 1) //!< The initialize command
-#define ib_ParticipantCommand_Kind_Restart      ((ib_ParticipantCommand_Kind) 2) //!< The restart command
+#define ib_ParticipantCommand_Kind_Restart      ((ib_ParticipantCommand_Kind) 1) //!< The restart command
+#define ib_ParticipantCommand_Kind_Shutdown     ((ib_ParticipantCommand_Kind) 2) //!< The shutdown command
 
 //!< The numeric participant id.
 typedef int32_t ib_ParticipantId;
@@ -32,31 +32,35 @@ typedef struct ib_ParticipantCommand ib_ParticipantCommand;
 
 //!< The state of a participant.
 typedef int8_t ib_ParticipantState;
-#define ib_ParticipantState_Invalid               ((ib_ParticipantState) 0)   //!< An invalid participant state
-#define ib_ParticipantState_Idle                  ((ib_ParticipantState) 1)   //!< The idle state
-#define ib_ParticipantState_Initializing          ((ib_ParticipantState) 2)   //!< The initializing state
-#define ib_ParticipantState_Initialized           ((ib_ParticipantState) 3)   //!< The initialized state
-#define ib_ParticipantState_Running               ((ib_ParticipantState) 4)   //!< The running state
-#define ib_ParticipantState_Paused                ((ib_ParticipantState) 5)   //!< The paused state
-#define ib_ParticipantState_Stopping              ((ib_ParticipantState) 6)   //!< The stopping state
-#define ib_ParticipantState_Stopped               ((ib_ParticipantState) 7)   //!< The stopped state
-#define ib_ParticipantState_Error                 ((ib_ParticipantState) 12)  //!< The error state
-#define ib_ParticipantState_ShuttingDown          ((ib_ParticipantState) 13)  //!< The shutting down state
-#define ib_ParticipantState_Shutdown              ((ib_ParticipantState) 14)  //!< The shutdown state
+#define ib_ParticipantState_Invalid                     ((ib_ParticipantState)   0) //!< An invalid participant state
+#define ib_ParticipantState_ServicesCreated             ((ib_ParticipantState)  10) //!< The controllers created state
+#define ib_ParticipantState_CommunicationInitializing   ((ib_ParticipantState)  20) //!< The communication initializing state
+#define ib_ParticipantState_CommunicationInitialized    ((ib_ParticipantState)  30) //!< The communication initialized state
+#define ib_ParticipantState_ReadyToRun                  ((ib_ParticipantState)  40) //!< The initialized state
+#define ib_ParticipantState_Running                     ((ib_ParticipantState)  50) //!< The running state
+#define ib_ParticipantState_Paused                      ((ib_ParticipantState)  60) //!< The paused state
+#define ib_ParticipantState_Stopping                    ((ib_ParticipantState)  70) //!< The stopping state
+#define ib_ParticipantState_Stopped                     ((ib_ParticipantState)  80) //!< The stopped state
+#define ib_ParticipantState_Error                       ((ib_ParticipantState)  90) //!< The error state
+#define ib_ParticipantState_ShuttingDown                ((ib_ParticipantState) 100) //!< The shutting down state
+#define ib_ParticipantState_Shutdown                    ((ib_ParticipantState) 110) //!< The shutdown state
+#define ib_ParticipantState_Reinitializing              ((ib_ParticipantState) 120) //!< The reinitializing state
 
 //!< The state of a system, deduced by states of the required participants.
 typedef int8_t ib_SystemState;
-#define ib_SystemState_Invalid               ((ib_SystemState) 0)   //!< An invalid participant state
-#define ib_SystemState_Idle                  ((ib_SystemState) 1)   //!< The idle state
-#define ib_SystemState_Initializing          ((ib_SystemState) 2)   //!< The initializing state
-#define ib_SystemState_Initialized           ((ib_SystemState) 3)   //!< The initialized state
-#define ib_SystemState_Running               ((ib_SystemState) 4)   //!< The running state
-#define ib_SystemState_Paused                ((ib_SystemState) 5)   //!< The paused state
-#define ib_SystemState_Stopping              ((ib_SystemState) 6)   //!< The stopping state
-#define ib_SystemState_Stopped               ((ib_SystemState) 7)   //!< The stopped state
-#define ib_SystemState_Error                 ((ib_SystemState) 12)  //!< The error state
-#define ib_SystemState_ShuttingDown          ((ib_SystemState) 13)  //!< The shutting down state
-#define ib_SystemState_Shutdown              ((ib_SystemState) 14)  //!< The shutdown state
+#define ib_SystemState_Invalid                     ((ib_SystemState)   0) //!< An invalid participant state
+#define ib_SystemState_ServicesCreated             ((ib_SystemState)  10) //!< The controllers created state
+#define ib_SystemState_CommunicationInitializing   ((ib_SystemState)  20) //!< The communication initializing state
+#define ib_SystemState_CommunicationInitialized    ((ib_SystemState)  30) //!< The communication initialized state
+#define ib_SystemState_ReadyToRun                  ((ib_SystemState)  40) //!< The initialized state
+#define ib_SystemState_Running                     ((ib_SystemState)  50) //!< The running state
+#define ib_SystemState_Paused                      ((ib_SystemState)  60) //!< The paused state
+#define ib_SystemState_Stopping                    ((ib_SystemState)  70) //!< The stopping state
+#define ib_SystemState_Stopped                     ((ib_SystemState)  80) //!< The stopped state
+#define ib_SystemState_Error                       ((ib_SystemState)  90) //!< The error state
+#define ib_SystemState_ShuttingDown                ((ib_SystemState) 100) //!< The shutting down state
+#define ib_SystemState_Shutdown                    ((ib_SystemState) 110) //!< The shutdown state
+#define ib_SystemState_Reinitializing              ((ib_SystemState) 120) //!< The reinitializing state
 
 typedef uint64_t ib_NanosecondsTime; //!< Simulation time
 

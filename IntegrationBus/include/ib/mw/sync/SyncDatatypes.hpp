@@ -41,19 +41,19 @@ struct SystemCommand
 
 // note: always increase number (never reuse old ones!)
 enum class ParticipantState : uint8_t {
-    Invalid = 0, //!< An invalid participant state
-    ServicesCreated = 10, //!< The controllers created state
-    CommunicationInitializing = 20, //!< The communication initializing state
-    CommunicationInitialized = 30, //!< The communication initialized state
-    ReadyToRun = 40, //!< The initialized state
-    Running = 50, //!< The running state
-    Paused = 60, //!< The paused state
-    Stopping = 70, //!< The stopping state
-    Stopped = 80, //!< The stopped state
-    Error = 90, //!< The error state
-    ShuttingDown = 100, //!< The shutting down state
-    Shutdown = 110, //!< The shutdown state
-    Reinitializing = 120,  //!< The reinitializing state
+    Invalid                     =   0, //!< An invalid participant state
+    ServicesCreated             =  10, //!< The controllers created state
+    CommunicationInitializing   =  20, //!< The communication initializing state
+    CommunicationInitialized    =  30, //!< The communication initialized state
+    ReadyToRun                  =  40, //!< The initialized state
+    Running                     =  50, //!< The running state
+    Paused                      =  60, //!< The paused state
+    Stopping                    =  70, //!< The stopping state
+    Stopped                     =  80, //!< The stopped state
+    Error                       =  90, //!< The error state
+    ShuttingDown                = 100, //!< The shutting down state
+    Shutdown                    = 110, //!< The shutdown state
+    Reinitializing              = 120, //!< The reinitializing state
 };
 
 struct ParticipantStatus
@@ -67,19 +67,19 @@ struct ParticipantStatus
 
 // note: always increase number (never reuse old ones!)
 enum class SystemState : uint8_t {
-    Invalid = 0, //!< An invalid system state
-    ServicesCreated = 10, //!< The controllers created state
-    CommunicationInitializing = 20, //!< The communication initializing state
-    CommunicationInitialized = 30, //!< The communication initialized state
-    ReadyToRun = 40, //!< The initialized state
-    Running = 50, //!< The running state
-    Paused = 60, //!< The paused state
-    Stopping = 70, //!< The stopping state
-    Stopped = 80, //!< The stopped state
-    Error = 90, //!< The error state
-    ShuttingDown = 100, //!< The shutting down state
-    Shutdown = 110, //!< The shutdown state
-    Reinitializing = 120, //!< The reinitializing state
+    Invalid                     =   0, //!< An invalid participant state
+    ServicesCreated             =  10, //!< The controllers created state
+    CommunicationInitializing   =  20, //!< The communication initializing state
+    CommunicationInitialized    =  30, //!< The communication initialized state
+    ReadyToRun                  =  40, //!< The initialized state
+    Running                     =  50, //!< The running state
+    Paused                      =  60, //!< The paused state
+    Stopping                    =  70, //!< The stopping state
+    Stopped                     =  80, //!< The stopped state
+    Error                       =  90, //!< The error state
+    ShuttingDown                = 100, //!< The shutting down state
+    Shutdown                    = 110, //!< The shutdown state
+    Reinitializing              = 120, //!< The reinitializing state
 };
 
 //! \brief Details of the simulation workflow regarding lifecycle and participant coordination.
