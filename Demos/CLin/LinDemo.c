@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
     }
 
     ib_ParticipantState outFinalParticipantState;
-    ib_StartConfiguration startConfig;
+    ib_LifecycleConfiguration startConfig;
     startConfig.coordinatedStart = ib_True;
     startConfig.coordinatedStop = ib_True;
 

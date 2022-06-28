@@ -82,7 +82,7 @@ public:
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto StartLifecycleNoSyncTime(StartConfiguration startConfiguration)
+    virtual auto StartLifecycleNoSyncTime(LifecycleConfiguration startConfiguration)
         -> std::future<ParticipantState> = 0;
 
     
@@ -97,7 +97,7 @@ public:
      * once the LifecycleService finishes operation.
      */
     virtual auto StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
-            StartConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
+            LifecycleConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
 
 
     /*! \brief Abort current simulation run due to an error.

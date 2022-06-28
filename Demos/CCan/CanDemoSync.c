@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
     ib_Participant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
 
     ib_ReturnCode result;
-    ib_StartConfiguration startConfig;
+    ib_LifecycleConfiguration startConfig;
     startConfig.coordinatedStart = ib_True;
     startConfig.coordinatedStop = ib_True;
     result = ib_Participant_StartLifecycleWithSyncTime(participant, &startConfig);

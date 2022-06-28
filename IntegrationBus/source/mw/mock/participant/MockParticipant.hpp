@@ -91,9 +91,9 @@ public:
     MOCK_METHOD(void, SetStopHandler, (StopHandlerT), (override));
     MOCK_METHOD(void, SetShutdownHandler, (ShutdownHandlerT), (override));
     MOCK_METHOD(std::future<sync::ParticipantState>, StartLifecycleNoSyncTime,
-                (sync::StartConfiguration), (override));
+                (sync::LifecycleConfiguration), (override));
     MOCK_METHOD(std::future<sync::ParticipantState>, StartLifecycleWithSyncTime,
-                (sync::ITimeSyncService *, sync::StartConfiguration),
+                (sync::ITimeSyncService *, sync::LifecycleConfiguration),
                 (override));
     MOCK_METHOD(void, ReportError, (std::string /*errorMsg*/), (override));
     MOCK_METHOD(void, Pause, (std::string /*reason*/), (override));

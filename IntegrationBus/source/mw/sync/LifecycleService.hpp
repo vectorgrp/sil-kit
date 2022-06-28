@@ -23,6 +23,7 @@ namespace sync {
 struct ParticipantTimeProvider;
 class TimeSyncService;
 class ILifecycleManagement;
+struct LifecycleConfiguration;
 
 class LifecycleService
     : public ILifecycleService
@@ -46,10 +47,10 @@ public:
 
     auto GetTimeSyncService() const -> ITimeSyncService* override;
 
-    auto StartLifecycleNoSyncTime(StartConfiguration startConfiguration)
+    auto StartLifecycleNoSyncTime(LifecycleConfiguration startConfiguration)
         -> std::future<ParticipantState> override;
     auto StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
-            StartConfiguration startConfiguration)
+            LifecycleConfiguration startConfiguration)
         -> std::future<ParticipantState> override;
 
     void ReportError(std::string errorMsg) override;
@@ -92,7 +93,7 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    auto ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+    auto StartLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
         -> std::future<ParticipantState>;
 
     void Shutdown(std::string reason);

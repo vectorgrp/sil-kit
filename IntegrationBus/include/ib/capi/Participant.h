@@ -421,13 +421,13 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_SetWorkflowConfiguration(
 typedef ib_ReturnCode (*ib_Participant_SetWorkflowConfiguration_t)(
     ib_Participant* participant, const ib_WorkflowConfiguration* workflowConfigration);
 
-//!< The StartLifecycle options
-typedef struct ib_StartConfiguration
+//!< The LifecycleLifecycle options
+typedef struct ib_LifecycleConfiguration
 {
     ib_InterfaceIdentifier interfaceId;
     ib_Bool coordinatedStart;
     ib_Bool coordinatedStop;
-} ib_StartConfiguration;
+} ib_LifecycleConfiguration;
 
 /*! \brief Start the lifecycle with the given parameters without simulation time synchronization.
 *  Requires a call to ib_Participant_WaitForLifecycleToComplete to retrieve the final state.
@@ -438,10 +438,10 @@ typedef struct ib_StartConfiguration
 */
 
 typedef ib_ReturnCode (*ib_Participant_StartLifecycleNoSyncTime_t)(
-    ib_Participant*, ib_StartConfiguration*);
+    ib_Participant*, ib_LifecycleConfiguration*);
 
 IntegrationBusAPI ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
-    ib_Participant* participant, ib_StartConfiguration* startconfiguration);
+    ib_Participant* participant, ib_LifecycleConfiguration* startconfiguration);
 
 /*! \brief Start the lifecycle with the given parameters with simulation time synchronization.
 * 
@@ -450,10 +450,10 @@ IntegrationBusAPI ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
 */
 
 typedef ib_ReturnCode (*ib_Participant_StartLifecycleWithSyncTime_t)(
-    ib_Participant*, ib_StartConfiguration*);
+    ib_Participant*, ib_LifecycleConfiguration*);
 
 IntegrationBusAPI ib_ReturnCode ib_Participant_StartLifecycleWithSyncTime(
-    ib_Participant* participant, ib_StartConfiguration* startConfiguration);
+    ib_Participant* participant, ib_LifecycleConfiguration* startConfiguration);
 
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state

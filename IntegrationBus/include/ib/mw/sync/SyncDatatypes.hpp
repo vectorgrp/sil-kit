@@ -90,10 +90,10 @@ struct WorkflowConfiguration
 };
 
 //!< The lifecycle start configuration.
-struct StartConfiguration
+struct LifecycleConfiguration
 {
-    bool coordinatedStart{false};
-    bool coordinatedStop{false};
+    bool coordinatedStart;
+    bool coordinatedStop;
 };
 
 } // namespace sync

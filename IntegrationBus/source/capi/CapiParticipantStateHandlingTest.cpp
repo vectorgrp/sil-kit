@@ -89,8 +89,8 @@ namespace {
         returnCode = ib_Participant_SetShutdownHandler((ib_Participant*)&mockParticipant, NULL, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        // ExecuteLifecycleWithSyncTime
-        ib_StartConfiguration startConfig;
+        // StartLifecycleWithSyncTime
+        ib_LifecycleConfiguration startConfig;
         returnCode = ib_Participant_StartLifecycleWithSyncTime(nullptr, &startConfig);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
@@ -264,7 +264,7 @@ namespace {
         std::promise<ParticipantState> state;
         state.set_value(ParticipantState::Shutdown);
 
-        ib_StartConfiguration startConfig;
+        ib_LifecycleConfiguration startConfig;
 
         EXPECT_CALL(mockParticipant.mockLifecycleService,
             StartLifecycleWithSyncTime(_, _)

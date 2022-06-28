@@ -121,7 +121,7 @@ void PrepareLifecycle(LifecycleService* lifecycleService)
 
 auto StartCoordinated() 
 {
-    sync::StartConfiguration sc;
+    sync::LifecycleConfiguration sc;
     sc.coordinatedStart = true;
     sc.coordinatedStop = true;
     return sc;

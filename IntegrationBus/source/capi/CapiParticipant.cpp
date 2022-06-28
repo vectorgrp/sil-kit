@@ -153,16 +153,16 @@ ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant, voi
 // Lifecycle async execution
 static std::map<ib_Participant*, std::future<ib::mw::sync::ParticipantState>> sRunAsyncFuturePerParticipant;
 
-static auto from_c(ib_StartConfiguration* csc)
+static auto from_c(ib_LifecycleConfiguration* csc)
 {
-    ib::mw::sync::StartConfiguration cpp;
+    ib::mw::sync::LifecycleConfiguration cpp;
     cpp.coordinatedStart = csc->coordinatedStart;
     cpp.coordinatedStop = csc->coordinatedStop;
     return cpp;
 }
 ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
     ib_Participant* participant,
-    ib_StartConfiguration* startConfiguration)
+    ib_LifecycleConfiguration* startConfiguration)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
@@ -183,7 +183,7 @@ ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
 
 ib_ReturnCode ib_Participant_StartLifecycleWithSyncTime(
     ib_Participant* participant,
-    ib_StartConfiguration* startConfiguration)
+    ib_LifecycleConfiguration* startConfiguration)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
   ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
