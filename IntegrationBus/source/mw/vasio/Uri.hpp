@@ -4,9 +4,6 @@
 #include <string>
 #include <sstream>
 
-#include "asio/local/stream_protocol.hpp"
-#include "asio/ip/tcp.hpp"
-
 // URI encoding of asio endpoint types.
 // NB: Very limited implementation for internal use only -- nothing close to standard RFC 3986
 
@@ -26,10 +23,9 @@ public:
 
 public:
     // public CTor
-    //!< Decomposes uriRepr into Host+Port or Path
-    explicit Uri(const asio::local::stream_protocol::endpoint& ep);
-    explicit Uri(const asio::ip::tcp::endpoint& ep);
-    explicit Uri(const std::string& host, uint16_t port);
+    //!< Initialize Uri with host and port name, and schema of "vib://"
+    explicit Uri(const std::string& host, const uint16_t port);
+    //!< Calls Parse() on uriStr
     explicit Uri(const std::string& uriStr);
     Uri(const Uri&) = default;
     Uri& operator=(const Uri&) = default;

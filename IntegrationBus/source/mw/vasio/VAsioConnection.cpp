@@ -162,6 +162,22 @@ auto printUris(const ib::mw::VAsioPeerInfo& info) -> std::string
     return ss.str();
 }
 
+auto fromAsioEndpoint(const asio::local::stream_protocol::endpoint& ep)
+{
+    std::stringstream uri;
+    const std::string localPrefix{ "local://" };
+    uri << localPrefix << ep.path();
+    return ib::mw::Uri::Parse(uri.str());
+}
+
+auto fromAsioEndpoint(const asio::ip::tcp::endpoint& ep)
+{
+    std::stringstream uri;
+    const std::string tcpPrefix{ "tcp://" };
+    uri << tcpPrefix << ep; //will be "ipv4:port" or "[ipv6]:port"
+    return ib::mw::Uri::Parse(uri.str());
+}
+
 } // namespace
 
 namespace std {
@@ -290,7 +306,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     // setup local acceptor URI (we can infer this based on the IbRegistry's name)
     auto registryLocalEndpoint = makeLocalEndpoint(registryUri.participantName,
         registryUri.participantId, domainId);
-    const auto localUri = Uri{registryLocalEndpoint}.EncodedString();
+    const auto localUri = fromAsioEndpoint(registryLocalEndpoint).EncodedString();
     registryUri.acceptorUris.push_back(localUri);
 
     _logger->Debug("Connecting to VAsio registry");
@@ -427,7 +443,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     if (_localAcceptor.is_open())
     {
         info.acceptorUris.push_back(
-            Uri{ _localAcceptor.local_endpoint() }.EncodedString()
+            fromAsioEndpoint(_localAcceptor.local_endpoint()).EncodedString()
         );
     }
 
@@ -436,11 +452,11 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
         throw std::runtime_error{ "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing" };
     }
 
-    auto epUri = Uri{_tcp4Acceptor.local_endpoint()};
+    auto epUri = fromAsioEndpoint(_tcp4Acceptor.local_endpoint());
     info.acceptorUris.emplace_back(epUri.EncodedString());
     if (_tcp6Acceptor.is_open())
     {
-        epUri = Uri{_tcp6Acceptor.local_endpoint()};
+        epUri = fromAsioEndpoint(_tcp6Acceptor.local_endpoint());
         info.acceptorUris.emplace_back(epUri.EncodedString());
     }
 

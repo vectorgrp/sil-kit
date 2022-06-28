@@ -14,6 +14,7 @@ TEST(UriTest, parse_uris)
 	ASSERT_EQ(uri.Host(), "hostname");
 	ASSERT_EQ(uri.Port(), 1234);
 	ASSERT_EQ(uri.Path(), "path?params"); //currently no query string / parameters / fragments handled
+	ASSERT_EQ(uri.EncodedString(), "vib://hostname:1234/path?params" );
 
 	//parsing garbage should throw
 	EXPECT_THROW(Uri::Parse("foo/bar"),
@@ -26,7 +27,8 @@ TEST(UriTest, parse_uris)
 	ASSERT_EQ(uri.Type(), Uri::UriType::Local);
 	ASSERT_EQ(uri.Host(), "");
 	ASSERT_EQ(uri.Scheme(), "local");
-	ASSERT_EQ(uri.Path(), "tmp/domainsockets.vib");
+	ASSERT_EQ(uri.Path(), "/tmp/domainsockets.vib");
+	ASSERT_EQ(uri.EncodedString(), "local:///tmp/domainsockets.vib");
 
 	uri = Uri::Parse("tcp://123.123.123.123:3456/");
 	ASSERT_EQ(uri.Type(), Uri::UriType::Tcp);
@@ -34,4 +36,19 @@ TEST(UriTest, parse_uris)
 	ASSERT_EQ(uri.Host(), "123.123.123.123");
 	ASSERT_EQ(uri.Port(), 3456);
 	ASSERT_EQ(uri.Path(), "");
+	ASSERT_EQ(uri.EncodedString(),  "tcp://123.123.123.123:3456/");
+
+	uri = Uri::Parse("tcp://[fe00::0]:3456/");
+	ASSERT_EQ(uri.Type(), Uri::UriType::Tcp);
+	ASSERT_EQ(uri.Scheme(), "tcp");
+	ASSERT_EQ(uri.Host(), "[fe00::0]");
+	ASSERT_EQ(uri.Port(), 3456);
+	ASSERT_EQ(uri.Path(), "");
+
+	//Windows local paths (contains C:\)
+	uri = Uri::Parse(R"aw(local://C:\\temp\hello\ world")aw");
+	ASSERT_EQ(uri.Scheme(), "local");
+	ASSERT_EQ(uri.Host(), "");
+	ASSERT_EQ(uri.Port(), 0);
+	ASSERT_EQ(uri.Path(), R"aw(C:\\temp\hello\ world")aw");
 }
