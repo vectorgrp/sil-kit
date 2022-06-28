@@ -77,7 +77,7 @@ public:
     {
         auto* lifecycleService = _participant->GetLifecycleService();
         _simulationFuture =
-            lifecycleService->ExecuteLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), true, true);
+            lifecycleService->StartLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), {true, true});
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -156,7 +156,7 @@ public:
     std::future<ParticipantState> RunAsync() const
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        return lifecycleService->ExecuteLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), true, true);
+        return lifecycleService->StartLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), {true, true});
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)

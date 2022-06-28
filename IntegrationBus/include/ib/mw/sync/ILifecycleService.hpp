@@ -16,52 +16,6 @@ namespace ib {
 namespace mw {
 namespace sync {
 
-//!<  StartOptions encode the options provided to StartLifecycleWithSyncTime
-//!   and StartLifecycleNoSyncTime methods.
-enum struct StartOptions: ib_StartOptions
-{
-    None = ib_StartOptions_None,
-    CoordinatedStart = ib_StartOptions_CoordinatedStart,
-    CoordinatedStop = ib_StartOptions_CoordinatedStop,
-};
-
-//!< Testing if an enum option is set.
-inline bool operator&(StartOptions lhs, StartOptions rhs)
-{
-    using BitsT = std::underlying_type_t<StartOptions>;
-    const auto lval = static_cast<BitsT>(lhs);
-    const auto rval = static_cast<BitsT>(rhs);
-    return (lval & rval) > 0;
-}
-//!< Adding an option to the StartOptions object on the left hand side of the expression
-inline StartOptions operator|(StartOptions lhs, StartOptions rhs)
-{
-    using BitsT = std::underlying_type_t<StartOptions>;
-    const BitsT validBits = ib_StartOptions_None 
-        | ib_StartOptions_CoordinatedStart
-        | ib_StartOptions_CoordinatedStop
-    ;
-    const auto lval = static_cast<BitsT>(lhs);
-    const auto rval = static_cast<BitsT>(rhs);
-    auto checkValueRange = [validBits](const auto value) {
-        // prevent invalid enum flag combinations, by excluding unknown
-        // flag bits
-        if((value & ~validBits) != 0)
-        {
-            throw ib::TypeConversionError{"StartOptions contain invalid enum values"};
-        }
-    };
-    checkValueRange(lval);
-    checkValueRange(rval);
-    return static_cast<StartOptions>(lval | rval);
-}
-
-inline StartOptions operator|=(StartOptions lhs, StartOptions rhs)
-{
-    auto ops = lhs | rhs;
-    return ops;
-}
-
 class ILifecycleService
 {
 public:
@@ -121,28 +75,29 @@ public:
 
     /*! \brief Start non blocking operation without virtual time synchronization, returns immediately.
      *
-     * Executes simulation without virtual time synchronization until shutdown is received. The simulation
+     * Starts simulation without virtual time synchronization until shutdown is received. The simulation
      * task is executed in the context of the middleware thread that
      * receives the grant or tick.
-     *
+     * \param startConfiguration the simulation start configuration.
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto StartLifecycleNoSyncTime(StartOptions startOptions)
+    virtual auto StartLifecycleNoSyncTime(StartConfiguration startConfiguration)
         -> std::future<ParticipantState> = 0;
 
     
     /*! \brief Start non blocking operation with virtual time synchronization, returns immediately.
      *
-     * Executes simulation with virtual time synchronization until shutdown is received. The simulation
+     * Starts simulation with virtual time synchronization until shutdown is received. The simulation
      * task is executed in the context of the middleware thread that
      * receives the grant or tick.
      *
+     * \param startConfiguration the simulation start configuration.
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
-                                              bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> = 0;
+    virtual auto StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
+            StartConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
 
 
     /*! \brief Abort current simulation run due to an error.

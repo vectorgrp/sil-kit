@@ -621,7 +621,11 @@ int main(int argc, char** argv)
   }
 
   ib_ParticipantState finalState;
-  returnCode = ib_Participant_StartLifecycleWithSyncTime(participant, ib_True, ib_True, ib_True);
+  ib_StartConfiguration startConfig;
+  startConfig.coordinatedStart = ib_True;
+  startConfig.coordinatedStop = ib_True;
+
+  returnCode = ib_Participant_StartLifecycleWithSyncTime(participant, &startConfig);
   if (returnCode != ib_ReturnCode_SUCCESS)
   {
     printf("ib_Participant_StartLifecycleWithSyncTime => %s\n", ib_GetLastErrorString());

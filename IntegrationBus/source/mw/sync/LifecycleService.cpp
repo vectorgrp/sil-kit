@@ -85,17 +85,15 @@ auto LifecycleService::ExecuteLifecycle(bool hasCoordinatedSimulationStart, bool
     return _finalStatePromise.get_future();
 }
 
-auto LifecycleService::StartLifecycleNoSyncTime(StartOptions startOptions) -> std::future<ParticipantState>
+auto LifecycleService::StartLifecycleNoSyncTime(StartConfiguration startConfiguration) -> std::future<ParticipantState>
 {
     _timeSyncActive = false;
 
-    return ExecuteLifecycle(startOptions & StartOptions::CoordinatedStart
-        ,startOptions & StartOptions::CoordinatedStop);
+    return ExecuteLifecycle(startConfiguration.coordinatedStart,
+               startConfiguration.coordinatedStop);
 }
 
-auto LifecycleService::ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
-                                                    bool hasCoordinatedSimulationStart,
-                                                    bool hasCoordinatedSimulationStop) -> std::future<ParticipantState>
+auto LifecycleService::StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService, StartConfiguration startConfiguration) -> std::future<ParticipantState>
 {
     if (_timeSyncService != timeSyncService)
     {
@@ -104,7 +102,8 @@ auto LifecycleService::ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncSe
 
     _timeSyncActive = true;
 
-    return ExecuteLifecycle(hasCoordinatedSimulationStart, hasCoordinatedSimulationStop);
+    return ExecuteLifecycle(startConfiguration.coordinatedStart,
+     startConfiguration.coordinatedStop);
 }
 
 void LifecycleService::ReportError(std::string errorMsg)

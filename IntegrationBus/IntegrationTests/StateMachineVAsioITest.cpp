@@ -136,7 +136,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::ServicesCreated);
-    auto finalState = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+    auto finalState = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::ReadyToRun);

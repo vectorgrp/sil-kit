@@ -89,6 +89,13 @@ struct WorkflowConfiguration
     std::vector<std::string> requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
 };
 
+//!< The lifecycle start configuration.
+struct StartConfiguration
+{
+    bool coordinatedStart{false};
+    bool coordinatedStop{false};
+};
+
 } // namespace sync
 } // namespace mw
 } // namespace ib

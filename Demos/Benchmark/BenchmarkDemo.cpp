@@ -326,7 +326,7 @@ void ParticipantsThread(
         PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
     });
 
-    lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+    lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
 }
 
 /**************************************************************************************************

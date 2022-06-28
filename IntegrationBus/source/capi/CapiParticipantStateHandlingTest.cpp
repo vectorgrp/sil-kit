@@ -90,12 +90,11 @@ namespace {
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         // ExecuteLifecycleWithSyncTime
-        returnCode = ib_Participant_StartLifecycleWithSyncTime(nullptr,
-            ib_False, ib_False, ib_False);
+        ib_StartConfiguration startConfig;
+        returnCode = ib_Participant_StartLifecycleWithSyncTime(nullptr, &startConfig);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
-        returnCode = ib_Participant_StartLifecycleWithSyncTime((ib_Participant*)&mockParticipant,
-            0xcd, ib_False, ib_False);
+        returnCode = ib_Participant_StartLifecycleWithSyncTime((ib_Participant*)&mockParticipant, nullptr);
         EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
 
         // WaitForLifecycleToComplete
@@ -265,14 +264,15 @@ namespace {
         std::promise<ParticipantState> state;
         state.set_value(ParticipantState::Shutdown);
 
+        ib_StartConfiguration startConfig;
+
         EXPECT_CALL(mockParticipant.mockLifecycleService,
-            ExecuteLifecycleWithSyncTime(_, _, _)
+            StartLifecycleWithSyncTime(_, _)
         ).Times(testing::Exactly(1))
             .WillOnce(Return(ByMove(state.get_future())));
 
 
-        returnCode = ib_Participant_StartLifecycleWithSyncTime(
-            cParticipant, ib_False, ib_False, ib_False);
+        returnCode = ib_Participant_StartLifecycleWithSyncTime(cParticipant, &startConfig);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
         returnCode = ib_Participant_WaitForLifecycleToComplete(cParticipant, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
@@ -286,8 +286,7 @@ namespace {
             .WillOnce(Return(ByMove(state.get_future())));
 
 
-        returnCode = ib_Participant_StartLifecycleNoSyncTime(
-            cParticipant, ib_StartOptions_None);
+        returnCode = ib_Participant_StartLifecycleNoSyncTime(cParticipant, &startConfig);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
         returnCode = ib_Participant_WaitForLifecycleToComplete(cParticipant, &outParticipantState);
         EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);

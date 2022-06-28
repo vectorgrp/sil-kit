@@ -191,7 +191,7 @@ int main(int argc, char** argv)
                     });
             }
 
-            auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

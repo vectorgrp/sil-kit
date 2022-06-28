@@ -46,10 +46,11 @@ public:
 
     auto GetTimeSyncService() const -> ITimeSyncService* override;
 
-    auto StartLifecycleNoSyncTime(StartOptions startOptions)
+    auto StartLifecycleNoSyncTime(StartConfiguration startConfiguration)
         -> std::future<ParticipantState> override;
-    auto ExecuteLifecycleWithSyncTime(ITimeSyncService* timeSyncService, bool hasCoordinatedSimulationStart,
-                                      bool hasCoordinatedSimulationStop) -> std::future<ParticipantState> override;
+    auto StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
+            StartConfiguration startConfiguration)
+        -> std::future<ParticipantState> override;
 
     void ReportError(std::string errorMsg) override;
 

@@ -179,7 +179,7 @@ protected:
                         participant.simtimePassedPromise.set_value();
                     }
                 });
-            auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
             finalStateFuture.get();
         }
         catch (const ib::ConfigurationError& error)

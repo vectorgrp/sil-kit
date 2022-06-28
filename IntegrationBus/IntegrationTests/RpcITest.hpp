@@ -378,7 +378,7 @@ protected:
                     }
                     participant.CheckAllCalledPromise();
                 });
-                auto finalStateFuture = lifecycleService->ExecuteLifecycleWithSyncTime(timeSyncService, true, true);
+                auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
                 finalStateFuture.get();
             }
             else

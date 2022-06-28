@@ -80,7 +80,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     {
         auto& participant = kv.second;
         auto* lifecycleService = participant->Participant()->GetLifecycleService();
-        participant->_result = lifecycleService->ExecuteLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), true, true);
+        participant->_result = lifecycleService->StartLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), {true, true});
     }
 
     // wait until simulation is finished or timeout is reached

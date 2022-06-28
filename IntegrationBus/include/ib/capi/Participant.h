@@ -422,49 +422,38 @@ typedef ib_ReturnCode (*ib_Participant_SetWorkflowConfiguration_t)(
     ib_Participant* participant, const ib_WorkflowConfiguration* workflowConfigration);
 
 //!< The StartLifecycle options
-typedef uint64_t ib_StartOptions;
-#define ib_StartOptions_None                       ((ib_StartOptions) 0)
-//!< Do a coordinated simulation start.
-#define ib_StartOptions_CoordinatedStart           ((ib_StartOptions) BIT(0))
-//!< Do a coordinated simulation stop.
-#define ib_StartOptions_CoordinatedStop            ((ib_StartOptions) BIT(1))
+typedef struct ib_StartConfiguration
+{
+    ib_InterfaceIdentifier interfaceId;
+    ib_Bool coordinatedStart;
+    ib_Bool coordinatedStop;
+} ib_StartConfiguration;
 
 /*! \brief Start the lifecycle with the given parameters without simulation time synchronization.
 *  Requires a call to ib_Participant_WaitForLifecycleToComplete to retrieve the final state.
 * 
 * \param participant the instance of the participant.
-* \param startOptions list of  ib_StartOption values combined with a logical OR operation.
+* \param startConfiguration contains the desired start configuration of the lifecycle.
 * 
 */
 
 typedef ib_ReturnCode (*ib_Participant_StartLifecycleNoSyncTime_t)(
-    ib_Participant* participant,
-    ib_StartOptions startOptions);
+    ib_Participant*, ib_StartConfiguration*);
 
 IntegrationBusAPI ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
-    ib_Participant* participant,
-    ib_StartOptions startOptions);
+    ib_Participant* participant, ib_StartConfiguration* startconfiguration);
 
 /*! \brief Start the lifecycle with the given parameters with simulation time synchronization.
 * 
 * \param participant the instance of the participant.
-* \param hasCoordinatedSimulationStart the participant shall take part in the coordinated startup.
-* \param hasCoordinatedSimulationStop the participant shall take part in the coordinated shutdown.
-* \param isRequiredParticipant this participant is required for the simulation run to begin simulation.
-* \param outParticipantState the final state of the participant when the lifecycle finished.
+* \param startConfiguration contains the desired start configuration of the lifecycle.
 */
 
 typedef ib_ReturnCode (*ib_Participant_StartLifecycleWithSyncTime_t)(
-    ib_Participant* participant,
-    ib_Bool hasCoordinatedSimulationStart,
-    ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant);
+    ib_Participant*, ib_StartConfiguration*);
 
 IntegrationBusAPI ib_ReturnCode ib_Participant_StartLifecycleWithSyncTime(
-    ib_Participant* participant,
-    ib_Bool hasCoordinatedSimulationStart,
-    ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant);
+    ib_Participant* participant, ib_StartConfiguration* startConfiguration);
 
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state

@@ -153,19 +153,26 @@ ib_ReturnCode ib_Participant_SetShutdownHandler(ib_Participant* participant, voi
 // Lifecycle async execution
 static std::map<ib_Participant*, std::future<ib::mw::sync::ParticipantState>> sRunAsyncFuturePerParticipant;
 
+static auto from_c(ib_StartConfiguration* csc)
+{
+    ib::mw::sync::StartConfiguration cpp;
+    cpp.coordinatedStart = csc->coordinatedStart;
+    cpp.coordinatedStop = csc->coordinatedStop;
+    return cpp;
+}
 ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
     ib_Participant* participant,
-    ib_StartOptions cOptions)
+    ib_StartConfiguration* startConfiguration)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
+  ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
     auto* lifecycleService = cppParticipant->GetLifecycleService();
 
-    auto cppOpts = static_cast<ib::mw::sync::StartOptions>(cOptions);
     sRunAsyncFuturePerParticipant[participant] =
-        lifecycleService->StartLifecycleNoSyncTime(cppOpts);
+        lifecycleService->StartLifecycleNoSyncTime(from_c(startConfiguration));
 
 
     return ib_ReturnCode_SUCCESS;
@@ -176,14 +183,10 @@ ib_ReturnCode ib_Participant_StartLifecycleNoSyncTime(
 
 ib_ReturnCode ib_Participant_StartLifecycleWithSyncTime(
     ib_Participant* participant,
-    ib_Bool hasCoordinatedSimulationStart,
-    ib_Bool hasCoordinatedSimulationStop,
-    ib_Bool isRequiredParticipant)
+    ib_StartConfiguration* startConfiguration)
 {
   ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStart);
-  ASSERT_VALID_BOOL_PARAMETER(hasCoordinatedSimulationStop);
-  ASSERT_VALID_BOOL_PARAMETER(isRequiredParticipant);
+  ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
   CAPI_ENTER
   {
     auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
@@ -191,10 +194,10 @@ ib_ReturnCode ib_Participant_StartLifecycleWithSyncTime(
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     sRunAsyncFuturePerParticipant[participant] =
-        lifecycleService->ExecuteLifecycleWithSyncTime(
+        lifecycleService->StartLifecycleWithSyncTime(
             timeSyncService,
-            hasCoordinatedSimulationStart == ib_True,
-            hasCoordinatedSimulationStop == ib_True);
+            from_c(startConfiguration)
+        );
 
     return ib_ReturnCode_SUCCESS;
   }
