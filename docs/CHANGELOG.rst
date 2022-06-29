@@ -5,15 +5,15 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.26] - unreleased
+[3.99.26] - 2022-06-29
 ----------------------
 
 Compatibility with 3.99.25
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): XXX
-- Application software interface (API): XXX
-- Middleware network protocol (VAsio): XXX
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol (VAsio): No
 
 Added
 ~~~~~
