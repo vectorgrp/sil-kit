@@ -9,21 +9,27 @@
 using namespace ib::mw;
 
 using asio::ip::tcp;
+using namespace ib::util;
+using CliParser = ib::util::CommandlineParser;
 
 std::promise<int> signalPromise;
 
+
 int main(int argc, char** argv)
 {
-    ib::util::CommandlineParser commandlineParser;
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("version", "v", "[--version]",
+    CliParser commandlineParser;
+    commandlineParser.Add<CliParser::Flag>("version", "v", "[--version]",
         "-v, --version: Get version info.");
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
+    commandlineParser.Add<CliParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
+    commandlineParser.Add<CliParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
+    commandlineParser.Add<CliParser::Option>("domain", "d", "42", "[--domain <domainId>]",
         "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>(
+    commandlineParser.Add<CliParser::Option>(
+        "listen-uri", "l", "vib://localhost:8500", "[--domain <domainId>]",
+        "-l, --listen-uri <vib-uri>: The vib:// URI the registry should listen on. Defaults to vib://localhost:8500.");
+    commandlineParser.Add<CliParser::Option>(
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
         "format was changed in v3.6.11.");
@@ -35,7 +41,7 @@ int main(int argc, char** argv)
     {
         commandlineParser.ParseArguments(argc, argv);
     }
-    catch (std::runtime_error & e)
+    catch (const std::runtime_error& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -43,14 +49,14 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("help").Value())
+    if (commandlineParser.Get<CliParser::Flag>("help").Value())
     {
         commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
         return 0;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("version").Value())
+    if (commandlineParser.Get<CliParser::Flag>("version").Value())
     {
         std::string ibHash{ ib::version::GitHash() };
         auto ibShortHash = ibHash.substr(0, 7);
@@ -61,9 +67,10 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    auto&& configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
-    auto useSignalHandler{ commandlineParser.Get<ib::util::CommandlineParser::Flag>("use-signal-handler").Value() };
-    auto domain{ commandlineParser.Get<ib::util::CommandlineParser::Option>("domain").Value() };
+    auto&& configurationFilename{ commandlineParser.Get<CliParser::Option>("configuration").Value() };
+    auto useSignalHandler{ commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value() };
+    auto domain{ commandlineParser.Get<CliParser::Option>("domain").Value() };
+    auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
     uint32_t domainId;
     try
     {
@@ -78,7 +85,7 @@ int main(int argc, char** argv)
 
     try
     {
-        auto configuration = !configurationFilename.empty() ?
+        auto configuration = (!configurationFilename.empty()) ?
             ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
             ib::cfg::ParticipantConfigurationFromString("");
 
