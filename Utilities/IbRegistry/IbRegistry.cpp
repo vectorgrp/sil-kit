@@ -89,10 +89,10 @@ int main(int argc, char** argv)
             ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
             ib::cfg::ParticipantConfigurationFromString("");
 
-        std::cout << "Creating registry at domain " << domainId << std::endl;
+        std::cout << "IbRegistry listening on " << listenUri << std::endl;
         VAsioRegistry registry{ configuration };
-        registry.ProvideDomain(domainId);
-
+        registry.ProvideDomain(listenUri);
+        
         if (useSignalHandler)
         {
             using namespace ib::registry;

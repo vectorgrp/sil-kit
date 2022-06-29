@@ -88,6 +88,50 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
     _connection.StartIoWorker();
 }
 
+
+void VAsioRegistry::ProvideDomain(std::string listenUri)
+{
+    auto uri = Uri::Parse(listenUri);
+    bool isAccepting{false};
+    // accept connection from participants on any interface
+    try
+    {
+        //Local domain sockets, failure is non fatal for operation.
+        _connection.AcceptLocalConnections(uri.Port());
+        isAccepting = true;
+    }
+    catch (const std::exception& e)
+    {
+        _logger->Warn("VAsioRegistry failed to create local listening socket: {}",
+            e.what());
+    }
+
+
+    try
+    {
+        // Resolve the configured hostname and accept on the given port:
+        _connection.AcceptTcpConnectionsOn(uri.Host(), uri.Port());
+        isAccepting = true;
+    }
+    catch (const std::exception& e)
+    {
+        _logger->Error("VAsioRegistry failed to create listening socket {}:{} (uri: {}). Reason: {}",
+            uri.Host(),
+            uri.Port(),
+            uri.EncodedString(),
+            e.what());
+        // For scenarios where multiple instances run on the same host, binding on TCP/IP
+        // will result in an error. However, if we can accept local ipc connections we can
+        // continue.
+        if (!isAccepting)
+        {
+            throw;
+        }
+    }
+    _connection.StartIoWorker();
+
+}
+
 void VAsioRegistry::SetAllConnectedHandler(std::function<void()> handler)
 {
     _onAllParticipantsConnected = std::move(handler);

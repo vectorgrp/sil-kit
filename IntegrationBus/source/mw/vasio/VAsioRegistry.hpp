@@ -25,6 +25,8 @@ public: // CTor
 public: // methods
     void ProvideDomain(uint32_t domainId) override;
 
+    void ProvideDomain(std::string listenUri) override;
+
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;
     auto GetLogger() -> logging::ILogger* override;

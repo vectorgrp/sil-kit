@@ -681,9 +681,10 @@ void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
                 resolverResults->service_name(),
                 (isIpv4(resolverResults->endpoint()) ? "TCPv4" : "TCPv6"));
         }
-        catch (asio::system_error& err)
+        catch (const asio::system_error& err)
         {
-            _logger->Error("VAsioConnection::AcceptConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName, port, err.what());
+            _logger->Error("VAsioConnection::AcceptConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName,
+                           port, err.what());
             return;
         }
 
