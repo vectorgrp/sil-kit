@@ -1,0 +1,12 @@
+{
+  "Description": "Sample configuration for Lifecycle",
+
+  "Logging": {
+    "Sinks": [
+      {
+        "Type": "Stdout",
+        "Level": "Warn"
+      }
+    ]
+  }
+}
