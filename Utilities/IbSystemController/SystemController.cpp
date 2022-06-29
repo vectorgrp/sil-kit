@@ -144,21 +144,26 @@ private:
 
 int main(int argc, char** argv)
 {
-    ib::util::CommandlineParser commandlineParser;
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("version", "v", "[--version]",
+    using namespace ib::util;
+    CommandlineParser commandlineParser;
+    commandlineParser.Add<CommandlineParser::Flag>("version", "v", "[--version]",
         "-v, --version: Get version info.");
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
+    commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
+    commandlineParser.Add<CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
         "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
+    commandlineParser.Add<CommandlineParser::Option>(
+        "connect-uri", "u", "vib://localhost:8500", "[--connect-uri <vibUri>]",
+        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to vib://localhost:8500.");
+    commandlineParser.Add<CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
+    commandlineParser.Add<CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
-    commandlineParser.Add<ib::util::CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
+    commandlineParser.Add<CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
-    std::cout << "Vector Integration Bus (VIB) -- System Controller" << std::endl
+    std::cout 
+        << "Vector Integration Bus (VIB) -- System Controller\n"
         << std::endl;
 
     try
@@ -173,14 +178,14 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("help").Value())
+    if (commandlineParser.Get<CommandlineParser::Flag>("help").Value())
     {
         commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
         return 0;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("version").Value())
+    if (commandlineParser.Get<CommandlineParser::Flag>("version").Value())
     {
         std::string ibHash{ ib::version::GitHash() };
         auto ibShortHash = ibHash.substr(0, 7);
@@ -191,7 +196,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (!commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").HasValues())
+    if (!commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").HasValues())
     {
         std::cerr << "Error: Arguments '<participantName1> [<participantName2> ...]' are missing" << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -199,10 +204,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto domain{ commandlineParser.Get<ib::util::CommandlineParser::Option>("domain").Value() };
-    auto participantName{ commandlineParser.Get<ib::util::CommandlineParser::Option>("name").Value() };
-    auto configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
-    auto expectedParticipantNames{ commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").Values() };
+    auto domain{ commandlineParser.Get<CommandlineParser::Option>("domain").Value() };
+    auto participantName{ commandlineParser.Get<CommandlineParser::Option>("name").Value() };
+    auto configurationFilename{ commandlineParser.Get<CommandlineParser::Option>("configuration").Value() };
+    auto expectedParticipantNames{
+        commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").Values()};
+    auto connectUri{ commandlineParser.Get<CommandlineParser::Option>("connect-uri").Value() };
 
     uint32_t domainId;
     try
@@ -234,12 +241,15 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cout << "Creating participant '" << participantName << "' at domain " << domainId << ", expecting ";
-        std::cout << (expectedParticipantNames.size() > 1 ? "participants '" : "participant '");
-        std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
+        std::cout
+            << "Creating participant '" << participantName
+            << "' at domain " << domainId << ", expecting participant"
+            << (expectedParticipantNames.size() > 1 ? "s '" : " '");
+        std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
+                  std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
-        auto participant = ib::CreateParticipant(configuration, participantName, domainId);
+        auto participant = ib::CreateParticipant(configuration, participantName, connectUri);
 
         IbController ibController(participant.get(), configuration, expectedParticipantNames);
 

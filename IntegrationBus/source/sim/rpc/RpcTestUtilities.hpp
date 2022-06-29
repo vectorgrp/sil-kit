@@ -30,6 +30,7 @@ struct MockConnection
 
     void SetLogger(ib::mw::logging::ILogger* /*logger*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}
+    void JoinDomain(std::string /*domainId*/) {}
 
     template <class IbServiceT>
     void RegisterIbService(const std::string& /*topicName*/, ib::mw::EndpointId /*endpointId*/,

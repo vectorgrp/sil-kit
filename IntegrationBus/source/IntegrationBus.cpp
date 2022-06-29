@@ -27,7 +27,9 @@ IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantCo
                                          std::string participantName, std::string registryUri)
     -> std::unique_ptr<mw::IParticipant>
 {
-    return CreateParticipant(participantConfig, participantName, 42);
+    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), participantName);
+    participant->JoinIbDomain(std::move(registryUri));
+    return participant;
 }
 
 }//namespace ib

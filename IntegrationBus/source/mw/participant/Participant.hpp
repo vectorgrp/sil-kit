@@ -278,6 +278,7 @@ public:
     * participant could not be created.
     */
     void JoinIbDomain(uint32_t domainId) override;
+    void JoinIbDomain(std::string registryUri) override;
 
     // For Testing Purposes:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }

@@ -376,6 +376,9 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     _logger->Trace("VAsio received announcement replies from all participants.");
 }
 
+void VAsioConnection::JoinDomain(std::string registryUri)
+{
+}
 void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& other,
                                                    const std::string& otherParticipantName)
 {

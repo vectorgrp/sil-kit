@@ -3,6 +3,7 @@
 #include <cassert>
 #include <sstream>
 #include <chrono>
+#include <string>
 
 #include "CanController.hpp"
 #include "EthController.hpp"
@@ -97,6 +98,15 @@ void Participant<IbConnectionT>::JoinIbDomain(uint32_t domainId)
     OnIbDomainJoined();
 
     _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
+}
+
+template <class IbConnectionT>
+void Participant<IbConnectionT>::JoinIbDomain(std::string registryUri)
+{
+    _ibConnection.JoinDomain(registryUri);
+    OnIbDomainJoined();
+
+    _logger->Info("Participant {} has connected to {}", _participantName, registryUri);
 }
 
 template <class IbConnectionT>

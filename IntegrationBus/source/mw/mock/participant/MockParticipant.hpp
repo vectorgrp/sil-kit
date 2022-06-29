@@ -395,6 +395,7 @@ public:
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
     void JoinIbDomain(uint32_t ) override {}
+    void JoinIbDomain(std::string ) override {}
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
