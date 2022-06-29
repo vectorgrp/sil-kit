@@ -28,6 +28,15 @@ namespace ib {
 */
 IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const uint32_t domainId)
+
+    -> std::unique_ptr<mw::IParticipant>;
+
+IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                         std::string participantName)
+    -> std::unique_ptr<mw::IParticipant>;
+
+IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                         std::string participantName, std::string registryUri)
     -> std::unique_ptr<mw::IParticipant>;
 
 } // namespace ib

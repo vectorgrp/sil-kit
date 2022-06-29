@@ -1,22 +1,26 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
+#include <sstream>
 
 #if defined(_WIN32)
-
-    #include <process.h>
-    inline auto GetTestPid()
-    {
-        return _getpid() & 232;
-    }
-
-#else // hopefully a posix OS
-//FIXME: with Fast-RTPS 1.8.1 on ubuntu 18.04 the generated domain IDs
-// were too high: we're now clamping the returned value to [0,232]
-    #include <unistd.h>
-    inline auto GetTestPid()
-    {
-        return getpid() & 232;
-    }
-    
+#   include <process.h>
+#   define getpid _getpid
+#else // assume POSIX
+#   include <unistd.h>
 #endif
+inline auto GetTestPid()
+{
+    return getpid() % 512;
+}
+
+inline auto MakeTestRegistryUri()
+{
+    std::stringstream ss;
+    int port = 8500;
+    int pid = getpid();
+    port += pid % 1000; // clamp to [8500, 9500)
+    // add a random offset to prevent two tests listening on the same port
+    ss << "vib://localhost:" << port;
+    return ss.str();
+}

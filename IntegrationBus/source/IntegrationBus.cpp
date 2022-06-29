@@ -15,5 +15,20 @@ auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> parti
     participant->JoinIbDomain(domainId);
     return participant;
 }
+
+auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                       std::string participantName)
+    -> std::unique_ptr<mw::IParticipant>
+{
+    return CreateParticipant(participantConfig, participantName, 42);
 }
+
+IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+                                         std::string participantName, std::string registryUri)
+    -> std::unique_ptr<mw::IParticipant>
+{
+    return CreateParticipant(participantConfig, participantName, 42);
+}
+
+}//namespace ib
 
