@@ -77,6 +77,10 @@ auto Uri::Parse(std::string rawUri) -> Uri
     {
         uri.SetType(UriType::Tcp);
     }
+    else if(uri.Scheme() == "vib")
+    {
+        uri.SetType(UriType::Tcp); //we default to TCP streams
+    }
     else if(uri.Scheme() == "local")
     {
         uri.SetType(UriType::Local);

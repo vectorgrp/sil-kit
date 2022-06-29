@@ -197,7 +197,7 @@ protected:
             dataPublishers = newDataPublishers;
         }
 
-        std::shared_ptr<ib::cfg::IParticipantConfiguration> config;
+        std::shared_ptr<ib::cfg::IParticipantConfiguration> config = ib::cfg::MockParticipantConfiguration();
         bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;

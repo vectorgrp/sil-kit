@@ -52,7 +52,7 @@ void VAsioRegistry::ProvideDomain(uint32_t domainId)
     try
     {
         //Local domain sockets, failure is non fatal for operation.
-        _connection.AcceptLocalConnections(domainId);
+        _connection.AcceptLocalConnections(std::to_string(domainId));
         isAccepting = true;
     }
     catch (const std::exception& e)
@@ -97,7 +97,7 @@ void VAsioRegistry::ProvideDomain(std::string listenUri)
     try
     {
         //Local domain sockets, failure is non fatal for operation.
-        _connection.AcceptLocalConnections(uri.Port());
+        _connection.AcceptLocalConnections(listenUri);
         isAccepting = true;
     }
     catch (const std::exception& e)

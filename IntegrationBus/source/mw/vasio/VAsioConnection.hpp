@@ -137,7 +137,7 @@ public:
     void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer);
 
     // Listening Sockets (acceptors)
-    void AcceptLocalConnections(uint32_t domainId);
+    void AcceptLocalConnections(const std::string& uniqueId);
     void AcceptTcpConnectionsOn(const std::string& hostname, uint16_t port);
 
     void StartIoWorker();
