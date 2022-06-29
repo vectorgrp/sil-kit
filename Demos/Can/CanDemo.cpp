@@ -30,8 +30,8 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
     out << seconds.count() << "s";
     return out;
 }
-}
-}
+} // namespace chrono
+} // namespace std
 
 void FrameTransmitHandler(const CanFrameTransmitEvent& ack, logging::ILogger* logger)
 {
@@ -154,9 +154,10 @@ int main(int argc, char** argv)
         {
             auto* lifecycleService = participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
-            // Set an Init Handler
+            
+            // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
-                std::cout << "Initializing " << participantName << std::endl;
+                std::cout << "Communication ready for " << participantName << std::endl;
                 canController->SetBaudRate(10'000, 1'000'000);
                 canController->Start();
             });

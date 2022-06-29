@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <future>
 #include <vector>
 #include <map>
 

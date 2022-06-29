@@ -2,19 +2,17 @@
 
 #pragma once
 
-#include <memory>
 #include <map>
 
 #include "ib/sim/lin/ILinController.hpp"
 #include "ib/mw/fwd_decl.hpp"
-#include "ITimeConsumer.hpp"
 
+#include "ITimeConsumer.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "IIbToLinController.hpp"
 #include "SimBehavior.hpp"
-
 #include "SynchronizedHandlers.hpp"
 
 namespace ib {

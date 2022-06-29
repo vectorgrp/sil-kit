@@ -59,6 +59,7 @@ void LinController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServi
 {
     _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
 }
+
 void LinController::SetTrivialBehavior()
 {
     _simulationBehavior.SetTrivialBehavior();

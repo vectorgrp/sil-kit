@@ -10,26 +10,26 @@ namespace mw {
 // The VAsioMsgKind tags are encoded in serialized (network) messages.
 
 template<typename MessageT>
-inline constexpr auto messageKind() -> VAsioMsgKind { return VAsioMsgKind::IbMwMsg;}
+inline constexpr auto messageKind() -> VAsioMsgKind { return VAsioMsgKind::IbMwMsg; }
 template<>
-inline constexpr auto messageKind<ParticipantAnnouncement>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage;}
+inline constexpr auto messageKind<ParticipantAnnouncement>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage; }
 template<>
-inline constexpr auto messageKind<ParticipantAnnouncementReply>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage;}
+inline constexpr auto messageKind<ParticipantAnnouncementReply>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage; }
 template<>
-inline constexpr auto messageKind<KnownParticipants>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage;}
+inline constexpr auto messageKind<KnownParticipants>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage; }
 template<>
-inline constexpr auto messageKind<SubscriptionAcknowledge>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAcknowledge;}
+inline constexpr auto messageKind<SubscriptionAcknowledge>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAcknowledge; }
 template<>
-inline constexpr auto messageKind<VAsioMsgSubscriber>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAnnouncement;}
+inline constexpr auto messageKind<VAsioMsgSubscriber>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAnnouncement; }
 
 template<typename MessageT>
-inline constexpr auto registryMessageKind() -> RegistryMessageKind { return RegistryMessageKind::Invalid;}
+inline constexpr auto registryMessageKind() -> RegistryMessageKind { return RegistryMessageKind::Invalid; }
 template<>
-inline constexpr auto registryMessageKind<ParticipantAnnouncement>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncement;}
+inline constexpr auto registryMessageKind<ParticipantAnnouncement>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncement; }
 template<>
-inline constexpr auto registryMessageKind<ParticipantAnnouncementReply>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncementReply;}
+inline constexpr auto registryMessageKind<ParticipantAnnouncementReply>() -> RegistryMessageKind { return RegistryMessageKind::ParticipantAnnouncementReply; }
 template<>
-inline constexpr auto registryMessageKind<KnownParticipants>() -> RegistryMessageKind { return RegistryMessageKind::KnownParticipants;}
+inline constexpr auto registryMessageKind<KnownParticipants>() -> RegistryMessageKind { return RegistryMessageKind::KnownParticipants; }
 
 // Helper function to classify simulation messages based on message kind
 inline constexpr bool IsMwOrSim(VAsioMsgKind kind);
@@ -43,5 +43,6 @@ inline constexpr bool IsMwOrSim(VAsioMsgKind kind)
         || kind == VAsioMsgKind::IbSimMsg
         ;
 }
-} //mw
-} //ib
+
+} // namespace mw
+} // namespace ib

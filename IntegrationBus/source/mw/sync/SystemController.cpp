@@ -40,7 +40,7 @@ void SystemController::AbortSimulation() const
 void SystemController::SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration)
 {
     //  Distribute to SystemMonitors (including self delivery) 
-    _participant->SendIbMessage(this, std::move(workflowConfiguration));
+    _participant->SendIbMessage(this, workflowConfiguration);
 }
 
 } // namespace sync

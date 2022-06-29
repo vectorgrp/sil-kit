@@ -86,4 +86,4 @@ TEST_F(SystemControllerTest, send_stop)
     controller.Stop();
 }
     
-} // anonymous namespace for test
+} // anonymous namespace

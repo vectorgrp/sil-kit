@@ -66,7 +66,6 @@ protected:
     LinMockParticipant participant;
     LinController controller;
     LinController controller2;
-    // FIXME check, if this should be a VIBE controller
     LinController controllerBusSim;
     Callbacks callbacks;
     LinController::FrameStatusHandler frameStatusHandler;

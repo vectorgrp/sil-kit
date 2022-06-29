@@ -1,6 +1,5 @@
-/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-//#define IntegrationBusAPI_EXPORT
 #include "ib/capi/IntegrationBus.h"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -13,7 +12,7 @@
 #include <map>
 #include <mutex>
 #include <cstring>
-#include "CapiImpl.h"
+#include "CapiImpl.hpp"
 
 extern "C" {
 
@@ -37,15 +36,32 @@ ib_ReturnCode ib_ReturnCodeToString(const char** outString, ib_ReturnCode return
 
     switch (returnCode)
     {
-    case ib_ReturnCode_SUCCESS: *outString = ib_ReturnCode_SUCCESS_str; break;
-    case ib_ReturnCode_UNSPECIFIEDERROR: *outString = ib_ReturnCode_UNSPECIFIEDERROR_str; break;
-    case ib_ReturnCode_NOTSUPPORTED: *outString = ib_ReturnCode_NOTSUPPORTED_str; break;
-    case ib_ReturnCode_NOTIMPLEMENTED: *outString = ib_ReturnCode_NOTIMPLEMENTED_str; break;
-    case ib_ReturnCode_BADPARAMETER: *outString = ib_ReturnCode_BADPARAMETER_str; break;
-    case ib_ReturnCode_BUFFERTOOSMALL: *outString = ib_ReturnCode_BUFFERTOOSMALL_str; break;
-    case ib_ReturnCode_TIMEOUT: *outString = ib_ReturnCode_TIMEOUT_str; break;
-    case ib_ReturnCode_UNSUPPORTEDSERVICE: *outString = ib_ReturnCode_UNSUPPORTEDSERVICE_str; break;
-    default: return ib_ReturnCode_BADPARAMETER; break;
+    case ib_ReturnCode_SUCCESS:
+        *outString = ib_ReturnCode_SUCCESS_str;
+        break;
+    case ib_ReturnCode_UNSPECIFIEDERROR:
+        *outString = ib_ReturnCode_UNSPECIFIEDERROR_str;
+        break;
+    case ib_ReturnCode_NOTSUPPORTED:
+        *outString = ib_ReturnCode_NOTSUPPORTED_str;
+        break;
+    case ib_ReturnCode_NOTIMPLEMENTED:
+        *outString = ib_ReturnCode_NOTIMPLEMENTED_str;
+        break;
+    case ib_ReturnCode_BADPARAMETER:
+        *outString = ib_ReturnCode_BADPARAMETER_str;
+        break;
+    case ib_ReturnCode_BUFFERTOOSMALL:
+        *outString = ib_ReturnCode_BUFFERTOOSMALL_str;
+        break;
+    case ib_ReturnCode_TIMEOUT:
+        *outString = ib_ReturnCode_TIMEOUT_str;
+        break;
+    case ib_ReturnCode_UNSUPPORTEDSERVICE:
+        *outString = ib_ReturnCode_UNSUPPORTEDSERVICE_str;
+        break;
+    default:
+        return ib_ReturnCode_BADPARAMETER;
     }
 
     return ib_ReturnCode_SUCCESS;
@@ -58,4 +74,4 @@ const char* ib_GetLastErrorString() {
 }
 
 
-}
+}//extern "C"

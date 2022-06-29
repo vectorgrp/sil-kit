@@ -8,9 +8,7 @@
 #include "gmock/gmock.h"
 
 #include "ParticipantConfiguration.hpp"
-
 #include "MockParticipant.hpp"
-
 #include "Logger.hpp"
 #include "LogMsgSender.hpp"
 

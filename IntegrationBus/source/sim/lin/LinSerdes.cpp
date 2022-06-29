@@ -53,6 +53,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinSendFrameHea
         >> header.id;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinTransmission& transmission)
 {
     buffer

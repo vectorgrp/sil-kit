@@ -8,7 +8,6 @@
 #include "EthController.hpp"
 #include "FlexrayController.hpp"
 #include "LinController.hpp"
-//#include "LinControllerReplay.hpp"
 #include "DataPublisher.hpp"
 #include "DataSubscriber.hpp"
 #include "DataSubscriberInternal.hpp"
@@ -37,7 +36,7 @@
 
 #include "Participant.hpp"
 
-#include "MessageTracing.hpp" // log tracing
+#include "MessageTracing.hpp"
 #include "UuidRandom.hpp"
 
 namespace ib {
@@ -82,7 +81,7 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
     _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {}, Middleware: {}",
                   _participantName, version::String(), "VAsio");
 
-    //set up default time provider used for controller instantiation
+    // set up default time provider used for controller instantiation
     _timeProvider = std::make_shared<sync::WallclockProvider>(1ms);
 
     if (!logParticipantNotice.empty())
@@ -92,20 +91,20 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::joinIbDomain(uint32_t domainId)
+void Participant<IbConnectionT>::JoinIbDomain(uint32_t domainId)
 {
     _ibConnection.JoinDomain(domainId);
-    onIbDomainJoined();
+    OnIbDomainJoined();
 
     _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
 }
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::onIbDomainJoined()
+void Participant<IbConnectionT>::OnIbDomainJoined()
 {
     SetupRemoteLogging();
 
-    //Ensure Service discovery is started
+    // Ensure Service discovery is started
     (void)GetServiceDiscovery();
 
     // Create the participants trace message sinks as declared in the configuration.
@@ -184,7 +183,7 @@ void Participant<IbConnectionT>::SetupRemoteLogging()
 template<class IbConnectionT>
 inline void Participant<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newClock)
 {
-    // register the time provider with all already instantiated controllers
+    // Register the time provider with all already instantiated controllers
     auto setTimeProvider = [newClock](auto& controllers) {
         for (auto& controller: controllers)
         {

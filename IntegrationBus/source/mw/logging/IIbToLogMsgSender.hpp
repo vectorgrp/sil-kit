@@ -2,7 +2,6 @@
 
 #pragma once
 
-
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 
 #include "IIbReceiver.hpp"
@@ -17,7 +16,6 @@ class IIbToLogMsgSender
     , public mw::IIbSender<LogMsg>
 {
 };
-
 
 } // namespace logging
 } // namespace mw

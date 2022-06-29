@@ -71,7 +71,6 @@ DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayPocStatusEvent)
 DefineIbMsgTrait_TypeName(ib::mw::service, ParticipantDiscoveryEvent)
 DefineIbMsgTrait_TypeName(ib::mw::service, ServiceDiscoveryEvent)
 
-
 //Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 DefineIbMsgTrait_HistSize(ib::mw::service, ParticipantDiscoveryEvent, 1)

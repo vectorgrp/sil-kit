@@ -20,11 +20,13 @@
 using namespace std::chrono_literals;
 
 namespace {
+
 using namespace ib::mw;
+
 auto MakeParticipant(std::string participantName, ProtocolVersion version) -> std::shared_ptr<IParticipantInternal>
 {
-    return std::make_shared<Participant<VAsioConnection>>(ib::cfg::ParticipantConfiguration{}, participantName,
-                                                          version);
+    return std::make_shared<Participant<VAsioConnection>>(ib::cfg::ParticipantConfiguration{},
+                                                          std::move(participantName), version);
 }
 
 auto MakeRegistry(ProtocolVersion version) -> std::shared_ptr<VAsioRegistry>
@@ -62,7 +64,7 @@ protected:
     {
         for (auto&& participant : _participants)
         {
-            participant->joinIbDomain(_domainId);
+            participant->JoinIbDomain(_domainId);
         }
     }
     void ExchangeData()
@@ -134,4 +136,5 @@ TEST_F(ParticipantVersionTest, Registry31_Participant31_2xParticipant30)
     JoinDomain();
     ExchangeData();
 }
+
 } // namespace

@@ -57,7 +57,7 @@ public:
 public:
     // ----------------------------------------
     // Operator Implementations
-    VAsioConnection& operator=(VAsioConnection& other) = delete; // also implicitly deleted by asio::io_context
+    VAsioConnection& operator=(const VAsioConnection& other) = delete; // also implicitly deleted by asio::io_context
     VAsioConnection& operator=(VAsioConnection&& other) = delete;
 
 public:
@@ -115,10 +115,11 @@ public:
         ExecuteOnIoThread(&VAsioConnection::SendIbMessageToTargetImpl<IbMessageT>, from, targetParticipantName, std::forward<IbMessageT>(msg));
     }
 
-    inline void OnAllMessagesDelivered(std::function<void()> callback)
+    inline void OnAllMessagesDelivered(const std::function<void()>& callback)
     {
         callback();
     }
+
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> function)
     {
@@ -233,7 +234,7 @@ private:
     void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 
     void AddParticipantToLookup(const std::string& participantName);
-    const std::string& GetParticipantFromLookup(const std::uint64_t participantId) const;
+    const std::string& GetParticipantFromLookup(std::uint64_t participantId) const;
 
     template<class IbMessageT>
     auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<IbLink<IbMessageT>>
@@ -270,7 +271,7 @@ private:
             auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
             ServiceDescriptor tmpServiceDescriptor(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceDescriptor());
             tmpServiceDescriptor.SetParticipantName(_participantName);
-            //Copy the Service Endpoint Id
+            // copy the Service Endpoint Id
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
 
@@ -340,17 +341,18 @@ private:
     }
 
     template <class IbMessageT>
-    void SendIbMessageToTargetImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
+    void SendIbMessageToTargetImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
+                                   IbMessageT&& msg)
     {
-      const auto& key = from->GetServiceDescriptor().GetNetworkName();
+        const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
-      auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
-      if (linkMap.count(key) < 1)
-      {
-        throw std::runtime_error{ "VAsioConnection::SendIbMessageImpl: sending on empty link for " + key };
-      }
-      auto&& link = linkMap[key];
-      link->DispatchIbMessageToTarget(from, targetParticipantName, std::forward<IbMessageT>(msg));
+        auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
+        if (linkMap.count(key) < 1)
+        {
+            throw std::runtime_error{"VAsioConnection::SendIbMessageImpl: sending on empty link for " + key};
+        }
+        auto&& link = linkMap[key];
+        link->DispatchIbMessageToTarget(from, targetParticipantName, std::forward<IbMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>
@@ -424,8 +426,7 @@ private:
     // Keep track of the sent Subscriptions when Registering an IB Service
     std::vector<std::pair<IVAsioPeer*, VAsioMsgSubscriber>> _pendingSubscriptionAcknowledges;
     std::promise<void> _receivedAllSubscriptionAcknowledges;
-    
-    
+
     // The worker thread should be the last members in this class. This ensures
     // that no callback is destroyed before the thread finishes.
     std::thread _ioWorker;
@@ -441,5 +442,5 @@ private:
     friend class VAsioConnectionTest;
 };
 
-} // mw
+} // namespace mw
 } // namespace ib

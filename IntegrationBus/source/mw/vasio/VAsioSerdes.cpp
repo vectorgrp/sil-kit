@@ -13,6 +13,7 @@
 
 namespace ib {
 namespace mw {
+
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RegistryMsgHeader& header)
 {
     buffer << header.preambel
@@ -99,7 +100,6 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
             << announcement.peerInfo
             ;
     }
-    
 
     return buffer;
 }
@@ -215,7 +215,7 @@ auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind
 
 auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader
 {
-    //read only the header into a new MessageBuffer
+    // read only the header into a new MessageBuffer
     auto data = buffer.PeekData();
     const auto readPos = buffer.ReadPos();
     std::vector<uint8_t> rawHeader;
@@ -228,13 +228,13 @@ auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader
     return header;
 }
 
-auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId
+auto ExtractEndpointId(MessageBuffer& buffer) -> EndpointId
 {
     EndpointId endpointId;
     buffer >> endpointId;
     return endpointId;
 }
-auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress
+auto ExtractEndpointAddress(MessageBuffer& buffer) -> EndpointAddress
 {
     EndpointAddress endpointAddress;
     buffer >> endpointAddress;
@@ -244,7 +244,6 @@ auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress
 void Serialize(MessageBuffer& buffer, const ParticipantAnnouncementReply& msg)
 {
     buffer << msg;
-    return;
 }
 void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out)
 {
@@ -254,7 +253,6 @@ void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out)
 void Serialize(MessageBuffer& buffer, const ParticipantAnnouncement& msg)
 {
     buffer << msg;
-    return;
 }
 void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out)
 {
@@ -264,7 +262,6 @@ void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out)
  void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Deserialize(MessageBuffer& buffer, VAsioMsgSubscriber& out)
@@ -275,7 +272,6 @@ void Deserialize(MessageBuffer& buffer, VAsioMsgSubscriber& out)
  void Serialize(MessageBuffer& buffer, const SubscriptionAcknowledge& msg)
 {
     buffer<< msg;
-    return;
 }
 void Deserialize(MessageBuffer& buffer, SubscriptionAcknowledge& out)
 {
@@ -285,7 +281,6 @@ void Deserialize(MessageBuffer& buffer, SubscriptionAcknowledge& out)
 void Serialize(MessageBuffer& buffer, const KnownParticipants& msg)
 {
     buffer << msg;
-    return;
 }
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out)
 {

@@ -8,7 +8,6 @@
 namespace ib {
 namespace mw {
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Early Protocol Handshake and Initial Service Subscription
 // VAsioMsgKind: IbRegistryMessage
@@ -39,6 +38,5 @@ void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
 
-
-} // mw
+} // namespace mw
 } // namespace ib

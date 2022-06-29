@@ -1,10 +1,8 @@
-
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
 
 #include "MessageBuffer.hpp"
-
 #include "ServiceDescriptor.hpp"
 #include "ServiceDatatypes.hpp"
 

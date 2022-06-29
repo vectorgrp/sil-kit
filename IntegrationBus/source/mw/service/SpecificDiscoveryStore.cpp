@@ -95,7 +95,6 @@ void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(ServiceDisc
     _specificHandlers[uniqueKey].emplace_back(std::move(handler));
 }
 
-
 } // namespace service
 } // namespace mw
 } // namespace ib

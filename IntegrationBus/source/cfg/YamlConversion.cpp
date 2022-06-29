@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "YamlConversion.hpp"
 
 #include <algorithm>
@@ -12,7 +13,6 @@ using namespace ib;
 // Local utilities
 namespace {
 
-//template<typename ConfigT>
 template<typename ConfigT, typename std::enable_if<
     !(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
 void optional_encode(const ib::util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
@@ -40,15 +40,15 @@ void optional_encode(const Replay& value, YAML::Node& node, const std::string& f
     }
 }
 
-
 template <typename ConfigT>
-auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, const std::vector<ConfigT>& defaultValue)
+auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, 
+    const std::vector<ConfigT>& defaultValue)
 {
     // Only encode vectors that have members that deviate from a default-value.
     // And also ensure we only encode values that are user-defined.
     if (!values.empty() && !(values == defaultValue))
     {
-        std::vector<ConfigT> userValues;  //XXX must not encode uint8/uint16 as character!, need upgrade ConfigT to uint32_t here magically
+        std::vector<ConfigT> userValues;
         static const ConfigT defaultObj{};
         // only encode non-default values
         for (const auto& value : values)
@@ -66,7 +66,8 @@ auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, co
 }
 
 template <typename ConfigT>
-auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName, const ConfigT& defaultValue)
+auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName, 
+    const ConfigT& defaultValue)
 {
     if (!(value == defaultValue))
     {
@@ -74,7 +75,7 @@ auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::strin
     }
 }
 
-} //end anonymous
+} // anonymous namespace
 
 // YAML type conversion helpers for ParticipantConfiguration data types
 namespace YAML {
@@ -458,14 +459,17 @@ bool Converter::decode(const Node& node, sim::fr::FlexrayClusterParameters& obj)
     obj.gdMiniSlotActionPointOffset = parseInt(obj.gdMiniSlotActionPointOffset, "gdMiniSlotActionPointOffset");
     obj.gdStaticSlot = parseInt(obj.gdStaticSlot, "gdStaticSlot");
     obj.gdSymbolWindow = parseInt(obj.gdSymbolWindow, "gdSymbolWindow");
-    obj.gdSymbolWindowActionPointOffset = parseInt(obj.gdSymbolWindowActionPointOffset, "gdSymbolWindowActionPointOffset");
+    obj.gdSymbolWindowActionPointOffset = parseInt(obj.gdSymbolWindowActionPointOffset, 
+        "gdSymbolWindowActionPointOffset");
     obj.gdTSSTransmitter = parseInt(obj.gdTSSTransmitter, "gdTSSTransmitter");
     obj.gdWakeupTxActive = parseInt(obj.gdWakeupTxActive, "gdWakeupTxActive");
     obj.gdWakeupTxIdle = parseInt(obj.gdWakeupTxIdle, "gdWakeupTxIdle");
     obj.gListenNoise = parseInt(obj.gListenNoise, "gListenNoise");
     obj.gMacroPerCycle = parseInt(obj.gMacroPerCycle, "gMacroPerCycle");
-    obj.gMaxWithoutClockCorrectionFatal = parseInt(obj.gMaxWithoutClockCorrectionFatal, "gMaxWithoutClockCorrectionFatal");
-    obj.gMaxWithoutClockCorrectionPassive = parseInt(obj.gMaxWithoutClockCorrectionPassive, "gMaxWithoutClockCorrectionPassive");
+    obj.gMaxWithoutClockCorrectionFatal = parseInt(obj.gMaxWithoutClockCorrectionFatal, 
+        "gMaxWithoutClockCorrectionFatal");
+    obj.gMaxWithoutClockCorrectionPassive = parseInt(obj.gMaxWithoutClockCorrectionPassive, 
+        "gMaxWithoutClockCorrectionPassive");
     obj.gNumberOfMiniSlots = parseInt(obj.gNumberOfMiniSlots, "gNumberOfMiniSlots");
     obj.gNumberOfStaticSlots = parseInt(obj.gNumberOfStaticSlots, "gNumberOfStaticSlots");
     obj.gPayloadLengthStatic = parseInt(obj.gPayloadLengthStatic, "gPayloadLengthStatic");

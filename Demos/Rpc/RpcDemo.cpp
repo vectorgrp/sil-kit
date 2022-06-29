@@ -4,7 +4,6 @@
 #include <sstream>
 #include <thread>
 #include <algorithm>
-#include <stdlib.h>
 
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"

@@ -1,6 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "WatchDog.hpp"
 
 #include <chrono>
 #include <thread>
@@ -10,9 +9,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ParticipantConfiguration.hpp"
-
 #include "ib/mw/sync/string_utils.hpp"
+#include "ParticipantConfiguration.hpp"
+#include "WatchDog.hpp"
 
 namespace {
 
@@ -155,5 +154,4 @@ TEST_F(WatchDogTest, create_health_check_configured)
     watchDog.Reset();
 }
 
-
-} // anonymous namespace for test
+} // anonymous namespace

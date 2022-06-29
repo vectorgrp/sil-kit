@@ -218,7 +218,6 @@ void LinControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
         _participant->SendIbMessage(this, tm);
 
         // dispatch local frame status handlers
-        // TODO fix epa check
         //LinFrameStatus masterFrameStatus = tm.status;
         //if (mode == LinFrameResponseMode::TxUnconditional)
         //{

@@ -32,33 +32,37 @@ using namespace ib::mw;
 using testing::Return;
 using testing::ReturnRef;
 using testing::_;
+
 //Printing helpers, required for implicit template usage in VAsioConnection
 namespace ib {
 namespace mw {
 namespace test {
+
 namespace  version1 {
 std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
 {
     out <<"version1:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
     return out;
 }
-} // version1
+} // namespace version1
+
 inline namespace version2 {
 std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
 {
     out <<"version2:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
     return out;
 }
-}
+} // namespace version2
+
 std::ostream& operator<<(std::ostream& out , const TestFrameEvent& msg)
 {
     out <<"TestFrameEvent{" << msg.integer <<",\"" << msg.str << "\"}";
     return out;
 }
 
-} //test
-} //mw
-} //ib
+} // namespace test
+} // namespace mw
+} // namespace ib
 
 namespace {
 struct MockIbMessageReceiver
@@ -76,12 +80,12 @@ struct MockIbMessageReceiver
 
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
-    //IIbMessageReceiver<T>
+    // IIbMessageReceiver<T>
     MOCK_METHOD(void, ReceiveIbMessage, (const ib::mw::IIbServiceEndpoint*, const test::version1::TestMessage&), (override));
     MOCK_METHOD(void, ReceiveIbMessage, (const ib::mw::IIbServiceEndpoint*, const test::version2::TestMessage&), (override));
     MOCK_METHOD(void, ReceiveIbMessage, (const ib::mw::IIbServiceEndpoint*, const test::TestFrameEvent&), (override));
 
-    //IIbServiceEndpoint
+    // IIbServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };
@@ -106,7 +110,7 @@ struct MockVAsioPeer
 
         _serviceDescriptor._serviceId = 1;
         _serviceDescriptor._participantId = 1;
-        
+
         _protocolVersion = CurrentProtocolVersion();
 
         ON_CALL(*this, GetLocalAddress()).WillByDefault(Return("127.0.0.1"));
@@ -116,7 +120,7 @@ struct MockVAsioPeer
         ON_CALL(*this, GetProtocolVersion()).WillByDefault(Return(_protocolVersion));
     }
 
-    //IVasioPeer
+    // IVasioPeer
     MOCK_METHOD(void, SendIbMsg, (SerializedMessage), (override));
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
     MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
@@ -127,12 +131,10 @@ struct MockVAsioPeer
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
 
-    //IIbServiceEndpoint
+    // IIbServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };
-
-
 
 //////////////////////////////////////////////////////////////////////
 // Matchers
@@ -155,7 +157,7 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
         ;
 }
 
-} //namespace 
+} // namespace
 
 //////////////////////////////////////////////////////////////////////
 // Test Fixture
@@ -163,6 +165,7 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
 
 namespace ib {
 namespace mw {
+
 class VAsioConnectionTest : public testing::Test
 {
 protected:
@@ -183,8 +186,10 @@ protected:
         _connection.RegisterIbMsgReceiver<MessageT, ServiceT>(networkName, receiver);
     }
 };
-} //mw
-} //ib
+
+} // namespace mw
+} // namespace ib
+
 //////////////////////////////////////////////////////////////////////
 // Versioned initial handshake
 //////////////////////////////////////////////////////////////////////
@@ -203,7 +208,6 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
     };
     EXPECT_CALL(_from, SendIbMsg(AnnouncementReplyMatcher(validator))).Times(1);
     _connection.OnSocketData(&_from, std::move(message));
-
 }
 
 TEST_F(VAsioConnectionTest, unsupported_version_reply_from_registry_should_throw)
@@ -255,16 +259,16 @@ TEST_F(VAsioConnectionTest, current_version_connect)
 // Versioned subscriptions: test backward compatibility
 //////////////////////////////////////////////////////////////////////
 
-//Disabled because we do not have a versioned Ser/Des that detects
+// Disabled because we do not have a versioned Ser/Des that detects
 // the different version used for transmission, this is a work in progress.
-    TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
+TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
 {
     // We send a 'version1', but expect to receive a 'version2' 
     test::version1::TestMessage message;
     message.integer = 1234;
     message.str ="1234";
 
-    //Setup subscriptions for transmisison
+    // Setup subscriptions for transmisison
     using MessageTrait = ib::mw::IbMsgTraits<decltype(message)>;
     VAsioMsgSubscriber subscriber;
     subscriber.msgTypeName = MessageTrait::SerdesName();
@@ -282,8 +286,8 @@ TEST_F(VAsioConnectionTest, current_version_connect)
     // Create a receiver with index 0 and a different TestMessage _version_
     MockIbMessageReceiver mockReceiver;
     RegisterIbMsgReceiver<test::version2::TestMessage,MockIbMessageReceiver>(subscriber.networkName, &mockReceiver);
-    //the actual message
 
+    // the actual message
     auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(),
         subscriber.receiverIdx);
 

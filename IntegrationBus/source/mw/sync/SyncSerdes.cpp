@@ -1,14 +1,11 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-
 #include "InternalSerdes.hpp"
 #include "SyncSerdes.hpp"
-
 
 namespace ib {
 namespace mw {
 namespace sync {
-
 
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ib::mw::sync::NextSimTask& task)
 {

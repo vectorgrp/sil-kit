@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "YamlParser.hpp"
 #include "yaml-cpp/yaml.h"
 
@@ -123,7 +124,8 @@ void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
         }
     }
 }
-void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType::value parentType = YAML::NodeType::Undefined)
+void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, 
+    YAML::NodeType::value parentType = YAML::NodeType::Undefined)
 {
     static Indent ind{ 0 };
     uint32_t seqNum = 0;
@@ -217,16 +219,11 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node, YAML::NodeType:
         }
     }
 }
-} //end anonymous namespace
+
+} // anonymous namespace
 
 namespace ib {
 namespace cfg {
-
-//bool Validate(const std::string& yamlString, std::ostream& warningMessages)
-//{
-//    YamlValidator validator;
-//    return validator.Validate(yamlString, warningMessages);
-//}
 
 //!< Helper to print the YAML document position
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)

@@ -21,6 +21,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameE
         ;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameEvent& msg)
 {
     uint8_t flags;
@@ -48,6 +49,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameT
            << ack.userContext;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
 {
     buffer >> ack.transmitId
@@ -65,6 +67,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanContro
            << msg.errorState;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanControllerStatus& msg)
 {
     buffer >> msg.timestamp
@@ -79,6 +82,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanConfig
            << msg.fdBaudRate;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanConfigureBaudrate& msg)
 {
     buffer >> msg.baudRate
@@ -92,6 +96,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanSetCon
            << msg.mode;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanSetControllerMode& msg)
 {
     uint8_t flags;
@@ -113,26 +118,31 @@ void Serialize(MessageBuffer& buffer, const sim::can::CanFrameEvent& msg)
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const sim::can::CanFrameTransmitEvent& msg)
 {
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const sim::can::CanControllerStatus& msg)
 {
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const sim::can::CanConfigureBaudrate& msg)
 {
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const sim::can::CanSetControllerMode& msg)
 {
     buffer << msg;
     return;
 }
+
 //////////////////////////////////////////////////////////////////////
 // Deserialize
 //////////////////////////////////////////////////////////////////////
@@ -140,18 +150,22 @@ void Deserialize(MessageBuffer& buffer, sim::can::CanFrameEvent& out)
 {
    buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, sim::can::CanFrameTransmitEvent& out)
 {
    buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, sim::can::CanControllerStatus& out)
 {
    buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, sim::can::CanConfigureBaudrate& out)
 {
    buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, sim::can::CanSetControllerMode& out)
 {
    buffer >> out;

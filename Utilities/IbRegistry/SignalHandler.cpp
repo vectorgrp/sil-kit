@@ -7,7 +7,8 @@
 //forward
 namespace {
 class SignalMonitor;
-}
+} // namespace
+
 // global signal handler
 static std::unique_ptr<SignalMonitor> gSignalMonitor;
 
@@ -56,8 +57,8 @@ public:
         auto ok = WriteFile(_writeEnd, &buf, sizeof(buf), nullptr, nullptr);
         (void)ok;
     }
-private:
 
+private:
     void workerMain()
     {
         std::vector<uint8_t> buf(1);
@@ -96,6 +97,7 @@ BOOL WINAPI systemHandler(DWORD ctrlType)
 #include <cerrno>
 #include <fcntl.h>
 #include <unistd.h>
+
 namespace {
 
 using namespace ib::registry;
@@ -126,6 +128,7 @@ public:
         signal(SIGTERM, &systemHandler);
         _worker = std::thread{std::bind(&SignalMonitor::workerMain, this)};
     }
+
     ~SignalMonitor()
     {
         signal(SIGINT, SIG_DFL);
@@ -135,7 +138,7 @@ public:
         ::close(_pipe[0]);
         ::close(_pipe[1]);
     }
-    
+
     void Notify(int signalNumber)
     {
         //in signal handler context: no allocs, no error handling
@@ -144,8 +147,8 @@ public:
         auto ok = ::write(_pipe[1], &buf, sizeof(buf));
         (void)ok;
     }
-private:
 
+private:
     void workerMain()
     {
         std::vector<uint8_t> buf(1);
@@ -174,15 +177,16 @@ void systemHandler(int sigNum)
     }
 }
 
-} //end anonymous namespace
+} // namespace
 #endif
 
-namespace ib { namespace registry {
+namespace ib {
+namespace registry {
 
 void RegisterSignalHandler(SignalHandlerT handler)
 {
     gSignalMonitor.reset(new SignalMonitor(std::move(handler)));
 }
 
-}
-}
+} // namespace registry
+} // namespace ib

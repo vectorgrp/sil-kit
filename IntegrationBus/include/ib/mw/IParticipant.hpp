@@ -96,7 +96,7 @@ public:
                                     const std::map<std::string, std::string>& labels,
                                     sim::rpc::RpcDiscoveryResultHandler handler) = 0;
 
-    //! \brief Return the  ILifecycleService for the current participant.
+    //! \brief Return the ILifecycleService for the current participant.
     virtual auto GetLifecycleService() -> sync::ILifecycleService* = 0;
     virtual auto GetSystemMonitor() -> sync::ISystemMonitor* = 0;
     virtual auto GetSystemController() -> sync::ISystemController* = 0;

@@ -3,7 +3,6 @@
 #pragma once
 
 #include <vector>
-#include <future>
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/data/IDataPublisher.hpp"

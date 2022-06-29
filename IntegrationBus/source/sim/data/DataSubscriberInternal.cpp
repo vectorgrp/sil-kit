@@ -2,8 +2,6 @@
 
 #include "DataSubscriberInternal.hpp"
 
-#include <cassert>
-
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {

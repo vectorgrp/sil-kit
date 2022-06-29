@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include <ostream>
 #include <unordered_map>
-#include <memory>
 
 #include "ib/sim/data/DataMessageDatatypes.hpp"
 #include "ib/util/HandlerId.hpp"

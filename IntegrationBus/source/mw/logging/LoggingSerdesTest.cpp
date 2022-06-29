@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "LoggingSerdes.hpp"
-
 #include "gtest/gtest.h"
+
+#include "LoggingSerdes.hpp"
 
 TEST(MwLoggingSerdes, LoggingSerdes)
 {

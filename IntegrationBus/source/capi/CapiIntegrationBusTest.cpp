@@ -7,49 +7,44 @@
 #include "MockParticipant.hpp"
 
 namespace {
-        const char* IB_CONFIG_STRING = "{"
-"            \"ConfigVersion\": \"0.0.1\","
-"            \"ConfigName\" : \"ConfigDemo\","
-"            \"Description\" : \"Sample configuration for testing puposes\","
-""
-"            \"SimulationSetup\" : {"
-""
-"            \"Participants\": ["
-"            {"
-"                \"Name\": \"Participant1\","
-"                \"Description\" : \"Demo Participant with nothing going on\","
-"            }"
-"            ],"
-""
-"        },"
-""
-"            \"MiddlewareConfig\": {"
-"            \"ActiveMiddleware\": \"VAsio\""
-"        }"
-""
-"    }";
+const auto IB_CONFIG_STRING = R"aw(
+{
+    "ConfigVersion": "0.0.1",
+    "ConfigName" : "ConfigDemo",
+    "Description" : "Sample configuration for testing purposes",
 
-const char* IB_MALFORMED_CONFIG_STRING = ""
-"            \"ConfigVersion\": \"0.0.1\","
-"            \"ConfigName\" : \"ConfigDemo\","
-"            \"Description\" : \"Sample configuration for testing puposes\","
-""
-"            \"SimulationSetup\" : {"
-""
-"            \"Participants\": ["
-"            {"
-"                \"Name\": \"Participant1\","
-"                \"Description\" : \"Demo Participant with nothing going on\","
-"            }"
-"            ],"
-""
-"        },"
-""
-"            \"MiddlewareConfig\": {"
-"            \"ActiveMiddleware\": \"VAsio\""
-"        }"
-""
-"    }";
+    "SimulationSetup" : {
+        "Participants": [
+            {
+                "Name": "Participant1",
+                "Description" : "Demo Participant with nothing going on"
+            }
+        ]
+    },
+
+    "MiddlewareConfig": {
+        "ActiveMiddleware": "VAsio"
+    }
+}
+)aw";
+
+const auto IB_MALFORMED_CONFIG_STRING = R"aw(
+"ConfigVersion": "0.0.1","
+"ConfigName" : "ConfigDemo","
+"Description" : "Sample configuration for testing purposes",
+"SimulationSetup" : {
+    "Participants": [
+        {
+            "Name": "Participant1",
+            "Description" : "Demo Participant with nothing going on",
+        }
+    ],
+},
+"MiddlewareConfig": {
+    "ActiveMiddleware": "VAsio"
+}
+}
+)aw";
 
 
     using namespace ib::sim::can;

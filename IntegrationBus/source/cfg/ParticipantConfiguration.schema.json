@@ -93,7 +93,7 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 63,
-          "title": "time offset for a static slot in macroticks (range 1 - 63)"
+          "title": "Time offset for a static slot in macroticks (range 1 - 63)"
         },
         "gdDynamicSlotIdlePhase": {
           "type": "integer",

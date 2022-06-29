@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "YamlParser.hpp"
 
 #include "ParticipantConfiguration.hpp"
@@ -187,11 +188,13 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(config.canControllers.at(0).name == "CAN1");
     EXPECT_TRUE(!config.canControllers.at(0).network.has_value());
     EXPECT_TRUE(config.canControllers.at(1).name == "MyCAN2");
-    EXPECT_TRUE(config.canControllers.at(1).network.has_value() && config.canControllers.at(1).network.value() == "CAN2");
+    EXPECT_TRUE(config.canControllers.at(1).network.has_value() && 
+        config.canControllers.at(1).network.value() == "CAN2");
 
     EXPECT_TRUE(config.linControllers.size() == 1);
     EXPECT_TRUE(config.linControllers.at(0).name == "SimpleEcu1_LIN1");
-    EXPECT_TRUE(config.linControllers.at(0).network.has_value() && config.linControllers.at(0).network.value() == "LIN1");
+    EXPECT_TRUE(config.linControllers.at(0).network.has_value() && 
+        config.linControllers.at(0).network.value() == "LIN1");
 
     EXPECT_TRUE(config.flexrayControllers.size() == 1);
     EXPECT_TRUE(config.flexrayControllers.at(0).name == "FlexRay1");
@@ -199,7 +202,8 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
 
     EXPECT_TRUE(config.dataPublishers.size() == 1);
     EXPECT_TRUE(config.dataPublishers.at(0).name == "Publisher1");
-    EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value() && config.dataPublishers.at(0).topic.value() == "Temperature");
+    EXPECT_TRUE(config.dataPublishers.at(0).topic.has_value() && 
+        config.dataPublishers.at(0).topic.value() == "Temperature");
 
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
@@ -353,7 +357,8 @@ TEST_F(YamlParserTest, middleware_convert)
 TEST_F(YamlParserTest, map_serdes)
 {
     std::map<std::string, std::string> mapin{
-        {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
+        {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, 
+        {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
     auto mapstr = ib::cfg::Serialize<std::map<std::string, std::string>>(mapin);
     auto mapout = ib::cfg::Deserialize<std::map<std::string, std::string>>(mapstr);
     EXPECT_EQ(mapin, mapout);

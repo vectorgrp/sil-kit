@@ -7,7 +7,8 @@
 
 using namespace std::chrono_literals;
 
-namespace ib { namespace mw {
+namespace ib {
+namespace mw {
 
 bool operator==(const VAsioPeerInfo& lhs, const VAsioPeerInfo& rhs)
 {
@@ -37,11 +38,13 @@ bool operator==(const KnownParticipants& lhs, const KnownParticipants& rhs)
 		;
 }
 
-}//namespace mw
-}//namespace ib
+} // namespace mw
+} // namespace ib
 
 namespace {
+
 using namespace ib::mw;
+
 auto MakePeerInfo() -> VAsioPeerInfo
 {
 	VAsioPeerInfo in{};
@@ -127,4 +130,5 @@ TEST(MwVAsioSerdes, vasio_knownParticipants)
 
 	EXPECT_EQ(in, out);
 }
-} //anonymous 
+
+} // namespace

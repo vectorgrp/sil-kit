@@ -9,14 +9,12 @@
 
 #include "Configuration.hpp"
 
-//#include "ib/cfg/Config.hpp"
-
 namespace spdlog {
 class logger;
 namespace sinks {
 class sink;
-} // sinks
-} // spdlog
+} // namespace sinks
+} // namespace spdlog
 
 namespace ib {
 namespace mw {

@@ -1,13 +1,11 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ServiceSerdes.hpp"
-
 #include "InternalSerdes.hpp"
 #include "ServiceDescriptor.hpp"
 
 namespace ib {
 namespace mw {
-
 
 // ServiceDescriptor encoding is here, because it pulls in IbConfiguration 
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
@@ -64,8 +62,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-//ServiceDiscoveryEvent
-
+// ServiceDiscoveryEvent
 inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     const ServiceDiscoveryEvent& msg)
 {
@@ -103,6 +100,7 @@ void Deserialize(MessageBuffer& buffer, ServiceDiscoveryEvent& out)
 {
     buffer >> out;
 }
+
 } // namespace service
 } // namespace mw
 } // namespace ib

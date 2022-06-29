@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <ostream>
-
 #include "ib/sim/can/CanDatatypes.hpp"
 
 namespace ib {

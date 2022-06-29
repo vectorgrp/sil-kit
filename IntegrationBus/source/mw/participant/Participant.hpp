@@ -279,7 +279,7 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void joinIbDomain(uint32_t domainId) override;
+    void JoinIbDomain(uint32_t domainId) override;
 
     // For Testing Purposes:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
@@ -308,7 +308,7 @@ private:
     void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const ValueT& passedValue,
                                                 const ValueT& configuredValue);
 
-    void onIbDomainJoined();
+    void OnIbDomainJoined();
 
     void SetupRemoteLogging();
 
@@ -357,7 +357,6 @@ private:
 
     std::unique_ptr<logging::ILogger> _logger;
     std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;
-    //std::unique_ptr<tracing::ReplayScheduler> _replayScheduler;
 
     std::tuple<
         ControllerMap<sim::can::IIbToCanController>,
@@ -390,6 +389,6 @@ private:
 
 };
 
-} // mw
+} // namespace mw
 } // namespace ib
 

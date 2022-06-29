@@ -11,6 +11,7 @@ using namespace std::chrono_literals;
 
 namespace ib {
 namespace cfg {
+
 inline namespace v4 {
 
 namespace {
@@ -22,11 +23,13 @@ void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configurati
     {
         if (sink.name.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSink \"Name\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+                ": TraceSink \"Name\" must not be empty!" };
         }
         if (sink.outputPath.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSink \"OutputPath\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+                ": TraceSink \"OutputPath\" must not be empty!" };
         }
         sinkNames.insert(sink.name);
     }
@@ -80,12 +83,14 @@ void ValidateTraceSources(const ib::cfg::v4::ParticipantConfiguration& configura
     {
         if (source.name.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSource \"Name\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+                ": TraceSource \"Name\" must not be empty!" };
         }
 
         if (source.inputPath.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + ": TraceSource \"InputPath\" must not be empty!" };
+            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+                ": TraceSource \"InputPath\" must not be empty!" };
         }
 
         auto ok = sourceNames.insert(source.name);
@@ -139,5 +144,6 @@ void Validate(const ib::cfg::v4::ParticipantConfiguration& configuration)
 }
 
 } // namespace v4
+
 } // namespace cfg
 } // namespace ib

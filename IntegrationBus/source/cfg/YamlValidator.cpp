@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "YamlValidator.hpp"
 
 #include "yaml-cpp/yaml.h"
@@ -6,7 +7,7 @@
 #include <stdexcept>
 #include <set>
 
-#include "YamlParser.hpp" //for operator<<(Mark)
+#include "YamlParser.hpp" // for operator<<(Mark)
 
 namespace {
 
@@ -46,13 +47,13 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
             }
             else if (node.IsSequence() || node.IsMap())
             {
-                //anonymous container, keep parent as is
+                // Anonymous container, keep parent as is
                 ok &= ValidateDoc(node, v, warnings, parent);
             }
         }
         else if (node.first.IsDefined() && node.second.IsDefined())
         {
-            //key value pair
+            // Key value pair
             auto& key = node.first;
             auto& value = node.second;
             auto keyName = v.MakeName(parent, key.Scalar());
@@ -62,27 +63,27 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
                          << " is already defined in path \"" << parent << "\"\n";
                 ok &= false;
             }
-            // a nonempty, but invalid element name
+            // A nonempty, but invalid element name
             if (!keyName.empty() && !v.IsSchemaElement(keyName))
             {
-                //Unknown elements, which are not found in the schema are only warnings
+                // Unknown elements, which are not found in the schema are only warnings
                 warnings << "At " << key.Mark() << ": Element \""
                     << v.ElementName(keyName) << "\"";
                 if (v.IsReservedElementName(keyName))
                 {
                     warnings << " is a reserved element name and as such"
                         << " not a sub-element of schema path \"";
-                    // misplacing a keyword is an error!
+                    // Misplacing a keyword is an error!
                     ok &= false;
                 }
                 else
                 {
-                    // we only report error if the element is a reserved keyword
+                    // We only report error if the element is a reserved keyword
                     warnings << " is being ignored. It is not a sub-element of schema path \"";
                 }
                 warnings << parent << "\"\n";
             }
-            // we are not a subelement of parent
+            // We are not a subelement of parent
             else if (v.HasSubelements(parent)
                 && !v.IsSubelementOf(parent, keyName)
                 )
@@ -95,8 +96,8 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
             }
             else if(value.IsMap() || value.IsSequence())
             {
-                // nested sequences and maps might have no  key name
-                std::string newParent = parent; //a fallback in case keyName is not given
+                // Nested sequences and maps might have no  key name
+                std::string newParent = parent; // A fallback in case keyName is not given
                 if (!keyName.empty())
                 {
                     newParent = keyName;
@@ -107,7 +108,6 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
                     ok &= ValidateDoc(value, v, warnings, newParent);
                 }
             }
-            // XXX can this happen even for IsMap and IsSequence?
             else if (value.size() > 0)
             {
                 std::string newParent = parent;
@@ -122,7 +122,7 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
     return ok;
 }
 
-} //end anonymous
+} // anonymous namespace
 
 namespace ib {
 namespace cfg {
@@ -139,7 +139,7 @@ bool YamlValidator::LoadSchema(std::string schemaVersion)
     {
         return false;
     }
-    //the root element in schema can be skipped
+    // The root element in schema can be skipped
     for (auto& subelement : _schema.subelements)
     {
         UpdateIndex(subelement, "");
@@ -182,7 +182,7 @@ bool YamlValidator::Validate(const std::string& yamlString, std::ostream& warnin
         }
         else
         {
-            // the document does not specify 'SchemaVersion', we're assuming version '1'
+            // The document does not specify 'SchemaVersion', we're assuming version '1'
             LoadSchema("1");
         }
         return ValidateDoc(yamlDoc, *this,  warnings, DocumentRoot());
@@ -203,7 +203,7 @@ auto YamlValidator::ParentName(const std::string& elementName) const -> std::str
     }
     else if (sep == 0)
     {
-        //special case for root lookups
+        // Special case for root lookups
         return _elementSeparator;
     }
     else
@@ -214,7 +214,7 @@ auto YamlValidator::ParentName(const std::string& elementName) const -> std::str
 
 auto YamlValidator::MakeName(const std::string& parentEl, const std::string& elementName) const -> std::string
 {
-    if (parentEl == _elementSeparator) //special case for root lookups
+    if (parentEl == _elementSeparator) // Special case for root lookups
     {
         return _elementSeparator + elementName;
     }
@@ -233,7 +233,7 @@ bool YamlValidator::HasSubelements(const std::string& elementName) const
 {
     if (elementName == _elementSeparator)
     {
-        //special case for root level lookups
+        // Special case for root level lookups
         return true;
     }
     else

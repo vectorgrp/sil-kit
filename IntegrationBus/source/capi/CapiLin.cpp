@@ -1,10 +1,10 @@
-/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ib/capi/IntegrationBus.h"
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/lin/all.hpp"
 #include "ib/sim/lin/string_utils.hpp"
-#include "CapiImpl.h"
+#include "CapiImpl.hpp"
 #include <cstring>
 
 static void assign(ib::sim::lin::LinFrame& cppFrame, const ib_Lin_Frame* cFrame) 

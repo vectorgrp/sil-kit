@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     {
         domainId = static_cast<uint32_t>(std::stoul(domain));
     }
-    catch (std::exception&)
+    catch (const std::exception&)
     {
         std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
 
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
         std::cout << "Creating registry at domain " << domainId << std::endl;
         VAsioRegistry registry{ configuration };
         registry.ProvideDomain(domainId);
-        
+
         if (useSignalHandler)
         {
             using namespace ib::registry;
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
             std::cin.ignore();
         }
     }
-    catch (const ib::ConfigurationError & error)
+    catch (const ib::ConfigurationError& error)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 
         return -2;
     }
-    catch (const std::exception & error)
+    catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #pragma once
 
 #include <chrono>
@@ -24,7 +25,6 @@ struct ParseTypeName
 #define DEFINE_VIB_PARSE_TYPE_NAME(TYPE) \
     template<> struct ParseTypeName<TYPE> { static constexpr const char* Name(){ return #TYPE;} }
 
-
 template <typename T>
 struct ParseTypeName<std::vector<T>>
 {
@@ -33,6 +33,7 @@ struct ParseTypeName<std::vector<T>>
         return ParseTypeName<T>::Name();
     }
 };
+
 // Encode/Decode implementation is provided as templated static methods, to reduce boiler plate code.
 struct Converter
 {
@@ -60,10 +61,10 @@ DEFINE_VIB_PARSE_TYPE_NAME(bool);
 DEFINE_VIB_PARSE_TYPE_NAME(std::vector<std::string>);
 DEFINE_VIB_PARSE_TYPE_NAME(std::string);
 
-} //end YAML
+} // namespace YAML
 
 ////////////////////////////////////////////////////////////////////////////////
-// Misc. VIB Parsing Helper
+// Miscellaneous VIB Parsing Helper
 ////////////////////////////////////////////////////////////////////////////////
 namespace ib {
 namespace cfg {

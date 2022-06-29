@@ -1,9 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "CreateParticipant.hpp"
-
-#include "Participant.hpp"
 #include <iostream>
+
+#include "CreateParticipant.hpp"
+#include "Participant.hpp"
 
 namespace ib {
 namespace mw {
@@ -40,5 +40,5 @@ auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguratio
     return *cfg;
 }
 
-} // mw
+} // namespace mw
 } // namespace ib

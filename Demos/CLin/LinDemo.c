@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
                          {0, &Master_SendFrame_19}, {0, &Master_SendFrame_34}, {5000000, &Master_GoToSleep}};
         Schedule_Create(&masterSchedule, tasks, 6);
 
-        ib_Participant_SetInitHandler(participant, NULL, &Master_InitCallback);
+        ib_Participant_SetCommunicationReadyHandler(participant, NULL, &Master_InitCallback);
         ib_HandlerId frameStatusHandlerId;
         ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus, &frameStatusHandlerId);
         ib_HandlerId wakeupHandlerId;
@@ -540,7 +540,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        ib_Participant_SetInitHandler(participant, NULL, &Slave_InitCallback);
+        ib_Participant_SetCommunicationReadyHandler(participant, NULL, &Slave_InitCallback);
         ib_HandlerId frameStatusHandlerId;
         ib_Lin_Controller_AddFrameStatusHandler(linController, NULL, &Slave_FrameStatusHandler, &frameStatusHandlerId);
         ib_HandlerId goToSleepHandlerId;

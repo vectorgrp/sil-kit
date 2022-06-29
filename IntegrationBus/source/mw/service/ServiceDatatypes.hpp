@@ -6,7 +6,7 @@
 #include <map>
 #include <sstream>
 
-#include "IIbServiceEndpoint.hpp" // ServiceDescription
+#include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace mw {
@@ -93,6 +93,7 @@ inline std::string to_string(const ParticipantDiscoveryEvent& serviceAnnouncemen
     str << serviceAnnouncement;
     return str.str();
 }
+
 } // namespace service
 } // namespace mw
 } // namespace ib

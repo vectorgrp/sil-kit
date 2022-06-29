@@ -79,7 +79,6 @@ struct TraceSink
     Type type{ Type::Undefined };
     std::string name;
     std::string outputPath;
-    //bool enabled{ true };
 };
 
 struct TraceSource
@@ -94,7 +93,6 @@ struct TraceSource
     Type type{ Type::Undefined };
     std::string name;
     std::string inputPath;
-    //bool enabled{ true };
 };
 
 //!< MdfChannel identification for replaying, refer to ASAM MDF 4.1 Specification, Chapter 5.4.3

@@ -24,7 +24,6 @@ protected:
     }
 };
 
-// TODO: Fix
 TEST_F(ParticipantTest, throw_on_empty_participant_name)
 {
     EXPECT_THROW(CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), ""),

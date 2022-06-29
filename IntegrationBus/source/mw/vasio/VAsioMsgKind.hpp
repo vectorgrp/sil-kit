@@ -16,6 +16,5 @@ enum class VAsioMsgKind: uint8_t
     IbRegistryMessage = 5,
 };
 
-
-} // mw
+} // namespace mw
 } // namespace ib

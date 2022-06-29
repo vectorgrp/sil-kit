@@ -13,6 +13,6 @@ bool operator==(const ParticipantStatus& lhs, const ParticipantStatus& rhs);
 bool operator==(const SystemCommand& lhs, const SystemCommand& rhs);
 bool operator==(const WorkflowConfiguration& lhs, const WorkflowConfiguration& rhs);
 
-}
-}
-}
+} // namespace sync
+} // namespace mw
+} // namespace ib

@@ -1,15 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-
 #include <atomic>
 
 #include "ib/mw/IParticipant.hpp"
 
-// IbInternal component:
 #include "internal_fwd.hpp"
 #include "IIbServiceEndpoint.hpp"
-// IbMwDiscovery
 #include "ServiceDatatypes.hpp"
 
 namespace ib {
@@ -30,7 +27,7 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    virtual void joinIbDomain(uint32_t domainId) = 0;
+    virtual void JoinIbDomain(uint32_t domainId) = 0;
 
     // For VIBE-NetworkSimulator integration:
     virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;

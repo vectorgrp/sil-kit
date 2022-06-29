@@ -46,7 +46,7 @@ TEST(IbRegistryReusageITest, DISABLED_IbRegistry_must_be_reusable_after_shutdown
 
     //auto RunParticipant = [&ibConfig, domainId](auto name) {
     //    auto participant = CreateParticipantImpl(ibConfig, name);
-    //    participant->joinIbDomain(domainId);
+    //    participant->JoinIbDomain(domainId);
     //    auto participantController = participant->GetParticipantController();
     //    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
     //    participantController->RunAsync();

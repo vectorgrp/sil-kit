@@ -1,10 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "NullConnectionParticipant.hpp"
-#include "CreateParticipant.hpp"
-
 #include "ib/mw/logging/ILogger.hpp"
 
+#include "NullConnectionParticipant.hpp"
+#include "CreateParticipant.hpp"
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
 

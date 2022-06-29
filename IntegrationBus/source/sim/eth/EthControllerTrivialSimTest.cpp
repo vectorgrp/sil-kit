@@ -48,18 +48,6 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
     return testing::Field(&EthernetFrameEvent::timestamp, timestamp);
 }
 
-//void SetDestinationMac(EthernetFrame& frame, const EthernetMac& destination)
-//{
-//    const size_t MinFrameSize = 64;
-//    const size_t DestinationMacStart = 0;
-//    if (frame.empty())
-//    {
-//        frame.resize(MinFrameSize);
-//    }
-//
-//    std::copy(destination.begin(), destination.end(), frame.begin() + DestinationMacStart);
-//}
-
 void SetSourceMac(EthernetFrame& frame, const EthernetMac& source)
 {
     const size_t MinFrameSize = 64;

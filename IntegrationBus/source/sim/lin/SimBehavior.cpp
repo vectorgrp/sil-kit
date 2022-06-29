@@ -73,6 +73,7 @@ void SimBehavior::SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink
     _detailed.SetSimulatedLink(simulatedLink);
     _currentBehavior = &_detailed;
 }
+
 void SimBehavior::SetTrivialBehavior()
 {
     _currentBehavior = &_trivial;

@@ -7,8 +7,8 @@
 
 #include "VAsioSerdes_Protocol30.hpp"
 
-namespace protocol_3_0
-{
+namespace protocol_3_0 {
+
 using ib::mw::MessageBuffer;
 // Backward compatible serdes with ProtocolVersion{3,0}
 
@@ -185,7 +185,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Particip
     return buffer;
 }
 
-} //protocol_3_0
+} // namespace protocol_3_0
 
 namespace ib {
 namespace mw {
@@ -217,7 +217,7 @@ void SerializeV30(MessageBuffer& buffer, const ParticipantAnnouncement& announce
 
 void DeserializeV30(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
-    //need legacy support here, convert old format to current one
+    // need legacy support here, convert old format to current one
     protocol_3_0::ParticipantAnnouncementReply oldReply;
     reply.remoteHeader.versionHigh = 3;
     reply.remoteHeader.versionHigh = 0;
@@ -225,7 +225,7 @@ void DeserializeV30(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
     reply.status = ParticipantAnnouncementReply::Status::Success;
     // subscribers is the same
     buffer >> oldReply;
-    for(const auto& subscriber: oldReply.subscribers)
+    for (const auto& subscriber : oldReply.subscribers)
     {
         VAsioMsgSubscriber newSubscriber;
         newSubscriber.msgTypeName = subscriber.msgTypeName;
@@ -240,7 +240,7 @@ void SerializeV30(MessageBuffer& buffer, const ParticipantAnnouncementReply& rep
 {
     // the ParticipantAnnouncementReply was extended for proto v3.1
     protocol_3_0::ParticipantAnnouncementReply oldReply;
-    for(const auto& subscriber: reply.subscribers)
+    for (const auto& subscriber : reply.subscribers)
     {
 
         protocol_3_0::VAsioMsgSubscriber oldSubscriber;
@@ -256,7 +256,7 @@ void DeserializeV30(MessageBuffer& buffer, KnownParticipants& participants)
 {
     protocol_3_0::KnownParticipants oldParticipants;
     buffer >> oldParticipants;
-    for(auto peerUri: oldParticipants.peerUris)
+    for (const auto& peerUri : oldParticipants.peerUris)
     {
         ib::mw::VAsioPeerInfo info;
         info.participantName = peerUri.participantName;
@@ -273,9 +273,9 @@ void SerializeV30(MessageBuffer& buffer, const KnownParticipants& participants)
     oldParticipants.messageHeader.versionHigh = 3;
     oldParticipants.messageHeader.versionLow = 0;
 
-    for(auto newPeerInfo: participants.peerInfos)
+    for (const auto& newPeerInfo : participants.peerInfos)
     {
-        //we only copy the peer Uris, the peerInfo 'acceptorHost' and 'acceptorPort'
+        // we only copy the peer Uris, the peerInfo 'acceptorHost' and 'acceptorPort'
         // were only used as fallback if the URIs were not set.
         protocol_3_0::VAsioPeerUri oldPeerUri;
         oldPeerUri.acceptorUris = newPeerInfo.acceptorUris;
@@ -283,11 +283,10 @@ void SerializeV30(MessageBuffer& buffer, const KnownParticipants& participants)
         oldPeerUri.participantName = newPeerInfo.participantName;
         oldParticipants.peerUris.emplace_back(std::move(oldPeerUri));
     }
-    
+
     // serialize old
     buffer << oldParticipants;
 }
-
 
 } // namespace mw
 } // namespace ib

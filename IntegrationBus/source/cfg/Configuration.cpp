@@ -23,16 +23,14 @@ bool operator==(const Logging& lhs, const Logging& rhs)
 
 bool operator==(const TraceSink& lhs, const TraceSink& rhs)
 {
-    return /*lhs.enabled == rhs.enabled
-        &&*/ lhs.name == rhs.name
+    return lhs.name == rhs.name
         && lhs.outputPath == rhs.outputPath
         && lhs.type == rhs.type;
 }
 
 bool operator==(const TraceSource& lhs, const TraceSource& rhs)
 {
-    return /*lhs.enabled == rhs.enabled
-        && */ lhs.inputPath == rhs.inputPath
+    return lhs.inputPath == rhs.inputPath
         && lhs.type == rhs.type
         && lhs.name == rhs.name;
 }

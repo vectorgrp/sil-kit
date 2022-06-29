@@ -1,7 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "LifecycleService.hpp"
-
 #include <chrono>
 #include <functional>
 #include <string>
@@ -12,6 +10,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/util/functional.hpp"
 
+#include "LifecycleService.hpp"
 #include "MockParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "SyncDatatypeUtils.hpp"
@@ -105,8 +104,6 @@ protected:
     MockParticipant participant;
     Callbacks callbacks;
     cfg::HealthCheck healthCheckConfig;
-
-
 };
 
 // will forward lifecycle with coordination up to 
@@ -1017,6 +1014,5 @@ TEST_F(LifecycleServiceTest, no_starting_callback_call_if_timesync_active)
     lifecycleService.ReceiveIbMessage(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
 }
-
 
 } // namespace

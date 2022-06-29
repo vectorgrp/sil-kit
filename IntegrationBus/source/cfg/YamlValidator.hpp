@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
+
 #include <map>
 #include <string>
 #include <ostream>
@@ -14,10 +15,6 @@ namespace cfg {
 class YamlValidator
 {
 public:
-    //Ctor
-
-public:
-    //Methods
     bool Validate(const std::string& yamlString, std::ostream& warnings);
     auto ParentName(const std::string& elementName) const -> std::string;
     auto ElementName(const std::string& elementName) const -> std::string;
@@ -44,11 +41,10 @@ public:
     auto DocumentRoot() const -> std::string;
 
 private:
-    // Methods
     void UpdateIndex(const YamlSchemaElem& element, const std::string& currentParent);
     bool LoadSchema(std::string schemaVersion);
+
 private:
-    // Members
     static const std::string _elementSeparator;
     std::map<std::string /*elementName*/, YamlSchemaElem> _index;
     YamlSchemaElem _schema;

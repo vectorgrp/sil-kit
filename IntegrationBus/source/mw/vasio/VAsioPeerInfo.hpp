@@ -23,5 +23,5 @@ struct VAsioPeerInfo
     std::string capabilities;
 };
 
-} // mw
+} // namespace mw
 } // namespace ib

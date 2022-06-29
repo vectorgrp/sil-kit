@@ -1,3 +1,5 @@
+# compile commands for clangd  support
+compile_commands.json
 # ignore cmake-generated path directories
 build*/
 _build*/

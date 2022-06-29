@@ -28,6 +28,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetF
 
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetFrameEvent& msg)
 {
     buffer >> msg.transmitId
@@ -45,6 +46,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetF
            << ack.status;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
 {
     buffer >> ack.transmitId
@@ -61,6 +63,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetS
            << msg.bitrate;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetStatus& msg)
 {
     buffer >> msg.timestamp
@@ -74,11 +77,13 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const EthernetS
     buffer << msg.mode;
     return buffer;
 }
+
 ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, EthernetSetMode& msg)
 {
     buffer >> msg.mode;
     return buffer;
 }
+
 using ib::mw::MessageBuffer;
 
 void Serialize(MessageBuffer& buffer, const EthernetFrameEvent& msg)
@@ -86,16 +91,19 @@ void Serialize(MessageBuffer& buffer, const EthernetFrameEvent& msg)
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const EthernetFrameTransmitEvent& msg)
 {
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const EthernetStatus& msg)
 {
     buffer << msg;
     return;
 }
+
 void Serialize(MessageBuffer& buffer, const EthernetSetMode& msg)
 {
     buffer << msg;
@@ -106,14 +114,17 @@ void Deserialize(MessageBuffer& buffer, EthernetFrameEvent& out)
 {
     buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, EthernetFrameTransmitEvent& out)
 {
     buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, EthernetStatus& out)
 {
     buffer >> out;
 }
+
 void Deserialize(MessageBuffer& buffer, EthernetSetMode& out)
 {
     buffer >> out;

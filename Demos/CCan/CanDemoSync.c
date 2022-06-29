@@ -72,12 +72,12 @@ typedef struct {
 } SimTaskContext;
 SimTaskContext simTaskContext;
 
-void InitCallback(void* context, ib_Participant* cbParticipant)
+void CommunicationReadyCallback(void* context, ib_Participant* cbParticipant)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbParticipant);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
-    printf(">> InitCallback of with context=%i\n", tc->someInt);
+    printf(">> CommunicationReadyCallback of with context=%i\n", tc->someInt);
 
     /* Set baud rate and start the controllers. We omitted the return value check for brevity.*/
     (void)ib_Can_Controller_SetBaudRate(canController, 10000u, 1000000u);
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
 
     participantHandlerContext.someInt = 123;
-    ib_Participant_SetInitHandler(participant, (void*)&participantHandlerContext, &InitCallback);
+    ib_Participant_SetCommunicationReadyHandler(participant, (void*)&participantHandlerContext, &CommunicationReadyCallback);
     ib_Participant_SetStopHandler(participant, (void*)&participantHandlerContext, &StopCallback);
     ib_Participant_SetShutdownHandler(participant, (void*)&participantHandlerContext, &ShutdownCallback);
 

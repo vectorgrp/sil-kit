@@ -5,8 +5,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/util/functional.hpp"
-
 #include "MockParticipant.hpp"
 
 #include "DataMessageDatatypeUtils.hpp"

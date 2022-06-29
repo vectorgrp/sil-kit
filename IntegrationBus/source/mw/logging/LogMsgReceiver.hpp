@@ -28,7 +28,6 @@ public:
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
 
-
 private:
     // ----------------------------------------
     // private members
@@ -49,7 +48,6 @@ auto LogMsgReceiver::GetServiceDescriptor() const -> const mw::ServiceDescriptor
 {
     return _serviceDescriptor;
 }
-
 
 } // namespace logging
 } // namespace mw

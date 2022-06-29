@@ -9,7 +9,8 @@ namespace ib {
 namespace cfg {
 
 auto MockParticipantConfiguration() -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
-auto MockParticipantConfigurationWithLogging(mw::logging::Level logLevel) -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
+auto MockParticipantConfigurationWithLogging(mw::logging::Level logLevel) 
+    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
 
 } // namespace cfg
 } // namespace ib

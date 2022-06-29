@@ -36,14 +36,15 @@ static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_
     }
 }
 
-#else  //windows 
+#else  // windows
+
 #include <mstcpip.h>
 #  if defined(__MINGW32__)
 
 static void SetConnectOptions(ib::mw::logging::ILogger* ,
     asio::generic::stream_protocol::socket&)
 {
-    // SIO_LOOPBACK_FAST_PATH not defined 
+    // SIO_LOOPBACK_FAST_PATH not defined
 }
 
 #   else
@@ -80,7 +81,7 @@ static void EnableQuickAck(ib::mw::logging::ILogger* ,
     //not supported
 }
 
-#endif  // __linux__
+#endif // __linux__
 
 static auto strip(std::string value, const std::string& chars) -> std::string
 {
@@ -394,7 +395,7 @@ void VAsioTcpPeer::StartAsyncRead()
 
     _msgBuffer.resize(4096);
     _wPos = {0u};
-    
+
     ReadSomeAsync();
 }
 
@@ -486,6 +487,5 @@ void VAsioTcpPeer::DispatchBuffer()
     }
 }
 
-
-} // mw
+} // namespace mw
 } // namespace ib

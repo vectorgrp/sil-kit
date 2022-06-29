@@ -31,8 +31,6 @@ target_link_libraries(IbSimCan
 
 add_vib_test(TestSimCanController
     SOURCES 
-        #CanControllerTest.cpp 
-        #CanControllerProxyTest.cpp 
         CanControllerConfigTest.cpp
         CanControllerDetailedSimTest.cpp 
         CanControllerTrivialSimTest.cpp

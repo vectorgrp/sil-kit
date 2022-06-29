@@ -10,13 +10,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/util/functional.hpp"
-
 #include "FlexrayDatatypeUtils.hpp"
-
 #include "MockParticipant.hpp"
-
 #include "ParticipantConfiguration.hpp"
+
+#include "ib/util/functional.hpp"
 
 namespace {
 

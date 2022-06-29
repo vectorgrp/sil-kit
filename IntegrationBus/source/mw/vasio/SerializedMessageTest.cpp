@@ -72,5 +72,4 @@ TEST(VAsioSerializedMessage, packed_handshake_message)
 	
 	ASSERT_EQ(to_string(ptr->acceptorUri0, ptr->acceptorUri0Size),
 		announcement.peerInfo.acceptorUris.at(0));
-
 }

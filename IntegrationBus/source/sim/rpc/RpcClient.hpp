@@ -10,8 +10,8 @@
 #include "ib/sim/rpc/IRpcClient.hpp"
 #include "ib/sim/rpc/IRpcCallHandle.hpp"
 #include "ib/sim/rpc/string_utils.hpp"
-#include "ITimeConsumer.hpp"
 
+#include "ITimeConsumer.hpp"
 #include "IIbToRpcClient.hpp"
 #include "IParticipantInternal.hpp"
 #include "RpcCallHandle.hpp"

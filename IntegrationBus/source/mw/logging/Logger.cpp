@@ -114,7 +114,6 @@ Logger::Logger(const std::string& participantName, cfg::Logging config)
             _logger->sinks().push_back(fileSink);
         }
         }
-        
     }
 
     _logger->flush_on(to_spdlog(_config.flushLevel));

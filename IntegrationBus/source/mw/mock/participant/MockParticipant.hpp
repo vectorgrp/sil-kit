@@ -4,6 +4,9 @@
 
 #include <chrono>
 
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+
 #include "ib/mw/sync/SyncDatatypes.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -24,9 +27,6 @@
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 #include "SynchronizedHandlers.hpp"
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 
 namespace ib {
 namespace mw {
@@ -394,7 +394,7 @@ public:
     auto GetParticipantName() const -> const std::string& override { return _name; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
-    void joinIbDomain(uint32_t ) override {}
+    void JoinIbDomain(uint32_t ) override {}
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 

@@ -126,7 +126,6 @@ struct FlexrayNode
         update.txBufferIndex = static_cast<decltype(update.txBufferIndex)>(bufferIdx);
 
         std::copy(payloadString.begin(), payloadString.end(), update.payload.begin());
-        //update.payload[payloadString.size()] = 0;
 
         controller->UpdateTxBuffer(update);
     }

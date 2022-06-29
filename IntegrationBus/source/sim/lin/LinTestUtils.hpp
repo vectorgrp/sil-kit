@@ -45,21 +45,25 @@ inline auto MakeFrame(LinIdT linId, LinChecksumModel checksumModel = LinChecksum
     frame.data = data;
     return frame;
 }
+
 inline auto AFrameWithId(LinIdT linId) -> testing::Matcher<const LinFrame&>
 {
     using namespace testing;
     return Field(&LinFrame::id, linId);
 }
+
 inline auto ATransmissionWith(LinFrame frame) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return Field(&LinTransmission::frame, frame);
 }
+
 inline auto ATransmissionWith(LinFrameStatus status) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
     return Field(&LinTransmission::status, status);
 }
+
 inline auto ATransmissionWith(LinFrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
@@ -68,6 +72,7 @@ inline auto ATransmissionWith(LinFrameStatus status, std::chrono::nanoseconds ti
         Field(&LinTransmission::timestamp, timestamp)
     );
 }
+
 inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;
@@ -76,6 +81,7 @@ inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status) -> testing:
         Field(&LinTransmission::status, status)
     );
 }
+
 inline auto ATransmissionWith(LinFrame frame, LinFrameStatus status, std::chrono::nanoseconds timestamp) -> testing::Matcher<const LinTransmission&>
 {
     using namespace testing;

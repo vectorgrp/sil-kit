@@ -115,10 +115,10 @@ typedef ib_ReturnCode (*ib_Participant_Destroy_t)(ib_Participant* participant);
 
 /*! \brief  The handler to be called on initialization
  *
- * \param context The user provided context passed in \ref ib_Participant_SetInitHandler
+ * \param context The user provided context passed in \ref ib_Participant_SetCommunicationReadyHandler
  * \param participant The simulation participant entering the initialized state
  */
-typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* participant);
+typedef void (*ib_ParticipantCommunicationReadyHandler_t)(void* context, ib_Participant* participant);
 
 /*! \brief Register a callback to perform initialization
  *
@@ -133,11 +133,12 @@ typedef void (*ib_ParticipantInitHandler_t)(void* context, ib_Participant* parti
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called on initialization
  */
-IntegrationBusAPI ib_ReturnCode ib_Participant_SetInitHandler(ib_Participant* participant,
-    void* context, ib_ParticipantInitHandler_t handler);
+IntegrationBusAPI ib_ReturnCode ib_Participant_SetCommunicationReadyHandler(ib_Participant* participant,
+    void* context, ib_ParticipantCommunicationReadyHandler_t handler);
 
-typedef ib_ReturnCode(*ib_Participant_SetInitHandler_t)(ib_Participant* participant,
-    void* context, ib_ParticipantInitHandler_t handler);
+typedef ib_ReturnCode (*ib_Participant_SetCommunicationReadyHandler_t)(
+    ib_Participant* participant,
+    void* context, ib_ParticipantCommunicationReadyHandler_t handler);
 
 /*! \brief The handler to be called on a simulation stop
  *

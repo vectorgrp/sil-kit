@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #pragma once
 #include <string>
 #include <cassert>
@@ -45,9 +46,6 @@ public:
     inline std::string to_string() const;
     inline mw::EndpointAddress to_endpointAddress() const;
 
-    //inline void Serialize(ib::mw::MessageBuffer& buffer) const;
-    //inline void Deserialize(ib::mw::MessageBuffer& buffer);
-
 public:
     inline ParticipantId GetParticipantId() const { return _participantId; 
     }
@@ -87,8 +85,6 @@ public:
         return true;
     }
     void SetSupplementalDataItem(std::string key, std::string val) { _supplementalData[key] = std::move(val); }
-
-private: 
 
 public:
     std::string _participantName; //!< name of the participant
@@ -190,5 +186,6 @@ inline std::string to_string(const ServiceDescriptor& serviceDescriptor)
 {
     return serviceDescriptor.to_string();
 }
+
 } // namespace mw
 } // namespace ib

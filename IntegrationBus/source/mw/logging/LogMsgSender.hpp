@@ -2,7 +2,6 @@
 
 #pragma once
 
-
 #include "IIbToLogMsgSender.hpp"
 #include "IParticipantInternal.hpp"
 #include "IIbServiceEndpoint.hpp"

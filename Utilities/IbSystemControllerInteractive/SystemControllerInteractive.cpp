@@ -82,9 +82,9 @@ class InteractiveSystemController
 public:
     InteractiveSystemController(ISystemController* controller,
                                 std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfiguration, std::string myName,
-                                const std::vector<std::string>& expectedParticipantNames)
+                                std::vector<std::string> expectedParticipantNames)
         : _participantConfiguration{std::move(participantConfiguration)}
-        , _expectedParticipantNames{expectedParticipantNames}
+        , _expectedParticipantNames{std::move(expectedParticipantNames)}
         , _myParticipantName{std::move(myName)}
         , _controller{controller}
     {
@@ -169,30 +169,32 @@ public:
         switch (systemCommand)
         {
         case SystemCommand::Kind::Invalid:
-            return;
+            break;
         case SystemCommand::Kind::Run:
             _controller->Run();
-            return;
+            break;
         case SystemCommand::Kind::Stop:
             _controller->Stop();
-            return;
-        case SystemCommand::Kind::AbortSimulation: 
+            break;
+        case SystemCommand::Kind::AbortSimulation:
             _controller->AbortSimulation();
-            return;
+            break;
         }
     }
 
-    void SendCommand(ParticipantCommand::Kind participantCommand, std::string participantName)
+    void SendCommand(ParticipantCommand::Kind participantCommand, const std::string& participantName)
     {
         std::cout << "Sending ParticipantCommand::" << participantCommand << " to participant '" << participantName << "'" << std::endl;
         switch (participantCommand)
         {
         case ParticipantCommand::Kind::Invalid:
-            return;
+            break;
         case ParticipantCommand::Kind::Restart:
             _controller->Restart(participantName);
+            break;
         case ParticipantCommand::Kind::Shutdown:
             _controller->Shutdown(participantName);
+            break;
         }
     }
 
@@ -226,7 +228,7 @@ int main(int argc, char** argv)
     {
         commandlineParser.ParseArguments(argc, argv);
     }
-    catch (std::runtime_error & e)
+    catch (const std::runtime_error& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -270,7 +272,7 @@ int main(int argc, char** argv)
     {
         domainId = static_cast<uint32_t>(std::stoul(domain));
     }
-    catch (std::exception&)
+    catch (const std::exception&)
     {
         std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
 
@@ -284,7 +286,7 @@ int main(int argc, char** argv)
             ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
             ib::cfg::ParticipantConfigurationFromString("");
     }
-    catch (const ib::ConfigurationError & error)
+    catch (const ib::ConfigurationError& error)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
@@ -311,7 +313,7 @@ int main(int argc, char** argv)
         InteractiveSystemController interactiveSystemController(participant->GetSystemController(), configuration, participantName, expectedParticipantNames);
         interactiveSystemController.RunInteractiveLoop();
     }
-    catch (const std::exception & error)
+    catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

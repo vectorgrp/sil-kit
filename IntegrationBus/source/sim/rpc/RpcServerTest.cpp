@@ -2,16 +2,16 @@
 
 #include "RpcClient.hpp"
 
-#include "RpcTestUtilities.hpp"
-
-#include "ib/util/functional.hpp"
-
 #include <chrono>
 #include <functional>
 #include <string>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
+#include "RpcTestUtilities.hpp"
+
+#include "ib/util/functional.hpp"
 
 namespace {
 

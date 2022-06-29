@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "Validation.hpp"
 
 #include <chrono>
@@ -37,7 +38,6 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
 {
     TraceSink sink;
     sink.name = "Sink1";
-    //sink.enabled = true;
     sink.type = TraceSink::Type::PcapFile;
 
     ParticipantConfiguration cfg;
@@ -56,7 +56,6 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
 {
     TraceSink sink;
     sink.name = "Sink1";
-    //sink.enabled = true;
     sink.type = TraceSink::Type::PcapFile;
 
     ParticipantConfiguration cfg;
@@ -75,7 +74,6 @@ TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
 {
     TraceSource source;
     source.name = "Source1";
-    //source.enabled = true;
     source.type = TraceSource::Type::Mdf4File;
     source.inputPath = "some/file.mf4";
 
@@ -97,7 +95,6 @@ TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
 {
     TraceSource source;
     source.name = "Source1";
-    //source.enabled = true;
     source.type = TraceSource::Type::Undefined;
     source.inputPath = "Foo";
 
@@ -129,4 +126,5 @@ TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
     sinkRef.name = "";
     EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
 }
+
 } // anonymous namespace

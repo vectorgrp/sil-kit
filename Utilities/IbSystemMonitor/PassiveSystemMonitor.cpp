@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     {
         domainId = static_cast<uint32_t>(std::stoul(domain));
     }
-    catch (std::exception&)
+    catch (const std::exception&)
     {
         std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
 

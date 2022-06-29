@@ -1,10 +1,10 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "MessageBuffer.hpp"
-
 #include <vector>
 
 #include "gtest/gtest.h"
+
+#include "MessageBuffer.hpp"
 
 using namespace std::chrono_literals;
 

@@ -38,7 +38,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
     {
         if (!_hasHistory)
             return;
-        
+
         _from = from->GetServiceDescriptor().to_endpointAddress();
         _last = msg;
         _hasValue = true;
@@ -47,7 +47,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
     {
         if (!_hasValue || !_hasHistory)
             return;
-       
+
         auto buffer = SerializedMessage(_last, _from, remoteIdx);
         peer->SendIbMsg(std::move(buffer));
     }
@@ -152,6 +152,5 @@ inline bool operator==(const RemoteReceiver& lhs, const RemoteReceiver& rhs)
         && lhs.remoteIdx == rhs.remoteIdx;
 }
 
-
-} // mw
+} // namespace mw
 } // namespace ib

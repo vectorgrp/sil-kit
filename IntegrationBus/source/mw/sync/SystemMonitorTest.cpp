@@ -9,10 +9,10 @@
 #include "gmock/gmock.h"
 
 #include "ib/util/functional.hpp"
+#include "ib/mw/sync/string_utils.hpp"
 
 #include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
-#include "ib/mw/sync/string_utils.hpp"
 
 namespace {
 
@@ -773,4 +773,4 @@ TEST_F(SystemMonitorTest, add_and_remove_system_state_and_participant_status_han
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-} // namespace
+} // anonymous namespace

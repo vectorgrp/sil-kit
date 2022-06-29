@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "ParticipantConfiguration.hpp"
 
 #include <fstream>
@@ -50,8 +51,6 @@ auto Parse(const std::string& text) -> ib::cfg::ParticipantConfiguration
         ib::cfg::v4::ParticipantConfiguration{};
     configuration.configurationFilePath.clear();
 
-    //PostProcess(config);
-
     return configuration;
 }
 
@@ -64,8 +63,6 @@ bool operator==(const CanController& lhs, const CanController& rhs)
 {
     return lhs.name == rhs.name
         && lhs.network == rhs.network;
-        //&& lhs.useTraceSinks == rhs.useTraceSinks
-        //&& lhs.replay == rhs.replay;
 }
 
 bool operator==(const LinController& lhs, const LinController& rhs)
@@ -170,7 +167,6 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
         && lhs.extensions == rhs.extensions;
 }
 
-
 // ================================================================================
 //  Public API
 // ================================================================================
@@ -198,7 +194,7 @@ constexpr NetworkType RpcClient::networkType;
 } // inline namespace v4
 
 auto ParticipantConfigurationFromString(const std::string& text)
--> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     auto configuration = ib::cfg::Parse(text);
 
@@ -206,7 +202,7 @@ auto ParticipantConfigurationFromString(const std::string& text)
 }
 
 auto ParticipantConfigurationFromFile(const std::string& filename)
--> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
 {
     auto text = ib::cfg::ReadFile(filename);
     auto configuration = ib::cfg::Parse(text);

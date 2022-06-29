@@ -89,7 +89,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     // Setup Participant for TestController
     auto participant = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController");
 
-    participant->joinIbDomain(domainId);
+    participant->JoinIbDomain(domainId);
     auto systemController = participant->GetSystemController();
     systemController->SetWorkflowConfiguration({syncParticipantNames});
     auto monitor = participant->GetSystemMonitor();
@@ -99,7 +99,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Setup Participant for Test Unit
     auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit");
-    participantTestUnit->joinIbDomain(domainId);
+    participantTestUnit->JoinIbDomain(domainId);
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 

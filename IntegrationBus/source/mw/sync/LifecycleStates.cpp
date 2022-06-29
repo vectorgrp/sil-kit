@@ -485,7 +485,6 @@ auto ErrorState::GetParticipantState() -> ParticipantState
     return ParticipantState::Error;
 }
 
-
 } // namespace sync
 } // namespace mw
 } // namespace ib

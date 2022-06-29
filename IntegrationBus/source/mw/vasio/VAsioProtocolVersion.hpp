@@ -14,7 +14,6 @@
 namespace ib {
 namespace mw {
 
-
 inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion;
 inline auto to_header(ProtocolVersion version);
 inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string;
@@ -90,5 +89,6 @@ inline auto operator<<(std::ostream& out, const ProtocolVersion& header) -> std:
     out << static_cast<int>(header.major) << "." << static_cast<int>(header.minor);
     return out;
 }
-} // mw
+
+} // namespace mw
 } // namespace ib

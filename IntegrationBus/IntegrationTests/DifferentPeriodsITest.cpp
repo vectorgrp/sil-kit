@@ -55,7 +55,7 @@ public:
         _participant =
             ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), _participantName);
 
-        _participant->joinIbDomain(domainId);
+        _participant->JoinIbDomain(domainId);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
@@ -124,7 +124,7 @@ public:
     {
         _participant = ib::mw::CreateParticipantImpl(
             ib::cfg::MockParticipantConfiguration(), participantName);
-        _participant->joinIbDomain(domainId);
+        _participant->JoinIbDomain(domainId);
 
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({_syncParticipantNames});

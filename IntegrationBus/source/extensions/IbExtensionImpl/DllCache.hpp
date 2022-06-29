@@ -9,7 +9,8 @@
 
 #include "IbExtensions.hpp"
 
-namespace ib { namespace extensions {
+namespace ib {
+namespace extensions {
 
 //!\brief DllCache keeps a shared reference to already loaded shared libraries.
 //
@@ -22,13 +23,11 @@ namespace ib { namespace extensions {
 class DllCache
 {
 public:
-
-    auto Get(mw::logging::ILogger* logger,
-        const std::string& extensionName,
-        const cfg::Extensions& config)
+    auto Get(mw::logging::ILogger* logger, const std::string& extensionName, const cfg::Extensions& config)
         -> ib::extensions::IIbExtension&
     {
-        try {
+        try
+        {
             //try to load the extension by its undecorated DLL/so name
             //and cache a reference to it.
             if (!_dll)
@@ -39,7 +38,7 @@ public:
             if (extensionName != _extensionName)
             {
                 throw ExtensionError("Cached Extension " + _extensionName
-                    + " differs from requested extension name: " + extensionName);
+                                     + " differs from requested extension name: " + extensionName);
             }
             return *_dll;
         }
@@ -47,7 +46,7 @@ public:
         {
             std::stringstream msg;
             msg << "Error loading VIB extension '" << extensionName << "': " << err.what();
-            if(logger)
+            if (logger)
             {
                 logger->Error(msg.str());
             }
@@ -60,5 +59,5 @@ private:
     std::shared_ptr<ib::extensions::IIbExtension> _dll;
 };
 
-}//end namespace extensions
-}//end namespace ib
+} //end namespace extensions
+} //end namespace ib

@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "YamlParser.hpp"
 #include "YamlValidator.hpp"
 
@@ -18,7 +19,7 @@ using namespace ib::cfg;
 TEST_F(YamlValidatorTest, yaml_doc_relations)
 {
     YamlValidator v;
-    //ensure that YAML validation of top-level elements works
+    // Ensure that YAML validation of top-level elements works
     EXPECT_TRUE(v.IsRootElement("/SchemaVersion"));
     EXPECT_TRUE(v.IsRootElement("/ParticipantName"));
     EXPECT_TRUE(v.IsRootElement("/Description"));

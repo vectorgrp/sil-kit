@@ -1,9 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
+#include <iostream>
+
 #include "WatchDog.hpp"
 #include "SetThreadName.hpp"
-
-#include <iostream>
 
 using namespace std::chrono_literals;
 
@@ -125,8 +125,7 @@ void WatchDog::Run()
     }
 }
 
-
-    // For testing purposes only
+// For testing purposes only
 std::chrono::milliseconds WatchDog::GetWarnTimeout()
 {
     return _warnTimeout;
@@ -136,8 +135,6 @@ std::chrono::milliseconds WatchDog::GetErrorTimeout()
 {
     return _errorTimeout;
 }
-
-
     
 } // namespace sync
 } // namespace mw

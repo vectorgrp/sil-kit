@@ -1,3 +1,5 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "ib/capi/IntegrationBus.h"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -5,7 +7,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/rpc/all.hpp"
 
-#include "CapiImpl.h"
+#include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
 #include <string>
@@ -14,7 +16,8 @@
 #include <mutex>
 #include <cstring>
 
-static void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<ib::sim::rpc::RpcDiscoveryResult>& cppDiscoveryResults)
+namespace {
+void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<ib::sim::rpc::RpcDiscoveryResult>& cppDiscoveryResults)
 {
     size_t numResults = cppDiscoveryResults.size();
     *cResultList = (ib_Rpc_DiscoveryResultList*)malloc(sizeof(ib_Rpc_DiscoveryResultList));
@@ -37,7 +40,7 @@ static void assign(ib_Rpc_DiscoveryResultList** cResultList, const std::vector<i
     }
 }
 
-static auto GetDataOrNullptr(const std::vector<std::uint8_t>& vector) -> const std::uint8_t*
+auto GetDataOrNullptr(const std::vector<std::uint8_t>& vector) -> const std::uint8_t*
 {
     if (vector.empty())
     {
@@ -46,7 +49,7 @@ static auto GetDataOrNullptr(const std::vector<std::uint8_t>& vector) -> const s
     return vector.data();
 }
 
-static ib::sim::rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, ib_Rpc_CallResultHandler_t handler)
+ib::sim::rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, ib_Rpc_CallResultHandler_t handler)
 {
     return [handler, context](ib::sim::rpc::IRpcClient* cppClient, const ib::sim::rpc::RpcCallResultEvent& event) {
         auto* cClient = reinterpret_cast<ib_Rpc_Client*>(cppClient);
@@ -60,7 +63,7 @@ static ib::sim::rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context
     };
 }
 
-static ib::sim::rpc::RpcCallHandler MakeRpcCallHandler(void* context, ib_Rpc_CallHandler_t handler)
+ib::sim::rpc::RpcCallHandler MakeRpcCallHandler(void* context, ib_Rpc_CallHandler_t handler)
 {
     return [handler, context](ib::sim::rpc::IRpcServer* cppServer, const ib::sim::rpc::RpcCallEvent& event) {
         auto* cServer = reinterpret_cast<ib_Rpc_Server*>(cppServer);
@@ -72,6 +75,8 @@ static ib::sim::rpc::RpcCallHandler MakeRpcCallHandler(void* context, ib_Rpc_Cal
         handler(context, cServer, &cEvent);
     };
 }
+
+}//namespace
 
 extern "C" {
 
@@ -110,7 +115,7 @@ ib_ReturnCode ib_Rpc_Server_SubmitResult(ib_Rpc_Server* self, ib_Rpc_CallHandle*
         auto cppServer = reinterpret_cast<ib::sim::rpc::IRpcServer*>(self);
         auto cppCallHandle = reinterpret_cast<ib::sim::rpc::IRpcCallHandle*>(callHandle);
         auto cppReturnData =
-            std::vector<uint8_t>(&(returnData->data[0]), &(returnData->data[0]) + returnData->size);
+            std::vector<uint8_t>(returnData->data, returnData->data+ returnData->size);
         cppServer->SubmitResult(cppCallHandle, cppReturnData);
         return ib_ReturnCode_SUCCESS;
     }
@@ -163,7 +168,7 @@ ib_ReturnCode ib_Rpc_Client_Call(ib_Rpc_Client* self, ib_Rpc_CallHandle** outHan
     {
         auto cppClient = reinterpret_cast<ib::sim::rpc::IRpcClient*>(self);
         auto cppCallHandle = cppClient->Call(
-            std::vector<uint8_t>(&(argumentData->data[0]), &(argumentData->data[0]) + argumentData->size));
+            std::vector<uint8_t>(argumentData->data, argumentData->data + argumentData->size));
         *outHandle = reinterpret_cast<ib_Rpc_CallHandle*>(cppCallHandle);
         return ib_ReturnCode_SUCCESS;
     }

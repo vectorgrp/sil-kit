@@ -1,9 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ServiceDiscovery.hpp"
-
-#include "string_utils_internal.hpp"
-
 #include <chrono>
 #include <functional>
 #include <set>
@@ -12,8 +8,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "UuidRandom.hpp" //for random strings
-
+#include "ServiceDiscovery.hpp"
+#include "string_utils_internal.hpp"
+#include "UuidRandom.hpp"
 #include "MockParticipant.hpp"
 
 namespace {

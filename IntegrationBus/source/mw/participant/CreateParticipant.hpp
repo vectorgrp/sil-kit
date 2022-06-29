@@ -14,6 +14,6 @@ auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> p
 
 auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                const std::string& participantName) -> ib::cfg::ParticipantConfiguration;
-} // mw
+} // namespace mw
 } // namespace ib
 

@@ -2,7 +2,7 @@
   "$schema": "./ParticipantConfiguration.schema.json",
   "SchemaVersion": "1",
   "ParticipantName": "CANoe",
-  "Description": "Participant which covers most parameters",
+  "Description": "Sample Configuration",
 
   "CanControllers": [
     {

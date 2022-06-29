@@ -13,16 +13,15 @@
 namespace ib {
 namespace mw {
 
-
 struct RemoteServiceEndpoint : IIbServiceEndpoint
 {
     void SetServiceDescriptor(const ib::mw::ServiceDescriptor&) override 
-    { 
+    {
         throw std::logic_error("This method is not supposed to be used in this struct."); 
     }
 
     auto GetServiceDescriptor() const -> const ServiceDescriptor & override
-    { 
+    {
         return _serviceDescriptor; 
     }
 
@@ -110,6 +109,5 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescr
 
 }
 
-
-} // mw
+} // namespace mw
 } // namespace ib

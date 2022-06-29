@@ -8,6 +8,7 @@
 using asio::ip::tcp;
 
 namespace {
+
 bool isLocalhostAddress(const std::string& hostUrl)
 {
     return hostUrl.find("tcp://127.") == 0 //ipv4
@@ -24,7 +25,8 @@ bool isCatchallAddress(const std::string& hostUrl)
         ;
 }
 
-}
+} // namespace
+
 namespace ib {
 namespace mw {
 
@@ -162,7 +164,6 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
-
     _logger->Info("Sending known participant message to {}", peer->GetInfo().participantName);
 
     KnownParticipants knownParticipantsMsg;

@@ -3,10 +3,8 @@
 #pragma once
 
 #include <vector>
-#include <future>
 #include <unordered_map>
 #include <unordered_set>
-#include <mutex>
 
 #include "ib/mw/fwd_decl.hpp"
 #include "ib/sim/data/IDataSubscriber.hpp"

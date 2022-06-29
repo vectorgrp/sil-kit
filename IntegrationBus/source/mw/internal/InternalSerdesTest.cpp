@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "InternalSerdes.hpp"
-
 #include "gtest/gtest.h"
+
+#include "InternalSerdes.hpp"
 
 TEST(MwVAsioSerdes, Mw_EndpointAddress)
 {
@@ -28,7 +28,6 @@ TEST(MwVAsioSerdes, Mw_EndpointAddress_multiple)
     ib::mw::EndpointAddress out1{1,1};
     ib::mw::EndpointAddress out2{2,2};
     ib::mw::EndpointAddress out3{3,3};
-
 
     buffer << in1 << in2 << in3;
     buffer >> out1 >> out2 >> out3;

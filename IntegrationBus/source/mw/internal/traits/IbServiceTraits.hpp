@@ -1,7 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-
 #include "internal_fwd.hpp"
 
 namespace ib {

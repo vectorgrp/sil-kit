@@ -7,7 +7,6 @@
 
 #include <tuple>
 #include <vector>
-#include <mutex>
 
 #include "IIbToFlexrayController.hpp"
 #include "IParticipantInternal.hpp"

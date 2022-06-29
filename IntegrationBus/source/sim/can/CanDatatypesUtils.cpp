@@ -2,8 +2,6 @@
 
 #include "CanDatatypesUtils.hpp"
 
-#include <cassert>
-
 namespace ib {
 namespace sim {
 namespace can {

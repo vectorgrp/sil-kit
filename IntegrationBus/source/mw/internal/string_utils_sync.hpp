@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "SyncDatatypes.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+
+#include "SyncDatatypes.hpp"
 
 namespace ib {
 namespace mw {

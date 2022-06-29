@@ -1,5 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #include "DataSerdes.hpp"
+
 namespace ib {
 namespace sim {
 namespace data {

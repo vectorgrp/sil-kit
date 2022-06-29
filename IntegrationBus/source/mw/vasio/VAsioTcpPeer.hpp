@@ -103,7 +103,6 @@ private:
     mw::ServiceDescriptor _serviceDescriptor;
 };
 
-
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
@@ -127,5 +126,5 @@ auto VAsioTcpPeer::GetProtocolVersion() const -> ProtocolVersion
     return _protocolVersion;
 }
 
-} // mw
+} // namespace mw
 } // namespace ib

@@ -34,14 +34,13 @@ public:
     virtual auto GetRemoteAddress() const -> std::string = 0;
     //! Local socket endpoint address.
     virtual auto GetLocalAddress() const -> std::string = 0;
-    //< Start the reading in the IO loop context
+    //! Start the reading in the IO loop context
     virtual void StartAsyncRead() = 0;
 
     //! Version management for backward compatibility on network ser/des level
     virtual void SetProtocolVersion(ProtocolVersion v) = 0;
     virtual auto GetProtocolVersion() const -> ProtocolVersion = 0;
-
 };
 
-} // mw
+} // namespace mw
 } // namespace ib

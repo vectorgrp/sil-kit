@@ -5,13 +5,12 @@
 #include <chrono>
 #include <string>
 
-// public include
 #include "ib/mw/sync/SyncDatatypes.hpp"
+
 #include "IIbServiceEndpoint.hpp"
 
 namespace ib {
 namespace mw {
-//! The synchronization namespace
 namespace sync {
 
 struct NextSimTask

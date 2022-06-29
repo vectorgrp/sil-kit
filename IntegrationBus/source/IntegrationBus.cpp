@@ -12,7 +12,7 @@ auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> parti
     -> std::unique_ptr<mw::IParticipant>
 {
     auto participant = mw::CreateParticipantImpl(std::move(participantConfig), participantName);
-    participant->joinIbDomain(domainId);
+    participant->JoinIbDomain(domainId);
     return participant;
 }
 }

@@ -7,34 +7,28 @@
 
 #include "traits/IbMsgTraits.hpp"
 
-//Datatypes for testing versioning and renaming of IB messages.
-namespace ib
-{
-namespace mw
-{
-namespace test
-{
+// Datatypes for testing versioning and renaming of IB messages.
+namespace ib {
+namespace mw {
+namespace test {
 
-// a test message that was extended to a new version 
-namespace version1
-{
+// a test message that was extended to a new version
+namespace version1 {
 struct TestMessage
 {
     std::string str{"1"};
     int integer{1};
 };
-//Printing helper
-} // version1
+} // namespace version1
 
 // the newer version of TestMessage
-inline namespace version2
-{
+inline namespace version2 {
 struct TestMessage
 {
     int integer{2};
     std::string str{"2"};
 };
-} // version2
+} // namespace version2
 
 // Assume we had to rename the TestMessage to TestFrameEvent
 struct TestFrameEvent
@@ -43,7 +37,7 @@ struct TestFrameEvent
     std::string str{"renamed"};
 };
 
-} // test
+} // namespace test
 
 //////////////////////////////////////////////////////////////////////
 // Traits for internal testing data types for wire protocol versioning and evolution
@@ -115,20 +109,15 @@ inline void Deserialize(MessageBuffer& buffer, test::TestFrameEvent& out)
 inline void Serialize(MessageBuffer& buffer, const test::TestFrameEvent& msg)
 {
     buffer << msg;
-    return;
 }
-
-inline auto Serialize(MessageBuffer& buffer, const test::version2::TestMessage& msg)
+inline void Serialize(MessageBuffer& buffer, const test::version2::TestMessage& msg)
 {
     buffer << msg;
-    return;
 }
-
-inline auto Serialize(MessageBuffer& buffer, const test::version1::TestMessage& msg)
+inline void Serialize(MessageBuffer& buffer, const test::version1::TestMessage& msg)
 {
     buffer << msg;
-    return;
 }
 
-} // mw
-} // ib
+} // namespace mw
+} // namespace ib

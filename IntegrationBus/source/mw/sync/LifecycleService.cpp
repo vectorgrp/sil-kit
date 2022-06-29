@@ -1,16 +1,16 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "LifecycleService.hpp"
-#include "TimeSyncService.hpp"
-#include "IServiceDiscovery.hpp"
-#include "LifecycleManagement.hpp"
-
 #include <cassert>
 #include <future>
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/ISystemMonitor.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+
+#include "LifecycleService.hpp"
+#include "TimeSyncService.hpp"
+#include "IServiceDiscovery.hpp"
+#include "LifecycleManagement.hpp"
 
 using namespace std::chrono_literals;
 

@@ -1,15 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "Uri.hpp"
 
-namespace
-{
+namespace {
 const std::string localPrefix{ "local://" };
 const std::string tcpPrefix{ "tcp://" };
-} //end anonymous
+} // namespace
 
 namespace ib {
 namespace mw {
-
 
 auto Uri::EncodedString() const -> const std::string&
 {

@@ -1,5 +1,0 @@
-// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
-// such as names of functions and macros.
-// For more information see https://go.microsoft.com/fwlink/?linkid=865984
-#define CAPI_ENTER try
-#define CAPI_LEAVE catch (const std::runtime_error& e) { ib_error_string = e.what(); return ib_ReturnCode_UNSPECIFIEDERROR; } catch (const std::exception&) { return ib_ReturnCode_UNSPECIFIEDERROR; }

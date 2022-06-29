@@ -3,7 +3,6 @@
 #pragma once
 
 #include "MessageBuffer.hpp"
-
 #include "EndpointAddress.hpp"
 
 namespace ib {
@@ -23,5 +22,5 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, EndpointAddress& addr)
     return buffer;
 }
 
-} // mw
+} // namespace mw
 } // namespace ib

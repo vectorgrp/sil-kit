@@ -2,8 +2,11 @@
 
 #pragma once
 
-#include "ib/mw/logging/ILogger.hpp"
+#include <fmt/format.h>
+#include <type_traits>
+#include <tuple>
 
+#include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/logging/string_utils.hpp"
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/can/string_utils.hpp"
@@ -12,16 +15,9 @@
 #include "ib/sim/lin/string_utils.hpp"
 #include "ib/sim/data/string_utils.hpp"
 #include "ib/sim/rpc/string_utils.hpp"
-// from internal
+
 #include "string_utils_sync.hpp"
-
-// internals
 #include "ServiceDatatypes.hpp"
-
-#include <fmt/format.h>
-
-#include <type_traits>
-#include <tuple>
 
 // Template helpers
 template<class Query, class...List>

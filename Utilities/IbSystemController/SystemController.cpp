@@ -82,7 +82,6 @@ public:
     {
         switch (newStatus.state)
         {
-        //case ParticipantState::Stopping:
         case ParticipantState::Stopped:
             if (!_stopInitiated)
             {
@@ -141,7 +140,6 @@ private:
 
     ISystemController* _controller;
     ISystemMonitor* _monitor;
-
 };
 
 int main(int argc, char** argv)
@@ -167,7 +165,7 @@ int main(int argc, char** argv)
     {
         commandlineParser.ParseArguments(argc, argv);
     }
-    catch (std::runtime_error & e)
+    catch (const std::runtime_error& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -211,7 +209,7 @@ int main(int argc, char** argv)
     {
         domainId = static_cast<uint32_t>(std::stoul(domain));
     }
-    catch (std::exception&)
+    catch (const std::exception&)
     {
         std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
 
@@ -225,7 +223,7 @@ int main(int argc, char** argv)
             ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
             ib::cfg::ParticipantConfigurationFromString("");
     }
-    catch (const ib::ConfigurationError & error)
+    catch (const ib::ConfigurationError& error)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

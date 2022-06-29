@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ServiceSerdes.hpp"
-
 #include "gtest/gtest.h"
+
+#include "ServiceSerdes.hpp"
 
 TEST(MwVAsioSerdes, Mw_Service)
 {

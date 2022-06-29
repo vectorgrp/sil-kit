@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include "ib/mw/sync/ISystemController.hpp"
-
-
 #include <cassert>
+
+#include "ib/mw/sync/ISystemController.hpp"
 
 #include "IIbToSystemController.hpp"
 #include "IParticipantInternal.hpp"

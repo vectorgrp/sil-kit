@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <iostream>
-
 #include "ib/sim/eth/EthernetDatatypes.hpp"
 
 namespace ib {

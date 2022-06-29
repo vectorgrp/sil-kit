@@ -1,12 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SyncSerdes.hpp"
-
 #include <chrono>
 
 #include "gtest/gtest.h"
 
+#include "SyncSerdes.hpp"
+
 using namespace std::chrono_literals;
+
+namespace {
 
 TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
 {
@@ -63,3 +65,6 @@ TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
     EXPECT_EQ(in.enterTime, out.enterTime);
     EXPECT_EQ(in.refreshTime, out.refreshTime);
 }
+
+} // anonymous namespace
+

@@ -16,7 +16,7 @@ using ServiceDiscoveryHandlerT =
 
 class IServiceDiscovery
 {
-public: //types
+public:
 
     virtual ~IServiceDiscovery() = default;
     //!< Publish a locally created new ServiceDescriptor to all other participants

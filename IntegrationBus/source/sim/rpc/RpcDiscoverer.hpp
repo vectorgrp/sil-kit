@@ -3,6 +3,7 @@
 #pragma once
 
 #include "IServiceDiscovery.hpp"
+
 #include "ib/sim/rpc/RpcDatatypes.hpp"
 
 namespace ib {

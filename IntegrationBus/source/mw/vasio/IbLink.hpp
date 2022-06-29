@@ -17,8 +17,7 @@ class IbLink
 {
 public:
     using ReceiverT = IIbMessageReceiver<MsgT>;
-    
-    
+
 public:
     // ----------------------------------------
     // Constructors and Destructor
@@ -35,8 +34,8 @@ public:
     void AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx);
 
     void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
-    void DistributeLocalIbMessage(const IIbServiceEndpoint* sender, const MsgT& msg);
-    
+    void DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
+
     void SetHistoryLength(size_t history);
 
     void DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
@@ -89,11 +88,11 @@ void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, con
     }
 }
 
-// Distribute outgoing (= from local) IbMessages to local (via _localReceivers) and remote (via transmitter per MsgT) receivers 
+// Distribute outgoing (= from local) IbMessages to local (via _localReceivers) and remote (via transmitter per MsgT) receivers
 template <class MsgT>
 void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
 {
-    // NB: Messages must be dispatched to remote receivers first. 
+    // NB: Messages must be dispatched to remote receivers first.
     // Otherwise, messages that may be produced during the internal dispatch will be dispatched to remote receivers first.
     // As a result, the messages may be delivered in the wrong order (possibly even reversed)
     DispatchIbMessage(&_vasioTransmitter, from, msg);
@@ -103,7 +102,7 @@ void IbLink<MsgT>::DistributeLocalIbMessage(const IIbServiceEndpoint* from, cons
         // C++ 17 -> if constexpr
         if (!IbMsgTraits<MsgT>::IsSelfDeliveryEnforced())
         {
-          if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor()) continue;
+            if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor()) continue;
         }
         DispatchIbMessage(receiver, from, msg);
     }
@@ -133,7 +132,6 @@ void IbLink<MsgT>::DispatchIbMessageToTarget(const IIbServiceEndpoint* from, con
     _vasioTransmitter.SendMessageToTarget(from, targetParticipantName, msg);
 }
 
-    
 template <class MsgT>
 void IbLink<MsgT>::SetHistoryLength(size_t history)
 {

@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include "spdlog/details/log_msg.h"
+
 #include "ib/exception.hpp"
 #include "ib/mw/logging/LoggingDatatypes.hpp"
-
-#include "spdlog/details/log_msg.h"
 
 namespace ib {
 namespace mw {

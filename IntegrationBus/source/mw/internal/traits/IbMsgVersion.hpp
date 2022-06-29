@@ -2,6 +2,7 @@
 
 #pragma once
 #include <cstdint>
+
 namespace ib {
 namespace mw {
 
@@ -15,7 +16,6 @@ template <class MsgT> struct IbMsgTraitVersion { static constexpr VersionT Versi
     struct IbMsgTraitVersion<TYPE_NAME> {\
         static constexpr VersionT Version() { return VERSION; }\
     }
-
 
 DefineIbMsgTrait_Version(ib::mw::logging::LogMsg, 1);
 DefineIbMsgTrait_Version(ib::mw::sync::ParticipantCommand, 1);

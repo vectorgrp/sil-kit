@@ -32,10 +32,12 @@ void SimBehavior::SendIbMessage(CanConfigureBaudrate&& msg)
 {
     SendIbMessageImpl(std::move(msg));
 }
+
 void SimBehavior::SendIbMessage(CanSetControllerMode&& msg)
 {
     SendIbMessageImpl(std::move(msg));
 }
+
 void SimBehavior::SendIbMessage(CanFrameEvent&& msg)
 {
     SendIbMessageImpl(std::move(msg));
@@ -46,6 +48,7 @@ void SimBehavior::SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink
     _detailed.SetSimulatedLink(simulatedLink);
     _currentBehavior = &_detailed;
 }
+
 void SimBehavior::SetTrivialBehavior()
 {
     _currentBehavior = &_trivial;

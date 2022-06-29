@@ -63,12 +63,12 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
     std::string participantNameSender = "Sender";
     auto pubParticipant = ib::mw::CreateParticipantImpl(
         ib::cfg::MockParticipantConfiguration(), participantNameSender);
-    pubParticipant->joinIbDomain(domainId);
+    pubParticipant->JoinIbDomain(domainId);
 
     std::string participantNameReceiver = "Receiver";
     auto subParticipant = ib::mw::CreateParticipantImpl(
         ib::cfg::MockParticipantConfiguration(), participantNameReceiver);
-    subParticipant->joinIbDomain(domainId);
+    subParticipant->JoinIbDomain(domainId);
 
     publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);
     subscriber = subParticipant->CreateDataSubscriber(

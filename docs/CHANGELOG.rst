@@ -102,7 +102,7 @@ Changed
     
         .. code-block:: c++
     
-          virtual void IParticipantController::InitHandler(InitHandlerT handler) = 0;
+          virtual void IParticipantController::CommunicationReadyHandler(CommunicationReadyHandlerT handler) = 0;
           
       + new (callbacks):
     
@@ -182,7 +182,7 @@ Changed
 
   .. code-block:: c
 
-    typedef void (*ib_ParticipantInitHandler_t)(void* context,
+    typedef void (*ib_ParticipantCommunicationReadyHandler_t)(void* context,
                       ib_Participant* participant,
                       ib_ParticipantCommand* command);
 
@@ -190,7 +190,7 @@ Changed
 
   .. code-block:: c
 
-    typedef void (*ib_ParticipantInitHandler_t)(void* context,
+    typedef void (*ib_ParticipantCommunicationReadyHandler_t)(void* context,
                       ib_Participant* participant);
 
 - SetRequiredParticipants changed to SetWorkflowConfiguration. The new struct currently has the required participants as its sole member.

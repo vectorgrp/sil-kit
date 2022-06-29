@@ -1,16 +1,16 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "SystemMonitor.hpp"
-#include "IServiceDiscovery.hpp"
-#include "LifecycleService.hpp"
-#include "TimeSyncService.hpp"
-
 #include <algorithm>
 #include <ctime>
 #include <iomanip> //std:put_time
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+
+#include "SystemMonitor.hpp"
+#include "IServiceDiscovery.hpp"
+#include "LifecycleService.hpp"
+#include "TimeSyncService.hpp"
 
 namespace ib {
 namespace mw {
@@ -392,7 +392,6 @@ void SystemMonitor::SetSystemState(sync::SystemState newState)
 {
     _systemState = newState;
 }
-
 
 } // namespace sync
 } // namespace mw

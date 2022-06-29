@@ -138,6 +138,7 @@ void SimBehaviorTrivial::SendIbMessage(LinFrameResponseUpdate&& msg)
 {
     SendIbMessageImpl(msg);
 }
+
 void SimBehaviorTrivial::SendIbMessage(LinControllerStatusUpdate&& msg)
 {
     SendIbMessageImpl(msg);

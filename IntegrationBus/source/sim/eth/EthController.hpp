@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <memory>
 #include <map>
 
 #include "ib/sim/eth/IEthernetController.hpp"

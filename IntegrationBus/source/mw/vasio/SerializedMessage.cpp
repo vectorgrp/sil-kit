@@ -1,10 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "SerializedMessage.hpp"
-namespace ib
-{
-namespace mw
-{
+
+namespace ib {
+namespace mw {
 
 // Constructor from raw data (reading)
 SerializedMessage::SerializedMessage(std::vector<uint8_t>&& blob)
@@ -13,15 +12,14 @@ SerializedMessage::SerializedMessage(std::vector<uint8_t>&& blob)
     ReadNetworkHeaders();
 }
 
-
 auto SerializedMessage::ReleaseStorage() -> std::vector<uint8_t>
 {
     auto buffer = _buffer.ReleaseStorage();
     if (buffer.size() > std::numeric_limits<uint32_t>::max())
         throw std::runtime_error{"SerializedMessage::Serialize: message buffer is too large"};
 
-    //emplace the buffer size as the first element in the byte stream
-    uint32_t bufferSize = static_cast<uint32_t>(buffer.size());
+    // emplace the buffer size as the first element in the byte stream
+    const auto bufferSize = static_cast<uint32_t>(buffer.size());
     memcpy(buffer.data(), &bufferSize, sizeof(uint32_t));
     return buffer;
 }
@@ -68,7 +66,7 @@ auto SerializedMessage::GetRegistryMessageHeader() const -> RegistryMsgHeader
 
 void SerializedMessage::WriteNetworkHeaders()
 {
-    _buffer << _messageSize; //place holder for finalization via ReleaseStorage()
+    _buffer << _messageSize; // placeholder for finalization via ReleaseStorage()
     _buffer << _messageKind;
     if (_messageKind == VAsioMsgKind::IbRegistryMessage)
     {
@@ -108,5 +106,5 @@ void SerializedMessage::ReadNetworkHeaders()
     }
 }
 
-} //mw
-} //ib
+} // namespace mw
+} // namespace ib

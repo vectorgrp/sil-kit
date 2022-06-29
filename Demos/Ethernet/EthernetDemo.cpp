@@ -127,7 +127,6 @@ void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& fro
 int main(int argc, char** argv)
 {
     ib::sim::eth::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
-    //ib::sim::eth::EthernetMac ReaderMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2};
     ib::sim::eth::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     if (argc < 3)
@@ -193,7 +192,8 @@ int main(int argc, char** argv)
         {
             auto* lifecycleService = participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
-            // Set an Init Handler
+
+            // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([&participantName, ethernetController]() {
                 std::cout << "Initializing " << participantName << std::endl;
                 ethernetController->Activate();

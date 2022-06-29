@@ -2,6 +2,7 @@
 
 #pragma once
 #include <cstdint>
+
 namespace ib {
 namespace mw {
 
@@ -16,7 +17,6 @@ template <class MsgT> struct IbMsgTraitSerdesName { static constexpr const char*
     struct IbMsgTraitSerdesName<TYPE_NAME> {\
         static constexpr const char* SerdesName() { return SERDES_NAME; }\
     }
-
 
 DefineIbMsgTrait_SerdesName(ib::mw::logging::LogMsg, "LOGMSG" );
 DefineIbMsgTrait_SerdesName(ib::mw::sync::ParticipantCommand, "PARTICIPANTCOMMAND" );

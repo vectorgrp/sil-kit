@@ -1,43 +1,43 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
+
 namespace ib {
 namespace sim {
-
 namespace can {
 class IIbToCanSimulator;
-} // can
+} // namespace can
 namespace eth {
 class IIbToEthSimulator;
-} // eth
+} // namespace eth
 namespace fr {
 class IIbToFlexrayBusSimulator;
-} // fr
+} // namespace fr
 namespace lin {
 class IIbToLinSimulator;
-} // lin
+} // namespace lin
 namespace data {
 class IIbToDataPublisher;
 class IIbToDataSubscriber;
 class IIbToDataSubscriberInternal;
 class DataSubscriberInternal;
-} // data
+} // namespace data
 namespace rpc {
 class IIbToRpcClient;
 class IIbToRpcServer;
 class IIbToRpcServerInternal;
 class RpcServerInternal;
 class RpcDiscoverer;
-} // rpc
-} // sim
+} // namespace rpc
+} // namespace sim
 namespace mw {
 namespace service {
 class IServiceDiscovery;
-} //service
+} // namespace service
 namespace sync {
 class LifecycleService;
 class TimeSyncService;
-} //sync
-} //mw
+} // namespace sync
+} // namespace mw
 } // namespace ib
 

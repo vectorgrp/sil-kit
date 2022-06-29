@@ -55,7 +55,7 @@ add_library(IntegrationBus ${ibLibType}
     capi/CapiDataPubSub.cpp
     capi/CapiRpc.cpp
     capi/CapiUtils.cpp
-    capi/CapiImpl.h
+    capi/CapiImpl.hpp
 
     IbForceIncludes.cpp
     CreateIbRegistry.cpp
@@ -86,12 +86,6 @@ elseif(UNIX)
     #for reproducible builds
     target_link_options(IntegrationBus
         PRIVATE -Wl,--build-id=none)
-    # strip symbols
-    #if(CMAKE_BUILD_TYPE STREQUAL Release)
-    #    add_custom_command(TARGET IntegrationBus
-    #        POST_BUILD
-    #        COMMAND ${CMAKE_STRIP} $<TARGET_FILE:IntegrationBus>)
-    #endif()
 
 endif()
 
@@ -165,6 +159,3 @@ export(EXPORT IntegrationBusTargets
     NAMESPACE "IntegrationBus::"
     FILE IntegrationBusTargets.cmake
     )
-#register in CMake user registry
-# the following sets registry keys on windows, not good for developing cmake
-#export(PACKAGE IntegrationBus)

@@ -1,4 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 #pragma once
 
 #include <array>
@@ -273,5 +274,6 @@ bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 
 } // namespace v4
+
 } // namespace cfg
 } // namespace ib

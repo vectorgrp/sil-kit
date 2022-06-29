@@ -21,7 +21,7 @@
 namespace ib {
 namespace mw {
 
-//Helper to allow calling Deserialize(MessageBuffer&, T&) inside of template method SerializedMessage::Deserialize<T>
+// Helper to allow calling Deserialize(MessageBuffer&, T&) inside of template method SerializedMessage::Deserialize<T>
 template<typename... Args>
 auto AdlDeserialize(Args&&... args) -> decltype(auto)
 {
@@ -125,6 +125,7 @@ auto SerializedMessage::Deserialize() -> ApiMessageT
     AdlDeserialize(_buffer, value);
     return value;
 }
+
 template <typename ApiMessageT>
 auto SerializedMessage::Deserialize() const -> ApiMessageT
 {
@@ -134,5 +135,5 @@ auto SerializedMessage::Deserialize() const -> ApiMessageT
     return value;
 }
 
-} //mw
-} //ib
+} // namespace mw
+} // namespace ib

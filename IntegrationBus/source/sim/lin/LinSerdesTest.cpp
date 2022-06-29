@@ -135,7 +135,6 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
     response1.frame.checksumModel = LinChecksumModel::Classic;
     response1.responseMode = LinFrameResponseMode::Rx;
 
-
     LinControllerConfig in;
     LinControllerConfig out;
     in.controllerMode = LinControllerMode::Slave;
@@ -181,7 +180,6 @@ TEST(MwVAsioSerdes, SimLin_FrameResponseUpdate)
     response1.frame.id = 36;
     response1.frame.checksumModel = LinChecksumModel::Classic;
     response1.responseMode = LinFrameResponseMode::Rx;
-
 
     LinFrameResponseUpdate in;
     LinFrameResponseUpdate out;

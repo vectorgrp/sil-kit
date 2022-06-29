@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <iostream>
-
 #include "ib/sim/fr/FlexrayDatatypes.hpp"
 
 namespace ib {

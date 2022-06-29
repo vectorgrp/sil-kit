@@ -13,7 +13,6 @@ const std::string controllerType = "controller.type";
 const std::string simulatedControllerOriginalParticipantName =
     "controller.netsim.originalParticipantName";
 
-
 // controllerType-specific values
 // Bus types
 const std::string controllerTypeCan = "CAN";

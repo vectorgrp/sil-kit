@@ -4,6 +4,7 @@
 
 #include "IIbReceiver.hpp"
 #include "IIbSender.hpp"
+
 #include "ib/sim/lin/LinDatatypes.hpp"
 
 namespace ib {

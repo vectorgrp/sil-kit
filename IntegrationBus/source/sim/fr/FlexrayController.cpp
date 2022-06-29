@@ -2,9 +2,9 @@
 
 #include "FlexrayController.hpp"
 #include "Validation.hpp"
-
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
+
 #include "ib/mw/logging/ILogger.hpp"
 
 namespace ib {

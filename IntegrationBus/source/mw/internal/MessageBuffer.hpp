@@ -1,7 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-
 #include <chrono>
 #include <string>
 #include <type_traits>
@@ -15,7 +14,6 @@
 #include "ib/util/vector_view.hpp"
 
 #include "ProtocolVersion.hpp"
-
 
 namespace ib {
 namespace mw {
@@ -394,7 +392,6 @@ MessageBuffer& MessageBuffer::operator>>(std::chrono::duration<Rep, Period>& dur
     duration = std::chrono::duration<Rep, Period>{count};
     return *this;
 }
-
 
 MessageBuffer& MessageBuffer::operator<<(std::chrono::system_clock::time_point time)
 {

@@ -58,7 +58,6 @@ private:
     
     std::thread _watchThread;
 };
-
     
 } // namespace sync
 } // namespace mw

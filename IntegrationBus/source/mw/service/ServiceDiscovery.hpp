@@ -60,7 +60,7 @@ public: // Interfaces
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantDiscoveryEvent& msg) override;
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceDiscoveryEvent& msg) override;
 
-private: //methods
+private: // Methods
 
     //!< React on a new participant
     void OnParticpantAddition(const ParticipantDiscoveryEvent& msg);
@@ -74,9 +74,6 @@ private: //methods
 
     //!< Inform about service changes
     void CallHandlers(ServiceDiscoveryEvent::Type eventType, const ServiceDescriptor& serviceDescriptor) const;
-
-    void AddService(const ServiceDescriptor& serviceDescriptor);
-    void RemoveService(const ServiceDescriptor& serviceDescriptor);
 
 private:
     IParticipantInternal* _participant{nullptr};

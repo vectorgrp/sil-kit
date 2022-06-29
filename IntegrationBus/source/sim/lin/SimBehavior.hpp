@@ -5,7 +5,6 @@
 #include <tuple>
 #include <vector>
 #include <map>
-#include <mutex>
 
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"

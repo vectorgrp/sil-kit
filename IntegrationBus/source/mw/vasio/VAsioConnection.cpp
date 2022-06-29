@@ -19,13 +19,12 @@
 #include "SetThreadName.hpp"
 #include "Uri.hpp"
 
-
-
 using namespace std::chrono_literals;
 namespace fs = ib::filesystem;
 
 namespace {
-//only TCP/IP need platform tweaks
+
+// only TCP/IP need platform tweaks
 template<typename AcceptorT>
 void SetPlatformOptions(AcceptorT&)
 {
@@ -163,9 +162,7 @@ auto printUris(const ib::mw::VAsioPeerInfo& info) -> std::string
     return ss.str();
 }
 
-} //anonymous namespace
-
-
+} // namespace
 
 namespace std {
 inline std::ostream& operator<< (std::ostream& out,
@@ -192,7 +189,7 @@ inline std::ostream& operator<< (std::ostream& out,
     }
     return out;
 }
-} //end namespace std 
+} //end namespace std
 
 namespace ib {
 namespace mw {
@@ -322,7 +319,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
     {
         if (_config.middleware.enableDomainSockets)
         {
-            //re-add local URI for user info output:
+            // re-add local URI for user info output:
             registryUri.acceptorUris.push_back(localUri);
         }
 
@@ -345,7 +342,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
 
     SendParticipantAnnouncement(registry.get());
     _registry = std::move(registry);
-    
+
     StartIoWorker();
 
     auto receivedAllReplies = _receivedAllParticipantReplies.get_future();
@@ -357,7 +354,7 @@ void VAsioConnection::JoinDomain(uint32_t domainId)
         _logger->Error("VIB timeout during connection handshake with IbRegistry.");
         throw ProtocolError("VIB timeout during connection handshake with IbRegistry.");
     }
-    //check if an exception was set:
+    // check if an exception was set:
     receivedAllReplies.get();
 
     _logger->Trace("VAsio received announcement replies from all participants.");
@@ -399,7 +396,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
     }
 
     // after negotiating the Version, we can safely deserialize the remaining message
-    //ParticipantAnnouncement announcement;
+    // ParticipantAnnouncement announcement;
     buffer.SetProtocolVersion(from->GetProtocolVersion());
     auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
 
@@ -422,11 +419,11 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
 
 void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 {
-    //Legacy Info for interop
-    //URI encoded infos
+    // Legacy Info for interop
+    // URI encoded infos
     VAsioPeerInfo info{ _participantName, _participantId, {}, {/*capabilities*/}};
 
-    //Ensure that the local acceptor is the first entry in the acceptorUris
+    // Ensure that the local acceptor is the first entry in the acceptorUris
     if (_localAcceptor.is_open())
     {
         info.acceptorUris.push_back(
@@ -463,8 +460,6 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     auto reply = buffer.Deserialize<ParticipantAnnouncementReply>();
     const auto& remoteVersion = from_header(reply.remoteHeader);
 
-
-
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
         _logger->Warn("Received failed participant announcement reply from {}",
@@ -484,7 +479,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
             // handshake with IbRegistry failed, we need to abort.
             auto error = ProtocolError(msg);
             _receivedAllParticipantReplies.set_exception(std::make_exception_ptr(error)); //propagate to main thread
-            throw error; //for I/O thread
+            throw error; // for I/O thread
         }
         return;
     }
@@ -530,28 +525,29 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
 {
-  const auto result = _hashToParticipantName.insert({ ib::util::hash::Hash(participantName), participantName });
-  if (result.second == false)
-  {
-    _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.", participantName);
-  }
+    const auto result = _hashToParticipantName.insert({ib::util::hash::Hash(participantName), participantName});
+    if (result.second == false)
+    {
+        _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.",
+                      participantName);
+    }
 }
 
 const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
 {
     const auto participantIter = _hashToParticipantName.find(participantId);
-  if (participantIter == _hashToParticipantName.end())
-  {
-    throw std::runtime_error{ "VAsioConnection: could not find participant in participant cache" };
-  }
-  return participantIter->second;
+    if (participantIter == _hashToParticipantName.end())
+    {
+        throw std::runtime_error{"VAsioConnection: could not find participant in participant cache"};
+    }
+    return participantIter->second;
 }
 
 void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer)
 {
     auto participantsMsg = buffer.Deserialize<KnownParticipants>();
 
-    //After receiving a ParticipantAnnouncement the Registry will send a KnownParticipants message
+    // After receiving a ParticipantAnnouncement the Registry will send a KnownParticipants message
     // check if we support its version here
     if(ProtocolVersionSupported(participantsMsg.messageHeader))
     {
@@ -642,7 +638,7 @@ void VAsioConnection::AcceptLocalConnections(uint32_t domainId)
 {
     auto localEndpoint = makeLocalEndpoint(_participantName, _participantId, domainId);
 
-    //file must not exist before we bind/listen on it
+    // file must not exist before we bind/listen on it
     (void)fs::remove(localEndpoint.path());
 
     AcceptConnectionsOn(_localAcceptor, localEndpoint);
@@ -650,7 +646,7 @@ void VAsioConnection::AcceptLocalConnections(uint32_t domainId)
 
 void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
 {
-    //Default to TCP IPv4 catchall
+    // Default to TCP IPv4 catchall
     tcp::endpoint endpoint(tcp::v4(), port);
 
     auto isIpv4 = [](const auto endpoint) {
@@ -828,7 +824,7 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
 
 void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    //Note: there may be multiple types that match the SerdesName
+    // Note: there may be multiple types that match the SerdesName
     // we try to find a version to match it, for backward compatibility.
     auto getVersionForSerdes = [](const auto& typeName, auto remoteVersion) {
         VersionT subscriptionVersion{0};
@@ -905,7 +901,6 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     bool wasAdded = false;
 
     tt::for_each(_ibLinks, [&](auto&& linkMap) {
-
         using LinkType = typename std::decay_t<decltype(linkMap)>::mapped_type::element_type;
 
         if (subscriber.msgTypeName != LinkType::MessageSerdesName())
@@ -920,9 +915,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
         ibLink->AddRemoteReceiver(from, subscriber.receiverIdx);
 
         wasAdded = true;
-
     });
-
 
     if (wasAdded)
         _logger->Debug("Registered subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);

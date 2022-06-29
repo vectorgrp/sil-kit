@@ -1,7 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
-
 #include <cstdint>
 
 #include "ib/mw/ParticipantId.hpp"
@@ -30,7 +29,6 @@ struct EndpointAddress
 inline bool operator==(ib::mw::EndpointAddress lhs, ib::mw::EndpointAddress rhs);
 inline bool operator!=(ib::mw::EndpointAddress lhs, ib::mw::EndpointAddress rhs);
 inline bool operator<(ib::mw::EndpointAddress lhs, ib::mw::EndpointAddress rhs);
-
 
 // ================================================================================
 //  Inline Implementations

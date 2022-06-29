@@ -15,6 +15,7 @@ void Serialize(ib::mw::MessageBuffer& buffer,const FunctionCallResponse& msg);
 
 void Deserialize(ib::mw::MessageBuffer& buffer, FunctionCall& out);
 void Deserialize(ib::mw::MessageBuffer& buffer, FunctionCallResponse& out);
+
 } // namespace rpc
 } // namespace sim
 } // namespace ib

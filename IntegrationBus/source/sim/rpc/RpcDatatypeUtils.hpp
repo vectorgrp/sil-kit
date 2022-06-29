@@ -3,6 +3,7 @@
 #pragma once
 
 #include <ostream>
+#include <map>
 
 #include "ib/sim/rpc/RpcDatatypes.hpp"
 

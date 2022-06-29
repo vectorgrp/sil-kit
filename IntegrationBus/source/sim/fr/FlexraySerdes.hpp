@@ -31,6 +31,7 @@ void Deserialize(ib::mw::MessageBuffer& buffer, FlexrayControllerConfig& out);
 void Deserialize(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& out);
 void Deserialize(ib::mw::MessageBuffer& buffer, FlexrayTxBufferUpdate& out);
 void Deserialize(ib::mw::MessageBuffer& buffer, FlexrayPocStatusEvent& out);
+
 } // namespace fr    
 } // namespace sim
 } // namespace ib

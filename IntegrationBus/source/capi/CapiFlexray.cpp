@@ -1,4 +1,4 @@
-/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <string>
 #include <string.h>
@@ -8,480 +8,502 @@
 #include "ib/sim/fr/all.hpp"
 
 #include "IParticipantInternal.hpp"
-#include "CapiImpl.h"
+#include "CapiImpl.hpp"
 #include "ParticipantConfiguration.hpp"
 
-static void assign(ib::sim::fr::FlexrayTxBufferConfig& cppConfig, const ib_Flexray_TxBufferConfig* config)
+namespace {
+void assign(ib::sim::fr::FlexrayTxBufferConfig& cppConfig, const ib_Flexray_TxBufferConfig* config)
 {
-  cppConfig.channels = (ib::sim::fr::FlexrayChannel)config->channels;
-  cppConfig.slotId = config->slotId;
-  cppConfig.offset = config->offset;
-  cppConfig.repetition = config->repetition;
-  cppConfig.hasPayloadPreambleIndicator = config->hasPayloadPreambleIndicator == ib_True;
-  cppConfig.headerCrc = config->headerCrc;
-  cppConfig.transmissionMode = (ib::sim::fr::FlexrayTransmissionMode)config->transmissionMode;
+    cppConfig.channels = (ib::sim::fr::FlexrayChannel)config->channels;
+    cppConfig.slotId = config->slotId;
+    cppConfig.offset = config->offset;
+    cppConfig.repetition = config->repetition;
+    cppConfig.hasPayloadPreambleIndicator = config->hasPayloadPreambleIndicator == ib_True;
+    cppConfig.headerCrc = config->headerCrc;
+    cppConfig.transmissionMode = (ib::sim::fr::FlexrayTransmissionMode)config->transmissionMode;
 }
 
-static void assign(ib::sim::fr::FlexrayClusterParameters& cppClusterParameters, const ib_Flexray_ClusterParameters* clusterParameters)
+void assign(ib::sim::fr::FlexrayClusterParameters& cppClusterParameters,
+                   const ib_Flexray_ClusterParameters* clusterParameters)
 {
-  cppClusterParameters.gColdstartAttempts = clusterParameters->gColdstartAttempts;
-  cppClusterParameters.gCycleCountMax = clusterParameters->gCycleCountMax;
-  cppClusterParameters.gdActionPointOffset = clusterParameters->gdActionPointOffset;
-  cppClusterParameters.gdDynamicSlotIdlePhase = clusterParameters->gdDynamicSlotIdlePhase;
-  cppClusterParameters.gdMiniSlot = clusterParameters->gdMiniSlot;
-  cppClusterParameters.gdMiniSlotActionPointOffset = clusterParameters->gdMiniSlotActionPointOffset;
-  cppClusterParameters.gdStaticSlot = clusterParameters->gdStaticSlot;
-  cppClusterParameters.gdSymbolWindow = clusterParameters->gdSymbolWindow;
-  cppClusterParameters.gdSymbolWindowActionPointOffset = clusterParameters->gdSymbolWindowActionPointOffset;
-  cppClusterParameters.gdTSSTransmitter = clusterParameters->gdTSSTransmitter;
-  cppClusterParameters.gdWakeupTxActive = clusterParameters->gdWakeupTxActive;
-  cppClusterParameters.gdWakeupTxIdle = clusterParameters->gdWakeupTxIdle;
-  cppClusterParameters.gListenNoise = clusterParameters->gListenNoise;
-  cppClusterParameters.gMacroPerCycle = clusterParameters->gMacroPerCycle;
-  cppClusterParameters.gMaxWithoutClockCorrectionFatal = clusterParameters->gMaxWithoutClockCorrectionFatal;
-  cppClusterParameters.gMaxWithoutClockCorrectionPassive = clusterParameters->gMaxWithoutClockCorrectionPassive;
-  cppClusterParameters.gNumberOfMiniSlots = clusterParameters->gNumberOfMiniSlots;
-  cppClusterParameters.gNumberOfStaticSlots = clusterParameters->gNumberOfStaticSlots;
-  cppClusterParameters.gPayloadLengthStatic = clusterParameters->gPayloadLengthStatic;
-  cppClusterParameters.gSyncFrameIDCountMax = clusterParameters->gSyncFrameIDCountMax;
+    cppClusterParameters.gColdstartAttempts = clusterParameters->gColdstartAttempts;
+    cppClusterParameters.gCycleCountMax = clusterParameters->gCycleCountMax;
+    cppClusterParameters.gdActionPointOffset = clusterParameters->gdActionPointOffset;
+    cppClusterParameters.gdDynamicSlotIdlePhase = clusterParameters->gdDynamicSlotIdlePhase;
+    cppClusterParameters.gdMiniSlot = clusterParameters->gdMiniSlot;
+    cppClusterParameters.gdMiniSlotActionPointOffset = clusterParameters->gdMiniSlotActionPointOffset;
+    cppClusterParameters.gdStaticSlot = clusterParameters->gdStaticSlot;
+    cppClusterParameters.gdSymbolWindow = clusterParameters->gdSymbolWindow;
+    cppClusterParameters.gdSymbolWindowActionPointOffset = clusterParameters->gdSymbolWindowActionPointOffset;
+    cppClusterParameters.gdTSSTransmitter = clusterParameters->gdTSSTransmitter;
+    cppClusterParameters.gdWakeupTxActive = clusterParameters->gdWakeupTxActive;
+    cppClusterParameters.gdWakeupTxIdle = clusterParameters->gdWakeupTxIdle;
+    cppClusterParameters.gListenNoise = clusterParameters->gListenNoise;
+    cppClusterParameters.gMacroPerCycle = clusterParameters->gMacroPerCycle;
+    cppClusterParameters.gMaxWithoutClockCorrectionFatal = clusterParameters->gMaxWithoutClockCorrectionFatal;
+    cppClusterParameters.gMaxWithoutClockCorrectionPassive = clusterParameters->gMaxWithoutClockCorrectionPassive;
+    cppClusterParameters.gNumberOfMiniSlots = clusterParameters->gNumberOfMiniSlots;
+    cppClusterParameters.gNumberOfStaticSlots = clusterParameters->gNumberOfStaticSlots;
+    cppClusterParameters.gPayloadLengthStatic = clusterParameters->gPayloadLengthStatic;
+    cppClusterParameters.gSyncFrameIDCountMax = clusterParameters->gSyncFrameIDCountMax;
 }
 
-static void assign(ib::sim::fr::FlexrayNodeParameters& cppNodeParameters, const ib_Flexray_NodeParameters* nodeParameters)
+void assign(ib::sim::fr::FlexrayNodeParameters& cppNodeParameters,
+                   const ib_Flexray_NodeParameters* nodeParameters)
 {
-  cppNodeParameters.pAllowHaltDueToClock = nodeParameters->pAllowHaltDueToClock;
-  cppNodeParameters.pAllowPassiveToActive = nodeParameters->pAllowPassiveToActive;
-  cppNodeParameters.pChannels = (ib::sim::fr::FlexrayChannel)nodeParameters->pChannels;
-  cppNodeParameters.pClusterDriftDamping = nodeParameters->pClusterDriftDamping;
-  cppNodeParameters.pdAcceptedStartupRange = nodeParameters->pdAcceptedStartupRange;
-  cppNodeParameters.pdListenTimeout = nodeParameters->pdListenTimeout;
-  cppNodeParameters.pKeySlotId = nodeParameters->pKeySlotId;
-  cppNodeParameters.pKeySlotOnlyEnabled = nodeParameters->pKeySlotOnlyEnabled;
-  cppNodeParameters.pKeySlotUsedForStartup = nodeParameters->pKeySlotUsedForStartup;
-  cppNodeParameters.pKeySlotUsedForSync = nodeParameters->pKeySlotUsedForSync;
-  cppNodeParameters.pLatestTx = nodeParameters->pLatestTx;
-  cppNodeParameters.pMacroInitialOffsetA = nodeParameters->pMacroInitialOffsetA;
-  cppNodeParameters.pMacroInitialOffsetB = nodeParameters->pMacroInitialOffsetB;
-  cppNodeParameters.pMicroInitialOffsetA = nodeParameters->pMicroInitialOffsetA;
-  cppNodeParameters.pMicroInitialOffsetB = nodeParameters->pMicroInitialOffsetB;
-  cppNodeParameters.pMicroPerCycle = nodeParameters->pMicroPerCycle;
-  cppNodeParameters.pOffsetCorrectionOut = nodeParameters->pOffsetCorrectionOut;
-  cppNodeParameters.pOffsetCorrectionStart = nodeParameters->pOffsetCorrectionStart;
-  cppNodeParameters.pRateCorrectionOut = nodeParameters->pRateCorrectionOut;
-  cppNodeParameters.pWakeupChannel = (ib::sim::fr::FlexrayChannel)nodeParameters->pWakeupChannel;
-  cppNodeParameters.pWakeupPattern = nodeParameters->pWakeupPattern;
-  cppNodeParameters.pdMicrotick = (ib::sim::fr::FlexrayClockPeriod)nodeParameters->pdMicrotick;
-  cppNodeParameters.pSamplesPerMicrotick = nodeParameters->pSamplesPerMicrotick;
+    cppNodeParameters.pAllowHaltDueToClock = nodeParameters->pAllowHaltDueToClock;
+    cppNodeParameters.pAllowPassiveToActive = nodeParameters->pAllowPassiveToActive;
+    cppNodeParameters.pChannels = (ib::sim::fr::FlexrayChannel)nodeParameters->pChannels;
+    cppNodeParameters.pClusterDriftDamping = nodeParameters->pClusterDriftDamping;
+    cppNodeParameters.pdAcceptedStartupRange = nodeParameters->pdAcceptedStartupRange;
+    cppNodeParameters.pdListenTimeout = nodeParameters->pdListenTimeout;
+    cppNodeParameters.pKeySlotId = nodeParameters->pKeySlotId;
+    cppNodeParameters.pKeySlotOnlyEnabled = nodeParameters->pKeySlotOnlyEnabled;
+    cppNodeParameters.pKeySlotUsedForStartup = nodeParameters->pKeySlotUsedForStartup;
+    cppNodeParameters.pKeySlotUsedForSync = nodeParameters->pKeySlotUsedForSync;
+    cppNodeParameters.pLatestTx = nodeParameters->pLatestTx;
+    cppNodeParameters.pMacroInitialOffsetA = nodeParameters->pMacroInitialOffsetA;
+    cppNodeParameters.pMacroInitialOffsetB = nodeParameters->pMacroInitialOffsetB;
+    cppNodeParameters.pMicroInitialOffsetA = nodeParameters->pMicroInitialOffsetA;
+    cppNodeParameters.pMicroInitialOffsetB = nodeParameters->pMicroInitialOffsetB;
+    cppNodeParameters.pMicroPerCycle = nodeParameters->pMicroPerCycle;
+    cppNodeParameters.pOffsetCorrectionOut = nodeParameters->pOffsetCorrectionOut;
+    cppNodeParameters.pOffsetCorrectionStart = nodeParameters->pOffsetCorrectionStart;
+    cppNodeParameters.pRateCorrectionOut = nodeParameters->pRateCorrectionOut;
+    cppNodeParameters.pWakeupChannel = (ib::sim::fr::FlexrayChannel)nodeParameters->pWakeupChannel;
+    cppNodeParameters.pWakeupPattern = nodeParameters->pWakeupPattern;
+    cppNodeParameters.pdMicrotick = (ib::sim::fr::FlexrayClockPeriod)nodeParameters->pdMicrotick;
+    cppNodeParameters.pSamplesPerMicrotick = nodeParameters->pSamplesPerMicrotick;
 }
 
-static void assign(ib::sim::fr::FlexrayControllerConfig& cppConfig, const ib_Flexray_ControllerConfig* config)
+void assign(ib::sim::fr::FlexrayControllerConfig& cppConfig, const ib_Flexray_ControllerConfig* config)
 {
-  assign(cppConfig.clusterParams, config->clusterParams);
-  assign(cppConfig.nodeParams, config->nodeParams);
+    assign(cppConfig.clusterParams, config->clusterParams);
+    assign(cppConfig.nodeParams, config->nodeParams);
 
-  for (uint32_t i = 0;i < config->numBufferConfigs; i++)
-  {
-    ib::sim::fr::FlexrayTxBufferConfig txBufferConfig;
-    assign(txBufferConfig, &config->bufferConfigs[i]);
-    cppConfig.bufferConfigs.push_back(std::move(txBufferConfig));
-  }
-}
-
-extern "C" {
-
-ib_ReturnCode ib_Flexray_Controller_Create(ib_Flexray_Controller** outController, ib_Participant* participant, const char* name, const char* network)
-{
-  ASSERT_VALID_OUT_PARAMETER(outController);
-  ASSERT_VALID_POINTER_PARAMETER(participant);
-  ASSERT_VALID_POINTER_PARAMETER(name);
-  ASSERT_VALID_POINTER_PARAMETER(network);
-  CAPI_ENTER
-  {
-    auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
-    std::string cppName(name);
-    std::string cppNetwork(network);
-    auto controller = cppParticipant->CreateFlexrayController(cppName, cppNetwork);
-    if (controller == nullptr)
+    for (uint32_t i = 0; i < config->numBufferConfigs; i++)
     {
-      return ib_ReturnCode_UNSPECIFIEDERROR;
+        ib::sim::fr::FlexrayTxBufferConfig txBufferConfig;
+        assign(txBufferConfig, &config->bufferConfigs[i]);
+        cppConfig.bufferConfigs.push_back(std::move(txBufferConfig));
     }
-    *outController = reinterpret_cast<ib_Flexray_Controller*>(controller);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
 }
+}//namespace
 
-ib_ReturnCode ib_Flexray_Controller_Configure(ib_Flexray_Controller* controller, const ib_Flexray_ControllerConfig* config)
+extern "C"
 {
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_POINTER_PARAMETER(config);
-  ASSERT_VALID_POINTER_PARAMETER(config->clusterParams);
-  ASSERT_VALID_POINTER_PARAMETER(config->nodeParams);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    ib::sim::fr::FlexrayControllerConfig cppConfig;
-    assign(cppConfig, config);
-
-    cppController->Configure(cppConfig);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_ReconfigureTxBuffer(ib_Flexray_Controller* controller, uint16_t txBufferIdx, const ib_Flexray_TxBufferConfig* config)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_POINTER_PARAMETER(config);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    ib::sim::fr::FlexrayTxBufferConfig cppConfig;
-    assign(cppConfig, config);
-
-    cppController->ReconfigureTxBuffer(txBufferIdx, cppConfig);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_UpdateTxBuffer(ib_Flexray_Controller* controller, const ib_Flexray_TxBufferUpdate* update)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_POINTER_PARAMETER(update);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    ib::sim::fr::FlexrayTxBufferUpdate cppUpdate;
-    cppUpdate.txBufferIndex = update->txBufferIndex;
-    cppUpdate.payloadDataValid = update->payloadDataValid == ib_True;
-    if (update->payloadDataValid)
+    ib_ReturnCode ib_Flexray_Controller_Create(ib_Flexray_Controller** outController, ib_Participant* participant,
+                                               const char* name, const char* network)
     {
-      ASSERT_VALID_POINTER_PARAMETER(update->payload.data);
-      cppUpdate.payload.assign(update->payload.data, update->payload.data+update->payload.size);
+        ASSERT_VALID_OUT_PARAMETER(outController);
+        ASSERT_VALID_POINTER_PARAMETER(participant);
+        ASSERT_VALID_POINTER_PARAMETER(name);
+        ASSERT_VALID_POINTER_PARAMETER(network);
+        CAPI_ENTER
+        {
+            auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+            auto controller = cppParticipant->CreateFlexrayController(name, network);
+            if (controller == nullptr)
+            {
+                return ib_ReturnCode_UNSPECIFIEDERROR;
+            }
+            *outController = reinterpret_cast<ib_Flexray_Controller*>(controller);
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    cppController->UpdateTxBuffer(cppUpdate);
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
 
-
-ib_ReturnCode ib_Flexray_Controller_ExecuteCmd(ib_Flexray_Controller* controller, ib_Flexray_ChiCommand cmd)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    switch (cmd)
+    ib_ReturnCode ib_Flexray_Controller_Configure(ib_Flexray_Controller* controller,
+                                                  const ib_Flexray_ControllerConfig* config)
     {
-    case ib_Flexray_ChiCommand_RUN:
-      cppController->Run();
-      break;
-    case ib_Flexray_ChiCommand_DEFERRED_HALT:
-      cppController->DeferredHalt();
-      break;
-    case ib_Flexray_ChiCommand_FREEZE:
-      cppController->Freeze();
-      break;
-    case ib_Flexray_ChiCommand_ALLOW_COLDSTART:
-      cppController->AllowColdstart();
-      break;
-    case ib_Flexray_ChiCommand_ALL_SLOTS:
-      cppController->AllSlots();
-      break;
-    case ib_Flexray_ChiCommand_WAKEUP:
-      cppController->Wakeup();
-      break;
-    default:
-      return ib_ReturnCode_BADPARAMETER;
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_POINTER_PARAMETER(config);
+        ASSERT_VALID_POINTER_PARAMETER(config->clusterParams);
+        ASSERT_VALID_POINTER_PARAMETER(config->nodeParams);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            ib::sim::fr::FlexrayControllerConfig cppConfig;
+            assign(cppConfig, config);
+
+            cppController->Configure(cppConfig);
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
 
-ib_ReturnCode ib_Flexray_Controller_AddFrameHandler(ib_Flexray_Controller* controller, void* context,
-                                                    ib_Flexray_FrameHandler_t handler, ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddFrameHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayFrameEvent& msg) {
-            ib_Flexray_FrameEvent message;
-            ib_Flexray_Frame frame;
-            ib_Flexray_Header header;
-
-            header.cycleCount = msg.frame.header.cycleCount;
-            header.frameId = msg.frame.header.frameId;
-            header.flags = msg.frame.header.flags;
-            header.headerCrc = msg.frame.header.headerCrc;
-            header.payloadLength = msg.frame.header.payloadLength;
-
-            frame.header = &header;
-            frame.payload.data = (uint8_t*)msg.frame.payload.data();
-            frame.payload.size = (uint32_t)msg.frame.payload.size();
-
-            message.interfaceId = ib_InterfaceIdentifier_FlexrayFrameEvent;
-            message.timestamp = msg.timestamp.count();
-            message.channel = (ib_Flexray_Channel)msg.channel;
-            message.frame = &frame;
-            
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_RemoveFrameHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
+    ib_ReturnCode ib_Flexray_Controller_ReconfigureTxBuffer(ib_Flexray_Controller* controller, uint16_t txBufferIdx,
+                                                            const ib_Flexray_TxBufferConfig* config)
     {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveFrameHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_POINTER_PARAMETER(config);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            ib::sim::fr::FlexrayTxBufferConfig cppConfig;
+            assign(cppConfig, config);
 
-ib_ReturnCode ib_Flexray_Controller_AddFrameTransmitHandler(ib_Flexray_Controller* controller, void* context,
-                                                            ib_Flexray_FrameTransmitHandler_t handler,
+            cppController->ReconfigureTxBuffer(txBufferIdx, cppConfig);
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_UpdateTxBuffer(ib_Flexray_Controller* controller,
+                                                       const ib_Flexray_TxBufferUpdate* update)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_POINTER_PARAMETER(update);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            ib::sim::fr::FlexrayTxBufferUpdate cppUpdate;
+            cppUpdate.txBufferIndex = update->txBufferIndex;
+            cppUpdate.payloadDataValid = update->payloadDataValid == ib_True;
+            if (update->payloadDataValid)
+            {
+                ASSERT_VALID_POINTER_PARAMETER(update->payload.data);
+                cppUpdate.payload.assign(update->payload.data, update->payload.data + update->payload.size);
+            }
+            cppController->UpdateTxBuffer(cppUpdate);
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_ExecuteCmd(ib_Flexray_Controller* controller, ib_Flexray_ChiCommand cmd)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            switch (cmd)
+            {
+            case ib_Flexray_ChiCommand_RUN:
+                cppController->Run();
+                break;
+            case ib_Flexray_ChiCommand_DEFERRED_HALT:
+                cppController->DeferredHalt();
+                break;
+            case ib_Flexray_ChiCommand_FREEZE:
+                cppController->Freeze();
+                break;
+            case ib_Flexray_ChiCommand_ALLOW_COLDSTART:
+                cppController->AllowColdstart();
+                break;
+            case ib_Flexray_ChiCommand_ALL_SLOTS:
+                cppController->AllSlots();
+                break;
+            case ib_Flexray_ChiCommand_WAKEUP:
+                cppController->Wakeup();
+                break;
+            default:
+                return ib_ReturnCode_BADPARAMETER;
+            }
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_AddFrameHandler(ib_Flexray_Controller* controller, void* context,
+                                                        ib_Flexray_FrameHandler_t handler, ib_HandlerId* outHandlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddFrameHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayFrameEvent& msg) {
+                    ib_Flexray_FrameEvent message;
+                    ib_Flexray_Frame frame;
+                    ib_Flexray_Header header;
+
+                    header.cycleCount = msg.frame.header.cycleCount;
+                    header.frameId = msg.frame.header.frameId;
+                    header.flags = msg.frame.header.flags;
+                    header.headerCrc = msg.frame.header.headerCrc;
+                    header.payloadLength = msg.frame.header.payloadLength;
+
+                    frame.header = &header;
+                    frame.payload.data = (uint8_t*)msg.frame.payload.data();
+                    frame.payload.size = (uint32_t)msg.frame.payload.size();
+
+                    message.interfaceId = ib_InterfaceIdentifier_FlexrayFrameEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.channel = (ib_Flexray_Channel)msg.channel;
+                    message.frame = &frame;
+
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_RemoveFrameHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemoveFrameHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_AddFrameTransmitHandler(ib_Flexray_Controller* controller, void* context,
+                                                                ib_Flexray_FrameTransmitHandler_t handler,
+                                                                ib_HandlerId* outHandlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddFrameTransmitHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl,
+                                   const ib::sim::fr::FlexrayFrameTransmitEvent& msg) {
+                    ib_Flexray_FrameTransmitEvent message;
+                    ib_Flexray_Frame frame;
+                    ib_Flexray_Header header;
+
+                    header.cycleCount = msg.frame.header.cycleCount;
+                    header.frameId = msg.frame.header.frameId;
+                    header.flags = msg.frame.header.flags;
+                    header.headerCrc = msg.frame.header.headerCrc;
+                    header.payloadLength = msg.frame.header.payloadLength;
+
+                    frame.payload.data = (uint8_t*)msg.frame.payload.data();
+                    frame.payload.size = (uint32_t)msg.frame.payload.size();
+                    frame.header = &header;
+
+                    message.interfaceId = ib_InterfaceIdentifier_FlexrayFrameTransmitEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.txBufferIndex = msg.txBufferIndex;
+                    message.channel = (ib_Flexray_Channel)msg.channel;
+                    message.frame = &frame;
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_RemoveFrameTransmitHandler(ib_Flexray_Controller* controller,
+                                                                   ib_HandlerId handlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemoveFrameTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_AddWakeupHandler(ib_Flexray_Controller* controller, void* context,
+                                                         ib_Flexray_WakeupHandler_t handler, ib_HandlerId* outHandlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddWakeupHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayWakeupEvent& msg) {
+                    ib_Flexray_SymbolEvent message;
+                    message.interfaceId = ib_InterfaceIdentifier_FlexrayWakeupEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.channel = (ib_Flexray_Channel)msg.channel;
+                    message.pattern = (ib_Flexray_SymbolPattern)msg.pattern;
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_RemoveWakeupHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemoveWakeupHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_AddPocStatusHandler(ib_Flexray_Controller* controller, void* context,
+                                                            ib_Flexray_PocStatusHandler_t handler,
                                                             ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddFrameTransmitHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayFrameTransmitEvent& msg) {
-            ib_Flexray_FrameTransmitEvent message;
-            ib_Flexray_Frame frame;
-            ib_Flexray_Header header;
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddPocStatusHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl,
+                                   const ib::sim::fr::FlexrayPocStatusEvent& msg) {
+                    ib_Flexray_PocStatusEvent message;
+                    message.interfaceId = ib_InterfaceIdentifier_FlexrayPocStatusEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.state = (ib_Flexray_PocState)msg.state;
+                    message.chiHaltRequest = msg.chiHaltRequest;
+                    message.coldstartNoise = msg.coldstartNoise;
+                    message.freeze = msg.freeze;
+                    message.chiReadyRequest = msg.chiReadyRequest;
+                    message.errorMode = (ib_Flexray_ErrorModeType)msg.errorMode;
+                    message.slotMode = (ib_Flexray_SlotModeType)msg.slotMode;
+                    message.startupState = (ib_Flexray_StartupStateType)msg.startupState;
+                    message.wakeupStatus = (ib_Flexray_WakeupStatusType)msg.wakeupStatus;
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
 
-            header.cycleCount = msg.frame.header.cycleCount;
-            header.frameId = msg.frame.header.frameId;
-            header.flags = msg.frame.header.flags;
-            header.headerCrc = msg.frame.header.headerCrc;
-            header.payloadLength = msg.frame.header.payloadLength;
-
-            frame.payload.data = (uint8_t*)msg.frame.payload.data();
-            frame.payload.size = (uint32_t)msg.frame.payload.size();
-            frame.header = &header;
-
-            message.interfaceId = ib_InterfaceIdentifier_FlexrayFrameTransmitEvent;
-            message.timestamp = msg.timestamp.count();
-            message.txBufferIndex = msg.txBufferIndex;
-            message.channel = (ib_Flexray_Channel)msg.channel;
-            message.frame = &frame;
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_RemoveFrameTransmitHandler(ib_Flexray_Controller* controller,
+    ib_ReturnCode ib_Flexray_Controller_RemovePocStatusHandler(ib_Flexray_Controller* controller,
                                                                ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
     {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveFrameTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemovePocStatusHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    CAPI_LEAVE
-}
 
-ib_ReturnCode ib_Flexray_Controller_AddWakeupHandler(ib_Flexray_Controller* controller, void* context,
-                                                     ib_Flexray_WakeupHandler_t handler, ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddWakeupHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayWakeupEvent& msg) {
-            ib_Flexray_SymbolEvent message;
-            message.interfaceId = ib_InterfaceIdentifier_FlexrayWakeupEvent;
-            message.timestamp = msg.timestamp.count();
-            message.channel = (ib_Flexray_Channel)msg.channel;
-            message.pattern = (ib_Flexray_SymbolPattern)msg.pattern;
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_RemoveWakeupHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
+    ib_ReturnCode ib_Flexray_Controller_AddSymbolHandler(ib_Flexray_Controller* controller, void* context,
+                                                         ib_Flexray_SymbolHandler_t handler, ib_HandlerId* outHandlerId)
     {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveWakeupHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddSymbolHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexraySymbolEvent& msg) {
+                    ib_Flexray_SymbolEvent message;
+                    message.interfaceId = ib_InterfaceIdentifier_FlexraySymbolEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.channel = (ib_Flexray_Channel)msg.channel;
+                    message.pattern = (ib_Flexray_SymbolPattern)msg.pattern;
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    CAPI_LEAVE
-}
 
-ib_ReturnCode ib_Flexray_Controller_AddPocStatusHandler(ib_Flexray_Controller* controller, void* context,
-                                                        ib_Flexray_PocStatusHandler_t handler,
-                                                        ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddPocStatusHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayPocStatusEvent& msg) {
-            ib_Flexray_PocStatusEvent message;
-            message.interfaceId = ib_InterfaceIdentifier_FlexrayPocStatusEvent;
-            message.timestamp = msg.timestamp.count();
-            message.state = (ib_Flexray_PocState)msg.state;
-            message.chiHaltRequest = msg.chiHaltRequest;
-            message.coldstartNoise = msg.coldstartNoise;
-            message.freeze = msg.freeze;
-            message.chiReadyRequest = msg.chiReadyRequest;
-            message.errorMode = (ib_Flexray_ErrorModeType)msg.errorMode;
-            message.slotMode = (ib_Flexray_SlotModeType)msg.slotMode;
-            message.startupState = (ib_Flexray_StartupStateType)msg.startupState;
-            message.wakeupStatus = (ib_Flexray_WakeupStatusType)msg.wakeupStatus;
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_RemovePocStatusHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
+    ib_ReturnCode ib_Flexray_Controller_RemoveSymbolHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
     {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemovePocStatusHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemoveSymbolHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    CAPI_LEAVE
-}
 
-ib_ReturnCode ib_Flexray_Controller_AddSymbolHandler(ib_Flexray_Controller* controller, void* context,
-                                                     ib_Flexray_SymbolHandler_t handler, ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddSymbolHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexraySymbolEvent& msg) {
-            ib_Flexray_SymbolEvent message;
-            message.interfaceId = ib_InterfaceIdentifier_FlexraySymbolEvent;
-            message.timestamp = msg.timestamp.count();
-            message.channel = (ib_Flexray_Channel)msg.channel;
-            message.pattern = (ib_Flexray_SymbolPattern)msg.pattern;
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_RemoveSymbolHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
+    ib_ReturnCode ib_Flexray_Controller_AddSymbolTransmitHandler(ib_Flexray_Controller* controller, void* context,
+                                                                 ib_Flexray_SymbolTransmitHandler_t handler,
+                                                                 ib_HandlerId* outHandlerId)
     {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveSymbolHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddSymbolTransmitHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl,
+                                   const ib::sim::fr::FlexraySymbolTransmitEvent& msg) {
+                    ib_Flexray_SymbolTransmitEvent message;
+                    message.interfaceId = ib_InterfaceIdentifier_FlexraySymbolTransmitEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.channel = (ib_Flexray_Channel)msg.channel;
+                    message.pattern = (ib_Flexray_SymbolPattern)msg.pattern;
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    CAPI_LEAVE
-}
 
-ib_ReturnCode ib_Flexray_Controller_AddSymbolTransmitHandler(ib_Flexray_Controller* controller, void* context,
-                                                             ib_Flexray_SymbolTransmitHandler_t handler,
+    ib_ReturnCode ib_Flexray_Controller_RemoveSymbolTransmitHandler(ib_Flexray_Controller* controller,
+                                                                    ib_HandlerId handlerId)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemoveSymbolTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
+
+    ib_ReturnCode ib_Flexray_Controller_AddCycleStartHandler(ib_Flexray_Controller* controller, void* context,
+                                                             ib_Flexray_CycleStartHandler_t handler,
                                                              ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddSymbolTransmitHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexraySymbolTransmitEvent& msg) {
-            ib_Flexray_SymbolTransmitEvent message;
-            message.interfaceId = ib_InterfaceIdentifier_FlexraySymbolTransmitEvent;
-            message.timestamp = msg.timestamp.count();
-            message.channel = (ib_Flexray_Channel)msg.channel;
-            message.pattern = (ib_Flexray_SymbolPattern)msg.pattern;
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
+    {
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        ASSERT_VALID_HANDLER_PARAMETER(handler);
+        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+        CAPI_ENTER
+        {
+            ib::sim::fr::IFlexrayController* cppController =
+                reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            *outHandlerId = (ib_HandlerId)cppController->AddCycleStartHandler(
+                [context, handler](ib::sim::fr::IFlexrayController* ctrl,
+                                   const ib::sim::fr::FlexrayCycleStartEvent& msg) {
+                    ib_Flexray_CycleStartEvent message;
+                    message.interfaceId = ib_InterfaceIdentifier_FlexrayCycleStartEvent;
+                    message.timestamp = msg.timestamp.count();
+                    message.cycleCounter = msg.cycleCounter;
+                    handler(context, ctrl, &message);
+                });
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
+    }
 
-ib_ReturnCode ib_Flexray_Controller_RemoveSymbolTransmitHandler(ib_Flexray_Controller* controller,
+    ib_ReturnCode ib_Flexray_Controller_RemoveCycleStartHandler(ib_Flexray_Controller* controller,
                                                                 ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
     {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveSymbolTransmitHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
+        ASSERT_VALID_POINTER_PARAMETER(controller);
+        CAPI_ENTER
+        {
+            auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
+            cppController->RemoveCycleStartHandler(static_cast<ib::util::HandlerId>(handlerId));
+            return ib_ReturnCode_SUCCESS;
+        }
+        CAPI_LEAVE
     }
-    CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_AddCycleStartHandler(ib_Flexray_Controller* controller, void* context,
-                                                         ib_Flexray_CycleStartHandler_t handler,
-                                                         ib_HandlerId* outHandlerId)
-{
-  ASSERT_VALID_POINTER_PARAMETER(controller);
-  ASSERT_VALID_HANDLER_PARAMETER(handler);
-  ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-  CAPI_ENTER
-  {
-    ib::sim::fr::IFlexrayController* cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-    *outHandlerId = (ib_HandlerId)cppController->AddCycleStartHandler(
-        [context, handler](ib::sim::fr::IFlexrayController* ctrl, const ib::sim::fr::FlexrayCycleStartEvent& msg) {
-            ib_Flexray_CycleStartEvent message;
-            message.interfaceId = ib_InterfaceIdentifier_FlexrayCycleStartEvent;
-            message.timestamp = msg.timestamp.count();
-            message.cycleCounter = msg.cycleCounter;
-            handler(context, ctrl, &message);
-        });
-    return ib_ReturnCode_SUCCESS;
-  }
-  CAPI_LEAVE
-}
-
-ib_ReturnCode ib_Flexray_Controller_RemoveCycleStartHandler(ib_Flexray_Controller* controller, ib_HandlerId handlerId)
-{
-    ASSERT_VALID_POINTER_PARAMETER(controller);
-    CAPI_ENTER
-    {
-        auto cppController = reinterpret_cast<ib::sim::fr::IFlexrayController*>(controller);
-        cppController->RemoveCycleStartHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
 }

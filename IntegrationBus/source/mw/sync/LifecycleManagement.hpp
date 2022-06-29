@@ -103,7 +103,6 @@ private:
     logging::ILogger* _logger;
 };
 
-
 } // namespace sync
 } // namespace mw
 } // namespace ib

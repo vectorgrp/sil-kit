@@ -14,7 +14,6 @@
 #include "IIbToLifecycleService.hpp"
 #include "IParticipantInternal.hpp"
 
-
 namespace ib {
 namespace mw {
 namespace sync {

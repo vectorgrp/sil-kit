@@ -15,14 +15,14 @@ namespace mw {
 class VAsioRegistry
     : public ib::vendor::IIbRegistry
 {
-public: //CTor
+public: // CTor
     VAsioRegistry() = delete;
     VAsioRegistry(const VAsioRegistry&) = delete;
     VAsioRegistry(VAsioRegistry&&) = delete;
     VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg,
         ProtocolVersion version =CurrentProtocolVersion());
 
-public: //methods
+public: // methods
     void ProvideDomain(uint32_t domainId) override;
 
     void SetAllConnectedHandler(std::function<void()> handler) override;

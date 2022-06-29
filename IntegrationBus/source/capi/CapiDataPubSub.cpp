@@ -1,3 +1,4 @@
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "ib/capi/IntegrationBus.h"
 #include "ib/IntegrationBus.hpp"
 #include "ib/mw/logging/ILogger.hpp"
@@ -5,7 +6,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/sim/data/all.hpp"
 
-#include "CapiImpl.h"
+#include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
 #include <string>
@@ -46,7 +47,7 @@ ib_ReturnCode ib_Data_Publisher_Publish(ib_Data_Publisher* self, const ib_ByteVe
     CAPI_ENTER
     {
         auto cppPublisher = reinterpret_cast<ib::sim::data::IDataPublisher*>(self);
-        cppPublisher->Publish(std::vector<uint8_t>(&(data->data[0]), &(data->data[0]) + data->size));
+        cppPublisher->Publish(std::vector<uint8_t>(data->data, data->data + data->size));
         return ib_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -74,7 +75,7 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_P
                                          ib::sim::data::IDataSubscriber* cppSubscriber,
                                          const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
             auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
-            uint8_t* payloadPointer = NULL;
+            uint8_t* payloadPointer = nullptr;
             if (cppDataMessageEvent.data.size() > 0)
             {
                 payloadPointer = (uint8_t*) &(cppDataMessageEvent.data[0]);
@@ -126,7 +127,7 @@ ib_ReturnCode ib_Data_Subscriber_SetDefaultDataMessageHandler(ib_Data_Subscriber
         [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
             const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
                 auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
-                uint8_t* payloadPointer = NULL;
+                uint8_t* payloadPointer = nullptr;
                 if (cppDataMessageEvent.data.size() > 0)
                 {
                     payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
@@ -162,7 +163,7 @@ ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(ib_Data_Subscribe
             [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
                                          const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
                 auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
-                uint8_t* payloadPointer = NULL;
+                uint8_t* payloadPointer = nullptr;
                 if (cppDataMessageEvent.data.size() > 0)
                 {
                     payloadPointer = (uint8_t* ) &(cppDataMessageEvent.data[0]);

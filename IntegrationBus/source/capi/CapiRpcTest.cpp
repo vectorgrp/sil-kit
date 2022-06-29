@@ -1,4 +1,4 @@
-/* Copyright (c) Vector Informatik GmbH. All rights reserved. */
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #ifdef WIN32
 #define _CRT_SECURE_NO_WARNINGS
@@ -355,4 +355,4 @@ TEST_F(CapiRpcTest, rpc_client_set_call_result_handler_wraps_c_handler_and_passe
     ib_Rpc_Client_SetCallResultHandler(cRpcClient, &context, CallResultHandlerWithStringContext);
 }
 
-}
+} //namespace
