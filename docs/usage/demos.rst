@@ -411,3 +411,55 @@ Benchmark Demo
       -  | \- DataPublisher / DataSubscribers are used in the participants.
          | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
          | \- All participants and the VAsio registry (VAsio only) run in the same process.
+
+
+Life Cycle Demo
+~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Participant with or without life cycle and / or time synchronization
+   *  -  Source location
+      -  Demos/Lifecycle
+   *  -  Requirements
+      -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
+         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+   *  -  Parameters
+      -  <ParticipantConfiguration.json|yaml>
+           File name of the ParticipantConfiguration to be used;
+           use ``IbConfig_DemoLifecycle.json`` for an example configuration.
+         <ParticipantName>
+           The name of the participant within the simulation; pauses and continues the simulation three times for five seconds if ``PauseTest``; can be anything otherwise.
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+         [\-\-async]
+           If timeSync flag is set, the participant will run without virtual time synchronization.
+         [\-\-uncoordinated]
+           If the uncoordinated flag is set, the participant will not coordinate its state transitions with other participants. 
+           The state transition Running->Stopping must be triggered via a call to :cpp:func:`ILifecycleService::Stop()<ib::mw::sync::ILifecycleService::Stop()>`.
+   *  -  Parameter Example
+      -  .. parsed-literal::
+
+            # Creates an Life Cycle Demo Process in the default domain 42:
+            |DemoDir|/IbDemoLifecycle Demos/Lifecycle/IbConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
+
+   *  -  System Example
+      -  .. parsed-literal::
+
+            # System Monitor (optional):
+            |SystemMonitor|
+
+            # Life cycle with coordinated start and stop, synchronized time and running the pause testing:
+            |DemoDir|/IbDemoLifecycle Demos/Lifecycle/IbConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
+
+            # Life cycle with synchronized time, but without coordinated start and stop (i.e., switches directly to the Running state):
+            |DemoDir|/IbDemoLifecycle Demos/Lifecycle/IbConfig_DemoLifecycle.json AnotherParticipant --syncTime
+
+            # System Controller (add NetworkSimulator as third parameter if using VIBE Network Simulator):
+            |SystemController| EthernetReader Ethernet Writer
+
+   *  -  Notes
+      -  | \- The ``PauseTest`` pauses in three consecutive time-steps for five (wall-clock) seconds, starting at simulation timestamp 0.02s.
