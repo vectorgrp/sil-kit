@@ -24,11 +24,9 @@ int main(int argc, char** argv)
         "-h, --help: Get this help.");
     commandlineParser.Add<CliParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
-    commandlineParser.Add<CliParser::Option>("domain", "d", "42", "[--domain <domainId>]",
-        "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
     commandlineParser.Add<CliParser::Option>(
-        "listen-uri", "u", "vib://localhost:8500", "[--domain <domainId>]",
-        "-u, --listen-uri <vib-uri>: The vib:// URI the registry should listen on. Defaults to vib://localhost:8500.");
+        "listen-uri", "u", "vib://localhost:8500", "[--listen-uri <uri>]",
+        "-u, --listen-uri <vib-uri>: The vib:// URI the registry should listen on. Defaults to 'vib://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
@@ -71,17 +69,6 @@ int main(int argc, char** argv)
     auto useSignalHandler{ commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value() };
     auto domain{ commandlineParser.Get<CliParser::Option>("domain").Value() };
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
-    uint32_t domainId;
-    try
-    {
-        domainId = static_cast<uint32_t>(std::stoul(domain));
-    }
-    catch (const std::exception&)
-    {
-        std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
-
-        return -1;
-    }
 
     try
     {

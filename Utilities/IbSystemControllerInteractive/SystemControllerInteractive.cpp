@@ -212,8 +212,9 @@ int main(int argc, char** argv)
         "-v, --version: Get version info.");
     commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
-        "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
+    commandlineParser.Add<ib::util::CommandlineParser::Option>(
+        "connect-uri", "u", "vib://localhost:8500", "[--connect-uri <vibUri>]",
+        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to 'vib://localhost:8500'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
@@ -262,22 +263,10 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto domain{ commandlineParser.Get<ib::util::CommandlineParser::Option>("domain").Value() };
+    auto connectUri{ commandlineParser.Get<ib::util::CommandlineParser::Option>("connect-uri").Value() };
     auto participantName{ commandlineParser.Get<ib::util::CommandlineParser::Option>("name").Value() };
     auto configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
     auto expectedParticipantNames{ commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").Values() };
-
-    uint32_t domainId;
-    try
-    {
-        domainId = static_cast<uint32_t>(std::stoul(domain));
-    }
-    catch (const std::exception&)
-    {
-        std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
-
-        return -1;
-    }
 
     std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration;
     try
@@ -297,12 +286,12 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cout << "Creating participant '" << participantName << "' at domain " << domainId << ", expecting ";
+        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << ", expecting ";
         std::cout << (expectedParticipantNames.size() > 1 ? "participants '" : "participant '");
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
-        auto participant = ib::CreateParticipant(configuration, participantName, domainId);
+        auto participant = ib::CreateParticipant(configuration, participantName, connectUri);
 
         auto systemMonitor = participant->GetSystemMonitor();
         auto systemController = participant->GetSystemController();

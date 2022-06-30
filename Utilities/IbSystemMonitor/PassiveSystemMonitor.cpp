@@ -36,8 +36,10 @@ int main(int argc, char** argv)
         "-v, --version: Get version info.");
     commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
-        "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
+
+    commandlineParser.Add<ib::util::CommandlineParser::Option>(
+        "connect-uri", "u", "vib://localhost:8500", "[--connect-uri <vibUri>]",
+        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to 'vib://localhost:8500'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.");
     commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
@@ -76,21 +78,9 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    auto domain{ commandlineParser.Get<ib::util::CommandlineParser::Option>("domain").Value() };
+    auto connectUri{ commandlineParser.Get<ib::util::CommandlineParser::Option>("connect-uri").Value() };
     auto participantName{ commandlineParser.Get<ib::util::CommandlineParser::Option>("name").Value() };
     auto configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
-
-    int domainId;
-    try
-    {
-        domainId = static_cast<uint32_t>(std::stoul(domain));
-    }
-    catch (const std::exception&)
-    {
-        std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
-
-        return -1;
-    }
 
     std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration;
     try
@@ -110,9 +100,9 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cout << "Creating participant '" << participantName << "' at domain " << domainId << std::endl;
+        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
 
-        auto participant = ib::CreateParticipant(std::move(configuration), participantName, domainId);
+        auto participant = ib::CreateParticipant(std::move(configuration), participantName, connectUri);
 
         auto* logger = participant->GetLogger();
         auto* systemMonitor = participant->GetSystemMonitor();

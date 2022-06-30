@@ -150,11 +150,9 @@ int main(int argc, char** argv)
         "-v, --version: Get version info.");
     commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<CommandlineParser::Option>("domain", "d", "42", "[--domain <domainId>]",
-        "-d, --domain <domainId>: The domain ID that is used by the Integration Bus. Defaults to 42.");
     commandlineParser.Add<CommandlineParser::Option>(
         "connect-uri", "u", "vib://localhost:8500", "[--connect-uri <vibUri>]",
-        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to vib://localhost:8500.");
+        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to 'vib://localhost:8500'.");
     commandlineParser.Add<CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
     commandlineParser.Add<CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
@@ -204,24 +202,11 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto domain{ commandlineParser.Get<CommandlineParser::Option>("domain").Value() };
     auto participantName{ commandlineParser.Get<CommandlineParser::Option>("name").Value() };
     auto configurationFilename{ commandlineParser.Get<CommandlineParser::Option>("configuration").Value() };
     auto expectedParticipantNames{
         commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").Values()};
     auto connectUri{ commandlineParser.Get<CommandlineParser::Option>("connect-uri").Value() };
-
-    uint32_t domainId;
-    try
-    {
-        domainId = static_cast<uint32_t>(std::stoul(domain));
-    }
-    catch (const std::exception&)
-    {
-        std::cerr << "Error: Domain '" << domain << "' is not a valid number" << std::endl;
-
-        return -1;
-    }
 
     std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration;
     try
@@ -243,7 +228,7 @@ int main(int argc, char** argv)
     {
         std::cout
             << "Creating participant '" << participantName
-            << "' at domain " << domainId << ", expecting participant"
+            << "' with registry " << connectUri << ", expecting participant"
             << (expectedParticipantNames.size() > 1 ? "s '" : " '");
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
                   std::ostream_iterator<std::string>(std::cout, "', '"));
