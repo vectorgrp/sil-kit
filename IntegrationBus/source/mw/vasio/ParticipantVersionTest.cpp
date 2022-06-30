@@ -105,7 +105,7 @@ protected:
     using ParticipantListT = std::vector<std::shared_ptr<IParticipantInternal>>;
     ParticipantListT _participants;
     std::shared_ptr<VAsioRegistry> _registry;
-    const int _domainId = 42;
+    const std::string _domainId = "vib://localhost:8500";
 };
 
 TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)

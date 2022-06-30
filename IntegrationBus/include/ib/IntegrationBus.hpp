@@ -18,7 +18,7 @@ namespace ib {
 *
 * \param config Configuration of the participant
 * \param participantName Name of the participant
-* \param domainId ID of the domain
+* \param registryUri the URI of the registry
 * \return Instance of the communication adapter
 *
 * \throw ib::configuration_error if the config has errors
@@ -26,10 +26,6 @@ namespace ib {
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.
 */
-IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                         const std::string& participantName, const uint32_t domainId)
-
-    -> std::unique_ptr<mw::IParticipant>;
 
 IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                          std::string participantName)

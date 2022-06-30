@@ -32,11 +32,9 @@ ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, const char*
     ASSERT_VALID_POINTER_PARAMETER(cDomainId);
     CAPI_ENTER
     {
-        uint32_t domainId = atoi(cDomainId);
-
         auto ibConfig = ib::cfg::ParticipantConfigurationFromString(cParticipantConfigurationString);
 
-        auto participant = ib::CreateParticipant(ibConfig, cParticipantName, domainId).release();
+        auto participant = ib::CreateParticipant(ibConfig, cParticipantName, cDomainId).release();
 
         if (participant == nullptr)
         {
@@ -48,7 +46,7 @@ ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, const char*
         auto* logger = participant->GetLogger();
         if (logger)
         {
-            logger->Info("Creating participant '{}' in domain {}", cParticipantName, domainId);
+            logger->Info("Creating participant '{}' in domain {}", cParticipantName, cDomainId);
         }
 
         *outParticipant = reinterpret_cast<ib_Participant*>(participant);

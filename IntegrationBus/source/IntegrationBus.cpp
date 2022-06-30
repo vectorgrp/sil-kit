@@ -23,12 +23,6 @@ auto configToUri(ib::cfg::IParticipantConfiguration* userConfig, uint32_t domain
 
 }// namespace
 namespace ib {
-auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                       const std::string& participantName, const uint32_t domainId)
-    -> std::unique_ptr<mw::IParticipant>
-{
-    return CreateParticipant(participantConfig, participantName, configToUri(participantConfig.get(), domainId));
-}
 
 auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                        std::string participantName)
