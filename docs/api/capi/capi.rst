@@ -19,9 +19,9 @@ The main entry point of the C API is the function to obtain a ib_Participant::
     ib_Participant* participant = NULL;
     const char* configString = "{ ... }";
     const char* participantName = "CanWriter";
-    const char* domainId = "1";
+    const char* registryUri = "vib://localhost:8500";
     ib_ReturnCode result = ib_Participant_Create(&participant, configString,
-                                                            participantName, domainId, ib_False);
+                                                            participantName, registryUri, ib_False);
 
 All further services of the C API of the IntegrationBus are requested through this Participant.
 

@@ -34,9 +34,9 @@ Terminology
  * - :doc:`Configuration<../configuration/configuration>`
    - The optional participant configuration file allows to easily configure a participant and its interconnection within the 
      simulation. It can be used to change a participants behavior without needing to recompile its sources.
- * - Domain Id
-   - A numerical label to uniquely identify a simulation run.
-     This allows running multiple simulations on the same host.
+ * - Registry URI
+   - The registry URI which specifies where the registry can be reached.
+     It defaults to 'vib://localhost:8500'.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
@@ -44,9 +44,8 @@ Terminology
    - The simulated time within a simulation as it is perceived by a participant. Participants might be synchronized or
      unsynchronized.
 
-A simulation consists of participants, which all share the same domain identifier.
+A simulation consists of participants which all connect to the same registry URI.
 The participants might be physically distributed in a network or running on the same host.
-The simulation is identified by its domain among all network hosts taking part in the simulation.
 
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
 Some participants can have special roles, depending on e.g. the synchronization and detail of the simulation or
@@ -108,7 +107,7 @@ One thread will act as a publisher by sending a test string to its subscribers:
    :lines: 14-40
 
 
-First, the configured middleware domain is joined by creating a participant ``PublisherParticipant``.
+First, the simulation is joined by creating a participant ``PublisherParticipant``.
 Creating the Participant properly initializes the VIB library and allows to instantiate
 :doc:`Services<../api/api>` and offers access to the
 :doc:`Life Cycle Service<../api/lifecycleService>`.

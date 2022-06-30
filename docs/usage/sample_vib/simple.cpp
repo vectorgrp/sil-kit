@@ -9,11 +9,11 @@
 #include "ib/mw/sync/all.hpp"
 #include "ib/mw/sync/string_utils.hpp" // string conversions for enums
 
-const auto domainId = 42;
+const auto registryUri = "vib://localhost:8500";
 
 void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 {
-    auto participant = ib::CreateParticipant(config, "PublisherParticipant", domainId);
+    auto participant = ib::CreateParticipant(config, "PublisherParticipant", registryUri);
     auto* publisher = participant->CreateDataPublisher("DataService");
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -42,7 +42,7 @@ void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 
 void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 {
-    auto participant = ib::CreateParticipant(config, "SubscriberParticipant", domainId);
+    auto participant = ib::CreateParticipant(config, "SubscriberParticipant", registryUri);
     auto* subscriber = participant->CreateDataSubscriber("DataService");
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();

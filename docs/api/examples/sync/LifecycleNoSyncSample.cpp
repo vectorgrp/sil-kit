@@ -1,5 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-auto participant = ib::CreateParticipant(ibConfig, participantName, domainId, true);
+auto participant = ib::CreateParticipant(ibConfig, participantName, registryUri);
 auto* lifecycleService = participant->GetLifecycleService();
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 

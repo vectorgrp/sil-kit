@@ -82,7 +82,7 @@ running on localhost listening on Port 8500. These values can be changed via the
 
    * - Port
      - The base port to be used by participants when connecting to the IbRegistry.
-       By default, the registry is expected to listen on port 8500 + *IbDomainId*.
+       By default, the registry is expected to listen on port 8500.
 
    * - Logging
      - Optional :ref:`Logger configuration<sec:cfg-participant-logger>` for the logger used by the registry.

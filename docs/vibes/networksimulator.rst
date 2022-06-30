@@ -73,12 +73,12 @@ Command Line Interface
 
 .. code-block:: 
 
-    Usage: VIBE-NetworkSimulator.exe [--version] [--help] [--name <participantName>] [--domain <domainId>] [--log <level>] [--participant-configuration <configuration>] <configuration>
+    Usage: VIBE-NetworkSimulator.exe [--version] [--help] [--name <participantName>] [--conect-uri <registryUri>] [--log <level>] [--participant-configuration <configuration>] <configuration>
     Arguments:
     -v, --version: Get version info.
     -h, --help: Get this help.
     -n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'NetworkSimulator'.
-    -d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42.
+    -u, --connect-uri <uri>: The URI of the registry. Defaults to 'vib://localhost:8500'.
     -l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
     -c, --participant-configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
     <configuration>: Path and filename of the Network Simulator configuration YAML or JSON file. Note that the format was changed in v3.6.11.

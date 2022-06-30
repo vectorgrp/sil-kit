@@ -96,7 +96,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // Client participant
     // ------------------
 
-    auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId, false);
+    auto participant = ib::CreateParticipant(std::move(config), participant_name, registryUri);
     auto* client = participant->CreateRpcClient("TestFunc", "application/octet-stream",
         [](IRpcClient* client, const CallHandle callHandle, const RpcCallStatus callStatus, const std::vector<uint8_t>& resultData) {
             // handle resultData
@@ -110,7 +110,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // Server participant
     // ------------------
 
-    auto participant = ib::CreateParticipant(std::move(config), participant_name, domainId, false);
+    auto participant = ib::CreateParticipant(std::move(config), participant_name, registryUri);
     auto* server = participant->CreateRpcServer("TestFunc", "application/octet-stream",
         [](IRpcServer* server, const CallHandle callHandle, const std::vector<uint8_t>& argumentData) {
             // handle argumentData
