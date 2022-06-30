@@ -526,7 +526,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_rejoin)
                              {},
                              specificDataHandlers}}});
     
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto domainId = MakeTestRegistryUri();
 
     _testSystem.SetupRegistryAndSystemMaster(domainId, false, {});
     RunParticipants(subscribers, domainId, false);

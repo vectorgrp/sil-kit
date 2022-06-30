@@ -303,12 +303,12 @@ protected:
         }
     };
 
-    void ParticipantThread(RpcParticipant& participant, uint32_t domainId, bool sync)
+    void ParticipantThread(RpcParticipant& participant, const std::string& registryUri, bool sync)
     {
         try
         {
             participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfigurationWithLogging(ib::mw::logging::Level::Info),
-                                                                     participant.name, domainId);
+                                                                     participant.name, registryUri);
 
             // Create Clients
             for (auto& c : participant.rpcClients)
@@ -427,14 +427,14 @@ protected:
         }
     }
 
-    void RunParticipants(std::vector<RpcParticipant>& rpcs, uint32_t domainId, bool sync)
+    void RunParticipants(std::vector<RpcParticipant>& rpcs, const std::string& registryUri, bool sync)
     {
         try
         {
             for (auto& participant : rpcs)
             {
-                _rpcThreads.emplace_back([this, &participant, domainId, sync] {
-                    ParticipantThread(participant, domainId, sync);
+                _rpcThreads.emplace_back([this, &participant, registryUri, sync] {
+                    ParticipantThread(participant, registryUri, sync);
                 });
             }
         }
@@ -500,7 +500,7 @@ protected:
 
     void RunSyncTest(std::vector<RpcParticipant>& rpcs)
     {
-        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        auto registryUri = MakeTestRegistryUri();
 
         std::vector<std::string> requiredParticipantNames;
         for (const auto& p : rpcs)
@@ -508,8 +508,8 @@ protected:
             requiredParticipantNames.push_back(p.name);
         }
 
-        _testSystem.SetupRegistryAndSystemMaster(domainId, true, requiredParticipantNames);
-        RunParticipants(rpcs, domainId, true);
+        _testSystem.SetupRegistryAndSystemMaster(registryUri, true, requiredParticipantNames);
+        RunParticipants(rpcs, registryUri, true);
         WaitForAllServersDiscovered(rpcs);
         StopSimOnallCalledAndReceived(rpcs, true);
         JoinRpcThreads();
@@ -518,10 +518,10 @@ protected:
 
     void RunAsyncTest(std::vector<RpcParticipant>& rpcs)
     {
-        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        auto registryUri = MakeTestRegistryUri();
 
-        _testSystem.SetupRegistryAndSystemMaster(domainId, false, {});
-        RunParticipants(rpcs, domainId, false);
+        _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
+        RunParticipants(rpcs, registryUri, false);
         WaitForAllServersDiscovered(rpcs);
         JoinRpcThreads();
         ShutdownSystem();

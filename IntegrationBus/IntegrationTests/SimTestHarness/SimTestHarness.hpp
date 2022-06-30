@@ -51,7 +51,8 @@ class SimTestHarness
 {
 public:
     //!< when deferParticipantCreation is true, SimParticipants will be created in the GetParticipant calls instead of in the constructor.
-    SimTestHarness(const std::vector<std::string>& syncParticipantNames, uint32_t domainId, bool deferParticipantCreation = false);
+    SimTestHarness(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
+                   bool deferParticipantCreation = false);
     ~SimTestHarness();
     //! \brief Run the simulation, return false if timeout is reached.
     bool Run(std::chrono::nanoseconds testRunTimeout = std::chrono::nanoseconds::min());
@@ -62,7 +63,7 @@ private:
     void AddParticipant(const std::string& participantName);
 
     std::vector<std::string> _syncParticipantNames;
-    const uint32_t _domainId;
+    std::string _registryUri;
     std::unique_ptr<SimSystemController> _simSystemController;
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;
     std::unique_ptr<ib::vendor::IIbRegistry> _registry;

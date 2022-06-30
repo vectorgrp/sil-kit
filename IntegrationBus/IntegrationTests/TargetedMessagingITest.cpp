@@ -26,7 +26,7 @@ using namespace ib::mw::sync;
 
 TEST(TargetedMessagingITest, targeted_messaging)
 {
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto domainId = MakeTestRegistryUri();
 
     std::vector<std::string> syncParticipantNames{ "Sender", "TargetReceiver" , "OtherReceiver" };
 

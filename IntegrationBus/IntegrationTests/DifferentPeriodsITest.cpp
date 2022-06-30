@@ -48,14 +48,14 @@ std::istream& operator>>(std::istream& in, nanoseconds& timestamp)
 class Publisher
 {
 public:
-    Publisher(const uint32_t domainId, const uint32_t publisherIndex, const uint32_t numMessages, std::chrono::nanoseconds period)
+    Publisher(const std::string& registryUri, const uint32_t publisherIndex, const uint32_t numMessages, std::chrono::nanoseconds period)
         : _numMessages{numMessages}
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
             ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), _participantName);
 
-        _participant->JoinIbDomain(domainId);
+        _participant->JoinIbDomain(registryUri);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
@@ -115,7 +115,7 @@ class Subscriber
 {
 public:
     Subscriber(const std::vector<std::string>& syncParticipantNames, const std::string& participantName,
-               const uint32_t domainId, const uint32_t& publisherCount, const uint32_t numMessages)
+               const std::string& registryUri, const uint32_t& publisherCount, const uint32_t numMessages)
         : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _numMessages{numMessages}
@@ -124,7 +124,7 @@ public:
     {
         _participant = ib::mw::CreateParticipantImpl(
             ib::cfg::MockParticipantConfiguration(), participantName);
-        _participant->JoinIbDomain(domainId);
+        _participant->JoinIbDomain(registryUri);
 
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({_syncParticipantNames});
@@ -241,11 +241,11 @@ class DifferentPeriodsITest : public testing::Test
 protected:
     DifferentPeriodsITest()
     {
-        domainId = static_cast<uint32_t>(GetTestPid());
+        registryUri = MakeTestRegistryUri();
     }
 
 protected:
-    uint32_t domainId;
+    std::string registryUri;
 
 };
 
@@ -269,17 +269,17 @@ TEST_F(DifferentPeriodsITest, different_simtask_periods)
     }
 
     VAsioRegistry registry{ib::cfg::MockParticipantConfiguration()};
-    registry.ProvideDomain(domainId);
+    registry.ProvideDomain(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
-    Subscriber subscriber(syncParticipantNames, subscriberName, domainId, publisherCount, numMessages);
+    Subscriber subscriber(syncParticipantNames, subscriberName, registryUri, publisherCount, numMessages);
     auto subscriberFuture = subscriber.RunAsync();
 
     std::vector<Publisher> publishers;
     publishers.reserve(publisherCount);
     for (auto i = 0u; i < publisherCount; i++)
     {
-        publishers.emplace_back(domainId, i, numMessages, publisherPeriods[i]);
+        publishers.emplace_back(registryUri, i, numMessages, publisherPeriods[i]);
         publishers[i].RunAsync();
     }
 

@@ -34,21 +34,21 @@ protected:
 // All created should be removed as well if a participant leaves
 TEST_F(ServiceDiscoveryITest, discover_services)
 {
-    auto domainId = static_cast<uint32_t>(GetTestPid());
+    auto registryUri = MakeTestRegistryUri();
     size_t numberOfServices = 5;
     std::string subscriberName = "Subscriber";
     std::string publisherName = "Publisher";
 
     // Registry
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
-    registry->ProvideDomain(domainId);
+    registry->ProvideDomain(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId);
+    auto&& publisher =  ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, registryUri);
 
     // Subscriber that monitors the services
     auto&& subscriber =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId);
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -124,20 +124,20 @@ TEST_F(ServiceDiscoveryITest, discover_services)
 // All created should be removed as well if a participant leaves
 TEST_F(ServiceDiscoveryITest, discover_specific_services)
 {
-    auto domainId = static_cast<uint32_t>(GetTestPid());
+    auto registryUri = MakeTestRegistryUri();
     size_t numberOfServices = 5;
     std::string subscriberName = "Subscriber";
     std::string publisherName = "Publisher";
 
     // Registry
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
-    registry->ProvideDomain(domainId);
+    registry->ProvideDomain(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, domainId);
+    auto&& publisher = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, registryUri);
 
     // Subscriber that monitors the services
-    auto&& subscriber = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, domainId);
+    auto&& subscriber = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
     const auto topic = "Topic";

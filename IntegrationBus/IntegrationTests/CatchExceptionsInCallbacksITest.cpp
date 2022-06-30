@@ -52,7 +52,7 @@ protected:
 
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto domainId = MakeTestRegistryUri();
 
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
     registry->ProvideDomain(domainId);

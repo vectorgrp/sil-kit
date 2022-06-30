@@ -48,14 +48,14 @@ std::istream& operator>>(std::istream& in, nanoseconds& timestamp)
 class Publisher
 {
 public:
-    Publisher(const uint32_t domainId, const uint32_t publisherIndex, const uint32_t testSize)
+    Publisher(const std::string&  registryUri, const uint32_t publisherIndex, const uint32_t testSize)
         : _testSize{testSize}
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
             ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), _participantName);
 
-        _participant->JoinIbDomain(domainId);
+        _participant->JoinIbDomain(registryUri);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
@@ -113,7 +113,7 @@ private:
 class Subscriber
 {
 public:
-    Subscriber(const std::string& participantName, const uint32_t domainId, const uint32_t& publisherCount, const uint32_t testSize)
+    Subscriber(const std::string& participantName, const std::string& registryUri, const uint32_t& publisherCount, const uint32_t testSize)
         : _publisherCount{publisherCount}
         , _messageIndexes(publisherCount, 0u)
         , _testSize{testSize}
@@ -121,7 +121,7 @@ public:
     {
         _participant = ib::mw::CreateParticipantImpl(
             ib::cfg::MockParticipantConfiguration(), participantName);
-        _participant->JoinIbDomain(domainId);
+        _participant->JoinIbDomain(registryUri);
 
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({syncParticipantNames});
@@ -249,11 +249,11 @@ class DeterministicSimVAsioITest : public testing::Test
 protected:
     DeterministicSimVAsioITest()
     {
-        domainId = static_cast<uint32_t>(GetTestPid());
+        registryUri = MakeTestRegistryUri();
     }
 
 protected:
-    uint32_t domainId;
+    std::string registryUri;
 };
 
 TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
@@ -269,17 +269,17 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
     }
 
     VAsioRegistry registry{ ib::cfg::MockParticipantConfiguration() };
-    registry.ProvideDomain(domainId);
+    registry.ProvideDomain(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
-    Subscriber subscriber(subscriberName, domainId, publisherCount, testSize);
+    Subscriber subscriber(subscriberName, registryUri, publisherCount, testSize);
     auto subscriberFuture = subscriber.RunAsync();
 
     std::vector<Publisher> publishers;
     publishers.reserve(publisherCount);
     for (auto i = 0u; i < publisherCount; i++)
     {
-        publishers.emplace_back(domainId, i, testSize);
+        publishers.emplace_back(registryUri, i, testSize);
         publishers[i].RunAsync();
     }
 

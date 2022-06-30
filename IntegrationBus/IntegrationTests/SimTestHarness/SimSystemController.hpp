@@ -15,10 +15,11 @@ class SimSystemController
 {
 public:
     SimSystemController() = delete;
-    SimSystemController(const std::vector<std::string>& syncParticipantNames, uint32_t domainId) : _syncParticipantNames{syncParticipantNames}
+    SimSystemController(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri)
+        : _syncParticipantNames{syncParticipantNames}
     {
         _participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", domainId);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", registryUri);
 
         _controller = _participant->GetSystemController();
         _controller->SetWorkflowConfiguration({_syncParticipantNames});

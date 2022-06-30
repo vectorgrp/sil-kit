@@ -46,7 +46,7 @@ protected:
 protected:
     ThreeEthControllerITest()
     {
-        domainId = static_cast<uint32_t>(GetTestPid());
+        registryUri = MakeTestRegistryUri();
 
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
@@ -124,7 +124,7 @@ protected:
 
     void ExecuteTest()
     {
-        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
+        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
         //participant setup
         auto* ethWriter  = testHarness.GetParticipant("EthWriter");
@@ -166,7 +166,7 @@ protected:
     }
 
 protected:
-    uint32_t domainId;
+    std::string registryUri;
     std::vector<std::string> syncParticipantNames;
 
     struct TestMessage

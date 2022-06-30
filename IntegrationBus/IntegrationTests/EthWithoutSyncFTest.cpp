@@ -30,7 +30,7 @@ protected:
 
     EthWithoutSyncFTest()
     {
-        _domainId = static_cast<uint32_t>(GetTestPid());
+        _domainId = MakeTestRegistryUri();
         SetupTestData();
     }
 
@@ -141,7 +141,7 @@ protected:
         ib::sim::eth::EthernetFrameTransmitEvent receivedAck;
     };
 
-    uint32_t _domainId;
+    std::string  _domainId;
     std::vector<TestFrame> _testFrames;
     std::promise<void> _ethReaderRegisteredPromise;
     std::promise<void> _ethReaderAllReceivedPromise;

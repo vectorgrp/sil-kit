@@ -293,11 +293,11 @@ protected:
     };
 
     // Specific for this test
-    void ParticipantThread(PubSubParticipant& participant, uint32_t domainId, bool sync)
+    void ParticipantThread(PubSubParticipant& participant, const std::string& registryUri, bool sync)
     {
         try
         {
-            participant.participant = ib::CreateParticipant(participant.config, participant.name, domainId);
+            participant.participant = ib::CreateParticipant(participant.config, participant.name, registryUri);
 
             participant.participantCreatedPromise.set_value();
 
@@ -404,14 +404,14 @@ protected:
         }
     }
 
-    void RunParticipants(std::vector<PubSubParticipant>& pubsubs, uint32_t domainId, bool sync)
+    void RunParticipants(std::vector<PubSubParticipant>& pubsubs, const std::string& registryUri, bool sync)
     {
         try
         {
             for (auto& pubsubParticipant : pubsubs)
             {
-                _pubSubThreads.emplace_back([this, &pubsubParticipant, domainId, sync] {
-                    ParticipantThread(pubsubParticipant, domainId, sync);
+                _pubSubThreads.emplace_back([this, &pubsubParticipant, registryUri, sync] {
+                    ParticipantThread(pubsubParticipant, registryUri, sync);
                 });
             }
         }
@@ -474,7 +474,7 @@ protected:
 
     void RunSyncTest(std::vector<PubSubParticipant>& pubsubs)
     {
-        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        auto registryUri = MakeTestRegistryUri();
 
         std::vector<std::string> requiredParticipantNames;
         for (const auto& p : pubsubs)
@@ -482,8 +482,8 @@ protected:
             requiredParticipantNames.push_back(p.name);
         }
 
-        _testSystem.SetupRegistryAndSystemMaster(domainId, true, requiredParticipantNames);
-        RunParticipants(pubsubs, domainId, true);
+        _testSystem.SetupRegistryAndSystemMaster(registryUri, true, requiredParticipantNames);
+        RunParticipants(pubsubs, registryUri, true);
         WaitForAllDiscovered(pubsubs);
         StopSimOnAllSentAndReceived(pubsubs, true);
         JoinPubSubThreads();
@@ -492,18 +492,18 @@ protected:
 
     void RunAsyncTest(std::vector<PubSubParticipant>& publishers, std::vector<PubSubParticipant>& subscribers)
     {
-        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        auto registryUri = MakeTestRegistryUri();
 
-        _testSystem.SetupRegistryAndSystemMaster(domainId, false, {});
+        _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
 
         //Start publishers first
-        RunParticipants(publishers, domainId, false);
+        RunParticipants(publishers, registryUri, false);
         for (auto& p : publishers)
         {
             p.WaitForAllSent();
         }
         //Start subscribers afterwards
-        RunParticipants(subscribers, domainId, false);
+        RunParticipants(subscribers, registryUri, false);
         JoinPubSubThreads();
         ShutdownSystem();
     }

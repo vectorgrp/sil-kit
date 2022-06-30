@@ -50,14 +50,15 @@ void SimParticipant::Stop()
 ////////////////////////////////////////
 // SimTestHarness
 ////////////////////////////////////////
-SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNames, uint32_t domainId, bool deferParticipantCreation)
+SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
+                               bool deferParticipantCreation)
     : _syncParticipantNames{ syncParticipantNames }
-    , _domainId{domainId}
+    , _registryUri{registryUri}
 {
 
     // start registry
     _registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
-    _registry->ProvideDomain(_domainId);
+    _registry->ProvideDomain(_registryUri);
 
     // configure and add participants
     if (!deferParticipantCreation)
@@ -68,7 +69,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
         }
     }
 
-    _simSystemController = std::make_unique<SimSystemController>(_syncParticipantNames, _domainId);
+    _simSystemController = std::make_unique<SimSystemController>(_syncParticipantNames, _registryUri);
 }
 
 SimTestHarness::~SimTestHarness() = default;
@@ -145,7 +146,7 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     participant->_name = participantName;
 
     participant->_participant =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _domainId);
+        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _registryUri);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

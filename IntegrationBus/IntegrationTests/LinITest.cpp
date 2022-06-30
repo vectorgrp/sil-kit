@@ -368,7 +368,7 @@ protected:
 
 TEST_F(LinITest, sync_lin_simulation)
 {
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto domainId = MakeTestRegistryUri();
     std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };
     _simTestHarness = std::make_unique<SimTestHarness>(participantNames, domainId, false);
 

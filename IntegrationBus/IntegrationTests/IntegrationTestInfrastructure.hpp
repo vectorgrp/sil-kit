@@ -25,14 +25,14 @@ public:
         FAIL() << ss.str();
     }
     
-    void SetupRegistryAndSystemMaster(uint32_t domainId, bool sync, const std::vector<std::string>& requiredParticipantNames)
+    void SetupRegistryAndSystemMaster(const std::string& registryUri, bool sync, const std::vector<std::string>& requiredParticipantNames)
     {
         try
         {
-            RunRegistry(domainId);
+            RunRegistry(registryUri);
             if (sync)
             {
-                RunSystemMaster(domainId, requiredParticipantNames);
+                RunSystemMaster(registryUri, requiredParticipantNames);
             }
         }
         catch (const std::exception& error)
@@ -51,16 +51,16 @@ public:
 
 private:
 
-    void RunRegistry(uint32_t domainId)
+    void RunRegistry(const std::string& registryUri)
     {
         _registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
-        _registry->ProvideDomain(domainId);
+        _registry->ProvideDomain(registryUri);
     }
 
-    void RunSystemMaster(uint32_t domainId, const std::vector<std::string>& requiredParticipantNames)
+    void RunSystemMaster(const std::string& registryUri, const std::vector<std::string>& requiredParticipantNames)
     {
         _systemMaster.participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", domainId);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", registryUri);
 
         _systemMaster.systemController = _systemMaster.participant->GetSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();

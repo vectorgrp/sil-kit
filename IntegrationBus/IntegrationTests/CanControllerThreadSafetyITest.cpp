@@ -64,14 +64,14 @@ protected:
         }
     };
 
-    void AsyncCanWriterThread(TestParticipant& participant, uint32_t domainId)
+    void AsyncCanWriterThread(TestParticipant& participant, const std::string& registryUri)
     {
         static uint32_t increasingCanId = 0;
 
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
 
             while (runAsync)
@@ -100,12 +100,12 @@ protected:
         participant.participant.reset();
     }
 
-    void AsyncCanReaderThread(TestParticipant& participant, uint32_t domainId)
+    void AsyncCanReaderThread(TestParticipant& participant, const std::string& registryUri)
     {
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
 
             auto frameHandler = [&participant](ICanController*, const CanFrameEvent& /*msg*/) {
@@ -148,12 +148,12 @@ protected:
         participant.participant.reset();
     }
 
-    void RunRegistry(uint32_t domainId)
+    void RunRegistry(const std::string& registryUri)
     {
         try
         {
             registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
-            registry->ProvideDomain(domainId);
+            registry->ProvideDomain(registryUri);
         }
         catch (const ib::ConfigurationError& error)
         {
@@ -170,14 +170,14 @@ protected:
     }
 
 
-    void RunAsyncCanWriter(TestParticipant& participant, uint32_t domainId)
+    void RunAsyncCanWriter(TestParticipant& participant, const std::string& registryUri)
     {
         runAsync = true;
 
         try
         {
-            asyncParticipantThreads.emplace_back([this, &participant, domainId] {
-                AsyncCanWriterThread(participant, domainId);
+            asyncParticipantThreads.emplace_back([this, &participant, registryUri] {
+                AsyncCanWriterThread(participant, registryUri);
             });
         }
         catch (const ib::ConfigurationError& error)
@@ -194,14 +194,14 @@ protected:
         }
     }
 
-    void RunAsyncCanReader(TestParticipant& participant, uint32_t domainId)
+    void RunAsyncCanReader(TestParticipant& participant, const std::string& registryUri)
     {
         runAsync = true;
 
         try
         {
-            asyncParticipantThreads.emplace_back([this, &participant, domainId] {
-                AsyncCanReaderThread(participant, domainId);
+            asyncParticipantThreads.emplace_back([this, &participant, registryUri] {
+                AsyncCanReaderThread(participant, registryUri);
             });
         }
         catch (const ib::ConfigurationError& error)
@@ -250,15 +250,15 @@ protected:
 TEST_F(CanControllerThreadSafetyITest, add_remove_handler_during_reception)
 {
     numParticipants = 0;
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto registryUri = MakeTestRegistryUri();
 
     TestParticipant canWriterParticipant{ "CanWriterParticipant" };
     TestParticipant canReaderParticipant{ "CanReaderParticipant" };
 
-    RunRegistry(domainId);
+    RunRegistry(registryUri);
 
-    RunAsyncCanWriter(canWriterParticipant, domainId);
-    RunAsyncCanReader(canReaderParticipant, domainId);
+    RunAsyncCanWriter(canWriterParticipant, registryUri);
+    RunAsyncCanReader(canReaderParticipant, registryUri);
 
     // Await successful communication of canReader
     canReaderParticipant.AwaitCommunication();

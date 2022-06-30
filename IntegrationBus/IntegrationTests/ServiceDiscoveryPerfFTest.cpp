@@ -35,9 +35,9 @@ protected:
         auto start = Now();
 
         std::vector<std::string> syncParticipantNames = {"Publisher", "Subscriber", "Subscriber2"};
-        auto domainId = static_cast<uint32_t>(GetTestPid());
+        auto registryUri = MakeTestRegistryUri();
 
-        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId, true);
+        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
         auto&& publisher = testHarness.GetParticipant("Publisher")->Participant();
         
         for (auto i = 0; i < numberOfServices; i++)

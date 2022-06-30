@@ -40,7 +40,7 @@ protected:
 
     CanWithoutSyncFTest()
     {
-        _domainId = static_cast<uint32_t>(GetTestPid());
+        _registryUri = MakeTestRegistryUri();
         SetupTestData();
     }
 
@@ -78,7 +78,7 @@ protected:
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _domainId);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _registryUri);
         auto* controller = participant->CreateCanController("CAN1");
 
         controller->AddFrameTransmitHandler(
@@ -110,7 +110,7 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _domainId);
+        auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(
@@ -153,7 +153,7 @@ protected:
         ib::sim::can::CanFrameTransmitEvent receivedAck;
     };
 
-    uint32_t _domainId;
+    std::string _registryUri;
     std::vector<Testmessage> _testMessages;
     std::promise<void> _canReaderRegisteredPromise;
     std::promise<void> _canReaderAllReceivedPromise;
@@ -163,7 +163,7 @@ protected:
 TEST_F(CanWithoutSyncFTest, can_communication_no_simulation_flow_vasio)
 {
     auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::ParticipantConfigurationFromString("ParticipantName: Registry"));
-    registry->ProvideDomain(_domainId);
+    registry->ProvideDomain(_registryUri);
     ExecuteTest();
 }
 

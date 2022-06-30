@@ -135,12 +135,12 @@ protected:
         FAIL() << reason;
     }
 
-    void SyncParticipantThread(TestParticipant& participant, uint32_t domainId)
+    void SyncParticipantThread(TestParticipant& participant, const std::string& registryUri)
     {
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
 
             auto* lifecycleService = participant.participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -190,12 +190,12 @@ protected:
 
     }
 
-    void AsyncParticipantThread(TestParticipant& participant, uint32_t domainId)
+    void AsyncParticipantThread(TestParticipant& participant, const std::string& registryUri)
     {
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, domainId);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", topic, mediaType, {},
@@ -237,12 +237,12 @@ protected:
         participant.participant.reset();
     }
 
-    void RunRegistry(uint32_t domainId)
+    void RunRegistry(const std::string& registryUri)
     {
         try
         {
             registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
-            registry->ProvideDomain(domainId);
+            registry->ProvideDomain(registryUri);
         }
         catch (const ib::ConfigurationError& error)
         {
@@ -258,12 +258,12 @@ protected:
         }
     }
 
-    void RunSystemMaster(uint32_t domainId)
+    void RunSystemMaster(const std::string& registryUri)
     {
         try
         {
             systemMaster.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, domainId);
+                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, registryUri);
 
             systemMaster.systemController = systemMaster.participant->GetSystemController();
             systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();
@@ -292,14 +292,14 @@ protected:
         }
     }
 
-    void RunSyncParticipants(std::vector<TestParticipant>& participants, uint32_t domainId)
+    void RunSyncParticipants(std::vector<TestParticipant>& participants, const std::string& registryUri)
     {
         try
         {
             for (auto& p : participants)
             {
                 syncParticipantThreads.emplace_back(
-                    [this, &p, domainId] { SyncParticipantThread(p, domainId); });
+                    [this, &p, registryUri] { SyncParticipantThread(p, registryUri); });
             }
 
         }
@@ -317,7 +317,7 @@ protected:
         }
     }
 
-    void RunAsyncParticipants(std::vector<TestParticipant>& participants, uint32_t domainId)
+    void RunAsyncParticipants(std::vector<TestParticipant>& participants, const std::string& registryUri)
     {
         runAsync = true;
 
@@ -325,7 +325,7 @@ protected:
         {
             for (auto& p : participants)
             {
-                asyncParticipantThreads.emplace_back([this, &p, domainId] { AsyncParticipantThread(p, domainId); });
+                asyncParticipantThreads.emplace_back([this, &p, registryUri] { AsyncParticipantThread(p, registryUri); });
             }
         }
         catch (const ib::ConfigurationError& error)
@@ -361,15 +361,15 @@ protected:
         asyncParticipantThreads.clear();
     }
 
-    void SetupSystem(uint32_t domainId, std::vector<TestParticipant>& syncParticipants)
+    void SetupSystem(const std::string& registryUri, std::vector<TestParticipant>& syncParticipants)
     {
         for (auto&& p : syncParticipants)
         {
             syncParticipantNames.push_back(p.name);
         }
 
-        RunRegistry(domainId);
-        RunSystemMaster(domainId);
+        RunRegistry(registryUri);
+        RunSystemMaster(registryUri);
         
     }
 
@@ -398,7 +398,7 @@ protected:
 TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 {
     numParticipants = 0;
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto registryUri = MakeTestRegistryUri();
 
     std::vector<TestParticipant> syncParticipants;
     syncParticipants.push_back({ "SyncParticipant1" });
@@ -408,9 +408,9 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
     asyncParticipants.push_back({ "AsyncParticipant1" });
     asyncParticipants.push_back({ "AsyncParticipant2" });
 
-    SetupSystem(domainId, syncParticipants);
+    SetupSystem(registryUri, syncParticipants);
 
-    RunSyncParticipants(syncParticipants, domainId);
+    RunSyncParticipants(syncParticipants, registryUri);
 
     std::cout << "Await simtime progress" << std::endl;
     // Await simtime progress
@@ -427,7 +427,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
         std::cout << ">> Hop on async participants" << std::endl;
 
         // Hop on with async participant
-        RunAsyncParticipants(asyncParticipants, domainId);
+        RunAsyncParticipants(asyncParticipants, registryUri);
 
         std::cout << ">> Await successful communication of async/sync participants" << std::endl;
         // Await successful communication of async/sync participants
@@ -473,19 +473,19 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToEmpty)
 {
     numParticipants = 0;
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto registryUri = MakeTestRegistryUri();
 
     std::vector<TestParticipant> syncParticipants;
     std::vector<TestParticipant> asyncParticipants;
     asyncParticipants.push_back({ "AsyncParticipant1" });
     asyncParticipants.push_back({ "AsyncParticipant2" });
 
-    SetupSystem(domainId, syncParticipants);
+    SetupSystem(registryUri, syncParticipants);
 
     for (int i = 0; i < 3; i++)
     {
         // Hop on with async participant on empty sim
-        RunAsyncParticipants(asyncParticipants, domainId);
+        RunAsyncParticipants(asyncParticipants, registryUri);
 
         // Await successful communication of async/sync participants
         for (auto& p : asyncParticipants)

@@ -93,7 +93,7 @@ protected:
 
     void ExecuteTest()
     {
-        const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+        auto domainId = MakeTestRegistryUri();
         ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");

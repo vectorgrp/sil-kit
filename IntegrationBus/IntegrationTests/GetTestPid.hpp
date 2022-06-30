@@ -9,10 +9,6 @@
 #else // assume POSIX
 #   include <unistd.h>
 #endif
-inline auto GetTestPid()
-{
-    return getpid() % 512;
-}
 
 inline auto MakeTestRegistryUri()
 {

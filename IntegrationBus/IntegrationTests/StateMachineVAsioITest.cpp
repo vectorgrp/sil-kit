@@ -80,7 +80,7 @@ protected:
 
 TEST_F(VAsioNetworkITest, vasio_state_machine)
 {
-    const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
+    auto domainId = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());

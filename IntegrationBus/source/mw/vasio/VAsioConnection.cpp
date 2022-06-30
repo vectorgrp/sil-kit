@@ -217,7 +217,7 @@ bool connectWithRetry(ib::mw::VAsioTcpPeer* peer, const ib::mw::VAsioPeerInfo& p
         }
     }
     return false;
-};
+}
 
 } // namespace
 
