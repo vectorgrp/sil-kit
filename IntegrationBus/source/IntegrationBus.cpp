@@ -28,14 +28,14 @@ auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> parti
                        std::string participantName)
     -> std::unique_ptr<mw::IParticipant>
 {
-    return CreateParticipant(participantConfig, participantName, configToUri(participantConfig.get(), 0));
+    return CreateParticipant(participantConfig, std::move(participantName), configToUri(participantConfig.get(), 0));
 }
 
 IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
                                          std::string participantName, std::string registryUri)
     -> std::unique_ptr<mw::IParticipant>
 {
-    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), participantName);
+    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), std::move(participantName));
     participant->JoinIbDomain(std::move(registryUri));
     return participant;
 }

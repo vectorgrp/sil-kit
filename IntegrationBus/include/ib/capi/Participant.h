@@ -85,7 +85,7 @@ typedef struct
 
 } ib_WorkflowConfiguration;
 
-/*! \brief Join the IB simulation with the domainId as a participant.
+/*! \brief Join the IB simulation hosted by the registry listening at URI as a participant.
 *
 * Join the IB simulation and become a participant
 * based on the given configuration options.
@@ -93,14 +93,14 @@ typedef struct
 * \param outParticipant The pointer through which the simulation participant will be returned (out parameter).
 * \param config Configuration of the participant passed as YAML/JSON string
 * \param participantName Name of the participant
-* \param cDomainId ID of the domain/simulation to join
+* \param cRegistryUri The `vib://` URI of the registry
 *
 */
 IntegrationBusAPI ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, 
-    const char* cJsonConfig, const char* cParticipantName, const char* cDomainId, ib_Bool isSynchronized);
+    const char* cJsonConfig, const char* cParticipantName, const char* cRegistryUri, ib_Bool isSynchronized);
 
 typedef ib_ReturnCode (*ib_Participant_Create_t)(ib_Participant** outParticipant, 
-    const char* cJsonConfig, const char* cParticipantName, const char* cDomainId, ib_Bool isSynchronized);
+    const char* cJsonConfig, const char* cParticipantName, const char* cRegistryUri, ib_Bool isSynchronized);
     
 /*! \brief Destroy a simulation participant and its associated simulation elements.
 *

@@ -504,19 +504,19 @@ int main(int argc, char* argv[])
     }
     participantName = argv[2]; 
 
-    const char* domainId = "42";
+    const char* registryUri = "vib://localhost:8500";
     if (argc >= 4)
     {
-        domainId = argv[3]; 
+        registryUri = argv[3]; 
     }
 
     ib_ReturnCode returnCode;
-    returnCode = ib_Participant_Create(&participant, jsonString, participantName, domainId, ib_True);
+    returnCode = ib_Participant_Create(&participant, jsonString, participantName, registryUri, ib_True);
     if (returnCode) {
         printf("%s\n", ib_GetLastErrorString());
         return 2;
     }
-    printf("Creating participant '%s' for simulation '%s'\n", participantName, domainId);
+    printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     const char* controllerName = "LIN1";
     const char* networkName = "LIN1";
