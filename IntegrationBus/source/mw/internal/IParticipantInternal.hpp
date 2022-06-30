@@ -21,14 +21,13 @@ public:
 
     /*! \brief Join the middleware domain as a participant.
     *
-    * Join the middleware domain and become a participant.
-    * \param domainId ID of the domain
+    * Connect to the registry listening on registryUri
+    * \param registryUri URI of the registry
     *
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    virtual void JoinIbDomain(uint32_t domainId) = 0;
-    virtual void JoinIbDomain(std::string registryUri) = 0;
+    virtual void JoinIbDomain(const std::string& registryUri) = 0;
 
     // For VIBE-NetworkSimulator integration:
     virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;

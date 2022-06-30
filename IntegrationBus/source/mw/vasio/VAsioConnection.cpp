@@ -293,14 +293,6 @@ void VAsioConnection::SetLogger(logging::ILogger* logger)
     _logger = logger;
 }
 
-void VAsioConnection::JoinDomain(uint32_t domainId)
-{
-    std::stringstream ss;
-    ss << "vib://" << _config.middleware.registry.hostname
-        << ":" << (_config.middleware.registry.port + domainId)
-        ;
-    return JoinDomain(ss.str());
-}
 
 void VAsioConnection::JoinDomain(std::string connectUri)
 {

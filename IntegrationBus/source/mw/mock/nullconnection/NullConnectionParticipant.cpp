@@ -16,8 +16,6 @@ struct NullConnection
     NullConnection(ib::cfg::ParticipantConfiguration /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/, ProtocolVersion) {}
 
     void SetLogger(logging::ILogger* /*logger*/) {}
-    void JoinDomain(uint32_t /*domainId*/) {}
-
     void JoinDomain(std::string /*registryUri*/) {}
 
     template<class IbServiceT>

@@ -271,14 +271,13 @@ public:
 
     /*! \brief Join the middleware domain as a participant.
     *
-    * Join the middleware domain and become a participant.
-    * \param domainId ID of the domain
+    * Connect to the registry and join the domain
+    * \param registryUri ID of the domain
     *
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void JoinIbDomain(uint32_t domainId) override;
-    void JoinIbDomain(std::string registryUri) override;
+    void JoinIbDomain(const std::string& registryUri) override;
 
     // For Testing Purposes:
     inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }

@@ -23,18 +23,18 @@
 extern "C"
 {
 ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, const char* cParticipantConfigurationString,
-                                    const char* cParticipantName, const char* cDomainId,
+                                    const char* cParticipantName, const char* cRegistryUri,
                                     ib_Bool /*unused isSynchronized*/)
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipant);
     ASSERT_VALID_POINTER_PARAMETER(cParticipantConfigurationString);
     ASSERT_VALID_POINTER_PARAMETER(cParticipantName);
-    ASSERT_VALID_POINTER_PARAMETER(cDomainId);
+    ASSERT_VALID_POINTER_PARAMETER(cRegistryUri);
     CAPI_ENTER
     {
         auto ibConfig = ib::cfg::ParticipantConfigurationFromString(cParticipantConfigurationString);
 
-        auto participant = ib::CreateParticipant(ibConfig, cParticipantName, cDomainId).release();
+        auto participant = ib::CreateParticipant(ibConfig, cParticipantName, cRegistryUri).release();
 
         if (participant == nullptr)
         {
@@ -46,7 +46,7 @@ ib_ReturnCode ib_Participant_Create(ib_Participant** outParticipant, const char*
         auto* logger = participant->GetLogger();
         if (logger)
         {
-            logger->Info("Creating participant '{}' in domain {}", cParticipantName, cDomainId);
+            logger->Info("Creating participant '{}' in domain {}", cParticipantName, cRegistryUri);
         }
 
         *outParticipant = reinterpret_cast<ib_Participant*>(participant);

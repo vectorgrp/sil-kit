@@ -64,7 +64,6 @@ public:
     // ----------------------------------------
     // Public methods
     void SetLogger(logging::ILogger* logger);
-    void JoinDomain(uint32_t domainId);
     void JoinDomain(std::string registryUri);
 
     template <class IbServiceT>

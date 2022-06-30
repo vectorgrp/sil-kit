@@ -80,16 +80,16 @@ protected:
 
 TEST_F(VAsioNetworkITest, vasio_state_machine)
 {
-    auto domainId = MakeTestRegistryUri();
+    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
-    registry->ProvideDomain(domainId);
+    registry->ProvideDomain(registryUri);
 
     // Setup Participant for TestController
     auto participant = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController");
 
-    participant->JoinIbDomain(domainId);
+    participant->JoinIbDomain(registryUri);
     auto systemController = participant->GetSystemController();
     systemController->SetWorkflowConfiguration({syncParticipantNames});
     auto monitor = participant->GetSystemMonitor();
@@ -99,7 +99,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Setup Participant for Test Unit
     auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit");
-    participantTestUnit->JoinIbDomain(domainId);
+    participantTestUnit->JoinIbDomain(registryUri);
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 

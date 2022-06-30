@@ -45,51 +45,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration>
     _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
 }
 
-void VAsioRegistry::ProvideDomain(uint32_t domainId)
-{
-    bool isAccepting{false};
-    // accept connection from participants on any interface
-    try
-    {
-        //Local domain sockets, failure is non fatal for operation.
-        _connection.AcceptLocalConnections(std::to_string(domainId));
-        isAccepting = true;
-    }
-    catch (const std::exception& e)
-    {
-        _logger->Warn("VAsioRegistry failed to create local listening socket: {}",
-            e.what());
-    }
-
-
-    const auto hostname = _vasioConfig->middleware.registry.hostname;
-    auto registryPort = static_cast<uint16_t>(_vasioConfig->middleware.registry.port + domainId);
-    try
-    {
-        // Resolve the configured hostname and accept on the given port:
-        _connection.AcceptTcpConnectionsOn(hostname, registryPort);
-        isAccepting = true;
-    }
-    catch (const std::exception& e)
-    {
-        _logger->Error("VAsioRegistry failed to create listening socket {}:{} for domainId={}. Reason: {}",
-            hostname,
-            registryPort,
-            domainId,
-            e.what());
-        // For scenarios where multiple instances run on the same host, binding on TCP/IP
-        // will result in an error. However, if we can accept local ipc connections we can
-        // continue.
-        if (!isAccepting)
-        {
-            throw;
-        }
-    }
-    _connection.StartIoWorker();
-}
-
-
-void VAsioRegistry::ProvideDomain(std::string listenUri)
+void VAsioRegistry::ProvideDomain(const std::string& listenUri)
 {
     auto uri = Uri::Parse(listenUri);
     bool isAccepting{false};

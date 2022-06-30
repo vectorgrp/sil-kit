@@ -49,7 +49,7 @@ protected:
     void SetupRegistry(ProtocolVersion registryVersion)
     {
         _registry = MakeRegistry(registryVersion);
-        _registry->ProvideDomain(_domainId);
+        _registry->ProvideDomain(registryUri);
     }
 
     void SetupParticipants(std::initializer_list<VersionedParticipant> participants)
@@ -64,7 +64,7 @@ protected:
     {
         for (auto&& participant : _participants)
         {
-            participant->JoinIbDomain(_domainId);
+            participant->JoinIbDomain(registryUri);
         }
     }
     void ExchangeData()
@@ -105,7 +105,7 @@ protected:
     using ParticipantListT = std::vector<std::shared_ptr<IParticipantInternal>>;
     ParticipantListT _participants;
     std::shared_ptr<VAsioRegistry> _registry;
-    const std::string _domainId = "vib://localhost:8500";
+    const std::string registryUri = "vib://localhost:8500";
 };
 
 TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)

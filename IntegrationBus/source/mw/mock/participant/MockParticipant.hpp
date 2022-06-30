@@ -394,8 +394,7 @@ public:
     auto GetParticipantName() const -> const std::string& override { return _name; }
 
     virtual auto GetTimeProvider() -> sync::ITimeProvider* { return &mockTimeProvider; }
-    void JoinIbDomain(uint32_t ) override {}
-    void JoinIbDomain(std::string ) override {}
+    void JoinIbDomain(const std::string& ) override {}
 
     auto GetServiceDiscovery() -> service::IServiceDiscovery* override { return &mockServiceDiscovery; }
 

@@ -26,13 +26,13 @@ using namespace ib::mw::sync;
 
 TEST(TargetedMessagingITest, targeted_messaging)
 {
-    auto domainId = MakeTestRegistryUri();
+    auto registryUri = MakeTestRegistryUri();
 
     std::vector<std::string> syncParticipantNames{ "Sender", "TargetReceiver" , "OtherReceiver" };
 
     auto receiveCount = 0;
 
-    ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
+    ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
     auto* senderCom = dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("Sender")->Participant());
 

@@ -52,20 +52,20 @@ protected:
 
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
-    auto domainId = MakeTestRegistryUri();
+    auto registryUri = MakeTestRegistryUri();
 
     auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
-    registry->ProvideDomain(domainId);
+    registry->ProvideDomain(registryUri);
 
     std::string participantNameSender = "Sender";
     auto pubParticipant = ib::mw::CreateParticipantImpl(
         ib::cfg::MockParticipantConfiguration(), participantNameSender);
-    pubParticipant->JoinIbDomain(domainId);
+    pubParticipant->JoinIbDomain(registryUri);
 
     std::string participantNameReceiver = "Receiver";
     auto subParticipant = ib::mw::CreateParticipantImpl(
         ib::cfg::MockParticipantConfiguration(), participantNameReceiver);
-    subParticipant->JoinIbDomain(domainId);
+    subParticipant->JoinIbDomain(registryUri);
 
     publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);
     subscriber = subParticipant->CreateDataSubscriber(

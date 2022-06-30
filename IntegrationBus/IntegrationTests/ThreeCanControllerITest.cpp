@@ -119,8 +119,8 @@ protected:
 
     void ExecuteTest()
     {
-        auto domainId = MakeTestRegistryUri();
-        ib::test::SimTestHarness testHarness(syncParticipantNames, domainId);
+        auto registryUri = MakeTestRegistryUri();
+        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);

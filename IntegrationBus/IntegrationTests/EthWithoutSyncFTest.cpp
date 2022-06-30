@@ -30,7 +30,7 @@ protected:
 
     EthWithoutSyncFTest()
     {
-        _domainId = MakeTestRegistryUri();
+        _registryUri = MakeTestRegistryUri();
         SetupTestData();
     }
 
@@ -64,7 +64,7 @@ protected:
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
         
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _domainId);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _registryUri);
         auto* controller = dynamic_cast<ib::sim::eth::EthController*>(participant->CreateEthernetController("ETH1"));
 
         controller->AddFrameTransmitHandler(
@@ -95,7 +95,7 @@ protected:
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _domainId);
+            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _registryUri);
         auto* controller = participant->CreateEthernetController("ETH1");
 
         controller->AddFrameHandler(
@@ -141,7 +141,7 @@ protected:
         ib::sim::eth::EthernetFrameTransmitEvent receivedAck;
     };
 
-    std::string  _domainId;
+    std::string  _registryUri;
     std::vector<TestFrame> _testFrames;
     std::promise<void> _ethReaderRegisteredPromise;
     std::promise<void> _ethReaderAllReceivedPromise;
@@ -151,7 +151,7 @@ protected:
 TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
     auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
-    registry->ProvideDomain(_domainId);
+    registry->ProvideDomain(_registryUri);
     ExecuteTest();
 }
 

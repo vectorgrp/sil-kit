@@ -20,12 +20,10 @@ public: // CTor
     VAsioRegistry(const VAsioRegistry&) = delete;
     VAsioRegistry(VAsioRegistry&&) = delete;
     VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg,
-        ProtocolVersion version =CurrentProtocolVersion());
+                  ProtocolVersion version = CurrentProtocolVersion());
 
 public: // methods
-    void ProvideDomain(uint32_t domainId) override;
-
-    void ProvideDomain(std::string listenUri) override;
+    void ProvideDomain(const std::string& listenUri) override;
 
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;

@@ -10,33 +10,35 @@
 
 namespace {
 
-auto configToUri(ib::cfg::IParticipantConfiguration* userConfig, uint32_t domainId)
+auto configToUri(ib::cfg::IParticipantConfiguration* userConfig)
 {
     auto* cfg = dynamic_cast<ib::cfg::ParticipantConfiguration*>(userConfig);
     std::stringstream uriStr;
     uriStr << "vib://"
         << cfg->middleware.registry.hostname
-        << ":"  << std::to_string(cfg->middleware.registry.port + domainId)
+        << ":"  << std::to_string(cfg->middleware.registry.port)
         ;
     return uriStr.str();
 }
 
 }// namespace
+
 namespace ib {
 
 auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                       std::string participantName)
+                       const std::string& participantName)
     -> std::unique_ptr<mw::IParticipant>
 {
-    return CreateParticipant(participantConfig, std::move(participantName), configToUri(participantConfig.get(), 0));
+    const auto uri = configToUri(participantConfig.get());
+    return CreateParticipant(participantConfig, participantName, uri);
 }
 
 IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                                         std::string participantName, std::string registryUri)
+                                         const std::string& participantName, const std::string& registryUri)
     -> std::unique_ptr<mw::IParticipant>
 {
-    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), std::move(participantName));
-    participant->JoinIbDomain(std::move(registryUri));
+    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), participantName);
+    participant->JoinIbDomain(registryUri);
     return participant;
 }
 

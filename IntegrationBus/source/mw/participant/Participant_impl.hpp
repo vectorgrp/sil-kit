@@ -91,17 +91,9 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
     }
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::JoinIbDomain(uint32_t domainId)
-{
-    _ibConnection.JoinDomain(domainId);
-    OnIbDomainJoined();
-
-    _logger->Info("Participant {} has joined the IB-Domain {}", _participantName, domainId);
-}
 
 template <class IbConnectionT>
-void Participant<IbConnectionT>::JoinIbDomain(std::string registryUri)
+void Participant<IbConnectionT>::JoinIbDomain(const std::string& registryUri)
 {
     _ibConnection.JoinDomain(registryUri);
     OnIbDomainJoined();

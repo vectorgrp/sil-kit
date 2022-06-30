@@ -368,9 +368,9 @@ protected:
 
 TEST_F(LinITest, sync_lin_simulation)
 {
-    auto domainId = MakeTestRegistryUri();
+    auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };
-    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, domainId, false);
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     std::vector<std::unique_ptr<LinNode>> linNodes;
     //Create a simulation setup with 2 participants

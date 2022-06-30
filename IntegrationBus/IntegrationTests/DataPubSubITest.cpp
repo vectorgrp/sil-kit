@@ -526,10 +526,10 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_rejoin)
                              {},
                              specificDataHandlers}}});
     
-    auto domainId = MakeTestRegistryUri();
+    auto registryUri = MakeTestRegistryUri();
 
-    _testSystem.SetupRegistryAndSystemMaster(domainId, false, {});
-    RunParticipants(subscribers, domainId, false);
+    _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
+    RunParticipants(subscribers, registryUri, false);
     for (auto& s : subscribers)
     {
         s.WaitForCreateParticipant();
@@ -538,7 +538,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_rejoin)
     for (uint32_t i = 0; i < numRejoins; i++)
     {
         // Start publishers
-        RunParticipants(publishers, domainId, false);
+        RunParticipants(publishers, registryUri, false);
         for (auto& p : publishers)
         {
             p.WaitForAllSent();

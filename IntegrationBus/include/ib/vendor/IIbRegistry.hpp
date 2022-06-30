@@ -16,8 +16,6 @@ class IIbRegistry
 {
 public:
     virtual ~IIbRegistry() = default;
-    //! \brief Provide the VAsio domain with the given domain ID
-    virtual void ProvideDomain(uint32_t domainId) = 0;
     //! \brief Register the handler that is called when all participants are connected
     virtual void SetAllConnectedHandler(std::function<void()> handler) = 0;
     //! \brief Register the handler that is called when all participants are disconnected
@@ -25,7 +23,7 @@ public:
     //! \brief Returns the logger that is used by the IB registry.
     virtual auto GetLogger() -> mw::logging::ILogger* = 0;
     //! \brief Provide the VAsio domain with the given listening URI with scheme vib://. e.g. vib://localhost:8500
-    virtual void ProvideDomain(std::string listenUri) = 0;
+    virtual void ProvideDomain(const std::string& listenUri) = 0;
 };
 
 
