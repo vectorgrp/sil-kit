@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId] [--async]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri] [--async]" << std::endl
                   << "Use \"EthernetWriter\" or \"EthernetReader\" as <ParticipantName>." << std::endl;
         return -1;
     }
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
     if (argc > 5)
     {
         std::cerr << "Too many arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId] [--async]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri] [--async]" << std::endl
                   << "Use \"EthernetWriter\" or \"EthernetReader\" as <ParticipantName>." << std::endl;
         return -1;
     }
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        uint32_t domainId = 42;
+        auto registryUri = "vib://localhost:8500";
 
         bool runSync = true;
 
@@ -166,23 +166,14 @@ int main(int argc, char** argv)
             }
             else
             {
-                try
-                {
-                    domainId = static_cast<uint32_t>(std::stoul(arg));
-                }
-                catch (...)
-                {
-                    std::cout << "Error: expected a numeric argument for [domainId] but got '" << arg << "'"
-                              << std::endl;
-                    return -1;
-                }
+                registryUri = arg.c_str();
             }
         }
 
         auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
-        std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
+        std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
+        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
         auto* ethernetController = participant->CreateEthernetController("Eth1");
 
         ethernetController->AddFrameHandler(&FrameHandler);

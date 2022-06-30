@@ -289,7 +289,7 @@ int main(int argc, char** argv) try
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [domainId]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri]" << std::endl
                   << "Use \"LinMaster\" or \"LinSlave\" as <ParticipantName>." << std::endl;
         return -1;
     }
@@ -297,16 +297,16 @@ int main(int argc, char** argv) try
     std::string participantConfigurationFilename(argv[1]);
     std::string participantName(argv[2]);
 
-    uint32_t domainId = 42;
+    auto registryUri = "vib://localdomain:8500";
     if (argc >= 4)
     {
-        domainId = static_cast<uint32_t>(std::stoul(argv[3]));
+        registryUri = argv[3];
     }
 
     auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
-    std::cout << "Creating participant '" << participantName << "' in domain " << domainId << std::endl;
-    auto participant = ib::CreateParticipant(participantConfiguration, participantName, domainId);
+    std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
+    auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1");

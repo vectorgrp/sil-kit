@@ -69,15 +69,15 @@ CAN Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``CanWriter`` or 
            ``CanReader``.
-         [domainId] 
-           Domain id of the registry to connect to; defaults to 42 (optional).
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
            the SystemController to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
             
-            # Creates a CAN Writer Process in the default domain 42:
+            # Creates a CAN Writer Process with the default registry URI
             |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter
    *  -  System Example
       - For synchronized execution:
@@ -132,15 +132,15 @@ Ethernet Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
-         [domainId] 
-           Domain id of the registry to connect to; defaults to 42 (optional).
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
            the SystemController to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates an Ethernet Writer Process in the default domain 42:
+            # Creates an Ethernet Writer Process with the default registry URI:
             |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter
    *  -  System Example
       - For synchronized execution:
@@ -199,12 +199,12 @@ LIN Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
-         [domainId] 
-           Domain id of the registry to connect to; defaults to 42 (optional).
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a LIN Master Process in the default domain 42:
+            # Creates a LIN Master Process with the default registry URI:
             |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinMaster
    *  -  System Example
       -  .. parsed-literal:: 
@@ -250,13 +250,13 @@ FlexRay Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Node0`` or 
            ``Node1``.
-         [domainId] 
-           Domain id of the registry to connect to; defaults to 42 (optional).
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a FlexRay Process for Node 0 in the default domain 42:
+            # Creates a FlexRay Process for Node 0 with the default registry URI:
             |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node0
    *  -  System Example
       -  .. parsed-literal:: 
@@ -301,13 +301,13 @@ Data Message Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``PubSub1``, ``PubSub2``, ``Subscriber1`` or 
            ``Subscriber2``.
-         [domainId] 
-           Domain id of the registry to connect to; defaults to 42 (optional).
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a FlexRay Process for Node 0 in the default domain 42:
+            # Creates a FlexRay Process for Node 0 with the default registry URI:
             |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub1
    *  -  System Example
       -  .. parsed-literal:: 
@@ -354,13 +354,13 @@ RPC Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Server`` or 
            ``Client``.
-         [domainId] 
-           Domain id of the registry to connect to; defaults to 42 (optional).
+         [registryUri] 
+           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a FlexRay Process for Node 0 in the default domain 42:
+            # Creates a FlexRay Process for Node 0 with the default registry URI:
             |DemoDir|/IbDemoRpc Demos/Rpc/IbConfig_DemoRpc.json Server
    *  -  System Example
       -  .. parsed-literal:: 
@@ -408,8 +408,8 @@ Benchmark Demo
              - ``--message-count NUM``
          #. Size of the messages in bytes (optional); must be at least ``1``; defaults to ``100``.
              - ``--message-size BYTES``
-         #. Domain ID (optional); defaults to ``42``.
-             - ``--domain-id NUM``
+         #. Registry URI (optional); defaults to ``vib://localhost:8500``.
+             - ``--registry-uri URI``
    *  -  Parameter Example
       -  .. parsed-literal:: 
 

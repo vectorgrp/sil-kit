@@ -35,15 +35,15 @@ void PrintUsage(const std::string& executableName)
         << " [numberOfParticipants]"
         << " [messageCount]"
         << " [messageSizeInBytes]"
-        << " [domainId]"
+        << " [registryURi]"
         << std::endl 
         << "If no arguments are given default values will be used" << std::endl
         << "\t--help\tshow this message." << std::endl
         << "\t--disable-domainsockets\tDisable local domain sockets." << std::endl
         << "\t--enable-nodelay\tEnable the TCP NO_DELAY flag." << std::endl
-        << "\t--domain-id\tSet domain id to NUM" << std::endl
-        << "\t--message-size\tSet message size to BYTES" << std::endl
-        << "\t--message-count\tSet number of messages to be send in each simulation iteration to NUM" << std::endl
+        << "\t--registry-uri\tThe URI of the registry to start." << std::endl
+        << "\t--message-size\tSet message size to BYTES." << std::endl
+        << "\t--message-count\tSet number of messages to be send in each simulation iteration to NUM." << std::endl
         << "\t--number-participants\tSet number of simulation participants to NUM" << std::endl
         << "\t--number-simulations\tSet number of simulations to perform to NUM" << std::endl
         << "\t--simulation-duration\tSet virtual simulation duration to SECONDS" << std::endl
@@ -57,7 +57,7 @@ struct BenchmarkConfig
     uint32_t numberOfParticipants = 4;
     uint32_t messageCount = 1;
     uint32_t messageSizeInBytes = 100;
-    uint32_t domainId = 42;
+    std::string registryUri = "vib://localhost:8500";
     bool disableLocaldomainSockets = false;
     bool tcpNoDelay = false;
 };
@@ -71,6 +71,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     auto asNum = [](const auto& str) {
         return static_cast<uint32_t>(std::stoul(str));
     };
+    auto asStr = [](auto& a) { return std::string{a};};
 
     // test and remove the flag from args, returns true if flag was present
     auto consumeFlag = [&args](const auto& namedOption) {
@@ -142,7 +143,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
         }
     };
     // Parse and consume the optional named arguments
-    parseOptional("--domain-id", config.domainId, asNum);
+    parseOptional("--registry-uri", config.registryUri, asStr);
     parseOptional("--message-size", config.messageSizeInBytes, asNum);
     parseOptional("--message-count", config.messageCount, asNum);
     parseOptional("--number-participants", config.numberOfParticipants, asNum);
@@ -169,7 +170,7 @@ bool Parse(int argc, char** argv, BenchmarkConfig& config)
     {
         switch (args.size())
         {
-        case 6: config.domainId = asNum(args.at(6));
+        case 6: config.registryUri = args.at(6);
             // [[fallthrough]]
         case 5: config.messageSizeInBytes = asNum(args.at(5));
             // [[fallthrough]]
@@ -285,7 +286,7 @@ void ParticipantsThread(
     uint32_t participantIndex,
     size_t& messageCounter)
 {
-    auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.domainId);
+    auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.registryUri);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
    
@@ -321,13 +322,14 @@ void ParticipantsThread(
 
     lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
 }
+const auto Config ="{}";
 
 /**************************************************************************************************
 * Main Function
 **************************************************************************************************/
 int main(int argc, char** argv)
 {
-    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString("{}");
+    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString(Config);
     BenchmarkConfig benchmark;
     if (!Parse(argc, argv, benchmark) || !Validate(benchmark))
     {
@@ -349,8 +351,8 @@ int main(int argc, char** argv)
     {
         std::unique_ptr<ib::vendor::IIbRegistry> registry;
         // TODO use new config
-        registry = ib::vendor::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString("{}"));
-        registry->ProvideDomain(benchmark.domainId);
+        registry = ib::vendor::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString(Config));
+        registry->ProvideDomain(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
         std::vector<std::chrono::nanoseconds> measuredRealDurations;
@@ -373,7 +375,7 @@ int main(int argc, char** argv)
                 threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark,  participantName, participantIndex, std::ref(counter));
             }
 
-            auto participant = ib::CreateParticipant(participantConfiguration, "SystemController", benchmark.domainId);
+            auto participant = ib::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
             auto controller = participant->GetSystemController();
             auto monitor = participant->GetSystemMonitor();
 
@@ -404,18 +406,18 @@ int main(int argc, char** argv)
         const auto averageDuration = std::accumulate(measuredRealDurations.begin(), measuredRealDurations.end(), 0ns) / measuredRealDurations.size();
         const auto averageNumberMessages = std::accumulate(messageCounts.begin(), messageCounts.end(), size_t{ 0 }) / messageCounts.size();
 
-        std::cout << std::endl;
-        std::cout << "Completed simulations with the following parameters:" << std::endl;
-        std::cout << "Number of simulations = " << benchmark.numberOfSimulations << std::endl;
-        std::cout << "Simulation duration = " << benchmark.simulationDuration << std::endl;
-        std::cout << "Number of participants = " << benchmark.numberOfParticipants << std::endl;
-        std::cout << "Message count per simulation task = " << benchmark.messageCount << std::endl;
-        std::cout << "Message size in bytes = " << benchmark.messageSizeInBytes << std::endl;
-        std::cout << "Domain ID = " << benchmark.domainId << std::endl;
-        std::cout << std::endl;
+        std::cout << std::endl
+                  << "Completed simulations with the following parameters:" << std::endl
+                  << "Number of simulations = " << benchmark.numberOfSimulations << std::endl
+                  << "Simulation duration = " << benchmark.simulationDuration << std::endl
+                  << "Number of participants = " << benchmark.numberOfParticipants << std::endl
+                  << "Message count per simulation task = " << benchmark.messageCount << std::endl
+                  << "Message size in bytes = " << benchmark.messageSizeInBytes << std::endl
+                  << "Registry URI = " << benchmark.registryUri << std::endl
+                  << std::endl;
 
-        std::cout << "Average realtime duration: " << averageDuration << std::endl;
-        std::cout << "Average number of messages: " << averageNumberMessages << std::endl;
+        std::cout << "Average realtime duration: " << averageDuration << std::endl
+                  << "Average number of messages: " << averageNumberMessages << std::endl;
 
         if (benchmark.numberOfSimulations > 1)
         {
