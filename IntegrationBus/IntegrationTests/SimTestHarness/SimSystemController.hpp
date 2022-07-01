@@ -3,7 +3,7 @@
 
 #include "ib/IntegrationBus.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 namespace ib {
 namespace test {
@@ -19,7 +19,7 @@ public:
         : _syncParticipantNames{syncParticipantNames}
     {
         _participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemController", registryUri);
+            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
 
         _controller = _participant->GetSystemController();
         _controller->SetWorkflowConfiguration({_syncParticipantNames});

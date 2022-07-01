@@ -8,7 +8,7 @@
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"
 
 #include "gmock/gmock.h"
@@ -46,12 +46,12 @@ TEST_F(SystemMonitorITest, discover_services)
     const std::string thirdParticipantName = "Third";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Create the first participant and register the connect and disconnect callbacks
     auto&& firstParticipant =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), firstParticipantName, registryUri);
+        ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), firstParticipantName, registryUri);
 
     auto* firstSystemMonitor = firstParticipant->GetSystemMonitor();
     firstSystemMonitor->SetParticipantConnectedHandler([this](const std::string& participantName) {
@@ -67,7 +67,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
         // Create the second participant which should trigger the callbacks of the first
         auto&& secondParticipant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), secondParticipantName, registryUri);
+            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), secondParticipantName, registryUri);
 
         auto* secondSystemMonitor = secondParticipant->GetSystemMonitor();
         secondSystemMonitor->SetParticipantConnectedHandler([this](const std::string& participantName) {
@@ -85,7 +85,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
             // Create the third participant which should trigger the callbacks of the first and second
             auto&& thirdParticipant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), thirdParticipantName, registryUri);
+                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), thirdParticipantName, registryUri);
 
             EXPECT_TRUE(firstSystemMonitor->IsParticipantConnected(thirdParticipantName));
             EXPECT_TRUE(secondSystemMonitor->IsParticipantConnected(thirdParticipantName));

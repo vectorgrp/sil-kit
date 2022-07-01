@@ -9,7 +9,7 @@
 
 #include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
@@ -53,7 +53,7 @@ public:
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
-            ib::mw::CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), _participantName);
+            ib::mw::CreateParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), _participantName);
 
         _participant->JoinIbDomain(registryUri);
 
@@ -123,7 +123,7 @@ public:
         , _participantName{participantName}
     {
         _participant = ib::mw::CreateParticipantImpl(
-            ib::cfg::MockParticipantConfiguration(), participantName);
+            ib::cfg::MakeEmptyParticipantConfiguration(), participantName);
         _participant->JoinIbDomain(registryUri);
 
         _systemController = _participant->GetSystemController();
@@ -268,7 +268,7 @@ TEST_F(DifferentPeriodsITest, different_simtask_periods)
         syncParticipantNames.push_back("Publisher" + std::to_string(i));
     }
 
-    VAsioRegistry registry{ib::cfg::MockParticipantConfiguration()};
+    VAsioRegistry registry{ib::cfg::MakeEmptyParticipantConfiguration()};
     registry.ProvideDomain(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes

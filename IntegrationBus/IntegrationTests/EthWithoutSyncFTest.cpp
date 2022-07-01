@@ -18,7 +18,7 @@
 
 #include "VAsioRegistry.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 namespace {
 
@@ -64,7 +64,7 @@ protected:
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
         
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthWriter", _registryUri);
+            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "EthWriter", _registryUri);
         auto* controller = dynamic_cast<ib::sim::eth::EthController*>(participant->CreateEthernetController("ETH1"));
 
         controller->AddFrameTransmitHandler(
@@ -95,7 +95,7 @@ protected:
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "EthReader", _registryUri);
+            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "EthReader", _registryUri);
         auto* controller = participant->CreateEthernetController("ETH1");
 
         controller->AddFrameHandler(
@@ -150,7 +150,7 @@ protected:
 
 TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(_registryUri);
     ExecuteTest();
 }

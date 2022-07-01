@@ -5,7 +5,7 @@
 #include "ib/vendor/CreateIbRegistry.hpp"
 #include "ib/IntegrationBus.hpp"
 #include "ib/sim/all.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 using namespace ib::mw;
 using namespace ib::mw::sync;
@@ -53,14 +53,14 @@ private:
 
     void RunRegistry(const std::string& registryUri)
     {
-        _registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+        _registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
         _registry->ProvideDomain(registryUri);
     }
 
     void RunSystemMaster(const std::string& registryUri, const std::vector<std::string>& requiredParticipantNames)
     {
         _systemMaster.participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "SystemMaster", registryUri);
+            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "SystemMaster", registryUri);
 
         _systemMaster.systemController = _systemMaster.participant->GetSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();

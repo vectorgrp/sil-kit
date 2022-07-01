@@ -8,7 +8,7 @@ target_link_libraries(IbSimTestHarness
     PRIVATE
         IntegrationBus
     PUBLIC
-        IbCfgMockParticipantConfiguration
+        IbConfigurationTestUtils
 )
 target_include_directories(IbSimTestHarness
     INTERFACE

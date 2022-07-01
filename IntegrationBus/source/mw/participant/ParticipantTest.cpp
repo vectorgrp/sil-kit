@@ -8,7 +8,7 @@
 
 #include "NullConnectionParticipant.hpp"
 #include "CanController.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 #include "ParticipantConfiguration.hpp"
 
 namespace {
@@ -26,7 +26,7 @@ protected:
 
 TEST_F(ParticipantTest, throw_on_empty_participant_name)
 {
-    EXPECT_THROW(CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), ""),
+    EXPECT_THROW(CreateNullConnectionParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), ""),
                  ib::ConfigurationError);
 }
 
@@ -54,7 +54,7 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 TEST_F(ParticipantTest, make_basic_controller)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), "TestParticipant");
 
     auto* canController = participant->CreateCanController("CAN1");
     auto basicCanController = dynamic_cast<ib::sim::can::CanController*>(canController);

@@ -15,7 +15,7 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 namespace {
 
@@ -83,11 +83,11 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Setup Participant for TestController
-    auto participant = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestController");
+    auto participant = CreateParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), "TestController");
 
     participant->JoinIbDomain(registryUri);
     auto systemController = participant->GetSystemController();
@@ -98,7 +98,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup Participant for Test Unit
-    auto participantTestUnit = CreateParticipantImpl(ib::cfg::MockParticipantConfiguration(), "TestUnit");
+    auto participantTestUnit = CreateParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), "TestUnit");
     participantTestUnit->JoinIbDomain(registryUri);
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();

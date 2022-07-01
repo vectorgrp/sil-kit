@@ -6,7 +6,7 @@
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 #include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
@@ -307,7 +307,7 @@ protected:
     {
         try
         {
-            participant.participant = ib::CreateParticipant(ib::cfg::MockParticipantConfigurationWithLogging(ib::mw::logging::Level::Info),
+            participant.participant = ib::CreateParticipant(ib::cfg::MakeParticipantConfigurationWithLogging(ib::mw::logging::Level::Info),
                                                                      participant.name, registryUri);
 
             // Create Clients

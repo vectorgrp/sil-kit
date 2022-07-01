@@ -14,7 +14,7 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 #include "VAsioRegistry.hpp"
 
@@ -54,17 +54,17 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
 
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     std::string participantNameSender = "Sender";
     auto pubParticipant = ib::mw::CreateParticipantImpl(
-        ib::cfg::MockParticipantConfiguration(), participantNameSender);
+        ib::cfg::MakeEmptyParticipantConfiguration(), participantNameSender);
     pubParticipant->JoinIbDomain(registryUri);
 
     std::string participantNameReceiver = "Receiver";
     auto subParticipant = ib::mw::CreateParticipantImpl(
-        ib::cfg::MockParticipantConfiguration(), participantNameReceiver);
+        ib::cfg::MakeEmptyParticipantConfiguration(), participantNameReceiver);
     subParticipant->JoinIbDomain(registryUri);
 
     publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);

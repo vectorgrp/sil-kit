@@ -6,7 +6,7 @@
 #include "ib/mw/sync/all.hpp"
 #include "ib/sim/all.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 #include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
@@ -189,7 +189,7 @@ protected:
         PubSubParticipant(const std::string& newName) { name = newName; }
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
             const std::vector<DataSubscriberInfo>& newDataSubscribers,
-            std::shared_ptr<ib::cfg::IParticipantConfiguration> newConfig = ib::cfg::MockParticipantConfiguration())
+            std::shared_ptr<ib::cfg::IParticipantConfiguration> newConfig = ib::cfg::MakeEmptyParticipantConfiguration())
         {
             config = newConfig;
             name = newName;
@@ -197,7 +197,7 @@ protected:
             dataPublishers = newDataPublishers;
         }
 
-        std::shared_ptr<ib::cfg::IParticipantConfiguration> config = ib::cfg::MockParticipantConfiguration();
+        std::shared_ptr<ib::cfg::IParticipantConfiguration> config = ib::cfg::MakeEmptyParticipantConfiguration();
         bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;

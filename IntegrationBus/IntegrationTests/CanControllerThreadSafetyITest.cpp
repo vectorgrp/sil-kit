@@ -17,7 +17,7 @@
 #include "ib/sim/all.hpp"
 #include "ib/vendor/CreateIbRegistry.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 namespace {
 
@@ -71,7 +71,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
+                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
 
             while (runAsync)
@@ -105,7 +105,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
+                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
 
             auto frameHandler = [&participant](ICanController*, const CanFrameEvent& /*msg*/) {
@@ -152,7 +152,7 @@ protected:
     {
         try
         {
-            registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+            registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
             registry->ProvideDomain(registryUri);
         }
         catch (const ib::ConfigurationError& error)

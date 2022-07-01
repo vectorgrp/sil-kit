@@ -14,7 +14,7 @@
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 #include "VAsioRegistry.hpp"
 
@@ -78,7 +78,7 @@ protected:
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
         auto participant =
-            ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanWriter", _registryUri);
+            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "CanWriter", _registryUri);
         auto* controller = participant->CreateCanController("CAN1");
 
         controller->AddFrameTransmitHandler(
@@ -110,7 +110,7 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto participant = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), "CanReader", _registryUri);
+        auto participant = ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "CanReader", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(

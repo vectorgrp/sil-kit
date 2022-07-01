@@ -42,5 +42,5 @@ endif (MSVC)
 
 add_vib_test(TestMwParticipant 
     SOURCES ParticipantTest.cpp 
-    LIBS IbMwMockNullConnection IbCfgMockParticipantConfiguration
+    LIBS IbMwMockNullConnection IbConfigurationTestUtils
 )

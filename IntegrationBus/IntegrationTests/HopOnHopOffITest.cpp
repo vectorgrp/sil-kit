@@ -17,7 +17,7 @@
 #include "ib/vendor/CreateIbRegistry.hpp"
 #include "ib/sim/all.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 namespace {
 
@@ -140,7 +140,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
+                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
 
             auto* lifecycleService = participant.participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -195,7 +195,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participant.name, registryUri);
+                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", topic, mediaType, {},
@@ -241,7 +241,7 @@ protected:
     {
         try
         {
-            registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+            registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
             registry->ProvideDomain(registryUri);
         }
         catch (const ib::ConfigurationError& error)
@@ -263,7 +263,7 @@ protected:
         try
         {
             systemMaster.participant =
-                ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), systemMasterName, registryUri);
+                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
             systemMaster.systemController = systemMaster.participant->GetSystemController();
             systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();

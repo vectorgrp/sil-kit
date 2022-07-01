@@ -9,7 +9,7 @@
 #include "ib/mw/sync/string_utils.hpp"
 #include "ib/vendor/CreateIbRegistry.hpp"
 
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -57,7 +57,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 {
 
     // start registry
-    _registry = ib::vendor::CreateIbRegistry(ib::cfg::MockParticipantConfiguration());
+    _registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
     _registry->ProvideDomain(_registryUri);
 
     // configure and add participants
@@ -146,7 +146,7 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     participant->_name = participantName;
 
     participant->_participant =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), participantName, _registryUri);
+        ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participantName, _registryUri);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).

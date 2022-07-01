@@ -1,14 +1,12 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbCfgMockParticipantConfiguration STATIC
-    MockParticipantConfiguration.cpp
-    MockParticipantConfiguration.hpp
+add_library(IbConfigurationTestUtils INTERFACE
+    ConfigurationTestUtils.hpp
 )
 
-target_include_directories(IbCfgMockParticipantConfiguration
+target_include_directories(IbConfigurationTestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(IbCfgMockParticipantConfiguration
-    PUBLIC IbConfiguration
-    PRIVATE IntegrationBus
+target_link_libraries(IbConfigurationTestUtils
+    INTERFACE IbConfiguration
 )

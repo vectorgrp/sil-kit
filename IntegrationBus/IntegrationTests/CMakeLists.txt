@@ -15,7 +15,7 @@ add_vib_test(FTestCanWithoutSync
       IbSimCan
       ${itest_extra_libs}
       IntegrationBus
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
 )
 
 add_vib_test(FTestEthWithoutSync
@@ -25,7 +25,7 @@ add_vib_test(FTestEthWithoutSync
       IbSimEthernet
       ${itest_extra_libs}
       IntegrationBus
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
 )
 
 add_vib_test(ITestThreeCanController
@@ -42,7 +42,7 @@ add_vib_test(FTestCanControllerThreadSafety
       CanControllerThreadSafetyITest.cpp
     LIBS
         IntegrationBus
-        IbCfgMockParticipantConfiguration
+        IbConfigurationTestUtils
 )
 
 add_vib_test(ITestThreeEthController
@@ -60,7 +60,7 @@ add_vib_test(ITestCatchExceptionsInCallbacks
       CatchExceptionsInCallbacksITest.cpp
     LIBS
       IbMwParticipant
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
       ${itest_extra_libs}
 )
 
@@ -69,7 +69,7 @@ add_vib_test(ITestHopOnHopOff
       HopOnHopOffITest.cpp
     LIBS
         IntegrationBus
-        IbCfgMockParticipantConfiguration
+        IbConfigurationTestUtils
 )
 
 add_vib_test(ITestDataPubSub
@@ -77,7 +77,7 @@ add_vib_test(ITestDataPubSub
       DataPubSubITest.cpp
     LIBS
         IntegrationBus
-        IbCfgMockParticipantConfiguration
+        IbConfigurationTestUtils
 )
 
 add_vib_test(ITestTargetedMessaging
@@ -95,7 +95,7 @@ add_vib_test(ITestRpc
       RpcITest.cpp
     LIBS
       IntegrationBus
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
 )
 
 add_vib_test(ITestStateMachineVAsio
@@ -104,7 +104,7 @@ add_vib_test(ITestStateMachineVAsio
     LIBS
       IbMwParticipant
       IbMwVAsio
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
 )
 
 add_vib_test(ITestDeterministicSimVAsio
@@ -113,7 +113,7 @@ add_vib_test(ITestDeterministicSimVAsio
     LIBS
       IbMwParticipant
       IbMwVAsio
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
 )
 
 add_vib_test(ITestDifferentPeriods
@@ -122,7 +122,7 @@ add_vib_test(ITestDifferentPeriods
     LIBS
       IbMwParticipant
       IbMwVAsio
-      IbCfgMockParticipantConfiguration
+      IbConfigurationTestUtils
 )
 
 add_vib_test(ITestIbRegistryReusage

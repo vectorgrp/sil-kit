@@ -54,5 +54,15 @@ add_vib_test(TestMwCfgYamlValidator
 )
 
 if(IB_BUILD_TESTS)
-    add_subdirectory(mock)
+    add_library(IbConfigurationTestUtils INTERFACE
+        ConfigurationTestUtils.hpp
+    )
+
+    target_include_directories(IbConfigurationTestUtils
+        INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+    )
+
+    target_link_libraries(IbConfigurationTestUtils
+        INTERFACE IbConfiguration
+    )
 endif()

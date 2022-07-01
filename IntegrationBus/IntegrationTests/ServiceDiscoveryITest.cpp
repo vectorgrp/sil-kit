@@ -9,7 +9,7 @@
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
 #include "ServiceDiscovery.hpp"
-#include "MockParticipantConfiguration.hpp"
+#include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"
 
 #include "gmock/gmock.h"
@@ -40,15 +40,15 @@ TEST_F(ServiceDiscoveryITest, discover_services)
     std::string publisherName = "Publisher";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, registryUri);
+    auto&& publisher =  ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
 
     // Subscriber that monitors the services
     auto&& subscriber =
-        ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, registryUri);
+        ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -130,14 +130,14 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
     std::string publisherName = "Publisher";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MockParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), publisherName, registryUri);
+    auto&& publisher = ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
 
     // Subscriber that monitors the services
-    auto&& subscriber = ib::CreateParticipant(ib::cfg::MockParticipantConfiguration(), subscriberName, registryUri);
+    auto&& subscriber = ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
     const auto topic = "Topic";
