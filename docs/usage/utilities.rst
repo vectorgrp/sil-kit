@@ -36,6 +36,7 @@ IbRegistry
         -h, --help                            Show the help of the IbRegistry.
         -s, --use-signal-handler              Exit this process when a signal is received. If not set, the process runs infinitely.
         -u, --listen-uri <vib-uri>            The vib:// URI the registry should listen on. Defaults to 'vib://localhost:8500'.
+        -l, --log <level>                     Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
         -c, --configuration <configuration>   Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
    *  - Usage Example
@@ -46,8 +47,8 @@ IbRegistry
 
    *  - Notes
       -  * The IbRegistry is packaged in the ``IntegrationBus/bin`` directory.
-         * When using the VAsio middleware, the IbRegistry must be started
-           before the IB participants.
+         * The IbRegistry must be started before other IB participants,
+           either with this process or using the :cpp:func:`ProvideDomain()<ib::vendor::vector::IIbRegistry::ProvideDomain()>` API.
 
 
 .. _sec:util-system-controller:

@@ -2,9 +2,12 @@
 
 #include "ib/version.hpp"
 #include "ib/cfg/IParticipantConfiguration.hpp"
+#include "ib/mw/logging/string_utils.hpp"
+
 #include "SignalHandler.hpp"
 #include "VAsioRegistry.hpp"
 #include "CommandlineParser.hpp"
+#include "ParticipantConfiguration.hpp"
 
 using namespace ib::mw;
 
@@ -12,9 +15,56 @@ using asio::ip::tcp;
 using namespace ib::util;
 using CliParser = ib::util::CommandlineParser;
 
+namespace {
+auto lowerCase(std::string s)
+{
+    std::transform(s.begin(),
+        s.end(),
+        s.begin(),
+        [](unsigned char c){ return (unsigned char)std::tolower(c);});
+    return s;
+}
+auto isValidLogLevel(const std::string& levelStr)
+{
+    auto logLevel = lowerCase(levelStr);
+    return logLevel == "trace"
+        || logLevel == "debug"
+        || logLevel == "warn"
+        || logLevel == "info"
+        || logLevel == "error"
+        || logLevel == "critical"
+        || logLevel == "off";
+}
+
+auto ConfigureLogging(std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration,
+    const std::string& logLevel)
+{
+    auto config = std::static_pointer_cast<ib::cfg::ParticipantConfiguration>(configuration);
+
+    auto it = std::find_if(config->logging.sinks.begin(),
+        config->logging.sinks.end(),
+        [](auto const& el) { return el.type == ib::cfg::Sink::Type::Stdout;}
+    );
+
+    auto level = ib::mw::logging::from_string(logLevel);
+
+    if (it != config->logging.sinks.end())
+    {
+        it->level = level;
+    }
+    else
+    {
+        ib::cfg::Sink newSink{};
+        newSink.type = ib::cfg::Sink::Type::Stdout;
+        newSink.level = level;
+        config->logging.sinks.emplace_back(std::move(newSink));
+    }
+}
+
+} //namespace
+
+
 std::promise<int> signalPromise;
-
-
 int main(int argc, char** argv)
 {
     CliParser commandlineParser;
@@ -31,6 +81,8 @@ int main(int argc, char** argv)
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
         "format was changed in v3.6.11.");
+    commandlineParser.Add<ib::util::CommandlineParser::Option>("log", "l", "info", "[--log <level>]",
+            "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
 
     std::cout << "Vector Integration Bus (VIB) -- Registry of the VAsio Middleware" << std::endl
         << std::endl;
@@ -67,14 +119,24 @@ int main(int argc, char** argv)
 
     auto&& configurationFilename{ commandlineParser.Get<CliParser::Option>("configuration").Value() };
     auto useSignalHandler{ commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value() };
-    auto domain{ commandlineParser.Get<CliParser::Option>("domain").Value() };
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
+    auto logLevel{ commandlineParser.Get<ib::util::CommandlineParser::Option>("log").Value() };
+
+    if (!isValidLogLevel(logLevel))
+    {
+        std::cerr << "Error: Argument '<level>' must be one of 'trace', 'debug',"
+                     " 'warn', 'info', 'error', 'critical', 'off'"
+                  << std::endl;
+        return -1;
+    }
 
     try
     {
         auto configuration = (!configurationFilename.empty()) ?
             ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
             ib::cfg::ParticipantConfigurationFromString("");
+
+        ConfigureLogging(configuration, logLevel);
 
         std::cout << "IbRegistry listening on " << listenUri << std::endl;
         VAsioRegistry registry{ configuration };

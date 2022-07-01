@@ -4,6 +4,9 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <algorithm>
+#include <cctype>
 
 #include "LoggingDatatypes.hpp"
 
@@ -12,6 +15,7 @@ namespace mw {
 namespace logging {
 
 inline std::string to_string(const Level& ibAddress);
+inline Level from_string(const std::string& levelStr);
 inline std::ostream& operator<<(std::ostream& out, const Level& ibAddress);
 inline std::string to_string(const SourceLoc& sourceLoc);
 inline std::ostream& operator<<(std::ostream& out, const SourceLoc& sourceLoc);
@@ -42,6 +46,35 @@ std::ostream& operator<<(std::ostream& outStream, const Level& lvl)
     default: outStream << "Invalid logging::Level";
     }
     return outStream;
+}
+
+inline Level from_string(const std::string& levelStr)
+{
+    auto lowerCase = [](auto s) {
+        std::transform(s.begin(),
+            s.end(),
+            s.begin(),
+            [](unsigned char c){ return (unsigned char)std::tolower(c);});
+        return s;
+    };
+    auto logLevel = lowerCase(levelStr);
+
+    if (logLevel == "trace")
+        return Level::Trace;
+    if (logLevel == "debug")
+        return Level::Debug;
+    if (logLevel == "warn")
+        return Level::Warn;
+    if (logLevel == "info")
+        return Level::Info;
+    if (logLevel == "error")
+        return Level::Error;
+    if (logLevel == "critical")
+        return Level::Critical;
+    if (logLevel == "off")
+        return Level::Off;
+    // default to Off
+    return Level::Off;
 }
 
 std::string to_string(const SourceLoc& sl)

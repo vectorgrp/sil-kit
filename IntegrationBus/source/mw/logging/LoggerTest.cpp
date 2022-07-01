@@ -45,6 +45,17 @@ auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> M
     );
 }
 
+TEST(LoggerTest, log_level_conversion)
+{
+    Level in{Level::Critical};
+    auto lvlStr = to_string(in);
+    auto out = from_string(lvlStr);
+    EXPECT_EQ(in, out) << "string representation was: " << lvlStr;
+
+    out = from_string("garbage");
+    EXPECT_EQ(out, Level::Off);
+}
+
 TEST(LoggerTest, send_log_message_with_sender)
 {
     EndpointAddress controllerAddress = {3, 8};
