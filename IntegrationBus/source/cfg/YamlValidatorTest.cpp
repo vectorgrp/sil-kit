@@ -42,9 +42,8 @@ TEST_F(YamlValidatorTest, validate_without_warnings)
     ParticipantConfiguration cfg;
     cfg.schemaVersion = "1";
     cfg.middleware.enableDomainSockets = true;
-    cfg.middleware.registry.connectAttempts = 1234;
-    cfg.middleware.registry.hostname = "not localhost";
-    cfg.middleware.registry.port = 3456;
+    cfg.middleware.connectAttempts = 1234;
+    cfg.middleware.registryUri = "vib://not-localhost";
     cfg.middleware.tcpNoDelay = true;
     cfg.middleware.tcpQuickAck = true;
     cfg.middleware.tcpReceiveBufferSize = 1234;
@@ -56,7 +55,7 @@ TEST_F(YamlValidatorTest, validate_without_warnings)
     auto isValid = validator.Validate(jsonString, stream);
     EXPECT_TRUE(isValid);
     auto warnings = stream.str();
-    EXPECT_TRUE(warnings.empty());
+    EXPECT_TRUE(warnings.empty()) << "Warnings: " << warnings;
 }
 
 TEST_F(YamlValidatorTest, validate_unknown_toplevel)

@@ -55,7 +55,6 @@ DEFINE_VIB_CONVERT(TraceSink::Type);
 DEFINE_VIB_CONVERT(TraceSource);
 DEFINE_VIB_CONVERT(TraceSource::Type);
 
-DEFINE_VIB_CONVERT(Registry);
 DEFINE_VIB_CONVERT(Middleware);
 
 DEFINE_VIB_CONVERT(Extensions);

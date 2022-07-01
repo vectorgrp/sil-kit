@@ -323,7 +323,7 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     // NB: We attempt to connect multiple times. The registry might be a separate process
     //     which may still be initializing when we are running. For example, this happens when all
     //     participants are started in a shell, and the registry is started in the background.
-    const auto connectAttempts = _config.middleware.registry.connectAttempts;
+    const auto connectAttempts = _config.middleware.connectAttempts;
 
     // Compute a list of Registry URIs and attempt to connect as per config
     std::vector<std::string> attemptedUris{{connectUri}};
@@ -353,7 +353,7 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     if (!ok)
     {
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
-                       _config.middleware.registry.connectAttempts);
+                       _config.middleware.connectAttempts);
         _logger->Info("   Make sure that the IbRegistry is up and running and is listening on the following URIs: {}.",
             printUris(attemptedUris));
         _logger->Info("   If a registry is unable to open a listening socket it will only be reachable"

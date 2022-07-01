@@ -163,13 +163,8 @@ Extensions:
   - path/to/extensions1
   - path/to/extensions2
 Middleware:
-  Registry:
-    Hostname: NotLocalhost
-    Logging:
-      Sinks:
-      - Type: Remote
-    Port: 1337
-    ConnectAttempts: 9
+  RegistryUri: vib://example.com:1234
+  ConnectAttempts: 9
   TcpNoDelay: true
   TcpQuickAck: true
   EnableDomainSockets: false
@@ -226,9 +221,8 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(config.extensions.searchPathHints.at(0) == "path/to/extensions1");
     EXPECT_TRUE(config.extensions.searchPathHints.at(1) == "path/to/extensions2");
 
-    EXPECT_TRUE(config.middleware.registry.connectAttempts == 9);
-    EXPECT_TRUE(config.middleware.registry.hostname == "NotLocalhost");
-    EXPECT_TRUE(config.middleware.registry.port == 1337);
+    EXPECT_TRUE(config.middleware.connectAttempts == 9);
+    EXPECT_TRUE(config.middleware.registryUri == "vib://example.com:1234");
     EXPECT_TRUE(config.middleware.enableDomainSockets == false);
     EXPECT_TRUE(config.middleware.tcpQuickAck == true);
     EXPECT_TRUE(config.middleware.tcpNoDelay == true);
@@ -322,18 +316,8 @@ TEST_F(YamlParserTest, middleware_convert)
 {
     auto node = YAML::Load(R"(
         {
-            "Registry": {
-                "Hostname": "not localhost",
-                "Port": 1234,
-                "Logging": {
-                    "Sinks": [
-                        {
-                            "Type": "Remote"
-                        }
-                    ]
-                },
-                "ConnectAttempts": 9
-            },
+            "RegistryUri": "vib://not-localhost:12345",
+            "ConnectAttempts": 9,
             "TcpNoDelay": true,
             "TcpQuickAck": true,
             "TcpSendBufferSize": 3456,
@@ -342,10 +326,8 @@ TEST_F(YamlParserTest, middleware_convert)
         }
     )");
     auto config = node.as<Middleware>();
-    EXPECT_EQ(config.registry.connectAttempts, 9);
-    EXPECT_EQ(config.registry.logging.sinks.at(0).type, Sink::Type::Remote);
-    EXPECT_EQ(config.registry.hostname, "not localhost");
-    EXPECT_EQ(config.registry.port, 1234);
+    EXPECT_EQ(config.registryUri, "vib://not-localhost:12345");
+    EXPECT_EQ(config.connectAttempts, 9);
 
     EXPECT_EQ(config.enableDomainSockets, false);
     EXPECT_EQ(config.tcpNoDelay, true);

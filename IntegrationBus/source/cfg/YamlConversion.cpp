@@ -976,38 +976,14 @@ bool Converter::decode(const Node& node, Extensions& obj)
     return true;
 }
 
-template<>
-Node Converter::encode(const Registry& obj)
-{
-    static const Registry defaultObj;
-    Node node;
-    non_default_encode(obj.hostname, node, "Hostname", defaultObj.hostname);
-    non_default_encode(obj.port, node, "Port", defaultObj.port);
-    non_default_encode(obj.logging, node, "Logging", defaultObj.logging);
-    non_default_encode(obj.connectAttempts, node, "ConnectAttempts", defaultObj.connectAttempts);
-    return node;
-}
-template<>
-bool Converter::decode(const Node& node, Registry& obj)
-{
-    optional_decode(obj.hostname, node, "Hostname");
-    optional_decode(obj.port, node, "Port");
-    optional_decode(obj.logging, node, "Logging");
-    optional_decode(obj.connectAttempts, node, "ConnectAttempts");
-
-    if (obj.connectAttempts < 1)
-    {
-        obj.connectAttempts = 1;
-    }
-    return true;
-}
 
 template<>
 Node Converter::encode(const Middleware& obj)
 {
     Node node;
     static const Middleware defaultObj;
-    non_default_encode(obj.registry, node, "Registry", defaultObj.registry);
+    non_default_encode(obj.registryUri, node, "RegistryUri", defaultObj.registryUri);
+    non_default_encode(obj.connectAttempts, node, "ConnectAttempts", defaultObj.connectAttempts);
     non_default_encode(obj.tcpNoDelay, node, "TcpNoDelay", defaultObj.tcpNoDelay);
     non_default_encode(obj.tcpQuickAck, node, "TcpQuickAck", defaultObj.tcpQuickAck);
     non_default_encode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize", defaultObj.tcpReceiveBufferSize);
@@ -1018,7 +994,8 @@ Node Converter::encode(const Middleware& obj)
 template<>
 bool Converter::decode(const Node& node, Middleware& obj)
 {
-    optional_decode(obj.registry, node, "Registry");
+    optional_decode(obj.registryUri, node, "RegistryUri");
+    optional_decode(obj.connectAttempts, node, "ConnectAttempts");
     optional_decode(obj.tcpNoDelay, node, "TcpNoDelay");
     optional_decode(obj.tcpQuickAck, node, "TcpQuickAck");
     optional_decode(obj.tcpReceiveBufferSize, node, "TcpReceiveBufferSize");

@@ -132,17 +132,11 @@ bool operator==(const Extensions& lhs, const Extensions& rhs)
     return lhs.searchPathHints == rhs.searchPathHints;
 }
 
-bool operator==(const Registry& lhs, const Registry& rhs)
-{
-    return lhs.port == rhs.port
-        && lhs.hostname == rhs.hostname
-        && lhs.logging == rhs.logging
-        && lhs.connectAttempts == rhs.connectAttempts;
-}
 
 bool operator==(const Middleware& lhs, const Middleware& rhs)
 {
-    return lhs.registry == rhs.registry
+    return lhs.registryUri == rhs.registryUri
+        && lhs.connectAttempts == rhs.connectAttempts
         && lhs.enableDomainSockets == rhs.enableDomainSockets
         && lhs.tcpNoDelay == rhs.tcpNoDelay
         && lhs.tcpQuickAck == rhs.tcpQuickAck

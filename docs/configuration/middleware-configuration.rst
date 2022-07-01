@@ -22,21 +22,17 @@ The middleware can be configured as follows.
 Configuration
 --------------------
 
-For the initial discovery of the VIB participants, the VAsio middleware uses a registry
+For the initial discovery of the VIB participants, the VIB uses a central registry
 process at a preconfigured hostname and port. By default, the registry is expected to be
-running on localhost listening on Port 8500. These values can be changed via the new
-*/Middleware/Registry* section, e.g.:
+running on localhost listening on Port 8500. These values can be changed via the
+`RegistryUri`, e.g.:
 
 
 .. code-block:: yaml
 
     Middleware:
-      Registry:
-        Hostname: remotehost
-        Port: 14014
-        Logging:
-          #...
-        ConnectAttempts: 1
+      RegistryUri: vib://localhost:8500
+      ConnectAttempts: 1
       TcpNoDelay: false
       TcpQuickAck: false
       TcpSendBufferSize: 1024
@@ -50,8 +46,14 @@ running on localhost listening on Port 8500. These values can be changed via the
    * - Property Name
      - Description
 
-   * - Registry
-     - The optional :ref:`VAsio Registry configuration<sec:mwcfg-vasio-registry>`.
+   * - RegistryUri
+     - The URI used by participants when connecting to the IbRegistry.
+       By default, the registry is expected to be running on "localhost" with port 8500.
+       The URI uses a scheme of 'vib', i.e. ``vib://localhost:8500``.
+
+   * - ConnectAttempts
+     - Number of connects to the registry a participant should attempt before giving up and signaling an error.
+       By default, only a single connect is attempted.
 
    * - TcpNoDelay
      - Enable the TCP_NODELAY flag on TCP sockets. This disables Nagle's algorithm.
@@ -65,29 +67,4 @@ running on localhost listening on Port 8500. These values can be changed via the
 
    * - TcpReceiveBufferSize
      - Sets the TCP receive buffer size. Be careful when changing the OS defaults!
-
-
-.. _sec:mwcfg-vasio-registry:
-
-.. list-table:: VAsio Registry Configuration
-   :widths: 15 85
-   :header-rows: 1
-
-   * - Property Name
-     - Description
-
-   * - Hostname
-     - The hostname to be used by participants when connecting to the IbRegistry.
-       By default, the registry is expected to be running on "localhost".
-
-   * - Port
-     - The base port to be used by participants when connecting to the IbRegistry.
-       By default, the registry is expected to listen on port 8500.
-
-   * - Logging
-     - Optional :ref:`Logger configuration<sec:cfg-participant-logger>` for the logger used by the registry.
-
-   * - ConnectAttempts
-     - Number of connects to the registry a participant should attempt before giving up and signaling an error.
-       By default, only a single connect is attempted.
 

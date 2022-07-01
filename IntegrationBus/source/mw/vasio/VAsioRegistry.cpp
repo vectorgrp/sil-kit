@@ -34,7 +34,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration>
     _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(cfg) },
     _connection{ *_vasioConfig, "IbRegistry", VAsioConnection::RegistryParticipantId, version}
 {
-    _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->middleware.registry.logging);
+    _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->logging);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)

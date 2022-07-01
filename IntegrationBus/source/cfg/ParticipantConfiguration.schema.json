@@ -753,25 +753,13 @@
       "type": "object",
       "title": "Optional configuration of the VAsio middleware",
       "properties": {
-        "Registry": {
-          "type": "object",
-          "title": "The registry used for the VAsio middleware.",
-          "properties": {
-            "Hostname": {
-              "type": "string",
-              "default": "localhost"
-            },
-            "Port": {
-              "type": "integer",
-              "default": "8500"
-            },
-            "Logging": { "$ref": "#/definitions/Logging" },
-            "ConnectAttempts": {
-              "type": "integer",
-              "default": "1"
-            }
-          },
-          "additionalProperties": false
+        "RegistryUri": {
+          "type": "string",
+          "default": "vib://localhost:8500"
+        },
+        "ConnectAttempts": {
+          "type": "integer",
+          "default": "1"
         },
         "TcpNoDelay": {
           "type": "boolean",

@@ -198,13 +198,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
             }
         },
         {"Middleware", {
-                {"Registry", {
-                        {"Hostname"},
-                        {"Port"},
-                        {"Logging"},
-                        {"ConnectAttempts"},
-                    },
-                },
+                {"RegistryUri"},
+                {"ConnectAttempts"},
                 {"TcpNoDelay"},
                 {"TcpQuickAck"},
                 {"TcpReceiveBufferSize"},

@@ -199,17 +199,10 @@ struct Extensions
 //  VAsio Middleware
 // ================================================================================
 
-struct Registry
-{
-    std::string hostname{ "localhost" };
-    uint16_t port{ 8500 };
-    Logging logging;
-    int connectAttempts{ 1 }; //!<  Number of connection attempts to the registry a participant should perform.
-};
-
 struct Middleware
 {
-    Registry registry;
+    std::string registryUri{ "vib://localhost:8500" }; //!< Default registry URI to connect to
+    int connectAttempts{ 1 }; //!<  Number of connection attempts to the registry a participant should perform.
     int tcpReceiveBufferSize{ -1 };
     int tcpSendBufferSize{ -1 };
     bool tcpNoDelay{ false }; //!< Disables Nagle's algorithm.
@@ -269,7 +262,6 @@ bool operator==(const RpcClient& lhs, const RpcClient& rhs);
 bool operator==(const HealthCheck& lhs, const HealthCheck& rhs);
 bool operator==(const Tracing& lhs, const Tracing& rhs);
 bool operator==(const Extensions& lhs, const Extensions& rhs);
-bool operator==(const Registry& lhs, const Registry& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 
