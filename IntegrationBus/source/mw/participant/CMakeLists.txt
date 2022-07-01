@@ -30,9 +30,7 @@ target_link_libraries(IbMwParticipant
         IbVersion
 )
 
-if (IB_MW_ENABLE_VASIO)
-    target_link_libraries(IbMwParticipant PUBLIC IbMwVAsio)
-endif()
+target_link_libraries(IbMwParticipant PUBLIC IbMwVAsio)
 
 target_include_directories(IbMwParticipant
     PUBLIC .

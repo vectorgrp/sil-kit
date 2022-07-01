@@ -16,9 +16,7 @@
 
 #include "GetTestPid.hpp"
 
-#if IB_MW_HAVE_VASIO
-#   include "VAsioRegistry.hpp"
-#endif
+#include "VAsioRegistry.hpp"
 
 #include "MockParticipantConfiguration.hpp"
 

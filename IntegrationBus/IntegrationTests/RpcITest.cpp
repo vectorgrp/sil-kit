@@ -7,8 +7,6 @@
 
 namespace {
 
-#if defined(IB_MW_HAVE_VASIO)
-
 //--------------------------------------
 // Sync tests: Publish in SimulationTask
 //--------------------------------------
@@ -289,7 +287,5 @@ TEST_F(RpcITest, test_1client_1server_async_vasio)
 
     RunAsyncTest(rpcs);
 }
-
-#endif
 
 } // anonymous namespace

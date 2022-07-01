@@ -54,9 +54,7 @@
 #include "ProtocolVersion.hpp"
 
 // Add connection types here and make sure they are instantiated in Participant.cpp
-#if defined(IB_MW_HAVE_VASIO)
-#   include "VAsioConnection.hpp"
-#endif
+#include "VAsioConnection.hpp"
 
 #include "ProtocolVersion.hpp"
 

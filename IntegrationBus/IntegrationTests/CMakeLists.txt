@@ -6,10 +6,7 @@ add_library(ITestUtils INTERFACE)
 target_include_directories(ITestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
-set(itest_extra_libs)
-if(IB_MW_ENABLE_VASIO)
-    set(itest_extra_libs IbMwVAsio)
-endif()
+set(itest_extra_libs IbMwVAsio)
 
 add_vib_test(FTestCanWithoutSync
     SOURCES
@@ -101,51 +98,49 @@ add_vib_test(ITestRpc
       IbCfgMockParticipantConfiguration
 )
 
-if(IB_MW_ENABLE_VASIO)
-    add_vib_test(ITestStateMachineVAsio
-        SOURCES
-          StateMachineVAsioITest.cpp
-        LIBS
-          IbMwParticipant
-          IbMwVAsio
-          IbCfgMockParticipantConfiguration
-    )
+add_vib_test(ITestStateMachineVAsio
+    SOURCES
+      StateMachineVAsioITest.cpp
+    LIBS
+      IbMwParticipant
+      IbMwVAsio
+      IbCfgMockParticipantConfiguration
+)
 
-    add_vib_test(ITestDeterministicSimVAsio
-        SOURCES
-          DeterministicSimVAsioITest.cpp
-        LIBS
-          IbMwParticipant
-          IbMwVAsio
-          IbCfgMockParticipantConfiguration
-    )
+add_vib_test(ITestDeterministicSimVAsio
+    SOURCES
+      DeterministicSimVAsioITest.cpp
+    LIBS
+      IbMwParticipant
+      IbMwVAsio
+      IbCfgMockParticipantConfiguration
+)
 
-    add_vib_test(ITestDifferentPeriods
-        SOURCES
-          DifferentPeriodsITest.cpp
-        LIBS
-          IbMwParticipant
-          IbMwVAsio
-          IbCfgMockParticipantConfiguration
-    )
+add_vib_test(ITestDifferentPeriods
+    SOURCES
+      DifferentPeriodsITest.cpp
+    LIBS
+      IbMwParticipant
+      IbMwVAsio
+      IbCfgMockParticipantConfiguration
+)
 
-    add_vib_test(ITestIbRegistryReusage
-        SOURCES
-          IbRegistryReusage.cpp
-        LIBS
-          IbMwParticipant
-          IbMwVAsio
-    )
+add_vib_test(ITestIbRegistryReusage
+    SOURCES
+      IbRegistryReusage.cpp
+    LIBS
+      IbMwParticipant
+      IbMwVAsio
+)
 
-    add_vib_test(ITestSingleParticipant
-        SOURCES
-          SingleParticipantITest.cpp
-        LIBS
-          IbMwParticipant
-          IbSimTestHarness
-          IbMwVAsio
-    )
-endif()
+add_vib_test(ITestSingleParticipant
+    SOURCES
+      SingleParticipantITest.cpp
+    LIBS
+      IbMwParticipant
+      IbSimTestHarness
+      IbMwVAsio
+)
 
 add_vib_test(ITestServiceDiscovery
     SOURCES

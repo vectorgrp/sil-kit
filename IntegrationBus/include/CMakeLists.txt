@@ -17,14 +17,6 @@ if(CMAKE_VERSION VERSION_GREATER 3.8.0)
 endif()
 
 ################################################################################
-# Ensure all our tests and internal libraries have the right build flags
-################################################################################
-if (IB_MW_ENABLE_VASIO)
-    target_compile_definitions(IbInterface INTERFACE IB_MW_HAVE_VASIO=1)
-endif()
-
-
-################################################################################
 # add to install targets of the IntegrationBus
 ################################################################################
 # Mark the IntegrationBus headers for export by adding it to the target container

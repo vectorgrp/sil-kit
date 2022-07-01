@@ -394,7 +394,6 @@ protected:
 
 };
 
-#if defined(IB_MW_HAVE_VASIO)
 
 TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 {
@@ -502,7 +501,5 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToEmpty)
 
     ShutdownSystem();
 }
-
-#endif
 
 } // anonymous namespace

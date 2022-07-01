@@ -7,8 +7,6 @@
 
 namespace {
 
-#if defined(IB_MW_HAVE_VASIO)
-
 //--------------------------------------
 // Sync tests: Publish in SimulationTask
 //--------------------------------------
@@ -559,8 +557,5 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_rejoin)
     JoinPubSubThreads();
     ShutdownSystem();
 }
-
-
-#endif
 
 } // anonymous namespace

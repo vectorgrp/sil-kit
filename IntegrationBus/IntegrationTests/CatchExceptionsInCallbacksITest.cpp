@@ -16,9 +16,7 @@
 #include "GetTestPid.hpp"
 #include "MockParticipantConfiguration.hpp"
 
-#if IB_MW_HAVE_VASIO
-#   include "VAsioRegistry.hpp"
-#endif
+#include "VAsioRegistry.hpp"
 
 namespace {
 
@@ -52,7 +50,6 @@ protected:
 };
 
 
-#if defined(IB_MW_HAVE_VASIO)
 TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
     const uint32_t domainId = static_cast<uint32_t>(GetTestPid());
@@ -89,6 +86,5 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 
     publishThread.join();
 }
-#endif //IB_MW_HAVE_VASIO
 
 } // anonymous namespace
