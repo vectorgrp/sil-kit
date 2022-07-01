@@ -19,7 +19,7 @@ namespace mw {
 namespace sync {
 
 //forward declarations
-struct ParticipantTimeProvider;
+class SynchronizedVirtualTimeProvider;
 class TimeSyncService;
 class ILifecycleManagement;
 struct LifecycleConfiguration;

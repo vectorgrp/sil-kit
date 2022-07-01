@@ -82,9 +82,6 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
     _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {}, Middleware: {}",
                   _participantName, version::String(), "VAsio");
 
-    // set up default time provider used for controller instantiation
-    _timeProvider = std::make_shared<sync::WallclockProvider>(1ms);
-
     if (!logParticipantNotice.empty())
     {
         _logger->Info(logParticipantNotice);
@@ -114,11 +111,9 @@ void Participant<IbConnectionT>::OnIbDomainJoined()
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     auto* lifecycleService = GetLifecycleService();
-
     auto* timeSyncService = dynamic_cast<mw::sync::TimeSyncService*>(lifecycleService->GetTimeSyncService());
 
-    _timeProvider = timeSyncService->GetTimeProvider();
-    _logger->Info("Time provider: {}", _timeProvider->TimeProviderName());
+    _timeProvider = timeSyncService;
 
     //// Enable replaying mechanism.
     //const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
@@ -249,7 +244,7 @@ auto Participant<IbConnectionT>::CreateCanController(const std::string& canonica
 
     auto controller = CreateController<ib::cfg::CanController, can::CanController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider.get());
+        _timeProvider);
 
     controller->RegisterServiceDiscovery();
     
@@ -276,7 +271,7 @@ auto Participant<IbConnectionT>::CreateEthernetController(const std::string& can
 
     auto controller = CreateController<ib::cfg::EthernetController, eth::EthController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider.get());
+        _timeProvider);
 
     controller->RegisterServiceDiscovery();
     return controller;
@@ -300,7 +295,7 @@ auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& cano
 
     auto controller = CreateController<ib::cfg::FlexrayController, fr::FlexrayController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider.get());
+        _timeProvider);
 
     controller->RegisterServiceDiscovery();
     return controller;
@@ -324,7 +319,7 @@ auto Participant<IbConnectionT>::CreateLinController(const std::string& canonica
 
     auto controller = CreateController<ib::cfg::LinController, lin::LinController>(
         controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider.get());
+        _timeProvider);
 
     controller->RegisterServiceDiscovery();
 
@@ -354,7 +349,7 @@ auto Participant<IbConnectionT>::CreateDataSubscriberInternal(const std::string&
     std::string network = linkName;
 
     return CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriberInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         topic, mediaType, publisherLabels, defaultHandler, parent);
 }
 
@@ -382,7 +377,7 @@ auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonica
     supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::DataPublisher, ib::sim::data::DataPublisher>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         controllerConfig.topic.value(), mediaType, labels, network);
 
     _ibConnection.SetHistoryLengthForLink(network, history, controller);
@@ -415,7 +410,7 @@ auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonic
     supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
 
     auto controller = CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriber>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         controllerConfig.topic.value(), mediaType, labels, defaultDataHandler, newDataSourceHandler);
 
     controller->RegisterServiceDiscovery();
@@ -449,7 +444,7 @@ auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& func
     supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
     return CreateController<ib::cfg::RpcServer, sim::rpc::RpcServerInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         functionName, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
@@ -474,7 +469,7 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
     supplementalData[ib::mw::service::supplKeyRpcClientUUID] = network;
 
     auto controller = CreateController<ib::cfg::RpcClient, ib::sim::rpc::RpcClient>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         controllerConfig.functionName.value(), mediaType, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
@@ -510,7 +505,7 @@ auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalNam
     supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
 
     auto controller = CreateController<ib::cfg::RpcServer, sim::rpc::RpcServer>(
-        controllerConfig, network, mw::ServiceType::Controller, supplementalData, true, _timeProvider.get(),
+        controllerConfig, network, mw::ServiceType::Controller, supplementalData, true, _timeProvider,
         controllerConfig.functionName.value(), mediaType, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection

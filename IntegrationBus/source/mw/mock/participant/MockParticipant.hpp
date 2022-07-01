@@ -57,6 +57,8 @@ public:
         MOCK_METHOD0(Now, std::chrono::nanoseconds());
     };
 
+    void SetTime(std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) override {}
+
     //XXX gtest 1.10 has a MOCK_METHOD macro with specifiers like const, noexcept.
     //    until then we use an auxiliary struct mockTime to get rid of "const this".
     auto Now() const -> std::chrono::nanoseconds override

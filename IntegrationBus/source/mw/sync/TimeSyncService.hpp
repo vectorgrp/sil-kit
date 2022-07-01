@@ -7,22 +7,21 @@
 #include <map>
 
 #include "ib/mw/sync/ITimeSyncService.hpp"
-#include "ITimeProvider.hpp"
-
-#include "ParticipantConfiguration.hpp"
-#include "PerformanceMonitor.hpp"
-#include "WatchDog.hpp"
 
 #include "IIbToTimeSyncService.hpp"
 #include "IParticipantInternal.hpp"
 #include "LifecycleService.hpp"
+#include "ParticipantConfiguration.hpp"
+#include "PerformanceMonitor.hpp"
+#include "TimeProvider.hpp"
+#include "WatchDog.hpp"
 
 namespace ib {
 namespace mw {
 namespace sync {
 
 //forward declarations
-struct ParticipantTimeProvider;
+class SynchronizedVirtualTimeProvider;
 class TimeConfiguration;
 
 struct ITimeSyncPolicy;
@@ -31,6 +30,7 @@ class TimeSyncService
     : public ITimeSyncService
     , public IIbToTimeSyncService
     , public mw::IIbServiceEndpoint
+    , public ITimeProvider
 {
     friend struct DistributedTimeQuantumPolicy;
 
@@ -58,13 +58,19 @@ public:
 
     void SetPeriod(std::chrono::nanoseconds period) override;
 
-    auto Now() const -> std::chrono::nanoseconds override;
-
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
 
     void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& task) override;
+
+    
+    // ITimeProvider
+    auto Now() const -> std::chrono::nanoseconds override;
+    auto TimeProviderName() const -> const std::string& override;
+    auto AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId override;
+    void RemoveNextSimStepHandler(HandlerId handlerId) override;
+    void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override;
 
     // Used by Policies
     template <class MsgT>
@@ -75,6 +81,7 @@ public:
     void InitializeTimeSyncPolicy(bool isSynchronized);
     void ResetTime();
     auto GetTimeProvider() -> std::shared_ptr<sync::ITimeProvider>;
+    void ConfigureTimeProvider(sync::TimeProviderKind timeProviderKind);
 
     // IIbServiceEndpoint
     inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
@@ -97,7 +104,7 @@ private:
     mw::ServiceDescriptor _serviceDescriptor{};
     LifecycleService* _lifecycleService{nullptr};
     logging::ILogger* _logger{nullptr};
-    std::shared_ptr<ParticipantTimeProvider> _timeProvider{nullptr};
+    std::unique_ptr<ITimeProvider> _timeProvider{nullptr};
     std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
 
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};

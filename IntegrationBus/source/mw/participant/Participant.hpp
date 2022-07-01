@@ -52,11 +52,12 @@
 #include "ServiceDiscovery.hpp"
 
 #include "ProtocolVersion.hpp"
+#include "TimeProvider.hpp"
 
 // Add connection types here and make sure they are instantiated in Participant.cpp
 #include "VAsioConnection.hpp"
 
-#include "ProtocolVersion.hpp"
+using namespace std::chrono_literals;
 
 namespace ib {
 namespace mw {
@@ -351,7 +352,11 @@ private:
     const ib::cfg::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
-    std::shared_ptr<sync::ITimeProvider> _timeProvider{nullptr};
+    //using TimeProviderPtr = std::unique_ptr<sync::ITimeProvider, std::function<void(ITimeProvider*)>>;
+    //TimeProviderPtr _timeProvider{nullptr};
+
+    sync::WallclockProvider _wallclockTimeProvider{1ms};
+    sync::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
 
     std::unique_ptr<logging::ILogger> _logger;
     std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;

@@ -1,14 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "TimeSyncService.hpp"
-#include "IServiceDiscovery.hpp"
-#include "SynchronizedHandlers.hpp"
-
 #include <cassert>
 #include <future>
 
 #include "ib/mw/logging/ILogger.hpp"
 #include "ib/mw/sync/string_utils.hpp"
+
+#include "TimeSyncService.hpp"
+#include "IServiceDiscovery.hpp"
+#include "SynchronizedHandlers.hpp"
 
 using namespace std::chrono_literals;
 
@@ -189,38 +189,6 @@ private:
     TimeConfiguration* _configuration;
 };
 
-//! \brief  A caching time provider: we update its internal state whenever the controller's
-//          simulation time changes.
-// This ensures that the our time provider is available even after
-// the TimeSyncService gets destructed.
-struct ParticipantTimeProvider : public sync::ITimeProvider
-{
-    std::chrono::nanoseconds _now;
-    const std::string _name{"ParticipantTimeProvider"};
-    util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
-
-    auto SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
-    {
-        // tell our users about the next simulation step
-        _handlers.InvokeAll(now, duration);
-        _now = now;
-    }
-
-    auto Now() const -> std::chrono::nanoseconds override { return _now; }
-
-    const std::string& TimeProviderName() const override { return _name; }
-
-    auto AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId override
-    {
-        return _handlers.Add(std::move(handler));
-    }
-
-    void RemoveNextSimStepHandler(HandlerId handlerId) override
-    {
-        _handlers.Remove(handlerId);
-    }
-};
-
 TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleService* lifecycleService,
                                  const cfg::HealthCheck& healthCheckConfig)
     : _participant{participant}
@@ -239,7 +207,7 @@ TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleSer
         this->ReportError(buffer.str());
     });
 
-    _timeProvider = std::make_shared<ParticipantTimeProvider>();
+    ConfigureTimeProvider(TimeProviderKind::NoSync);
     _timeConfiguration = std::make_shared<TimeConfiguration>();
 
     participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const ServiceDescriptor& descriptor) {
@@ -337,11 +305,6 @@ void TimeSyncService::AwaitNotPaused()
     }
 }
 
-auto TimeSyncService::Now() const -> std::chrono::nanoseconds
-{
-    return _timeProvider->Now();
-}
-
 void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     if (command.participant != _serviceDescriptor.GetParticipantId())
@@ -365,6 +328,31 @@ void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint*, const SystemCo
         assert(_timeSyncPolicy);
         _timeSyncPolicy->RequestInitialStep();
     }
+}
+
+auto TimeSyncService::Now() const -> std::chrono::nanoseconds
+{
+    return _timeProvider->Now();
+}
+
+auto TimeSyncService::TimeProviderName() const -> const std::string&
+{
+    return _timeProvider->TimeProviderName();
+}
+
+auto TimeSyncService::AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId
+{
+    return _timeProvider->AddNextSimStepHandler(std::move(handler));
+}
+
+void TimeSyncService::RemoveNextSimStepHandler(HandlerId handlerId) 
+{
+    _timeProvider->RemoveNextSimStepHandler(std::move(handlerId));
+}
+
+void TimeSyncService::SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) 
+{
+    _timeProvider->SetTime(now, duration);
 }
 
 void TimeSyncService::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
@@ -422,9 +410,21 @@ void TimeSyncService::ResetTime()
     _timeSyncPolicy->Initialize();
 }
 
-auto TimeSyncService::GetTimeProvider() -> std::shared_ptr<sync::ITimeProvider>
+void TimeSyncService::ConfigureTimeProvider(sync::TimeProviderKind timeProviderKind)
 {
-    return _timeProvider;
+    switch (timeProviderKind)
+    {
+    case sync::TimeProviderKind::NoSync:
+        _timeProvider = std::make_unique<sync::NoSyncProvider>(); 
+        break;
+    case sync::TimeProviderKind::WallClock: 
+        _timeProvider = std::make_unique<sync::WallclockProvider>(1ms); 
+        break;
+    case sync::TimeProviderKind::SyncTime: 
+        _timeProvider = std::make_unique<sync::SynchronizedVirtualTimeProvider>(); 
+        break;
+    default: break;
+    }
 }
 
 } // namespace sync

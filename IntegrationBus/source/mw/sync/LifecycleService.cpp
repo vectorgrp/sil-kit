@@ -54,6 +54,14 @@ void LifecycleService::SetShutdownHandler(ShutdownHandlerT handler)
 auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
     -> std::future<ParticipantState>
 {
+    if (_timeSyncActive)
+    {
+        _timeSyncService->ConfigureTimeProvider(TimeProviderKind::SyncTime);
+    }
+    else
+    {
+        _timeSyncService->ConfigureTimeProvider(TimeProviderKind::NoSync);
+    }
     _timeSyncService->InitializeTimeSyncPolicy(_timeSyncActive);
 
     _hasCoordinatedSimulationStart = hasCoordinatedSimulationStart;

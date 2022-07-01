@@ -39,6 +39,8 @@ public:
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
     virtual void RemoveNextSimStepHandler(HandlerId handlerId) = 0;
+
+    virtual void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) = 0;
 };
 
 

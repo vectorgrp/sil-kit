@@ -153,6 +153,8 @@ struct FixedTimeProvider : ib::mw::sync::ITimeProvider
     void RemoveNextSimStepHandler(HandlerId) override {}
 
     std::chrono::nanoseconds now;
+
+    void SetTime(std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) override {}
 };
 
 struct Callbacks
