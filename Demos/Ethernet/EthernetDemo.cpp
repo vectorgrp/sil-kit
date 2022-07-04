@@ -150,7 +150,7 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        auto registryUri = "vib://localhost:8500";
+        std::string registryUri{"vib://localhost:8500"};
 
         bool runSync = true;
 

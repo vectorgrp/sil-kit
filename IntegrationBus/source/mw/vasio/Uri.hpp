@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 
+#include "Optional.hpp"
 // URI encoding of asio endpoint types.
 // NB: Very limited implementation for internal use only -- nothing close to standard RFC 3986
 
@@ -51,7 +52,7 @@ private:
     UriType _type{ UriType::Undefined };
     std::string _scheme;
     std::string _host;
-    uint16_t _port{0};
+    util::Optional<uint16_t> _port{};
     std::string _path;
     std::string _uriString;
 };

@@ -19,7 +19,19 @@ auto Uri::Host() const -> const std::string&
 
 auto Uri::Port() const -> uint16_t
 {
-    return _port;
+    if(_port)
+    {
+        return *_port;
+    }
+    //return default value if not set
+    if(Type() == UriType::Local)
+    {
+        return 0;
+    }
+    else
+    {
+        return 8500;
+    }
 }
 
 auto Uri::Scheme() const -> const std::string&
@@ -103,22 +115,29 @@ auto Uri::Parse(std::string rawUri) -> Uri
         }
         //find port, if any in 'hostnameOrIp:port'
         idx = rawUri.rfind(portSeparator);
-        if(idx != rawUri.npos)
+        uri._host = rawUri.substr(0, idx);
+        if (idx != rawUri.npos)
         {
-            uri._host = rawUri.substr(0, idx);
             std::stringstream  portStr;
+            uint16_t port;
             portStr << rawUri.substr(idx+1);
-            portStr >> uri._port; //parse string to uint16_t
+            portStr >> port; //parse string to uint16_t
             if(portStr.fail())
             {
                 throw ib::ConfigurationError("Uri::Parse: failed to parse the port "
                     "number: " + portStr.str());
             }
 
-            if (uri._host.empty() || portStr.str().empty())
+            if (portStr.str().empty())
             {
-                throw ib::ConfigurationError("Uri::Parse: URI contains no host or port");
+                throw ib::ConfigurationError("Uri::Parse: URI with port separator contains no port");
             }
+            uri._port = port;
+
+        }
+        if (uri._host.empty())
+        {
+            throw ib::ConfigurationError("Uri::Parse: URI has empty host field");
         }
     }
     return uri;

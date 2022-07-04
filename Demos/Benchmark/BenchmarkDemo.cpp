@@ -322,14 +322,14 @@ void ParticipantsThread(
 
     lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
 }
-const auto Config ="{}";
+const auto config = "{}";
 
 /**************************************************************************************************
 * Main Function
 **************************************************************************************************/
 int main(int argc, char** argv)
 {
-    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString(Config);
+    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString(config);
     BenchmarkConfig benchmark;
     if (!Parse(argc, argv, benchmark) || !Validate(benchmark))
     {
@@ -351,7 +351,7 @@ int main(int argc, char** argv)
     {
         std::unique_ptr<ib::vendor::IIbRegistry> registry;
         // TODO use new config
-        registry = ib::vendor::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString(Config));
+        registry = ib::vendor::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString(config));
         registry->ProvideDomain(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
@@ -414,9 +414,8 @@ int main(int argc, char** argv)
                   << "Message count per simulation task = " << benchmark.messageCount << std::endl
                   << "Message size in bytes = " << benchmark.messageSizeInBytes << std::endl
                   << "Registry URI = " << benchmark.registryUri << std::endl
-                  << std::endl;
-
-        std::cout << "Average realtime duration: " << averageDuration << std::endl
+                  << std::endl
+                  << "Average realtime duration: " << averageDuration << std::endl
                   << "Average number of messages: " << averageNumberMessages << std::endl;
 
         if (benchmark.numberOfSimulations > 1)

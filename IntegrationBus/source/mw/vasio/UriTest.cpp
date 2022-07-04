@@ -22,6 +22,9 @@ TEST(UriTest, parse_uris)
 	EXPECT_THROW(Uri::Parse("fo:oo://bar:qux:quz://"),
 		ib::ConfigurationError);
 
+	EXPECT_THROW(Uri::Parse("vib://:1234"),
+		ib::ConfigurationError);
+
 	// Parse known internal (VAsio) URIs
 	uri = Uri::Parse("local:///tmp/domainsockets.vib");
 	ASSERT_EQ(uri.Type(), Uri::UriType::Local);
@@ -51,4 +54,17 @@ TEST(UriTest, parse_uris)
 	ASSERT_EQ(uri.Host(), "");
 	ASSERT_EQ(uri.Port(), 0);
 	ASSERT_EQ(uri.Path(), R"aw(C:\\temp\hello\ world")aw");
+
+	// No Port given results in default port
+	uri = Uri::Parse("vib://localhost");
+	ASSERT_EQ(uri.Scheme(), "vib");
+	ASSERT_EQ(uri.Host(), "localhost");
+	ASSERT_EQ(uri.Port(), 8500);
+	ASSERT_EQ(uri.Path(), "");
+	// Port 0 resolved to random port at runtime, must be 0 when using tcp:// or vib://
+	uri = Uri::Parse("vib://localhost:0");
+	ASSERT_EQ(uri.Scheme(), "vib");
+	ASSERT_EQ(uri.Host(), "localhost");
+	ASSERT_EQ(uri.Port(), 0);
+	ASSERT_EQ(uri.Path(), "");
 }
