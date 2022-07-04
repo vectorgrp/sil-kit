@@ -251,7 +251,7 @@ If a network simulator is available for a given network, it takes precedence of 
 
 The following table provides an overview of the behavior, if no network simulator is available.
 
-.. list-table:: : Message timestamp by participant type
+.. list-table:: : Message timestamp by synchronization mode
    :widths: 20 40 40
    :header-rows: 1
 
@@ -259,11 +259,11 @@ The following table provides an overview of the behavior, if no network simulato
      - Unsynchronized
      - Synchronized
    * - Unsynchronized
-     - Wall clock time of sender
-     - Wall clock time of sender
+     - Undefined
+     - Use timestamp of own simulation step
    * - Synchronized
-     - Most recent period start of sender
-     - Most recent period start of sender
+     - Undefined
+     - Use timestamp of sender
 
 .. _subsec:sim-syncExample:
 

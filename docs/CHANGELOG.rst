@@ -5,6 +5,45 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+
+[3.99.26] - TBD
+----------------------
+
+Compatibility with 3.99.26
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): XXX
+- Application software interface (API): XXX
+- Middleware network protocol (VAsio): XXX
+
+Added
+~~~~~
+
+
+Changed
+~~~~~~~
+- The timestamps for received events is now dependent on the synchronization mode of the sender and the receiver
+
+  .. list-table:: : Message timestamp by synchronization mode
+     :widths: 20 40 40
+     :header-rows: 1
+  
+     * - Sender / Receiver
+       - Unsynchronized
+       - Synchronized
+     * - Unsynchronized
+       - Undefined
+       - Use timestamp of own simulation step
+     * - Synchronized
+       - Undefined
+       - Use timestamp of sender
+
+
+Removed
+~~~~~~~
+
+
+
 [3.99.26] - 2022-06-29
 ----------------------
 
