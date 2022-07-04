@@ -92,6 +92,8 @@ public:
     void AwaitNotPaused();
     void ReportError(const std::string& errorMsg);
 
+    bool IsSynchronized();
+
 private:
     // ----------------------------------------
     // private methods

@@ -293,6 +293,10 @@ void VAsioConnection::SetLogger(logging::ILogger* logger)
     _logger = logger;
 }
 
+void VAsioConnection::SetTimeSyncService(sync::TimeSyncService* timeSyncService)
+{
+    _timeSyncService = timeSyncService;
+}
 
 void VAsioConnection::JoinDomain(std::string connectUri)
 {
@@ -826,7 +830,7 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     peerId.SetParticipantName(peer->GetInfo().participantName);
     peerId.SetNetworkName(link->Name());
     peerService.SetServiceDescriptor(peerId);
-    link->DistributeRemoteIbMessage(&peerService, msg);
+    link->DistributeRemoteIbMessage(&peerService, std::move(msg));
 
     _logger->Error("Lost connection to participant {}", peerId);
 }
@@ -939,7 +943,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
         auto& ibLink = linkMap[subscriber.networkName];
         if (!ibLink)
         {
-            ibLink = std::make_shared<LinkType>(subscriber.networkName, _logger);
+            ibLink = std::make_shared<LinkType>(subscriber.networkName, _logger, _timeSyncService);
         }
 
         ibLink->AddRemoteReceiver(from, subscriber.receiverIdx);

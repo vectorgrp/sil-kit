@@ -8,6 +8,7 @@
 #include "traits/IbMsgTraits.hpp"
 
 #include "IIbMessageReceiver.hpp"
+#include "TimeSyncService.hpp"
 
 namespace ib {
 namespace mw {
@@ -21,7 +22,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    IbLink(std::string name, logging::ILogger* logger);
+    IbLink(std::string name, logging::ILogger* logger, sync::TimeSyncService* timeSyncService);
 
 public:
     // ----------------------------------------
@@ -33,7 +34,7 @@ public:
     void AddLocalReceiver(ReceiverT* receiver);
     void AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx);
 
-    void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
+    void DistributeRemoteIbMessage(const IIbServiceEndpoint* from, MsgT&& msg);
     void DistributeLocalIbMessage(const IIbServiceEndpoint* from, const MsgT& msg);
 
     void SetHistoryLength(size_t history);
@@ -50,6 +51,7 @@ private:
     // private members
     std::string _name;
     logging::ILogger* _logger;
+    sync::TimeSyncService* _timeSyncService;
 
     std::vector<ReceiverT*> _localReceivers;
     VAsioTransmitter<MsgT> _vasioTransmitter;
@@ -59,9 +61,10 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-IbLink<MsgT>::IbLink(std::string name, logging::ILogger* logger)
+IbLink<MsgT>::IbLink(std::string name, logging::ILogger* logger, sync::TimeSyncService* timeSyncService)
     : _name{std::move(name)}
     , _logger{logger}
+    , _timeSyncService{timeSyncService}
 {
 }
 
@@ -78,10 +81,34 @@ void IbLink<MsgT>::AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx)
     _vasioTransmitter.AddRemoteReceiver(peer, remoteIdx);
 }
 
+
+// ==================================================================
+//  Function template using the trait to select the implementation
+// ==================================================================
+
+template <typename MsgT>
+void SetTimestamp(MsgT& msg, std::chrono::nanoseconds value, std::enable_if_t<HasTimestamp<MsgT>::value, bool> = true)
+{
+    if (msg.timestamp == std::chrono::nanoseconds::duration::min())
+    {
+        msg.timestamp = value;
+    }
+}
+
+template <typename MsgT>
+void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/, std::enable_if_t<!HasTimestamp<MsgT>::value, int> = false)
+{
+}
+
 // Distribute incoming (= from remote) IbMessages to local receivers
 template <class MsgT>
-void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, const MsgT& msg)
+void IbLink<MsgT>::DistributeRemoteIbMessage(const IIbServiceEndpoint* from, MsgT&& msg)
 {
+    if (_timeSyncService && _timeSyncService->IsSynchronized())
+    {
+        SetTimestamp(msg, _timeSyncService->Now());
+    }
+
     for (auto&& receiver : _localReceivers)
     {
         DispatchIbMessage(receiver, from, msg);

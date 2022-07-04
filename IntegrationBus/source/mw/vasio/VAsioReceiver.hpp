@@ -105,7 +105,7 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescr
     TraceRx(_logger, this, msg);
 
     auto remoteId = RemoteServiceEndpoint(descriptor);
-    _link->DistributeRemoteIbMessage(&remoteId, msg);
+    _link->DistributeRemoteIbMessage(&remoteId, std::move(msg));
 
 }
 

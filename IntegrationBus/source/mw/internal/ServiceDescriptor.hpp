@@ -47,8 +47,7 @@ public:
     inline mw::EndpointAddress to_endpointAddress() const;
 
 public:
-    inline ParticipantId GetParticipantId() const { return _participantId; 
-    }
+    inline ParticipantId GetParticipantId() const { return _participantId; }
     std::string GetParticipantName() const { return _participantName; }
     void SetParticipantName(std::string val) 
     {

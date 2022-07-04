@@ -2,22 +2,54 @@
 
 #pragma once
 
+#include <type_traits>
+
 #include "IbMsgVersion.hpp"
 #include "IbMsgSerdesName.hpp"
 
 namespace ib {
 namespace mw {
+// ==================================================================
+//  Workaround for C++14 (Helper Type Alias)
+// ==================================================================
+
+// Implements std::void_t from C++17
+template <typename...>
+struct MakeVoidT
+{
+    using type = void;
+};
+template <typename... Ts>
+using VoidT = typename MakeVoidT<Ts...>::type;
+
+// ==================================================================
+//  Trait which checks that '.timestamp' works
+// ==================================================================
+
+template <typename T, typename = void>
+struct HasTimestamp : std::false_type
+{
+};
+
+template <typename T>
+struct HasTimestamp<T, VoidT<decltype(std::declval<std::remove_cv_t<std::remove_reference_t<T>> &>().timestamp = std::chrono::nanoseconds{})>>
+    : std::true_type
+{
+};
+
 
 // the ib messages type traits
 template <class MsgT> struct IbMsgTraitTypeName { static constexpr const char *TypeName(); };
 template <class MsgT> struct IbMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
 template <class MsgT> struct IbMsgTraitEnforceSelfDelivery { static constexpr bool IsSelfDeliveryEnforced() { return false; } };
+template <class MsgT> struct IbMsgTraitHasTimestamp { static constexpr bool HasTimestamp() { return false; } };
 
 // The final message traits
 template <class MsgT> struct IbMsgTraits
     : IbMsgTraitTypeName<MsgT>
     , IbMsgTraitHistSize<MsgT>
     , IbMsgTraitEnforceSelfDelivery<MsgT>
+    , IbMsgTraitHasTimestamp<MsgT>
     , IbMsgTraitVersion<MsgT>
     , IbMsgTraitSerdesName<MsgT>
 {
@@ -31,6 +63,9 @@ template <class MsgT> struct IbMsgTraits
     };
 #define DefineIbMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct IbMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
     static constexpr bool IsSelfDeliveryEnforced() { return true; }\
+    };
+#define DefineIbMsgTrait_HasTimestamp(Namespace, MsgName) template<> struct IbMsgTraitHasTimestamp<Namespace::MsgName>{\
+    static constexpr bool HasTimestamp() { return true; }\
     };
 
 DefineIbMsgTrait_TypeName(ib::mw::logging, LogMsg)
@@ -71,14 +106,14 @@ DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayPocStatusEvent)
 DefineIbMsgTrait_TypeName(ib::mw::service, ParticipantDiscoveryEvent)
 DefineIbMsgTrait_TypeName(ib::mw::service, ServiceDiscoveryEvent)
 
-//Messages with history
+// Messages with history
 DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
 DefineIbMsgTrait_HistSize(ib::mw::service, ParticipantDiscoveryEvent, 1)
 DefineIbMsgTrait_HistSize(ib::sim::data, DataMessageEvent, 1)
 DefineIbMsgTrait_HistSize(ib::mw::sync, WorkflowConfiguration, 1)
 DefineIbMsgTrait_HistSize(ib::sim::lin, LinControllerConfig, 1)
 
-//Messages with enforced self delivery
+// Messages with enforced self delivery
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantStatus)
 DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, SystemCommand)

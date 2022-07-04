@@ -29,6 +29,7 @@ struct MockConnection
     }
 
     void SetLogger(ib::mw::logging::ILogger* /*logger*/) {}
+    void SetTimeSyncService(ib::mw::sync::TimeSyncService* /*timeSyncService*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}
     void JoinDomain(std::string /*domainId*/) {}
 

@@ -113,6 +113,8 @@ void Participant<IbConnectionT>::OnIbDomainJoined()
     auto* lifecycleService = GetLifecycleService();
     auto* timeSyncService = dynamic_cast<mw::sync::TimeSyncService*>(lifecycleService->GetTimeSyncService());
 
+    _ibConnection.SetTimeSyncService(timeSyncService);
+
     _timeProvider = timeSyncService;
 
     //// Enable replaying mechanism.

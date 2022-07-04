@@ -247,6 +247,11 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
     _lifecycleService->ChangeState(ParticipantState::Error, errorMsg);
 }
 
+bool TimeSyncService::IsSynchronized()
+{
+    return _isSynchronized;
+}
+
 auto TimeSyncService::State() const -> ParticipantState
 {
     return _lifecycleService->Status().state;

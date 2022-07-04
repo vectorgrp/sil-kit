@@ -9,8 +9,6 @@
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
-#include "LifecycleService.hpp"
-#include "TimeSyncService.hpp"
 
 namespace ib {
 namespace mw {

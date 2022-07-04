@@ -64,6 +64,7 @@ public:
     // ----------------------------------------
     // Public methods
     void SetLogger(logging::ILogger* logger);
+    void SetTimeSyncService(sync::TimeSyncService* timeSyncService);
     void JoinDomain(std::string registryUri);
 
     template <class IbServiceT>
@@ -242,7 +243,7 @@ private:
         auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[networkName];
         if (!ibLink)
         {
-            ibLink = std::make_shared<IbLink<IbMessageT>>(networkName, _logger);
+            ibLink = std::make_shared<IbLink<IbMessageT>>(networkName, _logger, _timeSyncService);
         }
         return ibLink;
     }
@@ -391,6 +392,7 @@ private:
     std::string _participantName;
     ParticipantId _participantId{0};
     logging::ILogger* _logger{nullptr};
+    sync::TimeSyncService* _timeSyncService{nullptr};
 
     //! \brief Virtual IB links by networkName according to IbConfig.
     util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
