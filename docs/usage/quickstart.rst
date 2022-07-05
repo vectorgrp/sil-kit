@@ -48,8 +48,7 @@ A simulation consists of participants which all connect to the same registry URI
 The participants might be physically distributed in a network or running on the same host.
 
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
-Some participants can have special roles, depending on e.g. the synchronization and detail of the simulation or
-:doc:`../vibes/overview`.
+Some participants can have special roles, depending on e.g. the synchronization and detail of the simulation.
 Additionally the :ref:`VAsio Middleware<sec:mwcfg-vasio>` of the Vector Integration Bus requires the
 :ref:`sec:util-registry` to work properly.
 

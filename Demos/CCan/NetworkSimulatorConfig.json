@@ -1,6 +1,6 @@
 {
   "SchemaVersion": "1",
-  "Description": "VIBE-Networksimulator configuration for CAN Demo",
+  "Description": "Network simulator configuration for a detailed simulation of the CAN Demo",
   "SimulatedNetworks": [
     {
       "Name": "CAN1",

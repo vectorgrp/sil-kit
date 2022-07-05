@@ -48,13 +48,13 @@ struct FlexrayClusterParameters
     //! Time offset for a static slot in MacroTicks (MT) (range 1-63).
     uint16_t gdActionPointOffset;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //gdCASRxLowMax   
 
     //! Duration of the idle phase within a dynamic slot in gdMiniSlots (range 0-2).
     uint16_t gdDynamicSlotIdlePhase;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //gdIgnoreAfterTx
 
     //! Duration of a mini slot in MacroTicks (MT) (2-63).
@@ -75,13 +75,13 @@ struct FlexrayClusterParameters
     //! Duration of TSS (Transmission Start Sequence) in gdBits (range 1-15).
     uint16_t gdTSSTransmitter;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //gdWakeupRxIdle
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //gdWakeupRxLow
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //gdWakeupRxWindow
 
     //! Duration of LOW Phase of a wakeup symbol in gdBit (range 15-60).
@@ -143,28 +143,28 @@ struct FlexrayNodeParameters
     //! Allowed deviation for startup frames during integration in MicroTicks (range 29-2743).
     FlexrayMicroTick pdAcceptedStartupRange;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pDecodingCorrection
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pDelayCompensationA
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pDelayCompensationB
 
     //! Duration of listen phase in MicroTicks (range 1926-2567692).
     FlexrayMicroTick pdListenTimeout;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pExternalSync
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pExternOffsetCorrection
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pExternRateCorrection
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pFallBackInternal
 
     //! Slot ID of the key slot (range 0-1023, value 0 means that there is no key slot).
@@ -206,10 +206,10 @@ struct FlexrayNodeParameters
     //! Maximum permissible rate correction value (range 3-3846 MicroTicks).
     FlexrayMicroTick pRateCorrectionOut;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pSecondKeySlotID
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pTwoKeySlotMode
 
     //! Channel used by the node to send a wakeup pattern (values FlexrayChannel::A, FlexrayChannel::B).
@@ -224,10 +224,10 @@ struct FlexrayNodeParameters
     //! Duration of a FlexRay MicroTick (12.5ns, 25ns or 50ns).
     FlexrayClockPeriod pdMicrotick;
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pNMVectorEarlyUpdate
 
-    ////! Not used by Network Simulator
+    ////! Not used by network simulator
     //pPayloadLengthDynMax
 
     //! Number of samples per MicroTick (values 1 or 2).

@@ -110,6 +110,13 @@ auto LinController::Status() const noexcept -> LinControllerStatus
 
 void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 {
+    if (_controllerStatus != LinControllerStatus::Operational)
+    {
+        std::string errorMsg{"LinController::SendFrame() must only be called when the controller is operational! Check "
+                             "whether a call to LinController::Init is missing."};
+        _logger->Error(errorMsg);
+        throw ib::StateError{errorMsg};
+    }
     if (_controllerMode != LinControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrame() must only be called in master mode!"};
@@ -125,6 +132,13 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 
 void LinController::SendFrameHeader(LinIdT linId)
 {
+    if (_controllerStatus != LinControllerStatus::Operational)
+    {
+        std::string errorMsg{"LinController::SendFrameHeader() must only be called when the controller is operational! "
+                             "Check whether a call to LinController::Init is missing."};
+        _logger->Error(errorMsg);
+        throw ib::StateError{errorMsg};
+    }
     if (_controllerMode != LinControllerMode::Master)
     {
         std::string errorMsg{"LinController::SendFrameHeader() must only be called in master mode!"};
@@ -148,6 +162,14 @@ void LinController::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
 
 void LinController::SetFrameResponses(std::vector<LinFrameResponse> responses)
 {
+    if (_controllerStatus != LinControllerStatus::Operational)
+    {
+        std::string errorMsg{"LinController::SetFrameResponses() must only be called when the controller is operational! "
+                             "Check whether a call to LinController::Init is missing."};
+        _logger->Error(errorMsg);
+        throw ib::StateError {errorMsg};
+    }
+
     GetThisLinNode().UpdateResponses(responses, _logger);
 
     LinFrameResponseUpdate frameResponseUpdate;

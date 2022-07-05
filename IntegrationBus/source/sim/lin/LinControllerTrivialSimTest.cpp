@@ -571,6 +571,22 @@ TEST_F(LinControllerTrivialSimTest, wake_up_uninitialized)
     EXPECT_THROW(controller.Wakeup(), ib::StateError);
 }
 
+
+TEST_F(LinControllerTrivialSimTest, send_frame_unitialized)
+{
+    EXPECT_THROW(controller.SendFrame({}, LinFrameResponseType::MasterResponse), ib::StateError);
+}
+
+TEST_F(LinControllerTrivialSimTest, send_frame_header_unitialized)
+{
+    EXPECT_THROW(controller.SendFrameHeader({}), ib::StateError);
+}
+
+TEST_F(LinControllerTrivialSimTest, set_responses_unitialized)
+{
+    EXPECT_THROW(controller.SetFrameResponses({}), ib::StateError);
+}
+
 TEST_F(LinControllerTrivialSimTest, wake_up_internal_uninitialized)
 {
     EXPECT_THROW(controller.WakeupInternal(), ib::StateError);

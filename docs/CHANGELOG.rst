@@ -5,23 +5,30 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-
-[3.99.26] - TBD
+[3.99.27] - unreleased
 ----------------------
 
 Compatibility with 3.99.26
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): XXX
-- Application software interface (API): XXX
-- Middleware network protocol (VAsio): XXX
-
-Added
-~~~~~
+- Application binary interface (ABI): 
+- Application software interface (API): No
+- Middleware network protocol (VAsio): 
 
 
 Changed
 ~~~~~~~
+
+- The trivial simulation and the detailed simulation have been made more consistent:
+
+   + ``ILinController::SendFrame``, ``ILinController::SendFrameHeader``, and ``ILinController::SetResponses`` now 
+       throw an ib::StateError if the controller has not been initialized
+
+   + ``IEthernetController::SendFrame`` now triggers a TransmitFrameEvent with TransmitState::ControllerInactive
+       if the controller has not been activated
+
+   + ``ICanController::SendFrame`` does not send a frame, but prints a warning if the controller has not been started
+
 - The timestamps for received events is now dependent on the synchronization mode of the sender and the receiver
 
   .. list-table:: : Message timestamp by synchronization mode
@@ -42,6 +49,13 @@ Changed
 Removed
 ~~~~~~~
 
+
+
+
+Removed
+~~~~~~~
+
+  - The documentation of the network simulator has been moved to its own repository.
 
 
 [3.99.26] - 2022-06-29
@@ -327,6 +341,7 @@ Removed
     ib_ParticipantState outParticipantState;
     returnCode = ib_Participant_WaitForLifecycleToComplete(participant,
                     &outParticipantState);
+
 
 [3.99.25] - 2022-06-13
 ----------------------
@@ -3073,7 +3088,7 @@ Changed
   - Ethernet Demo only uses Set/GetRawFrame calls
   - CAN & Ethernet demo can now run as asynchronous participants (add `--async` as command line argument)
 
-- Updated documentation of :doc:`./vibes/networksimulator` and :doc:`./simulation/simulation`
+- Updated documentation of network simulator and :doc:`./simulation/simulation`
 
 
 [3.7.13] - 2022-03-24

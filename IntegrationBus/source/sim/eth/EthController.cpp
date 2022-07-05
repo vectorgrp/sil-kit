@@ -58,6 +58,11 @@ void EthController::SetTrivialBehavior()
     _simulationBehavior.SetTrivialBehavior();
 }
 
+EthernetState EthController::GetState()
+{
+    return _ethState;
+}
+
 auto EthController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
     // NetSim uses ServiceType::Link and the simulated networkName

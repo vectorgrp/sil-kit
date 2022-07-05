@@ -12,6 +12,5 @@ Contents
   usage/demos
   configuration/configuration
   usage/utilities
-  vibes/overview
   CHANGELOG
   licenses/license

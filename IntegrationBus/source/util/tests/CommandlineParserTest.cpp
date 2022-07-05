@@ -49,7 +49,7 @@ TEST(IbCommandlineParserTest, test_mixed_arguments)
     commandlineParser.Add<ib::util::CommandlineParser::Option>("domain", "d", "42", "[--domain=<domainId>]",
         "-d, --domain <domainId>: The domain ID which is used by the Integration Bus. Defaults to 42");
     commandlineParser.Add<ib::util::CommandlineParser::Positional>("configuration", "<configuration>",
-        "<configuration>: Path and filename of the Network Simulator configuration YAML or JSON file. Note that the format was changed in v3.6.11");
+        "<configuration>: Path and filename of the network simulator configuration YAML or JSON file. Note that the format was changed in v3.6.11");
 
     EXPECT_EQ(commandlineParser.Get<ib::util::CommandlineParser::Flag>("version").Value(), false);
     EXPECT_EQ(commandlineParser.Get<ib::util::CommandlineParser::Flag>("help").Value(), false);

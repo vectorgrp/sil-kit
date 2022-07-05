@@ -233,8 +233,7 @@ struct LinControllerConfig
 {
     //! Configure as LIN master or LIN slave
     LinControllerMode controllerMode{LinControllerMode::Inactive};
-    /*! The operational baud rate of the controller. Only relevant for VIBE
-     * simulation.
+    /*! The operational baud rate of the controller. Used in a detailed simulation.
      */
     LinBaudRateT baudRate{0};
     /*! Optional LinFrameResponse configuration.
@@ -264,7 +263,7 @@ enum class LinControllerStatus
     //! Sleep Pending state is reached when a GoToSleep is issued.
     //  This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
     //  before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
-    //  This is only used when using detailed simulations with VIBE-NetworkSimulator.
+    //  This is only used when using detailed simulations with a network simulator.
     SleepPending = 3,
 };
 
@@ -308,14 +307,14 @@ struct LinFrameResponseUpdateEvent
 //! \brief Data type representing a finished LIN transmission, independent of success or error.
 struct LinTransmission
 {
-    std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in VIBE simulation.
+    std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in a detailed simulation.
     LinFrame frame;                        //!< The transmitted frame
     LinFrameStatus status;                 //!< The status of the transmitted frame
 };
 
 /*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
  *
- * Sent from LinController proxies to the VIBE NetworkSimulator.
+ * Used internally.
  */
 struct LinSendFrameRequest
 {
@@ -325,20 +324,20 @@ struct LinSendFrameRequest
 
 /*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
 *
-* Sent from LinController proxies to the VIBE NetworkSimulator.
+* Used internally.
 */
 struct LinSendFrameHeaderRequest
 {
     LinIdT id; //!< The LinIdT of the header to be transmitted
 };
 
-//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed LinFrameResponse data.
+//! \brief Data type used to inform other LIN participants about changed LinFrameResponse data.
 struct LinFrameResponseUpdate
 {
     std::vector<LinFrameResponse> frameResponses; //!< Vector of new FrameResponses.
 };
 
-//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed LinControllerStatus.
+//! \brief Data type used to inform other LIN participants about changed LinControllerStatus.
 struct LinControllerStatusUpdate
 {
     std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
@@ -348,7 +347,7 @@ struct LinControllerStatusUpdate
 //! \brief Data type representing a LIN WakeUp pulse.
 struct LinWakeupPulse
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in VIBE Simulation.
+    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in a detailed simulation.
     TransmitDirection direction; //!< The direction of the wakeup pulse.
 };
 

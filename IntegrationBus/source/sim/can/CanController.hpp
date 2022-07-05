@@ -104,6 +104,8 @@ public:
     void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
     void SetTrivialBehavior();
 
+    auto GetState() -> CanControllerState;
+
 private:
     // ----------------------------------------
     // private data types

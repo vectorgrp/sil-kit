@@ -71,6 +71,11 @@ protected:
             numAcked++;
         });
         auto* lifecycleService = participant->Participant()->GetLifecycleService();
+
+        lifecycleService->SetCommunicationReadyHandler([controller]() {
+            controller->Activate();
+        });
+
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         timeSyncService->SetSimulationTask(
             [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
@@ -97,6 +102,7 @@ protected:
     {
         std::cout << " Receiver init " << participant->Name() << std::endl;
         auto* controller = participant->Participant()->CreateEthernetController("ETH1", "LINK1");
+
         controller->AddFrameTransmitHandler(
             [this](IEthernetController* , const EthernetFrameTransmitEvent& ack) {
             callbacks.AckHandler(ack);
@@ -120,6 +126,12 @@ protected:
                     participant->Stop();
                 }
             });
+
+        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+
+        lifecycleService->SetCommunicationReadyHandler([controller]() {
+            controller->Activate();
+        });
     }
 
     void ExecuteTest()

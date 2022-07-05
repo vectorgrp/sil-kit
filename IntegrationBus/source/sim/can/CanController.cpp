@@ -56,6 +56,12 @@ void CanController::SetTrivialBehavior()
     _simulationBehavior.SetTrivialBehavior();
 }
 
+
+auto CanController::GetState() -> CanControllerState
+{
+    return _controllerState;
+}
+
 auto CanController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
     // NetSim uses ServiceType::Link and the simulated networkName

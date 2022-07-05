@@ -67,6 +67,8 @@ protected:
             ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "EthWriter", _registryUri);
         auto* controller = dynamic_cast<ib::sim::eth::EthController*>(participant->CreateEthernetController("ETH1"));
 
+        controller->Activate();
+
         controller->AddFrameTransmitHandler(
             [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameTransmitEvent& ack) {
                 _testFrames.at(numAcks++).receivedAck = ack;
@@ -97,6 +99,8 @@ protected:
         auto participant =
             ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "EthReader", _registryUri);
         auto* controller = participant->CreateEthernetController("ETH1");
+
+        controller->Activate();
 
         controller->AddFrameHandler(
             [this, &ethReaderAllReceivedPromiseLocal, &numReceived](ib::sim::eth::IEthernetController*, const ib::sim::eth::EthernetFrameEvent& msg) {

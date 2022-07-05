@@ -48,6 +48,13 @@ name::
 Ethernet controllers will only communicate within the same network. If no network name is provided, the controller name
 will be used as the network name.
 
+Initialization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Ethernet controller first has to call |Activate| before being able to
+send frames. Note that |Activate| can be called in the CommunicationReadyHandler of a LifecycleService.
+
+
 Sending Ethernet Frames
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -98,7 +105,7 @@ To be notified of the success or failure of the transmission, a ``FrameTransmitH
 
 .. admonition:: Note
 
-  In a simple simulation without the VIBE NetworkSimulator, the |EthernetTransmitStatus| of the 
+  In a simple simulation, the |EthernetTransmitStatus| of the 
   |EthernetFrameTransmitEvent| will always be |Transmitted|. 
 
 Receiving Ethernet FrameEvents
@@ -125,26 +132,16 @@ Adding a handler will return a |HandlerId| which can be used to remove the handl
 - |RemoveFrameTransmitHandler|  
 - |RemoveStateChangeHandler|
 
-Usage with the VIBE NetworkSimulator
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Initialization
-______________
-
-If used within a simulated Ethernet network, the Ethernet controller first has to call |Activate| before being able to
-send frames. Note that |Activate| can be called in the CommunicationReadyHandler of a LifecycleService.
-
 Switches
 ________
 
-An Ethernet controller should be connected to a switch for a valid simulation. For further details, refer to 
-:ref:`simulating Ethernet switches<sec:networksimulator-configuration>` and the 
-:ref:`Network Simulator configuration<sec:networksimulator-configuration>`.
+Switches can be used in a detailed simulation. 
+Refer to the documentation of the network simulator for further information.
 
 Receive State Change Events
-___________________________
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-State changes are only supported when using the VIBE NetworkSimulator. To receive state changes of an Ethernet 
+To receive state changes of an Ethernet 
 controller, a ``StateChangeHandler`` must be registered using |AddStateChangeHandler|::
 
   auto stateChangedHandler = [](IEthernetController*, const EthernetStateChangeEvent& stateChangeEvent) 
@@ -154,7 +151,7 @@ controller, a ``StateChangeHandler`` must be registered using |AddStateChangeHan
   ethernetController->AddStateChangeHandler(stateChangedHandler);
 
 Acknowledgements
-________________
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When sending frames, the |EthernetTransmitStatus| of the |EthernetFrameTransmitEvent| received in the
 ``FrameTransmitHandler`` will be one of the following values:
@@ -288,19 +285,17 @@ Assumptions:
 - *ethernetReceiver*, *ethernetSender* are of type |IEthernetController|.
 - All Ethernet controllers are connected to the same switch.
 
-Simple Ethernet Sender / Receiver Example (without VIBE NetworkSimulator)
+Simple Ethernet Sender / Receiver Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows a successful data transfer from one Ethernet controller to another. For simplicity this example is 
-considered to be without the VIBE NetworkSimulator so that an |EthernetFrameTransmitEvent| will always return 
-|Transmitted|
+This example shows a successful data transfer from one Ethernet controller to another. 
 
 .. literalinclude::
    examples/eth/ETH_Sender_Receiver.cpp
    :language: cpp
 
 
-State Transition Example (only with VIBE NetworkSimulator)
+State Transition Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows the possible state transitions for an Ethernet controller.
@@ -310,10 +305,10 @@ This example shows the possible state transitions for an Ethernet controller.
    :language: cpp
 
 
-Erroneous Transmissions (only with VIBE NetworkSimulator)
+Erroneous Transmissions (detailed simulation only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows different possible erroneous Ethernet transmissions when using the VIBE NetworkSimulator.
+This example shows different possible erroneous Ethernet transmissions.
 
 .. literalinclude::
    examples/eth/ETH_Erroneous_Transmissions.cpp

@@ -27,7 +27,7 @@ struct ib_Can_Frame
     ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     uint32_t id; //!< CAN Identifier
     ib_Can_FrameFlag flags; //!< CAN Arbitration and Control Field Flags; see ib_Can_FrameFlag
-    uint8_t dlc; //!< Data Length Code - determined by the Network Simulator
+    uint8_t dlc; //!< Data Length Code - determined by a network simulator if available
 
     ib_ByteVector data; //!< Data field containing the payload
 };
@@ -183,18 +183,12 @@ typedef ib_ReturnCode (*ib_Can_Controller_Create_t)(ib_Can_Controller** outCanCo
 
 /*! \brief Start the CAN controller
 *
-* NB: Only supported in VIBE simulation, the command is ignored
-* in simple simulation.
-*
 * \ref ib_Can_Controller_Reset(), \ref ib_Can_Controller_Stop(), \ref ib_Can_Controller_Sleep()
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Start(ib_Can_Controller* controller);
 
 typedef ib_ReturnCode (*ib_Can_Controller_Start_t)(ib_Can_Controller* controller);
 /*! \brief Stop the CAN controller
-*
-* NB: Only supported in VIBE simulation, the command is ignored
-* in simple simulation.
 *
 * \ref ib_Can_Controller_Reset(), \ref ib_Can_Controller_Start(), \ref ib_Can_Controller_Sleep()
 */
@@ -209,18 +203,12 @@ typedef ib_ReturnCode (*ib_Can_Controller_Stop_t)(ib_Can_Controller* controller)
 * CAN controller state to CanControllerState::Uninit and the
 * controller's error state to CanErrorState::NotAvailable.
 *
-* NB: Only supported in VIBE simulation, the command is ignored
-* in simple simulation.
-*
 * \ref ib_Can_Controller_Start(), \ref ib_Can_Controller_Stop(), \ref ib_Can_Controller_Sleep()
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_Reset(ib_Can_Controller* controller);
 
 typedef ib_ReturnCode (*ib_Can_Controller_Reset_t)(ib_Can_Controller* controller);
 /*! \brief Put the CAN controller in sleep mode
-*
-* NB: Only supported in VIBE simulation, the command is ignored
-* in simple simulation.
 *
 * \ref ib_Can_Controller_Reset(), ib_Can_Controller_Start(), \ref ib_Can_Controller_Stop()
 */
@@ -230,16 +218,9 @@ typedef ib_ReturnCode(*ib_Can_Controller_Sleep_t)(ib_Can_Controller* controller)
 
 /*! \brief Request the transmission of a CanFrame
 *
-* NB: In VIBE simulation, the CanFrame must provide a valid CAN
-* ID and valid flags. The data length code is optional and is
-* automatically derived by the VIBE CAN simulator based on the
-* provided flags and the length of the dataField. The controller
+* The CanFrame must provide a valid CAN
+* ID and valid flags. The controller
 * must be in the Started state to transmit and receive messages.
-*
-* NB: In simple simulation, the requirements for VIBE simulation
-* are not enforced. I.e., CanMessages are distributed to
-* connected controllers regardless of the content and controller
-* states are not checked.
 *
 * \param controller The Can controller that should send the Can frame.
 * \param frame The Can frame to transmit.
@@ -263,11 +244,9 @@ typedef ib_ReturnCode (*ib_Can_Controller_SendFrame_t)(ib_Can_Controller* contro
 * \param fdRate Baud rate for CAN FD messages given in bps; valid
 * range: 0 to 16'000'000
 *
-* NB: In VIBE simulation, the baud rate is used to calculate
+* In a detailed simulation, the baud rate is used to calculate
 * transmission delays of CAN messages and to determine proper
 * configuration and interoperation of the connected controllers.
-*
-* NB: The baud rate has no effect in simple simulation.
 */
 IntegrationBusAPI ib_ReturnCode ib_Can_Controller_SetBaudRate(ib_Can_Controller* controller, uint32_t rate, 
     uint32_t fdRate);
@@ -279,7 +258,7 @@ typedef ib_ReturnCode(*ib_Can_Controller_SetBaudRate_t)(ib_Can_Controller* contr
 * The registered handler is called when a CAN message was
 * successfully transmitted on the bus or when an error occurred.
 *
-* NB: Full support in VIBE simulation. In simple simulation, all
+* NB: Full support in a detailed simulation. In simple simulation, all
 * messages are automatically positively acknowledged.
 *
 * \param controller The Can controller for which the callback should be registered.
@@ -342,9 +321,6 @@ typedef ib_ReturnCode (*ib_Can_Controller_RemoveFrameHandler_t)(ib_Can_Controlle
 * state changes from ib_Can_ControllerState_Uninit to
 * ib_Can_ControllerState_Started.
 *
-* NB: Only supported in VIBE simulation. In simple simulation,
-* the handler is never called.
-*
 * \param controller The Can controller for which the state change callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on state change.
@@ -374,9 +350,6 @@ typedef ib_ReturnCode (*ib_Can_Controller_RemoveStateChangeHandler_t)(ib_Can_Con
 * controller changes. During normal operation, the controller
 * should be in state ib_Can_ErrorState_ErrorActive. The states correspond
 * to the error state handling protocol of the CAN specification.
-*
-* NB: Only supported in VIBE simulation. In simple simulation,
-* the handler is never called.
 *
 * \param controller The Can controller for which the error state callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.

@@ -74,6 +74,10 @@ protected:
         auto* lifecycleService = participant->Participant()->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
+        lifecycleService->SetCommunicationReadyHandler([canController]() {
+            canController->Start();
+        });
+
         timeSyncService->SetSimulationTask([this, canController, lifecycleService](auto, auto) {
             EXPECT_EQ(lifecycleService->State(), sync::ParticipantState::Running);
             if (numSent < testMessages.size())

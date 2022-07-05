@@ -11,7 +11,7 @@ Extensions Configuration
 Overview
 ========================================
 
-The :doc:`Vector Integration Bus Extensions<../vibes/overview>` are developed by Vector and provided in binary form.
+The Vector Integration Bus Extensions are developed by Vector and provided in binary form.
 To facilitate the lookup of these binaries, specific search paths can be configured in the extensions configuration.
 
 Configuration

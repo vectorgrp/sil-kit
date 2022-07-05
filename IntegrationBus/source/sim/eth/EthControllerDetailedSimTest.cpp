@@ -176,7 +176,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
 /*! \brief EthControllerProxy must not generate Acks
  *
  * Rationale:
- *   The EthControllerProxy is used in conjunction with a Network Simulator, which is
+ *   The EthControllerProxy is used in conjunction with a network simulator, which is
  *   responsible for Ack generation.
  */
 TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)

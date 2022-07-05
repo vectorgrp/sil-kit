@@ -82,8 +82,8 @@ Initialization
 Before the LIN Controller can be used, it must be initialized. The initialization is performed by setting up a
 |LinControllerConfig| and passing it to |Init|.
 
-At a minimum, the |LinControllerMode| must be set to either |LinControllerMode_Master| or |LinControllerMode_Slave|. If the VIBE
-NetworkSimulator is used, also a baud rate must be specified. In addition, the |LinControllerConfig| allows providing
+At a minimum, the |LinControllerMode| must be set to either |LinControllerMode_Master| or |LinControllerMode_Slave| 
+and the baud rate must be specified. In addition, the |LinControllerConfig| allows providing
 an initial set of |LinFrameResponse|, which is particularly useful for LIN slaves.
 
 The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID 
@@ -166,7 +166,7 @@ A successful transmission is confirmed via the registered callback, e.g.::
 
 .. admonition:: Note
 
-    The end of frame timestamp is only valid when using the VIBE NetworkSimulator.
+    The end of frame timestamp is only valid when using the detailed simulation.
 
 Receiving Data from a Slave
 ___________________________
@@ -287,7 +287,7 @@ shown here sequentially to demonstrate cause and effect.
 Assumptions:
 
 - *master*, *slave*, *slave1*, and *slave2* are of type |ILinController|.
-- *timeEndOfFrame* indicates the end of frame time stamp when using the VIBE NetworkSimulator. Otherwise the value of 
+- *timeEndOfFrame* indicates the end of frame time stamp when using the detiled simulation. Otherwise the value of 
   *timeEndofFrame* is undefined.
 - *UseAutosarInterface* is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API. 
   It will most likely not be used in practice and it merely intended to show the different usages of the API.

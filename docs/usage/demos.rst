@@ -55,13 +55,13 @@ CAN Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  CAN Reader/Writer with or without VIBE Network Simulator
+      -  CAN Reader/Writer with or without network simulator
    *  -  Source location
       -  Demos/Can
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
-         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
+         * network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguration to be used; 
@@ -84,9 +84,6 @@ CAN Demo
 
         .. parsed-literal:: 
 
-            # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator Demos/Can/NetworkSimulatorConfig.json
-
             # System Monitor (optional):
             |SystemMonitor|
 
@@ -96,7 +93,7 @@ CAN Demo
             # CAN Writer:
             |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter
 
-            # System Controller (add NetworkSimulator as third parameter if using VIBE Network Simulator):
+            # System Controller:
             |SystemController| CanReader CanWriter 
 
         For unsynchronized execution:
@@ -118,13 +115,13 @@ Ethernet Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  Ethernet Reader / Writer with or without VIBE Network Simulator
+      -  Ethernet Reader / Writer with or without network simulator
    *  -  Source location
       -  Demos/Ethernet
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
-         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
+         * Network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -147,9 +144,6 @@ Ethernet Demo
 
         .. parsed-literal:: 
 
-            # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator Demos/Ethernet/NetworkSimulatorConfig.json
-
             # System Monitor (optional):
             |SystemMonitor|
 
@@ -159,7 +153,7 @@ Ethernet Demo
             # Ethernet Writer:
             |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter
 
-            # System Controller (add NetworkSimulator as third parameter if using VIBE Network Simulator):
+            # System Controller:
             |SystemController| EthernetReader Ethernet Writer
 
         For unsynchronized execution:
@@ -191,7 +185,7 @@ LIN Demo
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
          * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
-         * :doc:`NetworkSimulator<../vibes/networksimulator>` (optional)
+         * Network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -208,9 +202,6 @@ LIN Demo
             |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinMaster
    *  -  System Example
       -  .. parsed-literal:: 
-
-            # VIBE Network Simulator (assumed to be in PATH, optional):
-            NetworkSimulator Demos/Lin/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
             |SystemMonitor|
@@ -241,8 +232,8 @@ FlexRay Demo
       -  Demos/FlexRay
    *  -  Requirements
       -  * :ref:`SystemController<sec:util-system-controller>`
+         * Network simulator (mandatory)
          * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
-         * :doc:`NetworkSimulator<../vibes/networksimulator>`
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -261,7 +252,7 @@ FlexRay Demo
    *  -  System Example
       -  .. parsed-literal:: 
 
-            # VIBE Network Simulator (assumed to be in PATH, necessary):
+            # Network simulator (assumed to be in PATH, necessary):
             NetworkSimulator Demos/FlexRay/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
@@ -274,7 +265,7 @@ FlexRay Demo
             |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node1
 
             # System Controller:
-            |SystemController| Node0 Node1
+            |SystemController| Node0 Node1 NetworkSimulator
    *  -  Notes
       -  Starting the FlexRay cycle takes quite some time, which is accurately modeled by the NetworkSimulator. 
          It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.

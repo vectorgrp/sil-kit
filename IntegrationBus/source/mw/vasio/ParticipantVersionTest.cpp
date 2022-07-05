@@ -76,6 +76,8 @@ protected:
         auto&& receiver = _participants.at(1);
 
         auto* recvCan = receiver->CreateCanController("CAN1");
+        recvCan->Start();
+
         uint8_t lastIter = 0;
         recvCan->AddFrameHandler([&lastIter, &done](auto*, const auto& event) {
             EXPECT_EQ(event.frame.dataField.size(), 7);
@@ -89,6 +91,7 @@ protected:
         });
 
         auto* sendCan = sender->CreateCanController("CAN1");
+        sendCan->Start();
         for (auto i = 1; i <= 10; i++)
         {
             ib::sim::can::CanFrame frame;

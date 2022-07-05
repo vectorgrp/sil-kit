@@ -66,18 +66,11 @@ public:
 
     /*! \brief Update the content of a previously configured TX buffer.
      *
-     * Due to the fixed and repetitive cycle of FlexRay, the behavior of UpdateTxBuffer is
-     * quite different when using a detailed Network Simulator or not.
-     *
-     * If a Network Simulator is used, a FlexRay message will be sent at the time matching to
+     * A FlexRay message will be sent at the time matching to
      * the configured Slot ID. If the buffer was configured with FlexrayTransmissionMode::SingleShot,
      * the content is sent exactly once. If it is configured as FlexrayTransmissionMode::Continuous,
      * the content is sent repeatedly according to the offset and repetition configuration.
      *
-     * Without a Network Simulator, a FlexRay message will be sent immediately and only once.
-     * I.e., the configuration according to cycle, repetition, and transmission mode is
-     * ignored. In particular, even with FlexrayTransmissionMode::Continuous, the message will be
-     * sent only once.
      *
      *  \see IFlexrayController::Configure(const FlexrayControllerConfig&)
      */

@@ -89,6 +89,8 @@ public:
     void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
     void SetTrivialBehavior();
 
+    EthernetState GetState();
+
 private:
     // ----------------------------------------
     // private methods

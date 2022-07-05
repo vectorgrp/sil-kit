@@ -52,11 +52,12 @@ public:
      * \param fdRate Baud rate for CAN FD messages given in bps; valid
      * range: 0 to 16'000'000
      *
-     * NB: In VIBE simulation, the baud rate is used to calculate
+     * NB: The baud rate of a CAN controller must be set before using it.
+     * 
+     * NB: In a detailed simulation, the baud rate is used to calculate
      * transmission delays of CAN messages and to determine proper
      * configuration and interoperation of the connected controllers.
-     *
-     * NB: The baud rate has no effect in simple simulation.
+     * 
      */
     virtual void SetBaudRate(uint32_t rate, uint32_t fdRate) = 0;
 
@@ -67,17 +68,11 @@ public:
      * CAN controller state to CanControllerState::Uninit and the
      * controller's error state to CanErrorState::NotAvailable.
      *
-     * NB: Only supported in VIBE simulation, the command is ignored
-     * in simple simulation.
-     *
      * \ref Start(), \ref Stop(), \ref Sleep()
      */
     virtual void Reset() = 0;
 
     /*! \brief Start the CAN controller
-     *
-     * NB: Only supported in VIBE simulation, the command is ignored
-     * in simple simulation.
      *
      * \ref Reset(), \ref Stop(), \ref Sleep()
      */
@@ -85,17 +80,11 @@ public:
 
     /*! \brief Stop the CAN controller
      *
-     * NB: Only supported in VIBE simulation, the command is ignored
-     * in simple simulation.
-     *
      * \ref Reset(), \ref Start(), \ref Sleep()
      */
     virtual void Stop() = 0;
 
     /*! \brief Put the CAN controller in sleep mode
-     *
-     * NB: Only supported in VIBE simulation, the command is ignored
-     * in simple simulation.
      *
      * \ref Reset(), Start(), \ref Stop()
      */
@@ -103,16 +92,9 @@ public:
 
     /*! \brief Request the transmission of a CanFrame
      *
-     * NB: In VIBE simulation, the CanFrame must provide a valid CAN
-     * ID and valid flags. The data length code is optional and is
-     * automatically derived by the VIBE CAN simulator based on the
-     * provided flags and the length of the dataField. The controller
+     * NB: The CanFrame must provide a valid CAN
+     * ID and valid flags. The controller
      * must be in the Started state to transmit and receive messages.
-     *
-     * NB: In simple simulation, the requirements for VIBE simulation
-     * are not enforced. I.e., CanMessages are distributed to
-     * connected controllers regardless of the content and controller
-     * states are not checked.
      * 
      * \param userContext An optional user provided pointer that is
      * reobtained when receiving the message.
@@ -145,9 +127,6 @@ public:
      * state changes from CanControllerState::Uninit to
      * CanControllerState::Started.
      * 
-     * NB: Only supported in VIBE simulation. In simple simulation,
-     * the handler is never called.
-     * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddStateChangeHandler(StateChangeHandler handler) = 0;
@@ -165,7 +144,7 @@ public:
      * should be in state CanErrorState::ErrorActive. The states correspond
      * to the error state handling protocol of the CAN specification.
      *
-     * NB: Only supported in VIBE simulation. In simple simulation,
+     * NB: Only supported in a detailed simulation. In simple simulation,
      * the handler is never called.
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
@@ -183,9 +162,7 @@ public:
      * The registered handler is called when a CAN message was
      * successfully transmitted on the bus or when an error occurred.
      *
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
-     * 
-     * NB: Full support in VIBE simulation. In simple simulation, all
+     * NB: Full support in a detailed simulation. In a simple simulation, all
      * messages are automatically positively acknowledged.
      */
     virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler, 

@@ -73,6 +73,7 @@ protected:
             participant.participant =
                 ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
+            participant.canController->Start();
 
             while (runAsync)
             {
@@ -107,6 +108,7 @@ protected:
             participant.participant =
                 ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
+            participant.canController->Start();
 
             auto frameHandler = [&participant](ICanController*, const CanFrameEvent& /*msg*/) {
                 participant.numReceptions++;

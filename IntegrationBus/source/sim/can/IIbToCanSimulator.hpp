@@ -24,10 +24,10 @@ public:
     ~IIbToCanSimulator() = default;
 
     /* NB: there is no setter or getter for an EndpointAddress of the bus
-     * simulator, since the Network Simulator manages multiple controllers with
-     * different endpoints. I.e., the Network Simulator is aware of the endpointIds.
+     * simulator, since a network simulator manages multiple controllers with
+     * different endpoints. I.e., a network simulator is aware of the endpointIds.
      */
-    //! \brief Setter and getter for the ParticipantID associated with this CAN Network Simulator
+    //! \brief Setter and getter for the ParticipantID associated with this CAN network simulator
     virtual void SetParticipantId(ib::mw::ParticipantId participantId) = 0;
     virtual auto GetParticipantId() const -> ib::mw::ParticipantId = 0;
 

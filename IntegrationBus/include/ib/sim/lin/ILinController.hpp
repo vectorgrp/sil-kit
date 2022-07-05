@@ -72,7 +72,7 @@ public:
      * 
      * \param config The Controller configuration contains:
      *  - controllerMode, either sets LIN master or LIN slave mode
-     *  - baudRate, determine transmission speeds (only used for VIBE simulation)
+     *  - baudRate, determine transmission speeds (only used for detailed simulation)
      *  - frameResponses, an optional set of initial FrameResponses
      *
      * *AUTOSAR Name:* Lin_Init
@@ -99,6 +99,8 @@ public:
      *
      * \param frame provides the LIN identifier, checksum model, and optional data
      * \param responseType determines if *frame.data* must is used for the frame response.
+     * 
+     * \throws ib::StateError if the LIN Controller is not initialized or not a master node.
      */
     virtual void SendFrame(LinFrame frame, LinFrameResponseType responseType) = 0;
 
@@ -107,7 +109,10 @@ public:
 
     /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN
      *  Masters The corresponding LIN ID does not need to be
-     *  previously configured. */
+     *  previously configured. 
+     * 
+     * \throws ib::StateError if the LIN Controller is not initialized.
+     */
     virtual void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) = 0;
 
     /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN Masters.
@@ -118,6 +123,8 @@ public:
      * NB: only configures responses for the provided LIN IDs. I.e.,
      * an empty vector does not clear or reset the currently
      * configured FrameResponses.
+     * 
+     * \throws ib::StateError if the LIN Controller is not initialized.
      */
     virtual void SetFrameResponses(std::vector<LinFrameResponse> responses) = 0;
 
@@ -160,12 +167,6 @@ public:
      * configured SlaveFrameResponseMode::Rx or
      * SlaveFrameResponseMode::TxUnconditional.
      *
-     * <em>Note: this is one of the major changes to the previous version.
-     * Previously, frame transmission was indicated using different
-     * means. For Masters, a TX was confirmed using the
-     * TxCompleteHandler while an RX was handled using
-     * ReceiveMessageHandler. For LIN slaves the confirmation varied
-     * for simple simulation and VIBE simulation.</em>
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */

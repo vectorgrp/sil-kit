@@ -23,7 +23,7 @@ typedef uint32_t ib_Lin_ControllerStatus;
 //! Sleep Pending state is reached when a GoToSleep is issued.
 //  This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
 //  before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
-//  This is only used when using detailed simulations with VIBE-NetworkSimulator.
+//  This is only used when using detailed simulations.
 #define ib_Lin_ControllerStatus_SleepPending ((ib_Lin_ControllerStatus)3)
 
 /*! Used to configure a Lin controller as a master or slave.
@@ -41,6 +41,7 @@ typedef uint8_t ib_Lin_ControllerMode;
 #define ib_Lin_ControllerMode_Slave ((ib_Lin_ControllerMode)2)
 
 /*! The operational baud rate of the controller.
+ * Used in detailed simulation. 
  *
  * *Range:* 200...20'000 Bd
  */
@@ -217,8 +218,7 @@ struct ib_Lin_ControllerConfig
     ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
     //! Configure as Lin master or Lin slave
     ib_Lin_ControllerMode controllerMode;
-    /*! The operational baud rate of the controller. Only relevant for VIBE
-     * simulation.
+    /*! The operational baud rate of the controller.
      */
     ib_Lin_BaudRate baudRate;
 
@@ -308,9 +308,9 @@ typedef ib_ReturnCode (*ib_Lin_Controller_Create_t)(
  *
  * \param controller The Lin controller to initialize
  * \param config The Controller configuration contains:
- *  - controllerMode, either sets Lin master or Lin slave mode
- *  - baudRate, determine transmission speeds (only used for VIBE simulation)
- *  - frameResponses, an optional set of initial FrameResponses
+ *  - controllerMode: either sets Lin master or Lin slave mode
+ *  - baudRate: determine transmission speeds
+ *  - frameResponses: an optional set of initial FrameResponses
  * 
  * *AUTOSAR Name:* Lin_Init
  */
@@ -430,12 +430,6 @@ typedef ib_ReturnCode(*ib_Lin_Controller_WakeupInternal_t)(ib_Lin_Controller* co
  * configured ib_Lin_FrameResponseMode_Rx or
  * ib_Lin_FrameResponseModeTxUnconditional.
  *
- * <em>Note: this is one of the major changes to the previous version.
- * Previously, frame transmission was indicated using different
- * means. For Masters, a TX was confirmed using the
- * TxCompleteHandler while an RX was handled using
- * ReceiveMessageHandler. For Lin slaves the confirmation varied
- * for simple simulation and VIBE simulation.</em>
  *
  * \param controller The LIN controller for which the callback should be registered.
  * \param context The user provided context pointer that is reobtained in the callback.

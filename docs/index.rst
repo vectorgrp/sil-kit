@@ -46,25 +46,21 @@ Vehicle Networks
 
 The VIB provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
 All networks can be simulated with two different levels of detail: simple, functional simulation
-or high detail, timing accurate simulation. Timing accurate simulation requires the :doc:`Vector Network
-Simulator <vibes/networksimulator>`, which is part of the :doc:`Vector Integration Bus Extensions (VIBEs) <vibes/overview>`.
+or high detail, timing accurate simulation. Timing accurate simulation requires the detailed simulation, which  
+needs an additional network simulator.
 
 Vehicle Network Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Applications access vehicle networks using matching controller models. While the
-controller interfaces are the same for simple and high detail simulation, the Vector
-Network Simulator VIBE requires controllers to be properly configured, initialized, and used
-according to the corresponding network. Without the Network Simulator, on the other hand,
-applications can directly send messages without initializing the controllers. As a result,
-an application that works in the simple use case do not necessarily work when switching to
-a high detail simulation using the Network Simulator. However, applications that have been tested
-with Network Simulator, will also work without it. The CAN, LIN, Ethernet, and FlexRay demos 
-provided with the VIB have all been tested both with and without the Network Simulator.
+Applications access vehicle networks using matching controller models. The
+controller interfaces are the same for simple and detailed simulation. As a result,
+an application that works in the simple use case does also work when switching to
+a high detail simulation using the network simulator. The CAN, LIN, and Ethernet demos 
+provided with the VIB have all been tested both with and without a network simulator. 
+The FlexRay feature is only available in the detailed simulation based on a network simulator.
 
-The section :ref:`sec:api-services` describes how to configure and use Vehicle Network Controllers
-and points out the differences between simple simulation and high detail VIBE simulation with the
-Network Simulator. In addition, the use of other services (Data Message, Rpc, ...) is presented in detail.
+The section :ref:`sec:api-services` describes how to configure and use Vehicle Network Controllers in detail. 
+In addition, the use of other services (Data Message, Rpc, ...) is presented as well.
 
 
 Prerequisites for Usage

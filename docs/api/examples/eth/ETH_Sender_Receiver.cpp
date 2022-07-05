@@ -55,7 +55,7 @@ sender_FrameTransmitHandler(ethernetSender, ethernetFrameTransmitEvent);
 //  - ethernetFrameTransmitEvent.sourceMac == {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1}
 //  - ethernetFrameTransmitEvent.timestamp == <Timestamp of EthernetFrame>
 //  - ethernetFrameTransmitEvent.status == EthernetTransmitStatus::Transmitted 
-// Note: When using the VIBE NetworkSimulator, the status can also be EthernetTransmitStatus::LinkDown.
+// Note: In a detailed simulation, the status can also be EthernetTransmitStatus::LinkDown.
 
 //  - RX Ethernet message for the receiver.
 receiver_FrameHandler(ethernetReceiver, ethernetFrameEvent);

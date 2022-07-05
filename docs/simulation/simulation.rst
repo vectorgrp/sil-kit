@@ -23,9 +23,8 @@ Simulation
 .. |SystemMonitor| replace:: :ref:`System Monitor<subsubsec:sim-lifecycle-systemMonitor>`
 
 ..
-  Reference implementations, VIBEs etc.
+  Reference implementations, etc.
 .. |IbSystemController| replace:: :ref:`VIB SystemController Utility<sec:util-system-controller>`
-.. |VibeNetSim| replace:: :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`
 
 
 The following chapter explains, how a simulation using the |ProductName| works.
@@ -246,7 +245,7 @@ Timestamps in Messages
 Each sent bus event is annotated with a timestamp, at which it was sent. 
 The timestamp is set automatically by the VIB client.
 Users do not have to (and should not try to) manually set the timestamp of a message.
-Depending on the mode of the participant (synchronized/unsynchronized) and whether the network is managed by a |VibeNetSim|, the timestamp's meaning and precision may differ.
+Depending on the mode of the participant (synchronized/unsynchronized) and whether the network is managed by a a network simulator, the timestamp's meaning and precision may differ.
 If a network simulator is available for a given network, it takes precedence of the timestamp control and overrides the timestamps of any bus message.
 
 The following table provides an overview of the behavior, if no network simulator is available.

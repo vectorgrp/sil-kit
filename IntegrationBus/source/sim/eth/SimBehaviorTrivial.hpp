@@ -32,7 +32,7 @@ private:
     void ReceiveIbMessage(const MsgT& msg);
 
     mw::IParticipantInternal* _participant{nullptr};
-    IEthernetController* _parentController{nullptr};
+    EthController* _parentController{nullptr};
     const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;

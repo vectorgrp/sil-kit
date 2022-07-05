@@ -27,7 +27,7 @@ public:
     /* Methods Create*Controller() create controllers at this IB participant.
      *
      * Controllers provide an easy interface to interact with a simulated bus. They
-     * act as a proxy to the controller implementation in a Network Simulator connected
+     * act as a proxy to the controller implementation if a network simulator is connected
      * to the Integration Bus.
      *
      * Each Create*Controller() method creates a proxy instance, sets up all

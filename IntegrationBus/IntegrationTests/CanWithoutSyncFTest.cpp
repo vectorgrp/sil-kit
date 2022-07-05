@@ -92,6 +92,8 @@ protected:
                 }
             });
 
+        controller->Start();
+
         _canReaderRegisteredPromise.get_future().wait_for(1min);
 
         while (numSent < _testMessages.size())
@@ -123,7 +125,9 @@ protected:
                     _canReaderAllReceivedPromise.set_value();
                     canReaderAllReceivedPromiseLocal.set_value();
                 }
-            });
+        });
+
+        controller->Start();
 
         _canReaderRegisteredPromise.set_value();
 

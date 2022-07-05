@@ -21,10 +21,9 @@ namespace ib {
 namespace sim {
 namespace fr {
 
-/*! \brief FlexRay Controller implementation for Network Simulator usage
+/*! \brief FlexRay Controller implementation for network simulator usage
  *
- * Acts as a proxy to the controllers implemented and simulated by the Network Simulator. For operation
- * without a Network Simulator cf. FrController.
+ * Acts as a proxy to the controllers implemented and simulated by the network simulator.
  */
 class FlexrayController
     : public IFlexrayController

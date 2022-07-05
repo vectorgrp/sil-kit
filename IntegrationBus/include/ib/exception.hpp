@@ -3,6 +3,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
 
 namespace ib {
 
@@ -27,7 +28,8 @@ class StateError : public std::logic_error
 public:
     using std::logic_error::logic_error;
 
-    StateError() : StateError("The requested operation is not valid in the current state.")
+    StateError(const std::string& what = "The requested operation is not valid in the current state.")
+        : std::logic_error(what.c_str())
     {
     }
 };

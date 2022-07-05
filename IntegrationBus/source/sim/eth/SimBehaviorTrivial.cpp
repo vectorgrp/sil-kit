@@ -43,17 +43,40 @@ auto SimBehaviorTrivial::AllowReception(const mw::IIbServiceEndpoint* /*from*/) 
 
 void SimBehaviorTrivial::SendIbMessage(EthernetFrameEvent&& ethFrameEvent)
 {
-    // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
-    ethFrameEvent.timestamp = _timeProvider->Now();
-    _tracer.Trace(ib::sim::TransmitDirection::TX, ethFrameEvent.timestamp, ethFrameEvent.frame);
-    _participant->SendIbMessage(_parentServiceEndpoint, ethFrameEvent);
+    EthernetState controllerState = _parentController->GetState();
 
-    EthernetFrameTransmitEvent ack;
-    ack.timestamp = ethFrameEvent.timestamp;
-    ack.transmitId = ethFrameEvent.transmitId;
-    ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
-    ack.status = EthernetTransmitStatus::Transmitted;
-    ReceiveIbMessage(ack);
+    if (controllerState == EthernetState::LinkUp)
+    {
+        // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
+        ethFrameEvent.timestamp = _timeProvider->Now();
+        _tracer.Trace(ib::sim::TransmitDirection::TX, ethFrameEvent.timestamp, ethFrameEvent.frame);
+        _participant->SendIbMessage(_parentServiceEndpoint, ethFrameEvent);
+
+        EthernetFrameTransmitEvent ack;
+        ack.timestamp = ethFrameEvent.timestamp;
+        ack.transmitId = ethFrameEvent.transmitId;
+        ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
+        ack.status = EthernetTransmitStatus::Transmitted;
+        ReceiveIbMessage(ack);
+    }
+    else
+    {
+        EthernetFrameTransmitEvent ack;
+        ack.timestamp = _timeProvider->Now();
+        ack.transmitId = ethFrameEvent.transmitId;
+        ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
+        if (controllerState == EthernetState::Inactive)
+        {
+            ack.status = EthernetTransmitStatus::ControllerInactive;
+        }
+        else if(controllerState == EthernetState::LinkDown)
+        {
+            ack.status = EthernetTransmitStatus::LinkDown;
+        }
+        ReceiveIbMessage(ack);
+    }
+
+    
 }
 
 void SimBehaviorTrivial::SendIbMessage(EthernetSetMode&& ethSetMode)

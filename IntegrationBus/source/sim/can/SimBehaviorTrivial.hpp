@@ -31,7 +31,7 @@ private:
     void ReceiveIbMessage(const MsgT& msg);
 
     mw::IParticipantInternal* _participant{nullptr};
-    ICanController* _parentController{nullptr};
+    CanController* _parentController{nullptr};
     const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
     mw::sync::ITimeProvider* _timeProvider{nullptr};
     extensions::Tracer _tracer;

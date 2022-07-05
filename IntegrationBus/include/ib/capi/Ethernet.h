@@ -138,9 +138,6 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_Create_t)(
 * Upon activation of the controller, the controller attempts to
 * establish a link. Messages can only be sent once the link has
 * been successfully established,
-*
-* NB: Only supported in VIBE simulation! In simple simulation,
-* messages can be sent without need to call ib_Ethernet_Controller_Activate()
 * 
 * \param controller The Ethernet controller to be activated.
 * \result A return code identifying the success/failure of the call.
@@ -156,9 +153,6 @@ typedef ib_ReturnCode(*ib_Ethernet_Controller_Activate_t)(ib_Ethernet_Controller
 * Deactivate the controller and shut down the link. The
 * controller will no longer receive messages, and it cannot send
 * messages anymore.
-*
-* NB: Only supported in VIBE simulation! In simple simulation,
-* ib_Ethernet_Controller_Deactivate() has no effects and messages can still be sent.
 * 
 * \param controller The Ethernet controller to be deactivated.
 * \result A return code identifying the success/failure of the call.
@@ -207,7 +201,7 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveFrameHandler_t)(ib_Ethernet
 * successfully transmitted or when the transmission has
 * failed. The original message is identified by the userContext.
 *
-* NB: Full support in VIBE Ethernet simulation. In simple
+* NB: Full support in a detailed simulation. In a simple
 * simulation, all messages are immediately positively
 * acknowledged by a receiving controller.
 * 
@@ -247,8 +241,6 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveFrameTransmitHandler_t)(ib_
 * ib_Ethernet_State_LinkUp. Similarly, the status changes back to ib_Ethernet_State_Inactive upon a
 * call to ib_Ethernet_Controller_Deactivate().
 *
-* NB: Only supported in VIBE Ethernet simulation.
-*
 * \param controller The Ethernet controller for which the message acknowledge callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
@@ -284,8 +276,6 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveStateChangeHandler_t)(ib_Et
 * changes. This is typically the case when a link was
 * successfully established, or the controller was deactivated.
 *
-* NB: Only supported in VIBE Ethernet simulation.
-* 
 * \param controller The Ethernet controller for which the bitrate change callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on change.
@@ -314,16 +304,18 @@ typedef ib_ReturnCode (*ib_Ethernet_Controller_RemoveBitrateChangeHandler_t)(ib_
 
 /*! \brief Send an Ethernet frame
 *
-* NB: In VIBE simulation, requires previous activation of the
+* Requires previous activation of the
 * controller and a successfully established link. Also, the
 * entire EthernetFrame must be valid, e.g., destination and source MAC
 * addresses must be valid, ether type and vlan tags must be
 * correct, payload size must be valid.
 *
-* These requirements for VIBE simulation are not enforced in
+* These requirements are not enforced in
 * simple simulation. In this case, the message is simply passed
-* on to all connected controllers without performing any check.
-* Nonetheless, the minimum frame size of 60 bytes must be provided, or 
+* on to all connected controllers without performing any check. 
+* The user must ensure that a valid frame is provided.
+* 
+* The minimum frame size of 60 bytes must be provided, or 
 * ib_ReturnCode_BAD_PARAMETER will be returned.
 *
 * \param controller The Ethernet controller that should send the frame.

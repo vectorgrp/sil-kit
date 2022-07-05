@@ -70,6 +70,11 @@ protected:
         });
 
         auto* lifecycleService = writer->Participant()->GetLifecycleService();
+
+        lifecycleService->SetCommunicationReadyHandler([controller]() {
+            controller->Start();
+        });
+
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         timeSyncService->SetSimulationTask(
             [this, controller](auto, auto)
@@ -114,6 +119,12 @@ protected:
             {
                 numReceived2++;
             }
+        });
+
+        auto* lifecycleService = reader->Participant()->GetLifecycleService();
+
+        lifecycleService->SetCommunicationReadyHandler([controller]() {
+            controller->Start();
         });
     }
 

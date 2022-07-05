@@ -120,8 +120,8 @@ IbSystemControllerInteractive
    *  -  Usage Example
       -  .. code-block:: powershell
 
-            # Start SystemControllerInteractive for two participants and a Network Simulator VIBE called NetworkSimulator:
-            IbSystemControllerInteractive Participant1 Participant2 NetworkSimulator
+            # Start SystemControllerInteractive for two participants:
+            IbSystemControllerInteractive Participant1 Participant2
    *  -  Notes
       -  * The distribution package contains the IbSystemControllerInteractive
            in the ``Integrationbus/bin/`` directory.

@@ -1,6 +1,6 @@
 {
   "SchemaVersion": "1",
-  "Description": "VIBE-Networksimulator configuration for LIN Demo",
+  "Description": "Network simulator configuration for a detailed simulation of the LIN Demo",
   "SimulatedNetworks": [
     {
       "Name": "LIN1",

@@ -1,6 +1,6 @@
 {
   "SchemaVersion": "1",
-  "Description": "VIBE-Networksimulator configuration for FlexRay Demo",
+  "Description": "Network simulator configuration for a detailed simulation of the FlexRay Demo",
   "SimulatedNetworks": [
     {
       "Name": "PowerTrain1",

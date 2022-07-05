@@ -50,9 +50,6 @@ public:
      * establish a link. Messages can only be sent once the link has
      * been successfully established,
      * cf. AddStateChangeHandler() and AddBitrateChangeHandler().
-     *
-     * NB: Only supported in VIBE simulation! In simple simulation,
-     * messages can be sent without need to call Activate()
      */
     virtual void Activate() = 0;
 
@@ -61,9 +58,6 @@ public:
      * Deactivate the controller and shut down the link. The
      * controller will no longer receive messages, and it cannot send
      * messages anymore.
-     *
-     * NB: Only supported in VIBE simulation! In simple simulation,
-     * Deactivate() has no effects and messages can still be sent.
      */
     virtual void Deactivate() = 0;
 
@@ -88,9 +82,9 @@ public:
      * successfully transmitted or when the transmission has
      * failed. The original message is identified by the transmitId.
      *
-     * NB: Full support in VIBE Ethernet simulation. In simple
+     * NB: Full support in a detailed simulation. In a simple
      * simulation, all messages are immediately positively
-     * acknowledged by a receiving controller.
+     * acknowledged.
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
@@ -110,8 +104,6 @@ public:
      * has been established, the state changes again from ::LinkDown to
      * ::LinkUp. Similarly, the status changes back to ::Inactive upon a
      * call to Deactivate().
-     *
-     * NB: Only supported in VIBE Ethernet simulation.
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
@@ -129,8 +121,6 @@ public:
      * changes. This is typically the case when a link was
      * successfully established, or the controller was deactivated.
      *
-     * NB: Only supported in VIBE Ethernet simulation.
-     * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddBitrateChangeHandler(BitrateChangeHandler handler) = 0;

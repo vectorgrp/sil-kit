@@ -63,7 +63,7 @@ will be used as the network name.
 
 .. admonition:: Note
 
-  The FlexRay service needs a detailed simulation based on the :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`.
+  The FlexRay service needs a detailed simulation based on the network simulator.
   Because of the intrinsic complexity within FlexRay, no trivial simulation exists.
 
 Initialization

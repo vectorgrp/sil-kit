@@ -62,7 +62,7 @@ Sending CAN Frames
 ~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a |CanFrame| and received as a |CanFrameEvent|. To send a |CanFrame|, it must be setup 
-with a CAN ID and the data to be transmitted. In VIBE simulation the |CanFrameFlags| are also relevant::
+with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlags| have to be set::
 
   // Prepare a CAN message with id 0x17
   CanFrame canFrame;
@@ -90,8 +90,8 @@ To be notified of the success or failure of the transmission, a ``FrameTransmitH
 
 .. admonition:: Note
 
-  In a simple simulation without the VIBE NetworkSimulator, the |CanTransmitStatus| of the |CanFrameTransmitEvent| will
-  always be |Transmitted|. If the VIBE NetworkSimulator is used, it is possible that the transmit queue overflows 
+  In a simple simulation without the network simulator, the |CanTransmitStatus| of the |CanFrameTransmitEvent| will
+  always be |Transmitted|. If adetailed simulation is used, it is possible that the transmit queue overflows 
   causing the handler to be called with |TransmitQueueFull| signaling a transmission failure.
 
 Receiving CAN FrameEvents
@@ -112,7 +112,7 @@ received. By default, only frames of the direction RX are handled.
 Receive state change events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-State changes are only supported when using the VIBE NetworkSimulator. To receive changes of the |CanControllerState|,
+To receive changes of the |CanControllerState|,
 a ``StateChangeHandler`` must be registered using |AddStateChangeHandler|::
 
   auto stateChangedHandler = [](ICanController*, const CanStateChangeEvent& stateChangeEvent) 
@@ -126,10 +126,9 @@ Similarly, changes in the |CanErrorState| can be tracked with |AddErrorStateChan
 Initialization
 ~~~~~~~~~~~~~~
 
-For a detailed simulation with the :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`, the baud rate of a CAN controller
-needs to be set by passing it to |SetBaudRate| before using it. Furthermore, it has to be started explicitly by calling 
-|Start|. Additional control commands for the detailed simulation are |Stop| and |Reset|. These functions can but do not 
-have to be called in a simple functional simulation without :ref:`VIBE Network Simulator<chap:VIBE-NetSim>`.
+Before one can use a CAN controller, its baud rate must be set by passing it to |SetBaudRate|.
+Furthermore, the CAN controller has to be started explicitly by calling 
+|Start| before using it. Additional control commands are |Stop| and |Reset|. 
 
 The following example configures a CAN controller with a baud rate of 10'000 baud for regular CAN messages and a baud 
 rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::

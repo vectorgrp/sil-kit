@@ -1,7 +1,9 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "CanController.hpp"
-#include "SimBehaviorTrivial.hpp"
+#include "SimBehaviorTrivial.hpp" 
+#include "ib/mw/logging/ILogger.hpp"
+
 
 namespace ib {
 namespace sim {
@@ -45,29 +47,36 @@ void SimBehaviorTrivial::SendIbMessage(CanSetControllerMode&& mode)
 
 void SimBehaviorTrivial::SendIbMessage(CanFrameEvent&& canFrameEvent)
 {
-    auto now = _timeProvider->Now();
-    CanFrameEvent canFrameEventCpy = canFrameEvent;
-    canFrameEventCpy.direction = TransmitDirection::TX;
-    canFrameEventCpy.timestamp = now;
+    if (_parentController->GetState() == CanControllerState::Started)
+    {
+        auto now = _timeProvider->Now();
+        CanFrameEvent canFrameEventCpy = canFrameEvent;
+        canFrameEventCpy.direction = TransmitDirection::TX;
+        canFrameEventCpy.timestamp = now;
 
-    _tracer.Trace(ib::sim::TransmitDirection::TX, now, canFrameEvent);
+        _tracer.Trace(ib::sim::TransmitDirection::TX, now, canFrameEvent);
 
-    // Self delivery as TX
-    ReceiveIbMessage(canFrameEventCpy);
+        // Self delivery as TX
+        ReceiveIbMessage(canFrameEventCpy);
 
-    // Send to others as RX
-    canFrameEventCpy.direction = TransmitDirection::RX;
-    _participant->SendIbMessage(_parentServiceEndpoint, canFrameEventCpy);
+        // Send to others as RX
+        canFrameEventCpy.direction = TransmitDirection::RX;
+        _participant->SendIbMessage(_parentServiceEndpoint, canFrameEventCpy);
 
-    // Self acknowledge
-    CanFrameTransmitEvent ack{};
-    ack.canId = canFrameEvent.frame.canId;
-    ack.status = CanTransmitStatus::Transmitted;
-    ack.transmitId = canFrameEvent.transmitId;
-    ack.userContext = canFrameEvent.userContext;
-    ack.timestamp = now;
+        // Self acknowledge
+        CanFrameTransmitEvent ack{};
+        ack.canId = canFrameEvent.frame.canId;
+        ack.status = CanTransmitStatus::Transmitted;
+        ack.transmitId = canFrameEvent.transmitId;
+        ack.userContext = canFrameEvent.userContext;
+        ack.timestamp = now;
 
-    ReceiveIbMessage(ack);
+        ReceiveIbMessage(ack);
+    }
+    else
+    {
+        _participant->GetLogger()->Warn("ICanController::SendFrame is called although can controller is not in state CanController::Started.");
+    }
 }
 
 } // namespace can
