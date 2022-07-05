@@ -494,7 +494,7 @@ node {
                 "VS2017-Win64",
                 "Ubuntu-18.04-gcc",
                 "Ubuntu-20.04-clang-12", // most modern compiler, no artifacts
-                "MinGW",
+                //"MinGW", // XXX disabled until we can improve CI performance
             ]
             publishToArtifactory = true
             buildDebugBin = true
