@@ -1,6 +1,7 @@
 # escape=`
 
-FROM ***VIB-820 Removed***/vector/windows/servercore/bare:ltsc2019
+ARG REGISTRY
+FROM ${REGISTRY}/vector/windows/servercore/bare:ltsc2019
 
 # install all the necessary packages
 RUN choco install -y --no-progress ninja --version 1.10.1 && `

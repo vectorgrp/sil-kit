@@ -13,7 +13,6 @@ buildDebugBin=false //debug binaries are only build when doing a release to cust
 buildWarningsAsErrors=true // compiler warnings are treated as errors
 // artifactory for archiving / packaging
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
-artifactoryRepo = '***VIB-820 Removed***'
 artifactoryBuildInfo = Artifactory.newBuildInfo()
 
 def gitBranch="master" // overriden in parallel pipeline based on scm vars
@@ -193,19 +192,24 @@ def archiveToArtifactory(config, scm, pattern) {
 
         print("INFO: found build artifact ${files[0]}")
         def fileName = files[0].name
-        def spec = """{
-            "files": [{
-                "pattern": "${files[0]}",
-                "target" : "${artifactoryRepo}/${projectName}/${scm.GIT_BRANCH}/${scm.GIT_COMMIT}/${fileName}",
-                "props"  : "git_commit=${scm.GIT_COMMIT};git_branch=${scm.GIT_BRANCH};git_url=${scm.GIT_URL}"
-        }]}"""
-        print("artifactory spec=${spec}")
-        def buildInfo = artifactoryServer.upload(
-            spec: spec,
-            failNoOp: true
-        )
-        setBuildRetention(buildInfo)
-        artifactoryBuildInfo.append(buildInfo)
+
+        configFileProvider(
+            [configFile(fileId: 'SILKIT_ARTIFACTORY_REPO', variable: 'SILKIT_ARTIFACTORY_REPO')]) {
+            def repo = readFile(file: SILKIT_ARTIFACTORY_REPO).trim()
+            def spec = """{
+                "files": [{
+                    "pattern": "${files[0]}",
+                    "target" : "${repo}/${projectName}/${scm.GIT_BRANCH}/${scm.GIT_COMMIT}/${fileName}",
+                    "props"  : "git_commit=${scm.GIT_COMMIT};git_branch=${scm.GIT_BRANCH};git_url=${scm.GIT_URL}"
+            }]}"""
+            print("artifactory spec=${spec}")
+            def buildInfo = artifactoryServer.upload(
+                spec: spec,
+                failNoOp: true
+            )
+            setBuildRetention(buildInfo)
+            artifactoryBuildInfo.append(buildInfo)
+        }
     }
 }
 
@@ -214,13 +218,20 @@ def buildDocker(config) {
         def dockerImage = config["DockerImage"]
         def dockerDir = "./IntegrationBus/ci/docker"
         def buildArgs = "--build-arg ARTIFACTORY=${artifactoryServer.url} "
-        print("Building docker image ${dockerImage}")
-        if(config.containsKey("DockerBuildArgs")) {
-            buildArgs += config["DockerBuildArgs"]
+
+        configFileProvider(
+            [configFile(fileId: 'VECTOR_DOCKER_REGISTRY', variable: 'VECTOR_DOCKER_REGISTRY')]) {
+            def registry = readFile(file: VECTOR_DOCKER_REGISTRY).trim()
+            buildArgs += " --build-arg REGISTRY=${registry} "
+
+            print("Building docker image ${dockerImage}")
+            if(config.containsKey("DockerBuildArgs")) {
+                buildArgs += config["DockerBuildArgs"]
+            }
+            // We assume the docker file (located in the docker subfolder) is named exactly like the docker image
+            buildArgs += " -f ${dockerDir}/${dockerImage} ${dockerDir}"
+            docker.build(dockerImage, buildArgs)
         }
-        // We assume the docker file (located in the docker subfolder) is named exactly like the docker image
-        buildArgs += " -f ${dockerDir}/${dockerImage} ${dockerDir}"
-        docker.build(dockerImage, buildArgs)
     }
 }
 // runOnNode: a helper that runs the userStages closure on an appropriate node

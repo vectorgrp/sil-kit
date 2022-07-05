@@ -1,5 +1,6 @@
 ARG UBUNTU_VERSION=18.04
-FROM ***VIB-820 Removed***/vector/ubuntu/full:${UBUNTU_VERSION}
+ARG REGISTRY
+FROM ${REGISTRY}/vector/ubuntu/full:${UBUNTU_VERSION}
 ARG UBUNTU_VERSION
 
 # without TZ the apt installer will hang
