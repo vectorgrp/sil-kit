@@ -41,6 +41,8 @@ public:
 
     void DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
 
+    void SetTimeSyncService(sync::TimeSyncService* timeSyncService);
+
 private:
     // ----------------------------------------
     // private methods
@@ -96,7 +98,7 @@ void SetTimestamp(MsgT& msg, std::chrono::nanoseconds value, std::enable_if_t<Ha
 }
 
 template <typename MsgT>
-void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/, std::enable_if_t<!HasTimestamp<MsgT>::value, int> = false)
+void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/, std::enable_if_t<!HasTimestamp<MsgT>::value, bool> = false)
 {
 }
 
@@ -157,6 +159,12 @@ template <class MsgT>
 void IbLink<MsgT>::DispatchIbMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
 {
     _vasioTransmitter.SendMessageToTarget(from, targetParticipantName, msg);
+}
+
+template <class MsgT>
+void IbLink<MsgT>::SetTimeSyncService(sync::TimeSyncService* timeSyncService)
+{
+    _timeSyncService = timeSyncService;
 }
 
 template <class MsgT>

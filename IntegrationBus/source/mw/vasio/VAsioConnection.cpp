@@ -296,6 +296,12 @@ void VAsioConnection::SetLogger(logging::ILogger* logger)
 void VAsioConnection::SetTimeSyncService(sync::TimeSyncService* timeSyncService)
 {
     _timeSyncService = timeSyncService;
+    util::tuple_tools::for_each(_ibLinks, [timeSyncService](auto&& linkMap) {
+        for (auto&& link : linkMap)
+        {
+            link.second->SetTimeSyncService(timeSyncService);
+        }
+    });
 }
 
 void VAsioConnection::JoinDomain(std::string connectUri)

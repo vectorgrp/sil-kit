@@ -32,7 +32,7 @@ struct HasTimestamp : std::false_type
 };
 
 template <typename T>
-struct HasTimestamp<T, VoidT<decltype(std::declval<std::remove_cv_t<std::remove_reference_t<T>> &>().timestamp = std::chrono::nanoseconds{})>>
+struct HasTimestamp<T, VoidT<decltype(std::declval<std::decay_t<T>>().timestamp = std::chrono::nanoseconds{})>>
     : std::true_type
 {
 };
@@ -42,14 +42,12 @@ struct HasTimestamp<T, VoidT<decltype(std::declval<std::remove_cv_t<std::remove_
 template <class MsgT> struct IbMsgTraitTypeName { static constexpr const char *TypeName(); };
 template <class MsgT> struct IbMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
 template <class MsgT> struct IbMsgTraitEnforceSelfDelivery { static constexpr bool IsSelfDeliveryEnforced() { return false; } };
-template <class MsgT> struct IbMsgTraitHasTimestamp { static constexpr bool HasTimestamp() { return false; } };
 
 // The final message traits
 template <class MsgT> struct IbMsgTraits
     : IbMsgTraitTypeName<MsgT>
     , IbMsgTraitHistSize<MsgT>
     , IbMsgTraitEnforceSelfDelivery<MsgT>
-    , IbMsgTraitHasTimestamp<MsgT>
     , IbMsgTraitVersion<MsgT>
     , IbMsgTraitSerdesName<MsgT>
 {
@@ -63,9 +61,6 @@ template <class MsgT> struct IbMsgTraits
     };
 #define DefineIbMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct IbMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
     static constexpr bool IsSelfDeliveryEnforced() { return true; }\
-    };
-#define DefineIbMsgTrait_HasTimestamp(Namespace, MsgName) template<> struct IbMsgTraitHasTimestamp<Namespace::MsgName>{\
-    static constexpr bool HasTimestamp() { return true; }\
     };
 
 DefineIbMsgTrait_TypeName(ib::mw::logging, LogMsg)

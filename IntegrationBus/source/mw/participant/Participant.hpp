@@ -352,9 +352,6 @@ private:
     const ib::cfg::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
-    //using TimeProviderPtr = std::unique_ptr<sync::ITimeProvider, std::function<void(ITimeProvider*)>>;
-    //TimeProviderPtr _timeProvider{nullptr};
-
     sync::WallclockProvider _wallclockTimeProvider{1ms};
     sync::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
 
