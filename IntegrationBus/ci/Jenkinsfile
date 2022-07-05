@@ -219,10 +219,19 @@ def buildDocker(config) {
         def dockerDir = "./IntegrationBus/ci/docker"
         def buildArgs = "--build-arg ARTIFACTORY=${artifactoryServer.url} "
 
-        configFileProvider(
-            [configFile(fileId: 'VECTOR_DOCKER_REGISTRY', variable: 'VECTOR_DOCKER_REGISTRY')]) {
+        configFileProvider([
+            configFile(fileId: 'VECTOR_DOCKER_REGISTRY', variable: 'VECTOR_DOCKER_REGISTRY'),
+            configFile(fileId: 'SILKIT_ARTIFACTORY_REPO', variable: 'SILKIT_ARTIFACTORY_REPO'),
+            configFile(fileId: 'PROXY_DOMAIN', variable: 'PROXY_DOMAIN'),
+            ]) {
             def registry = readFile(file: VECTOR_DOCKER_REGISTRY).trim()
             buildArgs += " --build-arg REGISTRY=${registry} "
+
+            def repo = readFile(file: SILKIT_ARTIFACTORY_REPO).trim()
+            buildArgs += " --build-arg SILKIT_ARTIFACTORY_REPO=${repo} "
+
+            def proxyDomain = readFile(file: PROXY_DOMAIN).trim()
+            buildArgs += " --build-arg PROXY_DOMAIN=${proxyDomain} "
 
             print("Building docker image ${dockerImage}")
             if(config.containsKey("DockerBuildArgs")) {

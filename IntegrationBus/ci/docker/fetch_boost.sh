@@ -2,8 +2,7 @@
 # fetch prebuilt binary boost 1.67.0 exported from subversion
 # BinLog is linked against this file
 set -u #bail on undefined var
-repo="***VIB-820 Removed***"
-boost_src="${ARTIFACTORY}/${repo}/ThirdParty/boost-1.67.0-ubuntu18.04.tgz"
+boost_src="${ARTIFACTORY}/${SILKIT_ARTIFACTORY_REPO}/ThirdParty/boost-1.67.0-ubuntu18.04.tgz"
 sha256=86352332734b31b2515de35aa2a270901efec41bea21f17779c3c3f490ff2b58
 die() {
 	echo -e --  "ERRROR $@"
@@ -20,9 +19,8 @@ then
     fi
 fi
 
-export NO_PROXY=***VIB-820 Removed***
-export no_proxy=***VIB-820 Removed***
-
+export NO_PROXY=${PROXY_DOMAIN}
+export no_proxy=${PROXY_DOMAIN}
 
 cd /tmp
 tgz="$(basename ${boost_src})"

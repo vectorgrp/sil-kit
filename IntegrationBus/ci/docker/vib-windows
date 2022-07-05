@@ -14,6 +14,7 @@ RUN choco install -y --no-progress ninja --version 1.10.1 && `
 # Fetch winlibs mingw build
 COPY fetch_mingw.py C:/
 ARG ARTIFACTORY
+ARG SILKIT_ARTIFACTORY_REPO
 RUN py -3 fetch_mingw.py
 
 # Sphinx documentation system

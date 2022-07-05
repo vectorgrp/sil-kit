@@ -8,7 +8,6 @@ import os.path
 import shutil
 import zipfile
 
-mingw_package_url = "***VIB-820 Removed***/ThirdParty/mingw-winlibs/winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64-9.0.0-r5.zip"
 
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -39,7 +38,11 @@ def main():
     artifactory = os.getenv("ARTIFACTORY")
     if artifactory is None:
         die("$ARTIFACTORY environment variable is not set!")
+    repo = os.getenv("SILKIT_ARTIFACTORY_REPO")
+    if repo is None:
+        die("$SILKIT_ARTIFACTORY_REPO  environment variable is not set!")
 
+    mingw_package_url = f"{repo}/ThirdParty/mingw-winlibs/winlibs-x86_64-posix-seh-gcc-11.2.0-mingw-w64-9.0.0-r5.zip"
     zipName = "mingw-w64.zip"
     fetch(f"{artifactory}/{mingw_package_url}", zipName )
 
