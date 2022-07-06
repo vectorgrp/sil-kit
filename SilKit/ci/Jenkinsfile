@@ -12,7 +12,7 @@ publishToArtifactory=false
 buildDebugBin=false //debug binaries are only build when doing a release to customers
 buildWarningsAsErrors=true // compiler warnings are treated as errors
 // artifactory for archiving / packaging
-artifactoryServer = Artifactory.server('SilKitArtifactory')
+artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
 artifactoryBuildInfo = Artifactory.newBuildInfo()
 
 def gitBranch="master" // overriden in parallel pipeline based on scm vars
