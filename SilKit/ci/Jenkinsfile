@@ -103,7 +103,7 @@ def buildConfigs = [
         DockerImage: "vib-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D IB_ENABLE_THREADSAN=ON",
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D SILKIT_ENABLE_THREADSAN=ON",
     ]
     ,[
         Name: "Ubuntu-address-sanitizer",
@@ -111,7 +111,7 @@ def buildConfigs = [
         DockerImage: "vib-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D IB_ENABLE_ASAN=ON",
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D SILKIT_ENABLE_ASAN=ON",
     ]
 ]
 
@@ -299,21 +299,21 @@ def runCmake(config, buildType) {
 
     if(buildType == "Release") {
         //only distribute source and docs in release mode
-        cmakeArgs +=" -DIB_INSTALL_SOURCE=ON "
+        cmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON "
     }
 
     if (config.containsKey("WarningsAsErrors")) {
         def isEnabled = config["WarningsAsErrors"].toBoolean()
         if(isEnabled) {
             print("Enabling Warnings-as-Errors for the current build config")
-            cmakeArgs +=" -DIB_WARNINGS_AS_ERRORS=ON "
+            cmakeArgs +=" -DSILKIT_WARNINGS_AS_ERRORS=ON "
         } else {
             print("Disabling Warnings-as-Errors for the current build config")
         }
     } else {
          if (buildWarningsAsErrors ) {
             print("Setting Build with Warnings as Errors (globally set)")
-            cmakeArgs +=" -DIB_WARNINGS_AS_ERRORS=ON "
+            cmakeArgs +=" -DSILKIT_WARNINGS_AS_ERRORS=ON "
         }
     }
 
