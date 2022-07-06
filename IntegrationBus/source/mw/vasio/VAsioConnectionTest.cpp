@@ -1,20 +1,20 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-//XXX fowards required for TestDataTypes because of  IbMsgTraits
-#include "ib/sim/can/fwd_decl.hpp"
-#include "ib/sim/eth/fwd_decl.hpp"
-#include "ib/sim/fr/fwd_decl.hpp"
-#include "ib/sim/lin/fwd_decl.hpp"
-#include "ib/sim/data/fwd_decl.hpp"
-#include "ib/sim/rpc/fwd_decl.hpp"
-#include "ib/mw/sync/fwd_decl.hpp"
-#include "ib/mw/logging/fwd_decl.hpp"
+//XXX fowards required for TestDataTypes because of  SilKitMsgTraits
+#include "silkit/services/can/fwd_decl.hpp"
+#include "silkit/services/eth/fwd_decl.hpp"
+#include "silkit/services/fr/fwd_decl.hpp"
+#include "silkit/services/lin/fwd_decl.hpp"
+#include "silkit/services/pubsub/fwd_decl.hpp"
+#include "silkit/services/rpc/fwd_decl.hpp"
+#include "silkit/core/sync/fwd_decl.hpp"
+#include "silkit/core/logging/fwd_decl.hpp"
 #include "ServiceDatatypes.hpp" //concrete, no forwards
 
 #include "ProtocolVersion.hpp"
 #include "TestDataTypes.hpp" // must be included before VAsioConnection
 
 #include "IVAsioPeer.hpp"
-#include "IIbMessageReceiver.hpp"
+#include "IMessageReceiver.hpp"
 
 #include "VAsioConnection.hpp"
 #include "MockParticipant.hpp" // for DummyLogger
@@ -27,16 +27,16 @@
 #include "gmock/gmock.h"
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 using testing::Return;
 using testing::ReturnRef;
 using testing::_;
 
 //Printing helpers, required for implicit template usage in VAsioConnection
-namespace ib {
-namespace mw {
-namespace test {
+namespace SilKit {
+namespace Core {
+namespace Tests {
 
 namespace  version1 {
 std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
@@ -44,15 +44,15 @@ std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
     out <<"version1:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
     return out;
 }
-} // namespace version1
+} // namespace Version1
 
-inline namespace version2 {
+inline namespace Version2 {
 std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
 {
     out <<"version2:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
     return out;
 }
-} // namespace version2
+} // namespace Version2
 
 std::ostream& operator<<(std::ostream& out , const TestFrameEvent& msg)
 {
@@ -60,32 +60,32 @@ std::ostream& operator<<(std::ostream& out , const TestFrameEvent& msg)
     return out;
 }
 
-} // namespace test
-} // namespace mw
-} // namespace ib
+} // namespace Tests
+} // namespace Core
+} // namespace SilKit
 
 namespace {
-struct MockIbMessageReceiver
-    : public IIbMessageReceiver<test::version1::TestMessage>
-    , public IIbMessageReceiver<test::version2::TestMessage>
-    , public IIbMessageReceiver<test::TestFrameEvent>
-    , public IIbServiceEndpoint
+struct MockSilKitMessageReceiver
+    : public IMessageReceiver<Tests::Version1::TestMessage>
+    , public IMessageReceiver<Tests::Version2::TestMessage>
+    , public IMessageReceiver<Tests::TestFrameEvent>
+    , public IServiceEndpoint
 {
     ServiceDescriptor _serviceDescriptor;
 
-    MockIbMessageReceiver()
+    MockSilKitMessageReceiver()
     {
         _serviceDescriptor._serviceId = 1;
         _serviceDescriptor._participantId = 1;
 
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
-    // IIbMessageReceiver<T>
-    MOCK_METHOD(void, ReceiveIbMessage, (const ib::mw::IIbServiceEndpoint*, const test::version1::TestMessage&), (override));
-    MOCK_METHOD(void, ReceiveIbMessage, (const ib::mw::IIbServiceEndpoint*, const test::version2::TestMessage&), (override));
-    MOCK_METHOD(void, ReceiveIbMessage, (const ib::mw::IIbServiceEndpoint*, const test::TestFrameEvent&), (override));
+    // IMessageReceiver<T>
+    MOCK_METHOD(void, ReceiveSilKitMessage, (const SilKit::Core::IServiceEndpoint*, const Tests::Version1::TestMessage&), (override));
+    MOCK_METHOD(void, ReceiveSilKitMessage, (const SilKit::Core::IServiceEndpoint*, const Tests::Version2::TestMessage&), (override));
+    MOCK_METHOD(void, ReceiveSilKitMessage, (const SilKit::Core::IServiceEndpoint*, const Tests::TestFrameEvent&), (override));
 
-    // IIbServiceEndpoint
+    // IServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };
@@ -93,7 +93,7 @@ struct MockIbMessageReceiver
 
 struct MockVAsioPeer
     : public IVAsioPeer
-    , public IIbServiceEndpoint
+    , public IServiceEndpoint
 {
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
@@ -121,7 +121,7 @@ struct MockVAsioPeer
     }
 
     // IVasioPeer
-    MOCK_METHOD(void, SendIbMsg, (SerializedMessage), (override));
+    MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
     MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
     MOCK_METHOD(void, SetInfo, (VAsioPeerInfo), (override));
@@ -131,7 +131,7 @@ struct MockVAsioPeer
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
 
-    // IIbServiceEndpoint
+    // IServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };
@@ -163,8 +163,8 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
 // Test Fixture
 //////////////////////////////////////////////////////////////////////
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class VAsioConnectionTest : public testing::Test
 {
@@ -176,19 +176,19 @@ protected:
     }
     VAsioConnection _connection;
     MockVAsioPeer _from;
-    test::DummyLogger _dummyLogger;
+    Tests::DummyLogger _dummyLogger;
 
     //we are a friend class
     // - allow selected access to private member
     template<typename MessageT, typename ServiceT>
-    void RegisterIbMsgReceiver(const std::string& networkName, ib::mw::IIbMessageReceiver<MessageT>* receiver)
+    void RegisterSilKitMsgReceiver(const std::string& networkName, SilKit::Core::IMessageReceiver<MessageT>* receiver)
     {
-        _connection.RegisterIbMsgReceiver<MessageT, ServiceT>(networkName, receiver);
+        _connection.RegisterSilKitMsgReceiver<MessageT, ServiceT>(networkName, receiver);
     }
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 
 //////////////////////////////////////////////////////////////////////
 // Versioned initial handshake
@@ -206,7 +206,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
     {
         return reply.status == ParticipantAnnouncementReply::Status::Failed;
     };
-    EXPECT_CALL(_from, SendIbMsg(AnnouncementReplyMatcher(validator))).Times(1);
+    EXPECT_CALL(_from, SendSilKitMsg(AnnouncementReplyMatcher(validator))).Times(1);
     _connection.OnSocketData(&_from, std::move(message));
 }
 
@@ -223,7 +223,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_reply_from_registry_should_throw
     SerializedMessage message(reply);
     EXPECT_THROW(
         _connection.OnSocketData(&_from, std::move(message)),
-        ib::ProtocolError);
+        SilKit::ProtocolError);
 }
 
 TEST_F(VAsioConnectionTest, supported_version_reply_from_registry_must_not_throw)
@@ -250,7 +250,7 @@ TEST_F(VAsioConnectionTest, current_version_connect)
     {
         return reply.status == ParticipantAnnouncementReply::Status::Success;
     };
-    EXPECT_CALL(_from, SendIbMsg(AnnouncementReplyMatcher(validator))).Times(1);
+    EXPECT_CALL(_from, SendSilKitMsg(AnnouncementReplyMatcher(validator))).Times(1);
 
     _connection.OnSocketData(&_from, std::move(message));
 }
@@ -264,12 +264,12 @@ TEST_F(VAsioConnectionTest, current_version_connect)
 TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
 {
     // We send a 'version1', but expect to receive a 'version2' 
-    test::version1::TestMessage message;
+    Tests::Version1::TestMessage message;
     message.integer = 1234;
     message.str ="1234";
 
     // Setup subscriptions for transmisison
-    using MessageTrait = ib::mw::IbMsgTraits<decltype(message)>;
+    using MessageTrait = SilKit::Core::SilKitMsgTraits<decltype(message)>;
     VAsioMsgSubscriber subscriber;
     subscriber.msgTypeName = MessageTrait::SerdesName();
     subscriber.networkName = "unittest";
@@ -280,12 +280,12 @@ TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
 
     // ReceiveSubscriptionAnnouncement -> sets internal structures up
     auto subscriberBuffer = SerializedMessage(subscriber);
-    EXPECT_CALL(_from, SendIbMsg(SubscriptionAcknowledgeMatcher(subscriber))).Times(1);
+    EXPECT_CALL(_from, SendSilKitMsg(SubscriptionAcknowledgeMatcher(subscriber))).Times(1);
     _connection.OnSocketData(&_from, std::move(subscriberBuffer));
 
     // Create a receiver with index 0 and a different TestMessage _version_
-    MockIbMessageReceiver mockReceiver;
-    RegisterIbMsgReceiver<test::version2::TestMessage,MockIbMessageReceiver>(subscriber.networkName, &mockReceiver);
+    MockSilKitMessageReceiver mockReceiver;
+    RegisterSilKitMsgReceiver<Tests::Version2::TestMessage,MockSilKitMessageReceiver>(subscriber.networkName, &mockReceiver);
 
     // the actual message
     auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(),

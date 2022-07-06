@@ -19,14 +19,14 @@ Register callbacks for state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To be notified about transitions of the ParticipantState, a ParticipantStatusHandler has to be registered. The
-:cpp:class:`ParticipantStatus<ib::mw::sync::ParticipantStatus>` contains the new ParticipantState and further details 
+:cpp:class:`ParticipantStatus<SilKit::Core::Orchestration::ParticipantStatus>` contains the new ParticipantState and further details 
 about the transition such as the name of the participant, the reason for the status change and timing information:
 
 .. code-block:: c++
 
   // Register ParticipantStatusHandler to receive ParticipantStatus updates from all participants.
   auto participantStatusHandler =
-      [](sync::ParticipantStatus status) {};
+      [](Orchestration::ParticipantStatus status) {};
 
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->AddParticipantStatusHandler(participantStatusHandler);
@@ -37,7 +37,7 @@ Last but not least a SystemStateHandler can be registered to get informed about 
 
   // Register SystemStateHandler to receive SystemState transitions.
   auto systemStateHandler =
-      [](sync::SystemState state) {};
+      [](Orchestration::SystemState state) {};
 
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->AddSystemStateHandler(systemStateHandler);
@@ -73,23 +73,23 @@ API and Data Type Reference
 
 System Monitor API
 ~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: ib::mw::sync::ISystemMonitor
+.. doxygenclass:: SilKit::Core::Orchestration::ISystemMonitor
    :members:
 
 
 Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenstruct:: ib::mw::sync::ParticipantStatus
+.. doxygenstruct:: SilKit::Core::Orchestration::ParticipantStatus
    :members:
 
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenenum:: ib::mw::sync::ParticipantState
+.. doxygenenum:: SilKit::Core::Orchestration::ParticipantState
 
-.. doxygenenum:: ib::mw::sync::SystemState
+.. doxygenenum:: SilKit::Core::Orchestration::SystemState
 
 
 Usage Example

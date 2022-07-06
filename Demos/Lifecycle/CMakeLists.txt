@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-make_ib_demo(IbDemoLifecycle LifecycleDemo.cpp)
+make_silkit_demo(SilKitDemoLifecycle LifecycleDemo.cpp)
 
-target_sources(IbDemoLifecycle
-    PRIVATE IbConfig_DemoLifecycle.json
+target_sources(SilKitDemoLifecycle
+    PRIVATE SilKitConfig_DemoLifecycle.json
 )

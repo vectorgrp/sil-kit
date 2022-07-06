@@ -1,16 +1,16 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-make_ib_demo(IbDemoCCan CanDemo.c)
-set_property(TARGET IbDemoCCan PROPERTY C_STANDARD 11)
-target_sources(IbDemoCCan
+make_silkit_demo(SilKitDemoCCan CanDemo.c)
+set_property(TARGET SilKitDemoCCan PROPERTY C_STANDARD 11)
+target_sources(SilKitDemoCCan
     PRIVATE 
-        IbConfig_DemoCan.json
+        SilKitConfig_DemoCan.json
         NetworkSimulatorConfig.json
 )
 
-make_ib_demo(IbDemoCCanSync CanDemoSync.c)
-set_property(TARGET IbDemoCCanSync PROPERTY C_STANDARD 11)
-target_sources(IbDemoCCanSync
+make_silkit_demo(SilKitDemoCCanSync CanDemoSync.c)
+set_property(TARGET SilKitDemoCCanSync PROPERTY C_STANDARD 11)
+target_sources(SilKitDemoCCanSync
     PRIVATE 
-        IbConfig_DemoCan.json
+        SilKitConfig_DemoCan.json
         NetworkSimulatorConfig.json
 )

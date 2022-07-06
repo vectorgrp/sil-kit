@@ -3,10 +3,10 @@
 #include "LoggingSerdes.hpp"
 
 
-namespace ib {
-namespace mw {
-namespace logging {
-using ib::mw::MessageBuffer;
+namespace SilKit {
+namespace Core {
+namespace Logging {
+using SilKit::Core::MessageBuffer;
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const SourceLoc& sourceLoc)
 {
@@ -54,6 +54,6 @@ void Deserialize(MessageBuffer& buffer, LogMsg& out)
 {
     buffer >> out;
 }
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

@@ -1,15 +1,15 @@
 // Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
 
-#include "IbExtensionBase.hpp"
-#include "IbExtensionMacros.hpp"
+#include "SilKitExtensionBase.hpp"
+#include "SilKitExtensionMacros.hpp"
 
 // definitions for linking
-struct WrongVersionExtension : public ib::extensions::IbExtensionBase
+struct WrongVersionExtension : public SilKit::SilKitExtensionBase
 {
-    using IbExtensionBase::IbExtensionBase;
+    using SilKitExtensionBase::SilKitExtensionBase;
 };
 
-IB_DECLARE_EXTENSION(
+SILKIT_DECLARE_EXTENSION(
     WrongVersionExtension,
     "Vector",
     1,

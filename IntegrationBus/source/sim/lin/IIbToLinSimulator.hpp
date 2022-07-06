@@ -2,26 +2,26 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
+#include "IServiceEndpoint.hpp"
 
-#include "ib/sim/lin/fwd_decl.hpp"
+#include "silkit/services/lin/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
-/*! \brief IIbToLinSimulator interface
+/*! \brief IMsgForLinSimulator interface
 *
 *  Used by the Participant, implemented by the LinSimulator
 */
-class IIbToLinSimulator
-    : public mw::IIbReceiver<LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
-    , public mw::IIbSender<LinTransmission, LinWakeupPulse, LinControllerConfig, LinFrameResponseUpdate>
+class IMsgForLinSimulator
+    : public Core::IReceiver<LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
+    , public Core::ISender<LinTransmission, LinWakeupPulse, LinControllerConfig, LinFrameResponseUpdate>
 {
 public:
-    virtual ~IIbToLinSimulator() = default;
+    virtual ~IMsgForLinSimulator() = default;
     
     /* NB: there is no setter or getter for an EndpointAddress of the
      * simulator, since the simulator manages multiple controllers
@@ -29,10 +29,10 @@ public:
      * the individual endpointIds.
      */
     //! \brief Setter and getter for the ParticipantID associated with this LIN simulator
-    virtual void SetParticipantId(mw::ParticipantId participantId) = 0;
-    virtual auto GetParticipantId() const -> mw::ParticipantId = 0;
+    virtual void SetParticipantId(Core::ParticipantId participantId) = 0;
+    virtual auto GetParticipantId() const -> Core::ParticipantId = 0;
 };
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

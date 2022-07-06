@@ -6,11 +6,11 @@
 #include <map>
 #include <sstream>
 
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace mw {
-namespace service {
+namespace SilKit {
+namespace Core {
+namespace Discovery {
 
 struct ServiceDiscoveryEvent
 {
@@ -94,6 +94,6 @@ inline std::string to_string(const ParticipantDiscoveryEvent& serviceAnnouncemen
     return str.str();
 }
 
-} // namespace service
-} // namespace mw
-} // namespace ib
+} // namespace Discovery
+} // namespace Core
+} // namespace SilKit

@@ -10,8 +10,8 @@
 #include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ib/mw/sync/all.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/services/all.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -21,10 +21,10 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::cfg;
-using namespace ib::mw;
+using namespace SilKit::Config;
+using namespace SilKit::Core;
 
-TEST(IbRegistryReusageITest, DISABLED_IbRegistry_must_be_reusable_after_shutdown)
+TEST(SilKitRegistryReusageITest, DISABLED_SilKitRegistry_must_be_reusable_after_shutdown)
 {
     //auto domainId = static_cast<uint32_t>(GetTestPid());
 
@@ -33,20 +33,20 @@ TEST(IbRegistryReusageITest, DISABLED_IbRegistry_must_be_reusable_after_shutdown
     //builder.SimulationSetup().AddParticipant("P2").AddParticipantController().WithSyncType(SyncType::DistributedTimeQuantum);
     //builder.SimulationSetup().ConfigureTimeSync().WithTickPeriod(1ms);
     //builder.WithActiveMiddleware(Middleware::VAsio);
-    //auto ibConfig = builder.Build();
+    //auto config = builder.Build();
 
     //std::promise<void> allConnected;
     //std::promise<void> allDisconnected;
     //const auto numIterations = 5;
 
-    //VAsioRegistry registry{ibConfig};
+    //VAsioRegistry registry{config};
     //registry.SetAllConnectedHandler([&allConnected]() { std::cout << "connected\n";  allConnected.set_value(); });
     //registry.SetAllDisconnectedHandler([&allDisconnected]() { std::cout << "disconnected\n";  allDisconnected.set_value(); });
     //registry.ProvideDomain(domainId);
 
-    //auto RunParticipant = [&ibConfig, domainId](auto name) {
-    //    auto participant = CreateParticipantImpl(ibConfig, name);
-    //    participant->JoinIbDomain(domainId);
+    //auto RunParticipant = [&config, domainId](auto name) {
+    //    auto participant = CreateParticipantImpl(config, name);
+    //    participant->JoinSilKitDomain(domainId);
     //    auto participantController = participant->GetParticipantController();
     //    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
     //    participantController->RunAsync();

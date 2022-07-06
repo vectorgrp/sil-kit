@@ -4,23 +4,23 @@
 
 #include "MessageBuffer.hpp"
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
-void Serialize(ib::mw::MessageBuffer& buffer, const EthernetFrameEvent& msg);
-void Serialize(ib::mw::MessageBuffer& buffer, const EthernetFrameTransmitEvent& msg);
-void Serialize(ib::mw::MessageBuffer& buffer, const EthernetStatus& msg);
-void Serialize(ib::mw::MessageBuffer& buffer, const EthernetSetMode& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer, const EthernetFrameEvent& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer, const EthernetFrameTransmitEvent& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer, const EthernetStatus& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer, const EthernetSetMode& msg);
 
-void Deserialize(ib::mw::MessageBuffer& buffer, EthernetFrameEvent& out);
-void Deserialize(ib::mw::MessageBuffer& buffer, EthernetFrameTransmitEvent& out);
-void Deserialize(ib::mw::MessageBuffer& buffer, EthernetStatus& out);
-void Deserialize(ib::mw::MessageBuffer& buffer, EthernetSetMode& out);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, EthernetFrameEvent& out);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, EthernetFrameTransmitEvent& out);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, EthernetStatus& out);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, EthernetSetMode& out);
 
 
-} // namespace eth    
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet    
+} // namespace Services
+} // namespace SilKit

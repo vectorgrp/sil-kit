@@ -5,7 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 namespace detail {
 
@@ -37,5 +37,5 @@ public:
 
 } //end namespace detail
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit
 

@@ -222,8 +222,8 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node,
 
 } // anonymous namespace
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 //!< Helper to print the YAML document position
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)
@@ -243,5 +243,5 @@ auto yaml_to_json(YAML::Node node) -> std::string
     return buf.str();
 }
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

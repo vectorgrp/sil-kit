@@ -4,14 +4,14 @@
 #include <sstream>
 #include <thread>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/util/serdes/sil/Serialization.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/util/serdes/sil/Serialization.hpp"
 
-using namespace ib::mw;
-using namespace ib::sim::data;
+using namespace SilKit::Core;
+using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
 
 void PublishMessage(IDataPublisher* publisher, std::string topicname)
@@ -24,14 +24,14 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
 
     std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
 
-    ib::util::serdes::sil::Serializer serializer;
+    SilKit::Util::SerDes::sil::Serializer serializer;
     serializer.Serialize(message);
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
 void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> Received new Message: with data=\"" << message << "\"" << std::endl;
 }
@@ -83,16 +83,16 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        auto registryUri = "vib://localhost:8500";
+        auto registryUri = "silkit://localhost:8500";
         if (argc >= 4)
         {
             registryUri = argv[3];
         }
 
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -172,7 +172,7 @@ int main(int argc, char** argv)
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

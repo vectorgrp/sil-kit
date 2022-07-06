@@ -3,14 +3,14 @@ Data Message API
 ================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
-.. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<ib::mw::IParticipant::CreateDataPublisher()>`
-.. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<ib::mw::IParticipant::CreateDataSubscriber()>`
-.. |Publish| replace:: :cpp:func:`Publish()<ib::sim::data::IDataPublisher::Publish()>`
-.. |SetDefaultDataMessageHandler| replace:: :cpp:func:`SetDefaultDataMessageHandler()<ib::sim::data::IDataSubscriber::SetDefaultDataMessageHandler()>`
-.. |AddExplicitDataMessageHandler| replace:: :cpp:func:`AddExplicitDataMessageHandler()<ib::sim::data::IDataSubscriber::AddExplicitDataMessageHandler()>`
-.. |IDataPublisher| replace:: :cpp:class:`IDataPublisher<ib::sim::data::IDataPublisher>`
-.. |IDataSubscriber| replace:: :cpp:class:`IDataPublisher<ib::sim::data::IDataSubscriber>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
+.. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<SilKit::Core::IParticipant::CreateDataPublisher()>`
+.. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<SilKit::Core::IParticipant::CreateDataSubscriber()>`
+.. |Publish| replace:: :cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>`
+.. |SetDefaultDataMessageHandler| replace:: :cpp:func:`SetDefaultDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDefaultDataMessageHandler()>`
+.. |AddExplicitDataMessageHandler| replace:: :cpp:func:`AddExplicitDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::AddExplicitDataMessageHandler()>`
+.. |IDataPublisher| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataPublisher>`
+.. |IDataSubscriber| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataSubscriber>`
 .. contents::
    :local:
    :depth: 3
@@ -162,21 +162,21 @@ The |IDataSubscriber| provides a callback registration mechanism for the default
 Data Publisher API
 ~~~~~~~~~~~~~~~~~~
 
-    .. doxygenclass:: ib::sim::data::IDataPublisher
+    .. doxygenclass:: SilKit::Services::PubSub::IDataPublisher
        :members:
 
 Data Subscriber API
 ~~~~~~~~~~~~~~~~~~~
 
-    .. doxygenclass:: ib::sim::data::IDataSubscriber
+    .. doxygenclass:: SilKit::Services::PubSub::IDataSubscriber
        :members:
 
 Data Structures
 ~~~~~~~~~~~~~~~
 
-    .. doxygenstruct:: ib::sim::data::DataMessageEvent
+    .. doxygenstruct:: SilKit::Services::PubSub::DataMessageEvent
        :members:
 
-    .. doxygenstruct:: ib::sim::data::NewDataPublisherEvent
+    .. doxygenstruct:: SilKit::Services::PubSub::NewDataPublisherEvent
        :members:
        

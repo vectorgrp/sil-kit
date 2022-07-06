@@ -8,37 +8,37 @@
 #include <memory>
 #include <ostream>
 
-#include "ib/sim/fwd_decl.hpp"
+#include "silkit/services/fwd_decl.hpp"
 
-#include "ib/cfg/fwd_decl.hpp"
-#include "ib/mw/logging/fwd_decl.hpp"
+#include "silkit/cfg/fwd_decl.hpp"
+#include "silkit/core/logging/fwd_decl.hpp"
 
-#include "ib/extensions/ITraceMessageSink.hpp"
-#include "ib/extensions/IReplay.hpp"
+#include "silkit/extensions/ITraceMessageSink.hpp"
+#include "silkit/extensions/IReplay.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
 // Configure the trace sinks based on the configuration and return a vector of
 // the sinks.
 
 auto CreateTraceMessageSinks(
-    mw::logging::ILogger* logger,
-    const cfg::Config& config,
-    const cfg::Participant& participantConfig
-    ) -> std::vector<std::unique_ptr<extensions::ITraceMessageSink>>;
+    Core::Logging::ILogger* logger,
+    const Config::Config& config,
+    const Config::Participant& participantConfig
+    ) -> std::vector<std::unique_ptr<ITraceMessageSink>>;
 
 // Configure replay files from the trace source configurations and return a vector of
 // the files.
 auto CreateReplayFiles(
-    mw::logging::ILogger* logger,
-    const cfg::Config& config,
-    const cfg::Participant& participantConfig
-    ) -> std::map<std::string, std::shared_ptr<extensions::IReplayFile>>;
+    Core::Logging::ILogger* logger,
+    const Config::Config& config,
+    const Config::Participant& participantConfig
+    ) -> std::map<std::string, std::shared_ptr<IReplayFile>>;
 
 //! \brief Predicate to check whether any of the participant's controllers
 //         has a Replay config.
 
-bool HasReplayConfig(const cfg::Participant& config);
+bool HasReplayConfig(const Config::Participant& config);
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit

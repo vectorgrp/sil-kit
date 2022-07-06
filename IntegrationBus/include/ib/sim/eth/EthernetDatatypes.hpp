@@ -6,16 +6,15 @@
 #include <chrono>
 #include <vector>
 
-#include "ib/IbMacros.hpp"
-#include "ib/sim/datatypes.hpp"
+#include "silkit/SilKitMacros.hpp"
+#include "silkit/services/datatypes.hpp"
 
 // ================================================================================
 //  Ethernet specific data types
 // ================================================================================
-namespace ib {
-namespace sim {
-//! The Ethernet namespace
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 //! \brief An Ethernet MAC address, i.e. FF:FF:FF:FF:FF:FF
 using EthernetMac = std::array<uint8_t, 6>;
@@ -126,6 +125,6 @@ struct EthernetSetMode
     EthernetMode mode; //!< EthernetMode that the Ethernet controller should reach.
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

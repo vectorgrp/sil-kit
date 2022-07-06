@@ -9,16 +9,16 @@
 #include <thread>
 #include <vector>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/sim/can/all.hpp"
-#include "ib/sim/can/string_utils.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/can/all.hpp"
+#include "silkit/services/can/string_utils.hpp"
 
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Can;
 
 using namespace std::chrono_literals;
 
@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& out, nanoseconds timestamp)
 } // namespace chrono
 } // namespace std
 
-void FrameTransmitHandler(const CanFrameTransmitEvent& ack, logging::ILogger* logger)
+void FrameTransmitHandler(const CanFrameTransmitEvent& ack, Logging::ILogger* logger)
 {
     std::stringstream buffer;
     buffer << ">> " << ack.status
@@ -42,7 +42,7 @@ void FrameTransmitHandler(const CanFrameTransmitEvent& ack, logging::ILogger* lo
     logger->Info(buffer.str());
 }
 
-void FrameHandler(const CanFrameEvent& frameEvent, logging::ILogger* logger)
+void FrameHandler(const CanFrameEvent& frameEvent, Logging::ILogger* logger)
 {
     std::string payload(frameEvent.frame.dataField.begin(), frameEvent.frame.dataField.end());
     std::stringstream buffer;
@@ -52,7 +52,7 @@ void FrameHandler(const CanFrameEvent& frameEvent, logging::ILogger* logger)
     logger->Info(buffer.str());
 }
 
-void SendFrame(ICanController* controller, logging::ILogger* logger)
+void SendFrame(ICanController* controller, Logging::ILogger* logger)
 {
     CanFrame canFrame {};
     canFrame.canId = 3;
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        std::string registryUri = "vib://localhost:8500";
+        std::string registryUri = "silkit://localhost:8500";
 
         bool runSync = true;
 
@@ -122,12 +122,12 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
 
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         auto* logger = participant->GetLogger();
         auto* canController = participant->CreateCanController("CAN1");
@@ -221,7 +221,7 @@ int main(int argc, char** argv)
             workerThread.join();
         }
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

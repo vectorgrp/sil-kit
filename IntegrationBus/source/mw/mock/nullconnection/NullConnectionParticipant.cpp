@@ -1,35 +1,35 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "NullConnectionParticipant.hpp"
 #include "CreateParticipant.hpp"
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 namespace {
 struct NullConnection
 {
-    NullConnection(ib::cfg::ParticipantConfiguration /*config*/, std::string /*participantName*/, ib::mw::ParticipantId /*participantId*/, ProtocolVersion) {}
+    NullConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/, ProtocolVersion) {}
 
-    void SetLogger(logging::ILogger* /*logger*/) {}
-    void SetTimeSyncService(sync::TimeSyncService* /*timeSyncService*/) {}
+    void SetLogger(Logging::ILogger* /*logger*/) {}
+    void SetTimeSyncService(Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinDomain(std::string /*registryUri*/) {}
 
-    template<class IbServiceT>
-    inline void RegisterIbService(const std::string& /*topicName*/, mw::EndpointId /*endpointId*/, IbServiceT* /*receiver*/) {}
+    template<class SilKitServiceT>
+    inline void RegisterSilKitService(const std::string& /*topicName*/, Core::EndpointId /*endpointId*/, SilKitServiceT* /*receiver*/) {}
 
-    template <class IbServiceT>
-    inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, IbServiceT* /*service*/) {}
+    template <class SilKitServiceT>
+    inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, SilKitServiceT* /*service*/) {}
 
-    template<typename IbMessageT>
-    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/) {}
+    template<typename SilKitMessageT>
+    void SendMsg(const Core::IServiceEndpoint* /*from*/, SilKitMessageT&& /*msg*/) {}
 
-    template<typename IbMessageT>
-    void SendIbMessage(const mw::IIbServiceEndpoint* /*from*/, const std::string& /*target*/, IbMessageT&& /*msg*/) {}
+    template<typename SilKitMessageT>
+    void SendMsg(const Core::IServiceEndpoint* /*from*/, const std::string& /*target*/, SilKitMessageT&& /*msg*/) {}
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) {}
     void FlushSendBuffers() {}
@@ -41,14 +41,14 @@ struct NullConnection
 };
 } // anonymous namespace
     
-auto CreateNullConnectionParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                         const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>
 {
-    auto&& cfg = ib::mw::ValidateAndSanitizeConfig(participantConfig, participantName);
+    auto&& cfg = SilKit::Core::ValidateAndSanitizeConfig(participantConfig, participantName);
     return std::make_unique<Participant<NullConnection>>(std::move(cfg), participantName);
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 

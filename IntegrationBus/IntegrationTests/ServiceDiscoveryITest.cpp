@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -18,7 +18,7 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 class ServiceDiscoveryITest : public testing::Test
 {
@@ -40,15 +40,15 @@ TEST_F(ServiceDiscoveryITest, discover_services)
     std::string publisherName = "Publisher";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
+    auto&& publisher =  SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
 
     // Subscriber that monitors the services
     auto&& subscriber =
-        ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
+        SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -75,9 +75,9 @@ TEST_F(ServiceDiscoveryITest, discover_services)
         {
             switch (discoveryType)
             {
-            case ib::mw::service::ServiceDiscoveryEvent::Type::Invalid:
+            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::Invalid:
                 break;
-            case ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated:
+            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated:
                 if (service.GetParticipantName() == publisherName)
                 {
                     createdServiceNames.push_back(service.GetServiceName());
@@ -87,7 +87,7 @@ TEST_F(ServiceDiscoveryITest, discover_services)
                     }
                 }
                 break;
-            case ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved:
+            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved:
                 if (service.GetParticipantName() == publisherName)
                 {
                     removedServiceNames.push_back(service.GetServiceName());
@@ -130,14 +130,14 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
     std::string publisherName = "Publisher";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher = ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
+    auto&& publisher = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
 
     // Subscriber that monitors the services
-    auto&& subscriber = ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
+    auto&& subscriber = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
     const auto topic = "Topic";
@@ -161,8 +161,8 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
             auto discoveryType, const auto& service) {
             switch (discoveryType)
             {
-            case ib::mw::service::ServiceDiscoveryEvent::Type::Invalid: break;
-            case ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated:
+            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::Invalid: break;
+            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated:
                 if (service.GetParticipantName() == publisherName)
                 {
                     createdServiceNames.push_back(service.GetServiceName());
@@ -172,7 +172,7 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
                     }
                 }
                 break;
-            case ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved:
+            case SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved:
                 if (service.GetParticipantName() == publisherName)
                 {
                     removedServiceNames.push_back(service.GetServiceName());
@@ -184,7 +184,7 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
                 break;
             default: break;
             }
-        }, ib::mw::service::controllerTypeDataPublisher, topic);
+        }, SilKit::Core::Discovery::controllerTypeDataPublisher, topic);
 
     // Await the creation
     allCreated.get_future().wait_for(10s);

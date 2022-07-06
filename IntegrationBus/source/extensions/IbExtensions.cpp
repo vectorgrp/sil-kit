@@ -4,26 +4,26 @@
 #    define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "IbExtensions.hpp"
+#include "SilKitExtensions.hpp"
 
 #include <sstream>
 #include <cstdlib> //getenv
 #include <iostream>
 #include <type_traits>
 
-#include "ib/version.hpp"
+#include "silkit/version.hpp"
 
 #include "detail/LoadExtension.hpp"
-#include "IbExtensionBase.hpp"
-#include "IbExtensionMacros.hpp"
-#include "IbExtensionUtils.hpp"
+#include "SilKitExtensionBase.hpp"
+#include "SilKitExtensionMacros.hpp"
+#include "SilKitExtensionUtils.hpp"
 
-namespace ib {
-namespace extensions {
+namespace SilKit {
+
 
 namespace {
 
-using BuildInfoType = decltype(IbExtensionDescriptor_t::build_infos);
+using BuildInfoType = decltype(SilKitExtensionDescriptor_t::build_infos);
 
 std::string to_string(const BuildInfoType& bi)
 {
@@ -45,26 +45,26 @@ bool isBuildCompatible(const BuildInfoType& myInfos, const BuildInfoType& otherI
     return ok;
 }
 
-void VerifyExtension(ib::mw::logging::ILogger* logger, const IbExtensionDescriptor_t* descr)
+void VerifyExtension(SilKit::Core::Logging::ILogger* logger, const SilKitExtensionDescriptor_t* descr)
 {
     if (descr == nullptr)
     {
-        throw ExtensionError("Extension returned invalid IbExtensionDescriptor");
+        throw ExtensionError("Extension returned invalid SilKitExtensionDescriptor");
     }
-    //verify the extensions VIB version to ours
-    if (descr->vib_version_major != ib::version::Major() || descr->vib_version_minor != ib::version::Minor()
-        || descr->vib_version_patch != ib::version::Patch())
+    //verify the extensions SILKIT version to ours
+    if (descr->silkit_version_major != SilKit::Version::Major() || descr->silkit_version_minor != SilKit::Version::Minor()
+        || descr->silkit_version_patch != SilKit::Version::Patch())
     {
         std::stringstream ss;
-        ss << "Version mismatch: host VIB version is: " << ib::version::Major() << "." << ib::version::Minor() << "."
-           << ib::version::Patch() << " module has version: " << descr->vib_version_major << "."
-           << descr->vib_version_minor << "." << descr->vib_version_patch << ".";
+        ss << "Version mismatch: host SILKIT version is: " << SilKit::Version::Major() << "." << SilKit::Version::Minor() << "."
+           << SilKit::Version::Patch() << " module has version: " << descr->silkit_version_major << "."
+           << descr->silkit_version_minor << "." << descr->silkit_version_patch << ".";
 
         throw ExtensionError(ss.str());
     }
 
     //verfiy build infos
-    const BuildInfoType ourBuild = IB_MAKE_BUILDINFOS();
+    const BuildInfoType ourBuild = SILKIT_MAKE_BUILDINFOS();
     const auto& extensionBuild = descr->build_infos;
 
     if (!isBuildCompatible(ourBuild, extensionBuild))
@@ -85,14 +85,14 @@ void VerifyExtension(ib::mw::logging::ILogger* logger, const IbExtensionDescript
     {
         if (logger)
         {
-            logger->Warn("VIB extension verification: build system is misconfigured, the host system is UNKNOWN");
+            logger->Warn("SILKIT extension verification: build system is misconfigured, the host system is UNKNOWN");
         }
     }
 
     if (my_sys != mod_sys)
     {
         std::stringstream msg;
-        msg << "VIB extension verification: Host system '" << my_sys << "' differs from module system '" << mod_sys
+        msg << "SILKIT extension verification: Host system '" << my_sys << "' differs from module system '" << mod_sys
             << "'";
         if (logger)
         {
@@ -105,7 +105,7 @@ void VerifyExtension(ib::mw::logging::ILogger* logger, const IbExtensionDescript
 //         separators, library prefix and file extensions from the detail impl.
 //The search paths can be changed using the hints argument.
 
-std::vector<std::string> FindLibrary(const std::string& name, const ib::extensions::ExtensionPathHints& hints)
+std::vector<std::string> FindLibrary(const std::string& name, const SilKit::ExtensionPathHints& hints)
 {
     const std::string debug_suffix = "d";
     const std::vector<std::string> candidates{name,
@@ -156,18 +156,18 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 ///////////////////////////////////////////////////////////////////////////
 
-auto LoadExtension(mw::logging::ILogger* logger, const std::string& name) -> std::shared_ptr<IIbExtension>
+auto LoadExtension(Core::Logging::ILogger* logger, const std::string& name) -> std::shared_ptr<ISilKitExtension>
 {
-    return LoadExtension(logger, name, cfg::Extensions{});
+    return LoadExtension(logger, name, Config::Extensions{});
 }
 
-auto LoadExtension(mw::logging::ILogger* logger, const std::string& name, const cfg::Extensions& config)
-    -> std::shared_ptr<IIbExtension>
+auto LoadExtension(Core::Logging::ILogger* logger, const std::string& name, const Config::Extensions& config)
+    -> std::shared_ptr<ISilKitExtension>
 {
     using namespace detail;
 
     ExtensionPathHints searchPathHints = config.searchPathHints;
-    searchPathHints.emplace_back("ENV:IB_EXTENSION_PATH");
+    searchPathHints.emplace_back("ENV:SILKIT_EXTENSION_PATH");
     searchPathHints.emplace_back(".");
     searchPathHints.emplace_back(GetProcessPath());
 
@@ -179,14 +179,14 @@ auto LoadExtension(mw::logging::ILogger* logger, const std::string& name, const 
         {
             auto lib = OpenLibrary(path);
             //find required C symbols for extension entry
-            auto extension_descr = GetSymbol<decltype(vib_extension_descriptor)>(lib, "vib_extension_descriptor");
+            auto extension_descr = GetSymbol<decltype(silkit_extension_descriptor)>(lib, "silkit_extension_descriptor");
             VerifyExtension(logger, extension_descr);
             return lib;
         }
         catch (const ExtensionError& ex)
         {
             std::stringstream msg;
-            msg << "Failed to verify VIB extension located at path'" << path << "': " << ex.what();
+            msg << "Failed to verify SILKIT extension located at path'" << path << "': " << ex.what();
             if (logger)
             {
                 logger->Debug(msg.str());
@@ -203,7 +203,7 @@ auto LoadExtension(mw::logging::ILogger* logger, const std::string& name, const 
         if (lib_handle != nullptr)
         {
             std::stringstream msg;
-            msg << "Loaded VIB extension '" << name << "' from path '" << path << "'";
+            msg << "Loaded SILKIT extension '" << name << "' from path '" << path << "'";
             if (logger)
             {
                 logger->Info(msg.str());
@@ -227,8 +227,8 @@ auto LoadExtension(mw::logging::ILogger* logger, const std::string& name, const 
     auto* create_ext = GetSymbol<decltype(CreateExtension)>(lib_handle, "CreateExtension");
     auto* release_ext = GetSymbol<decltype(ReleaseExtension)>(lib_handle, "ReleaseExtension");
 
-    auto* extension = static_cast<IIbExtension*>(create_ext());
-    return {extension, [lib_handle, release_ext](IIbExtension* instance) {
+    auto* extension = static_cast<ISilKitExtension*>(create_ext());
+    return {extension, [lib_handle, release_ext](ISilKitExtension* instance) {
                 //call the cleanup code inside the module
                 release_ext(instance);
                 //unload the actual shared library
@@ -236,5 +236,5 @@ auto LoadExtension(mw::logging::ILogger* logger, const std::string& name, const 
             }};
 }
 
-} //end namespace extensions
-} //end namespace ib
+
+} //end namespace SilKit

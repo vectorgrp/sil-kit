@@ -5,16 +5,16 @@
 #include "Logger.hpp"
 
 #include "IParticipantInternal.hpp"
-#include "IIbToLogMsgReceiver.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IMsgForLogMsgReceiver.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 class LogMsgReceiver
-    : public IIbToLogMsgReceiver
-    , public mw::IIbServiceEndpoint
+    : public IMsgForLogMsgReceiver
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -22,33 +22,33 @@ public:
     LogMsgReceiver(IParticipantInternal* participant, Logger* logger);
 
 public:
-    void ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const LogMsg& msg) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
     // private members
     IParticipantInternal* _participant{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
+    Core::ServiceDescriptor _serviceDescriptor{};
     
-    logging::Logger* _logger;
+    Logging::Logger* _logger;
 };
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-void LogMsgReceiver::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void LogMsgReceiver::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto LogMsgReceiver::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto LogMsgReceiver::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

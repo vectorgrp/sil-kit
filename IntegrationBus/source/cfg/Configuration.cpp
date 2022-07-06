@@ -2,8 +2,8 @@
 
 #include "Configuration.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 inline namespace v4 {
 
@@ -54,5 +54,5 @@ bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
 
 } // inline namespace v4
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

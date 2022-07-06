@@ -7,8 +7,8 @@
 #include <chrono>
 #include "SetThreadName.hpp"
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 class Timer
 {
@@ -69,7 +69,7 @@ private:
     // Methods
     void ThreadMain(std::future<void> future)
     {
-        ib::util::SetThreadName("IB-Timer");
+        SilKit::Util::SetThreadName("SilKit-Timer");
         while (_isRunning)
         {
             if (future.wait_for(_period) == std::future_status::timeout)
@@ -90,4 +90,4 @@ private:
 };
 
 } //end util
-} //end ib
+} //end silkit

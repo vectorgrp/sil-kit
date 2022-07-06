@@ -2,8 +2,8 @@
 
 #include "gtest/gtest.h"
 
-#include "ib/util/serdes/sil/Serializer.hpp"
-using namespace ib::util::serdes::sil;
+#include "silkit/util/serdes/sil/Serializer.hpp"
+using namespace SilKit::Util::SerDes::sil;
 
 namespace {
 

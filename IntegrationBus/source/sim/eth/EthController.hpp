@@ -4,28 +4,28 @@
 
 #include <map>
 
-#include "ib/sim/eth/IEthernetController.hpp"
-#include "ib/mw/fwd_decl.hpp"
+#include "silkit/services/eth/IEthernetController.hpp"
+#include "silkit/core/fwd_decl.hpp"
 #include "ITimeConsumer.hpp"
 
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 #include "ParticipantConfiguration.hpp"
-#include "IIbToEthController.hpp"
+#include "IMsgForEthController.hpp"
 #include "SimBehavior.hpp"
 
 #include "SynchronizedHandlers.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 
 class EthController
     : public IEthernetController
-    , public IIbToEthController
-    , public extensions::ITraceMessageSource
-    , public mw::IIbServiceEndpoint
+    , public IMsgForEthController
+    , public ITraceMessageSource
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -37,8 +37,8 @@ public:
     EthController() = delete;
     EthController(const EthController&) = delete;
     EthController(EthController&&) = delete;
-    EthController(mw::IParticipantInternal* participant, cfg::EthernetController config,
-                   mw::sync::ITimeProvider* timeProvider);
+    EthController(Core::IParticipantInternal* participant, Config::EthernetController config,
+                   Core::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -66,17 +66,17 @@ public:
     void RemoveStateChangeHandler(HandlerId handlerId) override;
     void RemoveBitrateChangeHandler(HandlerId handlerId) override;
 
-    // IIbToEthController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg) override;
+    // IMsgForEthController
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // ITraceMessageSource
-    inline void AddSink(extensions::ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
@@ -86,7 +86,7 @@ public:
 
     // Expose for unit tests
     auto SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId;
-    void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
+    void SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor);
     void SetTrivialBehavior();
 
     EthernetState GetState();
@@ -104,29 +104,29 @@ private:
     template <typename MsgT>
     void CallHandlers(const MsgT& msg);
 
-    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
-    auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
+    auto IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
+    auto AllowReception(const IServiceEndpoint* from) const -> bool;
 
     inline auto MakeTxId() -> EthernetTxId;
 
     template <typename MsgT>
-    inline void SendIbMessage(MsgT&& msg);
+    inline void SendMsg(MsgT&& msg);
 
 private:
     // ----------------------------------------
     // private members
-    mw::IParticipantInternal* _participant = nullptr;
-    cfg::EthernetController _config;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    Core::IParticipantInternal* _participant = nullptr;
+    Config::EthernetController _config;
+    ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
     SimBehavior _simulationBehavior;
 
     EthernetTxId _ethernetTxId = 0;
     EthernetState _ethState = EthernetState::Inactive;
     uint32_t _ethBitRate = 0;
-    extensions::Tracer _tracer;
+    Tracer _tracer;
 
     template <typename MsgT>
-    using CallbacksT = util::SynchronizedHandlers<CallbackT<MsgT>>;
+    using CallbacksT = Util::SynchronizedHandlers<CallbackT<MsgT>>;
 
     std::tuple<
         CallbacksT<EthernetFrameEvent>,
@@ -144,19 +144,19 @@ auto EthController::MakeTxId() -> EthernetTxId
     return ++_ethernetTxId;
 }
 
-void EthController::AddSink(extensions::ITraceMessageSink* sink)
+void EthController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
+    _tracer.AddSink(SilKit::Core::EndpointAddress{}, *sink);
 }
-void EthController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void EthController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
-auto EthController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto EthController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

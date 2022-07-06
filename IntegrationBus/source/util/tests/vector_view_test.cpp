@@ -6,10 +6,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/util/vector_view.hpp"
+#include "silkit/util/vector_view.hpp"
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 namespace tests {
 
 using ::testing::Return;
@@ -21,10 +21,10 @@ using ::testing::NiceMock;
 using ::testing::Throw;
 
     
-TEST(IbVectorViewTest, test_view_data_and_size)
+TEST(SilKitVectorViewTest, test_view_data_and_size)
 {
     using namespace std::placeholders;
-    using namespace ::ib::util;
+    using namespace ::SilKit::Util;
 
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
@@ -40,10 +40,10 @@ TEST(IbVectorViewTest, test_view_data_and_size)
     EXPECT_EQ(constIntSequenceView.data(), constIntSequence.data());
 }
 
-TEST(IbVectorViewTest, test_view_content_equals_sourcevector)
+TEST(SilKitVectorViewTest, test_view_content_equals_sourcevector)
 {
     using namespace std::placeholders;
-    using namespace ::ib::util;
+    using namespace ::SilKit::Util;
 
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
@@ -56,10 +56,10 @@ TEST(IbVectorViewTest, test_view_content_equals_sourcevector)
 
 }
 
-TEST(IbVectorViewTest, test_trim_view)
+TEST(SilKitVectorViewTest, test_trim_view)
 {
     using namespace std::placeholders;
-    using namespace ::ib::util;
+    using namespace ::SilKit::Util;
 
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
@@ -78,10 +78,10 @@ TEST(IbVectorViewTest, test_trim_view)
     }
 }
 
-TEST(IbVectorViewTest, test_iterators)
+TEST(SilKitVectorViewTest, test_iterators)
 {
     using namespace std::placeholders;
-    using namespace ::ib::util;
+    using namespace ::SilKit::Util;
 
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
@@ -107,10 +107,10 @@ TEST(IbVectorViewTest, test_iterators)
 }
 
 
-TEST(IbVectorViewTest, test_modify_view)
+TEST(SilKitVectorViewTest, test_modify_view)
 {
     using namespace std::placeholders;
-    using namespace ::ib::util;
+    using namespace ::SilKit::Util;
 
     std::vector<int> intSequence(10);
     std::fill(intSequence.begin(), intSequence.end(), 0);
@@ -134,5 +134,5 @@ TEST(IbVectorViewTest, test_modify_view)
 }
     
 } // namespace tests
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

@@ -3,8 +3,8 @@
 #include <iostream>
 #include <thread>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -17,7 +17,7 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 class SystemMonitorITest : public testing::Test
 {
@@ -46,12 +46,12 @@ TEST_F(SystemMonitorITest, discover_services)
     const std::string thirdParticipantName = "Third";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Create the first participant and register the connect and disconnect callbacks
     auto&& firstParticipant =
-        ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), firstParticipantName, registryUri);
+        SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), firstParticipantName, registryUri);
 
     auto* firstSystemMonitor = firstParticipant->GetSystemMonitor();
     firstSystemMonitor->SetParticipantConnectedHandler([this](const std::string& participantName) {
@@ -67,7 +67,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
         // Create the second participant which should trigger the callbacks of the first
         auto&& secondParticipant =
-            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), secondParticipantName, registryUri);
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), secondParticipantName, registryUri);
 
         auto* secondSystemMonitor = secondParticipant->GetSystemMonitor();
         secondSystemMonitor->SetParticipantConnectedHandler([this](const std::string& participantName) {
@@ -85,7 +85,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
             // Create the third participant which should trigger the callbacks of the first and second
             auto&& thirdParticipant =
-                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), thirdParticipantName, registryUri);
+                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), thirdParticipantName, registryUri);
 
             EXPECT_TRUE(firstSystemMonitor->IsParticipantConnected(thirdParticipantName));
             EXPECT_TRUE(secondSystemMonitor->IsParticipantConnected(thirdParticipantName));

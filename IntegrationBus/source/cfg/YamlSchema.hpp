@@ -6,8 +6,8 @@
 #include <vector>
 #include <initializer_list>
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 //!< A single element in a schema tree.
 // TODO might be extended to support type hints for parsing
@@ -39,5 +39,5 @@ inline namespace v4 {
 auto MakeYamlSchema() -> YamlSchemaElem;
 } // inline namespace v4
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

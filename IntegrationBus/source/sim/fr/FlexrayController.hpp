@@ -2,24 +2,24 @@
 
 #pragma once
 
-#include "ib/sim/fr/IFlexrayController.hpp"
-#include "ib/mw/fwd_decl.hpp"
+#include "silkit/services/fr/IFlexrayController.hpp"
+#include "silkit/core/fwd_decl.hpp"
 
 #include <tuple>
 #include <vector>
 
-#include "IIbToFlexrayController.hpp"
+#include "IMsgForFlexrayController.hpp"
 #include "IParticipantInternal.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 #include "ITraceMessageSource.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
 #include "SynchronizedHandlers.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 /*! \brief FlexRay Controller implementation for network simulator usage
  *
@@ -27,9 +27,9 @@ namespace fr {
  */
 class FlexrayController
     : public IFlexrayController
-    , public IIbToFlexrayController
-    , public extensions::ITraceMessageSource
-    , public mw::IIbServiceEndpoint
+    , public IMsgForFlexrayController
+    , public ITraceMessageSource
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -41,8 +41,8 @@ public:
     FlexrayController() = delete;
     FlexrayController(const FlexrayController&) = delete;
     FlexrayController(FlexrayController&&) = delete;
-    FlexrayController(mw::IParticipantInternal* participant, cfg::FlexrayController config,
-                      mw::sync::ITimeProvider* /*timeProvider*/);
+    FlexrayController(Core::IParticipantInternal* participant, Config::FlexrayController config,
+                      Core::Orchestration::ITimeProvider* /*timeProvider*/);
 
 public:
     // ----------------------------------------
@@ -93,26 +93,26 @@ public:
     void RemoveSymbolTransmitHandler(HandlerId handlerId) override;
     void RemoveCycleStartHandler(HandlerId handlerId) override;
 
-    // IIbToFlexrayController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayCycleStartEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
+    // IMsgForFlexrayController
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
 
     // ITraceMessageSource
-    inline void AddSink(extensions::ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
     // Public  methods
     //
-    void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
+    void SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor);
 
     void RegisterServiceDiscovery();
 
@@ -132,30 +132,30 @@ private:
     void CallHandlers(const MsgT& msg);
 
     template<typename MsgT>
-    inline void SendIbMessage(MsgT&& msg);
+    inline void SendMsg(MsgT&& msg);
 
     // Check, which config parameters are configurable
     bool IsClusterParametersConfigurable();
     bool IsNodeParametersConfigurable();
     bool IsTxBufferConfigsConfigurable();
 
-    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
-    auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
+    auto IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
+    auto AllowReception(const IServiceEndpoint* from) const -> bool;
 
 private:
     // ----------------------------------------
     // private members
-    mw::IParticipantInternal* _participant = nullptr;
-    cfg::FlexrayController _config;
-    ::ib::mw::ServiceDescriptor _serviceDescriptor;
+    Core::IParticipantInternal* _participant = nullptr;
+    Config::FlexrayController _config;
+    ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
     std::vector<FlexrayTxBufferConfig> _bufferConfigs;
-    extensions::Tracer _tracer;
+    Tracer _tracer;
 
     bool _simulatedLinkDetected = false;
-    mw::ServiceDescriptor _simulatedLink;
+    Core::ServiceDescriptor _simulatedLink;
 
     template <typename MsgT>
-    using CallbacksT = util::SynchronizedHandlers<CallbackT<MsgT>>;
+    using CallbacksT = Util::SynchronizedHandlers<CallbackT<MsgT>>;
 
     std::tuple<
         CallbacksT<FlexrayFrameEvent>,
@@ -171,20 +171,20 @@ private:
 // ==================================================================
 //  Inline Implementations
 // ==================================================================
-void FlexrayController::AddSink(extensions::ITraceMessageSink* sink)
+void FlexrayController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
+    _tracer.AddSink(SilKit::Core::EndpointAddress{}, *sink);
 }
 
-void FlexrayController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void FlexrayController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto FlexrayController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto FlexrayController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

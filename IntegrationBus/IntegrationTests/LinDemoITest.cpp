@@ -5,22 +5,22 @@
 
 #include "ITestFixture.hpp"
 
-#include "ib/sim/lin/all.hpp"
-#include "ib/sim/lin/string_utils.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/lin/all.hpp"
+#include "silkit/services/lin/string_utils.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "gtest/gtest.h"
 
 namespace {
 
-using namespace ib::test;
-using namespace ib::cfg;
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::lin;
+using namespace SilKit::Tests;
+using namespace SilKit::Config;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Lin;
 
 class Timer
 {
@@ -163,7 +163,7 @@ public:
     {
         LinFrame frame;
         frame.id = 16;
-        frame.checksumModel = lin::LinChecksumModel::Classic;
+        frame.checksumModel = Lin::LinChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
@@ -176,7 +176,7 @@ public:
     {
         LinFrame frame;
         frame.id = 17;
-        frame.checksumModel = lin::LinChecksumModel::Classic;
+        frame.checksumModel = Lin::LinChecksumModel::Classic;
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
@@ -189,7 +189,7 @@ public:
     {
         LinFrame frame;
         frame.id = 18;
-        frame.checksumModel = lin::LinChecksumModel::Enhanced;
+        frame.checksumModel = Lin::LinChecksumModel::Enhanced;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
@@ -202,7 +202,7 @@ public:
     {
         LinFrame frame;
         frame.id = 19;
-        frame.checksumModel = lin::LinChecksumModel::Classic;
+        frame.checksumModel = Lin::LinChecksumModel::Classic;
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
@@ -215,11 +215,11 @@ public:
     {
         LinFrame frame;
         frame.id = 34;
-        frame.checksumModel = lin::LinChecksumModel::Enhanced;
+        frame.checksumModel = Lin::LinChecksumModel::Enhanced;
         frame.dataLength = 6;
 
         _result.sendTimes.push_back(now);
-        _controller->SendFrame(frame, lin::LinFrameResponseType::SlaveResponse);
+        _controller->SendFrame(frame, Lin::LinFrameResponseType::SlaveResponse);
         Log() << "<< LIN LinFrame Header sent for ID=" << static_cast<unsigned int>(frame.id) << " now=" << now;
     }
 
@@ -248,7 +248,7 @@ public:
 
     void WakeupHandler(ILinController* controller, const LinWakeupEvent& /*wakeupEvent*/)
     {
-        if (controller->Status() != lin::LinControllerStatus::Sleep)
+        if (controller->Status() != Lin::LinControllerStatus::Sleep)
             Log() << "WARNING: Received Wakeup pulse while ControllerStatus is " << controller->Status() << ".";
 
         Log() << ">> Wakeup pulse received";
@@ -329,16 +329,16 @@ private:
 auto MakeControllerConfig(const std::string& participantName)
 {
   LinControllerConfig config;
-    config.controllerMode = lin::LinControllerMode::Master;
+    config.controllerMode = Lin::LinControllerMode::Master;
     config.baudRate = 20'000;
 
     if (participantName == "LinSlave")
     {
-        config.controllerMode = lin::LinControllerMode::Slave;
+        config.controllerMode = Lin::LinControllerMode::Slave;
         // Configure LIN Controller to receive a FrameResponse for LIN ID 16
         LinFrameResponse response_16;
         response_16.frame.id = 16;
-        response_16.frame.checksumModel = lin::LinChecksumModel::Classic;
+        response_16.frame.checksumModel = Lin::LinChecksumModel::Classic;
         response_16.frame.dataLength = 6;
         response_16.responseMode = LinFrameResponseMode::Rx;
 
@@ -347,7 +347,7 @@ auto MakeControllerConfig(const std::string& participantName)
         //    this message and not trigger a callback. This is also the default.
         LinFrameResponse response_17;
         response_17.frame.id = 17;
-        response_17.frame.checksumModel = lin::LinChecksumModel::Classic;
+        response_17.frame.checksumModel = Lin::LinChecksumModel::Classic;
         response_17.frame.dataLength = 6;
         response_17.responseMode = LinFrameResponseMode::Unused;
 
@@ -355,7 +355,7 @@ auto MakeControllerConfig(const std::string& participantName)
         //  - ChecksumModel does not match with master --> Receive with LIN_RX_ERROR
         LinFrameResponse response_18;
         response_18.frame.id = 18;
-        response_18.frame.checksumModel = lin::LinChecksumModel::Classic;
+        response_18.frame.checksumModel = Lin::LinChecksumModel::Classic;
         response_18.frame.dataLength = 8;
         response_18.responseMode = LinFrameResponseMode::Rx;
 
@@ -363,14 +363,14 @@ auto MakeControllerConfig(const std::string& participantName)
         //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
         LinFrameResponse response_19;
         response_19.frame.id = 19;
-        response_19.frame.checksumModel = lin::LinChecksumModel::Enhanced;
+        response_19.frame.checksumModel = Lin::LinChecksumModel::Enhanced;
         response_19.frame.dataLength = 1;
         response_19.responseMode = LinFrameResponseMode::Rx;
 
         // Configure LIN Controller to send a FrameResponse for LIN ID 34
         LinFrameResponse response_34;
         response_34.frame.id = 34;
-        response_34.frame.checksumModel = lin::LinChecksumModel::Enhanced;
+        response_34.frame.checksumModel = Lin::LinChecksumModel::Enhanced;
         response_34.frame.dataLength = 6;
         response_34.frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
         response_34.responseMode = LinFrameResponseMode::TxUnconditional;
@@ -408,8 +408,8 @@ TEST_F(SimTestHarnessITest, lin_demo)
 
         auto master = std::make_unique<LinMaster>(participant, linController);
 
-        linController->AddFrameStatusHandler(util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
-        linController->AddWakeupHandler(util::bind_method(master.get(), &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(Util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
+        linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
         timeSyncService->SetSimulationTask(
             [master = master.get(), participantName](auto now) {
@@ -441,9 +441,9 @@ TEST_F(SimTestHarnessITest, lin_demo)
           });
 
         auto slave = std::make_unique<LinSlave>(participant, linController);
-        linController->AddFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
-        linController->AddGoToSleepHandler(util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
-        linController->AddWakeupHandler(util::bind_method(slave.get(), &LinSlave::WakeupHandler));
+        linController->AddFrameStatusHandler(Util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
+        linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
+        linController->AddWakeupHandler(Util::bind_method(slave.get(), &LinSlave::WakeupHandler));
 
         //to validate the inputs
         slave->_controllerConfig = config;

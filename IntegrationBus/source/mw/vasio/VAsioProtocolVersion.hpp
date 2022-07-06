@@ -11,12 +11,12 @@
 #include "VAsioDatatypes.hpp" //for RegistryMsgHeader
 #include "MessageBuffer.hpp" //for ProtocolVersion
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion;
 inline auto to_header(ProtocolVersion version);
-inline auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string;
+inline auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeader) -> std::string;
 inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion;
 inline bool ProtocolVersionSupported(const RegistryMsgHeader& header);
 
@@ -38,8 +38,8 @@ auto to_header(ProtocolVersion version)
 	return header;
 }
 
-//! Map ProtocolVersion ranges to VIB distribution releases
-auto MapVersionToRelease(const ib::mw::RegistryMsgHeader& registryMsgHeader) -> std::string
+//! Map ProtocolVersion ranges to SILKIT distribution releases
+auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeader) -> std::string
 {
     const auto version = from_header(registryMsgHeader);
     if (version.major == 1)
@@ -90,5 +90,5 @@ inline auto operator<<(std::ostream& out, const ProtocolVersion& header) -> std:
     return out;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

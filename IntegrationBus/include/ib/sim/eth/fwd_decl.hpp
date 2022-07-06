@@ -2,9 +2,9 @@
 
 #pragma once
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 struct EthernetFrameEvent;
 struct EthernetFrameTransmitEvent;
@@ -12,6 +12,6 @@ struct EthernetStatus;
 struct EthernetSetMode;
 
 class IEthernetController;
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

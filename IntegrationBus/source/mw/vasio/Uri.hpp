@@ -8,8 +8,8 @@
 // URI encoding of asio endpoint types.
 // NB: Very limited implementation for internal use only -- nothing close to standard RFC 3986
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class Uri
 {
@@ -24,7 +24,7 @@ public:
 
 public:
     // public CTor
-    //!< Initialize Uri with host and port name, and schema of "vib://"
+    //!< Initialize Uri with host and port name, and schema of "silkit://"
     explicit Uri(const std::string& host, const uint16_t port);
     //!< Calls Parse() on uriStr
     explicit Uri(const std::string& uriStr);
@@ -52,10 +52,10 @@ private:
     UriType _type{ UriType::Undefined };
     std::string _scheme;
     std::string _host;
-    util::Optional<uint16_t> _port{};
+    Util::Optional<uint16_t> _port{};
     std::string _path;
     std::string _uriString;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

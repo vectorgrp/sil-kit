@@ -1,12 +1,12 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbConfigurationTestUtils INTERFACE
+add_library(SilKitConfigurationTestUtils INTERFACE
     ConfigurationTestUtils.hpp
 )
 
-target_include_directories(IbConfigurationTestUtils
+target_include_directories(SilKitConfigurationTestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(IbConfigurationTestUtils
-    INTERFACE IbConfiguration
+target_link_libraries(SilKitConfigurationTestUtils
+    INTERFACE SilKitConfiguration
 )

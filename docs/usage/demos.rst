@@ -3,14 +3,14 @@ Demos
 ======================
 
 This document describes the usage of the demo projects that are
-included with the Vector Integration Bus project and what their
+included with the Vector SilKit project and what their
 expected output and or results are. All demo source code is located in
 the Git repository in the folder Demos.
 
 .. |UtilDir| replace:: build/Release
 .. |DemoDir| replace:: build/Release
-.. |SystemMonitor| replace::  |UtilDir|/IbSystemMonitor
-.. |SystemController| replace::  |UtilDir|/IbSystemController
+.. |SystemMonitor| replace::  |UtilDir|/SilKitSystemMonitor
+.. |SystemController| replace::  |UtilDir|/SilKitSystemController
 
 .. admonition:: Note
 
@@ -38,11 +38,11 @@ The individual demos are build as a dependency.
 .. admonition:: Note
    
    The distributed Demos, as packaged by CPack, are preconfigured to build against 
-   a copy of the VIB binaries in ``../IntegrationBus/`` .
-   This can be overriden by providing your own ``IntegrationBus`` CMake target library,
+   a copy of the SILKIT binaries in ``../SilKit/`` .
+   This can be overriden by providing your own ``SilKit`` CMake target library,
    before the demos are configured by cmake.
-   Or by changing the ``find_package(IntegrationBus ... PATHS path/to/VIB)`` statement directly
-   in the ``IntegrationBus-Demos/CMakeLists.txt`` directory.
+   Or by changing the ``find_package(SilKit ... PATHS path/to/SILKIT)`` statement directly
+   in the ``SilKit-Demos/CMakeLists.txt`` directory.
 
 
 .. _sec:util-can-demo:
@@ -65,12 +65,12 @@ CAN Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguration to be used; 
-           use ``IbConfig_DemoCan.json`` for an example configuration.
+           use ``SilKitConfig_DemoCan.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``CanWriter`` or 
            ``CanReader``.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
            the SystemController to start.
@@ -78,7 +78,7 @@ CAN Demo
       -  .. parsed-literal:: 
             
             # Creates a CAN Writer Process with the default registry URI
-            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter
+            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanWriter
    *  -  System Example
       - For synchronized execution:
 
@@ -88,10 +88,10 @@ CAN Demo
             |SystemMonitor|
 
             # CAN Reader:
-            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanReader
+            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanReader
 
             # CAN Writer:
-            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter
+            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanWriter
 
             # System Controller:
             |SystemController| CanReader CanWriter 
@@ -101,10 +101,10 @@ CAN Demo
         .. parsed-literal:: 
 
             # CAN Reader:
-            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanReader --async
+            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanReader --async
 
             # CAN Writer:
-            |DemoDir|/IbDemoCan Demos/Can/IbConfig_DemoCan.json CanWriter --async
+            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanWriter --async
 
 
 Ethernet Demo
@@ -125,12 +125,12 @@ Ethernet Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``IbConfig_DemoEthernet.json`` for an example configuration.
+           use ``SilKitConfig_DemoEthernet.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
            the SystemController to start.
@@ -138,7 +138,7 @@ Ethernet Demo
       -  .. parsed-literal:: 
 
             # Creates an Ethernet Writer Process with the default registry URI:
-            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetWriter
    *  -  System Example
       - For synchronized execution:
 
@@ -148,10 +148,10 @@ Ethernet Demo
             |SystemMonitor|
 
             # Ethernet Reader:
-            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetReader
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetReader
 
             # Ethernet Writer:
-            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetWriter
 
             # System Controller:
             |SystemController| EthernetReader Ethernet Writer
@@ -161,10 +161,10 @@ Ethernet Demo
         .. parsed-literal:: 
 
             # Ethernet Reader:
-            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetReader --async
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetReader --async
 
             # Ethernet Writer:
-            |DemoDir|/IbDemoEthernet Demos/Ethernet/IbConfig_DemoEthernet.json EthernetWriter --async
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetWriter --async
 
    *  -  Notes
       -  | \- The writer sends Ethernet messages at a fixed rate of one message per quantum.
@@ -189,17 +189,17 @@ LIN Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``IbConfig_DemoLin.json`` for an example configuration.
+           use ``SilKitConfig_DemoLin.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
             # Creates a LIN Master Process with the default registry URI:
-            |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinMaster
+            |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.json LinMaster
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -207,10 +207,10 @@ LIN Demo
             |SystemMonitor|
 
             # LIN Master:
-            |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinMaster
+            |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.json LinMaster
 
             # LIN Slave:
-            |DemoDir|/IbDemoLin Demos/Lin/IbConfig_DemoLin.json LinSlave
+            |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.json LinSlave
 
             # System Controller:
             |SystemController| LinSlave LinMaster
@@ -237,18 +237,18 @@ FlexRay Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``IbConfig_DemoFlexRay.json`` for an example configuration.
+           use ``SilKitConfig_DemoFlexRay.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Node0`` or 
            ``Node1``.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
             # Creates a FlexRay Process for Node 0 with the default registry URI:
-            |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node0
+            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.json Node0
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -259,10 +259,10 @@ FlexRay Demo
             |SystemMonitor|
 
             # Node 0:
-            |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node0
+            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.json Node0
 
             # Node 1:
-            |DemoDir|/IbDemoFlexray Demos/FlexRay/IbConfig_DemoFlexray.json Node1
+            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.json Node1
 
             # System Controller:
             |SystemController| Node0 Node1 NetworkSimulator
@@ -288,18 +288,18 @@ Data Message Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``IbConfig_DemoDataMessage.json`` for an example configuration.
+           use ``SilKitConfig_DemoDataMessage.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``PubSub1``, ``PubSub2``, ``Subscriber1`` or 
            ``Subscriber2``.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
             # Creates a FlexRay Process for Node 0 with the default registry URI:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub1
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json PubSub1
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -307,16 +307,16 @@ Data Message Demo
             |SystemMonitor|
 
             # Publisher 1:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub1
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json PubSub1
 
             # Publisher 2:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json PubSub2
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json PubSub2
             
             # Subscriber 1:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Subscriber1
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Subscriber1
             
             # Subscriber 2:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Subscriber2
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Subscriber2
 
             # System Controller:
             |SystemController| PubSub1 PubSub2 Subscriber1 Subscriber2
@@ -341,18 +341,18 @@ RPC Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``IbConfig_DemoRpc.json`` for an example configuration.
+           use ``SilKitConfig_DemoRpc.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Server`` or 
            ``Client``.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
             # Creates a FlexRay Process for Node 0 with the default registry URI:
-            |DemoDir|/IbDemoRpc Demos/Rpc/IbConfig_DemoRpc.json Server
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.json Server
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -360,10 +360,10 @@ RPC Demo
             |SystemMonitor|
 
             # Server:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher1
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Publisher1
 
             # Client:
-            |DemoDir|/IbDemoDataMessage Demos/DataMessage/IbConfig_DemoDataMessage.json Publisher2
+            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Publisher2
             
             # System Controller:
             |SystemController| Server Client
@@ -380,7 +380,7 @@ Benchmark Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  Parametrizable demo to benchmark the IB performance. Runs the simulation with the specified parameters a number of times and summarizes the real execution time as result.
+      -  Parametrizable demo to benchmark the SilKit performance. Runs the simulation with the specified parameters a number of times and summarizes the real execution time as result.
    *  -  Source location
       -  Demos/Benchmark
    *  -  Parameters
@@ -399,14 +399,14 @@ Benchmark Demo
              - ``--message-count NUM``
          #. Size of the messages in bytes (optional); must be at least ``1``; defaults to ``100``.
              - ``--message-size BYTES``
-         #. Registry URI (optional); defaults to ``vib://localhost:8500``.
+         #. Registry URI (optional); defaults to ``silkit://localhost:8500``.
              - ``--registry-uri URI``
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
             # Creates a benchmark process, which runs the same simulation (VAsio middleware, 5s duration,
             # 10 participants, 1 message of 200 bytes per participant pair per tick) a hundred times.
-            |DemoDir|/IbDemoBenchmark VAsio 100 5 10 1 200 50
+            |DemoDir|/SilKitDemoBenchmark VAsio 100 5 10 1 200 50
    *  -  Notes
       -  | \- DataPublisher / DataSubscribers are used in the participants.
          | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
@@ -430,21 +430,21 @@ Life Cycle Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml>
            File name of the ParticipantConfiguration to be used;
-           use ``IbConfig_DemoLifecycle.json`` for an example configuration.
+           use ``SilKitConfig_DemoLifecycle.json`` for an example configuration.
          <ParticipantName>
            The name of the participant within the simulation; pauses and continues the simulation three times for five seconds if ``PauseTest``; can be anything otherwise.
          [registryUri] 
-           The vib:// URI of the registry to connect to; defaults to vib://localhost:8500 (optional).
+           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async]
            If timeSync flag is set, the participant will run without virtual time synchronization.
          [\-\-uncoordinated]
            If the uncoordinated flag is set, the participant will not coordinate its state transitions with other participants. 
-           The state transition Running->Stopping must be triggered via a call to :cpp:func:`ILifecycleService::Stop()<ib::mw::sync::ILifecycleService::Stop()>`.
+           The state transition Running->Stopping must be triggered via a call to :cpp:func:`ILifecycleService::Stop()<SilKit::Core::Orchestration::ILifecycleService::Stop()>`.
    *  -  Parameter Example
       -  .. parsed-literal::
 
             # Creates an Life Cycle Demo Process in the default domain 42:
-            |DemoDir|/IbDemoLifecycle Demos/Lifecycle/IbConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
+            |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
 
    *  -  System Example
       -  .. parsed-literal::
@@ -453,10 +453,10 @@ Life Cycle Demo
             |SystemMonitor|
 
             # Life cycle with coordinated start and stop, synchronized time and running the pause testing:
-            |DemoDir|/IbDemoLifecycle Demos/Lifecycle/IbConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
+            |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
 
             # Life cycle with synchronized time, but without coordinated start and stop (i.e., switches directly to the Running state):
-            |DemoDir|/IbDemoLifecycle Demos/Lifecycle/IbConfig_DemoLifecycle.json AnotherParticipant --syncTime
+            |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json AnotherParticipant --syncTime
 
             # System Controller (add NetworkSimulator as third parameter if using VIBE Network Simulator):
             |SystemController| EthernetReader Ethernet Writer

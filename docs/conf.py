@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../ThirdParty/breathe/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'IntegrationBus'
+project = 'SilKit'
 copyright = 'Vector Informatik GmbH. All rights reserved.'
 author = 'Vector Informatik GmbH'
 version = '4.0.0'
@@ -55,7 +55,7 @@ numfig_format = {'figure': 'Figure %s'}
 # The breathe project property is already set in the CMakeLists.txt
 # breathe_projects = { "PROJECT_NAME": "PATH_TO_DOXYGEN_XML_FOLDER" }
 
-breathe_default_project = "IntegrationBus"
+breathe_default_project = "SilKit"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

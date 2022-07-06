@@ -5,15 +5,15 @@
 #include "IParticipantInternal.hpp"
 #include "ParticipantConfiguration.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                            const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>;
 
-auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                               const std::string& participantName) -> ib::cfg::ParticipantConfiguration;
-} // namespace mw
-} // namespace ib
+auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+                               const std::string& participantName) -> SilKit::Config::ParticipantConfiguration;
+} // namespace Core
+} // namespace SilKit
 

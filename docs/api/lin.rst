@@ -5,57 +5,57 @@ LIN Service API
 ===================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
-.. |CreateLinController| replace:: :cpp:func:`CreateLinController<ib::mw::IParticipant::CreateLinController()>`
-.. |ILinController| replace:: :cpp:class:`ILinController<ib::sim::eth::ILinController>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
+.. |CreateLinController| replace:: :cpp:func:`CreateLinController<SilKit::Core::IParticipant::CreateLinController()>`
+.. |ILinController| replace:: :cpp:class:`ILinController<SilKit::Services::Ethernet::ILinController>`
 
-.. |Init| replace:: :cpp:func:`Init()<ib::sim::lin::ILinController::Init>`
-.. |SendFrame| replace:: :cpp:func:`SendFrame()<ib::sim::lin::ILinController::SendFrame>`
-.. |SendFrameHeader| replace:: :cpp:func:`SendFrameHeader()<ib::sim::lin::ILinController::SendFrameHeader>`
-.. |SetFrameResponse| replace:: :cpp:func:`SetFrameResponse()<ib::sim::lin::ILinController::SetFrameResponse>`
+.. |Init| replace:: :cpp:func:`Init()<SilKit::Services::Lin::ILinController::Init>`
+.. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Lin::ILinController::SendFrame>`
+.. |SendFrameHeader| replace:: :cpp:func:`SendFrameHeader()<SilKit::Services::Lin::ILinController::SendFrameHeader>`
+.. |SetFrameResponse| replace:: :cpp:func:`SetFrameResponse()<SilKit::Services::Lin::ILinController::SetFrameResponse>`
 
-.. |Wakeup| replace:: :cpp:func:`Wakeup()<ib::sim::lin::ILinController::Wakeup>`
-.. |GoToSleep| replace:: :cpp:func:`GoToSleep()<ib::sim::lin::ILinController::GoToSleep>`
+.. |Wakeup| replace:: :cpp:func:`Wakeup()<SilKit::Services::Lin::ILinController::Wakeup>`
+.. |GoToSleep| replace:: :cpp:func:`GoToSleep()<SilKit::Services::Lin::ILinController::GoToSleep>`
 
-.. |AddFrameStatusHandler| replace:: :cpp:type:`AddFrameStatusHandler()<ib::sim::lin::ILinController::AddFrameStatusHandler>`
-.. |AddGoToSleepHandler| replace:: :cpp:type:`AddGoToSleepHandler()<ib::sim::lin::ILinController::AddGoToSleepHandler>`
-.. |AddWakeupHandler| replace:: :cpp:type:`AddWakeupHandler()<ib::sim::lin::ILinController::AddWakeupHandler>`
-.. |AddFrameResponseUpdateHandler| replace:: :cpp:type:`AddFrameResponseUpdateHandler()<ib::sim::lin::ILinController::AddFrameResponseUpdateHandler>`
+.. |AddFrameStatusHandler| replace:: :cpp:type:`AddFrameStatusHandler()<SilKit::Services::Lin::ILinController::AddFrameStatusHandler>`
+.. |AddGoToSleepHandler| replace:: :cpp:type:`AddGoToSleepHandler()<SilKit::Services::Lin::ILinController::AddGoToSleepHandler>`
+.. |AddWakeupHandler| replace:: :cpp:type:`AddWakeupHandler()<SilKit::Services::Lin::ILinController::AddWakeupHandler>`
+.. |AddFrameResponseUpdateHandler| replace:: :cpp:type:`AddFrameResponseUpdateHandler()<SilKit::Services::Lin::ILinController::AddFrameResponseUpdateHandler>`
 
-.. |RemoveFrameStatusHandler| replace:: :cpp:type:`RemoveFrameStatusHandler()<ib::sim::lin::ILinController::RemoveFrameStatusHandler>`
-.. |RemoveGoToSleepHandler| replace:: :cpp:type:`RemoveGoToSleepHandler()<ib::sim::lin::ILinController::RemoveGoToSleepHandler>`
-.. |RemoveWakeupHandler| replace:: :cpp:type:`RemoveWakeupHandler()<ib::sim::lin::ILinController::RemoveWakeupHandler>`
-.. |RemoveFrameResponseUpdateHandler| replace:: :cpp:type:`RemoveFrameResponseUpdateHandler()<ib::sim::lin::ILinController::RemoveFrameResponseUpdateHandler>`
+.. |RemoveFrameStatusHandler| replace:: :cpp:type:`RemoveFrameStatusHandler()<SilKit::Services::Lin::ILinController::RemoveFrameStatusHandler>`
+.. |RemoveGoToSleepHandler| replace:: :cpp:type:`RemoveGoToSleepHandler()<SilKit::Services::Lin::ILinController::RemoveGoToSleepHandler>`
+.. |RemoveWakeupHandler| replace:: :cpp:type:`RemoveWakeupHandler()<SilKit::Services::Lin::ILinController::RemoveWakeupHandler>`
+.. |RemoveFrameResponseUpdateHandler| replace:: :cpp:type:`RemoveFrameResponseUpdateHandler()<SilKit::Services::Lin::ILinController::RemoveFrameResponseUpdateHandler>`
 
-.. |FrameStatusHandler| replace:: :cpp:type:`FrameStatusHandler<ib::sim::lin::ILinController::FrameStatusHandler>`
-.. |GoToSleepHandler| replace:: :cpp:type:`GoToSleepHandler<ib::sim::lin::ILinController::GoToSleepHandler>`
-.. |WakeupHandler| replace:: :cpp:type:`WakeupHandler<ib::sim::lin::ILinController::WakeupHandler>`
-.. |FrameResponseUpdateHandler| replace:: :cpp:type:`FrameResponseUpdateHandler<ib::sim::lin::ILinController::FrameResponseUpdateHandler>`
+.. |FrameStatusHandler| replace:: :cpp:type:`FrameStatusHandler<SilKit::Services::Lin::ILinController::FrameStatusHandler>`
+.. |GoToSleepHandler| replace:: :cpp:type:`GoToSleepHandler<SilKit::Services::Lin::ILinController::GoToSleepHandler>`
+.. |WakeupHandler| replace:: :cpp:type:`WakeupHandler<SilKit::Services::Lin::ILinController::WakeupHandler>`
+.. |FrameResponseUpdateHandler| replace:: :cpp:type:`FrameResponseUpdateHandler<SilKit::Services::Lin::ILinController::FrameResponseUpdateHandler>`
 
-.. |LinFrameStatusEvent| replace:: :cpp:class:`LinFrameStatusEvent<ib::sim::lin::LinFrameStatusEvent>`
-.. |LinGoToSleepEvent| replace:: :cpp:class:`LinGoToSleepEvent<ib::sim::lin::LinGoToSleepEvent>`
-.. |LinWakeupEvent| replace:: :cpp:class:`LinWakeupEvent<ib::sim::lin::LinWakeupEvent>`
-.. |LinFrameResponseUpdateEvent| replace:: :cpp:class:`LinFrameResponseUpdateEvent<ib::sim::lin::LinFrameResponseUpdateEvent>`
+.. |LinFrameStatusEvent| replace:: :cpp:class:`LinFrameStatusEvent<SilKit::Services::Lin::LinFrameStatusEvent>`
+.. |LinGoToSleepEvent| replace:: :cpp:class:`LinGoToSleepEvent<SilKit::Services::Lin::LinGoToSleepEvent>`
+.. |LinWakeupEvent| replace:: :cpp:class:`LinWakeupEvent<SilKit::Services::Lin::LinWakeupEvent>`
+.. |LinFrameResponseUpdateEvent| replace:: :cpp:class:`LinFrameResponseUpdateEvent<SilKit::Services::Lin::LinFrameResponseUpdateEvent>`
 
-.. |LinControllerConfig| replace:: :cpp:class:`LinControllerConfig<ib::sim::lin::LinControllerConfig>`
-.. |LinFrameResponse| replace:: :cpp:class:`LinFrameResponse<ib::sim::lin::LinFrameResponse>`
-.. |LinFrame| replace:: :cpp:class:`LinFrame<ib::sim::lin::LinFrame>`
+.. |LinControllerConfig| replace:: :cpp:class:`LinControllerConfig<SilKit::Services::Lin::LinControllerConfig>`
+.. |LinFrameResponse| replace:: :cpp:class:`LinFrameResponse<SilKit::Services::Lin::LinFrameResponse>`
+.. |LinFrame| replace:: :cpp:class:`LinFrame<SilKit::Services::Lin::LinFrame>`
 
-.. |LinControllerMode| replace:: :cpp:enum:`LinControllerMode<ib::sim::lin::LinControllerMode>`
-.. |LinControllerMode_Master| replace:: :cpp:enumerator:`LinControllerMode::Master<ib::sim::lin::Master>`
-.. |LinControllerMode_Slave| replace:: :cpp:enumerator:`LinControllerMode::Slave<ib::sim::lin::Slave>`
+.. |LinControllerMode| replace:: :cpp:enum:`LinControllerMode<SilKit::Services::Lin::LinControllerMode>`
+.. |LinControllerMode_Master| replace:: :cpp:enumerator:`LinControllerMode::Master<SilKit::Services::Lin::Master>`
+.. |LinControllerMode_Slave| replace:: :cpp:enumerator:`LinControllerMode::Slave<SilKit::Services::Lin::Slave>`
 
-.. |LinFrameResponseType_MasterResponse| replace:: :cpp:enumerator:`LinFrameResponseType::MasterResponse<ib::sim::lin::MasterResponse>`
-.. |LinFrameResponseType_SlaveResponse| replace:: :cpp:enumerator:`LinFrameResponseType::SlaveResponse<ib::sim::lin::SlaveResponse>`
+.. |LinFrameResponseType_MasterResponse| replace:: :cpp:enumerator:`LinFrameResponseType::MasterResponse<SilKit::Services::Lin::MasterResponse>`
+.. |LinFrameResponseType_SlaveResponse| replace:: :cpp:enumerator:`LinFrameResponseType::SlaveResponse<SilKit::Services::Lin::SlaveResponse>`
 
-.. |LinFrameResponseMode_Rx| replace:: :cpp:enumerator:`LinFrameResponseMode::Rx<ib::sim::lin::Rx>`
+.. |LinFrameResponseMode_Rx| replace:: :cpp:enumerator:`LinFrameResponseMode::Rx<SilKit::Services::Lin::Rx>`
 
-.. |LinFrameStatus| replace:: :cpp:enum:`LinFrameStatus<ib::sim::lin::LinFrameStatus>`
-.. |LinFrameStatus_LIN_TX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<ib::sim::lin::LIN_TX_ERROR>`
-.. |LinFrameStatus_LIN_RX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_ERROR<ib::sim::lin::LIN_RX_ERROR>`
-.. |LinFrameStatus_LIN_RX_NO_RESPONSE| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_NO_RESPONSE<ib::sim::lin::LIN_RX_NO_RESPONSE>`
+.. |LinFrameStatus| replace:: :cpp:enum:`LinFrameStatus<SilKit::Services::Lin::LinFrameStatus>`
+.. |LinFrameStatus_LIN_TX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<SilKit::Services::Lin::LIN_TX_ERROR>`
+.. |LinFrameStatus_LIN_RX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_ERROR<SilKit::Services::Lin::LIN_RX_ERROR>`
+.. |LinFrameStatus_LIN_RX_NO_RESPONSE| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_NO_RESPONSE<SilKit::Services::Lin::LIN_RX_NO_RESPONSE>`
 
-.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
+.. |HandlerId| replace:: :cpp:class:`HandlerId<SilKit::Services::HandlerId>`
 
 .. contents::
    :local:
@@ -247,35 +247,35 @@ API and Data Type Reference
 ---------------------------
 LIN Controller API
 ~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: ib::sim::lin::ILinController
+.. doxygenclass:: SilKit::Services::Lin::ILinController
    :members:
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib::sim::lin::LinFrame
+.. doxygenstruct:: SilKit::Services::Lin::LinFrame
    :members:
-.. doxygenstruct:: ib::sim::lin::LinFrameResponse
+.. doxygenstruct:: SilKit::Services::Lin::LinFrameResponse
    :members:
-.. doxygenstruct:: ib::sim::lin::LinControllerConfig
+.. doxygenstruct:: SilKit::Services::Lin::LinControllerConfig
    :members:
-.. doxygenstruct:: ib::sim::lin::LinFrameStatusEvent
+.. doxygenstruct:: SilKit::Services::Lin::LinFrameStatusEvent
    :members:
-.. doxygenstruct:: ib::sim::lin::LinWakeupEvent
+.. doxygenstruct:: SilKit::Services::Lin::LinWakeupEvent
    :members:
-.. doxygenstruct:: ib::sim::lin::LinGoToSleepEvent
+.. doxygenstruct:: SilKit::Services::Lin::LinGoToSleepEvent
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib::sim::lin::LinIdT
-.. doxygenenum:: ib::sim::lin::LinChecksumModel
-.. doxygentypedef:: ib::sim::lin::LinDataLengthT
-.. doxygenenum:: ib::sim::lin::LinFrameResponseType
-.. doxygenenum:: ib::sim::lin::LinFrameResponseMode
-.. doxygenenum:: ib::sim::lin::LinFrameStatus
-.. doxygenenum:: ib::sim::lin::LinControllerMode
-.. doxygentypedef:: ib::sim::lin::LinBaudRateT
-.. doxygenenum:: ib::sim::lin::LinControllerStatus
+.. doxygentypedef:: SilKit::Services::Lin::LinIdT
+.. doxygenenum:: SilKit::Services::Lin::LinChecksumModel
+.. doxygentypedef:: SilKit::Services::Lin::LinDataLengthT
+.. doxygenenum:: SilKit::Services::Lin::LinFrameResponseType
+.. doxygenenum:: SilKit::Services::Lin::LinFrameResponseMode
+.. doxygenenum:: SilKit::Services::Lin::LinFrameStatus
+.. doxygenenum:: SilKit::Services::Lin::LinControllerMode
+.. doxygentypedef:: SilKit::Services::Lin::LinBaudRateT
+.. doxygenenum:: SilKit::Services::Lin::LinControllerStatus
 
 Usage Examples
 --------------

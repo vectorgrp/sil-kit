@@ -8,15 +8,15 @@
 
 #include "ITestFixture.hpp"
 
-#include "ib/sim/can/all.hpp"
+#include "silkit/services/can/all.hpp"
 
 #include "gtest/gtest.h"
 
 namespace {
-using namespace ib::test;
-using namespace ib::cfg;
-using namespace ib::sim;
-using namespace ib::sim::can;
+using namespace SilKit::Tests;
+using namespace SilKit::Config;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Can;
 
 TEST_F(SimTestHarnessITest, can_demo)
 {
@@ -52,8 +52,8 @@ TEST_F(SimTestHarnessITest, can_demo)
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
 
-      canController->AddFrameTransmitHandler([&, participant](auto, const can::CanFrameTransmitEvent& frameTransmitEvent) {
-        if (frameTransmitEvent.status == can::CanTransmitStatus::Transmitted)
+      canController->AddFrameTransmitHandler([&, participant](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
+        if (frameTransmitEvent.status == Can::CanTransmitStatus::Transmitted)
         {
           receivedTransmitted = true;
           if(reinterpret_cast<void*>(participant) == frameTransmitEvent.userContext)
@@ -61,14 +61,14 @@ TEST_F(SimTestHarnessITest, can_demo)
             writerHasValidUserContext = true;
           }
         }
-        if (frameTransmitEvent.status == can::CanTransmitStatus::TransmitQueueFull)
+        if (frameTransmitEvent.status == Can::CanTransmitStatus::TransmitQueueFull)
         {
           receivedTransmitQueueFull = true;
         }
       });
 
-      canController->AddErrorStateChangeHandler([&](auto, const can::CanErrorStateChangeEvent& errorStateChangeEvent) {
-        if (errorStateChangeEvent.errorState == can::CanErrorState::ErrorActive)
+      canController->AddErrorStateChangeHandler([&](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
+        if (errorStateChangeEvent.errorState == Can::CanErrorState::ErrorActive)
         {
           receivedErrorActive = true;
         }
@@ -108,14 +108,14 @@ TEST_F(SimTestHarnessITest, can_demo)
         }
       });
 
-      canController->AddFrameHandler([&writerHasReceivedTx, &writerHasReceivedRx](auto, const can::CanFrameEvent& frameEvent) {
+      canController->AddFrameHandler([&writerHasReceivedTx, &writerHasReceivedRx](auto, const Can::CanFrameEvent& frameEvent) {
         //ignore early test messages
-        if(frameEvent.direction ==  ib::sim::TransmitDirection::TX)
+        if(frameEvent.direction ==  SilKit::Services::TransmitDirection::TX)
         {
           writerHasReceivedTx = true;
         }
 
-        if(frameEvent.direction ==  ib::sim::TransmitDirection::RX)
+        if(frameEvent.direction ==  SilKit::Services::TransmitDirection::RX)
         {
           writerHasReceivedRx = true;
         }
@@ -153,14 +153,14 @@ TEST_F(SimTestHarnessITest, can_demo)
         });
 
       canController->AddFrameHandler(
-        [&](auto, const can::CanFrameEvent& frameEvent)
+        [&](auto, const Can::CanFrameEvent& frameEvent)
         {
           if (frameEvent.userContext == nullptr)
           {
             //Ignore the early test messages
             return;
           }
-          EXPECT_EQ(frameEvent.direction, ib::sim::TransmitDirection::RX);
+          EXPECT_EQ(frameEvent.direction, SilKit::Services::TransmitDirection::RX);
 
           EXPECT_EQ(frameEvent.frame.canId, 123u);
           EXPECT_EQ(frameEvent.userContext, _simTestHarness->GetParticipant("CanWriter")->Participant())
@@ -173,8 +173,8 @@ TEST_F(SimTestHarnessITest, can_demo)
           result = true;
       });
 
-      canController->AddErrorStateChangeHandler([&](auto, const can::CanErrorStateChangeEvent& errorStateChangeEvent) {
-        if (errorStateChangeEvent.errorState == can::CanErrorState::ErrorActive)
+      canController->AddErrorStateChangeHandler([&](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
+        if (errorStateChangeEvent.errorState == Can::CanErrorState::ErrorActive)
         {
           readerReceivedErrorActive = true;
         }
@@ -197,14 +197,14 @@ TEST_F(SimTestHarnessITest, can_demo)
         canController->Start();
       });
 
-      canController->AddErrorStateChangeHandler([&](auto, const can::CanErrorStateChangeEvent& errorStateChangeEvent) {
-        if (errorStateChangeEvent.errorState == can::CanErrorState::ErrorActive)
+      canController->AddErrorStateChangeHandler([&](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
+        if (errorStateChangeEvent.errorState == Can::CanErrorState::ErrorActive)
         {
           monitorReceivedErrorActive = true;
         }
       });
 
-      canController->AddFrameHandler([&](auto, const can::CanFrameEvent& ) {
+      canController->AddFrameHandler([&](auto, const Can::CanFrameEvent& ) {
         monitorReceiveCount++;
       });
     }

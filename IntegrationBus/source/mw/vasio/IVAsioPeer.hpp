@@ -10,8 +10,8 @@
 
 #include "SerializedMessage.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class MessageBuffer;
 
@@ -25,7 +25,7 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-    virtual void SendIbMsg(SerializedMessage buffer) = 0;
+    virtual void SendSilKitMsg(SerializedMessage buffer) = 0;
     virtual void Subscribe(VAsioMsgSubscriber subscriber) = 0;
 
     virtual auto GetInfo() const -> const VAsioPeerInfo& = 0;
@@ -42,5 +42,5 @@ public:
     virtual auto GetProtocolVersion() const -> ProtocolVersion = 0;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

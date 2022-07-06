@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
@@ -18,13 +18,13 @@ using namespace asio::ip;
 #include <sys/socket.h>
 #include <errno.h>
 
-static void SetConnectOptions(ib::mw::logging::ILogger* ,
+static void SetConnectOptions(SilKit::Core::Logging::ILogger* ,
     asio::generic::stream_protocol::socket&)
 {
     // nothing specific required
 }
 
-static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
+static void EnableQuickAck(SilKit::Core::Logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
 {
     int val{1};
     //Disable Delayed Acknowledgments on the receiving side
@@ -41,7 +41,7 @@ static void EnableQuickAck(ib::mw::logging::ILogger* log, asio::generic::stream_
 #include <mstcpip.h>
 #  if defined(__MINGW32__)
 
-static void SetConnectOptions(ib::mw::logging::ILogger* ,
+static void SetConnectOptions(SilKit::Core::Logging::ILogger* ,
     asio::generic::stream_protocol::socket&)
 {
     // SIO_LOOPBACK_FAST_PATH not defined
@@ -49,7 +49,7 @@ static void SetConnectOptions(ib::mw::logging::ILogger* ,
 
 #   else
 
-static void SetConnectOptions(ib::mw::logging::ILogger* logger,
+static void SetConnectOptions(SilKit::Core::Logging::ILogger* logger,
     asio::generic::stream_protocol::socket& socket)
 {
     // This should improve loopback performance, and have no effect on remote TCP/IP
@@ -74,7 +74,7 @@ static void SetConnectOptions(ib::mw::logging::ILogger* logger,
 
 #   endif //!__MINGW32__
 
-static void EnableQuickAck(ib::mw::logging::ILogger* ,
+static void EnableQuickAck(SilKit::Core::Logging::ILogger* ,
     asio::generic::stream_protocol::socket& )
 
 {
@@ -94,12 +94,12 @@ static auto strip(std::string value, const std::string& chars) -> std::string
     return value;
 }
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-VAsioTcpPeer::VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* ibConnection, logging::ILogger* logger)
+VAsioTcpPeer::VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Logging::ILogger* logger)
     : _socket{executor}
-    , _ibConnection{ibConnection}
+    , _connection{connection}
     , _logger{logger}
 {
 }
@@ -118,7 +118,7 @@ void VAsioTcpPeer::Shutdown()
     if (_socket.is_open())
     {
         _logger->Info("Shutting down connection to {}", _info.participantName);
-        _ibConnection->OnPeerShutdown(this);
+        _connection->OnPeerShutdown(this);
         _socket.close();
     }
 }
@@ -181,7 +181,7 @@ auto VAsioTcpPeer::GetLocalAddress() const -> std::string
 
 bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 {
-    if (!_ibConnection->Config().middleware.enableDomainSockets)
+    if (!_connection->Config().middleware.enableDomainSockets)
     {
         return false;
     }
@@ -216,7 +216,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
         _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", strippedHost, port, err.what());
         return false;
     }
-    auto config = _ibConnection->Config();
+    auto config = _connection->Config();
     for (auto&& resolverEntry : resolverResults)
     {
         try
@@ -279,7 +279,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
             return Uri{uriStr};
     });
 
-    if (_ibConnection->Config().middleware.enableDomainSockets)
+    if (_connection->Config().middleware.enableDomainSockets)
     {
         //Attempt local connections first
         auto localUri = std::find_if(uris.begin(), uris.end(),
@@ -328,7 +328,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
 }
 
-void VAsioTcpPeer::SendIbMsg(SerializedMessage buffer)
+void VAsioTcpPeer::SendSilKitMsg(SerializedMessage buffer)
 {
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
 
@@ -386,7 +386,7 @@ void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
     _logger->Debug("Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName);
 
-    SendIbMsg(SerializedMessage{subscriber});
+    SendSilKitMsg(SerializedMessage{subscriber});
 }
 
 void VAsioTcpPeer::StartAsyncRead()
@@ -476,7 +476,7 @@ void VAsioTcpPeer::DispatchBuffer()
         _msgBuffer.resize(msgSize);
         SerializedMessage message{std::move(_msgBuffer)};
         message.SetProtocolVersion(GetProtocolVersion());
-        _ibConnection->OnSocketData(this, std::move(message));
+        _connection->OnSocketData(this, std::move(message));
 
         // keep trailing data in the buffer
         _msgBuffer = std::move(newBuffer);
@@ -487,5 +487,5 @@ void VAsioTcpPeer::DispatchBuffer()
     }
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

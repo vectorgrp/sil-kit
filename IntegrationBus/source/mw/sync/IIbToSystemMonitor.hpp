@@ -2,20 +2,20 @@
 
 #pragma once
 
-#include "ib/mw/sync/SyncDatatypes.hpp"
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "silkit/core/sync/SyncDatatypes.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
-class IIbToSystemMonitor
-    : public mw::IIbReceiver<ParticipantStatus, WorkflowConfiguration>
-    , public mw::IIbSender<>
+class IMsgForSystemMonitor
+    : public Core::IReceiver<ParticipantStatus, WorkflowConfiguration>
+    , public Core::ISender<>
 {
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

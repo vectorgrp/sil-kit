@@ -2,9 +2,9 @@
 
 #include "FlexrayDatatypeUtils.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 bool operator==(const FlexrayHeader& lhs, const FlexrayHeader& rhs)
 {
@@ -91,6 +91,6 @@ bool operator==(const FlexrayCycleStartEvent& lhs, const FlexrayCycleStartEvent&
         && lhs.timestamp == rhs.timestamp;
 }
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

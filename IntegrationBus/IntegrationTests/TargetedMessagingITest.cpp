@@ -7,12 +7,12 @@
 
 #include "SimTestHarness.hpp"
 #include "IParticipantInternal.hpp"
-#include "ib/sim/can/all.hpp"
-#include "ib/sim/can/CanDatatypes.hpp"
+#include "silkit/services/can/all.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
 #include "CanController.hpp"
 
-#include "ib/mw/sync/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -21,8 +21,8 @@
 
 namespace {
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::mw::sync;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
 
 TEST(TargetedMessagingITest, targeted_messaging)
 {
@@ -32,16 +32,16 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto receiveCount = 0;
 
-    ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
+    SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
-    auto* senderCom = dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("Sender")->Participant());
+    auto* senderCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(testHarness.GetParticipant("Sender")->Participant());
 
     auto systemCtrl = senderCom->GetSystemController();
 
     auto* senderLifecycleService = senderCom->GetLifecycleService();
     auto* senderTimeSyncService = senderLifecycleService->GetTimeSyncService();
 
-    auto* senderCan = dynamic_cast<ib::sim::can::CanController*>(senderCom->CreateCanController("CAN1"));
+    auto* senderCan = dynamic_cast<SilKit::Services::Can::CanController*>(senderCom->CreateCanController("CAN1"));
     senderCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
@@ -52,17 +52,17 @@ TEST(TargetedMessagingITest, targeted_messaging)
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
             if (now == 0ms)
             {
-                ib::sim::can::CanFrameEvent msg{};
-                msg.direction = ib::sim::TransmitDirection::RX;
+                SilKit::Services::Can::CanFrameEvent msg{};
+                msg.direction = SilKit::Services::TransmitDirection::RX;
                 msg.frame.canId = 42;
-                senderCom->SendIbMessage(senderCan, "TargetReceiver", msg);
+                senderCom->SendMsg(senderCan, "TargetReceiver", msg);
             }
 
             if (now == 3ms) { systemCtrl->Stop(); }
         });
 
     auto* receiverCom =
-        dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("TargetReceiver")->Participant());
+        dynamic_cast<SilKit::Core::IParticipantInternal*>(testHarness.GetParticipant("TargetReceiver")->Participant());
     auto* receiverLifecycleService = receiverCom->GetLifecycleService();
     auto* receiverTimeSyncService = receiverLifecycleService->GetTimeSyncService();
 
@@ -74,7 +74,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto* receiverCan = receiverCom->CreateCanController("CAN1");
 
     receiverCan->AddFrameHandler(
-        [&receiveCount](ib::sim::can::ICanController* controller, auto msg) {
+        [&receiveCount](SilKit::Services::Can::ICanController* controller, auto msg) {
             std::cout << "'TargetReceiver' received a message from controller '" << controller
                       << "' with canId=" << msg.frame.canId << std::endl;
             ASSERT_TRUE(msg.frame.canId == 42) << "The received canId is wrong. expected=42; received=" << msg.frame.canId;
@@ -82,7 +82,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
         });
 
     auto* otherReceiverCom =
-        dynamic_cast<ib::mw::IParticipantInternal*>(testHarness.GetParticipant("OtherReceiver")->Participant());
+        dynamic_cast<SilKit::Core::IParticipantInternal*>(testHarness.GetParticipant("OtherReceiver")->Participant());
     auto* otherLifecycleService = otherReceiverCom->GetLifecycleService();
     auto* otherTimeSyncService = otherLifecycleService->GetTimeSyncService();
     otherTimeSyncService->SetPeriod(1ms);

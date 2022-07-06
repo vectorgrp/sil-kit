@@ -1,40 +1,40 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-# the IbExtension is a standalone library except for its dependency on
-# ib/version.hpp
+# the SilKitExtension is a standalone library except for its dependency on
+# silkit/version.hpp
 
-add_library(IbExtensions STATIC
-    IbExtensions.cpp
-    IbExtensions.hpp
+add_library(SilKitExtensions STATIC
+    SilKitExtensions.cpp
+    SilKitExtensions.hpp
     detail/LoadExtension.hpp
-    IbExtensionApi/IIbExtension.hpp
-    IbExtensionApi/IbExtensionBase.hpp
-    IbExtensionApi/IbExtensionMacros.hpp
-    IbExtensionApi/IbExtensionABI.h
-    IbExtensionApi/IbExtensionUtils.hpp
-    IbExtensionApi/IbExtensionUtils.cpp
+    SilKitExtensionApi/ISilKitExtension.hpp
+    SilKitExtensionApi/SilKitExtensionBase.hpp
+    SilKitExtensionApi/SilKitExtensionMacros.hpp
+    SilKitExtensionApi/SilKitExtensionABI.h
+    SilKitExtensionApi/SilKitExtensionUtils.hpp
+    SilKitExtensionApi/SilKitExtensionUtils.cpp
 
 
     # Imlplementation Helpers
-    IbExtensionImpl/DllCache.hpp
-    IbExtensionImpl/FactorySingleton.hpp
+    SilKitExtensionImpl/DllCache.hpp
+    SilKitExtensionImpl/FactorySingleton.hpp
     #Extension implementations
     #   MDF4 (private)
-    IbExtensionImpl/CreateMdf4Tracing.cpp
-    IbExtensionImpl/CreateMdf4Tracing.hpp
+    SilKitExtensionImpl/CreateMdf4Tracing.cpp
+    SilKitExtensionImpl/CreateMdf4Tracing.hpp
 )
 
-target_include_directories(IbExtensions
+target_include_directories(SilKitExtensions
     PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/IbExtensionApi
-    ${CMAKE_CURRENT_LIST_DIR}/IbExtensionImpl
+    ${CMAKE_CURRENT_LIST_DIR}/SilKitExtensionApi
+    ${CMAKE_CURRENT_LIST_DIR}/SilKitExtensionImpl
 )
 
-target_link_libraries(IbExtensions
-    PUBLIC  IbInterface
-            IbConfiguration
-    PRIVATE IbVersion
-            IbTracing
+target_link_libraries(SilKitExtensions
+    PUBLIC  SilKitInterface
+            SilKitConfiguration
+    PRIVATE SilKitVersion
+            SilKitTracing
 )
 
 #Reproducible build: do not include CMAKE_SYSTEM_VERSION, it contains kernel version
@@ -48,14 +48,14 @@ if(UNIX)
         set(extension_os "${extension_os}/${ubuntu_vers}")
     endif()
 
-    target_link_libraries(IbExtensions
+    target_link_libraries(SilKitExtensions
         PRIVATE ${CMAKE_DL_LIBS}
     )
 
-    target_sources(IbExtensions PRIVATE detail/LoadExtension_posix.cpp)
+    target_sources(SilKitExtensions PRIVATE detail/LoadExtension_posix.cpp)
 
     #make sure we don't compile obviously bad code
-    target_compile_options(IbExtensions
+    target_compile_options(SilKitExtensions
         PRIVATE
             -pedantic -Wall -Wextra
             -Wcast-align -Wformat=2 -Wmissing-declarations
@@ -67,23 +67,23 @@ if(UNIX)
 
 elseif(MSVC OR MINGW)
 
-    target_sources(IbExtensions PRIVATE detail/LoadExtension_win.cpp)
+    target_sources(SilKitExtensions PRIVATE detail/LoadExtension_win.cpp)
 
     if(DEFINED MSVC_TOOLSET_VERSION)
-        target_compile_definitions(IbExtensions
+        target_compile_definitions(SilKitExtensions
             PUBLIC
-                IB_MSVC_TOOLSET_VERSION=${MSVC_TOOLSET_VERSION}
+                SILKIT_MSVC_TOOLSET_VERSION=${MSVC_TOOLSET_VERSION}
             )
 
     endif()
 endif()
 
-target_compile_definitions(IbExtensions
+target_compile_definitions(SilKitExtensions
     PRIVATE
-    IB_EXTENSION_OS="${extension_os}"
+    SILKIT_EXTENSION_OS="${extension_os}"
 )
 
-if(IB_BUILD_TESTS)
+if(SILKIT_BUILD_TESTS)
     add_subdirectory(Tests)
 endif()
 

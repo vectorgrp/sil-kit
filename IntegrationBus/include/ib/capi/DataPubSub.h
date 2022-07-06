@@ -2,59 +2,59 @@
 
 #pragma once
 #include <stdint.h>
-#include "ib/capi/IbMacros.h"
-#include "ib/capi/Types.h"
-#include "ib/capi/InterfaceIdentifiers.h"
+#include "silkit/capi/SilKitMacros.h"
+#include "silkit/capi/Types.h"
+#include "silkit/capi/InterfaceIdentifiers.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-IB_BEGIN_DECLS
+SILKIT_BEGIN_DECLS
 
 //! \brief An incoming DataMessage of a DataPublisher containing raw data and timestamp
 typedef struct
 {
-    ib_InterfaceIdentifier interfaceId;
+    SilKit_InterfaceIdentifier interfaceId;
     //! Send timestamp of the event
-    ib_NanosecondsTime timestamp;
+    SilKit_NanosecondsTime timestamp;
     //! Data field containing the payload
-    ib_ByteVector data; 
-} ib_Data_DataMessageEvent;
+    SilKit_ByteVector data; 
+} SilKit_DataMessageEvent;
 
 //! \brief Information about a newly discovered DataPublisher
 typedef struct
 {
-    ib_InterfaceIdentifier interfaceId;
+    SilKit_InterfaceIdentifier interfaceId;
     //! Reception timestamp of the event
-    ib_NanosecondsTime timestamp;
+    SilKit_NanosecondsTime timestamp;
     //! The topic string of the discovered DataPublisher.
     const char* topic;
     //! The mediaType of the discovered DataPublisher.
     const char* mediaType;
     //! The labels of the discovered DataPublisher.
-    ib_KeyValueList* labels;
-} ib_Data_NewDataPublisherEvent;
+    SilKit_KeyValueList* labels;
+} SilKit_NewDataPublisherEvent;
 
 /*! \brief represents a handle to a data publisher instance */
-typedef struct ib_Data_Publisher ib_Data_Publisher;
+typedef struct SilKit_DataPublisher SilKit_DataPublisher;
 /*! \brief represents a handle to a data subscriber instance */
-typedef struct ib_Data_Subscriber ib_Data_Subscriber;
+typedef struct SilKit_DataSubscriber SilKit_DataSubscriber;
 
 /*! \brief Handler type for incoming data message events on DataSubscribers. 
 * \param context The context that the user provided on registration.
 * \param subscriber The affected subscriber.
 * \param dataMessageEvent Contains the raw data and send timestamp.
 */
-typedef void (*ib_Data_DataMessageHandler_t)(void* context, ib_Data_Subscriber* subscriber, 
-    const ib_Data_DataMessageEvent* dataMessageEvent);
+typedef void (*SilKit_DataMessageHandler_t)(void* context, SilKit_DataSubscriber* subscriber, 
+    const SilKit_DataMessageEvent* dataMessageEvent);
 
 /*! \brief Handler type for new data publishers.
 * \param context The context that the user provided on registration.
 * \param subscriber The affected subscriber.
 * \param newDataPublisherEvent Contains information about the new DataPublisher and the reception timestamp.
 */
-typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscriber* subscriber,
-                                                  const ib_Data_NewDataPublisherEvent* newDataPublisherEvent);
+typedef void (*SilKit_NewDataPublisherHandler_t)(void* context, SilKit_DataSubscriber* subscriber,
+                                                  const SilKit_NewDataPublisherEvent* newDataPublisherEvent);
 
 /*! \brief Create a DataPublisher on the provided simulation participant with the provided properties.
 * \param out Pointer to which the resulting DataPublisher reference will be written.
@@ -63,18 +63,18 @@ typedef void (*ib_Data_NewDataPublisherHandler_t)(void* context, ib_Data_Subscri
 * \param topic The topic string on which data should be published through this DataPublisher.
 * \param mediaType A meta description of the data that will be published through this DataPublisher.
 * \param labels A list of key-value pairs of this DataPublisher. The labels are received in the
-* ib_Data_NewDataSourceHandler of a subscriber and are relevant for matching DataPublishers and DataSubscribers.
+* SilKit_NewDataSourceHandler of a subscriber and are relevant for matching DataPublishers and DataSubscribers.
 * \param history A number indicating the number of historic values that should be replayed for a new DataSubscriber.
 * Restricted to {0|1}.
 */
-IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_Participant* participant,
+SilKitAPI SilKit_ReturnCode SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
                                                          const char* controllerName, const char* topic,
-                                                         const char* mediaType, const ib_KeyValueList* labels,
+                                                         const char* mediaType, const SilKit_KeyValueList* labels,
                                                          uint8_t history);
 
-typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(ib_Data_Publisher** outPublisher, ib_Participant* participant,
+typedef SilKit_ReturnCode (*SilKit_DataPublisher_Create_t)(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
                                                     const char* controllerName, const char* topic,
-                                                    const char* mediaType, const ib_KeyValueList* labels,
+                                                    const char* mediaType, const SilKit_KeyValueList* labels,
                                                     uint8_t history);
 
 /*! \brief Create a DataSubscriber on the provided simulation participant with the provided properties.
@@ -86,42 +86,42 @@ typedef ib_ReturnCode (*ib_Data_Publisher_Create_t)(ib_Data_Publisher** outPubli
 * \param labels A list of key-value pairs used to annotate which publications this subscriber is interested in.
 * \param defaultDataHandlerContext A user provided context that is reobtained on data reception in the dataHandler.
 * \param defaultDataHandler The default handler that is called on data reception as long as no explicit handler on 
-* certain labels is registered. Can be overwritten by \ref ib_Data_Subscriber_SetDefaultDataMessageHandler.
+* certain labels is registered. Can be overwritten by \ref SilKit_DataSubscriber_SetDefaultDataMessageHandler.
 * \param newDataSourceContext A user provided context that is reobtained on invocation of the newDataSourceHandler.
 * \param newDataSourceHandler A handler that is called if a new matching publisher is discovered.
 */
-IntegrationBusAPI ib_ReturnCode
-ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_Participant* participant, const char* controllerName,
-                          const char* topic, const char* mediaType, const ib_KeyValueList* labels,
-                          void* defaultDataHandlerContext, ib_Data_DataMessageHandler_t defaultDataHandler,
-                          void* newDataSourceContext, ib_Data_NewDataPublisherHandler_t newDataSourceHandler);
+SilKitAPI SilKit_ReturnCode
+SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant, const char* controllerName,
+                          const char* topic, const char* mediaType, const SilKit_KeyValueList* labels,
+                          void* defaultDataHandlerContext, SilKit_DataMessageHandler_t defaultDataHandler,
+                          void* newDataSourceContext, SilKit_NewDataPublisherHandler_t newDataSourceHandler);
 
-typedef ib_ReturnCode (*ib_Data_Subscriber_Create_t)(ib_Data_Subscriber** outSubscriber, ib_Participant* participant,
+typedef SilKit_ReturnCode (*SilKit_DataSubscriber_Create_t)(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant,
                                                      const char* controllerName, const char* topic,
-                                                     const char* mediaType, const ib_KeyValueList* labels,
+                                                     const char* mediaType, const SilKit_KeyValueList* labels,
                                                      void* defaultDataHandlerContext,
-                                                     ib_Data_DataMessageHandler_t defaultDataHandler,
+                                                     SilKit_DataMessageHandler_t defaultDataHandler,
                                                      void* newDataSourceContext,
-                                                     ib_Data_NewDataPublisherHandler_t newDataSourceHandler);
+                                                     SilKit_NewDataPublisherHandler_t newDataSourceHandler);
 
 /*! \brief Publish data through the provided DataPublisher
 * \param self The DataPublisher that should publish the data.
 * \param data The data that should be published.
 */
-IntegrationBusAPI ib_ReturnCode ib_Data_Publisher_Publish(ib_Data_Publisher* self, const ib_ByteVector* data);
+SilKitAPI SilKit_ReturnCode SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
 
-typedef ib_ReturnCode (*ib_Data_Publisher_Publish_t)(ib_Data_Publisher* self, const ib_ByteVector* data);
+typedef SilKit_ReturnCode (*SilKit_DataPublisher_Publish_t)(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
 
 /*! \brief Sets / overwrites the default handler to be called on data reception.
 * \param self The DataSubscriber for which the handler should be set.
 * \param context A user provided context, that is reobtained on data reception in the dataHandler.
 * \param dataHandler A handler that is called on data reception.
 */
-IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_SetDefaultDataMessageHandler(
-    ib_Data_Subscriber* self, void* context, ib_Data_DataMessageHandler_t dataHandler);
+SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_SetDefaultDataMessageHandler(
+    SilKit_DataSubscriber* self, void* context, SilKit_DataMessageHandler_t dataHandler);
 
-typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultDataMessageHandler_t)(ib_Data_Subscriber* self, void* context,
-                                                                           ib_Data_DataMessageHandler_t dataHandler);
+typedef SilKit_ReturnCode (*SilKit_DataSubscriber_SetDefaultDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
+                                                                           SilKit_DataMessageHandler_t dataHandler);
 
 /*! \brief Register a reception handler explicit for given annotation details.
 * Overwrites previously registered explicit handlers if the same labels and media type are used.
@@ -133,27 +133,27 @@ typedef ib_ReturnCode (*ib_Data_Subscriber_SetDefaultDataMessageHandler_t)(ib_Da
 * \param context A user provided context that is reobtained on data reception in the explicit handler.
 * \param dataHandler A handler that is called on data reception by publishers with matching annotations.
 */
-IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(
-    ib_Data_Subscriber* self, void* context, ib_Data_DataMessageHandler_t dataHandler, const char* mediaType,
-    const ib_KeyValueList* labels, ib_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_AddExplicitDataMessageHandler(
+    SilKit_DataSubscriber* self, void* context, SilKit_DataMessageHandler_t dataHandler, const char* mediaType,
+    const SilKit_KeyValueList* labels, SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Data_Subscriber_AddExplicitDataMessageHandler_t)(ib_Data_Subscriber* self, void* context,
-                                                                            ib_Data_DataMessageHandler_t dataHandler,
+typedef SilKit_ReturnCode (*SilKit_DataSubscriber_AddExplicitDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
+                                                                            SilKit_DataMessageHandler_t dataHandler,
                                                                             const char* mediaType,
-                                                                            const ib_KeyValueList* labels,
-                                                                            ib_HandlerId* outHandlerId);
+                                                                            const SilKit_KeyValueList* labels,
+                                                                            SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Data_DataMessageHandler_t by ib_HandlerId on this subscriber
+/*! \brief  Remove a \ref SilKit_DataMessageHandler_t by SilKit_HandlerId on this subscriber
 *
 * \param self The subscriber for which the explicit handler should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Data_Subscriber_RemoveExplicitDataMessageHandler(ib_Data_Subscriber* self,
-                                                                                    ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_RemoveExplicitDataMessageHandler(SilKit_DataSubscriber* self,
+                                                                                    SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Data_Subscriber_RemoveExplicitDataMessageHandler_t)(ib_Data_Subscriber* self,
-                                                                               ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_DataSubscriber_RemoveExplicitDataMessageHandler_t)(SilKit_DataSubscriber* self,
+                                                                               SilKit_HandlerId handlerId);
 
-IB_END_DECLS
+SILKIT_END_DECLS
 
 #pragma pack(pop)

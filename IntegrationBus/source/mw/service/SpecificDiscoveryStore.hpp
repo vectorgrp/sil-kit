@@ -7,9 +7,9 @@
 
 #include "IServiceDiscovery.hpp"
 
-namespace ib {
-namespace mw {
-namespace service {
+namespace SilKit {
+namespace Core {
+namespace Discovery {
 
 //!< Store to prevent quadratic lookup of services
 class SpecificDiscoveryStore
@@ -52,7 +52,7 @@ private:
 
 };
 
-} // namespace service
-} // namespace mw
-} // namespace ib
+} // namespace Discovery
+} // namespace Core
+} // namespace SilKit
 

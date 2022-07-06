@@ -3,8 +3,8 @@
 # Helper Functions
 ################################################################################
 
-function(add_vib_test)
-    if(NOT ${IB_BUILD_TESTS})
+function(add_silkit_test)
+    if(NOT ${SILKIT_BUILD_TESTS})
         return()
     endif()
 
@@ -18,13 +18,13 @@ function(add_vib_test)
     )
 
     if(NOT PARSED_ARGS_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "add_ib_test function failed because no executable name was specified (UNPARSED_ARGUMENTS were empty).")
+        message(FATAL_ERROR "add_silkit_test function failed because no executable name was specified (UNPARSED_ARGUMENTS were empty).")
     endif()
 
     list(GET PARSED_ARGS_UNPARSED_ARGUMENTS 0 executableName)
 
     if(NOT PARSED_ARGS_SOURCES)
-        message(FATAL_ERROR "add_ib_test function for ${executableName} has an empty source list.")
+        message(FATAL_ERROR "add_silkit_test function for ${executableName} has an empty source list.")
     endif()
 
     add_executable(${executableName}
@@ -34,7 +34,7 @@ function(add_vib_test)
     set_property(TARGET ${executableName} PROPERTY FOLDER "Tests")
 
     target_link_libraries(${executableName}
-        PRIVATE IbInterface
+        PRIVATE SilKitInterface
         gtest
         gmock_main
         ${PARSED_ARGS_LIBS}
@@ -71,4 +71,4 @@ function(add_vib_test)
         get_filename_component(compilerDir ${CMAKE_CXX_COMPILER} DIRECTORY)
         set_tests_properties(${executableName} PROPERTIES ENVIRONMENT "PATH=${compilerDir};")
     endif()
-endfunction(add_vib_test)
+endfunction(add_silkit_test)

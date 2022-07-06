@@ -3,63 +3,63 @@
 #pragma once
 #include <limits.h>
 #include <stdint.h>
-#include "ib/capi/IbMacros.h"
-#include "ib/capi/Types.h"
+#include "silkit/capi/SilKitMacros.h"
+#include "silkit/capi/Types.h"
 
-IB_BEGIN_DECLS
+SILKIT_BEGIN_DECLS
 
-typedef int32_t ib_InterfaceIdentifier;
+typedef int32_t SilKit_InterfaceIdentifier;
 
 // CAN
-#define ib_InterfaceIdentifier_CanFrame                    ((ib_InterfaceIdentifier)1001001)
-#define ib_InterfaceIdentifier_CanFrameTransmitEvent       ((ib_InterfaceIdentifier)1002001)
-#define ib_InterfaceIdentifier_CanFrameEvent               ((ib_InterfaceIdentifier)1003001)
-#define ib_InterfaceIdentifier_CanStateChangeEvent         ((ib_InterfaceIdentifier)1004001)
-#define ib_InterfaceIdentifier_CanErrorStateChangeEvent    ((ib_InterfaceIdentifier)1005001)
+#define SilKit_InterfaceIdentifier_CanFrame                    ((SilKit_InterfaceIdentifier)1001001)
+#define SilKit_InterfaceIdentifier_CanFrameTransmitEvent       ((SilKit_InterfaceIdentifier)1002001)
+#define SilKit_InterfaceIdentifier_CanFrameEvent               ((SilKit_InterfaceIdentifier)1003001)
+#define SilKit_InterfaceIdentifier_CanStateChangeEvent         ((SilKit_InterfaceIdentifier)1004001)
+#define SilKit_InterfaceIdentifier_CanErrorStateChangeEvent    ((SilKit_InterfaceIdentifier)1005001)
 
 // Ethernet
-#define ib_InterfaceIdentifier_EthernetFrameEvent          ((ib_InterfaceIdentifier)2001001)
-#define ib_InterfaceIdentifier_EthernetFrameTransmitEvent  ((ib_InterfaceIdentifier)2002001)
-#define ib_InterfaceIdentifier_EthernetStateChangeEvent    ((ib_InterfaceIdentifier)2003001)
-#define ib_InterfaceIdentifier_EthernetBitrateChangeEvent  ((ib_InterfaceIdentifier)2004001)
-#define ib_InterfaceIdentifier_EthernetFrame               ((ib_InterfaceIdentifier)2005001)
+#define SilKit_InterfaceIdentifier_EthernetFrameEvent          ((SilKit_InterfaceIdentifier)2001001)
+#define SilKit_InterfaceIdentifier_EthernetFrameTransmitEvent  ((SilKit_InterfaceIdentifier)2002001)
+#define SilKit_InterfaceIdentifier_EthernetStateChangeEvent    ((SilKit_InterfaceIdentifier)2003001)
+#define SilKit_InterfaceIdentifier_EthernetBitrateChangeEvent  ((SilKit_InterfaceIdentifier)2004001)
+#define SilKit_InterfaceIdentifier_EthernetFrame               ((SilKit_InterfaceIdentifier)2005001)
 
 // FlexRay
-#define ib_InterfaceIdentifier_FlexrayFrameEvent           ((ib_InterfaceIdentifier)3001001)
-#define ib_InterfaceIdentifier_FlexrayFrameTransmitEvent   ((ib_InterfaceIdentifier)3002001)
-#define ib_InterfaceIdentifier_FlexraySymbolEvent          ((ib_InterfaceIdentifier)3003001)
-#define ib_InterfaceIdentifier_FlexraySymbolTransmitEvent  ((ib_InterfaceIdentifier)3004001)
-#define ib_InterfaceIdentifier_FlexrayCycleStartEvent      ((ib_InterfaceIdentifier)3005001)
-#define ib_InterfaceIdentifier_FlexrayPocStatusEvent       ((ib_InterfaceIdentifier)3006001)
-#define ib_InterfaceIdentifier_FlexrayWakeupEvent          ((ib_InterfaceIdentifier)3007001)
-#define ib_InterfaceIdentifier_FlexrayControllerConfig     ((ib_InterfaceIdentifier)3008001)
-#define ib_InterfaceIdentifier_FlexrayClusterParameters    ((ib_InterfaceIdentifier)3009001)
-#define ib_InterfaceIdentifier_FlexrayNodeParameters       ((ib_InterfaceIdentifier)3010001)
-#define ib_InterfaceIdentifier_FlexrayHostCommand          ((ib_InterfaceIdentifier)3011001)
-#define ib_InterfaceIdentifier_FlexrayHeader               ((ib_InterfaceIdentifier)3012001)
-#define ib_InterfaceIdentifier_FlexrayFrame                ((ib_InterfaceIdentifier)3013001)
-#define ib_InterfaceIdentifier_FlexrayTxBufferConfig       ((ib_InterfaceIdentifier)3014001)
-#define ib_InterfaceIdentifier_FlexrayTxBufferUpdate       ((ib_InterfaceIdentifier)3015001)
+#define SilKit_InterfaceIdentifier_FlexrayFrameEvent           ((SilKit_InterfaceIdentifier)3001001)
+#define SilKit_InterfaceIdentifier_FlexrayFrameTransmitEvent   ((SilKit_InterfaceIdentifier)3002001)
+#define SilKit_InterfaceIdentifier_FlexraySymbolEvent          ((SilKit_InterfaceIdentifier)3003001)
+#define SilKit_InterfaceIdentifier_FlexraySymbolTransmitEvent  ((SilKit_InterfaceIdentifier)3004001)
+#define SilKit_InterfaceIdentifier_FlexrayCycleStartEvent      ((SilKit_InterfaceIdentifier)3005001)
+#define SilKit_InterfaceIdentifier_FlexrayPocStatusEvent       ((SilKit_InterfaceIdentifier)3006001)
+#define SilKit_InterfaceIdentifier_FlexrayWakeupEvent          ((SilKit_InterfaceIdentifier)3007001)
+#define SilKit_InterfaceIdentifier_FlexrayControllerConfig     ((SilKit_InterfaceIdentifier)3008001)
+#define SilKit_InterfaceIdentifier_FlexrayClusterParameters    ((SilKit_InterfaceIdentifier)3009001)
+#define SilKit_InterfaceIdentifier_FlexrayNodeParameters       ((SilKit_InterfaceIdentifier)3010001)
+#define SilKit_InterfaceIdentifier_FlexrayHostCommand          ((SilKit_InterfaceIdentifier)3011001)
+#define SilKit_InterfaceIdentifier_FlexrayHeader               ((SilKit_InterfaceIdentifier)3012001)
+#define SilKit_InterfaceIdentifier_FlexrayFrame                ((SilKit_InterfaceIdentifier)3013001)
+#define SilKit_InterfaceIdentifier_FlexrayTxBufferConfig       ((SilKit_InterfaceIdentifier)3014001)
+#define SilKit_InterfaceIdentifier_FlexrayTxBufferUpdate       ((SilKit_InterfaceIdentifier)3015001)
 
 // Lin
-#define ib_InterfaceIdentifier_LinFrame                    ((ib_InterfaceIdentifier)4001001)
-#define ib_InterfaceIdentifier_LinFrameResponse            ((ib_InterfaceIdentifier)4002001)
-#define ib_InterfaceIdentifier_LinControllerConfig         ((ib_InterfaceIdentifier)4003001)
-#define ib_InterfaceIdentifier_LinFrameStatusEvent         ((ib_InterfaceIdentifier)4004001)
-#define ib_InterfaceIdentifier_LinGoToSleepEvent           ((ib_InterfaceIdentifier)4005001)
-#define ib_InterfaceIdentifier_LinWakeupEvent              ((ib_InterfaceIdentifier)4006001)
+#define SilKit_InterfaceIdentifier_LinFrame                    ((SilKit_InterfaceIdentifier)4001001)
+#define SilKit_InterfaceIdentifier_LinFrameResponse            ((SilKit_InterfaceIdentifier)4002001)
+#define SilKit_InterfaceIdentifier_LinControllerConfig         ((SilKit_InterfaceIdentifier)4003001)
+#define SilKit_InterfaceIdentifier_LinFrameStatusEvent         ((SilKit_InterfaceIdentifier)4004001)
+#define SilKit_InterfaceIdentifier_LinGoToSleepEvent           ((SilKit_InterfaceIdentifier)4005001)
+#define SilKit_InterfaceIdentifier_LinWakeupEvent              ((SilKit_InterfaceIdentifier)4006001)
 
 // Data
-#define ib_InterfaceIdentifier_DataMessageEvent            ((ib_InterfaceIdentifier)5001001)
-#define ib_InterfaceIdentifier_NewDataPublisherEvent       ((ib_InterfaceIdentifier)5001002)
+#define SilKit_InterfaceIdentifier_DataMessageEvent            ((SilKit_InterfaceIdentifier)5001001)
+#define SilKit_InterfaceIdentifier_NewDataPublisherEvent       ((SilKit_InterfaceIdentifier)5001002)
 
 // Rpc
-#define ib_InterfaceIdentifier_RpcDiscoveryResult          ((ib_InterfaceIdentifier)6001001)
-#define ib_InterfaceIdentifier_RpcCallEvent                ((ib_InterfaceIdentifier)6002001)
-#define ib_InterfaceIdentifier_RpcCallResultEvent          ((ib_InterfaceIdentifier)6003001)
-#define ib_InterfaceIdentifier_RpcDiscoveryResultList      ((ib_InterfaceIdentifier)6004001)
+#define SilKit_InterfaceIdentifier_RpcDiscoveryResult          ((SilKit_InterfaceIdentifier)6001001)
+#define SilKit_InterfaceIdentifier_RpcCallEvent                ((SilKit_InterfaceIdentifier)6002001)
+#define SilKit_InterfaceIdentifier_RpcCallResultEvent          ((SilKit_InterfaceIdentifier)6003001)
+#define SilKit_InterfaceIdentifier_RpcDiscoveryResultList      ((SilKit_InterfaceIdentifier)6004001)
 
 // Participant
-#define ib_InterfaceIdentifier_ParticipantStatus           ((ib_InterfaceIdentifier)7001001)
+#define SilKit_InterfaceIdentifier_ParticipantStatus           ((SilKit_InterfaceIdentifier)7001001)
 
-IB_END_DECLS
+SILKIT_END_DECLS

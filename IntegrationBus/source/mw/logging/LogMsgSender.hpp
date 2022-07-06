@@ -2,17 +2,17 @@
 
 #pragma once
 
-#include "IIbToLogMsgSender.hpp"
+#include "IMsgForLogMsgSender.hpp"
 #include "IParticipantInternal.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 class LogMsgSender
-    : public IIbToLogMsgSender
-    , public mw::IIbServiceEndpoint
+    : public IMsgForLogMsgSender
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -23,9 +23,9 @@ public:
     void SendLogMsg(const LogMsg& msg);
     void SendLogMsg(LogMsg&& msg);
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
@@ -35,22 +35,22 @@ private:
     // ----------------------------------------
     // private members
     IParticipantInternal* _participant{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
+    Core::ServiceDescriptor _serviceDescriptor{};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-void LogMsgSender::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void LogMsgSender::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto LogMsgSender::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto LogMsgSender::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

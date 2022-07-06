@@ -5,8 +5,8 @@
 #include "MessageBuffer.hpp"
 #include "EndpointAddress.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const EndpointAddress& addr)
 {
@@ -22,5 +22,5 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, EndpointAddress& addr)
     return buffer;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

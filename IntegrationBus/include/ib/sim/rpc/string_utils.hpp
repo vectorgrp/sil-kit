@@ -5,16 +5,16 @@
 #include <ostream>
 #include <sstream>
 
-#include "ib/exception.hpp"
-#include "ib/util/PrintableHexString.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/util/PrintableHexString.hpp"
 
 #include "RpcDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-// RpcIbMessages
+// RpcSilKitMessages
 inline std::string   to_string(const CallUUID& msg);
 inline std::ostream& operator<<(std::ostream& out, const CallUUID& msg);
 
@@ -55,8 +55,8 @@ std::string to_string(const FunctionCall& msg)
 }
 std::ostream& operator<<(std::ostream& out, const FunctionCall& msg)
 {
-    return out << "rpc::FunctionCall{callUUID=" << msg.callUUID << ", data="
-               << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+    return out << "Rpc::FunctionCall{callUUID=" << msg.callUUID << ", data="
+               << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size()
                << "}";
 }
@@ -69,8 +69,8 @@ std::string to_string(const FunctionCallResponse& msg)
 }
 std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg)
 {
-    return out << "rpc::FunctionCallResponse{callUUID=" << msg.callUUID
-               << ", data=" << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+    return out << "Rpc::FunctionCallResponse{callUUID=" << msg.callUUID
+               << ", data=" << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size() << "}";
 }
 
@@ -92,12 +92,12 @@ std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::str
 
 std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult)
 {
-    return out << "rpc::RpcDiscoveryResult{"
+    return out << "Rpc::RpcDiscoveryResult{"
                << "functionName=\"" << discoveryResult.functionName << "\", mediaType=" << discoveryResult.mediaType
                << ", labels=" << discoveryResult.labels
                << "}";
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

@@ -4,15 +4,15 @@
 
 #include <tuple>
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 template<typename... MsgT>
-class IIbSender
+class ISender
 {
 public:
-    using IbSendMessagesTypes = std::tuple<MsgT...>;
+    using SilKitSendMessagesTypes = std::tuple<MsgT...>;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

@@ -4,13 +4,13 @@
 
 #include "MessageBuffer.hpp"
 
-#include "ib/sim/data/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
-void Serialize(ib::mw::MessageBuffer& buffer, const DataMessageEvent& msg);
-void Deserialize(ib::mw::MessageBuffer& buffer, DataMessageEvent& out);
-} // namespace data    
-} // namespace sim
-} // namespace ib
+namespace SilKit {
+namespace Services {
+namespace PubSub {
+void Serialize(SilKit::Core::MessageBuffer& buffer, const DataMessageEvent& msg);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, DataMessageEvent& out);
+} // namespace PubSub    
+} // namespace Services
+} // namespace SilKit

@@ -5,11 +5,11 @@
 #include <iostream>
 #include <thread>
 
-#include "ib/IbMacros.hpp"
-#include "ib/mw/IParticipant.hpp"
-#include "ib/cfg/IParticipantConfiguration.hpp"
+#include "silkit/SilKitMacros.hpp"
+#include "silkit/core/IParticipant.hpp"
+#include "silkit/cfg/IParticipantConfiguration.hpp"
 
-namespace ib {
+namespace SilKit {
 
 /*! \brief Join the configured middleware domain as a participant.
 *
@@ -21,18 +21,18 @@ namespace ib {
 * \param registryUri the URI of the registry
 * \return Instance of the communication adapter
 *
-* \throw ib::configuration_error if the config has errors
+* \throw SilKit::configuration_error if the config has errors
 * \throw std::runtime_error Parameter participantName does not name
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.
 */
 
-IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName)
-    -> std::unique_ptr<mw::IParticipant>;
+    -> std::unique_ptr<Core::IParticipant>;
 
-IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<mw::IParticipant>;
+    -> std::unique_ptr<Core::IParticipant>;
 
-} // namespace ib
+} // namespace SilKit

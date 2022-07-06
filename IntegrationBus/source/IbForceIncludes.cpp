@@ -1,15 +1,15 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/cfg/IParticipantConfiguration.hpp"
+#include "silkit/cfg/IParticipantConfiguration.hpp"
 
-/*! \brief Dummy compilation unit to pull in exports from other ib libs
+/*! \brief Dummy compilation unit to pull in exports from other silkit libs
  *
- *  If you are missing an export from a ib lib, just add a dummy
+ *  If you are missing an export from a silkit lib, just add a dummy
  *  function that uses the missing methods or functions.
  */
 
-void __ib_force_include_participant_configuration()
+void __silkit_force_include_participant_configuration()
 {
-    auto foo1 = ib::cfg::ParticipantConfigurationFromString("");
-    auto foo2 = ib::cfg::ParticipantConfigurationFromFile("");
+    auto foo1 = SilKit::Config::ParticipantConfigurationFromString("");
+    auto foo2 = SilKit::Config::ParticipantConfigurationFromFile("");
 }

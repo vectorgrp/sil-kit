@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_vib_test(TestUtilsVectorView SOURCES vector_view_test.cpp)
-add_vib_test(TestUtilsSilSerDes SOURCES SilSerializerTest.cpp SilSerDesTest.cpp)
-add_vib_test(TestUtilsCommandlineParser SOURCES CommandlineParserTest.cpp LIBS IbUtil)
-add_vib_test(TestUtilsSynchronizedHandlers SOURCES SynchronizedHandlersTest.cpp LIBS IbUtil)
+add_silkit_test(TestUtilsVectorView SOURCES vector_view_test.cpp)
+add_silkit_test(TestUtilsSilSerDes SOURCES SilSerializerTest.cpp SilSerDesTest.cpp)
+add_silkit_test(TestUtilsCommandlineParser SOURCES CommandlineParserTest.cpp LIBS SilKitUtil)
+add_silkit_test(TestUtilsSynchronizedHandlers SOURCES SynchronizedHandlersTest.cpp LIBS SilKitUtil)

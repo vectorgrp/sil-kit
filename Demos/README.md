@@ -1,15 +1,15 @@
-# IntegrationBus Demos
+# SilKit Demos
 
-This directory contains sample projects that demonstrate how the IntegrationBus
+This directory contains sample projects that demonstrate how the SilKit
 API can be used:
 
 * **CAN, LIN, FlexRay, Ethernet, DataMessage, RPC**:
-  Write or read participants that are able to connect to IntegrationBus and use buses of
+  Write or read participants that are able to connect to SilKit and use buses of
   all supported protocols including CAN, LIN, FlexRay, Ethernet, DataMessage and the RPC service.
 
 
 * **Benchmark**:
-  A simple command line tool that allows to measure VIB simulation performance
+  A simple command line tool that allows to measure SILKIT simulation performance
   with configurable parameters.
 
 The build system is based on cmake.
@@ -20,7 +20,7 @@ Supported target platforms and build tools:
 
 ## Build Instructions
 
-For the binary release, the cmake build from the 'IntegrationBus-Demos'
+For the binary release, the cmake build from the 'SilKit-Demos'
 directory should work on all supported platforms in a similar way:
 
 > mkdir build
@@ -33,8 +33,8 @@ directory should work on all supported platforms in a similar way:
 
 The demos will be placed alongside the binaries.
 
-To build the demos as developer from within the IB source tree and place them alongside
-the binaries, build the 'Demos' CMake target from the IB 'build' directory:
+To build the demos as developer from within the SilKit source tree and place them alongside
+the binaries, build the 'Demos' CMake target from the SilKit 'build' directory:
 
 > cmake --build . --target Demos
 
@@ -43,9 +43,9 @@ compilation.
 
 * **Note:**
   By default, the demo build system assumes that it resides next to a binary
-  release of the VIB in a directory 'IntegrationBus' which contains a properly
-  exported build of the VIB. You can override this by providing your own
-  IntegrationBus::IntegrationBus target in cmake.
+  release of the SILKIT in a directory 'SilKit' which contains a properly
+  exported build of the SILKIT. You can override this by providing your own
+  SilKit::SilKit target in cmake.
 
 * **Windows: VisualStudio 2015 and VisualStudio 2017**
   It is possible to use Visual Studio directly, without project files or

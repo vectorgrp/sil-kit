@@ -4,11 +4,11 @@
 #include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
-DataPublisher::DataPublisher(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
+DataPublisher::DataPublisher(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
                              const std::string& topic, const std::string& mediaType,
                              const std::map<std::string, std::string>& labels, const std::string& pubUUID)
     : _topic{topic}
@@ -23,7 +23,7 @@ DataPublisher::DataPublisher(mw::IParticipantInternal* participant, mw::sync::IT
 void DataPublisher::Publish(std::vector<uint8_t> data)
 {
     DataMessageEvent msg{_timeProvider->Now(), std::move(data)};
-    _participant->SendIbMessage(this, std::move(msg));
+    _participant->SendMsg(this, std::move(msg));
 }
 
 void DataPublisher::Publish(const uint8_t* data, std::size_t size)
@@ -31,11 +31,11 @@ void DataPublisher::Publish(const uint8_t* data, std::size_t size)
     Publish({data, data + size});
 }
 
-void DataPublisher::SetTimeProvider(mw::sync::ITimeProvider* provider)
+void DataPublisher::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

@@ -5,13 +5,13 @@
 #include <thread>
 #include <algorithm>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
-using namespace ib::mw;
-using namespace ib::sim::rpc;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Rpc;
 using namespace std::chrono_literals;
 
 std::chrono::milliseconds callReturnTimeout{ 5000ms };
@@ -94,16 +94,16 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        auto registryUri = "vib://localhost:8500";
+        auto registryUri = "silkit://localhost:8500";
         if (argc >= 4)
         {
             registryUri = argv[3];
         }
 
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -179,7 +179,7 @@ int main(int argc, char** argv)
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/util/functional.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "MockParticipant.hpp"
 
@@ -28,11 +28,11 @@ using testing::_;
 using testing::InSequence;
 using testing::NiceMock;
 
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::eth;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Ethernet;
 
-using ::ib::mw::test::DummyParticipant;
+using ::SilKit::Core::Tests::DummyParticipant;
 
 auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthernetFrameEvent&>
 {
@@ -42,10 +42,10 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameTransmitEvent&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetStatus&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetSetMode&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameTransmitEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetStatus&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetSetMode&));
 };
 
 class EthernetControllerDetailedSimTest : public testing::Test
@@ -53,10 +53,10 @@ class EthernetControllerDetailedSimTest : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(FrameHandler, void(eth::IEthernetController*, const eth::EthernetFrameEvent&));
-        MOCK_METHOD2(FrameTransmitHandler, void(eth::IEthernetController*, eth::EthernetFrameTransmitEvent));
-        MOCK_METHOD2(StateChangeHandler, void(eth::IEthernetController*, eth::EthernetStateChangeEvent));
-        MOCK_METHOD2(BitrateChangedHandler, void(eth::IEthernetController*, eth::EthernetBitrateChangeEvent));
+        MOCK_METHOD2(FrameHandler, void(Ethernet::IEthernetController*, const Ethernet::EthernetFrameEvent&));
+        MOCK_METHOD2(FrameTransmitHandler, void(Ethernet::IEthernetController*, Ethernet::EthernetFrameTransmitEvent));
+        MOCK_METHOD2(StateChangeHandler, void(Ethernet::IEthernetController*, Ethernet::EthernetStateChangeEvent));
+        MOCK_METHOD2(BitrateChangedHandler, void(Ethernet::IEthernetController*, Ethernet::EthernetBitrateChangeEvent));
     };
 
 protected:
@@ -67,10 +67,10 @@ protected:
         controller.SetDetailedBehavior(from_endpointAddress(busSimAddress));
         controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::FrameHandler));
-        controller.AddFrameTransmitHandler(ib::util::bind_method(&callbacks, &Callbacks::FrameTransmitHandler));
-        controller.AddBitrateChangeHandler(ib::util::bind_method(&callbacks, &Callbacks::BitrateChangedHandler));
-        controller.AddStateChangeHandler(ib::util::bind_method(&callbacks, &Callbacks::StateChangeHandler));
+        controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::FrameHandler));
+        controller.AddFrameTransmitHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::FrameTransmitHandler));
+        controller.AddBitrateChangeHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::BitrateChangedHandler));
+        controller.AddStateChangeHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::StateChangeHandler));
 
         controllerBusSim.SetServiceDescriptor(from_endpointAddress(busSimAddress));
     }
@@ -82,7 +82,7 @@ protected:
     MockParticipant participant;
     Callbacks callbacks;
 
-    ib::cfg::EthernetController cfg;
+    SilKit::Config::EthernetController cfg;
     EthController controller;
     EthController controllerBusSim;
 };
@@ -107,18 +107,18 @@ TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
     EthernetSetMode Activate{ EthernetMode::Active };
     EthernetSetMode Deactivate{ EthernetMode::Inactive };
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, Activate))
+    EXPECT_CALL(participant, SendMsg(&controller, Activate))
         .Times(1);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, Deactivate))
+    EXPECT_CALL(participant, SendMsg(&controller, Deactivate))
         .Times(1);
 
     controller.Deactivate();
     controller.Activate();
-    controller.ReceiveIbMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::LinkUp, 17 });
+    controller.ReceiveSilKitMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::LinkUp, 17 });
     controller.Activate();
     controller.Deactivate();
-    controller.ReceiveIbMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::Inactive, 0 });
+    controller.ReceiveSilKitMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::Inactive, 0 });
     controller.Deactivate();
 }
 
@@ -126,7 +126,7 @@ TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
 TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
 {
     const auto now = 12345ns;
-    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(now)))
+    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now)))
         .Times(1);
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
@@ -136,11 +136,11 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
     controller.SendFrameEvent(msg);
 }
 
-/*! \brief SendFrame must not invoke the TimeProvider and triggers SendIbMessage on the participant
+/*! \brief SendFrame must not invoke the TimeProvider and triggers SendMsg on the participant
  */
 TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(0ns))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
 
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
 
@@ -158,7 +158,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
     EXPECT_CALL(callbacks, FrameHandler(&controller, msg))
         .Times(1);
 
-    controller.ReceiveIbMessage(&controllerBusSim, msg);
+    controller.ReceiveSilKitMessage(&controllerBusSim, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllerProxy must trigger the registered callback
@@ -170,7 +170,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
     EXPECT_CALL(callbacks, FrameTransmitHandler(&controller, expectedAck))
         .Times(1);
 
-    controller.ReceiveIbMessage(&controllerBusSim, expectedAck);
+    controller.ReceiveSilKitMessage(&controllerBusSim, expectedAck);
 }
 
 /*! \brief EthControllerProxy must not generate Acks
@@ -184,10 +184,10 @@ TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
     EthernetFrameEvent msg;
     msg.transmitId = 17;
 
-    EXPECT_CALL(participant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const EthernetFrameTransmitEvent&>()))
+    EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), A<const EthernetFrameTransmitEvent&>()))
         .Times(0);
 
-    controller.ReceiveIbMessage(&controllerBusSim, msg);
+    controller.ReceiveSilKitMessage(&controllerBusSim, msg);
 }
 
 /*! \brief EthControllerProxy must trigger bitrate changed callbacks when necessary
@@ -210,11 +210,11 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_bitrate_change)
         .Times(0);
 
     EthernetStatus newStatus = { 0ns, EthernetState::Inactive, 0 };
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
 
     newStatus.bitrate = 100;
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
 }
 
 /*! \brief EthControllerProxy must trigger state changed callbacks when necessary
@@ -237,27 +237,27 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_bitrate_change)
 TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_state_change)
 {
     InSequence executionSequence;
-    EXPECT_CALL(callbacks, StateChangeHandler(&controller, eth::EthernetStateChangeEvent{ 0ns, EthernetState::LinkUp }))
+    EXPECT_CALL(callbacks, StateChangeHandler(&controller, Ethernet::EthernetStateChangeEvent{ 0ns, EthernetState::LinkUp }))
         .Times(1);
-    EXPECT_CALL(callbacks, StateChangeHandler(&controller, eth::EthernetStateChangeEvent{ 0ns, EthernetState::LinkDown }))
+    EXPECT_CALL(callbacks, StateChangeHandler(&controller, Ethernet::EthernetStateChangeEvent{ 0ns, EthernetState::LinkDown }))
         .Times(1);
-    EXPECT_CALL(callbacks, StateChangeHandler(&controller, eth::EthernetStateChangeEvent{ 0ns, EthernetState::Inactive }))
+    EXPECT_CALL(callbacks, StateChangeHandler(&controller, Ethernet::EthernetStateChangeEvent{ 0ns, EthernetState::Inactive }))
         .Times(1);
 
 
     EthernetStatus newStatus = { 0ns, EthernetState::Inactive, 0 };
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::LinkUp;
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::LinkDown;
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::Inactive;
-    controller.ReceiveIbMessage(&controllerBusSim, newStatus);
+    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
 }
 
 

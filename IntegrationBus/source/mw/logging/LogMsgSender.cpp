@@ -2,9 +2,9 @@
 
 #include "LogMsgSender.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 LogMsgSender::LogMsgSender(IParticipantInternal* participant)
     : _participant{participant}
@@ -13,14 +13,14 @@ LogMsgSender::LogMsgSender(IParticipantInternal* participant)
 
 void LogMsgSender::SendLogMsg(const LogMsg& msg)
 {
-    _participant->SendIbMessage(this, msg);
+    _participant->SendMsg(this, msg);
 }
 
 void LogMsgSender::SendLogMsg(LogMsg&& msg)
 {
-    _participant->SendIbMessage(this, std::move(msg));
+    _participant->SendMsg(this, std::move(msg));
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

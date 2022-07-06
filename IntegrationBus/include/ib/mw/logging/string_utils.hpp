@@ -10,13 +10,13 @@
 
 #include "LoggingDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
-inline std::string to_string(const Level& ibAddress);
+inline std::string to_string(const Level& address);
 inline Level from_string(const std::string& levelStr);
-inline std::ostream& operator<<(std::ostream& out, const Level& ibAddress);
+inline std::ostream& operator<<(std::ostream& out, const Level& address);
 inline std::string to_string(const SourceLoc& sourceLoc);
 inline std::ostream& operator<<(std::ostream& out, const SourceLoc& sourceLoc);
 inline std::string to_string(const LogMsg& msg);
@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& outStream, const Level& lvl)
     case Level::Error: outStream << "Error"; break;
     case Level::Critical: outStream << "Critical"; break;
     case Level::Off: outStream << "Off"; break;
-    default: outStream << "Invalid logging::Level";
+    default: outStream << "Invalid Logging::Level";
     }
     return outStream;
 }
@@ -105,6 +105,6 @@ std::ostream& operator<<(std::ostream& out, const LogMsg& msg)
         << "}";
     return out;
 }
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

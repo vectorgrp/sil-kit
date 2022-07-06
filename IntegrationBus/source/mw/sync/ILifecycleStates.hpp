@@ -3,9 +3,9 @@
 #pragma once
 #include <string>
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class ILifecycleState
 {
@@ -32,6 +32,6 @@ public:
     virtual auto GetParticipantState() -> ParticipantState = 0;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

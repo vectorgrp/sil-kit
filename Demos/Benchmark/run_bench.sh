@@ -1,12 +1,12 @@
 #!/bin/sh
-#usage: run_bench.sh path/to/IbBenchmark.exe
+#usage: run_bench.sh path/to/SilKitBenchmark.exe
 set -e
 set -u
 EXE=$1
 shift
 REPEAT=3
 SIMTIME=1
-export IB_EXTENSION_PATH=$(dirname $EXE) #for vib-registry.so
+export SILKIT_EXTENSION_PATH=$(dirname $EXE) #for silkit-registry.so
 for msgsize in 1 64 1024
 do
 	for msg in 1 10 100

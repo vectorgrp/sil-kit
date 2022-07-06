@@ -2,45 +2,45 @@
 
 #pragma once
 
-#include "IIbToEthController.hpp"
+#include "IMsgForEthController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 
 #include "ISimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 class EthController;
 
 class SimBehaviorDetailed : public ISimBehavior
 {
 public:
-    SimBehaviorDetailed(mw::IParticipantInternal* participant, EthController* ethController,
-                       const mw::ServiceDescriptor& serviceDescriptor);
+    SimBehaviorDetailed(Core::IParticipantInternal* participant, EthController* ethController,
+                       const Core::ServiceDescriptor& serviceDescriptor);
 
-    void SendIbMessage(EthernetFrameEvent&& msg) override;
-    void SendIbMessage(EthernetSetMode&& msg) override;
+    void SendMsg(EthernetFrameEvent&& msg) override;
+    void SendMsg(EthernetSetMode&& msg) override;
     void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
     
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 
-    void SetSimulatedLink(const mw::ServiceDescriptor& simulatedLink);
+    void SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink);
 
 private:
     template <typename MsgT>
-    void SendIbMessageImpl(MsgT&& msg);
+    void SendMsgImpl(MsgT&& msg);
 
-    mw::IParticipantInternal* _participant{nullptr};
-    const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
-    const mw::ServiceDescriptor* _parentServiceDescriptor{nullptr};
-    mw::ServiceDescriptor _simulatedLink;
-    extensions::Tracer _tracer;
+    Core::IParticipantInternal* _participant{nullptr};
+    const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
+    const Core::ServiceDescriptor* _parentServiceDescriptor{nullptr};
+    Core::ServiceDescriptor _simulatedLink;
+    Tracer _tracer;
     std::map<EthernetTxId, EthernetFrame> _transmittedMessages;
 };
 
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

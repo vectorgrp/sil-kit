@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
 #include <map>
 #include <mutex>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 template <typename Callable>
 class SynchronizedHandlers
@@ -62,5 +62,5 @@ private:
     std::underlying_type_t<HandlerId> _nextHandlerId = 0;
 };
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

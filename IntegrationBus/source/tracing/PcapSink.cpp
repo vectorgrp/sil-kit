@@ -6,28 +6,28 @@
 #include <ctime>
 #include <sstream>
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/extensions/TraceMessage.hpp"
-#include "ib/extensions/string_utils.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/extensions/TraceMessage.hpp"
+#include "silkit/extensions/string_utils.hpp"
 
 #include "Pcap.hpp"
 #include "detail/NamedPipe.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
 namespace {
 Pcap::GlobalHeader g_pcapGlobalHeader{};
 } //anonymous namespace
 
-PcapSink::PcapSink(mw::logging::ILogger* logger, std::string name)
+PcapSink::PcapSink(Core::Logging::ILogger* logger, std::string name)
     : _name{std::move(name)}
     , _logger{logger}
 {
 
 }
 
-void PcapSink::Open(extensions::SinkType outputType, const std::string& outputPath)
+void PcapSink::Open(SinkType outputType, const std::string& outputPath)
 {
     if (outputPath.empty())
     {
@@ -36,7 +36,7 @@ void PcapSink::Open(extensions::SinkType outputType, const std::string& outputPa
 
     switch (outputType)
     {
-    case ib::extensions::SinkType::PcapFile:
+    case SilKit::SinkType::PcapFile:
         if (_file.is_open())
         {
             _file.close();
@@ -46,7 +46,7 @@ void PcapSink::Open(extensions::SinkType outputType, const std::string& outputPa
                 sizeof(g_pcapGlobalHeader));
         break;
 
-    case ib::extensions::SinkType::PcapNamedPipe:
+    case SilKit::SinkType::PcapNamedPipe:
         _pipe = detail::NamedPipe::Create(outputPath);
         _headerWritten = false;
         _outputPath = outputPath;
@@ -56,7 +56,7 @@ void PcapSink::Open(extensions::SinkType outputType, const std::string& outputPa
     }
 }
 
-auto PcapSink::GetLogger() const -> mw::logging::ILogger*
+auto PcapSink::GetLogger() const -> Core::Logging::ILogger*
 {
     return _logger;
 }
@@ -87,18 +87,18 @@ void PcapSink::Close()
     }
 }
 
-void PcapSink::Trace(ib::sim::TransmitDirection /*unused*/,
-        const mw::EndpointAddress& /* unused endpoint address */,
+void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
+        const Core::EndpointAddress& /* unused endpoint address */,
         std::chrono::nanoseconds timestamp,
-        const extensions::TraceMessage& traceMessage)
+        const TraceMessage& traceMessage)
 {
-    if (traceMessage.Type() != extensions::TraceMessageType::EthernetFrame)
+    if (traceMessage.Type() != TraceMessageType::EthernetFrame)
     {
         std::stringstream ss;
         ss << "Error: unsupported message type: " << traceMessage;
         throw std::runtime_error(ss.str());
     }
-    const auto& message = traceMessage.Get<sim::eth::EthernetFrame>();
+    const auto& message = traceMessage.Get<Services::Ethernet::EthernetFrame>();
 
     std::unique_lock<decltype(_lock)> lock;
     
@@ -144,4 +144,4 @@ void PcapSink::Trace(ib::sim::TransmitDirection /*unused*/,
 
 
 } // tracing
-} // ib
+} // silkit

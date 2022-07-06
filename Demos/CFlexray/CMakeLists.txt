@@ -1,7 +1,7 @@
-make_ib_demo(IbDemoCFlexray FlexrayDemo.c)
+make_silkit_demo(SilKitDemoCFlexray FlexrayDemo.c)
 
-target_sources(IbDemoCFlexray
+target_sources(SilKitDemoCFlexray
     PRIVATE
-        IbConfig_DemoFlexray.json
+        SilKitConfig_DemoFlexray.json
         NetworkSimulatorConfig.json
 )

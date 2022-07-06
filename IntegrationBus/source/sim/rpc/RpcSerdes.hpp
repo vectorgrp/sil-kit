@@ -4,18 +4,18 @@
 
 #include "MessageBuffer.hpp"
 
-#include "ib/sim/rpc/RpcDatatypes.hpp"
+#include "silkit/services/rpc/RpcDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-void Serialize(ib::mw::MessageBuffer& buffer,const FunctionCall& msg);
-void Serialize(ib::mw::MessageBuffer& buffer,const FunctionCallResponse& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer,const FunctionCall& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer,const FunctionCallResponse& msg);
 
-void Deserialize(ib::mw::MessageBuffer& buffer, FunctionCall& out);
-void Deserialize(ib::mw::MessageBuffer& buffer, FunctionCallResponse& out);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, FunctionCall& out);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, FunctionCallResponse& out);
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

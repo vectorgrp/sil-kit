@@ -8,17 +8,17 @@
 #include <string>
 #include <vector>
 
-#include "ib/cfg/IParticipantConfiguration.hpp"
-#include "ib/sim/fr/FlexrayDatatypes.hpp"
-#include "ib/mw/logging/LoggingDatatypes.hpp"
-#include "ib/sim/data/DataMessageDatatypes.hpp"
-#include "ib/sim/rpc/RpcDatatypes.hpp"
+#include "silkit/cfg/IParticipantConfiguration.hpp"
+#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/rpc/RpcDatatypes.hpp"
 
 #include "Configuration.hpp"
 #include "Optional.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 inline namespace v4 {
 
@@ -32,7 +32,7 @@ struct InternalController
     static constexpr NetworkType networkType = NetworkType::Undefined;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    SilKit::Util::Optional<std::string> network;
 };
 
 // ================================================================================
@@ -45,7 +45,7 @@ struct CanController
     static constexpr NetworkType networkType = NetworkType::CAN;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    SilKit::Util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -61,7 +61,7 @@ struct LinController
     static constexpr NetworkType networkType = NetworkType::LIN;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    SilKit::Util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -77,7 +77,7 @@ struct EthernetController
     static constexpr NetworkType networkType = NetworkType::Ethernet;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    SilKit::Util::Optional<std::string> network;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -93,11 +93,11 @@ struct FlexrayController
     static constexpr NetworkType networkType = NetworkType::FlexRay;
 
     std::string name;
-    ib::util::Optional<std::string> network;
+    SilKit::Util::Optional<std::string> network;
 
-    ib::util::Optional<sim::fr::FlexrayClusterParameters> clusterParameters;
-    ib::util::Optional<sim::fr::FlexrayNodeParameters> nodeParameters;
-    std::vector<sim::fr::FlexrayTxBufferConfig> txBufferConfigurations;
+    SilKit::Util::Optional<Services::Flexray::FlexrayClusterParameters> clusterParameters;
+    SilKit::Util::Optional<Services::Flexray::FlexrayNodeParameters> nodeParameters;
+    std::vector<Services::Flexray::FlexrayTxBufferConfig> txBufferConfigurations;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -113,10 +113,10 @@ struct DataPublisher
     static constexpr NetworkType networkType = NetworkType::Data;
 
     std::string name;
-    ib::util::Optional<std::string> topic;
+    SilKit::Util::Optional<std::string> topic;
 
     //! \brief History length of a DataPublisher.
-    ib::util::Optional<size_t> history{ 0 };
+    SilKit::Util::Optional<size_t> history{ 0 };
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -128,7 +128,7 @@ struct DataSubscriber
     static constexpr NetworkType networkType = NetworkType::Data;
 
     std::string name;
-    ib::util::Optional<std::string> topic;
+    SilKit::Util::Optional<std::string> topic;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -144,7 +144,7 @@ struct RpcServer
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    ib::util::Optional<std::string> functionName;
+    SilKit::Util::Optional<std::string> functionName;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -156,7 +156,7 @@ struct RpcClient
     static constexpr NetworkType networkType = NetworkType::RPC;
 
     std::string name;
-    ib::util::Optional<std::string> functionName;
+    SilKit::Util::Optional<std::string> functionName;
 
     std::vector<std::string> useTraceSinks;
     Replay replay;
@@ -169,8 +169,8 @@ struct RpcClient
 //! \brief Health checking service
 struct HealthCheck
 {
-    ib::util::Optional<std::chrono::milliseconds> softResponseTimeout;
-    ib::util::Optional<std::chrono::milliseconds> hardResponseTimeout;
+    SilKit::Util::Optional<std::chrono::milliseconds> softResponseTimeout;
+    SilKit::Util::Optional<std::chrono::milliseconds> hardResponseTimeout;
 };
 
 // ================================================================================
@@ -201,7 +201,7 @@ struct Extensions
 
 struct Middleware
 {
-    std::string registryUri{ "vib://localhost:8500" }; //!< Default registry URI to connect to
+    std::string registryUri{ "silkit://localhost:8500" }; //!< Default registry URI to connect to
     int connectAttempts{ 1 }; //!<  Number of connection attempts to the registry a participant should perform.
     int tcpReceiveBufferSize{ -1 };
     int tcpSendBufferSize{ -1 };
@@ -214,7 +214,7 @@ struct Middleware
 //  Root
 // ================================================================================
 
-//! \brief ParticipantConfiguration is the main configuration data object for a VIB participant.
+//! \brief ParticipantConfiguration is the main configuration data object for a SILKIT participant.
 struct ParticipantConfiguration
     : public IParticipantConfiguration
 {
@@ -267,5 +267,5 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
 
 } // namespace v4
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

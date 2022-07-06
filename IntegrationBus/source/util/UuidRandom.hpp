@@ -8,9 +8,9 @@
 #include <sstream>
 #include <string>
 
-namespace ib {
-namespace util {
-namespace uuid {
+namespace SilKit {
+namespace Util {
+namespace Uuid {
 
 // UUID implementation based on 2x64bit random numbers
 struct UUID
@@ -26,6 +26,6 @@ bool        operator<(const UUID& lhs, const UUID& rhs);
 UUID        generate();
 std::string to_string(const UUID& u);
 
-} // namespace uuid
-} // namespace util
-} // namespace ib
+} // namespace Uuid
+} // namespace Util
+} // namespace SilKit

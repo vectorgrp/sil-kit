@@ -4,8 +4,8 @@
 
 #include <functional>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 template<class C, typename RT, typename... Arg>
 auto bind_method(C* classPtr, RT(C::*method)(Arg...)) -> std::function<RT(Arg...)>
@@ -16,5 +16,5 @@ auto bind_method(C* classPtr, RT(C::*method)(Arg...)) -> std::function<RT(Arg...
            };
 }
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

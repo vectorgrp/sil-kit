@@ -1,12 +1,12 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #pragma once
 
-#include "ib/IntegrationBus.hpp"
+#include "silkit/SilKit.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
-namespace ib {
-namespace test {
+namespace SilKit {
+namespace Tests {
 
 ////////////////////////////////////////
 // SimSystemController
@@ -19,7 +19,7 @@ public:
         : _syncParticipantNames{syncParticipantNames}
     {
         _participant =
-            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
 
         _controller = _participant->GetSystemController();
         _controller->SetWorkflowConfiguration({_syncParticipantNames});
@@ -36,7 +36,7 @@ public:
         _participant.reset();
     }
 
-    void OnParticipantStatusChanged(ib::mw::sync::ParticipantStatus status)
+    void OnParticipantStatusChanged(SilKit::Core::Orchestration::ParticipantStatus status)
     {
         if (_isShuttingDown)
         {
@@ -44,14 +44,14 @@ public:
         }
         _participantStates[status.participantName] = status.state;
 
-        if (status.state == ib::mw::sync::ParticipantState::Stopped
-            || status.state == ib::mw::sync::ParticipantState::Error)
+        if (status.state == SilKit::Core::Orchestration::ParticipantState::Stopped
+            || status.state == SilKit::Core::Orchestration::ParticipantState::Error)
         {
             _controller->Stop();
         }
     }
 
-    void OnSystemStateChanged(ib::mw::sync::SystemState state)
+    void OnSystemStateChanged(SilKit::Core::Orchestration::SystemState state)
     {
         if (_isShuttingDown)
         {
@@ -60,12 +60,12 @@ public:
         //std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
-        case ib::mw::sync::SystemState::ReadyToRun:
+        case SilKit::Core::Orchestration::SystemState::ReadyToRun:
             _controller->Run();
             return;
-        case ib::mw::sync::SystemState::Running:
+        case SilKit::Core::Orchestration::SystemState::Running:
             return;
-        case ib::mw::sync::SystemState::Stopped:
+        case SilKit::Core::Orchestration::SystemState::Stopped:
             for (const auto& name : _syncParticipantNames)
             {
                 _controller->Shutdown(name);
@@ -76,13 +76,13 @@ public:
         }
     }
 private:
-    ib::mw::sync::ISystemController* _controller;
-    ib::mw::sync::ISystemMonitor* _monitor;
+    SilKit::Core::Orchestration::ISystemController* _controller;
+    SilKit::Core::Orchestration::ISystemMonitor* _monitor;
     std::vector<std::string> _syncParticipantNames;
-    std::map<std::string, ib::mw::sync::ParticipantState> _participantStates; //for printing status updates
+    std::map<std::string, SilKit::Core::Orchestration::ParticipantState> _participantStates; //for printing status updates
     std::atomic<bool> _isShuttingDown{false};
-    std::unique_ptr<ib::mw::IParticipant> _participant;
+    std::unique_ptr<SilKit::Core::IParticipant> _participant;
 };
 
-} // namespace test
-} // namespace ib
+} // namespace Tests
+} // namespace SilKit

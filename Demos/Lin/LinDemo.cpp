@@ -3,18 +3,18 @@
 #include <iostream>
 #include <thread>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/string_utils.hpp"
-#include "ib/sim/lin/all.hpp"
-#include "ib/sim/lin/string_utils.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/string_utils.hpp"
+#include "silkit/services/lin/all.hpp"
+#include "silkit/services/lin/string_utils.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/util/functional.hpp"
 
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::lin;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Lin;
 
 using namespace std::chrono_literals;
 using namespace std::placeholders;
@@ -297,16 +297,16 @@ int main(int argc, char** argv) try
     std::string participantConfigurationFilename(argv[1]);
     std::string participantName(argv[2]);
 
-    auto registryUri = "vib://localdomain:8500";
+    auto registryUri = "silkit://localdomain:8500";
     if (argc >= 4)
     {
         registryUri = argv[3];
     }
 
-    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+    auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
-    auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+    auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1");
@@ -333,8 +333,8 @@ int main(int argc, char** argv) try
             config.baudRate = 20'000;
             linController->Init(config);
         });
-        linController->AddFrameStatusHandler(util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
-        linController->AddWakeupHandler(util::bind_method(&master, &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(Util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
+        linController->AddWakeupHandler(Util::bind_method(&master, &LinMaster::WakeupHandler));
 
         timeSyncService->SetSimulationTask(
             [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -401,9 +401,9 @@ int main(int argc, char** argv) try
             linController->Init(config);
         });
 
-        linController->AddFrameStatusHandler(util::bind_method(&slave, &LinSlave::FrameStatusHandler));
-        linController->AddGoToSleepHandler(util::bind_method(&slave, &LinSlave::GoToSleepHandler));
-        linController->AddWakeupHandler(util::bind_method(&slave, &LinSlave::WakeupHandler));
+        linController->AddFrameStatusHandler(Util::bind_method(&slave, &LinSlave::FrameStatusHandler));
+        linController->AddGoToSleepHandler(Util::bind_method(&slave, &LinSlave::GoToSleepHandler));
+        linController->AddWakeupHandler(Util::bind_method(&slave, &LinSlave::WakeupHandler));
 
         timeSyncService->SetSimulationTask(
             [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -424,7 +424,7 @@ int main(int argc, char** argv) try
 
     return 0;
 }
-catch (const ib::ConfigurationError& error)
+catch (const SilKit::ConfigurationError& error)
 {
     std::cerr << "Invalid configuration: " << error.what() << std::endl;
     std::cout << "Press enter to stop the process..." << std::endl;

@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-#include "ib/capi/IntegrationBus.h"
+#include "silkit/capi/SilKit.h"
 
 #ifdef WIN32
 #pragma warning(disable : 5105)
@@ -47,10 +47,10 @@ char* LoadFile(char const* path)
     return result;
 }
 
-ib_Participant* participant;
-ib_Can_Controller* canController;
-ib_Can_Controller* canController2;
-ib_Logger* logger;
+SilKit_Participant* participant;
+SilKit_CanController* canController;
+SilKit_CanController* canController2;
+SilKit_Logger* logger;
 
 char* participantName;
 uint8_t canMessageCounter = 0;
@@ -61,7 +61,7 @@ typedef struct {
 
 TransmitContext transmitContext;
 
-void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct ib_Can_FrameTransmitEvent* cAck)
+void FrameTransmitHandler(void* context, SilKit_CanController* controller, struct SilKit_CanFrameTransmitEvent* cAck)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -70,10 +70,10 @@ void FrameTransmitHandler(void* context, ib_Can_Controller* controller, struct i
     char buffer[256];
     sprintf(buffer, ">> %i for CAN Message with transmitId=%i, timestamp=%" PRIu64 "\n", cAck->status, tc->someInt,
             cAck->timestamp);
-    ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
+    SilKit_Logger_Log(logger, SilKit_LoggingLevel_Info, buffer);
 }
 
-void FrameHandler(void* context, ib_Can_Controller* controller, ib_Can_FrameEvent* frameEvent)
+void FrameHandler(void* context, SilKit_CanController* controller, SilKit_CanFrameEvent* frameEvent)
 {
     UNUSED_ARG(controller);
 
@@ -103,14 +103,14 @@ void FrameHandler(void* context, ib_Can_Controller* controller, ib_Can_FrameEven
         }
     }
     position += sprintf(position, "\n");
-    ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
+    SilKit_Logger_Log(logger, SilKit_LoggingLevel_Info, buffer);
 }
 
 void SendFrame()
 {
-    ib_Can_Frame canFrame;
+    SilKit_CanFrame canFrame;
     canFrame.id = 17;
-    canFrame.flags = ib_Can_FrameFlag_brs;
+    canFrame.flags = SilKit_CanFrameFlag_brs;
 
     char payload[64];
     canMessageCounter += 1;
@@ -121,17 +121,17 @@ void SendFrame()
     canFrame.dlc = payloadSize;
 
     transmitContext.someInt = 1234;
-    ib_Can_Controller_SendFrame(canController, &canFrame, (void*)&transmitContext);
+    SilKit_CanController_SendFrame(canController, &canFrame, (void*)&transmitContext);
     char buffer[256];
     sprintf(buffer, "<< CAN Message sent with transmitId=%i\n", transmitContext.someInt);
-    ib_Logger_Log(logger, ib_LoggingLevel_Info, buffer);
+    SilKit_Logger_Log(logger, SilKit_LoggingLevel_Info, buffer);
 }
 
 int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
-        printf("usage: IbDemoCCan <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCCan <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
         return 1;
     }
 
@@ -143,16 +143,16 @@ int main(int argc, char* argv[])
     }
     participantName = argv[2];
 
-    const char* registryUri = "vib://localhost:8500";
+    const char* registryUri = "silkit://localhost:8500";
     if (argc >= 4)
     {
         registryUri = argv[3];
     }
 
-    ib_ReturnCode returnCode;
-    returnCode = ib_Participant_Create(&participant, jsonString, participantName, registryUri, ib_False);
+    SilKit_ReturnCode returnCode;
+    returnCode = SilKit_Participant_Create(&participant, jsonString, participantName, registryUri, SilKit_False);
     if (returnCode) {
-        printf("%s\n", ib_GetLastErrorString());
+        printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
@@ -160,28 +160,28 @@ int main(int argc, char* argv[])
     const char* canNetworkName = "CAN1";
 
     const char* canControllerName = "CAN1";
-    returnCode = ib_Can_Controller_Create(&canController, participant, canControllerName, canNetworkName);
+    returnCode = SilKit_CanController_Create(&canController, participant, canControllerName, canNetworkName);
     const char* canController2Name = "CAN2";
-    returnCode = ib_Can_Controller_Create(&canController2, participant, canController2Name, canNetworkName);
+    returnCode = SilKit_CanController_Create(&canController2, participant, canController2Name, canNetworkName);
 
-    ib_HandlerId frameTransmitHandlerId;
-    ib_Can_Controller_AddFrameTransmitHandler(
+    SilKit_HandlerId frameTransmitHandlerId;
+    SilKit_CanController_AddFrameTransmitHandler(
         canController, (void*)&transmitContext, &FrameTransmitHandler,
-        ib_Can_TransmitStatus_Transmitted | ib_Can_TransmitStatus_Canceled | ib_Can_TransmitStatus_TransmitQueueFull,
+        SilKit_CanTransmitStatus_Transmitted | SilKit_CanTransmitStatus_Canceled | SilKit_CanTransmitStatus_TransmitQueueFull,
         &frameTransmitHandlerId);
 
-    ib_HandlerId frameHandlerId;
-    ib_Can_Controller_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, ib_Direction_SendReceive,
+    SilKit_HandlerId frameHandlerId;
+    SilKit_CanController_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, SilKit_Direction_SendReceive,
                                       &frameHandlerId);
 
-    ib_Participant_GetLogger(&logger, participant);
+    SilKit_Participant_GetLogger(&logger, participant);
 
     for (int i = 0; i < 10; i++) {
         SendFrame();
         SleepMs(1000);
     }
 
-    ib_Participant_Destroy(participant);
+    SilKit_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

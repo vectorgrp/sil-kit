@@ -2,8 +2,8 @@
 
 #pragma once
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 namespace tuple_tools {
 
 /*! Helper to reduce the number of template arguments of a class template
@@ -34,5 +34,5 @@ struct rbind
 
 
 } // namespace tuple_tools
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

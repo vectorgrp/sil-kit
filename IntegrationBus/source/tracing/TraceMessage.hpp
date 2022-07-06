@@ -3,16 +3,16 @@
 #pragma once
 
 // NB: type erasing in TraceMessage requires us to use concrete types
-#include "ib/sim/eth/EthernetDatatypes.hpp"
-#include "ib/sim/can/CanDatatypes.hpp"
-#include "ib/sim/data/DataMessageDatatypes.hpp"
-#include "ib/sim/lin/LinDatatypes.hpp"
-#include "ib/sim/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
+#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/lin/LinDatatypes.hpp"
+#include "silkit/services/fr/FlexrayDatatypes.hpp"
 
 #include <stdexcept>
 
-namespace ib {
-namespace extensions {
+namespace SilKit {
+
 
 
 // helpers  to associate a TraceMessage-Type enum to a C++ type
@@ -34,10 +34,10 @@ struct TypeIdTrait
 
 template<class MsgT> struct MessageTrait;
 // specializations for supported (C++) Types
-template<> struct MessageTrait<sim::eth::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
-template<> struct MessageTrait<sim::can::CanFrameEvent> : TypeIdTrait<TraceMessageType::CanFrameEvent> {};
-template<> struct MessageTrait<sim::lin::LinFrame> : TypeIdTrait<TraceMessageType::LinFrame> {};
-template<> struct MessageTrait<sim::fr::FlexrayFrameEvent> : TypeIdTrait<TraceMessageType::FlexrayFrameEvent> {};
+template<> struct MessageTrait<Services::Ethernet::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
+template<> struct MessageTrait<Services::Can::CanFrameEvent> : TypeIdTrait<TraceMessageType::CanFrameEvent> {};
+template<> struct MessageTrait<Services::Lin::LinFrame> : TypeIdTrait<TraceMessageType::LinFrame> {};
+template<> struct MessageTrait<Services::Flexray::FlexrayFrameEvent> : TypeIdTrait<TraceMessageType::FlexrayFrameEvent> {};
 
 class TraceMessage
 {
@@ -86,5 +86,5 @@ private:
 
 
 
-} //end namespace extensions
-} //end namespace ib
+
+} //end namespace SilKit

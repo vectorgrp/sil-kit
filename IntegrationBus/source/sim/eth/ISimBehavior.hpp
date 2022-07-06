@@ -2,24 +2,24 @@
 
 #pragma once
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 class ISimBehavior
 {
 public:
     virtual ~ISimBehavior() = default;
-    virtual auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool = 0;
-    virtual void SendIbMessage(EthernetFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(EthernetSetMode&& msg) = 0;
+    virtual auto AllowReception(const Core::IServiceEndpoint* from) const -> bool = 0;
+    virtual void SendMsg(EthernetFrameEvent&& msg) = 0;
+    virtual void SendMsg(EthernetSetMode&& msg) = 0;
 
     virtual void OnReceiveAck(const EthernetFrameTransmitEvent& msg) = 0;
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

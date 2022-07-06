@@ -12,20 +12,20 @@
 #include "gtest/gtest.h"
 
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/vendor/CreateIbRegistry.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::cfg;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Config;
+using namespace SilKit::Services::Can;
 
 static size_t numParticipants;
 std::chrono::microseconds asyncDelayCanWriter{1us};
@@ -71,7 +71,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
             participant.canController->Start();
 
@@ -84,7 +84,7 @@ protected:
             }
 
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -106,7 +106,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("Can");
             participant.canController->Start();
 
@@ -122,7 +122,7 @@ protected:
 
             while (runAsync)
             {
-                std::vector<ib::sim::HandlerId> handlerIds{};
+                std::vector<SilKit::Services::HandlerId> handlerIds{};
                 for (int i = 0; i < numHandlersPerLoop; i++)
                 {
                     handlerIds.push_back(participant.canController->AddFrameHandler(frameHandler));
@@ -133,7 +133,7 @@ protected:
                 }
             }
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -154,10 +154,10 @@ protected:
     {
         try
         {
-            registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
+            registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
             registry->ProvideDomain(registryUri);
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -182,7 +182,7 @@ protected:
                 AsyncCanWriterThread(participant, registryUri);
             });
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -206,7 +206,7 @@ protected:
                 AsyncCanReaderThread(participant, registryUri);
             });
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -243,7 +243,7 @@ protected:
     }
 
 protected:
-    std::unique_ptr<ib::vendor::IIbRegistry> registry;
+    std::unique_ptr<SilKit::Vendor::ISilKitRegistry> registry;
     std::vector<std::thread> asyncParticipantThreads;
     bool runAsync{ true };
 };

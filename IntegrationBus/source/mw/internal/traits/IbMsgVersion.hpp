@@ -3,57 +3,57 @@
 #pragma once
 #include <cstdint>
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-// the ib messages type traits
+// the silkit messages type traits
 using VersionT = uint32_t;
-template <class MsgT> struct IbMsgTraitVersion { static constexpr VersionT Version(); };
+template <class MsgT> struct SilKitMsgTraitVersion { static constexpr VersionT Version(); };
 
 //helper to reduce boilerplate
-#define DefineIbMsgTrait_Version(TYPE_NAME, VERSION) \
+#define DefineSilKitMsgTrait_Version(TYPE_NAME, VERSION) \
     template<> \
-    struct IbMsgTraitVersion<TYPE_NAME> {\
+    struct SilKitMsgTraitVersion<TYPE_NAME> {\
         static constexpr VersionT Version() { return VERSION; }\
     }
 
-DefineIbMsgTrait_Version(ib::mw::logging::LogMsg, 1);
-DefineIbMsgTrait_Version(ib::mw::sync::ParticipantCommand, 1);
-DefineIbMsgTrait_Version(ib::mw::sync::SystemCommand, 1);
-DefineIbMsgTrait_Version(ib::mw::sync::ParticipantStatus, 1);
-DefineIbMsgTrait_Version(ib::mw::sync::WorkflowConfiguration, 1);
-DefineIbMsgTrait_Version(ib::mw::sync::NextSimTask, 1);
-DefineIbMsgTrait_Version(ib::sim::data::DataMessageEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::rpc::FunctionCall, 1);
-DefineIbMsgTrait_Version(ib::sim::rpc::FunctionCallResponse, 1);
-DefineIbMsgTrait_Version(ib::sim::can::CanFrameEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::can::CanFrameTransmitEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::can::CanControllerStatus, 1);
-DefineIbMsgTrait_Version(ib::sim::can::CanConfigureBaudrate, 1);
-DefineIbMsgTrait_Version(ib::sim::can::CanSetControllerMode, 1);
-DefineIbMsgTrait_Version(ib::sim::eth::EthernetFrameEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::eth::EthernetFrameTransmitEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::eth::EthernetStatus, 1);
-DefineIbMsgTrait_Version(ib::sim::eth::EthernetSetMode, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinSendFrameRequest, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinSendFrameHeaderRequest, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinTransmission, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinWakeupPulse, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinControllerConfig, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinControllerStatusUpdate, 1);
-DefineIbMsgTrait_Version(ib::sim::lin::LinFrameResponseUpdate, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayFrameEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayFrameTransmitEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexraySymbolEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexraySymbolTransmitEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayCycleStartEvent, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayHostCommand, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayControllerConfig, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayTxBufferConfigUpdate, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayTxBufferUpdate, 1);
-DefineIbMsgTrait_Version(ib::sim::fr::FlexrayPocStatusEvent, 1);
-DefineIbMsgTrait_Version(ib::mw::service::ParticipantDiscoveryEvent, 1);
-DefineIbMsgTrait_Version(ib::mw::service::ServiceDiscoveryEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Logging::LogMsg, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::ParticipantCommand, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::SystemCommand, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::ParticipantStatus, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::WorkflowConfiguration, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::NextSimTask, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::PubSub::DataMessageEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Rpc::FunctionCall, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Rpc::FunctionCallResponse, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Can::CanFrameEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Can::CanFrameTransmitEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Can::CanControllerStatus, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Can::CanConfigureBaudrate, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Can::CanSetControllerMode, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetFrameEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetFrameTransmitEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetStatus, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Ethernet::EthernetSetMode, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinSendFrameRequest, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinSendFrameHeaderRequest, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinTransmission, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinWakeupPulse, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinControllerConfig, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinControllerStatusUpdate, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinFrameResponseUpdate, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayFrameEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayFrameTransmitEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexraySymbolEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexraySymbolTransmitEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayCycleStartEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayHostCommand, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayControllerConfig, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayTxBufferConfigUpdate, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayTxBufferUpdate, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayPocStatusEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Discovery::ParticipantDiscoveryEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::Discovery::ServiceDiscoveryEvent, 1);
 
-} // mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

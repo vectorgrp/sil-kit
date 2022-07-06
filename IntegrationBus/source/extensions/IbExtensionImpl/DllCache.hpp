@@ -7,10 +7,10 @@
 
 #include "ParticipantConfiguration.hpp"
 
-#include "IbExtensions.hpp"
+#include "SilKitExtensions.hpp"
 
-namespace ib {
-namespace extensions {
+namespace SilKit {
+
 
 //!\brief DllCache keeps a shared reference to already loaded shared libraries.
 //
@@ -23,8 +23,8 @@ namespace extensions {
 class DllCache
 {
 public:
-    auto Get(mw::logging::ILogger* logger, const std::string& extensionName, const cfg::Extensions& config)
-        -> ib::extensions::IIbExtension&
+    auto Get(Core::Logging::ILogger* logger, const std::string& extensionName, const Config::Extensions& config)
+        -> SilKit::ISilKitExtension&
     {
         try
         {
@@ -32,7 +32,7 @@ public:
             //and cache a reference to it.
             if (!_dll)
             {
-                _dll = ib::extensions::LoadExtension(logger, extensionName, config);
+                _dll = SilKit::LoadExtension(logger, extensionName, config);
                 _extensionName = extensionName;
             }
             if (extensionName != _extensionName)
@@ -42,22 +42,22 @@ public:
             }
             return *_dll;
         }
-        catch (const ib::extensions::ExtensionError& err)
+        catch (const SilKit::ExtensionError& err)
         {
             std::stringstream msg;
-            msg << "Error loading VIB extension '" << extensionName << "': " << err.what();
+            msg << "Error loading SILKIT extension '" << extensionName << "': " << err.what();
             if (logger)
             {
                 logger->Error(msg.str());
             }
-            throw ib::extensions::ExtensionError{msg.str()};
+            throw SilKit::ExtensionError{msg.str()};
         }
     }
 
 private:
     std::string _extensionName;
-    std::shared_ptr<ib::extensions::IIbExtension> _dll;
+    std::shared_ptr<SilKit::ISilKitExtension> _dll;
 };
 
-} //end namespace extensions
-} //end namespace ib
+
+} //end namespace SilKit

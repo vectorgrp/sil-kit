@@ -10,8 +10,8 @@
 using namespace std::chrono_literals;
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayFrameEvent in;
     FlexrayFrameEvent out;
@@ -48,8 +48,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayFrameTransmitEvent in;
     FlexrayFrameTransmitEvent out;
@@ -88,8 +88,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexraySymbolEvent in;
     FlexraySymbolEvent out;
@@ -107,8 +107,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolTransmitEvent) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexraySymbolTransmitEvent in;
     FlexraySymbolTransmitEvent out;
@@ -126,8 +126,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolTransmitEvent) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayCycleStartEvent) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayCycleStartEvent in;
     FlexrayCycleStartEvent out;
@@ -143,8 +143,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayCycleStartEvent) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayHostCommand) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayHostCommand in;
     FlexrayHostCommand out;
@@ -158,8 +158,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayHostCommand) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayControllerConfig) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayControllerConfig in;
     FlexrayControllerConfig out;
@@ -283,8 +283,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayControllerConfig) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayTxBufferConfigUpdate in;
     FlexrayTxBufferConfigUpdate out;
@@ -306,8 +306,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayTxBufferUpdate in;
     FlexrayTxBufferUpdate out;
@@ -325,8 +325,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayPocStatusEvent) {
-    using namespace ib::sim::fr;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Flexray;
+    SilKit::Core::MessageBuffer buffer;
 
     FlexrayPocStatusEvent in{};
     FlexrayPocStatusEvent out{};

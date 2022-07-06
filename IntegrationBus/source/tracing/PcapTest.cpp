@@ -4,7 +4,7 @@
 
 #include <cstring>
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
@@ -14,9 +14,9 @@
 
 
 namespace {
-using namespace ib::tracing;
-using namespace ib::sim::eth;
-using namespace ib::mw::test;
+using namespace SilKit::tracing;
+using namespace SilKit::Services::Ethernet;
+using namespace SilKit::Core::Tests;
 
 std::vector<char> MakePcapTestData(EthernetFrame& frame, size_t numMessages)
 {

@@ -13,7 +13,7 @@
 
 // YAML-cpp serialization/deserialization for our config data types
 namespace YAML {
-using namespace ib::cfg;
+using namespace SilKit::Config;
 
 // Helper to parse a node as the given type or throw our ConversionError with the type's name in the error message.
 template <typename T>
@@ -22,7 +22,7 @@ struct ParseTypeName
     static constexpr const char* Name() { return  "Unknown Type"; }
 };
 
-#define DEFINE_VIB_PARSE_TYPE_NAME(TYPE) \
+#define DEFINE_SILKIT_PARSE_TYPE_NAME(TYPE) \
     template<> struct ParseTypeName<TYPE> { static constexpr const char* Name(){ return #TYPE;} }
 
 template <typename T>
@@ -38,38 +38,38 @@ struct ParseTypeName<std::vector<T>>
 struct Converter
 {
     // required for YAML::convert<T>:
-    template<typename IbDataType>
-    static Node encode(const IbDataType& obj);
-    template<typename IbDataType>
-    static bool decode(const Node& node, IbDataType& obj);
+    template<typename SilKitDataType>
+    static Node encode(const SilKitDataType& obj);
+    template<typename SilKitDataType>
+    static bool decode(const Node& node, SilKitDataType& obj);
 };
 
-#define DEFINE_VIB_CONVERT(TYPE)\
+#define DEFINE_SILKIT_CONVERT(TYPE)\
     template<> struct convert<TYPE> : public Converter  { };\
-    DEFINE_VIB_PARSE_TYPE_NAME(TYPE)
+    DEFINE_SILKIT_PARSE_TYPE_NAME(TYPE)
 
 // Other types used for parsing, required in ConversionError for helpful error messages
-DEFINE_VIB_PARSE_TYPE_NAME(int16_t);
-DEFINE_VIB_PARSE_TYPE_NAME(uint16_t);
-DEFINE_VIB_PARSE_TYPE_NAME(uint64_t);
-DEFINE_VIB_PARSE_TYPE_NAME(int64_t);
-DEFINE_VIB_PARSE_TYPE_NAME(int8_t);
-DEFINE_VIB_PARSE_TYPE_NAME(uint8_t);
-DEFINE_VIB_PARSE_TYPE_NAME(int);
-DEFINE_VIB_PARSE_TYPE_NAME(double);
-DEFINE_VIB_PARSE_TYPE_NAME(bool);
-DEFINE_VIB_PARSE_TYPE_NAME(std::vector<std::string>);
-DEFINE_VIB_PARSE_TYPE_NAME(std::string);
+DEFINE_SILKIT_PARSE_TYPE_NAME(int16_t);
+DEFINE_SILKIT_PARSE_TYPE_NAME(uint16_t);
+DEFINE_SILKIT_PARSE_TYPE_NAME(uint64_t);
+DEFINE_SILKIT_PARSE_TYPE_NAME(int64_t);
+DEFINE_SILKIT_PARSE_TYPE_NAME(int8_t);
+DEFINE_SILKIT_PARSE_TYPE_NAME(uint8_t);
+DEFINE_SILKIT_PARSE_TYPE_NAME(int);
+DEFINE_SILKIT_PARSE_TYPE_NAME(double);
+DEFINE_SILKIT_PARSE_TYPE_NAME(bool);
+DEFINE_SILKIT_PARSE_TYPE_NAME(std::vector<std::string>);
+DEFINE_SILKIT_PARSE_TYPE_NAME(std::string);
 
 } // namespace YAML
 
 ////////////////////////////////////////////////////////////////////////////////
-// Miscellaneous VIB Parsing Helper
+// Miscellaneous SILKIT Parsing Helper
 ////////////////////////////////////////////////////////////////////////////////
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
-// Exception type for Bad VIB internal type conversion
+// Exception type for Bad SILKIT internal type conversion
 class ConversionError : public YAML::BadConversion
 {
 public:
@@ -80,7 +80,7 @@ public:
     }
 };
 
-// Helper template function to convert VIB data types with nice error message
+// Helper template function to convert SILKIT data types with nice error message
 template <typename ValueT>
 auto parse_as(const YAML::Node& node) -> ValueT
 {
@@ -106,7 +106,7 @@ auto parse_as(const YAML::Node& node) -> ValueT
 
 template<typename ConfigT, typename std::enable_if<
     (std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
-void optional_encode(const util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+void optional_encode(const Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.has_value())
     {
@@ -116,7 +116,7 @@ void optional_encode(const util::Optional<ConfigT>& value, YAML::Node& node, con
 
 
 template<typename ConfigT>
-void optional_decode(util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
+void optional_decode(Util::Optional<ConfigT>& value, const YAML::Node& node, const std::string& fieldName)
 {
     if (node.IsMap() && node[fieldName]) //operator[] does not modify node
     {
@@ -177,5 +177,5 @@ void optional_decode_deprecated_alternative(ConfigT& value, const YAML::Node& no
     }
 }
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

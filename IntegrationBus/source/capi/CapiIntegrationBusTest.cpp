@@ -1,13 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "ib/capi/IntegrationBus.h"
-#include "ib/mw/all.hpp"
+#include "silkit/capi/SilKit.h"
+#include "silkit/core/all.hpp"
 
 #include "MockParticipant.hpp"
 
 namespace {
-const auto IB_CONFIG_STRING = R"aw(
+const auto SILKIT_CONFIG_STRING = R"aw(
 {
     "ConfigVersion": "0.0.1",
     "ConfigName" : "ConfigDemo",
@@ -28,7 +28,7 @@ const auto IB_CONFIG_STRING = R"aw(
 }
 )aw";
 
-const auto IB_MALFORMED_CONFIG_STRING = R"aw(
+const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
 "ConfigVersion": "0.0.1","
 "ConfigName" : "ConfigDemo","
 "Description" : "Sample configuration for testing purposes",
@@ -47,61 +47,61 @@ const auto IB_MALFORMED_CONFIG_STRING = R"aw(
 )aw";
 
 
-    using namespace ib::sim::can;
+    using namespace SilKit::Services::Can;
 
-    using ib::mw::test::DummyParticipant;
+    using SilKit::Core::Tests::DummyParticipant;
 
-    class CapiIntegrationBusTest : public testing::Test
+    class CapiSilKitTest : public testing::Test
     {
     public: 
-        ib::mw::test::DummyParticipant mockParticipant;
-        CapiIntegrationBusTest()
+        SilKit::Core::Tests::DummyParticipant mockParticipant;
+        CapiSilKitTest()
         {
             
         }
     };
 
-    TEST_F(CapiIntegrationBusTest, integration_bus_function_mapping)
+    TEST_F(CapiSilKitTest, integration_bus_function_mapping)
     {
-        ib_ReturnCode returnCode;
+        SilKit_ReturnCode returnCode;
 
-        ib_Participant* participant = nullptr;
-        returnCode = ib_Participant_Create(&participant, IB_CONFIG_STRING, "Participant1", "42", ib_False);
-        // since there is no IbRegistry, the call should fail
-        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+        SilKit_Participant* participant = nullptr;
+        returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "Participant1", "42", SilKit_False);
+        // since there is no SilKitRegistry, the call should fail
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
         EXPECT_TRUE(participant == nullptr);
 
-        // since there is no IbRegistry with which one could create a Participant, we check against nullptr
-        returnCode = ib_Participant_Destroy(nullptr);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        // since there is no SilKitRegistry with which one could create a Participant, we check against nullptr
+        returnCode = SilKit_Participant_Destroy(nullptr);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
 
 
-    TEST_F(CapiIntegrationBusTest, integration_bus_bad_params)
+    TEST_F(CapiSilKitTest, integration_bus_bad_params)
     {
-        ib_ReturnCode returnCode;
+        SilKit_ReturnCode returnCode;
 
-        ib_Participant* participant = nullptr;
-        returnCode = ib_Participant_Create(nullptr, IB_CONFIG_STRING, "Participant1", "42", ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Participant_Create(&participant, nullptr, "Participant1", "42", ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Participant_Create(&participant, IB_CONFIG_STRING, nullptr, "42", ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-        returnCode = ib_Participant_Create(&participant, IB_CONFIG_STRING, "Participant1", nullptr, ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-        returnCode =
-            ib_Participant_Create(&participant, IB_MALFORMED_CONFIG_STRING, "Participant1", "42", ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+        SilKit_Participant* participant = nullptr;
+        returnCode = SilKit_Participant_Create(nullptr, SILKIT_CONFIG_STRING, "Participant1", "42", SilKit_False);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+        returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "42", SilKit_False);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+        returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, nullptr, "42", SilKit_False);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+        returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "Participant1", nullptr, SilKit_False);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
         returnCode =
-            ib_Participant_Create(&participant, IB_CONFIG_STRING, "ParticipantNotExisting", "42", ib_False);
-        EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+            SilKit_Participant_Create(&participant, SILKIT_MALFORMED_CONFIG_STRING, "Participant1", "42", SilKit_False);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
 
-        // since there is no IbRegistry with which one could create a Participant, we check against nullptr
-        returnCode = ib_Participant_Destroy(nullptr);
-        EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        returnCode =
+            SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "ParticipantNotExisting", "42", SilKit_False);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+
+        // since there is no SilKitRegistry with which one could create a Participant, we check against nullptr
+        returnCode = SilKit_Participant_Destroy(nullptr);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
 
 }

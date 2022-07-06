@@ -10,8 +10,8 @@ using namespace std::chrono_literals;
 
 TEST(MwVAsioSerdes, SimLin_Frame)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinFrame in;
     LinFrame out;
@@ -29,8 +29,8 @@ TEST(MwVAsioSerdes, SimLin_Frame)
 
 TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinSendFrameRequest in;
     LinSendFrameRequest out;
@@ -49,8 +49,8 @@ TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
 
 TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinSendFrameHeaderRequest in;
     LinSendFrameHeaderRequest out;
@@ -64,8 +64,8 @@ TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
 }
 TEST(MwVAsioSerdes, SimLin_Transmission)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinTransmission in;
     LinTransmission out;
@@ -85,8 +85,8 @@ TEST(MwVAsioSerdes, SimLin_Transmission)
 
 TEST(MwVAsioSerdes, SimLin_WakeupPulse)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinWakeupPulse in;
     LinWakeupPulse out;
@@ -101,8 +101,8 @@ TEST(MwVAsioSerdes, SimLin_WakeupPulse)
 
 TEST(MwVAsioSerdes, SimLin_FrameResponse)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinFrameResponse in;
     LinFrameResponse out;
@@ -121,8 +121,8 @@ TEST(MwVAsioSerdes, SimLin_FrameResponse)
 
 TEST(MwVAsioSerdes, SimLin_ControllerConfig)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinFrameResponse response1;
     response1.frame.id = 50;
@@ -150,8 +150,8 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
 
 TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinControllerStatusUpdate in;
     LinControllerStatusUpdate out;
@@ -167,8 +167,8 @@ TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
 
 TEST(MwVAsioSerdes, SimLin_FrameResponseUpdate)
 {
-    using namespace ib::sim::lin;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Lin;
+    SilKit::Core::MessageBuffer buffer;
 
     LinFrameResponse response1;
     response1.frame.id = 50;

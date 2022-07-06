@@ -3,35 +3,35 @@
 #include "EthController.hpp"
 #include "SimBehaviorDetailed.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
-SimBehaviorDetailed::SimBehaviorDetailed(mw::IParticipantInternal* participant, EthController* ethController,
-                                       const mw::ServiceDescriptor& serviceDescriptor)
+SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant, EthController* ethController,
+                                       const Core::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(ethController)}
+    , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
     , _parentServiceDescriptor{&serviceDescriptor}
 {
 }
 
 template <typename MsgT>
-void SimBehaviorDetailed::SendIbMessageImpl(MsgT&& msg)
+void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendIbMessage(_parentServiceEndpoint, std::forward<MsgT>(msg));
+    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
-void SimBehaviorDetailed::SendIbMessage(EthernetFrameEvent&& msg)
+void SimBehaviorDetailed::SendMsg(EthernetFrameEvent&& msg)
 {
     // We keep a copy until the transmission was acknowledged before tracing the message
     _transmittedMessages[msg.transmitId] = msg.frame;
 
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
 
-void SimBehaviorDetailed::SendIbMessage(EthernetSetMode&& msg)
+void SimBehaviorDetailed::SendMsg(EthernetSetMode&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
 
 void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
@@ -42,14 +42,14 @@ void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
     {
         if (msg.status == EthernetTransmitStatus::Transmitted)
         {
-            _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, transmittedMsg->second);
+            _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, transmittedMsg->second);
         }
 
         _transmittedMessages.erase(msg.transmitId);
     }
 }
 
-auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool 
+auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool 
 {
     // If simulated, only allow reception from NetSim.
     // NetSim internally sets the ServiceId of this controller and sends messages with it,
@@ -59,11 +59,11 @@ auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) con
            && _parentServiceDescriptor->GetServiceId() == fromDescr.GetServiceId();
 }
 
-void SimBehaviorDetailed::SetSimulatedLink(const mw::ServiceDescriptor& simulatedLink)
+void SimBehaviorDetailed::SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink)
 {
     _simulatedLink = simulatedLink;
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

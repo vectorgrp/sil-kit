@@ -1,8 +1,8 @@
 ============
 Header Files
 ============
-The header files are organized hierarchically starting with the ``ib`` directory.
-The subdirectory structure resembles the layered architecture of the VIB.
+The header files are organized hierarchically starting with the ``silkit`` directory.
+The subdirectory structure resembles the layered architecture of the SILKIT.
 As a rule of thumb, each component has a subdirectory with its own namespace:
 
 .. list-table:: Include Directories
@@ -12,40 +12,40 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
     * - Path
       - Namespace
       - Description
-    * - ib/
-      - ``ib``
+    * - silkit/
+      - ``silkit``
       - Main header, version and macros.
-    * - ib/mw
-      - ``ib::mw``
+    * - silkit/mw
+      - ``SilKit::Core``
       - :doc:`Middleware<../configuration/middleware-configuration>` specific interfaces, data types and exceptions.
-    * - ib/mw/sync
-      - ``ib::mw::sync``
+    * - silkit/mw/sync
+      - ``SilKit::Core::Orchestration``
       - Synchronization mechanisms.
-    * - ib/sim
-      - ``ib::sim``
+    * - silkit/sim
+      - ``SilKit::Services``
       - :ref:`Simulation and Service<sec:api-services>` specific definitions.
-    * - ib/util
-      - ``ib::util``
+    * - silkit/util
+      - ``SilKit::Util``
       - Generic programming utilities
-    * - ib/cfg
-      - ``ib::cfg``
-      - Data structures representing the VIB :doc:`../configuration/configuration`.
+    * - silkit/cfg
+      - ``SilKit::Config``
+      - Data structures representing the SILKIT :doc:`../configuration/configuration`.
 
-The subdirectory layout follows mostly a uniform scheme for substantial VIB components:
- - `ib/<component>/all.hpp` is sufficient to use the component.
- - `ib/<component>/fwd_decl.hpp` contains forward declarations. 
- - Datatypes are declared in ``ib/<component>/<Component>Datatypes.hpp``.
+The subdirectory layout follows mostly a uniform scheme for substantial SILKIT components:
+ - `silkit/<component>/all.hpp` is sufficient to use the component.
+ - `silkit/<component>/fwd_decl.hpp` contains forward declarations. 
+ - Datatypes are declared in ``silkit/<component>/<Component>Datatypes.hpp``.
 
 
 .. _sec:header-vib-main:
 
-Using the VIB Headers
+Using the SILKIT Headers
 ---------------------
-The main header file is ``ib/IntegrationBus.hpp`` which defines the 
-:cpp:func:`CreateParticipant()<ib::CreateParticipant()>` function.
-Version information can be retrieved using the ``ib/version.hpp`` header 
+The main header file is ``silkit/SilKit.hpp`` which defines the 
+:cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>` function.
+Version information can be retrieved using the ``silkit/version.hpp`` header 
 and its functions, e.g. by using the 
-:cpp:func:`version::String()<ib::version::String()>` function.
+:cpp:func:`Version::String()<SilKit::Version::String()>` function.
 
 Further Reading
 ---------------

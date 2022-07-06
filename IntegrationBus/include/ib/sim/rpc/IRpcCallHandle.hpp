@@ -2,9 +2,9 @@
 
 #pragma once
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 class IRpcCallHandle
 {
@@ -16,6 +16,6 @@ public:
     virtual bool operator!=(const IRpcCallHandle& other) const = 0;
 };
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

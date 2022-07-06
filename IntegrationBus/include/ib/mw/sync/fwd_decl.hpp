@@ -2,9 +2,9 @@
 
 #pragma once
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 struct NextSimTask;
 
@@ -21,6 +21,6 @@ class ISystemMonitor;
 class ISystemController;
 
 class ITimeProvider;
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

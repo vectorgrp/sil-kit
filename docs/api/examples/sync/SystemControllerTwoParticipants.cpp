@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
-auto participant1 = ib::CreateParticipant(ibConfig, participantName1, registryUri);
-auto participant2 = ib::CreateParticipant(ibConfig, participantName2, registryUri);
+auto participant1 = SilKit::CreateParticipant(config, participantName1, registryUri);
+auto participant2 = SilKit::CreateParticipant(config, participantName2, registryUri);
 
 auto* systemController = participant1->GetSystemController();
 auto* systemMonitor = participant1->GetSystemMonitor();
@@ -13,7 +13,7 @@ systemController->SetWorkflowConfiguration({participantName1, participantName2})
 // Register SystemStateHandler to trigger the commands of the System Controller in the correct system states.
 // For more information about the use of the System Monitor refer to the corresponding section.
 auto systemStateHandler = 
-    [systemController, ibConfig](SystemState state) {
+    [systemController, config](SystemState state) {
         switch (state)
         {
         case SystemState::ReadyToRun:

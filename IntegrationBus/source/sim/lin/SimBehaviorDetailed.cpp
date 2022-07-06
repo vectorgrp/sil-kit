@@ -3,48 +3,48 @@
 #include "LinController.hpp"
 #include "SimBehaviorDetailed.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
-SimBehaviorDetailed::SimBehaviorDetailed(mw::IParticipantInternal* participant, LinController* linController,
-                                       const mw::ServiceDescriptor& serviceDescriptor)
+SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant, LinController* linController,
+                                       const Core::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
     , _parentController{linController}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(linController)}
+    , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(linController)}
     , _parentServiceDescriptor{&serviceDescriptor}
 {
 }
 
 template <typename MsgT>
-void SimBehaviorDetailed::SendIbMessageImpl(MsgT&& msg)
+void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendIbMessage(_parentServiceEndpoint, std::forward<MsgT>(msg));
+    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
-void SimBehaviorDetailed::SendIbMessage(LinSendFrameRequest&& msg)
+void SimBehaviorDetailed::SendMsg(LinSendFrameRequest&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(LinTransmission&& msg)
+void SimBehaviorDetailed::SendMsg(LinTransmission&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(LinControllerConfig&& msg)
+void SimBehaviorDetailed::SendMsg(LinControllerConfig&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(LinSendFrameHeaderRequest&& msg)
+void SimBehaviorDetailed::SendMsg(LinSendFrameHeaderRequest&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(LinFrameResponseUpdate&& msg)
+void SimBehaviorDetailed::SendMsg(LinFrameResponseUpdate&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(LinControllerStatusUpdate&& msg)
+void SimBehaviorDetailed::SendMsg(LinControllerStatusUpdate&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
 
 void SimBehaviorDetailed::GoToSleep()
@@ -53,7 +53,7 @@ void SimBehaviorDetailed::GoToSleep()
     gotosleepFrame.frame = GoToSleepFrame();
     gotosleepFrame.responseType = LinFrameResponseType::MasterResponse;
 
-    SendIbMessageImpl(gotosleepFrame);
+    SendMsgImpl(gotosleepFrame);
 
     // We signal SleepPending to the network simulator, so it will be able
     // to finish sleep frame transmissions before entering Sleep state.
@@ -67,7 +67,7 @@ void SimBehaviorDetailed::Wakeup()
 {
     // Send without direction, netsim will distribute with correct directions
     LinWakeupPulse pulse{};
-    SendIbMessageImpl(pulse);
+    SendMsgImpl(pulse);
     _parentController->WakeupInternal();
 }
 
@@ -77,7 +77,7 @@ auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission
     return linTransmission.status;
 }
 
-auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool 
+auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool 
 {
     // If simulated, only allow reception from NetSim.
     // NetSim internally sets the ServiceId of this controller and sends messages with it,
@@ -87,11 +87,11 @@ auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) con
            && _parentServiceDescriptor->GetServiceId() == fromDescr.GetServiceId();
 }
 
-void SimBehaviorDetailed::SetSimulatedLink(const mw::ServiceDescriptor& simulatedLink)
+void SimBehaviorDetailed::SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink)
 {
     _simulatedLink = simulatedLink;
 }
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

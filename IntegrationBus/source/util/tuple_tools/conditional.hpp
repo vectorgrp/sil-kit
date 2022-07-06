@@ -2,8 +2,8 @@
 
 #pragma once
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 namespace tuple_tools {
 
 template<class T>
@@ -36,5 +36,5 @@ constexpr bool invoke_if(Func&& func, Arg&&... element)
 }
 
 } // namespace tuple_tools
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

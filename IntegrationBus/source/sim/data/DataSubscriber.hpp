@@ -6,27 +6,27 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "ib/mw/fwd_decl.hpp"
-#include "ib/sim/data/IDataSubscriber.hpp"
+#include "silkit/core/fwd_decl.hpp"
+#include "silkit/services/pubsub/IDataSubscriber.hpp"
 #include "ITimeConsumer.hpp"
 
-#include "IIbToDataSubscriber.hpp"
+#include "IMsgForDataSubscriber.hpp"
 #include "IParticipantInternal.hpp"
 #include "DataSubscriberInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 class DataSubscriber
     : public IDataSubscriber
-    , public IIbToDataSubscriber
-    , public mw::sync::ITimeConsumer
-    , public mw::IIbServiceEndpoint
+    , public IMsgForDataSubscriber
+    , public Core::Orchestration::ITimeConsumer
+    , public Core::IServiceEndpoint
 {
 public:
-    DataSubscriber(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, const std::string& topic,
+    DataSubscriber(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
                    const std::string& mediaType, const std::map<std::string, std::string>& labels,
                    DataMessageHandlerT defaultDataHandler, NewDataPublisherHandlerT newDataSourceHandler);
 
@@ -40,12 +40,12 @@ public:
 
     void RemoveExplicitDataMessageHandler(HandlerId handlerId) override;
 
-    // ib::mw::sync::ITimeConsumer
-    inline void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
+    // SilKit::Core::Orchestration::ITimeConsumer
+    inline void SetTimeProvider(Core::Orchestration::ITimeProvider* provider) override;
     
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 private:
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
@@ -62,14 +62,14 @@ private:
     DataMessageHandlerT _defaultDataHandler;
     NewDataPublisherHandlerT _newDataSourceHandler;
 
-    mw::ServiceDescriptor _serviceDescriptor{};
+    Core::ServiceDescriptor _serviceDescriptor{};
 
     std::underlying_type_t<HandlerId> _nextExplicitDataMessageHandlerId = 0;
     std::unordered_map<std::string, DataSubscriberInternal*> _internalSubscribers;
     std::vector<ExplicitDataMessageHandlerInfo> _explicitDataMessageHandlers;
 
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IParticipantInternal* _participant{nullptr};
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
 
     std::unordered_set<SourceInfo, SourceInfo::HashFunction> _announcedDataSources;
 
@@ -80,21 +80,21 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void DataSubscriber::SetTimeProvider(mw::sync::ITimeProvider* provider)
+void DataSubscriber::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }
 
-void DataSubscriber::SetServiceDescriptor(const ib::mw::ServiceDescriptor& serviceDescriptor)
+void DataSubscriber::SetServiceDescriptor(const SilKit::Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto DataSubscriber::GetServiceDescriptor() const -> const ib::mw::ServiceDescriptor&
+auto DataSubscriber::GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

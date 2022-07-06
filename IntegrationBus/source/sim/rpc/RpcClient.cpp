@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "RpcClient.hpp"
 #include "IServiceDiscovery.hpp"
@@ -8,11 +8,11 @@
 #include "RpcDatatypeUtils.hpp"
 #include "UuidRandom.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-RpcClient::RpcClient(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
+RpcClient::RpcClient(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
                      const std::string& functionName, const std::string& mediaType,
                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                      RpcCallResultHandler handler)
@@ -31,8 +31,8 @@ void RpcClient::RegisterServiceDiscovery()
 {
     // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
-        [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
-               const ib::mw::ServiceDescriptor& serviceDescriptor) {
+        [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
             auto getVal = [serviceDescriptor](std::string key) {
                 std::string tmp;
                 if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
@@ -42,21 +42,21 @@ void RpcClient::RegisterServiceDiscovery()
                 return tmp;
             };
 
-            auto clientUUID = getVal(mw::service::supplKeyRpcServerInternalClientUUID);
+            auto clientUUID = getVal(Core::Discovery::supplKeyRpcServerInternalClientUUID);
 
             if (clientUUID == _clientUUID)
             {
-                if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
+                if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                 {
                     _numCounterparts++;
                 }
-                else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
                 {
                     _numCounterparts--;
                 }
             }
         },
-        mw::service::controllerTypeRpcServerInternal, _clientUUID);
+        Core::Discovery::controllerTypeRpcServerInternal, _clientUUID);
 }
 
 IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
@@ -69,13 +69,13 @@ IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
     }
     else
     {
-        util::uuid::UUID uuid = util::uuid::generate();
+        Util::Uuid::UUID uuid = Util::Uuid::generate();
         auto callUUID = CallUUID{uuid.ab, uuid.cd};
         auto callHandle = std::make_unique<CallHandleImpl>(callUUID);
         auto* callHandlePtr = callHandle.get();
         _detachedCallHandles[to_string(callUUID)] = std::make_pair(_numCounterparts, std::move(callHandle));
         FunctionCall msg{_timeProvider->Now(), std::move(callUUID), std::move(data)};
-        _participant->SendIbMessage(this, std::move(msg));
+        _participant->SendMsg(this, std::move(msg));
         return callHandlePtr;
     }
 }
@@ -90,7 +90,7 @@ void RpcClient::SetCallResultHandler(RpcCallResultHandler handler)
     _handler = std::move(handler);
 }
 
-void RpcClient::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCallResponse& msg)
+void RpcClient::ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const FunctionCallResponse& msg)
 {
     ReceiveMessage(msg);
 }
@@ -120,11 +120,11 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
     }
 }
 
-void RpcClient::SetTimeProvider(mw::sync::ITimeProvider* provider)
+void RpcClient::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

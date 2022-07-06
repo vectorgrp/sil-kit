@@ -5,20 +5,20 @@ Participant
 .. contents:: :local:
    :depth: 1
 
-This document describes the main entry point to the VIB simulation, the participant.
+This document describes the main entry point to the SILKIT simulation, the participant.
 By creating a participant with a given configuration, a connection 
 to a simulation is established and the configured participant joins the simulation.
 
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>` 
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>` 
 
 Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
-:ref:`ib/IntegrationBus.hpp<sec:header-vib-main>` and call the Participant API
+:ref:`silkit/SilKit.hpp<sec:header-vib-main>` and call the Participant API
 factory function::
 
-    auto config = ib::cfg::ParticipantConfigurationFromFile("your_config.yaml");
-    auto participant = ib::CreateParticipant(config, "ParticipantName", registryUri);
+    auto config = SilKit::Config::ParticipantConfigurationFromFile("your_config.yaml");
+    auto participant = SilKit::CreateParticipant(config, "ParticipantName", registryUri);
 
 To take part in the simulation, the Participant needs to be initialized with a proper
 configuration, a participant name and optionally the URI of the registry.
@@ -29,36 +29,36 @@ The IParticipant API
 ~~~~~~~~~~~~~~~~~~~~
 
 The instantiated |IParticipant| can then be used to access the other services
-of the VIB.
+of the SILKIT.
 
 .. admonition:: Warning.
 
     Services must NOT be created in callbacks. E.g., it is an error to call
     CreateCanController() in the registered callbacks for
-    :cpp:func:`CommunicationReadyHandler<ib::mw::sync::ILifecycleService::CommunicationReadyHandler()>`
+    :cpp:func:`CommunicationReadyHandler<SilKit::Core::Orchestration::ILifecycleService::CommunicationReadyHandler()>`
     or even
-    :cpp:func:`SimTask<ib::mw::sync::ITimeSyncService::SetSimulationTask()>`.
+    :cpp:func:`SimTask<SilKit::Core::Orchestration::ITimeSyncService::SetSimulationTask()>`.
 
 
-.. doxygenclass:: ib::mw::IParticipant
+.. doxygenclass:: SilKit::Core::IParticipant
    :members:
 
 
-VIB Version
+SILKIT Version
 ~~~~~~~~~~~
-Version information about the currently running VIB instance
+Version information about the currently running SILKIT instance
 can be queried using the following functions:
 
-    .. doxygenfunction:: ib::version::Major()
+    .. doxygenfunction:: SilKit::Version::Major()
 
-    .. doxygenfunction:: ib::version::Minor()
+    .. doxygenfunction:: SilKit::Version::Minor()
 
-    .. doxygenfunction:: ib::version::Patch()
+    .. doxygenfunction:: SilKit::Version::Patch()
 
-    .. doxygenfunction:: ib::version::String()
+    .. doxygenfunction:: SilKit::Version::String()
 
-    .. doxygenfunction:: ib::version::BuildNumber()
+    .. doxygenfunction:: SilKit::Version::BuildNumber()
 
-    .. doxygenfunction:: ib::version::VersionSuffix()
+    .. doxygenfunction:: SilKit::Version::VersionSuffix()
 
-    .. doxygenfunction:: ib::version::GitHash()
+    .. doxygenfunction:: SilKit::Version::GitHash()

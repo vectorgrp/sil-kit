@@ -10,8 +10,8 @@
 #include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ib/mw/sync/all.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/services/all.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -22,10 +22,10 @@
 namespace {
 
 using namespace std::chrono;
-using namespace ib::cfg;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::sim::data;
+using namespace SilKit::Config;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::PubSub;
 
 const std::string testMessage{"TestMessage"};
 std::vector<std::string> syncParticipantNames;
@@ -53,9 +53,9 @@ public:
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
         _participant =
-            ib::mw::CreateParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), _participantName);
+            SilKit::Core::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), _participantName);
 
-        _participant->JoinIbDomain(registryUri);
+        _participant->JoinSilKitDomain(registryUri);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
@@ -119,9 +119,9 @@ public:
         , _testSize{testSize}
         , _participantName{participantName}
     {
-        _participant = ib::mw::CreateParticipantImpl(
-            ib::cfg::MakeEmptyParticipantConfiguration(), participantName);
-        _participant->JoinIbDomain(registryUri);
+        _participant = SilKit::Core::CreateParticipantImpl(
+            SilKit::Config::MakeEmptyParticipantConfiguration(), participantName);
+        _participant->JoinSilKitDomain(registryUri);
 
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({syncParticipantNames});
@@ -268,7 +268,7 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
         syncParticipantNames.push_back("Publisher" + std::to_string(i));
     }
 
-    VAsioRegistry registry{ ib::cfg::MakeEmptyParticipantConfiguration() };
+    VAsioRegistry registry{ SilKit::Config::MakeEmptyParticipantConfiguration() };
     registry.ProvideDomain(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes

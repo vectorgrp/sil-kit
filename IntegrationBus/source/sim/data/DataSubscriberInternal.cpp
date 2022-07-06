@@ -2,13 +2,13 @@
 
 #include "DataSubscriberInternal.hpp"
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
-DataSubscriberInternal::DataSubscriberInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider, 
+DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider, 
                                                const std::string& topic, const std::string& mediaType,
                                                const std::map<std::string, std::string>& labels,
                                                DataMessageHandlerT defaultHandler, IDataSubscriber* parent)
@@ -38,7 +38,7 @@ void DataSubscriberInternal::RemoveExplicitDataMessageHandler(HandlerId handlerI
     _explicitDataMessageHandlers.Remove(handlerId);
 }
 
-void DataSubscriberInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
+void DataSubscriberInternal::ReceiveSilKitMessage(const Core::IServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
 {
     if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
@@ -61,12 +61,12 @@ void DataSubscriberInternal::ReceiveMessage(const DataMessageEvent& dataMessageE
     }
 }
 
-void DataSubscriberInternal::SetTimeProvider(mw::sync::ITimeProvider* provider)
+void DataSubscriberInternal::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }
 
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

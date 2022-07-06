@@ -4,14 +4,14 @@
 #include <sstream>
 #include <thread>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/util/serdes/sil/Serialization.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/util/serdes/sil/Serialization.hpp"
 
-using namespace ib::mw;
-using namespace ib::sim::data;
+using namespace SilKit::Core;
+using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
 
 
@@ -35,14 +35,14 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
 
     std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
 
-    ib::util::serdes::sil::Serializer serializer;
+    SilKit::Util::SerDes::sil::Serializer serializer;
     serializer.Serialize(message);
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
 void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [DefaultDataHandler] Received new Message: with data=\""
               << message << "\"" << std::endl;
@@ -50,7 +50,7 @@ void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent&
 
 void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher1] Received new Message: with data=\""
               << message << std::endl;
@@ -58,7 +58,7 @@ void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessa
 
 void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    ib::util::serdes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher2] Received new Message: with data=\""
               << message << "\"" << std::endl;
@@ -87,16 +87,16 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        auto registryUri = "vib://localhost:8500";
+        auto registryUri = "silkit://localhost:8500";
         if (argc >= 4)
         {
             registryUri = argv[3];
         }
 
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         // Set an Init Handler
         auto* lifecycleService = participant->GetLifecycleService();
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
             std::cout << "Shutting down..." << std::endl;
         });
 
-        const std::string mediaType{ ib::util::serdes::sil::MediaTypeData() };
+        const std::string mediaType{ SilKit::Util::SerDes::sil::MediaTypeData() };
 
         timeSyncService->SetPeriod(1s);
         if (participantName == "Publisher1")
@@ -165,7 +165,7 @@ int main(int argc, char** argv)
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

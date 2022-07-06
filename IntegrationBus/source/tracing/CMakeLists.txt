@@ -1,13 +1,13 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 ######################################################################
-# VIB Tracing and Replay component
+# SILKIT Tracing and Replay component
 # - Some tracing and replay functionality is implemented in
-#   the external vibe-mdf4tracing extension.
+#   the external silkite-mdf4tracing extension.
 ######################################################################
 
-option(IB_BUILD_COMPONENT_TRACING "Temporarily disable building of Tracing component" OFF)
-if(IB_BUILD_COMPONENT_TRACING)
-    add_library(IbTracing STATIC
+option(SILKIT_BUILD_COMPONENT_TRACING "Temporarily disable building of Tracing component" OFF)
+if(SILKIT_BUILD_COMPONENT_TRACING)
+    add_library(SilKitTracing STATIC
         PcapSink.cpp
         PcapSink.hpp
 
@@ -33,7 +33,7 @@ if(IB_BUILD_COMPONENT_TRACING)
         ReplayScheduler.cpp
     )
 
-    target_include_directories(IbTracing
+    target_include_directories(SilKitTracing
         PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}
             detail
@@ -41,26 +41,26 @@ if(IB_BUILD_COMPONENT_TRACING)
             ${CMAKE_CURRENT_LIST_DIR}
             ${CMAKE_CURRENT_LIST_DIR}/mock/
     )
-    target_link_libraries(IbTracing
+    target_link_libraries(SilKitTracing
         PRIVATE
-            IbInterface
-            IbMwLogging
+            SilKitInterface
+            SilKitMwLogging
         PUBLIC
-            IbInternal
-            IbSimEthernet
-            IbSimCan
-            IbSimFlexray
-            IbSimLin
-            IbSimDataMessage
+            SilKitInternal
+            SilKitSimEthernet
+            SilKitSimCan
+            SilKitSimFlexray
+            SilKitSimLin
+            SilKitSimDataMessage
     )
 
     if(WIN32)
-        target_sources(IbTracing PRIVATE
+        target_sources(SilKitTracing PRIVATE
             detail/NamedPipeWin.hpp
             detail/NamedPipeWin.cpp
             )
     elseif(UNIX)
-        target_sources(IbTracing PRIVATE
+        target_sources(SilKitTracing PRIVATE
             detail/NamedPipeLinux.hpp
             detail/NamedPipeLinux.cpp
             )
@@ -68,19 +68,19 @@ if(IB_BUILD_COMPONENT_TRACING)
         message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
     endif()
 
-    add_vib_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS IbMwMockParticipant IbTracing )
-    add_vib_test(TestTracing_Pcap SOURCES PcapTest.cpp LIBS IbTracing IbMwMockParticipant )
+    add_silkit_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS SilKitMwMockParticipant SilKitTracing )
+    add_silkit_test(TestTracing_Pcap SOURCES PcapTest.cpp LIBS SilKitTracing SilKitMwMockParticipant )
 else()
     # At least provide some mocks for testing
-    add_library(IbTracing INTERFACE)
-    target_include_directories(IbTracing
+    add_library(SilKitTracing INTERFACE)
+    target_include_directories(SilKitTracing
         INTERFACE
             ${CMAKE_CURRENT_LIST_DIR}
             ${CMAKE_CURRENT_LIST_DIR}/mock/
     )
-    target_link_libraries(IbTracing
+    target_link_libraries(SilKitTracing
         INTERFACE
-            IbInternal
-            IbSimEthernet
+            SilKitInternal
+            SilKitSimEthernet
     )
 endif()

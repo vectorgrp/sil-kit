@@ -4,44 +4,44 @@
 #include "SimBehaviorTrivial.hpp"
 
 namespace {
-auto GetSourceMac(const ib::sim::eth::EthernetFrame& frame) -> ib::sim::eth::EthernetMac
+auto GetSourceMac(const SilKit::Services::Ethernet::EthernetFrame& frame) -> SilKit::Services::Ethernet::EthernetMac
 {
-    ib::sim::eth::EthernetMac source{};
-    std::copy(frame.raw.begin() + sizeof(ib::sim::eth::EthernetMac),
-              frame.raw.begin() + 2 * sizeof(ib::sim::eth::EthernetMac), source.begin());
+    SilKit::Services::Ethernet::EthernetMac source{};
+    std::copy(frame.raw.begin() + sizeof(SilKit::Services::Ethernet::EthernetMac),
+              frame.raw.begin() + 2 * sizeof(SilKit::Services::Ethernet::EthernetMac), source.begin());
 
     return source;
 }
 } // namespace
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
-SimBehaviorTrivial::SimBehaviorTrivial(mw::IParticipantInternal* participant, EthController* ethController,
-                    mw::sync::ITimeProvider* timeProvider)
+SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, EthController* ethController,
+                    Core::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{ethController}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(ethController)}
+    , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
     , _timeProvider{timeProvider}
 {
     (void)_parentController;
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::ReceiveIbMessage(const MsgT& msg)
+void SimBehaviorTrivial::ReceiveSilKitMessage(const MsgT& msg)
 {
-    auto receivingController = dynamic_cast<mw::IIbMessageReceiver<MsgT>*>(_parentController);
+    auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     assert(receivingController);
-    receivingController->ReceiveIbMessage(_parentServiceEndpoint, msg);
+    receivingController->ReceiveSilKitMessage(_parentServiceEndpoint, msg);
 }
 
-auto SimBehaviorTrivial::AllowReception(const mw::IIbServiceEndpoint* /*from*/) const -> bool 
+auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
 { 
     return true; 
 }
 
-void SimBehaviorTrivial::SendIbMessage(EthernetFrameEvent&& ethFrameEvent)
+void SimBehaviorTrivial::SendMsg(EthernetFrameEvent&& ethFrameEvent)
 {
     EthernetState controllerState = _parentController->GetState();
 
@@ -49,15 +49,15 @@ void SimBehaviorTrivial::SendIbMessage(EthernetFrameEvent&& ethFrameEvent)
     {
         // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
         ethFrameEvent.timestamp = _timeProvider->Now();
-        _tracer.Trace(ib::sim::TransmitDirection::TX, ethFrameEvent.timestamp, ethFrameEvent.frame);
-        _participant->SendIbMessage(_parentServiceEndpoint, ethFrameEvent);
+        _tracer.Trace(SilKit::Services::TransmitDirection::TX, ethFrameEvent.timestamp, ethFrameEvent.frame);
+        _participant->SendMsg(_parentServiceEndpoint, ethFrameEvent);
 
         EthernetFrameTransmitEvent ack;
         ack.timestamp = ethFrameEvent.timestamp;
         ack.transmitId = ethFrameEvent.transmitId;
         ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
         ack.status = EthernetTransmitStatus::Transmitted;
-        ReceiveIbMessage(ack);
+        ReceiveSilKitMessage(ack);
     }
     else
     {
@@ -73,13 +73,13 @@ void SimBehaviorTrivial::SendIbMessage(EthernetFrameEvent&& ethFrameEvent)
         {
             ack.status = EthernetTransmitStatus::LinkDown;
         }
-        ReceiveIbMessage(ack);
+        ReceiveSilKitMessage(ack);
     }
 
     
 }
 
-void SimBehaviorTrivial::SendIbMessage(EthernetSetMode&& ethSetMode)
+void SimBehaviorTrivial::SendMsg(EthernetSetMode&& ethSetMode)
 {
     // Trivial: Reply EthernetSetMode locally with an EthernetStatus
     EthernetStatus statusReply{};
@@ -93,13 +93,13 @@ void SimBehaviorTrivial::SendIbMessage(EthernetSetMode&& ethSetMode)
     {
         statusReply.state = EthernetState::Inactive;
     }
-    ReceiveIbMessage(statusReply);
+    ReceiveSilKitMessage(statusReply);
 }
 
 void SimBehaviorTrivial::OnReceiveAck(const EthernetFrameTransmitEvent& /*msg*/)
 {
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

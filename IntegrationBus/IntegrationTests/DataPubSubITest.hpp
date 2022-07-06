@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/services/all.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
@@ -12,10 +12,10 @@
 #include "IntegrationTestInfrastructure.hpp"
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::cfg;
-using namespace ib::sim::data;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Config;
+using namespace SilKit::Services::PubSub;
 
 const size_t defaultMsgSize = 3;
 const uint32_t defaultNumMsgToPublish = 3;
@@ -158,7 +158,7 @@ protected:
         }
 
         void OnNewDataSource(IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource,
-                             ib::sim::data::DataMessageHandlerT receptionHandler)
+                             SilKit::Services::PubSub::DataMessageHandlerT receptionHandler)
         {
             newSourceCounter++;
             if (!allDiscovered)
@@ -189,7 +189,7 @@ protected:
         PubSubParticipant(const std::string& newName) { name = newName; }
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
             const std::vector<DataSubscriberInfo>& newDataSubscribers,
-            std::shared_ptr<ib::cfg::IParticipantConfiguration> newConfig = ib::cfg::MakeEmptyParticipantConfiguration())
+            std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig = SilKit::Config::MakeEmptyParticipantConfiguration())
         {
             config = newConfig;
             name = newName;
@@ -197,7 +197,7 @@ protected:
             dataPublishers = newDataPublishers;
         }
 
-        std::shared_ptr<ib::cfg::IParticipantConfiguration> config = ib::cfg::MakeEmptyParticipantConfiguration();
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config = SilKit::Config::MakeEmptyParticipantConfiguration();
         bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
@@ -297,7 +297,7 @@ protected:
     {
         try
         {
-            participant.participant = ib::CreateParticipant(participant.config, participant.name, registryUri);
+            participant.participant = SilKit::CreateParticipant(participant.config, participant.name, registryUri);
 
             participant.participantCreatedPromise.set_value();
 

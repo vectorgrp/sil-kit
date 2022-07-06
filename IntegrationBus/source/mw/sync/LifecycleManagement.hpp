@@ -4,15 +4,15 @@
 
 #include <memory>
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "LifecycleService.hpp"
 #include "SyncDatatypes.hpp"
 #include "ILifecycleStates.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class ILifecycleManagement
 {
@@ -37,7 +37,7 @@ class LifecycleManagement
     : public ILifecycleManagement
 {
 public:
-    LifecycleManagement(logging::ILogger* logger, LifecycleService* parentService);
+    LifecycleManagement(Logging::ILogger* logger, LifecycleService* parentService);
 
     void InitLifecycleManagement(std::string reason) override;
     void SkipSetupPhase(std::string reason) override;
@@ -77,7 +77,7 @@ public:
     ILifecycleState* GetShuttingDownState();
     ILifecycleState* GetShutdownState();
 
-    logging::ILogger* GetLogger();
+    Logging::ILogger* GetLogger();
 
     LifecycleService* GetService();
 
@@ -100,9 +100,9 @@ private:
     ILifecycleState* _currentState;
     LifecycleService* _parentService;
 
-    logging::ILogger* _logger;
+    Logging::ILogger* _logger;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

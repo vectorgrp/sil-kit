@@ -29,7 +29,7 @@ function(get_compiler_arch outComp outArch outPlatform  )
     else()
         message(FATAL_ERROR "Bitness is not supported: \"${CMAKE_SIZEOF_VOID_P}\"")
     endif()
-    message(STATUS "VIB Using ${SYSTEM_BITNESS}-Bit build")
+    message(STATUS "SILKIT Using ${SYSTEM_BITNESS}-Bit build")
 
     #get OS
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")

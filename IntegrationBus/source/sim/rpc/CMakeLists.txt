@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimRpc STATIC
+add_library(SilKitSimRpc STATIC
     RpcCallHandle.hpp
     RpcDatatypeUtils.hpp
     RpcDatatypeUtils.cpp
@@ -16,25 +16,25 @@ add_library(IbSimRpc STATIC
     RpcSerdes.cpp
 )
 
-target_include_directories(IbSimRpc
+target_include_directories(SilKitSimRpc
     PUBLIC .
 )
 
-target_link_libraries(IbSimRpc
-    PRIVATE IbInterface
-            IbInternal
-            IbUuid
-            IbConfiguration
+target_link_libraries(SilKitSimRpc
+    PRIVATE SilKitInterface
+            SilKitInternal
+            SilKitUuid
+            SilKitConfiguration
 )
 
-add_vib_test(TestSimRpc
+add_silkit_test(TestSimRpc
     SOURCES
         RpcClientTest.cpp
         RpcServerTest.cpp
     LIBS
-        IbSimRpc
-        IbMwMockParticipant
-        IbInternal
-        IbMwMockNullConnection
+        SilKitSimRpc
+        SilKitMwMockParticipant
+        SilKitInternal
+        SilKitMwMockNullConnection
 )
-add_vib_test(TestSimRpc_Serdes SOURCES RpcSerdesTest.cpp LIBS IbInternal IbSimRpc)
+add_silkit_test(TestSimRpc_Serdes SOURCES RpcSerdesTest.cpp LIBS SilKitInternal SilKitSimRpc)

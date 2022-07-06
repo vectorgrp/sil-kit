@@ -9,9 +9,9 @@
 #include <stdexcept>
 #include <vector>
 
-namespace ib {
-namespace util {
-namespace serdes {
+namespace SilKit {
+namespace Util {
+namespace SerDes {
 namespace sil {
 
 inline namespace v4 {
@@ -225,6 +225,6 @@ private:
 
 } // namespace v4
 } // namespace sil
-} // namespace serdes
-} // namespace util
-} // namespace ib
+} // namespace SerDes
+} // namespace Util
+} // namespace SilKit

@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -16,9 +16,9 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::cfg;
-using namespace ib::sim::eth;
+using namespace SilKit::Core;
+using namespace SilKit::Config;
+using namespace SilKit::Services::Ethernet;
 
 using testing::_;
 using testing::A;
@@ -59,7 +59,7 @@ protected:
         syncParticipantNames = { "EthWriter" ,"EthReader1" ,"EthReader2" };
     }
 
-    void SetupSender(ib::test::SimParticipant* participant)
+    void SetupSender(SilKit::Tests::SimParticipant* participant)
     {
         std::cout << " Sender init " << participant->Name() << std::endl;
 
@@ -98,7 +98,7 @@ protected:
         });
     }
 
-    void SetupReceiver(ib::test::SimParticipant* participant)
+    void SetupReceiver(SilKit::Tests::SimParticipant* participant)
     {
         std::cout << " Receiver init " << participant->Name() << std::endl;
         auto* controller = participant->Participant()->CreateEthernetController("ETH1", "LINK1");
@@ -136,7 +136,7 @@ protected:
 
     void ExecuteTest()
     {
-        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
         //participant setup
         auto* ethWriter  = testHarness.GetParticipant("EthWriter");
@@ -209,8 +209,8 @@ TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks)
 // TODO Reactivate after logging can be configured
 //TEST_F(ThreeEthControllerITest, DISABLED_test_vasio_logging_orthogonal)
 //{
-//    ibConfig = makeLoggingConfig();
-//    ibConfig.middlewareConfig.activeMiddleware = ib::cfg::Middleware::VAsio;
+//    config = makeLoggingConfig();
+//    config.middlewareConfig.activeMiddleware = SilKit::Config::Middleware::VAsio;
 //
 //    ExecuteTest();
 //}

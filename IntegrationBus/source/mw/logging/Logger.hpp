@@ -4,8 +4,8 @@
 
 #include <memory>
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
 
 #include "Configuration.hpp"
 
@@ -16,16 +16,16 @@ class sink;
 } // namespace sinks
 } // namespace spdlog
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 class Logger : public ILogger
 {
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    Logger(const std::string& participantName, cfg::Logging config);
+    Logger(const std::string& participantName, Config::Logging config);
 
     // ----------------------------------------
     // Public interface methods
@@ -54,12 +54,12 @@ protected:
 private:
     // ----------------------------------------
     // Private members
-    cfg::Logging _config;
+    Config::Logging _config;
 
     std::shared_ptr<spdlog::logger> _logger;
-    std::shared_ptr<spdlog::sinks::sink> _ibRemoteSink;
+    std::shared_ptr<spdlog::sinks::sink> _remoteSink;
 };
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

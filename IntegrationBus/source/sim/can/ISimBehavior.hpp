@@ -2,23 +2,23 @@
 
 #pragma once
 
-#include "ib/sim/can/CanDatatypes.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 class ISimBehavior
 {
 public:
     virtual ~ISimBehavior() = default;
-    virtual auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool = 0;
-    virtual void SendIbMessage(CanConfigureBaudrate&& msg) = 0;
-    virtual void SendIbMessage(CanSetControllerMode&& msg) = 0;
-    virtual void SendIbMessage(CanFrameEvent&& msg) = 0;
+    virtual auto AllowReception(const Core::IServiceEndpoint* from) const -> bool = 0;
+    virtual void SendMsg(CanConfigureBaudrate&& msg) = 0;
+    virtual void SendMsg(CanSetControllerMode&& msg) = 0;
+    virtual void SendMsg(CanFrameEvent&& msg) = 0;
 };
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

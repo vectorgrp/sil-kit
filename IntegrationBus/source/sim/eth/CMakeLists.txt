@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimEthernet STATIC
+add_library(SilKitSimEthernet STATIC
     EthController.cpp
     EthController.hpp
     #EthControllerReplay.hpp
@@ -17,29 +17,29 @@ add_library(IbSimEthernet STATIC
     EthernetSerdes.cpp
 )
 
-target_link_libraries(IbSimEthernet
+target_link_libraries(SilKitSimEthernet
     PUBLIC
-        IbTracing
+        SilKitTracing
     PRIVATE
-        IbInternal
-        IbInterface
-        IbMwLogging
+        SilKitInternal
+        SilKitInterface
+        SilKitMwLogging
 )
 
-target_include_directories(IbSimEthernet
+target_include_directories(SilKitSimEthernet
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_vib_test(TestSimEthController
+add_silkit_test(TestSimEthController
     SOURCES 
         EthControllerTrivialSimTest.cpp
         EthControllerDetailedSimTest.cpp
         EthControllerConfigTest.cpp
     LIBS
-        IbSimEthernet
-        IbMwMockParticipant
-        IbTracing
-        IbMwMockNullConnection
+        SilKitSimEthernet
+        SilKitMwMockParticipant
+        SilKitTracing
+        SilKitMwMockNullConnection
 )
-add_vib_test(TestSimEthernet_Serdes  SOURCES EthernetSerdesTest.cpp LIBS IbSimEthernet)
+add_silkit_test(TestSimEthernet_Serdes  SOURCES EthernetSerdesTest.cpp LIBS SilKitSimEthernet)

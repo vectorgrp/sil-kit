@@ -4,25 +4,25 @@
 
 #include "IServiceDiscovery.hpp"
 
-#include "ib/sim/rpc/RpcDatatypes.hpp"
+#include "silkit/services/rpc/RpcDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 class RpcDiscoverer
 {
 public:
-    RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery);
+    RpcDiscoverer(Core::Discovery::IServiceDiscovery* serviceDiscovery);
 
     std::vector<RpcDiscoveryResult> GetMatchingRpcServers(const std::string& functionName, const std::string& mediaType,
                                                           const std::map<std::string, std::string>& labels) const;
 
 private:
-    mw::service::IServiceDiscovery* _serviceDiscovery{nullptr};
+    Core::Discovery::IServiceDiscovery* _serviceDiscovery{nullptr};
 
 };
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

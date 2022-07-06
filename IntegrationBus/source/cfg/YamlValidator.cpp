@@ -12,10 +12,10 @@
 namespace {
 
 //!< Recursive validation helper to iterate through the YAML document
-bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
+bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
     std::ostream& warnings, const std::string& parent)
 {
-    using namespace ib::cfg;
+    using namespace SilKit::Config;
     bool ok = true;
     std::set<std::string> declaredKeys;
     auto isAlreadyDefined = [&declaredKeys](auto keyNameToCheck) {
@@ -124,8 +124,8 @@ bool ValidateDoc(YAML::Node& doc, const ib::cfg::YamlValidator& v,
 
 } // anonymous namespace
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
   
 const std::string YamlValidator::_elementSeparator{"/"};
 
@@ -272,5 +272,5 @@ auto YamlValidator::DocumentRoot() const -> std::string
     return _elementSeparator;
 }
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

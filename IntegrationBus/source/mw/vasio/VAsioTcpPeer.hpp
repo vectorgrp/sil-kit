@@ -8,24 +8,24 @@
 #include <queue>
 #include <mutex>
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 #include "ProtocolVersion.hpp"
 
 #include "asio.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class VAsioConnection;
 
 class VAsioTcpPeer
     : public IVAsioPeer
-    , public IIbServiceEndpoint
+    , public IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -35,7 +35,7 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioTcpPeer() = delete;
-    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* ibConnection, logging::ILogger* logger);
+    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Logging::ILogger* logger);
     VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer(VAsioTcpPeer&& other) = delete; //clang warning: implicitly deleted because of mutex
 
@@ -45,7 +45,7 @@ public:
 public:
     // ----------------------------------------
     // Public Methods
-    void SendIbMsg(SerializedMessage buffer) override;
+    void SendSilKitMsg(SerializedMessage buffer) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
 
     auto GetInfo() const -> const VAsioPeerInfo& override;
@@ -60,9 +60,9 @@ public:
 
     void StartAsyncRead() override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
     inline void SetProtocolVersion(ProtocolVersion v)  override;
     inline auto GetProtocolVersion() const -> ProtocolVersion  override;
@@ -83,10 +83,10 @@ private:
     // Private Members
     ProtocolVersion _protocolVersion{};
     asio::generic::stream_protocol::socket _socket;
-    VAsioConnection* _ibConnection{nullptr};
+    VAsioConnection* _connection{nullptr};
     VAsioPeerInfo _info;
 
-    logging::ILogger* _logger;
+    Logging::ILogger* _logger;
 
     // receiving
     uint32_t _currentMsgSize{0u};
@@ -100,18 +100,18 @@ private:
     std::mutex _sendingQueueLock;
     bool _sending{false};
     bool _enableQuickAck{false};
-    mw::ServiceDescriptor _serviceDescriptor;
+    Core::ServiceDescriptor _serviceDescriptor;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-void VAsioTcpPeer::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void VAsioTcpPeer::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
-auto VAsioTcpPeer::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto VAsioTcpPeer::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
@@ -126,5 +126,5 @@ auto VAsioTcpPeer::GetProtocolVersion() const -> ProtocolVersion
     return _protocolVersion;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

@@ -1,24 +1,24 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "ib/capi/Flexray.h"
-#include "ib/capi/IntegrationBus.h"
-#include "ib/sim/fr/all.hpp"
+#include "silkit/capi/Flexray.h"
+#include "silkit/capi/SilKit.h"
+#include "silkit/services/fr/all.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "MockParticipant.hpp"
 
 namespace
 {
-using namespace ib::mw;
-using namespace ib::cfg;
-using namespace ib::sim::fr;
-using ::ib::mw::test::DummyParticipant;
+using namespace SilKit::Core;
+using namespace SilKit::Config;
+using namespace SilKit::Services::Flexray;
+using ::SilKit::Core::Tests::DummyParticipant;
 using ::testing::_;
 
 class MockParticipant : public DummyParticipant
 {
 };
 
-class MockFlexrayController : public ib::sim::fr::IFlexrayController
+class MockFlexrayController : public SilKit::Services::Flexray::IFlexrayController
 {
 public:
     MOCK_METHOD1(Configure, void(const FlexrayControllerConfig& config));
@@ -30,20 +30,20 @@ public:
     MOCK_METHOD0(AllowColdstart, void());
     MOCK_METHOD0(AllSlots, void());
     MOCK_METHOD0(Wakeup, void());
-    MOCK_METHOD(ib::sim::HandlerId, AddFrameHandler, (FrameHandler));
-    MOCK_METHOD(void, RemoveFrameHandler, (ib::sim::HandlerId));
-    MOCK_METHOD(ib::sim::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler));
-    MOCK_METHOD(void, RemoveFrameTransmitHandler, (ib::sim::HandlerId));
-    MOCK_METHOD(ib::sim::HandlerId, AddWakeupHandler, (WakeupHandler));
-    MOCK_METHOD(void, RemoveWakeupHandler, (ib::sim::HandlerId));
-    MOCK_METHOD(ib::sim::HandlerId, AddPocStatusHandler, (PocStatusHandler));
-    MOCK_METHOD(void, RemovePocStatusHandler, (ib::sim::HandlerId));
-    MOCK_METHOD(ib::sim::HandlerId, AddSymbolHandler, (SymbolHandler));
-    MOCK_METHOD(void, RemoveSymbolHandler, (ib::sim::HandlerId));
-    MOCK_METHOD(ib::sim::HandlerId, AddSymbolTransmitHandler, (SymbolTransmitHandler));
-    MOCK_METHOD(void, RemoveSymbolTransmitHandler, (ib::sim::HandlerId));
-    MOCK_METHOD(ib::sim::HandlerId, AddCycleStartHandler, (CycleStartHandler));
-    MOCK_METHOD(void, RemoveCycleStartHandler, (ib::sim::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHandler, (FrameHandler));
+    MOCK_METHOD(void, RemoveFrameHandler, (SilKit::Services::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler));
+    MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddWakeupHandler, (WakeupHandler));
+    MOCK_METHOD(void, RemoveWakeupHandler, (SilKit::Services::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddPocStatusHandler, (PocStatusHandler));
+    MOCK_METHOD(void, RemovePocStatusHandler, (SilKit::Services::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddSymbolHandler, (SymbolHandler));
+    MOCK_METHOD(void, RemoveSymbolHandler, (SilKit::Services::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddSymbolTransmitHandler, (SymbolTransmitHandler));
+    MOCK_METHOD(void, RemoveSymbolTransmitHandler, (SilKit::Services::HandlerId));
+    MOCK_METHOD(SilKit::Services::HandlerId, AddCycleStartHandler, (CycleStartHandler));
+    MOCK_METHOD(void, RemoveCycleStartHandler, (SilKit::Services::HandlerId));
 };
 
 class CapiFlexrayTest : public testing::Test
@@ -56,38 +56,38 @@ public:
 
     struct Callbacks
     {
-        static void FrameHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                 const ib_Flexray_FrameEvent* /*message*/)
+        static void FrameHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                 const SilKit_FlexrayFrameEvent* /*message*/)
         {
         }
 
-        static void FrameTransmitHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                         const ib_Flexray_FrameTransmitEvent* /*acknowledge*/)
+        static void FrameTransmitHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                         const SilKit_FlexrayFrameTransmitEvent* /*acknowledge*/)
         {
         }
 
-        static void WakeupHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                  const ib_Flexray_WakeupEvent* /*wakeup*/)
+        static void WakeupHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                  const SilKit_FlexrayWakeupEvent* /*wakeup*/)
         {
         }
 
-        static void PocStatusHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                     const ib_Flexray_PocStatusEvent* /*status*/)
+        static void PocStatusHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                     const SilKit_FlexrayPocStatusEvent* /*status*/)
         {
         }
 
-        static void SymbolHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                  const ib_Flexray_SymbolEvent* /*symbol*/)
+        static void SymbolHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                  const SilKit_FlexraySymbolEvent* /*symbol*/)
         {
         }
 
-        static void SymbolTransmitHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                          const ib_Flexray_SymbolTransmitEvent* /*acknowledge*/)
+        static void SymbolTransmitHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                          const SilKit_FlexraySymbolTransmitEvent* /*acknowledge*/)
         {
         }
 
-        static void CycleStartHandler(void* /*context*/, ib_Flexray_Controller* /*controller*/,
-                                      const ib_Flexray_CycleStartEvent* /*cycleStart*/)
+        static void CycleStartHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+                                      const SilKit_FlexrayCycleStartEvent* /*cycleStart*/)
         {
         }
     };
@@ -101,12 +101,12 @@ protected:
 
 TEST_F(CapiFlexrayTest, make_flexray_controller)
 {
-    ib_ReturnCode returnCode;
-    ib_Flexray_Controller* frController = nullptr;
-    returnCode = ib_Flexray_Controller_Create(&frController, (ib_Participant*)&participant, controllerName.c_str(),
+    SilKit_ReturnCode returnCode;
+    SilKit_FlexrayController* frController = nullptr;
+    returnCode = SilKit_FlexrayController_Create(&frController, (SilKit_Participant*)&participant, controllerName.c_str(),
                                               networkName.c_str());
     // needs NullConnectionParticipant, which won't link with C-API. So just expect a general failure here.
-    EXPECT_EQ(returnCode, ib_ReturnCode_UNSPECIFIEDERROR);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
     EXPECT_EQ(frController, nullptr);
     // When using the NullConnectionParticipant, enable this:
     //EXPECT_NE(frController, nullptr);
@@ -114,221 +114,221 @@ TEST_F(CapiFlexrayTest, make_flexray_controller)
 
 TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
 {
-    ib_ReturnCode returnCode;
-    ib_Flexray_ClusterParameters clusterParameters;
-    ib_Flexray_NodeParameters nodeParameters;
-    ib_Flexray_ControllerConfig cfg;
-    ib_HandlerId handlerId;
+    SilKit_ReturnCode returnCode;
+    SilKit_FlexrayClusterParameters clusterParameters;
+    SilKit_FlexrayNodeParameters nodeParameters;
+    SilKit_FlexrayControllerConfig cfg;
+    SilKit_HandlerId handlerId;
 
     memset(&cfg, 0, sizeof(cfg));
     cfg.clusterParams = &clusterParameters;
     cfg.nodeParams = &nodeParameters;
 
     EXPECT_CALL(mockController, Configure(_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_Configure((ib_Flexray_Controller*)&mockController, &cfg);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_Configure((SilKit_FlexrayController*)&mockController, &cfg);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddFrameHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddFrameHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddFrameHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                        &Callbacks::FrameHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveFrameHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemoveFrameHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemoveFrameHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddFrameTransmitHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddFrameTransmitHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddFrameTransmitHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                                &Callbacks::FrameTransmitHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveFrameTransmitHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemoveFrameTransmitHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemoveFrameTransmitHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddWakeupHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddWakeupHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddWakeupHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                         &Callbacks::WakeupHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveWakeupHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemoveWakeupHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemoveWakeupHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddPocStatusHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddPocStatusHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddPocStatusHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                            &Callbacks::PocStatusHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemovePocStatusHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemovePocStatusHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemovePocStatusHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddSymbolHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddSymbolHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddSymbolHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                         &Callbacks::SymbolHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveSymbolHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemoveSymbolHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemoveSymbolHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddSymbolTransmitHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddSymbolTransmitHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                                 &Callbacks::SymbolTransmitHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveSymbolTransmitHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemoveSymbolTransmitHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemoveSymbolTransmitHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AddCycleStartHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_AddCycleStartHandler((ib_Flexray_Controller*)&mockController, NULL,
+    returnCode = SilKit_FlexrayController_AddCycleStartHandler((SilKit_FlexrayController*)&mockController, NULL,
                                                             &Callbacks::CycleStartHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, RemoveCycleStartHandler(static_cast<HandlerId>(0))).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_RemoveCycleStartHandler((ib_Flexray_Controller*)&mockController, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_RemoveCycleStartHandler((SilKit_FlexrayController*)&mockController, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, Run()).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_ExecuteCmd((ib_Flexray_Controller*)&mockController, ib_Flexray_ChiCommand_RUN);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_ExecuteCmd((SilKit_FlexrayController*)&mockController, SilKit_FlexrayChiCommand_RUN);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, DeferredHalt()).Times(testing::Exactly(1));
     returnCode =
-        ib_Flexray_Controller_ExecuteCmd((ib_Flexray_Controller*)&mockController, ib_Flexray_ChiCommand_DEFERRED_HALT);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        SilKit_FlexrayController_ExecuteCmd((SilKit_FlexrayController*)&mockController, SilKit_FlexrayChiCommand_DEFERRED_HALT);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, Freeze()).Times(testing::Exactly(1));
     returnCode =
-        ib_Flexray_Controller_ExecuteCmd((ib_Flexray_Controller*)&mockController, ib_Flexray_ChiCommand_FREEZE);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        SilKit_FlexrayController_ExecuteCmd((SilKit_FlexrayController*)&mockController, SilKit_FlexrayChiCommand_FREEZE);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AllowColdstart()).Times(testing::Exactly(1));
-    returnCode = ib_Flexray_Controller_ExecuteCmd((ib_Flexray_Controller*)&mockController,
-                                                  ib_Flexray_ChiCommand_ALLOW_COLDSTART);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_FlexrayController_ExecuteCmd((SilKit_FlexrayController*)&mockController,
+                                                  SilKit_FlexrayChiCommand_ALLOW_COLDSTART);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, AllSlots()).Times(testing::Exactly(1));
     returnCode =
-        ib_Flexray_Controller_ExecuteCmd((ib_Flexray_Controller*)&mockController, ib_Flexray_ChiCommand_ALL_SLOTS);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        SilKit_FlexrayController_ExecuteCmd((SilKit_FlexrayController*)&mockController, SilKit_FlexrayChiCommand_ALL_SLOTS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockController, Wakeup()).Times(testing::Exactly(1));
     returnCode =
-        ib_Flexray_Controller_ExecuteCmd((ib_Flexray_Controller*)&mockController, ib_Flexray_ChiCommand_WAKEUP);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+        SilKit_FlexrayController_ExecuteCmd((SilKit_FlexrayController*)&mockController, SilKit_FlexrayChiCommand_WAKEUP);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 TEST_F(CapiFlexrayTest, fr_controller_nullpointer_params)
 {
-    auto cMockParticipant = (ib_Participant*)&participant;
-    ib_ReturnCode returnCode;
-    ib_Flexray_ClusterParameters clusterParameters;
-    ib_Flexray_NodeParameters nodeParameters;
-    ib_Flexray_ControllerConfig cfg;
-    ib_HandlerId handlerId;
+    auto cMockParticipant = (SilKit_Participant*)&participant;
+    SilKit_ReturnCode returnCode;
+    SilKit_FlexrayClusterParameters clusterParameters;
+    SilKit_FlexrayNodeParameters nodeParameters;
+    SilKit_FlexrayControllerConfig cfg;
+    SilKit_HandlerId handlerId;
 
     memset(&cfg, 0, sizeof(cfg));
     cfg.clusterParams = &clusterParameters;
     cfg.nodeParams = &nodeParameters;
 
-    ib_Flexray_Controller* cController = (ib_Flexray_Controller*)&mockController;
-    ib_Flexray_Controller* cControllerReturn = nullptr;
+    SilKit_FlexrayController* cController = (SilKit_FlexrayController*)&mockController;
+    SilKit_FlexrayController* cControllerReturn = nullptr;
 
-    returnCode = ib_Flexray_Controller_Create(nullptr, nullptr, nullptr, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_Create(nullptr, nullptr, "bad", nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_Create(&cControllerReturn, nullptr, "bad", nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_Create(nullptr, cMockParticipant, "bad", "bad");
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_Create(&cControllerReturn, cMockParticipant, nullptr, "bad");
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_Create(&cControllerReturn, cMockParticipant, "bad", nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Create(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Create(nullptr, nullptr, "bad", nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Create(&cControllerReturn, nullptr, "bad", nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Create(nullptr, cMockParticipant, "bad", "bad");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Create(&cControllerReturn, cMockParticipant, nullptr, "bad");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Create(&cControllerReturn, cMockParticipant, "bad", nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_Configure(cController, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Configure(cController, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_Configure(nullptr, &cfg);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Configure(nullptr, &cfg);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_Configure(nullptr, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_Configure(nullptr, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_ExecuteCmd(nullptr, ib_Flexray_ChiCommand_RUN);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_ExecuteCmd(nullptr, SilKit_FlexrayChiCommand_RUN);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_AddFrameHandler(nullptr, NULL, &Callbacks::FrameHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddFrameHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddFrameHandler(cController, NULL, &Callbacks::FrameHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode =
-        ib_Flexray_Controller_AddFrameTransmitHandler(nullptr, NULL, &Callbacks::FrameTransmitHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode =
-        ib_Flexray_Controller_AddFrameTransmitHandler(cController, NULL, &Callbacks::FrameTransmitHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode = ib_Flexray_Controller_AddWakeupHandler(nullptr, NULL, &Callbacks::WakeupHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddWakeupHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddWakeupHandler(cController, NULL, &Callbacks::WakeupHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode = ib_Flexray_Controller_AddPocStatusHandler(nullptr, NULL, &Callbacks::PocStatusHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddPocStatusHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddPocStatusHandler(cController, NULL, &Callbacks::PocStatusHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-
-    returnCode = ib_Flexray_Controller_AddSymbolHandler(nullptr, NULL, &Callbacks::SymbolHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddSymbolHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddSymbolHandler(cController, NULL, &Callbacks::SymbolHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddFrameHandler(nullptr, NULL, &Callbacks::FrameHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddFrameHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddFrameHandler(cController, NULL, &Callbacks::FrameHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode =
-        ib_Flexray_Controller_AddSymbolTransmitHandler(nullptr, NULL, &Callbacks::SymbolTransmitHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        SilKit_FlexrayController_AddFrameTransmitHandler(nullptr, NULL, &Callbacks::FrameTransmitHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddFrameTransmitHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode =
-        ib_Flexray_Controller_AddSymbolTransmitHandler(cController, NULL, &Callbacks::SymbolTransmitHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        SilKit_FlexrayController_AddFrameTransmitHandler(cController, NULL, &Callbacks::FrameTransmitHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_AddCycleStartHandler(nullptr, NULL, &Callbacks::CycleStartHandler, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddCycleStartHandler(cController, NULL, nullptr, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_AddCycleStartHandler(cController, NULL, &Callbacks::CycleStartHandler, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddWakeupHandler(nullptr, NULL, &Callbacks::WakeupHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddWakeupHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddWakeupHandler(cController, NULL, &Callbacks::WakeupHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Flexray_Controller_RemoveFrameHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_RemoveFrameTransmitHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_RemoveWakeupHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_RemovePocStatusHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_RemoveSymbolHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_RemoveSymbolTransmitHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
-    returnCode = ib_Flexray_Controller_RemoveCycleStartHandler(nullptr, handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddPocStatusHandler(nullptr, NULL, &Callbacks::PocStatusHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddPocStatusHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddPocStatusHandler(cController, NULL, &Callbacks::PocStatusHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_FlexrayController_AddSymbolHandler(nullptr, NULL, &Callbacks::SymbolHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddSymbolHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddSymbolHandler(cController, NULL, &Callbacks::SymbolHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode =
+        SilKit_FlexrayController_AddSymbolTransmitHandler(nullptr, NULL, &Callbacks::SymbolTransmitHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddSymbolTransmitHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode =
+        SilKit_FlexrayController_AddSymbolTransmitHandler(cController, NULL, &Callbacks::SymbolTransmitHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_FlexrayController_AddCycleStartHandler(nullptr, NULL, &Callbacks::CycleStartHandler, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddCycleStartHandler(cController, NULL, nullptr, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_AddCycleStartHandler(cController, NULL, &Callbacks::CycleStartHandler, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_FlexrayController_RemoveFrameHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_RemoveFrameTransmitHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_RemoveWakeupHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_RemovePocStatusHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_RemoveSymbolHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_RemoveSymbolTransmitHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_FlexrayController_RemoveCycleStartHandler(nullptr, handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
 } // namespace

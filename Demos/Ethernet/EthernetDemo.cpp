@@ -8,13 +8,13 @@
 #include <thread>
 #include <vector>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
-using namespace ib::mw;
-using namespace ib::sim;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
 
 using namespace std::chrono_literals;
 
@@ -28,12 +28,12 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-eth::EthernetFrame CreateFrame(const eth::EthernetMac& destinationAddress, const eth::EthernetMac& sourceAddress,
+Ethernet::EthernetFrame CreateFrame(const Ethernet::EthernetMac& destinationAddress, const Ethernet::EthernetMac& sourceAddress,
                                     const std::vector<uint8_t>& payload)
 {
     const uint16_t etherType = 0x86dd;  // IPv6 protocol
 
-    eth::EthernetFrame frame{};
+    Ethernet::EthernetFrame frame{};
     std::copy(destinationAddress.begin(), destinationAddress.end(), std::back_inserter(frame.raw));
     std::copy(sourceAddress.begin(), sourceAddress.end(), std::back_inserter(frame.raw));
     auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
@@ -51,9 +51,9 @@ eth::EthernetFrame CreateFrame(const eth::EthernetMac& destinationAddress, const
     return frame;
 }
 
-std::string GetPayloadStringFromFrame(const eth::EthernetFrame& frame)
+std::string GetPayloadStringFromFrame(const Ethernet::EthernetFrame& frame)
 {
-    const size_t FrameHeaderSize = 2 * sizeof(eth::EthernetMac) + sizeof(EtherType);
+    const size_t FrameHeaderSize = 2 * sizeof(Ethernet::EthernetMac) + sizeof(EtherType);
 
     std::vector<uint8_t> payload;
     payload.insert(payload.end(), frame.raw.begin() + FrameHeaderSize, frame.raw.end());
@@ -61,9 +61,9 @@ std::string GetPayloadStringFromFrame(const eth::EthernetFrame& frame)
     return payloadString;
 }
 
-void FrameTransmitHandler(eth::IEthernetController* /*controller*/, const eth::EthernetFrameTransmitEvent& frameTransmitEvent)
+void FrameTransmitHandler(Ethernet::IEthernetController* /*controller*/, const Ethernet::EthernetFrameTransmitEvent& frameTransmitEvent)
 {
-    if (frameTransmitEvent.status == eth::EthernetTransmitStatus::Transmitted)
+    if (frameTransmitEvent.status == Ethernet::EthernetTransmitStatus::Transmitted)
     {
         std::cout << ">> ACK for Ethernet frame with transmitId=" << frameTransmitEvent.transmitId << std::endl;
     }
@@ -72,21 +72,21 @@ void FrameTransmitHandler(eth::IEthernetController* /*controller*/, const eth::E
         std::cout << ">> NACK for Ethernet frame with transmitId=" << frameTransmitEvent.transmitId;
         switch (frameTransmitEvent.status)
         {
-        case eth::EthernetTransmitStatus::Transmitted:
+        case Ethernet::EthernetTransmitStatus::Transmitted:
             break;
-        case eth::EthernetTransmitStatus::InvalidFrameFormat:
+        case Ethernet::EthernetTransmitStatus::InvalidFrameFormat:
             std::cout << ": InvalidFrameFormat";
             break;
-        case eth::EthernetTransmitStatus::ControllerInactive:
+        case Ethernet::EthernetTransmitStatus::ControllerInactive:
             std::cout << ": ControllerInactive";
             break;
-        case eth::EthernetTransmitStatus::LinkDown:
+        case Ethernet::EthernetTransmitStatus::LinkDown:
             std::cout << ": LinkDown";
             break;
-        case eth::EthernetTransmitStatus::Dropped:
+        case Ethernet::EthernetTransmitStatus::Dropped:
             std::cout << ": Dropped";
             break;
-        case eth::EthernetTransmitStatus::DuplicatedTransmitId:
+        case Ethernet::EthernetTransmitStatus::DuplicatedTransmitId:
             std::cout << ": DuplicatedTransmitId";
             break;
         }
@@ -95,7 +95,7 @@ void FrameTransmitHandler(eth::IEthernetController* /*controller*/, const eth::E
     }
 }
 
-void FrameHandler(eth::IEthernetController* /*controller*/, const eth::EthernetFrameEvent& frameEvent)
+void FrameHandler(Ethernet::IEthernetController* /*controller*/, const Ethernet::EthernetFrameEvent& frameEvent)
 {
     auto frame = frameEvent.frame;
     auto payload = GetPayloadStringFromFrame(frame);
@@ -104,7 +104,7 @@ void FrameHandler(eth::IEthernetController* /*controller*/, const eth::EthernetF
               << "\"" << std::endl;
 }
 
-void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& from, const eth::EthernetMac& to)
+void SendFrame(Ethernet::IEthernetController* controller, const Ethernet::EthernetMac& from, const Ethernet::EthernetMac& to)
 {
     static int frameId = 0;
     std::stringstream stream;
@@ -126,8 +126,8 @@ void SendFrame(eth::IEthernetController* controller, const eth::EthernetMac& fro
 
 int main(int argc, char** argv)
 {
-    ib::sim::eth::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
-    ib::sim::eth::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    SilKit::Services::Ethernet::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
+    SilKit::Services::Ethernet::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     if (argc < 3)
     {
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        std::string registryUri{"vib://localhost:8500"};
+        std::string registryUri{"silkit://localhost:8500"};
 
         bool runSync = true;
 
@@ -170,10 +170,10 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
         auto* ethernetController = participant->CreateEthernetController("Eth1");
 
         ethernetController->AddFrameHandler(&FrameHandler);
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
         }
 
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

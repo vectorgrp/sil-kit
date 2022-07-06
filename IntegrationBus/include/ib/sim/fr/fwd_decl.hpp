@@ -4,9 +4,9 @@
 
 #include <chrono>
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 struct FlexrayClusterParameters;
 struct FlexrayNodeParameters;
@@ -32,6 +32,6 @@ struct FlexrayPocStatusEvent;
 
 class IFlexrayController;
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

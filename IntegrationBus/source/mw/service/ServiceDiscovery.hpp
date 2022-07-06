@@ -12,20 +12,20 @@
 #include "SpecificDiscoveryStore.hpp"
 
 #include "IParticipantInternal.hpp"
-#include "IIbServiceEndpoint.hpp"
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IServiceEndpoint.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 #include "IServiceDiscovery.hpp"
 
-namespace ib {
-namespace mw {
-namespace service {
+namespace SilKit {
+namespace Core {
+namespace Discovery {
 
 class ServiceDiscovery
-    : public mw::IIbReceiver<ParticipantDiscoveryEvent, ServiceDiscoveryEvent>
-    , public mw::IIbSender<ParticipantDiscoveryEvent, ServiceDiscoveryEvent>
-    , public IIbServiceEndpoint
-    , public service::IServiceDiscovery
+    : public Core::IReceiver<ParticipantDiscoveryEvent, ServiceDiscoveryEvent>
+    , public Core::ISender<ParticipantDiscoveryEvent, ServiceDiscoveryEvent>
+    , public IServiceEndpoint
+    , public Discovery::IServiceDiscovery
 {
 public: 
 
@@ -52,13 +52,13 @@ public: //IServiceDiscovery
 
 public: // Interfaces
 
-    // IIbServiceEndpoint
-    void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
-    // IIbReceiver
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantDiscoveryEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ServiceDiscoveryEvent& msg) override;
+    // IReceiver
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ParticipantDiscoveryEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ServiceDiscoveryEvent& msg) override;
 
 private: // Methods
 
@@ -88,7 +88,7 @@ private:
     std::atomic<bool> _shuttingDown{false};
 };
 
-} // namespace service
-} // namespace mw
-} // namespace ib
+} // namespace Discovery
+} // namespace Core
+} // namespace SilKit
 

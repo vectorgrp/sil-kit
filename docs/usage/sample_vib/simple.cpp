@@ -4,16 +4,16 @@
 #include <chrono>
 #include <exception>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp" // string conversions for enums
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp" // string conversions for enums
 
-const auto registryUri = "vib://localhost:8500";
+const auto registryUri = "silkit://localhost:8500";
 
-void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
+void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
 {
-    auto participant = ib::CreateParticipant(config, "PublisherParticipant", registryUri);
+    auto participant = SilKit::CreateParticipant(config, "PublisherParticipant", registryUri);
     auto* publisher = participant->CreateDataPublisher("DataService");
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -40,16 +40,16 @@ void publisher_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
     }
 }
 
-void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
+void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
 {
-    auto participant = ib::CreateParticipant(config, "SubscriberParticipant", registryUri);
+    auto participant = SilKit::CreateParticipant(config, "SubscriberParticipant", registryUri);
     auto* subscriber = participant->CreateDataSubscriber("DataService");
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     //Register callback for reception of messages
     subscriber->SetDefaultDataMessageHandler(
-        [](ib::sim::data::IDataSubscriber* subscriber, const ib::sim::data::DataMessageEvent& dataMessageEvent) {
+        [](SilKit::Services::PubSub::IDataSubscriber* subscriber, const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
             std::string message{dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
             std::cout << " <- Received data=\"" << message << "\"" << std::endl;
         });
@@ -71,7 +71,7 @@ void subscriber_main(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
 
 int main(int argc, char** argv)
 {
-    auto config = ib::cfg::ParticipantConfigurationFromFile("simple.yaml");
+    auto config = SilKit::Config::ParticipantConfigurationFromFile("simple.yaml");
     std::thread publisher{publisher_main, config};
     std::thread subscriber{subscriber_main, config};
 

@@ -11,8 +11,8 @@
 #include <algorithm>
 
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 template <typename IterableT>
 class PrintableHexString
@@ -92,5 +92,5 @@ inline std::ostream& operator<<(std::ostream& out, const PrintableHexString<Iter
 }
 
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

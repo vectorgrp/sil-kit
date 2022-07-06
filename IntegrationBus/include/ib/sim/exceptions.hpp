@@ -4,12 +4,12 @@
 
 #include <exception>
 
-namespace ib {
-namespace sim {
+namespace SilKit {
+namespace Services {
 
 class ProtocolError : public std::exception
 {
 };
 
-} // namespace sim
-} // namespace ib
+} // namespace Services
+} // namespace SilKit

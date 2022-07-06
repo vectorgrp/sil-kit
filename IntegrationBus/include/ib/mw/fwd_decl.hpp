@@ -2,13 +2,13 @@
 
 #pragma once
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class IParticipant;
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 
 // also include subdirectories
 #include "sync/fwd_decl.hpp"

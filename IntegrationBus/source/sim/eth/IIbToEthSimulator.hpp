@@ -2,25 +2,25 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
-#include "IIbServiceEndpoint.hpp"
-#include "ib/sim/eth/fwd_decl.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
+#include "IServiceEndpoint.hpp"
+#include "silkit/services/eth/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
-/*! \brief IIbToEthSimulator interface
+/*! \brief IMsgForEthSimulator interface
 *
 *  Used by the Participant, implemented by the EthSimulator
 */
-class IIbToEthSimulator
-    : public mw::IIbReceiver<EthernetFrameEvent, EthernetSetMode>
-    , public mw::IIbSender<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
+class IMsgForEthSimulator
+    : public Core::IReceiver<EthernetFrameEvent, EthernetSetMode>
+    , public Core::ISender<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
 {
 public:
-    virtual ~IIbToEthSimulator() = default;
+    virtual ~IMsgForEthSimulator() = default;
     
     /* NB: there is no setter or getter for an EndpointAddress of the
      * simulator, since the simulator manages multiple controllers
@@ -28,10 +28,10 @@ public:
      * the individual endpointIds.
      */
     //! \brief Setter and getter for the ParticipantID associated with this ethernetsimulator
-    virtual void SetParticipantId(ib::mw::ParticipantId participantId) = 0;
-    virtual auto GetParticipantId() const -> ib::mw::ParticipantId = 0;
+    virtual void SetParticipantId(SilKit::Core::ParticipantId participantId) = 0;
+    virtual auto GetParticipantId() const -> SilKit::Core::ParticipantId = 0;
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

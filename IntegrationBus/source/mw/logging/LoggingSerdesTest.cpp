@@ -6,10 +6,10 @@
 
 TEST(MwLoggingSerdes, LoggingSerdes)
 {
-    ib::mw::MessageBuffer buffer;
-    ib::mw::logging::LogMsg in, out;
-    in.level = ib::mw::logging::Level::Trace;
-    ib::mw::logging::SourceLoc loc;
+    SilKit::Core::MessageBuffer buffer;
+    SilKit::Core::Logging::LogMsg in, out;
+    in.level = SilKit::Core::Logging::Level::Trace;
+    SilKit::Core::Logging::SourceLoc loc;
     loc.filename = "somefile.txt";
     loc.funcname ="TEST(LoggingSerdes)";
     loc.line = 15;

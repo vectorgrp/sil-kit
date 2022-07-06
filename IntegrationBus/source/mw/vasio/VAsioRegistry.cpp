@@ -27,14 +27,14 @@ bool isCatchallAddress(const std::string& hostUrl)
 
 } // namespace
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-VAsioRegistry::VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg, ProtocolVersion version) :
-    _vasioConfig{ std::dynamic_pointer_cast<ib::cfg::ParticipantConfiguration>(cfg) },
-    _connection{ *_vasioConfig, "IbRegistry", VAsioConnection::RegistryParticipantId, version}
+VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version) :
+    _vasioConfig{ std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg) },
+    _connection{ *_vasioConfig, "SilKitRegistry", VAsioConnection::RegistryParticipantId, version}
 {
-    _logger = std::make_unique<logging::Logger>("IbRegistry", _vasioConfig->logging);
+    _logger = std::make_unique<Logging::Logger>("SilKitRegistry", _vasioConfig->logging);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
@@ -96,7 +96,7 @@ void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
 {
     _onAllParticipantsDisconnected = std::move(handler);
 }
-auto VAsioRegistry::GetLogger() -> logging::ILogger*
+auto VAsioRegistry::GetLogger() -> Logging::ILogger*
 {
     return _logger.get();
 }
@@ -202,7 +202,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
         knownParticipantsMsg.peerInfos.push_back(peerInfo);
     }
 
-    peer->SendIbMsg(SerializedMessage{peer->GetProtocolVersion(), knownParticipantsMsg});
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), knownParticipantsMsg});
 }
 
 void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
@@ -235,6 +235,6 @@ bool VAsioRegistry::AllParticipantsAreConnected() const
     return true;*/
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 

@@ -1,5 +1,5 @@
-make_ib_demo(IbDemoCRpc RpcDemo.c)
-set_property(TARGET IbDemoCRpc PROPERTY C_STANDARD 11)
-target_sources(IbDemoCRpc
-    PRIVATE IbConfig_DemoRpc.json
+make_silkit_demo(SilKitDemoCRpc RpcDemo.c)
+set_property(TARGET SilKitDemoCRpc PROPERTY C_STANDARD 11)
+target_sources(SilKitDemoCRpc
+    PRIVATE SilKitConfig_DemoRpc.json
 )

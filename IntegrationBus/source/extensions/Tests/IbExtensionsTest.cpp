@@ -3,14 +3,14 @@
 #include <tuple>
 #include <iostream>
 
-#include "ib/version.hpp"
+#include "silkit/version.hpp"
 #include "ParticipantConfiguration.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include "MockParticipant.hpp" //for DummyLogger
-#include "IbExtensions.hpp"
+#include "SilKitExtensions.hpp"
 #include "DummyExtension.hpp"
 #include "Filesystem.hpp"
 
@@ -27,37 +27,37 @@ namespace
 {
 std::string GetCurrentWorkingDir()
 {
-    return ib::filesystem::current_path().string();
+    return SilKit::Filesystem::current_path().string();
 }
 
 void SetCurrentWorkingDir(const std::string& cwd)
 {
-    ib::filesystem::current_path(cwd);
+    SilKit::Filesystem::current_path(cwd);
 }
 
-class StdoutLogger: public ib::mw::test::DummyLogger 
+class StdoutLogger: public SilKit::Core::Tests::DummyLogger 
 {
 public:
     void Info(const std::string& msg) override
     {
-        std::cout << "IbExtensionTest: Info: " << msg << std::endl;
+        std::cout << "SilKitExtensionTest: Info: " << msg << std::endl;
     }
     void Debug(const std::string& msg) override
     {
-        std::cout << "IbExtensionTest: Debug: " << msg << std::endl;
+        std::cout << "SilKitExtensionTest: Debug: " << msg << std::endl;
     }
     void Warn(const std::string& msg) override
     {
-        std::cout << "IbExtensionTest: Warn: " << msg << std::endl;
+        std::cout << "SilKitExtensionTest: Warn: " << msg << std::endl;
     }
     void Error(const std::string& msg) override
     {
-        std::cout << "IbExtensionTest: Error: " << msg << std::endl;
+        std::cout << "SilKitExtensionTest: Error: " << msg << std::endl;
     }
 };
 }
 
-class IbExtensionsTest : public Test
+class SilKitExtensionsTest : public Test
 {
 protected:
     void TearDown() override
@@ -75,19 +75,19 @@ protected:
     StdoutLogger logger;
 };
 
-std::string IbExtensionsTest::currentWorkingDir;
+std::string SilKitExtensionsTest::currentWorkingDir;
 
 using triple = std::tuple<uint32_t, uint32_t, uint32_t>;
 
-TEST_F(IbExtensionsTest, load_dummy_lib)
+TEST_F(SilKitExtensionsTest, load_dummy_lib)
 {
     {
-        const auto testDir = ib::filesystem::path{"vib_library_test"};
-        ib::filesystem::current_path(testDir);
-        auto dummyExtension = ib::extensions::LoadExtension(&logger, "DummyExtension");
+        const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
+        SilKit::Filesystem::current_path(testDir);
+        auto dummyExtension = SilKit::LoadExtension(&logger, "DummyExtension");
 
         {
-            auto otherInstance = ib::extensions::LoadExtension(&logger, "DummyExtension");
+            auto otherInstance = SilKit::LoadExtension(&logger, "DummyExtension");
             std::cout <<" created second instance of DummyExtension" << std::endl;
         }
         ASSERT_NE(dummyExtension, nullptr);
@@ -99,8 +99,8 @@ TEST_F(IbExtensionsTest, load_dummy_lib)
 
 
         triple version;
-        triple reference{ib::version::Major(),
-                 ib::version::Minor(), ib::version::Patch()};
+        triple reference{SilKit::Version::Major(),
+                 SilKit::Version::Minor(), SilKit::Version::Patch()};
 
         dummyExtension->GetVersion(std::get<0>(version), std::get<1>(version),
                          std::get<2>(version));
@@ -111,34 +111,34 @@ TEST_F(IbExtensionsTest, load_dummy_lib)
 }
 
 
-TEST_F(IbExtensionsTest, dynamic_cast)
+TEST_F(SilKitExtensionsTest, dynamic_cast)
 {
-    const auto testDir = ib::filesystem::path{"vib_library_test"};
-    ib::filesystem::current_path(testDir);
+    const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
+    SilKit::Filesystem::current_path(testDir);
     // test if dynamic cast of dynamic extension works
-    auto extensionBase = ib::extensions::LoadExtension(&logger, "DummyExtension");
+    auto extensionBase = SilKit::LoadExtension(&logger, "DummyExtension");
     auto* dummy = dynamic_cast<DummyExtension*>(extensionBase.get());
     ASSERT_NE(dummy, nullptr);
     dummy->SetDummyValue(12345L);
     ASSERT_EQ(dummy->GetDummyValue(), 12345L);
 }
 
-TEST_F(IbExtensionsTest, wrong_version_number)
+TEST_F(SilKitExtensionsTest, wrong_version_number)
 {
     try
     {
-        auto extension = ib::extensions::LoadExtension(&logger, "WrongVersionExtension");
+        auto extension = SilKit::LoadExtension(&logger, "WrongVersionExtension");
         triple version;
         triple reference{
-            ib::version::Major(),
-            ib::version::Minor(),
-            ib::version::Patch()
+            SilKit::Version::Major(),
+            SilKit::Version::Minor(),
+            SilKit::Version::Patch()
         };
         extension->GetVersion(std::get<0>(version), std::get<1>(version),
                 std::get<2>(version));
         ASSERT_EQ(version, reference);
     }
-    catch (const ib::extensions::ExtensionError& error)
+    catch (const SilKit::ExtensionError& error)
     {
         const std::string msg{error.what()};
         std::cout << "OK: received expected version mismatch error"
@@ -150,19 +150,19 @@ TEST_F(IbExtensionsTest, wrong_version_number)
 
 }
 
-TEST_F(IbExtensionsTest, wrong_build_system)
+TEST_F(SilKitExtensionsTest, wrong_build_system)
 {
-    auto extension = ib::extensions::LoadExtension(&logger, "WrongBuildSystem");
+    auto extension = SilKit::LoadExtension(&logger, "WrongBuildSystem");
     //should print a harmless warning on stdout
 }
 
-TEST_F(IbExtensionsTest, multiple_extensions_loaded)
+TEST_F(SilKitExtensionsTest, multiple_extensions_loaded)
 {
-    const auto testDir = ib::filesystem::path{"vib_library_test"};
-    ib::filesystem::current_path(testDir);
+    const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
+    SilKit::Filesystem::current_path(testDir);
     //check that multiple instances don't interfere
-    auto base1 = ib::extensions::LoadExtension(&logger, "DummyExtension");
-    auto base2 = ib::extensions::LoadExtension(&logger, "DummyExtension");
+    auto base1 = SilKit::LoadExtension(&logger, "DummyExtension");
+    auto base2 = SilKit::LoadExtension(&logger, "DummyExtension");
 
     auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
     auto* mod2 = dynamic_cast<DummyExtension*>(base2.get());
@@ -174,13 +174,13 @@ TEST_F(IbExtensionsTest, multiple_extensions_loaded)
 }
 
 #if !defined(_WIN32)
-TEST_F(IbExtensionsTest, load_from_envvar)
+TEST_F(SilKitExtensionsTest, load_from_envvar)
 {
-    const auto testDir = ib::filesystem::path{"vib_library_test"};
+    const auto testDir = SilKit::Filesystem::path{"silkit_library_test"};
     setenv("TEST_VAR", testDir.c_str(), 1); // should be invariant
-    ib::cfg::Extensions config;
+    SilKit::Config::Extensions config;
     config.searchPathHints.emplace_back("ENV:TEST_VAR");
-    auto base1 = ib::extensions::LoadExtension(&logger, "DummyExtension", config);
+    auto base1 = SilKit::LoadExtension(&logger, "DummyExtension", config);
     auto* mod1 = dynamic_cast<DummyExtension*>(base1.get());
     mod1->SetDummyValue(1);
     EXPECT_EQ(mod1->GetDummyValue(), 1);

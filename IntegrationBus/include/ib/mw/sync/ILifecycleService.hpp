@@ -6,15 +6,15 @@
 #include <future>
 #include <string>
 
-#include "ib/mw/sync/ITimeSyncService.hpp"
-#include "ib/capi/Participant.h"
-#include "ib/exception.hpp"
+#include "silkit/core/sync/ITimeSyncService.hpp"
+#include "silkit/capi/Participant.h"
+#include "silkit/exception.hpp"
 
 #include "SyncDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class ILifecycleService
 {
@@ -103,7 +103,7 @@ public:
     /*! \brief Abort current simulation run due to an error.
      *
      * Switch to the \ref ParticipantState::Error state and
-     * report the error message in the IB system.
+     * report the error message in the SilKit system.
      */
     virtual void ReportError(std::string errorMsg) = 0;
     
@@ -156,6 +156,6 @@ public:
     virtual auto GetTimeSyncService() const -> ITimeSyncService* = 0;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

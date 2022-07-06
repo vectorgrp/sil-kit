@@ -12,8 +12,8 @@
 #include "EthController.hpp"
 
 namespace {
-using namespace ib::mw;
-using namespace ib::sim::eth;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Ethernet;
 
 class EthernetControllerConfigTest : public testing::Test
 {
@@ -21,16 +21,16 @@ public:
     EthernetControllerConfigTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
+        std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
 
-    ib::cfg::EthernetController controllerNoNetworkCfg;
+    SilKit::Config::EthernetController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->ethernetControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::EthernetController controllerWithNetworkCfg;
+    SilKit::Config::EthernetController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->ethernetControllers.push_back(controllerWithNetworkCfg);
@@ -45,7 +45,7 @@ TEST(EthernetControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName));
@@ -62,7 +62,7 @@ TEST(EthernetControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));
@@ -79,7 +79,7 @@ TEST(EthernetControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName, networkName));

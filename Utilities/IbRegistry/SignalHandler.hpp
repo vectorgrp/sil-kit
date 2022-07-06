@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include <functional>
 
-namespace ib {
+namespace SilKit {
 namespace registry {
 
 //! \brief RegisterSignalHandler can be used to portably register a single signal handler.
@@ -12,4 +12,4 @@ using SignalHandlerT = std::function<void(int)>;
 void RegisterSignalHandler(SignalHandlerT handler);
 
 } // namespace registry
-} // namespace ib
+} // namespace SilKit

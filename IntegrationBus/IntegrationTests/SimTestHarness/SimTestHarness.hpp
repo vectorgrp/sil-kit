@@ -11,11 +11,11 @@
 #include <memory>
 #include <cstdint>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/vendor/IIbRegistry.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/vendor/ISilKitRegistry.hpp"
 
-namespace ib { namespace test {
+namespace SilKit { namespace Tests {
 //forward
 class SimSystemController;
 
@@ -25,21 +25,21 @@ class SimSystemController;
 class SimParticipant
 {
 public:
-    using FutureResult = std::future<ib::mw::sync::ParticipantState>;
+    using FutureResult = std::future<SilKit::Core::Orchestration::ParticipantState>;
 
     SimParticipant(const SimParticipant&) = delete;
     SimParticipant operator=(const SimParticipant&) = delete;
     SimParticipant() = default;
 
     const std::string& Name() const;
-    ib::mw::IParticipant* Participant() const;
+    SilKit::Core::IParticipant* Participant() const;
     FutureResult& Result();
     void Stop();
 
 private:
     std::string _name;
     FutureResult _result;
-    std::unique_ptr<ib::mw::IParticipant> _participant;
+    std::unique_ptr<SilKit::Core::IParticipant> _participant;
 
     friend class SimTestHarness;
 };
@@ -66,10 +66,10 @@ private:
     std::string _registryUri;
     std::unique_ptr<SimSystemController> _simSystemController;
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;
-    std::unique_ptr<ib::vendor::IIbRegistry> _registry;
+    std::unique_ptr<SilKit::Vendor::ISilKitRegistry> _registry;
 };
 
 
 
-} //end ns ib
+} //end ns silkit
 } //end ns test

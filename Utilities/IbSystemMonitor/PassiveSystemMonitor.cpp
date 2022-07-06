@@ -11,15 +11,15 @@
 #include <iterator>
 #include <thread>
 
-#include "ib/version.hpp"
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/version.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "CommandlineParser.hpp"
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 using namespace std::chrono_literals;
 
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
@@ -31,21 +31,21 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 int main(int argc, char** argv)
 {
-    ib::util::CommandlineParser commandlineParser;
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("version", "v", "[--version]",
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "[--version]",
         "-v, --version: Get version info.");
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
 
-    commandlineParser.Add<ib::util::CommandlineParser::Option>(
-        "connect-uri", "u", "vib://localhost:8500", "[--connect-uri <vibUri>]",
-        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to 'vib://localhost:8500'.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
+        "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
+        "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
 
-    std::cout << "Vector Integration Bus (VIB) -- System Monitor" << std::endl
+    std::cout << "Vector SilKit -- System Monitor" << std::endl
         << std::endl;
 
     try
@@ -60,36 +60,36 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("help").Value())
+    if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value())
     {
         commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
         return 0;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("version").Value())
+    if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value())
     {
-        std::string ibHash{ ib::version::GitHash() };
-        auto ibShortHash = ibHash.substr(0, 7);
+        std::string hash{ SilKit::Version::GitHash() };
+        auto shortHash = hash.substr(0, 7);
         std::cout
             << "Version Info:" << std::endl
-            << " - Vector Integration Bus (VIB): " << ib::version::String() << ", #" << ibShortHash << std::endl;
+            << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }
 
-    auto connectUri{ commandlineParser.Get<ib::util::CommandlineParser::Option>("connect-uri").Value() };
-    auto participantName{ commandlineParser.Get<ib::util::CommandlineParser::Option>("name").Value() };
-    auto configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
+    auto connectUri{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("connect-uri").Value() };
+    auto participantName{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value() };
+    auto configurationFilename{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("configuration").Value() };
 
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration;
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
         configuration = !configurationFilename.empty() ?
-            ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
-            ib::cfg::ParticipantConfigurationFromString("");
+            SilKit::Config::ParticipantConfigurationFromFile(configurationFilename) :
+            SilKit::Config::ParticipantConfigurationFromString("");
     }
-    catch (const ib::ConfigurationError & error)
+    catch (const SilKit::ConfigurationError & error)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
@@ -102,19 +102,19 @@ int main(int argc, char** argv)
     {
         std::cout << "Creating participant '" << participantName << "' with registry " << connectUri << std::endl;
 
-        auto participant = ib::CreateParticipant(std::move(configuration), participantName, connectUri);
+        auto participant = SilKit::CreateParticipant(std::move(configuration), participantName, connectUri);
 
         auto* logger = participant->GetLogger();
         auto* systemMonitor = participant->GetSystemMonitor();
 
-        systemMonitor->AddParticipantStatusHandler([logger](const sync::ParticipantStatus& status) {
+        systemMonitor->AddParticipantStatusHandler([logger](const Orchestration::ParticipantStatus& status) {
             std::stringstream buffer;
             buffer << "New ParticipantState: " << status.participantName << " is " << status.state
                    << ",\tReason: " << status.enterReason;
             logger->Info(buffer.str());
         });
 
-        systemMonitor->AddSystemStateHandler([logger](sync::SystemState state) {
+        systemMonitor->AddSystemStateHandler([logger](Orchestration::SystemState state) {
             std::stringstream buffer;
             buffer << "New SystemState: " << state;
             logger->Info(buffer.str());

@@ -7,8 +7,8 @@
 
 #include "CreateParticipant.hpp"
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -21,7 +21,7 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 using testing::_;
 using testing::A;
@@ -44,8 +44,8 @@ protected:
     }
 
 protected:
-    ib::sim::data::IDataPublisher* publisher{nullptr};
-    ib::sim::data::IDataSubscriber* subscriber{nullptr};
+    SilKit::Services::PubSub::IDataPublisher* publisher{nullptr};
+    SilKit::Services::PubSub::IDataSubscriber* subscriber{nullptr};
     std::promise<bool> testOk;
 };
 
@@ -54,23 +54,23 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
 
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     std::string participantNameSender = "Sender";
-    auto pubParticipant = ib::mw::CreateParticipantImpl(
-        ib::cfg::MakeEmptyParticipantConfiguration(), participantNameSender);
-    pubParticipant->JoinIbDomain(registryUri);
+    auto pubParticipant = SilKit::Core::CreateParticipantImpl(
+        SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameSender);
+    pubParticipant->JoinSilKitDomain(registryUri);
 
     std::string participantNameReceiver = "Receiver";
-    auto subParticipant = ib::mw::CreateParticipantImpl(
-        ib::cfg::MakeEmptyParticipantConfiguration(), participantNameReceiver);
-    subParticipant->JoinIbDomain(registryUri);
+    auto subParticipant = SilKit::Core::CreateParticipantImpl(
+        SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameReceiver);
+    subParticipant->JoinSilKitDomain(registryUri);
 
     publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);
     subscriber = subParticipant->CreateDataSubscriber(
         "SubCtrl1", "CrashTopic", {}, {},
-        [this](auto* /*subscriber*/, const ib::sim::data::DataMessageEvent& /*data*/) {
+        [this](auto* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
             this->testOk.set_value(true);
             throw std::runtime_error{"CrashTest"};
         },

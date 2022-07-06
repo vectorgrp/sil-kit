@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
@@ -20,18 +20,18 @@ using namespace std::chrono_literals;
 
 using namespace testing;
 
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::util;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Util;
 
-using ::ib::mw::test::DummyParticipant;
+using ::SilKit::Core::Tests::DummyParticipant;
 
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const ParticipantCommand& msg));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const SystemCommand& msg));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const ParticipantCommand& msg));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const SystemCommand& msg));
 };
 
 class SystemControllerTest : public testing::Test
@@ -66,23 +66,23 @@ TEST_F(SystemControllerTest, configure_serviceDescriptor)
 TEST_F(SystemControllerTest, send_restart)
 {
     std::string name = "Participant";
-    auto nameHash = util::hash::Hash(name);
+    auto nameHash = Util::Hash::Hash(name);
     ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::Restart};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
     controller.Restart(name);
 }
 
 TEST_F(SystemControllerTest, send_run)
 {
     SystemCommand cmd{SystemCommand::Kind::Run};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
     controller.Run();
 }
     
 TEST_F(SystemControllerTest, send_stop)
 {
     SystemCommand cmd{SystemCommand::Kind::Stop};
-    EXPECT_CALL(participant, SendIbMessage(&controller, cmd)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
     controller.Stop();
 }
     

@@ -1,15 +1,15 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-if(${IB_BUILD_DOCS})
+if(${SILKIT_BUILD_DOCS})
     Project(IBDocs NONE)
-    include(IntegrationBusVersion)
-    configure_ib_version(${PROJECT_NAME})
+    include(SilKitVersion)
+    configure_silkit_version(${PROJECT_NAME})
     find_package(Doxygen REQUIRED)
     find_package(Sphinx REQUIRED)
 
     # Find all the public headers
-    get_target_property(IB_API_HEADERS IbApi SOURCES)
+    get_target_property(SILKIT_API_HEADERS SilKitApi SOURCES)
 
-    set(DOXYGEN_INPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/../IntegrationBus/include/ib)
+    set(DOXYGEN_INPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/../SilKit/include/silkit)
     set(DOXYGEN_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
     set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
     set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
@@ -38,12 +38,12 @@ if(${IB_BUILD_DOCS})
                            ${DOXYFILE_IN}
                            ${SPHINX_SOURCE}/conf.py
                        DEPENDS
-                           ${IB_API_HEADERS}
+                           ${SILKIT_API_HEADERS}
                            ${SPHINX_SOURCE_FILES}
                        COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
                        COMMAND ${SPHINX_EXECUTABLE} -b html
                            # Tell Breathe where to find the Doxygen output
-                           -Dbreathe_projects.IntegrationBus=${DOXYGEN_OUTPUT_DIR}/xml
+                           -Dbreathe_projects.SilKit=${DOXYGEN_OUTPUT_DIR}/xml
                            -Drelease=${PROJECT_VERSION}
                            -d${CMAKE_CURRENT_BINARY_DIR}/sphinx-doctree
 			   -T
@@ -61,10 +61,10 @@ if(${IB_BUILD_DOCS})
         FILES
             CHANGELOG.rst
         DESTINATION .
-        COMPONENT IntegrationBus-Developer
+        COMPONENT SilKit-Developer
     )
 
     #add sample code so it shows in the IDE, but don't build or install it
-    add_executable(sample_vib_new_config EXCLUDE_FROM_ALL usage/sample_vib/simple.cpp)
-    target_link_libraries(sample_vib_new_config PRIVATE IntegrationBus)
+    add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL usage/sample_vib/simple.cpp)
+    target_link_libraries(sample_silkit_new_config PRIVATE SilKit)
 endif()

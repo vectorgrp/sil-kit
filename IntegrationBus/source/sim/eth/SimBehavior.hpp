@@ -10,27 +10,27 @@
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 class EthController;
 
 class SimBehavior : public ISimBehavior
 {
 public:
-    SimBehavior(mw::IParticipantInternal* participant, EthController* ethController,
-                       mw::sync::ITimeProvider* timeProvider);
+    SimBehavior(Core::IParticipantInternal* participant, EthController* ethController,
+                       Core::Orchestration::ITimeProvider* timeProvider);
 
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(EthernetFrameEvent&& msg) override;
-    void SendIbMessage(EthernetSetMode&& msg) override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
+    void SendMsg(EthernetFrameEvent&& msg) override;
+    void SendMsg(EthernetSetMode&& msg) override;
     void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
 
-    void SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink);
+    void SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink);
     void SetTrivialBehavior();
 
     auto IsTrivial() const -> bool;
@@ -38,13 +38,13 @@ public:
 
 private:
     template <typename MsgT>
-    void SendIbMessageImpl(MsgT&& msg);
+    void SendMsgImpl(MsgT&& msg);
 
     SimBehaviorTrivial _trivial;
     SimBehaviorDetailed _detailed;
     ISimBehavior* _currentBehavior;
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

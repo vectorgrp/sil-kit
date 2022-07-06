@@ -4,8 +4,8 @@
 
 #include <cstdint>
 
-namespace ib {
-namespace sim {
+namespace SilKit {
+namespace Services {
 
 /*! \brief Flag indicating the direction of a message
  */
@@ -22,5 +22,5 @@ enum class TransmitDirection : uint8_t
 };
 using DirectionMask = uint8_t;
 
-} // namespace sim
-} // namespace ib
+} // namespace Services
+} // namespace SilKit

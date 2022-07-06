@@ -5,14 +5,14 @@
 #include <ostream>
 #include <sstream>
 
-#include "ib/exception.hpp"
-#include "ib/util/PrintableHexString.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/util/PrintableHexString.hpp"
 
 #include "FlexrayDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 inline std::string to_string(FlexrayChannel channel);
 inline std::string to_string(FlexrayClockPeriod period);
@@ -84,7 +84,7 @@ std::string to_string(FlexrayClockPeriod period)
     case FlexrayClockPeriod::T50NS:
         return "50ns";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(FlexrayTransmissionMode mode)
@@ -96,7 +96,7 @@ std::string to_string(FlexrayTransmissionMode mode)
     case FlexrayTransmissionMode::Continuous:
         return "Continuous";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
     
 std::string to_string(FlexrayChiCommand command)
@@ -116,7 +116,7 @@ std::string to_string(FlexrayChiCommand command)
     case FlexrayChiCommand::WAKEUP:
         return "WAKEUP";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
     
 std::string to_string(FlexraySymbolPattern pattern)
@@ -147,7 +147,7 @@ std::string to_string(FlexrayPocState state)
     case FlexrayPocState::Halt:
         return "Halt";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(const FlexrayHeader& header)
@@ -313,7 +313,7 @@ std::ostream& operator<<(std::ostream& out, FlexrayPocState state)
 std::ostream& operator<<(std::ostream& out, const FlexrayHeader& header)
 {
     return out
-        << "fr::FlexrayHeader{f=["
+        << "Flexray::FlexrayHeader{f=["
         << (header.IsSet(FlexrayHeader::Flag::SuFIndicator) ? "U" : "-")
         << (header.IsSet(FlexrayHeader::Flag::SyFIndicator) ? "Y" : "-")
         << (header.IsSet(FlexrayHeader::Flag::NFIndicator) ? "-" : "N")
@@ -328,7 +328,7 @@ std::ostream& operator<<(std::ostream& out, const FlexraySymbolEvent& symbol)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(symbol.timestamp);
     return out
-        << "fr::FlexraySymbolEvent{pattern=" << symbol.pattern
+        << "Flexray::FlexraySymbolEvent{pattern=" << symbol.pattern
         << ", channel=" << symbol.channel
         << " @ " << timestamp.count() << "ms}";
 }
@@ -337,7 +337,7 @@ std::ostream& operator<<(std::ostream& out, const FlexraySymbolTransmitEvent& sy
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(symbol.timestamp);
     return out
-        << "fr::FlexraySymbolTransmitEvent{pattern=" << symbol.pattern
+        << "Flexray::FlexraySymbolTransmitEvent{pattern=" << symbol.pattern
         << ", channel=" << symbol.channel
         << " @ " << timestamp.count() << "ms}";
 }
@@ -346,7 +346,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayCycleStartEvent& cycleS
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(cycleStart.timestamp);
     return out
-        << "fr::FlexrayCycleStartEvent{t=" << timestamp.count()
+        << "Flexray::FlexrayCycleStartEvent{t=" << timestamp.count()
         << "ms, cycleCounter=" << static_cast<uint32_t>(cycleStart.cycleCounter)
         << "}";
 }
@@ -354,7 +354,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayCycleStartEvent& cycleS
 std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    out << "fr::FlexrayFrameEvent{"
+    out << "Flexray::FlexrayFrameEvent{"
         << "ch=" << msg.channel
         << ", " << msg.frame.header
         << " @" << timestamp.count() << "ms";
@@ -362,7 +362,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
     {
         // if payload is valid, provide it as hex dump
         out << ", payload="
-            << util::AsHexString(msg.frame.payload).WithSeparator(" ").WithMaxLength(msg.frame.header.payloadLength);
+            << Util::AsHexString(msg.frame.payload).WithSeparator(" ").WithMaxLength(msg.frame.header.payloadLength);
     }
     return out << "}";
 }
@@ -370,7 +370,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
 std::ostream& operator<<(std::ostream& out, const FlexrayFrameTransmitEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "fr::FlexrayFrameTransmitEvent{"
+    return out << "Flexray::FlexrayFrameTransmitEvent{"
         << msg.frame.header
         << ", ch=" << msg.channel
         << ", txBuffer=" << msg.txBufferIndex
@@ -379,19 +379,19 @@ std::ostream& operator<<(std::ostream& out, const FlexrayFrameTransmitEvent& msg
 
 std::ostream& operator<<(std::ostream& out, const FlexrayHostCommand& msg)
 {
-    return out << "fr::FlexrayHostCommand{"
+    return out << "Flexray::FlexrayHostCommand{"
         << msg.command
         << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const FlexrayControllerConfig& /*msg*/)
 {
-    return out << "fr::FlexrayControllerConfig{...}";
+    return out << "Flexray::FlexrayControllerConfig{...}";
 }
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg)
 {
-    return out << "fr::FlexrayTxBufferConfig{"
+    return out << "Flexray::FlexrayTxBufferConfig{"
         << "ch=" << msg.channels
         << ", slot=" << msg.slotId
         << (msg.hasPayloadPreambleIndicator ? ", PP" : "")
@@ -404,7 +404,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg)
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg)
 {
-    return out << "fr::FlexrayTxBufferConfigUpdate{"
+    return out << "Flexray::FlexrayTxBufferConfigUpdate{"
         << "idx=" << msg.txBufferIndex
         << " " << msg.txBufferConfig
         << "}";
@@ -412,14 +412,14 @@ std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& m
 
 std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg)
 {
-    out << "fr::FlexrayTxBufferUpdate{"
+    out << "Flexray::FlexrayTxBufferUpdate{"
         << "idx=" << msg.txBufferIndex
         << ", payloadValid=";
 
     if (msg.payloadDataValid)
     {
         out << "t, payload=["
-            << util::AsHexString(msg.payload).WithSeparator(" ").WithMaxLength(8)
+            << Util::AsHexString(msg.payload).WithSeparator(" ").WithMaxLength(8)
             << "], payloadSize=" << msg.payload.size();
     }
     else
@@ -432,7 +432,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg)
 std::ostream& operator<<(std::ostream& out, const FlexrayPocStatusEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out << "fr::POCStatus{"
+    return out << "Flexray::POCStatus{"
         << "State=" << msg.state
         << ", Freeze=" << msg.freeze
         << " @" << timestamp.count() << "ms}";
@@ -452,7 +452,7 @@ std::ostream& operator<<(std::ostream& out, FlexraySlotModeType msg)
         out << "All"; break;
 
     default:
-        throw ib::TypeConversionError{};
+        throw SilKit::TypeConversionError{};
     }
     return out;
 }
@@ -472,7 +472,7 @@ std::ostream& operator<<(std::ostream& out, FlexrayErrorModeType msg)
 
 
     default:
-        throw ib::TypeConversionError{};
+        throw SilKit::TypeConversionError{};
     }
     return out;
 }
@@ -515,7 +515,7 @@ std::ostream& operator<<(std::ostream& out, FlexrayStartupStateType msg)
         out << "ExternalStartup"; break;
 
     default:
-        throw ib::TypeConversionError{};
+        throw SilKit::TypeConversionError{};
     }
 
     return out;
@@ -546,7 +546,7 @@ std::ostream& operator<<(std::ostream& out, FlexrayWakeupStatusType msg)
     case FlexrayWakeupStatusType::Transmitted:
         out << "Transmitted"; break;
     default:
-        throw ib::TypeConversionError{};
+        throw SilKit::TypeConversionError{};
     }
 
     return out;
@@ -555,6 +555,6 @@ std::ostream& operator<<(std::ostream& out, FlexrayWakeupStatusType msg)
 
 
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

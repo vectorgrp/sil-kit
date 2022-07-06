@@ -12,8 +12,8 @@ namespace {
 
 TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
 {
-    using namespace ib::mw::sync;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Core::Orchestration;
+    SilKit::Core::MessageBuffer buffer;
 
     ParticipantCommand in{7, ParticipantCommand::Kind::Restart};
     ParticipantCommand out{0, ParticipantCommand::Kind::Invalid};
@@ -27,8 +27,8 @@ TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
 
 TEST(MwVAsioSerdes, MwSync_SystemCommand)
 {
-    using namespace ib::mw::sync;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Core::Orchestration;
+    SilKit::Core::MessageBuffer buffer;
 
     SystemCommand in{SystemCommand::Kind::Run};
     SystemCommand out{SystemCommand::Kind::Invalid};
@@ -41,8 +41,8 @@ TEST(MwVAsioSerdes, MwSync_SystemCommand)
 
 TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
 {
-    using namespace ib::mw::sync;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Core::Orchestration;
+    SilKit::Core::MessageBuffer buffer;
 
     auto now = std::chrono::system_clock::now();
     decltype(now) nowUs = std::chrono::system_clock::time_point{std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch())};

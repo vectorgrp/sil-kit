@@ -6,7 +6,7 @@
 
 // pipeline config
 projectName="vib-main"
-artifactName='IntegrationBus'
+artifactName='SilKit'
 keepNumBuilds=10 //number of log files on Jenkins, workspaces are always cleaned
 publishToArtifactory=false
 buildDebugBin=false //debug binaries are only build when doing a release to customers
@@ -459,7 +459,7 @@ def doBuild(Map config) {
                 // safe the PDB files on windows
                 if(!isUnix()) {
                     // package PDB files without rebuilding
-                    def pdbArchive = "_build_Debug/IntegrationBus-${buildName}-PDB.zip"
+                    def pdbArchive = "_build_Debug/SilKit-${buildName}-PDB.zip"
                     run "python -mzipfile -c ${pdbArchive} _build_Debug/package-pdb/ _build_Release/package-pdb/"
                     archiveToArtifactory(config, scmVars, pdbArchive)
                 }

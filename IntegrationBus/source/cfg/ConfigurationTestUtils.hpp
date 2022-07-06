@@ -4,36 +4,36 @@
 
 #include <memory>
 
-#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
-inline auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
-inline auto MakeParticipantConfigurationWithLogging(mw::logging::Level logLevel) 
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
+inline auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
+inline auto MakeParticipantConfigurationWithLogging(Core::Logging::Level logLevel) 
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
 // inline implementations
 
-auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    return std::make_shared<ib::cfg::ParticipantConfiguration>();
+    return std::make_shared<SilKit::Config::ParticipantConfiguration>();
 }
 
-auto MakeParticipantConfigurationWithLogging(mw::logging::Level logLevel)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+auto MakeParticipantConfigurationWithLogging(Core::Logging::Level logLevel)
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    ib::cfg::ParticipantConfiguration config;
+    SilKit::Config::ParticipantConfiguration config;
 
-    auto sink = cfg::Sink{};
+    auto sink = Config::Sink{};
     sink.level = logLevel;
-    sink.type = cfg::Sink::Type::Stdout;
+    sink.type = Config::Sink::Type::Stdout;
     config.logging.sinks.push_back(sink);
 
-    return std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(config));
+    return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(config));
 }
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

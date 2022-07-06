@@ -2,27 +2,27 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-#include "ib/sim/lin/LinDatatypes.hpp"
+#include "silkit/services/lin/LinDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
-/*! \brief IIbToLinController interface
+/*! \brief IMsgForLinController interface
  *
  *  Used by the Participant, implemented by the LinControllerProxy
  */
-class IIbToLinController
-    : public mw::IIbReceiver<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate,
+class IMsgForLinController
+    : public Core::IReceiver<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate,
                              LinFrameResponseUpdate>
-    , public mw::IIbSender<LinTransmission, LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse,
+    , public Core::ISender<LinTransmission, LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse,
                            LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
 {
 };
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

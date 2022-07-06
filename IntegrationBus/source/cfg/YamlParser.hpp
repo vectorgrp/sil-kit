@@ -12,8 +12,8 @@
 
 #include "YamlConversion.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 //////////////////////////////////////////////////////////////////////
 // Configuration Parsing
@@ -22,13 +22,13 @@ namespace cfg {
 //!< Helper to print the YAML position in line and column format.
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark);
 
-template<typename VibConfigT>
-auto to_yaml(const VibConfigT& vibValue) -> YAML::Node
+template<typename SilKitConfigT>
+auto to_yaml(const SilKitConfigT& silkitValue) -> YAML::Node
 {
     YAML::Node node;
     try
     {
-        node = vibValue;
+        node = silkitValue;
         return node;
     }
     catch (const YAML::Exception& ex)
@@ -39,12 +39,12 @@ auto to_yaml(const VibConfigT& vibValue) -> YAML::Node
         throw ConfigurationError{ ss.str() };
     }
 }
-template<typename VibConfigT>
-auto from_yaml(const YAML::Node& node) -> VibConfigT
+template<typename SilKitConfigT>
+auto from_yaml(const YAML::Node& node) -> SilKitConfigT
 {
     try
     {
-        return node.as<VibConfigT>();
+        return node.as<SilKitConfigT>();
     }
     catch (const YAML::Exception& ex)
     {
@@ -73,5 +73,5 @@ auto Deserialize(const std::string& str) -> T
     return from_yaml<T>(YAML::Load(ss));
 }
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

@@ -5,12 +5,12 @@
 #include "VAsioMsgKind.hpp"
 #include "VAsioDatatypes.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 ////////////////////////////////////////////////////////////////////////////////
 // Early Protocol Handshake and Initial Service Subscription
-// VAsioMsgKind: IbRegistryMessage
+// VAsioMsgKind: SilKitRegistryMessage
 ////////////////////////////////////////////////////////////////////////////////
 
 // Extract the message size (first element in wire format message)
@@ -25,7 +25,7 @@ auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId;
 auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
 
 //! Handshake: Serialize ParticipantAnnouncementReply (contains remote peer's protocol version)
-//  VAsioMsgKind: IbRegistryMessage
+//  VAsioMsgKind: SilKitRegistryMessage
 void Serialize(MessageBuffer& buffer, const ParticipantAnnouncement& announcement);
 void Serialize(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply);
 void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber);
@@ -38,5 +38,5 @@ void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

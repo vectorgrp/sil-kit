@@ -19,7 +19,7 @@ static std::unique_ptr<SignalMonitor> gSignalMonitor;
 #include <windows.h>
 
 namespace {
-using namespace ib::registry;
+using namespace SilKit::registry;
 
 //forward
 BOOL WINAPI systemHandler(DWORD ctrlType);
@@ -100,7 +100,7 @@ BOOL WINAPI systemHandler(DWORD ctrlType)
 
 namespace {
 
-using namespace ib::registry;
+using namespace SilKit::registry;
 
 //forward
 void systemHandler(int sigNum);
@@ -180,7 +180,7 @@ void systemHandler(int sigNum)
 } // namespace
 #endif
 
-namespace ib {
+namespace SilKit {
 namespace registry {
 
 void RegisterSignalHandler(SignalHandlerT handler)
@@ -189,4 +189,4 @@ void RegisterSignalHandler(SignalHandlerT handler)
 }
 
 } // namespace registry
-} // namespace ib
+} // namespace SilKit

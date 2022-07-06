@@ -6,7 +6,7 @@ UseCRLF:         false
 UseTab:          Never
 
 ---
-# Vector IntegrationBus style
+# Vector SilKit style
 Language:        Cpp
 AccessModifierOffset: -4 
 AlignAfterOpenBracket: Align
@@ -81,7 +81,7 @@ IncludeCategories:
   - Regex:           '^<.*'
     Priority:        2
     SortPriority:    0
-  - Regex:           '"ib/.*'
+  - Regex:           '"silkit/.*'
     Priority:        3
     SortPriority:    0
   - Regex:           '^(<|"(gtest|gmock|isl|json)/)'

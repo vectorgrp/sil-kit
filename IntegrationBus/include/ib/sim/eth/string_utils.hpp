@@ -5,14 +5,14 @@
 #include <ostream>
 #include <sstream>
 
-#include "ib/exception.hpp"
-#include "ib/util/PrintableHexString.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/util/PrintableHexString.hpp"
 
 #include "EthernetDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 inline std::string to_string(EthernetTransmitStatus value);
 inline std::string to_string(EthernetState value);
@@ -55,7 +55,7 @@ std::string to_string(EthernetTransmitStatus value)
     case  EthernetTransmitStatus::InvalidFrameFormat:
         return "InvalidFrameFormat";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(EthernetState value)
@@ -69,7 +69,7 @@ std::string to_string(EthernetState value)
     case EthernetState::LinkUp:
         return "LinkUp";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(EthernetMode value)
@@ -81,7 +81,7 @@ std::string to_string(EthernetMode value)
     case EthernetMode::Active:
         return "Active";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(const EthernetFrame& msg)
@@ -153,11 +153,11 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrame& frame)
                 frame.raw.begin() + sizeof(EthernetMac),
                 frame.raw.begin() + 2 * sizeof(EthernetMac), sourceMac.begin());
 
-            out << ", src = " << util::AsHexString(sourceMac).WithSeparator(":")
-                << ", dst=" << util::AsHexString(destinationMac).WithSeparator(":");
+            out << ", src = " << Util::AsHexString(sourceMac).WithSeparator(":")
+                << ", dst=" << Util::AsHexString(destinationMac).WithSeparator(":");
         }
         return out
-            << ", data=[" << util::AsHexString(frame.raw).WithSeparator(" ").WithMaxLength(8)
+            << ", data=[" << Util::AsHexString(frame.raw).WithSeparator(" ").WithMaxLength(8)
             << "]}";
     }
 }
@@ -177,7 +177,7 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& ms
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     out
         << "EthernetFrameTransmitEvent{txId=" << msg.transmitId
-        << ", src=" << util::AsHexString(msg.sourceMac).WithSeparator(":")
+        << ", src=" << Util::AsHexString(msg.sourceMac).WithSeparator(":")
         << ", status=" << msg.status
         << " @" << timestamp.count() << "ms"
         << "}";
@@ -202,6 +202,6 @@ std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg)
         << "EthernetSetMode{" << msg.mode << "}";
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

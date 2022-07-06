@@ -8,8 +8,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/util/functional.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/util/functional.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
@@ -20,12 +20,12 @@ using namespace std::chrono_literals;
 
 using namespace testing;
 
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::util;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Util;
 
-using ::ib::mw::test::DummyParticipant;
+using ::SilKit::Core::Tests::DummyParticipant;
 
 class SystemMonitorTest : public testing::Test
 {
@@ -77,7 +77,7 @@ protected:
 
         monitorFrom.SetServiceDescriptor(from_endpointAddress(from));
 
-        monitor.ReceiveIbMessage(&monitorFrom, status);
+        monitor.ReceiveSilKitMessage(&monitorFrom, status);
     }
 
     void SetAllParticipantStates(ParticipantState state)

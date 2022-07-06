@@ -5,12 +5,11 @@
 #include <chrono>
 #include <vector>
 
-#include "ib/sim/datatypes.hpp"
+#include "silkit/services/datatypes.hpp"
 
-namespace ib {
-namespace sim {
-//! The FlexRay namespace
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 using FlexrayMicroTick = int32_t; //!< FlexRay micro tick
 using FlexrayMacroTick = int32_t; //!< FlexRay macro tick
@@ -515,7 +514,7 @@ enum class FlexrayWakeupStatusType : uint8_t
  */
 struct FlexrayPocStatusEvent
 {
-    std::chrono::nanoseconds timestamp; //!< IB timestamp
+    std::chrono::nanoseconds timestamp; //!< SilKit timestamp
 
     FlexrayPocState state; //!< Status of the Protocol Operation Control (POC).
     bool chiHaltRequest; //!< indicates whether a halt request was received from the CHI
@@ -622,6 +621,6 @@ inline FlexrayWakeupEvent::FlexrayWakeupEvent(const FlexraySymbolEvent& flexrayS
 {
 }
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

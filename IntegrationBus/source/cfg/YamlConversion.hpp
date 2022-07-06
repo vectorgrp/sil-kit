@@ -9,56 +9,56 @@
 
 #include "yaml-cpp/yaml.h"
 
-#include "VibYamlHelper.hpp"
+#include "SilKitYamlHelper.hpp"
 
 // YAML-cpp serialization/deserialization for ParticipantConfiguration data types
 namespace YAML {
 
-using namespace ib::cfg;
+using namespace SilKit::Config;
 
-DEFINE_VIB_CONVERT(std::chrono::milliseconds);
-DEFINE_VIB_CONVERT(std::chrono::nanoseconds);
+DEFINE_SILKIT_CONVERT(std::chrono::milliseconds);
+DEFINE_SILKIT_CONVERT(std::chrono::nanoseconds);
 
-DEFINE_VIB_CONVERT(Logging);
-DEFINE_VIB_CONVERT(Sink);
-DEFINE_VIB_CONVERT(Sink::Type);
-DEFINE_VIB_CONVERT(ib::mw::logging::Level);
+DEFINE_SILKIT_CONVERT(Logging);
+DEFINE_SILKIT_CONVERT(Sink);
+DEFINE_SILKIT_CONVERT(Sink::Type);
+DEFINE_SILKIT_CONVERT(SilKit::Core::Logging::Level);
 
-DEFINE_VIB_CONVERT(MdfChannel);
-DEFINE_VIB_CONVERT(Replay);
-DEFINE_VIB_CONVERT(Replay::Direction);
+DEFINE_SILKIT_CONVERT(MdfChannel);
+DEFINE_SILKIT_CONVERT(Replay);
+DEFINE_SILKIT_CONVERT(Replay::Direction);
 
-DEFINE_VIB_CONVERT(CanController);
+DEFINE_SILKIT_CONVERT(CanController);
 
-DEFINE_VIB_CONVERT(LinController);
+DEFINE_SILKIT_CONVERT(LinController);
 
-DEFINE_VIB_CONVERT(EthernetController);
+DEFINE_SILKIT_CONVERT(EthernetController);
 
-DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayClusterParameters);
-DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayNodeParameters);
-DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayTxBufferConfig);
-DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayChannel);
-DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayClockPeriod);
-DEFINE_VIB_CONVERT(ib::sim::fr::FlexrayTransmissionMode);
-DEFINE_VIB_CONVERT(FlexrayController);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClusterParameters);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayNodeParameters);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTxBufferConfig);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayChannel);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClockPeriod);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTransmissionMode);
+DEFINE_SILKIT_CONVERT(FlexrayController);
 
-DEFINE_VIB_CONVERT(DataPublisher);
-DEFINE_VIB_CONVERT(DataSubscriber);
-DEFINE_VIB_CONVERT(RpcServer);
-DEFINE_VIB_CONVERT(RpcClient);
+DEFINE_SILKIT_CONVERT(DataPublisher);
+DEFINE_SILKIT_CONVERT(DataSubscriber);
+DEFINE_SILKIT_CONVERT(RpcServer);
+DEFINE_SILKIT_CONVERT(RpcClient);
 
-DEFINE_VIB_CONVERT(HealthCheck);
+DEFINE_SILKIT_CONVERT(HealthCheck);
 
-DEFINE_VIB_CONVERT(Tracing);
-DEFINE_VIB_CONVERT(TraceSink);
-DEFINE_VIB_CONVERT(TraceSink::Type);
-DEFINE_VIB_CONVERT(TraceSource);
-DEFINE_VIB_CONVERT(TraceSource::Type);
+DEFINE_SILKIT_CONVERT(Tracing);
+DEFINE_SILKIT_CONVERT(TraceSink);
+DEFINE_SILKIT_CONVERT(TraceSink::Type);
+DEFINE_SILKIT_CONVERT(TraceSource);
+DEFINE_SILKIT_CONVERT(TraceSource::Type);
 
-DEFINE_VIB_CONVERT(Middleware);
+DEFINE_SILKIT_CONVERT(Middleware);
 
-DEFINE_VIB_CONVERT(Extensions);
+DEFINE_SILKIT_CONVERT(Extensions);
 
-DEFINE_VIB_CONVERT(ParticipantConfiguration);
+DEFINE_SILKIT_CONVERT(ParticipantConfiguration);
 
 } // namespace YAML

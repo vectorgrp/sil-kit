@@ -4,9 +4,9 @@
 
 #include <vector>
 
-namespace ib {
-namespace sim {
-namespace lin { 
+namespace SilKit {
+namespace Services {
+namespace Lin { 
 
 struct LinFrame;
 struct LinTransmission;
@@ -21,6 +21,6 @@ struct LinFrameStatusEvent;
 
 class ILinController;
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

@@ -90,8 +90,8 @@ DataSubscribers:
 - Name: SubCtrl2
 )raw";
 
-    auto configPubSub1 = ib::cfg::ParticipantConfigurationFromString(configStringPubSub1);
-    auto configPubSub2 = ib::cfg::ParticipantConfigurationFromString(configStringPubSub2);
+    auto configPubSub1 = SilKit::Config::ParticipantConfigurationFromString(configStringPubSub1);
+    auto configPubSub2 = SilKit::Config::ParticipantConfigurationFromString(configStringPubSub2);
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({

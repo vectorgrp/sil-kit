@@ -2,12 +2,12 @@
 
 #include "FlexraySerdes.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
-using ib::mw::MessageBuffer;
+namespace SilKit {
+namespace Services {
+namespace Flexray {
+using SilKit::Core::MessageBuffer;
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHeader& header)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayHeader& header)
 {
     buffer
         << header.flags
@@ -18,7 +18,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHe
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHeader& header)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayHeader& header)
 {
     buffer
         >> header.flags
@@ -29,7 +29,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHeader& 
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrame& frame)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayFrame& frame)
 {
     buffer
         << frame.header
@@ -37,7 +37,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFr
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrame& frame)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayFrame& frame)
 {
     buffer
         >> frame.header
@@ -45,7 +45,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrame& f
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrameEvent& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayFrameEvent& msg)
 {
     buffer
         << msg.timestamp
@@ -54,7 +54,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFr
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameEvent& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayFrameEvent& msg)
 {
     buffer
         >> msg.timestamp
@@ -63,7 +63,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameEve
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
 {
     buffer
         << msg.timestamp
@@ -73,7 +73,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayFr
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameTransmitEvent& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayFrameTransmitEvent& msg)
 {
     buffer
         >> msg.timestamp
@@ -83,7 +83,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayFrameTra
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySymbolEvent& symbol)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexraySymbolEvent& symbol)
 {
     buffer
         << symbol.timestamp
@@ -92,7 +92,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySy
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolEvent& symbol)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexraySymbolEvent& symbol)
 {
     buffer
         >> symbol.timestamp
@@ -101,7 +101,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolEv
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySymbolTransmitEvent& ack)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexraySymbolTransmitEvent& ack)
 {
     auto&& symbol = static_cast<const FlexraySymbolEvent&>(ack);
     buffer
@@ -109,7 +109,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexraySy
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolTransmitEvent& ack)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexraySymbolTransmitEvent& ack)
 {
     auto&& symbol = static_cast<FlexraySymbolEvent&>(ack);
     buffer
@@ -117,7 +117,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexraySymbolTr
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
                                          const FlexrayCycleStartEvent& flexrayCycleStartEvent)
 {
     buffer
@@ -126,7 +126,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayCycleStartEvent& flexrayCycleStartEvent)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayCycleStartEvent& flexrayCycleStartEvent)
 {
     buffer
         >> flexrayCycleStartEvent.timestamp
@@ -134,21 +134,21 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayCycleSta
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayHostCommand& cmd)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayHostCommand& cmd)
 {
     buffer
         << cmd.command;
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayHostCommand& cmd)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayHostCommand& cmd)
 {
     buffer
         >> cmd.command;
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayClusterParameters& clusterParam)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayClusterParameters& clusterParam)
 {
     buffer
         << clusterParam.gColdstartAttempts
@@ -174,7 +174,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayCl
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayClusterParameters& clusterParam)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayClusterParameters& clusterParam)
 {
     buffer
         >> clusterParam.gColdstartAttempts
@@ -200,7 +200,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayClusterP
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayNodeParameters& nodeParams)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayNodeParameters& nodeParams)
 {
     buffer
         << nodeParams.pAllowHaltDueToClock
@@ -229,7 +229,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayNo
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayNodeParameters& nodeParams)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayNodeParameters& nodeParams)
 {
     buffer
         >> nodeParams.pAllowHaltDueToClock
@@ -258,7 +258,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayNodePara
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferConfig& config)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferConfig& config)
 {
     buffer
         << config.channels
@@ -271,7 +271,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTx
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfig& config)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfig& config)
 {
     buffer
         >> config.channels
@@ -284,7 +284,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBuffer
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayControllerConfig& config)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayControllerConfig& config)
 {
     buffer
         << config.clusterParams
@@ -293,7 +293,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayCo
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayControllerConfig& config)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayControllerConfig& config)
 {
     buffer
         >> config.clusterParams
@@ -302,7 +302,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayControll
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& update)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& update)
 {
     buffer
         << update.txBufferIndex
@@ -310,7 +310,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTx
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& update)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& update)
 {
     buffer
         >> update.txBufferIndex
@@ -318,7 +318,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBuffer
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTxBufferUpdate& update)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferUpdate& update)
 {
     buffer
         << update.txBufferIndex
@@ -327,7 +327,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FlexrayTx
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBufferUpdate& update)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferUpdate& update)
 {
     buffer
         >> update.txBufferIndex
@@ -336,7 +336,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayTxBuffer
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
                                          const FlexrayPocStatusEvent& flexrayPocStatusEvent)
 {
     buffer
@@ -353,7 +353,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FlexrayPocStatusEvent& flexrayPocStatusEvent)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayPocStatusEvent& flexrayPocStatusEvent)
 {
     buffer
       >> flexrayPocStatusEvent.timestamp
@@ -480,6 +480,6 @@ void Deserialize(MessageBuffer& buffer, FlexrayPocStatusEvent& out)
     buffer >> out;
 }
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

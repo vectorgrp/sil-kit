@@ -12,8 +12,8 @@
 #include "FlexrayController.hpp"
 
 namespace {
-using namespace ib::mw;
-using namespace ib::sim::fr;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Flexray;
 
 class FlexrayControllerConfigTest : public testing::Test
 {
@@ -21,16 +21,16 @@ public:
     FlexrayControllerConfigTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
+        std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
 
-    ib::cfg::FlexrayController controllerNoNetworkCfg;
+    SilKit::Config::FlexrayController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->flexrayControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::FlexrayController controllerWithNetworkCfg;
+    SilKit::Config::FlexrayController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->flexrayControllers.push_back(controllerWithNetworkCfg);
@@ -45,7 +45,7 @@ TEST(FlexrayControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName));
     auto serviceDescr = controller->GetServiceDescriptor();
@@ -61,7 +61,7 @@ TEST(FlexrayControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName, networkName));
@@ -78,7 +78,7 @@ TEST(FlexrayControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName, networkName));

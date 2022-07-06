@@ -13,61 +13,61 @@ Lin Controller
 
 **A Lin controller is created with the following function:**
 
-.. doxygenfunction:: ib_Lin_Controller_Create
+.. doxygenfunction:: SilKit_LinController_Create
 
 **It's configuration is handed over to the function:**
 
-.. doxygenfunction:: ib_Lin_Controller_Init
+.. doxygenfunction:: SilKit_LinController_Init
 
 **The following set of functions can be used to add and remove event handlers on the controller:**
 
-.. doxygenfunction:: ib_Lin_Controller_AddFrameStatusHandler
-.. doxygenfunction:: ib_Lin_Controller_AddGoToSleepHandler
-.. doxygenfunction:: ib_Lin_Controller_AddWakeupHandler
-.. doxygenfunction:: ib_Lin_Controller_RemoveFrameStatusHandler
-.. doxygenfunction:: ib_Lin_Controller_RemoveGoToSleepHandler
-.. doxygenfunction:: ib_Lin_Controller_RemoveWakeupHandler
+.. doxygenfunction:: SilKit_LinController_AddFrameStatusHandler
+.. doxygenfunction:: SilKit_LinController_AddGoToSleepHandler
+.. doxygenfunction:: SilKit_LinController_AddWakeupHandler
+.. doxygenfunction:: SilKit_LinController_RemoveFrameStatusHandler
+.. doxygenfunction:: SilKit_LinController_RemoveGoToSleepHandler
+.. doxygenfunction:: SilKit_LinController_RemoveWakeupHandler
 
 **The following functions operate on a configured controller:**
 
-.. doxygenfunction:: ib_Lin_Controller_Status
-.. doxygenfunction:: ib_Lin_Controller_SendFrame
-.. doxygenfunction:: ib_Lin_Controller_SendFrameHeader
-.. doxygenfunction:: ib_Lin_Controller_SetFrameResponse
-.. doxygenfunction:: ib_Lin_Controller_SetFrameResponses
-.. doxygenfunction:: ib_Lin_Controller_GoToSleep
-.. doxygenfunction:: ib_Lin_Controller_GoToSleepInternal
-.. doxygenfunction:: ib_Lin_Controller_Wakeup
-.. doxygenfunction:: ib_Lin_Controller_WakeupInternal
+.. doxygenfunction:: SilKit_LinController_Status
+.. doxygenfunction:: SilKit_LinController_SendFrame
+.. doxygenfunction:: SilKit_LinController_SendFrameHeader
+.. doxygenfunction:: SilKit_LinController_SetFrameResponse
+.. doxygenfunction:: SilKit_LinController_SetFrameResponses
+.. doxygenfunction:: SilKit_LinController_GoToSleep
+.. doxygenfunction:: SilKit_LinController_GoToSleepInternal
+.. doxygenfunction:: SilKit_LinController_Wakeup
+.. doxygenfunction:: SilKit_LinController_WakeupInternal
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib_Lin_ControllerConfig
+.. doxygenstruct:: SilKit_LinControllerConfig
    :members:
-.. doxygenstruct:: ib_Lin_Frame
+.. doxygenstruct:: SilKit_LinFrame
    :members:
-.. doxygenstruct:: ib_Lin_FrameResponse
+.. doxygenstruct:: SilKit_LinFrameResponse
    :members:
-.. doxygenstruct:: ib_Lin_FrameStatusEvent
+.. doxygenstruct:: SilKit_LinFrameStatusEvent
    :members:
-.. doxygenstruct:: ib_Lin_WakeupEvent
+.. doxygenstruct:: SilKit_LinWakeupEvent
    :members:
-.. doxygenstruct:: ib_Lin_GoToSleepEvent
+.. doxygenstruct:: SilKit_LinGoToSleepEvent
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib_Lin_Controller
-.. doxygentypedef:: ib_Lin_ControllerStatus
-.. doxygentypedef:: ib_Lin_ControllerMode
-.. doxygentypedef:: ib_Lin_BaudRate
-.. doxygentypedef:: ib_Lin_FrameResponseMode
-.. doxygentypedef:: ib_Lin_Id
-.. doxygentypedef:: ib_Lin_ChecksumModel
-.. doxygentypedef:: ib_Lin_FrameResponseType
-.. doxygentypedef:: ib_Lin_FrameStatus
-.. doxygentypedef:: ib_Lin_DataLength
+.. doxygentypedef:: SilKit_LinController
+.. doxygentypedef:: SilKit_LinControllerStatus
+.. doxygentypedef:: SilKit_LinControllerMode
+.. doxygentypedef:: SilKit_LinBaudRate
+.. doxygentypedef:: SilKit_LinFrameResponseMode
+.. doxygentypedef:: SilKit_LinId
+.. doxygentypedef:: SilKit_LinChecksumModel
+.. doxygentypedef:: SilKit_LinFrameResponseType
+.. doxygentypedef:: SilKit_LinFrameStatus
+.. doxygentypedef:: SilKit_LinDataLength
 
-.. doxygentypedef:: ib_Lin_FrameStatusHandler_t
-.. doxygentypedef:: ib_Lin_GoToSleepHandler_t
-.. doxygentypedef:: ib_Lin_WakeupHandler_t
+.. doxygentypedef:: SilKit_LinFrameStatusHandler_t
+.. doxygentypedef:: SilKit_LinGoToSleepHandler_t
+.. doxygentypedef:: SilKit_LinWakeupHandler_t

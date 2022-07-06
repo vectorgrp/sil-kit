@@ -5,9 +5,9 @@
 #include <string>
 #include <map>
 
-namespace ib {
-namespace util {
-namespace hash {
+namespace SilKit {
+namespace Util {
+namespace Hash {
 
 /*! \brief Calculate the combination of two hash values 
 */
@@ -45,6 +45,6 @@ inline uint64_t Hash(const std::map<std::string, std::string>& mapToHash)
     return hash;
 }
 
-} // namespace hash
-} // namespace util
-} // namespace ib
+} // namespace Hash
+} // namespace Util
+} // namespace SilKit

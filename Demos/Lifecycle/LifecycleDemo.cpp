@@ -10,16 +10,16 @@
 #include <thread>
 #include <vector>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/sim/can/all.hpp"
-#include "ib/sim/can/string_utils.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/can/all.hpp"
+#include "silkit/services/can/string_utils.hpp"
 
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Can;
 
 using namespace std::chrono_literals;
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        std::string registryUri = "vib://localhost:8500";
+        std::string registryUri = "silkit://localhost:8500";
 
         bool coordinateStartAndStop = true;
         bool runSync = true;
@@ -90,12 +90,12 @@ int main(int argc, char** argv)
         // only used for async setups to stop the participant
         std::thread workerThread;
 
-        auto participantConfiguration = ib::cfg::ParticipantConfigurationFromFile(participantConfigurationFilename);
+        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
         auto sleepTimePerTick = 1000ms;
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
 
-        auto participant = ib::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         // In this demo, the life cycle service will always be used
         auto* lifecycleService = participant->GetLifecycleService();
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
                     }
                 });
             auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(
-                timeSyncService, sync::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
+                timeSyncService, Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
         else
         {
             auto finalStateFuture = lifecycleService->StartLifecycleNoSyncTime(
-                sync::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
+                Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
             workerThread.join();
         }
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

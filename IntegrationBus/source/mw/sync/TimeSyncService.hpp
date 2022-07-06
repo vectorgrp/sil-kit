@@ -6,9 +6,9 @@
 #include <tuple>
 #include <map>
 
-#include "ib/mw/sync/ITimeSyncService.hpp"
+#include "silkit/core/sync/ITimeSyncService.hpp"
 
-#include "IIbToTimeSyncService.hpp"
+#include "IMsgForTimeSyncService.hpp"
 #include "IParticipantInternal.hpp"
 #include "LifecycleService.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -16,9 +16,9 @@
 #include "TimeProvider.hpp"
 #include "WatchDog.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 //forward declarations
 class SynchronizedVirtualTimeProvider;
@@ -28,8 +28,8 @@ struct ITimeSyncPolicy;
 
 class TimeSyncService
     : public ITimeSyncService
-    , public IIbToTimeSyncService
-    , public mw::IIbServiceEndpoint
+    , public IMsgForTimeSyncService
+    , public Core::IServiceEndpoint
     , public ITimeProvider
 {
     friend struct DistributedTimeQuantumPolicy;
@@ -41,7 +41,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     TimeSyncService(IParticipantInternal* participant, LifecycleService* lifecycleService,
-                    const cfg::HealthCheck& healthCheckConfig);
+                    const Config::HealthCheck& healthCheckConfig);
 
 public:
     // ----------------------------------------
@@ -58,11 +58,11 @@ public:
 
     void SetPeriod(std::chrono::nanoseconds period) override;
 
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
 
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const NextSimTask& task) override;
 
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& task) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& task) override;
 
     
     // ITimeProvider
@@ -74,18 +74,18 @@ public:
 
     // Used by Policies
     template <class MsgT>
-    void SendIbMessage(MsgT&& msg) const;
+    void SendMsg(MsgT&& msg) const;
     void ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     void InitializeTimeSyncPolicy(bool isSynchronized);
     void ResetTime();
-    auto GetTimeProvider() -> std::shared_ptr<sync::ITimeProvider>;
-    void ConfigureTimeProvider(sync::TimeProviderKind timeProviderKind);
+    auto GetTimeProvider() -> std::shared_ptr<Orchestration::ITimeProvider>;
+    void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
     //void ChangeState(ParticipantState newState, std::string reason);
     void SetPaused(std::future<void> pausedFuture);
@@ -103,9 +103,9 @@ private:
     // ----------------------------------------
     // private members
     IParticipantInternal* _participant{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
+    Core::ServiceDescriptor _serviceDescriptor{};
     LifecycleService* _lifecycleService{nullptr};
-    logging::ILogger* _logger{nullptr};
+    Logging::ILogger* _logger{nullptr};
     std::unique_ptr<ITimeProvider> _timeProvider{nullptr};
     std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
 
@@ -120,8 +120,8 @@ private:
     SimTaskT _simTask;
     std::future<void> _asyncResult;
 
-    util::PerformanceMonitor _execTimeMonitor;
-    util::PerformanceMonitor _waitTimeMonitor;
+    Util::PerformanceMonitor _execTimeMonitor;
+    Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
 
     // When pausing our participant, message processing is deferred
@@ -134,21 +134,21 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-void TimeSyncService::SendIbMessage(MsgT&& msg) const
+void TimeSyncService::SendMsg(MsgT&& msg) const
 {
-    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendMsg(this, std::forward<MsgT>(msg));
 }
 
-void TimeSyncService::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void TimeSyncService::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto TimeSyncService::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto TimeSyncService::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

@@ -11,12 +11,12 @@
 #include <stdexcept>
 #include <map>
 
-#include "ib/util/vector_view.hpp"
+#include "silkit/util/vector_view.hpp"
 
 #include "ProtocolVersion.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 // The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
 struct end_of_buffer : public std::exception {};    
@@ -48,7 +48,7 @@ public:
     // Public methods for backward compatibility.
 
     // peek into raw data, e.g. for retrieving headers without modifying the buffer
-    inline auto PeekData() const  -> ib::util::vector_view<const uint8_t>;
+    inline auto PeekData() const  -> SilKit::Util::vector_view<const uint8_t>;
     inline auto ReadPos() const -> size_t;
 
     //! Set the format version to use for ser/des.
@@ -478,14 +478,14 @@ inline auto MessageBuffer::GetProtocolVersion() -> ProtocolVersion
 }
  
 
-inline auto MessageBuffer::PeekData() const  -> ib::util::vector_view<const uint8_t>
+inline auto MessageBuffer::PeekData() const  -> SilKit::Util::vector_view<const uint8_t>
 {
-    return ib::util::make_vector_view(_storage);
+    return SilKit::Util::make_vector_view(_storage);
 }
 inline auto MessageBuffer::ReadPos() const -> size_t
 {
     return _rPos;
 }
 
-} // mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

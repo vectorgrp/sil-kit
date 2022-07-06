@@ -9,7 +9,7 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/null_sink.h"
 // NB: we do not use the windows color sink, as that will open "CONOUT$" and
-//     we won't be able to trivially capture its output in IbLauncher.
+//     we won't be able to trivially capture its output in SilKitLauncher.
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -18,17 +18,17 @@
 
 #include "fmt/chrono.h"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 namespace {
-class IbRemoteSink
+class SilKitRemoteSink
     : public spdlog::sinks::base_sink<spdlog::details::null_mutex>
 {
 public:
-    IbRemoteSink() = delete;
-    IbRemoteSink(const Logger::LogMsgHandlerT& handler)
+    SilKitRemoteSink() = delete;
+    SilKitRemoteSink(const Logger::LogMsgHandlerT& handler)
         : _logMsgHandler{handler}
     {
     }
@@ -58,7 +58,7 @@ private:
 } // anonymous namespace
 
 
-Logger::Logger(const std::string& participantName, cfg::Logging config)
+Logger::Logger(const std::string& participantName, Config::Logging config)
     : _config{std::move(config)}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
@@ -89,12 +89,12 @@ Logger::Logger(const std::string& participantName, cfg::Logging config)
 
         switch (sink.type)
         {
-        case cfg::Sink::Type::Remote:
+        case Config::Sink::Type::Remote:
             // The remote sink is instantiated and added later together with setting up
             // all necessary connection logic to avoid segmentation errors if sth. goes wrong
             break;
 
-        case cfg::Sink::Type::Stdout:
+        case Config::Sink::Type::Stdout:
         {
 #if _WIN32
             auto stdoutSink = std::make_shared<spdlog::sinks::stdout_sink_mt>();
@@ -105,7 +105,7 @@ Logger::Logger(const std::string& participantName, cfg::Logging config)
             _logger->sinks().emplace_back(std::move(stdoutSink));
             break;
         }
-        case cfg::Sink::Type::File:
+        case Config::Sink::Type::File:
         {
             //
             auto filename = fmt::format("{}_{:%FT%H-%M-%S}.txt", sink.logName, tmBuffer);
@@ -157,16 +157,16 @@ void Logger::Critical(const std::string& msg)
 void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
 {
     auto remoteSinkRef = std::find_if(_config.sinks.begin(), _config.sinks.end(),
-        [](const cfg::Sink& sink) 
+        [](const Config::Sink& sink) 
         { 
-            return sink.type == cfg::Sink::Type::Remote;
+            return sink.type == Config::Sink::Type::Remote;
         });
 
     if (remoteSinkRef != _config.sinks.end())
     {
-        _ibRemoteSink = std::make_shared<IbRemoteSink>(handler);
-        _ibRemoteSink->set_level(to_spdlog(remoteSinkRef->level));
-        _logger->sinks().push_back(_ibRemoteSink);
+        _remoteSink = std::make_shared<SilKitRemoteSink>(handler);
+        _remoteSink->set_level(to_spdlog(remoteSinkRef->level));
+        _logger->sinks().push_back(_remoteSink);
     }
 }
 
@@ -174,7 +174,7 @@ void Logger::DisableRemoteLogging()
 {
     for (auto sink : _logger->sinks())
     {
-        auto* remoteSink = dynamic_cast<IbRemoteSink*>(sink.get());
+        auto* remoteSink = dynamic_cast<SilKitRemoteSink*>(sink.get());
         if (remoteSink)
         {
             remoteSink->Disable();
@@ -191,7 +191,7 @@ void Logger::LogReceivedMsg(const LogMsg& msg)
         if (to_spdlog(msg.level) < sink->level())
             continue;
 
-        if (sink.get() == _ibRemoteSink.get())
+        if (sink.get() == _remoteSink.get())
             continue;
 
         sink->log(spdlog_msg);
@@ -206,6 +206,6 @@ bool Logger::ShouldLog(Level level) const
     return _logger->should_log(to_spdlog(level));
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

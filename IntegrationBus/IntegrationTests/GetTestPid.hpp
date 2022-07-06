@@ -17,6 +17,6 @@ inline auto MakeTestRegistryUri()
     int pid = getpid();
     port += pid % 1000; // clamp to [8500, 9500)
     // add a random offset to prevent two tests listening on the same port
-    ss << "vib://localhost:" << port;
+    ss << "silkit://localhost:" << port;
     return ss.str();
 }

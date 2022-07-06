@@ -12,20 +12,20 @@
 #include "gtest/gtest.h"
 
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/vendor/CreateIbRegistry.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/services/all.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::cfg;
-using namespace ib::sim::data;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Config;
+using namespace SilKit::Services::PubSub;
 
 const std::string systemMasterName{"SystemMaster"};
 const std::string topic{"Topic"};
@@ -140,7 +140,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
 
             auto* lifecycleService = participant.participant->GetLifecycleService();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -175,7 +175,7 @@ protected:
             auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
             finalStateFuture.get();
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -195,7 +195,7 @@ protected:
         try
         {
             participant.participant =
-                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", topic, mediaType, {},
@@ -220,7 +220,7 @@ protected:
             }
 
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -241,10 +241,10 @@ protected:
     {
         try
         {
-            registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
+            registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
             registry->ProvideDomain(registryUri);
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -263,7 +263,7 @@ protected:
         try
         {
             systemMaster.participant =
-                ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
+                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
             systemMaster.systemController = systemMaster.participant->GetSystemController();
             systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();
@@ -278,7 +278,7 @@ protected:
                 ParticipantStatusHandler(newStatus);
             });
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -303,7 +303,7 @@ protected:
             }
 
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -328,7 +328,7 @@ protected:
                 asyncParticipantThreads.emplace_back([this, &p, registryUri] { AsyncParticipantThread(p, registryUri); });
             }
         }
-        catch (const ib::ConfigurationError& error)
+        catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
@@ -383,7 +383,7 @@ protected:
 
 protected:
     std::vector<std::string> syncParticipantNames;
-    std::unique_ptr<ib::vendor::IIbRegistry> registry;
+    std::unique_ptr<SilKit::Vendor::ISilKitRegistry> registry;
     SystemMaster systemMaster;
     std::vector<std::thread> syncParticipantThreads;
     std::vector<std::thread> asyncParticipantThreads;

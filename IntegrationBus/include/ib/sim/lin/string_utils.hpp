@@ -7,12 +7,12 @@
 
 #include "LinDatatypes.hpp"
 
-#include "ib/exception.hpp"
-#include "ib/util/PrintableHexString.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/util/PrintableHexString.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin { 
+namespace SilKit {
+namespace Services {
+namespace Lin { 
 
 inline std::string to_string(LinChecksumModel model);
 inline std::string to_string(LinFrameResponseType responseType);
@@ -61,7 +61,7 @@ std::string to_string(LinChecksumModel model)
     case LinChecksumModel::Classic:
         return "Classic";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(LinFrameResponseType responseType)
@@ -75,7 +75,7 @@ std::string to_string(LinFrameResponseType responseType)
     case LinFrameResponseType::SlaveToSlave:
         return "SlaveToSlave";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(LinFrameResponseMode responseMode)
@@ -89,7 +89,7 @@ std::string to_string(LinFrameResponseMode responseMode)
     case LinFrameResponseMode::TxUnconditional:
         return "TxUnconditional";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(LinFrameStatus frameStatus)
@@ -115,7 +115,7 @@ std::string to_string(LinFrameStatus frameStatus)
     case LinFrameStatus::LIN_RX_NO_RESPONSE:
         return "LIN_RX_NO_RESPONSE";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(LinControllerMode mode)
@@ -129,7 +129,7 @@ std::string to_string(LinControllerMode mode)
     case LinControllerMode::Slave:
         return "Slave";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 
@@ -146,7 +146,7 @@ std::string to_string(LinControllerStatus status)
     case LinControllerStatus::SleepPending:
         return "SleepPending";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 
@@ -214,7 +214,7 @@ std::ostream& operator<<(std::ostream& out, LinChecksumModel model)
     {
         return out << to_string(model);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "LinChecksumModel{" << static_cast<uint32_t>(model) << "}";
     }
@@ -225,7 +225,7 @@ std::ostream& operator<<(std::ostream& out, LinFrameResponseType responseType)
     {
         return out << to_string(responseType);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "LinFrameResponseType{" << static_cast<uint32_t>(responseType) << "}";
     }
@@ -237,7 +237,7 @@ std::ostream& operator<<(std::ostream& out, LinFrameResponseMode responseMode)
     {
         return out << to_string(responseMode);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "LinFrameResponseMode{" << static_cast<uint32_t>(responseMode) << "}";
     }
@@ -249,7 +249,7 @@ std::ostream& operator<<(std::ostream& out, LinFrameStatus frameStatus)
     {
         return out << to_string(frameStatus);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "LinFrameStatus{" << static_cast<uint32_t>(frameStatus) << "}";
     }
@@ -261,7 +261,7 @@ std::ostream& operator<<(std::ostream& out, LinControllerMode mode)
     {
         return out << to_string(mode);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "LinControllerMode{" << static_cast<uint32_t>(mode) << "}";
     }
@@ -273,7 +273,7 @@ std::ostream& operator<<(std::ostream& out, LinControllerStatus status)
     {
         return out << to_string(status);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "LinControllerStatus{" << static_cast<uint32_t>(status) << "}";
     }
@@ -284,10 +284,10 @@ std::ostream& operator<<(std::ostream& out, const LinFrame& frame)
     //instead of ios::copyfmt (which set badbit) we use a temporary stream 
     std::stringstream buf;
     buf
-        << "lin::LinFrame{id=" << static_cast<uint16_t>(frame.id)
+        << "Lin::LinFrame{id=" << static_cast<uint16_t>(frame.id)
         << ", cs=" << to_string(frame.checksumModel)
         << ", dl=" << static_cast<uint16_t>(frame.dataLength)
-        << ", d={" << util::AsHexString(frame.data).WithSeparator(" ")
+        << ", d={" << Util::AsHexString(frame.data).WithSeparator(" ")
         << "}}";
     return out << buf.str();
 }
@@ -295,32 +295,32 @@ std::ostream& operator<<(std::ostream& out, const LinFrame& frame)
 std::ostream& operator<<(std::ostream& out, const LinSendFrameRequest& request)
 {
     return out
-        << "lin::LinSendFrameRequest{fr=" << request.frame
+        << "Lin::LinSendFrameRequest{fr=" << request.frame
         << ", rt=" << request.responseType
         << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const LinSendFrameHeaderRequest& request)
 {
-    return out << "lin::LinSendFrameHeaderRequest{id=" << static_cast<uint16_t>(request.id) << "}";
+    return out << "Lin::LinSendFrameHeaderRequest{id=" << static_cast<uint16_t>(request.id) << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const LinTransmission& transmission)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(transmission.timestamp);
     return out
-        << "lin::LinTransmission{" << transmission.frame
+        << "Lin::LinTransmission{" << transmission.frame
         << ", status=" << transmission.status
         << ", time=" << timestamp.count() << "ms}";
 }
 std::ostream& operator<<(std::ostream& out, const LinWakeupPulse& pulse)
 {
-    return out << "lin::LinWakeupPulse{@" << pulse.timestamp.count() << "ms}";
+    return out << "Lin::LinWakeupPulse{@" << pulse.timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controllerConfig)
 {
-    out << "lin::LinControllerConfig{br=" << controllerConfig.baudRate
+    out << "Lin::LinControllerConfig{br=" << controllerConfig.baudRate
         << ", mode=" << controllerConfig.controllerMode
         << ", responses=[";
     if (controllerConfig.frameResponses.size() > 0)
@@ -339,14 +339,14 @@ std::ostream& operator<<(std::ostream& out, const LinControllerStatusUpdate& con
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(controllerStatusUpdate.timestamp);
     return out
-        << "lin::LinControllerStatusUpdate{" << controllerStatusUpdate.status
+        << "Lin::LinControllerStatusUpdate{" << controllerStatusUpdate.status
         << " @" << timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameResponseUpdate)
 {
     auto& responses = frameResponseUpdate.frameResponses;
-    out << "lin::LinFrameResponseUpdate{ids=[";
+    out << "Lin::LinFrameResponseUpdate{ids=[";
 
     if (responses.size() > 0)
     {
@@ -363,6 +363,6 @@ std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameR
 
 
     
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

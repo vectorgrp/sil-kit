@@ -8,8 +8,8 @@
 
 #include "EndpointAddress.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 //!< VAsioPeerInfo contains peer information such as acceptor URIs, name and ID
 struct VAsioPeerInfo
@@ -23,5 +23,5 @@ struct VAsioPeerInfo
     std::string capabilities;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

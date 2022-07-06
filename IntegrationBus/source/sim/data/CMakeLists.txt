@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimDataMessage STATIC
+add_library(SilKitSimDataMessage STATIC
     DataMessageDatatypeUtils.hpp
     DataMessageDatatypeUtils.cpp
     DataPublisher.hpp
@@ -14,32 +14,32 @@ add_library(IbSimDataMessage STATIC
     DataSerdes.cpp
 )
 
-target_include_directories(IbSimDataMessage
+target_include_directories(SilKitSimDataMessage
     PUBLIC .
 )
 
-target_link_libraries(IbSimDataMessage
-    PRIVATE IbInterface
-            IbSetThreadName
-            IbInternal
-            IbConfiguration
-            IbUtil
+target_link_libraries(SilKitSimDataMessage
+    PRIVATE SilKitInterface
+            SilKitSetThreadName
+            SilKitInternal
+            SilKitConfiguration
+            SilKitUtil
 )
 
-add_vib_test(TestSimDataPublisher 
+add_silkit_test(TestSimDataPublisher 
     SOURCES DataPublisherTest.cpp 
-    LIBS IbSimDataMessage IbMwMockParticipant IbInternal 
+    LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal 
 )
-add_vib_test(TestSimDataSubscriber
+add_silkit_test(TestSimDataSubscriber
     SOURCES DataSubscriberTest.cpp
-    LIBS IbSimDataMessage IbMwMockParticipant IbInternal 
+    LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal 
 )
-add_vib_test(TestSimDataSubscriberInternal
+add_silkit_test(TestSimDataSubscriberInternal
     SOURCES DataSubscriberInternalTest.cpp
-    LIBS IbSimDataMessage IbMwMockParticipant IbInternal
+    LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal
 )
-add_vib_test(TestPubSubMatching
+add_silkit_test(TestPubSubMatching
     SOURCES PubSubMatchingTest.cpp 
-    LIBS IbSimDataMessage IbUtil
+    LIBS SilKitSimDataMessage SilKitUtil
 )
-add_vib_test(TestSimData_Serdes SOURCES DataSerdesTest.cpp LIBS IbSimDataMessage IbInternal)
+add_silkit_test(TestSimData_Serdes SOURCES DataSerdesTest.cpp LIBS SilKitSimDataMessage SilKitInternal)

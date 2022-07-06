@@ -15,7 +15,7 @@ class YamlParserTest : public testing::Test
 {
 };
 
-using namespace ib::cfg;
+using namespace SilKit::Config;
 using namespace std::chrono_literals;
 
 //!< Yaml config which has almost complete list of config elements.
@@ -163,7 +163,7 @@ Extensions:
   - path/to/extensions1
   - path/to/extensions2
 Middleware:
-  RegistryUri: vib://example.com:1234
+  RegistryUri: silkit://example.com:1234
   ConnectAttempts: 9
   TcpNoDelay: true
   TcpQuickAck: true
@@ -202,7 +202,7 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
 
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
-    EXPECT_TRUE(config.logging.sinks.at(0).level == ib::mw::logging::Level::Critical);
+    EXPECT_TRUE(config.logging.sinks.at(0).level == SilKit::Core::Logging::Level::Critical);
     EXPECT_TRUE(config.logging.sinks.at(0).logName == "MyLog1");
 
     EXPECT_TRUE(config.healthCheck.softResponseTimeout.value() == 500ms);
@@ -222,7 +222,7 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(config.extensions.searchPathHints.at(1) == "path/to/extensions2");
 
     EXPECT_TRUE(config.middleware.connectAttempts == 9);
-    EXPECT_TRUE(config.middleware.registryUri == "vib://example.com:1234");
+    EXPECT_TRUE(config.middleware.registryUri == "silkit://example.com:1234");
     EXPECT_TRUE(config.middleware.enableDomainSockets == false);
     EXPECT_TRUE(config.middleware.tcpQuickAck == true);
     EXPECT_TRUE(config.middleware.tcpNoDelay == true);
@@ -291,7 +291,7 @@ TEST_F(YamlParserTest, yaml_native_type_conversions)
         Sink sink;
         logger.logFromRemotes = true;
         sink.type = Sink::Type::File;
-        sink.level = ib::mw::logging::Level::Trace;
+        sink.level = SilKit::Core::Logging::Level::Trace;
         sink.logName = "filename";
         logger.sinks.push_back(sink);
         sink.type = Sink::Type::Stdout;
@@ -316,7 +316,7 @@ TEST_F(YamlParserTest, middleware_convert)
 {
     auto node = YAML::Load(R"(
         {
-            "RegistryUri": "vib://not-localhost:12345",
+            "RegistryUri": "silkit://not-localhost:12345",
             "ConnectAttempts": 9,
             "TcpNoDelay": true,
             "TcpQuickAck": true,
@@ -326,7 +326,7 @@ TEST_F(YamlParserTest, middleware_convert)
         }
     )");
     auto config = node.as<Middleware>();
-    EXPECT_EQ(config.registryUri, "vib://not-localhost:12345");
+    EXPECT_EQ(config.registryUri, "silkit://not-localhost:12345");
     EXPECT_EQ(config.connectAttempts, 9);
 
     EXPECT_EQ(config.enableDomainSockets, false);
@@ -341,8 +341,8 @@ TEST_F(YamlParserTest, map_serdes)
     std::map<std::string, std::string> mapin{
         {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, 
         {"keye\nwithlinebreak", "vale\nwithlinebreak"}};
-    auto mapstr = ib::cfg::Serialize<std::map<std::string, std::string>>(mapin);
-    auto mapout = ib::cfg::Deserialize<std::map<std::string, std::string>>(mapstr);
+    auto mapstr = SilKit::Config::Serialize<std::map<std::string, std::string>>(mapin);
+    auto mapout = SilKit::Config::Deserialize<std::map<std::string, std::string>>(mapstr);
     EXPECT_EQ(mapin, mapout);
 }
 

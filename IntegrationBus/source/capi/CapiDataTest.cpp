@@ -6,13 +6,13 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "ib/capi/IntegrationBus.h"
-#include "ib/sim/data/all.hpp"
+#include "silkit/capi/SilKit.h"
+#include "silkit/services/pubsub/all.hpp"
 #include "MockParticipant.hpp"
 
 namespace {
-using namespace ib::sim::data;
-using ib::mw::test::DummyParticipant;
+using namespace SilKit::Services::PubSub;
+using SilKit::Core::Tests::DummyParticipant;
 
 MATCHER_P(PayloadMatcher, controlPayload, "")
 {
@@ -31,40 +31,40 @@ MATCHER_P(PayloadMatcher, controlPayload, "")
     return true;
 }
 
-class MockDataPublisher : public ib::sim::data::IDataPublisher
+class MockDataPublisher : public SilKit::Services::PubSub::IDataPublisher
 {
 public:
     MOCK_METHOD1(Publish, void(std::vector<uint8_t> data));
     virtual void Publish(const uint8_t* /*data*/, std::size_t /*size*/){};
 };
 
-class MockDataSubscriber : public ib::sim::data::IDataSubscriber
+class MockDataSubscriber : public SilKit::Services::PubSub::IDataSubscriber
 {
 public:
     MOCK_METHOD1(SetDefaultDataMessageHandler, void(DataMessageHandlerT callback));
-    MOCK_METHOD((ib::util::HandlerId), AddExplicitDataMessageHandler,
+    MOCK_METHOD((SilKit::Util::HandlerId), AddExplicitDataMessageHandler,
                 ((DataMessageHandlerT callback), const std::string& mediaType,
                  (const std::map<std::string, std::string>& labels)),
                 (override));
-    MOCK_METHOD(void, RemoveExplicitDataMessageHandler, (ib::util::HandlerId handlerId), (override));
+    MOCK_METHOD(void, RemoveExplicitDataMessageHandler, (SilKit::Util::HandlerId handlerId), (override));
 };
 
-class MockParticipant : public ib::mw::test::DummyParticipant
+class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
-    MOCK_METHOD(ib::sim::data::IDataPublisher*, CreateDataPublisher,
+    MOCK_METHOD(SilKit::Services::PubSub::IDataPublisher*, CreateDataPublisher,
                 (const std::string& /*controllerName*/, const std::string& /*topic*/, const std::string& /*mediaType*/,
                  (const std::map<std::string, std::string>& /*labels*/), size_t /* history */),
                 (override));
 
-    MOCK_METHOD(ib::sim::data::IDataSubscriber*, CreateDataSubscriber,
+    MOCK_METHOD(SilKit::Services::PubSub::IDataSubscriber*, CreateDataSubscriber,
                 (const std::string& /*controllerName*/, const std::string& /*topic*/, const std::string& /*mediaType*/,
-                 (const std::map<std::string, std::string>& /*labels*/), (ib::sim::data::DataMessageHandlerT /* callback*/),
-                 (ib::sim::data::NewDataPublisherHandlerT /* callback*/)),
+                 (const std::map<std::string, std::string>& /*labels*/), (SilKit::Services::PubSub::DataMessageHandlerT /* callback*/),
+                 (SilKit::Services::PubSub::NewDataPublisherHandlerT /* callback*/)),
                 (override));
 };
 
-void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
+void Copy_Label(SilKit_KeyValuePair* dst, const SilKit_KeyValuePair* src)
 {
     auto lenKey = strlen(src->key) + 1;
     auto lenVal = strlen(src->value) + 1;
@@ -78,16 +78,16 @@ void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
     strcpy((char*)dst->value, src->value);
 }
 
-void Create_Labels(ib_KeyValueList** outLabels, const ib_KeyValuePair* labels, uint32_t numLabels)
+void Create_Labels(SilKit_KeyValueList** outLabels, const SilKit_KeyValuePair* labels, uint32_t numLabels)
 {
-    ib_KeyValueList* newLabels;
-    newLabels = (ib_KeyValueList*)malloc(sizeof(ib_KeyValueList));
+    SilKit_KeyValueList* newLabels;
+    newLabels = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
     if (newLabels == nullptr)
     {
         throw std::bad_alloc();
     }
     newLabels->numLabels = numLabels;
-    newLabels->labels = (ib_KeyValuePair*)malloc(numLabels * sizeof(ib_KeyValuePair));
+    newLabels->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
     if (newLabels->labels == nullptr)
     {
         throw std::bad_alloc();
@@ -109,7 +109,7 @@ public:
     CapiDataTest()
     {
         uint32_t numLabels = 1;
-        ib_KeyValuePair labels[1] = {{"KeyA", "ValA"}};
+        SilKit_KeyValuePair labels[1] = {{"KeyA", "ValA"}};
         Create_Labels(&labelList, labels, numLabels);
 
         mediaType = "A";
@@ -128,183 +128,183 @@ public:
     void* dummyContextPtr;
 
     const char* mediaType;
-    ib_KeyValueList* labelList;
+    SilKit_KeyValueList* labelList;
 };
 
-void DefaultDataHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const ib_Data_DataMessageEvent* /*dataMessageEvent*/)
+void DefaultDataHandler(void* /*context*/, SilKit_DataSubscriber* /*subscriber*/, const SilKit_DataMessageEvent* /*dataMessageEvent*/)
 {
 }
 
-void NewDataSourceHandler(void* /*context*/, ib_Data_Subscriber* /*subscriber*/, const ib_Data_NewDataPublisherEvent* /*newDataPublisherEvent*/)
+void NewDataSourceHandler(void* /*context*/, SilKit_DataSubscriber* /*subscriber*/, const SilKit_NewDataPublisherEvent* /*newDataPublisherEvent*/)
 {
 }
 
 TEST_F(CapiDataTest, data_publisher_function_mapping)
 {
-    ib_ReturnCode returnCode;
-    ib_Data_Publisher* publisher;
+    SilKit_ReturnCode returnCode;
+    SilKit_DataPublisher* publisher;
 
     EXPECT_CALL(mockParticipant, CreateDataPublisher("publisher", "topic", mediaType, testing::_, 0)).Times(testing::Exactly(1));
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "publisher", "topic",
+    returnCode = SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, "publisher", "topic",
                                           mediaType, labelList, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    ib_ByteVector data = {0, 0};
+    SilKit_ByteVector data = {0, 0};
     EXPECT_CALL(mockDataPublisher, Publish(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Data_Publisher_Publish((ib_Data_Publisher*)&mockDataPublisher, &data);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_DataPublisher_Publish((SilKit_DataPublisher*)&mockDataPublisher, &data);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 TEST_F(CapiDataTest, data_subscriber_function_mapping)
 {
-    ib_ReturnCode returnCode;
+    SilKit_ReturnCode returnCode;
 
-    ib_Data_Subscriber* subscriber;
+    SilKit_DataSubscriber* subscriber;
 
     EXPECT_CALL(mockParticipant, CreateDataSubscriber("subscriber", "topic", mediaType, testing::_, testing::_, testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", "topic",
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, "subscriber", "topic",
                                            mediaType, labelList, nullptr, &DefaultDataHandler,
                                            nullptr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockDataSubscriber, SetDefaultDataMessageHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_SetDefaultDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, nullptr,
+    returnCode = SilKit_DataSubscriber_SetDefaultDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, nullptr,
                                                           &DefaultDataHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    ib_HandlerId handlerId;
+    SilKit_HandlerId handlerId;
 
     EXPECT_CALL(mockDataSubscriber, AddExplicitDataMessageHandler(testing::_, mediaType, testing::_))
         .Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, nullptr,
+    returnCode = SilKit_DataSubscriber_AddExplicitDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, nullptr,
                                                                   &DefaultDataHandler, mediaType, labelList,
                                                                   &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockDataSubscriber, RemoveExplicitDataMessageHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = ib_Data_Subscriber_RemoveExplicitDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber,
+    returnCode = SilKit_DataSubscriber_RemoveExplicitDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber,
                                                                      handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 TEST_F(CapiDataTest, data_publisher_bad_parameters)
 {
-    ib_ByteVector data = {0, 0};
-    ib_ReturnCode returnCode;
-    ib_Data_Publisher* publisher;
+    SilKit_ByteVector data = {0, 0};
+    SilKit_ReturnCode returnCode;
+    SilKit_DataPublisher* publisher;
 
-    returnCode = ib_Data_Publisher_Create(nullptr, (ib_Participant*)&mockParticipant, "publisher", "topic",
+    returnCode = SilKit_DataPublisher_Create(nullptr, (SilKit_Participant*)&mockParticipant, "publisher", "topic",
                                           mediaType, labelList, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, nullptr, "publisher", "topic", mediaType, labelList, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataPublisher_Create(&publisher, nullptr, "publisher", "topic", mediaType, labelList, 0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, nullptr,
+    returnCode = SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, nullptr,
                                           "topic", mediaType, labelList, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "publisher", nullptr,
+    returnCode = SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, "publisher", nullptr,
                                           mediaType, labelList, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Create(&publisher, (ib_Participant*)&mockParticipant, "publisher", "topic",
+    returnCode = SilKit_DataPublisher_Create(&publisher, (SilKit_Participant*)&mockParticipant, "publisher", "topic",
                                           nullptr, labelList, 0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Publish(nullptr, &data);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataPublisher_Publish(nullptr, &data);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Publisher_Publish((ib_Data_Publisher*)&mockDataPublisher, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataPublisher_Publish((SilKit_DataPublisher*)&mockDataPublisher, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
 TEST_F(CapiDataTest, data_subscriber_bad_parameters)
 {
-    ib_ReturnCode returnCode;
-    ib_Data_Subscriber* subscriber;
+    SilKit_ReturnCode returnCode;
+    SilKit_DataSubscriber* subscriber;
 
-    returnCode = ib_Data_Subscriber_Create(nullptr, (ib_Participant*)&mockParticipant, "subscriber", "topic",
+    returnCode = SilKit_DataSubscriber_Create(nullptr, (SilKit_Participant*)&mockParticipant, "subscriber", "topic",
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode =
-        ib_Data_Subscriber_Create(&subscriber, nullptr, "subscriber", "topic", mediaType, labelList,
+        SilKit_DataSubscriber_Create(&subscriber, nullptr, "subscriber", "topic", mediaType, labelList,
                                   dummyContextPtr, &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode =
-        ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, nullptr, "topic", mediaType, labelList,
+        SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, nullptr, "topic", mediaType, labelList,
                                   dummyContextPtr, &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", nullptr,
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, "subscriber", nullptr,
         mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", "topic",
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, "subscriber", "topic",
                                            nullptr, labelList, dummyContextPtr, &DefaultDataHandler,
                                            dummyContextPtr, &NewDataSourceHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_Create(&subscriber, (ib_Participant*)&mockParticipant, "subscriber", "topic",
+    returnCode = SilKit_DataSubscriber_Create(&subscriber, (SilKit_Participant*)&mockParticipant, "subscriber", "topic",
                                            mediaType, labelList, dummyContextPtr,
                                            &DefaultDataHandler, dummyContextPtr, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = ib_Data_Subscriber_SetDefaultDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataSubscriber_SetDefaultDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    constexpr ib_HandlerId defaultHanderId = 0xCAFECAFE;
-    ib_HandlerId handlerId = defaultHanderId;
+    constexpr SilKit_HandlerId defaultHanderId = 0xCAFECAFE;
+    SilKit_HandlerId handlerId = defaultHanderId;
 
     returnCode =
-        ib_Data_Subscriber_SetDefaultDataMessageHandler((ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+        SilKit_DataSubscriber_SetDefaultDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     handlerId = defaultHanderId;
-    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler,
+    returnCode = SilKit_DataSubscriber_AddExplicitDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler,
                                                                   mediaType, labelList, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     EXPECT_EQ(handlerId, defaultHanderId);
 
     handlerId = defaultHanderId;
-    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, nullptr, mediaType, labelList, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataSubscriber_AddExplicitDataMessageHandler(
+        (SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, nullptr, mediaType, labelList, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     EXPECT_EQ(handlerId, defaultHanderId);
 
     handlerId = defaultHanderId;
-    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, nullptr, labelList, &handlerId);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataSubscriber_AddExplicitDataMessageHandler(
+        (SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, nullptr, labelList, &handlerId);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     EXPECT_EQ(handlerId, defaultHanderId);
 
     handlerId = defaultHanderId;
-    returnCode = ib_Data_Subscriber_AddExplicitDataMessageHandler(
-        (ib_Data_Subscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, mediaType, labelList, nullptr);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataSubscriber_AddExplicitDataMessageHandler(
+        (SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, &DefaultDataHandler, mediaType, labelList, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     EXPECT_EQ(handlerId, defaultHanderId);
 
-    returnCode = ib_Data_Subscriber_RemoveExplicitDataMessageHandler(nullptr, (ib_HandlerId)0);
-    EXPECT_EQ(returnCode, ib_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_DataSubscriber_RemoveExplicitDataMessageHandler(nullptr, (SilKit_HandlerId)0);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
 TEST_F(CapiDataTest, data_publisher_publish)
 {
-    ib_ReturnCode returnCode = 0;
+    SilKit_ReturnCode returnCode = 0;
     // create payload
     uint8_t buffer[64];
     int messageCounter = 1;
     size_t payloadSize = snprintf((char*)buffer, sizeof(buffer), "PUBSUB %i", messageCounter);
-    ib_ByteVector data = {&buffer[0], payloadSize};
+    SilKit_ByteVector data = {&buffer[0], payloadSize};
 
     std::vector<uint8_t> refData(&(data.data[0]), &(data.data[0]) + data.size);
     EXPECT_CALL(mockDataPublisher, Publish(PayloadMatcher(refData))).Times(testing::Exactly(1));
-    returnCode = ib_Data_Publisher_Publish((ib_Data_Publisher*)&mockDataPublisher, &data);
-    EXPECT_EQ(returnCode, ib_ReturnCode_SUCCESS);
+    returnCode = SilKit_DataPublisher_Publish((SilKit_DataPublisher*)&mockDataPublisher, &data);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 } // namespace

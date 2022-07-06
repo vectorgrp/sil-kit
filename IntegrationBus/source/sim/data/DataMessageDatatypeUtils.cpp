@@ -2,9 +2,9 @@
 
 #include "DataMessageDatatypeUtils.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs)
 {
@@ -36,6 +36,6 @@ bool MatchLabels(const std::map<std::string, std::string>& subscriberLabels, con
     return true; // All of subscriberLabels is there -> match
 }
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

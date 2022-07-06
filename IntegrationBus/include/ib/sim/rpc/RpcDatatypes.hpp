@@ -10,9 +10,9 @@
 
 #include <cstdint>
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 class IRpcClient;
 class IRpcServer;
@@ -53,7 +53,7 @@ struct RpcDiscoveryResult
 
 using RpcDiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResults)>;
 
-// IbMessages
+// SilKitMessages
 //-----------
 
 struct CallUUID
@@ -102,6 +102,6 @@ inline bool operator==(const FunctionCallResponse& lhs, const FunctionCallRespon
     return lhs.callUUID == rhs.callUUID && lhs.data == rhs.data;
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

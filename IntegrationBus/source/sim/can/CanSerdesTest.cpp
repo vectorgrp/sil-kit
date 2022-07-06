@@ -10,8 +10,8 @@ using namespace std::chrono_literals;
 
 TEST(MwVAsioSerdes, SimCan_CanMessage)
 {
-    using namespace ib::sim::can;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Can;
+    SilKit::Core::MessageBuffer buffer;
 
     CanFrameEvent in;
     CanFrameEvent out;
@@ -47,8 +47,8 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
 
 TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
 {
-    using namespace ib::sim::can;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Can;
+    SilKit::Core::MessageBuffer buffer;
 
     CanFrameTransmitEvent in;
     CanFrameTransmitEvent out;
@@ -69,8 +69,8 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
 
 TEST(MwVAsioSerdes, SimCan_CanControllerStatus)
 {
-    using namespace ib::sim::can;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Can;
+    SilKit::Core::MessageBuffer buffer;
 
     CanControllerStatus in;
     CanControllerStatus out;
@@ -89,8 +89,8 @@ TEST(MwVAsioSerdes, SimCan_CanControllerStatus)
 
 TEST(MwVAsioSerdes, SimCan_CanConfigureBaudrate)
 {
-    using namespace ib::sim::can;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Can;
+    SilKit::Core::MessageBuffer buffer;
 
     CanConfigureBaudrate in;
     CanConfigureBaudrate out;
@@ -107,8 +107,8 @@ TEST(MwVAsioSerdes, SimCan_CanConfigureBaudrate)
 
 TEST(MwVAsioSerdes, SimCan_CanSetControllerMode)
 {
-    using namespace ib::sim::can;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Can;
+    SilKit::Core::MessageBuffer buffer;
 
     CanSetControllerMode in;
     CanSetControllerMode out;

@@ -7,7 +7,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "ib/capi/IntegrationBus.h"
+#include "silkit/capi/SilKit.h"
 
 #ifdef WIN32
 #    include "windows.h"
@@ -30,40 +30,40 @@ typedef uint8_t MasterState;
 #define MasterState_WaitForWakeup ((MasterState)2)
 #define MasterState_WakeupDone ((MasterState)3)
 
-static inline ib_NanosecondsTime milliseconds(unsigned long long msValue)
+static inline SilKit_NanosecondsTime milliseconds(unsigned long long msValue)
 {
     return msValue * 1000000ULL;
 }
 
 struct FlexrayNode
 {
-    ib_Flexray_Controller* _controller;
-    ib_Flexray_ControllerConfig* _controllerConfig;
-    ib_Flexray_PocStatusEvent _oldPocStatus;
-    ib_Bool _configureCalled;
-    ib_NanosecondsTime _startupDelay;
+    SilKit_FlexrayController* _controller;
+    SilKit_FlexrayControllerConfig* _controllerConfig;
+    SilKit_FlexrayPocStatusEvent _oldPocStatus;
+    SilKit_Bool _configureCalled;
+    SilKit_NanosecondsTime _startupDelay;
     MasterState _busState;
 };
 typedef struct FlexrayNode FlexrayNode;
 
-FlexrayNode* FlexrayNode_Create(ib_Flexray_Controller* controller, ib_Flexray_ControllerConfig* config);
+FlexrayNode* FlexrayNode_Create(SilKit_FlexrayController* controller, SilKit_FlexrayControllerConfig* config);
 void FlexrayNode_Init(FlexrayNode* flexrayNode);
-void FlexrayNode_SetStartupDelay(FlexrayNode* flexrayNode, ib_NanosecondsTime delay);
-void FlexrayNode_DoAction(FlexrayNode* flexrayNode, ib_NanosecondsTime now);
-void FlexrayNode_PocReady(struct FlexrayNode* flexrayNode, ib_NanosecondsTime now);
-void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, ib_NanosecondsTime now);
+void FlexrayNode_SetStartupDelay(FlexrayNode* flexrayNode, SilKit_NanosecondsTime delay);
+void FlexrayNode_DoAction(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now);
+void FlexrayNode_PocReady(struct FlexrayNode* flexrayNode, SilKit_NanosecondsTime now);
+void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now);
 void FlexrayNode_ReconfigureTxBuffers(struct FlexrayNode* flexrayNode);
-void FlexrayNode_PocStatusHandler(void* context, ib_Flexray_Controller* controller,
-                                  const ib_Flexray_PocStatusEvent* pocStatus);
-void FlexrayNode_WakeupHandler(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolEvent* symbol);
+void FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* controller,
+                                  const SilKit_FlexrayPocStatusEvent* pocStatus);
+void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol);
 
-void print_header(FILE* out, ib_Flexray_Header* header)
+void print_header(FILE* out, SilKit_FlexrayHeader* header)
 {
     fprintf(out, "FlexrayHeader{f=[%s%s%s%s],s=%d,l=%d,crc=0x%04x,c=%d}",
-            ((header->flags & ib_Flexray_Header_SuFIndicator) != 0) ? "U" : "-",
-            ((header->flags & ib_Flexray_Header_SyFIndicator) != 0) ? "Y" : "-",
-            ((header->flags & ib_Flexray_Header_NFIndicator) != 0) ? "-" : "N",
-            ((header->flags & ib_Flexray_Header_PPIndicator) != 0) ? "P" : "-", header->frameId, header->payloadLength,
+            ((header->flags & SilKit_FlexrayHeader_SuFIndicator) != 0) ? "U" : "-",
+            ((header->flags & SilKit_FlexrayHeader_SyFIndicator) != 0) ? "Y" : "-",
+            ((header->flags & SilKit_FlexrayHeader_NFIndicator) != 0) ? "-" : "N",
+            ((header->flags & SilKit_FlexrayHeader_PPIndicator) != 0) ? "P" : "-", header->frameId, header->payloadLength,
             header->headerCrc, header->cycleCount);
 }
 
@@ -88,23 +88,23 @@ void print_hexbytes(FILE* out, const uint8_t* bytes, size_t size)
     fprintf(out, "\"");
 }
 
-void print_channel(FILE* out, ib_Flexray_Channel channel)
+void print_channel(FILE* out, SilKit_FlexrayChannel channel)
 {
     switch (channel)
     {
-    case ib_Flexray_Channel_A: fprintf(out, "A"); break;
-    case ib_Flexray_Channel_B: fprintf(out, "B"); break;
-    case ib_Flexray_Channel_AB: fprintf(out, "AB"); break;
+    case SilKit_FlexrayChannel_A: fprintf(out, "A"); break;
+    case SilKit_FlexrayChannel_B: fprintf(out, "B"); break;
+    case SilKit_FlexrayChannel_AB: fprintf(out, "AB"); break;
     default: fprintf(out, "?"); break;
     }
 }
-void print_flexrayframeevent(FILE* out, const ib_Flexray_FrameEvent* message)
+void print_flexrayframeevent(FILE* out, const SilKit_FlexrayFrameEvent* message)
 {
     fprintf(out, "FlexrayFrameEvent ch=");
     print_channel(out, message->channel);
     fprintf(out, ",");
     print_header(out, message->frame->header);
-    if ((message->frame->header->flags & ib_Flexray_Header_NFIndicator) != 0)
+    if ((message->frame->header->flags & SilKit_FlexrayHeader_NFIndicator) != 0)
     {
         fprintf(out, ", payload=");
         print_hexbytes(out, message->frame->payload.data, message->frame->payload.size);
@@ -113,7 +113,7 @@ void print_flexrayframeevent(FILE* out, const ib_Flexray_FrameEvent* message)
     fflush(out);
 }
 
-void print_flexrayframetransmitevent(FILE* out, const ib_Flexray_FrameTransmitEvent* message)
+void print_flexrayframetransmitevent(FILE* out, const SilKit_FlexrayFrameTransmitEvent* message)
 {
     fprintf(out, "FlexrayFrameTransmitEvent ch=");
     print_channel(out, message->channel);
@@ -123,7 +123,7 @@ void print_flexrayframetransmitevent(FILE* out, const ib_Flexray_FrameTransmitEv
     fflush(out);
 }
 
-void ReceiveFrame(void* context, ib_Flexray_Controller* controller, const ib_Flexray_FrameEvent* message)
+void ReceiveFrame(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -132,8 +132,8 @@ void ReceiveFrame(void* context, ib_Flexray_Controller* controller, const ib_Fle
     print_flexrayframeevent(stdout, message);
 }
 
-void ReceiveFrameTransmit(void* context, ib_Flexray_Controller* controller,
-                          const ib_Flexray_FrameTransmitEvent* message)
+void ReceiveFrameTransmit(void* context, SilKit_FlexrayController* controller,
+                          const SilKit_FlexrayFrameTransmitEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -142,7 +142,7 @@ void ReceiveFrameTransmit(void* context, ib_Flexray_Controller* controller,
     print_flexrayframetransmitevent(stdout, message);
 }
 
-void ReceiveWakeup(void* context, ib_Flexray_Controller* controller, const ib_Flexray_WakeupEvent* message)
+void ReceiveWakeup(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayWakeupEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -151,7 +151,7 @@ void ReceiveWakeup(void* context, ib_Flexray_Controller* controller, const ib_Fl
     fprintf(stdout, "FlexrayWakeupEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
-void ReceiveSymbol(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolEvent* message)
+void ReceiveSymbol(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -160,8 +160,8 @@ void ReceiveSymbol(void* context, ib_Flexray_Controller* controller, const ib_Fl
     fprintf(stdout, "FlexraySymbolEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
-void ReceiveSymbolTransmit(void* context, ib_Flexray_Controller* controller,
-                           const ib_Flexray_SymbolTransmitEvent* message)
+void ReceiveSymbolTransmit(void* context, SilKit_FlexrayController* controller,
+                           const SilKit_FlexraySymbolTransmitEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -170,7 +170,7 @@ void ReceiveSymbolTransmit(void* context, ib_Flexray_Controller* controller,
     fprintf(stdout, "FlexraySymbolTransmitEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
-void ReceiveCycleStart(void* context, ib_Flexray_Controller* controller, const ib_Flexray_CycleStartEvent* message)
+void ReceiveCycleStart(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayCycleStartEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -179,24 +179,24 @@ void ReceiveCycleStart(void* context, ib_Flexray_Controller* controller, const i
     fprintf(stdout, "FlexrayCycleStartEvent cycleCounter=%d\n", message->cycleCounter);
 }
 
-void AppendTxBufferConfig(ib_Flexray_ControllerConfig** inOutControllerConfig,
-                          const ib_Flexray_TxBufferConfig* txBufferConfig)
+void AppendTxBufferConfig(SilKit_FlexrayControllerConfig** inOutControllerConfig,
+                          const SilKit_FlexrayTxBufferConfig* txBufferConfig)
 {
     uint32_t newNumTxBufferConfigs = (*inOutControllerConfig)->numBufferConfigs + 1;
-    size_t newSize = newNumTxBufferConfigs * sizeof(ib_Flexray_TxBufferConfig);
-    ib_Flexray_TxBufferConfig* result =
-        (ib_Flexray_TxBufferConfig*)realloc((*inOutControllerConfig)->bufferConfigs, newSize);
+    size_t newSize = newNumTxBufferConfigs * sizeof(SilKit_FlexrayTxBufferConfig);
+    SilKit_FlexrayTxBufferConfig* result =
+        (SilKit_FlexrayTxBufferConfig*)realloc((*inOutControllerConfig)->bufferConfigs, newSize);
     if (result == NULL)
     {
-        AbortOnFailedAllocation("ib_Flexray_TxBufferConfig");
+        AbortOnFailedAllocation("SilKit_FlexrayTxBufferConfig");
         return;
     }
-    memcpy(&result[newNumTxBufferConfigs - 1], txBufferConfig, sizeof(ib_Flexray_TxBufferConfig));
+    memcpy(&result[newNumTxBufferConfigs - 1], txBufferConfig, sizeof(SilKit_FlexrayTxBufferConfig));
     (*inOutControllerConfig)->numBufferConfigs = newNumTxBufferConfigs;
     (*inOutControllerConfig)->bufferConfigs = result;
 }
 
-FlexrayNode* FlexrayNode_Create(ib_Flexray_Controller* controller, ib_Flexray_ControllerConfig* config)
+FlexrayNode* FlexrayNode_Create(SilKit_FlexrayController* controller, SilKit_FlexrayControllerConfig* config)
 {
     struct FlexrayNode* flexrayNode = malloc(sizeof(FlexrayNode));
     if (flexrayNode == NULL)
@@ -206,41 +206,41 @@ FlexrayNode* FlexrayNode_Create(ib_Flexray_Controller* controller, ib_Flexray_Co
     }
     flexrayNode->_controller = controller;
     flexrayNode->_controllerConfig = config;
-    flexrayNode->_oldPocStatus.state = ib_Flexray_PocState_DefaultConfig;
-    flexrayNode->_configureCalled = ib_False;
+    flexrayNode->_oldPocStatus.state = SilKit_FlexrayPocState_DefaultConfig;
+    flexrayNode->_configureCalled = SilKit_False;
     flexrayNode->_startupDelay = 0;
     flexrayNode->_busState = MasterState_Ignore;
     return flexrayNode;
 }
 
-void FlexrayNode_SetStartupDelay(FlexrayNode* flexrayNode, ib_NanosecondsTime delay)
+void FlexrayNode_SetStartupDelay(FlexrayNode* flexrayNode, SilKit_NanosecondsTime delay)
 {
     flexrayNode->_startupDelay = delay;
 }
 
 void FlexrayNode_Init(FlexrayNode* flexrayNode)
 {
-    ib_ReturnCode returnCode;
+    SilKit_ReturnCode returnCode;
     if (flexrayNode->_configureCalled)
         return;
 
-    returnCode = ib_Flexray_Controller_Configure(flexrayNode->_controller, flexrayNode->_controllerConfig);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    returnCode = SilKit_FlexrayController_Configure(flexrayNode->_controller, flexrayNode->_controllerConfig);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_Configure => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_Configure => %s\n", SilKit_GetLastErrorString());
     }
-    flexrayNode->_configureCalled = ib_True;
+    flexrayNode->_configureCalled = SilKit_True;
 }
 
-void FlexrayNode_DoAction(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
+void FlexrayNode_DoAction(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now)
 {
     if (now < flexrayNode->_startupDelay)
         return;
     switch (flexrayNode->_oldPocStatus.state)
     {
-    case ib_Flexray_PocState_DefaultConfig: FlexrayNode_Init(flexrayNode); break;
-    case ib_Flexray_PocState_Ready: FlexrayNode_PocReady(flexrayNode, now); break;
-    case ib_Flexray_PocState_NormalActive:
+    case SilKit_FlexrayPocState_DefaultConfig: FlexrayNode_Init(flexrayNode); break;
+    case SilKit_FlexrayPocState_Ready: FlexrayNode_PocReady(flexrayNode, now); break;
+    case SilKit_FlexrayPocState_NormalActive:
         if (now == milliseconds(100) + milliseconds(flexrayNode->_startupDelay))
         {
             FlexrayNode_ReconfigureTxBuffers(flexrayNode);
@@ -250,33 +250,33 @@ void FlexrayNode_DoAction(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
             FlexrayNode_TxBufferUpdate(flexrayNode, now);
         }
         break;
-    case ib_Flexray_PocState_Config:
-    case ib_Flexray_PocState_Startup:
-    case ib_Flexray_PocState_Wakeup:
-    case ib_Flexray_PocState_NormalPassive:
-    case ib_Flexray_PocState_Halt: return;
+    case SilKit_FlexrayPocState_Config:
+    case SilKit_FlexrayPocState_Startup:
+    case SilKit_FlexrayPocState_Wakeup:
+    case SilKit_FlexrayPocState_NormalPassive:
+    case SilKit_FlexrayPocState_Halt: return;
     }
 }
 
-void FlexrayNode_PocReady(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
+void FlexrayNode_PocReady(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
 
     switch (flexrayNode->_busState)
     {
     case MasterState_PerformWakeup:
-        ib_Flexray_Controller_ExecuteCmd(flexrayNode->_controller, ib_Flexray_ChiCommand_WAKEUP);
+        SilKit_FlexrayController_ExecuteCmd(flexrayNode->_controller, SilKit_FlexrayChiCommand_WAKEUP);
         break;
     case MasterState_WaitForWakeup: break;
     case MasterState_WakeupDone:
-        ib_Flexray_Controller_ExecuteCmd(flexrayNode->_controller, ib_Flexray_ChiCommand_ALLOW_COLDSTART);
-        ib_Flexray_Controller_ExecuteCmd(flexrayNode->_controller, ib_Flexray_ChiCommand_RUN);
+        SilKit_FlexrayController_ExecuteCmd(flexrayNode->_controller, SilKit_FlexrayChiCommand_ALLOW_COLDSTART);
+        SilKit_FlexrayController_ExecuteCmd(flexrayNode->_controller, SilKit_FlexrayChiCommand_RUN);
         break;
     default: break;
     }
 }
 
-void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, ib_NanosecondsTime now)
+void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
 
@@ -291,16 +291,16 @@ void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, ib_NanosecondsTime now
     char payloadString[128];
     sprintf(payloadString, "FlexrayFrameEvent#%d sent from buffer %d", msgNumber, bufferIdx);
 
-    ib_Flexray_TxBufferUpdate update;
+    SilKit_FlexrayTxBufferUpdate update;
     update.payload.size = strlen(payloadString + 1);
     update.payload.data = (uint8_t*)payloadString;
-    update.payloadDataValid = ib_True;
+    update.payloadDataValid = SilKit_True;
     update.txBufferIndex = bufferIdx;
 
-    ib_ReturnCode returnCode = ib_Flexray_Controller_UpdateTxBuffer(flexrayNode->_controller, &update);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    SilKit_ReturnCode returnCode = SilKit_FlexrayController_UpdateTxBuffer(flexrayNode->_controller, &update);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_UpdateTxBuffer => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_UpdateTxBuffer => %s\n", SilKit_GetLastErrorString());
     }
 
     msgNumber++;
@@ -313,24 +313,24 @@ void FlexrayNode_ReconfigureTxBuffers(struct FlexrayNode* flexrayNode)
     uint16_t idx;
     for (idx = 0; idx < flexrayNode->_controllerConfig->numBufferConfigs; idx++)
     {
-        ib_Flexray_TxBufferConfig* bufferConfig = &(flexrayNode->_controllerConfig->bufferConfigs[idx]);
+        SilKit_FlexrayTxBufferConfig* bufferConfig = &(flexrayNode->_controllerConfig->bufferConfigs[idx]);
         switch (bufferConfig->channels)
         {
-        case ib_Flexray_Channel_A:
-            bufferConfig->channels = ib_Flexray_Channel_B;
-            ib_Flexray_Controller_ReconfigureTxBuffer(flexrayNode->_controller, idx, bufferConfig);
+        case SilKit_FlexrayChannel_A:
+            bufferConfig->channels = SilKit_FlexrayChannel_B;
+            SilKit_FlexrayController_ReconfigureTxBuffer(flexrayNode->_controller, idx, bufferConfig);
             break;
-        case ib_Flexray_Channel_B:
-            bufferConfig->channels = ib_Flexray_Channel_A;
-            ib_Flexray_Controller_ReconfigureTxBuffer(flexrayNode->_controller, idx, bufferConfig);
+        case SilKit_FlexrayChannel_B:
+            bufferConfig->channels = SilKit_FlexrayChannel_A;
+            SilKit_FlexrayController_ReconfigureTxBuffer(flexrayNode->_controller, idx, bufferConfig);
             break;
         default: break;
         }
     }
 }
 
-void FlexrayNode_PocStatusHandler(void* context, ib_Flexray_Controller* controller,
-                                  const ib_Flexray_PocStatusEvent* pocStatus)
+void FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* controller,
+                                  const SilKit_FlexrayPocStatusEvent* pocStatus)
 {
     UNUSED_ARG(controller);
 
@@ -338,7 +338,7 @@ void FlexrayNode_PocStatusHandler(void* context, ib_Flexray_Controller* controll
     printf(">> POC=%d freeze=%d wakeupStatus=%d slotMode=%d T=%" PRIu64 "\n", pocStatus->state, pocStatus->freeze,
            pocStatus->wakeupStatus, pocStatus->slotMode, pocStatus->timestamp);
 
-    if (flexrayNode->_oldPocStatus.state == ib_Flexray_PocState_Wakeup && pocStatus->state == ib_Flexray_PocState_Ready)
+    if (flexrayNode->_oldPocStatus.state == SilKit_FlexrayPocState_Wakeup && pocStatus->state == SilKit_FlexrayPocState_Ready)
     {
         printf("   Wakeup finished...\n");
         flexrayNode->_busState = MasterState_WakeupDone;
@@ -347,16 +347,16 @@ void FlexrayNode_PocStatusHandler(void* context, ib_Flexray_Controller* controll
     flexrayNode->_oldPocStatus = *pocStatus;
 }
 
-void FlexrayNode_WakeupHandler(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolEvent* symbol)
+void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol)
 {
     UNUSED_ARG(context);
 
     printf(">> WAKEUP! (%d)\n", symbol->pattern);
-    ib_Flexray_Controller_ExecuteCmd(controller, ib_Flexray_ChiCommand_ALLOW_COLDSTART);
-    ib_Flexray_Controller_ExecuteCmd(controller, ib_Flexray_ChiCommand_RUN);
+    SilKit_FlexrayController_ExecuteCmd(controller, SilKit_FlexrayChiCommand_ALLOW_COLDSTART);
+    SilKit_FlexrayController_ExecuteCmd(controller, SilKit_FlexrayChiCommand_RUN);
 }
 
-void FlexrayNode_SimulationTask(void* context, ib_Participant* participant, ib_NanosecondsTime time)
+void FlexrayNode_SimulationTask(void* context, SilKit_Participant* participant, SilKit_NanosecondsTime time)
 {
     UNUSED_ARG(participant);
 
@@ -402,9 +402,9 @@ char* LoadFile(char const* path)
 int main(int argc, char** argv)
 {
     char* participantName;
-    ib_Participant* participant;
+    SilKit_Participant* participant;
 
-    ib_Flexray_ClusterParameters clusterParams;
+    SilKit_FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 8;
     clusterParams.gCycleCountMax = 63;
     clusterParams.gdActionPointOffset = 2;
@@ -426,10 +426,10 @@ int main(int argc, char** argv)
     clusterParams.gPayloadLengthStatic = 16;
     clusterParams.gSyncFrameIDCountMax = 15;
 
-    ib_Flexray_NodeParameters nodeParams;
+    SilKit_FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 1;
     nodeParams.pAllowPassiveToActive = 0;
-    nodeParams.pChannels = ib_Flexray_Channel_AB;
+    nodeParams.pChannels = SilKit_FlexrayChannel_AB;
     nodeParams.pClusterDriftDamping = 2;
     nodeParams.pdAcceptedStartupRange = 212;
     nodeParams.pdListenTimeout = 400162;
@@ -446,14 +446,14 @@ int main(int argc, char** argv)
     nodeParams.pOffsetCorrectionOut = 127;
     nodeParams.pOffsetCorrectionStart = 3632;
     nodeParams.pRateCorrectionOut = 81;
-    nodeParams.pWakeupChannel = ib_Flexray_Channel_A;
+    nodeParams.pWakeupChannel = SilKit_FlexrayChannel_A;
     nodeParams.pWakeupPattern = 33;
-    nodeParams.pdMicrotick = ib_Flexray_ClockPeriod_T25NS;
+    nodeParams.pdMicrotick = SilKit_FlexrayClockPeriod_T25NS;
     nodeParams.pSamplesPerMicrotick = 2;
 
     if (argc < 3)
     {
-        printf("usage: IbDemoCFlexray <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCFlexray <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
         return 1;
     }
 
@@ -465,51 +465,51 @@ int main(int argc, char** argv)
     }
     participantName = argv[2];
 
-    const char* registryUri = "vib://localhost:8500";
+    const char* registryUri = "silkit://localhost:8500";
     if (argc >= 4)
     {
         registryUri = argv[3];
     }
 
-    ib_ReturnCode returnCode;
-    returnCode = ib_Participant_Create(&participant, jsonString, participantName, registryUri, ib_True);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    SilKit_ReturnCode returnCode;
+    returnCode = SilKit_Participant_Create(&participant, jsonString, participantName, registryUri, SilKit_True);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Participant_Create => %s\n", ib_GetLastErrorString());
+        printf("SilKit_Participant_Create => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
     const char* flexrayControllerName = "FlexRay1";
     const char* flexrayNetworkName = "FlexRay1";
 
-    ib_Flexray_ControllerConfig* config = (ib_Flexray_ControllerConfig*)malloc(sizeof(ib_Flexray_ControllerConfig));
+    SilKit_FlexrayControllerConfig* config = (SilKit_FlexrayControllerConfig*)malloc(sizeof(SilKit_FlexrayControllerConfig));
     if (config == NULL)
     {
-        AbortOnFailedAllocation("ib_Flexray_ControllerConfig");
+        AbortOnFailedAllocation("SilKit_FlexrayControllerConfig");
         return 2;
     }
-    memset(config, 0, sizeof(ib_Flexray_ControllerConfig));
+    memset(config, 0, sizeof(SilKit_FlexrayControllerConfig));
     config->clusterParams = &clusterParams;
     config->nodeParams = &nodeParams;
 
     if (!strcmp(participantName, "Node0"))
     {
         // initialize bufferConfig to send some FrMessages
-        ib_Flexray_TxBufferConfig cfg;
-        cfg.channels = ib_Flexray_Channel_AB;
+        SilKit_FlexrayTxBufferConfig cfg;
+        cfg.channels = SilKit_FlexrayChannel_AB;
         cfg.slotId = 10;
         cfg.offset = 0;
         cfg.repetition = 1;
-        cfg.hasPayloadPreambleIndicator = ib_False;
+        cfg.hasPayloadPreambleIndicator = SilKit_False;
         cfg.headerCrc = 5;
-        cfg.transmissionMode = ib_Flexray_TransmissionMode_SingleShot;
+        cfg.transmissionMode = SilKit_FlexrayTransmissionMode_SingleShot;
         AppendTxBufferConfig(&config, &cfg);
 
-        cfg.channels = ib_Flexray_Channel_A;
+        cfg.channels = SilKit_FlexrayChannel_A;
         cfg.slotId = 20;
         AppendTxBufferConfig(&config, &cfg);
 
-        cfg.channels = ib_Flexray_Channel_B;
+        cfg.channels = SilKit_FlexrayChannel_B;
         cfg.slotId = 30;
         AppendTxBufferConfig(&config, &cfg);
     }
@@ -518,30 +518,30 @@ int main(int argc, char** argv)
         config->nodeParams->pKeySlotId = 11;
 
         // initialize bufferConfig to send some FrMessages
-        ib_Flexray_TxBufferConfig cfg;
-        cfg.channels = ib_Flexray_Channel_AB;
+        SilKit_FlexrayTxBufferConfig cfg;
+        cfg.channels = SilKit_FlexrayChannel_AB;
         cfg.slotId = 11;
         cfg.offset = 0;
         cfg.repetition = 1;
-        cfg.hasPayloadPreambleIndicator = ib_False;
+        cfg.hasPayloadPreambleIndicator = SilKit_False;
         cfg.headerCrc = 5;
-        cfg.transmissionMode = ib_Flexray_TransmissionMode_SingleShot;
+        cfg.transmissionMode = SilKit_FlexrayTransmissionMode_SingleShot;
         AppendTxBufferConfig(&config, &cfg);
 
-        cfg.channels = ib_Flexray_Channel_A;
+        cfg.channels = SilKit_FlexrayChannel_A;
         cfg.slotId = 21;
         AppendTxBufferConfig(&config, &cfg);
 
-        cfg.channels = ib_Flexray_Channel_B;
+        cfg.channels = SilKit_FlexrayChannel_B;
         cfg.slotId = 31;
         AppendTxBufferConfig(&config, &cfg);
     }
 
-    ib_Flexray_Controller* controller;
-    returnCode = ib_Flexray_Controller_Create(&controller, participant, flexrayControllerName, flexrayNetworkName);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    SilKit_FlexrayController* controller;
+    returnCode = SilKit_FlexrayController_Create(&controller, participant, flexrayControllerName, flexrayNetworkName);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_Create => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_Create => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
     FlexrayNode* frNode = FlexrayNode_Create(controller, config);
@@ -555,83 +555,83 @@ int main(int argc, char** argv)
         FlexrayNode_SetStartupDelay(frNode, 0);
     }
 
-    ib_HandlerId pocStatusHandlerId;
-    returnCode = ib_Flexray_Controller_AddPocStatusHandler(controller, frNode, &FlexrayNode_PocStatusHandler,
+    SilKit_HandlerId pocStatusHandlerId;
+    returnCode = SilKit_FlexrayController_AddPocStatusHandler(controller, frNode, &FlexrayNode_PocStatusHandler,
                                                            &pocStatusHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddPocStatusHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddPocStatusHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    ib_HandlerId frameHandlerId;
-    returnCode = ib_Flexray_Controller_AddFrameHandler(controller, frNode, &ReceiveFrame, &frameHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    SilKit_HandlerId frameHandlerId;
+    returnCode = SilKit_FlexrayController_AddFrameHandler(controller, frNode, &ReceiveFrame, &frameHandlerId);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddFrameHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddFrameHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    ib_HandlerId frameTransmitHandlerId;
-    returnCode = ib_Flexray_Controller_AddFrameTransmitHandler(controller, frNode, &ReceiveFrameTransmit,
+    SilKit_HandlerId frameTransmitHandlerId;
+    returnCode = SilKit_FlexrayController_AddFrameTransmitHandler(controller, frNode, &ReceiveFrameTransmit,
                                                                &frameTransmitHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddFrameTransmitHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddFrameTransmitHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    ib_HandlerId wakeupHandlerId;
+    SilKit_HandlerId wakeupHandlerId;
     returnCode =
-        ib_Flexray_Controller_AddWakeupHandler(controller, frNode, &FlexrayNode_WakeupHandler, &wakeupHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+        SilKit_FlexrayController_AddWakeupHandler(controller, frNode, &FlexrayNode_WakeupHandler, &wakeupHandlerId);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddWakeupHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddWakeupHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    ib_HandlerId symbolHandlerId;
-    returnCode = ib_Flexray_Controller_AddSymbolHandler(controller, frNode, &ReceiveSymbol, &symbolHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    SilKit_HandlerId symbolHandlerId;
+    returnCode = SilKit_FlexrayController_AddSymbolHandler(controller, frNode, &ReceiveSymbol, &symbolHandlerId);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddSymbolHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddSymbolHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    ib_HandlerId symbolTransmitHandlerId;
-    returnCode = ib_Flexray_Controller_AddSymbolTransmitHandler(controller, frNode, &ReceiveSymbolTransmit,
+    SilKit_HandlerId symbolTransmitHandlerId;
+    returnCode = SilKit_FlexrayController_AddSymbolTransmitHandler(controller, frNode, &ReceiveSymbolTransmit,
                                                                 &symbolTransmitHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddSymbolTransmitHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddSymbolTransmitHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    ib_HandlerId cycleStartHandlerId;
+    SilKit_HandlerId cycleStartHandlerId;
     returnCode =
-        ib_Flexray_Controller_AddCycleStartHandler(controller, frNode, &ReceiveCycleStart, &cycleStartHandlerId);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+        SilKit_FlexrayController_AddCycleStartHandler(controller, frNode, &ReceiveCycleStart, &cycleStartHandlerId);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Flexray_Controller_AddCycleStartHandler => %s\n", ib_GetLastErrorString());
+        printf("SilKit_FlexrayController_AddCycleStartHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
 
-    returnCode = ib_Participant_SetSimulationTask(participant, frNode, &FlexrayNode_SimulationTask);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    returnCode = SilKit_Participant_SetSimulationTask(participant, frNode, &FlexrayNode_SimulationTask);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Participant_SetSimulationTask => %s\n", ib_GetLastErrorString());
+        printf("SilKit_Participant_SetSimulationTask => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
 
-    ib_ParticipantState finalState;
-    ib_LifecycleConfiguration startConfig;
-    startConfig.coordinatedStart = ib_True;
-    startConfig.coordinatedStop = ib_True;
+    SilKit_ParticipantState finalState;
+    SilKit_LifecycleConfiguration startConfig;
+    startConfig.coordinatedStart = SilKit_True;
+    startConfig.coordinatedStop = SilKit_True;
 
-    returnCode = ib_Participant_StartLifecycleWithSyncTime(participant, &startConfig);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    returnCode = SilKit_Participant_StartLifecycleWithSyncTime(participant, &startConfig);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Participant_StartLifecycleWithSyncTime => %s\n", ib_GetLastErrorString());
+        printf("SilKit_Participant_StartLifecycleWithSyncTime => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    returnCode = ib_Participant_WaitForLifecycleToComplete(participant, &finalState);
-    if (returnCode != ib_ReturnCode_SUCCESS)
+    returnCode = SilKit_Participant_WaitForLifecycleToComplete(participant, &finalState);
+    if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("ib_Participant_WaitForLifecycleToComplete => %s\n", ib_GetLastErrorString());
+        printf("SilKit_Participant_WaitForLifecycleToComplete => %s\n", SilKit_GetLastErrorString());
         return 3;
     }
     printf("Simulation stopped. Final State: %d\n", finalState);
@@ -640,7 +640,7 @@ int main(int argc, char** argv)
     char* result = fgets(line, 2, stdin);
     (void)result;
 
-    ib_Participant_Destroy(participant);
+    SilKit_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

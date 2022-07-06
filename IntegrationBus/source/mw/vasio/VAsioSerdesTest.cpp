@@ -7,8 +7,8 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 bool operator==(const VAsioPeerInfo& lhs, const VAsioPeerInfo& rhs)
 {
@@ -38,12 +38,12 @@ bool operator==(const KnownParticipants& lhs, const KnownParticipants& rhs)
 		;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 
 namespace {
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 auto MakePeerInfo() -> VAsioPeerInfo
 {

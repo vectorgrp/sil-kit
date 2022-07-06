@@ -3,58 +3,58 @@
 #pragma once
 #include <cstdint>
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 // The SerdesName must not change, even when the C++ struct's name changes.
 // This ensures the stability of the wire format of the vasio ser/des.
 
-template <class MsgT> struct IbMsgTraitSerdesName { static constexpr const char* SerdesName(); };
+template <class MsgT> struct SilKitMsgTraitSerdesName { static constexpr const char* SerdesName(); };
 
 //helper to reduce boilerplate
-#define DefineIbMsgTrait_SerdesName(TYPE_NAME, SERDES_NAME) \
+#define DefineSilKitMsgTrait_SerdesName(TYPE_NAME, SERDES_NAME) \
     template<> \
-    struct IbMsgTraitSerdesName<TYPE_NAME> {\
+    struct SilKitMsgTraitSerdesName<TYPE_NAME> {\
         static constexpr const char* SerdesName() { return SERDES_NAME; }\
     }
 
-DefineIbMsgTrait_SerdesName(ib::mw::logging::LogMsg, "LOGMSG" );
-DefineIbMsgTrait_SerdesName(ib::mw::sync::ParticipantCommand, "PARTICIPANTCOMMAND" );
-DefineIbMsgTrait_SerdesName(ib::mw::sync::SystemCommand, "SYSTEMCOMMAND" );
-DefineIbMsgTrait_SerdesName(ib::mw::sync::ParticipantStatus, "PARTICIPANTSTATUS" );
-DefineIbMsgTrait_SerdesName(ib::mw::sync::WorkflowConfiguration, "WORKFLOWCONFIGURATION" );
-DefineIbMsgTrait_SerdesName(ib::mw::sync::NextSimTask, "NEXTSIMTASK" );
-DefineIbMsgTrait_SerdesName(ib::sim::data::DataMessageEvent, "DATAMESSAGEEVENT" );
-DefineIbMsgTrait_SerdesName(ib::sim::rpc::FunctionCall, "FUNCTIONCALL" );
-DefineIbMsgTrait_SerdesName(ib::sim::rpc::FunctionCallResponse, "FUNCTIONCALLRESPONSE" );
-DefineIbMsgTrait_SerdesName(ib::sim::can::CanFrameEvent, "CANFRAMEEVENT" );
-DefineIbMsgTrait_SerdesName(ib::sim::can::CanFrameTransmitEvent, "CANFRAMETRANSMITEVENT" );
-DefineIbMsgTrait_SerdesName(ib::sim::can::CanControllerStatus, "CANCONTROLLERSTATUS" );
-DefineIbMsgTrait_SerdesName(ib::sim::can::CanConfigureBaudrate, "CANCONFIGUREBAUDRATE" );
-DefineIbMsgTrait_SerdesName(ib::sim::can::CanSetControllerMode, "CANSETCONTROLLERMODE" );
-DefineIbMsgTrait_SerdesName(ib::sim::eth::EthernetFrameEvent, "ETHERNETFRAMEEVENT" );
-DefineIbMsgTrait_SerdesName(ib::sim::eth::EthernetFrameTransmitEvent, "ETHERNETFRAMETRANSMITEVENT" );
-DefineIbMsgTrait_SerdesName(ib::sim::eth::EthernetStatus, "ETHERNETSTATUS" );
-DefineIbMsgTrait_SerdesName(ib::sim::eth::EthernetSetMode, "ETHERNETSETMODE" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinSendFrameRequest, "SENDFRAMEREQUEST" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinSendFrameHeaderRequest, "SENDFRAMEHEADERREQUEST" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinTransmission, "TRANSMISSION" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinWakeupPulse, "WAKEUPPULSE" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinControllerConfig, "CONTROLLERCONFIG" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinControllerStatusUpdate, "CONTROLLERSTATUSUPDATE" );
-DefineIbMsgTrait_SerdesName(ib::sim::lin::LinFrameResponseUpdate, "FRAMERESPONSEUPDATE" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayFrameEvent, "FRMESSAGE" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayFrameTransmitEvent, "FRMESSAGEACK" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexraySymbolEvent, "FRSYMBOL" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexraySymbolTransmitEvent, "FRSYMBOLACK" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayCycleStartEvent, "CYCLESTART" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayHostCommand, "HOSTCOMMAND" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayControllerConfig, "CONTROLLERCONFIG" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayTxBufferConfigUpdate, "TXBUFFERCONFIGUPDATE" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayTxBufferUpdate, "TXBUFFERUPDATE" );
-DefineIbMsgTrait_SerdesName(ib::sim::fr::FlexrayPocStatusEvent, "POCSTATUS" );
-DefineIbMsgTrait_SerdesName(ib::mw::service::ParticipantDiscoveryEvent, "SERVICEANNOUNCEMENT" );
-DefineIbMsgTrait_SerdesName(ib::mw::service::ServiceDiscoveryEvent, "SERVICEDISCOVERYEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Logging::LogMsg, "LOGMSG" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::ParticipantCommand, "PARTICIPANTCOMMAND" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::SystemCommand, "SYSTEMCOMMAND" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::ParticipantStatus, "PARTICIPANTSTATUS" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::WorkflowConfiguration, "WORKFLOWCONFIGURATION" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::NextSimTask, "NEXTSIMTASK" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::PubSub::DataMessageEvent, "DATAMESSAGEEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Rpc::FunctionCall, "FUNCTIONCALL" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Rpc::FunctionCallResponse, "FUNCTIONCALLRESPONSE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Can::CanFrameEvent, "CANFRAMEEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Can::CanFrameTransmitEvent, "CANFRAMETRANSMITEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Can::CanControllerStatus, "CANCONTROLLERSTATUS" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Can::CanConfigureBaudrate, "CANCONFIGUREBAUDRATE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Can::CanSetControllerMode, "CANSETCONTROLLERMODE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetFrameEvent, "ETHERNETFRAMEEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetFrameTransmitEvent, "ETHERNETFRAMETRANSMITEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetStatus, "ETHERNETSTATUS" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Ethernet::EthernetSetMode, "ETHERNETSETMODE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinSendFrameRequest, "SENDFRAMEREQUEST" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinSendFrameHeaderRequest, "SENDFRAMEHEADERREQUEST" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinTransmission, "TRANSMISSION" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinWakeupPulse, "WAKEUPPULSE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinControllerConfig, "CONTROLLERCONFIG" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinControllerStatusUpdate, "CONTROLLERSTATUSUPDATE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinFrameResponseUpdate, "FRAMERESPONSEUPDATE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayFrameEvent, "FRMESSAGE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayFrameTransmitEvent, "FRMESSAGEACK" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexraySymbolEvent, "FRSYMBOL" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexraySymbolTransmitEvent, "FRSYMBOLACK" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayCycleStartEvent, "CYCLESTART" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayHostCommand, "HOSTCOMMAND" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayControllerConfig, "CONTROLLERCONFIG" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayTxBufferConfigUpdate, "TXBUFFERCONFIGUPDATE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayTxBufferUpdate, "TXBUFFERUPDATE" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayPocStatusEvent, "POCSTATUS" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Discovery::ParticipantDiscoveryEvent, "SERVICEANNOUNCEMENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Discovery::ServiceDiscoveryEvent, "SERVICEDISCOVERYEVENT" );
 
-} // mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

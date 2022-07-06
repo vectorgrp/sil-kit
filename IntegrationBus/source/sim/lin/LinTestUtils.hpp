@@ -4,29 +4,29 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/sim/lin/LinDatatypes.hpp"
+#include "silkit/services/lin/LinDatatypes.hpp"
 
 #include "EndpointAddress.hpp"
 #include "MockParticipant.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 class ILinController;
 
-namespace test {
+namespace Tests {
 
-class LinMockParticipant : public mw::test::DummyParticipant
+class LinMockParticipant : public Core::Tests::DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinSendFrameRequest&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinSendFrameHeaderRequest&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinTransmission&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinFrameResponseUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinControllerConfig&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinControllerStatusUpdate&));
-    MOCK_METHOD2(SendIbMessage, void(const mw::IIbServiceEndpoint*, const LinWakeupPulse&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinSendFrameRequest&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinSendFrameHeaderRequest&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinTransmission&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinFrameResponseUpdate&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinControllerConfig&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinControllerStatusUpdate&));
+    MOCK_METHOD2(SendMsg, void(const Core::IServiceEndpoint*, const LinWakeupPulse&));
 };
 
 inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig
@@ -107,8 +107,8 @@ struct Callbacks
 };
 
 
-} // namespace test
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Tests
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit
 

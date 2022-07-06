@@ -4,28 +4,28 @@
 
 #include <cstdint>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 enum struct HandlerId : std::uint64_t
 {
 };
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit
 
-namespace ib {
-namespace sim {
+namespace SilKit {
+namespace Services {
 
-using ib::util::HandlerId;
+using SilKit::Util::HandlerId;
 
-} // namespace sim
-} // namespace ib
+} // namespace Services
+} // namespace SilKit
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-using ib::util::HandlerId;
+using SilKit::Util::HandlerId;
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

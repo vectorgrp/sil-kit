@@ -9,8 +9,8 @@
 #include "YamlParser.hpp"
 #include "YamlValidator.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 inline namespace v4 {
 
@@ -24,7 +24,7 @@ auto ReadFile(const std::string& filename) -> std::string
     std::ifstream fs(filename);
 
     if (!fs.is_open())
-        throw ib::ConfigurationError("the file could not be opened");
+        throw SilKit::ConfigurationError("the file could not be opened");
 
     std::stringstream buffer;
     buffer << fs.rdbuf();
@@ -32,13 +32,13 @@ auto ReadFile(const std::string& filename) -> std::string
     return buffer.str();
 }
 
-auto Parse(const std::string& text) -> ib::cfg::ParticipantConfiguration
+auto Parse(const std::string& text) -> SilKit::Config::ParticipantConfiguration
 {
     std::stringstream warnings;
-    ib::cfg::YamlValidator validator;
+    SilKit::Config::YamlValidator validator;
     if (!validator.Validate(text, warnings))
     {
-        throw ib::ConfigurationError{ "YAML validation returned errors: \n" + warnings.str() };
+        throw SilKit::ConfigurationError{ "YAML validation returned errors: \n" + warnings.str() };
     }
     if (warnings.str().size() > 0)
     {
@@ -47,8 +47,8 @@ auto Parse(const std::string& text) -> ib::cfg::ParticipantConfiguration
     YAML::Node doc = YAML::Load(text);
 
     auto configuration = !doc.IsNull() ?
-        ib::cfg::from_yaml<ib::cfg::v4::ParticipantConfiguration>(doc) :
-        ib::cfg::v4::ParticipantConfiguration{};
+        SilKit::Config::from_yaml<SilKit::Config::v4::ParticipantConfiguration>(doc) :
+        SilKit::Config::v4::ParticipantConfiguration{};
     configuration.configurationFilePath.clear();
 
     return configuration;
@@ -188,21 +188,21 @@ constexpr NetworkType RpcClient::networkType;
 } // inline namespace v4
 
 auto ParticipantConfigurationFromString(const std::string& text)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    auto configuration = ib::cfg::Parse(text);
+    auto configuration = SilKit::Config::Parse(text);
 
-    return std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configuration));
+    return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }
 
 auto ParticipantConfigurationFromFile(const std::string& filename)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
-    auto text = ib::cfg::ReadFile(filename);
-    auto configuration = ib::cfg::Parse(text);
+    auto text = SilKit::Config::ReadFile(filename);
+    auto configuration = SilKit::Config::Parse(text);
 
-    return std::make_shared<ib::cfg::ParticipantConfiguration>(std::move(configuration));
+    return std::make_shared<SilKit::Config::ParticipantConfiguration>(std::move(configuration));
 }
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

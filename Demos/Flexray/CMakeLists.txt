@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-make_ib_demo(IbDemoFlexray FlexrayDemo.cpp)
+make_silkit_demo(SilKitDemoFlexray FlexrayDemo.cpp)
 
-target_sources(IbDemoFlexray
-    PRIVATE IbConfig_DemoFlexray.json
+target_sources(SilKitDemoFlexray
+    PRIVATE SilKitConfig_DemoFlexray.json
     PRIVATE NetworkSimulatorConfig.json
 )

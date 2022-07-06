@@ -5,16 +5,16 @@
 #include "CreateParticipant.hpp"
 #include "Participant.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-auto CreateVAsioParticipantImpl(cfg::ParticipantConfiguration participantConfig, const std::string& participantName)
+auto CreateVAsioParticipantImpl(Config::ParticipantConfiguration participantConfig, const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>
 {
     return std::make_unique<Participant<VAsioConnection>>(std::move(participantConfig), participantName);
 }
 
-auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                            const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>
 {
@@ -23,16 +23,16 @@ auto CreateParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> p
     return CreateVAsioParticipantImpl(std::move(cfg), participantName);
 }
 
-auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
-                               const std::string& participantName) -> cfg::ParticipantConfiguration
+auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+                               const std::string& participantName) -> Config::ParticipantConfiguration
 {
     if (participantName.empty())
     {
-        throw ib::ConfigurationError("An empty participant name is not allowed");
+        throw SilKit::ConfigurationError("An empty participant name is not allowed");
     }
 
     // try to cast to ParticipantConfiguration to check if the shared pointer is valid
-    auto cfg = std::dynamic_pointer_cast<cfg::ParticipantConfiguration>(participantConfig);
+    auto cfg = std::dynamic_pointer_cast<Config::ParticipantConfiguration>(participantConfig);
     if (cfg == nullptr)
     {
         return {};
@@ -40,5 +40,5 @@ auto ValidateAndSanitizeConfig(std::shared_ptr<ib::cfg::IParticipantConfiguratio
     return *cfg;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

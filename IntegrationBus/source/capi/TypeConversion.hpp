@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "ib/capi/Types.h"
+#include "silkit/capi/Types.h"
 
 namespace {
 
-inline void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyValueList* cLabels)
+inline void assign(std::map<std::string, std::string>& cppLabels, const SilKit_KeyValueList* cLabels)
 {
     if (cLabels)
     {
@@ -17,14 +17,14 @@ inline void assign(std::map<std::string, std::string>& cppLabels, const ib_KeyVa
     }
 }
 
-inline void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
+inline void assign(SilKit_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
 {
     size_t numLabels = cppLabels.size();
-    *cLabels = (ib_KeyValueList*)malloc(sizeof(ib_KeyValueList));
+    *cLabels = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
     if (*cLabels != NULL)
     {
         (*cLabels)->numLabels = numLabels;
-        (*cLabels)->labels = (ib_KeyValuePair*)malloc(numLabels * sizeof(ib_KeyValuePair));
+        (*cLabels)->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
         if ((*cLabels)->labels != NULL)
         {
             uint32_t i = 0;
@@ -36,7 +36,7 @@ inline void assign(ib_KeyValueList** cLabels, const std::map<std::string, std::s
     }
 }
 
-inline void assign(std::vector<std::string>& cppStrings, const ib_StringList* cStrings)
+inline void assign(std::vector<std::string>& cppStrings, const SilKit_StringList* cStrings)
 {
     if (cStrings)
     {

@@ -5,8 +5,8 @@
 #include <thread>
 #include <future>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
 
 #include "CanDatatypesUtils.hpp"
 
@@ -23,7 +23,7 @@ namespace {
 using namespace std::chrono_literals;
 
 // basically the same as the normal == operator, but it doesn't compare timestamps
-bool Matches(const ib::sim::can::CanFrameEvent& lhs, const ib::sim::can::CanFrameEvent& rhs)
+bool Matches(const SilKit::Services::Can::CanFrameEvent& lhs, const SilKit::Services::Can::CanFrameEvent& rhs)
 {
     return lhs.transmitId == rhs.transmitId 
         && lhs.frame.canId == rhs.frame.canId
@@ -57,17 +57,17 @@ protected:
             canmsg.frame.canId = index;
             canmsg.frame.dataField.assign(messageString.begin(), messageString.end());
             canmsg.frame.dlc = canmsg.frame.dataField.size();
-            canmsg.frame.flags = ib::sim::can::CanFrame::CanFrameFlags{ 1,0,1,0,1 };
+            canmsg.frame.flags = SilKit::Services::Can::CanFrame::CanFrameFlags{ 1,0,1,0,1 };
             canmsg.timestamp = 1s;
             canmsg.transmitId = index + 1;
-            canmsg.direction = ib::sim::TransmitDirection::RX;
+            canmsg.direction = SilKit::Services::TransmitDirection::RX;
             canmsg.userContext = (void*)((size_t)index+1);
 
             auto& canack = _testMessages[index].expectedAck;
             canack.canId = index;
             canack.timestamp = 1s;
             canack.transmitId = index + 1;
-            canack.status = ib::sim::can::CanTransmitStatus::Transmitted;
+            canack.status = SilKit::Services::Can::CanTransmitStatus::Transmitted;
             canack.userContext = (void*)((size_t)index+1);
         }
     }
@@ -78,11 +78,11 @@ protected:
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
         auto participant =
-            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "CanWriter", _registryUri);
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "CanWriter", _registryUri);
         auto* controller = participant->CreateCanController("CAN1");
 
         controller->AddFrameTransmitHandler(
-            [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::can::ICanController* /*ctrl*/, const ib::sim::can::CanFrameTransmitEvent& ack) {
+            [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](SilKit::Services::Can::ICanController* /*ctrl*/, const SilKit::Services::Can::CanFrameTransmitEvent& ack) {
                 _testMessages.at(numAcks++).receivedAck = ack;
                 if (numAcks >= _testMessages.size())
                 {
@@ -112,11 +112,11 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto participant = ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "CanReader", _registryUri);
+        auto participant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "CanReader", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(
-            [this, &canReaderAllReceivedPromiseLocal, &numReceived](ib::sim::can::ICanController*, const ib::sim::can::CanFrameEvent& msg) {
+            [this, &canReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Can::ICanController*, const SilKit::Services::Can::CanFrameEvent& msg) {
 
                 _testMessages.at(numReceived++).receivedMsg = msg;
                 if (numReceived >= _testMessages.size())
@@ -151,10 +151,10 @@ protected:
 
     struct Testmessage
     {
-        ib::sim::can::CanFrameEvent expectedMsg;
-        ib::sim::can::CanFrameEvent receivedMsg;
-        ib::sim::can::CanFrameTransmitEvent expectedAck;
-        ib::sim::can::CanFrameTransmitEvent receivedAck;
+        SilKit::Services::Can::CanFrameEvent expectedMsg;
+        SilKit::Services::Can::CanFrameEvent receivedMsg;
+        SilKit::Services::Can::CanFrameTransmitEvent expectedAck;
+        SilKit::Services::Can::CanFrameTransmitEvent receivedAck;
     };
 
     std::string _registryUri;
@@ -166,7 +166,7 @@ protected:
 
 TEST_F(CanWithoutSyncFTest, can_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::ParticipantConfigurationFromString("ParticipantName: Registry"));
+    auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::ParticipantConfigurationFromString("ParticipantName: Registry"));
     registry->ProvideDomain(_registryUri);
     ExecuteTest();
 }

@@ -5,11 +5,11 @@
 #include <functional>
 
 #include "EthernetDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 /*! \brief Abstract Ethernet Controller API to be used by vECUs
  */
@@ -138,6 +138,6 @@ public:
     virtual auto SendFrame(EthernetFrame msg) -> EthernetTxId = 0;
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

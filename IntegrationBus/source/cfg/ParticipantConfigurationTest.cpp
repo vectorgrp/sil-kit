@@ -8,8 +8,8 @@
 
 #include "NullConnectionParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -25,7 +25,7 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-using namespace ib::cfg;
+using namespace SilKit::Config;
 
 class ParticipantConfigurationExamplesITest : public testing::Test
 {
@@ -35,25 +35,25 @@ protected:
     void CreateParticipantFromConfiguration(std::shared_ptr<IParticipantConfiguration> cfg)
     {
         auto participantConfig = *std::dynamic_pointer_cast<ParticipantConfiguration>(cfg);
-        (void)ib::mw::CreateNullConnectionParticipantImpl(cfg, participantConfig.participantName);
+        (void)SilKit::Core::CreateNullConnectionParticipantImpl(cfg, participantConfig.participantName);
     }
 };
 
 TEST_F(ParticipantConfigurationExamplesITest, throw_if_logging_is_configured_without_filename)
 {
-    EXPECT_THROW(ib::cfg::ParticipantConfigurationFromFile("ParticipantConfiguration_Logging_Without_File.json"),
-                 ib::ConfigurationError);
+    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Logging_Without_File.json"),
+                 SilKit::ConfigurationError);
 }
 
 TEST_F(ParticipantConfigurationExamplesITest, minimal_configuration_file)
 {
-    auto cfg = ib::cfg::ParticipantConfigurationFromFile("ParticipantConfiguration_Minimal.json");
+    auto cfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Minimal.json");
     CreateParticipantFromConfiguration(cfg);
 }
 
 TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file)
 {
-    auto cfg = ib::cfg::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.json");
+    auto cfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.json");
     CreateParticipantFromConfiguration(cfg);
 }
 

@@ -4,14 +4,14 @@
 
 #include "ParticipantConfiguration.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 inline namespace v4 {
 
-void Validate(const ib::cfg::v4::ParticipantConfiguration& configuration);
+void Validate(const SilKit::Config::v4::ParticipantConfiguration& configuration);
 
 } // namespace v4
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

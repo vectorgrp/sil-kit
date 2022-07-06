@@ -3,9 +3,9 @@
 #include <cassert>
 #include <future>
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/ISystemMonitor.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/sync/ISystemMonitor.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
@@ -14,11 +14,11 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 LifecycleService::LifecycleService(IParticipantInternal* participant,
-                                   const cfg::HealthCheck& healthCheckConfig)
+                                   const Config::HealthCheck& healthCheckConfig)
     : _participant{participant}
     , _logger{participant->GetLogger()}
 {
@@ -68,9 +68,9 @@ auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool h
     _hasCoordinatedSimulationStop = hasCoordinatedSimulationStop;
 
     // Update ServiceDescriptor
-    _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::lifecycleHasCoordinatedStart,
+    _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleHasCoordinatedStart,
                                                std::to_string(hasCoordinatedSimulationStart));
-    _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::lifecycleHasCoordinatedStop,
+    _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleHasCoordinatedStop,
                                                std::to_string(hasCoordinatedSimulationStop));
 
     // Publish services
@@ -261,7 +261,7 @@ auto LifecycleService::Status() const -> const ParticipantStatus&
     return _status;
 }
 
-void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
+void LifecycleService::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
@@ -284,7 +284,7 @@ auto LifecycleService::GetTimeSyncService() const -> ITimeSyncService*
     return _timeSyncService;
 }
 
-void LifecycleService::ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& command)
+void LifecycleService::ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& command)
 {
     // Ignore messages if the lifecycle is not being executed yet
     if (!_isRunning)
@@ -349,7 +349,7 @@ void LifecycleService::ChangeState(ParticipantState newState, std::string reason
     ss << "New ParticipantState: " << newState << "; reason: " << _status.enterReason;
     _logger->Info(ss.str());
 
-    SendIbMessage(_status);
+    SendMsg(_status);
 }
 
 void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
@@ -367,6 +367,6 @@ bool LifecycleService::IsTimeSyncActive()
     return _timeSyncActive;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

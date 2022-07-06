@@ -1,15 +1,15 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-auto participant = ib::CreateParticipant(ibConfig, participantName, registryUri);
+auto participant = SilKit::CreateParticipant(config, participantName, registryUri);
 auto* lifecycleService = participant->GetLifecycleService();
 auto* timeSyncService = lifecycleService->GetTimeSyncService();
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
 canController->AddFrameTransmitHandler(
-	[](can::ICanController* /*ctrl*/, const can::CanFrameTransmitEvent& ack) {
+	[](Can::ICanController* /*ctrl*/, const Can::CanFrameTransmitEvent& ack) {
 		//async handle transmit status
 });
 canController->AddFrameHandler(
-	[](can::ICanController* /*ctrl*/, const can::CanFrameEvent& frameEvent) {
+	[](Can::ICanController* /*ctrl*/, const Can::CanFrameEvent& frameEvent) {
 		//async handle message reception
 });
 
@@ -37,7 +37,7 @@ if (participantName == "CanWriter")
 	timeSyncService->SetSimulationTask(
 		[canController, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 			std::cout << "now=" << now << ", duration=" << duration << std::endl;
-			ib::mw::sim::can::CanFrame msg;
+			SilKit::Core::Services::Can::CanFrame msg;
 			msg.timestamp = now;
 			msg.canId = 17;
 			canController->SendFrame(std::move(msg));

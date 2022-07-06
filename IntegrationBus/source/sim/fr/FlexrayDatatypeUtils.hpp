@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "ib/sim/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/fr/FlexrayDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 bool operator==(const FlexrayHeader& lhs, const FlexrayHeader& rhs);
 bool operator==(const FlexrayFrame& lhs, const FlexrayFrame& rhs);
@@ -22,6 +22,6 @@ bool operator==(const FlexrayPocStatusEvent& lhs, const FlexrayPocStatusEvent& r
 bool operator==(const FlexrayCycleStartEvent& lhs, const FlexrayCycleStartEvent& rhs);
 
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

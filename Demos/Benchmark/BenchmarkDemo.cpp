@@ -7,16 +7,16 @@
 #include <algorithm>
 #include <iterator>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
 
-#include "ib/vendor/CreateIbRegistry.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::cfg;
-using namespace ib::sim::data;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Config;
+using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
 
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
@@ -57,7 +57,7 @@ struct BenchmarkConfig
     uint32_t numberOfParticipants = 4;
     uint32_t messageCount = 1;
     uint32_t messageSizeInBytes = 100;
-    std::string registryUri = "vib://localhost:8500";
+    std::string registryUri = "silkit://localhost:8500";
     bool disableLocaldomainSockets = false;
     bool tcpNoDelay = false;
 };
@@ -280,13 +280,13 @@ void SystemStateHandler(ISystemController* controller, SystemState newState, con
 }
 
 void ParticipantsThread(
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> ibConfig,
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
     const BenchmarkConfig& benchmark,
     const std::string& participantName,
     uint32_t participantIndex,
     size_t& messageCounter)
 {
-    auto participant = ib::CreateParticipant(ibConfig, participantName, benchmark.registryUri);
+    auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
    
@@ -329,7 +329,7 @@ const auto config = "{}";
 **************************************************************************************************/
 int main(int argc, char** argv)
 {
-    auto participantConfiguration = ib::cfg::ParticipantConfigurationFromString(config);
+    auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromString(config);
     BenchmarkConfig benchmark;
     if (!Parse(argc, argv, benchmark) || !Validate(benchmark))
     {
@@ -338,20 +338,20 @@ int main(int argc, char** argv)
 
     if (benchmark.disableLocaldomainSockets)
     {
-        //ibConfig.middlewareConfig.vasio.enableDomainSockets = false;
+        //config.middlewareConfig.vasio.enableDomainSockets = false;
     }
 
     if (benchmark.tcpNoDelay)
     {
-        //ibConfig.middlewareConfig.vasio.tcpNoDelay = true;
-        //ibConfig.middlewareConfig.vasio.tcpQuickAck = true;
+        //config.middlewareConfig.vasio.tcpNoDelay = true;
+        //config.middlewareConfig.vasio.tcpQuickAck = true;
     }
 
     try
     {
-        std::unique_ptr<ib::vendor::IIbRegistry> registry;
+        std::unique_ptr<SilKit::Vendor::ISilKitRegistry> registry;
         // TODO use new config
-        registry = ib::vendor::CreateIbRegistry(ib::cfg::ParticipantConfigurationFromString(config));
+        registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(config));
         registry->ProvideDomain(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
@@ -375,7 +375,7 @@ int main(int argc, char** argv)
                 threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark,  participantName, participantIndex, std::ref(counter));
             }
 
-            auto participant = ib::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
+            auto participant = SilKit::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
             auto controller = participant->GetSystemController();
             auto monitor = participant->GetSystemMonitor();
 
@@ -433,7 +433,7 @@ int main(int argc, char** argv)
             }
         }
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Invalid configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

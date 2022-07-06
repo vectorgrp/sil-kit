@@ -6,8 +6,8 @@
 
 #include "TraceMessage.hpp"
 
-namespace ib {
-namespace extensions {
+namespace SilKit {
+
 
 inline std::string to_string(const TraceMessage&);
 inline std::string to_string(TraceMessageType);
@@ -50,5 +50,5 @@ std::string to_string(TraceMessageType type)
     }
 }
 
-} //end namespace extensions
-} //end namespace ib
+
+} //end namespace SilKit

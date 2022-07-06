@@ -12,7 +12,7 @@
 #include <functional>
 #include <cctype>
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "VAsioTcpPeer.hpp"
 #include "Filesystem.hpp"
@@ -20,7 +20,7 @@
 #include "Uri.hpp"
 
 using namespace std::chrono_literals;
-namespace fs = ib::filesystem;
+namespace fs = SilKit::Filesystem;
 
 namespace {
 
@@ -36,7 +36,7 @@ void SetSocketPermissions(const EndpointT&)
 }
 
 template<typename AcceptorT>
-void SetListenOptions(ib::mw::logging::ILogger*,
+void SetListenOptions(SilKit::Core::Logging::ILogger*,
     AcceptorT&)
 {
 }
@@ -53,7 +53,7 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 
 #   if !defined(__MINGW32__)
 template<>
-void SetListenOptions(ib::mw::logging::ILogger* logger,
+void SetListenOptions(SilKit::Core::Logging::ILogger* logger,
     asio::ip::tcp::acceptor& acceptor)
 {
     // This should improve loopback performance, and have no effect on remote TCP/IP
@@ -93,7 +93,7 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 }
 
 template<>
-void SetListenOptions(ib::mw::logging::ILogger* ,
+void SetListenOptions(SilKit::Core::Logging::ILogger* ,
     asio::ip::tcp::acceptor& )
 {
     // no op
@@ -118,7 +118,7 @@ auto printableName(const std::string& participantName) -> std::string
     return safeName;
 }
 //Debug  print of given peer infos
-auto printUris(const ib::mw::VAsioPeerInfo& info)
+auto printUris(const SilKit::Core::VAsioPeerInfo& info)
 {
     std::stringstream ss;
     for (auto& uri : info.acceptorUris)
@@ -141,7 +141,7 @@ auto printUris(const std::vector<std::string>& uris)
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in 
 // a runtime exception. We create a unique temporary file path, with a fixed length.
-auto makeLocalEndpoint(const std::string& participantName, const ib::mw::ParticipantId& id,
+auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::ParticipantId& id,
                        const std::string& uniqueValue) -> asio::local::stream_protocol::endpoint
 {
     asio::local::stream_protocol::endpoint result;
@@ -166,7 +166,7 @@ auto makeLocalEndpoint(const std::string& participantName, const ib::mw::Partici
         << fs::path::preferred_separator
         << bounded_name
         << std::hex << unique_id
-        << ".vib";
+        << ".silkit";
 
     result.path(path.str());
     return result;
@@ -180,7 +180,7 @@ auto fromAsioEndpoint(const asio::local::stream_protocol::endpoint& ep)
     std::stringstream uri;
     const std::string localPrefix{ "local://" };
     uri << localPrefix << ep.path();
-    return ib::mw::Uri::Parse(uri.str());
+    return SilKit::Core::Uri::Parse(uri.str());
 }
 
 // end point to string conversions
@@ -189,12 +189,12 @@ auto fromAsioEndpoint(const asio::ip::tcp::endpoint& ep)
     std::stringstream uri;
     const std::string tcpPrefix{ "tcp://" };
     uri << tcpPrefix << ep; //will be "ipv4:port" or "[ipv6]:port"
-    return ib::mw::Uri::Parse(uri.str());
+    return SilKit::Core::Uri::Parse(uri.str());
 }
 
-auto makeLocalPeerInfo(const std::string& name, ib::mw::ParticipantId id, const std::string& uniqueDetail)
+auto makeLocalPeerInfo(const std::string& name, SilKit::Core::ParticipantId id, const std::string& uniqueDetail)
 {
-    ib::mw::VAsioPeerInfo pi;
+    SilKit::Core::VAsioPeerInfo pi;
     pi.participantName = name;
     pi.participantId = id;
     auto localEp = makeLocalEndpoint(name, id, uniqueDetail);
@@ -202,7 +202,7 @@ auto makeLocalPeerInfo(const std::string& name, ib::mw::ParticipantId id, const 
     return pi;
 }
 
-bool connectWithRetry(ib::mw::VAsioTcpPeer* peer, const ib::mw::VAsioPeerInfo& pi, size_t connectAttempts)
+bool connectWithRetry(SilKit::Core::VAsioTcpPeer* peer, const SilKit::Core::VAsioPeerInfo& pi, size_t connectAttempts)
 {
     for (auto i = 0u; i < connectAttempts; i++)
     {
@@ -248,16 +248,16 @@ inline std::ostream& operator<< (std::ostream& out,
 }
 } //end namespace std
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-namespace tt = util::tuple_tools;
+namespace tt = Util::tuple_tools;
 
 template <class T> struct Zero { using Type = T; };
 
 using asio::ip::tcp;
 
-VAsioConnection::VAsioConnection(ib::cfg::ParticipantConfiguration config,
+VAsioConnection::VAsioConnection(SilKit::Config::ParticipantConfiguration config,
     std::string participantName, ParticipantId participantId,
     ProtocolVersion version)
     : _config{std::move(config)}
@@ -269,7 +269,7 @@ VAsioConnection::VAsioConnection(ib::cfg::ParticipantConfiguration config,
     , _version{version}
 {
     RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
-    _hashToParticipantName.insert(std::pair<uint64_t, std::string>(ib::util::hash::Hash(_participantName), _participantName));
+    _hashToParticipantName.insert(std::pair<uint64_t, std::string>(SilKit::Util::Hash::Hash(_participantName), _participantName));
 }
 
 VAsioConnection::~VAsioConnection()
@@ -288,15 +288,15 @@ VAsioConnection::~VAsioConnection()
 
 }
 
-void VAsioConnection::SetLogger(logging::ILogger* logger)
+void VAsioConnection::SetLogger(Logging::ILogger* logger)
 {
     _logger = logger;
 }
 
-void VAsioConnection::SetTimeSyncService(sync::TimeSyncService* timeSyncService)
+void VAsioConnection::SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService)
 {
     _timeSyncService = timeSyncService;
-    util::tuple_tools::for_each(_ibLinks, [timeSyncService](auto&& linkMap) {
+    Util::tuple_tools::for_each(_links, [timeSyncService](auto&& linkMap) {
         for (auto&& link : linkMap)
         {
             link.second->SetTimeSyncService(timeSyncService);
@@ -343,7 +343,7 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     // First, attempt local connections if available:
     if (_config.middleware.enableDomainSockets)
     {
-        auto localPi = makeLocalPeerInfo("IbRegistry", 0, connectUri);
+        auto localPi = makeLocalPeerInfo("SilKitRegistry", 0, connectUri);
         //store local domain acceptor address for printing debug infos later
         attemptedUris.push_back(localPi.acceptorUris.at(0));
         ok = connectWithRetry(registry.get(), localPi, connectAttempts);
@@ -354,7 +354,7 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     {
         // setup TCP remote URI
         VAsioPeerInfo pi;
-        pi.participantName = "IbRegistry";
+        pi.participantName = "SilKitRegistry";
         pi.participantId = 0;
         pi.acceptorUris.push_back(connectUri);
         ok = connectWithRetry(registry.get(), pi, connectAttempts);
@@ -364,15 +364,15 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     {
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
                        _config.middleware.connectAttempts);
-        _logger->Info("   Make sure that the IbRegistry is up and running and is listening on the following URIs: {}.",
+        _logger->Info("   Make sure that the SilKitRegistry is up and running and is listening on the following URIs: {}.",
             printUris(attemptedUris));
         _logger->Info("   If a registry is unable to open a listening socket it will only be reachable"
                       " via local domain sockets, which depend on the working directory"
                       " and the middleware configuration ('enableDomainSockets').");
         _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
-        _logger->Info("   You can configure the IbRegistry hostname and port via the IbConfig.");
-        _logger->Info("   The IbRegistry executable can be found in your IB installation folder:");
-        _logger->Info("     INSTALL_DIR/bin/IbRegistry[.exe]");
+        _logger->Info("   You can configure the SilKitRegistry hostname and port via the SilKitConfig.");
+        _logger->Info("   The SilKitRegistry executable can be found in your SilKit installation folder:");
+        _logger->Info("     INSTALL_DIR/bin/SilKitRegistry[.exe]");
         throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
     }
 
@@ -390,8 +390,8 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     auto waitOk = receivedAllReplies.wait_for(5s);
     if(waitOk == std::future_status::timeout)
     {
-        _logger->Error("VIB timeout during connection handshake with IbRegistry.");
-        throw ProtocolError("VIB timeout during connection handshake with IbRegistry.");
+        _logger->Error("SILKIT timeout during connection handshake with SilKitRegistry.");
+        throw ProtocolError("SILKIT timeout during connection handshake with SilKitRegistry.");
     }
     // check if an exception was set:
     receivedAllReplies.get();
@@ -429,7 +429,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
         reply.remoteHeader = to_header(_version); // tell remote peer what version we intent to speak
-        from->SendIbMsg(SerializedMessage{from->GetProtocolVersion(), reply});
+        from->SendSilKitMsg(SerializedMessage{from->GetProtocolVersion(), reply});
 
         return;
     }
@@ -443,7 +443,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
         announcement.messageHeader.versionLow);
 
     from->SetInfo(announcement.peerInfo);
-    auto& service = dynamic_cast<IIbServiceEndpoint&>(*from);
+    auto& service = dynamic_cast<IServiceEndpoint&>(*from);
     auto serviceDescriptor = service.GetServiceDescriptor();
     serviceDescriptor.SetParticipantName(announcement.peerInfo.participantName);
     service.SetServiceDescriptor(serviceDescriptor);
@@ -490,7 +490,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     announcement.peerInfo = std::move(info);
 
     _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
-    peer->SendIbMsg(SerializedMessage{announcement});
+    peer->SendSilKitMsg(SerializedMessage{announcement});
 
 }
 
@@ -507,15 +507,15 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
         // check what went wrong during the handshake
         if(reply.remoteHeader.preambel != handshakeHeader.preambel)
         {
-            auto msg = fmt::format("VIB Connection Handshake: ParticipantAnnouncementReply contains invalid preambel in header. check endianess on participant {}.", from->GetInfo().participantName);
+            auto msg = fmt::format("SILKIT Connection Handshake: ParticipantAnnouncementReply contains invalid preambel in header. check endianess on participant {}.", from->GetInfo().participantName);
         }
-        const auto msg = fmt::format("VIB Connection Handshake: ParticipantAnnouncementReply contains unsupported version."
+        const auto msg = fmt::format("SILKIT Connection Handshake: ParticipantAnnouncementReply contains unsupported version."
                         " participant={} participant-version={}",
                         from->GetInfo().participantName, remoteVersion);
 
         if(from->GetInfo().participantId == RegistryParticipantId)
         {
-            // handshake with IbRegistry failed, we need to abort.
+            // handshake with SilKitRegistry failed, we need to abort.
             auto error = ProtocolError(msg);
             _receivedAllParticipantReplies.set_exception(std::make_exception_ptr(error)); //propagate to main thread
             throw error; // for I/O thread
@@ -559,12 +559,12 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
     _logger->Debug("Sending participant announcement reply to {} with protocol version {}.{}",
         peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
         reply.remoteHeader.versionLow);
-    peer->SendIbMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 }
 
 void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
 {
-    const auto result = _hashToParticipantName.insert({ib::util::hash::Hash(participantName), participantName});
+    const auto result = _hashToParticipantName.insert({SilKit::Util::Hash::Hash(participantName), participantName});
     if (result.second == false)
     {
         _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.",
@@ -600,11 +600,11 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
         reply.remoteHeader = to_header(_version);
-        peer->SendIbMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+        peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
         return;
     }
 
-    _logger->Debug("Received known participants list from IbRegistry protocol {}.{}",
+    _logger->Debug("Received known participants list from SilKitRegistry protocol {}.{}",
         participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
 
     auto connectPeer = [this](const auto peerUri) {
@@ -633,7 +633,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         peer->SetServiceDescriptor(peerId);
 
         const auto result =
-            _hashToParticipantName.insert({ib::util::hash::Hash(peerUri.participantName), peerUri.participantName});
+            _hashToParticipantName.insert({SilKit::Util::Hash::Hash(peerUri.participantName), peerUri.participantName});
         if (result.second == false)
         {
             assert(false);
@@ -660,7 +660,7 @@ void VAsioConnection::StartIoWorker()
     _ioWorker = std::thread{[this]() {
         try
         {
-            ib::util::SetThreadName("IB-IOWorker");
+            SilKit::Util::SetThreadName("SilKit-IOWorker");
             _ioContext.run();
             return 0;
         }
@@ -820,23 +820,23 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
 
     auto& info = peer->GetInfo();
 
-    ib::mw::sync::ParticipantStatus msg;
+    SilKit::Core::Orchestration::ParticipantStatus msg;
     msg.participantName = info.participantName;
-    msg.state = ib::mw::sync::ParticipantState::Error;
+    msg.state = SilKit::Core::Orchestration::ParticipantState::Error;
     msg.enterReason = "Connection Lost";
     msg.enterTime = std::chrono::system_clock::now();
     msg.refreshTime = std::chrono::system_clock::now();
 
-    auto&& link = GetLinkByName<ib::mw::sync::ParticipantStatus>("default");
+    auto&& link = GetLinkByName<SilKit::Core::Orchestration::ParticipantStatus>("default");
 
     // The VAsioTcpPeer has an incomplete Service ID, fill in the missing
     // link and participant names.
-    auto& peerService = dynamic_cast<IIbServiceEndpoint&>(*peer);
+    auto& peerService = dynamic_cast<IServiceEndpoint&>(*peer);
     auto peerId = peerService.GetServiceDescriptor();
     peerId.SetParticipantName(peer->GetInfo().participantName);
     peerId.SetNetworkName(link->Name());
     peerService.SetServiceDescriptor(peerId);
-    link->DistributeRemoteIbMessage(&peerService, std::move(msg));
+    link->DistributeRemoteSilKitMessage(&peerService, std::move(msg));
 
     _logger->Error("Lost connection to participant {}", peerId);
 }
@@ -853,11 +853,11 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
         return ReceiveSubscriptionAnnouncement(from, std::move(buffer));
     case VAsioMsgKind::SubscriptionAcknowledge:
         return ReceiveSubscriptionAcknowledge(from, std::move(buffer));
-    case VAsioMsgKind::IbMwMsg:
-        return ReceiveRawIbMessage(from, std::move(buffer));
-    case VAsioMsgKind::IbSimMsg:
-        return ReceiveRawIbMessage(from, std::move(buffer));
-    case VAsioMsgKind::IbRegistryMessage:
+    case VAsioMsgKind::SilKitMwMsg:
+        return ReceiveRawSilKitMessage(from, std::move(buffer));
+    case VAsioMsgKind::SilKitSimMsg:
+        return ReceiveRawSilKitMessage(from, std::move(buffer));
+    case VAsioMsgKind::SilKitRegistryMessage:
         return ReceiveRegistryMessage(from, std::move(buffer));
     }
 }
@@ -868,16 +868,16 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     // we try to find a version to match it, for backward compatibility.
     auto getVersionForSerdes = [](const auto& typeName, auto remoteVersion) {
         VersionT subscriptionVersion{0};
-        IbMessageTypes supportedMessageTypes{};
+        SilKitMessageTypes supportedMessageTypes{};
 
         tt::for_each(supportedMessageTypes,
             [&subscriptionVersion, &typeName, remoteVersion](auto&& myType) {
             using MsgT = std::decay_t<decltype(myType)>;
-            if (typeName == IbMsgTraits<MsgT>::SerdesName())
+            if (typeName == SilKitMsgTraits<MsgT>::SerdesName())
             {
-                if(IbMsgTraits<MsgT>::Version() <= remoteVersion)
+                if(SilKitMsgTraits<MsgT>::Version() <= remoteVersion)
                 {
-                    subscriptionVersion =  IbMsgTraits<MsgT>::Version();
+                    subscriptionVersion =  SilKitMsgTraits<MsgT>::Version();
                 }
             }
         });
@@ -908,7 +908,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
         ? SubscriptionAcknowledge::Status::Success
         : SubscriptionAcknowledge::Status::Failed;
 
-    from->SendIbMsg(SerializedMessage{from->GetProtocolVersion(), ack});
+    from->SendSilKitMsg(SerializedMessage{from->GetProtocolVersion(), ack});
 }
 
 void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer)
@@ -940,19 +940,19 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 {
     bool wasAdded = false;
 
-    tt::for_each(_ibLinks, [&](auto&& linkMap) {
+    tt::for_each(_links, [&](auto&& linkMap) {
         using LinkType = typename std::decay_t<decltype(linkMap)>::mapped_type::element_type;
 
         if (subscriber.msgTypeName != LinkType::MessageSerdesName())
             return;
 
-        auto& ibLink = linkMap[subscriber.networkName];
-        if (!ibLink)
+        auto& link = linkMap[subscriber.networkName];
+        if (!link)
         {
-            ibLink = std::make_shared<LinkType>(subscriber.networkName, _logger, _timeSyncService);
+            link = std::make_shared<LinkType>(subscriber.networkName, _logger, _timeSyncService);
         }
 
-        ibLink->AddRemoteReceiver(from, subscriber.receiverIdx);
+        link->AddRemoteReceiver(from, subscriber.receiverIdx);
 
         wasAdded = true;
     });
@@ -965,18 +965,18 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     return wasAdded;
 }
 
-void VAsioConnection::ReceiveRawIbMessage(IVAsioPeer* from, SerializedMessage&& buffer)
+void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage&& buffer)
 {
     auto receiverIdx =  buffer.GetRemoteIndex();//ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
     {
-        _logger->Warn("Ignoring RawIbMessage for unknown receiverIdx={}", receiverIdx);
+        _logger->Warn("Ignoring RawSilKitMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
 
     auto endpoint = buffer.GetEndpointAddress(); //ExtractEndpointAddress(buffer);
 
-    auto* fromService = dynamic_cast<IIbServiceEndpoint*>(from);
+    auto* fromService = dynamic_cast<IServiceEndpoint*>(from);
     ServiceDescriptor tmpService(fromService->GetServiceDescriptor());
     tmpService.SetServiceId(endpoint.endpoint);
 
@@ -1005,5 +1005,5 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage
     }
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

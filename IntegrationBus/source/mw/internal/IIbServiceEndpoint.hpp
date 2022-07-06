@@ -12,8 +12,8 @@
 #include "ServiceDescriptor.hpp"
 #include "ServiceConfigKeys.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& id);
 
 inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor);
@@ -23,10 +23,10 @@ inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceDescripto
 inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 
 
-class IIbServiceEndpoint
+class IServiceEndpoint
 {
 public:
-    virtual ~IIbServiceEndpoint() = default;
+    virtual ~IServiceEndpoint() = default;
     virtual void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) = 0;
     virtual auto GetServiceDescriptor() const -> const ServiceDescriptor& = 0;
 };
@@ -56,5 +56,5 @@ inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& desc
     return out << descriptor.to_string();
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

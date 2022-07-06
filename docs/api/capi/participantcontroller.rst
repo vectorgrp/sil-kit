@@ -6,17 +6,17 @@ Participant Controller C API
    :depth: 3
 
 The features of the ParticipantController in the Cpp API are not provided through a ParticipantController abstraction 
-in the C API but directly provided through the ib_Participant.
+in the C API but directly provided through the SilKit_Participant.
 
-.. doxygenfunction:: ib_Participant_SetCommunicationReadyHandler
-.. doxygenfunction:: ib_Participant_SetStopHandler
-.. doxygenfunction:: ib_Participant_SetShutdownHandler
-.. doxygenfunction:: ib_Participant_Run
-.. doxygenfunction:: ib_Participant_RunAsync
-.. doxygenfunction:: ib_Participant_WaitForRunAsyncToComplete
-.. doxygenfunction:: ib_Participant_SetPeriod
-.. doxygenfunction:: ib_Participant_SetSimulationTask
-.. doxygenfunction:: ib_Participant_SetSimulationTaskAsync
-.. doxygenfunction:: ib_Participant_CompleteSimulationTask
-.. doxygenfunction:: ib_Participant_Pause
-.. doxygenfunction:: ib_Participant_Continue
+.. doxygenfunction:: SilKit_Participant_SetCommunicationReadyHandler
+.. doxygenfunction:: SilKit_Participant_SetStopHandler
+.. doxygenfunction:: SilKit_Participant_SetShutdownHandler
+.. doxygenfunction:: SilKit_Participant_Run
+.. doxygenfunction:: SilKit_Participant_RunAsync
+.. doxygenfunction:: SilKit_Participant_WaitForRunAsyncToComplete
+.. doxygenfunction:: SilKit_Participant_SetPeriod
+.. doxygenfunction:: SilKit_Participant_SetSimulationTask
+.. doxygenfunction:: SilKit_Participant_SetSimulationTaskAsync
+.. doxygenfunction:: SilKit_Participant_CompleteSimulationTask
+.. doxygenfunction:: SilKit_Participant_Pause
+.. doxygenfunction:: SilKit_Participant_Continue

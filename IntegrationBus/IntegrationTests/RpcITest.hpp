@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/services/all.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
@@ -12,10 +12,10 @@
 #include "IntegrationTestInfrastructure.hpp"
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::cfg;
-using namespace ib::sim::rpc;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Config;
+using namespace SilKit::Services::Rpc;
 
 const uint8_t rpcFuncIncrement = 100u;
 const size_t defaultMsgSize = 3;
@@ -307,7 +307,7 @@ protected:
     {
         try
         {
-            participant.participant = ib::CreateParticipant(ib::cfg::MakeParticipantConfigurationWithLogging(ib::mw::logging::Level::Info),
+            participant.participant = SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Core::Logging::Level::Info),
                                                                      participant.name, registryUri);
 
             // Create Clients

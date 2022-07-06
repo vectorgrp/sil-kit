@@ -2,9 +2,9 @@
 
 #include "LogMsgReceiver.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 LogMsgReceiver::LogMsgReceiver(IParticipantInternal* participant, Logger* logger)
     : _participant{participant}
@@ -13,11 +13,11 @@ LogMsgReceiver::LogMsgReceiver(IParticipantInternal* participant, Logger* logger
     (void)_participant;
 }
 
-void LogMsgReceiver::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const LogMsg& msg)
+void LogMsgReceiver::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const LogMsg& msg)
 {
     _logger->LogReceivedMsg(msg);
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

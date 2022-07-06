@@ -12,8 +12,8 @@
 #include "CanController.hpp"
 
 namespace {
-using namespace ib::mw;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Can;
 
 class CanControllerConfigTest : public testing::Test
 {
@@ -21,16 +21,16 @@ public:
     CanControllerConfigTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
+        std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
 
-    ib::cfg::CanController controllerNoNetworkCfg;
+    SilKit::Config::CanController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->canControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::CanController controllerWithNetworkCfg;
+    SilKit::Config::CanController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->canControllers.push_back(controllerWithNetworkCfg);
@@ -45,7 +45,7 @@ TEST(CanControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<CanController*>(participant->CreateCanController(controllerName));
@@ -62,7 +62,7 @@ TEST(CanControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<CanController*>(participant->CreateCanController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
@@ -78,7 +78,7 @@ TEST(CanControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<CanController*>(participant->CreateCanController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();

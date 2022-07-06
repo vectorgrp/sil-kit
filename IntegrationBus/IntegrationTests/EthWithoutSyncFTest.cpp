@@ -5,8 +5,8 @@
 #include <thread>
 #include <future>
 
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
 
 #include "EthDatatypeUtils.hpp"
 #include "EthController.hpp"
@@ -44,12 +44,12 @@ protected:
             std::string messageString = messageBuilder.str();
             auto& frameEvent = _testFrames[index].expectedFrameEvent;
 
-            ib::sim::eth::EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
-            ib::sim::eth::EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-            ib::sim::eth::EthernetEtherType etherType{ 0x0800 };
-            ib::sim::eth::EthernetVlanTagControlIdentifier tci{ 0x0000 };
+            SilKit::Services::Ethernet::EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
+            SilKit::Services::Ethernet::EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
+            SilKit::Services::Ethernet::EthernetEtherType etherType{ 0x0800 };
+            SilKit::Services::Ethernet::EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
-            frameEvent.frame = ib::sim::eth::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
+            frameEvent.frame = SilKit::Services::Ethernet::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
             frameEvent.transmitId = index + 1;
 
             auto& ethack = _testFrames[index].expectedAck;
@@ -64,13 +64,13 @@ protected:
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
         
         auto participant =
-            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "EthWriter", _registryUri);
-        auto* controller = dynamic_cast<ib::sim::eth::EthController*>(participant->CreateEthernetController("ETH1"));
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "EthWriter", _registryUri);
+        auto* controller = dynamic_cast<SilKit::Services::Ethernet::EthController*>(participant->CreateEthernetController("ETH1"));
 
         controller->Activate();
 
         controller->AddFrameTransmitHandler(
-            [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](ib::sim::eth::IEthernetController* /*ctrl*/, const ib::sim::eth::EthernetFrameTransmitEvent& ack) {
+            [this, &ethWriterAllAcksReceivedPromiseLocal, &numAcks](SilKit::Services::Ethernet::IEthernetController* /*ctrl*/, const SilKit::Services::Ethernet::EthernetFrameTransmitEvent& ack) {
                 _testFrames.at(numAcks++).receivedAck = ack;
                 if (numAcks >= _testFrames.size())
                 {
@@ -97,13 +97,13 @@ protected:
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto participant =
-            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "EthReader", _registryUri);
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "EthReader", _registryUri);
         auto* controller = participant->CreateEthernetController("ETH1");
 
         controller->Activate();
 
         controller->AddFrameHandler(
-            [this, &ethReaderAllReceivedPromiseLocal, &numReceived](ib::sim::eth::IEthernetController*, const ib::sim::eth::EthernetFrameEvent& msg) {
+            [this, &ethReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Ethernet::IEthernetController*, const SilKit::Services::Ethernet::EthernetFrameEvent& msg) {
 
                 _testFrames.at(numReceived++).receivedFrameEvent = msg;
                 if (numReceived >= _testFrames.size())
@@ -139,10 +139,10 @@ protected:
 
     struct TestFrame
     {
-        ib::sim::eth::EthernetFrameEvent expectedFrameEvent;
-        ib::sim::eth::EthernetFrameEvent receivedFrameEvent;
-        ib::sim::eth::EthernetFrameTransmitEvent expectedAck;
-        ib::sim::eth::EthernetFrameTransmitEvent receivedAck;
+        SilKit::Services::Ethernet::EthernetFrameEvent expectedFrameEvent;
+        SilKit::Services::Ethernet::EthernetFrameEvent receivedFrameEvent;
+        SilKit::Services::Ethernet::EthernetFrameTransmitEvent expectedAck;
+        SilKit::Services::Ethernet::EthernetFrameTransmitEvent receivedAck;
     };
 
     std::string  _registryUri;
@@ -154,7 +154,7 @@ protected:
 
 TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<ib::mw::VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
+    auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(_registryUri);
     ExecuteTest();
 }

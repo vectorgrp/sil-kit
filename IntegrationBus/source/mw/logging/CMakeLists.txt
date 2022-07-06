@@ -1,8 +1,8 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbMwLogging STATIC
+add_library(SilKitMwLogging STATIC
     SpdlogTypeConversion.hpp
-    IIbToLogMsgSender.hpp
-    IIbToLogMsgReceiver.hpp
+    IMsgForLogMsgSender.hpp
+    IMsgForLogMsgReceiver.hpp
 
     LogMsgSender.hpp
     LogMsgSender.cpp
@@ -12,8 +12,8 @@ add_library(IbMwLogging STATIC
 
     Logger.hpp
     Logger.cpp
-    #string formatting for VIB types
-    VibFmtFormatters.hpp
+    #string formatting for SILKIT types
+    SilKitFmtFormatters.hpp
 
     LoggingSerdes.hpp
     LoggingSerdes.cpp
@@ -25,13 +25,13 @@ add_library(IbMwLogging STATIC
 
 if (TARGET fmt-header-only)
     message(STATUS "have fmt-header-only")
-    target_link_libraries(IbMwLogging
+    target_link_libraries(SilKitMwLogging
         INTERFACE
             $<BUILD_INTERFACE:fmt-header-only>
         PRIVATE
             $<BUILD_INTERFACE:fmt-header-only>
     )
-    target_compile_definitions(IbMwLogging
+    target_compile_definitions(SilKitMwLogging
         INTERFACE
             $<BUILD_INTERFACE:HAVE_FMTLIB>
             $<BUILD_INTERFACE:FMT_HEADER_ONLY>
@@ -41,32 +41,32 @@ if (TARGET fmt-header-only)
     )
 endif()
 
-target_include_directories(IbMwLogging
+target_include_directories(SilKitMwLogging
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 
-target_link_libraries(IbMwLogging
-    PUBLIC IbInterface
-    PUBLIC IbInternal
+target_link_libraries(SilKitMwLogging
+    PUBLIC SilKitInterface
+    PUBLIC SilKitInternal
     PRIVATE spdlog
-    PRIVATE IbMwSync
-    PUBLIC IbMwService
-    INTERFACE IbConfiguration
-    PRIVATE IbConfiguration
+    PRIVATE SilKitMwSync
+    PUBLIC SilKitMwService
+    INTERFACE SilKitConfiguration
+    PRIVATE SilKitConfiguration
 )
 
 if(UNIX)
-    set_target_properties(IbMwLogging
+    set_target_properties(SilKitMwLogging
         PROPERTIES
         VISIBILITY_INLINES_HIDDEN 1
         CXX_VISIBILITY_PRESET hidden
     )
 endif()
 
-add_vib_test(TestMwLoggingLogger 
+add_silkit_test(TestMwLoggingLogger 
     SOURCES LoggerTest.cpp 
-    LIBS IbMwLogging IbMwMockParticipant
+    LIBS SilKitMwLogging SilKitMwMockParticipant
 )
-add_vib_test(TestMwLogging_Serdes SOURCES LoggingSerdesTest.cpp LIBS IbMwLogging )
+add_silkit_test(TestMwLogging_Serdes SOURCES LoggingSerdesTest.cpp LIBS SilKitMwLogging )

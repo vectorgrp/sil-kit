@@ -1,23 +1,23 @@
-Vector Integration Bus Release Version: @PROJECT_VERSION@
+Vector SilKit Release Version: @PROJECT_VERSION@
 ---------------------------------------------
 
 Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 The layout of this release bundle is as follows:
 
-+ IntegrationBus/
-  - the binary Vector IntegrationBus release including the object files,
++ SilKit/
+  - the binary Vector SilKit release including the object files,
     the C++ interface headers and CMake exported targets.
 
-+ IntegrationBus-Demos/
++ SilKit-Demos/
   - Integrationbus Demos in source form. The demos are preconfigured to use
-    the pre-built binary distribution of the IntegrationBus/ directory.
+    the pre-built binary distribution of the SilKit/ directory.
 
-+ IntegrationBus-Documentation/
++ SilKit-Documentation/
   - Documentation in HTML and text format.
 
-+ IntegrationBus-Source/
-  - The complete source tree of the IntegrationBus with a limited set of
++ SilKit-Source/
+  - The complete source tree of the SilKit with a limited set of
     third-party components.
     Some dependencies, like Fast-RTPS, are fetched by the CMake build system
     in the configuration stage.

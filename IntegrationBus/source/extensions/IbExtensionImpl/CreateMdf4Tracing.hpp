@@ -4,26 +4,26 @@
 
 #include <string>
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "ITraceMessageSink.hpp"
 #include "IReplay.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
-namespace ib { namespace extensions {
+namespace SilKit { 
 
-auto CreateMdf4Tracing(cfg::ParticipantConfiguration config,
-    ib::mw::logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
+auto CreateMdf4Tracing(Config::ParticipantConfiguration config,
+    SilKit::Core::Logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>;
 
 //////////////////////////////////////////////////////////////////////
 // MDF4 Replay
 //////////////////////////////////////////////////////////////////////
 
-auto CreateMdf4Replay(cfg::ParticipantConfiguration config, ib::mw::logging::ILogger* logger,
+auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Core::Logging::ILogger* logger,
                       const std::string& fileName)
     -> std::shared_ptr<IReplayFile>;
 
-}//end namespace extensions
-}//end namespace ib
+
+}//end namespace SilKit

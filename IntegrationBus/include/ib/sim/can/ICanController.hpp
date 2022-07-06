@@ -5,11 +5,11 @@
 #include <functional>
 
 #include "CanDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 /*! \brief Abstract CAN Controller API to be used by vECUs
  */
@@ -179,6 +179,6 @@ public:
 
 };
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

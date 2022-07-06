@@ -3,32 +3,32 @@ Ethernet Service API
 ====================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
-.. |CreateEthernetController| replace:: :cpp:func:`CreateEthernetController<ib::mw::IParticipant::CreateEthernetController()>`
-.. |IEthernetController| replace:: :cpp:class:`IEthernetController<ib::sim::eth::IEthernetController>`
-.. |Activate| replace:: :cpp:func:`Activate()<ib::sim::eth::IEthernetController::Activate>`
-.. |SendFrame| replace:: :cpp:func:`SendFrame()<ib::sim::eth::IEthernetController::SendFrame>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
+.. |CreateEthernetController| replace:: :cpp:func:`CreateEthernetController<SilKit::Core::IParticipant::CreateEthernetController()>`
+.. |IEthernetController| replace:: :cpp:class:`IEthernetController<SilKit::Services::Ethernet::IEthernetController>`
+.. |Activate| replace:: :cpp:func:`Activate()<SilKit::Services::Ethernet::IEthernetController::Activate>`
+.. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Ethernet::IEthernetController::SendFrame>`
 
-.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<ib::sim::eth::IEthernetController::AddFrameTransmitHandler>`
-.. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<ib::sim::eth::IEthernetController::AddStateChangeHandler>`
-.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::eth::IEthernetController::AddFrameHandler>`
+.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<SilKit::Services::Ethernet::IEthernetController::AddFrameTransmitHandler>`
+.. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<SilKit::Services::Ethernet::IEthernetController::AddStateChangeHandler>`
+.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<SilKit::Services::Ethernet::IEthernetController::AddFrameHandler>`
 
-.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<ib::sim::eth::IEthernetController::RemoveFrameTransmitHandler>`
-.. |RemoveStateChangeHandler| replace:: :cpp:func:`RemoveStateChangeHandler()<ib::sim::eth::IEthernetController::RemoveStateChangeHandler>`
-.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<ib::sim::eth::IEthernetController::RemoveFrameHandler>`
+.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<SilKit::Services::Ethernet::IEthernetController::RemoveFrameTransmitHandler>`
+.. |RemoveStateChangeHandler| replace:: :cpp:func:`RemoveStateChangeHandler()<SilKit::Services::Ethernet::IEthernetController::RemoveStateChangeHandler>`
+.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<SilKit::Services::Ethernet::IEthernetController::RemoveFrameHandler>`
 
-.. |EthernetFrame| replace:: :cpp:class:`EthernetFrame<ib::sim::eth::EthernetFrame>`
-.. |EthernetFrameEvent| replace:: :cpp:class:`EthernetFrameEvent<ib::sim::eth::EthernetFrameEvent>`
-.. |EthernetFrameTransmitEvent| replace:: :cpp:class:`EthernetFrameTransmitEvent<ib::sim::eth::EthernetFrameTransmitEvent>`
-.. |EthernetTransmitStatus| replace:: :cpp:enum:`EthernetTransmitStatus<ib::sim::eth::EthernetTransmitStatus>`
+.. |EthernetFrame| replace:: :cpp:class:`EthernetFrame<SilKit::Services::Ethernet::EthernetFrame>`
+.. |EthernetFrameEvent| replace:: :cpp:class:`EthernetFrameEvent<SilKit::Services::Ethernet::EthernetFrameEvent>`
+.. |EthernetFrameTransmitEvent| replace:: :cpp:class:`EthernetFrameTransmitEvent<SilKit::Services::Ethernet::EthernetFrameTransmitEvent>`
+.. |EthernetTransmitStatus| replace:: :cpp:enum:`EthernetTransmitStatus<SilKit::Services::Ethernet::EthernetTransmitStatus>`
 
-.. |Transmitted| replace:: :cpp:enumerator:`EthernetTransmitStatus::Transmitted<ib::sim::eth::Transmitted>`
-.. |ControllerInactive| replace:: :cpp:enumerator:`EthernetTransmitStatus::ControllerInactive<ib::sim::eth::ControllerInactive>`
-.. |LinkDown| replace:: :cpp:enumerator:`EthernetTransmitStatus::LinkDown<ib::sim::eth::LinkDown>`
-.. |Dropped| replace:: :cpp:enumerator:`EthernetTransmitStatus::Dropped<ib::sim::eth::Dropped>`
-.. |InvalidFrameFormat| replace:: :cpp:enumerator:`EthernetTransmitStatus::InvalidFrameFormat<ib::sim::eth::InvalidFrameFormat>`
+.. |Transmitted| replace:: :cpp:enumerator:`EthernetTransmitStatus::Transmitted<SilKit::Services::Ethernet::Transmitted>`
+.. |ControllerInactive| replace:: :cpp:enumerator:`EthernetTransmitStatus::ControllerInactive<SilKit::Services::Ethernet::ControllerInactive>`
+.. |LinkDown| replace:: :cpp:enumerator:`EthernetTransmitStatus::LinkDown<SilKit::Services::Ethernet::LinkDown>`
+.. |Dropped| replace:: :cpp:enumerator:`EthernetTransmitStatus::Dropped<SilKit::Services::Ethernet::Dropped>`
+.. |InvalidFrameFormat| replace:: :cpp:enumerator:`EthernetTransmitStatus::InvalidFrameFormat<SilKit::Services::Ethernet::InvalidFrameFormat>`
 
-.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
+.. |HandlerId| replace:: :cpp:class:`HandlerId<SilKit::Services::HandlerId>`
 
 .. contents::
    :local:
@@ -227,13 +227,13 @@ has to be specified as "PcapPipe" in the configuration:
   ]
     
 
-The VIB process responsible for the Ethernet Controller "ETH0" will open the specified named pipe "EthernetPipe" during
-start up of the Participant. When the IntegrationBus writes the first message to the pipe, the VIB process will be 
+The SILKIT process responsible for the Ethernet Controller "ETH0" will open the specified named pipe "EthernetPipe" during
+start up of the Participant. When the SilKit writes the first message to the pipe, the SILKIT process will be 
 blocked until another process connects to the named pipe and reads the traced messages from the pipe.
 
 The reading process could be a tool like `Wireshark <https://www.wireshark.org/>`_, which allows visualizing live trace
 messages. Under Windows, named pipes reside in a special filesystem namespace prefixed with "\\.\pipe\". The following 
-snippet will attach *wireshark* to the named pipe created by your VIB simulation:
+snippet will attach *wireshark* to the named pipe created by your SILKIT simulation:
 
 .. code-block:: powershell
 
@@ -247,31 +247,31 @@ API and Data Type Reference
 Ethernet Controller API
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenclass:: ib::sim::eth::IEthernetController
+.. doxygenclass:: SilKit::Services::Ethernet::IEthernetController
    :members:
 
 Data Structures
 ~~~~~~~~~~~~~~~
 
-.. doxygenstruct:: ib::sim::eth::EthernetFrame
+.. doxygenstruct:: SilKit::Services::Ethernet::EthernetFrame
    :members:
-.. doxygenstruct:: ib::sim::eth::EthernetFrameEvent
+.. doxygenstruct:: SilKit::Services::Ethernet::EthernetFrameEvent
    :members:
-.. doxygenstruct:: ib::sim::eth::EthernetFrameTransmitEvent
+.. doxygenstruct:: SilKit::Services::Ethernet::EthernetFrameTransmitEvent
    :members:
-.. doxygenstruct:: ib::sim::eth::EthernetStateChangeEvent
+.. doxygenstruct:: SilKit::Services::Ethernet::EthernetStateChangeEvent
    :members:
-.. doxygenstruct:: ib::sim::eth::EthernetBitrateChangeEvent
+.. doxygenstruct:: SilKit::Services::Ethernet::EthernetBitrateChangeEvent
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygentypedef:: ib::sim::eth::EthernetMac
-.. doxygentypedef:: ib::sim::eth::EthernetTxId
-.. doxygentypedef:: ib::sim::eth::EthernetBitrate
-.. doxygenenum:: ib::sim::eth::EthernetTransmitStatus
-.. doxygenenum:: ib::sim::eth::EthernetState
+.. doxygentypedef:: SilKit::Services::Ethernet::EthernetMac
+.. doxygentypedef:: SilKit::Services::Ethernet::EthernetTxId
+.. doxygentypedef:: SilKit::Services::Ethernet::EthernetBitrate
+.. doxygenenum:: SilKit::Services::Ethernet::EthernetTransmitStatus
+.. doxygenenum:: SilKit::Services::Ethernet::EthernetState
 
 Usage Examples
 --------------

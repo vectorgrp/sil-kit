@@ -6,9 +6,9 @@
 
 #include "RpcDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 class IRpcServer
 {
@@ -34,6 +34,6 @@ public:
     virtual void SetCallHandler(RpcCallHandler handler) = 0;
 };
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

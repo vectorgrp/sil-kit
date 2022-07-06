@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 namespace detail {
 
@@ -31,4 +31,4 @@ private:
 
 } //end namespace detail
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit

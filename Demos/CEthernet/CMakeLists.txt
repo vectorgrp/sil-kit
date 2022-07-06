@@ -1,8 +1,8 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-make_ib_demo(IbDemoCEthernet EthernetDemo.c)
-set_property(TARGET IbDemoCEthernet PROPERTY C_STANDARD 11)
-target_sources(IbDemoCEthernet
+make_silkit_demo(SilKitDemoCEthernet EthernetDemo.c)
+set_property(TARGET SilKitDemoCEthernet PROPERTY C_STANDARD 11)
+target_sources(SilKitDemoCEthernet
     PRIVATE 
-        IbConfig_DemoEthernet.json
+        SilKitConfig_DemoEthernet.json
         NetworkSimulatorConfig.json
 )

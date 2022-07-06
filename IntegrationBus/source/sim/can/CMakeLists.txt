@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimCan STATIC
+add_library(SilKitSimCan STATIC
     CanDatatypesUtils.cpp
     CanDatatypesUtils.hpp
     CanController.cpp
@@ -16,29 +16,29 @@ add_library(IbSimCan STATIC
     CanSerdes.cpp
 )
 
-target_include_directories(IbSimCan
+target_include_directories(SilKitSimCan
     PUBLIC .
 )
 
-target_link_libraries(IbSimCan
-    PRIVATE IbInterface
-            IbInternal
-            IbTracing
-            IbConfiguration
-    INTERFACE IbInternal
-            IbConfiguration
+target_link_libraries(SilKitSimCan
+    PRIVATE SilKitInterface
+            SilKitInternal
+            SilKitTracing
+            SilKitConfiguration
+    INTERFACE SilKitInternal
+            SilKitConfiguration
 )
 
-add_vib_test(TestSimCanController
+add_silkit_test(TestSimCanController
     SOURCES 
         CanControllerConfigTest.cpp
         CanControllerDetailedSimTest.cpp 
         CanControllerTrivialSimTest.cpp
     LIBS 
-        IbSimCan 
-        IbMwMockParticipant
-        IbTracing
-        IbMwMockNullConnection
+        SilKitSimCan 
+        SilKitMwMockParticipant
+        SilKitTracing
+        SilKitMwMockNullConnection
 )
 
-add_vib_test(TestSimCan_Serdes  SOURCES CanSerdesTest.cpp LIBS IbInternal IbSimCan)
+add_silkit_test(TestSimCan_Serdes  SOURCES CanSerdesTest.cpp LIBS SilKitInternal SilKitSimCan)

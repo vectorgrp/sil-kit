@@ -2,29 +2,29 @@
 
 #pragma once
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "../internal/IIbServiceEndpoint.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "../internal/IServiceEndpoint.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 
-template<class IbMessageT>
-void TraceRx(logging::ILogger* logger, const IIbServiceEndpoint* addr, const IbMessageT& msg)
+template<class SilKitMessageT>
+void TraceRx(Logging::ILogger* logger, const IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
   logger->Trace("Recv from {}: {}", addr->GetServiceDescriptor(), msg);
 }
 
-template<class IbMessageT>
-void TraceTx(logging::ILogger* logger, const IIbServiceEndpoint* addr, const IbMessageT& msg)
+template<class SilKitMessageT>
+void TraceTx(Logging::ILogger* logger, const IServiceEndpoint* addr, const SilKitMessageT& msg)
 {
   logger->Trace("Send from {}: {}", addr->GetServiceDescriptor(), msg);
 }
 
 // Don't trace LogMessages - this could cause cycles!
-inline void TraceRx(logging::ILogger* /*logger*/, IIbServiceEndpoint* /*addr*/, const logging::LogMsg& /*msg*/) {}
-inline void TraceTx(logging::ILogger* /*logger*/, IIbServiceEndpoint* /*addr*/, const logging::LogMsg& /*msg*/) {}
+inline void TraceRx(Logging::ILogger* /*logger*/, IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
+inline void TraceTx(Logging::ILogger* /*logger*/, IServiceEndpoint* /*addr*/, const Logging::LogMsg& /*msg*/) {}
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 

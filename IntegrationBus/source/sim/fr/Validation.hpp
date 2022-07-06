@@ -2,16 +2,16 @@
 
 #pragma once
 
-#include "ib/sim/fwd_decl.hpp"
+#include "silkit/services/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 void Validate(const FlexrayClusterParameters& clusterParameters);
 
 void Validate(const FlexrayNodeParameters& nodeParameters);
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

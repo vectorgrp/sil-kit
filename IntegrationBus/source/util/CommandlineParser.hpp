@@ -9,8 +9,8 @@
 #include <memory>
 #include <assert.h>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 //! \brief Parse commandline arguments
 class CommandlineParser
@@ -288,5 +288,5 @@ private:
     std::vector<std::unique_ptr<IArgument>> _arguments;
 };
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

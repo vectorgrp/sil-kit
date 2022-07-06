@@ -3,41 +3,41 @@ CAN Service API
 ===================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
-.. |CreateCanController| replace:: :cpp:func:`CreateCanController<ib::mw::IParticipant::CreateCanController()>`
-.. |ICanController| replace:: :cpp:class:`ICanController<ib::sim::can::ICanController>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
+.. |CreateCanController| replace:: :cpp:func:`CreateCanController<SilKit::Core::IParticipant::CreateCanController()>`
+.. |ICanController| replace:: :cpp:class:`ICanController<SilKit::Services::Can::ICanController>`
 
-.. |SendFrame| replace:: :cpp:func:`SendFrame()<ib::sim::can::ICanController::SendFrame>`
-.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<ib::sim::can::ICanController::AddFrameTransmitHandler>`
-.. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<ib::sim::can::ICanController::AddStateChangeHandler>`
-.. |AddErrorStateChangeHandler| replace:: :cpp:func:`AddErrorStateChangeHandler()<ib::sim::can::ICanController::AddErrorStateChangeHandler>`
-.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::can::ICanController::AddFrameHandler>`
-.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<ib::sim::can::ICanController::RemoveFrameTransmitHandler>`
-.. |RemoveStateChangeHandler| replace:: :cpp:func:`RemoveStateChangeHandler()<ib::sim::can::ICanController::RemoveStateChangeHandler>`
-.. |RemoveErrorStateChangeHandler| replace:: :cpp:func:`RemoveErrorStateChangeHandler()<ib::sim::can::ICanController::RemoveErrorStateChangeHandler>`
-.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<ib::sim::can::ICanController::RemoveFrameHandler>`
-.. |Start| replace:: :cpp:func:`Start()<ib::sim::can::ICanController::Start>`
-.. |Stop| replace:: :cpp:func:`Stop()<ib::sim::can::ICanController::Stop>`
-.. |Reset| replace:: :cpp:func:`Reset()<ib::sim::can::ICanController::Reset>`
-.. |SetBaudRate| replace:: :cpp:func:`ICanController::SetBaudRate()<ib::sim::can::ICanController::SetBaudRate>`
+.. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Can::ICanController::SendFrame>`
+.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<SilKit::Services::Can::ICanController::AddFrameTransmitHandler>`
+.. |AddStateChangeHandler| replace:: :cpp:func:`AddStateChangeHandler()<SilKit::Services::Can::ICanController::AddStateChangeHandler>`
+.. |AddErrorStateChangeHandler| replace:: :cpp:func:`AddErrorStateChangeHandler()<SilKit::Services::Can::ICanController::AddErrorStateChangeHandler>`
+.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<SilKit::Services::Can::ICanController::AddFrameHandler>`
+.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<SilKit::Services::Can::ICanController::RemoveFrameTransmitHandler>`
+.. |RemoveStateChangeHandler| replace:: :cpp:func:`RemoveStateChangeHandler()<SilKit::Services::Can::ICanController::RemoveStateChangeHandler>`
+.. |RemoveErrorStateChangeHandler| replace:: :cpp:func:`RemoveErrorStateChangeHandler()<SilKit::Services::Can::ICanController::RemoveErrorStateChangeHandler>`
+.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<SilKit::Services::Can::ICanController::RemoveFrameHandler>`
+.. |Start| replace:: :cpp:func:`Start()<SilKit::Services::Can::ICanController::Start>`
+.. |Stop| replace:: :cpp:func:`Stop()<SilKit::Services::Can::ICanController::Stop>`
+.. |Reset| replace:: :cpp:func:`Reset()<SilKit::Services::Can::ICanController::Reset>`
+.. |SetBaudRate| replace:: :cpp:func:`ICanController::SetBaudRate()<SilKit::Services::Can::ICanController::SetBaudRate>`
 
-.. |CanFrame| replace:: :cpp:class:`CanFrame<ib::sim::can::CanFrame>`
-.. |CanFrameEvent| replace:: :cpp:class:`CanFrameEvent<ib::sim::can::CanFrameEvent>`
-.. |CanFrameTransmitEvent| replace:: :cpp:class:`CanFrameTransmitEvent<ib::sim::can::CanFrameTransmitEvent>`
-.. |CanStateChangeEvent| replace:: :cpp:class:`CanStateChangeEvent<ib::sim::can::CanStateChangeEvent>`
-.. |CanErrorStateChangeEvent| replace:: :cpp:class:`CanErrorStateChangeEvent<ib::sim::can::CanErrorStateChangeEvent>`
+.. |CanFrame| replace:: :cpp:class:`CanFrame<SilKit::Services::Can::CanFrame>`
+.. |CanFrameEvent| replace:: :cpp:class:`CanFrameEvent<SilKit::Services::Can::CanFrameEvent>`
+.. |CanFrameTransmitEvent| replace:: :cpp:class:`CanFrameTransmitEvent<SilKit::Services::Can::CanFrameTransmitEvent>`
+.. |CanStateChangeEvent| replace:: :cpp:class:`CanStateChangeEvent<SilKit::Services::Can::CanStateChangeEvent>`
+.. |CanErrorStateChangeEvent| replace:: :cpp:class:`CanErrorStateChangeEvent<SilKit::Services::Can::CanErrorStateChangeEvent>`
 
-.. |CanControllerState| replace:: :cpp:enum:`CanControllerState<ib::sim::can::CanControllerState>`
-.. |CanErrorState| replace:: :cpp:enum:`CanErrorState<ib::sim::can::CanErrorState>`
-.. |CanFrameFlags| replace:: :cpp:class:`CanFrame::CanFrameFlags<ib::sim::can::CanFrame::CanFrameFlags>`
-.. |CanTransmitStatus| replace:: :cpp:enum:`CanTransmitStatus<ib::sim::can::CanTransmitStatus>`
+.. |CanControllerState| replace:: :cpp:enum:`CanControllerState<SilKit::Services::Can::CanControllerState>`
+.. |CanErrorState| replace:: :cpp:enum:`CanErrorState<SilKit::Services::Can::CanErrorState>`
+.. |CanFrameFlags| replace:: :cpp:class:`CanFrame::CanFrameFlags<SilKit::Services::Can::CanFrame::CanFrameFlags>`
+.. |CanTransmitStatus| replace:: :cpp:enum:`CanTransmitStatus<SilKit::Services::Can::CanTransmitStatus>`
 
-.. |Transmitted| replace:: :cpp:enumerator:`CanTransmitStatus::Transmitted<ib::sim::can::Transmitted>`
-.. |Canceled| replace:: :cpp:enumerator:`CanTransmitStatus::Canceled<ib::sim::can::Canceled>`
-.. |TransmitQueueFull| replace:: :cpp:enumerator:`CanTransmitStatus::TransmitQueueFull<ib::sim::can::TransmitQueueFull>`
-.. |DuplicatedTransmitId| replace:: :cpp:enumerator:`CanTransmitStatus::DuplicatedTransmitId<ib::sim::can::DuplicatedTransmitId>`
+.. |Transmitted| replace:: :cpp:enumerator:`CanTransmitStatus::Transmitted<SilKit::Services::Can::Transmitted>`
+.. |Canceled| replace:: :cpp:enumerator:`CanTransmitStatus::Canceled<SilKit::Services::Can::Canceled>`
+.. |TransmitQueueFull| replace:: :cpp:enumerator:`CanTransmitStatus::TransmitQueueFull<SilKit::Services::Can::TransmitQueueFull>`
+.. |DuplicatedTransmitId| replace:: :cpp:enumerator:`CanTransmitStatus::DuplicatedTransmitId<SilKit::Services::Can::DuplicatedTransmitId>`
 
-.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
+.. |HandlerId| replace:: :cpp:class:`HandlerId<SilKit::Services::HandlerId>`
 
 .. contents::
    :local:
@@ -139,7 +139,7 @@ rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
 .. admonition:: Note
 
    Both |SetBaudRate| and |Start|  should not be called earlier than in the life cycle service's
-   :cpp:func:`communication ready handler<ib::mw::synd::ILifecycleService::SetCommunicationReadyHandler()>`. Otherwise, it is not guaranteed 
+   :cpp:func:`communication ready handler<SilKit::Core::synd::ILifecycleService::SetCommunicationReadyHandler()>`. Otherwise, it is not guaranteed 
    that all participants are already connected, which can cause the call to have no effect.
 
 Managing the event handlers
@@ -167,29 +167,29 @@ API and Data Type Reference
 --------------------------------------------------
 CAN Controller API
 ~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: ib::sim::can::ICanController
+.. doxygenclass:: SilKit::Services::Can::ICanController
    :members:
 
 Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib::sim::can::CanFrame
+.. doxygenstruct:: SilKit::Services::Can::CanFrame
    :members:
-.. doxygenstruct:: ib::sim::can::CanFrameEvent
+.. doxygenstruct:: SilKit::Services::Can::CanFrameEvent
    :members:
-.. doxygenstruct:: ib::sim::can::CanFrameTransmitEvent
+.. doxygenstruct:: SilKit::Services::Can::CanFrameTransmitEvent
    :members:
-.. doxygenstruct:: ib::sim::can::CanStateChangeEvent
+.. doxygenstruct:: SilKit::Services::Can::CanStateChangeEvent
    :members:
-.. doxygenstruct:: ib::sim::can::CanErrorStateChangeEvent
+.. doxygenstruct:: SilKit::Services::Can::CanErrorStateChangeEvent
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenenum:: ib::sim::can::CanControllerState
-.. doxygenenum:: ib::sim::can::CanErrorState
-.. doxygenenum:: ib::sim::can::CanTransmitStatus
-.. doxygentypedef:: ib::sim::can::CanTxId
+.. doxygenenum:: SilKit::Services::Can::CanControllerState
+.. doxygenenum:: SilKit::Services::Can::CanErrorState
+.. doxygenenum:: SilKit::Services::Can::CanTransmitStatus
+.. doxygentypedef:: SilKit::Services::Can::CanTxId
 
 Usage Examples
 ----------------------------------------------------

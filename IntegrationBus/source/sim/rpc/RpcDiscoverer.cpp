@@ -4,11 +4,11 @@
 #include "RpcDatatypeUtils.hpp"
 #include "YamlParser.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-RpcDiscoverer::RpcDiscoverer(mw::service::IServiceDiscovery* serviceDiscovery) : _serviceDiscovery { serviceDiscovery }
+RpcDiscoverer::RpcDiscoverer(Core::Discovery::IServiceDiscovery* serviceDiscovery) : _serviceDiscovery { serviceDiscovery }
 {
 }
 
@@ -21,8 +21,8 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
     for (const auto& serviceDescriptor : serviceDescriptors)
     {
         std::string controllerType;
-        if (serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, controllerType)
-              && controllerType == mw::service::controllerTypeRpcServer)
+        if (serviceDescriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType)
+              && controllerType == Core::Discovery::controllerTypeRpcServer)
         {
             auto getVal = [serviceDescriptor](std::string key) {
                 std::string tmp;
@@ -33,11 +33,11 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
                 return tmp;
             };
 
-            auto rpcServerFunctionName = getVal(mw::service::supplKeyRpcServerFunctionName);
-            auto rpcServerMediaType = getVal(mw::service::supplKeyRpcServerMediaType);
-            std::string labelsStr = getVal(mw::service::supplKeyRpcServerLabels);
+            auto rpcServerFunctionName = getVal(Core::Discovery::supplKeyRpcServerFunctionName);
+            auto rpcServerMediaType = getVal(Core::Discovery::supplKeyRpcServerMediaType);
+            std::string labelsStr = getVal(Core::Discovery::supplKeyRpcServerLabels);
             auto rpcServerLabels =
-                ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
+                SilKit::Config::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
             if ((functionName == "" || functionName == rpcServerFunctionName)
                 && MatchMediaType(mediaType, rpcServerMediaType) && MatchLabels(labels, rpcServerLabels))
@@ -50,6 +50,6 @@ std::vector<RpcDiscoveryResult> RpcDiscoverer::GetMatchingRpcServers(
     return discoveryResults;
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

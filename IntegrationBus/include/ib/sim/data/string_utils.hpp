@@ -5,14 +5,14 @@
 #include <ostream>
 #include <sstream>
 
-#include "ib/exception.hpp"
-#include "ib/util/PrintableHexString.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/util/PrintableHexString.hpp"
 
 #include "DataMessageDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 inline std::string to_string(const DataMessageEvent& msg);
 inline std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg);
@@ -28,12 +28,12 @@ std::string to_string(const DataMessageEvent& msg)
 }
 std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg)
 {
-    return out << "data::DataMessageEvent{data="
-               << util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
+    return out << "PubSub::DataMessageEvent{data="
+               << Util::AsHexString(msg.data).WithSeparator(" ").WithMaxLength(16)
                << ", size=" << msg.data.size()
                << "}";
 }
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

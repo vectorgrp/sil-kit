@@ -10,46 +10,46 @@ Can Controller
 
 **A Can controller is created and configured with the following functions:**
 
-.. doxygenfunction:: ib_Can_Controller_Create
-.. doxygenfunction:: ib_Can_Controller_SetBaudRate
+.. doxygenfunction:: SilKit_CanController_Create
+.. doxygenfunction:: SilKit_CanController_SetBaudRate
 
 **It's status can be controlled with the functions:**
 
-.. doxygenfunction:: ib_Can_Controller_Start
-.. doxygenfunction:: ib_Can_Controller_Stop
-.. doxygenfunction:: ib_Can_Controller_Reset
-.. doxygenfunction:: ib_Can_Controller_Sleep
+.. doxygenfunction:: SilKit_CanController_Start
+.. doxygenfunction:: SilKit_CanController_Stop
+.. doxygenfunction:: SilKit_CanController_Reset
+.. doxygenfunction:: SilKit_CanController_Sleep
 
 **The controller can send frames with:**
 
-.. doxygenfunction:: ib_Can_Controller_SendFrame
+.. doxygenfunction:: SilKit_CanController_SendFrame
 
 **The following set of functions can be used to add and remove event handlers on the controller:**
 
-.. doxygenfunction:: ib_Can_Controller_AddFrameTransmitHandler
-.. doxygenfunction:: ib_Can_Controller_AddFrameHandler
-.. doxygenfunction:: ib_Can_Controller_AddStateChangeHandler
-.. doxygenfunction:: ib_Can_Controller_AddErrorStateChangeHandler
-.. doxygenfunction:: ib_Can_Controller_RemoveFrameTransmitHandler
-.. doxygenfunction:: ib_Can_Controller_RemoveFrameHandler
-.. doxygenfunction:: ib_Can_Controller_RemoveStateChangeHandler
-.. doxygenfunction:: ib_Can_Controller_RemoveErrorStateChangeHandler
+.. doxygenfunction:: SilKit_CanController_AddFrameTransmitHandler
+.. doxygenfunction:: SilKit_CanController_AddFrameHandler
+.. doxygenfunction:: SilKit_CanController_AddStateChangeHandler
+.. doxygenfunction:: SilKit_CanController_AddErrorStateChangeHandler
+.. doxygenfunction:: SilKit_CanController_RemoveFrameTransmitHandler
+.. doxygenfunction:: SilKit_CanController_RemoveFrameHandler
+.. doxygenfunction:: SilKit_CanController_RemoveStateChangeHandler
+.. doxygenfunction:: SilKit_CanController_RemoveErrorStateChangeHandler
 
 Data Structures
 ~~~~~~~~~~~~~~~
 
-.. doxygenstruct:: ib_Can_Frame
+.. doxygenstruct:: SilKit_CanFrame
    :members:
 
-.. doxygenstruct:: ib_Can_FrameEvent
+.. doxygenstruct:: SilKit_CanFrameEvent
    :members:
 
-.. doxygenstruct:: ib_Can_FrameTransmitEvent
+.. doxygenstruct:: SilKit_CanFrameTransmitEvent
    :members:
 
-.. doxygenstruct:: ib_Can_StateChangeEvent
+.. doxygenstruct:: SilKit_CanStateChangeEvent
    :members:
 
-.. doxygenstruct:: ib_Can_ErrorStateChangeEvent
+.. doxygenstruct:: SilKit_CanErrorStateChangeEvent
    :members:
 

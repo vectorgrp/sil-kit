@@ -5,23 +5,23 @@
 #include "IReplayDataController.hpp"
 #include "EthController.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 class EthControllerReplay
     : public IEthernetController
-    , public IIbToEthController
-    , public ib::mw::sync::ITimeConsumer
-    , public extensions::ITraceMessageSource
+    , public IMsgForEthController
+    , public SilKit::Core::Orchestration::ITimeConsumer
+    , public ITraceMessageSource
     , public tracing::IReplayDataController
-    , public mw::IIbServiceEndpoint
+    , public Core::IServiceEndpoint
 {
 public:
     // Constructors 
     EthControllerReplay() = delete;
-    EthControllerReplay(mw::IParticipantInternal* participant, cfg::EthernetController config,
-                        mw::sync::ITimeProvider* timeProvider)
+    EthControllerReplay(Core::IParticipantInternal* participant, Config::EthernetController config,
+                        Core::Orchestration::ITimeProvider* timeProvider)
         : _replayConfig{ config.replay }
         , _controller{ participant, config, timeProvider }
     {
@@ -44,46 +44,46 @@ public:
     void AddStateChangeHandler(StateChangeHandler handler) override;
     void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
-    // IIbToEthController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg) override;
+    // IMsgForEthController
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 
-    // ib::mw::sync::ITimeConsumer
-    void SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider) override;
+    // SilKit::Core::Orchestration::ITimeConsumer
+    void SetTimeProvider(SilKit::Core::Orchestration::ITimeProvider* timeProvider) override;
 
     // ITraceMessageSource
-    void AddSink(extensions::ITraceMessageSink* sink) override;
+    void AddSink(ITraceMessageSink* sink) override;
 
     // IReplayDataProvider
 
-    void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
+    void ReplayMessage(const IReplayMessage* replayMessage) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 private:
     //Private methods
-    void ReplaySend(const extensions::IReplayMessage* replayMessage);
-    void ReplayReceive(const extensions::IReplayMessage* replayMessage);
+    void ReplaySend(const IReplayMessage* replayMessage);
+    void ReplayReceive(const IReplayMessage* replayMessage);
 private:
-    ib::util::Optional<cfg::Replay> _replayConfig;
+    SilKit::Util::Optional<Config::Replay> _replayConfig;
     EthController _controller;
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-void EthControllerReplay::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void EthControllerReplay::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _controller.SetServiceDescriptor(serviceDescriptor);
 }
-auto EthControllerReplay::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto EthControllerReplay::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _controller.GetServiceDescriptor();
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

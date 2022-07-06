@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbMwService STATIC
+add_library(SilKitMwService STATIC
     ServiceDatatypes.hpp
     ServiceDiscovery.hpp
     ServiceDiscovery.cpp
@@ -10,25 +10,25 @@ add_library(IbMwService STATIC
     ServiceSerdes.cpp
 )
 
-target_include_directories(IbMwService
+target_include_directories(SilKitMwService
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(IbMwService
-    PUBLIC IbInterface
+target_link_libraries(SilKitMwService
+    PUBLIC SilKitInterface
     PRIVATE 
-        IbInternal
-        IbConfiguration
-        IbMwLogging
+        SilKitInternal
+        SilKitConfiguration
+        SilKitMwLogging
     INTERFACE 
-        IbInternal
-        IbConfiguration
+        SilKitInternal
+        SilKitConfiguration
 )
 
 
-add_vib_test(TestMwServiceDiscovery
+add_silkit_test(TestMwServiceDiscovery
     SOURCES ServiceDiscoveryTest.cpp 
-    LIBS IbMwService IbMwMockParticipant IbUuid)
+    LIBS SilKitMwService SilKitMwMockParticipant SilKitUuid)
 
-add_vib_test(TestMwService_Serdes SOURCES ServiceSerdesTest.cpp LIBS IbMwService)
+add_silkit_test(TestMwService_Serdes SOURCES ServiceSerdesTest.cpp LIBS SilKitMwService)

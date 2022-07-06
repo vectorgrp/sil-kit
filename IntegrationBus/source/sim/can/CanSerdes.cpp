@@ -1,14 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "MessageBuffer.hpp"
-#include "ib/sim/can/CanDatatypes.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
 #include "CanSerdes.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameEvent& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanFrameEvent& msg)
 {
     buffer << msg.transmitId
         << msg.timestamp
@@ -22,7 +22,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameE
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameEvent& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanFrameEvent& msg)
 {
     uint8_t flags;
     uint8_t dlc;
@@ -40,7 +40,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameEvent& 
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameTransmitEvent& ack)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanFrameTransmitEvent& ack)
 {
     buffer << ack.transmitId
            << ack.canId
@@ -50,7 +50,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanFrameT
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
 {
     buffer >> ack.transmitId
            >> ack.canId
@@ -60,7 +60,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanFrameTransmi
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanControllerStatus& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanControllerStatus& msg)
 {
     buffer << msg.timestamp
            << msg.controllerState
@@ -68,7 +68,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanContro
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanControllerStatus& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanControllerStatus& msg)
 {
     buffer >> msg.timestamp
            >> msg.controllerState
@@ -76,28 +76,28 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanControllerSt
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanConfigureBaudrate& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanConfigureBaudrate& msg)
 {
     buffer << msg.baudRate
            << msg.fdBaudRate;
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanConfigureBaudrate& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanConfigureBaudrate& msg)
 {
     buffer >> msg.baudRate
            >> msg.fdBaudRate;
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CanSetControllerMode& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanSetControllerMode& msg)
 {
     buffer << *reinterpret_cast<const uint8_t*>(&msg.flags)
            << msg.mode;
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanSetControllerMode& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanSetControllerMode& msg)
 {
     uint8_t flags;
     buffer >> flags
@@ -106,38 +106,38 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CanSetControlle
     return buffer;
 }
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 // when changing any of the datatypes, add transparent compatibility code here,
 // based on the buffer.GetProtocolVersion()
 
 //////////////////////////////////////////////////////////////////////
 // Serialize
 //////////////////////////////////////////////////////////////////////
-void Serialize(MessageBuffer& buffer, const sim::can::CanFrameEvent& msg)
+void Serialize(MessageBuffer& buffer, const Services::Can::CanFrameEvent& msg)
 {
     buffer << msg;
     return;
 }
 
-void Serialize(MessageBuffer& buffer, const sim::can::CanFrameTransmitEvent& msg)
+void Serialize(MessageBuffer& buffer, const Services::Can::CanFrameTransmitEvent& msg)
 {
     buffer << msg;
     return;
 }
 
-void Serialize(MessageBuffer& buffer, const sim::can::CanControllerStatus& msg)
+void Serialize(MessageBuffer& buffer, const Services::Can::CanControllerStatus& msg)
 {
     buffer << msg;
     return;
 }
 
-void Serialize(MessageBuffer& buffer, const sim::can::CanConfigureBaudrate& msg)
+void Serialize(MessageBuffer& buffer, const Services::Can::CanConfigureBaudrate& msg)
 {
     buffer << msg;
     return;
 }
 
-void Serialize(MessageBuffer& buffer, const sim::can::CanSetControllerMode& msg)
+void Serialize(MessageBuffer& buffer, const Services::Can::CanSetControllerMode& msg)
 {
     buffer << msg;
     return;
@@ -146,31 +146,31 @@ void Serialize(MessageBuffer& buffer, const sim::can::CanSetControllerMode& msg)
 //////////////////////////////////////////////////////////////////////
 // Deserialize
 //////////////////////////////////////////////////////////////////////
-void Deserialize(MessageBuffer& buffer, sim::can::CanFrameEvent& out)
+void Deserialize(MessageBuffer& buffer, Services::Can::CanFrameEvent& out)
 {
    buffer >> out;
 }
 
-void Deserialize(MessageBuffer& buffer, sim::can::CanFrameTransmitEvent& out)
+void Deserialize(MessageBuffer& buffer, Services::Can::CanFrameTransmitEvent& out)
 {
    buffer >> out;
 }
 
-void Deserialize(MessageBuffer& buffer, sim::can::CanControllerStatus& out)
+void Deserialize(MessageBuffer& buffer, Services::Can::CanControllerStatus& out)
 {
    buffer >> out;
 }
 
-void Deserialize(MessageBuffer& buffer, sim::can::CanConfigureBaudrate& out)
+void Deserialize(MessageBuffer& buffer, Services::Can::CanConfigureBaudrate& out)
 {
    buffer >> out;
 }
 
-void Deserialize(MessageBuffer& buffer, sim::can::CanSetControllerMode& out)
+void Deserialize(MessageBuffer& buffer, Services::Can::CanSetControllerMode& out)
 {
    buffer >> out;
 }
 
-} // namespace can    
-} // namespace sim
-} // namespace ib
+} // namespace Can    
+} // namespace Services
+} // namespace SilKit

@@ -12,8 +12,8 @@ using namespace std::chrono_literals;
 
 TEST(MwVAsioSerdes, SimEthernet_EthMessage)
 {
-    using namespace ib::sim::eth;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Ethernet;
+    SilKit::Core::MessageBuffer buffer;
 
     EthernetFrameEvent in;
     EthernetFrameEvent out;
@@ -37,8 +37,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
 
 TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
 {
-    using namespace ib::sim::eth;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Ethernet;
+    SilKit::Core::MessageBuffer buffer;
 
     EthernetFrameTransmitEvent in;
     EthernetFrameTransmitEvent out;
@@ -57,8 +57,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
 
 TEST(MwVAsioSerdes, SimEthernet_EthStatus)
 {
-    using namespace ib::sim::eth;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Ethernet;
+    SilKit::Core::MessageBuffer buffer;
 
     EthernetStatus in;
     EthernetStatus out;
@@ -77,8 +77,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthStatus)
 
 TEST(MwVAsioSerdes, SimEthernet_EthSetMode)
 {
-    using namespace ib::sim::eth;
-    ib::mw::MessageBuffer buffer;
+    using namespace SilKit::Services::Ethernet;
+    SilKit::Core::MessageBuffer buffer;
 
     EthernetSetMode in;
     EthernetSetMode out;

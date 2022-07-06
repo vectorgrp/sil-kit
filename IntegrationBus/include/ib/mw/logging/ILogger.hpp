@@ -14,12 +14,12 @@
 #    endif
 #    include "fmt/format.h"
 #    include "fmt/ostream.h"
-#    include "VibFmtFormatters.hpp"
+#    include "SilKitFmtFormatters.hpp"
 #endif //HAVE_FMTLIB
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 class ILogger
 {
@@ -101,5 +101,5 @@ protected:
 };
 
 } // logging
-} // mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

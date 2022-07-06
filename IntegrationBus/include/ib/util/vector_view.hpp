@@ -6,8 +6,8 @@
 #include <vector>
 #include <stdexcept>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 template<typename T>
 class vector_view
@@ -244,5 +244,5 @@ auto make_vector_view(const std::vector<T>& vector) -> vector_view<const T>
     return vector_view<const T>(vector);
 }
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

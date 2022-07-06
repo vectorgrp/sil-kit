@@ -1,16 +1,16 @@
 // Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
-#ifndef __IB_EXTENSION_ABI_H__
-#define __IB_EXTENSION_ABI_H__
+#ifndef __SILKIT_EXTENSION_ABI_H__
+#define __SILKIT_EXTENSION_ABI_H__
 
-/*! VIB Extension Libraries
+/*! SILKIT Extension Libraries
  *
  * This header defines the shared library interface in terms of C symbols, which
- * allow creation of VIB extensions as dynamic libraries.
+ * allow creation of SILKIT extensions as dynamic libraries.
  * You have to implement the C functions listed below in your own library.
  *
  * Version Compatibility:
- * - VIB version must match, otherwise the extension will not be loaded.
- * - newer versions of IbExtensionDescriptor must not change the existing struct
+ * - SILKIT version must match, otherwise the extension will not be loaded.
+ * - newer versions of SilKitExtensionDescriptor must not change the existing struct
  *   layout, but may append to it.
  */
 
@@ -29,26 +29,26 @@ extern "C" {
 #   define VIBE_CABI
 #endif
 
-//! \brief The IbExtensionDescriptor is a simple C structure that contains
+//! \brief The SilKitExtensionDescriptor is a simple C structure that contains
 //!        interoperability information.
 //! This structure is provided by the dynamic library at load time, and the
 //! extension mechanism verifies that the extension is compatible with the host
-//! VIB system, before accessing the Create/Release routines.
+//! SILKIT system, before accessing the Create/Release routines.
 
-struct IbExtensionDescriptor {
-    uint32_t    vib_version_major;
-    uint32_t    vib_version_minor;
-    uint32_t    vib_version_patch;
+struct SilKitExtensionDescriptor {
+    uint32_t    silkit_version_major;
+    uint32_t    silkit_version_minor;
+    uint32_t    silkit_version_patch;
     const char* extension_name;
     const char* vendor_name;
     const char* system_name; // eg, distribution or operating system name
-    uint32_t build_infos[5]; // See IbExtension.hpp for values
+    uint32_t build_infos[5]; // See SilKitExtension.hpp for values
 };
-typedef struct IbExtensionDescriptor IbExtensionDescriptor_t;
+typedef struct SilKitExtensionDescriptor SilKitExtensionDescriptor_t;
 
-//! \brief The vib_extension_descriptor marks the entry point for an extension
+//! \brief The silkit_extension_descriptor marks the entry point for an extension
 //         shared library.
-VIBE_API extern const IbExtensionDescriptor_t vib_extension_descriptor;
+VIBE_API extern const SilKitExtensionDescriptor_t silkit_extension_descriptor;
 
 //! \brief Handle to a C++ instance of an extension
 #define VIBE_EXTENSION_HANDLE void*
@@ -65,4 +65,4 @@ VIBE_API void VIBE_CABI ReleaseExtension(VIBE_EXTENSION_HANDLE extension);
 }
 #endif //__cplusplus
 
-#endif // __IB_EXTENSION_ABI_H__
+#endif // __SILKIT_EXTENSION_ABI_H__

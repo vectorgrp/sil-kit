@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <windows.h>
-namespace ib {
+namespace SilKit {
 namespace tracing {
 namespace detail {
 
@@ -120,4 +120,4 @@ std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 
 } //end namespace detail
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit

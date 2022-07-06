@@ -2,20 +2,20 @@
 
 #pragma once
 
-#include "ib/extensions/IReplay.hpp"
+#include "silkit/extensions/IReplay.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 class PcapReplay
-    : public extensions::IReplayDataProvider
+    : public IReplayDataProvider
 {
 public:
     // TODO adapt once tracing is reinstated 
-    auto OpenFile(/*const cfg::Config& config,*/
+    auto OpenFile(/*const Config::Config& config,*/
         const std::string& filePath,
-        ib::mw::logging::ILogger* ibLogger)
-        -> std::shared_ptr<extensions::IReplayFile> override;
+        SilKit::Core::Logging::ILogger* logger)
+        -> std::shared_ptr<IReplayFile> override;
 };
 
 } // namespace tracing
-} // namespace ib
+} // namespace SilKit

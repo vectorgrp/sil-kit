@@ -1,19 +1,19 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/version.hpp"
-#include "ib/cfg/IParticipantConfiguration.hpp"
-#include "ib/mw/logging/string_utils.hpp"
+#include "silkit/version.hpp"
+#include "silkit/cfg/IParticipantConfiguration.hpp"
+#include "silkit/core/logging/string_utils.hpp"
 
 #include "SignalHandler.hpp"
 #include "VAsioRegistry.hpp"
 #include "CommandlineParser.hpp"
 #include "ParticipantConfiguration.hpp"
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 using asio::ip::tcp;
-using namespace ib::util;
-using CliParser = ib::util::CommandlineParser;
+using namespace SilKit::Util;
+using CliParser = SilKit::Util::CommandlineParser;
 
 namespace {
 auto lowerCase(std::string s)
@@ -36,17 +36,17 @@ auto isValidLogLevel(const std::string& levelStr)
         || logLevel == "off";
 }
 
-auto ConfigureLogging(std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration,
+auto ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
     const std::string& logLevel)
 {
-    auto config = std::static_pointer_cast<ib::cfg::ParticipantConfiguration>(configuration);
+    auto config = std::static_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
 
     auto it = std::find_if(config->logging.sinks.begin(),
         config->logging.sinks.end(),
-        [](auto const& el) { return el.type == ib::cfg::Sink::Type::Stdout;}
+        [](auto const& el) { return el.type == SilKit::Config::Sink::Type::Stdout;}
     );
 
-    auto level = ib::mw::logging::from_string(logLevel);
+    auto level = SilKit::Core::Logging::from_string(logLevel);
 
     if (it != config->logging.sinks.end())
     {
@@ -54,8 +54,8 @@ auto ConfigureLogging(std::shared_ptr<ib::cfg::IParticipantConfiguration> config
     }
     else
     {
-        ib::cfg::Sink newSink{};
-        newSink.type = ib::cfg::Sink::Type::Stdout;
+        SilKit::Config::Sink newSink{};
+        newSink.type = SilKit::Config::Sink::Type::Stdout;
         newSink.level = level;
         config->logging.sinks.emplace_back(std::move(newSink));
     }
@@ -75,16 +75,16 @@ int main(int argc, char** argv)
     commandlineParser.Add<CliParser::Flag>("use-signal-handler", "s", "[--use-signal-handler]",
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
     commandlineParser.Add<CliParser::Option>(
-        "listen-uri", "u", "vib://localhost:8500", "[--listen-uri <uri>]",
-        "-u, --listen-uri <vib-uri>: The vib:// URI the registry should listen on. Defaults to 'vib://localhost:8500'.");
+        "listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
+        "-u, --listen-uri <vib-uri>: The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
         "format was changed in v3.6.11.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("log", "l", "info", "[--log <level>]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
 
-    std::cout << "Vector Integration Bus (VIB) -- Registry of the VAsio Middleware" << std::endl
+    std::cout << "Vector SilKit -- Registry of the VAsio Middleware" << std::endl
         << std::endl;
 
     try
@@ -108,11 +108,11 @@ int main(int argc, char** argv)
 
     if (commandlineParser.Get<CliParser::Flag>("version").Value())
     {
-        std::string ibHash{ ib::version::GitHash() };
-        auto ibShortHash = ibHash.substr(0, 7);
+        std::string hash{ SilKit::Version::GitHash() };
+        auto shortHash = hash.substr(0, 7);
         std::cout
             << "Version Info:" << std::endl
-            << " - Vector Integration Bus (VIB): " << ib::version::String() << ", #" << ibShortHash << std::endl;
+            << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     auto&& configurationFilename{ commandlineParser.Get<CliParser::Option>("configuration").Value() };
     auto useSignalHandler{ commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value() };
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
-    auto logLevel{ commandlineParser.Get<ib::util::CommandlineParser::Option>("log").Value() };
+    auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
 
     if (!isValidLogLevel(logLevel))
     {
@@ -133,18 +133,18 @@ int main(int argc, char** argv)
     try
     {
         auto configuration = (!configurationFilename.empty()) ?
-            ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
-            ib::cfg::ParticipantConfigurationFromString("");
+            SilKit::Config::ParticipantConfigurationFromFile(configurationFilename) :
+            SilKit::Config::ParticipantConfigurationFromString("");
 
         ConfigureLogging(configuration, logLevel);
 
-        std::cout << "IbRegistry listening on " << listenUri << std::endl;
+        std::cout << "SilKitRegistry listening on " << listenUri << std::endl;
         VAsioRegistry registry{ configuration };
         registry.ProvideDomain(listenUri);
         
         if (useSignalHandler)
         {
-            using namespace ib::registry;
+            using namespace SilKit::registry;
 
 
             auto signalValue = signalPromise.get_future();
@@ -167,7 +167,7 @@ int main(int argc, char** argv)
             std::cin.ignore();
         }
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

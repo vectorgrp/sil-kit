@@ -9,7 +9,7 @@ and message type indicators. See `SerializedMessage` for reference.
 
 During the inital handshake a number of messages are exchanged.
 First, the `ParticipantAnnouncement` message is transmitted.
-When connecting to the IbRegistry a `KnownParticipants` message is returned.
+When connecting to the SilKitRegistry a `KnownParticipants` message is returned.
 In any case, a `ParticipantAnnouncementReply` is returned.
 
 All three message types contain a header of type `RegistryMsgHeader`.
@@ -33,7 +33,7 @@ one cannot rely on a protocol version so early in the connection handshake.
 The `ParticipantAnnouncementReply` contains a list of service subscriptions,
 in the form of a vector of `VAsioMsgSubscriber` objects.
 These objects contain a `msgTypeName` that is manually set for each message type,
-rather than using the data type's C++ name. (see internal/traits/IbMsgSerdesName.hpp)
+rather than using the data type's C++ name. (see internal/traits/SilKitMsgSerdesName.hpp)
 This allows us to change the API/C++ names without breaking compatibility with legacy services.
 
 To subscribe to such an announced service, a message of type `SubscriptionAcknowledge` is
@@ -54,5 +54,5 @@ Compatiblity Use Cases:
   If the data type is used during 1. Inital Handshake, the protocol version must be bumped and 
   compat code added to the handshake.
   If the data type is used during 2. Service Subscriptions, its data types version should be increased
-  and compat code added to its Ser/Des routines. (see internal/traits/IbMsgVersion.hpp)
+  and compat code added to its Ser/Des routines. (see internal/traits/SilKitMsgVersion.hpp)
 

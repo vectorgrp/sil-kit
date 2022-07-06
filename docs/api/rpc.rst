@@ -3,16 +3,16 @@ Remote procedure call (Rpc) API
 =================================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
-.. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient<ib::mw::IParticipant::CreateRpcClient()>`
-.. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<ib::mw::IParticipant::CreateRpcServer()>`
-.. |Call| replace:: :cpp:func:`Call()<ib::sim::rpc::IRpcClient::Call()>`
-.. |SubmitResult| replace:: :cpp:func:`SubmitResult()<ib::sim::rpc::IRpcServer::SubmitResult()>`
-.. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<ib::sim::rpc::IRpcServer::SetCallHandler()>`
-.. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<ib::sim::rpc::IRpcClient::SetCallResultHandler()>`
-.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<ib::mw::IParticipant::DiscoverRpcServers()>`
-.. |IRpcClient| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcClient>`
-.. |IRpcServer| replace:: :cpp:class:`IRpcClient<ib::sim::rpc::IRpcServer>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
+.. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient<SilKit::Core::IParticipant::CreateRpcClient()>`
+.. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<SilKit::Core::IParticipant::CreateRpcServer()>`
+.. |Call| replace:: :cpp:func:`Call()<SilKit::Services::Rpc::IRpcClient::Call()>`
+.. |SubmitResult| replace:: :cpp:func:`SubmitResult()<SilKit::Services::Rpc::IRpcServer::SubmitResult()>`
+.. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<SilKit::Services::Rpc::IRpcServer::SetCallHandler()>`
+.. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<SilKit::Services::Rpc::IRpcClient::SetCallResultHandler()>`
+.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<SilKit::Core::IParticipant::DiscoverRpcServers()>`
+.. |IRpcClient| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcClient>`
+.. |IRpcServer| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcServer>`
 .. contents::
    :local:
    :depth: 3
@@ -96,7 +96,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // Client participant
     // ------------------
 
-    auto participant = ib::CreateParticipant(std::move(config), participant_name, registryUri);
+    auto participant = SilKit::CreateParticipant(std::move(config), participant_name, registryUri);
     auto* client = participant->CreateRpcClient("TestFunc", "application/octet-stream",
         [](IRpcClient* client, const CallHandle callHandle, const RpcCallStatus callStatus, const std::vector<uint8_t>& resultData) {
             // handle resultData
@@ -110,7 +110,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // Server participant
     // ------------------
 
-    auto participant = ib::CreateParticipant(std::move(config), participant_name, registryUri);
+    auto participant = SilKit::CreateParticipant(std::move(config), participant_name, registryUri);
     auto* server = participant->CreateRpcServer("TestFunc", "application/octet-stream",
         [](IRpcServer* server, const CallHandle callHandle, const std::vector<uint8_t>& argumentData) {
             // handle argumentData
@@ -121,12 +121,12 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
 RpcClient API
 ~~~~~~~~~~~~~~~~~~
 
-    .. doxygenclass:: ib::sim::rpc::IRpcClient
+    .. doxygenclass:: SilKit::Services::Rpc::IRpcClient
        :members:
 
 RpcServers API
 ~~~~~~~~~~~~~~~~~~~
 
-    .. doxygenclass:: ib::sim::rpc::IRpcServer
+    .. doxygenclass:: SilKit::Services::Rpc::IRpcServer
        :members:
 

@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimFlexray STATIC
+add_library(SilKitSimFlexray STATIC
     FlexrayController.cpp
     FlexrayController.hpp
     FlexrayDatatypeUtils.cpp
@@ -11,28 +11,28 @@ add_library(IbSimFlexray STATIC
     FlexraySerdes.cpp
 )
 
-target_include_directories(IbSimFlexray
+target_include_directories(SilKitSimFlexray
     PUBLIC .
 )
 
-target_link_libraries(IbSimFlexray
-    PRIVATE IbInterface
-            IbInternal
-            IbMwLogging
-            IbTracing
-            IbConfiguration
+target_link_libraries(SilKitSimFlexray
+    PRIVATE SilKitInterface
+            SilKitInternal
+            SilKitMwLogging
+            SilKitTracing
+            SilKitConfiguration
 )
 
-add_vib_test(TestSimFlexrayValidation SOURCES ValidationTest.cpp LIBS IbSimFlexray)
-add_vib_test(TestSimFlexrayController
+add_silkit_test(TestSimFlexrayValidation SOURCES ValidationTest.cpp LIBS SilKitSimFlexray)
+add_silkit_test(TestSimFlexrayController
     SOURCES
         FlexrayControllerTest.cpp
         FlexrayControllerConfigTest.cpp
     LIBS 
-        IbSimFlexray
-        IbMwMockParticipant
-        IbTracing
-        IbConfiguration
-        IbMwMockNullConnection
+        SilKitSimFlexray
+        SilKitMwMockParticipant
+        SilKitTracing
+        SilKitConfiguration
+        SilKitMwMockNullConnection
 )
-add_vib_test(TestSimFlexray_Serdes SOURCES FlexraySerdesTest.cpp LIBS IbInternal IbSimFlexray)
+add_silkit_test(TestSimFlexray_Serdes SOURCES FlexraySerdesTest.cpp LIBS SilKitInternal SilKitSimFlexray)

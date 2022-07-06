@@ -5,6 +5,6 @@
 #include "can/all.hpp"
 #include "eth/all.hpp"
 #include "fr/all.hpp"
-#include "data/all.hpp"
+#include "pubsub/all.hpp"
 #include "lin/all.hpp"
 #include "rpc/all.hpp"

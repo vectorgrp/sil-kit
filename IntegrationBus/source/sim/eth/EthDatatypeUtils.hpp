@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 inline bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs)
 {
@@ -65,13 +65,13 @@ const size_t EthernetFrameVlanTagSize = sizeof(EthernetEtherTypeVlanTag) + sizeo
 const size_t EthernetFrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(EthernetEtherType);
 
 //! \brief Build an Ethernet level 2 frame without VLAN tag
-inline auto CreateEthernetFrame(const ib::sim::eth::EthernetMac& destinationMac,
-    const ib::sim::eth::EthernetMac& sourceMac,
-    const ib::sim::eth::EthernetEtherType& etherType,
+inline auto CreateEthernetFrame(const SilKit::Services::Ethernet::EthernetMac& destinationMac,
+    const SilKit::Services::Ethernet::EthernetMac& sourceMac,
+    const SilKit::Services::Ethernet::EthernetEtherType& etherType,
     const std::string& payload)
-    -> ib::sim::eth::EthernetFrame
+    -> SilKit::Services::Ethernet::EthernetFrame
 {
-    ib::sim::eth::EthernetFrame frame{};
+    SilKit::Services::Ethernet::EthernetFrame frame{};
 
     frame.raw.reserve(EthernetFrameHeaderSize + payload.size());
     std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(frame.raw));
@@ -85,14 +85,14 @@ inline auto CreateEthernetFrame(const ib::sim::eth::EthernetMac& destinationMac,
 }
 
 //! \brief Build an Ethernet level 2 frame with VLAN tag
-inline auto CreateEthernetFrameWithVlanTag(const ib::sim::eth::EthernetMac& destinationMac,
-    const ib::sim::eth::EthernetMac& sourceMac,
-    const ib::sim::eth::EthernetEtherType& etherType,
+inline auto CreateEthernetFrameWithVlanTag(const SilKit::Services::Ethernet::EthernetMac& destinationMac,
+    const SilKit::Services::Ethernet::EthernetMac& sourceMac,
+    const SilKit::Services::Ethernet::EthernetEtherType& etherType,
     const std::string& payload,
     const EthernetVlanTagControlIdentifier& tci)
-    -> ib::sim::eth::EthernetFrame
+    -> SilKit::Services::Ethernet::EthernetFrame
 {
-    ib::sim::eth::EthernetFrame frame{};
+    SilKit::Services::Ethernet::EthernetFrame frame{};
 
     frame.raw.reserve(EthernetFrameHeaderSize + payload.size());
     std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(frame.raw));
@@ -111,6 +111,6 @@ inline auto CreateEthernetFrameWithVlanTag(const ib::sim::eth::EthernetMac& dest
     return frame;
 }
 
-} // namespace ib
-} // namespace sim
-} // namespace eth
+} // namespace SilKit
+} // namespace Services
+} // namespace Ethernet

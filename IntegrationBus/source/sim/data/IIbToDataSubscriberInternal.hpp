@@ -2,23 +2,23 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-#include "ib/sim/data/fwd_decl.hpp"
+#include "silkit/services/pubsub/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
-//! \brief IIbToDataSubscriber interface used by the Participant
-class IIbToDataSubscriberInternal
-    : public mw::IIbReceiver<DataMessageEvent>
-    , public mw::IIbSender<>
+//! \brief IMsgForDataSubscriber interface used by the Participant
+class IMsgForDataSubscriberInternal
+    : public Core::IReceiver<DataMessageEvent>
+    , public Core::ISender<>
 {
 };
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit
 

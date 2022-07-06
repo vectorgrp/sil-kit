@@ -2,20 +2,20 @@
 
 #pragma once
 
-#include "IbLink.hpp"
+#include "SilKitLink.hpp"
 
 #include "VAsioDatatypes.hpp"
 
 #include "MessageTracing.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 #include "SerializedMessage.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-struct RemoteServiceEndpoint : IIbServiceEndpoint
+struct RemoteServiceEndpoint : IServiceEndpoint
 {
-    void SetServiceDescriptor(const ib::mw::ServiceDescriptor&) override 
+    void SetServiceDescriptor(const SilKit::Core::ServiceDescriptor&) override 
     {
         throw std::logic_error("This method is not supposed to be used in this struct."); 
     }
@@ -49,12 +49,12 @@ public:
 template <class MsgT>
 class VAsioReceiver
     : public IVAsioReceiver
-    , public IIbServiceEndpoint
+    , public IServiceEndpoint
 {
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<IbLink<MsgT>> link, logging::ILogger* logger);
+    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Logging::ILogger* logger);
 
 public:
     // ----------------------------------------
@@ -74,8 +74,8 @@ private:
     // ----------------------------------------
     // private members
     VAsioMsgSubscriber _subscriptionInfo;
-    std::shared_ptr<IbLink<MsgT>> _link;
-    logging::ILogger* _logger;
+    std::shared_ptr<SilKitLink<MsgT>> _link;
+    Logging::ILogger* _logger;
     ServiceDescriptor _serviceDescriptor;
 };
 
@@ -83,7 +83,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<IbLink<MsgT>> link, logging::ILogger* logger)
+VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Logging::ILogger* logger)
     : _subscriptionInfo{std::move(subscriberInfo)}
     , _link{link}
     , _logger{logger}
@@ -105,9 +105,9 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescr
     TraceRx(_logger, this, msg);
 
     auto remoteId = RemoteServiceEndpoint(descriptor);
-    _link->DistributeRemoteIbMessage(&remoteId, std::move(msg));
+    _link->DistributeRemoteSilKitMessage(&remoteId, std::move(msg));
 
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

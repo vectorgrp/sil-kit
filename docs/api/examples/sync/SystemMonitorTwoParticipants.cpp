@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
-auto participant1 = ib::CreateParticipant(ibConfig, participantName1, registryUri);
-auto participant2 = ib::CreateParticipant(ibConfig, participantName2, registryUri);
+auto participant1 = SilKit::CreateParticipant(config, participantName1, registryUri);
+auto participant2 = SilKit::CreateParticipant(config, participantName2, registryUri);
 
 auto* systemMonitor = participant1->GetSystemMonitor();
 

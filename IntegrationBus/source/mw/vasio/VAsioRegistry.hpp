@@ -4,22 +4,22 @@
 #include <list>
 
 #include "VAsioConnection.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/vendor/IIbRegistry.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/vendor/ISilKitRegistry.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "ProtocolVersion.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class VAsioRegistry
-    : public ib::vendor::IIbRegistry
+    : public SilKit::Vendor::ISilKitRegistry
 {
 public: // CTor
     VAsioRegistry() = delete;
     VAsioRegistry(const VAsioRegistry&) = delete;
     VAsioRegistry(VAsioRegistry&&) = delete;
-    VAsioRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> cfg,
+    VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg,
                   ProtocolVersion version = CurrentProtocolVersion());
 
 public: // methods
@@ -27,14 +27,14 @@ public: // methods
 
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;
-    auto GetLogger() -> logging::ILogger* override;
+    auto GetLogger() -> Logging::ILogger* override;
 
 private:
     // ----------------------------------------
     // private data types
     struct ConnectedParticipantInfo {
         IVAsioPeer* peer;
-        ib::mw::VAsioPeerInfo peerInfo;
+        SilKit::Core::VAsioPeerInfo peerInfo;
     };
 
 private:
@@ -50,13 +50,13 @@ private:
 private:
     // ----------------------------------------
     // private members
-    std::unique_ptr<logging::ILogger> _logger;
+    std::unique_ptr<Logging::ILogger> _logger;
     std::vector<ConnectedParticipantInfo> _connectedParticipants;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
-    std::shared_ptr<ib::cfg::ParticipantConfiguration> _vasioConfig;
+    std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;
     VAsioConnection _connection;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

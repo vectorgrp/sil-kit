@@ -2,26 +2,26 @@
 
 #pragma once
 
-#include "ib/sim/lin/LinDatatypes.hpp"
+#include "silkit/services/lin/LinDatatypes.hpp"
 
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 class ISimBehavior
 {
 public:
     virtual ~ISimBehavior() = default;
-    virtual auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool = 0;
+    virtual auto AllowReception(const Core::IServiceEndpoint* from) const -> bool = 0;
 
-    virtual void SendIbMessage(LinSendFrameRequest&& sendFrameRequest) = 0;
-    virtual void SendIbMessage(LinTransmission&& transmission) = 0;
-    virtual void SendIbMessage(LinControllerConfig&& controllerConfig) = 0;
-    virtual void SendIbMessage(LinSendFrameHeaderRequest&& header) = 0;
-    virtual void SendIbMessage(LinFrameResponseUpdate&& frameResponseUpdate) = 0;
-    virtual void SendIbMessage(LinControllerStatusUpdate&& statusUpdate) = 0;
+    virtual void SendMsg(LinSendFrameRequest&& sendFrameRequest) = 0;
+    virtual void SendMsg(LinTransmission&& transmission) = 0;
+    virtual void SendMsg(LinControllerConfig&& controllerConfig) = 0;
+    virtual void SendMsg(LinSendFrameHeaderRequest&& header) = 0;
+    virtual void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) = 0;
+    virtual void SendMsg(LinControllerStatusUpdate&& statusUpdate) = 0;
     
     virtual void GoToSleep() = 0;
     virtual void Wakeup() = 0;
@@ -29,6 +29,6 @@ public:
     virtual auto CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame) -> LinFrameStatus = 0;
 };
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

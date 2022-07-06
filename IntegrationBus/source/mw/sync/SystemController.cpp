@@ -3,9 +3,9 @@
 #include "SystemController.hpp"
 #include "Hash.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 SystemController::SystemController(IParticipantInternal* participant)
     : _participant{participant}
@@ -14,7 +14,7 @@ SystemController::SystemController(IParticipantInternal* participant)
 
 void SystemController::Restart(const std::string& participantName) const
 {
-    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Restart);
+    SendParticipantCommand(Util::Hash::Hash(participantName), ParticipantCommand::Kind::Restart);
 }
 
 void SystemController::Run() const
@@ -29,7 +29,7 @@ void SystemController::Stop() const
 
 void SystemController::Shutdown(const std::string& participantName) const
 {
-    SendParticipantCommand(util::hash::Hash(participantName), ParticipantCommand::Kind::Shutdown);
+    SendParticipantCommand(Util::Hash::Hash(participantName), ParticipantCommand::Kind::Shutdown);
 }
 
 void SystemController::AbortSimulation() const
@@ -40,9 +40,9 @@ void SystemController::AbortSimulation() const
 void SystemController::SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration)
 {
     //  Distribute to SystemMonitors (including self delivery) 
-    _participant->SendIbMessage(this, workflowConfiguration);
+    _participant->SendMsg(this, workflowConfiguration);
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

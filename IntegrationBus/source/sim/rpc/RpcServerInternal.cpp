@@ -2,13 +2,13 @@
 
 #include "RpcServerInternal.hpp"
 #include "RpcDatatypeUtils.hpp"
-#include "ib/sim/rpc/string_utils.hpp"
+#include "silkit/services/rpc/string_utils.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
+RpcServerInternal::RpcServerInternal(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
                                      const std::string& functionName, const std::string& mediaType,
                                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                                      RpcCallHandler handler, IRpcServer* parent)
@@ -23,7 +23,7 @@ RpcServerInternal::RpcServerInternal(mw::IParticipantInternal* participant, mw::
 {
 }
 
-void RpcServerInternal::ReceiveIbMessage(const mw::IIbServiceEndpoint* /*from*/, const FunctionCall& msg)
+void RpcServerInternal::ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const FunctionCall& msg)
 {
     ReceiveMessage(msg);
 }
@@ -47,7 +47,7 @@ void RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, const std::v
     auto it = _receivedCallHandles.find(callHandleStr);
     if (it != _receivedCallHandles.end())
     {
-        _participant->SendIbMessage(this, FunctionCallResponse{_timeProvider->Now(), callHandle._callUUID, resultData});
+        _participant->SendMsg(this, FunctionCallResponse{_timeProvider->Now(), callHandle._callUUID, resultData});
         _receivedCallHandles.erase(callHandleStr);
     }
 }
@@ -57,11 +57,11 @@ void RpcServerInternal::SetRpcHandler(RpcCallHandler handler)
     _handler = std::move(handler);
 }
 
-void RpcServerInternal::SetTimeProvider(mw::sync::ITimeProvider* provider)
+void RpcServerInternal::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

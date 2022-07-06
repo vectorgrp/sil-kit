@@ -3,14 +3,14 @@
 #pragma once
 #include <atomic>
 
-#include "ib/mw/IParticipant.hpp"
+#include "silkit/core/IParticipant.hpp"
 
 #include "internal_fwd.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 #include "ServiceDatatypes.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class IParticipantInternal : public IParticipant
 {
@@ -27,125 +27,125 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    virtual void JoinIbDomain(const std::string& registryUri) = 0;
+    virtual void JoinSilKitDomain(const std::string& registryUri) = 0;
 
     // For VIBE-NetworkSimulator integration:
-    virtual void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
-    virtual void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
-    virtual void RegisterFlexraySimulator(sim::fr::IIbToFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
-    virtual void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim, const std::vector<std::string>& networkNames) = 0;
+    virtual void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
+    virtual void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
+    virtual void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
+    virtual void RegisterLinSimulator(Services::Lin::IMsgForLinSimulator* busSim, const std::vector<std::string>& networkNames) = 0;
 
-    // The SendIbMessages are virtual functions so we can mock them in testing.
+    // The SendMsgs are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::can::CanFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanConfigureBaudrate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::can::CanSetControllerMode& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Can::CanFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanConfigureBaudrate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanSetControllerMode& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthernetFrameEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::eth::EthernetFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthernetFrameTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthernetStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::eth::EthernetSetMode& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Ethernet::EthernetFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetFrameTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetSetMode& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayFrameEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::fr::FlexrayFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayFrameTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::fr::FlexrayFrameTransmitEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexraySymbolEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexraySymbolTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayCycleStartEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayHostCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayControllerConfig& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferConfigUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::fr::FlexrayPocStatusEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Flexray::FlexrayFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayFrameTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Flexray::FlexrayFrameTransmitEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexraySymbolEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexraySymbolTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayCycleStartEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayHostCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayControllerConfig& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayPocStatusEvent& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinSendFrameRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinSendFrameHeaderRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinTransmission& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinWakeupPulse& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinControllerConfig& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinControllerStatusUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::lin::LinFrameResponseUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinSendFrameRequest& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinSendFrameHeaderRequest& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinTransmission& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinWakeupPulse& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinControllerConfig& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Rpc::FunctionCall&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Rpc::FunctionCallResponse& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Rpc::FunctionCallResponse&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::NextSimTask& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::ParticipantCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::SystemCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const sync::WorkflowConfiguration& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::NextSimTask& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::ParticipantCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::SystemCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const logging::LogMsg& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, logging::LogMsg&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Logging::LogMsg& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Logging::LogMsg&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ParticipantDiscoveryEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ParticipantDiscoveryEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ServiceDiscoveryEvent& msg) = 0;
 
     // targeted messaging
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::can::CanFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanControllerStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanConfigureBaudrate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanSetControllerMode& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Can::CanFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanControllerStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanConfigureBaudrate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanSetControllerMode& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetFrameEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::eth::EthernetFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetFrameTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetSetMode& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Ethernet::EthernetFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetSetMode& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameTransmitEvent&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolTransmitEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayCycleStartEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayHostCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayControllerConfig& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferConfigUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayPocStatusEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameTransmitEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolTransmitEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayCycleStartEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayHostCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayControllerConfig& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayPocStatusEvent& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameHeaderRequest& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinTransmission& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinWakeupPulse& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerConfig& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerStatusUpdate& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinFrameResponseUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameRequest& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameHeaderRequest& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinTransmission& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinWakeupPulse& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerConfig& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessageEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessageEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::DataMessageEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::PubSub::DataMessageEvent&& msg) = 0;
     
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCallResponse& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCallResponse&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCall& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCall&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCallResponse& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCallResponse&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::NextSimTask& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::SystemCommand& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::WorkflowConfiguration& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::NextSimTask& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const logging::LogMsg& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, logging::LogMsg&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Logging::LogMsg& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Logging::LogMsg&& msg) = 0;
 
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ParticipantDiscoveryEvent& msg) = 0;
-    virtual void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ParticipantDiscoveryEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ServiceDiscoveryEvent& msg) = 0;
 
     // For Connection/middleware support:
     virtual void OnAllMessagesDelivered(std::function<void()> callback) = 0;
@@ -153,27 +153,27 @@ public:
     virtual void ExecuteDeferred(std::function<void()> callback) = 0;
 
     //Service discovery for dynamic, configuration-less simulations
-    virtual auto GetServiceDiscovery() -> service::IServiceDiscovery* = 0;
+    virtual auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* = 0;
 	
 	// Internal DataSubscriber that is only created on a matching data connection
     virtual auto CreateDataSubscriberInternal(
         const std::string& topic, const std::string& linkName,
         const std::string& mediaType,
-        const std::map<std::string, std::string>& publisherLabels, sim::data::DataMessageHandlerT callback,
-        sim::data::IDataSubscriber* parent) -> sim::data::DataSubscriberInternal*  = 0;
+        const std::map<std::string, std::string>& publisherLabels, Services::PubSub::DataMessageHandlerT callback,
+        Services::PubSub::IDataSubscriber* parent) -> Services::PubSub::DataSubscriberInternal*  = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection
     virtual auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                          const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                                         sim::rpc::RpcCallHandler handler, sim::rpc::IRpcServer* parent)
-        -> ib::sim::rpc::RpcServerInternal* = 0;
+                                         Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
+        -> SilKit::Services::Rpc::RpcServerInternal* = 0;
 
-    virtual auto CreateTimeSyncService(mw::sync::LifecycleService* service) -> sync::TimeSyncService* = 0;
+    virtual auto CreateTimeSyncService(Core::Orchestration::LifecycleService* service) -> Orchestration::TimeSyncService* = 0;
 
 protected:
     std::atomic<EndpointId> _localEndpointId{ 0 };
 };
 
-} // mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 

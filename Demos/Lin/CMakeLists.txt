@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-make_ib_demo(IbDemoLin LinDemo.cpp)
+make_silkit_demo(SilKitDemoLin LinDemo.cpp)
 
-target_sources(IbDemoLin 
-	PRIVATE IbConfig_DemoLin.json
+target_sources(SilKitDemoLin 
+	PRIVATE SilKitConfig_DemoLin.json
     PRIVATE NetworkSimulatorConfig.json
 )

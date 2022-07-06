@@ -1,11 +1,11 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "ServiceDiscovery.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
-namespace ib {
-namespace mw {
-namespace service {
+namespace SilKit {
+namespace Core {
+namespace Discovery {
 
 ServiceDiscovery::ServiceDiscovery(IParticipantInternal* participant, const std::string& participantName)
     : _participant{participant}
@@ -17,22 +17,22 @@ ServiceDiscovery::ServiceDiscovery(IParticipantInternal* participant, const std:
 
 ServiceDiscovery::~ServiceDiscovery() noexcept
 {
-    // We might still receive asynchronous IB messages or callbacks
+    // We might still receive asynchronous SilKit messages or callbacks
     // when shutting down. we set a  guard here and prevent mutating our internal maps
     _shuttingDown = true;
 }
 
-void ServiceDiscovery::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void ServiceDiscovery::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto ServiceDiscovery::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto ServiceDiscovery::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantDiscoveryEvent& msg)
+void ServiceDiscovery::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ParticipantDiscoveryEvent& msg)
 {
     if (_shuttingDown)
     {
@@ -100,7 +100,7 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceCreated;
     event.serviceDescriptor = serviceDescriptor;
-    _participant->SendIbMessage(this, std::move(event));
+    _participant->SendMsg(this, std::move(event));
 }
 
 // TODO: Is never called, connect once services can be removed
@@ -117,10 +117,10 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
     ServiceDiscoveryEvent event;
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
     event.serviceDescriptor = serviceDescriptor;
-    _participant->SendIbMessage(this, std::move(event));
+    _participant->SendMsg(this, std::move(event));
 }
 
-void ServiceDiscovery::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
+void ServiceDiscovery::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
 {
     if (_shuttingDown)
     {
@@ -153,11 +153,11 @@ void ServiceDiscovery::OnServiceAddition(const ServiceDescriptor& serviceDescrip
     if (fromParticipant != _participantName)
     {
         std::string supplControllerTypeName;
-        serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, supplControllerTypeName);
+        serviceDescriptor.GetSupplementalDataItem(Core::Discovery::controllerType, supplControllerTypeName);
 
         // A remote participant might be unknown, however, it will send an event for its own ServiceDiscovery service
         // when first joining the simulation. React by announcing all services of this participant
-        if (supplControllerTypeName == mw::service::controllerTypeServiceDiscovery)
+        if (supplControllerTypeName == Core::Discovery::controllerTypeServiceDiscovery)
         {
             AnnounceLocalParticipantTo(fromParticipant);
         }
@@ -179,7 +179,7 @@ void ServiceDiscovery::AnnounceLocalParticipantTo(const std::string& otherPartic
     {
         localServices.services.push_back(thisParticipantServiceMap.second);
     }
-    _participant->SendIbMessage(this, otherParticipant, std::move(localServices));
+    _participant->SendMsg(this, otherParticipant, std::move(localServices));
 }
 
 void ServiceDiscovery::OnServiceRemoval(const ServiceDescriptor& serviceDescriptor)
@@ -255,6 +255,6 @@ void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryH
     _specificDiscoveryStore.RegisterSpecificServiceDiscoveryHandler(handler, controllerTypeName, supplDataValue);
 }
 
-} // namespace service
-} // namespace mw
-} // namespace ib
+} // namespace Discovery
+} // namespace Core
+} // namespace SilKit

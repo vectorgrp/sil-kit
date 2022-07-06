@@ -5,13 +5,13 @@
 #include "IServiceDiscovery.hpp"
 #include "YamlParser.hpp"
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
-DataSubscriber::DataSubscriber(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
+DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
                                const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
                                DataMessageHandlerT defaultDataHandler, NewDataPublisherHandlerT newDataSourceHandler)
     : _topic{topic}
@@ -27,8 +27,8 @@ DataSubscriber::DataSubscriber(mw::IParticipantInternal* participant, mw::sync::
 void DataSubscriber::RegisterServiceDiscovery()
 {
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
-        [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
-               const ib::mw::ServiceDescriptor& serviceDescriptor) {
+        [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
 
                 auto getVal = [serviceDescriptor](std::string key) {
                     std::string tmp;
@@ -39,18 +39,18 @@ void DataSubscriber::RegisterServiceDiscovery()
                     return tmp;
                 };
 
-                auto topic = getVal(mw::service::supplKeyDataPublisherTopic);
-                std::string pubMediaType{ getVal(mw::service::supplKeyDataPublisherMediaType)};
-                auto pubUUID = getVal(mw::service::supplKeyDataPublisherPubUUID);
-                std::string labelsStr = getVal(mw::service::supplKeyDataPublisherPubLabels);
-                std::map<std::string, std::string> publisherLabels = ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
+                auto topic = getVal(Core::Discovery::supplKeyDataPublisherTopic);
+                std::string pubMediaType{ getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
+                auto pubUUID = getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
+                std::string labelsStr = getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                std::map<std::string, std::string> publisherLabels = SilKit::Config::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
                 if (topic == _topic && MatchMediaType(_mediaType, pubMediaType) &&
                     MatchLabels(_labels, publisherLabels))
                 {
                     std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
-                    if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
+                    if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                     {
                         // NB: The internal subscriber carries its publisher's information
                         // that AddExplicitDataHandlersToInternalSubscribers() needs to check matching between
@@ -73,13 +73,13 @@ void DataSubscriber::RegisterServiceDiscovery()
                         // NB: Try to assign specific handlers here as _internalSubscibers has changed
                         AddExplicitDataHandlersToInternalSubscribers();
                     }
-                    else if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                    else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
                     {
                         RemoveInternalSubscriber(pubUUID);
                     }
                 }
             
-        }, mw::service::controllerTypeDataPublisher, _topic);
+        }, Core::Discovery::controllerTypeDataPublisher, _topic);
 }
 
 void DataSubscriber::SetDefaultDataMessageHandler(DataMessageHandlerT callback)
@@ -182,6 +182,6 @@ void DataSubscriber::AddExplicitDataHandlersToInternalSubscribers()
     }
 }
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

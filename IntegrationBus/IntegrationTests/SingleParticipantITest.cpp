@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -15,8 +15,8 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Can;
 
 using testing::_;
 using testing::A;
@@ -57,7 +57,7 @@ protected:
         syncParticipantNames = {"CanWriter"};
     }
 
-    void SetupWriter(ib::test::SimParticipant* participant)
+    void SetupWriter(SilKit::Tests::SimParticipant* participant)
     {
 
         auto* canController = participant->Participant()->CreateCanController("CAN1");
@@ -79,7 +79,7 @@ protected:
         });
 
         timeSyncService->SetSimulationTask([this, canController, lifecycleService](auto, auto) {
-            EXPECT_EQ(lifecycleService->State(), sync::ParticipantState::Running);
+            EXPECT_EQ(lifecycleService->State(), Orchestration::ParticipantState::Running);
             if (numSent < testMessages.size())
             {
                 const auto& message = testMessages.at(numSent);
@@ -98,7 +98,7 @@ protected:
     void ExecuteTest()
     {
         auto registryUri = MakeTestRegistryUri();
-        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);

@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbMwSync
+add_library(SilKitMwSync
     ILifecycleStates.hpp
     LifecycleManagement.hpp
     LifecycleManagement.cpp
@@ -23,40 +23,40 @@ add_library(IbMwSync
     SyncSerdes.cpp
 )
 
-target_include_directories(IbMwSync
+target_include_directories(SilKitMwSync
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(IbMwSync
+target_link_libraries(SilKitMwSync
     PUBLIC 
-        IbInterface
-        IbUtil
-        IbSetThreadName
-        IbInternal
+        SilKitInterface
+        SilKitUtil
+        SilKitSetThreadName
+        SilKitInternal
     PRIVATE 
-        IbInternal
-        IbMwLogging
-        IbConfiguration
+        SilKitInternal
+        SilKitMwLogging
+        SilKitConfiguration
     INTERFACE
-        IbInternal
-        IbConfiguration
+        SilKitInternal
+        SilKitConfiguration
 )
 
-add_vib_test(TestMwLifecycleService
+add_silkit_test(TestMwLifecycleService
     SOURCES LifecycleServiceTest.cpp 
-    LIBS IbMwSync IbMwMockParticipant
+    LIBS SilKitMwSync SilKitMwMockParticipant
 )
-add_vib_test(TestMwSystemController 
+add_silkit_test(TestMwSystemController 
     SOURCES SystemControllerTest.cpp 
-    LIBS IbMwSync IbMwMockParticipant
+    LIBS SilKitMwSync SilKitMwMockParticipant
 )
-add_vib_test(TestMwSystemMonitor 
+add_silkit_test(TestMwSystemMonitor 
     SOURCES SystemMonitorTest.cpp 
-    LIBS IbMwSync IbMwMockParticipant
+    LIBS SilKitMwSync SilKitMwMockParticipant
 )
-add_vib_test(TestMwWatchDog
+add_silkit_test(TestMwWatchDog
     SOURCES WatchDogTest.cpp
-    LIBS IbMwSync
+    LIBS SilKitMwSync
 )
-add_vib_test(TestMwSync_Serdes SOURCES SyncSerdesTest.cpp LIBS IbMwSync IbInternal)
+add_silkit_test(TestMwSync_Serdes SOURCES SyncSerdesTest.cpp LIBS SilKitMwSync SilKitInternal)

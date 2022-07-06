@@ -6,10 +6,10 @@
 
 TEST(MwVAsioSerdes, Mw_EndpointAddress)
 {
-    ib::mw::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer;
 
-    ib::mw::EndpointAddress in{3,7};
-    ib::mw::EndpointAddress out{1,1};
+    SilKit::Core::EndpointAddress in{3,7};
+    SilKit::Core::EndpointAddress out{1,1};
     
     buffer << in;
     buffer >> out;
@@ -19,15 +19,15 @@ TEST(MwVAsioSerdes, Mw_EndpointAddress)
 
 TEST(MwVAsioSerdes, Mw_EndpointAddress_multiple)
 {
-    ib::mw::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer;
 
-    ib::mw::EndpointAddress in1{3,7};
-    ib::mw::EndpointAddress in2{4,8};
-    ib::mw::EndpointAddress in3{5,9};
+    SilKit::Core::EndpointAddress in1{3,7};
+    SilKit::Core::EndpointAddress in2{4,8};
+    SilKit::Core::EndpointAddress in3{5,9};
 
-    ib::mw::EndpointAddress out1{1,1};
-    ib::mw::EndpointAddress out2{2,2};
-    ib::mw::EndpointAddress out3{3,3};
+    SilKit::Core::EndpointAddress out1{1,1};
+    SilKit::Core::EndpointAddress out2{2,2};
+    SilKit::Core::EndpointAddress out3{3,3};
 
     buffer << in1 << in2 << in3;
     buffer >> out1 >> out2 >> out3;

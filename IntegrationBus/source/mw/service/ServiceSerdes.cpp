@@ -4,12 +4,12 @@
 #include "InternalSerdes.hpp"
 #include "ServiceDescriptor.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-// ServiceDescriptor encoding is here, because it pulls in IbConfiguration 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
-    const ib::mw::ServiceDescriptor& msg)
+// ServiceDescriptor encoding is here, because it pulls in SilKitConfiguration 
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+    const SilKit::Core::ServiceDescriptor& msg)
 {
     buffer
         << msg._participantName
@@ -24,8 +24,8 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
-    ib::mw::ServiceDescriptor& updatedMsg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
+    SilKit::Core::ServiceDescriptor& updatedMsg)
 {
     buffer
         >> updatedMsg._participantName
@@ -39,10 +39,10 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
         ;
     return buffer;
 }
-namespace service {
+namespace Discovery {
 
 // ParticipantDiscoveryEvent
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
     const ParticipantDiscoveryEvent& msg)
 {
     buffer << msg.participantName
@@ -52,7 +52,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
     ParticipantDiscoveryEvent& updatedMsg)
 {
     buffer >> updatedMsg.participantName
@@ -63,7 +63,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
 }
 
 // ServiceDiscoveryEvent
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
     const ServiceDiscoveryEvent& msg)
 {
     buffer << msg.type
@@ -72,7 +72,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer,
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer,
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer,
     ServiceDiscoveryEvent& updatedMsg)
 {
     buffer >> updatedMsg.type
@@ -101,6 +101,6 @@ void Deserialize(MessageBuffer& buffer, ServiceDiscoveryEvent& out)
     buffer >> out;
 }
 
-} // namespace service
-} // namespace mw
-} // namespace ib
+} // namespace Discovery
+} // namespace Core
+} // namespace SilKit

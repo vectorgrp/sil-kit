@@ -11,8 +11,8 @@
 #include "EndpointAddress.hpp"
 #include "Hash.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 typedef std::map<std::string, std::string> SupplementalData;
 
@@ -44,31 +44,31 @@ public:
     inline bool operator==(const ServiceDescriptor& rhs) const;
     inline bool operator!=(const ServiceDescriptor& rhs) const;
     inline std::string to_string() const;
-    inline mw::EndpointAddress to_endpointAddress() const;
+    inline Core::EndpointAddress to_endpointAddress() const;
 
 public:
     inline ParticipantId GetParticipantId() const { return _participantId; }
     std::string GetParticipantName() const { return _participantName; }
     void SetParticipantName(std::string val) 
     {
-        _participantId = ib::util::hash::Hash(val);
+        _participantId = SilKit::Util::Hash::Hash(val);
         _participantName = std::move(val);
     }
 
-    ib::mw::ServiceType GetServiceType() const { return _serviceType; }
-    void SetServiceType(ib::mw::ServiceType val) {_serviceType = std::move(val); }
+    SilKit::Core::ServiceType GetServiceType() const { return _serviceType; }
+    void SetServiceType(SilKit::Core::ServiceType val) {_serviceType = std::move(val); }
 
     std::string GetNetworkName() const { return _networkName; }
     void SetNetworkName(std::string val) {_networkName = std::move(val); }
 
-    ib::cfg::NetworkType GetNetworkType() const { return _networkType; }
-    void SetNetworkType(ib::cfg::NetworkType val) { _networkType = std::move(val); }
+    SilKit::Config::NetworkType GetNetworkType() const { return _networkType; }
+    void SetNetworkType(SilKit::Config::NetworkType val) { _networkType = std::move(val); }
 
     std::string GetServiceName() const { return _serviceName; }
     void SetServiceName(std::string val) {_serviceName = std::move(val); }
 
-    ib::mw::EndpointId GetServiceId() const { return _serviceId; }
-    void SetServiceId(ib::mw::EndpointId val) {_serviceId = std::move(val); }
+    SilKit::Core::EndpointId GetServiceId() const { return _serviceId; }
+    void SetServiceId(SilKit::Core::EndpointId val) {_serviceId = std::move(val); }
 
     SupplementalData GetSupplementalData() const { return _supplementalData; }
     void SetSupplementalData(SupplementalData val) { _supplementalData = std::move(val); }
@@ -90,7 +90,7 @@ public:
     ParticipantId _participantId{0};
     ServiceType _serviceType{ServiceType::Undefined};
     std::string _networkName; //!< the service's link name
-    ib::cfg::NetworkType _networkType{ib::cfg::NetworkType::Invalid};
+    SilKit::Config::NetworkType _networkType{SilKit::Config::NetworkType::Invalid};
     std::string _serviceName;
     EndpointId _serviceId;
     SupplementalData _supplementalData;
@@ -120,7 +120,7 @@ std::string ServiceDescriptor::to_string() const
     ss 
         << GetParticipantName()
         << separator
-        << ib::mw::to_string(GetServiceType())
+        << SilKit::Core::to_string(GetServiceType())
         ;
     switch (GetServiceType())
     {
@@ -128,7 +128,7 @@ std::string ServiceDescriptor::to_string() const
     {
         ss 
             << separator
-            << cfg::to_string(GetNetworkType())
+            << Config::to_string(GetNetworkType())
             << separator
             << GetNetworkName()
             ;
@@ -138,7 +138,7 @@ std::string ServiceDescriptor::to_string() const
     case ServiceType::SimulatedController:
     {
         std::string controllerTypeName;
-        if (!GetSupplementalDataItem(ib::mw::service::controllerType, controllerTypeName))
+        if (!GetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName))
         {
             throw std::logic_error("supplementalData.size() > 0");
         }
@@ -186,5 +186,5 @@ inline std::string to_string(const ServiceDescriptor& serviceDescriptor)
     return serviceDescriptor.to_string();
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

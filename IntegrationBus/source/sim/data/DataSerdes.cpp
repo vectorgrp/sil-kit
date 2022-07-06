@@ -2,32 +2,32 @@
 
 #include "DataSerdes.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const DataMessageEvent& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const DataMessageEvent& msg)
 {
     buffer << msg.data
            << msg.timestamp;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, DataMessageEvent& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, DataMessageEvent& msg)
 {
     buffer >> msg.data
            >> msg.timestamp;
     return buffer;
 }
-void Serialize(ib::mw::MessageBuffer& buffer, const DataMessageEvent& msg)
+void Serialize(SilKit::Core::MessageBuffer& buffer, const DataMessageEvent& msg)
 {
     buffer << msg;
     return;
 }
-void Deserialize(ib::mw::MessageBuffer& buffer, DataMessageEvent& out)
+void Deserialize(SilKit::Core::MessageBuffer& buffer, DataMessageEvent& out)
 {
     buffer >> out;
 }
 
-} // namespace data    
-} // namespace sim
-} // namespace ib
+} // namespace PubSub    
+} // namespace Services
+} // namespace SilKit

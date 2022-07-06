@@ -14,7 +14,7 @@ class YamlValidatorTest : public testing::Test
 {
 };
 
-using namespace ib::cfg;
+using namespace SilKit::Config;
 
 TEST_F(YamlValidatorTest, yaml_doc_relations)
 {
@@ -43,7 +43,7 @@ TEST_F(YamlValidatorTest, validate_without_warnings)
     cfg.schemaVersion = "1";
     cfg.middleware.enableDomainSockets = true;
     cfg.middleware.connectAttempts = 1234;
-    cfg.middleware.registryUri = "vib://not-localhost";
+    cfg.middleware.registryUri = "silkit://not-localhost";
     cfg.middleware.tcpNoDelay = true;
     cfg.middleware.tcpQuickAck = true;
     cfg.middleware.tcpReceiveBufferSize = 1234;

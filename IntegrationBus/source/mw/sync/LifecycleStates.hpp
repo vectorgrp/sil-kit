@@ -4,14 +4,14 @@
 
 #include <string>
 
-#include "ib/mw/sync/SyncDatatypes.hpp"
+#include "silkit/core/sync/SyncDatatypes.hpp"
 
 #include "ILifecycleStates.hpp"
 #include "LifecycleManagement.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class State : public ILifecycleState
 {
@@ -255,6 +255,6 @@ public:
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
 };
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

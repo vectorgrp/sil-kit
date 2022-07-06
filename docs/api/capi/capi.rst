@@ -11,26 +11,26 @@ C API
 
 .. highlight:: c
 
-VIB Entry Point and API Organization
+SILKIT Entry Point and API Organization
 ====================================
 
-The main entry point of the C API is the function to obtain a ib_Participant::
+The main entry point of the C API is the function to obtain a SilKit_Participant::
 
-    ib_Participant* participant = NULL;
+    SilKit_Participant* participant = NULL;
     const char* configString = "{ ... }";
     const char* participantName = "CanWriter";
-    const char* registryUri = "vib://localhost:8500";
-    ib_ReturnCode result = ib_Participant_Create(&participant, configString,
-                                                            participantName, registryUri, ib_False);
+    const char* registryUri = "silkit://localhost:8500";
+    SilKit_ReturnCode result = SilKit_Participant_Create(&participant, configString,
+                                                            participantName, registryUri, SilKit_False);
 
-All further services of the C API of the IntegrationBus are requested through this Participant.
+All further services of the C API of the SilKit are requested through this Participant.
 
 Entities obtained through the Participant must not be destroyed/deleted by the user of the API.
-All entities, that are provided through the API expect for the ib_Participant are destroyed through
-the internals of the Integration Bus implementation.
+All entities, that are provided through the API expect for the SilKit_Participant are destroyed through
+the internals of the SilKit implementation.
 
-After creation of a Participant it must be ensured that eventually ib_Participant_Destroy is called
-with the corresponding pointer to the ib_Participant entity.
+After creation of a Participant it must be ensured that eventually SilKit_Participant_Destroy is called
+with the corresponding pointer to the SilKit_Participant entity.
 
 
 API and Data Type Reference
@@ -38,16 +38,16 @@ API and Data Type Reference
 
 General API
 -----------
-.. doxygenfunction:: ib_ReturnCodeToString
-.. doxygenfunction:: ib_GetLastErrorString
+.. doxygenfunction:: SilKit_ReturnCodeToString
+.. doxygenfunction:: SilKit_GetLastErrorString
 
 Participant API
 ---------------
 
-.. doxygenfunction:: ib_Participant_Create
-.. doxygenfunction:: ib_Participant_Destroy
+.. doxygenfunction:: SilKit_Participant_Create
+.. doxygenfunction:: SilKit_Participant_Destroy
 
-Most creator functions for other objects (such as bus controllers) require an ib_Participant, 
+Most creator functions for other objects (such as bus controllers) require an SilKit_Participant, 
 which is the factory object, as input parameter.
 
 Services
@@ -88,9 +88,9 @@ The Logger API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Logger API can be used to write log messages.
 
-.. doxygenfunction:: ib_Participant_GetLogger
-.. doxygenfunction:: ib_Logger_Log
+.. doxygenfunction:: SilKit_Participant_GetLogger
+.. doxygenfunction:: SilKit_Logger_Log
 
 Enumerations and Typedefs
 -------------------------
-.. doxygentypedef:: ib_LoggingLevel
+.. doxygentypedef:: SilKit_LoggingLevel

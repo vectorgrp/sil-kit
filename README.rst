@@ -1,14 +1,14 @@
 ================================
-The Vector Integration Bus
+The Vector SilKit
 ================================
 
-The Vector Integration Bus is a runtime component that enables distributed
+The Vector SilKit is a runtime component that enables distributed
 simulation for automative applications. This README is intended to provide you
-with quick start on how to build the Integration Bus.
+with quick start on how to build the SilKit.
 
-For documentation on using the Integration Bus, see the html documentation,
-which can be generated when building the Integration Bus (cf. Customizing the
-Build) and is provided in pre-built form with the Integration Bus packages.
+For documentation on using the SilKit, see the html documentation,
+which can be generated when building the SilKit (cf. Customizing the
+Build) and is provided in pre-built form with the SilKit packages.
 
 
 Getting Started - GIT Clone
@@ -30,7 +30,7 @@ required third party software::
 2. Generate a Project
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Integration Bus uses CMake for its build system. CMake can generate a
+The SilKit uses CMake for its build system. CMake can generate a
 platform specific project, e.g., a Visual Studio solution or Linux make
 files. To generate a project using the default project generator, create a build
 directory and configure cmake::
@@ -52,35 +52,35 @@ called "install" next to the build folder, run cmake as follows::
 
 There are also specific options to toggle details of the build:
 
-    1. IB_BUILD_DOCS=ON (default: OFF) generates html documentation using
+    1. SILKIT_BUILD_DOCS=ON (default: OFF) generates html documentation using
        Doxygen and Sphinx. Both must be installed beforehand. Sphinx is a Python
        program that can be installed via pip.
 
-    2. IB_BUILD_TESTS=OFF (default: ON) disables the generation of unit and
+    2. SILKIT_BUILD_TESTS=OFF (default: ON) disables the generation of unit and
        integration tests. The tests are based on the google test framework,
-       which is bundled with the Integration Bus.
+       which is bundled with the SilKit.
 
-    3. IB_BUILD_DEMOS=OFF (default: ON) disables the generation of demo
-       applications for the Integration Bus.
+    3. SILKIT_BUILD_DEMOS=OFF (default: ON) disables the generation of demo
+       applications for the SilKit.
 
-    4. IB_BUILD_UTILITIES=OFF (default: ON) disables the generation of utility tools
+    4. SILKIT_BUILD_UTILITIES=OFF (default: ON) disables the generation of utility tools
        (registry, system controller and system monitor).
 
-E.g., if you want to build the Integration Bus with documentation enabled,
+E.g., if you want to build the SilKit with documentation enabled,
 call cmake in your build directory as follows::
        
-    cmake -DIB_BUILD_DOCS=ON ..
+    cmake -SILKIT_BUILD_DOCS=ON ..
 
-4. Build the Integration Bus
+4. Build the SilKit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once the project has been generated, you can build the Integration Bus using the
+Once the project has been generated, you can build the SilKit using the
 project specific tools, e.g., by opening the generated Visual Studio or by
 running gnu make. You can also start the build process using CMake in a platform
 independent way::
 
     cmake --build .
 
-To install the Integration Bus to a previously configured location, run::
+To install the SilKit to a previously configured location, run::
 
     cmake --build . --target install

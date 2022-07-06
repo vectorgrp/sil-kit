@@ -6,8 +6,8 @@
 
 #include "conditional.hpp"
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 namespace tuple_tools {
 
 /*! Apply a generic function to all members of a tuple
@@ -55,6 +55,6 @@ void for_each(Tuple&& tuple, Func&& func)
 }
 
 } // namespace tuple_tools
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit
 

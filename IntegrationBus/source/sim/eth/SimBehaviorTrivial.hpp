@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "IIbToEthController.hpp"
+#include "IMsgForEthController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 
 #include "ISimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 class EthController;
 
@@ -18,26 +18,26 @@ class SimBehaviorTrivial : public ISimBehavior
 {
 public:
 
-    SimBehaviorTrivial(mw::IParticipantInternal* participant, EthController* ethController,
-                      mw::sync::ITimeProvider* timeProvider);
+    SimBehaviorTrivial(Core::IParticipantInternal* participant, EthController* ethController,
+                      Core::Orchestration::ITimeProvider* timeProvider);
 
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(EthernetFrameEvent&& ethFrameEvent) override;
-    void SendIbMessage(EthernetSetMode&& ethFrameEvent) override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
+    void SendMsg(EthernetFrameEvent&& ethFrameEvent) override;
+    void SendMsg(EthernetSetMode&& ethFrameEvent) override;
 
     void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
 
 private:
     template <typename MsgT>
-    void ReceiveIbMessage(const MsgT& msg);
+    void ReceiveSilKitMessage(const MsgT& msg);
 
-    mw::IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     EthController* _parentController{nullptr};
-    const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    extensions::Tracer _tracer;
+    const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Tracer _tracer;
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

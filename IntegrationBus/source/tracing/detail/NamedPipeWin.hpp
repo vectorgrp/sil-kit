@@ -3,7 +3,7 @@
 #include "NamedPipe.hpp"
 #include <windows.h>
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 namespace detail {
 
@@ -36,4 +36,4 @@ private:
 
 } //end namespace detail
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit

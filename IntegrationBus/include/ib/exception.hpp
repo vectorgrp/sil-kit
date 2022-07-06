@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace ib {
+namespace SilKit {
 
 class TypeConversionError : public std::runtime_error
 {
@@ -40,12 +40,12 @@ public:
     using std::runtime_error::runtime_error;
 };
 
- namespace extensions {
+ 
 //! \brief ExtensionError is thrown when an extension could not be loaded
 class ExtensionError : public std::runtime_error
 {
     using std::runtime_error::runtime_error;
 };
-}//end namespace extensions
 
-} // namespace ib
+
+} // namespace SilKit

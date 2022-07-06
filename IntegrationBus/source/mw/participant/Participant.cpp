@@ -3,10 +3,10 @@
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 template class Participant<VAsioConnection>;
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

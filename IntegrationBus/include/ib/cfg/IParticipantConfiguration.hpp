@@ -5,11 +5,11 @@
 #include <string>
 #include <memory>
 
-#include "ib/IbMacros.hpp"
-#include "ib/exception.hpp"
+#include "silkit/SilKitMacros.hpp"
+#include "silkit/exception.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 class IParticipantConfiguration
 {
@@ -25,11 +25,11 @@ public:
 * \param text A string that adheres to our JSON schema.
 * \return The configuration data
 *
-* \throw ib::configuration_error The input string violates the
+* \throw SilKit::configuration_error The input string violates the
 * JSON format, schema or an integrity rule.
 */
-IntegrationBusAPI auto ParticipantConfigurationFromString(const std::string& text)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
+SilKitAPI auto ParticipantConfigurationFromString(const std::string& text)
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
 /*! \brief Parse configuration from a YAML or JSON file.
 *
@@ -39,12 +39,12 @@ IntegrationBusAPI auto ParticipantConfigurationFromString(const std::string& tex
 * \param filename Path to the YAML or JSON file.
 * \return The configuration data
 *
-* \throw ib::configuration_error The file could not be read, or
+* \throw SilKit::configuration_error The file could not be read, or
 * the input string violates the YAML/JSON format, schema or an
 * integrity rule.
 */
-IntegrationBusAPI auto ParticipantConfigurationFromFile(const std::string& filename)
-    -> std::shared_ptr<ib::cfg::IParticipantConfiguration>;
+SilKitAPI auto ParticipantConfigurationFromFile(const std::string& filename)
+    -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

@@ -6,21 +6,21 @@
 #include <chrono>
 #include <sstream>
 
-#include "ib/cfg/Config.hpp"
-#include "ib/mw/IParticipant.hpp"
-#include "ib/mw/sync/ISystemMonitor.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/extensions/string_utils.hpp"
+#include "silkit/cfg/Config.hpp"
+#include "silkit/core/IParticipant.hpp"
+#include "silkit/core/sync/ISystemMonitor.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/extensions/string_utils.hpp"
 
 #include "IReplayDataController.hpp"
 #include "Tracing.hpp"
 
 using namespace std::literals::chrono_literals;
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
-using namespace extensions;
+
 
 namespace 
 { 
@@ -122,29 +122,29 @@ private:
         return _metaInfos.at(name);
     }
     const std::map<std::string, std::string>& _metaInfos;
-    //Used as default in VIB, CANoe
+    //Used as default in SILKIT, CANoe
     const std::string _defaultSeparator{"/"};
 };
 
-TraceMessageType to_channelType(cfg::Link::Type linkType)
+TraceMessageType to_channelType(Config::Link::Type linkType)
 {
     switch (linkType)
     {
-    case cfg::NetworkType::Ethernet:
+    case Config::NetworkType::Ethernet:
         return TraceMessageType::EthernetFrame;
-    case cfg::NetworkType::CAN:
+    case Config::NetworkType::CAN:
         return TraceMessageType::CanFrameEvent;
-    case cfg::NetworkType::LIN:
+    case Config::NetworkType::LIN:
         return TraceMessageType::LinFrame;
-    case cfg::NetworkType::FlexRay:
+    case Config::NetworkType::FlexRay:
         return TraceMessageType::FrMessage;
     default:
         throw std::runtime_error("Unknown channel Type");
     }
 }
 
-// Helper to match a channel by a cfg::MdfChannel identification supplied by the user
-bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const cfg::MdfChannel& mdfId)
+// Helper to match a channel by a Config::MdfChannel identification supplied by the user
+bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const Config::MdfChannel& mdfId)
 {
     const auto metaInfos = MetaInfos(*channel);
     bool result = true;
@@ -167,8 +167,8 @@ bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const cfg::MdfChan
     return result;
 }
 
-// Helper to identify Channel by its name in VIB format
-bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& networkName,
+// Helper to identify Channel by its name in SILKIT format
+bool MatchSilKitChannel(std::shared_ptr<IReplayChannel> channel, const std::string& networkName,
     const std::string& participantName, const std::string& controllerName)
 {
     // The source info contains 'Link/Participant/Controller'
@@ -187,7 +187,7 @@ bool MatchIbChannel(std::shared_ptr<IReplayChannel> channel, const std::string& 
 }
 
 // Helper to check if a user defined config has non-default values
-bool HasMdfChannelSelection(const cfg::MdfChannel& mdf)
+bool HasMdfChannelSelection(const Config::MdfChannel& mdf)
 {
     // True if at least one member was set by user
     return mdf.channelName
@@ -200,7 +200,7 @@ bool HasMdfChannelSelection(const cfg::MdfChannel& mdf)
         ;
 }
 // Helper for useful error messages
-std::string to_string(const cfg::MdfChannel& mdf)
+std::string to_string(const Config::MdfChannel& mdf)
 {
     std::stringstream result;
     result << "MdfChannel{";
@@ -223,13 +223,13 @@ std::string to_string(const cfg::MdfChannel& mdf)
 }
 
 // Find the MDF channels associated with the given participant/controller names and types or an MdfChannel identification.
-auto FindReplayChannel(ib::mw::logging::ILogger* log,
+auto FindReplayChannel(SilKit::Core::Logging::ILogger* log,
     IReplayFile* replayFile,
-    const cfg::Replay& replayConfig,
+    const Config::Replay& replayConfig,
     const std::string& controllerName,
     const std::string& participantName,
     const std::string& networkName,
-    const ib::cfg::Link::Type linkType
+    const SilKit::Config::Link::Type linkType
     ) ->  std::shared_ptr<IReplayChannel>
 {
     std::vector<std::shared_ptr<IReplayChannel>> channelList;
@@ -255,13 +255,13 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
         }
         else
         {
-            // VIB builtin channel lookup
+            // SILKIT builtin channel lookup
             if (channel->Type() != type)
             {
                 log->Trace("Replay: skipping channel '{}' of type {}", channel->Name(), to_string(channel->Type()));
                 continue;
             }
-            if (MatchIbChannel(channel, networkName, participantName, controllerName))
+            if (MatchSilKitChannel(channel, networkName, participantName, controllerName))
             {
                 channelList.emplace_back(std::move(channel));
             }
@@ -277,7 +277,7 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
             << to_string(replayConfig.mdfChannel)
             << " found " << channelList.size() << " channels in \"" << replayFile->FilePath() << "\"."
             << " MdfChannel config must yield a unique channel!";
-        throw ib::ConfigurationError{ msg.str() };
+        throw SilKit::ConfigurationError{ msg.str() };
     }
 
     if (channelList.size() < 1)
@@ -288,11 +288,11 @@ auto FindReplayChannel(ib::mw::logging::ILogger* log,
 }
 } //end anonymous namespace
 
-ReplayScheduler::ReplayScheduler(const cfg::Config& config,
-    const cfg::Participant& participantConfig,
+ReplayScheduler::ReplayScheduler(const Config::Config& config,
+    const Config::Participant& participantConfig,
     std::chrono::nanoseconds tickPeriod,
-    mw::IParticipant* participant,
-    mw::sync::ITimeProvider* timeProvider)
+    Core::IParticipant* participant,
+    Core::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _timeProvider{timeProvider}
     , _tickPeriod{tickPeriod}
@@ -315,7 +315,7 @@ ReplayScheduler::ReplayScheduler(const cfg::Config& config,
     );
 }
 
-void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, const cfg::Participant& participantConfig,
+void ReplayScheduler::ConfigureNetworkSimulators(const Config::Config& config, const Config::Participant& participantConfig,
     tracing::IReplayDataController& netSim)
 {
     // Make sure we are only invoked once per participant
@@ -347,13 +347,13 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
         // MdfChannel configuration is not supported on NetSim!
         if (HasMdfChannelSelection(simulator.replay.mdfChannel))
         {
-            throw ib::ConfigurationError{"Error: MdfChannel selection is not supported for NetworkSimulator replays!"};
+            throw SilKit::ConfigurationError{"Error: MdfChannel selection is not supported for NetworkSimulator replays!"};
         }
         for (const auto& networkName : simulator.simulatedLinks)
         {
             try
             {
-                const auto& link = cfg::get_by_name(config.simulationSetup.links, networkName);
+                const auto& link = Config::get_by_name(config.simulationSetup.links, networkName);
                 //NB currently (v3.3.7) the NetworkSimulator uses the controller's endpoints to create trace channel source infos.
                 // Thus, we try to attach a replay task for each of our simulated link's endpoints.
                 auto replayFile = replayFiles.at(simulator.replay.useTraceSource);
@@ -372,7 +372,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
                         {
                             continue;
                         }
-                        if (MatchIbChannel(channel, networkName, participantName, controllerName))
+                        if (MatchSilKitChannel(channel, networkName, participantName, controllerName))
                         {
                             //make sure this channel is not shared among endpoints
                             replayChannels.erase(it);
@@ -428,7 +428,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const cfg::Config& config, cons
 }
 
 
-void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg::Participant& participantConfig)
+void ReplayScheduler::ConfigureControllers(const Config::Config& config, const Config::Participant& participantConfig)
 {
     // create trace sources (aka IReplayFile)
     auto replayFiles = tracing::CreateReplayFiles(_log, config, participantConfig);
@@ -457,7 +457,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
                 // Not all controllers might have active replaying -- we only know that at least one
                 // controller has replaying active.
-                if ((controllerConfig.replay.direction == cfg::Replay::Direction::Undefined)
+                if ((controllerConfig.replay.direction == Config::Replay::Direction::Undefined)
                     && controllerConfig.replay.useTraceSource.empty())
                 {
                     _log->Debug("ReplayScheduler::ConfigureController: skipping controller {} because it has no active Replay!", controllerConfig.name);
@@ -502,7 +502,7 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
                 _replayTasks.emplace_back(std::move(task));
             }
-            catch (const ib::ConfigurationError& ex)
+            catch (const SilKit::ConfigurationError& ex)
             {
                 _log->Error("ReplayScheduler: misconfiguration of controller " + controllerConfig.name
                     + ": " + ex.what());
@@ -518,10 +518,10 @@ void ReplayScheduler::ConfigureControllers(const cfg::Config& config, const cfg:
 
     // Bus Controllers
     // TODO FIXME Replay is currently not working so this will be commented out
-    //makeTasks(participantConfig.ethernetControllers, &mw::IParticipant::CreateEthernetController);
-    //makeTasks(participantConfig.canControllers, &mw::IParticipant::CreateCanController);
-    //TODO makeTasks(participantConfig.flexrayControllers, &mw::IParticipant::CreateFlexrayController);
-    //makeTasks(participantConfig.linControllers, &mw::IParticipant::CreateLinController);
+    //makeTasks(participantConfig.ethernetControllers, &Core::IParticipant::CreateEthernetController);
+    //makeTasks(participantConfig.canControllers, &Core::IParticipant::CreateCanController);
+    //TODO makeTasks(participantConfig.flexrayControllers, &Core::IParticipant::CreateFlexrayController);
+    //makeTasks(participantConfig.linControllers, &Core::IParticipant::CreateLinController);
 }
 
 ReplayScheduler::~ReplayScheduler()
@@ -578,5 +578,5 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
 }
 
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit
 

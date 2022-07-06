@@ -4,12 +4,12 @@
 
 #include "spdlog/details/log_msg.h"
 
-#include "ib/exception.hpp"
-#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 inline auto to_spdlog(Level level) -> spdlog::level::level_enum
 {
@@ -30,7 +30,7 @@ inline auto to_spdlog(Level level) -> spdlog::level::level_enum
     case Level::Off:
         return spdlog::level::off;
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 inline auto from_spdlog(spdlog::level::level_enum level) -> Level
@@ -52,7 +52,7 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
     case spdlog::level::off:
         return Level::Off;
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 inline auto from_spdlog(const spdlog::source_loc& spdLoc) -> SourceLoc
@@ -93,6 +93,6 @@ inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
     };
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

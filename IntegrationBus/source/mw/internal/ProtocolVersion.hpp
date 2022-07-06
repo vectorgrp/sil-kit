@@ -2,8 +2,8 @@
 
 #pragma once
 #include <tuple>
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 // The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
 
@@ -32,5 +32,5 @@ inline bool operator!=(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
     return !(lhs == rhs);
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

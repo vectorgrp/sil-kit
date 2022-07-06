@@ -2,15 +2,15 @@
 
 #pragma once
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 struct SourceLoc;
 struct LogMsg;
 
 class ILogger;
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-set(IntegrationBus_VERSION @PROJECT_VERSION@)
+set(SilKit_VERSION @PROJECT_VERSION@)
 include(CMakeFindDependencyMacro)
 
 @PACKAGE_INIT@
-get_filename_component(IB_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-include("${IB_CMAKE_DIR}/IntegrationBusTargets.cmake")
+get_filename_component(SILKIT_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include("${SILKIT_CMAKE_DIR}/SilKitTargets.cmake")

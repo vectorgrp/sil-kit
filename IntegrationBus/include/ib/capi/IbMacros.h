@@ -3,34 +3,34 @@
 #pragma once
 
 #ifdef __cplusplus
-#define IB_BEGIN_DECLS extern "C" {
-#define IB_END_DECLS }
+#define SILKIT_BEGIN_DECLS extern "C" {
+#define SILKIT_END_DECLS }
 #else
-#define IB_BEGIN_DECLS 
-#define IB_END_DECLS 
+#define SILKIT_BEGIN_DECLS 
+#define SILKIT_END_DECLS 
 #endif
 
-#ifdef IB_BUILD_STATIC
-#    define IntegrationBusAPI
-# elif defined(EXPORT_IntegrationBusAPI)
+#ifdef SILKIT_BUILD_STATIC
+#    define SilKitAPI
+# elif defined(EXPORT_SilKitAPI)
 // define compiler specific export / import attributes
-// define IntegrationBusAPI as EXPORT
+// define SilKitAPI as EXPORT
 #    if defined(_WIN32)
-#        define IntegrationBusAPI __declspec(dllexport)
+#        define SilKitAPI __declspec(dllexport)
 #    elif defined(__GNUC__)
-#        define IntegrationBusAPI __attribute__((visibility("default")))
+#        define SilKitAPI __attribute__((visibility("default")))
 #    else
-#        define IntegrationBusAPI
+#        define SilKitAPI
 #        pragma warning Unknown dynamic link export semantics.
 #    endif
 #else
-// declare IntegrationBusAPI as IMPORT
+// declare SilKitAPI as IMPORT
 #    if defined(_WIN32)
-#        define IntegrationBusAPI __declspec(dllimport)
+#        define SilKitAPI __declspec(dllimport)
 #    elif defined(__GNUC__)
-#        define IntegrationBusAPI
+#        define SilKitAPI
 #    else
-#        define IntegrationBusAPI
+#        define SilKitAPI
 #        pragma warning Unknown dynamic link import semantics.
 #    endif
 #endif  

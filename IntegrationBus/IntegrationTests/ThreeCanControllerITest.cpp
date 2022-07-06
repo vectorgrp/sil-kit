@@ -3,8 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -16,8 +16,8 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Can;
 
 using testing::_;
 using testing::A;
@@ -59,7 +59,7 @@ protected:
         syncParticipantNames = { "CanWriter", "CanReader1", "CanReader2" };
     }
 
-    void SetupWriter(ib::test::SimParticipant* writer)
+    void SetupWriter(SilKit::Tests::SimParticipant* writer)
     {
 
         auto* controller = writer->Participant()->CreateCanController("CAN1", "CAN1");
@@ -94,7 +94,7 @@ protected:
         });
     }
 
-    void SetupReader(ib::test::SimParticipant* reader)
+    void SetupReader(SilKit::Tests::SimParticipant* reader)
     {
 
         auto* controller = reader->Participant()->CreateCanController("CAN1", "CAN1");
@@ -131,7 +131,7 @@ protected:
     void ExecuteTest()
     {
         auto registryUri = MakeTestRegistryUri();
-        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);

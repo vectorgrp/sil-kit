@@ -7,7 +7,7 @@ Service Configuration (CAN, LIN, FlexRay, Ethernet, Data, RPC)
 
 Overview
 ========================================
-All services of the Vector Integration Bus can be configured within the participant configuration.
+All services of the Vector SilKit can be configured within the participant configuration.
 The following sections describe how each service can be configured.
 The configuration of the single services is fully optional.
        

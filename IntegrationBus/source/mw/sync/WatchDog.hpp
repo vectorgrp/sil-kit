@@ -8,16 +8,16 @@
 
 #include "ParticipantConfiguration.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class WatchDog
 {
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    WatchDog(const cfg::HealthCheck& healthCheckConfig);
+    WatchDog(const Config::HealthCheck& healthCheckConfig);
     ~WatchDog();
 
 public:
@@ -59,6 +59,6 @@ private:
     std::thread _watchThread;
 };
     
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

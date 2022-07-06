@@ -7,47 +7,47 @@
 #include <memory>
 
 #include "ITimeProvider.hpp"
-#include "ib/mw/IParticipant.hpp"
-#include "ib/cfg/fwd_decl.hpp"
+#include "silkit/core/IParticipant.hpp"
+#include "silkit/cfg/fwd_decl.hpp"
 
 #include "IReplayDataController.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
 class ReplayScheduler
 {
 public:
-    ReplayScheduler(const cfg::Config& config,  const cfg::Participant& participantConfig,
-        std::chrono::nanoseconds tickPeriod, mw::IParticipant* participant, mw::sync::ITimeProvider* timeProvider);
+    ReplayScheduler(const Config::Config& config,  const Config::Participant& participantConfig,
+        std::chrono::nanoseconds tickPeriod, Core::IParticipant* participant, Core::Orchestration::ITimeProvider* timeProvider);
     ~ReplayScheduler();
-    void ConfigureNetworkSimulators(const cfg::Config& config, const cfg::Participant& participantConfig,
+    void ConfigureNetworkSimulators(const Config::Config& config, const Config::Participant& participantConfig,
         tracing::IReplayDataController& netsim);
 private:
     // Methods
   
-    void ConfigureControllers(const cfg::Config& config, const cfg::Participant& participantConfig);
+    void ConfigureControllers(const Config::Config& config, const Config::Participant& participantConfig);
     void ReplayMessages(std::chrono::nanoseconds now, std::chrono::nanoseconds duration);
 
 private:
     // Members
     struct ReplayTask
     {
-        std::shared_ptr<extensions::IReplayFile> replayFile;
+        std::shared_ptr<IReplayFile> replayFile;
         std::string name;
         IReplayDataController* controller{nullptr};
-        std::shared_ptr<extensions::IReplayChannelReader> replayReader;
+        std::shared_ptr<IReplayChannelReader> replayReader;
         std::chrono::nanoseconds initialTime{0};
         bool doneReplaying{false};
     };
     std::chrono::nanoseconds _tickPeriod{0};
     std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
-    mw::logging::ILogger* _log{nullptr};
-    mw::IParticipant* _participant{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    Core::Logging::ILogger* _log{nullptr};
+    Core::IParticipant* _participant{nullptr};
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;
     bool _isDone{false};
     std::vector<std::string> _knownSimulators;
 };
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit

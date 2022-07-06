@@ -16,78 +16,78 @@
 #include "gtest/gtest.h"
 
 
-namespace ib {
-namespace sim {
-namespace rpc {
-namespace test {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
+namespace Tests {
 
 struct MockConnection
 {
-    MockConnection(ib::cfg::ParticipantConfiguration /*config*/, std::string /*participantName*/,
-                   ib::mw::ParticipantId /*participantId*/, ib::mw::ProtocolVersion)
+    MockConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
+                   SilKit::Core::ParticipantId /*participantId*/, SilKit::Core::ProtocolVersion)
     {
     }
 
-    void SetLogger(ib::mw::logging::ILogger* /*logger*/) {}
-    void SetTimeSyncService(ib::mw::sync::TimeSyncService* /*timeSyncService*/) {}
+    void SetLogger(SilKit::Core::Logging::ILogger* /*logger*/) {}
+    void SetTimeSyncService(SilKit::Core::Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}
     void JoinDomain(std::string /*domainId*/) {}
 
-    template <class IbServiceT>
-    void RegisterIbService(const std::string& /*topicName*/, ib::mw::EndpointId /*endpointId*/,
-                           IbServiceT* /*receiver*/)
+    template <class SilKitServiceT>
+    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/,
+                           SilKitServiceT* /*receiver*/)
     {
     }
 
-    void RegisterIbService(const std::string& /*topicName*/, ib::mw::EndpointId /*endpointId*/, RpcClient* receiver)
+    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/, RpcClient* receiver)
     {
         services.rpcClient.push_back(receiver);
     }
 
-    void RegisterIbService(const std::string& /*topicName*/, ib::mw::EndpointId /*endpointId*/, RpcServer* receiver)
+    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/, RpcServer* receiver)
     {
         services.rpcServer.push_back(receiver);
     }
 
-    void RegisterIbService(const std::string& /*topicName*/, ib::mw::EndpointId /*endpointId*/,
+    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/,
                            RpcServerInternal* receiver)
     {
         services.rpcServerInternal.push_back(receiver);
     }
 
-    template <class IbServiceT>
-    void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, IbServiceT* /*service*/)
+    template <class SilKitServiceT>
+    void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, SilKitServiceT* /*service*/)
     {
     }
 
-    template <typename IbMessageT>
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, IbMessageT&& /*msg*/)
+    template <typename SilKitMessageT>
+    void SendMsg(const SilKit::Core::IServiceEndpoint* /*from*/, SilKitMessageT&& /*msg*/)
     {
     }
 
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, FunctionCall msg)
+    void SendMsg(const SilKit::Core::IServiceEndpoint* from, FunctionCall msg)
     {
         for (auto& rpcServerInternal : services.rpcServerInternal)
         {
-            rpcServerInternal->ReceiveIbMessage(from, msg);
+            rpcServerInternal->ReceiveSilKitMessage(from, msg);
         }
-        Mock_SendIbMessage(from, std::move(msg));
+        Mock_SendMsg(from, std::move(msg));
     }
 
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* from, FunctionCallResponse msg)
+    void SendMsg(const SilKit::Core::IServiceEndpoint* from, FunctionCallResponse msg)
     {
         for (auto& rpcClient : services.rpcClient)
         {
-            rpcClient->ReceiveIbMessage(from, msg);
+            rpcClient->ReceiveSilKitMessage(from, msg);
         }
-        Mock_SendIbMessage(from, std::move(msg));
+        Mock_SendMsg(from, std::move(msg));
     }
 
-    MOCK_METHOD(void, Mock_SendIbMessage, (const ib::mw::IIbServiceEndpoint* /*from*/, FunctionCall /*msg*/));
-    MOCK_METHOD(void, Mock_SendIbMessage, (const ib::mw::IIbServiceEndpoint* /*from*/, FunctionCallResponse /*msg*/));
+    MOCK_METHOD(void, Mock_SendMsg, (const SilKit::Core::IServiceEndpoint* /*from*/, FunctionCall /*msg*/));
+    MOCK_METHOD(void, Mock_SendMsg, (const SilKit::Core::IServiceEndpoint* /*from*/, FunctionCallResponse /*msg*/));
 
-    template <typename IbMessageT>
-    void SendIbMessage(const ib::mw::IIbServiceEndpoint* /*from*/, const std::string& /*target*/, IbMessageT&& /*msg*/)
+    template <typename SilKitMessageT>
+    void SendMsg(const SilKit::Core::IServiceEndpoint* /*from*/, const std::string& /*target*/, SilKitMessageT&& /*msg*/)
     {
     }
 
@@ -97,13 +97,13 @@ struct MockConnection
     void NotifyShutdown() {}
 
     void RegisterMessageReceiver(
-        std::function<void(ib::mw::IVAsioPeer* /*peer*/, ib::mw::ParticipantAnnouncement)> /*callback*/)
+        std::function<void(SilKit::Core::IVAsioPeer* /*peer*/, SilKit::Core::ParticipantAnnouncement)> /*callback*/)
     {
     }
 
-    void RegisterPeerShutdownCallback(std::function<void(ib::mw::IVAsioPeer* peer)> /*callback*/) {}
+    void RegisterPeerShutdownCallback(std::function<void(SilKit::Core::IVAsioPeer* peer)> /*callback*/) {}
 
-    void Test_SetTimeProvider(ib::mw::sync::ITimeProvider* timeProvider)
+    void Test_SetTimeProvider(SilKit::Core::Orchestration::ITimeProvider* timeProvider)
     {
         for (auto& service : services.rpcClient)
         {
@@ -129,17 +129,17 @@ struct MockConnection
     } services;
 };
 
-using MockConnectionParticipant = ib::mw::Participant<MockConnection>;
+using MockConnectionParticipant = SilKit::Core::Participant<MockConnection>;
 
-inline auto MakeMockConnectionParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+inline auto MakeMockConnectionParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                           const std::string& participantName)
     -> std::unique_ptr<MockConnectionParticipant>
 {
-    auto&& cfg = ib::mw::ValidateAndSanitizeConfig(participantConfig, participantName);
+    auto&& cfg = SilKit::Core::ValidateAndSanitizeConfig(participantConfig, participantName);
     return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName);
 }
 
-struct FixedTimeProvider : ib::mw::sync::ITimeProvider
+struct FixedTimeProvider : SilKit::Core::Orchestration::ITimeProvider
 {
     auto Now() const -> std::chrono::nanoseconds override { return now; }
 
@@ -191,16 +191,16 @@ public:
     }
 
 private:
-    static auto MakeParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
+    static auto MakeParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
     {
-        auto configuration = std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
+        auto configuration = std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
 
-        ib::cfg::RpcClient rpcClientConfig;
+        SilKit::Config::RpcClient rpcClientConfig;
         rpcClientConfig.name = "RpcClient";
         rpcClientConfig.functionName = "FunctionA";
         configuration->rpcClients.push_back(rpcClientConfig);
 
-        ib::cfg::RpcServer rpcServerConfig;
+        SilKit::Config::RpcServer rpcServerConfig;
         rpcServerConfig.name = "RpcServer";
         rpcServerConfig.functionName = "FunctionA";
         configuration->rpcServers.push_back(rpcServerConfig);
@@ -221,7 +221,7 @@ private:
     IRpcServer* _rpcServer = nullptr;
 };
 
-} // namespace test
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Tests
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

@@ -37,8 +37,8 @@ auto platform_temp_directory() -> std::string
 }
 #endif
 } //end anonymous namespace
-namespace ib {
-namespace filesystem {
+namespace SilKit {
+namespace Filesystem {
 
 path::path(const string_type& source)
     :_path{ source }
@@ -105,5 +105,5 @@ bool create_directory(const path& where)
         return errno == EEXIST;
     }
 }
-} // namespace filesystem
-} // namespace ib
+} // namespace Filesystem
+} // namespace SilKit

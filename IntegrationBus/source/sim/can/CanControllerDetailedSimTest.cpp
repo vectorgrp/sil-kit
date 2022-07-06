@@ -23,19 +23,19 @@ using ::testing::_;
 using ::testing::InSequence;
 using ::testing::NiceMock;
 
-using namespace ib::mw;
-using namespace ib::sim::can;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Can;
 
-using ::ib::mw::test::DummyParticipant;
+using ::SilKit::Core::Tests::DummyParticipant;
 
 
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanFrameEvent&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanFrameTransmitEvent&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanConfigureBaudrate&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const CanSetControllerMode&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanFrameEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanFrameTransmitEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanConfigureBaudrate&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanSetControllerMode&));
 };
 
 class CanControllerCallbacks
@@ -60,7 +60,7 @@ TEST(CanControllerDetailedSimTest, send_can_message)
     CanFrameEvent testFrameEvent{};
     testFrameEvent.transmitId = 1;
 
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, testFrameEvent))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, testFrameEvent))
         .Times(1);
 
     canController.SendFrame(testFrameEvent.frame);
@@ -82,7 +82,7 @@ TEST(CanControllerDetailedSimTest, receive_can_message)
     canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
 
     CanFrameEvent testFrameEvent{};
-    testFrameEvent.direction = ib::sim::TransmitDirection::RX;
+    testFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
@@ -90,7 +90,7 @@ TEST(CanControllerDetailedSimTest, receive_can_message)
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
 
-    canController.ReceiveIbMessage(&canControllerFrom, testFrameEvent);
+    canController.ReceiveSilKitMessage(&canControllerFrom, testFrameEvent);
 }
 
 TEST(CanControllerDetailedSimTest, start_stop_sleep_reset)
@@ -109,13 +109,13 @@ TEST(CanControllerDetailedSimTest, start_stop_sleep_reset)
     CanSetControllerMode sleepCommand = { { 0, 0 }, CanControllerState::Sleep };
     CanSetControllerMode resetCommand = { { 1, 1 }, CanControllerState::Uninit };
 
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, startCommand))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, startCommand))
         .Times(1);
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, stopCommand))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, stopCommand))
         .Times(1);
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, sleepCommand))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, sleepCommand))
         .Times(1);
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, resetCommand))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, resetCommand))
         .Times(1);
 
     canController.Start();
@@ -138,9 +138,9 @@ TEST(CanControllerDetailedSimTest, set_baudrate)
     CanConfigureBaudrate baudrate1 = { 3000, 0 };
     CanConfigureBaudrate baudrate2 = { 3000, 500000 };
 
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, baudrate1))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, baudrate1))
         .Times(1);
-    EXPECT_CALL(mockParticipant, SendIbMessage(&canController, baudrate2))
+    EXPECT_CALL(mockParticipant, SendMsg(&canController, baudrate2))
         .Times(1);
 
     canController.SetBaudRate(baudrate1.baudRate, baudrate1.fdBaudRate);
@@ -178,17 +178,17 @@ TEST(CanControllerDetailedSimTest, receive_new_controller_state)
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveIbMessage(&canControllerFrom, controllerStatus);
+    canController.ReceiveSilKitMessage(&canControllerFrom, controllerStatus);
 
     // only stateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveIbMessage(&canControllerFrom, controllerStatus);
+    canController.ReceiveSilKitMessage(&canControllerFrom, controllerStatus);
 
     // only errorStateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::ErrorActive;
-    canController.ReceiveIbMessage(&canControllerFrom, controllerStatus);
+    canController.ReceiveSilKitMessage(&canControllerFrom, controllerStatus);
 }
 
 TEST(CanControllerDetailedSimTest, receive_ack)
@@ -223,8 +223,8 @@ TEST(CanControllerDetailedSimTest, receive_ack)
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
 
-    canController.ReceiveIbMessage(&canControllerFrom, ack1);
-    canController.ReceiveIbMessage(&canControllerFrom, ack2);
+    canController.ReceiveSilKitMessage(&canControllerFrom, ack1);
+    canController.ReceiveSilKitMessage(&canControllerFrom, ack2);
 }
 
 /*! \brief Ensure that the proxy does not generate an Ack
@@ -248,13 +248,13 @@ TEST(CanControllerDetailedSimTest, must_not_generate_ack)
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     CanFrameEvent msg{};
-    EXPECT_CALL(mockParticipant, SendIbMessage(An<const IIbServiceEndpoint*>(), A<const CanFrameTransmitEvent&>()))
+    EXPECT_CALL(mockParticipant, SendMsg(An<const IServiceEndpoint*>(), A<const CanFrameTransmitEvent&>()))
         .Times(0);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
 
-    canController.ReceiveIbMessage(&canControllerFrom, msg);
+    canController.ReceiveSilKitMessage(&canControllerFrom, msg);
 }
 
 } // anonymous namespace

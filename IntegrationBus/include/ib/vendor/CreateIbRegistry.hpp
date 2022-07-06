@@ -5,25 +5,25 @@
 #include <memory>
 #include <functional>
 
-#include "ib/IbMacros.hpp"
-#include "ib/vendor/IIbRegistry.hpp"
-#include "ib/cfg/IParticipantConfiguration.hpp"
+#include "silkit/SilKitMacros.hpp"
+#include "silkit/vendor/ISilKitRegistry.hpp"
+#include "silkit/cfg/IParticipantConfiguration.hpp"
 
 
-namespace ib {
-namespace vendor {
-inline namespace vector {
+namespace SilKit {
+namespace Vendor {
+inline namespace Vector {
 
-/*! \brief Create an instance of IIbRegistry.
+/*! \brief Create an instance of ISilKitRegistry.
 *
-* This API is specific to the Vector Informatik implementation of the IntegrationBus.
-* It is required as a central service for other VIB participants to register with.
+* This API is specific to the Vector Informatik implementation of the SilKit.
+* It is required as a central service for other SILKIT participants to register with.
 * Throws std::runtime_error on error.
 */
 
-IntegrationBusAPI auto CreateIbRegistry(std::shared_ptr<cfg::IParticipantConfiguration> config)
-    -> std::unique_ptr<IIbRegistry>;
+SilKitAPI auto CreateSilKitRegistry(std::shared_ptr<Config::IParticipantConfiguration> config)
+    -> std::unique_ptr<ISilKitRegistry>;
 
-}// namespace vector
-}// namespace vendor
-}// namespace ib
+}// namespace Vector
+}// namespace Vendor
+}// namespace SilKit

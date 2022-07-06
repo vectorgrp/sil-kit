@@ -3,43 +3,43 @@
 #include "version.hpp"
 #include "version_macros.hpp"
 
-namespace ib {
-namespace version {
+namespace SilKit {
+namespace Version {
         
-auto IntegrationBusAPI Major() -> uint32_t
+auto SilKitAPI Major() -> uint32_t
 {
-    return IB_VERSION_MAJOR;
+    return SILKIT_VERSION_MAJOR;
 }
     
-auto IntegrationBusAPI Minor() -> uint32_t
+auto SilKitAPI Minor() -> uint32_t
 {
-    return IB_VERSION_MINOR;
+    return SILKIT_VERSION_MINOR;
 }
     
-auto IntegrationBusAPI Patch() -> uint32_t
+auto SilKitAPI Patch() -> uint32_t
 {
-    return IB_VERSION_PATCH;
+    return SILKIT_VERSION_PATCH;
 }
 
-auto IntegrationBusAPI BuildNumber() -> uint32_t
+auto SilKitAPI BuildNumber() -> uint32_t
 {
-    return IB_BUILD_NUMBER;
+    return SILKIT_BUILD_NUMBER;
 }
 
-auto IntegrationBusAPI String() -> const char*
+auto SilKitAPI String() -> const char*
 {
-    return IB_VERSION_STRING;
+    return SILKIT_VERSION_STRING;
 }
 
-auto IntegrationBusAPI VersionSuffix() -> const char*
+auto SilKitAPI VersionSuffix() -> const char*
 {
-    return IB_VERSION_SUFFIX;
+    return SILKIT_VERSION_SUFFIX;
 }
 
-auto IntegrationBusAPI GitHash() -> const char*
+auto SilKitAPI GitHash() -> const char*
 {
-    return IB_GIT_HASH;
+    return SILKIT_GIT_HASH;
 }
 
-} // namespace version
-} // namespace ib
+} // namespace Version
+} // namespace SilKit

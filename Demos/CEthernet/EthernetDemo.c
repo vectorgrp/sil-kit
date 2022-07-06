@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-#include "ib/capi/IntegrationBus.h"
+#include "silkit/capi/SilKit.h"
 
 #ifdef WIN32
 #pragma warning(disable: 5105 4204)
@@ -65,9 +65,9 @@ void MacToBytes(uint8_t* outBytes, const char* mac)
     }
 }
 
-ib_Participant* participant;
-ib_Ethernet_Controller* ethernetController1;
-ib_Ethernet_Controller* ethernetController2;
+SilKit_Participant* participant;
+SilKit_EthernetController* ethernetController1;
+SilKit_EthernetController* ethernetController2;
 
 char* participantName;
 uint8_t ethernetFrameCounter = 0;
@@ -84,8 +84,8 @@ typedef struct  {
 
 TransmitContext transmitContext;
 
-void FrameTransmitHandler(void* context, ib_Ethernet_Controller* controller,
-                          struct ib_Ethernet_FrameTransmitEvent* frameTransmitEvent)
+void FrameTransmitHandler(void* context, SilKit_EthernetController* controller,
+                          struct SilKit_EthernetFrameTransmitEvent* frameTransmitEvent)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -95,7 +95,7 @@ void FrameTransmitHandler(void* context, ib_Ethernet_Controller* controller,
            tc->someInt, frameTransmitEvent->timestamp);
 }
 
-void FrameHandler(void* context, ib_Ethernet_Controller* controller, ib_Ethernet_FrameEvent* frameEvent)
+void FrameHandler(void* context, SilKit_EthernetController* controller, SilKit_EthernetFrameEvent* frameEvent)
 {
     UNUSED_ARG(controller);
 
@@ -149,10 +149,10 @@ void SendFrame()
         exit(-2);
     }
 
-    ib_Ethernet_Frame ef = {ib_InterfaceIdentifier_EthernetFrame, {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize}};
+    SilKit_EthernetFrame ef = {SilKit_InterfaceIdentifier_EthernetFrame, {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize}};
 
     transmitContext.someInt = ethernetFrameCounter;
-    ib_Ethernet_Controller_SendFrame(ethernetController1, &ef, (void*)&transmitContext);
+    SilKit_EthernetController_SendFrame(ethernetController1, &ef, (void*)&transmitContext);
     
     printf("Ethernet frame sent \n");
 }
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
-        printf("usage: IbDemoCEthernet <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCEthernet <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
         return 1;
     }
 
@@ -173,30 +173,30 @@ int main(int argc, char* argv[])
     }
     participantName = argv[2]; 
 
-    const char* registryUri = "vib://localhost:8500";
+    const char* registryUri = "silkit://localhost:8500";
     if (argc >= 4)
     {
         registryUri = argv[3]; 
     }
 
-    ib_ReturnCode returnCode;
-    returnCode = ib_Participant_Create(&participant, jsonString, participantName, registryUri, ib_False);
+    SilKit_ReturnCode returnCode;
+    returnCode = SilKit_Participant_Create(&participant, jsonString, participantName, registryUri, SilKit_False);
     if (returnCode) 
     {
-        printf("%s\n", ib_GetLastErrorString());
+        printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
 
-    returnCode = ib_Ethernet_Controller_Create(&ethernetController1, participant, "ETH0", "Ethernet1");
-    returnCode = ib_Ethernet_Controller_Create(&ethernetController2, participant, "ETH1", "Ethernet1");
+    returnCode = SilKit_EthernetController_Create(&ethernetController1, participant, "ETH0", "Ethernet1");
+    returnCode = SilKit_EthernetController_Create(&ethernetController2, participant, "ETH1", "Ethernet1");
 
-    ib_HandlerId frameTransmitHandlerId;
-    ib_Ethernet_Controller_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler,
+    SilKit_HandlerId frameTransmitHandlerId;
+    SilKit_EthernetController_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler,
                                                    &frameTransmitHandlerId);
-    ib_HandlerId frameHandlerId;
-    ib_Ethernet_Controller_AddFrameHandler(ethernetController2, NULL, &FrameHandler, &frameHandlerId);
+    SilKit_HandlerId frameHandlerId;
+    SilKit_EthernetController_AddFrameHandler(ethernetController2, NULL, &FrameHandler, &frameHandlerId);
 
     for (int i = 0; i < 10; i ++) 
     {
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
         SleepMs(1000);
     }
 
-    ib_Participant_Destroy(participant);
+    SilKit_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

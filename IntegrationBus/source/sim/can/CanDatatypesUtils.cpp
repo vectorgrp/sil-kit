@@ -2,9 +2,9 @@
 
 #include "CanDatatypesUtils.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 bool operator==(const CanFrame::CanFrameFlags& lhs, const CanFrame::CanFrameFlags& rhs)
 {

@@ -4,11 +4,11 @@
 
 #include <type_traits>
 
-#include "IbMsgVersion.hpp"
-#include "IbMsgSerdesName.hpp"
+#include "SilKitMsgVersion.hpp"
+#include "SilKitMsgSerdesName.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 // ==================================================================
 //  Workaround for C++14 (Helper Type Alias)
 // ==================================================================
@@ -38,80 +38,80 @@ struct HasTimestamp<T, VoidT<decltype(std::declval<std::decay_t<T>>().timestamp 
 };
 
 
-// the ib messages type traits
-template <class MsgT> struct IbMsgTraitTypeName { static constexpr const char *TypeName(); };
-template <class MsgT> struct IbMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
-template <class MsgT> struct IbMsgTraitEnforceSelfDelivery { static constexpr bool IsSelfDeliveryEnforced() { return false; } };
+// the silkit messages type traits
+template <class MsgT> struct SilKitMsgTraitTypeName { static constexpr const char *TypeName(); };
+template <class MsgT> struct SilKitMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
+template <class MsgT> struct SilKitMsgTraitEnforceSelfDelivery { static constexpr bool IsSelfDeliveryEnforced() { return false; } };
 
 // The final message traits
-template <class MsgT> struct IbMsgTraits
-    : IbMsgTraitTypeName<MsgT>
-    , IbMsgTraitHistSize<MsgT>
-    , IbMsgTraitEnforceSelfDelivery<MsgT>
-    , IbMsgTraitVersion<MsgT>
-    , IbMsgTraitSerdesName<MsgT>
+template <class MsgT> struct SilKitMsgTraits
+    : SilKitMsgTraitTypeName<MsgT>
+    , SilKitMsgTraitHistSize<MsgT>
+    , SilKitMsgTraitEnforceSelfDelivery<MsgT>
+    , SilKitMsgTraitVersion<MsgT>
+    , SilKitMsgTraitSerdesName<MsgT>
 {
 };
 
-#define DefineIbMsgTrait_TypeName(Namespace, MsgName) template<> struct IbMsgTraitTypeName<Namespace::MsgName>{\
+#define DefineSilKitMsgTrait_TypeName(Namespace, MsgName) template<> struct SilKitMsgTraitTypeName<Namespace::MsgName>{\
     static constexpr const char* TypeName() { return #Namespace "::" #MsgName; }\
     };
-#define DefineIbMsgTrait_HistSize(Namespace, MsgName, HistorySize) template<> struct IbMsgTraitHistSize<Namespace::MsgName>{\
+#define DefineSilKitMsgTrait_HistSize(Namespace, MsgName, HistorySize) template<> struct SilKitMsgTraitHistSize<Namespace::MsgName>{\
     static constexpr std::size_t HistSize() { return HistorySize; } \
     };
-#define DefineIbMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct IbMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
+#define DefineSilKitMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct SilKitMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
     static constexpr bool IsSelfDeliveryEnforced() { return true; }\
     };
 
-DefineIbMsgTrait_TypeName(ib::mw::logging, LogMsg)
-DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantCommand)
-DefineIbMsgTrait_TypeName(ib::mw::sync, SystemCommand)
-DefineIbMsgTrait_TypeName(ib::mw::sync, ParticipantStatus)
-DefineIbMsgTrait_TypeName(ib::mw::sync, WorkflowConfiguration)
-DefineIbMsgTrait_TypeName(ib::mw::sync, NextSimTask)
-DefineIbMsgTrait_TypeName(ib::sim::data, DataMessageEvent)
-DefineIbMsgTrait_TypeName(ib::sim::rpc, FunctionCall)
-DefineIbMsgTrait_TypeName(ib::sim::rpc, FunctionCallResponse)
-DefineIbMsgTrait_TypeName(ib::sim::can, CanFrameEvent)
-DefineIbMsgTrait_TypeName(ib::sim::can, CanFrameTransmitEvent)
-DefineIbMsgTrait_TypeName(ib::sim::can, CanControllerStatus)
-DefineIbMsgTrait_TypeName(ib::sim::can, CanConfigureBaudrate)
-DefineIbMsgTrait_TypeName(ib::sim::can, CanSetControllerMode)
-DefineIbMsgTrait_TypeName(ib::sim::eth, EthernetFrameEvent)
-DefineIbMsgTrait_TypeName(ib::sim::eth, EthernetFrameTransmitEvent)
-DefineIbMsgTrait_TypeName(ib::sim::eth, EthernetStatus)
-DefineIbMsgTrait_TypeName(ib::sim::eth, EthernetSetMode)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinSendFrameRequest)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinSendFrameHeaderRequest)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinTransmission)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinWakeupPulse)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinControllerConfig)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinControllerStatusUpdate)
-DefineIbMsgTrait_TypeName(ib::sim::lin, LinFrameResponseUpdate)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayFrameEvent)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayFrameTransmitEvent)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexraySymbolEvent)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexraySymbolTransmitEvent)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayCycleStartEvent)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayHostCommand)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayControllerConfig)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayTxBufferConfigUpdate)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayTxBufferUpdate)
-DefineIbMsgTrait_TypeName(ib::sim::fr, FlexrayPocStatusEvent)
-DefineIbMsgTrait_TypeName(ib::mw::service, ParticipantDiscoveryEvent)
-DefineIbMsgTrait_TypeName(ib::mw::service, ServiceDiscoveryEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Logging, LogMsg)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, ParticipantCommand)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, SystemCommand)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, ParticipantStatus)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, WorkflowConfiguration)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, NextSimTask)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::PubSub, DataMessageEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc, FunctionCall)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc, FunctionCallResponse)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanFrameEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanFrameTransmitEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanControllerStatus)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanConfigureBaudrate)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Can, CanSetControllerMode)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetFrameEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetFrameTransmitEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetStatus)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Ethernet, EthernetSetMode)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinSendFrameRequest)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinSendFrameHeaderRequest)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinTransmission)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinWakeupPulse)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinControllerConfig)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinControllerStatusUpdate)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinFrameResponseUpdate)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayFrameEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayFrameTransmitEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexraySymbolEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexraySymbolTransmitEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayCycleStartEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayHostCommand)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayControllerConfig)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayTxBufferConfigUpdate)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayTxBufferUpdate)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayPocStatusEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Discovery, ParticipantDiscoveryEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::Discovery, ServiceDiscoveryEvent)
 
 // Messages with history
-DefineIbMsgTrait_HistSize(ib::mw::sync, ParticipantStatus, 1)
-DefineIbMsgTrait_HistSize(ib::mw::service, ParticipantDiscoveryEvent, 1)
-DefineIbMsgTrait_HistSize(ib::sim::data, DataMessageEvent, 1)
-DefineIbMsgTrait_HistSize(ib::mw::sync, WorkflowConfiguration, 1)
-DefineIbMsgTrait_HistSize(ib::sim::lin, LinControllerConfig, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Core::Orchestration, ParticipantStatus, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Core::Discovery, ParticipantDiscoveryEvent, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Services::PubSub, DataMessageEvent, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Core::Orchestration, WorkflowConfiguration, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, LinControllerConfig, 1)
 
 // Messages with enforced self delivery
-DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantCommand)
-DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, ParticipantStatus)
-DefineIbMsgTrait_EnforceSelfDelivery(ib::mw::sync, SystemCommand)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Core::Orchestration, ParticipantCommand)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Core::Orchestration, ParticipantStatus)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Core::Orchestration, SystemCommand)
 
-} // mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

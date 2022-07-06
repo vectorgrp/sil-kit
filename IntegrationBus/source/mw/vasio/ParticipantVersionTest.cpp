@@ -15,23 +15,23 @@
 
 #include "SimSystemController.hpp"
 
-#include "ib/sim/can/all.hpp"
+#include "silkit/services/can/all.hpp"
 
 using namespace std::chrono_literals;
 
 namespace {
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 auto MakeParticipant(std::string participantName, ProtocolVersion version) -> std::shared_ptr<IParticipantInternal>
 {
-    return std::make_shared<Participant<VAsioConnection>>(ib::cfg::ParticipantConfiguration{},
+    return std::make_shared<Participant<VAsioConnection>>(SilKit::Config::ParticipantConfiguration{},
                                                           std::move(participantName), version);
 }
 
 auto MakeRegistry(ProtocolVersion version) -> std::shared_ptr<VAsioRegistry>
 {
-    auto configPtr = std::make_shared<ib::cfg::ParticipantConfiguration>();
+    auto configPtr = std::make_shared<SilKit::Config::ParticipantConfiguration>();
     return std::make_shared<VAsioRegistry>(configPtr, version);
 }
 
@@ -64,7 +64,7 @@ protected:
     {
         for (auto&& participant : _participants)
         {
-            participant->JoinIbDomain(registryUri);
+            participant->JoinSilKitDomain(registryUri);
         }
     }
     void ExchangeData()
@@ -94,7 +94,7 @@ protected:
         sendCan->Start();
         for (auto i = 1; i <= 10; i++)
         {
-            ib::sim::can::CanFrame frame;
+            SilKit::Services::Can::CanFrame frame;
             frame.canId = 5;
             frame.dataField = {1, 2, 3, 4, 5, 6, (uint8_t)i};
             frame.dlc = frame.dataField.size();
@@ -104,11 +104,11 @@ protected:
         EXPECT_EQ(waitResult, std::future_status::ready);
     }
 
-    std::unique_ptr<ib::test::SimSystemController> _systemController;
+    std::unique_ptr<SilKit::Tests::SimSystemController> _systemController;
     using ParticipantListT = std::vector<std::shared_ptr<IParticipantInternal>>;
     ParticipantListT _participants;
     std::shared_ptr<VAsioRegistry> _registry;
-    const std::string registryUri = "vib://localhost:8500";
+    const std::string registryUri = "silkit://localhost:8500";
 };
 
 TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)
@@ -118,7 +118,7 @@ TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)
     //SetupParticipants({{"LegacyParticipant", {1,0}}});
     SetupParticipants({VersionedParticipant{"LegacyParticipant", {1, 0}}});
     // do handshake
-    EXPECT_THROW(JoinDomain(), ib::ProtocolError);
+    EXPECT_THROW(JoinDomain(), SilKit::ProtocolError);
 }
 
 TEST_F(ParticipantVersionTest, Registry30_Participant31_Participant30)

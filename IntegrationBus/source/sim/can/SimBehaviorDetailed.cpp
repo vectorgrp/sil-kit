@@ -3,37 +3,37 @@
 #include "CanController.hpp"
 #include "SimBehaviorDetailed.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
-SimBehaviorDetailed::SimBehaviorDetailed(mw::IParticipantInternal* participant, CanController* canController,
-                                       const mw::ServiceDescriptor& serviceDescriptor)
+SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant, CanController* canController,
+                                       const Core::ServiceDescriptor& serviceDescriptor)
     : _participant{participant}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(canController)}
+    , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(canController)}
     , _parentServiceDescriptor{&serviceDescriptor}
 {
 }
 
 template <typename MsgT>
-void SimBehaviorDetailed::SendIbMessageImpl(MsgT&& msg)
+void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendIbMessage(_parentServiceEndpoint, std::forward<MsgT>(msg));
+    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
-void SimBehaviorDetailed::SendIbMessage(CanConfigureBaudrate&& msg)
+void SimBehaviorDetailed::SendMsg(CanConfigureBaudrate&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(CanSetControllerMode&& msg)
+void SimBehaviorDetailed::SendMsg(CanSetControllerMode&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendIbMessage(CanFrameEvent&& msg)
+void SimBehaviorDetailed::SendMsg(CanFrameEvent&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
 
-auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool 
+auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool 
 {
     // If simulated, only allow reception from NetSim.
     // NetSim internally sets the ServiceId of this controller and sends messages with it,
@@ -43,11 +43,11 @@ auto SimBehaviorDetailed::AllowReception(const mw::IIbServiceEndpoint* from) con
            && _parentServiceDescriptor->GetServiceId() == fromDescr.GetServiceId();
 }
 
-void SimBehaviorDetailed::SetSimulatedLink(const mw::ServiceDescriptor& simulatedLink)
+void SimBehaviorDetailed::SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink)
 {
     _simulatedLink = simulatedLink;
 }
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

@@ -5,11 +5,11 @@
 #include <ostream>
 #include <map>
 
-#include "ib/sim/rpc/RpcDatatypes.hpp"
+#include "silkit/services/rpc/RpcDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 bool MatchMediaType(const std::string& clientMediaType, const std::string& serverMediaType);
 
@@ -17,6 +17,6 @@ bool MatchLabels(const std::map<std::string, std::string>& clientLabels,
                  const std::map<std::string, std::string>& serverLabels);
 
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

@@ -3,15 +3,15 @@
 
 #include <memory>
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
 
 #include "PcapReader.hpp"
 
 
 namespace {
-using namespace ib::extensions;
-using namespace ib::mw::logging;
-using namespace ib::tracing;
+
+using namespace SilKit::Core::Logging;
+using namespace SilKit::tracing;
 //////////////////////////////////////////////////////////////////////
 // IReplay: Boilerplate to satisfy interfaces follows.
 //          Actual implementation is in PcapReader.
@@ -27,7 +27,7 @@ public:
     }
 
     // Interface IReplayChannel
-    auto Type() const -> ib::extensions::TraceMessageType override
+    auto Type() const -> SilKit::TraceMessageType override
     {
         //our version supports only ethernet
         return TraceMessageType::EthernetFrame;
@@ -69,7 +69,7 @@ class ReplayPcapFile :
     public IReplayFile
 {
 public:
-    ReplayPcapFile(std::string filePath, ib::mw::logging::ILogger* logger)
+    ReplayPcapFile(std::string filePath, SilKit::Core::Logging::ILogger* logger)
         : _filePath{std::move(filePath)}
     {
         auto channel = std::make_shared<ReplayPcapChannel>(_filePath, logger);
@@ -79,7 +79,7 @@ public:
     {
         return _filePath;
     }
-    auto IntegrationBusConfig() const -> std::string override
+    auto SilKitConfig() const -> std::string override
     {
         return {};
     }
@@ -106,14 +106,14 @@ private:
 } //end anonymous namespace
 
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
-auto PcapReplay::OpenFile(const ib::cfg::Config& /*unused*/, const std::string& filePath, ib::mw::logging::ILogger* ibLogger)
-    -> std::shared_ptr<extensions::IReplayFile>
+auto PcapReplay::OpenFile(const SilKit::Config::Config& /*unused*/, const std::string& filePath, SilKit::Core::Logging::ILogger* logger)
+    -> std::shared_ptr<IReplayFile>
 {
-    return std::make_shared<ReplayPcapFile>(filePath, ibLogger);
+    return std::make_shared<ReplayPcapFile>(filePath, logger);
 }
 
 } // namespace tracing
-} // namespace ib
+} // namespace SilKit

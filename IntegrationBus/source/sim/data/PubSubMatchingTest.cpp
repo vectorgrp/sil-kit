@@ -11,7 +11,7 @@ namespace {
 
 using namespace testing;
 
-using namespace ib::sim::data;
+using namespace SilKit::Services::PubSub;
 
 class PubSubMatchingTest : public ::testing::Test
 {

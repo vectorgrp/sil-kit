@@ -11,37 +11,37 @@
 #include "EndpointAddress.hpp"
 #include "detail/NamedPipe.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
 
 class PcapSink
-    : public extensions::ITraceMessageSink
+    : public ITraceMessageSink
 {
 public:
     // ----------------------------------------
     // Constructors and Destructor
     PcapSink() = delete;
     PcapSink(const PcapSink&) = delete;
-    PcapSink(mw::logging::ILogger* logger, std::string name);
+    PcapSink(Core::Logging::ILogger* logger, std::string name);
     ~PcapSink() = default;
 
     // ----------------------------------------
     // Public methods
 
     void Open(
-        extensions::SinkType outputType,
+        SinkType outputType,
         const std::string& outputPath
     ) override;
     void Close() override;
 
-    void Trace(ib::sim::TransmitDirection txRx,
-        const mw::EndpointAddress& id,
+    void Trace(SilKit::Services::TransmitDirection txRx,
+        const Core::EndpointAddress& id,
         std::chrono::nanoseconds timestamp,
-        const extensions::TraceMessage& msg
+        const TraceMessage& msg
     ) override;
 
-    auto GetLogger() const -> mw::logging::ILogger* override;
+    auto GetLogger() const -> Core::Logging::ILogger* override;
 
     auto Name() const -> const std::string& override;
 
@@ -55,8 +55,8 @@ private:
     std::string _name;
     std::string _busName;
     std::string _outputPath;
-    mw::logging::ILogger* _logger{nullptr};
+    Core::Logging::ILogger* _logger{nullptr};
 };
 
 } // namespace tracing
-} // namespace ib
+} // namespace SilKit

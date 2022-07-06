@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "IServiceDiscovery.hpp"
 #include "RpcServer.hpp"
@@ -8,11 +8,11 @@
 #include "UuidRandom.hpp"
 #include "YamlParser.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-RpcServer::RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
+RpcServer::RpcServer(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
                      const std::string& functionName, const std::string& mediaType,
                      const std::map<std::string, std::string>& labels, RpcCallHandler handler)
     : _functionName{functionName}
@@ -29,9 +29,9 @@ void RpcServer::RegisterServiceDiscovery()
 {
     // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
-        [this](ib::mw::service::ServiceDiscoveryEvent::Type discoveryType,
-               const ib::mw::ServiceDescriptor& serviceDescriptor) {
-            if (discoveryType == ib::mw::service::ServiceDiscoveryEvent::Type::ServiceCreated)
+        [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
+            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
             {
 
                 auto getVal = [serviceDescriptor](std::string key) {
@@ -43,12 +43,12 @@ void RpcServer::RegisterServiceDiscovery()
                     return tmp;
                 };
 
-                auto functionName = getVal(mw::service::supplKeyRpcClientFunctionName);
-                auto clientMediaType = getVal(mw::service::supplKeyRpcClientMediaType);
-                auto clientUUID = getVal(mw::service::supplKeyRpcClientUUID);
-                std::string labelsStr = getVal(mw::service::supplKeyRpcClientLabels);
+                auto functionName = getVal(Core::Discovery::supplKeyRpcClientFunctionName);
+                auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
+                auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
+                std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
                 std::map<std::string, std::string> clientLabels =
-                    ib::cfg::Deserialize<std::map<std::string, std::string>>(labelsStr);
+                    SilKit::Config::Deserialize<std::map<std::string, std::string>>(labelsStr);
 
                 if (functionName == _functionName && MatchMediaType(clientMediaType, _mediaType)
                     && MatchLabels(clientLabels, _labels))
@@ -56,7 +56,7 @@ void RpcServer::RegisterServiceDiscovery()
                     AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
                 }
             }
-        }, mw::service::controllerTypeRpcClient, _functionName);
+        }, Core::Discovery::controllerTypeRpcClient, _functionName);
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData)
@@ -93,11 +93,11 @@ void RpcServer::SetCallHandler(RpcCallHandler handler)
     }
 }
 
-void RpcServer::SetTimeProvider(mw::sync::ITimeProvider* provider)
+void RpcServer::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

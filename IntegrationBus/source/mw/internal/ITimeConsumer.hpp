@@ -3,9 +3,9 @@
 #pragma once
 #include "ITimeProvider.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 /*!
 * \brief Virtual time consumer. Used to register with a time provider.
@@ -18,6 +18,6 @@ public:
     virtual void SetTimeProvider(ITimeProvider* provider) = 0;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

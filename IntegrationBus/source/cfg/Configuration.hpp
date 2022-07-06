@@ -8,14 +8,14 @@
 #include <string>
 #include <vector>
 
-#include "ib/exception.hpp"
-#include "ib/IbMacros.hpp"
-#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/SilKitMacros.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
 
 #include "Optional.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 inline namespace v4 {
 
@@ -50,7 +50,7 @@ struct Sink
     };
 
     Type type{ Type::Remote };
-    mw::logging::Level level{ mw::logging::Level::Info };
+    Core::Logging::Level level{ Core::Logging::Level::Info };
     std::string logName;
 };
 
@@ -58,7 +58,7 @@ struct Sink
 struct Logging
 {
     bool logFromRemotes{ false };
-    mw::logging::Level flushLevel{ mw::logging::Level::Off };
+    Core::Logging::Level flushLevel{ Core::Logging::Level::Off };
     std::vector<Sink> sinks;
 };
 
@@ -99,13 +99,13 @@ struct TraceSource
 struct MdfChannel
 {
     // A user supplied empty string in the configuration is valid
-    ib::util::Optional<std::string> channelName; //!< maps to MDF cn_tx_name
-    ib::util::Optional<std::string> channelSource; //!< maps to MDF si_tx_name of cn_si_source
-    ib::util::Optional<std::string> channelPath; //!< maps to MDF si_tx_path of cn_si_source
+    SilKit::Util::Optional<std::string> channelName; //!< maps to MDF cn_tx_name
+    SilKit::Util::Optional<std::string> channelSource; //!< maps to MDF si_tx_name of cn_si_source
+    SilKit::Util::Optional<std::string> channelPath; //!< maps to MDF si_tx_path of cn_si_source
 
-    ib::util::Optional<std::string> groupName; //!< maps to MDF cg_tx_name
-    ib::util::Optional<std::string> groupSource; //!< maps to MDF si_tx_name of cg_si_acq_source
-    ib::util::Optional<std::string> groupPath; //!< maps to MDF si_tx_path of cn_si_acq_source
+    SilKit::Util::Optional<std::string> groupName; //!< maps to MDF cg_tx_name
+    SilKit::Util::Optional<std::string> groupSource; //!< maps to MDF si_tx_name of cg_si_acq_source
+    SilKit::Util::Optional<std::string> groupPath; //!< maps to MDF si_tx_path of cn_si_acq_source
 };
 
 struct Replay
@@ -150,7 +150,7 @@ auto to_string(TraceSink::Type sinkType) -> std::string
     case TraceSink::Type::Undefined:
         return "Undefined";
     default:
-        throw ib::TypeConversionError{ "Invalid SinkType" };
+        throw SilKit::TypeConversionError{ "Invalid SinkType" };
     }
 }
 
@@ -172,5 +172,5 @@ auto to_string(NetworkType networkType) -> std::string
 
 } // inline namespace v4
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

@@ -6,17 +6,17 @@ Utilities
    :local:
    :depth: 1
 
-Running a Vector Integration Bus (VIB) system is supported by several utilities.
+Running a Vector SilKit system is supported by several utilities.
 The registry is a mandatory part of the VAsio middleware -- it implements
 connection and service discovery for participants.
 The system monitor and controller are provided for convenience. They implement
 a simulation-wide state tracking and system command handling which is required
 in every simulation. However, using these utilities is not mandatory -- users
-of the VIB are free to implement their own system and state handling.
+of the SILKIT are free to implement their own system and state handling.
 
 .. _sec:util-registry:
 
-IbRegistry
+SilKitRegistry
 ~~~~~~~~~~~~~~
 
 .. list-table::
@@ -24,36 +24,36 @@ IbRegistry
    :stub-columns: 1
 
    *  - Abstract
-      - The Registry enables discovery between IB participants when using the
+      - The Registry enables discovery between SilKit participants when using the
         VAsio middleware. It is mandatory when using the VAsio middleware.
 
    *  - Source location
-      - ``Utilities/IbRegistry``
+      - ``Utilities/SilKitRegistry``
    *  - Requirements
       - None
    *  - Parameters
       - -v, --version                         Get version info.
-        -h, --help                            Show the help of the IbRegistry.
+        -h, --help                            Show the help of the SilKitRegistry.
         -s, --use-signal-handler              Exit this process when a signal is received. If not set, the process runs infinitely.
-        -u, --listen-uri <vib-uri>            The vib:// URI the registry should listen on. Defaults to 'vib://localhost:8500'.
+        -u, --listen-uri <vib-uri>            The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
         -l, --log <level>                     Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
         -c, --configuration <configuration>   Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
    *  - Usage Example
       - .. code-block:: powershell
 
-            # Start the IbRegistry
-            IbRegistry
+            # Start the SilKitRegistry
+            SilKitRegistry
 
    *  - Notes
-      -  * The IbRegistry is packaged in the ``IntegrationBus/bin`` directory.
-         * The IbRegistry must be started before other IB participants,
-           either with this process or using the :cpp:func:`ProvideDomain()<ib::vendor::vector::IIbRegistry::ProvideDomain()>` API.
+      -  * The SilKitRegistry is packaged in the ``SilKit/bin`` directory.
+         * The SilKitRegistry must be started before other SilKit participants,
+           either with this process or using the :cpp:func:`ProvideDomain()<SilKit::Vendor::Vector::ISilKitRegistry::ProvideDomain()>` API.
 
 
 .. _sec:util-system-controller:
 
-IbSystemController
+SilKitSystemController
 ~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -62,18 +62,18 @@ IbSystemController
 
    *  -  Abstract
       -  The SystemController implements state handling for the participants of
-         an Integration Bus system.
+         an SilKit system.
          Examples for state change commands called by the SystemController are
          'Run' or 'Stop'.
    *  -  Source location
-      -  ``Utilities/IbSystemController``
+      -  ``Utilities/SilKitSystemController``
    *  -  Requirements
-      -  The SystemController needs a running IbRegistry to connect to. 
+      -  The SystemController needs a running SilKitRegistry to connect to. 
          Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
       -  -v, --version                                Get version info.
-         -h, --help                                   Show the help of the IbSystemController.
-         -u, --connect-uri <vibUri>                   The registry URI to connect to. Defaults to 'vib://localhost:8500'.
+         -h, --help                                   Show the help of the SilKitSystemController.
+         -u, --connect-uri <silkitUri>                   The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
          -c, --configuration <configuration>          Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
@@ -83,16 +83,16 @@ IbSystemController
       -  .. code-block:: powershell
 
             # Start SystemController and wait for Participant1 and Participant2:
-            IbSystemController Participant1 Participant2
+            SilKitSystemController Participant1 Participant2
    *  -  Notes
-      -  * The distribution package contains the IbSystemController in the
+      -  * The distribution package contains the SilKitSystemController in the
            ``Integrationbus/bin/`` directory.
 
 
 
 .. _sec:util-system-controller-interactive:
 
-IbSystemControllerInteractive
+SilKitSystemControllerInteractive
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -104,14 +104,14 @@ IbSystemControllerInteractive
          manually via a command line interface. A user can enter commands on
          standard input: "Run", "Stop", "Abort", "Shutdown <ParticipantName>, Restart <ParticipantName>"
    *  -  Source location
-      -  ``Utilities/IbSystemControllerInteractive``
+      -  ``Utilities/SilKitSystemControllerInteractive``
    *  -  Requirements
-      -  The SystemController needs a running IbRegistry to connect to. 
+      -  The SystemController needs a running SilKitRegistry to connect to. 
          Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
       -  -v, --version                                Get version info.
-         -h, --help                                   Show the help of the IbSystemControllerInteractive.
-         -u, --connect-uri <vibUri>                   The registry URI to connect to. Defaults to 'vib://localhost:8500'.
+         -h, --help                                   Show the help of the SilKitSystemControllerInteractive.
+         -u, --connect-uri <silkitUri>                   The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
          -c, --configuration  <configuration>         Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
@@ -121,15 +121,15 @@ IbSystemControllerInteractive
       -  .. code-block:: powershell
 
             # Start SystemControllerInteractive for two participants:
-            IbSystemControllerInteractive Participant1 Participant2
+            SilKitSystemControllerInteractive Participant1 Participant2
    *  -  Notes
-      -  * The distribution package contains the IbSystemControllerInteractive
+      -  * The distribution package contains the SilKitSystemControllerInteractive
            in the ``Integrationbus/bin/`` directory.
 
 
 .. _sec:util-system-monitor:
 
-IbSystemMonitor
+SilKitSystemMonitor
 ~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -138,15 +138,15 @@ IbSystemMonitor
 
    *  -  Abstract
       -  The SystemMonitor visualizes the states of the participants of an
-         Integration Bus simulation.
+         SilKit simulation.
    *  -  Source location
-      -  ``Utilities/IbSystemMonitor``
+      -  ``Utilities/SilKitSystemMonitor``
    *  -  Requirements
-      -  Requires a running IbRegistry to connect to.
+      -  Requires a running SilKitRegistry to connect to.
    *  -  Parameters
       -  -v, --version                           Get version info.
-         -h, --help                              Show the help of the IbSystemMonitor.
-         -u, --connect-uri <vibUri>              The registry URI to connect to. Defaults to 'vib://localhost:8500'.
+         -h, --help                              Show the help of the SilKitSystemMonitor.
+         -u, --connect-uri <silkitUri>              The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
          -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to 'SystemController'.
          -c, --configuration  <configuration>    Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 
@@ -154,9 +154,9 @@ IbSystemMonitor
       -  .. code-block:: powershell
             
             # Start SystemMonitor
-            IbSystemMonitor
+            SilKitSystemMonitor
    *  -  Notes
-      -  * The distribution package contains the IbSystemMonitor in the
+      -  * The distribution package contains the SilKitSystemMonitor in the
            ``Integrationbus/bin/`` directory.
          * The SystemMonitor represents a passive participant in an Integration
            Bus system. Thus, it can be (re)started at any time.

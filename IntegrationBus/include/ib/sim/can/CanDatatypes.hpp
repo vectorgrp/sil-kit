@@ -5,15 +5,14 @@
 #include <chrono>
 #include <vector>
 
-#include "ib/sim/datatypes.hpp"
+#include "silkit/services/datatypes.hpp"
 
 // ================================================================================
 //  CAN specific data types
 // ================================================================================
-namespace ib {
-namespace sim {
-//! The CAN namespace
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 using CanTxId = uint32_t; //!< Set by the CanController, used for acknowledgements
 
@@ -175,6 +174,6 @@ struct CanErrorStateChangeEvent
     CanErrorState errorState; //!< The new error state
 };
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

@@ -4,9 +4,9 @@
 
 #include "DataMessageDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 class IDataPublisher
 {
@@ -40,6 +40,6 @@ public:
 //  Inline Implementations
 // ================================================================================
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

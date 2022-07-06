@@ -3,18 +3,18 @@
 #pragma once
 #include <cstdint>
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 enum class VAsioMsgKind: uint8_t
 {
     Invalid = 0,
     SubscriptionAnnouncement = 1,
     SubscriptionAcknowledge = 2,
-    IbMwMsg = 3, //Deprecated? and nowhere used as of 3.99.22
-    IbSimMsg = 4,
-    IbRegistryMessage = 5,
+    SilKitMwMsg = 3, //Deprecated? and nowhere used as of 3.99.22
+    SilKitSimMsg = 4,
+    SilKitRegistryMessage = 5,
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

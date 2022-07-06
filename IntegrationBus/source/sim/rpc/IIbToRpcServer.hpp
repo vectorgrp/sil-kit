@@ -2,25 +2,25 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-#include "ib/sim/rpc/fwd_decl.hpp"
+#include "silkit/services/rpc/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-//! \brief IIbToRpcServer interface used by the Participant
-class IIbToRpcServer
-    : public mw::IIbReceiver<>
-    , public mw::IIbSender<>
+//! \brief IMsgForRpcServer interface used by the Participant
+class IMsgForRpcServer
+    : public Core::IReceiver<>
+    , public Core::ISender<>
 {
 public:
-    virtual ~IIbToRpcServer() noexcept = default;
+    virtual ~IMsgForRpcServer() noexcept = default;
 };
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit
 

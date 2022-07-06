@@ -3,54 +3,54 @@
 #include "LinController.hpp"
 #include "SimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 class LinController;
 
-SimBehavior::SimBehavior(mw::IParticipantInternal* participant, LinController* linController,
-                    mw::sync::ITimeProvider* timeProvider)
+SimBehavior::SimBehavior(Core::IParticipantInternal* participant, LinController* linController,
+                    Core::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, linController, timeProvider}
     , _detailed{participant, linController, linController->GetServiceDescriptor()}
 {
     _currentBehavior = &_trivial;
 }
 
-auto SimBehavior::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool
+auto SimBehavior::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {
     return _currentBehavior->AllowReception(from);
 }
 
 template <typename MsgT>
-void SimBehavior::SendIbMessageImpl(MsgT&& msg)
+void SimBehavior::SendMsgImpl(MsgT&& msg)
 {
-    _currentBehavior->SendIbMessage(std::forward<MsgT>(msg));
+    _currentBehavior->SendMsg(std::forward<MsgT>(msg));
 }
 
-void SimBehavior::SendIbMessage(LinSendFrameRequest&& msg)
+void SimBehavior::SendMsg(LinSendFrameRequest&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
-void SimBehavior::SendIbMessage(LinTransmission&& msg)
+void SimBehavior::SendMsg(LinTransmission&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
-void SimBehavior::SendIbMessage(LinControllerConfig&& msg)
+void SimBehavior::SendMsg(LinControllerConfig&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
-void SimBehavior::SendIbMessage(LinSendFrameHeaderRequest&& msg)
+void SimBehavior::SendMsg(LinSendFrameHeaderRequest&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
-void SimBehavior::SendIbMessage(LinFrameResponseUpdate&& msg)
+void SimBehavior::SendMsg(LinFrameResponseUpdate&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
-void SimBehavior::SendIbMessage(LinControllerStatusUpdate&& msg)
+void SimBehavior::SendMsg(LinControllerStatusUpdate&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
 
 void SimBehavior::GoToSleep()
@@ -68,7 +68,7 @@ auto SimBehavior::CalcFrameStatus(const LinTransmission& linTransmission, bool i
     return _currentBehavior->CalcFrameStatus(linTransmission, isGoToSleepFrame);
 }
 
-void SimBehavior::SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink)
+void SimBehavior::SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink)
 {
     _detailed.SetSimulatedLink(simulatedLink);
     _currentBehavior = &_detailed;
@@ -90,6 +90,6 @@ auto SimBehavior::IsDetailed() const -> bool
 }
 
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

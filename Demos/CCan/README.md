@@ -11,4 +11,4 @@ For build instructions refer to the parent demo directory.
 ## Usage
 The Demo expects a path to the configuration variable and the participant's name ("CANoe")
 as arguments.
-> ./IbDemoCCan VirtualCanCable1_VAsio.json  CANoe
+> ./SilKitDemoCCan VirtualCanCable1_VAsio.json  CANoe

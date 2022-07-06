@@ -9,7 +9,7 @@
 #   include <windows.h>
 #endif
 
-namespace ib { namespace extensions {namespace detail {
+namespace SilKit { namespace detail {
 
 #if defined(_WIN32)
 
@@ -32,5 +32,5 @@ void* FindSymbol(LibraryHandle& hnd, const std::string& symbol_name);
 void CloseLibrary(const LibraryHandle& hnd);
 std::string GetProcessPath();
 } //end namespace detail
-} //end namespace extensions
-} //end namespace ib
+
+} //end namespace SilKit

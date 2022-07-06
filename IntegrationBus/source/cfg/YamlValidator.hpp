@@ -8,8 +8,8 @@
 
 #include "YamlSchema.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 //!< YamlValidator is able to check the element <-> sub-element relations in a YAML document
 class YamlValidator
@@ -50,5 +50,5 @@ private:
     YamlSchemaElem _schema;
 };
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

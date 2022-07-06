@@ -6,12 +6,11 @@
 #include <string>
 #include <vector>
 
-#include "ib/mw/ParticipantId.hpp"
+#include "silkit/core/ParticipantId.hpp"
 
-namespace ib {
-namespace mw {
-//! The synchronization namespace
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 struct ParticipantCommand
 {
@@ -95,6 +94,6 @@ struct LifecycleConfiguration
     bool coordinatedStop;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

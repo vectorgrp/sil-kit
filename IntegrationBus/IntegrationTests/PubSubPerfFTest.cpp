@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -36,7 +36,7 @@ protected:
 
         std::vector<std::string> syncParticipantNames = {"Publisher", "Subscriber"};
         auto registryUri = MakeTestRegistryUri();
-        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
 
         // Subscriber
         auto&& subscriber = testHarness.GetParticipant("Subscriber")->Participant();
@@ -52,7 +52,7 @@ protected:
             (void)subscriber->CreateDataSubscriber(
                 controllerName, topic, "", {},
                 [&receptionCount, subLogger, numberOfTopics, &subLifecycleService](
-                    ib::sim::data::IDataSubscriber* /*subscriber*/, const ib::sim::data::DataMessageEvent& /*data*/) {
+                    SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
                     receptionCount++;
                     if (receptionCount == numberOfTopics)
                     {
@@ -67,7 +67,7 @@ protected:
         auto&& publisher = testHarness.GetParticipant("Publisher")->Participant();
         auto pubLogger = publisher->GetLogger();
         pubLogger->Info(">>> Created Publisher participant");
-        std::vector<ib::sim::data::IDataPublisher*> pubController;
+        std::vector<SilKit::Services::PubSub::IDataPublisher*> pubController;
         std::vector<uint8_t> testData = {1, 1, 1};
         pubController.reserve(numberOfTopics);
         bool allPublished = false;

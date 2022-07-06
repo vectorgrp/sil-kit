@@ -2,17 +2,17 @@
 
 #pragma once
 
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 template<typename T>
-class IIbMessageReceiver
+class IMessageReceiver
 {
 public:
-    virtual void ReceiveIbMessage(const ib::mw::IIbServiceEndpoint* from, const T& msg) = 0;
+    virtual void ReceiveSilKitMessage(const SilKit::Core::IServiceEndpoint* from, const T& msg) = 0;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

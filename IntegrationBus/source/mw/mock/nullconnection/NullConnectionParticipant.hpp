@@ -3,15 +3,15 @@
 #pragma once
 
 #include "IParticipantInternal.hpp"
-#include "ib/cfg/IParticipantConfiguration.hpp"
+#include "silkit/cfg/IParticipantConfiguration.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-auto CreateNullConnectionParticipantImpl(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                         const std::string& participantName)
     -> std::unique_ptr<IParticipantInternal>;
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 

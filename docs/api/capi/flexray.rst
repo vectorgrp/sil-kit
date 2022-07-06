@@ -22,76 +22,76 @@ To configure these frames, the API provides functions to manipulate TX buffers.
 
 **The following functions can be used to create a FlexRay controller and manipulate it's configuration:**
 
-.. doxygenfunction:: ib_Flexray_Controller_Create
-.. doxygenfunction:: ib_Flexray_Controller_Configure
-.. doxygenfunction:: ib_Flexray_Controller_ReconfigureTxBuffer
-.. doxygenfunction:: ib_Flexray_Controller_UpdateTxBuffer
+.. doxygenfunction:: SilKit_FlexrayController_Create
+.. doxygenfunction:: SilKit_FlexrayController_Configure
+.. doxygenfunction:: SilKit_FlexrayController_ReconfigureTxBuffer
+.. doxygenfunction:: SilKit_FlexrayController_UpdateTxBuffer
 
 **The following function can be used to manipulate the controller's state by triggering chi commands:**
 
-.. doxygenfunction:: ib_Flexray_Controller_ExecuteCmd
+.. doxygenfunction:: SilKit_FlexrayController_ExecuteCmd
 
 **The following set of functions can be used to add and remove event handlers on the controller:**
 
-.. doxygenfunction:: ib_Flexray_Controller_AddFrameHandler
-.. doxygenfunction:: ib_Flexray_Controller_AddFrameTransmitHandler
-.. doxygenfunction:: ib_Flexray_Controller_AddWakeupHandler
-.. doxygenfunction:: ib_Flexray_Controller_AddPocStatusHandler
-.. doxygenfunction:: ib_Flexray_Controller_AddSymbolHandler
-.. doxygenfunction:: ib_Flexray_Controller_AddSymbolTransmitHandler
-.. doxygenfunction:: ib_Flexray_Controller_AddCycleStartHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemoveFrameHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemoveFrameTransmitHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemoveWakeupHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemovePocStatusHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemoveSymbolHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemoveSymbolTransmitHandler
-.. doxygenfunction:: ib_Flexray_Controller_RemoveCycleStartHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddFrameHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddFrameTransmitHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddWakeupHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddPocStatusHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddSymbolHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddSymbolTransmitHandler
+.. doxygenfunction:: SilKit_FlexrayController_AddCycleStartHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemoveFrameHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemoveFrameTransmitHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemoveWakeupHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemovePocStatusHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemoveSymbolHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemoveSymbolTransmitHandler
+.. doxygenfunction:: SilKit_FlexrayController_RemoveCycleStartHandler
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib_Flexray_ClusterParameters
+.. doxygenstruct:: SilKit_FlexrayClusterParameters
    :members:
-.. doxygenstruct:: ib_Flexray_NodeParameters
+.. doxygenstruct:: SilKit_FlexrayNodeParameters
    :members:
-.. doxygenstruct:: ib_Flexray_TxBufferConfig
+.. doxygenstruct:: SilKit_FlexrayTxBufferConfig
    :members:
-.. doxygenstruct:: ib_Flexray_ControllerConfig
+.. doxygenstruct:: SilKit_FlexrayControllerConfig
    :members:
-.. doxygenstruct:: ib_Flexray_TxBufferUpdate
+.. doxygenstruct:: SilKit_FlexrayTxBufferUpdate
    :members:
-.. doxygenstruct:: ib_Flexray_HostCommand
+.. doxygenstruct:: SilKit_FlexrayHostCommand
    :members:
-.. doxygenstruct:: ib_Flexray_Header
+.. doxygenstruct:: SilKit_FlexrayHeader
    :members:
-.. doxygenstruct:: ib_Flexray_Frame
+.. doxygenstruct:: SilKit_FlexrayFrame
    :members:
 
-.. doxygenstruct:: ib_Flexray_FrameEvent
+.. doxygenstruct:: SilKit_FlexrayFrameEvent
    :members:
-.. doxygenstruct:: ib_Flexray_FrameTransmitEvent
+.. doxygenstruct:: SilKit_FlexrayFrameTransmitEvent
    :members:
-.. doxygenstruct:: ib_Flexray_SymbolEvent
+.. doxygenstruct:: SilKit_FlexraySymbolEvent
    :members:
-.. doxygenstruct:: ib_Flexray_CycleStartEvent
+.. doxygenstruct:: SilKit_FlexrayCycleStartEvent
    :members:
-.. doxygenstruct:: ib_Flexray_PocStatusEvent
+.. doxygenstruct:: SilKit_FlexrayPocStatusEvent
    :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib_Flexray_MacroTick
-.. doxygentypedef:: ib_Flexray_MicroTick
-.. doxygentypedef:: ib_Flexray_ClockPeriod
-.. doxygentypedef:: ib_Flexray_Channel
-.. doxygentypedef:: ib_Flexray_SymbolPattern
-.. doxygentypedef:: ib_Flexray_ChiCommand
-.. doxygentypedef:: ib_Flexray_TransmissionMode
-.. doxygentypedef:: ib_Flexray_PocState
-.. doxygentypedef:: ib_Flexray_SlotModeType
-.. doxygentypedef:: ib_Flexray_ErrorModeType
-.. doxygentypedef:: ib_Flexray_StartupStateType
-.. doxygentypedef:: ib_Flexray_WakeupStatusType
-.. doxygentypedef:: ib_Flexray_Header_Flag
+.. doxygentypedef:: SilKit_FlexrayMacroTick
+.. doxygentypedef:: SilKit_FlexrayMicroTick
+.. doxygentypedef:: SilKit_FlexrayClockPeriod
+.. doxygentypedef:: SilKit_FlexrayChannel
+.. doxygentypedef:: SilKit_FlexraySymbolPattern
+.. doxygentypedef:: SilKit_FlexrayChiCommand
+.. doxygentypedef:: SilKit_FlexrayTransmissionMode
+.. doxygentypedef:: SilKit_FlexrayPocState
+.. doxygentypedef:: SilKit_FlexraySlotModeType
+.. doxygentypedef:: SilKit_FlexrayErrorModeType
+.. doxygentypedef:: SilKit_FlexrayStartupStateType
+.. doxygentypedef:: SilKit_FlexrayWakeupStatusType
+.. doxygentypedef:: SilKit_FlexrayHeader_Flag
 
-.. doxygentypedef:: ib_Flexray_SymbolTransmitEvent
+.. doxygentypedef:: SilKit_FlexraySymbolTransmitEvent

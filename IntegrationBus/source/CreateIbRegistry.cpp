@@ -4,24 +4,24 @@
 #include <functional>
 #include <memory>
 
-#include "ib/vendor/CreateIbRegistry.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "ParticipantConfiguration.hpp"
 #include "VAsioRegistry.hpp"
 
 
-namespace ib {
-namespace vendor {
-inline namespace vector {
+namespace SilKit {
+namespace Vendor {
+inline namespace Vector {
 
-auto CreateIbRegistry(std::shared_ptr<ib::cfg::IParticipantConfiguration> config)
-    -> std::unique_ptr<vendor::IIbRegistry>
+auto CreateSilKitRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
+    -> std::unique_ptr<Vendor::ISilKitRegistry>
 {
-    return std::make_unique<mw::VAsioRegistry>(config);
+    return std::make_unique<Core::VAsioRegistry>(config);
 }
 
 
-} // namespace vector
-} // namespace vendor
-} // namespace ib
+} // namespace Vector
+} // namespace Vendor
+} // namespace SilKit

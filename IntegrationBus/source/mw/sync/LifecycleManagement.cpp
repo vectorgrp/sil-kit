@@ -5,12 +5,12 @@
 #include "LifecycleManagement.hpp"
 #include "LifecycleStates.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 // LifecycleManagement
-LifecycleManagement::LifecycleManagement(logging::ILogger* logger, LifecycleService* parentService)
+LifecycleManagement::LifecycleManagement(Logging::ILogger* logger, LifecycleService* parentService)
     : _parentService(parentService)
     , _logger(logger)
 {
@@ -228,7 +228,7 @@ ILifecycleState* LifecycleManagement::GetShutdownState()
     return _shutDownState.get();
 }
 
-logging::ILogger* LifecycleManagement::GetLogger()
+Logging::ILogger* LifecycleManagement::GetLogger()
 {
     return _logger;
 }
@@ -238,6 +238,6 @@ LifecycleService* LifecycleManagement::GetService()
     return _parentService;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

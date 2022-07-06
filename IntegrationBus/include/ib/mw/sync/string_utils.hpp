@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ib/mw/sync/SyncDatatypes.hpp"
+#include "silkit/core/sync/SyncDatatypes.hpp"
 
 #include <string>
 #include <iomanip> //std::put_time
@@ -10,11 +10,11 @@
 #include <sstream>
 #include <ctime>
 
-#include "ib/exception.hpp"
+#include "silkit/exception.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 inline std::string to_string(ParticipantState state);
 inline std::string to_string(SystemState state);
@@ -70,7 +70,7 @@ std::string to_string(ParticipantState state)
     case ParticipantState::Reinitializing:
         return "Reinitializing";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
     
 std::string to_string(SystemState state)
@@ -104,7 +104,7 @@ std::string to_string(SystemState state)
     case SystemState::Reinitializing:
         return "Reinitializing";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(ParticipantCommand::Kind command)
@@ -118,7 +118,7 @@ std::string to_string(ParticipantCommand::Kind command)
     case ParticipantCommand::Kind::Shutdown:
         return "Shutdown";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
     
 std::string to_string(SystemCommand::Kind command)
@@ -134,7 +134,7 @@ std::string to_string(SystemCommand::Kind command)
     case SystemCommand::Kind::AbortSimulation:
         return "AbortSimulation";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(const ParticipantCommand& command)
@@ -164,7 +164,7 @@ std::ostream& operator<<(std::ostream& out, ParticipantState state)
     {
         return out << to_string(state);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "ParticipantState{" << static_cast<uint32_t>(state) << "}";
     }
@@ -176,7 +176,7 @@ std::ostream& operator<<(std::ostream& out, SystemState state)
     {
         return out << to_string(state);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "SystemState{" << static_cast<uint32_t>(state) << "}";
     }
@@ -188,7 +188,7 @@ std::ostream& operator<<(std::ostream& out, ParticipantCommand::Kind command)
     {
         return out << to_string(command);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "ParticipantCommand::Kind{" << static_cast<uint32_t>(command) << "}";
     }
@@ -200,7 +200,7 @@ std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command)
     {
         return out << to_string(command);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "SystemCommand::Kind{" << static_cast<uint32_t>(command) << "}";
     }
@@ -208,13 +208,13 @@ std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command)
 
 std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command)
 {
-    out << "sync::ParticipantCommand{" << command.kind << "}";
+    out << "Orchestration::ParticipantCommand{" << command.kind << "}";
     return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const SystemCommand& command)
 {
-    out << "sync::SystemCommand{" << command.kind << "}";
+    out << "Orchestration::SystemCommand{" << command.kind << "}";
     return out;
 }
 
@@ -228,7 +228,7 @@ std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)
     localtime_r(&enterTime, &tmBuffer);
 #endif
 
-    out << "sync::ParticipantStatus{" << status.participantName
+    out << "Orchestration::ParticipantStatus{" << status.participantName
         << ", State=" << status.state
         << ", Reason=" << status.enterReason
         << ", Time=" << std::put_time(&tmBuffer, "%FT%T")
@@ -246,7 +246,7 @@ std::string to_string(const WorkflowConfiguration& participants)
 
 std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflowConfiguration)
 {
-    out << "sync::WorkflowConfiguration{requiredParticipantNames=";
+    out << "Orchestration::WorkflowConfiguration{requiredParticipantNames=";
     bool first = true;
     for (auto&& p : workflowConfiguration.requiredParticipantNames)
     {
@@ -259,6 +259,6 @@ std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflo
     return out;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

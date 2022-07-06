@@ -3,78 +3,78 @@
 #pragma once
 #include <stdint.h>
 #include <stddef.h>
-#include "IbMacros.h"
+#include "SilKitMacros.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-IB_BEGIN_DECLS
+SILKIT_BEGIN_DECLS
 
-typedef struct ib_Participant ib_Participant;
+typedef struct SilKit_Participant SilKit_Participant;
 
-typedef int32_t ib_ReturnCode;
+typedef int32_t SilKit_ReturnCode;
 
-#define ib_ReturnCode_SUCCESS            ((ib_ReturnCode) 0)
-#define ib_ReturnCode_UNSPECIFIEDERROR   ((ib_ReturnCode) 1)
-#define ib_ReturnCode_NOTSUPPORTED       ((ib_ReturnCode) 2)
-#define ib_ReturnCode_NOTIMPLEMENTED     ((ib_ReturnCode) 3)
-#define ib_ReturnCode_BADPARAMETER       ((ib_ReturnCode) 4)
-#define ib_ReturnCode_BUFFERTOOSMALL     ((ib_ReturnCode) 5)
-#define ib_ReturnCode_TIMEOUT            ((ib_ReturnCode) 6)
-#define ib_ReturnCode_UNSUPPORTEDSERVICE ((ib_ReturnCode) 7)
-#define ib_ReturnCode_WRONGSTATE         ((ib_ReturnCode) 8) // Returned on exception ib::StateError (CapiImpl.h)
+#define SilKit_ReturnCode_SUCCESS            ((SilKit_ReturnCode) 0)
+#define SilKit_ReturnCode_UNSPECIFIEDERROR   ((SilKit_ReturnCode) 1)
+#define SilKit_ReturnCode_NOTSUPPORTED       ((SilKit_ReturnCode) 2)
+#define SilKit_ReturnCode_NOTIMPLEMENTED     ((SilKit_ReturnCode) 3)
+#define SilKit_ReturnCode_BADPARAMETER       ((SilKit_ReturnCode) 4)
+#define SilKit_ReturnCode_BUFFERTOOSMALL     ((SilKit_ReturnCode) 5)
+#define SilKit_ReturnCode_TIMEOUT            ((SilKit_ReturnCode) 6)
+#define SilKit_ReturnCode_UNSUPPORTEDSERVICE ((SilKit_ReturnCode) 7)
+#define SilKit_ReturnCode_WRONGSTATE         ((SilKit_ReturnCode) 8) // Returned on exception SilKit::StateError (CapiImpl.h)
 
-typedef uint64_t ib_NanosecondsTime;
+typedef uint64_t SilKit_NanosecondsTime;
 
 typedef struct
 {
     uint8_t MajorVersion;
     uint8_t MinorVersion;
-} ib_Version;
+} SilKit_Version;
 
-struct ib_ByteVector
+struct SilKit_ByteVector
 {
     const uint8_t* data;
     size_t size;
 };
-typedef struct ib_ByteVector ib_ByteVector;
+typedef struct SilKit_ByteVector SilKit_ByteVector;
 
 
 /*! \brief Key-value pair */
-typedef struct ib_KeyValuePair
+typedef struct SilKit_KeyValuePair
 {
     const char* key;
     const char* value;
-} ib_KeyValuePair;
+} SilKit_KeyValuePair;
 
 /*! \brief Key-value list */
-typedef struct ib_KeyValueList
+typedef struct SilKit_KeyValueList
 {
     size_t numLabels;
-    ib_KeyValuePair* labels;
-} ib_KeyValueList;
+    SilKit_KeyValuePair* labels;
+} SilKit_KeyValueList;
 
 /*! \brief String list */
-typedef struct ib_StringList
+typedef struct SilKit_StringList
 {
     size_t numStrings;
     char** strings;
-} ib_StringList;
+} SilKit_StringList;
 
-typedef uint8_t ib_Bool;
-#define ib_True  ((ib_Bool)1)
-#define ib_False ((ib_Bool)0)
+typedef uint8_t SilKit_Bool;
+#define SilKit_True  ((SilKit_Bool)1)
+#define SilKit_False ((SilKit_Bool)0)
 
-// NB: Should map to ib::sim::TransmitDirection
+// NB: Should map to SilKit::Services::TransmitDirection
 /*! \brief An enum type defining the transmit direction within the simulation */
-typedef uint8_t ib_Direction;
-#define ib_Direction_Undefined      ((ib_Direction) 0)
-#define ib_Direction_Send           ((ib_Direction) 1)
-#define ib_Direction_Receive        ((ib_Direction) 2)
-#define ib_Direction_SendReceive    ((ib_Direction) 3)
+typedef uint8_t SilKit_Direction;
+#define SilKit_Direction_Undefined      ((SilKit_Direction) 0)
+#define SilKit_Direction_Send           ((SilKit_Direction) 1)
+#define SilKit_Direction_Receive        ((SilKit_Direction) 2)
+#define SilKit_Direction_SendReceive    ((SilKit_Direction) 3)
 
-typedef uint64_t ib_HandlerId;
+typedef uint64_t SilKit_HandlerId;
 
-IB_END_DECLS
+SILKIT_END_DECLS
 
 #pragma pack(pop)

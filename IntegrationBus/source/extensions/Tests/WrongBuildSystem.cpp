@@ -1,26 +1,26 @@
 // Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
 
-#include "ib/version.hpp"
+#include "silkit/version.hpp"
 
-#include "IbExtensionBase.hpp"
-#include "IbExtensionMacros.hpp"
+#include "SilKitExtensionBase.hpp"
+#include "SilKitExtensionMacros.hpp"
 
 // definitions for linking
-struct WrongBuildSystem : public ib::extensions::IbExtensionBase
+struct WrongBuildSystem : public SilKit::SilKitExtensionBase
 {
-    using IbExtensionBase::IbExtensionBase;
+    using SilKitExtensionBase::SilKitExtensionBase;
 };
 
 // Manually declare entry symbol
-extern "C" const IbExtensionDescriptor_t vib_extension_descriptor
+extern "C" const SilKitExtensionDescriptor_t silkit_extension_descriptor
 {
-    ib::version::Major(),
-    ib::version::Minor(),
-    ib::version::Patch(),
+    SilKit::Version::Major(),
+    SilKit::Version::Minor(),
+    SilKit::Version::Patch(),
     "WrongBuildSystem",
     "Vector",
     "IncompatibleBuildHost",
-    IB_MAKE_BUILDINFOS(),
+    SILKIT_MAKE_BUILDINFOS(),
 };
 
 VIBE_API VIBE_EXTENSION_HANDLE VIBE_CABI CreateExtension()

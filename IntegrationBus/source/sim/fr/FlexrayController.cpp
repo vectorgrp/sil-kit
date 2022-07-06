@@ -5,14 +5,14 @@
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
-FlexrayController::FlexrayController(mw::IParticipantInternal* participant, cfg::FlexrayController config,
-                                     mw::sync::ITimeProvider* /*timeProvider*/)
+FlexrayController::FlexrayController(Core::IParticipantInternal* participant, Config::FlexrayController config,
+                                     Core::Orchestration::ITimeProvider* /*timeProvider*/)
     : _participant(participant)
     , _config{std::move(config)}
 {
@@ -24,15 +24,15 @@ FlexrayController::FlexrayController(mw::IParticipantInternal* participant, cfg:
 
 void FlexrayController::RegisterServiceDiscovery()
 {
-    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
+    Core::Discovery::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
-        [this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
-                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
+        [this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                                  const Core::ServiceDescriptor& remoteServiceDescriptor) {
             // check if discovered service is a network simulator (if none is known)
             if (!_simulatedLinkDetected)
             {
                 // check if received descriptor has a matching simulated link
-                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 {
                     SetDetailedBehavior(remoteServiceDescriptor);
@@ -41,7 +41,7 @@ void FlexrayController::RegisterServiceDiscovery()
         });
 }
 
-auto FlexrayController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+auto FlexrayController::AllowReception(const IServiceEndpoint* from) const -> bool
 {
     const auto& fromDescr = from->GetServiceDescriptor();
     return _simulatedLinkDetected &&
@@ -49,15 +49,15 @@ auto FlexrayController::AllowReception(const IIbServiceEndpoint* from) const -> 
            && _serviceDescriptor.GetServiceId() == fromDescr.GetServiceId();
 }
 
-auto FlexrayController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+auto FlexrayController::IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
     // NetSim uses ServiceType::Link and the simulated networkName
-    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+    return remoteServiceDescriptor.GetServiceType() == SilKit::Core::ServiceType::Link
            && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
 // Expose for testing purposes
-void FlexrayController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+void FlexrayController::SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor)
 {
     _simulatedLinkDetected = true;
     _simulatedLink = remoteServiceDescriptor;
@@ -114,7 +114,7 @@ void FlexrayController::Configure(const FlexrayControllerConfig& config)
     Validate(cfg.nodeParams);
 
     _bufferConfigs = cfg.bufferConfigs;
-    SendIbMessage(cfg);
+    SendMsg(cfg);
 }
 
 void FlexrayController::ReconfigureTxBuffer(uint16_t txBufferIdx, const FlexrayTxBufferConfig& config)
@@ -135,7 +135,7 @@ void FlexrayController::ReconfigureTxBuffer(uint16_t txBufferIdx, const FlexrayT
     FlexrayTxBufferConfigUpdate update;
     update.txBufferIndex = txBufferIdx;
     update.txBufferConfig = config;
-    SendIbMessage(update);
+    SendMsg(update);
 }
 
 void FlexrayController::UpdateTxBuffer(const FlexrayTxBufferUpdate& update)
@@ -146,67 +146,67 @@ void FlexrayController::UpdateTxBuffer(const FlexrayTxBufferUpdate& update)
         throw std::out_of_range{"Unconfigured txBufferIndex!"};
     }
 
-    SendIbMessage(update);
+    SendMsg(update);
 }
 
 void FlexrayController::Run()
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::RUN;
-    SendIbMessage(cmd);
+    SendMsg(cmd);
 }
 
 void FlexrayController::DeferredHalt()
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::DEFERRED_HALT;
-    SendIbMessage(cmd);
+    SendMsg(cmd);
 }
 
 void FlexrayController::Freeze()
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::FREEZE;
-    SendIbMessage(cmd);
+    SendMsg(cmd);
 }
 
 void FlexrayController::AllowColdstart()
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::ALLOW_COLDSTART;
-    SendIbMessage(cmd);
+    SendMsg(cmd);
 }
 
 void FlexrayController::AllSlots()
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::ALL_SLOTS;
-    SendIbMessage(cmd);
+    SendMsg(cmd);
 }
 
 void FlexrayController::Wakeup()
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::WAKEUP;
-    SendIbMessage(cmd);
+    SendMsg(cmd);
 }
 
 //------------------------
-// ReceiveIbMessage
+// ReceiveSilKitMessage
 //------------------------
 
-void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameEvent& msg)
+void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
         return;
     }
 
-    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, msg);
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg)
+void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -217,12 +217,12 @@ void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     tmp.frame = msg.frame;
     tmp.channel = msg.channel;
     tmp.timestamp = msg.timestamp;
-    _tracer.Trace(ib::sim::TransmitDirection::TX, msg.timestamp, tmp);
+    _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, tmp);
 
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolEvent& msg)
+void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -244,7 +244,7 @@ void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg)
+void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -254,7 +254,7 @@ void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayCycleStartEvent& msg)
+void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -264,7 +264,7 @@ void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const FlexrayPocStatusEvent& msg)
+void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -276,9 +276,9 @@ void FlexrayController::ReceiveIbMessage(const IIbServiceEndpoint* from, const F
 
 
 template <typename MsgT>
-void FlexrayController::SendIbMessage(MsgT&& msg)
+void FlexrayController::SendMsg(MsgT&& msg)
 {
-    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendMsg(this, std::forward<MsgT>(msg));
 }
 
 //------------------------
@@ -397,6 +397,6 @@ void FlexrayController::CallHandlers(const MsgT& msg)
     callbacks.InvokeAll(this, msg);
 }
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

@@ -4,15 +4,15 @@
 
 #include "MessageBuffer.hpp"
 
-#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
-void Serialize(ib::mw::MessageBuffer& buffer,const LogMsg& msg);
-void Deserialize(ib::mw::MessageBuffer& buffer, LogMsg& out);
+void Serialize(SilKit::Core::MessageBuffer& buffer,const LogMsg& msg);
+void Deserialize(SilKit::Core::MessageBuffer& buffer, LogMsg& out);
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

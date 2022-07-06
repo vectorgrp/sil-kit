@@ -1,18 +1,18 @@
 // Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
 
-#include "IbExtensionUtils.hpp"
+#include "SilKitExtensionUtils.hpp"
 
-#if !defined(IB_EXTENSION_OS)
-#   define IB_EXTENSION_OS "UNKNOWN"
+#if !defined(SILKIT_EXTENSION_OS)
+#   define SILKIT_EXTENSION_OS "UNKNOWN"
 #endif
 
-namespace ib { namespace extensions {
+namespace SilKit { 
 
 
 const char* BuildinfoSystem()
 {
-    return IB_EXTENSION_OS;
+    return SILKIT_EXTENSION_OS;
 }
 
-}//end namespace extensions
-}//end namespace ib
+
+}//end namespace SilKit

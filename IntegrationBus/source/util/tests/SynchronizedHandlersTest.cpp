@@ -25,7 +25,7 @@ struct Callbacks
 
 TEST(SynchronizedHandlersTest, add_and_remove_functions_during_calling)
 {
-    ib::util::SynchronizedHandlers<TestFunction> callables;
+    SilKit::Util::SynchronizedHandlers<TestFunction> callables;
 
     Callbacks callbacks;
 
@@ -76,7 +76,7 @@ struct CallbacksTwoArgs
 
 TEST(SynchronizedHandlersTest, add_and_remove_functions_during_calling_two_args)
 {
-    ib::util::SynchronizedHandlers<TestFunctionTwoArgs> callables;
+    SilKit::Util::SynchronizedHandlers<TestFunctionTwoArgs> callables;
 
     CallbacksTwoArgs callbacks;
 
@@ -120,10 +120,10 @@ TEST(SynchronizedHandlersTest, add_and_remove_functions_during_calling_two_args)
 
 TEST(SynchronizedHandlersTest, add_remove_call_concurrently)
 {
-    ib::util::SynchronizedHandlers<TestFunction> callables;
+    SilKit::Util::SynchronizedHandlers<TestFunction> callables;
 
     std::mutex mutex;
-    std::set<ib::util::HandlerId> handlerIds;
+    std::set<SilKit::Util::HandlerId> handlerIds;
 
     std::atomic<std::uint32_t> called{0};
 
@@ -173,7 +173,7 @@ TEST(SynchronizedHandlersTest, add_remove_call_concurrently)
                     return std::make_pair(handlerId, true);
                 }
 
-                return std::make_pair(ib::util::HandlerId{}, false);
+                return std::make_pair(SilKit::Util::HandlerId{}, false);
             }();
 
             if (result.second)

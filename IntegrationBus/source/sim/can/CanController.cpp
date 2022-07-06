@@ -1,17 +1,17 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 #include "CanController.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
-CanController::CanController(mw::IParticipantInternal* participant, ib::cfg::CanController config,
-                             mw::sync::ITimeProvider* timeProvider)
+CanController::CanController(Core::IParticipantInternal* participant, SilKit::Config::CanController config,
+                             Core::Orchestration::ITimeProvider* timeProvider)
     : _participant(participant)
     , _config{config}
     , _simulationBehavior{participant, this, timeProvider}
@@ -24,13 +24,13 @@ CanController::CanController(mw::IParticipantInternal* participant, ib::cfg::Can
 
 void CanController::RegisterServiceDiscovery()
 {
-    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
-    disc->RegisterServiceDiscoveryHandler([this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
-                                                 const mw::ServiceDescriptor& remoteServiceDescriptor) {
+    Core::Discovery::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
+    disc->RegisterServiceDiscoveryHandler([this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                                                 const Core::ServiceDescriptor& remoteServiceDescriptor) {
         if (_simulationBehavior.IsTrivial())
         {
             // Check if received descriptor has a matching simulated link
-            if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+            if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
                 SetDetailedBehavior(remoteServiceDescriptor);
@@ -38,7 +38,7 @@ void CanController::RegisterServiceDiscovery()
         }
         else
         {
-            if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
+            if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
                 && IsRelevantNetwork(remoteServiceDescriptor))
             {
                 SetTrivialBehavior();
@@ -47,7 +47,7 @@ void CanController::RegisterServiceDiscovery()
     });
 }
 
-void CanController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+void CanController::SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor)
 {
     _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
 }
@@ -62,22 +62,22 @@ auto CanController::GetState() -> CanControllerState
     return _controllerState;
 }
 
-auto CanController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+auto CanController::IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
     // NetSim uses ServiceType::Link and the simulated networkName
-    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+    return remoteServiceDescriptor.GetServiceType() == SilKit::Core::ServiceType::Link
            && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
-auto CanController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+auto CanController::AllowReception(const IServiceEndpoint* from) const -> bool
 {
     return _simulationBehavior.AllowReception(from);
 }
 
 template <typename MsgT>
-void CanController::SendIbMessage(MsgT&& msg)
+void CanController::SendMsg(MsgT&& msg)
 {
-    _simulationBehavior.SendIbMessage(std::move(msg));
+    _simulationBehavior.SendMsg(std::move(msg));
 }
 
 //------------------------
@@ -89,7 +89,7 @@ void CanController::SetBaudRate(uint32_t rate, uint32_t fdRate)
     _baudRate.baudRate = rate;
     _baudRate.fdBaudRate = fdRate;
 
-    SendIbMessage(_baudRate);
+    SendMsg(_baudRate);
 }
 
 void CanController::Reset()
@@ -99,7 +99,7 @@ void CanController::Reset()
     mode.flags.resetErrorHandling = 1;
     mode.mode = CanControllerState::Uninit;
 
-    SendIbMessage(mode);
+    SendMsg(mode);
 }
 
 void CanController::Start()
@@ -124,7 +124,7 @@ void CanController::ChangeControllerMode(CanControllerState state)
     mode.flags.resetErrorHandling = 0;
     mode.mode = state;
 
-    SendIbMessage(mode);
+    SendMsg(mode);
 }
 
 auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTxId
@@ -134,26 +134,26 @@ auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTx
     canFrameEvent.transmitId = MakeTxId();
     canFrameEvent.userContext = userContext;
 
-    SendIbMessage(canFrameEvent);
+    SendMsg(canFrameEvent);
     return canFrameEvent.transmitId;
 }
 
 //------------------------
-// ReceiveIbMessage
+// ReceiveSilKitMessage
 //------------------------
 
-void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanFrameEvent& msg)
+void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const CanFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
         return;
     }
 
-    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, msg);
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, msg);
     CallHandlers(msg);
 }
 
-void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanFrameTransmitEvent& msg)
+void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const CanFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -163,7 +163,7 @@ void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanFr
     CallHandlers(msg);
 }
 
-void CanController::ReceiveIbMessage(const IIbServiceEndpoint* from, const CanControllerStatus& msg)
+void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const CanControllerStatus& msg)
 {
     if (!AllowReception(from))
     {
@@ -265,6 +265,6 @@ void CanController::CallHandlers(const MsgT& msg)
     callbacks.InvokeAll(this, msg);
 }
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

@@ -10,10 +10,10 @@ Middleware Configuration
 Overview
 --------------------
 
-The Vector Integration Bus is powered by the Vector VAsio middleware. 
-This middleware is open source and included in the sources of the Vector Integration Bus.
+The Vector SilKit is powered by the Vector VAsio middleware. 
+This middleware is open source and included in the sources of the Vector SilKit.
 The currently supported middleware is *Boost.Asio* based and was specifically designed for the Vector
-Integration Bus as a transport layer.
+SilKit as a transport layer.
 
 The middleware can be configured as follows.
 
@@ -22,7 +22,7 @@ The middleware can be configured as follows.
 Configuration
 --------------------
 
-For the initial discovery of the VIB participants, the VIB uses a central registry
+For the initial discovery of the SILKIT participants, the SILKIT uses a central registry
 process at a preconfigured hostname and port. By default, the registry is expected to be
 running on localhost listening on Port 8500. These values can be changed via the
 `RegistryUri`, e.g.:
@@ -31,7 +31,7 @@ running on localhost listening on Port 8500. These values can be changed via the
 .. code-block:: yaml
 
     Middleware:
-      RegistryUri: vib://localhost:8500
+      RegistryUri: silkit://localhost:8500
       ConnectAttempts: 1
       TcpNoDelay: false
       TcpQuickAck: false
@@ -47,9 +47,9 @@ running on localhost listening on Port 8500. These values can be changed via the
      - Description
 
    * - RegistryUri
-     - The URI used by participants when connecting to the IbRegistry.
+     - The URI used by participants when connecting to the SilKitRegistry.
        By default, the registry is expected to be running on "localhost" with port 8500.
-       The URI uses a scheme of 'vib', i.e. ``vib://localhost:8500``.
+       The URI uses a scheme of 'vib', i.e. ``silkit://localhost:8500``.
 
    * - ConnectAttempts
      - Number of connects to the registry a participant should attempt before giving up and signaling an error.

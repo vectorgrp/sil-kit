@@ -11,8 +11,8 @@
 // Backward compatibility:
 #include "VAsioSerdes_Protocol30.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RegistryMsgHeader& header)
 {
@@ -287,5 +287,5 @@ void Deserialize(MessageBuffer& buffer,KnownParticipants& out)
     buffer >> out;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

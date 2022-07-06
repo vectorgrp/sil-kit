@@ -6,7 +6,7 @@
 #include <cstdlib> //getenv
 #include <io.h> //access
 
-#include "IbExtensions.hpp"
+#include "SilKitExtensions.hpp"
 #include "LoadExtension.hpp"
 
 
@@ -15,7 +15,7 @@
 #endif
 
 
-namespace ib { namespace extensions { namespace detail {
+namespace SilKit {  namespace detail {
 static std::string lastErrorMessage()
 {
     std::string rv{};
@@ -100,5 +100,5 @@ std::string GetProcessPath()
 }
 
 }//detail
-}//extensions
-}//ib
+
+}//silkit

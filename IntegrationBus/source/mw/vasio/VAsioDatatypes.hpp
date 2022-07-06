@@ -10,13 +10,13 @@
 #include "VAsioPeerInfo.hpp"
 #include "ProtocolVersion.hpp" // for current ProtocolVersion in RegistryMsgHeader
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 struct RegistryMsgHeader
 {
     std::array<uint8_t, 4> preambel{{'V', 'I', 'B', '-'}};
-    // If versionHigh/Low changes here, update VIB version range .
+    // If versionHigh/Low changes here, update SILKIT version range .
     // Also, ensure backwards compatibility in the Ser/Des code path.
     // See VAsioProtcolVersion.hpp
     uint16_t versionHigh;
@@ -49,7 +49,7 @@ struct SubscriptionAcknowledge
 struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader;
-    ib::mw::VAsioPeerInfo peerInfo;
+    SilKit::Core::VAsioPeerInfo peerInfo;
 };
 
 struct ParticipantAnnouncementReply
@@ -66,7 +66,7 @@ struct ParticipantAnnouncementReply
 struct KnownParticipants
 {
     RegistryMsgHeader messageHeader;
-    std::vector<ib::mw::VAsioPeerInfo> peerInfos;
+    std::vector<SilKit::Core::VAsioPeerInfo> peerInfos;
 };
 
 enum class RegistryMessageKind : uint8_t
@@ -109,5 +109,5 @@ inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& 
         && lhs.msgTypeName == rhs.msgTypeName;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

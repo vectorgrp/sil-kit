@@ -1,31 +1,31 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-// This test ensures that the public VIB api is compatible with windows headers.
+// This test ensures that the public SILKIT api is compatible with windows headers.
 
 // 1. include any relevant windows headers, that define some evil macros, e.g.,
 // max and min
 #include <windows.h>
 
-// 2. include all VIB headers
-#include "ib/cfg/all.hpp"
-#include "ib/exception.hpp"
-#include "ib/IbMacros.hpp"
-#include "ib/IntegrationBus.hpp"
+// 2. include all SILKIT headers
+#include "silkit/cfg/all.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/SilKitMacros.hpp"
+#include "silkit/SilKit.hpp"
 
-#include "ib/mw/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/core/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
-#include "ib/sim/all.hpp"
-#include "ib/sim/exceptions.hpp"
-#include "ib/sim/can/string_utils.hpp"
-#include "ib/sim/eth/string_utils.hpp"
-#include "ib/sim/fr/string_utils.hpp"
-#include "ib/sim/lin/string_utils.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/services/exceptions.hpp"
+#include "silkit/services/can/string_utils.hpp"
+#include "silkit/services/eth/string_utils.hpp"
+#include "silkit/services/fr/string_utils.hpp"
+#include "silkit/services/lin/string_utils.hpp"
 
-#include "ib/util/functional.hpp"
-#include "ib/util/PrintableHexString.hpp"
-#include "ib/util/vector_view.hpp"
-#include "ib/version.hpp"
+#include "silkit/util/functional.hpp"
+#include "silkit/util/PrintableHexString.hpp"
+#include "silkit/util/vector_view.hpp"
+#include "silkit/version.hpp"
 
 // 3. Provide a dummy test for proper integration with our test runner.
 #include "gtest/gtest.h"

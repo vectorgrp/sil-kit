@@ -6,22 +6,22 @@
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
 
-#include "ib/sim/lin/all.hpp"
-#include "ib/sim/lin/string_utils.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/lin/all.hpp"
+#include "silkit/services/lin/string_utils.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "gtest/gtest.h"
 
 namespace {
 
-using namespace ib::test;
-using namespace ib::cfg;
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::lin;
+using namespace SilKit::Tests;
+using namespace SilKit::Config;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Lin;
 using namespace std::chrono_literals;
 
 class Timer
@@ -387,8 +387,8 @@ TEST_F(LinITest, sync_lin_simulation)
 
         auto master = std::make_unique<LinMaster>(participant, linController);
 
-        linController->AddFrameStatusHandler(util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
-        linController->AddWakeupHandler(util::bind_method(master.get(), &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(Util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
+        linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
         timeSyncService->SetSimulationTask(
             [master = master.get(), participantName](auto now) {
@@ -411,8 +411,8 @@ TEST_F(LinITest, sync_lin_simulation)
           });
 
         auto slave = std::make_unique<LinSlave>(participant, linController);
-        linController->AddFrameStatusHandler(util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
-        linController->AddGoToSleepHandler(util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
+        linController->AddFrameStatusHandler(Util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
+        linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
 
         //to validate the inputs
         slave->_controllerConfig = config;

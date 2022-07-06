@@ -1,25 +1,25 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 cmake_minimum_required(VERSION 3.8)
-project("IntegrationBus-SystemController" LANGUAGES CXX C)
+project("SilKit-SystemController" LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 
-include(IntegrationBusInstall)
+include(SilKitInstall)
 
-add_executable(IbSystemController
+add_executable(sil-kit-system-controller
     SystemController.cpp
 )
 
 # Group this demo project into a folder
-set_target_properties(IbSystemController PROPERTIES
+set_target_properties(sil-kit-system-controller PROPERTIES
     FOLDER "Utilities"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
     INSTALL_RPATH "$ORIGIN/../lib"
 )
 
-target_link_libraries(IbSystemController
-    IntegrationBus
-    IbUtil
+target_link_libraries(sil-kit-system-controller
+    SilKit
+    SilKitUtil
 )
-install(TARGETS IbSystemController
+install(TARGETS sil-kit-system-controller
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

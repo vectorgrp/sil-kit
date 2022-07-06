@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbSimLin STATIC
+add_library(SilKitSimLin STATIC
     LinController.cpp
     LinController.hpp
     
@@ -14,28 +14,28 @@ add_library(IbSimLin STATIC
     LinSerdes.cpp
 )
 
-target_include_directories(IbSimLin
+target_include_directories(SilKitSimLin
     PUBLIC .
 )
 
-target_link_libraries(IbSimLin
-    PUBLIC  IbInterface
-    PRIVATE IbInterface
-            IbInternal
-            IbMwLogging
-            IbTracing
+target_link_libraries(SilKitSimLin
+    PUBLIC  SilKitInterface
+    PRIVATE SilKitInterface
+            SilKitInternal
+            SilKitMwLogging
+            SilKitTracing
 )
 
-add_vib_test(TestSimLin
+add_silkit_test(TestSimLin
     SOURCES
         LinTestUtils.hpp
         LinControllerDetailedSimTest.cpp
         LinControllerTrivialSimTest.cpp
         LinControllerConfigTest.cpp
     LIBS
-        IbSimLin
-        IbMwMockParticipant
-        IbTracing
-        IbMwMockNullConnection
+        SilKitSimLin
+        SilKitMwMockParticipant
+        SilKitTracing
+        SilKitMwMockNullConnection
 )
-add_vib_test(TestSimLin_Serdes  SOURCES LinSerdesTest.cpp LIBS IbInternal IbSimLin)
+add_silkit_test(TestSimLin_Serdes  SOURCES LinSerdesTest.cpp LIBS SilKitInternal SilKitSimLin)

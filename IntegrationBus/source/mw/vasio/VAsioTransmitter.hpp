@@ -7,23 +7,23 @@
 #include "IVAsioPeer.hpp"
 #include <type_traits>
 
-#include "IIbMessageReceiver.hpp"
-#include "IIbServiceEndpoint.hpp"
-#include "traits/IbMsgTraits.hpp"
+#include "IMessageReceiver.hpp"
+#include "IServiceEndpoint.hpp"
+#include "traits/SilKitMsgTraits.hpp"
 
 #include "SerializedMessage.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-//auxiliary class for conditional compilation using ib message traits
+//auxiliary class for conditional compilation using silkit message traits
 template<typename MsgT, std::size_t MsgHistSize>
 struct MessageHistory {};
 // MessageHistory<.., 0>: message history is disabled
 template<typename MsgT> struct MessageHistory<MsgT, 0>
 {
     void SetHistoryLength(size_t) {}
-    void Save(const IIbServiceEndpoint*, const MsgT& ) {}
+    void Save(const IServiceEndpoint*, const MsgT& ) {}
     void NotifyPeer(IVAsioPeer*, EndpointId) {}
 };
 // MessageHistory<.., 1>: save last message and notify peers about it
@@ -34,7 +34,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
         _hasHistory = historyLength != 0;
     }
 
-    void Save(const IIbServiceEndpoint* from , const MsgT& msg)
+    void Save(const IServiceEndpoint* from , const MsgT& msg)
     {
         if (!_hasHistory)
             return;
@@ -49,7 +49,7 @@ template<typename MsgT> struct MessageHistory<MsgT, 1>
             return;
 
         auto buffer = SerializedMessage(_last, _from, remoteIdx);
-        peer->SendIbMsg(std::move(buffer));
+        peer->SendSilKitMsg(std::move(buffer));
     }
 private:
     MsgT _last;
@@ -66,10 +66,10 @@ struct RemoteReceiver {
 
 template <class MsgT>
 class VAsioTransmitter 
-    : public IIbMessageReceiver<MsgT>
-    , public IIbServiceEndpoint
+    : public IMessageReceiver<MsgT>
+    , public IServiceEndpoint
 {
-    using History = MessageHistory<MsgT, IbMsgTraits<MsgT>::HistSize()>;
+    using History = MessageHistory<MsgT, SilKitMsgTraits<MsgT>::HistSize()>;
     History _hist;
 public:
     // ----------------------------------------
@@ -89,7 +89,7 @@ public:
         _hist.NotifyPeer(peer, remoteIdx);
     }
 
-    void SendMessageToTarget(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
+    void SendMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
     {
         // TODO  what do we do with the history for targeted messaging?
         _hist.Save(from, msg);
@@ -106,7 +106,7 @@ public:
             throw std::runtime_error{ss.str()};
         }
         auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx);
-        receiverIter->peer->SendIbMsg(std::move(buffer));
+        receiverIter->peer->SendSilKitMsg(std::move(buffer));
     }
 
     void SetHistoryLength(size_t historyLength)
@@ -117,17 +117,17 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const MsgT& msg) override
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const MsgT& msg) override
     {
         _hist.Save(from, msg);
         for (auto& receiver : _remoteReceivers)
         {
             auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiver.remoteIdx);
-            receiver.peer->SendIbMsg(std::move(buffer));
+            receiver.peer->SendSilKitMsg(std::move(buffer));
         }
     }
 
-    // IIbServiceEndpoint
+    // IServiceEndpoint
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override
     {
         _serviceDescriptor = serviceDescriptor;
@@ -152,5 +152,5 @@ inline bool operator==(const RemoteReceiver& lhs, const RemoteReceiver& rhs)
         && lhs.remoteIdx == rhs.remoteIdx;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

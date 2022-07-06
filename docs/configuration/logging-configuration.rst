@@ -13,13 +13,13 @@ Overview
 
 .. _sec:cfg-participant-logging:
 
-Within the Vector Integration Bus, the Logger provides features for local and distributed logging on different log 
+Within the Vector SilKit, the Logger provides features for local and distributed logging on different log 
 levels.
 
 Configuration
 ========================================
 The Logging configuration allows to configure the logging behaviour of the simulation participant.
-Within the Vector Integration Bus, the Logger uses so called sinks to store log messages.
+Within the Vector SilKit, the Logger uses so called sinks to store log messages.
 Multiple sinks can be configured at the same time. For example, to send log
 messages with log level Debug or higher to a remote logger and write Trace level
 logs to a file, the following configuration could be used:

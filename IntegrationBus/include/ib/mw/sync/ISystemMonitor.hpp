@@ -7,11 +7,11 @@
 #include <string>
 
 #include "SyncDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class ISystemMonitor
 {
@@ -68,7 +68,7 @@ public:
     virtual void RemoveParticipantStatusHandler(HandlerId handlerId) = 0;
 
     //! \brief Get the current ::SystemState
-    virtual auto SystemState() const -> sync::SystemState = 0;
+    virtual auto SystemState() const -> Orchestration::SystemState = 0;
 
     /*! \brief Get the current \ref ParticipantStatus of specific participant
      *
@@ -76,7 +76,7 @@ public:
      * \throw std::runtime_error If the participantId does not
      *        identify a participant that participates in synchronization.
      */
-    virtual auto ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus& = 0;
+    virtual auto ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus& = 0;
 
     /*! \brief Set a callback for participants being connected.
      *
@@ -98,6 +98,6 @@ public:
     virtual auto IsParticipantConnected(const std::string& participantName) const -> bool = 0;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

@@ -15,17 +15,17 @@ using namespace std::chrono_literals;
 
 using namespace testing;
 
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::sim::data;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Services::PubSub;
 
-using ::ib::mw::test::DummyParticipant;
+using ::SilKit::Core::Tests::DummyParticipant;
 
 class MockParticipant : public DummyParticipant
 {
 public:
 
-    MOCK_METHOD(void, SendIbMessage, (const IIbServiceEndpoint*, DataMessageEvent&&));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, DataMessageEvent&&));
 };
 
 class DataPublisherTest : public ::testing::Test
@@ -49,7 +49,7 @@ TEST_F(DataPublisherTest, publish_vector)
 {
     DataMessageEvent msg{0ns, sampleData};
 
-    EXPECT_CALL(participant, SendIbMessage(&publisher, std::move(msg)))
+    EXPECT_CALL(participant, SendMsg(&publisher, std::move(msg)))
         .Times(1);
 
     publisher.Publish(sampleData);
@@ -59,7 +59,7 @@ TEST_F(DataPublisherTest, publish_raw)
 {
     DataMessageEvent msg{0ns, sampleData};
 
-    EXPECT_CALL(participant, SendIbMessage(&publisher, std::move(msg)))
+    EXPECT_CALL(participant, SendMsg(&publisher, std::move(msg)))
         .Times(1);
 
     publisher.Publish(sampleData.data(), sampleData.size());

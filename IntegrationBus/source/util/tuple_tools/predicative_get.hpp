@@ -4,8 +4,8 @@
 
 #include <tuple>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 namespace tuple_tools {
 
 /*! Retrieve a tuple element identified by a boolean predicate.
@@ -85,5 +85,5 @@ constexpr const auto& predicative_get(const std::tuple<Head, Tail...>& tuple)
 
 
 } // namespace tuple_tools
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

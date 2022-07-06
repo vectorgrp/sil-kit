@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "ib/sim/can/CanDatatypes.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 bool operator==(const CanFrame::CanFrameFlags& lhs, const CanFrame::CanFrameFlags& rhs);
 bool operator==(const CanFrame& lhs, const CanFrame& rhs);

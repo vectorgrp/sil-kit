@@ -5,11 +5,11 @@
 #include <iomanip>
 #include <sstream>
 
-#include "ib/exception.hpp"
+#include "silkit/exception.hpp"
 #include "datatypes.hpp"
 
-namespace ib {
-namespace sim {
+namespace SilKit {
+namespace Services {
 
 inline std::string to_string(TransmitDirection direction);
 
@@ -31,7 +31,7 @@ std::string to_string(TransmitDirection direction)
     case TransmitDirection::TXRX:
         return "TXRX";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::ostream& operator<<(std::ostream& out, TransmitDirection direction)
@@ -40,11 +40,11 @@ std::ostream& operator<<(std::ostream& out, TransmitDirection direction)
     {
         return out << to_string(direction);
     }
-    catch (const ib::TypeConversionError&)
+    catch (const SilKit::TypeConversionError&)
     {
         return out << "TransmitDirection{" << static_cast<uint8_t>(direction) << "}";
     }
 }
     
-} // namespace sim
-} // namespace ib
+} // namespace Services
+} // namespace SilKit

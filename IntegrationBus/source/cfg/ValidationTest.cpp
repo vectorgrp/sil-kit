@@ -9,7 +9,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/util/functional.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "Validation.hpp"
 
@@ -25,8 +25,8 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-using namespace ib::mw;
-using namespace ib::cfg;
+using namespace SilKit::Core;
+using namespace SilKit::Config;
 
 using namespace std::chrono_literals;
 
@@ -49,7 +49,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
     controller.useTraceSinks.push_back("UndefinedSink");
     cfg.ethernetControllers.emplace_back(std::move(controller));
 
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
 TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
@@ -67,7 +67,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
     controller.useTraceSinks.push_back("");
     cfg.ethernetControllers.emplace_back(std::move(controller));
 
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
 TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
@@ -88,7 +88,7 @@ TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
     controller.replay.direction = Replay::Direction::Send;
     cfg.ethernetControllers.emplace_back(std::move(controller));
 
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
 TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
@@ -111,20 +111,20 @@ TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
     auto& sourceRef = cfg.tracing.traceSources.at(0);
 
     sourceRef.inputPath = "";
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 
     sourceRef.inputPath = "SomeFile";
     sourceRef.name = "";
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 
     auto& sinkRef = cfg.tracing.traceSinks.at(0);
 
     sinkRef.outputPath = "";
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 
     sinkRef.outputPath = "SomeFile";
     sinkRef.name = "";
-    EXPECT_THROW(Validate(cfg), ib::ConfigurationError);
+    EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
 } // anonymous namespace

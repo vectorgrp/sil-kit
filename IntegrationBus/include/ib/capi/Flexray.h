@@ -3,45 +3,45 @@
 #pragma once
 
 #include <stdint.h>
-#include "ib/capi/IbMacros.h"
-#include "ib/capi/Types.h"
-#include "ib/capi/InterfaceIdentifiers.h"
+#include "silkit/capi/SilKitMacros.h"
+#include "silkit/capi/Types.h"
+#include "silkit/capi/InterfaceIdentifiers.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-IB_BEGIN_DECLS
+SILKIT_BEGIN_DECLS
 
 //!\typedef FlexRay micro tick
-typedef int32_t ib_Flexray_MicroTick;
+typedef int32_t SilKit_FlexrayMicroTick;
 //!\typedef FlexRay macro tick
-typedef int32_t ib_Flexray_MacroTick;
+typedef int32_t SilKit_FlexrayMacroTick;
 
 //! \brief Type and constants for the FlexRay channel parameter A, B, or AB
-typedef uint32_t ib_Flexray_Channel;
-#define ib_Flexray_Channel_None ((ib_Flexray_Channel)0x00)
-#define ib_Flexray_Channel_A    ((ib_Flexray_Channel)0x01)
-#define ib_Flexray_Channel_B    ((ib_Flexray_Channel)0x02)
-#define ib_Flexray_Channel_AB   ((ib_Flexray_Channel)0x03)
+typedef uint32_t SilKit_FlexrayChannel;
+#define SilKit_FlexrayChannel_None ((SilKit_FlexrayChannel)0x00)
+#define SilKit_FlexrayChannel_A    ((SilKit_FlexrayChannel)0x01)
+#define SilKit_FlexrayChannel_B    ((SilKit_FlexrayChannel)0x02)
+#define SilKit_FlexrayChannel_AB   ((SilKit_FlexrayChannel)0x03)
 
 //! \brief Period of the clock (used for micro tick period and sample clock period).
-typedef uint32_t ib_Flexray_ClockPeriod;
+typedef uint32_t SilKit_FlexrayClockPeriod;
 //!< 12.5ns / 80MHz
-#define ib_Flexray_ClockPeriod_T12_5NS ((ib_Flexray_ClockPeriod)1)
+#define SilKit_FlexrayClockPeriod_T12_5NS ((SilKit_FlexrayClockPeriod)1)
 //!< 25ns   / 40MHz
-#define ib_Flexray_ClockPeriod_T25NS   ((ib_Flexray_ClockPeriod)2)
+#define SilKit_FlexrayClockPeriod_T25NS   ((SilKit_FlexrayClockPeriod)2)
 //!< 50ns   / 20MHz
-#define ib_Flexray_ClockPeriod_T50NS   ((ib_Flexray_ClockPeriod)3)
+#define SilKit_FlexrayClockPeriod_T50NS   ((SilKit_FlexrayClockPeriod)3)
 
 /*!
  * \brief Protocol relevant global cluster parameters
  *
  *  Cf. 'FlexRay Protocol Specification Version 3.0.1' Appendix B.3.1.1 Parameters.
  */
-struct ib_Flexray_ClusterParameters
+struct SilKit_FlexrayClusterParameters
 {
   //! The interface id specifying which version of this struct was obtained
-  ib_InterfaceIdentifier interfaceId;
+  SilKit_InterfaceIdentifier interfaceId;
 
   //! Number of attempts for a cold start before giving up (range 2-31).
   uint8_t gColdstartAttempts;
@@ -121,17 +121,17 @@ struct ib_Flexray_ClusterParameters
   //! Max number of distinct sync frame identifiers present in a given cluster. (range 2-15).
   uint8_t gSyncFrameIDCountMax;
 };
-typedef struct ib_Flexray_ClusterParameters ib_Flexray_ClusterParameters;
+typedef struct SilKit_FlexrayClusterParameters SilKit_FlexrayClusterParameters;
 
 /*!
  * \brief Protocol relevant global node parameters
  *
  *  Cf. 'FlexRay Protocol Specification Version 3.0.1' Appendix B.3.2 Parameters.
  */
-struct ib_Flexray_NodeParameters
+struct SilKit_FlexrayNodeParameters
 {
   //! The interface id specifying which version of this struct was obtained
-  ib_InterfaceIdentifier interfaceId;
+  SilKit_InterfaceIdentifier interfaceId;
 
   // ----------------------------------------------------------------------
   // Parameters according to B.3.2.1
@@ -143,13 +143,13 @@ struct ib_Flexray_NodeParameters
   uint8_t pAllowPassiveToActive;
 
   //! Channel(s) to which the controller is connected (values FlexrayChannel::A, FlexrayChannel::B, FlexrayChannel::AB).
-  ib_Flexray_Channel pChannels;
+  SilKit_FlexrayChannel pChannels;
 
   //! Cluster drift damping factor for rate correction in MicroTicks (range 0-10).
   uint8_t pClusterDriftDamping;
 
   //! Allowed deviation for startup frames during integration in MicroTicks (range 29-2743).
-  ib_Flexray_MicroTick pdAcceptedStartupRange;
+  SilKit_FlexrayMicroTick pdAcceptedStartupRange;
 
   ////! Not used by network simulator
   // pDecodingCorrection
@@ -161,7 +161,7 @@ struct ib_Flexray_NodeParameters
   // pDelayCompensationB
 
   //! Duration of listen phase in MicroTicks (range 1926-2567692).
-  ib_Flexray_MicroTick pdListenTimeout;
+  SilKit_FlexrayMicroTick pdListenTimeout;
 
   ////! Not used by network simulator
   // pExternalSync
@@ -197,22 +197,22 @@ struct ib_Flexray_NodeParameters
   uint8_t pMacroInitialOffsetB;
 
   //! Offset between secondary time reference and MT boundary (range 0-239 MicroTicks).
-  ib_Flexray_MicroTick pMicroInitialOffsetA;
+  SilKit_FlexrayMicroTick pMicroInitialOffsetA;
 
   //! Offset between secondary time reference and MT boundary (range 0-239 MicroTicks).
-  ib_Flexray_MicroTick pMicroInitialOffsetB;
+  SilKit_FlexrayMicroTick pMicroInitialOffsetB;
 
   //! Nominal number of MicroTicks in the communication cycle (range 960-1280000).
-  ib_Flexray_MicroTick pMicroPerCycle;
+  SilKit_FlexrayMicroTick pMicroPerCycle;
 
   //! Maximum permissible offset correction value (range 15-16082 MicroTicks).
-  ib_Flexray_MicroTick pOffsetCorrectionOut;
+  SilKit_FlexrayMicroTick pOffsetCorrectionOut;
 
   //! Start of the offset correction phase within the NIT, (7-15999 MT).
   uint16_t pOffsetCorrectionStart;
 
   //! Maximum permissible rate correction value (range 3-3846 MicroTicks).
-  ib_Flexray_MicroTick pRateCorrectionOut;
+  SilKit_FlexrayMicroTick pRateCorrectionOut;
 
   ////! Not used by network simulator
   // pSecondKeySlotID
@@ -221,7 +221,7 @@ struct ib_Flexray_NodeParameters
   // pTwoKeySlotMode
 
   //! Channel used by the node to send a wakeup pattern (values FlexrayChannel::A, FlexrayChannel::B).
-  ib_Flexray_Channel pWakeupChannel;
+  SilKit_FlexrayChannel pWakeupChannel;
 
   //! Number of repetitions of the wakeup symbol (range 0-63, value 0 or 1 prevents sending of WUP).
   uint8_t pWakeupPattern;
@@ -230,7 +230,7 @@ struct ib_Flexray_NodeParameters
   // Parameters according to B.3.2.2
 
   //! Duration of a FlexRay MicroTick (12.5ns, 25ns or 50ns).
-  ib_Flexray_ClockPeriod pdMicrotick;
+  SilKit_FlexrayClockPeriod pdMicrotick;
 
   ////! Not used by network simulator
   // pNMVectorEarlyUpdate
@@ -241,21 +241,21 @@ struct ib_Flexray_NodeParameters
   //! Number of samples per MicroTick (values 1 or 2).
   uint8_t pSamplesPerMicrotick;
 };
-typedef struct ib_Flexray_NodeParameters ib_Flexray_NodeParameters;
+typedef struct SilKit_FlexrayNodeParameters SilKit_FlexrayNodeParameters;
 
 //! Transmission mode for FlexRay Tx-Buffer
-typedef uint8_t ib_Flexray_TransmissionMode;
-#define ib_Flexray_TransmissionMode_SingleShot ((ib_Flexray_TransmissionMode)0)
-#define ib_Flexray_TransmissionMode_Continuous ((ib_Flexray_TransmissionMode)1)
+typedef uint8_t SilKit_FlexrayTransmissionMode;
+#define SilKit_FlexrayTransmissionMode_SingleShot ((SilKit_FlexrayTransmissionMode)0)
+#define SilKit_FlexrayTransmissionMode_Continuous ((SilKit_FlexrayTransmissionMode)1)
 
 //! Configuration of Tx-Buffer, used in struct FlexrayControllerConfig
-struct ib_Flexray_TxBufferConfig
+struct SilKit_FlexrayTxBufferConfig
 {
   //! The interface id specifying which version of this struct was obtained
-  ib_InterfaceIdentifier interfaceId;
+  SilKit_InterfaceIdentifier interfaceId;
 
   //! (values FlexrayChannel::A, FlexrayChannel::B, FlexrayChannel::AB)
-  ib_Flexray_Channel channels;
+  SilKit_FlexrayChannel channels;
 
   //! The slot Id of frame
   uint16_t slotId;
@@ -267,75 +267,75 @@ struct ib_Flexray_TxBufferConfig
   uint8_t repetition;
 
   //! Set the PPindicator
-  ib_Bool hasPayloadPreambleIndicator;
+  SilKit_Bool hasPayloadPreambleIndicator;
 
   //! Header CRC, 11 bits
   uint16_t headerCrc;
 
   //! FlexrayTransmissionMode::SingleShot or FlexrayTransmissionMode::Continuous
-  ib_Flexray_TransmissionMode transmissionMode;
+  SilKit_FlexrayTransmissionMode transmissionMode;
 };
-typedef struct ib_Flexray_TxBufferConfig ib_Flexray_TxBufferConfig;
+typedef struct SilKit_FlexrayTxBufferConfig SilKit_FlexrayTxBufferConfig;
 
 //! Configure the communication parameters of the FlexRay controller.
-struct ib_Flexray_ControllerConfig
+struct SilKit_FlexrayControllerConfig
 {
   //! The interface id specifying which version of this struct was obtained
-  ib_InterfaceIdentifier interfaceId;
+  SilKit_InterfaceIdentifier interfaceId;
   //! FlexRay cluster parameters
-  ib_Flexray_ClusterParameters* clusterParams;
+  SilKit_FlexrayClusterParameters* clusterParams;
   //! FlexRay node parameters
-  ib_Flexray_NodeParameters* nodeParams;
+  SilKit_FlexrayNodeParameters* nodeParams;
 
   //! FlexRay buffer configs
   uint32_t                   numBufferConfigs;
-  ib_Flexray_TxBufferConfig* bufferConfigs;
+  SilKit_FlexrayTxBufferConfig* bufferConfigs;
 };
-typedef struct ib_Flexray_ControllerConfig ib_Flexray_ControllerConfig;
+typedef struct SilKit_FlexrayControllerConfig SilKit_FlexrayControllerConfig;
 
 //! Update the content of a FlexRay TX-Buffer
-struct ib_Flexray_TxBufferUpdate
+struct SilKit_FlexrayTxBufferUpdate
 {
   //! The interface id specifying which version of this struct was obtained
-  ib_InterfaceIdentifier interfaceId;
+  SilKit_InterfaceIdentifier interfaceId;
 
   //! Index of the TX Buffers according to the configured buffers (cf. FlexrayControllerConfig).
   uint16_t txBufferIndex;
 
   //! Payload data valid flag
-  ib_Bool payloadDataValid;
+  SilKit_Bool payloadDataValid;
 
   //! Raw payload containing 0 to 254 bytes.
-  ib_ByteVector payload;
+  SilKit_ByteVector payload;
 };
-typedef struct ib_Flexray_TxBufferUpdate ib_Flexray_TxBufferUpdate;
+typedef struct SilKit_FlexrayTxBufferUpdate SilKit_FlexrayTxBufferUpdate;
 
 //! FlexRay controller commands
-typedef uint8_t ib_Flexray_ChiCommand;
-#define ib_Flexray_ChiCommand_RUN             ((ib_Flexray_ChiCommand)0x00)
-#define ib_Flexray_ChiCommand_DEFERRED_HALT   ((ib_Flexray_ChiCommand)0x01)
-#define ib_Flexray_ChiCommand_FREEZE          ((ib_Flexray_ChiCommand)0x02)
-#define ib_Flexray_ChiCommand_ALLOW_COLDSTART ((ib_Flexray_ChiCommand)0x03)
-#define ib_Flexray_ChiCommand_ALL_SLOTS       ((ib_Flexray_ChiCommand)0x04)
-#define ib_Flexray_ChiCommand_WAKEUP          ((ib_Flexray_ChiCommand)0x05)
+typedef uint8_t SilKit_FlexrayChiCommand;
+#define SilKit_FlexrayChiCommand_RUN             ((SilKit_FlexrayChiCommand)0x00)
+#define SilKit_FlexrayChiCommand_DEFERRED_HALT   ((SilKit_FlexrayChiCommand)0x01)
+#define SilKit_FlexrayChiCommand_FREEZE          ((SilKit_FlexrayChiCommand)0x02)
+#define SilKit_FlexrayChiCommand_ALLOW_COLDSTART ((SilKit_FlexrayChiCommand)0x03)
+#define SilKit_FlexrayChiCommand_ALL_SLOTS       ((SilKit_FlexrayChiCommand)0x04)
+#define SilKit_FlexrayChiCommand_WAKEUP          ((SilKit_FlexrayChiCommand)0x05)
 
-struct ib_Flexray_HostCommand
+struct SilKit_FlexrayHostCommand
 {
     //! The interface id specifying which version of this struct was obtained
-    ib_InterfaceIdentifier interfaceId;
+    SilKit_InterfaceIdentifier interfaceId;
 
-    ib_Flexray_ChiCommand command;
+    SilKit_FlexrayChiCommand command;
 };
 
-typedef uint8_t ib_Flexray_Header_Flag;
-#define ib_Flexray_Header_SuFIndicator ((ib_Flexray_Header_Flag)0x01)
-#define ib_Flexray_Header_SyFIndicator ((ib_Flexray_Header_Flag)0x02)
-#define ib_Flexray_Header_NFIndicator  ((ib_Flexray_Header_Flag)0x04)
-#define ib_Flexray_Header_PPIndicator  ((ib_Flexray_Header_Flag)0x08)
+typedef uint8_t SilKit_FlexrayHeader_Flag;
+#define SilKit_FlexrayHeader_SuFIndicator ((SilKit_FlexrayHeader_Flag)0x01)
+#define SilKit_FlexrayHeader_SyFIndicator ((SilKit_FlexrayHeader_Flag)0x02)
+#define SilKit_FlexrayHeader_NFIndicator  ((SilKit_FlexrayHeader_Flag)0x04)
+#define SilKit_FlexrayHeader_PPIndicator  ((SilKit_FlexrayHeader_Flag)0x08)
 
-struct ib_Flexray_Header
+struct SilKit_FlexrayHeader
 {
-  ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
   /*!
     * \brief Flags bit map according to FlagMask. Description:
     *  - [7-5]: unused
@@ -351,143 +351,143 @@ struct ib_Flexray_Header
   uint16_t headerCrc;     //  = 0; //!< Header CRC, 11 bits
   uint8_t  cycleCount;    //  = 0; //!< Cycle in which the frame was sent: 0 - 63
 };
-typedef struct ib_Flexray_Header ib_Flexray_Header;
+typedef struct SilKit_FlexrayHeader SilKit_FlexrayHeader;
 
-struct ib_Flexray_Frame
+struct SilKit_FlexrayFrame
 {
-  ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
-  ib_Flexray_Header* header;  //!< Header flags, slot, crc, and cycle indidcators
-  ib_ByteVector     payload;
+  SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_FlexrayHeader* header;  //!< Header flags, slot, crc, and cycle indidcators
+  SilKit_ByteVector     payload;
 };
-typedef struct ib_Flexray_Frame ib_Flexray_Frame;
+typedef struct SilKit_FlexrayFrame SilKit_FlexrayFrame;
 
-struct ib_Flexray_FrameEvent
+struct SilKit_FlexrayFrameEvent
 {
-  ib_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
-  ib_NanosecondsTime     timestamp;   //!< Time at end of frame transmission
-  ib_Flexray_Channel     channel;     //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
-  ib_Flexray_Frame*      frame;       //!< Received FlexRay frame
+  SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime     timestamp;   //!< Time at end of frame transmission
+  SilKit_FlexrayChannel     channel;     //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+  SilKit_FlexrayFrame*      frame;       //!< Received FlexRay frame
 };
-typedef struct ib_Flexray_FrameEvent ib_Flexray_FrameEvent;
+typedef struct SilKit_FlexrayFrameEvent SilKit_FlexrayFrameEvent;
 
 /*!
  * \brief Acknowledge for the transmit on the FlexRay bus
  */
-struct ib_Flexray_FrameTransmitEvent
+struct SilKit_FlexrayFrameTransmitEvent
 {
-  ib_InterfaceIdentifier interfaceId;   //!< The interface id specifying which version of this struct was obtained
-  ib_NanosecondsTime     timestamp;     //!< Time at end of frame transmission
+  SilKit_InterfaceIdentifier interfaceId;   //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime     timestamp;     //!< Time at end of frame transmission
   uint16_t               txBufferIndex; //!< Tx buffer, that was used for the transmission
-  ib_Flexray_Channel     channel;       //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
-  ib_Flexray_Frame*      frame;         //!< Copy of the FlexRay frame that was successfully transmitted
+  SilKit_FlexrayChannel     channel;       //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
+  SilKit_FlexrayFrame*      frame;         //!< Copy of the FlexRay frame that was successfully transmitted
 };
-typedef struct ib_Flexray_FrameTransmitEvent ib_Flexray_FrameTransmitEvent;
+typedef struct SilKit_FlexrayFrameTransmitEvent SilKit_FlexrayFrameTransmitEvent;
 
 /*!
  * \brief FlexRay symbols patterns.
  */
-typedef uint8_t ib_Flexray_SymbolPattern;
+typedef uint8_t SilKit_FlexraySymbolPattern;
 //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
-#define ib_Flexray_SymbolPattern_CasMts ((ib_Flexray_SymbolPattern)0x00)
+#define SilKit_FlexraySymbolPattern_CasMts ((SilKit_FlexraySymbolPattern)0x00)
 //!< Wakeup symbol (WUS).
-#define ib_Flexray_SymbolPattern_Wus    ((ib_Flexray_SymbolPattern)0x01)
+#define SilKit_FlexraySymbolPattern_Wus    ((SilKit_FlexraySymbolPattern)0x01)
 //!< Wakeup During Operation Pattern (WUDOP).
-#define ib_Flexray_SymbolPattern_Wudop  ((ib_Flexray_SymbolPattern)0x02)
+#define SilKit_FlexraySymbolPattern_Wudop  ((SilKit_FlexraySymbolPattern)0x02)
 
 /*!
  * \brief A FlexRay Symbol as received on the FlexRay bus.
  */
-struct ib_Flexray_SymbolEvent
+struct SilKit_FlexraySymbolEvent
 {
-  ib_InterfaceIdentifier   interfaceId; //!< The interface id specifying which version of this struct was obtained
-  ib_NanosecondsTime       timestamp;   //!< End time of symbol reception.
-  ib_Flexray_Channel       channel;     //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
-  ib_Flexray_SymbolPattern pattern;     //!< The received symbol, e.g. wakeup pattern
+  SilKit_InterfaceIdentifier   interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime       timestamp;   //!< End time of symbol reception.
+  SilKit_FlexrayChannel       channel;     //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
+  SilKit_FlexraySymbolPattern pattern;     //!< The received symbol, e.g. wakeup pattern
 };
-typedef struct ib_Flexray_SymbolEvent ib_Flexray_SymbolEvent;
-typedef struct ib_Flexray_SymbolEvent ib_Flexray_SymbolTransmitEvent;
-typedef struct ib_Flexray_SymbolEvent ib_Flexray_WakeupEvent;
+typedef struct SilKit_FlexraySymbolEvent SilKit_FlexraySymbolEvent;
+typedef struct SilKit_FlexraySymbolEvent SilKit_FlexraySymbolTransmitEvent;
+typedef struct SilKit_FlexraySymbolEvent SilKit_FlexrayWakeupEvent;
 
 /*!
  * \brief Indicate the start of a FlexRay cycle.
  */
-struct ib_Flexray_CycleStartEvent
+struct SilKit_FlexrayCycleStartEvent
 {
-  ib_InterfaceIdentifier interfaceId;  //!< The interface id specifying which version of this struct was obtained
-  ib_NanosecondsTime     timestamp;    //!< Cycle starting time.
+  SilKit_InterfaceIdentifier interfaceId;  //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime     timestamp;    //!< Cycle starting time.
   uint8_t                cycleCounter; //!< Counter of FlexRay cycles.
 };
-typedef struct ib_Flexray_CycleStartEvent ib_Flexray_CycleStartEvent;
+typedef struct SilKit_FlexrayCycleStartEvent SilKit_FlexrayCycleStartEvent;
 
 /*!
  * \brief Protocol Operation Control (POC) state of the FlexRay communication controller
  * *AUTOSAR Name:* Fr_POCStateType
  */
-typedef uint8_t ib_Flexray_PocState;
+typedef uint8_t SilKit_FlexrayPocState;
 //!< CC expects configuration. Initial state after reset.
-#define ib_Flexray_PocState_DefaultConfig ((ib_Flexray_PocState)0x00)
+#define SilKit_FlexrayPocState_DefaultConfig ((SilKit_FlexrayPocState)0x00)
 //!< CC is in configuration mode for setting communication parameters
-#define ib_Flexray_PocState_Config        ((ib_Flexray_PocState)0x01)
+#define SilKit_FlexrayPocState_Config        ((SilKit_FlexrayPocState)0x01)
 //!< intermediate state for initialization process (after Config).
-#define ib_Flexray_PocState_Ready         ((ib_Flexray_PocState)0x02)
+#define SilKit_FlexrayPocState_Ready         ((SilKit_FlexrayPocState)0x02)
 //!< FlexRay startup phase
-#define ib_Flexray_PocState_Startup       ((ib_Flexray_PocState)0x03)
+#define SilKit_FlexrayPocState_Startup       ((SilKit_FlexrayPocState)0x03)
 //!< FlexRay wakeup phase
-#define ib_Flexray_PocState_Wakeup        ((ib_Flexray_PocState)0x04)
+#define SilKit_FlexrayPocState_Wakeup        ((SilKit_FlexrayPocState)0x04)
 //!< Normal operating mode
-#define ib_Flexray_PocState_NormalActive  ((ib_Flexray_PocState)0x05)
+#define SilKit_FlexrayPocState_NormalActive  ((SilKit_FlexrayPocState)0x05)
 //!< Operating mode with transient or tolerable errors
-#define ib_Flexray_PocState_NormalPassive ((ib_Flexray_PocState)0x06)
+#define SilKit_FlexrayPocState_NormalPassive ((SilKit_FlexrayPocState)0x06)
 //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
-#define ib_Flexray_PocState_Halt          ((ib_Flexray_PocState)0x07)
+#define SilKit_FlexrayPocState_Halt          ((SilKit_FlexrayPocState)0x07)
 
 /*!
 * \brief Indicates what slot mode the POC is in.
 * *AUTOSAR Name:* Fr_SlotModeType
 */
-typedef uint8_t ib_Flexray_SlotModeType;
-#define ib_Flexray_SlotModeType_KeySlot    ((ib_Flexray_SlotModeType)0x00)
-#define ib_Flexray_SlotModeType_AllPending ((ib_Flexray_SlotModeType)0x01)
-#define ib_Flexray_SlotModeType_All        ((ib_Flexray_SlotModeType)0x02)
+typedef uint8_t SilKit_FlexraySlotModeType;
+#define SilKit_FlexraySlotModeType_KeySlot    ((SilKit_FlexraySlotModeType)0x00)
+#define SilKit_FlexraySlotModeType_AllPending ((SilKit_FlexraySlotModeType)0x01)
+#define SilKit_FlexraySlotModeType_All        ((SilKit_FlexraySlotModeType)0x02)
 
 /*!
 * \brief Indicates what error mode the POC is in.
 * *AUTOSAR Name:* Fr_ErrorModeType
 */
-typedef uint8_t ib_Flexray_ErrorModeType;
-#define ib_Flexray_ErrorModeType_Active   ((ib_Flexray_ErrorModeType)0x00)
-#define ib_Flexray_ErrorModeType_Passive  ((ib_Flexray_ErrorModeType)0x01)
-#define ib_Flexray_ErrorModeType_CommHalt ((ib_Flexray_ErrorModeType)0x02)
+typedef uint8_t SilKit_FlexrayErrorModeType;
+#define SilKit_FlexrayErrorModeType_Active   ((SilKit_FlexrayErrorModeType)0x00)
+#define SilKit_FlexrayErrorModeType_Passive  ((SilKit_FlexrayErrorModeType)0x01)
+#define SilKit_FlexrayErrorModeType_CommHalt ((SilKit_FlexrayErrorModeType)0x02)
 
 /*!
 * \brief Indicates the current substate in the startup procedure.
 * *AUTOSAR Name:* Fr_StartupStateType
 */
-typedef uint8_t ib_Flexray_StartupStateType;
-#define ib_Flexray_StartupStateType_Undefined                    ((ib_Flexray_StartupStateType)0x00)
-#define ib_Flexray_StartupStateType_ColdStartListen              ((ib_Flexray_StartupStateType)0x01)
-#define ib_Flexray_StartupStateType_IntegrationColdstartCheck    ((ib_Flexray_StartupStateType)0x02)
-#define ib_Flexray_StartupStateType_ColdStartJoin                ((ib_Flexray_StartupStateType)0x03)
-#define ib_Flexray_StartupStateType_ColdStartCollisionResolution ((ib_Flexray_StartupStateType)0x04)
-#define ib_Flexray_StartupStateType_ColdStartConsistencyCheck    ((ib_Flexray_StartupStateType)0x05)
-#define ib_Flexray_StartupStateType_IntegrationListen            ((ib_Flexray_StartupStateType)0x06)
-#define ib_Flexray_StartupStateType_InitializeSchedule           ((ib_Flexray_StartupStateType)0x07)
-#define ib_Flexray_StartupStateType_IntegrationConsistencyCheck  ((ib_Flexray_StartupStateType)0x08)
-#define ib_Flexray_StartupStateType_ColdStartGap                 ((ib_Flexray_StartupStateType)0x09)
-#define ib_Flexray_StartupStateType_ExternalStartup              ((ib_Flexray_StartupStateType)0x0A)
+typedef uint8_t SilKit_FlexrayStartupStateType;
+#define SilKit_FlexrayStartupStateType_Undefined                    ((SilKit_FlexrayStartupStateType)0x00)
+#define SilKit_FlexrayStartupStateType_ColdStartListen              ((SilKit_FlexrayStartupStateType)0x01)
+#define SilKit_FlexrayStartupStateType_IntegrationColdstartCheck    ((SilKit_FlexrayStartupStateType)0x02)
+#define SilKit_FlexrayStartupStateType_ColdStartJoin                ((SilKit_FlexrayStartupStateType)0x03)
+#define SilKit_FlexrayStartupStateType_ColdStartCollisionResolution ((SilKit_FlexrayStartupStateType)0x04)
+#define SilKit_FlexrayStartupStateType_ColdStartConsistencyCheck    ((SilKit_FlexrayStartupStateType)0x05)
+#define SilKit_FlexrayStartupStateType_IntegrationListen            ((SilKit_FlexrayStartupStateType)0x06)
+#define SilKit_FlexrayStartupStateType_InitializeSchedule           ((SilKit_FlexrayStartupStateType)0x07)
+#define SilKit_FlexrayStartupStateType_IntegrationConsistencyCheck  ((SilKit_FlexrayStartupStateType)0x08)
+#define SilKit_FlexrayStartupStateType_ColdStartGap                 ((SilKit_FlexrayStartupStateType)0x09)
+#define SilKit_FlexrayStartupStateType_ExternalStartup              ((SilKit_FlexrayStartupStateType)0x0A)
 
 /*!
 * \brief Indicates the outcome of the wake-up mechanism.
 * *AUTOSAR Name:* Fr_WakeupStateType
 */
-typedef uint8_t ib_Flexray_WakeupStatusType;
-#define ib_Flexray_WakeupStatusType_Undefined        ((ib_Flexray_WakeupStatusType)0x00)
-#define ib_Flexray_WakeupStatusType_ReceivedHeader   ((ib_Flexray_WakeupStatusType)0x01)
-#define ib_Flexray_WakeupStatusType_ReceivedWup      ((ib_Flexray_WakeupStatusType)0x02)
-#define ib_Flexray_WakeupStatusType_CollisionHeader  ((ib_Flexray_WakeupStatusType)0x03)
-#define ib_Flexray_WakeupStatusType_CollisionWup     ((ib_Flexray_WakeupStatusType)0x04)
-#define ib_Flexray_WakeupStatusType_CollisionUnknown ((ib_Flexray_WakeupStatusType)0x05)
-#define ib_Flexray_WakeupStatusType_Transmitted      ((ib_Flexray_WakeupStatusType)0x06)
+typedef uint8_t SilKit_FlexrayWakeupStatusType;
+#define SilKit_FlexrayWakeupStatusType_Undefined        ((SilKit_FlexrayWakeupStatusType)0x00)
+#define SilKit_FlexrayWakeupStatusType_ReceivedHeader   ((SilKit_FlexrayWakeupStatusType)0x01)
+#define SilKit_FlexrayWakeupStatusType_ReceivedWup      ((SilKit_FlexrayWakeupStatusType)0x02)
+#define SilKit_FlexrayWakeupStatusType_CollisionHeader  ((SilKit_FlexrayWakeupStatusType)0x03)
+#define SilKit_FlexrayWakeupStatusType_CollisionWup     ((SilKit_FlexrayWakeupStatusType)0x04)
+#define SilKit_FlexrayWakeupStatusType_CollisionUnknown ((SilKit_FlexrayWakeupStatusType)0x05)
+#define SilKit_FlexrayWakeupStatusType_Transmitted      ((SilKit_FlexrayWakeupStatusType)0x06)
 
 /*!
  * \brief Protocol Operation Control status as available in the AUTOSAR
@@ -498,80 +498,80 @@ typedef uint8_t ib_Flexray_WakeupStatusType;
  * *AUTOSAR Name:* Fr_POCStatusType
  * 
  */
-struct ib_Flexray_PocStatusEvent
+struct SilKit_FlexrayPocStatusEvent
 {
-  ib_InterfaceIdentifier      interfaceId;     //!< The interface id specifying which version of this struct was obtained
-  ib_NanosecondsTime          timestamp;       //!< IB timestamp
-  ib_Flexray_PocState         state;           /* = ib_Flexray_PocState_DefaultConfig; */     //!< Status of the Protocol Operation Control (POC).
-  ib_Bool                     chiHaltRequest;  /* = false; */                                 //!< indicates whether a halt request was received from the CHI
-  ib_Bool                     coldstartNoise;  /* = false; */                                 //!< indicates noisy channel conditions during coldstart
-  ib_Bool                     freeze;          /* = false; */                                 //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
-  ib_Bool                     chiReadyRequest; /* = false; */                                 //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
-  ib_Flexray_ErrorModeType    errorMode;       /* = ib_Flexray_ErrorModeType_Active; */       //!< indicates the error mode of the POC
-  ib_Flexray_SlotModeType     slotMode;        /* = ib_Flexray_SlotModeType_KeySlot; */       //!< indicates the slot mode of the POC
-  ib_Flexray_StartupStateType startupState;    /* = ib_Flexray_StartupStateType_Undefined; */ //!< indicates states within the STARTUP mechanism
-  ib_Flexray_WakeupStatusType wakeupStatus;    /* = ib_Flexray_WakeupStatusType_Undefined; */ //!< outcome of the execution of the WAKEUP mechanism
+  SilKit_InterfaceIdentifier      interfaceId;     //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime          timestamp;       //!< SilKit timestamp
+  SilKit_FlexrayPocState         state;           /* = SilKit_FlexrayPocState_DefaultConfig; */     //!< Status of the Protocol Operation Control (POC).
+  SilKit_Bool                     chiHaltRequest;  /* = false; */                                 //!< indicates whether a halt request was received from the CHI
+  SilKit_Bool                     coldstartNoise;  /* = false; */                                 //!< indicates noisy channel conditions during coldstart
+  SilKit_Bool                     freeze;          /* = false; */                                 //!< indicates that the POC entered a halt state due to an error condition requiring immediate halt.
+  SilKit_Bool                     chiReadyRequest; /* = false; */                                 //!< indicates that the CHI requested to enter ready state at the end of the communication cycle.
+  SilKit_FlexrayErrorModeType    errorMode;       /* = SilKit_FlexrayErrorModeType_Active; */       //!< indicates the error mode of the POC
+  SilKit_FlexraySlotModeType     slotMode;        /* = SilKit_FlexraySlotModeType_KeySlot; */       //!< indicates the slot mode of the POC
+  SilKit_FlexrayStartupStateType startupState;    /* = SilKit_FlexrayStartupStateType_Undefined; */ //!< indicates states within the STARTUP mechanism
+  SilKit_FlexrayWakeupStatusType wakeupStatus;    /* = SilKit_FlexrayWakeupStatusType_Undefined; */ //!< outcome of the execution of the WAKEUP mechanism
 };
-typedef struct ib_Flexray_PocStatusEvent ib_Flexray_PocStatusEvent;
+typedef struct SilKit_FlexrayPocStatusEvent SilKit_FlexrayPocStatusEvent;
 
 /*! \brief abstract FlexRay Controller object to be used by vECUs
  */
-typedef void ib_Flexray_Controller;
+typedef void SilKit_FlexrayController;
 
 /*! Callback type to indicate that a FlexRay message has been received.
   *  Cf. \ref AddFrameHandler();
   */
-typedef void (*ib_Flexray_FrameHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_FrameEvent* message);
+typedef void (*SilKit_FlexrayFrameHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameEvent* message);
 /*! Callback type to indicate that a FlexrayFrameTransmitEvent has been received.
   *  Cf. \ref AddFrameTransmitHandler();
   */
-typedef void (*ib_Flexray_FrameTransmitHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_FrameTransmitEvent* acknowledge);
+typedef void (*SilKit_FlexrayFrameTransmitHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameTransmitEvent* acknowledge);
 
 /*! Callback type to indicate that a wakeup has been received.
   *   Should be answered by a call to Run(). Cf. \ref AddWakeupHandler();
   */
-typedef void (*ib_Flexray_WakeupHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_WakeupEvent* symbol);
+typedef void (*SilKit_FlexrayWakeupHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayWakeupEvent* symbol);
 
 /*! Callback type to indicate that the POC status (including state variables, modes and error codes) has changed.
   *
   */
-typedef void (*ib_Flexray_PocStatusHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_PocStatusEvent* status);
+typedef void (*SilKit_FlexrayPocStatusHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayPocStatusEvent* status);
 
 /*! Callback type to indicate that the controller has received a symbol.
   *  Cf. \ref AddSymbolHandler();
   */
-typedef void (*ib_Flexray_SymbolHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolEvent* symbol);
+typedef void (*SilKit_FlexraySymbolHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol);
 
 /*! Callback type to indicate that the controller has sent a symbol.
   *  Cf. \ref AddSymbolTransmitHandler();
   */
-typedef void (*ib_Flexray_SymbolTransmitHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_SymbolTransmitEvent* acknowledge);
+typedef void (*SilKit_FlexraySymbolTransmitHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolTransmitEvent* acknowledge);
 
 /*! Callback type to indicate that a new FlexRay cycle did start.
   *  Cf. \ref AddCycleStartHandler();
   */
-typedef void (*ib_Flexray_CycleStartHandler_t)(void* context, ib_Flexray_Controller* controller, const ib_Flexray_CycleStartEvent* cycleStart);
+typedef void (*SilKit_FlexrayCycleStartHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayCycleStartEvent* cycleStart);
 
 /* ! \brief Create a FlexRay controller with the given name.
  * ! \note The object returned must not be deallocated using free()!
  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_Create(ib_Flexray_Controller** outController,
-                                                             ib_Participant* participant, const char* name,
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_Create(SilKit_FlexrayController** outController,
+                                                             SilKit_Participant* participant, const char* name,
                                                              const char* network);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_Create_t)(ib_Flexray_Controller** outController,
-                                                        ib_Participant* participant, const char* name,
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_Create_t)(SilKit_FlexrayController** outController,
+                                                        SilKit_Participant* participant, const char* name,
                                                         const char* network);
 
 /*! \brief Apply the given controller configuration to the controller.*/
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_Configure(ib_Flexray_Controller* controller, const ib_Flexray_ControllerConfig* config);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller, const SilKit_FlexrayControllerConfig* config);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_Configure_t)(ib_Flexray_Controller* controller, const ib_Flexray_ControllerConfig* config);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_Configure_t)(SilKit_FlexrayController* controller, const SilKit_FlexrayControllerConfig* config);
 
-/*! \brief Reconfigure a TX Buffer that was previously setup with ib_Flexray_Controller_Configure()*/
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_ReconfigureTxBuffer(ib_Flexray_Controller* controller, uint16_t txBufferIdx, const ib_Flexray_TxBufferConfig* config);
+/*! \brief Reconfigure a TX Buffer that was previously setup with SilKit_FlexrayController_Configure()*/
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx, const SilKit_FlexrayTxBufferConfig* config);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_ReconfigureTxBuffer_t)(ib_Flexray_Controller* controller, uint16_t txBufferIdx, const ib_Flexray_TxBufferConfig* config);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_ReconfigureTxBuffer_t)(SilKit_FlexrayController* controller, uint16_t txBufferIdx, const SilKit_FlexrayTxBufferConfig* config);
 
 /*! \brief Update the content of a previously configured TX buffer.
   *
@@ -580,16 +580,16 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_ReconfigureTxBuffer_t)(ib_Flexray_
   * the content is sent exactly once. If it is configured as FlexrayTransmissionMode::Continuous,
   * the content is sent repeatedly according to the offset and repetition configuration.
   *
-  *  \see ib_Flexray_Controller_Configure(const FlexrayControllerConfig&)
+  *  \see SilKit_FlexrayController_Configure(const FlexrayControllerConfig&)
   */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_UpdateTxBuffer(ib_Flexray_Controller* controller, const ib_Flexray_TxBufferUpdate* update);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller, const SilKit_FlexrayTxBufferUpdate* update);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_UpdateTxBuffer_t)(ib_Flexray_Controller* controller, const ib_Flexray_TxBufferUpdate* update);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_UpdateTxBuffer_t)(SilKit_FlexrayController* controller, const SilKit_FlexrayTxBufferUpdate* update);
 
 //! \brief Send the given FlexrayChiCommand.
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_ExecuteCmd(ib_Flexray_Controller* controller, ib_Flexray_ChiCommand cmd);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_ExecuteCmd_t)(ib_Flexray_Controller* controller, ib_Flexray_ChiCommand cmd);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_ExecuteCmd_t)(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd);
 
 /*! \brief Receive a FlexRay message from the given controller.
  *
@@ -598,23 +598,23 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_ExecuteCmd_t)(ib_Flexray_Controlle
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddFrameHandler(ib_Flexray_Controller* controller, void* context,
-                                                                      ib_Flexray_FrameHandler_t handler,
-                                                                      ib_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
+                                                                      SilKit_FlexrayFrameHandler_t handler,
+                                                                      SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameHandler_t)(ib_Flexray_Controller* controller, void* context,
-                                                                 ib_Flexray_FrameHandler_t handler,
-                                                                 ib_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddFrameHandler_t)(SilKit_FlexrayController* controller, void* context,
+                                                                 SilKit_FlexrayFrameHandler_t handler,
+                                                                 SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Flexray_FrameHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexrayFrameHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveFrameHandler(ib_Flexray_Controller* controller,
-                                                                         ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller,
+                                                                         SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameHandler_t)(ib_Flexray_Controller* controller,
-                                                                    ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveFrameHandler_t)(SilKit_FlexrayController* controller,
+                                                                    SilKit_HandlerId handlerId);
 
 /*! \brief Notification that a FlexRay message has been successfully sent.
  *
@@ -623,25 +623,25 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameHandler_t)(ib_Flexray_C
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddFrameTransmitHandler(ib_Flexray_Controller* controller,
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller,
                                                                               void* context,
-                                                                              ib_Flexray_FrameTransmitHandler_t handler,
-                                                                              ib_HandlerId* outHandlerId);
+                                                                              SilKit_FlexrayFrameTransmitHandler_t handler,
+                                                                              SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddFrameTransmitHandler_t)(ib_Flexray_Controller* controller,
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddFrameTransmitHandler_t)(SilKit_FlexrayController* controller,
                                                                          void* context,
-                                                                         ib_Flexray_FrameTransmitHandler_t handler,
-                                                                         ib_HandlerId* outHandlerId);
+                                                                         SilKit_FlexrayFrameTransmitHandler_t handler,
+                                                                         SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Flexray_FrameTransmitHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexrayFrameTransmitHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveFrameTransmitHandler(ib_Flexray_Controller* controller,
-                                                                                 ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
+                                                                                 SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameTransmitHandler_t)(ib_Flexray_Controller* controller,
-                                                                            ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveFrameTransmitHandler_t)(SilKit_FlexrayController* controller,
+                                                                            SilKit_HandlerId handlerId);
 
 /*! \brief Notification that a wakeup has been received.
  *
@@ -650,23 +650,23 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveFrameTransmitHandler_t)(ib_F
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddWakeupHandler(ib_Flexray_Controller* controller, void* context,
-                                                                       ib_Flexray_WakeupHandler_t handler,
-                                                                       ib_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
+                                                                       SilKit_FlexrayWakeupHandler_t handler,
+                                                                       SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddWakeupHandler_t)(ib_Flexray_Controller* controller, void* context,
-                                                                  ib_Flexray_WakeupHandler_t handler,
-                                                                  ib_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddWakeupHandler_t)(SilKit_FlexrayController* controller, void* context,
+                                                                  SilKit_FlexrayWakeupHandler_t handler,
+                                                                  SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Flexray_WakeupHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexrayWakeupHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveWakeupHandler(ib_Flexray_Controller* controller,
-                                                                          ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller,
+                                                                          SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveWakeupHandler_t)(ib_Flexray_Controller* controller,
-                                                                     ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveWakeupHandler_t)(SilKit_FlexrayController* controller,
+                                                                     SilKit_HandlerId handlerId);
 
 /*! \brief Notification that the POC status has changed.
  *
@@ -675,24 +675,24 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveWakeupHandler_t)(ib_Flexray_
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddPocStatusHandler(ib_Flexray_Controller* controller,
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller,
                                                                           void* context,
-                                                                          ib_Flexray_PocStatusHandler_t handler,
-                                                                          ib_HandlerId* outHandlerId);
+                                                                          SilKit_FlexrayPocStatusHandler_t handler,
+                                                                          SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddPocStatusHandler_t)(ib_Flexray_Controller* controller, void* context,
-                                                                     ib_Flexray_PocStatusHandler_t handler,
-                                                                     ib_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddPocStatusHandler_t)(SilKit_FlexrayController* controller, void* context,
+                                                                     SilKit_FlexrayPocStatusHandler_t handler,
+                                                                     SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Flexray_PocStatusHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexrayPocStatusHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemovePocStatusHandler(ib_Flexray_Controller* controller,
-                                                                             ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
+                                                                             SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemovePocStatusHandler_t)(ib_Flexray_Controller* controller,
-                                                                        ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemovePocStatusHandler_t)(SilKit_FlexrayController* controller,
+                                                                        SilKit_HandlerId handlerId);
 
 /*! \brief Notification that the controller has received a symbol.
   *
@@ -705,23 +705,23 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_RemovePocStatusHandler_t)(ib_Flexr
   * \param handler The handler to be called.
   * \param outHandlerId The handler identifier that can be used to remove the callback.
   */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddSymbolHandler(ib_Flexray_Controller* controller, void* context,
-                                                                       ib_Flexray_SymbolHandler_t handler,
-                                                                       ib_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
+                                                                       SilKit_FlexraySymbolHandler_t handler,
+                                                                       SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolHandler_t)(ib_Flexray_Controller* controller, void* context,
-                                                                  ib_Flexray_SymbolHandler_t handler,
-                                                                  ib_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddSymbolHandler_t)(SilKit_FlexrayController* controller, void* context,
+                                                                  SilKit_FlexraySymbolHandler_t handler,
+                                                                  SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Flexray_SymbolHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexraySymbolHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveSymbolHandler(ib_Flexray_Controller* controller,
-                                                                          ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller,
+                                                                          SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolHandler_t)(ib_Flexray_Controller* controller,
-                                                                     ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolHandler_t)(SilKit_FlexrayController* controller,
+                                                                     SilKit_HandlerId handlerId);
 
 /*! \brief Notification that the controller has sent a symbol.
   *
@@ -735,24 +735,24 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolHandler_t)(ib_Flexray_
   * \param handler The handler to be called.
   * \param outHandlerId The handler identifier that can be used to remove the callback.
   */
-IntegrationBusAPI ib_ReturnCode
-ib_Flexray_Controller_AddSymbolTransmitHandler(ib_Flexray_Controller* controller, void* context,
-                                               ib_Flexray_SymbolTransmitHandler_t handler, ib_HandlerId* outHandlerId);
+SilKitAPI SilKit_ReturnCode
+SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
+                                               SilKit_FlexraySymbolTransmitHandler_t handler, SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddSymbolTransmitHandler_t)(ib_Flexray_Controller* controller,
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddSymbolTransmitHandler_t)(SilKit_FlexrayController* controller,
                                                                           void* context,
-                                                                          ib_Flexray_SymbolTransmitHandler_t handler,
-                                                                          ib_HandlerId* outHandlerId);
+                                                                          SilKit_FlexraySymbolTransmitHandler_t handler,
+                                                                          SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref ib_Flexray_SymbolTransmitHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexraySymbolTransmitHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveSymbolTransmitHandler(ib_Flexray_Controller* controller,
-                                                                                  ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
+                                                                                  SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolTransmitHandler_t)(ib_Flexray_Controller* controller,
-                                                                             ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolTransmitHandler_t)(SilKit_FlexrayController* controller,
+                                                                             SilKit_HandlerId handlerId);
 
 /*! \brief Notification that a new FlexRay cycle did start.
  *
@@ -761,26 +761,26 @@ typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveSymbolTransmitHandler_t)(ib_
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_AddCycleStartHandler(ib_Flexray_Controller* controller,
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller,
                                                                            void* context,
-                                                                           ib_Flexray_CycleStartHandler_t handler,
-                                                                           ib_HandlerId* outHandlerId);
+                                                                           SilKit_FlexrayCycleStartHandler_t handler,
+                                                                           SilKit_HandlerId* outHandlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_AddCycleStartHandler_t)(ib_Flexray_Controller* controller, void* context,
-                                                                      ib_Flexray_CycleStartHandler_t handler,
-                                                                      ib_HandlerId* outHandlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddCycleStartHandler_t)(SilKit_FlexrayController* controller, void* context,
+                                                                      SilKit_FlexrayCycleStartHandler_t handler,
+                                                                      SilKit_HandlerId* outHandlerId);
 
 
-/*! \brief  Remove a \ref ib_Flexray_CycleStartHandler_t by ib_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_FlexrayCycleStartHandler_t by SilKit_HandlerId on this controller 
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-IntegrationBusAPI ib_ReturnCode ib_Flexray_Controller_RemoveCycleStartHandler(ib_Flexray_Controller* controller,
-                                                                              ib_HandlerId handlerId);
+SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
+                                                                              SilKit_HandlerId handlerId);
 
-typedef ib_ReturnCode (*ib_Flexray_Controller_RemoveCycleStartHandler_t)(ib_Flexray_Controller* controller,
-                                                                         ib_HandlerId handlerId);
+typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveCycleStartHandler_t)(SilKit_FlexrayController* controller,
+                                                                         SilKit_HandlerId handlerId);
 
-IB_END_DECLS
+SILKIT_END_DECLS
 
 #pragma pack(pop)

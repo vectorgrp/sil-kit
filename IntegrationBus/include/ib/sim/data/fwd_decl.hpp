@@ -2,9 +2,9 @@
 
 #pragma once
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 struct PublisherAnnouncement;
 struct DataMessageEvent;
@@ -12,6 +12,6 @@ struct DataMessageEvent;
 class IDataPublisher;
 class IDataSubscriber;
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

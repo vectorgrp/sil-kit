@@ -4,19 +4,19 @@
 
 #include <cassert>
 
-#include "ib/mw/sync/ISystemController.hpp"
+#include "silkit/core/sync/ISystemController.hpp"
 
-#include "IIbToSystemController.hpp"
+#include "IMsgForSystemController.hpp"
 #include "IParticipantInternal.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class SystemController
     : public ISystemController
-    , public IIbToSystemController
-    , public mw::IIbServiceEndpoint
+    , public IMsgForSystemController
+    , public Core::IServiceEndpoint
 {
     public:
     // ----------------------------------------
@@ -43,15 +43,15 @@ public:
     void AbortSimulation() const override;
     void SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
     // private methods
     template <class MsgT>
-    inline void SendIbMessage(MsgT&& msg) const;
+    inline void SendMsg(MsgT&& msg) const;
 
     inline void SendParticipantCommand(ParticipantId participantId, ParticipantCommand::Kind kind) const;
     inline void SendSystemCommand(SystemCommand::Kind kind) const;
@@ -60,17 +60,17 @@ private:
     // ----------------------------------------
     // private members
     IParticipantInternal* _participant{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor;
+    Core::ServiceDescriptor _serviceDescriptor;
 };
 
 // ================================================================================
 // Inline Implementations
 // ================================================================================
 template <class MsgT>
-void SystemController::SendIbMessage(MsgT&& msg) const
+void SystemController::SendMsg(MsgT&& msg) const
 {
     assert(_participant);
-    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendMsg(this, std::forward<MsgT>(msg));
 }
 
 void SystemController::SendParticipantCommand(ParticipantId participantId, ParticipantCommand::Kind kind) const
@@ -79,7 +79,7 @@ void SystemController::SendParticipantCommand(ParticipantId participantId, Parti
     cmd.participant = participantId;
     cmd.kind = kind;
 
-    SendIbMessage(std::move(cmd));
+    SendMsg(std::move(cmd));
 }
     
 void SystemController::SendSystemCommand(SystemCommand::Kind kind) const
@@ -87,23 +87,23 @@ void SystemController::SendSystemCommand(SystemCommand::Kind kind) const
     SystemCommand cmd;
     cmd.kind = kind;
 
-    SendIbMessage(std::move(cmd));
+    SendMsg(std::move(cmd));
 }
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-void SystemController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void SystemController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto SystemController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto SystemController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

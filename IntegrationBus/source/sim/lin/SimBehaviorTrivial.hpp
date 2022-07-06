@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "IIbToLinController.hpp"
+#include "IMsgForLinController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 
 #include "ISimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 class LinController;
 
@@ -18,17 +18,17 @@ class SimBehaviorTrivial : public ISimBehavior
 {
 public:
 
-    SimBehaviorTrivial(mw::IParticipantInternal* participant, LinController* linController,
-                       mw::sync::ITimeProvider* timeProvider);
+    SimBehaviorTrivial(Core::IParticipantInternal* participant, LinController* linController,
+                       Core::Orchestration::ITimeProvider* timeProvider);
 
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     
-    void SendIbMessage(LinSendFrameRequest&& sendFrameRequest) override;
-    void SendIbMessage(LinTransmission&& transmission) override;
-    void SendIbMessage(LinControllerConfig&& controllerConfig) override;
-    void SendIbMessage(LinSendFrameHeaderRequest&& header) override;
-    void SendIbMessage(LinFrameResponseUpdate&& frameResponseUpdate) override;
-    void SendIbMessage(LinControllerStatusUpdate&& statusUpdate) override;
+    void SendMsg(LinSendFrameRequest&& sendFrameRequest) override;
+    void SendMsg(LinTransmission&& transmission) override;
+    void SendMsg(LinControllerConfig&& controllerConfig) override;
+    void SendMsg(LinSendFrameHeaderRequest&& header) override;
+    void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) override;
+    void SendMsg(LinControllerStatusUpdate&& statusUpdate) override;
 
     void GoToSleep() override;
     void Wakeup() override;
@@ -36,18 +36,18 @@ public:
 
 private:
     template <typename MsgT>
-    void ReceiveIbMessage(const MsgT& msg);
+    void ReceiveSilKitMessage(const MsgT& msg);
 
     template <typename MsgT>
-    void SendIbMessageImpl(MsgT&& msg);
+    void SendMsgImpl(MsgT&& msg);
 
-    mw::IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     LinController* _parentController{nullptr};
-    const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    extensions::Tracer _tracer;
+    const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Tracer _tracer;
 };
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

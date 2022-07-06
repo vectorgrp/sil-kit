@@ -5,17 +5,17 @@
 #include <iostream>
 #include <chrono>
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/sim/lin/string_utils.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/lin/string_utils.hpp"
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
-LinController::LinController(mw::IParticipantInternal* participant, ib::cfg::LinController config,
-                               mw::sync::ITimeProvider* timeProvider)
+LinController::LinController(Core::IParticipantInternal* participant, SilKit::Config::LinController config,
+                               Core::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _config{config}
     , _logger{participant->GetLogger()}
@@ -31,13 +31,13 @@ LinController::LinController(mw::IParticipantInternal* participant, ib::cfg::Lin
 void LinController::RegisterServiceDiscovery()
 {
     _participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
-        [this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
-                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
+        [this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                                  const Core::ServiceDescriptor& remoteServiceDescriptor) {
             // check if discovered service is a network simulator (if none is known)
             if (_simulationBehavior.IsTrivial())
             {
                 // check if received descriptor has a matching simulated link
-                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 {
                     SetDetailedBehavior(remoteServiceDescriptor);
@@ -45,7 +45,7 @@ void LinController::RegisterServiceDiscovery()
             }
             else
             {
-                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
+                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 
                 {
@@ -55,7 +55,7 @@ void LinController::RegisterServiceDiscovery()
         });
 }
 
-void LinController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+void LinController::SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor)
 {
     _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
 }
@@ -65,26 +65,26 @@ void LinController::SetTrivialBehavior()
     _simulationBehavior.SetTrivialBehavior();
 }
 
-auto LinController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+auto LinController::AllowReception(const IServiceEndpoint* from) const -> bool
 {
     return _simulationBehavior.AllowReception(from);
 }
 
-auto LinController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+auto LinController::IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
-    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+    return remoteServiceDescriptor.GetServiceType() == SilKit::Core::ServiceType::Link
            && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
 template <typename MsgT>
-void LinController::SendIbMessage(MsgT&& msg)
+void LinController::SendMsg(MsgT&& msg)
 {
-    // Detailed: Distribute IbMessage
+    // Detailed: Distribute SilKitMessage
     // Trivial: 
     //   LinSendFrameRequest: Call SetFrameResponse and SendFrameHeader
     //   LinSendFrameHeaderRequest: Send a LinTansmission based on the cached responses and self-deliver LinFrameStatusEvent
-    //   Other: Distribute IbMessage
-    _simulationBehavior.SendIbMessage(std::move(msg));
+    //   Other: Distribute SilKitMessage
+    _simulationBehavior.SendMsg(std::move(msg));
 }
 
 //------------------------
@@ -100,7 +100,7 @@ void LinController::Init(LinControllerConfig config)
 
     _controllerMode = config.controllerMode;
     _controllerStatus = LinControllerStatus::Operational;
-    SendIbMessage(config);
+    SendMsg(config);
 }
 
 auto LinController::Status() const noexcept -> LinControllerStatus
@@ -115,7 +115,7 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
         std::string errorMsg{"LinController::SendFrame() must only be called when the controller is operational! Check "
                              "whether a call to LinController::Init is missing."};
         _logger->Error(errorMsg);
-        throw ib::StateError{errorMsg};
+        throw SilKit::StateError{errorMsg};
     }
     if (_controllerMode != LinControllerMode::Master)
     {
@@ -127,7 +127,7 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
     LinSendFrameRequest sendFrame;
     sendFrame.frame = frame;
     sendFrame.responseType = responseType;
-    SendIbMessage(sendFrame);
+    SendMsg(sendFrame);
 }
 
 void LinController::SendFrameHeader(LinIdT linId)
@@ -137,7 +137,7 @@ void LinController::SendFrameHeader(LinIdT linId)
         std::string errorMsg{"LinController::SendFrameHeader() must only be called when the controller is operational! "
                              "Check whether a call to LinController::Init is missing."};
         _logger->Error(errorMsg);
-        throw ib::StateError{errorMsg};
+        throw SilKit::StateError{errorMsg};
     }
     if (_controllerMode != LinControllerMode::Master)
     {
@@ -147,7 +147,7 @@ void LinController::SendFrameHeader(LinIdT linId)
     }
     LinSendFrameHeaderRequest header;
     header.id = linId;
-    SendIbMessage(header);
+    SendMsg(header);
 }
 
 void LinController::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
@@ -167,14 +167,14 @@ void LinController::SetFrameResponses(std::vector<LinFrameResponse> responses)
         std::string errorMsg{"LinController::SetFrameResponses() must only be called when the controller is operational! "
                              "Check whether a call to LinController::Init is missing."};
         _logger->Error(errorMsg);
-        throw ib::StateError {errorMsg};
+        throw SilKit::StateError {errorMsg};
     }
 
     GetThisLinNode().UpdateResponses(responses, _logger);
 
     LinFrameResponseUpdate frameResponseUpdate;
     frameResponseUpdate.frameResponses = std::move(responses);
-    SendIbMessage(frameResponseUpdate);
+    SendMsg(frameResponseUpdate);
 }
 
 void LinController::GoToSleep()
@@ -183,7 +183,7 @@ void LinController::GoToSleep()
     {
         std::string errorMsg{"LinController::GoToSleep() must not be called for slaves or uninitialized masters!"};
         _logger->Error(errorMsg);
-        throw ib::StateError{errorMsg};
+        throw SilKit::StateError{errorMsg};
     }
 
     // Detailed: Send LinSendFrameRequest with GoToSleep-Frame and set LinControllerStatus::SleepPending. BusSim will trigger LinTransmission.
@@ -204,7 +204,7 @@ void LinController::Wakeup()
     {
         std::string errorMsg{"LinController::Wakeup() must not be called before LinController::Init()"};
         _logger->Error(errorMsg);
-        throw ib::StateError{errorMsg};
+        throw SilKit::StateError{errorMsg};
     }
 
     // Detailed: Send LinWakeupPulse and call WakeupInternal()
@@ -223,7 +223,7 @@ void LinController::SetControllerStatus(LinControllerStatus status)
     {
         std::string errorMsg{"LinController::Wakeup()/Sleep() must not be called before LinController::Init()"};
         _logger->Error(errorMsg);
-        throw ib::StateError{errorMsg};
+        throw SilKit::StateError{errorMsg};
     }
 
     if (_controllerStatus == status)
@@ -236,14 +236,14 @@ void LinController::SetControllerStatus(LinControllerStatus status)
     LinControllerStatusUpdate msg;
     msg.status = status;
 
-    SendIbMessage(msg);
+    SendMsg(msg);
 }
 
 //------------------------
 // Node bookkeeping
 //------------------------
 
-void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responses_, mw::logging::ILogger* logger)
+void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responses_, Core::Logging::ILogger* logger)
 {
     for (auto&& response : responses_)
     {
@@ -262,16 +262,16 @@ auto LinController::GetThisLinNode() -> LinNode&
     return GetLinNode(_serviceDescriptor.to_endpointAddress());
 }
 
-auto LinController::GetLinNode(mw::EndpointAddress addr) -> LinNode&
+auto LinController::GetLinNode(Core::EndpointAddress addr) -> LinNode&
 {
     auto iter = std::lower_bound(_linNodes.begin(), _linNodes.end(), addr,
-                                 [](const LinNode& lhs, const mw::EndpointAddress& address) {
-                                     return lhs.ibAddress < address;
+                                 [](const LinNode& lhs, const Core::EndpointAddress& address) {
+                                     return lhs.address < address;
                                  });
-    if (iter == _linNodes.end() || iter->ibAddress != addr)
+    if (iter == _linNodes.end() || iter->address != addr)
     {
         LinNode node;
-        node.ibAddress = addr;
+        node.address = addr;
         iter = _linNodes.insert(iter, node);
     }
     return *iter;
@@ -307,10 +307,10 @@ auto LinController::GetResponse(LinIdT id) -> std::pair<int, LinFrame>
 }
 
 //------------------------
-// ReceiveIbMessage
+// ReceiveSilKitMessage
 //------------------------
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg)
+void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinTransmission& msg)
 {
     if (!AllowReception(from))
     {
@@ -342,7 +342,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTr
     if (_controllerMode == LinControllerMode::Inactive)
         _logger->Warn("Inactive LinController received a transmission.");
 
-    _tracer.Trace(ib::sim::TransmitDirection::RX, msg.timestamp, frame);
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, frame);
 
     bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
 
@@ -367,7 +367,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTr
     }
 }
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg)
+void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinWakeupPulse& msg)
 {
     if (!AllowReception(from))
     {
@@ -377,10 +377,10 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWa
     CallHandlers(LinWakeupEvent{msg.timestamp, msg.direction});
 }
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg)
+void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerConfig& msg)
 {
-    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
-    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
+    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in detailed simulations.
+    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the detailed simulations.
     // NOTE: only self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor)
         return;
@@ -396,10 +396,10 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinCo
     }
 }
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg)
+void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
 {
-    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in VIBE simulation.
-    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the VIBE simulation.
+    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in detailed simulations.
+    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the detailed simulations.
     // NOTE: only self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor) 
         return;
@@ -413,7 +413,7 @@ void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFr
     }
 }
 
-void LinController::ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg)
+void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg)
 {
     auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
     linNode.controllerStatus = msg.status;
@@ -496,6 +496,6 @@ void LinController::CallHandlers(const MsgT& msg)
     callbacks.InvokeAll(this, msg);
 }
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

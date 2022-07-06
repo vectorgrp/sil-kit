@@ -2,50 +2,50 @@
 
 #include "CanController.hpp"
 #include "SimBehaviorTrivial.hpp" 
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
-SimBehaviorTrivial::SimBehaviorTrivial(mw::IParticipantInternal* participant, CanController* canController,
-                    mw::sync::ITimeProvider* timeProvider)
+SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, CanController* canController,
+                    Core::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{canController}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(canController)}
+    , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(canController)}
     , _timeProvider{timeProvider}
 {
     (void)_parentController;
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::ReceiveIbMessage(const MsgT& msg)
+void SimBehaviorTrivial::ReceiveSilKitMessage(const MsgT& msg)
 {
-    auto receivingController = dynamic_cast<mw::IIbMessageReceiver<MsgT>*>(_parentController);
+    auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     assert(receivingController);
-    receivingController->ReceiveIbMessage(_parentServiceEndpoint, msg);
+    receivingController->ReceiveSilKitMessage(_parentServiceEndpoint, msg);
 }
 
-auto SimBehaviorTrivial::AllowReception(const mw::IIbServiceEndpoint* /*from*/) const -> bool 
+auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
 { 
     return true; 
 }
 
-void SimBehaviorTrivial::SendIbMessage(CanConfigureBaudrate&& /*baudRate*/)
+void SimBehaviorTrivial::SendMsg(CanConfigureBaudrate&& /*baudRate*/)
 { 
 }
 
-void SimBehaviorTrivial::SendIbMessage(CanSetControllerMode&& mode)
+void SimBehaviorTrivial::SendMsg(CanSetControllerMode&& mode)
 {
     CanControllerStatus newStatus;
     newStatus.timestamp = _timeProvider->Now();
     newStatus.controllerState = mode.mode;
 
-    ReceiveIbMessage(newStatus);
+    ReceiveSilKitMessage(newStatus);
 }
 
-void SimBehaviorTrivial::SendIbMessage(CanFrameEvent&& canFrameEvent)
+void SimBehaviorTrivial::SendMsg(CanFrameEvent&& canFrameEvent)
 {
     if (_parentController->GetState() == CanControllerState::Started)
     {
@@ -54,14 +54,14 @@ void SimBehaviorTrivial::SendIbMessage(CanFrameEvent&& canFrameEvent)
         canFrameEventCpy.direction = TransmitDirection::TX;
         canFrameEventCpy.timestamp = now;
 
-        _tracer.Trace(ib::sim::TransmitDirection::TX, now, canFrameEvent);
+        _tracer.Trace(SilKit::Services::TransmitDirection::TX, now, canFrameEvent);
 
         // Self delivery as TX
-        ReceiveIbMessage(canFrameEventCpy);
+        ReceiveSilKitMessage(canFrameEventCpy);
 
         // Send to others as RX
         canFrameEventCpy.direction = TransmitDirection::RX;
-        _participant->SendIbMessage(_parentServiceEndpoint, canFrameEventCpy);
+        _participant->SendMsg(_parentServiceEndpoint, canFrameEventCpy);
 
         // Self acknowledge
         CanFrameTransmitEvent ack{};
@@ -71,7 +71,7 @@ void SimBehaviorTrivial::SendIbMessage(CanFrameEvent&& canFrameEvent)
         ack.userContext = canFrameEvent.userContext;
         ack.timestamp = now;
 
-        ReceiveIbMessage(ack);
+        ReceiveSilKitMessage(ack);
     }
     else
     {
@@ -79,6 +79,6 @@ void SimBehaviorTrivial::SendIbMessage(CanFrameEvent&& canFrameEvent)
     }
 }
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

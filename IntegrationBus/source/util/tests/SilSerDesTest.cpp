@@ -2,9 +2,9 @@
 
 #include "gtest/gtest.h"
 
-#include "ib/util/serdes/sil/Serializer.hpp"
-#include "ib/util/serdes/sil/Deserializer.hpp"
-using namespace ib::util::serdes::sil;
+#include "silkit/util/serdes/sil/Serializer.hpp"
+#include "silkit/util/serdes/sil/Deserializer.hpp"
+using namespace SilKit::Util::SerDes::sil;
 
 namespace {
 

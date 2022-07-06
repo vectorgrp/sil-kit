@@ -6,12 +6,11 @@
 #include <chrono>
 #include <vector>
 
-#include "ib/sim/datatypes.hpp"
+#include "silkit/services/datatypes.hpp"
 
-namespace ib {
-namespace sim {
-//! The LIN namespace
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 /*! \brief The identifier of a LIN \ref LinFrame
  *
@@ -421,6 +420,6 @@ inline bool operator==(const LinFrameResponseUpdate& lhs, const LinFrameResponse
     return lhs.frameResponses == rhs.frameResponses;
 }
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

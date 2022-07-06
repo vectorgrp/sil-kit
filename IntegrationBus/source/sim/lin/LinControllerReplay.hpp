@@ -7,23 +7,23 @@
 #include "IReplayDataController.hpp"
 #include "LinController.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 class LinControllerReplay
     : public ILinController
-    , public IIbToLinController
-    , public extensions::ITraceMessageSource
+    , public IMsgForLinController
+    , public ITraceMessageSource
     , public tracing::IReplayDataController
-    , public mw::IIbServiceEndpoint
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
     // Public Data Types
 
-    LinControllerReplay(mw::IParticipantInternal* participant, cfg::LinController config,
-            mw::sync::ITimeProvider* timeProvider);
+    LinControllerReplay(Core::IParticipantInternal* participant, Config::LinController config,
+            Core::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -48,56 +48,56 @@ public:
     void AddWakeupHandler(WakeupHandler handler) override;
     void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
-    // IIbToLinController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinTransmission& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinWakeupPulse& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerConfig& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
+    // IMsgForLinController
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinTransmission& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinWakeupPulse& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerConfig& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
 
 public:
     // ----------------------------------------
     // Public interface methods
 
     // ITraceMessageSource
-    void AddSink(extensions::ITraceMessageSink* sink) override;
+    void AddSink(ITraceMessageSink* sink) override;
 
     // IReplayDataProvider
 
-    void ReplayMessage(const extensions::IReplayMessage* replayMessage) override;
+    void ReplayMessage(const IReplayMessage* replayMessage) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 private:
     // ----------------------------------------
     // private members
-    cfg::Replay _replayConfig{};
+    Config::Replay _replayConfig{};
     LinController _controller;
-    mw::IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     // for local callbacks
     std::vector<FrameStatusHandler> _frameStatusHandler; 
     std::vector<GoToSleepHandler> _goToSleepHandler;
     LinControllerMode _mode{LinControllerMode::Inactive};
     // For tracing on a Master
-    extensions::Tracer _tracer;
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
+    Tracer _tracer;
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-void LinControllerReplay::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void LinControllerReplay::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _controller.SetServiceDescriptor(serviceDescriptor);
 }
-auto LinControllerReplay::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto LinControllerReplay::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _controller.GetServiceDescriptor();
 }
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

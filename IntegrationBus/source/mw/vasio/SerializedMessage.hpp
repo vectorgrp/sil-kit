@@ -18,8 +18,8 @@
 #include "LoggingSerdes.hpp"
 #include "DataSerdes.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 // Helper to allow calling Deserialize(MessageBuffer&, T&) inside of template method SerializedMessage::Deserialize<T>
 template<typename... Args>
@@ -48,7 +48,7 @@ public: // Sending a SerializedMessage: from T to binary blob
 
 	auto ReleaseStorage() -> std::vector<uint8_t>;
 
-public: // Receiving a SerializedMessage: from binary blob to IbMessage<T>
+public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 	explicit SerializedMessage(std::vector<uint8_t>&& blob);
 
 	template<typename ApiMessageT>
@@ -135,5 +135,5 @@ auto SerializedMessage::Deserialize() const -> ApiMessageT
     return value;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

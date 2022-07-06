@@ -2,19 +2,19 @@
 
 #pragma once
 
-namespace ib { namespace extensions {
+namespace SilKit { 
 
-//! \brief The interface for all IB extensions.
+//! \brief The interface for all SilKit extensions.
 
-class IIbExtension
+class ISilKitExtension
 {
 public:
-    virtual ~IIbExtension() = default;
+    virtual ~ISilKitExtension() = default;
     virtual const char* GetExtensionName() const = 0;
     virtual const char* GetVendorName() const = 0;
     virtual void GetVersion(uint32_t& major,
                     uint32_t& minor, uint32_t& patch) const = 0;
 };  
 
-}//end namespace extensions
-}//end namespace ib
+
+}//end namespace SilKit

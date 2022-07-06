@@ -2,8 +2,8 @@
 
 #include "SerializedMessage.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 // Constructor from raw data (reading)
 SerializedMessage::SerializedMessage(std::vector<uint8_t>&& blob)
@@ -68,7 +68,7 @@ void SerializedMessage::WriteNetworkHeaders()
 {
     _buffer << _messageSize; // placeholder for finalization via ReleaseStorage()
     _buffer << _messageKind;
-    if (_messageKind == VAsioMsgKind::IbRegistryMessage)
+    if (_messageKind == VAsioMsgKind::SilKitRegistryMessage)
     {
         _buffer << _registryKind;
     }
@@ -82,7 +82,7 @@ void SerializedMessage::ReadNetworkHeaders()
 {
     _messageSize = ExtractMessageSize(_buffer);
     _messageKind = ExtractMessageKind(_buffer);
-    if (_messageKind == VAsioMsgKind::IbRegistryMessage)
+    if (_messageKind == VAsioMsgKind::SilKitRegistryMessage)
     {
         //optional registry kind tag
         _registryKind = ExtractRegistryMessageKind(_buffer);
@@ -106,5 +106,5 @@ void SerializedMessage::ReadNetworkHeaders()
     }
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

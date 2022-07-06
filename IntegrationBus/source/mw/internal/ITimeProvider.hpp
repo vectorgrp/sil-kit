@@ -6,11 +6,11 @@
 #include <string>
 #include <functional>
 
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 /*!
 * \brief Virtual time provider. Used for send timestamps.
@@ -44,6 +44,6 @@ public:
 };
 
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

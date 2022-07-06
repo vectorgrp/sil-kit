@@ -2,7 +2,7 @@
 #pragma once
 #include <cstdint>
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 namespace Pcap {
 
@@ -33,4 +33,4 @@ static_assert(sizeof(PacketHeader) == PacketHeaderSize, "PacketHeader size must 
 
 } // Pcap
 } // tracing
-} // ib
+} // silkit

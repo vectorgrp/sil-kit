@@ -1,11 +1,11 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-make_ib_demo(IbDemoDataMessage DataMessageDemo.cpp)
-target_sources(IbDemoDataMessage
-    PRIVATE IbConfig_DemoDataMessage.json
+make_silkit_demo(SilKitDemoDataMessage DataMessageDemo.cpp)
+target_sources(SilKitDemoDataMessage
+    PRIVATE SilKitConfig_DemoDataMessage.json
 )
 
-make_ib_demo(IbDemoDataMessageExt DataMessageDemoExt.cpp)
-target_sources(IbDemoDataMessageExt
-    PRIVATE IbConfig_DemoDataMessage.json
+make_silkit_demo(SilKitDemoDataMessageExt DataMessageDemoExt.cpp)
+target_sources(SilKitDemoDataMessageExt
+    PRIVATE SilKitConfig_DemoDataMessage.json
 )

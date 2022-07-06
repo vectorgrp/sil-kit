@@ -3,9 +3,9 @@
 #include <iostream>
 #include <atomic>
 
-#include "ib/sim/all.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -15,7 +15,7 @@
 
 namespace {
 using namespace std::chrono_literals;
-using namespace ib::test;
+using namespace SilKit::Tests;
 
 const std::chrono::nanoseconds expectedTime{10ms};
 
@@ -67,7 +67,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
 std::promise<bool> startupPromise;
 std::promise<void> nextIterPromise;
 
-auto BackgroundThread(ib::mw::sync::ITimeSyncService* parti)
+auto BackgroundThread(SilKit::Core::Orchestration::ITimeSyncService* parti)
 {
     while (true)
     {

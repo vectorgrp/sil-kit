@@ -11,7 +11,7 @@
 #endif
 #define UNUSED_ARG(X) (void)(X)
 
-#include "ib/capi/IntegrationBus.h"
+#include "silkit/capi/SilKit.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,9 +53,9 @@ char* LoadFile(char const* path)
 }
 
 
-ib_Participant* participant;
-ib_Rpc_Client* client;
-ib_Rpc_Server* server;
+SilKit_Participant* participant;
+SilKit_RpcClient* client;
+SilKit_RpcServer* server;
 
 uint8_t callCounter = 0;
 
@@ -66,7 +66,7 @@ char* participantName;
 
 uint8_t buffer[3];
 
-void PrintByteVector(const ib_ByteVector* data)
+void PrintByteVector(const SilKit_ByteVector* data)
 {
     for (size_t i = 0; i < data->size; i++)
     {
@@ -79,7 +79,7 @@ void PrintByteVector(const ib_ByteVector* data)
     printf("\n");
 }
 
-void CallHandler(void* context, ib_Rpc_Server* cbServer, const ib_Rpc_CallEvent* event)
+void CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_CallEvent* event)
 {
     UNUSED_ARG(context);
 
@@ -87,7 +87,7 @@ void CallHandler(void* context, ib_Rpc_Server* cbServer, const ib_Rpc_CallEvent*
     uint8_t* tmp = (uint8_t*)malloc(event->argumentData.size * sizeof(uint8_t));
     if (tmp == NULL)
     {
-        AbortOnFailedAllocation("ib_ByteVector");
+        AbortOnFailedAllocation("SilKit_ByteVector");
         return;
     }
     printf("[Server] Call received: ");
@@ -97,17 +97,17 @@ void CallHandler(void* context, ib_Rpc_Server* cbServer, const ib_Rpc_CallEvent*
         tmp[i] = event->argumentData.data[i] + (uint8_t)100;
     }
 
-    const ib_ByteVector returnData = {tmp, event->argumentData.size};
-    ib_Rpc_Server_SubmitResult(cbServer, event->callHandle, &returnData);
+    const SilKit_ByteVector returnData = {tmp, event->argumentData.size};
+    SilKit_RpcServer_SubmitResult(cbServer, event->callHandle, &returnData);
     free(tmp);
 }
 
-void CallReturnHandler(void* context, ib_Rpc_Client* cbClient, const ib_Rpc_CallResultEvent* event)
+void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_CallResultEvent* event)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbClient);
 
-    if (event->callStatus == ib_Rpc_CallStatus_SUCCESS)
+    if (event->callStatus == SilKit_CallStatus_SUCCESS)
     {
         printf("[client] Call returned: ");
         PrintByteVector(&event->resultData);
@@ -118,7 +118,7 @@ void CallReturnHandler(void* context, ib_Rpc_Client* cbClient, const ib_Rpc_Call
     }
 }
 
-void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* discoveryResults)
+void DiscoveryResultHandler(void* context, const SilKit_DiscoveryResultList* discoveryResults)
 {
     UNUSED_ARG(context);
 
@@ -134,7 +134,7 @@ void DiscoveryResultHandler(void* context, const ib_Rpc_DiscoveryResultList* dis
     }
 }
 
-void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
+void Copy_Label(SilKit_KeyValuePair* dst, const SilKit_KeyValuePair* src)
 {
     dst->key = malloc(strlen(src->key) + 1);
     dst->value = malloc(strlen(src->value) + 1);
@@ -145,20 +145,20 @@ void Copy_Label(ib_KeyValuePair* dst, const ib_KeyValuePair* src)
     }
 }
 
-void Create_Labels(ib_KeyValueList** outLabelList, const ib_KeyValuePair* labels, size_t numLabels)
+void Create_Labels(SilKit_KeyValueList** outLabelList, const SilKit_KeyValuePair* labels, size_t numLabels)
 {
-    ib_KeyValueList* newLabelList;
-    newLabelList = (ib_KeyValueList*)malloc(sizeof(ib_KeyValueList));
+    SilKit_KeyValueList* newLabelList;
+    newLabelList = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
     if (newLabelList == NULL)
     {
-        AbortOnFailedAllocation("ib_KeyValueList");
+        AbortOnFailedAllocation("SilKit_KeyValueList");
         return;
     }
     newLabelList->numLabels = numLabels;
-    newLabelList->labels = (ib_KeyValuePair*)malloc(numLabels * sizeof(ib_KeyValuePair));
+    newLabelList->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
     if (newLabelList->labels == NULL)
     {
-        AbortOnFailedAllocation("ib_KeyValuePair");
+        AbortOnFailedAllocation("SilKit_KeyValuePair");
         return;
     }
     for (size_t i = 0; i < numLabels; i++)
@@ -168,7 +168,7 @@ void Create_Labels(ib_KeyValueList** outLabelList, const ib_KeyValuePair* labels
     *outLabelList = newLabelList;
 }
 
-void Labels_Destroy(ib_KeyValueList* labelList)
+void Labels_Destroy(SilKit_KeyValueList* labelList)
 {
     if (labelList)
     {
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
-        printf("usage: IbDemoCData <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCData <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
         return 1;
     }
 
@@ -197,16 +197,16 @@ int main(int argc, char* argv[])
     }
     participantName = argv[2];
 
-    const char* registryUri = "vib://localhost:8500";
+    const char* registryUri = "silkit://localhost:8500";
     if (argc >= 4)
     {
         registryUri = argv[3];
     }
 
-    ib_ReturnCode returnCode;
-    returnCode = ib_Participant_Create(&participant, jsonString, participantName, registryUri, ib_False);
+    SilKit_ReturnCode returnCode;
+    returnCode = SilKit_Participant_Create(&participant, jsonString, participantName, registryUri, SilKit_False);
     if (returnCode) {
-        printf("%s\n", ib_GetLastErrorString());
+        printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
@@ -215,21 +215,21 @@ int main(int argc, char* argv[])
     {
         const char* filterFunctionName = "";
         const char* filterMediaType = "";
-        ib_KeyValueList* filterLabelList;
+        SilKit_KeyValueList* filterLabelList;
         size_t numLabels = 1;
-        ib_KeyValuePair filterLabels[1] = {{"KeyA", "ValA"}};
+        SilKit_KeyValuePair filterLabels[1] = {{"KeyA", "ValA"}};
         Create_Labels(&filterLabelList, filterLabels, numLabels);
 
-        returnCode = ib_Rpc_DiscoverServers(participant, filterFunctionName, filterMediaType, filterLabelList, NULL,
+        returnCode = SilKit_DiscoverServers(participant, filterFunctionName, filterMediaType, filterLabelList, NULL,
                                             &DiscoveryResultHandler);
 
         const char* mediaType = "A";
-        ib_KeyValueList* labelList;
+        SilKit_KeyValueList* labelList;
         numLabels = 1;
-        ib_KeyValuePair labels[1] = { {"KeyA", "ValA"} };
+        SilKit_KeyValuePair labels[1] = { {"KeyA", "ValA"} };
         Create_Labels(&labelList, labels, numLabels);
 
-        returnCode = ib_Rpc_Client_Create(&client, participant, "ClientCtrl1", "TestFunc", mediaType, labelList, NULL,
+        returnCode = SilKit_RpcClient_Create(&client, participant, "ClientCtrl1", "TestFunc", mediaType, labelList, NULL,
                                           &CallReturnHandler);
 
         for (uint8_t i = 0; i < numCalls; i++)
@@ -238,22 +238,22 @@ int main(int argc, char* argv[])
             buffer[0] = i;
             buffer[1] = i;
             buffer[2] = i;
-            ib_ByteVector argumentData = { &buffer[0], 3 };
+            SilKit_ByteVector argumentData = { &buffer[0], 3 };
             printf("[Client] Call dispatched: ");
             PrintByteVector(&argumentData);
-            ib_Rpc_CallHandle* callHandle;
-            ib_Rpc_Client_Call(client, &callHandle, &argumentData);
+            SilKit_CallHandle* callHandle;
+            SilKit_RpcClient_Call(client, &callHandle, &argumentData);
         }
     }
     else if (strcmp(participantName, "Server") == 0)
     {
         const char* mediaType = "A";
-        ib_KeyValueList* labelList;
+        SilKit_KeyValueList* labelList;
         size_t numLabels = 2;
-        ib_KeyValuePair labels[2] = {{"KeyA", "ValA"}, {"KeyB", "ValB"}};
+        SilKit_KeyValuePair labels[2] = {{"KeyA", "ValA"}, {"KeyB", "ValB"}};
         Create_Labels(&labelList, labels, numLabels);
 
-        returnCode = ib_Rpc_Server_Create(&server, participant, "ServerCtrl1", "TestFunc", mediaType, labelList, NULL,
+        returnCode = SilKit_RpcServer_Create(&server, participant, "ServerCtrl1", "TestFunc", mediaType, labelList, NULL,
                                           &CallHandler);
 
         while (receiveCallCount < numCalls)
@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    ib_Participant_Destroy(participant);
+    SilKit_Participant_Destroy(participant);
     if (jsonString)
     {
         free(jsonString);

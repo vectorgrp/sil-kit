@@ -1,14 +1,14 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-auto participant = ib::CreateParticipant(ibConfig, participantName, registryUri);
+auto participant = SilKit::CreateParticipant(config, participantName, registryUri);
 auto* lifecycleService = participant->GetLifecycleService();
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
 canController->AddFrameTransmitHandler(
-	[](can::ICanController* /*ctrl*/, const can::CanFrameTransmitEvent& ack) {
+	[](Can::ICanController* /*ctrl*/, const Can::CanFrameTransmitEvent& ack) {
 		//async handle transmit status
 });
 canController->AddFrameHandler(
-	[](can::ICanController* /*ctrl*/, const can::CanFrameEvent& frameEvent) {
+	[](Can::ICanController* /*ctrl*/, const Can::CanFrameEvent& frameEvent) {
 		//async handle message reception
 });
 

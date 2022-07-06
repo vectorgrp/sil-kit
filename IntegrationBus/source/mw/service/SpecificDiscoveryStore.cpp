@@ -2,9 +2,9 @@
 
 #include "SpecificDiscoveryStore.hpp"
 
-namespace ib {
-namespace mw {
-namespace service {
+namespace SilKit {
+namespace Core {
+namespace Discovery {
 
 SpecificDiscoveryStore::SpecificDiscoveryStore(const std::string& participantName) 
     : _participantName{ participantName }
@@ -18,7 +18,7 @@ void SpecificDiscoveryStore::ServiceChange(ServiceDiscoveryEvent::Type changeTyp
 
     // Store serviceDescriptors (for specific handlers) by participantName | controllerTypeName | supplDataKey | supplDataValue
     std::string supplControllerTypeName;
-    if (serviceDescriptor.GetSupplementalDataItem(mw::service::controllerType, supplControllerTypeName))
+    if (serviceDescriptor.GetSupplementalDataItem(Core::Discovery::controllerType, supplControllerTypeName))
     {
         // Specific handlers are only allowed for fixed controller type names
         if (_allowedSpecificDiscovery.count(supplControllerTypeName))
@@ -95,7 +95,7 @@ void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(ServiceDisc
     _specificHandlers[uniqueKey].emplace_back(std::move(handler));
 }
 
-} // namespace service
-} // namespace mw
-} // namespace ib
+} // namespace Discovery
+} // namespace Core
+} // namespace SilKit
 

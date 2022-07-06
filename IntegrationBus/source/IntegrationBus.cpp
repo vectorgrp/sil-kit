@@ -1,30 +1,30 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "IntegrationBus.hpp"
+#include "SilKit.hpp"
 
 #include "Validation.hpp"
 #include "CreateParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
 
 
-namespace ib {
+namespace SilKit {
 
-auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                        const std::string& participantName)
-    -> std::unique_ptr<mw::IParticipant>
+    -> std::unique_ptr<Core::IParticipant>
 {
-    const auto uri = dynamic_cast<cfg::ParticipantConfiguration&>(*participantConfig).middleware.registryUri;
+    const auto uri = dynamic_cast<Config::ParticipantConfiguration&>(*participantConfig).middleware.registryUri;
     return CreateParticipant(participantConfig, participantName, uri);
 }
 
-IntegrationBusAPI auto CreateParticipant(std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfig,
+SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<mw::IParticipant>
+    -> std::unique_ptr<Core::IParticipant>
 {
-    auto participant = mw::CreateParticipantImpl(std::move(participantConfig), participantName);
-    participant->JoinIbDomain(registryUri);
+    auto participant = Core::CreateParticipantImpl(std::move(participantConfig), participantName);
+    participant->JoinSilKitDomain(registryUri);
     return participant;
 }
 
-}//namespace ib
+}//namespace SilKit
 

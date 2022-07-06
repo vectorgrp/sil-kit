@@ -2,21 +2,21 @@
 
 #pragma once
 
-#include "ib/mw/logging/LoggingDatatypes.hpp"
+#include "silkit/core/logging/LoggingDatatypes.hpp"
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
-class IIbToLogMsgReceiver
-    : public mw::IIbReceiver<LogMsg>
-    , public mw::IIbSender<>
+class IMsgForLogMsgReceiver
+    : public Core::IReceiver<LogMsg>
+    , public Core::ISender<>
 {
 };
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

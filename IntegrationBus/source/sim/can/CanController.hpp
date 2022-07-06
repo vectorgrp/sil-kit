@@ -7,11 +7,11 @@
 #include <map>
 #include <mutex>
 
-#include "ib/sim/can/ICanController.hpp"
-#include "ib/mw/fwd_decl.hpp"
+#include "silkit/services/can/ICanController.hpp"
+#include "silkit/core/fwd_decl.hpp"
 #include "ITimeConsumer.hpp"
 
-#include "IIbToCanController.hpp"
+#include "IMsgForCanController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -20,15 +20,15 @@
 
 #include "SynchronizedHandlers.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 class CanController
     : public ICanController
-    , public IIbToCanController
-    , public extensions::ITraceMessageSource
-    , public mw::IIbServiceEndpoint
+    , public IMsgForCanController
+    , public ITraceMessageSource
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -40,8 +40,8 @@ public:
     CanController() = delete;
     CanController(const CanController&) = delete;
     CanController(CanController&&) = delete;
-    CanController(mw::IParticipantInternal* participant, ib::cfg::CanController config,
-                   mw::sync::ITimeProvider* timeProvider);
+    CanController(Core::IParticipantInternal* participant, SilKit::Config::CanController config,
+                   Core::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -82,17 +82,17 @@ public:
                                            | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) override;
     void RemoveFrameTransmitHandler(HandlerId handlerId) override;
 
-    // IIbToCanController
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) override;
+    // IMsgForCanController
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
 
     //ITraceMessageSource
-    inline void AddSink(extensions::ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
@@ -101,7 +101,7 @@ public:
     void RegisterServiceDiscovery();
 
     // Expose the simulated/trivial mode for unit tests
-    void SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor);
+    void SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor);
     void SetTrivialBehavior();
 
     auto GetState() -> CanControllerState;
@@ -142,22 +142,22 @@ private:
     template <typename MsgT>
     void CallHandlers(const MsgT& msg);
 
-    auto IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
-    auto AllowReception(const IIbServiceEndpoint* from) const -> bool;
+    auto IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
+    auto AllowReception(const IServiceEndpoint* from) const -> bool;
 
     inline auto MakeTxId() -> CanTxId;
 
     template <typename MsgT>
-    inline void SendIbMessage(MsgT&& msg);
+    inline void SendMsg(MsgT&& msg);
 
 private:
     // ----------------------------------------
     // private members
-    mw::IParticipantInternal* _participant = nullptr;
-    cfg::CanController _config;
+    Core::IParticipantInternal* _participant = nullptr;
+    Config::CanController _config;
     SimBehavior _simulationBehavior;
-    mw::ServiceDescriptor _serviceDescriptor;
-    extensions::Tracer _tracer;
+    Core::ServiceDescriptor _serviceDescriptor;
+    Tracer _tracer;
 
     CanTxId _canTxId = 0;
     CanControllerState _controllerState = CanControllerState::Uninit;
@@ -165,7 +165,7 @@ private:
     CanConfigureBaudrate _baudRate = { 0, 0 };
 
     template <typename MsgT>
-    using FilteredCallbacks = util::SynchronizedHandlers<FilteredCallback<MsgT>>;
+    using FilteredCallbacks = Util::SynchronizedHandlers<FilteredCallback<MsgT>>;
 
     std::tuple<
         FilteredCallbacks<CanFrameEvent>,
@@ -183,20 +183,20 @@ auto CanController::MakeTxId() -> CanTxId
     return ++_canTxId;
 }
 
-void CanController::AddSink(extensions::ITraceMessageSink* sink)
+void CanController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(ib::mw::EndpointAddress{}, *sink);
+    _tracer.AddSink(SilKit::Core::EndpointAddress{}, *sink);
 }
 
-void CanController::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void CanController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
-auto CanController::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto CanController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

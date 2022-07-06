@@ -11,11 +11,11 @@
 #include <unistd.h>
 #include <limits.h>
 
-#include "IbExtensions.hpp"
+#include "SilKitExtensions.hpp"
 #include "LoadExtension.hpp"
 
 
-namespace ib { namespace extensions {namespace detail {
+namespace SilKit { namespace detail {
 
 //used by FindLibrary
 const std::string lib_file_extension=".so";
@@ -76,5 +76,5 @@ std::string GetProcessPath()
 }
 
 }//detail
-}//extensions
-}//ib
+
+}//silkit

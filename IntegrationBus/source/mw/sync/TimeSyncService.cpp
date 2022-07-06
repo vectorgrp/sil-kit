@@ -3,8 +3,8 @@
 #include <cassert>
 #include <future>
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
@@ -12,9 +12,9 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class TimeConfiguration
 {
@@ -74,7 +74,7 @@ public:
     virtual void Initialize() = 0;
     virtual void RequestInitialStep() = 0;
     virtual void RequestNextStep() = 0;
-    virtual void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) = 0;
+    virtual void ReceiveNextSimTask(const IServiceEndpoint* from, const NextSimTask& task) = 0;
 };
 
 //! brief Synchronization policy for unsynchronized participants
@@ -85,7 +85,7 @@ public:
     void Initialize() override {}
     void RequestInitialStep() override {}
     void RequestNextStep() override {}
-    void ReceiveNextSimTask(const IIbServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
+    void ReceiveNextSimTask(const IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
 };
 
 //! brief Synchronization policy of the VAsio middleware
@@ -109,7 +109,7 @@ public:
 
     void RequestInitialStep() override
     {
-        _controller.SendIbMessage(_configuration->_myNextTask);
+        _controller.SendMsg(_configuration->_myNextTask);
         // Bootstrap checked execution, in case there is no other participant.
         // Else, checked execution is initiated when we receive their NextSimTask messages.
         _participant->ExecuteDeferred([this]() {
@@ -117,9 +117,9 @@ public:
         });
     }
 
-    void RequestNextStep() override { _controller.SendIbMessage(_configuration->_myNextTask); }
+    void RequestNextStep() override { _controller.SendMsg(_configuration->_myNextTask); }
 
-    void ReceiveNextSimTask(const IIbServiceEndpoint* from, const NextSimTask& task) override
+    void ReceiveNextSimTask(const IServiceEndpoint* from, const NextSimTask& task) override
     {
         _configuration->_otherNextTasks[from->GetServiceDescriptor().GetParticipantName()] = task;
 
@@ -190,7 +190,7 @@ private:
 };
 
 TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleService* lifecycleService,
-                                 const cfg::HealthCheck& healthCheckConfig)
+                                 const Config::HealthCheck& healthCheckConfig)
     : _participant{participant}
     , _lifecycleService{lifecycleService}
     , _logger{participant->GetLogger()}
@@ -214,11 +214,11 @@ TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleSer
         if (descriptor.GetServiceType() == ServiceType::InternalController)
         {
             std::string controllerType;
-            descriptor.GetSupplementalDataItem(service::controllerType, controllerType);
-            if (controllerType == service::controllerTypeTimeSyncService)
+            descriptor.GetSupplementalDataItem(Discovery::controllerType, controllerType);
+            if (controllerType == Discovery::controllerTypeTimeSyncService)
             {
                 std::string timeSyncActive;
-                descriptor.GetSupplementalDataItem(service::timeSyncActive, timeSyncActive);
+                descriptor.GetSupplementalDataItem(Discovery::timeSyncActive, timeSyncActive);
                 if (timeSyncActive == "1")
                 {
                     auto descriptorParticipantName = descriptor.GetParticipantName();
@@ -310,7 +310,7 @@ void TimeSyncService::AwaitNotPaused()
     }
 }
 
-void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const ParticipantCommand& command)
+void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
@@ -318,7 +318,7 @@ void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const
     //Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
 }
 
-void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* from, const NextSimTask& task)
+void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint* from, const NextSimTask& task)
 {
     if (_timeSyncPolicy)
     {
@@ -326,7 +326,7 @@ void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint* from, const Nex
     }
 }
 
-void TimeSyncService::ReceiveIbMessage(const IIbServiceEndpoint*, const SystemCommand& command)
+void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint*, const SystemCommand& command)
 {
     if (command.kind == SystemCommand::Kind::Run && _timeSyncConfigured)
     {
@@ -400,7 +400,7 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
     try
     {
         _timeSyncPolicy = MakeTimeSyncPolicy(isSynchronized);
-        _serviceDescriptor.SetSupplementalDataItem(ib::mw::service::timeSyncActive, (isSynchronized) ? "1" : "0");
+        _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncActive, (isSynchronized) ? "1" : "0");
         ResetTime();
     }
     catch (const std::exception& e)
@@ -415,23 +415,23 @@ void TimeSyncService::ResetTime()
     _timeSyncPolicy->Initialize();
 }
 
-void TimeSyncService::ConfigureTimeProvider(sync::TimeProviderKind timeProviderKind)
+void TimeSyncService::ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind)
 {
     switch (timeProviderKind)
     {
-    case sync::TimeProviderKind::NoSync:
-        _timeProvider = std::make_unique<sync::NoSyncProvider>(); 
+    case Orchestration::TimeProviderKind::NoSync:
+        _timeProvider = std::make_unique<Orchestration::NoSyncProvider>(); 
         break;
-    case sync::TimeProviderKind::WallClock: 
-        _timeProvider = std::make_unique<sync::WallclockProvider>(1ms); 
+    case Orchestration::TimeProviderKind::WallClock: 
+        _timeProvider = std::make_unique<Orchestration::WallclockProvider>(1ms); 
         break;
-    case sync::TimeProviderKind::SyncTime: 
-        _timeProvider = std::make_unique<sync::SynchronizedVirtualTimeProvider>(); 
+    case Orchestration::TimeProviderKind::SyncTime: 
+        _timeProvider = std::make_unique<Orchestration::SynchronizedVirtualTimeProvider>(); 
         break;
     default: break;
     }
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

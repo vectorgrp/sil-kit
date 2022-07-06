@@ -2,32 +2,32 @@
 
 #include <sstream>
 
-#include "ib/cfg/Config.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/extensions/string_utils.hpp"
+#include "silkit/cfg/Config.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/extensions/string_utils.hpp"
 
 #include "CreateMdf4Tracing.hpp"
 #include "PcapSink.hpp"
 #include "Tracing.hpp"
 #include "PcapReplay.hpp"
 
-namespace ib {
+namespace SilKit {
 
 namespace tracing {
 
-using extensions::ITraceMessageSink;
-using extensions::SinkType;
-using extensions::TraceMessage;
-using extensions::TraceMessageType;
+using ITraceMessageSink;
+using SinkType;
+using TraceMessage;
+using TraceMessageType;
 
 
 
 // Tracing
 
 auto CreateTraceMessageSinks(
-    mw::logging::ILogger* logger,
-    const cfg::Config& config,
-    const cfg::Participant& participantConfig
+    Core::Logging::ILogger* logger,
+    const Config::Config& config,
+    const Config::Participant& participantConfig
     ) -> std::vector<std::unique_ptr<ITraceMessageSink>>
 {
     auto controllerUsesSink = [&participantConfig](const auto& name, const auto& controllers)
@@ -75,23 +75,23 @@ auto CreateTraceMessageSinks(
 
         switch (sinkCfg.type)
         {
-        case cfg::TraceSink::Type::Mdf4File:
+        case Config::TraceSink::Type::Mdf4File:
         {
             //the `config' contains information about the links, which
             // will be useful when naming the MDF4 channels
-            auto sink = extensions::CreateMdf4Tracing(config, logger, participantConfig.name, sinkCfg.name);
+            auto sink = CreateMdf4Tracing(config, logger, participantConfig.name, sinkCfg.name);
             sink->Open(tracing::SinkType::Mdf4File, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
         }
-        case cfg::TraceSink::Type::PcapFile:
+        case Config::TraceSink::Type::PcapFile:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapFile, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
         }
-        case  cfg::TraceSink::Type::PcapPipe:
+        case  Config::TraceSink::Type::PcapPipe:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(tracing::SinkType::PcapNamedPipe, sinkCfg.outputPath);
@@ -107,30 +107,30 @@ auto CreateTraceMessageSinks(
 }
 
     
-auto CreateReplayFiles(mw::logging::ILogger* logger, /*const cfg::Config& config,*/
-    const cfg::Participant& participantConfig)
-    -> std::map<std::string, std::shared_ptr<extensions::IReplayFile>>
+auto CreateReplayFiles(Core::Logging::ILogger* logger, /*const Config::Config& config,*/
+    const Config::Participant& participantConfig)
+    -> std::map<std::string, std::shared_ptr<IReplayFile>>
 {
-    std::map<std::string, std::shared_ptr<extensions::IReplayFile>> replayFiles;
+    std::map<std::string, std::shared_ptr<IReplayFile>> replayFiles;
 
     for (const auto& source : participantConfig.traceSources)
     {
         switch (source.type)
         {
-        case cfg::TraceSource::Type::Mdf4File:
+        case Config::TraceSource::Type::Mdf4File:
         {
-            auto file = extensions::CreateMdf4Replay(config, logger, source.inputPath);
+            auto file = CreateMdf4Replay(config, logger, source.inputPath);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }
-        case cfg::TraceSource::Type::PcapFile:
+        case Config::TraceSource::Type::PcapFile:
         {
             auto provider = PcapReplay{};
             auto file = provider.OpenFile(/*config, */source.inputPath, logger);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }
-        case cfg::TraceSource::Type::Undefined: //[[fallthrough]]
+        case Config::TraceSource::Type::Undefined: //[[fallthrough]]
         default:
             throw std::runtime_error("CreateReplayFiles: unknown TraceSource::Type!");
         }
@@ -141,7 +141,7 @@ auto CreateReplayFiles(mw::logging::ILogger* logger, /*const cfg::Config& config
 
 // Replaying utilities
 
-bool HasReplayConfig(const cfg::Participant& cfg)
+bool HasReplayConfig(const Config::Participant& cfg)
 {
     // if there are no replay trace sources, the Replay blocks are invalid
     if (cfg.traceSources.empty())
@@ -153,7 +153,7 @@ bool HasReplayConfig(const cfg::Participant& cfg)
     {
         for (const auto& ctrl : ctrls)
         {
-            if ( (ctrl.replay.direction != cfg::Replay::Direction::Undefined)
+            if ( (ctrl.replay.direction != Config::Replay::Direction::Undefined)
                 && !ctrl.replay.useTraceSource.empty()
             )
             {
@@ -177,4 +177,4 @@ bool HasReplayConfig(const cfg::Participant& cfg)
     return ok;
 }
 } //end namespace tracing
-} //end namespace ib
+} //end namespace SilKit

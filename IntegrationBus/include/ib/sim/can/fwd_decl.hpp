@@ -2,9 +2,9 @@
 
 #pragma once
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 struct CanFrame;
 struct CanFrameEvent;
@@ -17,6 +17,6 @@ struct CanErrorStateChangeEvent;
 
 class ICanController;
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

@@ -9,8 +9,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/sim/lin/string_utils.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/services/lin/string_utils.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "LinTestUtils.hpp"
 
@@ -20,11 +20,11 @@ using namespace std::chrono_literals;
 using namespace std::placeholders;
 
 using namespace testing;
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::lin;
-using namespace ib::sim::lin::test;
-using namespace ib::util;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Lin;
+using namespace SilKit::Services::Lin::Tests;
+using namespace SilKit::Util;
 
 class LinControllerDetailedSimTest : public testing::Test
 {
@@ -62,7 +62,7 @@ protected:
     const EndpointAddress addr1_proxy{7, 5};
     const EndpointAddress addr2_proxy{4, 9};
 
-    ib::cfg::LinController cfg;
+    SilKit::Config::LinController cfg;
     LinMockParticipant participant;
     LinController controller;
     LinController controller2;
@@ -76,7 +76,7 @@ protected:
 
 TEST_F(LinControllerDetailedSimTest, send_frame)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
@@ -85,14 +85,14 @@ TEST_F(LinControllerDetailedSimTest, send_frame)
     expectedMsg.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,5,6,7,8});
     expectedMsg.responseType = LinFrameResponseType::SlaveResponse;
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, expectedMsg)).Times(1);
 
     controller.SendFrame(expectedMsg.frame, expectedMsg.responseType);
 }
 
 TEST_F(LinControllerDetailedSimTest, send_frame_header)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
@@ -100,14 +100,14 @@ TEST_F(LinControllerDetailedSimTest, send_frame_header)
     LinSendFrameHeaderRequest expectedMsg;
     expectedMsg.id = 13;
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, expectedMsg)).Times(1);
 
     controller.SendFrameHeader(expectedMsg.id);
 }
 
 TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
@@ -120,12 +120,12 @@ TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
     LinTransmission transmission;
     transmission.frame = rxFrame;
     transmission.status = LinFrameStatus::LIN_RX_OK;
-    controller.ReceiveIbMessage(&controllerBusSim, transmission);
+    controller.ReceiveSilKitMessage(&controllerBusSim, transmission);
 }
 
 TEST_F(LinControllerDetailedSimTest, set_frame_response)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     
@@ -137,14 +137,14 @@ TEST_F(LinControllerDetailedSimTest, set_frame_response)
     LinFrameResponseUpdate expectedMsg;
     expectedMsg.frameResponses.push_back(response);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, expectedMsg)).Times(1);
 
     controller.SetFrameResponse(response.frame, response.responseMode);
 }
 
 TEST_F(LinControllerDetailedSimTest, set_frame_responses)
 {
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
 
@@ -165,7 +165,7 @@ TEST_F(LinControllerDetailedSimTest, set_frame_responses)
     LinFrameResponseUpdate expectedMsg;
     expectedMsg.frameResponses = responses;
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, expectedMsg)).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, expectedMsg)).Times(1);
 
     controller.SetFrameResponses(responses);
 }
@@ -173,7 +173,7 @@ TEST_F(LinControllerDetailedSimTest, set_frame_responses)
 TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
@@ -196,13 +196,13 @@ TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler)
     EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response2))
         .Times(1);
 
-    controller.ReceiveIbMessage(&controller2, responseUpdate);
+    controller.ReceiveSilKitMessage(&controller2, responseUpdate);
 }
 
 TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler_for_slave_config)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
@@ -224,13 +224,13 @@ TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler_for_s
     EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response2))
         .Times(1);
 
-    controller.ReceiveIbMessage(&controller2, slaveCfg);
+    controller.ReceiveSilKitMessage(&controller2, slaveCfg);
 }
 
 TEST_F(LinControllerDetailedSimTest, go_to_sleep)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
@@ -239,9 +239,9 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep)
     expectedMsg.frame = GoToSleepFrame();
     expectedMsg.responseType = LinFrameResponseType::MasterResponse;
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, expectedMsg))
+    EXPECT_CALL(participant, SendMsg(&controller, expectedMsg))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::SleepPending)))
+    EXPECT_CALL(participant, SendMsg(&controller, AControllerStatusUpdateWith(LinControllerStatus::SleepPending)))
         .Times(1);
 
     controller.GoToSleep();
@@ -250,13 +250,13 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep)
 TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinSendFrameRequest&>()))
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinSendFrameRequest&>()))
         .Times(0);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Sleep)))
+    EXPECT_CALL(participant, SendMsg(&controller, AControllerStatusUpdateWith(LinControllerStatus::Sleep)))
         .Times(1);
 
     controller.GoToSleepInternal();
@@ -265,7 +265,7 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal)
 TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
@@ -278,13 +278,13 @@ TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
     goToSleep.frame = GoToSleepFrame();
     goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
-    controller.ReceiveIbMessage(&controllerBusSim, goToSleep);
+    controller.ReceiveSilKitMessage(&controllerBusSim, goToSleep);
 }
 
 TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
@@ -298,19 +298,19 @@ TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
     goToSleep.frame.data[0] = 1;
     goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
-    controller.ReceiveIbMessage(&controllerBusSim, goToSleep);
+    controller.ReceiveSilKitMessage(&controllerBusSim, goToSleep);
 }
 
 TEST_F(LinControllerDetailedSimTest, wake_up)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinWakeupPulse&>()))
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinWakeupPulse&>()))
         .Times(1);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
+    EXPECT_CALL(participant, SendMsg(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
         .Times(1);
 
     controller.Wakeup();
@@ -319,14 +319,14 @@ TEST_F(LinControllerDetailedSimTest, wake_up)
 TEST_F(LinControllerDetailedSimTest, wake_up_internal)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     controller.Init(config);
 
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinWakeupPulse&>()))
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinWakeupPulse&>()))
         .Times(0);
-    EXPECT_CALL(participant, SendIbMessage(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
+    EXPECT_CALL(participant, SendMsg(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
         .Times(1);
 
     controller.WakeupInternal();
@@ -336,7 +336,7 @@ TEST_F(LinControllerDetailedSimTest, wake_up_internal)
 TEST_F(LinControllerDetailedSimTest, call_wakeup_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendIbMessage(&controller, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
     controller.Init(config);
     controller.AddFrameStatusHandler(frameStatusHandler);
@@ -347,28 +347,28 @@ TEST_F(LinControllerDetailedSimTest, call_wakeup_handler)
 
     LinWakeupPulse wakeupPulse;
 
-    controller.ReceiveIbMessage(&controllerBusSim, wakeupPulse);
+    controller.ReceiveSilKitMessage(&controllerBusSim, wakeupPulse);
 }
 
 // No initialization causes exception
 TEST_F(LinControllerDetailedSimTest, go_to_sleep_uninitialized)
 {
-    EXPECT_THROW(controller.GoToSleep(), ib::StateError);
+    EXPECT_THROW(controller.GoToSleep(), SilKit::StateError);
 }
 
 TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal_uninitialized)
 {
-    EXPECT_THROW(controller.GoToSleepInternal(), ib::StateError);
+    EXPECT_THROW(controller.GoToSleepInternal(), SilKit::StateError);
 }
 
 TEST_F(LinControllerDetailedSimTest, wake_up_uninitialized)
 {
-    EXPECT_THROW(controller.Wakeup(), ib::StateError);
+    EXPECT_THROW(controller.Wakeup(), SilKit::StateError);
 }
 
 TEST_F(LinControllerDetailedSimTest, wake_up_internal_uninitialized)
 {
-    EXPECT_THROW(controller.WakeupInternal(), ib::StateError);
+    EXPECT_THROW(controller.WakeupInternal(), SilKit::StateError);
 }
 
 } // namespace

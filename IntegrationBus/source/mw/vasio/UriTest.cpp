@@ -2,36 +2,36 @@
 
 #include "Uri.hpp"
 
-#include "ib/exception.hpp"
+#include "silkit/exception.hpp"
 
 #include "gtest/gtest.h"
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 TEST(UriTest, parse_uris)
 {
-	auto uri = Uri::Parse("vib://hostname:1234/path?params");
-	ASSERT_EQ(uri.Scheme(), "vib");
+	auto uri = Uri::Parse("silkit://hostname:1234/path?params");
+	ASSERT_EQ(uri.Scheme(), "silkit");
 	ASSERT_EQ(uri.Host(), "hostname");
 	ASSERT_EQ(uri.Port(), 1234);
 	ASSERT_EQ(uri.Path(), "path?params"); //currently no query string / parameters / fragments handled
-	ASSERT_EQ(uri.EncodedString(), "vib://hostname:1234/path?params" );
+	ASSERT_EQ(uri.EncodedString(), "silkit://hostname:1234/path?params" );
 
 	//parsing garbage should throw
 	EXPECT_THROW(Uri::Parse("foo/bar"),
-		ib::ConfigurationError);
+		SilKit::ConfigurationError);
 	EXPECT_THROW(Uri::Parse("fo:oo://bar:qux:quz://"),
-		ib::ConfigurationError);
+		SilKit::ConfigurationError);
 
-	EXPECT_THROW(Uri::Parse("vib://:1234"),
-		ib::ConfigurationError);
+	EXPECT_THROW(Uri::Parse("silkit://:1234"),
+		SilKit::ConfigurationError);
 
 	// Parse known internal (VAsio) URIs
-	uri = Uri::Parse("local:///tmp/domainsockets.vib");
+	uri = Uri::Parse("local:///tmp/domainsockets.silkit");
 	ASSERT_EQ(uri.Type(), Uri::UriType::Local);
 	ASSERT_EQ(uri.Host(), "");
 	ASSERT_EQ(uri.Scheme(), "local");
-	ASSERT_EQ(uri.Path(), "/tmp/domainsockets.vib");
-	ASSERT_EQ(uri.EncodedString(), "local:///tmp/domainsockets.vib");
+	ASSERT_EQ(uri.Path(), "/tmp/domainsockets.silkit");
+	ASSERT_EQ(uri.EncodedString(), "local:///tmp/domainsockets.silkit");
 
 	uri = Uri::Parse("tcp://123.123.123.123:3456/");
 	ASSERT_EQ(uri.Type(), Uri::UriType::Tcp);
@@ -56,14 +56,14 @@ TEST(UriTest, parse_uris)
 	ASSERT_EQ(uri.Path(), R"aw(C:\\temp\hello\ world")aw");
 
 	// No Port given results in default port
-	uri = Uri::Parse("vib://localhost");
-	ASSERT_EQ(uri.Scheme(), "vib");
+	uri = Uri::Parse("silkit://localhost");
+	ASSERT_EQ(uri.Scheme(), "silkit");
 	ASSERT_EQ(uri.Host(), "localhost");
 	ASSERT_EQ(uri.Port(), 8500);
 	ASSERT_EQ(uri.Path(), "");
-	// Port 0 resolved to random port at runtime, must be 0 when using tcp:// or vib://
-	uri = Uri::Parse("vib://localhost:0");
-	ASSERT_EQ(uri.Scheme(), "vib");
+	// Port 0 resolved to random port at runtime, must be 0 when using tcp:// or silkit://
+	uri = Uri::Parse("silkit://localhost:0");
+	ASSERT_EQ(uri.Scheme(), "silkit");
 	ASSERT_EQ(uri.Host(), "localhost");
 	ASSERT_EQ(uri.Port(), 0);
 	ASSERT_EQ(uri.Path(), "");

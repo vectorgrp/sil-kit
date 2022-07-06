@@ -3,39 +3,39 @@
 #include "EthController.hpp"
 #include "SimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
 class EthController;
 
-SimBehavior::SimBehavior(mw::IParticipantInternal* participant, EthController* ethController,
-                    mw::sync::ITimeProvider* timeProvider)
+SimBehavior::SimBehavior(Core::IParticipantInternal* participant, EthController* ethController,
+                    Core::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, ethController, timeProvider}
     , _detailed{participant, ethController, ethController->GetServiceDescriptor()}
 {
     _currentBehavior = &_trivial;
 }
 
-auto SimBehavior::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool
+auto SimBehavior::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {
     return _currentBehavior->AllowReception(from);
 }
 
 template <typename MsgT>
-void SimBehavior::SendIbMessageImpl(MsgT&& msg)
+void SimBehavior::SendMsgImpl(MsgT&& msg)
 {
-    _currentBehavior->SendIbMessage(std::forward<MsgT>(msg));
+    _currentBehavior->SendMsg(std::forward<MsgT>(msg));
 }
 
-void SimBehavior::SendIbMessage(EthernetFrameEvent&& msg) 
+void SimBehavior::SendMsg(EthernetFrameEvent&& msg) 
 { 
-    SendIbMessageImpl(std::move(msg)); 
+    SendMsgImpl(std::move(msg)); 
 }
 
-void SimBehavior::SendIbMessage(EthernetSetMode&& msg)
+void SimBehavior::SendMsg(EthernetSetMode&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
 
 void SimBehavior::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
@@ -43,7 +43,7 @@ void SimBehavior::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
     _currentBehavior->OnReceiveAck(msg);
 }
 
-void SimBehavior::SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink)
+void SimBehavior::SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink)
 {
     _detailed.SetSimulatedLink(simulatedLink);
     _currentBehavior = &_detailed;
@@ -64,6 +64,6 @@ auto SimBehavior::IsDetailed() const -> bool
 }
 
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

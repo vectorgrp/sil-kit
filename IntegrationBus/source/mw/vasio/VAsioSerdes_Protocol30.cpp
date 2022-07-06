@@ -9,7 +9,7 @@
 
 namespace protocol_3_0 {
 
-using ib::mw::MessageBuffer;
+using SilKit::Core::MessageBuffer;
 // Backward compatible serdes with ProtocolVersion{3,0}
 
 // header is fixed at this version
@@ -38,7 +38,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, RegistryMsgHeader& heade
 // the older VAsioMsgSubscriber lacks the version field
 struct VAsioMsgSubscriber
 {
-    ib::mw::EndpointId receiverIdx;
+    SilKit::Core::EndpointId receiverIdx;
     std::string networkName;
     std::string msgTypeName;
 };
@@ -65,7 +65,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subs
 struct VAsioPeerInfo
 {
     std::string participantName;
-    ib::mw::ParticipantId participantId;
+    SilKit::Core::ParticipantId participantId;
     std::string acceptorHost;
     uint16_t acceptorPort;
 };
@@ -73,7 +73,7 @@ struct VAsioPeerInfo
 struct VAsioPeerUri
 {
     std::string participantName;
-    ib::mw::ParticipantId participantId;
+    SilKit::Core::ParticipantId participantId;
     std::vector<std::string> acceptorUris;
 };
 
@@ -81,7 +81,7 @@ struct ParticipantAnnouncement
 {
     RegistryMsgHeader messageHeader; //not changed
     VAsioPeerInfo peerInfo;
-    //!< additional field as of VIB >3.4.1, will be ignored by older participants
+    //!< additional field as of SILKIT >3.4.1, will be ignored by older participants
     VAsioPeerUri peerUri;
 };
 
@@ -94,12 +94,12 @@ struct KnownParticipants
 {
     RegistryMsgHeader messageHeader;
     std::vector<VAsioPeerInfo> peerInfos;
-    //!< additional field as of VIB >3.4.1, will be ignored by older participants
+    //!< additional field as of SILKIT >3.4.1, will be ignored by older participants
     std::vector<VAsioPeerUri> peerUris;
 };
 
 // Actual Serdes Code
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const VAsioPeerInfo& peerInfo)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const VAsioPeerInfo& peerInfo)
 {
     buffer << peerInfo.participantName
            << peerInfo.participantId
@@ -108,7 +108,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const VA
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, VAsioPeerInfo& peerInfo)
 {
     buffer >> peerInfo.participantName
            >> peerInfo.participantId
@@ -118,7 +118,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, VAsioPee
 }
 
 //SerDes v3.1
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const VAsioPeerUri& peerUri)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const VAsioPeerUri& peerUri)
 {
     buffer << peerUri.participantName
            << peerUri.participantId
@@ -127,7 +127,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const VA
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, VAsioPeerUri& peerUri)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, VAsioPeerUri& peerUri)
 {
     buffer >> peerUri.participantName
            >> peerUri.participantId
@@ -137,7 +137,7 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, VAsioPee
 }
 
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const ParticipantAnnouncement& announcement)
 {
     buffer << announcement.messageHeader
         << announcement.peerInfo
@@ -146,7 +146,7 @@ inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const Pa
 
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ParticipantAnnouncement& announcement)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
     buffer >> announcement.messageHeader
         >> announcement.peerInfo
@@ -155,14 +155,14 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Particip
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const KnownParticipants& participants)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const KnownParticipants& participants)
 {
     buffer << participants.messageHeader
         << participants.peerInfos
         << participants.peerUris;
     return buffer;
 }
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, KnownParticipants& participants)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, KnownParticipants& participants)
 {
     buffer >> participants.messageHeader
         >> participants.peerInfos;
@@ -173,13 +173,13 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, KnownPar
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
 {
     buffer << reply.subscribers;
     return buffer;
 }
 
-inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
     buffer >> reply.subscribers;
     return buffer;
@@ -187,8 +187,8 @@ inline ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, Particip
 
 } // namespace protocol_3_0
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 void DeserializeV30(MessageBuffer& buffer, ParticipantAnnouncement& announcement)
 {
@@ -258,7 +258,7 @@ void DeserializeV30(MessageBuffer& buffer, KnownParticipants& participants)
     buffer >> oldParticipants;
     for (const auto& peerUri : oldParticipants.peerUris)
     {
-        ib::mw::VAsioPeerInfo info;
+        SilKit::Core::VAsioPeerInfo info;
         info.participantName = peerUri.participantName;
         info.participantId = peerUri.participantId;
         info.acceptorUris = peerUri.acceptorUris;
@@ -288,5 +288,5 @@ void SerializeV30(MessageBuffer& buffer, const KnownParticipants& participants)
     buffer << oldParticipants;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

@@ -9,25 +9,25 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ib/sim/fr/FlexrayDatatypes.hpp"
-#include "ib/exception.hpp"
+#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/exception.hpp"
 
 namespace {
 
-using namespace ib::sim::fr;
+using namespace SilKit::Services::Flexray;
 
 TEST(TestSimFlexrayValidation, throw_if_gColdstartAttempts_is_out_of_range)
 {
     FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 0;
-    EXPECT_THROW(Validate(clusterParams), ib::ConfigurationError);
+    EXPECT_THROW(Validate(clusterParams), SilKit::ConfigurationError);
 }
 
 TEST(TestSimFlexrayValidation, throw_if_pAllowHaltDueToClock_is_not_0_or_1)
 {
     FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 2;
-    EXPECT_THROW(Validate(nodeParams), ib::ConfigurationError);
+    EXPECT_THROW(Validate(nodeParams), SilKit::ConfigurationError);
 }
 
 TEST(TestSimFlexrayValidation, valid_cluster_params_lower_boundary_must_not_throw)

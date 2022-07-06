@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbConfiguration STATIC
+add_library(SilKitConfiguration STATIC
     Configuration.hpp
     Configuration.cpp
     ParticipantConfiguration.hpp
@@ -16,51 +16,51 @@ add_library(IbConfiguration STATIC
     YamlValidator.cpp
 )
 
-target_link_libraries(IbConfiguration
-    PRIVATE IbInterface
-    PRIVATE IbUtil
-    INTERFACE IbUtil
+target_link_libraries(SilKitConfiguration
+    PRIVATE SilKitInterface
+    PRIVATE SilKitUtil
+    INTERFACE SilKitUtil
     PRIVATE yaml-cpp
     INTERFACE yaml-cpp
 )
 
-target_include_directories(IbConfiguration
+target_include_directories(SilKitConfiguration
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_vib_test(TestMwCfgValidation 
+add_silkit_test(TestMwCfgValidation 
     SOURCES ValidationTest.cpp 
-    LIBS IbConfiguration
+    LIBS SilKitConfiguration
 )
 
-add_vib_test(TestParticipantConfiguration 
+add_silkit_test(TestParticipantConfiguration 
     SOURCES ParticipantConfigurationTest.cpp
-    LIBS IbMwMockNullConnection
+    LIBS SilKitMwMockNullConnection
     CONFIGS
         ParticipantConfiguration_Minimal.json
         ParticipantConfiguration_Full.json
         ParticipantConfiguration_Logging_Without_File.json
 )
 
-add_vib_test(TestMwCfgYamlParser 
+add_silkit_test(TestMwCfgYamlParser 
     SOURCES YamlParserTest.cpp 
-    LIBS IbConfiguration yaml-cpp
+    LIBS SilKitConfiguration yaml-cpp
 )
 
-add_vib_test(TestMwCfgYamlValidator 
+add_silkit_test(TestMwCfgYamlValidator 
     SOURCES YamlValidatorTest.cpp 
-    LIBS IbConfiguration yaml-cpp
+    LIBS SilKitConfiguration yaml-cpp
 )
 
-if(IB_BUILD_TESTS)
-    add_library(IbConfigurationTestUtils INTERFACE)
+if(SILKIT_BUILD_TESTS)
+    add_library(SilKitConfigurationTestUtils INTERFACE)
 
-    target_include_directories(IbConfigurationTestUtils
+    target_include_directories(SilKitConfigurationTestUtils
         INTERFACE ${CMAKE_CURRENT_LIST_DIR}
     )
 
-    target_link_libraries(IbConfigurationTestUtils
-        INTERFACE IbConfiguration
+    target_link_libraries(SilKitConfigurationTestUtils
+        INTERFACE SilKitConfiguration
     )
 endif()

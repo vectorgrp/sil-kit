@@ -7,9 +7,9 @@
 
 #include "ServiceDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace service {
+namespace SilKit {
+namespace Core {
+namespace Discovery {
 
 using ServiceDiscoveryHandlerT =
     std::function<void(ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor&)>;
@@ -37,6 +37,6 @@ public:
 
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

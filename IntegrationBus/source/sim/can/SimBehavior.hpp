@@ -10,27 +10,27 @@
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-#include "ib/sim/can/CanDatatypes.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 class CanController;
 
 class SimBehavior : public ISimBehavior
 {
 public:
-    SimBehavior(mw::IParticipantInternal* participant, CanController* canController,
-                       mw::sync::ITimeProvider* timeProvider);
+    SimBehavior(Core::IParticipantInternal* participant, CanController* canController,
+                       Core::Orchestration::ITimeProvider* timeProvider);
 
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(CanConfigureBaudrate&& msg) override;
-    void SendIbMessage(CanSetControllerMode&& msg) override;
-    void SendIbMessage(CanFrameEvent&& msg) override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
+    void SendMsg(CanConfigureBaudrate&& msg) override;
+    void SendMsg(CanSetControllerMode&& msg) override;
+    void SendMsg(CanFrameEvent&& msg) override;
 
-    void SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink);
+    void SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink);
     void SetTrivialBehavior();
 
     auto IsTrivial() const -> bool;
@@ -38,13 +38,13 @@ public:
 
 private:
     template <typename MsgT>
-    void SendIbMessageImpl(MsgT&& msg);
+    void SendMsgImpl(MsgT&& msg);
 
     SimBehaviorTrivial _trivial;
     SimBehaviorDetailed _detailed;
     ISimBehavior* _currentBehavior;
 };
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

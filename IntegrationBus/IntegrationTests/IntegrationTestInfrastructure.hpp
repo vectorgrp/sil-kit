@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "ib/vendor/CreateIbRegistry.hpp"
-#include "ib/IntegrationBus.hpp"
-#include "ib/sim/all.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/services/all.hpp"
 #include "ConfigurationTestUtils.hpp"
 
-using namespace ib::mw;
-using namespace ib::mw::sync;
-using namespace ib::cfg;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Config;
 
 class TestInfrastructure
 {
@@ -53,14 +53,14 @@ private:
 
     void RunRegistry(const std::string& registryUri)
     {
-        _registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
+        _registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
         _registry->ProvideDomain(registryUri);
     }
 
     void RunSystemMaster(const std::string& registryUri, const std::vector<std::string>& requiredParticipantNames)
     {
         _systemMaster.participant =
-            ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), "SystemMaster", registryUri);
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemMaster", registryUri);
 
         _systemMaster.systemController = _systemMaster.participant->GetSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();
@@ -99,7 +99,7 @@ private:
         });
     }
 
-    std::unique_ptr<ib::vendor::IIbRegistry> _registry;
+    std::unique_ptr<SilKit::Vendor::ISilKitRegistry> _registry;
 
     struct SystemMaster
     {

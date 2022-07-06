@@ -2,9 +2,9 @@
 
 #include <iostream>
 
-#include "ib/sim/all.hpp"
-#include "ib/util/functional.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/util/functional.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -37,7 +37,7 @@ protected:
         std::vector<std::string> syncParticipantNames = {"Publisher", "Subscriber", "Subscriber2"};
         auto registryUri = MakeTestRegistryUri();
 
-        ib::test::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
+        SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
         auto&& publisher = testHarness.GetParticipant("Publisher")->Participant();
         
         for (auto i = 0; i < numberOfServices; i++)
@@ -66,7 +66,7 @@ protected:
                 const auto controllerName = "SubCtrl" + std::to_string(i);
                 (void)subscriber->CreateDataSubscriber(
                     controllerName, topic, {}, {},
-                    [](ib::sim::data::IDataSubscriber* /*subscriber*/, const ib::sim::data::DataMessageEvent& /*data*/) {
+                    [](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
                     }); 
             }
         };
@@ -90,7 +90,7 @@ protected:
 };
 
 
-// Stress testing the discovery mechanism, it shouldn't slow down the IB performance
+// Stress testing the discovery mechanism, it shouldn't slow down the SilKit performance
 
 TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_10services)
 {

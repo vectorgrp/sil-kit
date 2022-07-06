@@ -1,37 +1,37 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "PcapReader.hpp"
 
-#include "ib/sim/eth/EthernetDatatypes.hpp"
+#include "silkit/services/eth/EthernetDatatypes.hpp"
 
 #include "Pcap.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
-using namespace ib::extensions;
-using namespace ib::mw::logging;
+
+using namespace SilKit::Core::Logging;
 //////////////////////////////////////////////////////////////////////
 // PcapMessage -- internal only
 //////////////////////////////////////////////////////////////////////
 
 class PcapMessage
-    : public ib::extensions::IReplayMessage
-    , public ib::sim::eth::EthernetFrame
+    : public SilKit::IReplayMessage
+    , public SilKit::Services::Ethernet::EthernetFrame
 {
 public:
 
     auto Timestamp() const -> std::chrono::nanoseconds override;
     void SetTimestamp(std::chrono::nanoseconds timeStamp);
 
-    auto GetDirection() const ->ib::sim::TransmitDirection override;
+    auto GetDirection() const ->SilKit::Services::TransmitDirection override;
 
-    auto EndpointAddress() const -> ib::mw::EndpointAddress override;
+    auto EndpointAddress() const -> SilKit::Core::EndpointAddress override;
 
-    auto Type() const -> ib::extensions::TraceMessageType override;
+    auto Type() const -> SilKit::TraceMessageType override;
 
 private:
     std::chrono::nanoseconds _timeStamp{0};
-    ib::sim::TransmitDirection _direction{ ib::sim::TransmitDirection::TX };
-    ib::mw::EndpointAddress  _endpointAddress{};
+    SilKit::Services::TransmitDirection _direction{ SilKit::Services::TransmitDirection::TX };
+    SilKit::Core::EndpointAddress  _endpointAddress{};
 };
 
 void PcapMessage::SetTimestamp(std::chrono::nanoseconds timeStamp)
@@ -44,12 +44,12 @@ auto PcapMessage::Timestamp() const -> std::chrono::nanoseconds
     return _timeStamp;
 }
 
-auto PcapMessage::GetDirection() const -> ib::sim::TransmitDirection
+auto PcapMessage::GetDirection() const -> SilKit::Services::TransmitDirection
 {
     return _direction;
 }
 
-auto PcapMessage::EndpointAddress() const -> ib::mw::EndpointAddress
+auto PcapMessage::EndpointAddress() const -> SilKit::Core::EndpointAddress
 {
     return _endpointAddress;
 }
@@ -63,7 +63,7 @@ auto PcapMessage::Type() const -> TraceMessageType
 // PcapReader
 //////////////////////////////////////////////////////////////////////
 
-PcapReader::PcapReader(std::istream* stream, ib::mw::logging::ILogger* logger)
+PcapReader::PcapReader(std::istream* stream, SilKit::Core::Logging::ILogger* logger)
     : _stream{stream}
     , _log{logger}
 {
@@ -213,4 +213,4 @@ auto PcapReader::GetMetaInfos() const -> const std::map<std::string, std::string
 
 
 } // namespace tracing
-} // namespace ib
+} // namespace SilKit

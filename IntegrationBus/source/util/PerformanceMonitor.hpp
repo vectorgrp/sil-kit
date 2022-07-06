@@ -4,8 +4,8 @@
 
 #include <chrono>
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 class PerformanceMonitor
 {
@@ -72,5 +72,5 @@ auto PerformanceMonitor::AvgDuration() -> StdDurationT
         return std::chrono::duration_cast<StdDurationT>(_durationSum) / _sampleCount;
 }
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

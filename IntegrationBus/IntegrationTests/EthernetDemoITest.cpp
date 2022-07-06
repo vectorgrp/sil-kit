@@ -7,7 +7,7 @@
 #include <unordered_map> //remove this after rebase on cmake-cleanup-branch
 
 
-#include "ib/sim/eth/all.hpp"
+#include "silkit/services/eth/all.hpp"
 
 #include "gtest/gtest.h"
 
@@ -15,9 +15,9 @@
 #include "EthDatatypeUtils.hpp"
 
 namespace {
-using namespace ib::test;
-using namespace ib::cfg;
-using namespace ib::sim;
+using namespace SilKit::Tests;
+using namespace SilKit::Config;
+using namespace SilKit::Services;
 
 
 TEST_F(SimTestHarnessITest, ethernet_demo)
@@ -25,12 +25,12 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
     //Create a simulation setup with 2 participants 
     SetupFromParticipantList({"EthernetReader", "EthernetWriter"});
 
-    const ib::sim::eth::EthernetMac writerMac{00, 22, 33, 44, 55, 66};
-    const ib::sim::eth::EthernetMac readerMac{00, 88, 99, 00, 11, 22};
-    const ib::sim::eth::EthernetEtherType etherType{ 0x0800 };
+    const SilKit::Services::Ethernet::EthernetMac writerMac{00, 22, 33, 44, 55, 66};
+    const SilKit::Services::Ethernet::EthernetMac readerMac{00, 88, 99, 00, 11, 22};
+    const SilKit::Services::Ethernet::EthernetEtherType etherType{ 0x0800 };
 
     //Test Data
-    auto frame = ib::sim::eth::CreateEthernetFrame(readerMac, writerMac, etherType,
+    auto frame = SilKit::Services::Ethernet::CreateEthernetFrame(readerMac, writerMac, etherType,
       "Hello World! We need a minimum size of 64 bytes for the frame so here is some useless data");
 
     //Test Results
@@ -58,27 +58,27 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
             ethernetController->Activate();
         });
 
-        ethernetController->AddBitrateChangeHandler([&](auto, eth::EthernetBitrateChangeEvent bitrateChangeEvent) {
+        ethernetController->AddBitrateChangeHandler([&](auto, Ethernet::EthernetBitrateChangeEvent bitrateChangeEvent) {
           linkBitrate = bitrateChangeEvent.bitrate;
         });
 
-        ethernetController->AddStateChangeHandler([&](auto, eth::EthernetStateChangeEvent stateChangeEvent) {
-          if (stateChangeEvent.state == eth::EthernetState::LinkDown)
+        ethernetController->AddStateChangeHandler([&](auto, Ethernet::EthernetStateChangeEvent stateChangeEvent) {
+          if (stateChangeEvent.state == Ethernet::EthernetState::LinkDown)
           {
             receivedLinkDown = true;
           }
-          if (stateChangeEvent.state == eth::EthernetState::LinkUp)
+          if (stateChangeEvent.state == Ethernet::EthernetState::LinkUp)
           {
             receivedLinkUp = true;
           }
         });
 
         ethernetController->AddFrameTransmitHandler([&](auto, auto ack) {
-          if (ack.status == eth::EthernetTransmitStatus::Transmitted)
+          if (ack.status == Ethernet::EthernetTransmitStatus::Transmitted)
           {
             receivedAckTransmitted = true;
           }
-          if (ack.status == eth::EthernetTransmitStatus::Dropped)
+          if (ack.status == Ethernet::EthernetTransmitStatus::Dropped)
           {
             receivedAckDropped = true;
           }

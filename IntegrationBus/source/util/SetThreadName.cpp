@@ -9,8 +9,8 @@
 #include <pthread.h>
 #endif
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 #if defined(_WIN32)
 
@@ -76,5 +76,5 @@ void SetThreadName(const std::string& threadName)
 
 #endif
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

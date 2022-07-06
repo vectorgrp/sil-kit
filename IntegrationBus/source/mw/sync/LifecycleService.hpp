@@ -6,17 +6,17 @@
 #include <tuple>
 #include <map>
 
-#include "ib/mw/sync/ILifecycleService.hpp"
+#include "silkit/core/sync/ILifecycleService.hpp"
 
 #include "PerformanceMonitor.hpp"
 #include "WatchDog.hpp"
 
-#include "IIbToLifecycleService.hpp"
+#include "IMsgForLifecycleService.hpp"
 #include "IParticipantInternal.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 //forward declarations
 class SynchronizedVirtualTimeProvider;
@@ -26,14 +26,14 @@ struct LifecycleConfiguration;
 
 class LifecycleService
     : public ILifecycleService
-    , public IIbToLifecycleService
-    , public mw::IIbServiceEndpoint
+    , public IMsgForLifecycleService
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     LifecycleService(IParticipantInternal* participant,
-                     const cfg::HealthCheck& healthCheckConfig);
+                     const Config::HealthCheck& healthCheckConfig);
 
 public:
     // ----------------------------------------
@@ -62,16 +62,16 @@ public:
     auto State() const -> ParticipantState override;
     auto Status() const -> const ParticipantStatus& override;
 
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const ParticipantCommand& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const SystemCommand& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& msg) override;
 
     // Used by Policies
     template <class MsgT>
-    void SendIbMessage(MsgT&& msg) const;
+    void SendMsg(MsgT&& msg) const;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 
 public:
@@ -103,8 +103,8 @@ private:
     // ----------------------------------------
     // private members
     IParticipantInternal* _participant{nullptr};
-    mw::ServiceDescriptor _serviceDescriptor{};
-    logging::ILogger* _logger{nullptr};
+    Core::ServiceDescriptor _serviceDescriptor{};
+    Logging::ILogger* _logger{nullptr};
 
     TimeSyncService* _timeSyncService;
 
@@ -133,21 +133,21 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-void LifecycleService::SendIbMessage(MsgT&& msg) const
+void LifecycleService::SendMsg(MsgT&& msg) const
 {
-    _participant->SendIbMessage(this, std::forward<MsgT>(msg));
+    _participant->SendMsg(this, std::forward<MsgT>(msg));
 }
 
-void LifecycleService::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void LifecycleService::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto LifecycleService::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto LifecycleService::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

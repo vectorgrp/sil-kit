@@ -7,7 +7,7 @@
 Third-Party Licenses
 ====================
 
-The Integration Bus uses third party software components. The full and
+The SilKit uses third party software components. The full and
 unmodified license of each component is printed below.
 
 .. contents:: :local:

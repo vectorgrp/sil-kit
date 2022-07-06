@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-namespace ib { namespace extensions {
+namespace SilKit { 
 //! \brief Fields of the BuildInfo array
 enum class BuildInfoField
 {
@@ -54,9 +54,9 @@ constexpr uint32_t BuildinfoCPlusPlus()
 constexpr uint32_t BuildinfoCompiler()
 {
 #if defined(_MSC_VER)
-#   if defined(IB_MSVC_TOOLSET_VERSION)
+#   if defined(SILKIT_MSVC_TOOLSET_VERSION)
     // We rely on CMake to provide proper toolset version.
-    return IB_MSVC_TOOLSET_VERSION;
+    return SILKIT_MSVC_TOOLSET_VERSION;
 #   elif defined(_MSVC_STL_VERSION)
     // In case newer, future toolset is not recognized by CMake:
     // On VS2015/17/19 _MSVC_STL_VERSION contains the toolset number, e.g. 141, 142 etc.
@@ -107,5 +107,5 @@ constexpr uint32_t BuildinfoDebug()
 #endif
 }
 
-}//end namespace extensions
-}//end namespace ib
+
+}//end namespace SilKit

@@ -9,26 +9,26 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 
 inline namespace v4 {
 
 namespace {
 
-void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configuration)
+void ValidateTraceSinks(const SilKit::Config::v4::ParticipantConfiguration& configuration)
 {
     std::set<std::string> sinkNames;
     for (const auto& sink : configuration.tracing.traceSinks)
     {
         if (sink.name.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+            throw SilKit::ConfigurationError{ "On Participant " + configuration.participantName + 
                 ": TraceSink \"Name\" must not be empty!" };
         }
         if (sink.outputPath.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+            throw SilKit::ConfigurationError{ "On Participant " + configuration.participantName + 
                 ": TraceSink \"OutputPath\" must not be empty!" };
         }
         sinkNames.insert(sink.name);
@@ -36,7 +36,7 @@ void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configurati
 
     if (sinkNames.size() != configuration.tracing.traceSinks.size())
     {
-        throw ib::ConfigurationError{ "TraceSinks must have unique names!" };
+        throw SilKit::ConfigurationError{ "TraceSinks must have unique names!" };
     }
 
     auto sinkExists = [&sinkNames](const auto& name) -> bool {
@@ -55,12 +55,12 @@ void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configurati
                 if (traceSink.empty())
                 {
                     ss << "has an empty string in a  UseTraceSinks field!";
-                    throw ib::ConfigurationError{ ss.str() };
+                    throw SilKit::ConfigurationError{ ss.str() };
                 }
                 if (!sinkExists(traceSink))
                 {
                     ss << "has a UseTraceSinks field which refers to a non-existing TraceSink: " << traceSink;
-                    throw ib::ConfigurationError{ ss.str() };
+                    throw SilKit::ConfigurationError{ ss.str() };
                 }
             }
         }
@@ -76,27 +76,27 @@ void ValidateTraceSinks(const ib::cfg::v4::ParticipantConfiguration& configurati
     validateController(configuration.rpcClients);
 }
 
-void ValidateTraceSources(const ib::cfg::v4::ParticipantConfiguration& configuration)
+void ValidateTraceSources(const SilKit::Config::v4::ParticipantConfiguration& configuration)
 {
     std::set<std::string> sourceNames;
     for (const auto& source : configuration.tracing.traceSources)
     {
         if (source.name.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+            throw SilKit::ConfigurationError{ "On Participant " + configuration.participantName + 
                 ": TraceSource \"Name\" must not be empty!" };
         }
 
         if (source.inputPath.empty())
         {
-            throw ib::ConfigurationError{ "On Participant " + configuration.participantName + 
+            throw SilKit::ConfigurationError{ "On Participant " + configuration.participantName + 
                 ": TraceSource \"InputPath\" must not be empty!" };
         }
 
         auto ok = sourceNames.insert(source.name);
         if (!ok.second)
         {
-            throw ib::ConfigurationError{ "TraceSources must have a unique name: duplicate entry is " + source.name };
+            throw SilKit::ConfigurationError{ "TraceSources must have a unique name: duplicate entry is " + source.name };
         }
     }
 
@@ -120,7 +120,7 @@ void ValidateTraceSources(const ib::cfg::v4::ParticipantConfiguration& configura
             {
                 ss << "has a Replay::UseTraceSource field which refers to a non-existing TraceSource: "
                     << controller.replay.useTraceSource;
-                throw ib::ConfigurationError{ ss.str() };
+                throw SilKit::ConfigurationError{ ss.str() };
             }
         }
     };
@@ -137,7 +137,7 @@ void ValidateTraceSources(const ib::cfg::v4::ParticipantConfiguration& configura
 
 } // anonymous namespace
 
-void Validate(const ib::cfg::v4::ParticipantConfiguration& configuration)
+void Validate(const SilKit::Config::v4::ParticipantConfiguration& configuration)
 {
     ValidateTraceSinks(configuration);
     ValidateTraceSources(configuration);
@@ -145,5 +145,5 @@ void Validate(const ib::cfg::v4::ParticipantConfiguration& configuration)
 
 } // namespace v4
 
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

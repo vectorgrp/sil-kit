@@ -139,11 +139,11 @@ def parseArgs():
     parser = argparse.ArgumentParser(description='VIB distribution packaging tool. It allows bundling and merging multiple CPack generated zip files into a single release zip file')
     parser.add_argument('--projectroot', metavar='PROJECT_ROOT', type=str,
             help="the toplevel project directory containing the source")
-    parser.add_argument('zipfiles', metavar='IntegrationBus-<CONFIG>.zip', type=str,
+    parser.add_argument('zipfiles', metavar='SilKit-<CONFIG>.zip', type=str,
             help="""Zip files which contain the IB binaries and are packaged by CPack.
             The distribution will contain all merged zipfiles. 
             The pattern of <name>-<sem_version>-<compiler>-<arch>-<buildtype> is significant for computing the output name.
-            For Example: IntegrationBus-1.0.0-VS2015-Win32-Debug.zip IntegrationBus-1.0.0-VS2015-Win32-Release.zip""",
+            For Example: SilKit-1.0.0-VS2015-Win32-Debug.zip SilKit-1.0.0-VS2015-Win32-Release.zip""",
             nargs="+")
     parser.add_argument('--work-dir', type=str, help="Specify the work directory", default="_package")
     parser.add_argument('-d','--debug', action="store_true", help="enable debugging output")
@@ -297,7 +297,7 @@ def main():
     deploy_dirs={
         #Source   archive-name
         #"Demos" : "Demos",
-        #"IntegrationBus" : "Source",
+        #"SilKit" : "Source",
         #"ThirdParty/json11" : "ThirdParty/json11",
         #"ThirdParty/googletest-1.8.0" : "ThirdParty/googletest-1.8.0",
         #"ThirdParty/Fast-RTPS/thirdparty/asio/" : "ThirdParty/Fast-RTPS/thirdparty/asio/",

@@ -6,209 +6,209 @@ add_library(ITestUtils INTERFACE)
 target_include_directories(ITestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
-set(itest_extra_libs IbMwVAsio)
+set(itest_extra_libs SilKitMwVAsio)
 
-add_vib_test(FTestCanWithoutSync
+add_silkit_test(FTestCanWithoutSync
     SOURCES
       CanWithoutSyncFTest.cpp
     LIBS
-      IbSimCan
+      SilKitSimCan
       ${itest_extra_libs}
-      IntegrationBus
-      IbConfigurationTestUtils
+      SilKit
+      SilKitConfigurationTestUtils
 )
 
-add_vib_test(FTestEthWithoutSync
+add_silkit_test(FTestEthWithoutSync
     SOURCES
       EthWithoutSyncFTest.cpp
     LIBS
-      IbSimEthernet
+      SilKitSimEthernet
       ${itest_extra_libs}
-      IntegrationBus
-      IbConfigurationTestUtils
+      SilKit
+      SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestThreeCanController
+add_silkit_test(ITestThreeCanController
     SOURCES
       ThreeCanControllerITest.cpp
     LIBS
-        IbMwParticipant
-        IbSimTestHarness
+        SilKitMwParticipant
+        SilKitSimTestHarness
         ${itest_extra_libs}
 )
 
-add_vib_test(FTestCanControllerThreadSafety
+add_silkit_test(FTestCanControllerThreadSafety
     SOURCES
       CanControllerThreadSafetyITest.cpp
     LIBS
-        IntegrationBus
-        IbConfigurationTestUtils
+        SilKit
+        SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestThreeEthController
+add_silkit_test(ITestThreeEthController
     SOURCES
       ThreeEthControllerITest.cpp
     LIBS
-      IbSimTestHarness
-      IbMwParticipant
-      IbSimEthernet
+      SilKitSimTestHarness
+      SilKitMwParticipant
+      SilKitSimEthernet
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestCatchExceptionsInCallbacks
+add_silkit_test(ITestCatchExceptionsInCallbacks
     SOURCES
       CatchExceptionsInCallbacksITest.cpp
     LIBS
-      IbMwParticipant
-      IbConfigurationTestUtils
+      SilKitMwParticipant
+      SilKitConfigurationTestUtils
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestHopOnHopOff
+add_silkit_test(ITestHopOnHopOff
     SOURCES
       HopOnHopOffITest.cpp
     LIBS
-        IntegrationBus
-        IbConfigurationTestUtils
+        SilKit
+        SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestDataPubSub
+add_silkit_test(ITestDataPubSub
     SOURCES
       DataPubSubITest.cpp
     LIBS
-        IntegrationBus
-        IbConfigurationTestUtils
+        SilKit
+        SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestTargetedMessaging
+add_silkit_test(ITestTargetedMessaging
     SOURCES
       TargetedMessagingITest.cpp
     LIBS
-      IbTracing
-      IbSimCan
-      IbSimTestHarness
-      IbInternal
+      SilKitTracing
+      SilKitSimCan
+      SilKitSimTestHarness
+      SilKitInternal
 )
 
-add_vib_test(ITestRpc
+add_silkit_test(ITestRpc
     SOURCES
       RpcITest.cpp
     LIBS
-      IntegrationBus
-      IbConfigurationTestUtils
+      SilKit
+      SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestStateMachineVAsio
+add_silkit_test(ITestStateMachineVAsio
     SOURCES
       StateMachineVAsioITest.cpp
     LIBS
-      IbMwParticipant
-      IbMwVAsio
-      IbConfigurationTestUtils
+      SilKitMwParticipant
+      SilKitMwVAsio
+      SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestDeterministicSimVAsio
+add_silkit_test(ITestDeterministicSimVAsio
     SOURCES
       DeterministicSimVAsioITest.cpp
     LIBS
-      IbMwParticipant
-      IbMwVAsio
-      IbConfigurationTestUtils
+      SilKitMwParticipant
+      SilKitMwVAsio
+      SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestDifferentPeriods
+add_silkit_test(ITestDifferentPeriods
     SOURCES
       DifferentPeriodsITest.cpp
     LIBS
-      IbMwParticipant
-      IbMwVAsio
-      IbConfigurationTestUtils
+      SilKitMwParticipant
+      SilKitMwVAsio
+      SilKitConfigurationTestUtils
 )
 
-add_vib_test(ITestIbRegistryReusage
+add_silkit_test(ITestSilKitRegistryReusage
     SOURCES
-      IbRegistryReusage.cpp
+      SilKitRegistryReusage.cpp
     LIBS
-      IbMwParticipant
-      IbMwVAsio
+      SilKitMwParticipant
+      SilKitMwVAsio
 )
 
-add_vib_test(ITestSingleParticipant
+add_silkit_test(ITestSingleParticipant
     SOURCES
       SingleParticipantITest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
-      IbMwVAsio
+      SilKitMwParticipant
+      SilKitSimTestHarness
+      SilKitMwVAsio
 )
 
-add_vib_test(ITestServiceDiscovery
+add_silkit_test(ITestServiceDiscovery
     SOURCES
       ServiceDiscoveryITest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
+      SilKitMwParticipant
+      SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_vib_test(FTestServiceDiscoveryPerf
+add_silkit_test(FTestServiceDiscoveryPerf
     SOURCES
       ServiceDiscoveryPerfFTest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
+      SilKitMwParticipant
+      SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestSystemMonitor
+add_silkit_test(ITestSystemMonitor
     SOURCES
       SystemMonitorITest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
+      SilKitMwParticipant
+      SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_vib_test(FTestPubSubPerf
+add_silkit_test(FTestPubSubPerf
     SOURCES
       PubSubPerfFTest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
+      SilKitMwParticipant
+      SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestAsyncSimTask
+add_silkit_test(ITestAsyncSimTask
     SOURCES
       AsyncSimTaskITest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
+      SilKitMwParticipant
+      SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_vib_test(ITestLin
+add_silkit_test(ITestLin
     SOURCES
       LinITest.cpp
     LIBS
-      IbMwParticipant
-      IbSimTestHarness
+      SilKitMwParticipant
+      SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
 # Windows specific tests
 if(MSVC)
-    add_vib_test(ITestCompatibilityWithWindowsHeaders
+    add_silkit_test(ITestCompatibilityWithWindowsHeaders
         SOURCES
         CompatibilityWithWindowsHeadersITest.cpp
         LIBS
-        IbMwParticipant
+        SilKitMwParticipant
         )
 endif()
 
 
 # ITests based on demos
 
-add_vib_test(ITestLinDemo SOURCES LinDemoITest.cpp LIBS IbSimTestHarness IbMwParticipant ${itest_extra_libs})
-add_vib_test(ITestCanDemo SOURCES CanDemoITest.cpp LIBS IbSimTestHarness IbMwParticipant ${itest_extra_libs})
-add_vib_test(ITestEthernetDemo SOURCES EthernetDemoITest.cpp LIBS IbSimTestHarness IbMwParticipant ${itest_extra_libs})
+add_silkit_test(ITestLinDemo SOURCES LinDemoITest.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
+add_silkit_test(ITestCanDemo SOURCES CanDemoITest.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
+add_silkit_test(ITestEthernetDemo SOURCES EthernetDemoITest.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})

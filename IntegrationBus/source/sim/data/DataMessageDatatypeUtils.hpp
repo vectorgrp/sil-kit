@@ -4,14 +4,14 @@
 
 #include <unordered_map>
 
-#include "ib/sim/data/DataMessageDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/util/HandlerId.hpp"
 
 #include "Hash.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 class DataSubscriberInternal;
 
@@ -43,13 +43,13 @@ struct SourceInfo
     struct HashFunction
     {
         size_t operator()(const SourceInfo& s) const { 
-            auto hMediaType = ib::util::hash::Hash(s.mediaType);
-            auto hLabels = ib::util::hash::Hash(s.labels);
-            return ib::util::hash::HashCombine(hMediaType, hLabels);
+            auto hMediaType = SilKit::Util::Hash::Hash(s.mediaType);
+            auto hLabels = SilKit::Util::Hash::Hash(s.labels);
+            return SilKit::Util::Hash::HashCombine(hMediaType, hLabels);
         }
     };
 };
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

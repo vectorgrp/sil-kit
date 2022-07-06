@@ -9,35 +9,35 @@
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-#include "ib/sim/lin/LinDatatypes.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "silkit/services/lin/LinDatatypes.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 class LinController;
 
 class SimBehavior : public ISimBehavior
 {
 public:
-    SimBehavior(mw::IParticipantInternal* participant, LinController* linController,
-                       mw::sync::ITimeProvider* timeProvider);
+    SimBehavior(Core::IParticipantInternal* participant, LinController* linController,
+                       Core::Orchestration::ITimeProvider* timeProvider);
 
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 
-    void SendIbMessage(LinSendFrameRequest&& sendFrameRequest) override;
-    void SendIbMessage(LinTransmission&& transmission) override;
-    void SendIbMessage(LinControllerConfig&& controllerConfig) override;
-    void SendIbMessage(LinSendFrameHeaderRequest&& header) override;
-    void SendIbMessage(LinFrameResponseUpdate&& frameResponseUpdate) override;
-    void SendIbMessage(LinControllerStatusUpdate&& statusUpdate) override;
+    void SendMsg(LinSendFrameRequest&& sendFrameRequest) override;
+    void SendMsg(LinTransmission&& transmission) override;
+    void SendMsg(LinControllerConfig&& controllerConfig) override;
+    void SendMsg(LinSendFrameHeaderRequest&& header) override;
+    void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) override;
+    void SendMsg(LinControllerStatusUpdate&& statusUpdate) override;
 
     void GoToSleep() override;
     void Wakeup() override;
     auto CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame) -> LinFrameStatus override;
 
-    void SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink);
+    void SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink);
     void SetTrivialBehavior();
 
     auto IsTrivial() const -> bool;
@@ -45,13 +45,13 @@ public:
 
 private:
     template <typename MsgT>
-    void SendIbMessageImpl(MsgT&& msg);
+    void SendMsgImpl(MsgT&& msg);
 
     SimBehaviorTrivial _trivial;
     SimBehaviorDetailed _detailed;
     ISimBehavior* _currentBehavior;
 };
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

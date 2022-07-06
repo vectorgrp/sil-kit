@@ -2,24 +2,24 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
-#include "ib/sim/eth/fwd_decl.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
+#include "silkit/services/eth/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
-/*! \brief IIbToEthController interface
+/*! \brief IMsgForEthController interface
  *
  *  Used by the Participant, implemented by the EthController
  */
-class IIbToEthController
-    : public mw::IIbReceiver<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
-    , public mw::IIbSender<EthernetFrameEvent, EthernetSetMode>
+class IMsgForEthController
+    : public Core::IReceiver<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
+    , public Core::ISender<EthernetFrameEvent, EthernetSetMode>
 {
 };
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

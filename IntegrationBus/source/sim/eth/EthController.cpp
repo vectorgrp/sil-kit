@@ -1,18 +1,18 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "EthController.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 
-EthController::EthController(mw::IParticipantInternal* participant, cfg::EthernetController config,
-                               mw::sync::ITimeProvider* timeProvider)
+EthController::EthController(Core::IParticipantInternal* participant, Config::EthernetController config,
+                               Core::Orchestration::ITimeProvider* timeProvider)
     : _participant(participant)
     , _config{config}
     , _simulationBehavior{participant, this, timeProvider}
@@ -25,14 +25,14 @@ EthController::EthController(mw::IParticipantInternal* participant, cfg::Etherne
 
 void EthController::RegisterServiceDiscovery()
 {
-    mw::service::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
+    Core::Discovery::IServiceDiscovery* disc = _participant->GetServiceDiscovery();
     disc->RegisterServiceDiscoveryHandler(
-        [this](mw::service::ServiceDiscoveryEvent::Type discoveryType,
-                                  const mw::ServiceDescriptor& remoteServiceDescriptor) {
+        [this](Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                                  const Core::ServiceDescriptor& remoteServiceDescriptor) {
             if (_simulationBehavior.IsTrivial())
             {
                 // Check if received descriptor has a matching simulated link
-                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceCreated
+                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 {
                     SetDetailedBehavior(remoteServiceDescriptor);
@@ -40,7 +40,7 @@ void EthController::RegisterServiceDiscovery()
             }
             else
             {
-                if (discoveryType == mw::service::ServiceDiscoveryEvent::Type::ServiceRemoved
+                if (discoveryType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 {
                     SetTrivialBehavior();
@@ -49,7 +49,7 @@ void EthController::RegisterServiceDiscovery()
         });
 }
 
-void EthController::SetDetailedBehavior(const mw::ServiceDescriptor& remoteServiceDescriptor)
+void EthController::SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor)
 {
     _simulationBehavior.SetDetailedBehavior(remoteServiceDescriptor);
 }
@@ -63,22 +63,22 @@ EthernetState EthController::GetState()
     return _ethState;
 }
 
-auto EthController::IsRelevantNetwork(const mw::ServiceDescriptor& remoteServiceDescriptor) const -> bool
+auto EthController::IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool
 {
     // NetSim uses ServiceType::Link and the simulated networkName
-    return remoteServiceDescriptor.GetServiceType() == ib::mw::ServiceType::Link
+    return remoteServiceDescriptor.GetServiceType() == SilKit::Core::ServiceType::Link
            && remoteServiceDescriptor.GetNetworkName() == _serviceDescriptor.GetNetworkName();
 }
 
-auto EthController::AllowReception(const IIbServiceEndpoint* from) const -> bool
+auto EthController::AllowReception(const IServiceEndpoint* from) const -> bool
 {
     return _simulationBehavior.AllowReception(from);
 }
 
 template <typename MsgT>
-void EthController::SendIbMessage(MsgT&& msg)
+void EthController::SendMsg(MsgT&& msg)
 {
-    _simulationBehavior.SendIbMessage(std::move(msg));
+    _simulationBehavior.SendMsg(std::move(msg));
 }
 
 //------------------------
@@ -92,7 +92,7 @@ void EthController::Activate()
         return;
 
     EthernetSetMode msg { EthernetMode::Active };
-    SendIbMessage(msg);
+    SendMsg(msg);
 }
 
 void EthController::Deactivate()
@@ -102,7 +102,7 @@ void EthController::Deactivate()
         return;
 
     EthernetSetMode msg{ EthernetMode::Inactive };
-    SendIbMessage(msg);
+    SendMsg(msg);
 }
 
 auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
@@ -110,7 +110,7 @@ auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
-    SendIbMessage(std::move(msg));
+    SendMsg(std::move(msg));
 
     return txId;
 }
@@ -123,23 +123,23 @@ auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
 }
 
 //------------------------
-// ReceiveIbMessage
+// ReceiveSilKitMessage
 //------------------------
 
-void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg)
+void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
         return;
     }
 
-    _tracer.Trace(ib::sim::TransmitDirection::RX,
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX,
         msg.timestamp, msg.frame);
 
     CallHandlers(msg);
 }
 
-void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)
+void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -150,7 +150,7 @@ void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const Ether
     CallHandlers(msg);
 }
 
-void EthController::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetStatus& msg)
+void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg)
 {
     if (!AllowReception(from))
     {
@@ -249,6 +249,6 @@ void EthController::CallHandlers(const MsgT& msg)
     callbacks.InvokeAll(this, msg);
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

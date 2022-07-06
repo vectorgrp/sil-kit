@@ -1,27 +1,27 @@
 /* Copyright (c) Vector Informatik GmbH. All rights reserved. */
 
 #pragma once
-#include "ib/capi/Types.h"
+#include "silkit/capi/Types.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-IB_BEGIN_DECLS
+SILKIT_BEGIN_DECLS
 
 #define CAPI_ENTER \
     try
 
 #define CAPI_LEAVE \
-    catch (const ib::StateError& e) { \
-        ib_error_string = e.what(); \
-        return ib_ReturnCode_WRONGSTATE; \
+    catch (const SilKit::StateError& e) { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_WRONGSTATE; \
     } \
     catch (const std::runtime_error& e) { \
-        ib_error_string = e.what(); \
-        return ib_ReturnCode_UNSPECIFIEDERROR; \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     } \
     catch (const std::exception&) { \
-        return ib_ReturnCode_UNSPECIFIEDERROR; \
+        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     }
 
 #define kInvalidFunctionPointer  "Handler function parameter must not be null."
@@ -29,45 +29,45 @@ IB_BEGIN_DECLS
 #define ASSERT_VALID_POINTER_PARAMETER(p)                     \
   if (p == nullptr)                                           \
   {                                                           \
-    ib_error_string = "Parameter '" #p "' must not be null."; \
-    return ib_ReturnCode_BADPARAMETER;                        \
+    SilKit_error_string = "Parameter '" #p "' must not be null."; \
+    return SilKit_ReturnCode_BADPARAMETER;                        \
   }
 #define ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(p)          \
   if (p == nullptr)                                           \
   {                                                           \
-    ib_error_string = "Parameter '" #p "' must not be null."; \
-    return ib_ReturnCode_BADPARAMETER;                        \
+    SilKit_error_string = "Parameter '" #p "' must not be null."; \
+    return SilKit_ReturnCode_BADPARAMETER;                        \
   }                                                           \
   if (*p == nullptr)                                          \
   {                                                           \
-    ib_error_string =                                         \
+    SilKit_error_string =                                         \
       "Parameter '" #p "' must not point to a null value.";   \
-    return ib_ReturnCode_BADPARAMETER;                        \
+    return SilKit_ReturnCode_BADPARAMETER;                        \
   }
 #define ASSERT_VALID_OUT_PARAMETER(p)                         \
   if (p == nullptr)                                           \
   {                                                           \
-    ib_error_string =                                         \
+    SilKit_error_string =                                         \
       "Return parameter '" #p "' must not be null.";          \
-    return ib_ReturnCode_BADPARAMETER;                        \
+    return SilKit_ReturnCode_BADPARAMETER;                        \
   }
 #define ASSERT_VALID_HANDLER_PARAMETER(handler)               \
   if (handler == nullptr)                                     \
   {                                                           \
-    ib_error_string = kInvalidFunctionPointer;                \
-    return ib_ReturnCode_BADPARAMETER;                        \
+    SilKit_error_string = kInvalidFunctionPointer;                \
+    return SilKit_ReturnCode_BADPARAMETER;                        \
   }
 
 #define ASSERT_VALID_BOOL_PARAMETER(b)                        \
-  if (!(b == ib_True || b == ib_False))                        \
+  if (!(b == SilKit_True || b == SilKit_False))                        \
   {                                                           \
-    ib_error_string =                                         \
-        "The parameter '" #b "' is not a valid ib_Bool.";     \
-    return ib_ReturnCode_BADPARAMETER;                        \
+    SilKit_error_string =                                         \
+        "The parameter '" #b "' is not a valid SilKit_Bool.";     \
+    return SilKit_ReturnCode_BADPARAMETER;                        \
   }
 
-extern thread_local std::string ib_error_string;
+extern thread_local std::string SilKit_error_string;
 
-IB_END_DECLS
+SILKIT_END_DECLS
 
 #pragma pack(pop)

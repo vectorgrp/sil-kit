@@ -3,45 +3,45 @@ FlexRay Service API
 ===================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<ib::mw::IParticipant>`
-.. |CreateFlexrayController| replace:: :cpp:func:`CreateFlexrayController<ib::mw::IParticipant::CreateFlexrayController()>`
-.. |IFlexrayController| replace:: :cpp:class:`IFlexrayController<ib::sim::fr::IFlexrayController>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
+.. |CreateFlexrayController| replace:: :cpp:func:`CreateFlexrayController<SilKit::Core::IParticipant::CreateFlexrayController()>`
+.. |IFlexrayController| replace:: :cpp:class:`IFlexrayController<SilKit::Services::Flexray::IFlexrayController>`
 
-.. |FlexrayControllerConfig| replace:: :cpp:class:`FlexrayControllerConfig<ib::sim::fr::FlexrayControllerConfig>`
-.. |Configure| replace:: :cpp:func:`Configure()<ib::sim::fr::IFlexrayController::Configure>`
+.. |FlexrayControllerConfig| replace:: :cpp:class:`FlexrayControllerConfig<SilKit::Services::Flexray::FlexrayControllerConfig>`
+.. |Configure| replace:: :cpp:func:`Configure()<SilKit::Services::Flexray::IFlexrayController::Configure>`
 
-.. |FlexrayPocState_Ready| replace:: :cpp:enumerator:`FlexrayPocState::Ready<ib::sim::fr::FlexrayPocState::Ready>`
-.. |FlexrayPocState_Wakeup| replace:: :cpp:enumerator:`FlexrayPocState::Wakeup<ib::sim::fr::FlexrayPocState::Wakeup>`
+.. |FlexrayPocState_Ready| replace:: :cpp:enumerator:`FlexrayPocState::Ready<SilKit::Services::Flexray::FlexrayPocState::Ready>`
+.. |FlexrayPocState_Wakeup| replace:: :cpp:enumerator:`FlexrayPocState::Wakeup<SilKit::Services::Flexray::FlexrayPocState::Wakeup>`
 
-.. |FlexrayClusterParameters| replace:: :cpp:class:`FlexrayClusterParameters<ib::sim::fr::FlexrayClusterParameters>`
-.. |FlexrayNodeParameters| replace:: :cpp:class:`FlexrayNodeParameters<ib::sim::fr::FlexrayNodeParameters>`
-.. |FlexrayTxBufferConfig| replace:: :cpp:class:`FlexrayTxBufferConfig<ib::sim::fr::FlexrayTxBufferConfig>`
+.. |FlexrayClusterParameters| replace:: :cpp:class:`FlexrayClusterParameters<SilKit::Services::Flexray::FlexrayClusterParameters>`
+.. |FlexrayNodeParameters| replace:: :cpp:class:`FlexrayNodeParameters<SilKit::Services::Flexray::FlexrayNodeParameters>`
+.. |FlexrayTxBufferConfig| replace:: :cpp:class:`FlexrayTxBufferConfig<SilKit::Services::Flexray::FlexrayTxBufferConfig>`
 
-.. |FlexrayFrameEvent| replace:: :cpp:class:`FlexrayFrameEvent<ib::sim::fr::FlexrayFrameEvent>`
-.. |FlexrayPocStatusEvent| replace:: :cpp:class:`FlexrayPocStatusEvent<ib::sim::fr::FlexrayPocStatusEvent>`
+.. |FlexrayFrameEvent| replace:: :cpp:class:`FlexrayFrameEvent<SilKit::Services::Flexray::FlexrayFrameEvent>`
+.. |FlexrayPocStatusEvent| replace:: :cpp:class:`FlexrayPocStatusEvent<SilKit::Services::Flexray::FlexrayPocStatusEvent>`
 
-.. |Wakeup| replace:: :cpp:func:`Wakeup()<ib::sim::fr::IFlexrayController::Wakeup>`
-.. |AllowColdstart| replace:: :cpp:func:`AllowColdstart()<ib::sim::fr::IFlexrayController::AllowColdstart>`
-.. |Run| replace:: :cpp:func:`Run()<ib::sim::fr::IFlexrayController::Run>`
-.. |UpdateTxBuffer| replace:: :cpp:func:`UpdateTxBuffer()<ib::sim::fr::IFlexrayController::UpdateTxBuffer>`
+.. |Wakeup| replace:: :cpp:func:`Wakeup()<SilKit::Services::Flexray::IFlexrayController::Wakeup>`
+.. |AllowColdstart| replace:: :cpp:func:`AllowColdstart()<SilKit::Services::Flexray::IFlexrayController::AllowColdstart>`
+.. |Run| replace:: :cpp:func:`Run()<SilKit::Services::Flexray::IFlexrayController::Run>`
+.. |UpdateTxBuffer| replace:: :cpp:func:`UpdateTxBuffer()<SilKit::Services::Flexray::IFlexrayController::UpdateTxBuffer>`
 
-.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<ib::sim::fr::IFlexrayController::AddFrameHandler>`
-.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<ib::sim::fr::IFlexrayController::AddFrameTransmitHandler>`
-.. |AddWakeupHandler| replace:: :cpp:func:`AddWakeupHandler()<ib::sim::fr::IFlexrayController::AddWakeupHandler>`
-.. |AddPocStatusHandler| replace:: :cpp:func:`AddPocStatusHandler()<ib::sim::fr::IFlexrayController::AddPocStatusHandler>`
-.. |AddSymbolHandler| replace:: :cpp:func:`AddSymbolHandler()<ib::sim::fr::IFlexrayController::AddSymbolHandler>`
-.. |AddSymbolTransmitHandler| replace:: :cpp:func:`AddSymbolTransmitHandler()<ib::sim::fr::IFlexrayController::AddSymbolTransmitHandler>`
-.. |AddCycleStartHandler| replace:: :cpp:func:`AddCycleStartHandler()<ib::sim::fr::IFlexrayController::AddCycleStartHandler>`
+.. |AddFrameHandler| replace:: :cpp:func:`AddFrameHandler()<SilKit::Services::Flexray::IFlexrayController::AddFrameHandler>`
+.. |AddFrameTransmitHandler| replace:: :cpp:func:`AddFrameTransmitHandler()<SilKit::Services::Flexray::IFlexrayController::AddFrameTransmitHandler>`
+.. |AddWakeupHandler| replace:: :cpp:func:`AddWakeupHandler()<SilKit::Services::Flexray::IFlexrayController::AddWakeupHandler>`
+.. |AddPocStatusHandler| replace:: :cpp:func:`AddPocStatusHandler()<SilKit::Services::Flexray::IFlexrayController::AddPocStatusHandler>`
+.. |AddSymbolHandler| replace:: :cpp:func:`AddSymbolHandler()<SilKit::Services::Flexray::IFlexrayController::AddSymbolHandler>`
+.. |AddSymbolTransmitHandler| replace:: :cpp:func:`AddSymbolTransmitHandler()<SilKit::Services::Flexray::IFlexrayController::AddSymbolTransmitHandler>`
+.. |AddCycleStartHandler| replace:: :cpp:func:`AddCycleStartHandler()<SilKit::Services::Flexray::IFlexrayController::AddCycleStartHandler>`
 
-.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<ib::sim::fr::IFlexrayController::RemoveFrameHandler>`
-.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<ib::sim::fr::IFlexrayController::RemoveFrameTransmitHandler>`
-.. |RemoveWakeupHandler| replace:: :cpp:func:`RemoveWakeupHandler()<ib::sim::fr::IFlexrayController::RemoveWakeupHandler>`
-.. |RemovePocStatusHandler| replace:: :cpp:func:`RemovePocStatusHandler()<ib::sim::fr::IFlexrayController::RemovePocStatusHandler>`
-.. |RemoveSymbolHandler| replace:: :cpp:func:`RemoveSymbolHandler()<ib::sim::fr::IFlexrayController::RemoveSymbolHandler>`
-.. |RemoveSymbolTransmitHandler| replace:: :cpp:func:`RemoveSymbolTransmitHandler()<ib::sim::fr::IFlexrayController::RemoveSymbolTransmitHandler>`
-.. |RemoveCycleStartHandler| replace:: :cpp:func:`RemoveCycleStartHandler()<ib::sim::fr::IFlexrayController::RemoveCycleStartHandler>`
+.. |RemoveFrameHandler| replace:: :cpp:func:`RemoveFrameHandler()<SilKit::Services::Flexray::IFlexrayController::RemoveFrameHandler>`
+.. |RemoveFrameTransmitHandler| replace:: :cpp:func:`RemoveFrameTransmitHandler()<SilKit::Services::Flexray::IFlexrayController::RemoveFrameTransmitHandler>`
+.. |RemoveWakeupHandler| replace:: :cpp:func:`RemoveWakeupHandler()<SilKit::Services::Flexray::IFlexrayController::RemoveWakeupHandler>`
+.. |RemovePocStatusHandler| replace:: :cpp:func:`RemovePocStatusHandler()<SilKit::Services::Flexray::IFlexrayController::RemovePocStatusHandler>`
+.. |RemoveSymbolHandler| replace:: :cpp:func:`RemoveSymbolHandler()<SilKit::Services::Flexray::IFlexrayController::RemoveSymbolHandler>`
+.. |RemoveSymbolTransmitHandler| replace:: :cpp:func:`RemoveSymbolTransmitHandler()<SilKit::Services::Flexray::IFlexrayController::RemoveSymbolTransmitHandler>`
+.. |RemoveCycleStartHandler| replace:: :cpp:func:`RemoveCycleStartHandler()<SilKit::Services::Flexray::IFlexrayController::RemoveCycleStartHandler>`
 
-.. |HandlerId| replace:: :cpp:class:`HandlerId<ib::sim::HandlerId>`
+.. |HandlerId| replace:: :cpp:class:`HandlerId<SilKit::Services::HandlerId>`
 
 .. contents::
    :local:
@@ -262,49 +262,49 @@ API and Data Type Reference
 
 FlexRay Controller API
 ~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: ib::sim::fr::IFlexrayController
+.. doxygenclass:: SilKit::Services::Flexray::IFlexrayController
   :members:
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib::sim::fr::FlexrayFrame
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayFrame
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayHeader
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayHeader
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayFrameEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayFrameEvent
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayFrameTransmitEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayFrameTransmitEvent
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexraySymbolEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexraySymbolEvent
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexraySymbolTransmitEvent
-.. doxygenstruct:: ib::sim::fr::FlexrayWakeupEvent
-.. doxygenstruct:: ib::sim::fr::FlexrayPocStatusEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexraySymbolTransmitEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayWakeupEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayPocStatusEvent
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayCycleStartEvent
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayCycleStartEvent
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayControllerConfig
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayControllerConfig
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayClusterParameters
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayClusterParameters
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayNodeParameters
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayNodeParameters
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayTxBufferConfig
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayTxBufferConfig
   :members:
-.. doxygenstruct:: ib::sim::fr::FlexrayTxBufferUpdate
+.. doxygenstruct:: SilKit::Services::Flexray::FlexrayTxBufferUpdate
   :members:
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: ib::sim::fr::FlexrayMacroTick
-.. doxygentypedef:: ib::sim::fr::FlexrayMicroTick
-.. doxygenenum:: ib::sim::fr::FlexrayClockPeriod
-.. doxygenenum:: ib::sim::fr::FlexrayChannel
-.. doxygenenum:: ib::sim::fr::FlexraySymbolPattern
-.. doxygenenum:: ib::sim::fr::FlexrayChiCommand
-.. doxygenenum:: ib::sim::fr::FlexrayTransmissionMode
-.. doxygenenum:: ib::sim::fr::FlexrayPocState
-.. doxygenenum:: ib::sim::fr::FlexraySlotModeType
-.. doxygenenum:: ib::sim::fr::FlexrayErrorModeType
-.. doxygenenum:: ib::sim::fr::FlexrayStartupStateType
-.. doxygenenum:: ib::sim::fr::FlexrayWakeupStatusType
+.. doxygentypedef:: SilKit::Services::Flexray::FlexrayMacroTick
+.. doxygentypedef:: SilKit::Services::Flexray::FlexrayMicroTick
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayClockPeriod
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayChannel
+.. doxygenenum:: SilKit::Services::Flexray::FlexraySymbolPattern
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayChiCommand
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayTransmissionMode
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayPocState
+.. doxygenenum:: SilKit::Services::Flexray::FlexraySlotModeType
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayErrorModeType
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayStartupStateType
+.. doxygenenum:: SilKit::Services::Flexray::FlexrayWakeupStatusType

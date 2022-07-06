@@ -2,10 +2,10 @@
 
 #include "Uri.hpp"
 
-#include "ib/exception.hpp"
+#include "silkit/exception.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 auto Uri::EncodedString() const -> const std::string&
 {
@@ -63,7 +63,7 @@ Uri::Uri(const std::string& uriStr)
 Uri::Uri(const std::string& host, const uint16_t port)
 {
     std::stringstream uri;
-    uri << "vib://" << host << ":" << port;
+    uri << "silkit://" << host << ":" << port;
     *this = Uri::Parse(uri.str());
 }
 
@@ -78,7 +78,7 @@ auto Uri::Parse(std::string rawUri) -> Uri
     auto idx = rawUri.find(schemeSeparator);
     if(idx == rawUri.npos)
     {
-        throw ib::ConfigurationError("Uri::Parse: could not find scheme "
+        throw SilKit::ConfigurationError("Uri::Parse: could not find scheme "
             "separator in user input: \"" + rawUri + "\"");
     }
     uri._scheme = rawUri.substr(0, idx);
@@ -89,7 +89,7 @@ auto Uri::Parse(std::string rawUri) -> Uri
     {
         uri.SetType(UriType::Tcp);
     }
-    else if(uri.Scheme() == "vib")
+    else if(uri.Scheme() == "silkit")
     {
         uri.SetType(UriType::Tcp); //we default to TCP streams
     }
@@ -124,24 +124,24 @@ auto Uri::Parse(std::string rawUri) -> Uri
             portStr >> port; //parse string to uint16_t
             if(portStr.fail())
             {
-                throw ib::ConfigurationError("Uri::Parse: failed to parse the port "
+                throw SilKit::ConfigurationError("Uri::Parse: failed to parse the port "
                     "number: " + portStr.str());
             }
 
             if (portStr.str().empty())
             {
-                throw ib::ConfigurationError("Uri::Parse: URI with port separator contains no port");
+                throw SilKit::ConfigurationError("Uri::Parse: URI with port separator contains no port");
             }
             uri._port = port;
 
         }
         if (uri._host.empty())
         {
-            throw ib::ConfigurationError("Uri::Parse: URI has empty host field");
+            throw SilKit::ConfigurationError("Uri::Parse: URI has empty host field");
         }
     }
     return uri;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

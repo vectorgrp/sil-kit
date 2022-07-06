@@ -9,9 +9,9 @@
 #include "Timer.hpp"
 #include "SynchronizedHandlers.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 enum class TimeProviderKind : uint8_t
 {
@@ -35,10 +35,10 @@ public:
     inline void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override;
 
 private:
-    util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
+    Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
     const std::string _name{"WallclockProvider"};
     std::chrono::nanoseconds _tickPeriod{0};
-    util::Timer _timer;
+    Util::Timer _timer;
 };
 
 class NoSyncProvider : public ITimeProvider
@@ -59,7 +59,7 @@ private:
 //          simulation time changes.
 // This ensures that the our time provider is available even after
 // the TimeSyncService gets destructed.
-class SynchronizedVirtualTimeProvider : public sync::ITimeProvider
+class SynchronizedVirtualTimeProvider : public Orchestration::ITimeProvider
 {
 public:
     inline auto Now() const -> std::chrono::nanoseconds override;
@@ -71,7 +71,7 @@ public:
 private:
     std::chrono::nanoseconds _now;
     const std::string _name{"ParticipantTimeProvider"};
-    util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
+    Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -167,6 +167,6 @@ auto SynchronizedVirtualTimeProvider::TimeProviderName() const -> const std::str
 {
     return _name;
 }
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

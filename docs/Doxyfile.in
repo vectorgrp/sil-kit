@@ -1430,7 +1430,6 @@ GENERATE_QHP           = NO
 
 QCH_FILE               =
 
-# The QHP_NAMESPACE tag specifies the namespace to use when generating Qt Help
 # Project output. For more information please see Qt Help Project / Namespace
 # (see: http://doc.qt.io/archives/qt-4.8/qthelpproject.html#namespace).
 # The default value is: org.doxygen.Project.
@@ -1438,7 +1437,6 @@ QCH_FILE               =
 
 QHP_NAMESPACE          = org.doxygen.Project
 
-# The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating Qt
 # Help Project output. For more information please see Qt Help Project / Virtual
 # Folders (see: http://doc.qt.io/archives/qt-4.8/qthelpproject.html#virtual-
 # folders).
@@ -2172,7 +2170,7 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             = "IntegrationBusAPI=", "IB_BEGIN_DECLS"
+PREDEFINED             = "SilKitAPI=", "SILKIT_BEGIN_DECLS"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

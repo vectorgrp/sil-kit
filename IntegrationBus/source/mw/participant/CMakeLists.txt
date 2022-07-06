@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_library(IbMwParticipant STATIC
+add_library(SilKitMwParticipant STATIC
     Participant.hpp
     Participant_impl.hpp
     Participant.cpp
@@ -7,40 +7,40 @@ add_library(IbMwParticipant STATIC
     CreateParticipant.cpp
 )
 
-target_link_libraries(IbMwParticipant
-    INTERFACE  IbInterface
+target_link_libraries(SilKitMwParticipant
+    INTERFACE  SilKitInterface
     PUBLIC
-        IbInternal
-        IbMwLogging
-        IbConfiguration
-        IbUtil
-        IbSetThreadName
-        IbUuid
-        IbMwSync
-        IbSimCan
-        IbSimEthernet
-        IbSimFlexray
-        IbSimLin
-        IbSimDataMessage
-        IbSimRpc
-        IbTracing
-        IbMwService
-    INTERFACE  IbMwService
+        SilKitInternal
+        SilKitMwLogging
+        SilKitConfiguration
+        SilKitUtil
+        SilKitSetThreadName
+        SilKitUuid
+        SilKitMwSync
+        SilKitSimCan
+        SilKitSimEthernet
+        SilKitSimFlexray
+        SilKitSimLin
+        SilKitSimDataMessage
+        SilKitSimRpc
+        SilKitTracing
+        SilKitMwService
+    INTERFACE  SilKitMwService
     PRIVATE
-        IbVersion
+        SilKitVersion
 )
 
-target_link_libraries(IbMwParticipant PUBLIC IbMwVAsio)
+target_link_libraries(SilKitMwParticipant PUBLIC SilKitMwVAsio)
 
-target_include_directories(IbMwParticipant
+target_include_directories(SilKitMwParticipant
     PUBLIC .
 )
 
 if (MSVC)
-    target_compile_options(IbMwParticipant PRIVATE "/bigobj")
+    target_compile_options(SilKitMwParticipant PRIVATE "/bigobj")
 endif (MSVC)
 
-add_vib_test(TestMwParticipant 
+add_silkit_test(TestMwParticipant 
     SOURCES ParticipantTest.cpp 
-    LIBS IbMwMockNullConnection IbConfigurationTestUtils
+    LIBS SilKitMwMockNullConnection SilKitConfigurationTestUtils
 )

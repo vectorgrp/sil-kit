@@ -7,31 +7,31 @@
 
 #include "EndpointAddress.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-inline std::string to_string(const ib::mw::EndpointAddress& ibAddress);
+inline std::string to_string(const SilKit::Core::EndpointAddress& address);
 
-inline std::ostream& operator<<(std::ostream& out, const ib::mw::EndpointAddress& ibAddress);
+inline std::ostream& operator<<(std::ostream& out, const SilKit::Core::EndpointAddress& address);
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-std::string to_string(const ib::mw::EndpointAddress& ibAddress)
+std::string to_string(const SilKit::Core::EndpointAddress& address)
 {
     std::stringstream outStream;
-    outStream << ibAddress;
+    outStream << address;
     return outStream.str();
 }
 
-std::ostream& operator<<(std::ostream& out, const ib::mw::EndpointAddress& ibAddress)
+std::ostream& operator<<(std::ostream& out, const SilKit::Core::EndpointAddress& address)
 {
-    out << "Addr{" << ibAddress.participant
-        << ", " << ibAddress.endpoint
+    out << "Addr{" << address.participant
+        << ", " << address.endpoint
         << "}";
     return out;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

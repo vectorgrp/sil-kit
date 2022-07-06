@@ -12,8 +12,8 @@
 #include "LinController.hpp"
 
 namespace {
-using namespace ib::mw;
-using namespace ib::sim::lin;
+using namespace SilKit::Core;
+using namespace SilKit::Services::Lin;
 
 class LinControllerConfigTest : public testing::Test
 {
@@ -21,16 +21,16 @@ public:
     LinControllerConfigTest(){};
 };
 
-auto PrepareParticipantConfiguration() -> std::shared_ptr<ib::cfg::ParticipantConfiguration>
+auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
 {
     auto mockConfig =
-        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
+        std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
 
-    ib::cfg::LinController controllerNoNetworkCfg;
+    SilKit::Config::LinController controllerNoNetworkCfg;
     controllerNoNetworkCfg.name = "ControllerWithoutNetwork";
     mockConfig->linControllers.push_back(controllerNoNetworkCfg);
 
-    ib::cfg::LinController controllerWithNetworkCfg;
+    SilKit::Config::LinController controllerWithNetworkCfg;
     controllerWithNetworkCfg.name = "ControllerWithNetwork";
     controllerWithNetworkCfg.network = "ConfigNet";
     mockConfig->linControllers.push_back(controllerWithNetworkCfg);
@@ -45,7 +45,7 @@ TEST(LinControllerConfigTest, create_controller_unconfigured)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller =
         dynamic_cast<LinController*>(participant->CreateLinController(controllerName));
@@ -62,7 +62,7 @@ TEST(LinControllerConfigTest, create_controller_configured_no_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<LinController*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();
@@ -78,7 +78,7 @@ TEST(LinControllerConfigTest, create_controller_configured_with_network)
 
     auto&& config = PrepareParticipantConfiguration();
 
-    auto participant = ib::mw::CreateNullConnectionParticipantImpl(config, "TestParticipant");
+    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
 
     auto controller = dynamic_cast<LinController*>(participant->CreateLinController(controllerName, networkName));
     auto serviceDescr = controller->GetServiceDescriptor();

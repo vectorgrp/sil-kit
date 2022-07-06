@@ -12,12 +12,12 @@
 
 #include "RpcTestUtilities.hpp"
 
-#include "ib/util/functional.hpp"
+#include "silkit/util/functional.hpp"
 
 namespace {
 
-using namespace ib::sim::rpc;
-using namespace ib::sim::rpc::test;
+using namespace SilKit::Services::Rpc;
+using namespace SilKit::Services::Rpc::Tests;
 
 class RpcClientTest : public RpcTestBase
 {
@@ -32,7 +32,7 @@ TEST_F(RpcClientTest, rpc_client_calls_result_handler_with_error_when_no_server_
             ASSERT_EQ(event.callStatus, RpcCallStatus::ServerNotReachable);
         });
 
-    rpcClient->SetCallResultHandler(ib::util::bind_method(&callbacks, &Callbacks::CallResultHandler));
+    rpcClient->SetCallResultHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallResultHandler));
     rpcClient->Call(sampleData);
 }
 
@@ -44,15 +44,15 @@ TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_d
     CreateRpcServer();
     IRpcClient* iRpcClient = CreateRpcClient();
 
-    EXPECT_CALL(participant->GetIbConnection(), Mock_SendIbMessage(testing::_, testing::A<FunctionCall>()))
-        .WillOnce([this, &fixedTimeProvider](const ib::mw::IIbServiceEndpoint* /*from*/, const FunctionCall& msg) {
+    EXPECT_CALL(participant->GetSilKitConnection(), Mock_SendMsg(testing::_, testing::A<FunctionCall>()))
+        .WillOnce([this, &fixedTimeProvider](const SilKit::Core::IServiceEndpoint* /*from*/, const FunctionCall& msg) {
             ASSERT_EQ(msg.timestamp, fixedTimeProvider.now);
             ASSERT_EQ(msg.data, sampleData);
         });
 
     // HACK: Change the time provider for the captured services. Must happen _after_ the RpcServer and RpcClient (and
     //       therefore the RpcServerInternal) have been created.
-    participant->GetIbConnection().Test_SetTimeProvider(&fixedTimeProvider);
+    participant->GetSilKitConnection().Test_SetTimeProvider(&fixedTimeProvider);
 
     iRpcClient->Call(sampleData);
 }

@@ -8,9 +8,9 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
     bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs)
     {
         return lhs.data == rhs.data
@@ -21,12 +21,12 @@ namespace data {
 }
 TEST(MwVAsioSerdes, SimData_LargeDataMessage)
 {
-    using namespace ib::sim::data;
-    using namespace ib::mw;
+    using namespace SilKit::Services::PubSub;
+    using namespace SilKit::Core;
 
     const std::vector<uint8_t> referenceData(114'793, 'D');
-    ib::mw::MessageBuffer buffer;
-    ib::sim::data::DataMessageEvent in, out;
+    SilKit::Core::MessageBuffer buffer;
+    SilKit::Services::PubSub::DataMessageEvent in, out;
     in.data = {1,2,3,4};
     in.timestamp = 0xabcdefns;
         

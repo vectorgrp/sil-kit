@@ -3,47 +3,47 @@
 #include "CanController.hpp"
 #include "SimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 class CanController;
 
-SimBehavior::SimBehavior(mw::IParticipantInternal* participant, CanController* canController,
-                    mw::sync::ITimeProvider* timeProvider)
+SimBehavior::SimBehavior(Core::IParticipantInternal* participant, CanController* canController,
+                    Core::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, canController, timeProvider}
     , _detailed{participant, canController, canController->GetServiceDescriptor()}
 {
     _currentBehavior = &_trivial;
 }
 
-auto SimBehavior::AllowReception(const mw::IIbServiceEndpoint* from) const -> bool
+auto SimBehavior::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {
     return _currentBehavior->AllowReception(from);
 }
 
 template <typename MsgT>
-void SimBehavior::SendIbMessageImpl(MsgT&& msg)
+void SimBehavior::SendMsgImpl(MsgT&& msg)
 {
-    _currentBehavior->SendIbMessage(std::forward<MsgT>(msg));
+    _currentBehavior->SendMsg(std::forward<MsgT>(msg));
 }
 
-void SimBehavior::SendIbMessage(CanConfigureBaudrate&& msg)
+void SimBehavior::SendMsg(CanConfigureBaudrate&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
 
-void SimBehavior::SendIbMessage(CanSetControllerMode&& msg)
+void SimBehavior::SendMsg(CanSetControllerMode&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
 
-void SimBehavior::SendIbMessage(CanFrameEvent&& msg)
+void SimBehavior::SendMsg(CanFrameEvent&& msg)
 {
-    SendIbMessageImpl(std::move(msg));
+    SendMsgImpl(std::move(msg));
 }
 
-void SimBehavior::SetDetailedBehavior(const mw::ServiceDescriptor& simulatedLink)
+void SimBehavior::SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink)
 {
     _detailed.SetSimulatedLink(simulatedLink);
     _currentBehavior = &_detailed;
@@ -65,6 +65,6 @@ auto SimBehavior::IsDetailed() const -> bool
 }
 
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

@@ -33,7 +33,7 @@ struct PackedHandshake
 };
 #pragma pack(pop)
 
-using namespace ib::mw;
+using namespace SilKit::Core;
 
 TEST(VAsioSerializedMessage, packed_handshake_message)
 {
@@ -50,7 +50,7 @@ TEST(VAsioSerializedMessage, packed_handshake_message)
 	ASSERT_EQ(blob.size(), sizeof(PackedHandshake));
 
 	ASSERT_EQ(blob.size(), ptr->messageSize);
-	ASSERT_EQ(ptr->messageKind, (uint8_t)VAsioMsgKind::IbRegistryMessage);
+	ASSERT_EQ(ptr->messageKind, (uint8_t)VAsioMsgKind::SilKitRegistryMessage);
 	ASSERT_EQ(ptr->registryMessageKind, (uint8_t)RegistryMessageKind::ParticipantAnnouncement);
 
 	ASSERT_EQ(ptr->preambel, announcement.messageHeader.preambel);

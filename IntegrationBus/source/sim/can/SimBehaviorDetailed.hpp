@@ -2,42 +2,42 @@
 
 #pragma once
 
-#include "IIbToCanController.hpp"
+#include "IMsgForCanController.hpp"
 #include "IParticipantInternal.hpp"
 
 #include "ISimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 class CanController;
 
 class SimBehaviorDetailed : public ISimBehavior
 {
 public:
-    SimBehaviorDetailed(mw::IParticipantInternal* participant, CanController* canController,
-                       const mw::ServiceDescriptor& serviceDescriptor);
+    SimBehaviorDetailed(Core::IParticipantInternal* participant, CanController* canController,
+                       const Core::ServiceDescriptor& serviceDescriptor);
 
-    void SendIbMessage(CanConfigureBaudrate&& msg) override;
-    void SendIbMessage(CanSetControllerMode&& msg) override;
-    void SendIbMessage(CanFrameEvent&& msg) override;
+    void SendMsg(CanConfigureBaudrate&& msg) override;
+    void SendMsg(CanSetControllerMode&& msg) override;
+    void SendMsg(CanFrameEvent&& msg) override;
     
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 
-    void SetSimulatedLink(const mw::ServiceDescriptor& simulatedLink);
+    void SetSimulatedLink(const Core::ServiceDescriptor& simulatedLink);
 
 private:
     template <typename MsgT>
-    void SendIbMessageImpl(MsgT&& msg);
+    void SendMsgImpl(MsgT&& msg);
 
-    mw::IParticipantInternal* _participant{nullptr};
-    const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
-    const mw::ServiceDescriptor* _parentServiceDescriptor{nullptr};
-    mw::ServiceDescriptor _simulatedLink;
+    Core::IParticipantInternal* _participant{nullptr};
+    const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
+    const Core::ServiceDescriptor* _parentServiceDescriptor{nullptr};
+    Core::ServiceDescriptor _simulatedLink;
 };
 
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

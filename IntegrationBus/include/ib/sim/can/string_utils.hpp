@@ -5,15 +5,15 @@
 #include <ostream>
 #include <sstream>
 
-#include "ib/exception.hpp"
-#include "ib/util/PrintableHexString.hpp"
-#include "ib/sim/string_utils.hpp"
+#include "silkit/exception.hpp"
+#include "silkit/util/PrintableHexString.hpp"
+#include "silkit/services/string_utils.hpp"
 
 #include "CanDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 inline std::string to_string(CanControllerState state);
 inline std::string to_string(CanErrorState state);
@@ -54,7 +54,7 @@ std::string to_string(CanControllerState state)
     case CanControllerState::Sleep:
         return "Sleep";
     };
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(CanErrorState state)
@@ -70,7 +70,7 @@ std::string to_string(CanErrorState state)
     case CanErrorState::BusOff:
         return "BusOff";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(CanFrame::CanFrameFlags flags)
@@ -93,7 +93,7 @@ std::string to_string(CanTransmitStatus status)
     case CanTransmitStatus::DuplicatedTransmitId:
         return "DuplicatedTransmitId";
     }
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 std::string to_string(const CanFrame& msg)
@@ -171,11 +171,11 @@ std::ostream& operator<<(std::ostream& out, CanTransmitStatus status)
 std::ostream& operator<<(std::ostream& out, const CanFrame& msg)
 {
     return out
-        << "can::CanFrame{"
+        << "Can::CanFrame{"
         << ", canId=" << msg.canId
         << ", flags=" << msg.flags
         << ", dlc=" << static_cast<uint32_t>(msg.dlc)
-        << ", data=[" << util::AsHexString(msg.dataField).WithSeparator(" ").WithMaxLength(8)
+        << ", data=[" << Util::AsHexString(msg.dataField).WithSeparator(" ").WithMaxLength(8)
         << "], data.size=" << msg.dataField.size() << "}";
 }
 
@@ -184,7 +184,7 @@ std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "can::CanFrameEvent{txId=" << msg.transmitId 
+        << "Can::CanFrameEvent{txId=" << msg.transmitId 
         << ", userContext=" << msg.userContext
         << ", direction=" << msg.direction
         << ", frame=" << msg.frame
@@ -195,7 +195,7 @@ std::ostream& operator<<(std::ostream& out, const CanControllerStatus& status)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
     return out
-        << "can::CanControllerStatus{CtrlState=" << status.controllerState
+        << "Can::CanControllerStatus{CtrlState=" << status.controllerState
         << ", ErrorState=" << status.errorState
         << " @" << timestamp.count() << "ms}";
 }
@@ -204,7 +204,7 @@ std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& status)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
     return out
-        << "can::CanTtransmitAcknowledge{txId=" << status.transmitId
+        << "Can::CanTtransmitAcknowledge{txId=" << status.transmitId
         << ", status=" << status.status
         << " @" << timestamp.count() << "ms}";
 }
@@ -212,14 +212,14 @@ std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& status)
 std::ostream& operator<<(std::ostream& out, const CanConfigureBaudrate& rate)
 {
     return out
-        << "can::CanConfigureBaudrate{" << rate.baudRate
+        << "Can::CanConfigureBaudrate{" << rate.baudRate
         << ", " << rate.fdBaudRate
         << "}";
 }
 
 std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& mode)
 {
-    out << "can::CanSetControllerMode{" << mode.mode;
+    out << "Can::CanSetControllerMode{" << mode.mode;
 
     if (mode.flags.cancelTransmitRequests)
         out << ", cancelTX";

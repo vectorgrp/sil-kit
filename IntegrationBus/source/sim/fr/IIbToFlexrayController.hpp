@@ -2,27 +2,27 @@
 
 #pragma once
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-#include "ib/sim/fr/fwd_decl.hpp"
+#include "silkit/services/fr/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
-/*! \brief IIbToFlexrayController interface
+/*! \brief IMsgForFlexrayController interface
  *
  *  Used by the Participant, implemented by the FlexrayController
  */
-class IIbToFlexrayController
-    : public mw::IIbReceiver<FlexrayFrameEvent, FlexrayFrameTransmitEvent, FlexraySymbolEvent,
+class IMsgForFlexrayController
+    : public Core::IReceiver<FlexrayFrameEvent, FlexrayFrameTransmitEvent, FlexraySymbolEvent,
                              FlexraySymbolTransmitEvent, FlexrayCycleStartEvent, FlexrayPocStatusEvent>
-    , public mw::IIbSender<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,
+    , public Core::ISender<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,
                            FlexrayTxBufferUpdate>
 {
 };
 
-} // namespace fr
-} // namespace sim
-} // namespace ib
+} // namespace Flexray
+} // namespace Services
+} // namespace SilKit

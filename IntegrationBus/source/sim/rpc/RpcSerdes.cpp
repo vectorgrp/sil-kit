@@ -2,41 +2,41 @@
 
 #include "RpcSerdes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const CallUUID& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CallUUID& msg)
 {
     buffer << msg.ab << msg.cd;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, CallUUID& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CallUUID& msg)
 {
     buffer >> msg.ab >> msg.cd;
     return buffer;
 }
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FunctionCall& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FunctionCall& msg)
 {
     buffer << msg.timestamp << msg.callUUID << msg.data;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FunctionCall& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FunctionCall& msg)
 {
     buffer >> msg.timestamp >> msg.callUUID >> msg.data;
     return buffer;
 }
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const FunctionCallResponse& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FunctionCallResponse& msg)
 {
     buffer << msg.timestamp << msg.callUUID << msg.data;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, FunctionCallResponse& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FunctionCallResponse& msg)
 {
     buffer >> msg.timestamp >> msg.callUUID >> msg.data;
     return buffer;
 }
-using ib::mw::MessageBuffer;
+using SilKit::Core::MessageBuffer;
 
 void Serialize(MessageBuffer& buffer, const FunctionCall& msg)
 {
@@ -57,6 +57,6 @@ void Deserialize(MessageBuffer& buffer, FunctionCallResponse& out)
 {
     buffer >> out;
 }
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

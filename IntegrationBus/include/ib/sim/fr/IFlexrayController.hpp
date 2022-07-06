@@ -6,11 +6,11 @@
 #include <functional>
 
 #include "FlexrayDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace sim {
-namespace fr {
+namespace SilKit {
+namespace Services {
+namespace Flexray {
 
 /*! \brief Abstract FlexRay Controller API to be used by vECUs
  */
@@ -193,6 +193,6 @@ public:
     virtual void RemoveCycleStartHandler(HandlerId handlerId) = 0;
 };
 
-} // namespace fr
+} // namespace Flexray
 } // SimModels
-} // namespace ib
+} // namespace SilKit

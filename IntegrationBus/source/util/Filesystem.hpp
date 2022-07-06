@@ -4,10 +4,10 @@
 
 #include <string>
 
-namespace ib {
-namespace filesystem {
+namespace SilKit {
+namespace Filesystem {
 
-// Cross platform and portable filesystem API modeled after C++17 std::filesystem.
+// Cross platform and portable filesystem API modeled after C++17 std::Filesystem.
 // Only our required functionality is implemented.
 // Will be removed when we upgrade to C++17.
 
@@ -58,5 +58,5 @@ path temp_directory_path();
 //!< Remove a file or directory.
 bool remove(const path&);
 
-} // namespace filesystem
-} // namespace ib
+} // namespace Filesystem
+} // namespace SilKit

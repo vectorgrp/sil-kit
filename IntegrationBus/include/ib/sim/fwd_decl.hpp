@@ -3,13 +3,13 @@
 #include "eth/fwd_decl.hpp"
 #include "fr/fwd_decl.hpp"
 #include "lin/fwd_decl.hpp"
-#include "data/fwd_decl.hpp"
+#include "pubsub/fwd_decl.hpp"
 #include "rpc/fwd_decl.hpp"
 
-namespace ib {
-namespace sim {
+namespace SilKit {
+namespace Services {
 
 class ProtocolError;
 
-} // namespace sim
-} // namespace ib
+} // namespace Services
+} // namespace SilKit

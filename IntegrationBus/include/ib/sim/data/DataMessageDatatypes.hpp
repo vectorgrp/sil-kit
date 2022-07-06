@@ -9,10 +9,9 @@
 #include <string>
 #include <chrono>
 
-namespace ib {
-namespace sim {
-//! The namespace for Data Message
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 class IDataSubscriber;
 class IDataPublisher;
@@ -28,7 +27,7 @@ struct DataMessageEvent
 
 //! \brief Callback type for new data reception callbacks
 using DataMessageHandlerT =
-    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
+    std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
 
 //! \brief Information about a newly discovered DataPublisher
 struct NewDataPublisherEvent
@@ -45,9 +44,9 @@ struct NewDataPublisherEvent
 
 //! \brief Callback type for new data publishers
 using NewDataPublisherHandlerT =
-    std::function<void(ib::sim::data::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
+    std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit
 

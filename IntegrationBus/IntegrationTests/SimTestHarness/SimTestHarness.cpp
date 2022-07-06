@@ -6,8 +6,8 @@
 #include <atomic>
 #include <chrono>
 
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/vendor/CreateIbRegistry.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
@@ -22,20 +22,20 @@ auto Now()
 }
 
 } // namespace
-namespace ib {
-namespace test {
+namespace SilKit {
+namespace Tests {
 
 const std::string& SimParticipant::Name() const
 {
     return _name;
 }
 
-ib::mw::IParticipant* SimParticipant::Participant() const
+SilKit::Core::IParticipant* SimParticipant::Participant() const
 {
     return _participant.get();
 }
 
-std::future<ib::mw::sync::ParticipantState>& SimParticipant::Result()
+std::future<SilKit::Core::Orchestration::ParticipantState>& SimParticipant::Result()
 {
     return _result;
 }
@@ -57,7 +57,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 {
 
     // start registry
-    _registry = ib::vendor::CreateIbRegistry(ib::cfg::MakeEmptyParticipantConfiguration());
+    _registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
     _registry->ProvideDomain(_registryUri);
 
     // configure and add participants
@@ -146,7 +146,7 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     participant->_name = participantName;
 
     participant->_participant =
-        ib::CreateParticipant(ib::cfg::MakeEmptyParticipantConfiguration(), participantName, _registryUri);
+        SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participantName, _registryUri);
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).
@@ -167,5 +167,5 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
 }
 
 
-} // namespace test
-} // namespace ib
+} // namespace Tests
+} // namespace SilKit

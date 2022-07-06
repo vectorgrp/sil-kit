@@ -3,9 +3,9 @@
 #include "LifecycleStates.hpp"
 #include "LifecycleManagement.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 // State
 void State::RunSimulation(std::string reason)
@@ -484,6 +484,6 @@ auto ErrorState::GetParticipantState() -> ParticipantState
     return ParticipantState::Error;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

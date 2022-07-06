@@ -6,11 +6,11 @@
 #include <string>
 
 #include "LinDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 /*! 
  * The LIN controller can assume the role of a LIN master or a LIN
@@ -100,7 +100,7 @@ public:
      * \param frame provides the LIN identifier, checksum model, and optional data
      * \param responseType determines if *frame.data* must is used for the frame response.
      * 
-     * \throws ib::StateError if the LIN Controller is not initialized or not a master node.
+     * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
      */
     virtual void SendFrame(LinFrame frame, LinFrameResponseType responseType) = 0;
 
@@ -111,7 +111,7 @@ public:
      *  Masters The corresponding LIN ID does not need to be
      *  previously configured. 
      * 
-     * \throws ib::StateError if the LIN Controller is not initialized.
+     * \throws SilKit::StateError if the LIN Controller is not initialized.
      */
     virtual void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) = 0;
 
@@ -124,32 +124,32 @@ public:
      * an empty vector does not clear or reset the currently
      * configured FrameResponses.
      * 
-     * \throws ib::StateError if the LIN Controller is not initialized.
+     * \throws SilKit::StateError if the LIN Controller is not initialized.
      */
     virtual void SetFrameResponses(std::vector<LinFrameResponse> responses) = 0;
 
     /*! \brief Transmit a go-to-sleep-command and set ControllerState::Sleep and enable wake-up
      *
      * *AUTOSAR Name:* Lin_GoToSleep
-     * \throw ib::StateError Command issued with wrong LinControllerMode
+     * \throw SilKit::StateError Command issued with wrong LinControllerMode
      */
     virtual void GoToSleep() = 0;
     /*! \brief Set ControllerState::Sleep without sending a go-to-sleep command.
      *
      * *AUTOSAR Name:* Lin_GoToSleepInternal
-     * \throw ib::StateError Command issued with wrong LinControllerMode
+     * \throw SilKit::StateError Command issued with wrong LinControllerMode
      */
     virtual void GoToSleepInternal() = 0;
     /*! \brief Generate a wake up pulse and set ControllerState::Operational.
      *
      * *AUTOSAR Name:* Lin_Wakeup
-     * \throw ib::StateError Command issued with wrong LinControllerMode
+     * \throw SilKit::StateError Command issued with wrong LinControllerMode
      */
     virtual void Wakeup() = 0;
     /*! Set ControllerState::Operational without generating a wake up pulse.
      *
      * *AUTOSAR Name:* Lin_WakeupInternal
-     * \throw ib::StateError Command issued with wrong LinControllerMode
+     * \throw SilKit::StateError Command issued with wrong LinControllerMode
      */
     virtual void WakeupInternal() = 0;
 
@@ -235,8 +235,8 @@ public:
     virtual void RemoveFrameResponseUpdateHandler(HandlerId handlerId) = 0;
 };
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit
 
 

@@ -7,11 +7,11 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
-WatchDog::WatchDog(const cfg::HealthCheck& healthCheckConfig)
+WatchDog::WatchDog(const Config::HealthCheck& healthCheckConfig)
     : _warnHandler{[](std::chrono::milliseconds) {}}
     , _errorHandler{[](std::chrono::milliseconds) {}}
 {
@@ -66,7 +66,7 @@ void WatchDog::Run()
         Warn,
         Error
     };
-    ib::util::SetThreadName("IB-Watchdog");
+    SilKit::Util::SetThreadName("SilKit-Watchdog");
     WatchDogState state = WatchDogState::Healthy;
     auto stopFuture = _stopPromise.get_future();
     
@@ -136,6 +136,6 @@ std::chrono::milliseconds WatchDog::GetErrorTimeout()
     return _errorTimeout;
 }
     
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

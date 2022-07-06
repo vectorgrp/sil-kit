@@ -10,45 +10,45 @@
 #include <map>
 #include <tuple>
 
-#include "ib/mw/all.hpp"
-#include "ib/sim/all.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/all.hpp"
+#include "silkit/services/all.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
-// Interfaces relying on IbInternal
-#include "IIbToLogMsgSender.hpp"
-#include "IIbToLogMsgReceiver.hpp"
+// Interfaces relying on SilKitInternal
+#include "IMsgForLogMsgSender.hpp"
+#include "IMsgForLogMsgReceiver.hpp"
 
-#include "IIbToCanSimulator.hpp"
-#include "IIbToCanController.hpp"
+#include "IMsgForCanSimulator.hpp"
+#include "IMsgForCanController.hpp"
 
-#include "IIbToEthSimulator.hpp"
-#include "IIbToEthController.hpp"
+#include "IMsgForEthSimulator.hpp"
+#include "IMsgForEthController.hpp"
 
-#include "IIbToLinSimulator.hpp"
-#include "IIbToLinController.hpp"
+#include "IMsgForLinSimulator.hpp"
+#include "IMsgForLinController.hpp"
 
-#include "IIbToFlexrayBusSimulator.hpp"
-#include "IIbToFlexrayController.hpp"
+#include "IMsgForFlexrayBusSimulator.hpp"
+#include "IMsgForFlexrayController.hpp"
 
-#include "IIbToDataPublisher.hpp"
-#include "IIbToDataSubscriber.hpp"
-#include "IIbToDataSubscriberInternal.hpp"
+#include "IMsgForDataPublisher.hpp"
+#include "IMsgForDataSubscriber.hpp"
+#include "IMsgForDataSubscriberInternal.hpp"
 
-#include "IIbToRpcServer.hpp"
-#include "IIbToRpcServerInternal.hpp"
-#include "IIbToRpcClient.hpp"
+#include "IMsgForRpcServer.hpp"
+#include "IMsgForRpcServerInternal.hpp"
+#include "IMsgForRpcClient.hpp"
 
-#include "IIbToSystemMonitor.hpp"
-#include "IIbToSystemController.hpp"
-#include "IIbToLifecycleService.hpp"
-#include "IIbToTimeSyncService.hpp"
+#include "IMsgForSystemMonitor.hpp"
+#include "IMsgForSystemController.hpp"
+#include "IMsgForLifecycleService.hpp"
+#include "IMsgForTimeSyncService.hpp"
 
 #include "ITraceMessageSink.hpp"
 #include "ITraceMessageSource.hpp"
 
-// IbMwService
+// SilKitMwService
 #include "ServiceDiscovery.hpp"
 
 #include "ProtocolVersion.hpp"
@@ -59,10 +59,10 @@
 
 using namespace std::chrono_literals;
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 class Participant : public IParticipantInternal
 {
 public:
@@ -75,7 +75,7 @@ public:
     Participant() = default;
     Participant(const Participant&) = default;
     Participant(Participant&&) = default;
-    Participant(cfg::ParticipantConfiguration participantConfig, const std::string& participantName,
+    Participant(Config::ParticipantConfiguration participantConfig, const std::string& participantName,
                 ProtocolVersion version = CurrentProtocolVersion());
 
 public:
@@ -90,177 +90,177 @@ public:
     //
     // IParticipant
     auto CreateCanController(const std::string& canonicalName, const std::string& networkName)
-        -> sim::can::ICanController* override;
-    auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* override;
+        -> Services::Can::ICanController* override;
+    auto CreateCanController(const std::string& canonicalName) -> Services::Can::ICanController* override;
     auto CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
-        -> sim::eth::IEthernetController* override;
-    auto CreateEthernetController(const std::string& canonicalName) -> sim::eth::IEthernetController* override;
+        -> Services::Ethernet::IEthernetController* override;
+    auto CreateEthernetController(const std::string& canonicalName) -> Services::Ethernet::IEthernetController* override;
     auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
-        -> sim::fr::IFlexrayController* override;
-    auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFlexrayController* override;
+        -> Services::Flexray::IFlexrayController* override;
+    auto CreateFlexrayController(const std::string& canonicalName) -> Services::Flexray::IFlexrayController* override;
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
-        -> sim::lin::ILinController* override;
-    auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* override;
+        -> Services::Lin::ILinController* override;
+    auto CreateLinController(const std::string& canonicalName) -> Services::Lin::ILinController* override;
 
     auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
                              const std::string& mediaType,
                              const std::map<std::string, std::string>& labels, size_t history = 0)
-        -> sim::data::IDataPublisher* override;
-    auto CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher* override;
+        -> Services::PubSub::IDataPublisher* override;
+    auto CreateDataPublisher(const std::string& canonicalName) -> Services::PubSub::IDataPublisher* override;
 
     auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
                               const std::string& mediaType,
                               const std::map<std::string, std::string>& labels,
-                              sim::data::DataMessageHandlerT defaultDataHandler,
-                              sim::data::NewDataPublisherHandlerT newDataSourceHandler = nullptr)
-        -> sim::data::IDataSubscriber* override;
-    auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* override;
+                              Services::PubSub::DataMessageHandlerT defaultDataHandler,
+                              Services::PubSub::NewDataPublisherHandlerT newDataSourceHandler = nullptr)
+        -> Services::PubSub::IDataSubscriber* override;
+    auto CreateDataSubscriber(const std::string& canonicalName) -> Services::PubSub::IDataSubscriber* override;
 
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
                                       const std::string& mediaType,
                                       const std::map<std::string, std::string>& publisherLabels,
-                                      sim::data::DataMessageHandlerT callback, sim::data::IDataSubscriber* parent)
-        -> sim::data::DataSubscriberInternal* override;
+                                      Services::PubSub::DataMessageHandlerT callback, Services::PubSub::IDataSubscriber* parent)
+        -> Services::PubSub::DataSubscriberInternal* override;
 
     auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
-                         const std::map<std::string, std::string>& labels, sim::rpc::RpcCallResultHandler handler)
-        -> sim::rpc::IRpcClient* override;
-    auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* override;
+                         const std::map<std::string, std::string>& labels, Services::Rpc::RpcCallResultHandler handler)
+        -> Services::Rpc::IRpcClient* override;
+    auto CreateRpcClient(const std::string& canonicalName) -> Services::Rpc::IRpcClient* override;
 
     auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
-                         const std::map<std::string, std::string>& labels, sim::rpc::RpcCallHandler handler)
-        -> sim::rpc::IRpcServer* override;
-    auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* override;
+                         const std::map<std::string, std::string>& labels, Services::Rpc::RpcCallHandler handler)
+        -> Services::Rpc::IRpcServer* override;
+    auto CreateRpcServer(const std::string& canonicalName) -> Services::Rpc::IRpcServer* override;
 
     auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                  const std::string& mediaType, const std::map<std::string, std::string>& labels,
-                                 sim::rpc::RpcCallHandler handler, sim::rpc::IRpcServer* parent)
-        -> sim::rpc::RpcServerInternal* override;
+                                 Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
+        -> Services::Rpc::RpcServerInternal* override;
 
     void DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
                             const std::map<std::string, std::string>& labels,
-                            sim::rpc::RpcDiscoveryResultHandler handler) override;
+                            Services::Rpc::RpcDiscoveryResultHandler handler) override;
 
-    auto GetLifecycleService() -> sync::ILifecycleService* override;
-    auto CreateTimeSyncService(sync::LifecycleService* service) -> sync::TimeSyncService* override;
-    auto GetSystemMonitor() -> sync::ISystemMonitor* override;
-    auto GetSystemController() -> sync::ISystemController* override;
-    auto GetServiceDiscovery() -> service::IServiceDiscovery* override;
-    auto GetLogger() -> logging::ILogger* override;
+    auto GetLifecycleService() -> Orchestration::ILifecycleService* override;
+    auto CreateTimeSyncService(Orchestration::LifecycleService* service) -> Orchestration::TimeSyncService* override;
+    auto GetSystemMonitor() -> Orchestration::ISystemMonitor* override;
+    auto GetSystemController() -> Orchestration::ISystemController* override;
+    auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
+    auto GetLogger() -> Logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
 
-    void RegisterCanSimulator(sim::can::IIbToCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
-    void RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim, const std::vector<std::string>& networkNames) override;
-    void RegisterFlexraySimulator(sim::fr::IIbToFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) override;
-    void RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) override;
+    void RegisterLinSimulator(Services::Lin::IMsgForLinSimulator* busSim, const std::vector<std::string>& networkNames) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::can::CanFrameEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanFrameTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanControllerStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanConfigureBaudrate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::can::CanSetControllerMode& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::Can::CanFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Can::CanConfigureBaudrate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Can::CanSetControllerMode& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetFrameEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::eth::EthernetFrameEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetFrameTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::eth::EthernetSetMode& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::Ethernet::EthernetFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetFrameTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetStatus& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetSetMode& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayFrameEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FlexrayFrameEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayFrameTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FlexrayFrameTransmitEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexraySymbolEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexraySymbolTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayCycleStartEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayHostCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayControllerConfig& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferConfigUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayPocStatusEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameTransmitEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexraySymbolEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexraySymbolTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayCycleStartEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayHostCommand& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayControllerConfig& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayPocStatusEvent& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameHeaderRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinTransmission& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinWakeupPulse& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerConfig& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerStatusUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinFrameResponseUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinSendFrameRequest& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinSendFrameHeaderRequest& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinTransmission& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinWakeupPulse& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerConfig& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::NextSimTask& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::ParticipantCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::SystemCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const sync::WorkflowConfiguration& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Orchestration::NextSimTask& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Orchestration::ParticipantStatus& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Orchestration::ParticipantCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Orchestration::SystemCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Orchestration::WorkflowConfiguration& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const logging::LogMsg& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, logging::LogMsg&& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Logging::LogMsg& msg) override;
+    void SendMsg(const IServiceEndpoint*, Logging::LogMsg&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::Rpc::FunctionCall&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCallResponse& msg) override;
+    void SendMsg(const IServiceEndpoint* from, Services::Rpc::FunctionCallResponse&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const service::ParticipantDiscoveryEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const service::ServiceDiscoveryEvent& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Discovery::ParticipantDiscoveryEvent& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Discovery::ServiceDiscoveryEvent& msg) override;
 
     // targeted messaging
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::can::CanFrameEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanFrameTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanControllerStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanConfigureBaudrate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::can::CanSetControllerMode& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Can::CanFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanControllerStatus& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanConfigureBaudrate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanSetControllerMode& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetFrameEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::eth::EthernetFrameEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetFrameTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::eth::EthernetSetMode& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Ethernet::EthernetFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetStatus& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetSetMode& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameTransmitEvent&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolTransmitEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayCycleStartEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayHostCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayControllerConfig& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferConfigUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayPocStatusEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameTransmitEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolTransmitEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayCycleStartEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayHostCommand& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayControllerConfig& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayPocStatusEvent& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameHeaderRequest& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinTransmission& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinWakeupPulse& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerConfig& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerStatusUpdate& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinFrameResponseUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameRequest& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameHeaderRequest& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinTransmission& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinWakeupPulse& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerConfig& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::NextSimTask& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantStatus& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::ParticipantCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::SystemCommand& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const sync::WorkflowConfiguration& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::NextSimTask& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::ParticipantStatus& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::ParticipantCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const logging::LogMsg& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, logging::LogMsg&& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Logging::LogMsg& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, Logging::LogMsg&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::data::DataMessageEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::data::DataMessageEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::DataMessageEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::PubSub::DataMessageEvent&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCall& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCall&& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::rpc::FunctionCallResponse& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::rpc::FunctionCallResponse&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCall& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCall&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCallResponse& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCallResponse&& msg) override;
 
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ParticipantDiscoveryEvent& msg) override;
-    void SendIbMessage(const IIbServiceEndpoint*, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Discovery::ParticipantDiscoveryEvent& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Discovery::ServiceDiscoveryEvent& msg) override;
 
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
@@ -278,10 +278,10 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void JoinIbDomain(const std::string& registryUri) override;
+    void JoinSilKitDomain(const std::string& registryUri) override;
 
     // For Testing Purposes:
-    inline auto GetIbConnection() -> IbConnectionT& { return _ibConnection; }
+    inline auto GetSilKitConnection() -> SilKitConnectionT& { return _connection; }
 
 private:
     // ----------------------------------------
@@ -300,95 +300,95 @@ private:
 
     //!< Update the controller configuration for a given optional field. Prefers configured values over programmatically passed values.
     template <typename ValueT>
-    void UpdateOptionalConfigValue(const std::string& canonicalName, ib::util::Optional<ValueT>& configuredValue,
+    void UpdateOptionalConfigValue(const std::string& canonicalName, SilKit::Util::Optional<ValueT>& configuredValue,
                                    const ValueT& passedValue);
 
     template <typename ValueT>
     void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const ValueT& passedValue,
                                                 const ValueT& configuredValue);
 
-    void OnIbDomainJoined();
+    void OnSilKitDomainJoined();
 
     void SetupRemoteLogging();
 
-    void SetTimeProvider(sync::ITimeProvider*);
+    void SetTimeProvider(Orchestration::ITimeProvider*);
 
-    template<class IbMessageT>
-    void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg);
-    template<class IbMessageT>
-    void SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg);
+    template<class SilKitMessageT>
+    void SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg);
+    template<class SilKitMessageT>
+    void SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg);
 
     template<class ControllerT>
     auto GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*;
 
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
-    auto CreateInternalController(const std::string& serviceName, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, bool publishService, Arg&&... arg) -> ControllerT*;
+    auto CreateInternalController(const std::string& serviceName, const Core::ServiceType serviceType,
+                          const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg) -> ControllerT*;
 
     //!< Internal controller creation, explicit network argument for ConfigT without network
     template <class ConfigT, class ControllerT, typename... Arg>
-    auto CreateController(const ConfigT& config, const std::string& network, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+    auto CreateController(const ConfigT& config, const std::string& network, const Core::ServiceType serviceType,
+                          const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
         -> ControllerT*;
 
     //!< Internal controller creation, expects config.network
     template <class ConfigT, class ControllerT, typename... Arg>
-    auto CreateController(const ConfigT& config, const mw::ServiceType serviceType,
-                          const mw::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+    auto CreateController(const ConfigT& config, const Core::ServiceType serviceType,
+                          const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
         -> ControllerT*;
 
 
-    template<class IIbToSimulatorT>
-    void RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
+    template<class IMsgForSimulatorT>
+    void RegisterSimulator(IMsgForSimulatorT* busSim, Config::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
 
     template<class ConfigT>
-    void AddTraceSinksToSource(extensions::ITraceMessageSource* controller, ConfigT config);
+    void AddTraceSinksToSource(ITraceMessageSource* controller, ConfigT config);
 
 private:
     // ----------------------------------------
     // private members
     std::string _participantName;
-    const ib::cfg::ParticipantConfiguration _participantConfig;
+    const SilKit::Config::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
-    sync::WallclockProvider _wallclockTimeProvider{1ms};
-    sync::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
+    Orchestration::WallclockProvider _wallclockTimeProvider{1ms};
+    Orchestration::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
 
-    std::unique_ptr<logging::ILogger> _logger;
-    std::vector<std::unique_ptr<extensions::ITraceMessageSink>> _traceSinks;
+    std::unique_ptr<Logging::ILogger> _logger;
+    std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;
 
     std::tuple<
-        ControllerMap<sim::can::IIbToCanController>,
-        ControllerMap<sim::eth::IIbToEthController>,
-        ControllerMap<sim::fr::IIbToFlexrayController>,
-        ControllerMap<sim::lin::IIbToLinController>,
-        ControllerMap<sim::data::IIbToDataPublisher>,
-        ControllerMap<sim::data::IIbToDataSubscriber>,
-        ControllerMap<sim::data::IIbToDataSubscriberInternal>,
-        ControllerMap<sim::rpc::IIbToRpcClient>,
-        ControllerMap<sim::rpc::IIbToRpcServer>,
-        ControllerMap<sim::rpc::IIbToRpcServerInternal>,
-        ControllerMap<logging::IIbToLogMsgSender>,
-        ControllerMap<logging::IIbToLogMsgReceiver>,
-        ControllerMap<sync::IIbToLifecycleService>,
-        ControllerMap<sync::IIbToSystemMonitor>,
-        ControllerMap<sync::IIbToSystemController>,
-        ControllerMap<sync::IIbToTimeSyncService>,
-        ControllerMap<service::ServiceDiscovery>
+        ControllerMap<Services::Can::IMsgForCanController>,
+        ControllerMap<Services::Ethernet::IMsgForEthController>,
+        ControllerMap<Services::Flexray::IMsgForFlexrayController>,
+        ControllerMap<Services::Lin::IMsgForLinController>,
+        ControllerMap<Services::PubSub::IMsgForDataPublisher>,
+        ControllerMap<Services::PubSub::IMsgForDataSubscriber>,
+        ControllerMap<Services::PubSub::IMsgForDataSubscriberInternal>,
+        ControllerMap<Services::Rpc::IMsgForRpcClient>,
+        ControllerMap<Services::Rpc::IMsgForRpcServer>,
+        ControllerMap<Services::Rpc::IMsgForRpcServerInternal>,
+        ControllerMap<Logging::IMsgForLogMsgSender>,
+        ControllerMap<Logging::IMsgForLogMsgReceiver>,
+        ControllerMap<Orchestration::IMsgForLifecycleService>,
+        ControllerMap<Orchestration::IMsgForSystemMonitor>,
+        ControllerMap<Orchestration::IMsgForSystemController>,
+        ControllerMap<Orchestration::IMsgForTimeSyncService>,
+        ControllerMap<Discovery::ServiceDiscovery>
     > _controllers;
 
     std::tuple<
-        sim::can::IIbToCanSimulator*,
-        sim::eth::IIbToEthSimulator*,
-        sim::fr::IIbToFlexrayBusSimulator*,
-        sim::lin::IIbToLinSimulator*
+        Services::Can::IMsgForCanSimulator*,
+        Services::Ethernet::IMsgForEthSimulator*,
+        Services::Flexray::IMsgForFlexrayBusSimulator*,
+        Services::Lin::IMsgForLinSimulator*
     > _simulators {nullptr, nullptr, nullptr, nullptr};
 
-    IbConnectionT _ibConnection;
+    SilKitConnectionT _connection;
 
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit
 

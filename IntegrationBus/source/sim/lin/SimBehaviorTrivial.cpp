@@ -3,9 +3,9 @@
 #include "LinController.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
 namespace {
 inline auto ToFrameResponseMode(LinFrameResponseType responseType) -> LinFrameResponseMode
@@ -31,68 +31,68 @@ inline auto ToTxFrameStatus(LinFrameStatus status) -> LinFrameStatus
     }
 }
 
-inline auto ToTracingDir(LinFrameStatus status) -> ib::sim::TransmitDirection
+inline auto ToTracingDir(LinFrameStatus status) -> SilKit::Services::TransmitDirection
 {
     switch (status)
     {
     case LinFrameStatus::LIN_RX_ERROR: //[[fallthrough]]
     case LinFrameStatus::LIN_RX_BUSY: //[[fallthrough]]
     case LinFrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
-    case LinFrameStatus::LIN_RX_OK: return ib::sim::TransmitDirection::RX;
+    case LinFrameStatus::LIN_RX_OK: return SilKit::Services::TransmitDirection::RX;
     case LinFrameStatus::LIN_TX_ERROR: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_BUSY: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
-    case LinFrameStatus::LIN_TX_OK: return ib::sim::TransmitDirection::TX;
+    case LinFrameStatus::LIN_TX_OK: return SilKit::Services::TransmitDirection::TX;
     default:
         //if invalid status given, failsafe to send.
-        return ib::sim::TransmitDirection::TX;
+        return SilKit::Services::TransmitDirection::TX;
     }
 }
 
 } // namespace
 
-SimBehaviorTrivial::SimBehaviorTrivial(mw::IParticipantInternal* participant, LinController* linController,
-                                       mw::sync::ITimeProvider* timeProvider)
+SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, LinController* linController,
+                                       Core::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{linController}
-    , _parentServiceEndpoint{dynamic_cast<mw::IIbServiceEndpoint*>(linController)}
+    , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(linController)}
     , _timeProvider{timeProvider}
 {
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::ReceiveIbMessage(const MsgT& msg)
+void SimBehaviorTrivial::ReceiveSilKitMessage(const MsgT& msg)
 {
-    auto receivingController = dynamic_cast<mw::IIbMessageReceiver<MsgT>*>(_parentController);
+    auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     assert(receivingController);
-    receivingController->ReceiveIbMessage(_parentServiceEndpoint, msg);
+    receivingController->ReceiveSilKitMessage(_parentServiceEndpoint, msg);
 }
 
-auto SimBehaviorTrivial::AllowReception(const mw::IIbServiceEndpoint* /*from*/) const -> bool 
+auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
 { 
     return true; 
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::SendIbMessageImpl(MsgT&& msg)
+void SimBehaviorTrivial::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendIbMessage(_parentServiceEndpoint, std::forward<MsgT>(msg));
+    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
-void SimBehaviorTrivial::SendIbMessage(LinSendFrameRequest&& msg)
+void SimBehaviorTrivial::SendMsg(LinSendFrameRequest&& msg)
 {
     _parentController->SetFrameResponse(msg.frame, ToFrameResponseMode(msg.responseType));
     _parentController->SendFrameHeader(msg.frame.id);
 }
-void SimBehaviorTrivial::SendIbMessage(LinTransmission&& msg)
+void SimBehaviorTrivial::SendMsg(LinTransmission&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorTrivial::SendIbMessage(LinControllerConfig&& msg)
+void SimBehaviorTrivial::SendMsg(LinControllerConfig&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
-void SimBehaviorTrivial::SendIbMessage(LinSendFrameHeaderRequest&& msg)
+void SimBehaviorTrivial::SendMsg(LinSendFrameHeaderRequest&& msg)
 {
     // We answer the call immediately based on the cached responses
     LinTransmission transmission;
@@ -116,7 +116,7 @@ void SimBehaviorTrivial::SendIbMessage(LinSendFrameHeaderRequest&& msg)
     }
 
     // Dispatch the LIN transmission to all connected nodes
-    SendIbMessageImpl(transmission);
+    SendMsgImpl(transmission);
 
     // Dispatch the LIN transmission to our own callbacks
     LinFrameResponseMode masterResponseMode =
@@ -134,14 +134,14 @@ void SimBehaviorTrivial::SendIbMessage(LinSendFrameHeaderRequest&& msg)
 
 }
 
-void SimBehaviorTrivial::SendIbMessage(LinFrameResponseUpdate&& msg)
+void SimBehaviorTrivial::SendMsg(LinFrameResponseUpdate&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
 
-void SimBehaviorTrivial::SendIbMessage(LinControllerStatusUpdate&& msg)
+void SimBehaviorTrivial::SendMsg(LinControllerStatusUpdate&& msg)
 {
-    SendIbMessageImpl(msg);
+    SendMsgImpl(msg);
 }
 
 auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame)
@@ -188,7 +188,7 @@ void SimBehaviorTrivial::GoToSleep()
     gotosleepTx.status = LinFrameStatus::LIN_RX_OK;
     gotosleepTx.timestamp = _timeProvider->Now();
 
-    SendIbMessageImpl(gotosleepTx);
+    SendMsgImpl(gotosleepTx);
 
     // For trivial simulations we go directly to Sleep state.
     _parentController->GoToSleepInternal();
@@ -198,14 +198,14 @@ void SimBehaviorTrivial::Wakeup()
 {
     // Send to others with direction=RX
     LinWakeupPulse pulse{_timeProvider->Now(), TransmitDirection::RX};
-    SendIbMessageImpl(pulse);
+    SendMsgImpl(pulse);
 
     // No self delivery: directly call handlers with direction=TX
-    ReceiveIbMessage(LinWakeupPulse{pulse.timestamp, TransmitDirection::TX});
+    ReceiveSilKitMessage(LinWakeupPulse{pulse.timestamp, TransmitDirection::TX});
     _parentController->WakeupInternal();
 }
 
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

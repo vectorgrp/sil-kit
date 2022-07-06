@@ -6,21 +6,21 @@
 #include <memory>
 #include <unordered_set>
 
-#include "ib/mw/sync/ISystemMonitor.hpp"
+#include "silkit/core/sync/ISystemMonitor.hpp"
 
-#include "IIbToSystemMonitor.hpp"
+#include "IMsgForSystemMonitor.hpp"
 #include "IParticipantInternal.hpp"
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 #include "SynchronizedHandlers.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class SystemMonitor
     : public ISystemMonitor
-    , public IIbToSystemMonitor
-    , public mw::IIbServiceEndpoint
+    , public IMsgForSystemMonitor
+    , public Core::IServiceEndpoint
 {
 public:
     // ----------------------------------------
@@ -47,20 +47,20 @@ public:
     auto AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId override;
     void RemoveParticipantStatusHandler(HandlerId handlerId) override;
 
-    auto SystemState() const -> sync::SystemState override;
-    auto ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus& override;
+    auto SystemState() const -> Orchestration::SystemState override;
+    auto ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus& override;
 
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg) override;
-    void ReceiveIbMessage(const IIbServiceEndpoint* from, const sync::WorkflowConfiguration& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg) override;
+    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) override;
 
     void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) override;
     void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) override;
 
     auto IsParticipantConnected(const std::string& participantName) const -> bool override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor & override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
 public:
     // ----------------------------------------
@@ -89,26 +89,26 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    bool AllRequiredParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const;
-    void ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState);
-    void UpdateSystemState(const sync::ParticipantStatus& newStatus);
+    bool AllRequiredParticipantsInState(std::initializer_list<Orchestration::ParticipantState> acceptedStates) const;
+    void ValidateParticipantStatusUpdate(const Orchestration::ParticipantStatus& newStatus, Orchestration::ParticipantState oldState);
+    void UpdateSystemState(const Orchestration::ParticipantStatus& newStatus);
 
-    inline void SetSystemState(sync::SystemState newState);
+    inline void SetSystemState(Orchestration::SystemState newState);
 
 private:
     // ----------------------------------------
     // private members
-    mw::ServiceDescriptor _serviceDescriptor{};
-    logging::ILogger* _logger{nullptr};
+    Core::ServiceDescriptor _serviceDescriptor{};
+    Logging::ILogger* _logger{nullptr};
 
     std::vector<std::string> _requiredParticipantNames{};
-    std::map<std::string, sync::ParticipantStatus> _participantStatus;
-    sync::SystemState _systemState{sync::SystemState::Invalid};
+    std::map<std::string, Orchestration::ParticipantStatus> _participantStatus;
+    Orchestration::SystemState _systemState{Orchestration::SystemState::Invalid};
 
     unsigned int _invalidTransitionCount{0u};
 
-    util::SynchronizedHandlers<ParticipantStatusHandlerT> _participantStatusHandlers;
-    util::SynchronizedHandlers<SystemStateHandlerT> _systemStateHandlers;
+    Util::SynchronizedHandlers<ParticipantStatusHandlerT> _participantStatusHandlers;
+    Util::SynchronizedHandlers<SystemStateHandlerT> _systemStateHandlers;
 
     ParticipantConnectedHandler _participantConnectedHandler;
     ParticipantDisconnectedHandler _participantDisconnectedHandler;
@@ -123,16 +123,16 @@ auto SystemMonitor::InvalidTransitionCount() const -> unsigned int
     return _invalidTransitionCount;
 }
 
-void SystemMonitor::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void SystemMonitor::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto SystemMonitor::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto SystemMonitor::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

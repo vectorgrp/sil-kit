@@ -5,20 +5,20 @@
 #include <istream>
 #include <fstream>
 
-#include "ib/extensions/IReplay.hpp"
+#include "silkit/extensions/IReplay.hpp"
 
-namespace ib {
+namespace SilKit {
 namespace tracing {
 
 
 class PcapReader
-    : public ib::extensions::IReplayChannelReader
+    : public SilKit::IReplayChannelReader
 {
 public:
     // Constructors
-    PcapReader(const std::string& filePath, ib::mw::logging::ILogger* logger);
+    PcapReader(const std::string& filePath, SilKit::Core::Logging::ILogger* logger);
     //This CTor is for testing purposes only:
-    PcapReader(std::istream* stream, ib::mw::logging::ILogger* logger);
+    PcapReader(std::istream* stream, SilKit::Core::Logging::ILogger* logger);
     PcapReader(PcapReader& other);
 
 public:
@@ -29,7 +29,7 @@ public:
 
     // Interface IReplayChannelReader
     bool Seek(size_t messageNumber) override;
-    auto Read() -> std::shared_ptr<ib::extensions::IReplayMessage>  override;
+    auto Read() -> std::shared_ptr<SilKit::IReplayMessage>  override;
 
     auto GetMetaInfos() const -> const std::map<std::string, std::string>&;
 private:
@@ -41,13 +41,13 @@ private:
     std::ifstream _file;
     std::istream* _stream{nullptr};
     std::map<std::string, std::string> _metaInfos;
-    std::shared_ptr<extensions::IReplayMessage> _currentMessage;
+    std::shared_ptr<IReplayMessage> _currentMessage;
     uint64_t _numMessages{0};
-    ib::mw::logging::ILogger* _log{nullptr};
+    SilKit::Core::Logging::ILogger* _log{nullptr};
     std::chrono::nanoseconds _startTime{0};
     std::chrono::nanoseconds _endTime{0};
 };
 
 
 } // namespace tracing
-} // namespace ib
+} // namespace SilKit

@@ -2,8 +2,8 @@
 
 #pragma once
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 namespace tuple_tools {
 
 template <template <class> class TemplateT, class TupleT>
@@ -19,5 +19,5 @@ template <template <class> class TemplateT, class TupleT>
 using wrapped_tuple = typename wrapped_tuple_helper<TemplateT, TupleT>::Type;
 
 } // namespace tuple_tools
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

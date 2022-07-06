@@ -10,28 +10,28 @@ It consists of DataPublishers and DataSubscribers.
 
 DataPublishers
 ~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_Data_Publisher_Create
-.. doxygenfunction:: ib_Data_Publisher_Publish
+.. doxygenfunction:: SilKit_DataPublisher_Create
+.. doxygenfunction:: SilKit_DataPublisher_Publish
 
 DataSubscribers
 ~~~~~~~~~~~~~~~
-.. doxygenfunction:: ib_Data_Subscriber_Create
-.. doxygenfunction:: ib_Data_Subscriber_SetDefaultDataMessageHandler
-.. doxygenfunction:: ib_Data_Subscriber_AddExplicitDataMessageHandler
+.. doxygenfunction:: SilKit_DataSubscriber_Create
+.. doxygenfunction:: SilKit_DataSubscriber_SetDefaultDataMessageHandler
+.. doxygenfunction:: SilKit_DataSubscriber_AddExplicitDataMessageHandler
 
 Handlers
 ~~~~~~~~
 The DataSubscriber is created with a handler for data reception and a handler
 for notification about new sources:
 
-.. doxygentypedef:: ib_Data_DataMessageHandler_t
-.. doxygentypedef:: ib_Data_NewDataPublisherHandler_t
+.. doxygentypedef:: SilKit_DataMessageHandler_t
+.. doxygentypedef:: SilKit_NewDataPublisherHandler_t
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: ib_Data_DataMessageEvent
+.. doxygenstruct:: SilKit_DataMessageEvent
    :members:
-.. doxygenstruct:: ib_Data_NewDataPublisherEvent
+.. doxygenstruct:: SilKit_NewDataPublisherEvent
    :members:
 
 

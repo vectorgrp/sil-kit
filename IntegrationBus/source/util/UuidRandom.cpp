@@ -3,9 +3,9 @@
 #include "UuidRandom.hpp"
 #include <limits>
 
-namespace ib {
-namespace util {
-namespace uuid {
+namespace SilKit {
+namespace Util {
+namespace Uuid {
 
 bool operator==(const UUID& lhs, const UUID& rhs)
 {
@@ -70,6 +70,6 @@ std::string to_string(const UUID& u)
     return ss.str();
 }
 
-} // namespace uuid
-} // namespace util
-} // namespace ib
+} // namespace Uuid
+} // namespace Util
+} // namespace SilKit

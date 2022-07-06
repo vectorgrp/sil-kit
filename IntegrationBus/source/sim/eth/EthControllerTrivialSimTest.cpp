@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "ib/util/functional.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "MockParticipant.hpp"
 #include "MockTraceSink.hpp"
@@ -28,12 +28,12 @@ using testing::_;
 using testing::InSequence;
 using testing::NiceMock;
 
-using namespace ib::mw;
-using namespace ib::sim;
-using namespace ib::sim::eth;
+using namespace SilKit::Core;
+using namespace SilKit::Services;
+using namespace SilKit::Services::Ethernet;
 
-using ::ib::mw::test::DummyParticipant;
-using ::ib::test::MockTraceSink;
+using ::SilKit::Core::Tests::DummyParticipant;
+using ::SilKit::Tests::MockTraceSink;
 
 MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "") 
 {
@@ -64,10 +64,10 @@ class MockParticipant : public DummyParticipant
 {
 public:
 
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameEvent&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetFrameTransmitEvent&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetStatus&));
-    MOCK_METHOD2(SendIbMessage, void(const IIbServiceEndpoint*, const EthernetSetMode&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameTransmitEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetStatus&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetSetMode&));
 };
 
 class EthernetControllerTrivialSimTest : public testing::Test
@@ -75,10 +75,10 @@ class EthernetControllerTrivialSimTest : public testing::Test
 protected:
     struct Callbacks
     {
-        MOCK_METHOD2(ReceiveMessage, void(eth::IEthernetController*, const eth::EthernetFrameEvent&));
-        MOCK_METHOD2(MessageAck, void(eth::IEthernetController*, eth::EthernetFrameTransmitEvent));
-        MOCK_METHOD2(StateChanged, void(eth::IEthernetController*, eth::EthernetState));
-        MOCK_METHOD2(BitRateChanged, void(eth::IEthernetController*, eth::EthernetBitrate));
+        MOCK_METHOD2(ReceiveMessage, void(Ethernet::IEthernetController*, const Ethernet::EthernetFrameEvent&));
+        MOCK_METHOD2(MessageAck, void(Ethernet::IEthernetController*, Ethernet::EthernetFrameTransmitEvent));
+        MOCK_METHOD2(StateChanged, void(Ethernet::IEthernetController*, Ethernet::EthernetState));
+        MOCK_METHOD2(BitRateChanged, void(Ethernet::IEthernetController*, Ethernet::EthernetBitrate));
     };
 
 protected:
@@ -88,8 +88,8 @@ protected:
     {
         controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-        controller.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
-        controller.AddFrameTransmitHandler(ib::util::bind_method(&callbacks, &Callbacks::MessageAck));
+        controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        controller.AddFrameTransmitHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::MessageAck));
 
         controllerOther.SetServiceDescriptor(from_endpointAddress(otherAddress));
     }
@@ -102,12 +102,12 @@ protected:
     MockParticipant participant;
     Callbacks callbacks;
 
-    ib::cfg::EthernetController cfg;
+    SilKit::Config::EthernetController cfg;
     EthController controller;
     EthController controllerOther;
 };
 
-/*! \brief SendFrame must invoke the TimeProvider and triggers SendIbMessage on the participant
+/*! \brief SendFrame must invoke the TimeProvider and triggers SendMsg on the participant
 */
 TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
 {
@@ -115,7 +115,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
         .WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
-    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(now))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now))).Times(1);
 
     EthernetFrameTransmitEvent ack{};
     ack.sourceMac = EthernetMac{0, 0, 0, 0, 0, 0};
@@ -139,7 +139,7 @@ TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
     ON_CALL(participant.mockTimeProvider.mockTime, Now()).WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
-    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(now))).Times(0);
+    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now))).Times(0);
 
     EthernetFrameTransmitEvent nack{};
     nack.sourceMac = EthernetMac{0, 0, 0, 0, 0, 0};
@@ -178,7 +178,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_message)
         .Times(1);
 
     controller.Activate();
-    controller.ReceiveIbMessage(&controllerOther, msg);
+    controller.ReceiveSilKitMessage(&controllerOther, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllers must trigger the registered callback, if
@@ -189,7 +189,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
     EthernetFrameEvent msg{};
     SetSourceMac(msg.frame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
 
-    EXPECT_CALL(participant, SendIbMessage(&controller, AnEthMessageWith(0ns))).Times(1);
+    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
     EthernetFrameTransmitEvent ack{ 0, EthernetMac{ 1, 2, 3, 4, 5, 6 }, 0ms, EthernetTransmitStatus::Transmitted };
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
@@ -207,16 +207,16 @@ TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
     EthController testController{&participant, cfg, participant.GetTimeProvider()};
 
     const int numHandlers = 10;
-    std::vector<ib::sim::HandlerId> handlerIds;
+    std::vector<SilKit::Services::HandlerId> handlerIds;
     for (int i = 0; i < numHandlers; i++)
     {
-        handlerIds.push_back(testController.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage)));
+        handlerIds.push_back(testController.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage)));
     }
 
     EthernetFrameEvent msg;
     SetSourceMac(msg.frame, EthernetMac{0, 0, 0, 0, 0, 0});
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(numHandlers);
-    testController.ReceiveIbMessage(&controllerOther, msg);
+    testController.ReceiveSilKitMessage(&controllerOther, msg);
 
     for (auto&& handlerId : handlerIds)
     {
@@ -224,7 +224,7 @@ TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
     }
 
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(0);
-    testController.ReceiveIbMessage(&controllerOther, msg);
+    testController.ReceiveSilKitMessage(&controllerOther, msg);
 }
 
 /*! \brief Removed handler in handler
@@ -234,9 +234,9 @@ TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
     EthController testController{&participant, cfg, participant.GetTimeProvider()};
 
     auto handlerIdToRemove =
-        testController.AddFrameHandler(ib::util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
+        testController.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
 
-    auto testHandler = [handlerIdToRemove](eth::IEthernetController* ctrl, const eth::EthernetFrameEvent&) {
+    auto testHandler = [handlerIdToRemove](Ethernet::IEthernetController* ctrl, const Ethernet::EthernetFrameEvent&) {
         ctrl->RemoveFrameHandler(handlerIdToRemove);
     };
     testController.AddFrameHandler(testHandler);
@@ -245,23 +245,23 @@ TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
     SetSourceMac(msg.frame, EthernetMac{0, 0, 0, 0, 0, 0});
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(1);
     // Calls testHandler and Callbacks::ReceiveMessage, the latter is removed in testHandler 
-    testController.ReceiveIbMessage(&controllerOther, msg);
+    testController.ReceiveSilKitMessage(&controllerOther, msg);
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(0);
     // Call testHandler again, handlerIdToRemove is invalid now but should only result in a warning
-    testController.ReceiveIbMessage(&controllerOther, msg);
+    testController.ReceiveSilKitMessage(&controllerOther, msg);
 }
 
 
 TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
 {
 #if (0)
-    using namespace ib::extensions;
+    
 
     const auto now = 1337ns;
     ON_CALL(participant.mockTimeProvider.mockTime, Now())
         .WillByDefault(testing::Return(now));
 
-    ib::cfg::EthernetController config{};
+    SilKit::Config::EthernetController config{};
     auto ethController = EthController(&participant, config, participant.GetTimeProvider());
     ethController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     ethController.AddSink(&traceSink);
@@ -275,19 +275,19 @@ TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
     EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(ib::sim::TransmitDirection::TX, controllerAddress, now, frame))
+        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, frame))
         .Times(1);
     ethController.SendFrame(frame);
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(ib::sim::TransmitDirection::RX, controllerAddress, now, frame))
+        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, frame))
         .Times(1);
 
     EthernetFrameEvent ethMsg{};
     ethMsg.frame = frame;
     ethMsg.timestamp = now;
-    ethController.ReceiveIbMessage(&controllerOther, ethMsg);
+    ethController.ReceiveSilKitMessage(&controllerOther, ethMsg);
 #endif // 0
 }
 

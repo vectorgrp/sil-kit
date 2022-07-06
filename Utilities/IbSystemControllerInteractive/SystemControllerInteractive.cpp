@@ -12,20 +12,20 @@
 #include <iterator>
 #include <thread>
 
-#include "ib/version.hpp"
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/version.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "CommandlineParser.hpp"
 
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::mw::sync;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
 
 using namespace std::chrono_literals;
 
-sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
+Orchestration::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
 {
     if (cmdString == "Invalid")
         return SystemCommand::Kind::Invalid;
@@ -36,10 +36,10 @@ sync::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
     else if (cmdString == "Abort" || cmdString == "AbortSimulation")
         return SystemCommand::Kind::AbortSimulation;
 
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
-void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
+void ReportParticipantStatus(const SilKit::Core::Orchestration::ParticipantStatus& status)
 {
     std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
     std::tm tmBuffer;
@@ -60,12 +60,12 @@ void ReportParticipantStatus(const ib::mw::sync::ParticipantStatus& status)
         << std::endl;
 }
 
-void ReportSystemState(ib::mw::sync::SystemState state)
+void ReportSystemState(SilKit::Core::Orchestration::SystemState state)
 {
     std::cout << "New SystemState: " << state << std::endl;
 }
 
-sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString)
+Orchestration::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString)
 {
     if (cmdString == "Invalid")
         return ParticipantCommand::Kind::Invalid;
@@ -74,14 +74,14 @@ sync::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString
     else if (cmdString == "Shutdown")
         return ParticipantCommand::Kind::Shutdown;
 
-    throw ib::TypeConversionError{};
+    throw SilKit::TypeConversionError{};
 }
 
 class InteractiveSystemController
 {
 public:
     InteractiveSystemController(ISystemController* controller,
-                                std::shared_ptr<ib::cfg::IParticipantConfiguration> participantConfiguration, std::string myName,
+                                std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfiguration, std::string myName,
                                 std::vector<std::string> expectedParticipantNames)
         : _participantConfiguration{std::move(participantConfiguration)}
         , _expectedParticipantNames{std::move(expectedParticipantNames)}
@@ -118,7 +118,7 @@ public:
                 std::cout << "> ";
                 continue;
             }
-            catch (const ib::TypeConversionError&)
+            catch (const SilKit::TypeConversionError&)
             {
                 // pass
             }
@@ -139,7 +139,7 @@ public:
                     }
                     else
                     {
-                        throw ib::TypeConversionError{"Participant command requrires a participant name"};
+                        throw SilKit::TypeConversionError{"Participant command requrires a participant name"};
                     }
                 }
 
@@ -147,7 +147,7 @@ public:
                 std::cout << "> ";
                 continue;
             }
-            catch (const ib::TypeConversionError&)
+            catch (const SilKit::TypeConversionError&)
             {
                 // pass
             }
@@ -199,7 +199,7 @@ public:
     }
 
 private:
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> _participantConfiguration;
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> _participantConfiguration;
     std::vector<std::string> _expectedParticipantNames;
     std::string _myParticipantName;
     ISystemController* _controller{nullptr};
@@ -207,22 +207,22 @@ private:
 
 int main(int argc, char** argv)
 {
-    ib::util::CommandlineParser commandlineParser;
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("version", "v", "[--version]",
+    SilKit::Util::CommandlineParser commandlineParser;
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "[--version]",
         "-v, --version: Get version info.");
-    commandlineParser.Add<ib::util::CommandlineParser::Flag>("help", "h", "[--help]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>(
-        "connect-uri", "u", "vib://localhost:8500", "[--connect-uri <vibUri>]",
-        "-u, --connect-uri <vibUri>: The registry URI to connect to. Defaults to 'vib://localhost:8500'.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
+        "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
+        "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
-    commandlineParser.Add<ib::util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
-    commandlineParser.Add<ib::util::CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
+    commandlineParser.Add<SilKit::Util::CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
-    std::cout << "Vector Integration Bus (VIB) -- Interactive System Controller" << std::endl
+    std::cout << "Vector SilKit -- Interactive System Controller" << std::endl
         << std::endl;
 
     try
@@ -237,25 +237,25 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("help").Value())
+    if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value())
     {
         commandlineParser.PrintUsageInfo(std::cout, argv[0]);
 
         return 0;
     }
 
-    if (commandlineParser.Get<ib::util::CommandlineParser::Flag>("version").Value())
+    if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value())
     {
-        std::string ibHash{ ib::version::GitHash() };
-        auto ibShortHash = ibHash.substr(0, 7);
+        std::string hash{ SilKit::Version::GitHash() };
+        auto shortHash = hash.substr(0, 7);
         std::cout
             << "Version Info:" << std::endl
-            << " - Vector Integration Bus (VIB): " << ib::version::String() << ", #" << ibShortHash << std::endl;
+            << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }
 
-    if (!commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").HasValues())
+    if (!commandlineParser.Get<SilKit::Util::CommandlineParser::PositionalList>("participantNames").HasValues())
     {
         std::cerr << "Error: Arguments '<participantName1> [<participantName2> ...]' are missing" << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -263,19 +263,19 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto connectUri{ commandlineParser.Get<ib::util::CommandlineParser::Option>("connect-uri").Value() };
-    auto participantName{ commandlineParser.Get<ib::util::CommandlineParser::Option>("name").Value() };
-    auto configurationFilename{ commandlineParser.Get<ib::util::CommandlineParser::Option>("configuration").Value() };
-    auto expectedParticipantNames{ commandlineParser.Get<ib::util::CommandlineParser::PositionalList>("participantNames").Values() };
+    auto connectUri{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("connect-uri").Value() };
+    auto participantName{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value() };
+    auto configurationFilename{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("configuration").Value() };
+    auto expectedParticipantNames{ commandlineParser.Get<SilKit::Util::CommandlineParser::PositionalList>("participantNames").Values() };
 
-    std::shared_ptr<ib::cfg::IParticipantConfiguration> configuration;
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
         configuration = !configurationFilename.empty() ?
-            ib::cfg::ParticipantConfigurationFromFile(configurationFilename) :
-            ib::cfg::ParticipantConfigurationFromString("");
+            SilKit::Config::ParticipantConfigurationFromFile(configurationFilename) :
+            SilKit::Config::ParticipantConfigurationFromString("");
     }
-    catch (const ib::ConfigurationError& error)
+    catch (const SilKit::ConfigurationError& error)
     {
         std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
@@ -291,7 +291,7 @@ int main(int argc, char** argv)
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()), std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
 
-        auto participant = ib::CreateParticipant(configuration, participantName, connectUri);
+        auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
 
         auto systemMonitor = participant->GetSystemMonitor();
         auto systemController = participant->GetSystemController();

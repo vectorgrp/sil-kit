@@ -1,10 +1,10 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
-#include "ib/capi/IntegrationBus.h"
-#include "ib/IntegrationBus.hpp"
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/all.hpp"
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/sim/data/all.hpp"
+#include "silkit/capi/SilKit.h"
+#include "silkit/SilKit.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/pubsub/all.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
@@ -18,9 +18,9 @@
 
 extern "C" {
 
-ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_Participant* participant,
+SilKit_ReturnCode SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
                                            const char* controllerName, const char* topic,
-                                           const char* mediaType, const ib_KeyValueList* labels,
+                                           const char* mediaType, const SilKit_KeyValueList* labels,
                                            uint8_t history)
     {
     ASSERT_VALID_OUT_PARAMETER(outPublisher);
@@ -30,34 +30,34 @@ ib_ReturnCode ib_Data_Publisher_Create(ib_Data_Publisher** outPublisher, ib_Part
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         auto dataPublisher = cppParticipant->CreateDataPublisher(controllerName, topic, mediaType, cppLabels, history);
-        *outPublisher = reinterpret_cast<ib_Data_Publisher*>(dataPublisher);
-        return ib_ReturnCode_SUCCESS;
+        *outPublisher = reinterpret_cast<SilKit_DataPublisher*>(dataPublisher);
+        return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Publisher_Publish(ib_Data_Publisher* self, const ib_ByteVector* data)
+SilKit_ReturnCode SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(data);
     CAPI_ENTER
     {
-        auto cppPublisher = reinterpret_cast<ib::sim::data::IDataPublisher*>(self);
+        auto cppPublisher = reinterpret_cast<SilKit::Services::PubSub::IDataPublisher*>(self);
         cppPublisher->Publish(std::vector<uint8_t>(data->data, data->data + data->size));
-        return ib_ReturnCode_SUCCESS;
+        return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_Participant* participant,
+SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant,
                                         const char* controllerName, const char* topic, const char* mediaType,
-                                        const ib_KeyValueList* labels, void* defaultDataHandlerContext,
-                                        ib_Data_DataMessageHandler_t defaultDataHandler, void* newDataSourceContext,
-                                        ib_Data_NewDataPublisherHandler_t newDataSourceHandler)
+                                        const SilKit_KeyValueList* labels, void* defaultDataHandlerContext,
+                                        SilKit_DataMessageHandler_t defaultDataHandler, void* newDataSourceContext,
+                                        SilKit_NewDataPublisherHandler_t newDataSourceHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(outSubscriber);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -67,22 +67,22 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_P
     ASSERT_VALID_HANDLER_PARAMETER(newDataSourceHandler);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<ib::mw::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
 
         auto cppDefaultDataHandler = [defaultDataHandler, defaultDataHandlerContext](
-                                         ib::sim::data::IDataSubscriber* cppSubscriber,
-                                         const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
-            auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
+                                         SilKit::Services::PubSub::IDataSubscriber* cppSubscriber,
+                                         const SilKit::Services::PubSub::DataMessageEvent& cppDataMessageEvent) {
+            auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriber);
             uint8_t* payloadPointer = nullptr;
             if (cppDataMessageEvent.data.size() > 0)
             {
                 payloadPointer = (uint8_t*) &(cppDataMessageEvent.data[0]);
             }
 
-            ib_Data_DataMessageEvent cDataMessageEvent;
-            cDataMessageEvent.interfaceId = ib_InterfaceIdentifier_DataMessageEvent;
+            SilKit_DataMessageEvent cDataMessageEvent;
+            cDataMessageEvent.interfaceId = SilKit_InterfaceIdentifier_DataMessageEvent;
             cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
             cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
             
@@ -90,15 +90,15 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_P
         };
 
         auto cppNewDataSourceHandler = [newDataSourceHandler, newDataSourceContext](
-                                           ib::sim::data::IDataSubscriber* cppSubscriber,
-                                           const ib::sim::data::NewDataPublisherEvent& cppNewDataPublisherEvent) {
-            auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriber);
+                                           SilKit::Services::PubSub::IDataSubscriber* cppSubscriber,
+                                           const SilKit::Services::PubSub::NewDataPublisherEvent& cppNewDataPublisherEvent) {
+            auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriber);
 
-            ib_KeyValueList* cLabels;
+            SilKit_KeyValueList* cLabels;
             assign(&cLabels, cppNewDataPublisherEvent.labels);
 
-            ib_Data_NewDataPublisherEvent cNewDataPublisherEvent;
-            cNewDataPublisherEvent.interfaceId = ib_InterfaceIdentifier_NewDataPublisherEvent;
+            SilKit_NewDataPublisherEvent cNewDataPublisherEvent;
+            cNewDataPublisherEvent.interfaceId = SilKit_InterfaceIdentifier_NewDataPublisherEvent;
             cNewDataPublisherEvent.timestamp = cppNewDataPublisherEvent.timestamp.count();
             cNewDataPublisherEvent.topic = cppNewDataPublisherEvent.topic.c_str();
             cNewDataPublisherEvent.mediaType = cppNewDataPublisherEvent.mediaType.c_str();
@@ -109,46 +109,46 @@ ib_ReturnCode ib_Data_Subscriber_Create(ib_Data_Subscriber** outSubscriber, ib_P
 
         auto dataSubscriber = cppParticipant->CreateDataSubscriber(controllerName, topic, mediaType, cppLabels,
                                                                cppDefaultDataHandler, cppNewDataSourceHandler);
-        *outSubscriber = reinterpret_cast<ib_Data_Subscriber*>(dataSubscriber);
-        return ib_ReturnCode_SUCCESS;
+        *outSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(dataSubscriber);
+        return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_SetDefaultDataMessageHandler(ib_Data_Subscriber* self, void* context,
-                                                      ib_Data_DataMessageHandler_t dataHandler)
+SilKit_ReturnCode SilKit_DataSubscriber_SetDefaultDataMessageHandler(SilKit_DataSubscriber* self, void* context,
+                                                      SilKit_DataMessageHandler_t dataHandler)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
     CAPI_ENTER
     {
-        auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
+        auto cppSubscriber = reinterpret_cast<SilKit::Services::PubSub::IDataSubscriber*>(self);
     cppSubscriber->SetDefaultDataMessageHandler(
-        [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
-            const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
-                auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
+        [dataHandler, context](SilKit::Services::PubSub::IDataSubscriber* cppSubscriberHandler,
+            const SilKit::Services::PubSub::DataMessageEvent& cppDataMessageEvent) {
+                auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriberHandler);
                 uint8_t* payloadPointer = nullptr;
                 if (cppDataMessageEvent.data.size() > 0)
                 {
                     payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
                 }
-                ib_Data_DataMessageEvent cDataMessageEvent;
-                cDataMessageEvent.interfaceId = ib_InterfaceIdentifier_DataMessageEvent;
+                SilKit_DataMessageEvent cDataMessageEvent;
+                cDataMessageEvent.interfaceId = SilKit_InterfaceIdentifier_DataMessageEvent;
                 cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
                 cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
 
                 dataHandler(context, cSubscriber, &cDataMessageEvent);
             });
-        return ib_ReturnCode_SUCCESS;
+        return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(ib_Data_Subscriber* self, void* context,
-                                                               ib_Data_DataMessageHandler_t dataHandler,
+SilKit_ReturnCode SilKit_DataSubscriber_AddExplicitDataMessageHandler(SilKit_DataSubscriber* self, void* context,
+                                                               SilKit_DataMessageHandler_t dataHandler,
                                                                const char* mediaType,
-                                                               const ib_KeyValueList* labels,
-                                                               ib_HandlerId * outHandlerId)
+                                                               const SilKit_KeyValueList* labels,
+                                                               SilKit_HandlerId * outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
@@ -156,40 +156,40 @@ ib_ReturnCode ib_Data_Subscriber_AddExplicitDataMessageHandler(ib_Data_Subscribe
     ASSERT_VALID_OUT_PARAMETER(outHandlerId);
     CAPI_ENTER
     {
-        auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
+        auto cppSubscriber = reinterpret_cast<SilKit::Services::PubSub::IDataSubscriber*>(self);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         auto cppHandlerId = cppSubscriber->AddExplicitDataMessageHandler(
-            [dataHandler, context](ib::sim::data::IDataSubscriber* cppSubscriberHandler,
-                                         const ib::sim::data::DataMessageEvent& cppDataMessageEvent) {
-                auto* cSubscriber = reinterpret_cast<ib_Data_Subscriber*>(cppSubscriberHandler);
+            [dataHandler, context](SilKit::Services::PubSub::IDataSubscriber* cppSubscriberHandler,
+                                         const SilKit::Services::PubSub::DataMessageEvent& cppDataMessageEvent) {
+                auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriberHandler);
                 uint8_t* payloadPointer = nullptr;
                 if (cppDataMessageEvent.data.size() > 0)
                 {
                     payloadPointer = (uint8_t* ) &(cppDataMessageEvent.data[0]);
                 }
-                ib_Data_DataMessageEvent cDataMessageEvent;
-                cDataMessageEvent.interfaceId = ib_InterfaceIdentifier_DataMessageEvent;
+                SilKit_DataMessageEvent cDataMessageEvent;
+                cDataMessageEvent.interfaceId = SilKit_InterfaceIdentifier_DataMessageEvent;
                 cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
                 cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
 
                 dataHandler(context, cSubscriber, &cDataMessageEvent);
             }, mediaType, cppLabels);
-        *outHandlerId = static_cast<ib_HandlerId>(cppHandlerId);
-        return ib_ReturnCode_SUCCESS;
+        *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
+        return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-ib_ReturnCode ib_Data_Subscriber_RemoveExplicitDataMessageHandler(ib_Data_Subscriber* self,
-                                                                  ib_HandlerId handlerId)
+SilKit_ReturnCode SilKit_DataSubscriber_RemoveExplicitDataMessageHandler(SilKit_DataSubscriber* self,
+                                                                  SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     CAPI_ENTER
     {
-        auto cppSubscriber = reinterpret_cast<ib::sim::data::IDataSubscriber*>(self);
-        cppSubscriber->RemoveExplicitDataMessageHandler(static_cast<ib::util::HandlerId>(handlerId));
-        return ib_ReturnCode_SUCCESS;
+        auto cppSubscriber = reinterpret_cast<SilKit::Services::PubSub::IDataSubscriber*>(self);
+        cppSubscriber->RemoveExplicitDataMessageHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+        return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }

@@ -6,26 +6,26 @@
 
 TEST(MwVAsioSerdes, Mw_Service)
 {
-    ib::mw::MessageBuffer buffer;
+    SilKit::Core::MessageBuffer buffer;
 
-    ib::mw::service::ParticipantDiscoveryEvent in{};
+    SilKit::Core::Discovery::ParticipantDiscoveryEvent in{};
     in.participantName = "Input";
     for (auto i = 0; i < 10; i++) {
-        ib::mw::SupplementalData supplementalData;
+        SilKit::Core::SupplementalData supplementalData;
         supplementalData["hello"] = "world";
 
-        ib::mw::ServiceDescriptor descr;
+        SilKit::Core::ServiceDescriptor descr;
         descr.SetParticipantName("Participant" + std::to_string(i));
         descr.SetNetworkName("Link" + std::to_string(i));
         descr.SetServiceName("Service" + std::to_string(i));
-        descr.SetServiceId(static_cast<ib::mw::EndpointId>(i));
-        descr.SetServiceType(ib::mw::ServiceType::SimulatedController);
+        descr.SetServiceId(static_cast<SilKit::Core::EndpointId>(i));
+        descr.SetServiceType(SilKit::Core::ServiceType::SimulatedController);
         descr.SetSupplementalData(supplementalData);
         descr.SetSupplementalDataItem("Second", "Supplement");
         in.services.push_back(descr);
     }
 
-    ib::mw::service::ParticipantDiscoveryEvent out{};
+    SilKit::Core::Discovery::ParticipantDiscoveryEvent out{};
     
     Serialize(buffer, in);
     Deserialize(buffer, out);

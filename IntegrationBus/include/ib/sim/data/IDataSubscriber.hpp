@@ -3,11 +3,11 @@
 #pragma once
 
 #include "DataMessageDatatypes.hpp"
-#include "ib/util/HandlerId.hpp"
+#include "silkit/util/HandlerId.hpp"
 
-namespace ib {
-namespace sim {
-namespace data {
+namespace SilKit {
+namespace Services {
+namespace PubSub {
 
 class IDataSubscriber
 {
@@ -47,6 +47,6 @@ public:
 //  Inline Implementations
 // ================================================================================
 
-} // namespace data
-} // namespace sim
-} // namespace ib
+} // namespace PubSub
+} // namespace Services
+} // namespace SilKit

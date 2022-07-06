@@ -3,19 +3,19 @@
 #pragma once
 
 #include "SyncDatatypes.hpp"
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
-class IIbToTimeSyncService
-    : public mw::IIbReceiver<ParticipantCommand, NextSimTask, SystemCommand>
-    , public mw::IIbSender<ParticipantStatus, NextSimTask>
+class IMsgForTimeSyncService
+    : public Core::IReceiver<ParticipantCommand, NextSimTask, SystemCommand>
+    , public Core::ISender<ParticipantStatus, NextSimTask>
 {
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

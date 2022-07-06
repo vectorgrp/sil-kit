@@ -2,11 +2,11 @@
 #include <string>
 
 #pragma once
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 // Set the name for the current thread.
 void SetThreadName(const std::string& threadName);
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

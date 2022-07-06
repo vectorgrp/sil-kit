@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "IIbToCanController.hpp"
+#include "IMsgForCanController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
 
 #include "ISimBehavior.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
 class CanController;
 
@@ -18,25 +18,25 @@ class SimBehaviorTrivial : public ISimBehavior
 {
 public:
 
-    SimBehaviorTrivial(mw::IParticipantInternal* participant, CanController* canController,
-                      mw::sync::ITimeProvider* timeProvider);
+    SimBehaviorTrivial(Core::IParticipantInternal* participant, CanController* canController,
+                      Core::Orchestration::ITimeProvider* timeProvider);
 
-    auto AllowReception(const mw::IIbServiceEndpoint* from) const -> bool override;
-    void SendIbMessage(CanConfigureBaudrate&& /*baudRate*/) override;
-    void SendIbMessage(CanSetControllerMode&& mode) override;
-    void SendIbMessage(CanFrameEvent&& canFrameEvent) override;
+    auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
+    void SendMsg(CanConfigureBaudrate&& /*baudRate*/) override;
+    void SendMsg(CanSetControllerMode&& mode) override;
+    void SendMsg(CanFrameEvent&& canFrameEvent) override;
 
 private:
     template <typename MsgT>
-    void ReceiveIbMessage(const MsgT& msg);
+    void ReceiveSilKitMessage(const MsgT& msg);
 
-    mw::IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     CanController* _parentController{nullptr};
-    const mw::IIbServiceEndpoint* _parentServiceEndpoint{nullptr};
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    extensions::Tracer _tracer;
+    const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Tracer _tracer;
 };
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

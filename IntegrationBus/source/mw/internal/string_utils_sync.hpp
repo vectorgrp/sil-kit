@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "SyncDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 inline std::string to_string(const NextSimTask& nextTask);
 
@@ -29,12 +29,12 @@ std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
 {
     auto tp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.timePoint);
     auto duration = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(nextTask.duration);
-    out << "sync::NextSimTask{tp=" << tp.count()
+    out << "Orchestration::NextSimTask{tp=" << tp.count()
         << "ms, duration=" << duration.count()
         << "ms}";
     return out;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

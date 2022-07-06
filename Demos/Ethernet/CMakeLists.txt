@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-make_ib_demo(IbDemoEthernet  EthernetDemo.cpp)
+make_silkit_demo(SilKitDemoEthernet  EthernetDemo.cpp)
 
-target_sources(IbDemoEthernet
-    PRIVATE IbConfig_DemoEthernet.json
+target_sources(SilKitDemoEthernet
+    PRIVATE SilKitConfig_DemoEthernet.json
     PRIVATE NetworkSimulatorConfig.json
 )

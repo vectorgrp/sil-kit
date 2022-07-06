@@ -33,20 +33,20 @@
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/predicative_get.hpp"
 
-#include "ib/version.hpp"
+#include "silkit/version.hpp"
 
 #include "Participant.hpp"
 
 #include "MessageTracing.hpp"
 #include "UuidRandom.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
-using namespace ib::sim;
+using namespace SilKit::Services;
 using namespace std::chrono_literals;
 
-namespace tt = util::tuple_tools;
+namespace tt = Util::tuple_tools;
 
 // Anonymous namespace for Helper Traits and Functions
 namespace {
@@ -58,13 +58,13 @@ struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> :
 
 } // namespace anonymous
 
-template <class IbConnectionT>
-Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participantConfig,
+template <class SilKitConnectionT>
+Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig,
                                         const std::string& participantName, ProtocolVersion version)
     : _participantName{participantName}
     , _participantConfig{participantConfig}
-    , _participantId{util::hash::Hash(participantName)}
-    , _ibConnection{_participantConfig, participantName, _participantId, version}
+    , _participantId{Util::Hash::Hash(participantName)}
+    , _connection{_participantConfig, participantName, _participantId, version}
 {
     std::string logParticipantNotice; //!< We defer logging the notice until the logger is created
     if (!_participantConfig.participantName.empty() && _participantConfig.participantName != participantName)
@@ -76,11 +76,11 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
     }
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = std::make_unique<logging::Logger>(_participantName, _participantConfig.logging);
-    _ibConnection.SetLogger(_logger.get());
+    _logger = std::make_unique<Logging::Logger>(_participantName, _participantConfig.logging);
+    _connection.SetLogger(_logger.get());
 
-    _logger->Info("Creating Participant for Participant {}, IntegrationBus-Version: {}, Middleware: {}",
-                  _participantName, version::String(), "VAsio");
+    _logger->Info("Creating Participant for Participant {}, SilKit-Version: {}, Middleware: {}",
+                  _participantName, Version::String(), "VAsio");
 
     if (!logParticipantNotice.empty())
     {
@@ -89,17 +89,17 @@ Participant<IbConnectionT>::Participant(cfg::ParticipantConfiguration participan
 }
 
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::JoinIbDomain(const std::string& registryUri)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::JoinSilKitDomain(const std::string& registryUri)
 {
-    _ibConnection.JoinDomain(registryUri);
-    OnIbDomainJoined();
+    _connection.JoinDomain(registryUri);
+    OnSilKitDomainJoined();
 
     _logger->Info("Participant {} has connected to {}", _participantName, registryUri);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::OnIbDomainJoined()
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
 {
     SetupRemoteLogging();
 
@@ -111,9 +111,9 @@ void Participant<IbConnectionT>::OnIbDomainJoined()
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     auto* lifecycleService = GetLifecycleService();
-    auto* timeSyncService = dynamic_cast<mw::sync::TimeSyncService*>(lifecycleService->GetTimeSyncService());
+    auto* timeSyncService = dynamic_cast<Core::Orchestration::TimeSyncService*>(lifecycleService->GetTimeSyncService());
 
-    _ibConnection.SetTimeSyncService(timeSyncService);
+    _connection.SetTimeSyncService(timeSyncService);
 
     _timeProvider = timeSyncService;
 
@@ -132,41 +132,41 @@ void Participant<IbConnectionT>::OnIbDomainJoined()
 
     // Ensure shutdowns are cleanly handled.
     auto&& monitor = GetSystemMonitor();
-    monitor->AddSystemStateHandler([&conn = GetIbConnection()](auto newState) {
-        if (newState == sync::SystemState::ShuttingDown)
+    monitor->AddSystemStateHandler([&conn = GetSilKitConnection()](auto newState) {
+        if (newState == Orchestration::SystemState::ShuttingDown)
         {
             conn.NotifyShutdown();
         }
     });
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SetupRemoteLogging()
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SetupRemoteLogging()
 {
-    auto* logger = dynamic_cast<logging::Logger*>(_logger.get());
+    auto* logger = dynamic_cast<Logging::Logger*>(_logger.get());
     if (logger)
     {
         if (_participantConfig.logging.logFromRemotes)
         {
-            mw::SupplementalData supplementalData;
-            supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerReceiver;
+            Core::SupplementalData supplementalData;
+            supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLoggerReceiver;
 
-            CreateInternalController<logging::LogMsgReceiver>("LogMsgReceiver", mw::ServiceType::InternalController,
+            CreateInternalController<Logging::LogMsgReceiver>("LogMsgReceiver", Core::ServiceType::InternalController,
                                                       std::move(supplementalData), true, logger);
         }
 
         auto sinkIter = std::find_if(_participantConfig.logging.sinks.begin(), _participantConfig.logging.sinks.end(),
-            [](const cfg::Sink& sink) { return sink.type == cfg::Sink::Type::Remote; });
+            [](const Config::Sink& sink) { return sink.type == Config::Sink::Type::Remote; });
 
         if (sinkIter != _participantConfig.logging.sinks.end())
         {
-            mw::SupplementalData supplementalData;
-            supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLoggerSender;
+            Core::SupplementalData supplementalData;
+            supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLoggerSender;
 
-            auto&& logMsgSender = CreateInternalController<logging::LogMsgSender>(
-                "LogMsgSender", mw::ServiceType::InternalController, std::move(supplementalData), true);
+            auto&& logMsgSender = CreateInternalController<Logging::LogMsgSender>(
+                "LogMsgSender", Core::ServiceType::InternalController, std::move(supplementalData), true);
 
-            logger->RegisterRemoteLogging([logMsgSender](logging::LogMsg logMsg) {
+            logger->RegisterRemoteLogging([logMsgSender](Logging::LogMsg logMsg) {
 
                 logMsgSender->SendLogMsg(std::move(logMsg));
 
@@ -179,14 +179,14 @@ void Participant<IbConnectionT>::SetupRemoteLogging()
     }
 }
 
-template<class IbConnectionT>
-inline void Participant<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* newClock)
+template<class SilKitConnectionT>
+inline void Participant<SilKitConnectionT>::SetTimeProvider(Orchestration::ITimeProvider* newClock)
 {
     // Register the time provider with all already instantiated controllers
     auto setTimeProvider = [newClock](auto& controllers) {
         for (auto& controller: controllers)
         {
-            auto* ctl = dynamic_cast<ib::mw::sync::ITimeConsumer*>(controller.second.get());
+            auto* ctl = dynamic_cast<SilKit::Core::Orchestration::ITimeConsumer*>(controller.second.get());
             if (ctl)
             {
                 ctl->SetTimeProvider(newClock);
@@ -196,9 +196,9 @@ inline void Participant<IbConnectionT>::SetTimeProvider(sync::ITimeProvider* new
     tt::for_each(_controllers, setTimeProvider);
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <typename ConfigT>
-auto Participant<IbConnectionT>::GetConfigByControllerName(const std::vector<ConfigT>& controllers,
+auto Participant<SilKitConnectionT>::GetConfigByControllerName(const std::vector<ConfigT>& controllers,
                                                           const std::string& canonicalName) -> ConfigT
 {
     ConfigT controllerConfig;
@@ -217,10 +217,10 @@ auto Participant<IbConnectionT>::GetConfigByControllerName(const std::vector<Con
     return controllerConfig;
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <typename ValueT>
-void Participant<IbConnectionT>::UpdateOptionalConfigValue(const std::string& controllerName,
-                                                           ib::util::Optional<ValueT>& configuredValue,
+void Participant<SilKitConnectionT>::UpdateOptionalConfigValue(const std::string& controllerName,
+                                                           SilKit::Util::Optional<ValueT>& configuredValue,
                                                            const ValueT& passedValue)
 {
     if (!configuredValue.has_value())
@@ -235,17 +235,17 @@ void Participant<IbConnectionT>::UpdateOptionalConfigValue(const std::string& co
     }
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> can::ICanController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateCanController(const std::string& canonicalName, const std::string& networkName) -> Can::ICanController*
 {
-    ib::cfg::CanController controllerConfig = GetConfigByControllerName(_participantConfig.canControllers, canonicalName);
+    SilKit::Config::CanController controllerConfig = GetConfigByControllerName(_participantConfig.canControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeCan;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeCan;
 
-    auto controller = CreateController<ib::cfg::CanController, can::CanController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<SilKit::Config::CanController, Can::CanController>(
+        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider);
 
     controller->RegisterServiceDiscovery();
@@ -254,73 +254,73 @@ auto Participant<IbConnectionT>::CreateCanController(const std::string& canonica
 }
 
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateCanController(const std::string& canonicalName)
-    -> can::ICanController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateCanController(const std::string& canonicalName)
+    -> Can::ICanController*
 {
     return CreateCanController(canonicalName, canonicalName);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
-    -> eth::IEthernetController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
+    -> Ethernet::IEthernetController*
 {
-    ib::cfg::EthernetController controllerConfig = GetConfigByControllerName(_participantConfig.ethernetControllers, canonicalName);
+    SilKit::Config::EthernetController controllerConfig = GetConfigByControllerName(_participantConfig.ethernetControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeEthernet;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeEthernet;
 
-    auto controller = CreateController<ib::cfg::EthernetController, eth::EthController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<SilKit::Config::EthernetController, Ethernet::EthController>(
+        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider);
 
     controller->RegisterServiceDiscovery();
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateEthernetController(const std::string& canonicalName) -> eth::IEthernetController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string& canonicalName) -> Ethernet::IEthernetController*
 {
     return CreateEthernetController(canonicalName, canonicalName);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
-    -> sim::fr::IFlexrayController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
+    -> Services::Flexray::IFlexrayController*
 {
-    ib::cfg::FlexrayController controllerConfig = GetConfigByControllerName(_participantConfig.flexrayControllers, canonicalName);
+    SilKit::Config::FlexrayController controllerConfig = GetConfigByControllerName(_participantConfig.flexrayControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeFlexray;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeFlexray;
 
-    auto controller = CreateController<ib::cfg::FlexrayController, fr::FlexrayController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<SilKit::Config::FlexrayController, Flexray::FlexrayController>(
+        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider);
 
     controller->RegisterServiceDiscovery();
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFlexrayController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> Services::Flexray::IFlexrayController*
 {
     return CreateFlexrayController(canonicalName, canonicalName);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateLinController(const std::string& canonicalName, const std::string& networkName)
-    -> lin::ILinController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateLinController(const std::string& canonicalName, const std::string& networkName)
+    -> Lin::ILinController*
 {
-    ib::cfg::LinController controllerConfig = GetConfigByControllerName(_participantConfig.linControllers, canonicalName);
+    SilKit::Config::LinController controllerConfig = GetConfigByControllerName(_participantConfig.linControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLin;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLin;
 
-    auto controller = CreateController<ib::cfg::LinController, lin::LinController>(
-        controllerConfig, mw::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<SilKit::Config::LinController, Lin::LinController>(
+        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         _timeProvider);
 
     controller->RegisterServiceDiscovery();
@@ -328,91 +328,91 @@ auto Participant<IbConnectionT>::CreateLinController(const std::string& canonica
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateLinController(const std::string& canonicalName) -> lin::ILinController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateLinController(const std::string& canonicalName) -> Lin::ILinController*
 {
     return CreateLinController(canonicalName, canonicalName);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
                                                              const std::string& mediaType,
                                                              const std::map<std::string, std::string>& publisherLabels,
-                                                             sim::data::DataMessageHandlerT defaultHandler,
-                                                             sim::data::IDataSubscriber* parent)
-    -> sim::data::DataSubscriberInternal*
+                                                             Services::PubSub::DataMessageHandlerT defaultHandler,
+                                                             Services::PubSub::IDataSubscriber* parent)
+    -> Services::PubSub::DataSubscriberInternal*
 {
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriberInternal;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriberInternal;
 
-    ib::cfg::DataSubscriber controllerConfig;
+    SilKit::Config::DataSubscriber controllerConfig;
     // Use a unique name to avoid collisions of several subscribers on same topic on one participant
-    controllerConfig.name = util::uuid::to_string(util::uuid::generate());
+    controllerConfig.name = Util::Uuid::to_string(Util::Uuid::generate());
     std::string network = linkName;
 
-    return CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriberInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+    return CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         topic, mediaType, publisherLabels, defaultHandler, parent);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
     const std::string& mediaType, const std::map<std::string, std::string>& labels,
-    size_t history) -> sim::data::IDataPublisher*
+    size_t history) -> Services::PubSub::IDataPublisher*
 {
     if (history > 1)
     {
-        throw ib::ConfigurationError("DataPublishers do not support history > 1.");
+        throw SilKit::ConfigurationError("DataPublishers do not support history > 1.");
     }
 
-    std::string network = util::uuid::to_string(util::uuid::generate());
+    std::string network = Util::Uuid::to_string(Util::Uuid::generate());
 
-    ib::cfg::DataPublisher controllerConfig = GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
+    SilKit::Config::DataPublisher controllerConfig = GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, topic);
 
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataPublisher;
-    supplementalData[ib::mw::service::supplKeyDataPublisherTopic] = controllerConfig.topic.value();
-    supplementalData[ib::mw::service::supplKeyDataPublisherPubUUID] = network;
-    supplementalData[ib::mw::service::supplKeyDataPublisherMediaType] = mediaType;
-    auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[ib::mw::service::supplKeyDataPublisherPubLabels] = labelStr;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataPublisher;
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherTopic] = controllerConfig.topic.value();
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubUUID] = network;
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherMediaType] = mediaType;
+    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] = labelStr;
 
-    auto controller = CreateController<ib::cfg::DataPublisher, ib::sim::data::DataPublisher>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+    auto controller = CreateController<SilKit::Config::DataPublisher, SilKit::Services::PubSub::DataPublisher>(
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         controllerConfig.topic.value(), mediaType, labels, network);
 
-    _ibConnection.SetHistoryLengthForLink(network, history, controller);
+    _connection.SetHistoryLengthForLink(network, history, controller);
 
     return controller;
     
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& canonicalName) -> Services::PubSub::IDataPublisher*
 {
     return CreateDataPublisher(canonicalName, canonicalName, { "" }, {}, 0);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
                                                       const std::string& mediaType,
                                                       const std::map<std::string, std::string>& labels,
-                                                      ib::sim::data::DataMessageHandlerT defaultDataHandler,
-                                                      ib::sim::data::NewDataPublisherHandlerT newDataSourceHandler)
-    -> sim::data::IDataSubscriber*
+                                                      SilKit::Services::PubSub::DataMessageHandlerT defaultDataHandler,
+                                                      SilKit::Services::PubSub::NewDataPublisherHandlerT newDataSourceHandler)
+    -> Services::PubSub::IDataSubscriber*
 {
-    ib::cfg::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
+    SilKit::Config::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, topic);
 
     // Use unique network name that same topic for multiple DataSubscribers on one participant works
-    std::string network = util::uuid::to_string(util::uuid::generate());
+    std::string network = Util::Uuid::to_string(Util::Uuid::generate());
 
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeDataSubscriber;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriber;
 
-    auto controller = CreateController<ib::cfg::DataSubscriber, sim::data::DataSubscriber>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+    auto controller = CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriber>(
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         controllerConfig.topic.value(), mediaType, labels, defaultDataHandler, newDataSourceHandler);
 
     controller->RegisterServiceDiscovery();
@@ -420,58 +420,58 @@ auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonic
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateDataSubscriber(const std::string& canonicalName) -> Services::PubSub::IDataSubscriber*
 {
     return CreateDataSubscriber(canonicalName, canonicalName, { "" }, {}, nullptr, nullptr);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
                                                          const std::string& mediaType,
                                                          const std::map<std::string, std::string>& clientLabels,
-                                                         sim::rpc::RpcCallHandler handler,
-                                                         sim::rpc::IRpcServer* parent) -> sim::rpc::RpcServerInternal*
+                                                         Services::Rpc::RpcCallHandler handler,
+                                                         Services::Rpc::IRpcServer* parent) -> Services::Rpc::RpcServerInternal*
 {
     _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
 
-    ib::cfg::RpcServer controllerConfig;
+    SilKit::Config::RpcServer controllerConfig;
     // Use a unique name to avoid collisions of several RpcSevers on same functionName on one participant
-    controllerConfig.name = util::uuid::to_string(util::uuid::generate());
+    controllerConfig.name = Util::Uuid::to_string(Util::Uuid::generate());
     std::string network = clientUUID;
 
     // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServerInternal;
-    supplementalData[ib::mw::service::supplKeyRpcServerInternalClientUUID] = clientUUID;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServerInternal;
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
-    return CreateController<ib::cfg::RpcServer, sim::rpc::RpcServerInternal>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+    return CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServerInternal>(
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         functionName, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName, const std::string& functionName,
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonicalName, const std::string& functionName,
                                                  const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels,
-                                                 sim::rpc::RpcCallResultHandler handler) -> sim::rpc::IRpcClient*
+                                                 Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient*
 {
-    auto network = util::uuid::to_string(util::uuid::generate());
+    auto network = Util::Uuid::to_string(Util::Uuid::generate());
 
-    ib::cfg::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
+    SilKit::Config::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, functionName);
 
     // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcClient;
-    supplementalData[ib::mw::service::supplKeyRpcClientFunctionName] = controllerConfig.functionName.value();
-    supplementalData[ib::mw::service::supplKeyRpcClientMediaType] = mediaType;
-    auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[ib::mw::service::supplKeyRpcClientLabels] = labelStr;
-    supplementalData[ib::mw::service::supplKeyRpcClientUUID] = network;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcClient;
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientFunctionName] = controllerConfig.functionName.value();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientMediaType] = mediaType;
+    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] = labelStr;
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;
 
-    auto controller = CreateController<ib::cfg::RpcClient, ib::sim::rpc::RpcClient>(
-        controllerConfig, network, mw::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+    auto controller = CreateController<SilKit::Config::RpcClient, SilKit::Services::Rpc::RpcClient>(
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
         controllerConfig.functionName.value(), mediaType, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
@@ -480,34 +480,34 @@ auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalNam
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonicalName) -> Services::Rpc::IRpcClient*
 {
     return CreateRpcClient(canonicalName, canonicalName, { "" }, {}, nullptr);
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
                                                  const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels,
-                                                 sim::rpc::RpcCallHandler handler) -> sim::rpc::IRpcServer*
+                                                 Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer*
 {
     // Use unique network name that same functionName for multiple RpcServers on one participant works
-    std::string network = util::uuid::to_string(util::uuid::generate());
+    std::string network = Util::Uuid::to_string(Util::Uuid::generate());
 
-    ib::cfg::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
+    SilKit::Config::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, functionName);
 	
     // RpcServer announces himself to be found by DiscoverRpcServers()
-    mw::SupplementalData supplementalData;
-    supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeRpcServer;
-    supplementalData[ib::mw::service::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
-    supplementalData[ib::mw::service::supplKeyRpcServerMediaType] = mediaType;
-    auto labelStr = ib::cfg::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[ib::mw::service::supplKeyRpcServerLabels] = labelStr;
+    Core::SupplementalData supplementalData;
+    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = mediaType;
+    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] = labelStr;
 
-    auto controller = CreateController<ib::cfg::RpcServer, sim::rpc::RpcServer>(
-        controllerConfig, network, mw::ServiceType::Controller, supplementalData, true, _timeProvider,
+    auto controller = CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServer>(
+        controllerConfig, network, Core::ServiceType::Controller, supplementalData, true, _timeProvider,
         controllerConfig.functionName.value(), mediaType, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
@@ -516,55 +516,55 @@ auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalNam
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonicalName) -> Services::Rpc::IRpcServer*
 {
     return CreateRpcServer(canonicalName, canonicalName, { "" }, {}, nullptr);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
                                                     const std::map<std::string, std::string>& labels,
-                                                    sim::rpc::RpcDiscoveryResultHandler handler)
+                                                    Services::Rpc::RpcDiscoveryResultHandler handler)
 {
-    sim::rpc::RpcDiscoverer rpcDiscoverer{GetServiceDiscovery()};
+    Services::Rpc::RpcDiscoverer rpcDiscoverer{GetServiceDiscovery()};
     handler(rpcDiscoverer.GetMatchingRpcServers(functionName, mediaType, labels));
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::CreateTimeSyncService(sync::LifecycleService* service) -> sync::TimeSyncService*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::LifecycleService* service) -> Orchestration::TimeSyncService*
 {
     auto* timeSyncService =
-        GetController<sync::TimeSyncService>("default", ib::mw::service::controllerTypeTimeSyncService);
+        GetController<Orchestration::TimeSyncService>("default", SilKit::Core::Discovery::controllerTypeTimeSyncService);
 
     if (timeSyncService)
     {
         throw std::runtime_error("Tried to instantiate TimeSyncService multiple times!");
     }
 
-    mw::SupplementalData timeSyncSupplementalData;
-    timeSyncSupplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeTimeSyncService;
+    Core::SupplementalData timeSyncSupplementalData;
+    timeSyncSupplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeTimeSyncService;
 
-    timeSyncService = CreateInternalController<sync::TimeSyncService>(
-        ib::mw::service::controllerTypeTimeSyncService, mw::ServiceType::InternalController,
+    timeSyncService = CreateInternalController<Orchestration::TimeSyncService>(
+        SilKit::Core::Discovery::controllerTypeTimeSyncService, Core::ServiceType::InternalController,
         std::move(timeSyncSupplementalData), false, service, _participantConfig.healthCheck);
 
     return timeSyncService;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::GetLifecycleService() -> sync::ILifecycleService*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetLifecycleService() -> Orchestration::ILifecycleService*
 {
     auto* lifecycleService =
-        GetController<sync::LifecycleService>("default", ib::mw::service::controllerTypeLifecycleService);
+        GetController<Orchestration::LifecycleService>("default", SilKit::Core::Discovery::controllerTypeLifecycleService);
 
     if (!lifecycleService)
     {
-        mw::SupplementalData lifecycleSupplementalData;
-        lifecycleSupplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeLifecycleService;
+        Core::SupplementalData lifecycleSupplementalData;
+        lifecycleSupplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLifecycleService;
 
-        lifecycleService = CreateInternalController<sync::LifecycleService>(
-            ib::mw::service::controllerTypeLifecycleService, mw::ServiceType::InternalController,
+        lifecycleService = CreateInternalController<Orchestration::LifecycleService>(
+            SilKit::Core::Discovery::controllerTypeLifecycleService, Core::ServiceType::InternalController,
             std::move(lifecycleSupplementalData), false,
             _participantConfig.healthCheck);
     }
@@ -572,662 +572,662 @@ auto Participant<IbConnectionT>::GetLifecycleService() -> sync::ILifecycleServic
 }
 
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::GetSystemMonitor() -> sync::ISystemMonitor*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Orchestration::ISystemMonitor*
 {
-    auto* controller = GetController<sync::SystemMonitor>("default", "SystemMonitor");
+    auto* controller = GetController<Orchestration::SystemMonitor>("default", "SystemMonitor");
     if (!controller)
     {
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeSystemMonitor;
+        Core::SupplementalData supplementalData;
+        supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeSystemMonitor;
 
-        controller = CreateInternalController<sync::SystemMonitor>("SystemMonitor", mw::ServiceType::InternalController,
+        controller = CreateInternalController<Orchestration::SystemMonitor>("SystemMonitor", Core::ServiceType::InternalController,
                                                                    std::move(supplementalData), true);
 
-        _ibConnection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
+        _connection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
             controller->OnParticipantConnected(peer->GetInfo().participantName);
         });
 
-        _ibConnection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
+        _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticipantDisconnected(peer->GetInfo().participantName);
         });
     }
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::GetServiceDiscovery() -> service::IServiceDiscovery*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServiceDiscovery*
 {
-    auto* controller = GetController<service::ServiceDiscovery>("default", "ServiceDiscovery");
+    auto* controller = GetController<Discovery::ServiceDiscovery>("default", "ServiceDiscovery");
     if (!controller)
     {
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeServiceDiscovery;
+        Core::SupplementalData supplementalData;
+        supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeServiceDiscovery;
 
-        controller = CreateInternalController<service::ServiceDiscovery>(
-            "ServiceDiscovery", mw::ServiceType::InternalController, std::move(supplementalData), true, _participantName);
+        controller = CreateInternalController<Discovery::ServiceDiscovery>(
+            "ServiceDiscovery", Core::ServiceType::InternalController, std::move(supplementalData), true, _participantName);
         
-        _ibConnection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
+        _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticpantRemoval(peer->GetInfo().participantName);
         });
     }
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::GetSystemController() -> sync::ISystemController*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetSystemController() -> Orchestration::ISystemController*
 {
-    auto* controller = GetController<sync::SystemController>("default", "SystemController");
+    auto* controller = GetController<Orchestration::SystemController>("default", "SystemController");
     if (!controller)
     {
-        mw::SupplementalData supplementalData;
-        supplementalData[ib::mw::service::controllerType] = ib::mw::service::controllerTypeSystemController;
+        Core::SupplementalData supplementalData;
+        supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeSystemController;
 
-        return CreateInternalController<sync::SystemController>("SystemController", mw::ServiceType::InternalController,
+        return CreateInternalController<Orchestration::SystemController>("SystemController", Core::ServiceType::InternalController,
                                                                 std::move(supplementalData), true);
     }
     return controller;
 }
 
-template <class IbConnectionT>
-auto Participant<IbConnectionT>::GetLogger() -> logging::ILogger*
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetLogger() -> Logging::ILogger*
 {
     return _logger.get();
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::RegisterCanSimulator(can::IIbToCanSimulator* busSim,  const std::vector<std::string>& networkNames)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::RegisterCanSimulator(Can::IMsgForCanSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::NetworkType::CAN, networkNames);
+    RegisterSimulator(busSim, Config::NetworkType::CAN, networkNames);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::RegisterEthSimulator(sim::eth::IIbToEthSimulator* busSim,  const std::vector<std::string>& networkNames)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::NetworkType::Ethernet, networkNames);
+    RegisterSimulator(busSim, Config::NetworkType::Ethernet, networkNames);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::RegisterFlexraySimulator(sim::fr::IIbToFlexrayBusSimulator* busSim,  const std::vector<std::string>& networkNames)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::NetworkType::FlexRay, networkNames);
+    RegisterSimulator(busSim, Config::NetworkType::FlexRay, networkNames);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::RegisterLinSimulator(sim::lin::IIbToLinSimulator* busSim,  const std::vector<std::string>& networkNames)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::RegisterLinSimulator(Services::Lin::IMsgForLinSimulator* busSim,  const std::vector<std::string>& networkNames)
 {
-    RegisterSimulator(busSim, cfg::NetworkType::LIN, networkNames);
+    RegisterSimulator(busSim, Config::NetworkType::LIN, networkNames);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanFrameEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::CanFrameEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, can::CanFrameEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Can::CanFrameEvent&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanFrameTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::CanFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanControllerStatus& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::CanControllerStatus& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanConfigureBaudrate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::CanConfigureBaudrate& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const can::CanSetControllerMode& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::CanSetControllerMode& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetFrameEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Ethernet::EthernetFrameEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, eth::EthernetFrameEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Ethernet::EthernetFrameEvent&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetFrameTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Ethernet::EthernetFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetStatus& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Ethernet::EthernetStatus& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const eth::EthernetSetMode& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Ethernet::EthernetSetMode& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayFrameEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FlexrayFrameEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameEvent&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayFrameTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::fr::FlexrayFrameTransmitEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameTransmitEvent&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexraySymbolEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexraySymbolEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexraySymbolTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexraySymbolTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayCycleStartEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayCycleStartEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayHostCommand& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayHostCommand& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayControllerConfig& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayControllerConfig& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferConfigUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayTxBufferUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferUpdate& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::fr::FlexrayPocStatusEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayPocStatusEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameRequest& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinSendFrameRequest& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinSendFrameHeaderRequest& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinSendFrameHeaderRequest& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinTransmission& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinTransmission& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinWakeupPulse& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinWakeupPulse& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerConfig& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerConfig& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinControllerStatusUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::lin::LinFrameResponseUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::data::DataMessageEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::data::DataMessageEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCall& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCall&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Rpc::FunctionCall&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sim::rpc::FunctionCallResponse& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCallResponse& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, sim::rpc::FunctionCallResponse&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Rpc::FunctionCallResponse&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::NextSimTask& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::NextSimTask& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantStatus& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::ParticipantCommand& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::ParticipantCommand& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::SystemCommand& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::SystemCommand& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const sync::WorkflowConfiguration& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const logging::LogMsg& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Logging::LogMsg& msg)
 {
-    SendIbMessageImpl(from, msg);
+    SendMsgImpl(from, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, logging::LogMsg&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Logging::LogMsg&& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ParticipantDiscoveryEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Discovery::ParticipantDiscoveryEvent& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const service::ServiceDiscoveryEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Discovery::ServiceDiscoveryEvent& msg)
 {
-    SendIbMessageImpl(from, std::move(msg));
+    SendMsgImpl(from, std::move(msg));
 }
 
-template <class IbConnectionT>
-template <typename IbMessageT>
-void Participant<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
+template <class SilKitConnectionT>
+template <typename SilKitMessageT>
+void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
 {
     TraceTx(_logger.get(), from, msg);
-    _ibConnection.SendIbMessage(from, std::forward<IbMessageT>(msg));
+    _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
 }
 
 // targeted messaging
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanFrameEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::CanFrameEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, can::CanFrameEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Can::CanFrameEvent&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanFrameTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::CanFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanControllerStatus& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::CanControllerStatus& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanConfigureBaudrate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::CanConfigureBaudrate& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const can::CanSetControllerMode& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::CanSetControllerMode& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetFrameEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Ethernet::EthernetFrameEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, eth::EthernetFrameEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Ethernet::EthernetFrameEvent&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetFrameTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Ethernet::EthernetFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetStatus& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Ethernet::EthernetStatus& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const eth::EthernetSetMode& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Ethernet::EthernetSetMode& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameEvent&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayFrameTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, sim::fr::FlexrayFrameTransmitEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameTransmitEvent&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexraySymbolTransmitEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolTransmitEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayCycleStartEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayCycleStartEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayHostCommand& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayHostCommand& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayControllerConfig& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayControllerConfig& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferConfigUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayTxBufferUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferUpdate& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::fr::FlexrayPocStatusEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayPocStatusEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameRequest& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameRequest& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinSendFrameHeaderRequest& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameHeaderRequest& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinTransmission& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinTransmission& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinWakeupPulse& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinWakeupPulse& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerConfig& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerConfig& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinControllerStatusUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sim::lin::LinFrameResponseUpdate& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sim::data::DataMessageEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const Services::PubSub::DataMessageEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              sim::data::DataMessageEvent&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              Services::PubSub::DataMessageEvent&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sim::rpc::FunctionCall& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const Services::Rpc::FunctionCall& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              sim::rpc::FunctionCall&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              Services::Rpc::FunctionCall&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sim::rpc::FunctionCallResponse& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const Services::Rpc::FunctionCallResponse& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              sim::rpc::FunctionCallResponse&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              Services::Rpc::FunctionCallResponse&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const sync::NextSimTask& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                              const Orchestration::NextSimTask& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantStatus& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantStatus& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::ParticipantCommand& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantCommand& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::SystemCommand& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const sync::WorkflowConfiguration& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const logging::LogMsg& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Logging::LogMsg& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, logging::LogMsg&& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Logging::LogMsg&& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, std::move(msg));
+    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ParticipantDiscoveryEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ParticipantDiscoveryEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, const service::ServiceDiscoveryEvent& msg)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ServiceDiscoveryEvent& msg)
 {
-    SendIbMessageImpl(from, targetParticipantName, msg);
+    SendMsgImpl(from, targetParticipantName, msg);
 }
 
-template <class IbConnectionT>
-template <typename IbMessageT>
-void Participant<IbConnectionT>::SendIbMessageImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
+template <class SilKitConnectionT>
+template <typename SilKitMessageT>
+void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg)
 {
     TraceTx(_logger.get(), from, msg);
-    _ibConnection.SendIbMessage(from, targetParticipantName, std::forward<IbMessageT>(msg));
+    _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
 }
 
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <class ControllerT>
-auto Participant<IbConnectionT>::GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*
+auto Participant<SilKitConnectionT>::GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
     const auto&& qualifiedName = networkName + "/" + serviceName;
@@ -1241,25 +1241,25 @@ auto Participant<IbConnectionT>::GetController(const std::string& networkName, c
     }
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <class ControllerT, typename... Arg>
-auto Participant<IbConnectionT>::CreateInternalController(const std::string& serviceName,
-                                                          const mw::ServiceType serviceType,
-                                                          const mw::SupplementalData& supplementalData,
+auto Participant<SilKitConnectionT>::CreateInternalController(const std::string& serviceName,
+                                                          const Core::ServiceType serviceType,
+                                                          const Core::SupplementalData& supplementalData,
                                                           const bool publishService, Arg&&... arg) -> ControllerT*
 {
-    cfg::InternalController config;
+    Config::InternalController config;
     config.name = serviceName;
     config.network = "default";
 
-    return CreateController<cfg::InternalController, ControllerT>(config, serviceType, supplementalData, publishService, 
+    return CreateController<Config::InternalController, ControllerT>(config, serviceType, supplementalData, publishService, 
                                                                   std::forward<Arg>(arg)...);
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <class ConfigT, class ControllerT, typename... Arg>
-auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const mw::ServiceType serviceType,
-                                                  const mw::SupplementalData& supplementalData,
+auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, const Core::ServiceType serviceType,
+                                                  const Core::SupplementalData& supplementalData,
                                                   const bool publishService,
                                                   Arg&&... arg) -> ControllerT*
 {
@@ -1268,17 +1268,17 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const m
                                                   publishService, std::forward<Arg>(arg)...);
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <class ConfigT, class ControllerT, typename... Arg>
-auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const std::string& network,
-                                                  const mw::ServiceType serviceType,
-                                                  const mw::SupplementalData& supplementalData,
+auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, const std::string& network,
+                                                  const Core::ServiceType serviceType,
+                                                  const Core::SupplementalData& supplementalData,
                                                   const bool publishService,
                                                   Arg&&... arg) -> ControllerT*
 {
     if (config.name == "")
     {
-        throw ib::ConfigurationError("Services must have a non-empty name.");
+        throw SilKit::ConfigurationError("Services must have a non-empty name.");
     }
 
     // If possible, load controller from cache
@@ -1306,12 +1306,12 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const s
 
     controller->SetServiceDescriptor(std::move(descriptor));
 
-    _ibConnection.RegisterIbService(network, localEndpoint, controllerPtr);
+    _connection.RegisterSilKitService(network, localEndpoint, controllerPtr);
     const auto qualifiedName = network + "/" + config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
     // TODO uncomment once trace & replay work again
-    //auto* traceSource = dynamic_cast<extensions::ITraceMessageSource*>(controllerPtr);
+    //auto* traceSource = dynamic_cast<ITraceMessageSource*>(controllerPtr);
     //if (traceSource)
     //{
     //    AddTraceSinksToSource(traceSource, config);
@@ -1323,9 +1323,9 @@ auto Participant<IbConnectionT>::CreateController(const ConfigT& config, const s
     return controllerPtr;
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <class ConfigT>
-void Participant<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessageSource* traceSource, ConfigT config)
+void Participant<SilKitConnectionT>::AddTraceSinksToSource(ITraceMessageSource* traceSource, ConfigT config)
 {
     if (config.useTraceSinks.empty())
     {
@@ -1350,21 +1350,21 @@ void Participant<IbConnectionT>::AddTraceSinksToSource(extensions::ITraceMessage
                 << sinkName;
 
             GetLogger()->Error(ss.str());
-            throw ib::ConfigurationError(ss.str());
+            throw SilKit::ConfigurationError(ss.str());
         }
         traceSource->AddSink((*sinkIter).get());
     }
 }
 
-template <class IbConnectionT>
-template <class IIbToSimulatorT>
-void Participant<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg::NetworkType linkType,
+template <class SilKitConnectionT>
+template <class IMsgForSimulatorT>
+void Participant<SilKitConnectionT>::RegisterSimulator(IMsgForSimulatorT* busSim, Config::NetworkType linkType,
                                                   const std::vector<std::string>& simulatedNetworkNames)
 {
-    auto& serviceEndpoint = dynamic_cast<mw::IIbServiceEndpoint&>(*busSim);
+    auto& serviceEndpoint = dynamic_cast<Core::IServiceEndpoint&>(*busSim);
     auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
     //XXX we temporarily overwrite the simulator's serviceEndpoint (not used internally)
-    //    only for RegisterIbService: we should refactor RegisterIbService to accept the ServiceDescriptor directly
+    //    only for RegisterSilKitService: we should refactor RegisterSilKitService to accept the ServiceDescriptor directly
     for (const auto& network: simulatedNetworkNames)
     {
         auto id = ServiceDescriptor{};
@@ -1376,32 +1376,32 @@ void Participant<IbConnectionT>::RegisterSimulator(IIbToSimulatorT* busSim, cfg:
         serviceEndpoint.SetServiceDescriptor(id);
         // Tell the middle-ware we are interested in this named network of the given type
         EndpointId unused{}; //not used in VAsioConnection.hpp
-        _ibConnection.RegisterIbService(network, unused, busSim);
+        _connection.RegisterSilKitService(network, unused, busSim);
     }
     serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore 
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::OnAllMessagesDelivered(std::function<void()> callback)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::OnAllMessagesDelivered(std::function<void()> callback)
 {
-    _ibConnection.OnAllMessagesDelivered(std::move(callback));
+    _connection.OnAllMessagesDelivered(std::move(callback));
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::FlushSendBuffers()
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::FlushSendBuffers()
 {
-    _ibConnection.FlushSendBuffers();
+    _connection.FlushSendBuffers();
 }
 
-template <class IbConnectionT>
-void Participant<IbConnectionT>::ExecuteDeferred(std::function<void()> callback)
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::ExecuteDeferred(std::function<void()> callback)
 {
-    _ibConnection.ExecuteDeferred(std::move(callback));
+    _connection.ExecuteDeferred(std::move(callback));
 }
 
-template <class IbConnectionT>
+template <class SilKitConnectionT>
 template <typename ValueT>
-void Participant<IbConnectionT>::LogMismatchBetweenConfigAndPassedValue(const std::string& canonicalName,
+void Participant<SilKitConnectionT>::LogMismatchBetweenConfigAndPassedValue(const std::string& canonicalName,
                                                                         const ValueT& passedValue,
                                                                         const ValueT& configuredValue)
 {
@@ -1415,5 +1415,5 @@ void Participant<IbConnectionT>::LogMismatchBetweenConfigAndPassedValue(const st
     _logger->Info(ss.str());
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

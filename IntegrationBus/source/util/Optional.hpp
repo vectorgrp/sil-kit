@@ -2,8 +2,8 @@
 
 #pragma once
 
-namespace ib {
-namespace util {
+namespace SilKit {
+namespace Util {
 
 //! \brief Super simple drop in replacement for std::optional
 //!
@@ -71,5 +71,5 @@ bool operator==(const Optional<T>& lhs, const Optional<T>& rhs)
         && lhs.value() == rhs.value();
 }
 
-} // namespace util
-} // namespace ib
+} // namespace Util
+} // namespace SilKit

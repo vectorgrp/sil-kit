@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_subdirectory(IbRegistry)
-add_subdirectory(IbSystemController)
-add_subdirectory(IbSystemControllerInteractive)
-add_subdirectory(IbSystemMonitor)
+add_subdirectory(SilKitRegistry)
+add_subdirectory(SilKitSystemController)
+add_subdirectory(SilKitSystemControllerInteractive)
+add_subdirectory(SilKitSystemMonitor)

@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "ib/sim/rpc/IRpcCallHandle.hpp"
-#include "ib/sim/rpc/RpcDatatypes.hpp"
+#include "silkit/services/rpc/IRpcCallHandle.hpp"
+#include "silkit/services/rpc/RpcDatatypes.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 class CallHandleImpl : public IRpcCallHandle
 {
@@ -29,6 +29,6 @@ class CallHandleImpl : public IRpcCallHandle
     CallUUID _callUUID;
 };
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

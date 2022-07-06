@@ -3,26 +3,26 @@
 #pragma once
 
 // Static builds
-#ifdef IB_BUILD_STATIC
-#   define IntegrationBusAPI
-#elif defined(EXPORT_IntegrationBusAPI)
-// define IntegrationBusAPI as EXPORT
+#ifdef SILKIT_BUILD_STATIC
+#   define SilKitAPI
+#elif defined(EXPORT_SilKitAPI)
+// define SilKitAPI as EXPORT
 #    if defined(_WIN32)
-#        define IntegrationBusAPI __declspec(dllexport)
+#        define SilKitAPI __declspec(dllexport)
 #    elif defined(__GNUC__)
-#        define IntegrationBusAPI __attribute__((visibility("default")))
+#        define SilKitAPI __attribute__((visibility("default")))
 #    else
-#        define IntegrationBusAPI
+#        define SilKitAPI
 #        pragma warning Unknown dynamic link export semantics.
 #    endif
-#else // defined(EXPORT_IntegrationBusAPI)
-// declare IntegrationBusAPI as IMPORT
+#else // defined(EXPORT_SilKitAPI)
+// declare SilKitAPI as IMPORT
 #    if defined(_WIN32)
-#        define IntegrationBusAPI __declspec(dllimport)
+#        define SilKitAPI __declspec(dllimport)
 #    elif defined(__GNUC__)
-#        define IntegrationBusAPI
+#        define SilKitAPI
 #    else
-#        define IntegrationBusAPI
+#        define SilKitAPI
 #        pragma warning Unknown dynamic link import semantics.
 #    endif
-#endif // IB_BUILD_STATIC
+#endif // SILKIT_BUILD_STATIC

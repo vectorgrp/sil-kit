@@ -5,28 +5,28 @@
 #include <vector>
 #include <future>
 
-#include "ib/mw/fwd_decl.hpp"
-#include "ib/sim/rpc/IRpcServer.hpp"
-#include "ib/sim/rpc/IRpcCallHandle.hpp"
+#include "silkit/core/fwd_decl.hpp"
+#include "silkit/services/rpc/IRpcServer.hpp"
+#include "silkit/services/rpc/IRpcCallHandle.hpp"
 
 #include "ITimeConsumer.hpp"
-#include "IIbToRpcServer.hpp"
+#include "IMsgForRpcServer.hpp"
 #include "IParticipantInternal.hpp"
 #include "RpcServerInternal.hpp"
 #include "RpcCallHandle.hpp"
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 class RpcServer
     : public IRpcServer
-    , public IIbToRpcServer
-    , public mw::sync::ITimeConsumer
-    , public mw::IIbServiceEndpoint
+    , public IMsgForRpcServer
+    , public Core::Orchestration::ITimeConsumer
+    , public Core::IServiceEndpoint
 {
 public:
-    RpcServer(mw::IParticipantInternal* participant, mw::sync::ITimeProvider* timeProvider,
+    RpcServer(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
               const std::string& functionName, const std::string& mediaType,
               const std::map<std::string, std::string>& labels, RpcCallHandler handler);
 
@@ -36,12 +36,12 @@ public:
 
     void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) override;
 
-    //ib::mw::sync::ITimeConsumer
-    void SetTimeProvider(mw::sync::ITimeProvider* provider) override;
+    //SilKit::Core::Orchestration::ITimeConsumer
+    void SetTimeProvider(Core::Orchestration::ITimeProvider* provider) override;
 
-    // IIbServiceEndpoint
-    inline void SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor) override;
-    inline auto GetServiceDescriptor() const -> const mw::ServiceDescriptor& override;
+    // IServiceEndpoint
+    inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
+    inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
     void AddInternalRpcServer(const std::string& clientUUID, std::string joinedMediaType,
@@ -51,27 +51,27 @@ private:
     std::map<std::string, std::string> _labels;
     RpcCallHandler _handler;
 
-    mw::ServiceDescriptor _serviceDescriptor{};
+    Core::ServiceDescriptor _serviceDescriptor{};
     std::vector<RpcServerInternal*> _internalRpcServers;
-    mw::logging::ILogger* _logger;
-    mw::sync::ITimeProvider* _timeProvider{nullptr};
-    mw::IParticipantInternal* _participant{nullptr};
+    Core::Logging::ILogger* _logger;
+    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
 };
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
 
-void RpcServer::SetServiceDescriptor(const mw::ServiceDescriptor& serviceDescriptor)
+void RpcServer::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
 
-auto RpcServer::GetServiceDescriptor() const -> const mw::ServiceDescriptor&
+auto RpcServer::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

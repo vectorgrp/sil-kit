@@ -4,23 +4,23 @@
 #include <ctime>
 #include <iomanip> //std:put_time
 
-#include "ib/mw/logging/ILogger.hpp"
-#include "ib/mw/sync/string_utils.hpp"
+#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/core/sync/string_utils.hpp"
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 SystemMonitor::SystemMonitor(IParticipantInternal* participant)
     : _logger{participant->GetLogger()}
 {
 }
 
-void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/,
-                                     const sync::WorkflowConfiguration& workflowConfiguration)
+void SystemMonitor::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/,
+                                     const Orchestration::WorkflowConfiguration& workflowConfiguration)
 {
     UpdateRequiredParticipantNames(workflowConfiguration.requiredParticipantNames);
 }
@@ -42,8 +42,8 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
         auto&& statusIter = _participantStatus.find(name);
         if (statusIter == _participantStatus.end())
         {
-            _participantStatus[name] = sync::ParticipantStatus{};
-            _participantStatus[name].state = sync::ParticipantState::Invalid;
+            _participantStatus[name] = Orchestration::ParticipantStatus{};
+            _participantStatus[name].state = Orchestration::ParticipantState::Invalid;
             allRequiredParticipantsKnown = false;
         }
     }
@@ -64,7 +64,7 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
 }
 auto SystemMonitor::AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId
 {
-    if (_systemState != sync::SystemState::Invalid)
+    if (_systemState != Orchestration::SystemState::Invalid)
     {
         handler(_systemState);
     }
@@ -86,7 +86,7 @@ auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandlerT handle
     for (auto&& kv : _participantStatus)
     {
         auto&& participantStatus = kv.second;
-        if (participantStatus.state == sync::ParticipantState::Invalid)
+        if (participantStatus.state == Orchestration::ParticipantState::Invalid)
             continue;
 
         handler(participantStatus);
@@ -103,12 +103,12 @@ void SystemMonitor::RemoveParticipantStatusHandler(HandlerId handlerId)
     }
 }
 
-auto SystemMonitor::SystemState() const -> sync::SystemState
+auto SystemMonitor::SystemState() const -> Orchestration::SystemState
 {
     return _systemState;
 }
 
-auto SystemMonitor::ParticipantStatus(const std::string& participantName) const -> const sync::ParticipantStatus&
+auto SystemMonitor::ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus&
 {
     auto&& statusIter = _participantStatus.find(participantName);
     if (statusIter == _participantStatus.end())
@@ -119,14 +119,14 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantName) const 
     return statusIter->second;
 }
 
-void SystemMonitor::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const sync::ParticipantStatus& newParticipantStatus)
+void SystemMonitor::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const Orchestration::ParticipantStatus& newParticipantStatus)
 {
     auto participantName = newParticipantStatus.participantName;
 
     // Validation
     auto oldParticipantState = _participantStatus[participantName].state;
     ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
-    if (oldParticipantState == sync::ParticipantState::Shutdown)
+    if (oldParticipantState == Orchestration::ParticipantState::Shutdown)
     {
         _logger->Debug("Ignoring ParticipantState update from participant {} to ParticipantState::{} because "
                        "participant is already in terminal state ParticipantState::Shutdown.",
@@ -195,7 +195,7 @@ void SystemMonitor::OnParticipantDisconnected(const std::string& participantName
     }
 }
 
-bool SystemMonitor::AllRequiredParticipantsInState(std::initializer_list<sync::ParticipantState> acceptedStates) const
+bool SystemMonitor::AllRequiredParticipantsInState(std::initializer_list<Orchestration::ParticipantState> acceptedStates) const
 {
     for (auto&& name : _requiredParticipantNames)
     {
@@ -208,60 +208,60 @@ bool SystemMonitor::AllRequiredParticipantsInState(std::initializer_list<sync::P
     return true;
 }
 
-void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatus& newStatus, sync::ParticipantState oldState)
+void SystemMonitor::ValidateParticipantStatusUpdate(const Orchestration::ParticipantStatus& newStatus, Orchestration::ParticipantState oldState)
 {
-    auto is_any_of = [](sync::ParticipantState state, std::initializer_list<sync::ParticipantState> stateList)
+    auto is_any_of = [](Orchestration::ParticipantState state, std::initializer_list<Orchestration::ParticipantState> stateList)
     {
         return std::any_of(begin(stateList), end(stateList), [=](auto candidate) { return candidate == state; });
     };
 
     switch (newStatus.state)
     {
-    case sync::ParticipantState::ServicesCreated:
-        if (is_any_of(oldState, {sync::ParticipantState::Invalid, sync::ParticipantState::Reinitializing}))
+    case Orchestration::ParticipantState::ServicesCreated:
+        if (is_any_of(oldState, {Orchestration::ParticipantState::Invalid, Orchestration::ParticipantState::Reinitializing}))
             return;
 
-    case sync::ParticipantState::CommunicationInitializing:
-        if (is_any_of(oldState, {sync::ParticipantState::ServicesCreated}))
+    case Orchestration::ParticipantState::CommunicationInitializing:
+        if (is_any_of(oldState, {Orchestration::ParticipantState::ServicesCreated}))
             return;
 
-    case sync::ParticipantState::CommunicationInitialized:
-        if (oldState == sync::ParticipantState::CommunicationInitializing)
+    case Orchestration::ParticipantState::CommunicationInitialized:
+        if (oldState == Orchestration::ParticipantState::CommunicationInitializing)
             return;
 
-    case sync::ParticipantState::ReadyToRun:
-        if (oldState == sync::ParticipantState::CommunicationInitialized)
+    case Orchestration::ParticipantState::ReadyToRun:
+        if (oldState == Orchestration::ParticipantState::CommunicationInitialized)
             return;
 
-    case sync::ParticipantState::Running:
-        if (is_any_of(oldState, {sync::ParticipantState::ReadyToRun, sync::ParticipantState::Paused}))
+    case Orchestration::ParticipantState::Running:
+        if (is_any_of(oldState, {Orchestration::ParticipantState::ReadyToRun, Orchestration::ParticipantState::Paused}))
             return;
 
-    case sync::ParticipantState::Paused:
-        if (oldState == sync::ParticipantState::Running)
+    case Orchestration::ParticipantState::Paused:
+        if (oldState == Orchestration::ParticipantState::Running)
             return;
 
-    case sync::ParticipantState::Stopping:
-        if (is_any_of(oldState, {sync::ParticipantState::Running, sync::ParticipantState::Paused}))
+    case Orchestration::ParticipantState::Stopping:
+        if (is_any_of(oldState, {Orchestration::ParticipantState::Running, Orchestration::ParticipantState::Paused}))
             return;
 
-    case sync::ParticipantState::Stopped:
-        if (oldState == sync::ParticipantState::Stopping)
+    case Orchestration::ParticipantState::Stopped:
+        if (oldState == Orchestration::ParticipantState::Stopping)
             return;
 
-    case sync::ParticipantState::ShuttingDown:
-        if (is_any_of(oldState, {sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
+    case Orchestration::ParticipantState::ShuttingDown:
+        if (is_any_of(oldState, {Orchestration::ParticipantState::Error, Orchestration::ParticipantState::Stopped}))
             return;
 
-    case sync::ParticipantState::Shutdown:
-        if (oldState == sync::ParticipantState::ShuttingDown)
+    case Orchestration::ParticipantState::Shutdown:
+        if (oldState == Orchestration::ParticipantState::ShuttingDown)
             return;
 
-    case sync::ParticipantState::Reinitializing:
-        if (is_any_of(oldState, {sync::ParticipantState::Error, sync::ParticipantState::Stopped}))
+    case Orchestration::ParticipantState::Reinitializing:
+        if (is_any_of(oldState, {Orchestration::ParticipantState::Error, Orchestration::ParticipantState::Stopped}))
             return;
 
-    case sync::ParticipantState::Error:
+    case Orchestration::ParticipantState::Error:
         return;
 
     default:
@@ -288,7 +288,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const sync::ParticipantStatu
     _invalidTransitionCount++;
 }
 
-void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
+void SystemMonitor::UpdateSystemState(const Orchestration::ParticipantStatus& newStatus)
 {
     auto&& nameIter = std::find(_requiredParticipantNames.begin(), _requiredParticipantNames.end(), newStatus.participantName);
     if (nameIter == _requiredParticipantNames.end())
@@ -298,87 +298,87 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
 
     switch (newStatus.state)
     {
-    case sync::ParticipantState::ServicesCreated:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::ServicesCreated,
-                                            sync::ParticipantState::CommunicationInitializing,
-                                            sync::ParticipantState::CommunicationInitialized,
-                                            sync::ParticipantState::ReadyToRun, 
-                                            sync::ParticipantState::Running}))
+    case Orchestration::ParticipantState::ServicesCreated:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::ServicesCreated,
+                                            Orchestration::ParticipantState::CommunicationInitializing,
+                                            Orchestration::ParticipantState::CommunicationInitialized,
+                                            Orchestration::ParticipantState::ReadyToRun, 
+                                            Orchestration::ParticipantState::Running}))
         {
-            SetSystemState(sync::SystemState::ServicesCreated);
+            SetSystemState(Orchestration::SystemState::ServicesCreated);
         }
         return;
 
-    case sync::ParticipantState::CommunicationInitializing:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::CommunicationInitializing,
-                                            sync::ParticipantState::CommunicationInitialized,
-                                            sync::ParticipantState::ReadyToRun, 
-                                            sync::ParticipantState::Running}))
+    case Orchestration::ParticipantState::CommunicationInitializing:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::CommunicationInitializing,
+                                            Orchestration::ParticipantState::CommunicationInitialized,
+                                            Orchestration::ParticipantState::ReadyToRun, 
+                                            Orchestration::ParticipantState::Running}))
         {
-            SetSystemState(sync::SystemState::CommunicationInitializing);
+            SetSystemState(Orchestration::SystemState::CommunicationInitializing);
         }
         return;
 
-    case sync::ParticipantState::CommunicationInitialized:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::CommunicationInitialized,
-                                            sync::ParticipantState::ReadyToRun, 
-                                            sync::ParticipantState::Running}))
+    case Orchestration::ParticipantState::CommunicationInitialized:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::CommunicationInitialized,
+                                            Orchestration::ParticipantState::ReadyToRun, 
+                                            Orchestration::ParticipantState::Running}))
         {
-            SetSystemState(sync::SystemState::CommunicationInitialized);
+            SetSystemState(Orchestration::SystemState::CommunicationInitialized);
         }
         return;
 
-    case sync::ParticipantState::ReadyToRun:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::ReadyToRun, 
-                                            sync::ParticipantState::Running}))
+    case Orchestration::ParticipantState::ReadyToRun:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::ReadyToRun, 
+                                            Orchestration::ParticipantState::Running}))
         {
-            SetSystemState(sync::SystemState::ReadyToRun);
+            SetSystemState(Orchestration::SystemState::ReadyToRun);
         }
         return;
 
-    case sync::ParticipantState::Running:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::Running}))
+    case Orchestration::ParticipantState::Running:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Running}))
         {
-            SetSystemState(sync::SystemState::Running);
+            SetSystemState(Orchestration::SystemState::Running);
         }
         return;
 
-    case sync::ParticipantState::Paused:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::Paused, 
-                                            sync::ParticipantState::Running}))
-            SetSystemState(sync::SystemState::Paused);
+    case Orchestration::ParticipantState::Paused:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Paused, 
+                                            Orchestration::ParticipantState::Running}))
+            SetSystemState(Orchestration::SystemState::Paused);
         return;
 
-    case sync::ParticipantState::Stopping:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::Stopping, 
-                                            sync::ParticipantState::Stopped,
-                                            sync::ParticipantState::Paused, 
-                                            sync::ParticipantState::Running}))
-            SetSystemState(sync::SystemState::Stopping);
+    case Orchestration::ParticipantState::Stopping:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Stopping, 
+                                            Orchestration::ParticipantState::Stopped,
+                                            Orchestration::ParticipantState::Paused, 
+                                            Orchestration::ParticipantState::Running}))
+            SetSystemState(Orchestration::SystemState::Stopping);
         return;
 
-    case sync::ParticipantState::Stopped:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::Stopped}))
-            SetSystemState(sync::SystemState::Stopped);
+    case Orchestration::ParticipantState::Stopped:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Stopped}))
+            SetSystemState(Orchestration::SystemState::Stopped);
         return;
 
-    case sync::ParticipantState::ShuttingDown:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::ShuttingDown, 
-                                            sync::ParticipantState::Shutdown,
-                                            sync::ParticipantState::Stopped, 
-                                            sync::ParticipantState::Error,
-                                            sync::ParticipantState::ServicesCreated, 
-                                            sync::ParticipantState::ReadyToRun}))
-            SetSystemState(sync::SystemState::ShuttingDown);
+    case Orchestration::ParticipantState::ShuttingDown:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::ShuttingDown, 
+                                            Orchestration::ParticipantState::Shutdown,
+                                            Orchestration::ParticipantState::Stopped, 
+                                            Orchestration::ParticipantState::Error,
+                                            Orchestration::ParticipantState::ServicesCreated, 
+                                            Orchestration::ParticipantState::ReadyToRun}))
+            SetSystemState(Orchestration::SystemState::ShuttingDown);
         return;
 
-    case sync::ParticipantState::Shutdown:
-        if (AllRequiredParticipantsInState({sync::ParticipantState::Shutdown}))
-            SetSystemState(sync::SystemState::Shutdown);
+    case Orchestration::ParticipantState::Shutdown:
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Shutdown}))
+            SetSystemState(Orchestration::SystemState::Shutdown);
         return;
 
-    case sync::ParticipantState::Error:
-        SetSystemState(sync::SystemState::Error);
+    case Orchestration::ParticipantState::Error:
+        SetSystemState(Orchestration::SystemState::Error);
         return;
 
     default:
@@ -386,11 +386,11 @@ void SystemMonitor::UpdateSystemState(const sync::ParticipantStatus& newStatus)
     }
 }
 
-void SystemMonitor::SetSystemState(sync::SystemState newState)
+void SystemMonitor::SetSystemState(Orchestration::SystemState newState)
 {
     _systemState = newState;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

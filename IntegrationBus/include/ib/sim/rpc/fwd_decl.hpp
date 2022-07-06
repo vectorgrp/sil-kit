@@ -2,9 +2,9 @@
 
 #pragma once
 
-namespace ib {
-namespace sim {
-namespace rpc {
+namespace SilKit {
+namespace Services {
+namespace Rpc {
 
 struct RpcCallEvent;
 struct RpcCallResultEvent;
@@ -14,12 +14,12 @@ class IRpcClient;
 class IRpcServer;
 class IRpcCallHandle;
 
-// IbMessages
+// SilKitMessages
 //-----------
 
 struct FunctionCall;
 struct FunctionCallResponse;
 
-} // namespace rpc
-} // namespace sim
-} // namespace ib
+} // namespace Rpc
+} // namespace Services
+} // namespace SilKit

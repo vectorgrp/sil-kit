@@ -1,7 +1,7 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 find_package(Threads REQUIRED)
 
-add_library(IbMwVAsio STATIC
+add_library(SilKitMwVAsio STATIC
     VAsioConnection.hpp
     VAsioConnection.cpp
 
@@ -11,7 +11,7 @@ add_library(IbMwVAsio STATIC
     VAsioSerdes_Protocol30.hpp
     VAsioSerdes_Protocol30.cpp
 
-    IbLink.hpp
+    SilKitLink.hpp
     IVAsioPeer.hpp
     VAsioDatatypes.hpp
     VAsioMsgKind.hpp
@@ -31,50 +31,50 @@ add_library(IbMwVAsio STATIC
     SerializedMessage.cpp
 )
 
-target_link_libraries(IbMwVAsio
+target_link_libraries(SilKitMwVAsio
     PUBLIC
-      IbUtil
-      IbInterface
-      IbInternal
-      IbMwSync
-      IbMwLogging
-      IbMwService
-      IbSimDataMessage
-      IbSimRpc
-      IbSimCan
-      IbSimEthernet
-      IbSimLin
-      IbSimFlexray
+      SilKitUtil
+      SilKitInterface
+      SilKitInternal
+      SilKitMwSync
+      SilKitMwLogging
+      SilKitMwService
+      SilKitSimDataMessage
+      SilKitSimRpc
+      SilKitSimCan
+      SilKitSimEthernet
+      SilKitSimLin
+      SilKitSimFlexray
       Threads::Threads
-      IbFilesystem
+      SilKitFilesystem
       asio
     INTERFACE
-      IbConfiguration
+      SilKitConfiguration
 )
 
-target_compile_definitions(IbMwVAsio PRIVATE ASIO_STANDALONE)
+target_compile_definitions(SilKitMwVAsio PRIVATE ASIO_STANDALONE)
 
-target_include_directories(IbMwVAsio
+target_include_directories(SilKitMwVAsio
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 
 if (MSVC)
-    target_compile_options(IbMwVAsio PRIVATE "/bigobj")
-    target_compile_definitions(IbMwVAsio PUBLIC _WIN32_WINNT=0x0601)
+    target_compile_options(SilKitMwVAsio PRIVATE "/bigobj")
+    target_compile_definitions(SilKitMwVAsio PUBLIC _WIN32_WINNT=0x0601)
 endif()
 if(MINGW)
-    target_compile_definitions(IbMwVAsio PUBLIC _WIN32_WINNT=0x0601)
-    target_link_libraries(IbMwVAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
+    target_compile_definitions(SilKitMwVAsio PUBLIC _WIN32_WINNT=0x0601)
+    target_link_libraries(SilKitMwVAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
 endif()
 
-add_vib_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS IbMwVAsio IbMwMockParticipant)
+add_silkit_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS SilKitMwVAsio SilKitMwMockParticipant)
 
-add_vib_test(TestMwVAsio_Serdes  SOURCES VAsioSerdesTest.cpp LIBS IbMwVAsio)
-add_vib_test(TestMwVAsio_SerializedMessage  SOURCES SerializedMessageTest.cpp LIBS IbMwVAsio)
-add_vib_test(TestMwVAsio_Uri  SOURCES UriTest.cpp LIBS IbMwVAsio)
+add_silkit_test(TestMwVAsio_Serdes  SOURCES VAsioSerdesTest.cpp LIBS SilKitMwVAsio)
+add_silkit_test(TestMwVAsio_SerializedMessage  SOURCES SerializedMessageTest.cpp LIBS SilKitMwVAsio)
+add_silkit_test(TestMwVAsio_Uri  SOURCES UriTest.cpp LIBS SilKitMwVAsio)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version
 # and do integration tests here
-add_vib_test(ITest_ParticipantVersion  SOURCES ParticipantVersionTest.cpp LIBS IbMwParticipant IbSimTestHarness)
+add_silkit_test(ITest_ParticipantVersion  SOURCES ParticipantVersionTest.cpp LIBS SilKitMwParticipant SilKitSimTestHarness)

@@ -2,8 +2,8 @@
 
 #include "YamlSchema.hpp"
 
-namespace ib {
-namespace cfg {
+namespace SilKit {
+namespace Config {
 inline namespace v4 {
 
 //!< Create the YAML schema for VAsio ParticipantConfigurations.
@@ -212,5 +212,5 @@ auto MakeYamlSchema() -> YamlSchemaElem
 }
 
 } // inline namespace v4
-} // namespace cfg
-} // namespace ib
+} // namespace Config
+} // namespace SilKit

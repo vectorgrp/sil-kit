@@ -11,33 +11,33 @@
 #include <future>
 
 #include "ParticipantConfiguration.hpp"
-#include "ib/mw/logging/ILogger.hpp"
+#include "silkit/core/logging/ILogger.hpp"
 
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/wrapped_tuple.hpp"
 
-#include "IbLink.hpp"
+#include "SilKitLink.hpp"
 #include "IVAsioPeer.hpp"
 #include "VAsioReceiver.hpp"
 #include "VAsioTransmitter.hpp"
 #include "VAsioMsgKind.hpp"
-#include "IIbServiceEndpoint.hpp"
-#include "traits/IbMsgTraits.hpp"
-#include "traits/IbServiceTraits.hpp"
+#include "IServiceEndpoint.hpp"
+#include "traits/SilKitMsgTraits.hpp"
+#include "traits/SilKitServiceTraits.hpp"
 
 // private data types for unit testing support:
 #include "TestDataTypes.hpp"
 
-#include "ib/mw/sync/string_utils.hpp"
-#include "ib/sim/can/string_utils.hpp"
+#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/can/string_utils.hpp"
 
 #include "asio.hpp"
 
 #include "ProtocolVersion.hpp"
 #include "SerializedMessage.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 class VAsioConnection
 {
@@ -50,7 +50,7 @@ public:
     // Constructors and Destructor
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
-    VAsioConnection(ib::cfg::ParticipantConfiguration config, std::string participantName,
+    VAsioConnection(SilKit::Config::ParticipantConfiguration config, std::string participantName,
         ParticipantId participantId, ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection();
 
@@ -63,15 +63,15 @@ public:
 public:
     // ----------------------------------------
     // Public methods
-    void SetLogger(logging::ILogger* logger);
-    void SetTimeSyncService(sync::TimeSyncService* timeSyncService);
+    void SetLogger(Logging::ILogger* logger);
+    void SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService);
     void JoinDomain(std::string registryUri);
 
-    template <class IbServiceT>
-    void RegisterIbService(const std::string& link, EndpointId endpointId, IbServiceT* service)
+    template <class SilKitServiceT>
+    void RegisterSilKitService(const std::string& link, EndpointId endpointId, SilKitServiceT* service)
     {
         std::future<void> allAcked;
-        if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+        if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
             assert(_pendingSubscriptionAcknowledges.empty());
             _receivedAllSubscriptionAcknowledges = std::promise<void>{};
@@ -79,41 +79,41 @@ public:
         }
 
         _ioContext.dispatch([this, link, endpointId, service]() {
-            this->RegisterIbServiceImpl<IbServiceT>(link, endpointId, service);
+            this->RegisterSilKitServiceImpl<SilKitServiceT>(link, endpointId, service);
         });
 
-        if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+        if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
-            _logger->Trace("VAsio waiting for subscription acknowledges for IbService {}.", typeid(*service).name());
+            _logger->Trace("VAsio waiting for subscription acknowledges for SilKitService {}.", typeid(*service).name());
             allAcked.wait();
-            _logger->Trace("VAsio received all subscription acknowledges for IbService {}.", typeid(*service).name());
+            _logger->Trace("VAsio received all subscription acknowledges for SilKitService {}.", typeid(*service).name());
         }
     }
 
-    template <class IbServiceT>
-    void SetHistoryLengthForLink(const std::string& networkName, size_t historyLength, IbServiceT* /*service*/)
+    template <class SilKitServiceT>
+    void SetHistoryLengthForLink(const std::string& networkName, size_t historyLength, SilKitServiceT* /*service*/)
     {
-        // NB: Dummy IbServiceT* is fed in here to deduce IbServiceT, as it is only used in 'typename IbServiceT',
+        // NB: Dummy SilKitServiceT* is fed in here to deduce SilKitServiceT, as it is only used in 'typename SilKitServiceT',
         // which is not sufficient to get the type for some compilers (e.g. Clang)
-        typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
+        typename SilKitServiceT::SilKitSendMessagesTypes sendMessageTypes{};
 
-        util::tuple_tools::for_each(sendMessageTypes, [this, &networkName, historyLength](auto&& ibMessage) {
-            using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            auto link = this->GetLinkByName<IbMessageT>(networkName); 
+        Util::tuple_tools::for_each(sendMessageTypes, [this, &networkName, historyLength](auto&& message) {
+            using SilKitMessageT = std::decay_t<decltype(message)>;
+            auto link = this->GetLinkByName<SilKitMessageT>(networkName); 
             link->SetHistoryLength(historyLength);
         });
     }
 
-    template<typename IbMessageT>
-    void SendIbMessage(const IIbServiceEndpoint* from, IbMessageT&& msg)
+    template<typename SilKitMessageT>
+    void SendMsg(const IServiceEndpoint* from, SilKitMessageT&& msg)
     {
-        ExecuteOnIoThread(&VAsioConnection::SendIbMessageImpl<IbMessageT>, from, std::forward<IbMessageT>(msg));
+        ExecuteOnIoThread(&VAsioConnection::SendMsgImpl<SilKitMessageT>, from, std::forward<SilKitMessageT>(msg));
     }
 
-    template<typename IbMessageT>
-    void SendIbMessage(const IIbServiceEndpoint* from, const std::string& targetParticipantName, IbMessageT&& msg)
+    template<typename SilKitMessageT>
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg)
     {
-        ExecuteOnIoThread(&VAsioConnection::SendIbMessageToTargetImpl<IbMessageT>, from, targetParticipantName, std::forward<IbMessageT>(msg));
+        ExecuteOnIoThread(&VAsioConnection::SendMsgToTargetImpl<SilKitMessageT>, from, targetParticipantName, std::forward<SilKitMessageT>(msg));
     }
 
     inline void OnAllMessagesDelivered(const std::function<void()>& callback)
@@ -127,7 +127,7 @@ public:
         asio::post(_ioContext.get_executor(), std::move(function));
     }
 
-    inline auto Config() const -> const ib::cfg::ParticipantConfiguration&
+    inline auto Config() const -> const SilKit::Config::ParticipantConfiguration&
     {
         return _config;
     }
@@ -157,64 +157,64 @@ private:
     // ----------------------------------------
     // private data types
     template <class MsgT>
-    using IbLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
+    using SilKitLinkMap = std::map<std::string, std::shared_ptr<SilKitLink<MsgT>>>;
 
     template <class MsgT>
-    using IbServiceToReceiverMap = std::map<std::string, IIbMessageReceiver<MsgT>*>;
+    using SilKitServiceToReceiverMap = std::map<std::string, IMessageReceiver<MsgT>*>;
     template <class MsgT>
-    using IbServiceToLinkMap = std::map<std::string, std::shared_ptr<IbLink<MsgT>>>;
+    using SilKitServiceToLinkMap = std::map<std::string, std::shared_ptr<SilKitLink<MsgT>>>;
 
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
-    using IbMessageTypes = std::tuple<
-        logging::LogMsg,
-        sync::NextSimTask,
-        sync::SystemCommand,
-        sync::ParticipantCommand,
-        sync::ParticipantStatus,
-        sync::WorkflowConfiguration,
-        sim::data::DataMessageEvent,
-        sim::rpc::FunctionCall,
-        sim::rpc::FunctionCallResponse,
-        sim::can::CanFrameEvent,
-        sim::can::CanFrameTransmitEvent,
-        sim::can::CanControllerStatus,
-        sim::can::CanConfigureBaudrate,
-        sim::can::CanSetControllerMode,
-        sim::eth::EthernetFrameEvent,
-        sim::eth::EthernetFrameTransmitEvent,
-        sim::eth::EthernetStatus,
-        sim::eth::EthernetSetMode,
-        sim::lin::LinSendFrameRequest,
-        sim::lin::LinSendFrameHeaderRequest,
-        sim::lin::LinTransmission,
-        sim::lin::LinWakeupPulse,
-        sim::lin::LinControllerConfig,
-        sim::lin::LinControllerStatusUpdate,
-        sim::lin::LinFrameResponseUpdate,
-        sim::fr::FlexrayFrameEvent,
-        sim::fr::FlexrayFrameTransmitEvent,
-        sim::fr::FlexraySymbolEvent,
-        sim::fr::FlexraySymbolTransmitEvent,
-        sim::fr::FlexrayCycleStartEvent,
-        sim::fr::FlexrayHostCommand,
-        sim::fr::FlexrayControllerConfig,
-        sim::fr::FlexrayTxBufferConfigUpdate,
-        sim::fr::FlexrayTxBufferUpdate,
-        sim::fr::FlexrayPocStatusEvent,
-        mw::service::ParticipantDiscoveryEvent,
-        mw::service::ServiceDiscoveryEvent,
+    using SilKitMessageTypes = std::tuple<
+        Logging::LogMsg,
+        Orchestration::NextSimTask,
+        Orchestration::SystemCommand,
+        Orchestration::ParticipantCommand,
+        Orchestration::ParticipantStatus,
+        Orchestration::WorkflowConfiguration,
+        Services::PubSub::DataMessageEvent,
+        Services::Rpc::FunctionCall,
+        Services::Rpc::FunctionCallResponse,
+        Services::Can::CanFrameEvent,
+        Services::Can::CanFrameTransmitEvent,
+        Services::Can::CanControllerStatus,
+        Services::Can::CanConfigureBaudrate,
+        Services::Can::CanSetControllerMode,
+        Services::Ethernet::EthernetFrameEvent,
+        Services::Ethernet::EthernetFrameTransmitEvent,
+        Services::Ethernet::EthernetStatus,
+        Services::Ethernet::EthernetSetMode,
+        Services::Lin::LinSendFrameRequest,
+        Services::Lin::LinSendFrameHeaderRequest,
+        Services::Lin::LinTransmission,
+        Services::Lin::LinWakeupPulse,
+        Services::Lin::LinControllerConfig,
+        Services::Lin::LinControllerStatusUpdate,
+        Services::Lin::LinFrameResponseUpdate,
+        Services::Flexray::FlexrayFrameEvent,
+        Services::Flexray::FlexrayFrameTransmitEvent,
+        Services::Flexray::FlexraySymbolEvent,
+        Services::Flexray::FlexraySymbolTransmitEvent,
+        Services::Flexray::FlexrayCycleStartEvent,
+        Services::Flexray::FlexrayHostCommand,
+        Services::Flexray::FlexrayControllerConfig,
+        Services::Flexray::FlexrayTxBufferConfigUpdate,
+        Services::Flexray::FlexrayTxBufferUpdate,
+        Services::Flexray::FlexrayPocStatusEvent,
+        Core::Discovery::ParticipantDiscoveryEvent,
+        Core::Discovery::ServiceDiscoveryEvent,
 
         // Private testing data types
-        mw::test::version1::TestMessage,
-        mw::test::version2::TestMessage,
-        mw::test::TestFrameEvent
+        Core::Tests::Version1::TestMessage,
+        Core::Tests::Version2::TestMessage,
+        Core::Tests::TestFrameEvent
     >;
 
 private:
     // ----------------------------------------
     // private methods
-    void ReceiveRawIbMessage(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage&& buffer);
     void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
     void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer);
     void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer);
@@ -237,26 +237,26 @@ private:
     void AddParticipantToLookup(const std::string& participantName);
     const std::string& GetParticipantFromLookup(std::uint64_t participantId) const;
 
-    template<class IbMessageT>
-    auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<IbLink<IbMessageT>>
+    template<class SilKitMessageT>
+    auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<SilKitLink<SilKitMessageT>>
     {
-        auto& ibLink = std::get<IbLinkMap<IbMessageT>>(_ibLinks)[networkName];
-        if (!ibLink)
+        auto& link = std::get<SilKitLinkMap<SilKitMessageT>>(_links)[networkName];
+        if (!link)
         {
-            ibLink = std::make_shared<IbLink<IbMessageT>>(networkName, _logger, _timeSyncService);
+            link = std::make_shared<SilKitLink<SilKitMessageT>>(networkName, _logger, _timeSyncService);
         }
-        return ibLink;
+        return link;
     }
 
-    template<class IbMessageT, class IbServiceT>
-    void RegisterIbMsgReceiver(const std::string& networkName, ib::mw::IIbMessageReceiver<IbMessageT>* receiver)
+    template<class SilKitMessageT, class SilKitServiceT>
+    void RegisterSilKitMsgReceiver(const std::string& networkName, SilKit::Core::IMessageReceiver<SilKitMessageT>* receiver)
     {
         assert(_logger);
 
-        auto link = GetLinkByName<IbMessageT>(networkName);
+        auto link = GetLinkByName<SilKitMessageT>(networkName);
         link->AddLocalReceiver(receiver);
 
-        std::string msgSerdesName = IbMsgTraits<IbMessageT>::SerdesName();
+        std::string msgSerdesName = SilKitMsgTraits<SilKitMessageT>::SerdesName();
         const std::string uniqueReceiverId = networkName + "/" + msgSerdesName;
         bool isNewReceiver = _vasioUniqueReceiverIds.insert(uniqueReceiverId).second;
         if (isNewReceiver)
@@ -266,11 +266,11 @@ private:
             subscriptionInfo.receiverIdx = static_cast<decltype(subscriptionInfo.receiverIdx)>(_vasioReceivers.size());
             subscriptionInfo.networkName = networkName;
             subscriptionInfo.msgTypeName = msgSerdesName;
-            subscriptionInfo.version = IbMsgTraits<IbMessageT>::Version();
+            subscriptionInfo.version = SilKitMsgTraits<SilKitMessageT>::Version();
 
-            std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<IbMessageT>>(subscriptionInfo, link, _logger);
-            auto* serviceEndpointPtr = dynamic_cast<IIbServiceEndpoint*>(rawReceiver.get());
-            ServiceDescriptor tmpServiceDescriptor(dynamic_cast<mw::IIbServiceEndpoint&>(*receiver).GetServiceDescriptor());
+            std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<SilKitMessageT>>(subscriptionInfo, link, _logger);
+            auto* serviceEndpointPtr = dynamic_cast<IServiceEndpoint*>(rawReceiver.get());
+            ServiceDescriptor tmpServiceDescriptor(dynamic_cast<Core::IServiceEndpoint&>(*receiver).GetServiceDescriptor());
             tmpServiceDescriptor.SetParticipantName(_participantName);
             // copy the Service Endpoint Id
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
@@ -278,7 +278,7 @@ private:
 
             for (auto&& peer : _peers)
             {
-                if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+                if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
                 {
                     _pendingSubscriptionAcknowledges.emplace_back(peer.get(), subscriptionInfo);
                 }
@@ -287,38 +287,38 @@ private:
         }
     }
 
-    template<class IbMessageT>
-    void RegisterIbMsgSender(const std::string& networkName, const IIbServiceEndpoint* serviceId)
+    template<class SilKitMessageT>
+    void RegisterSilKitMsgSender(const std::string& networkName, const IServiceEndpoint* serviceId)
     {
-        auto ibLink = GetLinkByName<IbMessageT>(networkName);
-        auto&& serviceLinkMap = std::get<IbServiceToLinkMap<IbMessageT>>(_serviceToLinkMap);
-        serviceLinkMap[serviceId->GetServiceDescriptor().GetNetworkName()] = ibLink;
+        auto link = GetLinkByName<SilKitMessageT>(networkName);
+        auto&& serviceLinkMap = std::get<SilKitServiceToLinkMap<SilKitMessageT>>(_serviceToLinkMap);
+        serviceLinkMap[serviceId->GetServiceDescriptor().GetNetworkName()] = link;
     }
 
-    template<class IbServiceT>
-    inline void RegisterIbServiceImpl(const std::string& link, EndpointId /*endpointId*/, IbServiceT* service)
+    template<class SilKitServiceT>
+    inline void RegisterSilKitServiceImpl(const std::string& link, EndpointId /*endpointId*/, SilKitServiceT* service)
     {
-        typename IbServiceT::IbReceiveMessagesTypes receiveMessageTypes{};
-        typename IbServiceT::IbSendMessagesTypes sendMessageTypes{};
+        typename SilKitServiceT::SilKitReceiveMessagesTypes receiveMessageTypes{};
+        typename SilKitServiceT::SilKitSendMessagesTypes sendMessageTypes{};
 
-        util::tuple_tools::for_each(receiveMessageTypes,
-            [this, &link, service](auto&& ibMessage)
+        Util::tuple_tools::for_each(receiveMessageTypes,
+            [this, &link, service](auto&& message)
         {
-            using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            this->RegisterIbMsgReceiver<IbMessageT, IbServiceT>(link, service);
+            using SilKitMessageT = std::decay_t<decltype(message)>;
+            this->RegisterSilKitMsgReceiver<SilKitMessageT, SilKitServiceT>(link, service);
         }
         );
 
-        util::tuple_tools::for_each(sendMessageTypes,
-            [this, &link,  &service](auto&& ibMessage)
+        Util::tuple_tools::for_each(sendMessageTypes,
+            [this, &link,  &service](auto&& message)
         {
-            using IbMessageT = std::decay_t<decltype(ibMessage)>;
-            auto& serviceId = dynamic_cast<IIbServiceEndpoint&>(*service);
-            this->RegisterIbMsgSender<IbMessageT>(link, &serviceId);
+            using SilKitMessageT = std::decay_t<decltype(message)>;
+            auto& serviceId = dynamic_cast<IServiceEndpoint&>(*service);
+            this->RegisterSilKitMsgSender<SilKitMessageT>(link, &serviceId);
         }
         );
 
-        if (!IbServiceTraits<IbServiceT>::UseAsyncRegistration())
+        if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
             if (_pendingSubscriptionAcknowledges.empty())
             {
@@ -327,33 +327,33 @@ private:
         }
     }
 
-    template <class IbMessageT>
-    void SendIbMessageImpl(const IIbServiceEndpoint* from, IbMessageT&& msg)
+    template <class SilKitMessageT>
+    void SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
     {
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
-        auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
+        auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw std::runtime_error{ "VAsioConnection::SendIbMessageImpl: sending on empty link for " + key };
+            throw std::runtime_error{ "VAsioConnection::SendMsgImpl: sending on empty link for " + key };
         }
         auto&& link = linkMap[key];
-        link->DistributeLocalIbMessage(from, std::forward<IbMessageT>(msg));
+        link->DistributeLocalSilKitMessage(from, std::forward<SilKitMessageT>(msg));
     }
 
-    template <class IbMessageT>
-    void SendIbMessageToTargetImpl(const IIbServiceEndpoint* from, const std::string& targetParticipantName,
-                                   IbMessageT&& msg)
+    template <class SilKitMessageT>
+    void SendMsgToTargetImpl(const IServiceEndpoint* from, const std::string& targetParticipantName,
+                                   SilKitMessageT&& msg)
     {
         const auto& key = from->GetServiceDescriptor().GetNetworkName();
 
-        auto& linkMap = std::get<IbServiceToLinkMap<std::decay_t<IbMessageT>>>(_serviceToLinkMap);
+        auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw std::runtime_error{"VAsioConnection::SendIbMessageImpl: sending on empty link for " + key};
+            throw std::runtime_error{"VAsioConnection::SendMsgImpl: sending on empty link for " + key};
         }
         auto&& link = linkMap[key];
-        link->DispatchIbMessageToTarget(from, targetParticipantName, std::forward<IbMessageT>(msg));
+        link->DispatchSilKitMessageToTarget(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
     }
 
     template <typename... MethodArgs, typename... Args>
@@ -388,16 +388,16 @@ private:
 private:
     // ----------------------------------------
     // private members
-    ib::cfg::ParticipantConfiguration _config;
+    SilKit::Config::ParticipantConfiguration _config;
     std::string _participantName;
     ParticipantId _participantId{0};
-    logging::ILogger* _logger{nullptr};
-    sync::TimeSyncService* _timeSyncService{nullptr};
+    Logging::ILogger* _logger{nullptr};
+    Orchestration::TimeSyncService* _timeSyncService{nullptr};
 
-    //! \brief Virtual IB links by networkName according to IbConfig.
-    util::tuple_tools::wrapped_tuple<IbLinkMap, IbMessageTypes> _ibLinks;
+    //! \brief Virtual SilKit links by networkName according to SilKitConfig.
+    Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;
     //! \brief Lookup for links by name.
-    util::tuple_tools::wrapped_tuple<IbServiceToLinkMap, IbMessageTypes> _serviceToLinkMap;
+    Util::tuple_tools::wrapped_tuple<SilKitServiceToLinkMap, SilKitMessageTypes> _serviceToLinkMap;
 
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
     std::unordered_set<std::string> _vasioUniqueReceiverIds;
@@ -425,7 +425,7 @@ private:
     std::vector<IVAsioPeer*> _pendingParticipantReplies;
     std::promise<void> _receivedAllParticipantReplies;
 
-    // Keep track of the sent Subscriptions when Registering an IB Service
+    // Keep track of the sent Subscriptions when Registering an SilKit Service
     std::vector<std::pair<IVAsioPeer*, VAsioMsgSubscriber>> _pendingSubscriptionAcknowledges;
     std::promise<void> _receivedAllSubscriptionAcknowledges;
 
@@ -444,5 +444,5 @@ private:
     friend class VAsioConnectionTest;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

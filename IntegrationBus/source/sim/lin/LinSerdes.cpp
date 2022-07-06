@@ -3,11 +3,11 @@
 #include "LinSerdes.hpp"
 
 
-namespace ib {
-namespace sim {
-namespace lin {
+namespace SilKit {
+namespace Services {
+namespace Lin {
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrame& frame)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinFrame& frame)
 {
     buffer
         << frame.id
@@ -16,7 +16,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrame&
         << frame.data;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrame& frame)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinFrame& frame)
 {
     buffer
         >> frame.id
@@ -26,14 +26,14 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrame& frame
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinSendFrameRequest& frame)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinSendFrameRequest& frame)
 {
     buffer
         << frame.frame
         << frame.responseType;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinSendFrameRequest& frame)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinSendFrameRequest& frame)
 {
     buffer
         >> frame.frame
@@ -41,20 +41,20 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinSendFrameReq
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinSendFrameHeaderRequest& header)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinSendFrameHeaderRequest& header)
 {
     buffer
         << header.id;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinSendFrameHeaderRequest& header)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinSendFrameHeaderRequest& header)
 {
     buffer
         >> header.id;
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinTransmission& transmission)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinTransmission& transmission)
 {
     buffer
         << transmission.timestamp
@@ -62,7 +62,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinTransm
         << transmission.status;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinTransmission& transmission)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinTransmission& transmission)
 {
     buffer
         >> transmission.timestamp
@@ -71,14 +71,14 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinTransmission
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinWakeupPulse& pulse)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinWakeupPulse& pulse)
 {
     buffer
         << pulse.timestamp
         << pulse.direction;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinWakeupPulse& pulse)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinWakeupPulse& pulse)
 {
     buffer
         >> pulse.timestamp
@@ -86,14 +86,14 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinWakeupPulse&
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrameResponse& response)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinFrameResponse& response)
 {
     buffer
         << response.frame
         << response.responseMode;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrameResponse& response)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinFrameResponse& response)
 {
     buffer
         >> response.frame
@@ -101,7 +101,7 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrameRespons
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinControllerConfig& config)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinControllerConfig& config)
 {
     buffer
         << config.controllerMode
@@ -109,7 +109,7 @@ ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinContro
         << config.frameResponses;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinControllerConfig& config)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinControllerConfig& config)
 {
     buffer
         >> config.controllerMode
@@ -118,14 +118,14 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinControllerCo
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinControllerStatusUpdate& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinControllerStatusUpdate& msg)
 {
     buffer
         << msg.timestamp
         << msg.status;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinControllerStatusUpdate& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinControllerStatusUpdate& msg)
 {
     buffer
         >> msg.timestamp
@@ -133,20 +133,20 @@ ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinControllerSt
     return buffer;
 }
 
-ib::mw::MessageBuffer& operator<<(ib::mw::MessageBuffer& buffer, const LinFrameResponseUpdate& update)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinFrameResponseUpdate& update)
 {
     buffer
         << update.frameResponses;
     return buffer;
 }
-ib::mw::MessageBuffer& operator>>(ib::mw::MessageBuffer& buffer, LinFrameResponseUpdate& update)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinFrameResponseUpdate& update)
 {
     buffer
         >> update.frameResponses;
     return buffer;
 }
 
-using ib::mw::MessageBuffer;
+using SilKit::Core::MessageBuffer;
 void Serialize(MessageBuffer& buffer, const LinFrame& msg)
 {
     buffer << msg;
@@ -229,6 +229,6 @@ void Deserialize(MessageBuffer& buffer, LinFrameResponseUpdate& out)
     buffer >> out;
 }
 
-} // namespace lin
-} // namespace sim
-} // namespace ib
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

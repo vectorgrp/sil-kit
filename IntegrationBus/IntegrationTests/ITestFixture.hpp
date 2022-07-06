@@ -12,10 +12,10 @@
 
 #include "gtest/gtest.h"
 
-namespace ib {
-namespace test {
+namespace SilKit {
+namespace Tests {
 
-using namespace ib::cfg;
+using namespace SilKit::Config;
 
 using namespace std::chrono_literals;
 
@@ -79,7 +79,7 @@ protected: //CTor and operators
     void SetupFromParticipantList(std::vector<std::string> participantNames)
     {
         // create test harness with deferred participant creation.
-        // Will only create the IbRegistry and tell the SystemController the participantNames
+        // Will only create the SilKitRegistry and tell the SystemController the participantNames
         _simTestHarness = std::make_unique<SimTestHarness>(participantNames, _registryUri, true);
 
     }
@@ -89,5 +89,5 @@ protected:// members
     std::unique_ptr<SimTestHarness> _simTestHarness;
 };
 
-} //namespace test
-} //namespace ib
+} //namespace Tests
+} //namespace SilKit

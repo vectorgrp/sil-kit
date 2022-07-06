@@ -24,16 +24,16 @@ using testing::InSequence;
 using testing::NiceMock;
 
 using namespace testing;
-using namespace ib;
-using namespace ib::mw;
-using namespace ib::mw::logging;
+using namespace SilKit;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Logging;
 
-using ib::mw::test::DummyParticipant;
+using SilKit::Core::Tests::DummyParticipant;
 
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD((void), SendIbMessage, (const IIbServiceEndpoint*, LogMsg&&));
+    MOCK_METHOD((void), SendMsg, (const IServiceEndpoint*, LogMsg&&));
 };
 
 auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> Matcher<LogMsg&&>
@@ -71,7 +71,7 @@ TEST(LoggerTest, send_log_message_with_sender)
     msg.level = Level::Info;
     msg.payload = std::string{"some payload"};
 
-    EXPECT_CALL(mockParticipant, SendIbMessage(&logMsgSender, std::move(msg)))
+    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender, std::move(msg)))
         .Times(1);
 
     logMsgSender.SendLogMsg(std::move(msg));
@@ -81,10 +81,10 @@ TEST(LoggerTest, send_log_message_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};
 
-    cfg::Logging config;
-    auto sink = cfg::Sink{};
-    sink.level = ib::mw::logging::Level::Debug;
-    sink.type = cfg::Sink::Type::Remote;
+    Config::Logging config;
+    auto sink = Config::Sink{};
+    sink.level = SilKit::Core::Logging::Level::Debug;
+    sink.type = Config::Sink::Type::Remote;
 
     config.sinks.push_back(sink);
 
@@ -95,7 +95,7 @@ TEST(LoggerTest, send_log_message_from_logger)
     LogMsgSender logMsgSender(&mockParticipant);
     logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    logger.RegisterRemoteLogging([&logMsgSender](logging::LogMsg logMsg) {
+    logger.RegisterRemoteLogging([&logMsgSender](Logging::LogMsg logMsg) {
 
         logMsgSender.SendLogMsg(std::move(logMsg));
 
@@ -103,13 +103,13 @@ TEST(LoggerTest, send_log_message_from_logger)
 
     std::string payload{"Test log message"};
 
-    EXPECT_CALL(mockParticipant, SendIbMessage(&logMsgSender,
+    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender,
         ALogMsgWith(loggerName, Level::Info, payload)))
         .Times(1);
 
     logger.Info(payload);
 
-    EXPECT_CALL(mockParticipant, SendIbMessage(&logMsgSender,
+    EXPECT_CALL(mockParticipant, SendMsg(&logMsgSender,
         ALogMsgWith(loggerName, Level::Critical, payload)))
         .Times(1);
 

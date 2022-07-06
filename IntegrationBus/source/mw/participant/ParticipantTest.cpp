@@ -13,8 +13,8 @@
 
 namespace {
 
-using namespace ib::mw;
-using namespace ib::cfg;
+using namespace SilKit::Core;
+using namespace SilKit::Config;
 
 class ParticipantTest : public testing::Test
 {
@@ -26,14 +26,14 @@ protected:
 
 TEST_F(ParticipantTest, throw_on_empty_participant_name)
 {
-    EXPECT_THROW(CreateNullConnectionParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), ""),
-                 ib::ConfigurationError);
+    EXPECT_THROW(CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), ""),
+                 SilKit::ConfigurationError);
 }
 
 TEST_F(ParticipantTest, support_nullptr_in_IParticipantConfiguration)
 {
     EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(nullptr, "TestParticipant"));
-    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(std::make_shared<ib::cfg::IParticipantConfiguration>(),
+    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(std::make_shared<SilKit::Config::IParticipantConfiguration>(),
                                                        "TestParticipant"));
 }
 
@@ -41,7 +41,7 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 {
     const auto configuredParticipantName = "ConfiguredParticipantName";
     auto mockConfig =
-        std::make_shared<ib::cfg::ParticipantConfiguration>(ib::cfg::ParticipantConfiguration());
+        std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
     mockConfig->participantName = configuredParticipantName;
 
 
@@ -54,10 +54,10 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 TEST_F(ParticipantTest, make_basic_controller)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
 
     auto* canController = participant->CreateCanController("CAN1");
-    auto basicCanController = dynamic_cast<ib::sim::can::CanController*>(canController);
+    auto basicCanController = dynamic_cast<SilKit::Services::Can::CanController*>(canController);
 
     EXPECT_NE(basicCanController, nullptr);
 }

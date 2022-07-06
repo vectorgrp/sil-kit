@@ -2,25 +2,25 @@
 
 #pragma once
 
-#include "ib/sim/can/CanDatatypes.hpp"
+#include "silkit/services/can/CanDatatypes.hpp"
 
-#include "IIbReceiver.hpp"
-#include "IIbSender.hpp"
+#include "IReceiver.hpp"
+#include "ISender.hpp"
 
-namespace ib {
-namespace sim {
-namespace can {
+namespace SilKit {
+namespace Services {
+namespace Can {
 
-/*! \brief IIbToCanController interface
+/*! \brief IMsgForCanController interface
  *
  *  Used by the Participant, implemented by the CanController
  */
-class IIbToCanController
-    : public mw::IIbReceiver<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
-    , public mw::IIbSender<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
+class IMsgForCanController
+    : public Core::IReceiver<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
+    , public Core::ISender<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
 {
 };
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

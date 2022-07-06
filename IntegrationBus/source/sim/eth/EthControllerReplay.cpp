@@ -2,9 +2,9 @@
 
 #include "EthControllerReplay.hpp"
 
-namespace ib {
-namespace sim {
-namespace eth {
+namespace SilKit {
+namespace Services {
+namespace Ethernet {
 void EthControllerReplay::Activate()
 {
     _controller.Activate();
@@ -18,7 +18,7 @@ void EthControllerReplay::Deactivate()
 auto EthControllerReplay::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 {
     // ignore the user's API calls if we're configured for replay
-    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //if (tracing::IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Send))
     //{
     //    return 0;
     //}
@@ -29,7 +29,7 @@ auto EthControllerReplay::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
 auto EthControllerReplay::SendFrame(EthernetFrame msg) -> EthernetTxId
 {
     // ignore the user's API calls if we're configured for replay
-    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    //if (tracing::IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Send))
     //{
     //    return 0;
     //}
@@ -56,53 +56,53 @@ void EthControllerReplay::AddBitrateChangeHandler(BitrateChangeHandler handler)
     _controller.AddBitrateChangeHandler(std::move(handler));
 }
 
-// IIbToEthController
-void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* from, const EthernetFrameEvent& msg)
+// IMsgForEthController
+void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
-    //if (tracing::IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    //if (tracing::IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Receive))
     //{
     //    return;
     //}
 
-    _controller.ReceiveIbMessage(from, msg);
+    _controller.ReceiveSilKitMessage(from, msg);
 }
 
-void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetFrameTransmitEvent& /*msg*/)
+void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const EthernetFrameTransmitEvent& /*msg*/)
 {
 }
 
-void EthControllerReplay::ReceiveIbMessage(const IIbServiceEndpoint* /*from*/, const EthernetStatus& /*msg*/)
+void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const EthernetStatus& /*msg*/)
 {
 }
 
-// ib::mw::sync::ITimeConsumer
-void EthControllerReplay::SetTimeProvider(ib::mw::sync::ITimeProvider* /*timeProvider*/)
+// SilKit::Core::Orchestration::ITimeConsumer
+void EthControllerReplay::SetTimeProvider(SilKit::Core::Orchestration::ITimeProvider* /*timeProvider*/)
 {
     //_controller.SetTimeProvider(timeProvider);
 }
 
 // ITraceMessageSource
-void EthControllerReplay::AddSink(extensions::ITraceMessageSink* sink)
+void EthControllerReplay::AddSink(ITraceMessageSink* sink)
 {
     _controller.AddSink(sink);
 }
 
 // IReplayDataProvider
 
-void EthControllerReplay::ReplayMessage(const extensions::IReplayMessage* replayMessage)
+void EthControllerReplay::ReplayMessage(const IReplayMessage* replayMessage)
 {
-    using namespace ib::tracing;
+    using namespace SilKit::tracing;
     switch (replayMessage->GetDirection())
     {
-    case ib::sim::TransmitDirection::TX:
-        //if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Send))
+    case SilKit::Services::TransmitDirection::TX:
+        //if (IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Send))
         //{
         //    ReplaySend(replayMessage);
         //}
         break;
-    case ib::sim::TransmitDirection::RX:
-        //if (IsReplayEnabledFor(_replayConfig, cfg::Replay::Direction::Receive))
+    case SilKit::Services::TransmitDirection::RX:
+        //if (IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Receive))
         //{
         //    ReplayReceive(replayMessage);
         //}
@@ -115,24 +115,24 @@ void EthControllerReplay::ReplayMessage(const extensions::IReplayMessage* replay
 }
 
 
-void EthControllerReplay::ReplaySend(const extensions::IReplayMessage* replayMessage)
+void EthControllerReplay::ReplaySend(const IReplayMessage* replayMessage)
 {
     // need to copy the message here.
     // will throw if invalid message type.
-    sim::eth::EthernetFrame msg = dynamic_cast<const sim::eth::EthernetFrame&>(*replayMessage);
+    Services::Ethernet::EthernetFrame msg = dynamic_cast<const Services::Ethernet::EthernetFrame&>(*replayMessage);
     _controller.SendFrame(std::move(msg));
 }
 
-void EthControllerReplay::ReplayReceive(const extensions::IReplayMessage* replayMessage)
+void EthControllerReplay::ReplayReceive(const IReplayMessage* replayMessage)
 {
     static tracing::ReplayServiceDescriptor replayService;
-    sim::eth::EthernetFrame frame = dynamic_cast<const sim::eth::EthernetFrame&>(*replayMessage);
-    sim::eth::EthernetFrameEvent msg{};
+    Services::Ethernet::EthernetFrame frame = dynamic_cast<const Services::Ethernet::EthernetFrame&>(*replayMessage);
+    Services::Ethernet::EthernetFrameEvent msg{};
     msg.frame = std::move(frame);
     msg.timestamp = replayMessage->Timestamp();
-    _controller.ReceiveIbMessage(&replayService, msg);
+    _controller.ReceiveSilKitMessage(&replayService, msg);
 }
 
-} // namespace eth
-} // namespace sim
-} // namespace ib
+} // namespace Ethernet
+} // namespace Services
+} // namespace SilKit

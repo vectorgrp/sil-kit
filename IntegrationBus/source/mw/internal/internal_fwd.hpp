@@ -2,42 +2,42 @@
 
 #pragma once
 
-namespace ib {
-namespace sim {
-namespace can {
-class IIbToCanSimulator;
-} // namespace can
-namespace eth {
-class IIbToEthSimulator;
-} // namespace eth
-namespace fr {
-class IIbToFlexrayBusSimulator;
-} // namespace fr
-namespace lin {
-class IIbToLinSimulator;
-} // namespace lin
-namespace data {
-class IIbToDataPublisher;
-class IIbToDataSubscriber;
-class IIbToDataSubscriberInternal;
+namespace SilKit {
+namespace Services {
+namespace Can {
+class IMsgForCanSimulator;
+} // namespace Can
+namespace Ethernet {
+class IMsgForEthSimulator;
+} // namespace Ethernet
+namespace Flexray {
+class IMsgForFlexrayBusSimulator;
+} // namespace Flexray
+namespace Lin {
+class IMsgForLinSimulator;
+} // namespace Lin
+namespace PubSub {
+class IMsgForDataPublisher;
+class IMsgForDataSubscriber;
+class IMsgForDataSubscriberInternal;
 class DataSubscriberInternal;
-} // namespace data
-namespace rpc {
-class IIbToRpcClient;
-class IIbToRpcServer;
-class IIbToRpcServerInternal;
+} // namespace PubSub
+namespace Rpc {
+class IMsgForRpcClient;
+class IMsgForRpcServer;
+class IMsgForRpcServerInternal;
 class RpcServerInternal;
 class RpcDiscoverer;
-} // namespace rpc
-} // namespace sim
-namespace mw {
-namespace service {
+} // namespace Rpc
+} // namespace Services
+namespace Core {
+namespace Discovery {
 class IServiceDiscovery;
-} // namespace service
-namespace sync {
+} // namespace Discovery
+namespace Orchestration {
 class LifecycleService;
 class TimeSyncService;
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit
 

@@ -8,8 +8,8 @@
 #include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "ib/mw/sync/all.hpp"
-#include "ib/util/functional.hpp"
+#include "silkit/core/sync/all.hpp"
+#include "silkit/util/functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -20,8 +20,8 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace ib::mw;
-using namespace ib::mw::sync;
+using namespace SilKit::Core;
+using namespace SilKit::Core::Orchestration;
 
 using testing::_;
 using testing::A;
@@ -83,13 +83,13 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
-    auto registry = std::make_unique<VAsioRegistry>(ib::cfg::MakeEmptyParticipantConfiguration());
+    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->ProvideDomain(registryUri);
 
     // Setup Participant for TestController
-    auto participant = CreateParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), "TestController");
+    auto participant = CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestController");
 
-    participant->JoinIbDomain(registryUri);
+    participant->JoinSilKitDomain(registryUri);
     auto systemController = participant->GetSystemController();
     systemController->SetWorkflowConfiguration({syncParticipantNames});
     auto monitor = participant->GetSystemMonitor();
@@ -98,8 +98,8 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup Participant for Test Unit
-    auto participantTestUnit = CreateParticipantImpl(ib::cfg::MakeEmptyParticipantConfiguration(), "TestUnit");
-    participantTestUnit->JoinIbDomain(registryUri);
+    auto participantTestUnit = CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit");
+    participantTestUnit->JoinSilKitDomain(registryUri);
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 

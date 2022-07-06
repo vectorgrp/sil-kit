@@ -3,20 +3,20 @@
 #include "VAsioMsgKind.hpp"
 #include "VAsioDatatypes.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 // Associate a Message Kind with concrete VAsio data types.
 // The VAsioMsgKind tags are encoded in serialized (network) messages.
 
 template<typename MessageT>
-inline constexpr auto messageKind() -> VAsioMsgKind { return VAsioMsgKind::IbMwMsg; }
+inline constexpr auto messageKind() -> VAsioMsgKind { return VAsioMsgKind::SilKitMwMsg; }
 template<>
-inline constexpr auto messageKind<ParticipantAnnouncement>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage; }
+inline constexpr auto messageKind<ParticipantAnnouncement>() -> VAsioMsgKind { return VAsioMsgKind::SilKitRegistryMessage; }
 template<>
-inline constexpr auto messageKind<ParticipantAnnouncementReply>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage; }
+inline constexpr auto messageKind<ParticipantAnnouncementReply>() -> VAsioMsgKind { return VAsioMsgKind::SilKitRegistryMessage; }
 template<>
-inline constexpr auto messageKind<KnownParticipants>() -> VAsioMsgKind { return VAsioMsgKind::IbRegistryMessage; }
+inline constexpr auto messageKind<KnownParticipants>() -> VAsioMsgKind { return VAsioMsgKind::SilKitRegistryMessage; }
 template<>
 inline constexpr auto messageKind<SubscriptionAcknowledge>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAcknowledge; }
 template<>
@@ -39,10 +39,10 @@ inline constexpr bool IsMwOrSim(VAsioMsgKind kind);
 //////////////////////////////////////////////////////////////////////
 inline constexpr bool IsMwOrSim(VAsioMsgKind kind)
 {
-    return kind == VAsioMsgKind::IbMwMsg
-        || kind == VAsioMsgKind::IbSimMsg
+    return kind == VAsioMsgKind::SilKitMwMsg
+        || kind == VAsioMsgKind::SilKitSimMsg
         ;
 }
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

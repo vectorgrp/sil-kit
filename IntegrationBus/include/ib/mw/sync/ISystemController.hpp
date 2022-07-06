@@ -4,9 +4,9 @@
 
 #include "SyncDatatypes.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 class ISystemController
 {
@@ -67,6 +67,6 @@ public:
     virtual void SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration) = 0;
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

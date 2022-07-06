@@ -5,9 +5,9 @@
 #include <chrono>
 #include <string>
 
-namespace ib {
-namespace mw {
-namespace logging {
+namespace SilKit {
+namespace Core {
+namespace Logging {
 
 using log_clock = std::chrono::system_clock;
 
@@ -63,6 +63,6 @@ inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
         && lhs.payload == rhs.payload;
 }
 
-} // namespace logging
-} // namespace mw
-} // namespace ib
+} // namespace Logging
+} // namespace Core
+} // namespace SilKit

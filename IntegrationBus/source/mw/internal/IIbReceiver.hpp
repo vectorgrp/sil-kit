@@ -3,18 +3,18 @@
 #pragma once
 #include <tuple>
 
-#include "IIbMessageReceiver.hpp"
+#include "IMessageReceiver.hpp"
 
-namespace ib {
-namespace mw {
+namespace SilKit {
+namespace Core {
 
 template<typename... MsgT>
-class IIbReceiver : public IIbMessageReceiver<MsgT>...
+class IReceiver : public IMessageReceiver<MsgT>...
 {
 public:
-    using IbReceiveMessagesTypes = std::tuple<MsgT...>;
-    virtual ~IIbReceiver() = default;
+    using SilKitReceiveMessagesTypes = std::tuple<MsgT...>;
+    virtual ~IReceiver() = default;
 };
 
-} // namespace mw
-} // namespace ib
+} // namespace Core
+} // namespace SilKit

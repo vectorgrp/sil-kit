@@ -7,15 +7,15 @@
 #include <chrono>
 #include <type_traits>
 
-using namespace ib::cfg;
-using namespace ib;
+using namespace SilKit::Config;
+using namespace SilKit;
 
 // Local utilities
 namespace {
 
 template<typename ConfigT, typename std::enable_if<
     !(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
-void optional_encode(const ib::util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
+void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.has_value())
     {
@@ -206,37 +206,37 @@ bool Converter::decode(const Node& node, Sink::Type& obj)
 }
 
 template<>
-Node Converter::encode(const mw::logging::Level& obj)
+Node Converter::encode(const Core::Logging::Level& obj)
 {
     Node node;
     switch (obj)
     {
-    case mw::logging::Level::Critical:
+    case Core::Logging::Level::Critical:
         node = "Critical";
         break;
-    case mw::logging::Level::Error:
+    case Core::Logging::Level::Error:
         node = "Error";
         break;
-    case mw::logging::Level::Warn:
+    case Core::Logging::Level::Warn:
         node = "Warn";
         break;
-    case mw::logging::Level::Info:
+    case Core::Logging::Level::Info:
         node = "Info";
         break;
-    case mw::logging::Level::Debug:
+    case Core::Logging::Level::Debug:
         node = "Debug";
         break;
-    case mw::logging::Level::Trace:
+    case Core::Logging::Level::Trace:
         node = "Trace";
         break;
-    case mw::logging::Level::Off:
+    case Core::Logging::Level::Off:
         node = "Off";
         break;
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, mw::logging::Level& obj)
+bool Converter::decode(const Node& node, Core::Logging::Level& obj)
 {
     if (!node.IsScalar())
     {
@@ -245,22 +245,22 @@ bool Converter::decode(const Node& node, mw::logging::Level& obj)
     }
     auto&& str = parse_as<std::string>(node);
     if (str == "Critical")
-        obj = mw::logging::Level::Critical;
+        obj = Core::Logging::Level::Critical;
     else if (str == "Error")
-        obj = mw::logging::Level::Error;
+        obj = Core::Logging::Level::Error;
     else if (str == "Warn")
-        obj = mw::logging::Level::Warn;
+        obj = Core::Logging::Level::Warn;
     else if (str == "Info")
-        obj = mw::logging::Level::Info;
+        obj = Core::Logging::Level::Info;
     else if (str == "Debug")
-        obj = mw::logging::Level::Debug;
+        obj = Core::Logging::Level::Debug;
     else if (str == "Trace")
-        obj = mw::logging::Level::Trace;
+        obj = Core::Logging::Level::Trace;
     else if (str == "Off")
-        obj = mw::logging::Level::Off;
+        obj = Core::Logging::Level::Off;
     else
     {
-        throw ConversionError(node, "Unknown mw::logging::Level: " + str + ".");
+        throw ConversionError(node, "Unknown Core::Logging::Level: " + str + ".");
     }
     return true;
 }
@@ -417,7 +417,7 @@ bool Converter::decode(const Node& node, EthernetController& obj)
 }
 
 template<>
-Node Converter::encode(const sim::fr::FlexrayClusterParameters& obj)
+Node Converter::encode(const Services::Flexray::FlexrayClusterParameters& obj)
 {
     Node node;
     // Parse parameters as an int value; uint8_t would be interpreted as a character
@@ -444,7 +444,7 @@ Node Converter::encode(const sim::fr::FlexrayClusterParameters& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::FlexrayClusterParameters& obj)
+bool Converter::decode(const Node& node, Services::Flexray::FlexrayClusterParameters& obj)
 {
     // Parse parameters as an int value; uint8_t would be interpreted as a character
     auto parseInt = [&node](auto instance, auto name)
@@ -477,7 +477,7 @@ bool Converter::decode(const Node& node, sim::fr::FlexrayClusterParameters& obj)
     return true;
 }
 template<>
-Node Converter::encode(const sim::fr::FlexrayNodeParameters& obj)
+Node Converter::encode(const Services::Flexray::FlexrayNodeParameters& obj)
 {
     Node node;
     node["pAllowHaltDueToClock"] = static_cast<int>(obj.pAllowHaltDueToClock);
@@ -506,7 +506,7 @@ Node Converter::encode(const sim::fr::FlexrayNodeParameters& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::FlexrayNodeParameters& obj)
+bool Converter::decode(const Node& node, Services::Flexray::FlexrayNodeParameters& obj)
 {
     auto parseInt = [&node](auto instance, auto name)
     {
@@ -532,14 +532,14 @@ bool Converter::decode(const Node& node, sim::fr::FlexrayNodeParameters& obj)
     obj.pRateCorrectionOut = parseInt(obj.pRateCorrectionOut, "pRateCorrectionOut");
     obj.pWakeupPattern = parseInt(obj.pWakeupPattern, "pWakeupPattern");
     obj.pSamplesPerMicrotick = parseInt(obj.pSamplesPerMicrotick, "pSamplesPerMicrotick");
-    obj.pWakeupChannel = parse_as<sim::fr::FlexrayChannel>(node["pWakeupChannel"]);
-    obj.pdMicrotick = parse_as<sim::fr::FlexrayClockPeriod>(node["pdMicrotick"]);
-    obj.pChannels = parse_as<sim::fr::FlexrayChannel>(node["pChannels"]);
+    obj.pWakeupChannel = parse_as<Services::Flexray::FlexrayChannel>(node["pWakeupChannel"]);
+    obj.pdMicrotick = parse_as<Services::Flexray::FlexrayClockPeriod>(node["pdMicrotick"]);
+    obj.pChannels = parse_as<Services::Flexray::FlexrayChannel>(node["pChannels"]);
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::FlexrayTxBufferConfig& obj)
+Node Converter::encode(const Services::Flexray::FlexrayTxBufferConfig& obj)
 {
     Node node;
     node["channels"] = obj.channels;
@@ -552,105 +552,105 @@ Node Converter::encode(const sim::fr::FlexrayTxBufferConfig& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::FlexrayTxBufferConfig& obj)
+bool Converter::decode(const Node& node, Services::Flexray::FlexrayTxBufferConfig& obj)
 {
-    obj.channels = parse_as<sim::fr::FlexrayChannel>(node["channels"]);
+    obj.channels = parse_as<Services::Flexray::FlexrayChannel>(node["channels"]);
     obj.slotId = parse_as<uint16_t>(node["slotId"]);
     obj.offset = static_cast<uint8_t>(parse_as<int>(node["offset"]));
     obj.repetition = static_cast<uint8_t>(parse_as<int>(node["repetition"]));
     obj.hasPayloadPreambleIndicator = parse_as<bool>(node["PPindicator"]);
     obj.headerCrc = parse_as<uint16_t>(node["headerCrc"]);
-    obj.transmissionMode = parse_as<sim::fr::FlexrayTransmissionMode>(node["transmissionMode"]);
+    obj.transmissionMode = parse_as<Services::Flexray::FlexrayTransmissionMode>(node["transmissionMode"]);
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::FlexrayChannel& obj)
+Node Converter::encode(const Services::Flexray::FlexrayChannel& obj)
 {
     Node node;
     switch (obj)
     {
-    case sim::fr::FlexrayChannel::A:
+    case Services::Flexray::FlexrayChannel::A:
         node = "A";
         break;
-    case sim::fr::FlexrayChannel::B:
+    case Services::Flexray::FlexrayChannel::B:
         node = "B";
         break;
-    case sim::fr::FlexrayChannel::AB:
+    case Services::Flexray::FlexrayChannel::AB:
         node =  "AB";
         break;
-    case sim::fr::FlexrayChannel::None:
+    case Services::Flexray::FlexrayChannel::None:
         node = "None";
         break;
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::FlexrayChannel& obj)
+bool Converter::decode(const Node& node, Services::Flexray::FlexrayChannel& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "A")
-        obj =  sim::fr::FlexrayChannel::A;
+        obj =  Services::Flexray::FlexrayChannel::A;
     else if (str == "B")
-        obj =  sim::fr::FlexrayChannel::B;
+        obj =  Services::Flexray::FlexrayChannel::B;
     else if (str == "AB")
-        obj =  sim::fr::FlexrayChannel::AB;
+        obj =  Services::Flexray::FlexrayChannel::AB;
     else if (str == "None" || str == "")
-        obj = sim::fr::FlexrayChannel::None;
+        obj = Services::Flexray::FlexrayChannel::None;
     else
     {
-        throw ConversionError(node, "Unknown sim::fr::FlexrayChannel: " + str);
+        throw ConversionError(node, "Unknown Services::Flexray::FlexrayChannel: " + str);
     }
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::FlexrayClockPeriod& obj)
+Node Converter::encode(const Services::Flexray::FlexrayClockPeriod& obj)
 {
     Node node;
     switch (obj)
     {
-    case sim::fr::FlexrayClockPeriod::T12_5NS:
+    case Services::Flexray::FlexrayClockPeriod::T12_5NS:
         node = "12.5ns";
         break;
-    case sim::fr::FlexrayClockPeriod::T25NS:
+    case Services::Flexray::FlexrayClockPeriod::T25NS:
         node =  "25ns";
         break;
-    case sim::fr::FlexrayClockPeriod::T50NS:
+    case Services::Flexray::FlexrayClockPeriod::T50NS:
         node = "50ns";
         break;
     default:
-        throw ConversionError(node, "Unknown sim::fr::FlexrayClockPeriod");
+        throw ConversionError(node, "Unknown Services::Flexray::FlexrayClockPeriod");
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::FlexrayClockPeriod& obj)
+bool Converter::decode(const Node& node, Services::Flexray::FlexrayClockPeriod& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "12.5ns")
-        obj = sim::fr::FlexrayClockPeriod::T12_5NS;
+        obj = Services::Flexray::FlexrayClockPeriod::T12_5NS;
     else if (str == "25ns")
-        obj = sim::fr::FlexrayClockPeriod::T25NS;
+        obj = Services::Flexray::FlexrayClockPeriod::T25NS;
     else if (str == "50ns")
-        obj = sim::fr::FlexrayClockPeriod::T50NS;
+        obj = Services::Flexray::FlexrayClockPeriod::T50NS;
     else
     {
-        throw ConversionError(node, "Unknown sim::fr::FlexrayClockPeriod: " + str);
+        throw ConversionError(node, "Unknown Services::Flexray::FlexrayClockPeriod: " + str);
     }
     return true;
 }
 
 template<>
-Node Converter::encode(const sim::fr::FlexrayTransmissionMode& obj)
+Node Converter::encode(const Services::Flexray::FlexrayTransmissionMode& obj)
 {
     Node node;
     switch (obj)
     {
-    case sim::fr::FlexrayTransmissionMode::Continuous:
+    case Services::Flexray::FlexrayTransmissionMode::Continuous:
         node = "Continuous";
         break;
-    case sim::fr::FlexrayTransmissionMode::SingleShot:
+    case Services::Flexray::FlexrayTransmissionMode::SingleShot:
         node = "SingleShot";
         break;
     default:
@@ -659,16 +659,16 @@ Node Converter::encode(const sim::fr::FlexrayTransmissionMode& obj)
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, sim::fr::FlexrayTransmissionMode& obj)
+bool Converter::decode(const Node& node, Services::Flexray::FlexrayTransmissionMode& obj)
 {
     auto&& str = parse_as<std::string>(node);
     if (str == "Continuous")
-        obj = sim::fr::FlexrayTransmissionMode::Continuous;
+        obj = Services::Flexray::FlexrayTransmissionMode::Continuous;
     else if (str == "SingleShot")
-        obj = sim::fr::FlexrayTransmissionMode::SingleShot;
+        obj = Services::Flexray::FlexrayTransmissionMode::SingleShot;
     else
     {
-        throw ConversionError(node, "Unknown sim::fr::FlexrayTransmissionMode: " + str);
+        throw ConversionError(node, "Unknown Services::Flexray::FlexrayTransmissionMode: " + str);
     }
     return true;
 }

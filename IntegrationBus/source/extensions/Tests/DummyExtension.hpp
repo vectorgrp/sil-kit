@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "IbExtensionBase.hpp"
+#include "SilKitExtensionBase.hpp"
 
-struct DummyExtension : public ib::extensions::IbExtensionBase
+struct DummyExtension : public SilKit::SilKitExtensionBase
 {
     int64_t _value{};
-    using IbExtensionBase::IbExtensionBase;
+    using SilKitExtensionBase::SilKitExtensionBase;
 
     //some methods for testing dynamic cast across DLL boundaries
     int64_t GetDummyValue() const

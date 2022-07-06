@@ -2,9 +2,9 @@
 
 #include "SyncDatatypeUtils.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 bool operator==(const ParticipantCommand& lhs, const ParticipantCommand& rhs)
 {
@@ -30,6 +30,6 @@ bool operator==(const WorkflowConfiguration& lhs, const WorkflowConfiguration& r
     return lhs.requiredParticipantNames == rhs.requiredParticipantNames;
 }
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit

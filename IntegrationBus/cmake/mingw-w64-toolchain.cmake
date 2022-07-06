@@ -12,7 +12,7 @@ set(CMAKE_RC_COMPILER ${TOOL_TRIPLE}-windres)
 # - fix missing symbols when using winpthreads:
 set(_c_flags "-static-libgcc -static-libstdc++ -m64")
 # - statically link winpthread, so we do not have a shared library
-#   dependency on IntegrationBus.dll
+#   dependency on SilKit.dll
 set(_l_flags "-Wl,-Bstatic,--whole-archive -lwinpthread -Wl,-Bdynamic,--no-whole-archive")
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${_c_flags} ${_l_flags}")
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "${_c_flags} ${_l_flags}")

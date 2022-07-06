@@ -2,35 +2,35 @@
 
 #pragma once
 #include <stdint.h>
-#include "ib/capi/IbMacros.h"
-#include "ib/capi/Types.h"
+#include "silkit/capi/SilKitMacros.h"
+#include "silkit/capi/Types.h"
 
 #pragma pack(push)
 #pragma pack(8)
 
-IB_BEGIN_DECLS
+SILKIT_BEGIN_DECLS
 
 /*! \brief Information level of log messages
 */
-typedef uint32_t ib_LoggingLevel;
-#define ib_LoggingLevel_Trace ((uint32_t) 0) //!< Detailed debug-level messages
-#define ib_LoggingLevel_Debug ((uint32_t) 1) //!< Normal debug-level messages
-#define ib_LoggingLevel_Info ((uint32_t) 2) //!< Informational content
-#define ib_LoggingLevel_Warn ((uint32_t) 3) //!< Warnings
-#define ib_LoggingLevel_Error ((uint32_t) 4) //!< Non-critical errors
-#define ib_LoggingLevel_Critical ((uint32_t) 5) //!< Critical errors
-#define ib_LoggingLevel_Off ((uint32_t) 6) //!< Logging is disabled
+typedef uint32_t SilKit_LoggingLevel;
+#define SilKit_LoggingLevel_Trace ((uint32_t) 0) //!< Detailed debug-level messages
+#define SilKit_LoggingLevel_Debug ((uint32_t) 1) //!< Normal debug-level messages
+#define SilKit_LoggingLevel_Info ((uint32_t) 2) //!< Informational content
+#define SilKit_LoggingLevel_Warn ((uint32_t) 3) //!< Warnings
+#define SilKit_LoggingLevel_Error ((uint32_t) 4) //!< Non-critical errors
+#define SilKit_LoggingLevel_Critical ((uint32_t) 5) //!< Critical errors
+#define SilKit_LoggingLevel_Off ((uint32_t) 6) //!< Logging is disabled
 
-typedef struct ib_Logger ib_Logger;
+typedef struct SilKit_Logger SilKit_Logger;
 
-typedef ib_ReturnCode(*ib_Logger_Log_t)(ib_Logger* self, ib_LoggingLevel level, const char* message);
+typedef SilKit_ReturnCode(*SilKit_Logger_Log_t)(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
 /*! \brief Log a message with a specified level
  *
  * \param level The log level for the message
  * \param message The message which shall be logged.
  */
-IntegrationBusAPI ib_ReturnCode ib_Logger_Log(ib_Logger* self, ib_LoggingLevel level, const char* message);
+SilKitAPI SilKit_ReturnCode SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
 
-IB_END_DECLS
+SILKIT_END_DECLS
 
 #pragma pack(pop)

@@ -5,13 +5,13 @@
 #include <chrono>
 #include <string>
 
-#include "ib/mw/sync/SyncDatatypes.hpp"
+#include "silkit/core/sync/SyncDatatypes.hpp"
 
-#include "IIbServiceEndpoint.hpp"
+#include "IServiceEndpoint.hpp"
 
-namespace ib {
-namespace mw {
-namespace sync {
+namespace SilKit {
+namespace Core {
+namespace Orchestration {
 
 struct NextSimTask
 {
@@ -19,6 +19,6 @@ struct NextSimTask
     std::chrono::nanoseconds duration{0};
 };
 
-} // namespace sync
-} // namespace mw
-} // namespace ib
+} // namespace Orchestration
+} // namespace Core
+} // namespace SilKit
