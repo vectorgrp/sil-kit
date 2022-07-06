@@ -18,7 +18,7 @@
 #endif //HAVE_FMTLIB
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 class ILogger
@@ -101,5 +101,5 @@ protected:
 };
 
 } // logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

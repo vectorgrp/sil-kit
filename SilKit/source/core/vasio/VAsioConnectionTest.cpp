@@ -7,7 +7,7 @@
 #include "silkit/services/pubsub/fwd_decl.hpp"
 #include "silkit/services/rpc/fwd_decl.hpp"
 #include "silkit/core/sync/fwd_decl.hpp"
-#include "silkit/core/logging/fwd_decl.hpp"
+#include "silkit/services/logging/fwd_decl.hpp"
 #include "ServiceDatatypes.hpp" //concrete, no forwards
 
 #include "ProtocolVersion.hpp"

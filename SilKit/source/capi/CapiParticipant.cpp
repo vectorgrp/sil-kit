@@ -4,7 +4,7 @@
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/core/sync/all.hpp"
 #include "silkit/core/sync/string_utils.hpp"
 #include "IParticipantInternal.hpp"

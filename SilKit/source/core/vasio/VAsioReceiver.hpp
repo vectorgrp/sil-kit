@@ -54,7 +54,7 @@ class VAsioReceiver
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Logging::ILogger* logger);
+    VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Services::Logging::ILogger* logger);
 
 public:
     // ----------------------------------------
@@ -75,7 +75,7 @@ private:
     // private members
     VAsioMsgSubscriber _subscriptionInfo;
     std::shared_ptr<SilKitLink<MsgT>> _link;
-    Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
     ServiceDescriptor _serviceDescriptor;
 };
 
@@ -83,7 +83,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Logging::ILogger* logger)
+VAsioReceiver<MsgT>::VAsioReceiver(VAsioMsgSubscriber subscriberInfo, std::shared_ptr<SilKitLink<MsgT>> link, Services::Logging::ILogger* logger)
     : _subscriptionInfo{std::move(subscriberInfo)}
     , _link{link}
     , _logger{logger}
@@ -102,7 +102,7 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescr
 {
     MsgT msg = buffer.Deserialize<MsgT>();
 
-    TraceRx(_logger, this, msg);
+    Services::TraceRx(_logger, this, msg);
 
     auto remoteId = RemoteServiceEndpoint(descriptor);
     _link->DistributeRemoteSilKitMessage(&remoteId, std::move(msg));

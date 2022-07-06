@@ -12,7 +12,7 @@
 #include <functional>
 #include <cctype>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "VAsioTcpPeer.hpp"
 #include "Filesystem.hpp"
@@ -36,7 +36,7 @@ void SetSocketPermissions(const EndpointT&)
 }
 
 template<typename AcceptorT>
-void SetListenOptions(SilKit::Core::Logging::ILogger*,
+void SetListenOptions(SilKit::Services::Logging::ILogger*,
     AcceptorT&)
 {
 }
@@ -53,7 +53,7 @@ void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
 
 #   if !defined(__MINGW32__)
 template<>
-void SetListenOptions(SilKit::Core::Logging::ILogger* logger,
+void SetListenOptions(SilKit::Services::Logging::ILogger* logger,
     asio::ip::tcp::acceptor& acceptor)
 {
     // This should improve loopback performance, and have no effect on remote TCP/IP
@@ -93,7 +93,7 @@ void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint
 }
 
 template<>
-void SetListenOptions(SilKit::Core::Logging::ILogger* ,
+void SetListenOptions(SilKit::Services::Logging::ILogger* ,
     asio::ip::tcp::acceptor& )
 {
     // no op
@@ -288,7 +288,7 @@ VAsioConnection::~VAsioConnection()
 
 }
 
-void VAsioConnection::SetLogger(Logging::ILogger* logger)
+void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
 {
     _logger = logger;
 }

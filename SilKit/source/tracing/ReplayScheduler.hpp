@@ -42,7 +42,7 @@ private:
     };
     std::chrono::nanoseconds _tickPeriod{0};
     std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
-    Core::Logging::ILogger* _log{nullptr};
+    Services::Logging::ILogger* _log{nullptr};
     Core::IParticipant* _participant{nullptr};
     Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;

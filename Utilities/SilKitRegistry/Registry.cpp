@@ -2,7 +2,7 @@
 
 #include "silkit/version.hpp"
 #include "silkit/cfg/IParticipantConfiguration.hpp"
-#include "silkit/core/logging/string_utils.hpp"
+#include "silkit/services/logging/string_utils.hpp"
 
 #include "SignalHandler.hpp"
 #include "VAsioRegistry.hpp"
@@ -46,7 +46,7 @@ auto ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
         [](auto const& el) { return el.type == SilKit::Config::Sink::Type::Stdout;}
     );
 
-    auto level = SilKit::Core::Logging::from_string(logLevel);
+    auto level = SilKit::Services::Logging::from_string(logLevel);
 
     if (it != config->logging.sinks.end())
     {

@@ -12,7 +12,7 @@
 
 #include "silkit/core/all.hpp"
 #include "silkit/services/all.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
@@ -146,7 +146,7 @@ public:
     auto GetSystemMonitor() -> Orchestration::ISystemMonitor* override;
     auto GetSystemController() -> Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
-    auto GetLogger() -> Logging::ILogger* override;
+    auto GetLogger() -> Services::Logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
 
     void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
@@ -194,8 +194,8 @@ public:
     void SendMsg(const IServiceEndpoint*, const Orchestration::SystemCommand& msg) override;
     void SendMsg(const IServiceEndpoint*, const Orchestration::WorkflowConfiguration& msg) override;
 
-    void SendMsg(const IServiceEndpoint*, const Logging::LogMsg& msg) override;
-    void SendMsg(const IServiceEndpoint*, Logging::LogMsg&& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Services::Logging::LogMsg& msg) override;
+    void SendMsg(const IServiceEndpoint*, Services::Logging::LogMsg&& msg) override;
 
     void SendMsg(const IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg) override;
@@ -248,8 +248,8 @@ public:
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg) override;
 
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Logging::LogMsg& msg) override;
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, Logging::LogMsg&& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Logging::LogMsg& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, Services::Logging::LogMsg&& msg) override;
 
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::DataMessageEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::PubSub::DataMessageEvent&& msg) override;
@@ -355,7 +355,7 @@ private:
     Orchestration::WallclockProvider _wallclockTimeProvider{1ms};
     Orchestration::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
 
-    std::unique_ptr<Logging::ILogger> _logger;
+    std::unique_ptr<Services::Logging::ILogger> _logger;
     std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;
 
     std::tuple<
@@ -369,8 +369,8 @@ private:
         ControllerMap<Services::Rpc::IMsgForRpcClient>,
         ControllerMap<Services::Rpc::IMsgForRpcServer>,
         ControllerMap<Services::Rpc::IMsgForRpcServerInternal>,
-        ControllerMap<Logging::IMsgForLogMsgSender>,
-        ControllerMap<Logging::IMsgForLogMsgReceiver>,
+        ControllerMap<Services::Logging::IMsgForLogMsgSender>,
+        ControllerMap<Services::Logging::IMsgForLogMsgReceiver>,
         ControllerMap<Orchestration::IMsgForLifecycleService>,
         ControllerMap<Orchestration::IMsgForSystemMonitor>,
         ControllerMap<Orchestration::IMsgForSystemController>,

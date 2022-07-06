@@ -8,7 +8,7 @@
 #include <queue>
 #include <mutex>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
@@ -35,7 +35,7 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioTcpPeer() = delete;
-    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Logging::ILogger* logger);
+    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Services::Logging::ILogger* logger);
     VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer(VAsioTcpPeer&& other) = delete; //clang warning: implicitly deleted because of mutex
 
@@ -86,7 +86,7 @@ private:
     VAsioConnection* _connection{nullptr};
     VAsioPeerInfo _info;
 
-    Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
 
     // receiving
     uint32_t _currentMsgSize{0u};

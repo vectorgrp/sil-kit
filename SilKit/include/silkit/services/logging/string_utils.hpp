@@ -11,7 +11,7 @@
 #include "LoggingDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 inline std::string to_string(const Level& address);
@@ -106,5 +106,5 @@ std::ostream& operator<<(std::ostream& out, const LogMsg& msg)
     return out;
 }
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

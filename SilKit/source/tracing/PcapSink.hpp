@@ -23,7 +23,7 @@ public:
     // Constructors and Destructor
     PcapSink() = delete;
     PcapSink(const PcapSink&) = delete;
-    PcapSink(Core::Logging::ILogger* logger, std::string name);
+    PcapSink(Services::Logging::ILogger* logger, std::string name);
     ~PcapSink() = default;
 
     // ----------------------------------------
@@ -41,7 +41,7 @@ public:
         const TraceMessage& msg
     ) override;
 
-    auto GetLogger() const -> Core::Logging::ILogger* override;
+    auto GetLogger() const -> Services::Logging::ILogger* override;
 
     auto Name() const -> const std::string& override;
 
@@ -55,7 +55,7 @@ private:
     std::string _name;
     std::string _busName;
     std::string _outputPath;
-    Core::Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILogger* _logger{nullptr};
 };
 
 } // namespace tracing

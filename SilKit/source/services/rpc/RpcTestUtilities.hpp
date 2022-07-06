@@ -28,7 +28,7 @@ struct MockConnection
     {
     }
 
-    void SetLogger(SilKit::Core::Logging::ILogger* /*logger*/) {}
+    void SetLogger(SilKit::Services::Logging::ILogger* /*logger*/) {}
     void SetTimeSyncService(SilKit::Core::Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}
     void JoinDomain(std::string /*domainId*/) {}

@@ -100,7 +100,7 @@ public:
     virtual auto GetLifecycleService() -> Orchestration::ILifecycleService* = 0;
     virtual auto GetSystemMonitor() -> Orchestration::ISystemMonitor* = 0;
     virtual auto GetSystemController() -> Orchestration::ISystemController* = 0;
-    virtual auto GetLogger() -> Logging::ILogger* = 0;
+    virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 };
 
 } // namespace Core

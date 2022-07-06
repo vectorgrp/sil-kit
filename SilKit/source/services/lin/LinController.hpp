@@ -102,7 +102,7 @@ public:
         LinControllerStatus controllerStatus{LinControllerStatus::Unknown};
         std::array<LinFrameResponse, 64> responses;
 
-        void UpdateResponses(std::vector<LinFrameResponse> responses_, Core::Logging::ILogger* logger);
+        void UpdateResponses(std::vector<LinFrameResponse> responses_, Services::Logging::ILogger* logger);
     };
     auto GetResponse(LinIdT id) -> std::pair<int, LinFrame>;
     auto GetThisLinNode() -> LinNode&;
@@ -140,7 +140,7 @@ private:
     // private members
     Core::IParticipantInternal* _participant;
     Config::LinController _config;
-    Core::Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
     SimBehavior _simulationBehavior;
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
 

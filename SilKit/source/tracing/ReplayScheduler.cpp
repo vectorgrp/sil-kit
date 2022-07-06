@@ -223,7 +223,7 @@ std::string to_string(const Config::MdfChannel& mdf)
 }
 
 // Find the MDF channels associated with the given participant/controller names and types or an MdfChannel identification.
-auto FindReplayChannel(SilKit::Core::Logging::ILogger* log,
+auto FindReplayChannel(SilKit::Services::Logging::ILogger* log,
     IReplayFile* replayFile,
     const Config::Replay& replayConfig,
     const std::string& controllerName,

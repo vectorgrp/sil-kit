@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "silkit/cfg/Config.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/extensions/string_utils.hpp"
 
 #include "CreateMdf4Tracing.hpp"
@@ -25,7 +25,7 @@ using TraceMessageType;
 // Tracing
 
 auto CreateTraceMessageSinks(
-    Core::Logging::ILogger* logger,
+    Services::Logging::ILogger* logger,
     const Config::Config& config,
     const Config::Participant& participantConfig
     ) -> std::vector<std::unique_ptr<ITraceMessageSink>>
@@ -107,7 +107,7 @@ auto CreateTraceMessageSinks(
 }
 
     
-auto CreateReplayFiles(Core::Logging::ILogger* logger, /*const Config::Config& config,*/
+auto CreateReplayFiles(Services::Logging::ILogger* logger, /*const Config::Config& config,*/
     const Config::Participant& participantConfig)
     -> std::map<std::string, std::shared_ptr<IReplayFile>>
 {

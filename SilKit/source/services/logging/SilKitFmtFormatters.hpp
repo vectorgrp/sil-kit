@@ -6,8 +6,8 @@
 #include <type_traits>
 #include <tuple>
 
-#include "silkit/core/logging/ILogger.hpp"
-#include "silkit/core/logging/string_utils.hpp"
+#include "silkit/services/logging/ILogger.hpp"
+#include "silkit/services/logging/string_utils.hpp"
 #include "silkit/core/sync/string_utils.hpp"
 #include "silkit/services/can/string_utils.hpp"
 #include "silkit/services/eth/string_utils.hpp"
@@ -41,7 +41,7 @@ static constexpr bool is_printable_silkit_type_v = is_printable_silkit_type<T>::
 
 template<class T>
 struct is_printable_silkit_type<T, std::enable_if_t<is_one_of_v<T, 
-        SilKit::Core::Logging::LogMsg,
+        SilKit::Services::Logging::LogMsg,
         SilKit::Core::Orchestration::NextSimTask,
         SilKit::Core::Orchestration::SystemCommand,
         SilKit::Core::Orchestration::ParticipantCommand,

@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
@@ -18,13 +18,13 @@ using namespace asio::ip;
 #include <sys/socket.h>
 #include <errno.h>
 
-static void SetConnectOptions(SilKit::Core::Logging::ILogger* ,
+static void SetConnectOptions(SilKit::Services::Logging::ILogger* ,
     asio::generic::stream_protocol::socket&)
 {
     // nothing specific required
 }
 
-static void EnableQuickAck(SilKit::Core::Logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
+static void EnableQuickAck(SilKit::Services::Logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
 {
     int val{1};
     //Disable Delayed Acknowledgments on the receiving side
@@ -41,7 +41,7 @@ static void EnableQuickAck(SilKit::Core::Logging::ILogger* log, asio::generic::s
 #include <mstcpip.h>
 #  if defined(__MINGW32__)
 
-static void SetConnectOptions(SilKit::Core::Logging::ILogger* ,
+static void SetConnectOptions(SilKit::Services::Logging::ILogger* ,
     asio::generic::stream_protocol::socket&)
 {
     // SIO_LOOPBACK_FAST_PATH not defined
@@ -49,7 +49,7 @@ static void SetConnectOptions(SilKit::Core::Logging::ILogger* ,
 
 #   else
 
-static void SetConnectOptions(SilKit::Core::Logging::ILogger* logger,
+static void SetConnectOptions(SilKit::Services::Logging::ILogger* logger,
     asio::generic::stream_protocol::socket& socket)
 {
     // This should improve loopback performance, and have no effect on remote TCP/IP
@@ -74,7 +74,7 @@ static void SetConnectOptions(SilKit::Core::Logging::ILogger* logger,
 
 #   endif //!__MINGW32__
 
-static void EnableQuickAck(SilKit::Core::Logging::ILogger* ,
+static void EnableQuickAck(SilKit::Services::Logging::ILogger* ,
     asio::generic::stream_protocol::socket& )
 
 {
@@ -97,7 +97,7 @@ static auto strip(std::string value, const std::string& chars) -> std::string
 namespace SilKit {
 namespace Core {
 
-VAsioTcpPeer::VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Logging::ILogger* logger)
+VAsioTcpPeer::VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Services::Logging::ILogger* logger)
     : _socket{executor}
     , _connection{connection}
     , _logger{logger}

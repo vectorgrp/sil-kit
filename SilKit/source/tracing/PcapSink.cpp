@@ -6,7 +6,7 @@
 #include <ctime>
 #include <sstream>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/extensions/TraceMessage.hpp"
 #include "silkit/extensions/string_utils.hpp"
 
@@ -20,7 +20,7 @@ namespace {
 Pcap::GlobalHeader g_pcapGlobalHeader{};
 } //anonymous namespace
 
-PcapSink::PcapSink(Core::Logging::ILogger* logger, std::string name)
+PcapSink::PcapSink(Services::Logging::ILogger* logger, std::string name)
     : _name{std::move(name)}
     , _logger{logger}
 {
@@ -56,7 +56,7 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
     }
 }
 
-auto PcapSink::GetLogger() const -> Core::Logging::ILogger*
+auto PcapSink::GetLogger() const -> Services::Logging::ILogger*
 {
     return _logger;
 }

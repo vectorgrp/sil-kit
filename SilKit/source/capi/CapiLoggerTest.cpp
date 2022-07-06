@@ -2,12 +2,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
-#include "silkit/core/logging/all.hpp"
+#include "silkit/services/logging/all.hpp"
 
 namespace {
-    using namespace SilKit::Core::Logging;
+    using namespace SilKit::Services::Logging;
 
-    class MockLogger : public SilKit::Core::Logging::ILogger
+    class MockLogger : public SilKit::Services::Logging::ILogger
     {
     public:
         MOCK_METHOD2(Log, void(Level, const std::string&));

@@ -10,7 +10,7 @@
 
 namespace {
 
-using namespace SilKit::Core::Logging;
+using namespace SilKit::Services::Logging;
 using namespace SilKit::tracing;
 //////////////////////////////////////////////////////////////////////
 // IReplay: Boilerplate to satisfy interfaces follows.
@@ -69,7 +69,7 @@ class ReplayPcapFile :
     public IReplayFile
 {
 public:
-    ReplayPcapFile(std::string filePath, SilKit::Core::Logging::ILogger* logger)
+    ReplayPcapFile(std::string filePath, SilKit::Services::Logging::ILogger* logger)
         : _filePath{std::move(filePath)}
     {
         auto channel = std::make_shared<ReplayPcapChannel>(_filePath, logger);
@@ -109,7 +109,7 @@ private:
 namespace SilKit {
 namespace tracing {
 
-auto PcapReplay::OpenFile(const SilKit::Config::Config& /*unused*/, const std::string& filePath, SilKit::Core::Logging::ILogger* logger)
+auto PcapReplay::OpenFile(const SilKit::Config::Config& /*unused*/, const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
     -> std::shared_ptr<IReplayFile>
 {
     return std::make_shared<ReplayPcapFile>(filePath, logger);

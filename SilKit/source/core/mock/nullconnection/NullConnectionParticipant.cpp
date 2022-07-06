@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "NullConnectionParticipant.hpp"
 #include "CreateParticipant.hpp"
@@ -15,7 +15,7 @@ struct NullConnection
 {
     NullConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/, ProtocolVersion) {}
 
-    void SetLogger(Logging::ILogger* /*logger*/) {}
+    void SetLogger(Services::Logging::ILogger* /*logger*/) {}
     void SetTimeSyncService(Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinDomain(std::string /*registryUri*/) {}
 

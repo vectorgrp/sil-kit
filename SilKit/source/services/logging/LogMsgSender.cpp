@@ -3,10 +3,10 @@
 #include "LogMsgSender.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
-LogMsgSender::LogMsgSender(IParticipantInternal* participant)
+LogMsgSender::LogMsgSender(Core::IParticipantInternal* participant)
     : _participant{participant}
 {
 }
@@ -22,5 +22,5 @@ void LogMsgSender::SendLogMsg(LogMsg&& msg)
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

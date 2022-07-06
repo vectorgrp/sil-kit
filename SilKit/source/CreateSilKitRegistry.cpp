@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "ParticipantConfiguration.hpp"
 #include "VAsioRegistry.hpp"

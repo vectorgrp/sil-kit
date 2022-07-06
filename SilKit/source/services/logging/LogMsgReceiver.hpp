@@ -9,7 +9,7 @@
 #include "IServiceEndpoint.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 class LogMsgReceiver
@@ -19,10 +19,10 @@ class LogMsgReceiver
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgReceiver(IParticipantInternal* participant, Logger* logger);
+    LogMsgReceiver(Core::IParticipantInternal* participant, Logger* logger);
 
 public:
-    void ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const LogMsg& msg) override;
+    void ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const LogMsg& msg) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -31,7 +31,7 @@ public:
 private:
     // ----------------------------------------
     // private members
-    IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
     
     Logging::Logger* _logger;
@@ -50,5 +50,5 @@ auto LogMsgReceiver::GetServiceDescriptor() const -> const Core::ServiceDescript
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

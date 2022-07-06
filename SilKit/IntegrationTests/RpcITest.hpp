@@ -307,7 +307,7 @@ protected:
     {
         try
         {
-            participant.participant = SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Core::Logging::Level::Info),
+            participant.participant = SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Services::Logging::Level::Info),
                                                                      participant.name, registryUri);
 
             // Create Clients

@@ -99,7 +99,7 @@ private:
     // ----------------------------------------
     // private members
     Core::ServiceDescriptor _serviceDescriptor{};
-    Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILogger* _logger{nullptr};
 
     std::vector<std::string> _requiredParticipantNames{};
     std::map<std::string, Orchestration::ParticipantStatus> _participantStatus;

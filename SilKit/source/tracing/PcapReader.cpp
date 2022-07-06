@@ -8,7 +8,7 @@
 namespace SilKit {
 namespace tracing {
 
-using namespace SilKit::Core::Logging;
+using namespace SilKit::Services::Logging;
 //////////////////////////////////////////////////////////////////////
 // PcapMessage -- internal only
 //////////////////////////////////////////////////////////////////////
@@ -63,7 +63,7 @@ auto PcapMessage::Type() const -> TraceMessageType
 // PcapReader
 //////////////////////////////////////////////////////////////////////
 
-PcapReader::PcapReader(std::istream* stream, SilKit::Core::Logging::ILogger* logger)
+PcapReader::PcapReader(std::istream* stream, SilKit::Services::Logging::ILogger* logger)
     : _stream{stream}
     , _log{logger}
 {

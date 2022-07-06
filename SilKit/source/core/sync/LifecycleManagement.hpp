@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "LifecycleService.hpp"
 #include "SyncDatatypes.hpp"
@@ -37,7 +37,7 @@ class LifecycleManagement
     : public ILifecycleManagement
 {
 public:
-    LifecycleManagement(Logging::ILogger* logger, LifecycleService* parentService);
+    LifecycleManagement(Services::Logging::ILogger* logger, LifecycleService* parentService);
 
     void InitLifecycleManagement(std::string reason) override;
     void SkipSetupPhase(std::string reason) override;
@@ -77,7 +77,7 @@ public:
     ILifecycleState* GetShuttingDownState();
     ILifecycleState* GetShutdownState();
 
-    Logging::ILogger* GetLogger();
+    Services::Logging::ILogger* GetLogger();
 
     LifecycleService* GetService();
 
@@ -100,7 +100,7 @@ private:
     ILifecycleState* _currentState;
     LifecycleService* _parentService;
 
-    Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
 };
 
 } // namespace Orchestration

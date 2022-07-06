@@ -62,7 +62,7 @@ private:
     Core::ServiceDescriptor _serviceDescriptor{};
     uint32_t _numCounterparts{0};
     std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
-    Core::Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
     Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 };

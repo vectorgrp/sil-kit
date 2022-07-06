@@ -12,5 +12,4 @@ class IParticipant;
 
 // also include subdirectories
 #include "sync/fwd_decl.hpp"
-#include "logging/fwd_decl.hpp"
 

@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 #include "ParticipantConfiguration.hpp"
 
@@ -12,7 +12,7 @@ namespace SilKit {
 namespace Config {
 
 inline auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
-inline auto MakeParticipantConfigurationWithLogging(Core::Logging::Level logLevel) 
+inline auto MakeParticipantConfigurationWithLogging(Services::Logging::Level logLevel) 
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>;
 
 // inline implementations
@@ -22,7 +22,7 @@ auto MakeEmptyParticipantConfiguration() -> std::shared_ptr<SilKit::Config::IPar
     return std::make_shared<SilKit::Config::ParticipantConfiguration>();
 }
 
-auto MakeParticipantConfigurationWithLogging(Core::Logging::Level logLevel)
+auto MakeParticipantConfigurationWithLogging(Services::Logging::Level logLevel)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 {
     SilKit::Config::ParticipantConfiguration config;

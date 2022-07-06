@@ -11,7 +11,7 @@
 #include <future>
 
 #include "ParticipantConfiguration.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/wrapped_tuple.hpp"
@@ -63,7 +63,7 @@ public:
 public:
     // ----------------------------------------
     // Public methods
-    void SetLogger(Logging::ILogger* logger);
+    void SetLogger(Services::Logging::ILogger* logger);
     void SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService);
     void JoinDomain(std::string registryUri);
 
@@ -167,7 +167,7 @@ private:
     using ParticipantAnnouncementReceiver = std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)>;
 
     using SilKitMessageTypes = std::tuple<
-        Logging::LogMsg,
+        Services::Logging::LogMsg,
         Orchestration::NextSimTask,
         Orchestration::SystemCommand,
         Orchestration::ParticipantCommand,
@@ -391,7 +391,7 @@ private:
     SilKit::Config::ParticipantConfiguration _config;
     std::string _participantName;
     ParticipantId _participantId{0};
-    Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILogger* _logger{nullptr};
     Orchestration::TimeSyncService* _timeSyncService{nullptr};
 
     //! \brief Virtual SilKit links by networkName according to SilKitConfig.

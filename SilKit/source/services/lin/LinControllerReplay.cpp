@@ -5,7 +5,7 @@
 #include <iostream>
 #include <chrono>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 
 namespace {

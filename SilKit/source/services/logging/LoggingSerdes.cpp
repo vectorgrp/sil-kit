@@ -4,7 +4,7 @@
 
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 using SilKit::Core::MessageBuffer;
 
@@ -55,5 +55,5 @@ void Deserialize(MessageBuffer& buffer, LogMsg& out)
     buffer >> out;
 }
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

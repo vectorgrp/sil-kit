@@ -7,9 +7,9 @@
 TEST(MwLoggingSerdes, LoggingSerdes)
 {
     SilKit::Core::MessageBuffer buffer;
-    SilKit::Core::Logging::LogMsg in, out;
-    in.level = SilKit::Core::Logging::Level::Trace;
-    SilKit::Core::Logging::SourceLoc loc;
+    SilKit::Services::Logging::LogMsg in, out;
+    in.level = SilKit::Services::Logging::Level::Trace;
+    SilKit::Services::Logging::SourceLoc loc;
     loc.filename = "somefile.txt";
     loc.funcname ="TEST(LoggingSerdes)";
     loc.line = 15;

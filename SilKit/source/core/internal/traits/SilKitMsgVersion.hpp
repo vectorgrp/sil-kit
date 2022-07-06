@@ -17,7 +17,7 @@ template <class MsgT> struct SilKitMsgTraitVersion { static constexpr VersionT V
         static constexpr VersionT Version() { return VERSION; }\
     }
 
-DefineSilKitMsgTrait_Version(SilKit::Core::Logging::LogMsg, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Logging::LogMsg, 1);
 DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::ParticipantCommand, 1);
 DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::SystemCommand, 1);
 DefineSilKitMsgTrait_Version(SilKit::Core::Orchestration::ParticipantStatus, 1);

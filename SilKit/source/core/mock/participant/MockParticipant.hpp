@@ -8,8 +8,8 @@
 #include "gmock/gmock.h"
 
 #include "silkit/core/sync/SyncDatatypes.hpp"
-#include "silkit/core/logging/LoggingDatatypes.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/core/sync/ILifecycleService.hpp"
 #include "silkit/core/sync/ITimeSyncService.hpp"
 #include "silkit/core/sync/ISystemController.hpp"
@@ -32,10 +32,10 @@ namespace SilKit {
 namespace Core {
 namespace Tests {
 
-class DummyLogger : public Logging::ILogger
+class DummyLogger : public Services::Logging::ILogger
 {
 public:
-    void Log(Logging::Level /*level*/, const std::string& /*msg*/) override {}
+    void Log(Services::Logging::Level /*level*/, const std::string& /*msg*/) override {}
     void Trace(const std::string& /*msg*/) override {}
     void Debug(const std::string& /*msg*/) override {}
     void Info(const std::string& /*msg*/) override {}
@@ -43,9 +43,9 @@ public:
     void Error(const std::string& /*msg*/) override {}
     void Critical(const std::string& /*msg*/) override {}
     void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
-    void LogReceivedMsg(const Logging::LogMsg& /*msg*/) {}
+    void LogReceivedMsg(const Services::Logging::LogMsg& /*msg*/) {}
 protected:
-    bool ShouldLog(Logging::Level) const override { return true; }
+    bool ShouldLog(Services::Logging::Level) const override { return true; }
 };
 
 
@@ -272,7 +272,7 @@ public:
     auto GetSystemMonitor() -> Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
     auto GetSystemController() -> Orchestration::ISystemController* override { return &mockSystemController; }
 
-    auto GetLogger() -> Logging::ILogger* override { return &logger; }
+    auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
 
     void RegisterCanSimulator(Services::Can::IMsgForCanSimulator*, const std::vector<std::string>& ) override {}
     void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* , const std::vector<std::string>&) override {}
@@ -327,8 +327,8 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::SystemCommand& /*msg*/)  override{}
     void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::WorkflowConfiguration& /*msg*/)  override{}
 
-    void SendMsg(const IServiceEndpoint* /*from*/, Logging::LogMsg&& /*msg*/)  override{}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Logging::LogMsg& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, Services::Logging::LogMsg&& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Logging::LogMsg& /*msg*/)  override{}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ParticipantDiscoveryEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ServiceDiscoveryEvent& /*msg*/)  override{}
@@ -383,8 +383,8 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::SystemCommand& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::WorkflowConfiguration& /*msg*/) override {}
 
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, Logging::LogMsg&& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Logging::LogMsg& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, Services::Logging::LogMsg&& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Logging::LogMsg& /*msg*/) override {}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Discovery::ParticipantDiscoveryEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Discovery::ServiceDiscoveryEvent& /*msg*/) override {}

@@ -3,7 +3,7 @@
 #include <cassert>
 #include <future>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/core/sync/string_utils.hpp"
 
 #include "TimeSyncService.hpp"

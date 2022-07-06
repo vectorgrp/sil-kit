@@ -55,7 +55,7 @@ public:
         std::chrono::nanoseconds timestamp, const SilKit::Services::Flexray::FlexrayFrameEvent& message));
 
 
-    auto GetLogger() const -> Logging::ILogger* override
+    auto GetLogger() const -> Services::Logging::ILogger* override
     {
         return nullptr;
     }

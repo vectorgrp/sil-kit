@@ -206,37 +206,37 @@ bool Converter::decode(const Node& node, Sink::Type& obj)
 }
 
 template<>
-Node Converter::encode(const Core::Logging::Level& obj)
+Node Converter::encode(const Services::Logging::Level& obj)
 {
     Node node;
     switch (obj)
     {
-    case Core::Logging::Level::Critical:
+    case Services::Logging::Level::Critical:
         node = "Critical";
         break;
-    case Core::Logging::Level::Error:
+    case Services::Logging::Level::Error:
         node = "Error";
         break;
-    case Core::Logging::Level::Warn:
+    case Services::Logging::Level::Warn:
         node = "Warn";
         break;
-    case Core::Logging::Level::Info:
+    case Services::Logging::Level::Info:
         node = "Info";
         break;
-    case Core::Logging::Level::Debug:
+    case Services::Logging::Level::Debug:
         node = "Debug";
         break;
-    case Core::Logging::Level::Trace:
+    case Services::Logging::Level::Trace:
         node = "Trace";
         break;
-    case Core::Logging::Level::Off:
+    case Services::Logging::Level::Off:
         node = "Off";
         break;
     }
     return node;
 }
 template<>
-bool Converter::decode(const Node& node, Core::Logging::Level& obj)
+bool Converter::decode(const Node& node, Services::Logging::Level& obj)
 {
     if (!node.IsScalar())
     {
@@ -245,22 +245,22 @@ bool Converter::decode(const Node& node, Core::Logging::Level& obj)
     }
     auto&& str = parse_as<std::string>(node);
     if (str == "Critical")
-        obj = Core::Logging::Level::Critical;
+        obj = Services::Logging::Level::Critical;
     else if (str == "Error")
-        obj = Core::Logging::Level::Error;
+        obj = Services::Logging::Level::Error;
     else if (str == "Warn")
-        obj = Core::Logging::Level::Warn;
+        obj = Services::Logging::Level::Warn;
     else if (str == "Info")
-        obj = Core::Logging::Level::Info;
+        obj = Services::Logging::Level::Info;
     else if (str == "Debug")
-        obj = Core::Logging::Level::Debug;
+        obj = Services::Logging::Level::Debug;
     else if (str == "Trace")
-        obj = Core::Logging::Level::Trace;
+        obj = Services::Logging::Level::Trace;
     else if (str == "Off")
-        obj = Core::Logging::Level::Off;
+        obj = Services::Logging::Level::Off;
     else
     {
-        throw ConversionError(node, "Unknown Core::Logging::Level: " + str + ".");
+        throw ConversionError(node, "Unknown Services::Logging::Level: " + str + ".");
     }
     return true;
 }

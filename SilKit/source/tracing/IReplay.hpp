@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <iterator>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/datatypes.hpp"
 
 #include "TraceMessage.hpp"
@@ -33,7 +33,7 @@ public:
     // TODO
     virtual auto OpenFile(/*const SilKit::Config::Config& config,*/
         const std::string& filePath,
-        SilKit::Core::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile> = 0;
+        SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile> = 0;
 };
 
 class IReplayFile

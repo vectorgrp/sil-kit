@@ -26,7 +26,7 @@ using testing::NiceMock;
 using namespace testing;
 using namespace SilKit;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Logging;
+using namespace SilKit::Services::Logging;
 
 using SilKit::Core::Tests::DummyParticipant;
 
@@ -83,7 +83,7 @@ TEST(LoggerTest, send_log_message_from_logger)
 
     Config::Logging config;
     auto sink = Config::Sink{};
-    sink.level = SilKit::Core::Logging::Level::Debug;
+    sink.level = Level::Debug;
     sink.type = Config::Sink::Type::Remote;
 
     config.sinks.push_back(sink);
@@ -95,7 +95,7 @@ TEST(LoggerTest, send_log_message_from_logger)
     LogMsgSender logMsgSender(&mockParticipant);
     logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    logger.RegisterRemoteLogging([&logMsgSender](Logging::LogMsg logMsg) {
+    logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) {
 
         logMsgSender.SendLogMsg(std::move(logMsg));
 

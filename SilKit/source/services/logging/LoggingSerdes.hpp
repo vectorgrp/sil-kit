@@ -4,15 +4,15 @@
 
 #include "MessageBuffer.hpp"
 
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 void Serialize(SilKit::Core::MessageBuffer& buffer,const LogMsg& msg);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, LogMsg& out);
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

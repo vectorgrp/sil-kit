@@ -4,7 +4,7 @@
 
 #include "silkit/services/all.hpp"
 #include "silkit/util/functional.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"

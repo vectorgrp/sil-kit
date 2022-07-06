@@ -4,7 +4,7 @@
 #include <list>
 
 #include "VAsioConnection.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/vendor/ISilKitRegistry.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "ProtocolVersion.hpp"
@@ -27,7 +27,7 @@ public: // methods
 
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;
-    auto GetLogger() -> Logging::ILogger* override;
+    auto GetLogger() -> Services::Logging::ILogger* override;
 
 private:
     // ----------------------------------------
@@ -50,7 +50,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    std::unique_ptr<Logging::ILogger> _logger;
+    std::unique_ptr<Services::Logging::ILogger> _logger;
     std::vector<ConnectedParticipantInfo> _connectedParticipants;
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;

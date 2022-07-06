@@ -53,7 +53,7 @@ private:
 
     Core::ServiceDescriptor _serviceDescriptor{};
     std::vector<RpcServerInternal*> _internalRpcServers;
-    Core::Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
     Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 };

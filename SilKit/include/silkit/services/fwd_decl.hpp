@@ -5,6 +5,7 @@
 #include "lin/fwd_decl.hpp"
 #include "pubsub/fwd_decl.hpp"
 #include "rpc/fwd_decl.hpp"
+#include "logging/fwd_decl.hpp"
 
 namespace SilKit {
 namespace Services {

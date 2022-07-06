@@ -4,7 +4,7 @@
 #include <memory>
 #include <sstream>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "SilKitExtensions.hpp"
 #include "DllCache.hpp"
@@ -16,7 +16,7 @@ namespace SilKit {
 // which keeps the shared library loaded during the lifetime of the calling process.
 
 template<typename FactoryT> 
-auto FactorySingleton(Core::Logging::ILogger* logger,
+auto FactorySingleton(Services::Logging::ILogger* logger,
     const std::string& extensionName,
     const Config::Extensions& config)
     -> FactoryT&

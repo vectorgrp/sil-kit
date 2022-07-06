@@ -105,7 +105,7 @@ private:
     IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
     LifecycleService* _lifecycleService{nullptr};
-    Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILogger* _logger{nullptr};
     std::unique_ptr<ITimeProvider> _timeProvider{nullptr};
     std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
 

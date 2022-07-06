@@ -63,7 +63,7 @@ template <class MsgT> struct SilKitMsgTraits
     static constexpr bool IsSelfDeliveryEnforced() { return true; }\
     };
 
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Logging, LogMsg)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg)
 DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, ParticipantCommand)
 DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, SystemCommand)
 DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, ParticipantStatus)

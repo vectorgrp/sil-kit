@@ -25,7 +25,6 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-using namespace SilKit::Core;
 using namespace SilKit::Config;
 
 using namespace std::chrono_literals;

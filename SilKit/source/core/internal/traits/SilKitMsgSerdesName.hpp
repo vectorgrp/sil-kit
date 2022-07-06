@@ -18,7 +18,7 @@ template <class MsgT> struct SilKitMsgTraitSerdesName { static constexpr const c
         static constexpr const char* SerdesName() { return SERDES_NAME; }\
     }
 
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Logging::LogMsg, "LOGMSG" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Logging::LogMsg, "LOGMSG" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::ParticipantCommand, "PARTICIPANTCOMMAND" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::SystemCommand, "SYSTEMCOMMAND" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::ParticipantStatus, "PARTICIPANTSTATUS" );

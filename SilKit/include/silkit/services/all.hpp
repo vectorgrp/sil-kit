@@ -8,3 +8,4 @@
 #include "pubsub/all.hpp"
 #include "lin/all.hpp"
 #include "rpc/all.hpp"
+#include "logging/all.hpp"

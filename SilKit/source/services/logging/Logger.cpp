@@ -19,7 +19,7 @@
 #include "fmt/chrono.h"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 namespace {
@@ -207,5 +207,5 @@ bool Logger::ShouldLog(Level level) const
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

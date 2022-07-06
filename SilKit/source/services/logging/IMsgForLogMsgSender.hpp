@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 class IMsgForLogMsgSender
@@ -18,5 +18,5 @@ class IMsgForLogMsgSender
 };
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

@@ -104,7 +104,7 @@ private:
     // private members
     IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
-    Logging::ILogger* _logger{nullptr};
+    Services::Logging::ILogger* _logger{nullptr};
 
     TimeSyncService* _timeSyncService;
 

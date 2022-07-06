@@ -10,7 +10,7 @@
 
 #include "ParticipantConfiguration.hpp"
 #include "silkit/exception.hpp"
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "ISilKitExtension.hpp"
 
@@ -37,14 +37,14 @@ using ExtensionPathHints = std::vector<std::string>;
 //         decorating the name with platform specific prefix, suffix and
 //         extensions.
 // The first match is loaded.
-auto LoadExtension(Core::Logging::ILogger* logger,
+auto LoadExtension(Services::Logging::ILogger* logger,
     const std::string& undecorated_name) -> std::shared_ptr<ISilKitExtension>;
 
 //! \brief Loads the extension by name and uses the additional search path hints from
 //         the extension configuration.
 //! NB: a path hint can contain the prefix "ENV:" to refer to an environment
 //! variable name.
-auto LoadExtension(Core::Logging::ILogger* logger,
+auto LoadExtension(Services::Logging::ILogger* logger,
     const std::string& undecorated_name, const Config::Extensions& config)
     -> std::shared_ptr<ISilKitExtension>;
 

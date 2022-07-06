@@ -34,7 +34,7 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
     _vasioConfig{ std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg) },
     _connection{ *_vasioConfig, "SilKitRegistry", VAsioConnection::RegistryParticipantId, version}
 {
-    _logger = std::make_unique<Logging::Logger>("SilKitRegistry", _vasioConfig->logging);
+    _logger = std::make_unique<Services::Logging::Logger>("SilKitRegistry", _vasioConfig->logging);
     _connection.SetLogger(_logger.get());
 
     _connection.RegisterMessageReceiver([this](IVAsioPeer* from, const ParticipantAnnouncement& announcement)
@@ -96,7 +96,7 @@ void VAsioRegistry::SetAllDisconnectedHandler(std::function<void()> handler)
 {
     _onAllParticipantsDisconnected = std::move(handler);
 }
-auto VAsioRegistry::GetLogger() -> Logging::ILogger*
+auto VAsioRegistry::GetLogger() -> Services::Logging::ILogger*
 {
     return _logger.get();
 }

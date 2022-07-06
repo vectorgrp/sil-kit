@@ -8,7 +8,7 @@
 #include <tuple>
 
 #include "silkit/core/fwd_decl.hpp"
-#include "silkit/core/logging/fwd_decl.hpp"
+#include "silkit/services/logging/fwd_decl.hpp"
 
 #include "EndpointAddress.hpp"
 #include "TraceMessage.hpp"
@@ -35,7 +35,7 @@ public:
 
     virtual void Open(SinkType type, const std::string& outputPath) = 0;
     virtual void Close() = 0;
-    virtual auto GetLogger() const -> Core::Logging::ILogger* = 0;
+    virtual auto GetLogger() const -> Services::Logging::ILogger* = 0;
     virtual auto Name() const -> const std::string& = 0;
 
     virtual void Trace(
@@ -52,7 +52,7 @@ public:
     virtual ~ITraceMessageSinkFactory() = default;
     // TODO
     virtual auto Create(/*Config::Config config, */
-            SilKit::Core::Logging::ILogger* logger,
+            SilKit::Services::Logging::ILogger* logger,
             std::string participantName,
             std::string sinkName
         )

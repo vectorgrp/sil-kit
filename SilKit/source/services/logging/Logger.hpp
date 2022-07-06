@@ -4,8 +4,8 @@
 
 #include <memory>
 
-#include "silkit/core/logging/ILogger.hpp"
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/ILogger.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 #include "Configuration.hpp"
 
@@ -17,7 +17,7 @@ class sink;
 } // namespace spdlog
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 class Logger : public ILogger
@@ -61,5 +61,5 @@ private:
 };
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

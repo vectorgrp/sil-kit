@@ -1,4 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
+
 add_library(SilKitMwLogging STATIC
     SpdlogTypeConversion.hpp
     IMsgForLogMsgSender.hpp
@@ -12,7 +13,7 @@ add_library(SilKitMwLogging STATIC
 
     Logger.hpp
     Logger.cpp
-    #string formatting for SILKIT types
+    #string formatting for SIL Kit types
     SilKitFmtFormatters.hpp
 
     LoggingSerdes.hpp
@@ -45,7 +46,6 @@ target_include_directories(SilKitMwLogging
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
 
 target_link_libraries(SilKitMwLogging
     PUBLIC SilKitInterface

@@ -10,7 +10,7 @@
 
 #include "silkit/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 #include "Optional.hpp"
 
@@ -50,7 +50,7 @@ struct Sink
     };
 
     Type type{ Type::Remote };
-    Core::Logging::Level level{ Core::Logging::Level::Info };
+    Services::Logging::Level level{ Services::Logging::Level::Info };
     std::string logName;
 };
 
@@ -58,7 +58,7 @@ struct Sink
 struct Logging
 {
     bool logFromRemotes{ false };
-    Core::Logging::Level flushLevel{ Core::Logging::Level::Off };
+    Services::Logging::Level flushLevel{ Services::Logging::Level::Off };
     std::vector<Sink> sinks;
 };
 

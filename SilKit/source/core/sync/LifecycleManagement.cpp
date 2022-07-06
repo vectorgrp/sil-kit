@@ -10,7 +10,7 @@ namespace Core {
 namespace Orchestration {
 
 // LifecycleManagement
-LifecycleManagement::LifecycleManagement(Logging::ILogger* logger, LifecycleService* parentService)
+LifecycleManagement::LifecycleManagement(Services::Logging::ILogger* logger, LifecycleService* parentService)
     : _parentService(parentService)
     , _logger(logger)
 {
@@ -228,7 +228,7 @@ ILifecycleState* LifecycleManagement::GetShutdownState()
     return _shutDownState.get();
 }
 
-Logging::ILogger* LifecycleManagement::GetLogger()
+Services::Logging::ILogger* LifecycleManagement::GetLogger()
 {
     return _logger;
 }

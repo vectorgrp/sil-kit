@@ -202,7 +202,7 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
 
     EXPECT_TRUE(config.logging.sinks.size() == 1);
     EXPECT_TRUE(config.logging.sinks.at(0).type == Sink::Type::File);
-    EXPECT_TRUE(config.logging.sinks.at(0).level == SilKit::Core::Logging::Level::Critical);
+    EXPECT_TRUE(config.logging.sinks.at(0).level == SilKit::Services::Logging::Level::Critical);
     EXPECT_TRUE(config.logging.sinks.at(0).logName == "MyLog1");
 
     EXPECT_TRUE(config.healthCheck.softResponseTimeout.value() == 500ms);
@@ -291,7 +291,7 @@ TEST_F(YamlParserTest, yaml_native_type_conversions)
         Sink sink;
         logger.logFromRemotes = true;
         sink.type = Sink::Type::File;
-        sink.level = SilKit::Core::Logging::Level::Trace;
+        sink.level = SilKit::Services::Logging::Level::Trace;
         sink.logName = "filename";
         logger.sinks.push_back(sink);
         sink.type = Sink::Type::Stdout;

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "VAsioTransmitter.hpp"
 #include "traits/SilKitMsgTraits.hpp"
@@ -22,7 +22,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    SilKitLink(std::string name, Logging::ILogger* logger, Orchestration::TimeSyncService* timeSyncService);
+    SilKitLink(std::string name, Services::Logging::ILogger* logger, Orchestration::TimeSyncService* timeSyncService);
 
 public:
     // ----------------------------------------
@@ -52,7 +52,7 @@ private:
     // ----------------------------------------
     // private members
     std::string _name;
-    Logging::ILogger* _logger;
+    Services::Logging::ILogger* _logger;
     Orchestration::TimeSyncService* _timeSyncService;
 
     std::vector<ReceiverT*> _localReceivers;
@@ -63,7 +63,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-SilKitLink<MsgT>::SilKitLink(std::string name, Logging::ILogger* logger, Orchestration::TimeSyncService* timeSyncService)
+SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILogger* logger, Orchestration::TimeSyncService* timeSyncService)
     : _name{std::move(name)}
     , _logger{logger}
     , _timeSyncService{timeSyncService}

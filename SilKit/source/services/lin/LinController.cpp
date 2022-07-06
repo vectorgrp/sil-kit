@@ -5,7 +5,7 @@
 #include <iostream>
 #include <chrono>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
@@ -243,7 +243,7 @@ void LinController::SetControllerStatus(LinControllerStatus status)
 // Node bookkeeping
 //------------------------
 
-void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responses_, Core::Logging::ILogger* logger)
+void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responses_, Services::Logging::ILogger* logger)
 {
     for (auto&& response : responses_)
     {

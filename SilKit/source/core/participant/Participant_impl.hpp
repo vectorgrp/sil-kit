@@ -76,7 +76,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     }
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = std::make_unique<Logging::Logger>(_participantName, _participantConfig.logging);
+    _logger = std::make_unique<Services::Logging::Logger>(_participantName, _participantConfig.logging);
     _connection.SetLogger(_logger.get());
 
     _logger->Info("Creating Participant for Participant {}, SilKit-Version: {}, Middleware: {}",
@@ -143,7 +143,7 @@ void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SetupRemoteLogging()
 {
-    auto* logger = dynamic_cast<Logging::Logger*>(_logger.get());
+    auto* logger = dynamic_cast<Services::Logging::Logger*>(_logger.get());
     if (logger)
     {
         if (_participantConfig.logging.logFromRemotes)
@@ -151,7 +151,7 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
             Core::SupplementalData supplementalData;
             supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLoggerReceiver;
 
-            CreateInternalController<Logging::LogMsgReceiver>("LogMsgReceiver", Core::ServiceType::InternalController,
+            CreateInternalController<Services::Logging::LogMsgReceiver>("LogMsgReceiver", Core::ServiceType::InternalController,
                                                       std::move(supplementalData), true, logger);
         }
 
@@ -163,10 +163,10 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
             Core::SupplementalData supplementalData;
             supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLoggerSender;
 
-            auto&& logMsgSender = CreateInternalController<Logging::LogMsgSender>(
+            auto&& logMsgSender = CreateInternalController<Services::Logging::LogMsgSender>(
                 "LogMsgSender", Core::ServiceType::InternalController, std::move(supplementalData), true);
 
-            logger->RegisterRemoteLogging([logMsgSender](Logging::LogMsg logMsg) {
+            logger->RegisterRemoteLogging([logMsgSender](Services::Logging::LogMsg logMsg) {
 
                 logMsgSender->SendLogMsg(std::move(logMsg));
 
@@ -630,7 +630,7 @@ auto Participant<SilKitConnectionT>::GetSystemController() -> Orchestration::ISy
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetLogger() -> Logging::ILogger*
+auto Participant<SilKitConnectionT>::GetLogger() -> Services::Logging::ILogger*
 {
     return _logger.get();
 }
@@ -907,13 +907,13 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Logging::LogMsg& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Logging::LogMsg& msg)
 {
     SendMsgImpl(from, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Logging::LogMsg&& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Logging::LogMsg&& msg)
 {
     SendMsgImpl(from, std::move(msg));
 }
@@ -1193,13 +1193,13 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Logging::LogMsg& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Logging::LogMsg& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Logging::LogMsg&& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Logging::LogMsg&& msg)
 {
     SendMsgImpl(from, targetParticipantName, std::move(msg));
 }

@@ -5,10 +5,10 @@
 #include "spdlog/details/log_msg.h"
 
 #include "silkit/exception.hpp"
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 inline auto to_spdlog(Level level) -> spdlog::level::level_enum
@@ -94,5 +94,5 @@ inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

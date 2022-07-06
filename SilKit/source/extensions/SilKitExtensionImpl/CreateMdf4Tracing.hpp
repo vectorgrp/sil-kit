@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "ITraceMessageSink.hpp"
 #include "IReplay.hpp"
@@ -14,14 +14,14 @@
 namespace SilKit { 
 
 auto CreateMdf4Tracing(Config::ParticipantConfiguration config,
-    SilKit::Core::Logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
+    SilKit::Services::Logging::ILogger* logger, const std::string& participantName, const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>;
 
 //////////////////////////////////////////////////////////////////////
 // MDF4 Replay
 //////////////////////////////////////////////////////////////////////
 
-auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Core::Logging::ILogger* logger,
+auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
                       const std::string& fileName)
     -> std::shared_ptr<IReplayFile>;
 

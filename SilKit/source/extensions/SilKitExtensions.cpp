@@ -45,7 +45,7 @@ bool isBuildCompatible(const BuildInfoType& myInfos, const BuildInfoType& otherI
     return ok;
 }
 
-void VerifyExtension(SilKit::Core::Logging::ILogger* logger, const SilKitExtensionDescriptor_t* descr)
+void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExtensionDescriptor_t* descr)
 {
     if (descr == nullptr)
     {
@@ -156,12 +156,12 @@ SymType* GetSymbol(detail::LibraryHandle hnd, const std::string& sym_name)
 
 ///////////////////////////////////////////////////////////////////////////
 
-auto LoadExtension(Core::Logging::ILogger* logger, const std::string& name) -> std::shared_ptr<ISilKitExtension>
+auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name) -> std::shared_ptr<ISilKitExtension>
 {
     return LoadExtension(logger, name, Config::Extensions{});
 }
 
-auto LoadExtension(Core::Logging::ILogger* logger, const std::string& name, const Config::Extensions& config)
+auto LoadExtension(Services::Logging::ILogger* logger, const std::string& name, const Config::Extensions& config)
     -> std::shared_ptr<ISilKitExtension>
 {
     using namespace detail;

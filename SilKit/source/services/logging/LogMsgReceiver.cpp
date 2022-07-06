@@ -3,21 +3,21 @@
 #include "LogMsgReceiver.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
-LogMsgReceiver::LogMsgReceiver(IParticipantInternal* participant, Logger* logger)
+LogMsgReceiver::LogMsgReceiver(Core::IParticipantInternal* participant, Logger* logger)
     : _participant{participant}
     , _logger{logger}
 {
     (void)_participant;
 }
 
-void LogMsgReceiver::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const LogMsg& msg)
+void LogMsgReceiver::ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const LogMsg& msg)
 {
     _logger->LogReceivedMsg(msg);
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

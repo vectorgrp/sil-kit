@@ -2,7 +2,7 @@
 
 #include "CanController.hpp"
 #include "SimBehaviorTrivial.hpp" 
-#include "silkit/core/logging/ILogger.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 
 namespace SilKit {

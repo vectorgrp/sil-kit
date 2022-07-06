@@ -86,8 +86,8 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::SystemCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Logging::LogMsg& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Logging::LogMsg&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Logging::LogMsg& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Logging::LogMsg&& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ServiceDiscoveryEvent& msg) = 0;
@@ -141,8 +141,8 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Logging::LogMsg& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Logging::LogMsg&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Logging::LogMsg& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Logging::LogMsg&& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ServiceDiscoveryEvent& msg) = 0;

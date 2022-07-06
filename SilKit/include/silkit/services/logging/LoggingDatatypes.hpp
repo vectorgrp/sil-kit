@@ -6,7 +6,7 @@
 #include <string>
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 using log_clock = std::chrono::system_clock;
@@ -64,5 +64,5 @@ inline bool operator==(const LogMsg& lhs, const LogMsg& rhs)
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

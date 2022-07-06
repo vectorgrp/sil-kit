@@ -23,7 +23,7 @@ namespace SilKit {
 class DllCache
 {
 public:
-    auto Get(Core::Logging::ILogger* logger, const std::string& extensionName, const Config::Extensions& config)
+    auto Get(Services::Logging::ILogger* logger, const std::string& extensionName, const Config::Extensions& config)
         -> SilKit::ISilKitExtension&
     {
         try

@@ -7,7 +7,7 @@
 #include "IServiceEndpoint.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 class LogMsgSender
@@ -17,7 +17,7 @@ class LogMsgSender
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    LogMsgSender(IParticipantInternal* participant);
+    LogMsgSender(Core::IParticipantInternal* participant);
 
 public:
     void SendLogMsg(const LogMsg& msg);
@@ -34,7 +34,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
 };
 
@@ -52,5 +52,5 @@ auto LogMsgSender::GetServiceDescriptor() const -> const Core::ServiceDescriptor
 }
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

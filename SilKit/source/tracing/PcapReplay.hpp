@@ -13,7 +13,7 @@ public:
     // TODO adapt once tracing is reinstated 
     auto OpenFile(/*const Config::Config& config,*/
         const std::string& filePath,
-        SilKit::Core::Logging::ILogger* logger)
+        SilKit::Services::Logging::ILogger* logger)
         -> std::shared_ptr<IReplayFile> override;
 };
 

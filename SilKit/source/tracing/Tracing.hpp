@@ -11,7 +11,7 @@
 #include "silkit/services/fwd_decl.hpp"
 
 #include "silkit/cfg/fwd_decl.hpp"
-#include "silkit/core/logging/fwd_decl.hpp"
+#include "silkit/services/logging/fwd_decl.hpp"
 
 #include "silkit/extensions/ITraceMessageSink.hpp"
 #include "silkit/extensions/IReplay.hpp"
@@ -23,7 +23,7 @@ namespace tracing {
 // the sinks.
 
 auto CreateTraceMessageSinks(
-    Core::Logging::ILogger* logger,
+    Services::Logging::ILogger* logger,
     const Config::Config& config,
     const Config::Participant& participantConfig
     ) -> std::vector<std::unique_ptr<ITraceMessageSink>>;
@@ -31,7 +31,7 @@ auto CreateTraceMessageSinks(
 // Configure replay files from the trace source configurations and return a vector of
 // the files.
 auto CreateReplayFiles(
-    Core::Logging::ILogger* logger,
+    Services::Logging::ILogger* logger,
     const Config::Config& config,
     const Config::Participant& participantConfig
     ) -> std::map<std::string, std::shared_ptr<IReplayFile>>;

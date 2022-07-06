@@ -3,7 +3,7 @@
 #pragma once
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Logging {
 
 struct SourceLoc;
@@ -12,5 +12,5 @@ struct LogMsg;
 class ILogger;
 
 } // namespace Logging
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

@@ -10,7 +10,7 @@
 
 #include "silkit/cfg/IParticipantConfiguration.hpp"
 #include "silkit/services/fr/FlexrayDatatypes.hpp"
-#include "silkit/core/logging/LoggingDatatypes.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
