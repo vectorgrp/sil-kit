@@ -1,0 +1,12 @@
+{
+  "Description": "Sample configuration for CAN",
+
+  "Logging": {
+    "Sinks": [
+      {
+        "Type": "Stdout",
+        "Level": "Info"
+      }
+    ]
+  }
+}

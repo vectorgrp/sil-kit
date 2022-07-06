@@ -106,6 +106,7 @@ add_subdirectory(DataMessage)
 add_subdirectory(Rpc)
 add_subdirectory(Benchmark)
 add_subdirectory(Lifecycle)
+add_subdirectory(TimeAnnotation)
 
 # C-API Demos
 add_subdirectory(CCan)
