@@ -4,13 +4,13 @@
 
 #include <string>
 
-#include "silkit/core/sync/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/SyncDatatypes.hpp"
 
 #include "ILifecycleStates.hpp"
 #include "LifecycleManagement.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class State : public ILifecycleState
@@ -256,5 +256,5 @@ public:
     auto GetParticipantState() -> ParticipantState override;
 };
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

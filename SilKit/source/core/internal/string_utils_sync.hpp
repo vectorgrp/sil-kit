@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "SyncDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 inline std::string to_string(const NextSimTask& nextTask);
@@ -36,5 +36,5 @@ std::ostream& operator<<(std::ostream& out, const NextSimTask& nextTask)
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

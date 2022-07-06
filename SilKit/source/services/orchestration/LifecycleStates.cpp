@@ -4,7 +4,7 @@
 #include "LifecycleManagement.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 // State
@@ -485,5 +485,5 @@ auto ErrorState::GetParticipantState() -> ParticipantState
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

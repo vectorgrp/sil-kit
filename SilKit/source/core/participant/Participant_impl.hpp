@@ -111,7 +111,7 @@ void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     auto* lifecycleService = GetLifecycleService();
-    auto* timeSyncService = dynamic_cast<Core::Orchestration::TimeSyncService*>(lifecycleService->GetTimeSyncService());
+    auto* timeSyncService = dynamic_cast<Services::Orchestration::TimeSyncService*>(lifecycleService->GetTimeSyncService());
 
     _connection.SetTimeSyncService(timeSyncService);
 
@@ -133,7 +133,7 @@ void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
     // Ensure shutdowns are cleanly handled.
     auto&& monitor = GetSystemMonitor();
     monitor->AddSystemStateHandler([&conn = GetSilKitConnection()](auto newState) {
-        if (newState == Orchestration::SystemState::ShuttingDown)
+        if (newState == Services::Orchestration::SystemState::ShuttingDown)
         {
             conn.NotifyShutdown();
         }
@@ -186,7 +186,7 @@ inline void Participant<SilKitConnectionT>::SetTimeProvider(Orchestration::ITime
     auto setTimeProvider = [newClock](auto& controllers) {
         for (auto& controller: controllers)
         {
-            auto* ctl = dynamic_cast<SilKit::Core::Orchestration::ITimeConsumer*>(controller.second.get());
+            auto* ctl = dynamic_cast<SilKit::Services::Orchestration::ITimeConsumer*>(controller.second.get());
             if (ctl)
             {
                 ctl->SetTimeProvider(newClock);
@@ -532,7 +532,7 @@ void Participant<SilKitConnectionT>::DiscoverRpcServers(const std::string& funct
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::LifecycleService* service) -> Orchestration::TimeSyncService*
+auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService*
 {
     auto* timeSyncService =
         GetController<Orchestration::TimeSyncService>("default", SilKit::Core::Discovery::controllerTypeTimeSyncService);
@@ -553,7 +553,7 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetLifecycleService() -> Orchestration::ILifecycleService*
+auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestration::ILifecycleService*
 {
     auto* lifecycleService =
         GetController<Orchestration::LifecycleService>("default", SilKit::Core::Discovery::controllerTypeLifecycleService);
@@ -573,7 +573,7 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Orchestration::ILi
 
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Orchestration::ISystemMonitor*
+auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestration::ISystemMonitor*
 {
     auto* controller = GetController<Orchestration::SystemMonitor>("default", "SystemMonitor");
     if (!controller)
@@ -615,7 +615,7 @@ auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServic
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetSystemController() -> Orchestration::ISystemController*
+auto Participant<SilKitConnectionT>::GetSystemController() -> Services::Orchestration::ISystemController*
 {
     auto* controller = GetController<Orchestration::SystemController>("default", "SystemController");
     if (!controller)
@@ -876,31 +876,31 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Servi
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::NextSimTask& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::NextSimTask& msg)
 {
     SendMsgImpl(from, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg)
 {
     SendMsgImpl(from, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::ParticipantCommand& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::ParticipantCommand& msg)
 {
     SendMsgImpl(from, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::SystemCommand& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::SystemCommand& msg)
 {
     SendMsgImpl(from, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::WorkflowConfiguration& msg)
 {
     SendMsgImpl(from, msg);
 }
@@ -1163,31 +1163,31 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const Orchestration::NextSimTask& msg)
+                                              const Services::Orchestration::NextSimTask& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantStatus& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantStatus& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantCommand& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantCommand& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::SystemCommand& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::WorkflowConfiguration& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }

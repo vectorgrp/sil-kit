@@ -23,7 +23,7 @@ namespace Lin {
 
 
 LinControllerReplay::LinControllerReplay(Core::IParticipantInternal* participant, Config::LinController config,
-            Core::Orchestration::ITimeProvider* timeProvider)
+            Services::Orchestration::ITimeProvider* timeProvider)
     : _replayConfig{config.replay}
     , _controller{participant, timeProvider}
     , _participant{participant}

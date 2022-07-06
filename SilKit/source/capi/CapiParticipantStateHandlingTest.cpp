@@ -7,12 +7,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 
 #include "MockParticipant.hpp"
 
 namespace {
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 using testing::Return;
 using testing::ByMove;
 using SilKit::Core::Tests::DummyParticipant;
@@ -212,7 +212,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     auto* cParticipant = (SilKit_Participant*)&mockParticipant;
 
     // required for MockSystemMonitor::ParticipantStatus
-    testing::DefaultValue<const SilKit::Core::Orchestration::ParticipantStatus&>::Set(SilKit::Core::Orchestration::ParticipantStatus());
+    testing::DefaultValue<const SilKit::Services::Orchestration::ParticipantStatus&>::Set(SilKit::Services::Orchestration::ParticipantStatus());
 
     EXPECT_CALL(mockParticipant.mockLifecycleService,
         SetCommunicationReadyHandler(testing::_)

@@ -5,7 +5,6 @@
 #include <map>
 
 #include "silkit/services/eth/IEthernetController.hpp"
-#include "silkit/core/fwd_decl.hpp"
 #include "ITimeConsumer.hpp"
 
 #include "IParticipantInternal.hpp"
@@ -38,7 +37,7 @@ public:
     EthController(const EthController&) = delete;
     EthController(EthController&&) = delete;
     EthController(Core::IParticipantInternal* participant, Config::EthernetController config,
-                   Core::Orchestration::ITimeProvider* timeProvider);
+                   Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------

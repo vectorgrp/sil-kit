@@ -6,7 +6,7 @@
 #include "MessageBuffer.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 void Serialize(SilKit::Core::MessageBuffer& buffer, const ParticipantCommand& msg);
@@ -22,5 +22,5 @@ void Deserialize(SilKit::Core::MessageBuffer& buffer, WorkflowConfiguration& out
 void Deserialize(SilKit::Core::MessageBuffer& buffer, NextSimTask& out);
 
 } // namespace Orchestration    
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

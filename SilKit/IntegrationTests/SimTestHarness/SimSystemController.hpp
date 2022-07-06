@@ -36,7 +36,7 @@ public:
         _participant.reset();
     }
 
-    void OnParticipantStatusChanged(SilKit::Core::Orchestration::ParticipantStatus status)
+    void OnParticipantStatusChanged(SilKit::Services::Orchestration::ParticipantStatus status)
     {
         if (_isShuttingDown)
         {
@@ -44,14 +44,14 @@ public:
         }
         _participantStates[status.participantName] = status.state;
 
-        if (status.state == SilKit::Core::Orchestration::ParticipantState::Stopped
-            || status.state == SilKit::Core::Orchestration::ParticipantState::Error)
+        if (status.state == SilKit::Services::Orchestration::ParticipantState::Stopped
+            || status.state == SilKit::Services::Orchestration::ParticipantState::Error)
         {
             _controller->Stop();
         }
     }
 
-    void OnSystemStateChanged(SilKit::Core::Orchestration::SystemState state)
+    void OnSystemStateChanged(SilKit::Services::Orchestration::SystemState state)
     {
         if (_isShuttingDown)
         {
@@ -60,12 +60,12 @@ public:
         //std::cout << "SimTestHarness: System State is now " << state << std::endl;
         switch (state)
         {
-        case SilKit::Core::Orchestration::SystemState::ReadyToRun:
+        case SilKit::Services::Orchestration::SystemState::ReadyToRun:
             _controller->Run();
             return;
-        case SilKit::Core::Orchestration::SystemState::Running:
+        case SilKit::Services::Orchestration::SystemState::Running:
             return;
-        case SilKit::Core::Orchestration::SystemState::Stopped:
+        case SilKit::Services::Orchestration::SystemState::Stopped:
             for (const auto& name : _syncParticipantNames)
             {
                 _controller->Shutdown(name);
@@ -76,12 +76,12 @@ public:
         }
     }
 private:
-    SilKit::Core::Orchestration::ISystemController* _controller;
-    SilKit::Core::Orchestration::ISystemMonitor* _monitor;
+    SilKit::Services::Orchestration::ISystemController* _controller;
+    SilKit::Services::Orchestration::ISystemMonitor* _monitor;
     std::vector<std::string> _syncParticipantNames;
-    std::map<std::string, SilKit::Core::Orchestration::ParticipantState> _participantStates; //for printing status updates
+    std::map<std::string, SilKit::Services::Orchestration::ParticipantState> _participantStates; //for printing status updates
     std::atomic<bool> _isShuttingDown{false};
-    std::unique_ptr<SilKit::Core::IParticipant> _participant;
+    std::unique_ptr<SilKit::IParticipant> _participant;
 };
 
 } // namespace Tests

@@ -3,7 +3,7 @@
 ==============================
 Life Cycle Service
 ==============================
-.. |ILifecycleService| replace:: :cpp:class:`ILifecycleService<SilKit::Core::Orchestration::ILifecycleService>`
+.. |ILifecycleService| replace:: :cpp:class:`ILifecycleService<SilKit::Services::Orchestration::ILifecycleService>`
 .. |Participant| replace:: :doc:`Participant<participant>`
 
 .. contents::
@@ -13,7 +13,7 @@ Life Cycle Service
 .. highlight:: cpp
 
 The life cycle service is the main interface to model a member of a simulation.
-It provides access to the  :cpp:class:`time synchronization service <SilKit::Core::Orchestration::ITimeSyncService>`, register callbacks for state changes, query the participant's state and issue commands to change the state.
+It provides access to the  :cpp:class:`time synchronization service <SilKit::Services::Orchestration::ITimeSyncService>`, register callbacks for state changes, query the participant's state and issue commands to change the state.
 For an overview of a participant's state and its relation to the simulation
 refer to the :ref:`participant life cycle section<sec:sim-lifecycle-syncParticipants>`.
 
@@ -77,28 +77,28 @@ The ``CommunicationReady`` handler should be used to intialize and configure :do
 
 Controlling the Participant
 """""""""""""""""""""""""""
-After a successful startup, the participant will enter the :cpp:enumerator:`Running<SilKit::Core::Orchestration::Running>` state.
-:cpp:func:`State()<SilKit::Core::Orchestration::ILifecycleService::State()>` returns the
-current state as a plain enumeration, whereas :cpp:func:`Status()<SilKit::Core::Orchestration::ILifecycleService::Status()>`
+After a successful startup, the participant will enter the :cpp:enumerator:`Running<SilKit::Services::Orchestration::Running>` state.
+:cpp:func:`State()<SilKit::Services::Orchestration::ILifecycleService::State()>` returns the
+current state as a plain enumeration, whereas :cpp:func:`Status()<SilKit::Services::Orchestration::ILifecycleService::Status()>`
 returns additional information such as the participant's name, the human readable 
 reason for entering the state, and the wall clock time when the state was entered.
 
-To temporarily pause a simulation task, the :cpp:func:`Pause()<SilKit::Core::Orchestration::ILifecycleService::Pause()>`
+To temporarily pause a simulation task, the :cpp:func:`Pause()<SilKit::Services::Orchestration::ILifecycleService::Pause()>`
 method can be invoked with a human readable explanation as a string argument.
-Execution can be resumed using the :cpp:func:`Continue()<SilKit::Core::Orchestration::ILifecycleService::Continue()>`
+Execution can be resumed using the :cpp:func:`Continue()<SilKit::Services::Orchestration::ILifecycleService::Continue()>`
 method.
 
 To abort the simulation and report an error message use the 
-:cpp:func:`ReportError()<SilKit::Core::Orchestration::ILifecycleService::ReportError()>` method.
-This will change the current participant state to :cpp:enumerator:`Error<SilKit::Core::Orchestration::Error>` and report the error message
+:cpp:func:`ReportError()<SilKit::Services::Orchestration::ILifecycleService::ReportError()>` method.
+This will change the current participant state to :cpp:enumerator:`Error<SilKit::Services::Orchestration::Error>` and report the error message
 to the SILKIT runtime system.
 ReportError is also called when the invocation of a registered handler throws an exception.
 
-To stop a particular participant, use the :cpp:func:`Stop()<SilKit::Core::Orchestration::ILifecycleService::Stop()>`
+To stop a particular participant, use the :cpp:func:`Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`
 method.
-This will exit the :cpp:func:`StartLifecycleNoTimeSync<SilKit::Core::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` (or :cpp:func:`StartLifecycleWithTimeSync<SilKit::Core::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`) loop,
+This will exit the :cpp:func:`StartLifecycleNoTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` (or :cpp:func:`StartLifecycleWithTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`) loop,
 call a registered StopHandler and switch to
-the :cpp:enumerator:`Stopped<SilKit::Core::Orchestration::Stopped>` state.
+the :cpp:enumerator:`Stopped<SilKit::Services::Orchestration::Stopped>` state.
 
 .. admonition:: Note
 
@@ -116,7 +116,7 @@ the :cpp:enumerator:`Stopped<SilKit::Core::Orchestration::Stopped>` state.
 API and Data Type Reference
 -------------------------------
 
-.. doxygenclass:: SilKit::Core::Orchestration::ILifecycleService
+.. doxygenclass:: SilKit::Services::Orchestration::ILifecycleService
    :members:
 
 Usage Example

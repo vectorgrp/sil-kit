@@ -19,7 +19,7 @@ class SimBehaviorTrivial : public ISimBehavior
 public:
 
     SimBehaviorTrivial(Core::IParticipantInternal* participant, LinController* linController,
-                       Core::Orchestration::ITimeProvider* timeProvider);
+                       Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     
@@ -44,7 +44,7 @@ private:
     Core::IParticipantInternal* _participant{nullptr};
     LinController* _parentController{nullptr};
     const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
-    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Tracer _tracer;
 };
 

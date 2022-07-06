@@ -14,18 +14,18 @@
 
 #include "silkit/version.hpp"
 #include "silkit/SilKit.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "CommandlineParser.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 
 using namespace std::chrono_literals;
 
-Orchestration::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
+SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
 {
     if (cmdString == "Invalid")
         return SystemCommand::Kind::Invalid;
@@ -39,7 +39,7 @@ Orchestration::SystemCommand::Kind ToSystemCommand(const std::string& cmdString)
     throw SilKit::TypeConversionError{};
 }
 
-void ReportParticipantStatus(const SilKit::Core::Orchestration::ParticipantStatus& status)
+void ReportParticipantStatus(const SilKit::Services::Orchestration::ParticipantStatus& status)
 {
     std::time_t enterTime = std::chrono::system_clock::to_time_t(status.enterTime);
     std::tm tmBuffer;
@@ -60,12 +60,12 @@ void ReportParticipantStatus(const SilKit::Core::Orchestration::ParticipantStatu
         << std::endl;
 }
 
-void ReportSystemState(SilKit::Core::Orchestration::SystemState state)
+void ReportSystemState(SilKit::Services::Orchestration::SystemState state)
 {
     std::cout << "New SystemState: " << state << std::endl;
 }
 
-Orchestration::ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString)
+ParticipantCommand::Kind ToParticipantCommand(const std::string& cmdString)
 {
     if (cmdString == "Invalid")
         return ParticipantCommand::Kind::Invalid;

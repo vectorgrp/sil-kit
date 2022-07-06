@@ -7,7 +7,7 @@
 #include <memory>
 
 #include "ITimeProvider.hpp"
-#include "silkit/core/IParticipant.hpp"
+#include "silkit/IParticipant.hpp"
 #include "silkit/cfg/fwd_decl.hpp"
 
 #include "IReplayDataController.hpp"
@@ -19,7 +19,7 @@ class ReplayScheduler
 {
 public:
     ReplayScheduler(const Config::Config& config,  const Config::Participant& participantConfig,
-        std::chrono::nanoseconds tickPeriod, Core::IParticipant* participant, Core::Orchestration::ITimeProvider* timeProvider);
+        std::chrono::nanoseconds tickPeriod, IParticipant* participant, Services::Orchestration::ITimeProvider* timeProvider);
     ~ReplayScheduler();
     void ConfigureNetworkSimulators(const Config::Config& config, const Config::Participant& participantConfig,
         tracing::IReplayDataController& netsim);
@@ -43,8 +43,8 @@ private:
     std::chrono::nanoseconds _tickPeriod{0};
     std::chrono::nanoseconds _startTime{std::chrono::nanoseconds::min()};
     Services::Logging::ILogger* _log{nullptr};
-    Core::IParticipant* _participant{nullptr};
-    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    IParticipant* _participant{nullptr};
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     std::vector<ReplayTask> _replayTasks;
     bool _isDone{false};
     std::vector<std::string> _knownSimulators;

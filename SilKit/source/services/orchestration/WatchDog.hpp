@@ -9,7 +9,7 @@
 #include "ParticipantConfiguration.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class WatchDog
@@ -60,5 +60,5 @@ private:
 };
     
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

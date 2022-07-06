@@ -3,8 +3,8 @@
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/rpc/all.hpp"
 
 #include "CapiImpl.hpp"
@@ -92,7 +92,7 @@ SilKit_ReturnCode SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Partici
     ASSERT_VALID_HANDLER_PARAMETER(callHandler);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         auto rcpServer = cppParticipant->CreateRpcServer(controllerName, functionName, mediaType, cppLabels,
@@ -147,7 +147,7 @@ SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Partici
     ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         auto rcpClient = cppParticipant->CreateRpcClient(controllerName, functionName, mediaType, cppLabels,
@@ -196,7 +196,7 @@ SilKit_ReturnCode SilKit_DiscoverServers(SilKit_Participant* participant, const 
     ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         auto cppMediaType = std::string(mediaType);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);

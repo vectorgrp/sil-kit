@@ -13,13 +13,13 @@
 
 #include "silkit/version.hpp"
 #include "silkit/SilKit.hpp"
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 
 #include "CommandlineParser.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 
 using namespace std::chrono_literals;
 
@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class SilKitController
 {
 public:
-    SilKitController(SilKit::Core::IParticipant* participant, std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
+    SilKitController(SilKit::IParticipant* participant, std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
                  const std::vector<std::string>& expectedParticipantNames)
         : _config{std::move(config)}
         , _expectedParticipantNames{expectedParticipantNames}

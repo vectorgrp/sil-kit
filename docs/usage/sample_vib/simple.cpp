@@ -6,8 +6,8 @@
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp" // string conversions for enums
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp" // string conversions for enums
 
 const auto registryUri = "silkit://localhost:8500";
 

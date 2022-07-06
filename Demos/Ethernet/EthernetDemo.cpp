@@ -10,8 +10,8 @@
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 using namespace SilKit::Core;
 using namespace SilKit::Services;

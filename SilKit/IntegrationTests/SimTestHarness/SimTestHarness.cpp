@@ -6,7 +6,7 @@
 #include <atomic>
 #include <chrono>
 
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "ConfigurationTestUtils.hpp"
@@ -30,12 +30,12 @@ const std::string& SimParticipant::Name() const
     return _name;
 }
 
-SilKit::Core::IParticipant* SimParticipant::Participant() const
+SilKit::IParticipant* SimParticipant::Participant() const
 {
     return _participant.get();
 }
 
-std::future<SilKit::Core::Orchestration::ParticipantState>& SimParticipant::Result()
+std::future<SilKit::Services::Orchestration::ParticipantState>& SimParticipant::Result()
 {
     return _result;
 }

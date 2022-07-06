@@ -7,13 +7,13 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "silkit/core/sync/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/SyncDatatypes.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/ILifecycleService.hpp"
-#include "silkit/core/sync/ITimeSyncService.hpp"
-#include "silkit/core/sync/ISystemController.hpp"
-#include "silkit/core/sync/ISystemMonitor.hpp"
+#include "silkit/services/orchestration/ILifecycleService.hpp"
+#include "silkit/services/orchestration/ITimeSyncService.hpp"
+#include "silkit/services/orchestration/ISystemController.hpp"
+#include "silkit/services/orchestration/ISystemMonitor.hpp"
 
 #include "silkit/services/fwd_decl.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
@@ -49,7 +49,7 @@ protected:
 };
 
 
-class MockTimeProvider : public Orchestration::ITimeProvider
+class MockTimeProvider : public Services::Orchestration::ITimeProvider
 {
 public:
     struct MockTime
@@ -86,27 +86,27 @@ public:
 };
 
 
-class MockLifecycleService : public Orchestration::ILifecycleService {
+class MockLifecycleService : public Services::Orchestration::ILifecycleService {
 public:
     MOCK_METHOD(void, SetCommunicationReadyHandler, (CommunicationReadyHandlerT), (override));
     MOCK_METHOD(void, SetStartingHandler, (StartingHandlerT), (override));
     MOCK_METHOD(void, SetStopHandler, (StopHandlerT), (override));
     MOCK_METHOD(void, SetShutdownHandler, (ShutdownHandlerT), (override));
-    MOCK_METHOD(std::future<Orchestration::ParticipantState>, StartLifecycleNoSyncTime,
-                (Orchestration::LifecycleConfiguration), (override));
-    MOCK_METHOD(std::future<Orchestration::ParticipantState>, StartLifecycleWithSyncTime,
-                (Orchestration::ITimeSyncService *, Orchestration::LifecycleConfiguration),
+    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycleNoSyncTime,
+                (Services::Orchestration::LifecycleConfiguration), (override));
+    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycleWithSyncTime,
+                (Services::Orchestration::ITimeSyncService*, Services::Orchestration::LifecycleConfiguration),
                 (override));
     MOCK_METHOD(void, ReportError, (std::string /*errorMsg*/), (override));
     MOCK_METHOD(void, Pause, (std::string /*reason*/), (override));
     MOCK_METHOD(void, Continue, (), (override));
     MOCK_METHOD(void, Stop, (std::string /*reason*/), (override));
-    MOCK_METHOD(Orchestration::ParticipantState, State, (), (override, const));
-    MOCK_METHOD(Orchestration::ParticipantStatus&, Status, (), (override, const));
-    MOCK_METHOD(Orchestration::ITimeSyncService*, GetTimeSyncService, (), (override, const));
+    MOCK_METHOD(Services::Orchestration::ParticipantState, State, (), (override, const));
+    MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
+    MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), (override, const));
 };
 
-class MockTimeSyncService : public Orchestration::ITimeSyncService
+class MockTimeSyncService : public Services::Orchestration::ITimeSyncService
 {
 public:
     MOCK_METHOD(void, SetSimulationTask, (SimTaskT task), (override));
@@ -117,7 +117,7 @@ public:
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };
 
-class MockSystemMonitor : public Orchestration::ISystemMonitor {
+class MockSystemMonitor : public Services::Orchestration::ISystemMonitor {
 public:
     MOCK_METHOD(HandlerId, AddSystemStateHandler, (SystemStateHandlerT));
     MOCK_METHOD(void, RemoveSystemStateHandler, (HandlerId));
@@ -125,22 +125,22 @@ public:
     MOCK_METHOD(HandlerId, AddParticipantStatusHandler, (ParticipantStatusHandlerT));
     MOCK_METHOD(void, RemoveParticipantStatusHandler, (HandlerId));
 
-    MOCK_CONST_METHOD0(SystemState,  Orchestration::SystemState());
-    MOCK_CONST_METHOD1(ParticipantStatus, const Orchestration::ParticipantStatus&(const std::string& participantName));
+    MOCK_CONST_METHOD0(SystemState,  Services::Orchestration::SystemState());
+    MOCK_CONST_METHOD1(ParticipantStatus, const Services::Orchestration::ParticipantStatus&(const std::string& participantName));
 
     MOCK_METHOD(void, SetParticipantConnectedHandler, (ParticipantConnectedHandler handler), (override));
     MOCK_METHOD(void, SetParticipantDisconnectedHandler, (ParticipantDisconnectedHandler handler), (override));
     MOCK_METHOD(bool, IsParticipantConnected, (const std::string& participantName), (const, override));
 };
 
-class MockSystemController : public Orchestration::ISystemController {
+class MockSystemController : public Services::Orchestration::ISystemController {
 public:
     MOCK_METHOD(void, Restart, (const std::string& participantId), (const, override));
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());
     MOCK_CONST_METHOD0(AbortSimulation, void());
     MOCK_METHOD(void, Shutdown, (const std::string&), (const, override));
-    MOCK_METHOD((void), SetWorkflowConfiguration, (const SilKit::Core::Orchestration::WorkflowConfiguration& workflowConfiguration));
+    MOCK_METHOD((void), SetWorkflowConfiguration, (const SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration));
 };
 
 class MockServiceDiscovery : public Discovery::IServiceDiscovery
@@ -266,11 +266,11 @@ public:
                             const std::map<std::string, std::string>& /*labels*/,
                             Services::Rpc::RpcDiscoveryResultHandler /*handler*/) override{};
 
-    auto GetLifecycleService() -> Orchestration::ILifecycleService* override { return &mockLifecycleService; }
+    auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override { return &mockLifecycleService; }
     // TODO mock this?
-    auto CreateTimeSyncService(Orchestration::LifecycleService*) -> Orchestration::TimeSyncService* override { return nullptr; };
-    auto GetSystemMonitor() -> Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
-    auto GetSystemController() -> Orchestration::ISystemController* override { return &mockSystemController; }
+    auto CreateTimeSyncService(Services::Orchestration::LifecycleService*) -> Services::Orchestration::TimeSyncService* override { return nullptr; };
+    auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
+    auto GetSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
 
@@ -321,11 +321,11 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Rpc::FunctionCallResponse& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, Services::Rpc::FunctionCallResponse&& /*msg*/) override {}
 
-    void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::NextSimTask& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::ParticipantStatus& /*msg*/)  override{}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::ParticipantCommand& /*msg*/)  override{}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::SystemCommand& /*msg*/)  override{}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Orchestration::WorkflowConfiguration& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::NextSimTask& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::ParticipantStatus& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::ParticipantCommand& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::SystemCommand& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::WorkflowConfiguration& /*msg*/)  override{}
 
     void SendMsg(const IServiceEndpoint* /*from*/, Services::Logging::LogMsg&& /*msg*/)  override{}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Logging::LogMsg& /*msg*/)  override{}
@@ -377,11 +377,11 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Rpc::FunctionCallResponse& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, Services::Rpc::FunctionCallResponse&& /*msg*/) override {}
 
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::NextSimTask& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::ParticipantStatus& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::ParticipantCommand& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::SystemCommand& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Orchestration::WorkflowConfiguration& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::NextSimTask& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::ParticipantStatus& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::ParticipantCommand& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::SystemCommand& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::WorkflowConfiguration& /*msg*/) override {}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, Services::Logging::LogMsg&& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Logging::LogMsg& /*msg*/) override {}
@@ -395,7 +395,7 @@ public:
     void ExecuteDeferred(std::function<void()> /*callback*/) override {}
     auto GetParticipantName() const -> const std::string& override { return _name; }
 
-    virtual auto GetTimeProvider() -> Orchestration::ITimeProvider* { return &mockTimeProvider; }
+    virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider* { return &mockTimeProvider; }
     void JoinSilKitDomain(const std::string& ) override {}
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override { return &mockServiceDiscovery; }

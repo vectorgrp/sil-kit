@@ -9,8 +9,8 @@
 #include <thread>
 
 #include "silkit/SilKit.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/fr/all.hpp"
 #include "silkit/util/functional.hpp"
 

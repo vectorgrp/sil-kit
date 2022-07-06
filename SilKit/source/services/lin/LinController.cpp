@@ -15,7 +15,7 @@ namespace Services {
 namespace Lin {
 
 LinController::LinController(Core::IParticipantInternal* participant, SilKit::Config::LinController config,
-                               Core::Orchestration::ITimeProvider* timeProvider)
+                               Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _config{config}
     , _logger{participant->GetLogger()}

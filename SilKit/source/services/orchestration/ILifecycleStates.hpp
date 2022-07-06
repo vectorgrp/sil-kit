@@ -4,7 +4,7 @@
 #include <string>
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class ILifecycleState
@@ -33,5 +33,5 @@ public:
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

@@ -12,7 +12,7 @@
 #include <cstdint>
 
 #include "silkit/SilKit.hpp"
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/ISilKitRegistry.hpp"
 
 namespace SilKit { namespace Tests {
@@ -25,21 +25,21 @@ class SimSystemController;
 class SimParticipant
 {
 public:
-    using FutureResult = std::future<SilKit::Core::Orchestration::ParticipantState>;
+    using FutureResult = std::future<SilKit::Services::Orchestration::ParticipantState>;
 
     SimParticipant(const SimParticipant&) = delete;
     SimParticipant operator=(const SimParticipant&) = delete;
     SimParticipant() = default;
 
     const std::string& Name() const;
-    SilKit::Core::IParticipant* Participant() const;
+    SilKit::IParticipant* Participant() const;
     FutureResult& Result();
     void Stop();
 
 private:
     std::string _name;
     FutureResult _result;
-    std::unique_ptr<SilKit::Core::IParticipant> _participant;
+    std::unique_ptr<SilKit::IParticipant> _participant;
 
     friend class SimTestHarness;
 };

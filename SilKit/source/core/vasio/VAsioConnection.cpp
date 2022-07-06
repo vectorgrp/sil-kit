@@ -141,7 +141,7 @@ auto printUris(const std::vector<std::string>& uris)
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in 
 // a runtime exception. We create a unique temporary file path, with a fixed length.
-auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::ParticipantId& id,
+auto makeLocalEndpoint(const std::string& participantName, const SilKit::ParticipantId& id,
                        const std::string& uniqueValue) -> asio::local::stream_protocol::endpoint
 {
     asio::local::stream_protocol::endpoint result;
@@ -192,7 +192,7 @@ auto fromAsioEndpoint(const asio::ip::tcp::endpoint& ep)
     return SilKit::Core::Uri::Parse(uri.str());
 }
 
-auto makeLocalPeerInfo(const std::string& name, SilKit::Core::ParticipantId id, const std::string& uniqueDetail)
+auto makeLocalPeerInfo(const std::string& name, SilKit::ParticipantId id, const std::string& uniqueDetail)
 {
     SilKit::Core::VAsioPeerInfo pi;
     pi.participantName = name;
@@ -293,7 +293,7 @@ void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
     _logger = logger;
 }
 
-void VAsioConnection::SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService)
+void VAsioConnection::SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService)
 {
     _timeSyncService = timeSyncService;
     Util::tuple_tools::for_each(_links, [timeSyncService](auto&& linkMap) {
@@ -820,14 +820,14 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
 
     auto& info = peer->GetInfo();
 
-    SilKit::Core::Orchestration::ParticipantStatus msg;
+    SilKit::Services::Orchestration::ParticipantStatus msg;
     msg.participantName = info.participantName;
-    msg.state = SilKit::Core::Orchestration::ParticipantState::Error;
+    msg.state = SilKit::Services::Orchestration::ParticipantState::Error;
     msg.enterReason = "Connection Lost";
     msg.enterTime = std::chrono::system_clock::now();
     msg.refreshTime = std::chrono::system_clock::now();
 
-    auto&& link = GetLinkByName<SilKit::Core::Orchestration::ParticipantStatus>("default");
+    auto&& link = GetLinkByName<SilKit::Services::Orchestration::ParticipantStatus>("default");
 
     // The VAsioTcpPeer has an incomplete Service ID, fill in the missing
     // link and participant names.

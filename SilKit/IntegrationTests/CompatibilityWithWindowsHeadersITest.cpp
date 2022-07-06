@@ -12,8 +12,7 @@
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/SilKit.hpp"
 
-#include "silkit/core/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/exceptions.hpp"

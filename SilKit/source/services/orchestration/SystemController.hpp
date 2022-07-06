@@ -4,13 +4,13 @@
 
 #include <cassert>
 
-#include "silkit/core/sync/ISystemController.hpp"
+#include "silkit/services/orchestration/ISystemController.hpp"
 
 #include "IMsgForSystemController.hpp"
 #include "IParticipantInternal.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class SystemController
@@ -26,7 +26,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemController() = default;
-    SystemController(IParticipantInternal* participant);
+    SystemController(Core::IParticipantInternal* participant);
     SystemController(const SystemController& other) = default;
     SystemController(SystemController&& other) = default;
     SystemController& operator=(const SystemController& other) = default;
@@ -59,7 +59,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor;
 };
 
@@ -105,5 +105,5 @@ auto SystemController::GetServiceDescriptor() const -> const Core::ServiceDescri
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

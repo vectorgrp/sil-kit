@@ -4,7 +4,7 @@
 #include <atomic>
 
 #include "silkit/services/all.hpp"
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/util/functional.hpp"
 
 #include "SimTestHarness.hpp"
@@ -67,7 +67,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
 std::promise<bool> startupPromise;
 std::promise<void> nextIterPromise;
 
-auto BackgroundThread(SilKit::Core::Orchestration::ITimeSyncService* parti)
+auto BackgroundThread(SilKit::Services::Orchestration::ITimeSyncService* parti)
 {
     while (true)
     {

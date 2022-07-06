@@ -64,11 +64,11 @@ template <class MsgT> struct SilKitMsgTraits
     };
 
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg)
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, ParticipantCommand)
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, SystemCommand)
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, ParticipantStatus)
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, WorkflowConfiguration)
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Orchestration, NextSimTask)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, ParticipantCommand)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, SystemCommand)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, ParticipantStatus)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, WorkflowConfiguration)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, NextSimTask)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::PubSub, DataMessageEvent)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc, FunctionCall)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Rpc, FunctionCallResponse)
@@ -102,16 +102,16 @@ DefineSilKitMsgTrait_TypeName(SilKit::Core::Discovery, ParticipantDiscoveryEvent
 DefineSilKitMsgTrait_TypeName(SilKit::Core::Discovery, ServiceDiscoveryEvent)
 
 // Messages with history
-DefineSilKitMsgTrait_HistSize(SilKit::Core::Orchestration, ParticipantStatus, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, ParticipantStatus, 1)
 DefineSilKitMsgTrait_HistSize(SilKit::Core::Discovery, ParticipantDiscoveryEvent, 1)
 DefineSilKitMsgTrait_HistSize(SilKit::Services::PubSub, DataMessageEvent, 1)
-DefineSilKitMsgTrait_HistSize(SilKit::Core::Orchestration, WorkflowConfiguration, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, WorkflowConfiguration, 1)
 DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, LinControllerConfig, 1)
 
 // Messages with enforced self delivery
-DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Core::Orchestration, ParticipantCommand)
-DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Core::Orchestration, ParticipantStatus)
-DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Core::Orchestration, SystemCommand)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantCommand)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, SystemCommand)
 
 } // namespace Core
 } // namespace SilKit

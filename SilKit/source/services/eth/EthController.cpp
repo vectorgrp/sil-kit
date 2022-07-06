@@ -12,7 +12,7 @@ namespace Services {
 namespace Ethernet {
 
 EthController::EthController(Core::IParticipantInternal* participant, Config::EthernetController config,
-                               Core::Orchestration::ITimeProvider* timeProvider)
+                               Services::Orchestration::ITimeProvider* timeProvider)
     : _participant(participant)
     , _config{config}
     , _simulationBehavior{participant, this, timeProvider}

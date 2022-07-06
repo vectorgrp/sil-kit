@@ -7,7 +7,7 @@
 #include "ISender.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class IMsgForParticipantController
@@ -17,5 +17,5 @@ class IMsgForParticipantController
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

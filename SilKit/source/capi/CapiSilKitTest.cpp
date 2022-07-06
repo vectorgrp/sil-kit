@@ -2,7 +2,6 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
-#include "silkit/core/all.hpp"
 
 #include "MockParticipant.hpp"
 

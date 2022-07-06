@@ -24,12 +24,12 @@ namespace Tests {
 struct MockConnection
 {
     MockConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
-                   SilKit::Core::ParticipantId /*participantId*/, SilKit::Core::ProtocolVersion)
+                   SilKit::ParticipantId /*participantId*/, SilKit::Core::ProtocolVersion)
     {
     }
 
     void SetLogger(SilKit::Services::Logging::ILogger* /*logger*/) {}
-    void SetTimeSyncService(SilKit::Core::Orchestration::TimeSyncService* /*timeSyncService*/) {}
+    void SetTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinDomain(uint32_t /*domainId*/) {}
     void JoinDomain(std::string /*domainId*/) {}
 
@@ -103,7 +103,7 @@ struct MockConnection
 
     void RegisterPeerShutdownCallback(std::function<void(SilKit::Core::IVAsioPeer* peer)> /*callback*/) {}
 
-    void Test_SetTimeProvider(SilKit::Core::Orchestration::ITimeProvider* timeProvider)
+    void Test_SetTimeProvider(SilKit::Services::Orchestration::ITimeProvider* timeProvider)
     {
         for (auto& service : services.rpcClient)
         {
@@ -139,7 +139,7 @@ inline auto MakeMockConnectionParticipant(std::shared_ptr<SilKit::Config::IParti
     return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName);
 }
 
-struct FixedTimeProvider : SilKit::Core::Orchestration::ITimeProvider
+struct FixedTimeProvider : SilKit::Services::Orchestration::ITimeProvider
 {
     auto Now() const -> std::chrono::nanoseconds override { return now; }
 

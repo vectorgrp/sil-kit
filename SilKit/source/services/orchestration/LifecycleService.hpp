@@ -6,7 +6,7 @@
 #include <tuple>
 #include <map>
 
-#include "silkit/core/sync/ILifecycleService.hpp"
+#include "silkit/services/orchestration/ILifecycleService.hpp"
 
 #include "PerformanceMonitor.hpp"
 #include "WatchDog.hpp"
@@ -15,7 +15,7 @@
 #include "IParticipantInternal.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 //forward declarations
@@ -32,7 +32,7 @@ class LifecycleService
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    LifecycleService(IParticipantInternal* participant,
+    LifecycleService(Core::IParticipantInternal* participant,
                      const Config::HealthCheck& healthCheckConfig);
 
 public:
@@ -102,7 +102,7 @@ private:
 private:
     // ----------------------------------------
     // private members
-    IParticipantInternal* _participant{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
     Services::Logging::ILogger* _logger{nullptr};
 
@@ -149,5 +149,5 @@ auto LifecycleService::GetServiceDescriptor() const -> const Core::ServiceDescri
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

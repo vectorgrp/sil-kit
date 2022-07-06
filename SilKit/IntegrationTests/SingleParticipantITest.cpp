@@ -15,7 +15,7 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace SilKit::Core;
+using namespace SilKit;
 using namespace SilKit::Services::Can;
 
 using testing::_;
@@ -79,7 +79,7 @@ protected:
         });
 
         timeSyncService->SetSimulationTask([this, canController, lifecycleService](auto, auto) {
-            EXPECT_EQ(lifecycleService->State(), Orchestration::ParticipantState::Running);
+            EXPECT_EQ(lifecycleService->State(), Services::Orchestration::ParticipantState::Running);
             if (numSent < testMessages.size())
             {
                 const auto& message = testMessages.at(numSent);

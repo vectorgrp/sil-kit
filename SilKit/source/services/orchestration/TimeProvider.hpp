@@ -10,7 +10,7 @@
 #include "SynchronizedHandlers.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 enum class TimeProviderKind : uint8_t
@@ -168,5 +168,5 @@ auto SynchronizedVirtualTimeProvider::TimeProviderName() const -> const std::str
     return _name;
 }
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

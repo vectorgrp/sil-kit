@@ -6,7 +6,7 @@
 #include <memory>
 #include <unordered_set>
 
-#include "silkit/core/sync/ISystemMonitor.hpp"
+#include "silkit/services/orchestration/ISystemMonitor.hpp"
 
 #include "IMsgForSystemMonitor.hpp"
 #include "IParticipantInternal.hpp"
@@ -14,7 +14,7 @@
 #include "SynchronizedHandlers.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class SystemMonitor
@@ -30,7 +30,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     SystemMonitor() = default;
-    SystemMonitor(IParticipantInternal* participant);
+    SystemMonitor(Core::IParticipantInternal* participant);
     SystemMonitor(const SystemMonitor& other) = delete;
     SystemMonitor(SystemMonitor&& other) = delete;
     SystemMonitor& operator=(const SystemMonitor& other) = delete;
@@ -134,5 +134,5 @@ auto SystemMonitor::GetServiceDescriptor() const -> const Core::ServiceDescripto
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

@@ -7,14 +7,12 @@
 #include <string>
 #include <functional>
 
-#include "silkit/core/fwd_decl.hpp"
 #include "silkit/services/fwd_decl.hpp"
 
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
 
 /*! \brief Communication interface to be used by SilKit participants
  *
@@ -97,11 +95,10 @@ public:
                                     Services::Rpc::RpcDiscoveryResultHandler handler) = 0;
 
     //! \brief Return the ILifecycleService for the current participant.
-    virtual auto GetLifecycleService() -> Orchestration::ILifecycleService* = 0;
-    virtual auto GetSystemMonitor() -> Orchestration::ISystemMonitor* = 0;
-    virtual auto GetSystemController() -> Orchestration::ISystemController* = 0;
+    virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+    virtual auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
+    virtual auto GetSystemController() -> Services::Orchestration::ISystemController* = 0;
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 };
 
-} // namespace Core
 } // namespace SilKit

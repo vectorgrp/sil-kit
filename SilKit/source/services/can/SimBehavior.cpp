@@ -10,7 +10,7 @@ namespace Can {
 class CanController;
 
 SimBehavior::SimBehavior(Core::IParticipantInternal* participant, CanController* canController,
-                    Core::Orchestration::ITimeProvider* timeProvider)
+                    Services::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, canController, timeProvider}
     , _detailed{participant, canController, canController->GetServiceDescriptor()}
 {

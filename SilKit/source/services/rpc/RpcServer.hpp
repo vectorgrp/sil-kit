@@ -5,7 +5,6 @@
 #include <vector>
 #include <future>
 
-#include "silkit/core/fwd_decl.hpp"
 #include "silkit/services/rpc/IRpcServer.hpp"
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
 
@@ -22,11 +21,11 @@ namespace Rpc {
 class RpcServer
     : public IRpcServer
     , public IMsgForRpcServer
-    , public Core::Orchestration::ITimeConsumer
+    , public Services::Orchestration::ITimeConsumer
     , public Core::IServiceEndpoint
 {
 public:
-    RpcServer(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
+    RpcServer(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
               const std::string& functionName, const std::string& mediaType,
               const std::map<std::string, std::string>& labels, RpcCallHandler handler);
 
@@ -36,8 +35,8 @@ public:
 
     void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) override;
 
-    //SilKit::Core::Orchestration::ITimeConsumer
-    void SetTimeProvider(Core::Orchestration::ITimeProvider* provider) override;
+    //SilKit::Services::Orchestration::ITimeConsumer
+    void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -54,7 +53,7 @@ private:
     Core::ServiceDescriptor _serviceDescriptor{};
     std::vector<RpcServerInternal*> _internalRpcServers;
     Services::Logging::ILogger* _logger;
-    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 };
 

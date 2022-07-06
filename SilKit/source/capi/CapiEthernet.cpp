@@ -3,8 +3,8 @@
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/eth/all.hpp"
 #include "silkit/services/eth/string_utils.hpp"
 
@@ -39,7 +39,7 @@ SilKit_ReturnCode SilKit_EthernetController_Create(SilKit_EthernetController** o
     ASSERT_VALID_POINTER_PARAMETER(network);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         auto ethernetController = cppParticipant->CreateEthernetController(name, network);
         *outController = reinterpret_cast<SilKit_EthernetController*>(ethernetController);
         return SilKit_ReturnCode_SUCCESS;

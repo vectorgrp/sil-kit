@@ -3,8 +3,8 @@ FlexRay Service API
 ===================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
-.. |CreateFlexrayController| replace:: :cpp:func:`CreateFlexrayController<SilKit::Core::IParticipant::CreateFlexrayController()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
+.. |CreateFlexrayController| replace:: :cpp:func:`CreateFlexrayController<SilKit::IParticipant::CreateFlexrayController()>`
 .. |IFlexrayController| replace:: :cpp:class:`IFlexrayController<SilKit::Services::Flexray::IFlexrayController>`
 
 .. |FlexrayControllerConfig| replace:: :cpp:class:`FlexrayControllerConfig<SilKit::Services::Flexray::FlexrayControllerConfig>`

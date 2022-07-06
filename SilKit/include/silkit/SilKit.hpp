@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "silkit/SilKitMacros.hpp"
-#include "silkit/core/IParticipant.hpp"
+#include "silkit/IParticipant.hpp"
 #include "silkit/cfg/IParticipantConfiguration.hpp"
 
 namespace SilKit {
@@ -29,10 +29,10 @@ namespace SilKit {
 
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName)
-    -> std::unique_ptr<Core::IParticipant>;
+    -> std::unique_ptr<IParticipant>;
 
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<Core::IParticipant>;
+    -> std::unique_ptr<IParticipant>;
 
 } // namespace SilKit

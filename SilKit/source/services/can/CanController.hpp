@@ -8,7 +8,6 @@
 #include <mutex>
 
 #include "silkit/services/can/ICanController.hpp"
-#include "silkit/core/fwd_decl.hpp"
 #include "ITimeConsumer.hpp"
 
 #include "IMsgForCanController.hpp"
@@ -41,7 +40,7 @@ public:
     CanController(const CanController&) = delete;
     CanController(CanController&&) = delete;
     CanController(Core::IParticipantInternal* participant, SilKit::Config::CanController config,
-                   Core::Orchestration::ITimeProvider* timeProvider);
+                   Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------

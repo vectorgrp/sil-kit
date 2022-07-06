@@ -12,8 +12,8 @@
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/can/all.hpp"
 #include "silkit/services/can/string_utils.hpp"
 

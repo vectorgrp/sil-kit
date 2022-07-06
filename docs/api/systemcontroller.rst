@@ -23,36 +23,36 @@ the System Controller, so that no erroneous state changes occur and the transiti
   implementation is needed.
 
 Before the system controller can be used to initiate state transisitions, 
-:cpp:func:`SetWorkflowConfiguration()<SilKit::Core::Orchestration::ISystemController::SetWorkflowConfiguration()>` must be called
-with a :cpp:class:`WorkflowConfiguration<SilKit::Core::Orchestration::WorkflowConfiguration>` containing the set of 
+:cpp:func:`SetWorkflowConfiguration()<SilKit::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>` must be called
+with a :cpp:class:`WorkflowConfiguration<SilKit::Services::Orchestration::WorkflowConfiguration>` containing the set of 
 required participants within the simulation.
 
 Initiate state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After the required participants are set and the participants called 
-:cpp:func:`StartLifecycleNoTimeSync<SilKit::Core::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` or 
-:cpp:func:`StartLifecycleWithTimeSync<SilKit::Core::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`, 
-the participant states will progress automatically either to :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Core::Orchestration::ReadyToRun>` 
-(for coordinated participants) or :cpp:enumerator:`ParticipantState::Running<SilKit::Core::Orchestration::Running>`  (for non-coordinated participants).
+:cpp:func:`StartLifecycleNoTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` or 
+:cpp:func:`StartLifecycleWithTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`, 
+the participant states will progress automatically either to :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>` 
+(for coordinated participants) or :cpp:enumerator:`ParticipantState::Running<SilKit::Services::Orchestration::Running>`  (for non-coordinated participants).
 
-Once all required participants reached at least :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Core::Orchestration::ReadyToRun>` 
-(and therefore the system is in :cpp:enumerator:`SystemState::ReadyToRun<SilKit::Core::Orchestration::ReadyToRun>`, the next transition can be initiated
-by calling the :cpp:func:`Run()<SilKit::Core::Orchestration::ISystemController::Run()>` command::
+Once all required participants reached at least :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>` 
+(and therefore the system is in :cpp:enumerator:`SystemState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>`, the next transition can be initiated
+by calling the :cpp:func:`Run()<SilKit::Services::Orchestration::ISystemController::Run()>` command::
 
   // Initiate state transition from ReadyToRun to Running for all coordinated participants.
   auto* systemController = participant->GetSystemController();
   systemController->Run();
 
 After all participants are successfully running and the system is in
-:cpp:enumerator:`SystemState::Running<SilKit::Core::Orchestration::Running>`, the simulation can be stopped by calling
-the :cpp:func:`Stop()<SilKit::Core::Orchestration::ISystemController::Stop()>` command::
+:cpp:enumerator:`SystemState::Running<SilKit::Services::Orchestration::Running>`, the simulation can be stopped by calling
+the :cpp:func:`Stop()<SilKit::Services::Orchestration::ISystemController::Stop()>` command::
 
   // Initiate state transition from Running to Stopped for all coordinated participants.
   auto* systemController = participant->GetSystemController();
   systemController->Stop();
 
-If the system is in :cpp:enumerator:`SystemState::Stopped<SilKit::Core::Orchestration::Stopped>`, participants can either
+If the system is in :cpp:enumerator:`SystemState::Stopped<SilKit::Services::Orchestration::Stopped>`, participants can either
 be restart or the system can be shut down::
 
   // Restart a participant by providing its name.
@@ -63,7 +63,7 @@ be restart or the system can be shut down::
   auto* systemController = participant->GetSystemController();
   systemController->Shutdown();
 
-After a participant is in :cpp:enumerator:`ParticipantState::Shutdown<SilKit::Core::Orchestration::Shutdown>`,
+After a participant is in :cpp:enumerator:`ParticipantState::Shutdown<SilKit::Services::Orchestration::Shutdown>`,
 the simulation is considered to be completed and no more state transitions are possible.
 
 
@@ -72,17 +72,17 @@ API and Data Type Reference
 
 System Controller API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: SilKit::Core::Orchestration::ISystemController
+.. doxygenclass:: SilKit::Services::Orchestration::ISystemController
     :members:
 
 
 Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenstruct:: SilKit::Core::Orchestration::ParticipantCommand
+.. doxygenstruct:: SilKit::Services::Orchestration::ParticipantCommand
     :members:
 
-.. doxygenstruct:: SilKit::Core::Orchestration::SystemCommand
+.. doxygenstruct:: SilKit::Services::Orchestration::SystemCommand
     :members:
 
 

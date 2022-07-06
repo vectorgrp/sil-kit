@@ -3,8 +3,8 @@ CAN Service API
 ===================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
-.. |CreateCanController| replace:: :cpp:func:`CreateCanController<SilKit::Core::IParticipant::CreateCanController()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
+.. |CreateCanController| replace:: :cpp:func:`CreateCanController<SilKit::IParticipant::CreateCanController()>`
 .. |ICanController| replace:: :cpp:class:`ICanController<SilKit::Services::Can::ICanController>`
 
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Can::ICanController::SendFrame>`

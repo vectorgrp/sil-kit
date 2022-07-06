@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "silkit/core/sync/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/SyncDatatypes.hpp"
 
 #include <string>
 #include <iomanip> //std::put_time
@@ -13,7 +13,7 @@
 #include "silkit/exception.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 inline std::string to_string(ParticipantState state);
@@ -260,5 +260,5 @@ std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflo
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

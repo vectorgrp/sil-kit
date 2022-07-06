@@ -4,7 +4,7 @@
 #include <future>
 
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
@@ -13,7 +13,7 @@
 using namespace std::chrono_literals;
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class TimeConfiguration
@@ -74,7 +74,7 @@ public:
     virtual void Initialize() = 0;
     virtual void RequestInitialStep() = 0;
     virtual void RequestNextStep() = 0;
-    virtual void ReceiveNextSimTask(const IServiceEndpoint* from, const NextSimTask& task) = 0;
+    virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
 };
 
 //! brief Synchronization policy for unsynchronized participants
@@ -85,14 +85,14 @@ public:
     void Initialize() override {}
     void RequestInitialStep() override {}
     void RequestNextStep() override {}
-    void ReceiveNextSimTask(const IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
+    void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
 };
 
 //! brief Synchronization policy of the VAsio middleware
 struct SynchronizedPolicy : public ITimeSyncPolicy
 {
 public:
-    SynchronizedPolicy(TimeSyncService& controller, IParticipantInternal* participant, TimeConfiguration* configuration)
+    SynchronizedPolicy(TimeSyncService& controller, Core::IParticipantInternal* participant, TimeConfiguration* configuration)
         : _controller(controller)
         , _participant(participant)
         , _configuration(configuration)
@@ -119,7 +119,7 @@ public:
 
     void RequestNextStep() override { _controller.SendMsg(_configuration->_myNextTask); }
 
-    void ReceiveNextSimTask(const IServiceEndpoint* from, const NextSimTask& task) override
+    void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
         _configuration->_otherNextTasks[from->GetServiceDescriptor().GetParticipantName()] = task;
 
@@ -185,11 +185,11 @@ private:
     }
 
     TimeSyncService& _controller;
-    IParticipantInternal* _participant;
+    Core::IParticipantInternal* _participant;
     TimeConfiguration* _configuration;
 };
 
-TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleService* lifecycleService,
+TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, LifecycleService* lifecycleService,
                                  const Config::HealthCheck& healthCheckConfig)
     : _participant{participant}
     , _lifecycleService{lifecycleService}
@@ -210,15 +210,15 @@ TimeSyncService::TimeSyncService(IParticipantInternal* participant, LifecycleSer
     ConfigureTimeProvider(TimeProviderKind::NoSync);
     _timeConfiguration = std::make_shared<TimeConfiguration>();
 
-    participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const ServiceDescriptor& descriptor) {
-        if (descriptor.GetServiceType() == ServiceType::InternalController)
+    participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const Core::ServiceDescriptor& descriptor) {
+            if (descriptor.GetServiceType() == Core::ServiceType::InternalController)
         {
             std::string controllerType;
-            descriptor.GetSupplementalDataItem(Discovery::controllerType, controllerType);
-            if (controllerType == Discovery::controllerTypeTimeSyncService)
+            descriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType);
+            if (controllerType == Core::Discovery::controllerTypeTimeSyncService)
             {
                 std::string timeSyncActive;
-                descriptor.GetSupplementalDataItem(Discovery::timeSyncActive, timeSyncActive);
+                descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncActive, timeSyncActive);
                 if (timeSyncActive == "1")
                 {
                     auto descriptorParticipantName = descriptor.GetParticipantName();
@@ -433,5 +433,5 @@ void TimeSyncService::ConfigureTimeProvider(Orchestration::TimeProviderKind time
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

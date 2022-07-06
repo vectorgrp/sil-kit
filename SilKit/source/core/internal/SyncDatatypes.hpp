@@ -5,12 +5,12 @@
 #include <chrono>
 #include <string>
 
-#include "silkit/core/sync/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/SyncDatatypes.hpp"
 
 #include "IServiceEndpoint.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 struct NextSimTask
@@ -20,5 +20,5 @@ struct NextSimTask
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

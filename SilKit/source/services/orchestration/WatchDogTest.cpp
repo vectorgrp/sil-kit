@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "WatchDog.hpp"
 
@@ -20,8 +20,7 @@ using namespace std::chrono_literals;
 using namespace testing;
 
 using namespace SilKit;
-using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 
 
 class WatchDogTest : public testing::Test

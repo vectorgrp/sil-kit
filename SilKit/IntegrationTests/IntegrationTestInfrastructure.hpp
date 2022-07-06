@@ -7,8 +7,8 @@
 #include "silkit/services/all.hpp"
 #include "ConfigurationTestUtils.hpp"
 
-using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Config;
 
 class TestInfrastructure

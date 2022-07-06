@@ -3,7 +3,7 @@
 #pragma once
 #include <atomic>
 
-#include "silkit/core/IParticipant.hpp"
+#include "silkit/IParticipant.hpp"
 
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
@@ -80,11 +80,11 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Rpc::FunctionCallResponse& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Rpc::FunctionCallResponse&& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::NextSimTask& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::ParticipantCommand& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::SystemCommand& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::NextSimTask& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::ParticipantCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::SystemCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::WorkflowConfiguration& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Logging::LogMsg& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Logging::LogMsg&& msg) = 0;
@@ -135,11 +135,11 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCallResponse& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCallResponse&& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::NextSimTask& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantStatus& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::ParticipantCommand& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::NextSimTask& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantStatus& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::SystemCommand& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::WorkflowConfiguration& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Logging::LogMsg& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Logging::LogMsg&& msg) = 0;
@@ -168,7 +168,7 @@ public:
                                          Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
         -> SilKit::Services::Rpc::RpcServerInternal* = 0;
 
-    virtual auto CreateTimeSyncService(Core::Orchestration::LifecycleService* service) -> Orchestration::TimeSyncService* = 0;
+    virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService* = 0;
 
 protected:
     std::atomic<EndpointId> _localEndpointId{ 0 };

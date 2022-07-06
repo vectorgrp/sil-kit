@@ -11,7 +11,7 @@ namespace Services {
 namespace Can {
 
 CanController::CanController(Core::IParticipantInternal* participant, SilKit::Config::CanController config,
-                             Core::Orchestration::ITimeProvider* timeProvider)
+                             Services::Orchestration::ITimeProvider* timeProvider)
     : _participant(participant)
     , _config{config}
     , _simulationBehavior{participant, this, timeProvider}

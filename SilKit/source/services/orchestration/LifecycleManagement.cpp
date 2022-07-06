@@ -6,7 +6,7 @@
 #include "LifecycleStates.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 // LifecycleManagement
@@ -239,5 +239,5 @@ LifecycleService* LifecycleManagement::GetService()
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

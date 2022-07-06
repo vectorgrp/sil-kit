@@ -29,7 +29,7 @@ SilKit_ReturnCode SilKit_CanController_Create(SilKit_CanController** outControll
     ASSERT_VALID_POINTER_PARAMETER(cNetwork);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         auto canController = cppParticipant->CreateCanController(cName, cNetwork);
         *outController = reinterpret_cast<SilKit_CanController*>(canController);
         return SilKit_ReturnCode_SUCCESS;

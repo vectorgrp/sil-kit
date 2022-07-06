@@ -11,7 +11,7 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
+DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                                const std::string& topic, const std::string& mediaType, const std::map<std::string, std::string>& labels,
                                DataMessageHandlerT defaultDataHandler, NewDataPublisherHandlerT newDataSourceHandler)
     : _topic{topic}

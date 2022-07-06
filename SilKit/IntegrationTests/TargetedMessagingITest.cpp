@@ -11,7 +11,7 @@
 #include "silkit/services/can/CanDatatypes.hpp"
 #include "CanController.hpp"
 
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/util/functional.hpp"
 
 #include "gmock/gmock.h"
@@ -22,7 +22,7 @@
 namespace {
 using namespace std::chrono_literals;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 
 TEST(TargetedMessagingITest, targeted_messaging)
 {

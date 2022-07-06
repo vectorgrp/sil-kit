@@ -439,7 +439,7 @@ Life Cycle Demo
            If timeSync flag is set, the participant will run without virtual time synchronization.
          [\-\-uncoordinated]
            If the uncoordinated flag is set, the participant will not coordinate its state transitions with other participants. 
-           The state transition Running->Stopping must be triggered via a call to :cpp:func:`ILifecycleService::Stop()<SilKit::Core::Orchestration::ILifecycleService::Stop()>`.
+           The state transition Running->Stopping must be triggered via a call to :cpp:func:`ILifecycleService::Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`.
    *  -  Parameter Example
       -  .. parsed-literal::
 

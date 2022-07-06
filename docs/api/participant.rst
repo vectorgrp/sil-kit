@@ -9,7 +9,7 @@ This document describes the main entry point to the SILKIT simulation, the parti
 By creating a participant with a given configuration, a connection 
 to a simulation is established and the configured participant joins the simulation.
 
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>` 
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>` 
 
 Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,12 +35,12 @@ of the SILKIT.
 
     Services must NOT be created in callbacks. E.g., it is an error to call
     CreateCanController() in the registered callbacks for
-    :cpp:func:`CommunicationReadyHandler<SilKit::Core::Orchestration::ILifecycleService::CommunicationReadyHandler()>`
+    :cpp:func:`CommunicationReadyHandler<SilKit::Services::Orchestration::ILifecycleService::CommunicationReadyHandler()>`
     or even
-    :cpp:func:`SimTask<SilKit::Core::Orchestration::ITimeSyncService::SetSimulationTask()>`.
+    :cpp:func:`SimTask<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTask()>`.
 
 
-.. doxygenclass:: SilKit::Core::IParticipant
+.. doxygenclass:: SilKit::IParticipant
    :members:
 
 

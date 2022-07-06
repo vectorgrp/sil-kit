@@ -22,7 +22,7 @@ class SimBehavior : public ISimBehavior
 {
 public:
     SimBehavior(Core::IParticipantInternal* participant, LinController* linController,
-                       Core::Orchestration::ITimeProvider* timeProvider);
+                       Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 

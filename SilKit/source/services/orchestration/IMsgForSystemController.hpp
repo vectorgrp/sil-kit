@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "silkit/core/sync/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/SyncDatatypes.hpp"
 #include "IReceiver.hpp"
 #include "ISender.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class IMsgForSystemController
@@ -17,5 +17,5 @@ class IMsgForSystemController
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

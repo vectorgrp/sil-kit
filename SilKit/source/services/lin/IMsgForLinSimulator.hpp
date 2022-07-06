@@ -29,8 +29,8 @@ public:
      * the individual endpointIds.
      */
     //! \brief Setter and getter for the ParticipantID associated with this LIN simulator
-    virtual void SetParticipantId(Core::ParticipantId participantId) = 0;
-    virtual auto GetParticipantId() const -> Core::ParticipantId = 0;
+    virtual void SetParticipantId(ParticipantId participantId) = 0;
+    virtual auto GetParticipantId() const -> ParticipantId = 0;
 };
 
 } // namespace Lin

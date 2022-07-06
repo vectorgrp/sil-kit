@@ -11,7 +11,7 @@
 #include "VAsioRegistry.hpp"
 #include "ConfigurationTestUtils.hpp"
 
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
 
 #include "gmock/gmock.h"
@@ -24,7 +24,7 @@ namespace {
 using namespace std::chrono;
 using namespace SilKit::Config;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::PubSub;
 
 const std::string testMessage{"TestMessage"};

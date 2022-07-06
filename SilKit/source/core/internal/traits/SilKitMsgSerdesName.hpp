@@ -19,11 +19,11 @@ template <class MsgT> struct SilKitMsgTraitSerdesName { static constexpr const c
     }
 
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Logging::LogMsg, "LOGMSG" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::ParticipantCommand, "PARTICIPANTCOMMAND" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::SystemCommand, "SYSTEMCOMMAND" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::ParticipantStatus, "PARTICIPANTSTATUS" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::WorkflowConfiguration, "WORKFLOWCONFIGURATION" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Orchestration::NextSimTask, "NEXTSIMTASK" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::ParticipantCommand, "PARTICIPANTCOMMAND" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::SystemCommand, "SYSTEMCOMMAND" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::ParticipantStatus, "PARTICIPANTSTATUS" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::WorkflowConfiguration, "WORKFLOWCONFIGURATION" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::NextSimTask, "NEXTSIMTASK" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::PubSub::DataMessageEvent, "DATAMESSAGEEVENT" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Rpc::FunctionCall, "FUNCTIONCALL" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Rpc::FunctionCallResponse, "FUNCTIONCALLRESPONSE" );

@@ -50,7 +50,7 @@ SilKit_ReturnCode SilKit_LinController_Create(SilKit_LinController** outLinContr
     ASSERT_VALID_POINTER_PARAMETER(network);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         auto cppLinController = cppParticipant->CreateLinController(name, network);
         if (cppLinController == nullptr)
         {

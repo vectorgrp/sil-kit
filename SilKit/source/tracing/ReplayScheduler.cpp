@@ -7,8 +7,8 @@
 #include <sstream>
 
 #include "silkit/cfg/Config.hpp"
-#include "silkit/core/IParticipant.hpp"
-#include "silkit/core/sync/ISystemMonitor.hpp"
+#include "silkit/IParticipant.hpp"
+#include "silkit/services/orchestration/ISystemMonitor.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/extensions/string_utils.hpp"
 
@@ -291,8 +291,8 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log,
 ReplayScheduler::ReplayScheduler(const Config::Config& config,
     const Config::Participant& participantConfig,
     std::chrono::nanoseconds tickPeriod,
-    Core::IParticipant* participant,
-    Core::Orchestration::ITimeProvider* timeProvider)
+    IParticipant* participant,
+    Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _timeProvider{timeProvider}
     , _tickPeriod{tickPeriod}
@@ -518,10 +518,10 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
 
     // Bus Controllers
     // TODO FIXME Replay is currently not working so this will be commented out
-    //makeTasks(participantConfig.ethernetControllers, &Core::IParticipant::CreateEthernetController);
-    //makeTasks(participantConfig.canControllers, &Core::IParticipant::CreateCanController);
-    //TODO makeTasks(participantConfig.flexrayControllers, &Core::IParticipant::CreateFlexrayController);
-    //makeTasks(participantConfig.linControllers, &Core::IParticipant::CreateLinController);
+    //makeTasks(participantConfig.ethernetControllers, &IParticipant::CreateEthernetController);
+    //makeTasks(participantConfig.canControllers, &IParticipant::CreateCanController);
+    //TODO makeTasks(participantConfig.flexrayControllers, &IParticipant::CreateFlexrayController);
+    //makeTasks(participantConfig.linControllers, &IParticipant::CreateLinController);
 }
 
 ReplayScheduler::~ReplayScheduler()

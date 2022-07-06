@@ -23,7 +23,7 @@ class SimBehavior : public ISimBehavior
 {
 public:
     SimBehavior(Core::IParticipantInternal* participant, CanController* canController,
-                       Core::Orchestration::ITimeProvider* timeProvider);
+                       Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     void SendMsg(CanConfigureBaudrate&& msg) override;

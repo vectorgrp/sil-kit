@@ -10,7 +10,7 @@
 #include "silkit/util/HandlerId.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class ISystemMonitor
@@ -99,5 +99,5 @@ public:
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

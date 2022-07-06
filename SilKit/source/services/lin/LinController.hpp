@@ -5,7 +5,6 @@
 #include <map>
 
 #include "silkit/services/lin/ILinController.hpp"
-#include "silkit/core/fwd_decl.hpp"
 
 #include "ITimeConsumer.hpp"
 #include "IParticipantInternal.hpp"
@@ -36,7 +35,7 @@ public:
     LinController(const LinController&) = delete;
     LinController(LinController&&) = delete;
     LinController(Core::IParticipantInternal* participant, Config::LinController config,
-                   Core::Orchestration::ITimeProvider* timeProvider);
+                   Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------

@@ -10,7 +10,6 @@
 #include <map>
 #include <tuple>
 
-#include "silkit/core/all.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -141,10 +140,10 @@ public:
                             const std::map<std::string, std::string>& labels,
                             Services::Rpc::RpcDiscoveryResultHandler handler) override;
 
-    auto GetLifecycleService() -> Orchestration::ILifecycleService* override;
-    auto CreateTimeSyncService(Orchestration::LifecycleService* service) -> Orchestration::TimeSyncService* override;
-    auto GetSystemMonitor() -> Orchestration::ISystemMonitor* override;
-    auto GetSystemController() -> Orchestration::ISystemController* override;
+    auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;
+    auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService* override;
+    auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
+    auto GetSystemController() -> Services::Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
     auto GetLogger() -> Services::Logging::ILogger* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
@@ -188,11 +187,11 @@ public:
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) override;
 
-    void SendMsg(const IServiceEndpoint*, const Orchestration::NextSimTask& msg) override;
-    void SendMsg(const IServiceEndpoint*, const Orchestration::ParticipantStatus& msg) override;
-    void SendMsg(const IServiceEndpoint*, const Orchestration::ParticipantCommand& msg) override;
-    void SendMsg(const IServiceEndpoint*, const Orchestration::SystemCommand& msg) override;
-    void SendMsg(const IServiceEndpoint*, const Orchestration::WorkflowConfiguration& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Services::Orchestration::NextSimTask& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Services::Orchestration::ParticipantStatus& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Services::Orchestration::ParticipantCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Services::Orchestration::SystemCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const Services::Orchestration::WorkflowConfiguration& msg) override;
 
     void SendMsg(const IServiceEndpoint*, const Services::Logging::LogMsg& msg) override;
     void SendMsg(const IServiceEndpoint*, Services::Logging::LogMsg&& msg) override;
@@ -242,11 +241,11 @@ public:
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg) override;
 
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::NextSimTask& msg) override;
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::ParticipantStatus& msg) override;
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::ParticipantCommand& msg) override;
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::SystemCommand& msg) override;
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Orchestration::WorkflowConfiguration& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::NextSimTask& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::ParticipantStatus& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::ParticipantCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::SystemCommand& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::WorkflowConfiguration& msg) override;
 
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Logging::LogMsg& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, Services::Logging::LogMsg&& msg) override;
@@ -311,7 +310,7 @@ private:
 
     void SetupRemoteLogging();
 
-    void SetTimeProvider(Orchestration::ITimeProvider*);
+    void SetTimeProvider(Services::Orchestration::ITimeProvider*);
 
     template<class SilKitMessageT>
     void SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg);
@@ -352,8 +351,8 @@ private:
     const SilKit::Config::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
-    Orchestration::WallclockProvider _wallclockTimeProvider{1ms};
-    Orchestration::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
+    Services::Orchestration::WallclockProvider _wallclockTimeProvider{1ms};
+    Services::Orchestration::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
 
     std::unique_ptr<Services::Logging::ILogger> _logger;
     std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;
@@ -371,10 +370,10 @@ private:
         ControllerMap<Services::Rpc::IMsgForRpcServerInternal>,
         ControllerMap<Services::Logging::IMsgForLogMsgSender>,
         ControllerMap<Services::Logging::IMsgForLogMsgReceiver>,
-        ControllerMap<Orchestration::IMsgForLifecycleService>,
-        ControllerMap<Orchestration::IMsgForSystemMonitor>,
-        ControllerMap<Orchestration::IMsgForSystemController>,
-        ControllerMap<Orchestration::IMsgForTimeSyncService>,
+        ControllerMap<Services::Orchestration::IMsgForLifecycleService>,
+        ControllerMap<Services::Orchestration::IMsgForSystemMonitor>,
+        ControllerMap<Services::Orchestration::IMsgForSystemController>,
+        ControllerMap<Services::Orchestration::IMsgForTimeSyncService>,
         ControllerMap<Discovery::ServiceDiscovery>
     > _controllers;
 

@@ -2,12 +2,12 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 
 #include "MockParticipant.hpp"
 
 namespace {
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 using SilKit::Core::Tests::DummyParticipant;
 
 class CapiTimeSyncTest : public testing::Test
@@ -42,7 +42,7 @@ TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
     returnCode = SilKit_Participant_SetPeriod((SilKit_Participant*)&mockParticipant, 1000);
 
     EXPECT_CALL(mockParticipant.mockTimeSyncService,
-        SetSimulationTask(testing::Matcher<SilKit::Core::Orchestration::ITimeSyncService::SimTaskT>(testing::_))
+        SetSimulationTask(testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimTaskT>(testing::_))
     ).Times(testing::Exactly(1));
     returnCode = SilKit_Participant_SetSimulationTask((SilKit_Participant*)&mockParticipant, nullptr, &SimTask);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);

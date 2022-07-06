@@ -10,7 +10,7 @@ namespace Services {
 namespace Can {
 
 SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, CanController* canController,
-                    Core::Orchestration::ITimeProvider* timeProvider)
+                    Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{canController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(canController)}

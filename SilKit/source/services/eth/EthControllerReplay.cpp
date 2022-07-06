@@ -76,8 +76,8 @@ void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/,
 {
 }
 
-// SilKit::Core::Orchestration::ITimeConsumer
-void EthControllerReplay::SetTimeProvider(SilKit::Core::Orchestration::ITimeProvider* /*timeProvider*/)
+// SilKit::Services::Orchestration::ITimeConsumer
+void EthControllerReplay::SetTimeProvider(SilKit::Services::Orchestration::ITimeProvider* /*timeProvider*/)
 {
     //_controller.SetTimeProvider(timeProvider);
 }

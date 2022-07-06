@@ -10,7 +10,7 @@
 #include "CreateParticipant.hpp"
 #include "VAsioRegistry.hpp"
 
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
 
 #include "gmock/gmock.h"

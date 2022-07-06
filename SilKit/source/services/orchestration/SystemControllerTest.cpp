@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "MockParticipant.hpp"
 #include "SyncDatatypeUtils.hpp"
@@ -22,7 +22,7 @@ using namespace testing;
 
 using namespace SilKit;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Util;
 
 using ::SilKit::Core::Tests::DummyParticipant;

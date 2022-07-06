@@ -12,7 +12,7 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-RpcClient::RpcClient(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
+RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                      const std::string& functionName, const std::string& mediaType,
                      const std::map<std::string, std::string>& labels, const std::string& clientUUID,
                      RpcCallResultHandler handler)
@@ -120,7 +120,7 @@ void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
     }
 }
 
-void RpcClient::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
+void RpcClient::SetTimeProvider(Services::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }

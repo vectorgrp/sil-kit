@@ -13,13 +13,13 @@
 
 #include "silkit/version.hpp"
 #include "silkit/SilKit.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "CommandlineParser.hpp"
 
-using namespace SilKit::Core;
+using namespace SilKit;
 using namespace std::chrono_literals;
 
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
@@ -107,14 +107,14 @@ int main(int argc, char** argv)
         auto* logger = participant->GetLogger();
         auto* systemMonitor = participant->GetSystemMonitor();
 
-        systemMonitor->AddParticipantStatusHandler([logger](const Orchestration::ParticipantStatus& status) {
+        systemMonitor->AddParticipantStatusHandler([logger](const Services::Orchestration::ParticipantStatus& status) {
             std::stringstream buffer;
             buffer << "New ParticipantState: " << status.participantName << " is " << status.state
                    << ",\tReason: " << status.enterReason;
             logger->Info(buffer.str());
         });
 
-        systemMonitor->AddSystemStateHandler([logger](Orchestration::SystemState state) {
+        systemMonitor->AddSystemStateHandler([logger](Services::Orchestration::SystemState state) {
             std::stringstream buffer;
             buffer << "New SystemState: " << state;
             logger->Info(buffer.str());

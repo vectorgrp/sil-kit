@@ -23,7 +23,7 @@ public:
     // Public Data Types
 
     LinControllerReplay(Core::IParticipantInternal* participant, Config::LinController config,
-            Core::Orchestration::ITimeProvider* timeProvider);
+            Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -82,7 +82,7 @@ private:
     LinControllerMode _mode{LinControllerMode::Inactive};
     // For tracing on a Master
     Tracer _tracer;
-    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 };
 
 // ================================================================================

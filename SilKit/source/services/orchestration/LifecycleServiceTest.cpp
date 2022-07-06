@@ -7,7 +7,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/util/functional.hpp"
 
 #include "LifecycleService.hpp"
@@ -24,7 +24,7 @@ using namespace testing;
 
 using namespace SilKit;
 using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Util;
 
 using ::SilKit::Core::Tests::DummyParticipant;
@@ -51,7 +51,7 @@ public:
     }
 
 public:
-    MOCK_METHOD(TimeSyncService*, CreateTimeSyncService, (Orchestration::LifecycleService*));
+    MOCK_METHOD(TimeSyncService*, CreateTimeSyncService, (LifecycleService*));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const ParticipantStatus& msg));
 
 public:
@@ -118,7 +118,7 @@ void PrepareLifecycle(LifecycleService* lifecycleService)
 
 auto StartCoordinated() 
 {
-    Orchestration::LifecycleConfiguration sc;
+    LifecycleConfiguration sc;
     sc.coordinatedStart = true;
     sc.coordinatedStop = true;
     return sc;

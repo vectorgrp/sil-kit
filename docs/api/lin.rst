@@ -5,8 +5,8 @@ LIN Service API
 ===================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
-.. |CreateLinController| replace:: :cpp:func:`CreateLinController<SilKit::Core::IParticipant::CreateLinController()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
+.. |CreateLinController| replace:: :cpp:func:`CreateLinController<SilKit::IParticipant::CreateLinController()>`
 .. |ILinController| replace:: :cpp:class:`ILinController<SilKit::Services::Ethernet::ILinController>`
 
 .. |Init| replace:: :cpp:func:`Init()<SilKit::Services::Lin::ILinController::Init>`

@@ -5,7 +5,7 @@
 #include "SyncDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class ISystemController
@@ -68,5 +68,5 @@ public:
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

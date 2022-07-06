@@ -3,7 +3,7 @@
 #pragma once
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 struct NextSimTask;
@@ -22,5 +22,5 @@ class ISystemController;
 
 class ITimeProvider;
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

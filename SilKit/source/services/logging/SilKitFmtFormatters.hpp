@@ -8,7 +8,7 @@
 
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/logging/string_utils.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/can/string_utils.hpp"
 #include "silkit/services/eth/string_utils.hpp"
 #include "silkit/services/fr/string_utils.hpp"
@@ -42,11 +42,11 @@ static constexpr bool is_printable_silkit_type_v = is_printable_silkit_type<T>::
 template<class T>
 struct is_printable_silkit_type<T, std::enable_if_t<is_one_of_v<T, 
         SilKit::Services::Logging::LogMsg,
-        SilKit::Core::Orchestration::NextSimTask,
-        SilKit::Core::Orchestration::SystemCommand,
-        SilKit::Core::Orchestration::ParticipantCommand,
-        SilKit::Core::Orchestration::ParticipantStatus,
-        SilKit::Core::Orchestration::WorkflowConfiguration,
+        SilKit::Services::Orchestration::NextSimTask,
+        SilKit::Services::Orchestration::SystemCommand,
+        SilKit::Services::Orchestration::ParticipantCommand,
+        SilKit::Services::Orchestration::ParticipantStatus,
+        SilKit::Services::Orchestration::WorkflowConfiguration,
         SilKit::Services::PubSub::DataMessageEvent,
         SilKit::Services::Rpc::FunctionCall,
         SilKit::Services::Rpc::FunctionCallResponse,

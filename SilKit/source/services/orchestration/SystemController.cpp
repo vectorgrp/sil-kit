@@ -4,10 +4,10 @@
 #include "Hash.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
-SystemController::SystemController(IParticipantInternal* participant)
+SystemController::SystemController(Core::IParticipantInternal* participant)
     : _participant{participant}
 {
 }
@@ -44,5 +44,5 @@ void SystemController::SetWorkflowConfiguration(const WorkflowConfiguration& wor
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

@@ -22,7 +22,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    SilKitLink(std::string name, Services::Logging::ILogger* logger, Orchestration::TimeSyncService* timeSyncService);
+    SilKitLink(std::string name, Services::Logging::ILogger* logger, Services::Orchestration::TimeSyncService* timeSyncService);
 
 public:
     // ----------------------------------------
@@ -41,7 +41,7 @@ public:
 
     void DispatchSilKitMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
 
-    void SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService);
+    void SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService);
 
 private:
     // ----------------------------------------
@@ -53,7 +53,7 @@ private:
     // private members
     std::string _name;
     Services::Logging::ILogger* _logger;
-    Orchestration::TimeSyncService* _timeSyncService;
+    Services::Orchestration::TimeSyncService* _timeSyncService;
 
     std::vector<ReceiverT*> _localReceivers;
     VAsioTransmitter<MsgT> _vasioTransmitter;
@@ -63,7 +63,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILogger* logger, Orchestration::TimeSyncService* timeSyncService)
+SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILogger* logger, Services::Orchestration::TimeSyncService* timeSyncService)
     : _name{std::move(name)}
     , _logger{logger}
     , _timeSyncService{timeSyncService}
@@ -162,7 +162,7 @@ void SilKitLink<MsgT>::DispatchSilKitMessageToTarget(const IServiceEndpoint* fro
 }
 
 template <class MsgT>
-void SilKitLink<MsgT>::SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService)
+void SilKitLink<MsgT>::SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService)
 {
     _timeSyncService = timeSyncService;
 }

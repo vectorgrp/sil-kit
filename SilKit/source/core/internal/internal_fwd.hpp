@@ -29,15 +29,15 @@ class IMsgForRpcServerInternal;
 class RpcServerInternal;
 class RpcDiscoverer;
 } // namespace Rpc
+namespace Orchestration {
+class LifecycleService;
+class TimeSyncService;
+} // namespace Orchestration
 } // namespace Services
 namespace Core {
 namespace Discovery {
 class IServiceDiscovery;
 } // namespace Discovery
-namespace Orchestration {
-class LifecycleService;
-class TimeSyncService;
-} // namespace Orchestration
 } // namespace Core
 } // namespace SilKit
 

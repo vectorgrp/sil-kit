@@ -8,7 +8,7 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider, 
+DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, 
                                                const std::string& topic, const std::string& mediaType,
                                                const std::map<std::string, std::string>& labels,
                                                DataMessageHandlerT defaultHandler, IDataSubscriber* parent)
@@ -61,7 +61,7 @@ void DataSubscriberInternal::ReceiveMessage(const DataMessageEvent& dataMessageE
     }
 }
 
-void DataSubscriberInternal::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
+void DataSubscriberInternal::SetTimeProvider(Services::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }

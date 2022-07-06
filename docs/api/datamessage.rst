@@ -3,9 +3,9 @@ Data Message API
 ================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
-.. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<SilKit::Core::IParticipant::CreateDataPublisher()>`
-.. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<SilKit::Core::IParticipant::CreateDataSubscriber()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
+.. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher<SilKit::IParticipant::CreateDataPublisher()>`
+.. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber<SilKit::IParticipant::CreateDataSubscriber()>`
 .. |Publish| replace:: :cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>`
 .. |SetDefaultDataMessageHandler| replace:: :cpp:func:`SetDefaultDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDefaultDataMessageHandler()>`
 .. |AddExplicitDataMessageHandler| replace:: :cpp:func:`AddExplicitDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::AddExplicitDataMessageHandler()>`

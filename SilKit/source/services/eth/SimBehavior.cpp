@@ -10,7 +10,7 @@ namespace Ethernet {
 class EthController;
 
 SimBehavior::SimBehavior(Core::IParticipantInternal* participant, EthController* ethController,
-                    Core::Orchestration::ITimeProvider* timeProvider)
+                    Services::Orchestration::ITimeProvider* timeProvider)
     : _trivial{participant, ethController, timeProvider}
     , _detailed{participant, ethController, ethController->GetServiceDescriptor()}
 {

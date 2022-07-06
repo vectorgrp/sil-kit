@@ -3,8 +3,8 @@
 ============================
 Time Synchronization Service
 ============================
-.. |ILifecycleService| replace:: :cpp:class:`ILifecycleService<SilKit::Core::Orchestration::ILifecycleService>`
-.. |ITimeSyncService| replace:: :cpp:class:`ITimeSyncService<SilKit::Core::Orchestration::ITimeSyncService>`
+.. |ILifecycleService| replace:: :cpp:class:`ILifecycleService<SilKit::Services::Orchestration::ILifecycleService>`
+.. |ITimeSyncService| replace:: :cpp:class:`ITimeSyncService<SilKit::Services::Orchestration::ITimeSyncService>`
 .. |Participant| replace:: :doc:`Participant<participant>`
 
 .. contents::
@@ -39,9 +39,9 @@ The simulation task will be executed asynchronously::
 Controlling the Participant
 """""""""""""""""""""""""""
 
-After a successful startup, the participant will enter the :cpp:enumerator:`Running<SilKit::Core::Orchestration::Running>` state.
+After a successful startup, the participant will enter the :cpp:enumerator:`Running<SilKit::Services::Orchestration::Running>` state.
 The participant can now access the current simulation time using the
-:cpp:func:`Now()<SilKit::Core::Orchestration::ITimeSyncService::Now()>` method.
+:cpp:func:`Now()<SilKit::Services::Orchestration::ITimeSyncService::Now()>` method.
 
 Synchronizing an application thread with the simulation task
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -49,26 +49,26 @@ Synchronizing an application thread with the simulation task
 In special cases, it may be required to synchronize an application thread with the execution of the simulation task. 
 That is, the application wants to execute some code between time steps (given by invocations of the simulation task), *but on a different thread*
 than where the simulation task is executing.
-To achieve this, use :cpp:func:`SetSimulationTaskAsync()<SilKit::Core::Orchestration::ITimeSyncService::SetSimulationTaskAsync()>` to assign
-the simulation task function, and :cpp:func:`CompleteSimulationTask()<SilKit::Core::Orchestration::ITimeSyncService::CompleteSimulationTask()>` to let
+To achieve this, use :cpp:func:`SetSimulationTaskAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTaskAsync()>` to assign
+the simulation task function, and :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>` to let
 the SILKIT continue the simulation. 
 If the simulation task has been assigned using that function, execution will stop after the simulation task has finished executing.
-By invoking :cpp:func:`CompleteSimulationTask()<SilKit::Core::Orchestration::ITimeSyncService::CompleteSimulationTask()>` SILKIT's simulation loop 
-(implemented in :cpp:func:`RunAsync<SilKit::Core::Orchestration::ITimeSyncService::RunAsync()>`) will continue to the next time step.
+By invoking :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>` SILKIT's simulation loop 
+(implemented in :cpp:func:`RunAsync<SilKit::Services::Orchestration::ITimeSyncService::RunAsync()>`) will continue to the next time step.
 
 Changing simulation task duration
 """"""""""""""""""""""""""""""""""
-Within the SILKIT, :cpp:func:`SetPeriod()<SilKit::Core::Orchestration::ITimeSyncService::SetPeriod()>` specifies the simulation 
+Within the SILKIT, :cpp:func:`SetPeriod()<SilKit::Services::Orchestration::ITimeSyncService::SetPeriod()>` specifies the simulation 
 time duration of each simulation task invocation. It corresponds to the simulation time difference between each 
 task execution.
 The simulation task duration can be changed at any time by calling
-:cpp:func:`SetPeriod()<SilKit::Core::Orchestration::ITimeSyncService::SetPeriod()>`. When calling it within a simulation task, 
+:cpp:func:`SetPeriod()<SilKit::Services::Orchestration::ITimeSyncService::SetPeriod()>`. When calling it within a simulation task, 
 the duration of the current simulation task will already be affected by the call.
 
 API and Data Type Reference
 -------------------------------
 
-.. doxygenclass:: SilKit::Core::Orchestration::ITimeSyncService
+.. doxygenclass:: SilKit::Services::Orchestration::ITimeSyncService
    :members:
 
 Usage Example

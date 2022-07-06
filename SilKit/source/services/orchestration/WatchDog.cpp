@@ -8,7 +8,7 @@
 using namespace std::chrono_literals;
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 WatchDog::WatchDog(const Config::HealthCheck& healthCheckConfig)
@@ -137,5 +137,5 @@ std::chrono::milliseconds WatchDog::GetErrorTimeout()
 }
     
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

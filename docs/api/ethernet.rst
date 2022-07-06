@@ -3,8 +3,8 @@ Ethernet Service API
 ====================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
-.. |CreateEthernetController| replace:: :cpp:func:`CreateEthernetController<SilKit::Core::IParticipant::CreateEthernetController()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
+.. |CreateEthernetController| replace:: :cpp:func:`CreateEthernetController<SilKit::IParticipant::CreateEthernetController()>`
 .. |IEthernetController| replace:: :cpp:class:`IEthernetController<SilKit::Services::Ethernet::IEthernetController>`
 .. |Activate| replace:: :cpp:func:`Activate()<SilKit::Services::Ethernet::IEthernetController::Activate>`
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Ethernet::IEthernetController::SendFrame>`

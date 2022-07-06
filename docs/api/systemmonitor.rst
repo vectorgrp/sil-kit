@@ -19,7 +19,7 @@ Register callbacks for state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To be notified about transitions of the ParticipantState, a ParticipantStatusHandler has to be registered. The
-:cpp:class:`ParticipantStatus<SilKit::Core::Orchestration::ParticipantStatus>` contains the new ParticipantState and further details 
+:cpp:class:`ParticipantStatus<SilKit::Services::Orchestration::ParticipantStatus>` contains the new ParticipantState and further details 
 about the transition such as the name of the participant, the reason for the status change and timing information:
 
 .. code-block:: c++
@@ -73,23 +73,23 @@ API and Data Type Reference
 
 System Monitor API
 ~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: SilKit::Core::Orchestration::ISystemMonitor
+.. doxygenclass:: SilKit::Services::Orchestration::ISystemMonitor
    :members:
 
 
 Data Structures
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenstruct:: SilKit::Core::Orchestration::ParticipantStatus
+.. doxygenstruct:: SilKit::Services::Orchestration::ParticipantStatus
    :members:
 
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygenenum:: SilKit::Core::Orchestration::ParticipantState
+.. doxygenenum:: SilKit::Services::Orchestration::ParticipantState
 
-.. doxygenenum:: SilKit::Core::Orchestration::SystemState
+.. doxygenenum:: SilKit::Services::Orchestration::SystemState
 
 
 Usage Example

@@ -3,7 +3,7 @@
 #pragma once
 #include <cstdint>
 
-#include "silkit/core/ParticipantId.hpp"
+#include "silkit/ParticipantId.hpp"
 
 namespace SilKit {
 namespace Core {

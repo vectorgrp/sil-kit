@@ -3,7 +3,6 @@
 #pragma once
 
 #include "silkit/services/fr/IFlexrayController.hpp"
-#include "silkit/core/fwd_decl.hpp"
 
 #include <tuple>
 #include <vector>
@@ -42,7 +41,7 @@ public:
     FlexrayController(const FlexrayController&) = delete;
     FlexrayController(FlexrayController&&) = delete;
     FlexrayController(Core::IParticipantInternal* participant, Config::FlexrayController config,
-                      Core::Orchestration::ITimeProvider* /*timeProvider*/);
+                      Services::Orchestration::ITimeProvider* /*timeProvider*/);
 
 public:
     // ----------------------------------------

@@ -12,7 +12,7 @@ namespace Services {
 namespace Flexray {
 
 FlexrayController::FlexrayController(Core::IParticipantInternal* participant, Config::FlexrayController config,
-                                     Core::Orchestration::ITimeProvider* /*timeProvider*/)
+                                     Services::Orchestration::ITimeProvider* /*timeProvider*/)
     : _participant(participant)
     , _config{std::move(config)}
 {

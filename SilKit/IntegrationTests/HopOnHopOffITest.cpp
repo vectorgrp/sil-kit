@@ -13,7 +13,7 @@
 
 
 #include "silkit/SilKit.hpp"
-#include "silkit/core/sync/all.hpp"
+#include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/services/all.hpp"
 
@@ -22,8 +22,8 @@
 namespace {
 
 using namespace std::chrono_literals;
-using namespace SilKit::Core;
-using namespace SilKit::Core::Orchestration;
+using namespace SilKit;
+using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Config;
 using namespace SilKit::Services::PubSub;
 

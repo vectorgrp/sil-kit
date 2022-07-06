@@ -52,7 +52,7 @@ inline auto ToTracingDir(LinFrameStatus status) -> SilKit::Services::TransmitDir
 } // namespace
 
 SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, LinController* linController,
-                                       Core::Orchestration::ITimeProvider* timeProvider)
+                                       Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{linController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(linController)}

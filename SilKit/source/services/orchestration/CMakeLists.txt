@@ -7,6 +7,7 @@ add_library(SilKitMwSync
     LifecycleStates.cpp
     LifecycleService.hpp
     LifecycleService.cpp
+    
     SyncDatatypeUtils.hpp
     SyncDatatypeUtils.cpp
     SystemController.hpp
@@ -18,7 +19,7 @@ add_library(SilKitMwSync
     TimeProvider.hpp
     TimeSyncService.hpp
     TimeSyncService.cpp
-
+    
     SyncSerdes.hpp
     SyncSerdes.cpp
 )

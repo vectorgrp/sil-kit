@@ -19,7 +19,7 @@ namespace Services {
 namespace Ethernet {
 
 SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, EthController* ethController,
-                    Core::Orchestration::ITimeProvider* timeProvider)
+                    Services::Orchestration::ITimeProvider* timeProvider)
     : _participant{participant}
     , _parentController{ethController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}

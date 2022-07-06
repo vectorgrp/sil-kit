@@ -6,6 +6,7 @@
 #include "pubsub/fwd_decl.hpp"
 #include "rpc/fwd_decl.hpp"
 #include "logging/fwd_decl.hpp"
+#include "orchestration/fwd_decl.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -121,7 +121,7 @@ typedef void (*SilKit_EthernetBitrateChangeHandler_t)(void* context, SilKit_Ethe
 * \result A return code identifying the success/failure of the call.
 * ! \note The object returned must not be deallocated using free()!
 * 
-* \see SilKit::Core::IParticipant::CreateEthernetController
+* \see SilKit::IParticipant::CreateEthernetController
 */
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_Create(
   SilKit_EthernetController** outController,

@@ -540,7 +540,7 @@ Registered user callbacks are served with Replay Messages if the configured dire
 !!! Architecture
 ~~~~~~~~~~~~~~~~
 
-The trace and replay mechanism is an extension to the existing :cpp:class:`IParticipant<SilKit::Core::IParticipant>`, and consists of several parts:
+The trace and replay mechanism is an extension to the existing :cpp:class:`IParticipant<SilKit::IParticipant>`, and consists of several parts:
 
 To have a consistent time base during the simulation and throughout the participant, an instance of :cpp:class:`ITimeProvider<SilKit::Services::Orchestration::ITimeProvider>` is used.
 It gives access to the current simulation time, or as a fallback the wall-clock time if no time synchronization service is configured.

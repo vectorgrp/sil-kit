@@ -13,7 +13,7 @@ namespace Core {
 namespace {
 struct NullConnection
 {
-    NullConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/, SilKit::Core::ParticipantId /*participantId*/, ProtocolVersion) {}
+    NullConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/, SilKit::ParticipantId /*participantId*/, ProtocolVersion) {}
 
     void SetLogger(Services::Logging::ILogger* /*logger*/) {}
     void SetTimeSyncService(Orchestration::TimeSyncService* /*timeSyncService*/) {}

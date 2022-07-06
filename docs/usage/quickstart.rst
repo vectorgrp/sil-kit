@@ -119,7 +119,7 @@ The actual simulation is performed in the simulation task. The simulation task
 is a callback that is executed by the SILKIT runtime whenever the the simulation
 time of the SILKIT is advanced. This callback has to be registered with the
 time synchronization service's
-:cpp:func:`SetSimulationTask()<SilKit::Core::Orchestration::ITimeSyncService::SetSimulationTask()>`.
+:cpp:func:`SetSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTask()>`.
 
 The subscriber runs in its own thread, too:
 

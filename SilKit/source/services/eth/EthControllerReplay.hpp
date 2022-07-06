@@ -12,7 +12,7 @@ namespace Ethernet {
 class EthControllerReplay
     : public IEthernetController
     , public IMsgForEthController
-    , public SilKit::Core::Orchestration::ITimeConsumer
+    , public SilKit::Services::Orchestration::ITimeConsumer
     , public ITraceMessageSource
     , public tracing::IReplayDataController
     , public Core::IServiceEndpoint
@@ -21,7 +21,7 @@ public:
     // Constructors 
     EthControllerReplay() = delete;
     EthControllerReplay(Core::IParticipantInternal* participant, Config::EthernetController config,
-                        Core::Orchestration::ITimeProvider* timeProvider)
+                        Services::Orchestration::ITimeProvider* timeProvider)
         : _replayConfig{ config.replay }
         , _controller{ participant, config, timeProvider }
     {
@@ -49,8 +49,8 @@ public:
     void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
     void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 
-    // SilKit::Core::Orchestration::ITimeConsumer
-    void SetTimeProvider(SilKit::Core::Orchestration::ITimeProvider* timeProvider) override;
+    // SilKit::Services::Orchestration::ITimeConsumer
+    void SetTimeProvider(SilKit::Services::Orchestration::ITimeProvider* timeProvider) override;
 
     // ITraceMessageSource
     void AddSink(ITraceMessageSink* sink) override;

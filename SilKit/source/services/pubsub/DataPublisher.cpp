@@ -8,7 +8,7 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-DataPublisher::DataPublisher(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
+DataPublisher::DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                              const std::string& topic, const std::string& mediaType,
                              const std::map<std::string, std::string>& labels, const std::string& pubUUID)
     : _topic{topic}
@@ -31,7 +31,7 @@ void DataPublisher::Publish(const uint8_t* data, std::size_t size)
     Publish({data, data + size});
 }
 
-void DataPublisher::SetTimeProvider(Core::Orchestration::ITimeProvider* provider)
+void DataPublisher::SetTimeProvider(Services::Orchestration::ITimeProvider* provider)
 {
     _timeProvider = provider;
 }

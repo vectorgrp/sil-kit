@@ -4,8 +4,8 @@
 #include <future>
 
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/ISystemMonitor.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/ISystemMonitor.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
@@ -15,9 +15,9 @@
 using namespace std::chrono_literals;
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
-LifecycleService::LifecycleService(IParticipantInternal* participant,
+LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
                                    const Config::HealthCheck& healthCheckConfig)
     : _participant{participant}
     , _logger{participant->GetLogger()}
@@ -368,5 +368,5 @@ bool LifecycleService::IsTimeSyncActive()
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

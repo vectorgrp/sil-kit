@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "silkit/core/ParticipantId.hpp"
+#include "silkit/ParticipantId.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 struct ParticipantCommand
@@ -95,5 +95,5 @@ struct LifecycleConfiguration
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

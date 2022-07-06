@@ -7,7 +7,6 @@
 #include <chrono>
 #include <tuple>
 
-#include "silkit/core/fwd_decl.hpp"
 #include "silkit/services/logging/fwd_decl.hpp"
 
 #include "EndpointAddress.hpp"

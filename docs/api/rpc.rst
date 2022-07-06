@@ -3,14 +3,14 @@ Remote procedure call (Rpc) API
 =================================
 
 .. Macros for docs use
-.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::Core::IParticipant>`
-.. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient<SilKit::Core::IParticipant::CreateRpcClient()>`
-.. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<SilKit::Core::IParticipant::CreateRpcServer()>`
+.. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
+.. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient<SilKit::IParticipant::CreateRpcClient()>`
+.. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer<SilKit::IParticipant::CreateRpcServer()>`
 .. |Call| replace:: :cpp:func:`Call()<SilKit::Services::Rpc::IRpcClient::Call()>`
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<SilKit::Services::Rpc::IRpcServer::SubmitResult()>`
 .. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<SilKit::Services::Rpc::IRpcServer::SetCallHandler()>`
 .. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<SilKit::Services::Rpc::IRpcClient::SetCallResultHandler()>`
-.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<SilKit::Core::IParticipant::DiscoverRpcServers()>`
+.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<SilKit::IParticipant::DiscoverRpcServers()>`
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcServer>`
 .. contents::

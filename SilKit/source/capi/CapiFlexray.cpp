@@ -101,7 +101,7 @@ extern "C"
         ASSERT_VALID_POINTER_PARAMETER(network);
         CAPI_ENTER
         {
-            auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+            auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
             auto controller = cppParticipant->CreateFlexrayController(name, network);
             if (controller == nullptr)
             {

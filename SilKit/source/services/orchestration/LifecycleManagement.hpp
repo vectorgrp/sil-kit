@@ -11,7 +11,7 @@
 #include "ILifecycleStates.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class ILifecycleManagement
@@ -104,5 +104,5 @@ private:
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

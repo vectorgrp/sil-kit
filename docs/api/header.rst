@@ -19,7 +19,7 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
       - ``SilKit::Core``
       - :doc:`Middleware<../configuration/middleware-configuration>` specific interfaces, data types and exceptions.
     * - silkit/mw/sync
-      - ``SilKit::Core::Orchestration``
+      - ``SilKit::Services::Orchestration``
       - Synchronization mechanisms.
     * - silkit/sim
       - ``SilKit::Services``

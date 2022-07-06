@@ -5,16 +5,16 @@
 #include <iomanip> //std:put_time
 
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
-SystemMonitor::SystemMonitor(IParticipantInternal* participant)
+SystemMonitor::SystemMonitor(Core::IParticipantInternal* participant)
     : _logger{participant->GetLogger()}
 {
 }
@@ -392,5 +392,5 @@ void SystemMonitor::SetSystemState(Orchestration::SystemState newState)
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

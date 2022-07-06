@@ -6,14 +6,14 @@
 #include <future>
 #include <string>
 
-#include "silkit/core/sync/ITimeSyncService.hpp"
+#include "silkit/services/orchestration/ITimeSyncService.hpp"
 #include "silkit/capi/Participant.h"
 #include "silkit/exception.hpp"
 
 #include "SyncDatatypes.hpp"
 
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 
 class ILifecycleService
@@ -157,5 +157,5 @@ public:
 };
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit

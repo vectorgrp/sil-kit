@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "silkit/core/fwd_decl.hpp"
 #include "ITimeConsumer.hpp"
 
 #include "IMsgForDataSubscriberInternal.hpp"
@@ -16,11 +15,11 @@ namespace PubSub {
 
 class DataSubscriberInternal
     : public IMsgForDataSubscriberInternal
-    , public Core::Orchestration::ITimeConsumer
+    , public Services::Orchestration::ITimeConsumer
     , public Core::IServiceEndpoint
 {
 public:
-    DataSubscriberInternal(Core::IParticipantInternal* participant, Core::Orchestration::ITimeProvider* timeProvider,
+    DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                            const std::string& topic, const std::string& mediaType,
                            const std::map<std::string, std::string>& labels, DataMessageHandlerT defaultHandler,
                            IDataSubscriber* parent);
@@ -36,8 +35,8 @@ public:
 
     void ReceiveMessage(const DataMessageEvent& dataMessageEvent);
 
-    //SilKit::Core::Orchestration::ITimeConsumer
-    void SetTimeProvider(Core::Orchestration::ITimeProvider* provider) override;
+    //SilKit::Services::Orchestration::ITimeConsumer
+    void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
 
     std::string GetMediaType() { return _mediaType; };
     std::map <std::string, std::string> GetLabels() { return _labels; };
@@ -55,7 +54,7 @@ private:
 
     IDataSubscriber* _parent{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};
-    Core::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 };
 

@@ -28,7 +28,7 @@
 // private data types for unit testing support:
 #include "TestDataTypes.hpp"
 
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
 #include "asio.hpp"
@@ -64,7 +64,7 @@ public:
     // ----------------------------------------
     // Public methods
     void SetLogger(Services::Logging::ILogger* logger);
-    void SetTimeSyncService(Orchestration::TimeSyncService* timeSyncService);
+    void SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService);
     void JoinDomain(std::string registryUri);
 
     template <class SilKitServiceT>
@@ -168,11 +168,11 @@ private:
 
     using SilKitMessageTypes = std::tuple<
         Services::Logging::LogMsg,
-        Orchestration::NextSimTask,
-        Orchestration::SystemCommand,
-        Orchestration::ParticipantCommand,
-        Orchestration::ParticipantStatus,
-        Orchestration::WorkflowConfiguration,
+        Services::Orchestration::NextSimTask,
+        Services::Orchestration::SystemCommand,
+        Services::Orchestration::ParticipantCommand,
+        Services::Orchestration::ParticipantStatus,
+        Services::Orchestration::WorkflowConfiguration,
         Services::PubSub::DataMessageEvent,
         Services::Rpc::FunctionCall,
         Services::Rpc::FunctionCallResponse,
@@ -392,7 +392,7 @@ private:
     std::string _participantName;
     ParticipantId _participantId{0};
     Services::Logging::ILogger* _logger{nullptr};
-    Orchestration::TimeSyncService* _timeSyncService{nullptr};
+    Services::Orchestration::TimeSyncService* _timeSyncService{nullptr};
 
     //! \brief Virtual SilKit links by networkName according to SilKitConfig.
     Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;

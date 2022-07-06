@@ -2,8 +2,8 @@
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/core/sync/all.hpp"
-#include "silkit/core/sync/string_utils.hpp"
+#include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/pubsub/all.hpp"
 
 #include "CapiImpl.hpp"
@@ -30,7 +30,7 @@ SilKit_ReturnCode SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublishe
     ASSERT_VALID_POINTER_PARAMETER(mediaType);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
         auto dataPublisher = cppParticipant->CreateDataPublisher(controllerName, topic, mediaType, cppLabels, history);
@@ -67,7 +67,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscr
     ASSERT_VALID_HANDLER_PARAMETER(newDataSourceHandler);
     CAPI_ENTER
     {
-        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipant*>(participant);
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
         std::map<std::string, std::string> cppLabels;
         assign(cppLabels, labels);
 

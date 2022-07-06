@@ -11,7 +11,7 @@ namespace SilKit {
 
 auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                        const std::string& participantName)
-    -> std::unique_ptr<Core::IParticipant>
+    -> std::unique_ptr<IParticipant>
 {
     const auto uri = dynamic_cast<Config::ParticipantConfiguration&>(*participantConfig).middleware.registryUri;
     return CreateParticipant(participantConfig, participantName, uri);
@@ -19,7 +19,7 @@ auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration
 
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<Core::IParticipant>
+    -> std::unique_ptr<IParticipant>
 {
     auto participant = Core::CreateParticipantImpl(std::move(participantConfig), participantName);
     participant->JoinSilKitDomain(registryUri);

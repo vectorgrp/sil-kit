@@ -12,7 +12,7 @@ namespace {
 
 TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
 {
-    using namespace SilKit::Core::Orchestration;
+    using namespace SilKit::Services::Orchestration;
     SilKit::Core::MessageBuffer buffer;
 
     ParticipantCommand in{7, ParticipantCommand::Kind::Restart};
@@ -27,7 +27,7 @@ TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
 
 TEST(MwVAsioSerdes, MwSync_SystemCommand)
 {
-    using namespace SilKit::Core::Orchestration;
+    using namespace SilKit::Services::Orchestration;
     SilKit::Core::MessageBuffer buffer;
 
     SystemCommand in{SystemCommand::Kind::Run};
@@ -41,7 +41,7 @@ TEST(MwVAsioSerdes, MwSync_SystemCommand)
 
 TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
 {
-    using namespace SilKit::Core::Orchestration;
+    using namespace SilKit::Services::Orchestration;
     SilKit::Core::MessageBuffer buffer;
 
     auto now = std::chrono::system_clock::now();
