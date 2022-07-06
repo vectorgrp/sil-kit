@@ -62,7 +62,7 @@ void State::Error(std::string reason)
 void State::NewSystemState(SystemState systemState)
 {
     std::stringstream ss;
-    ss << toString() << " received new systemState '" << systemState << "'";
+    ss << toString() << " received SystemState::" << systemState;
     _lifecycleManager->GetLogger()->Info(ss.str());
 }
 
@@ -109,7 +109,7 @@ void ServicesCreatedState::NewSystemState(SystemState systemState)
                               SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
     {
         std::stringstream ss;
-        ss << "New SystemState '" << systemState << "' received";
+        ss << "Received SystemState::" << systemState;
         _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializingState(), ss.str());
     }
 }
@@ -134,7 +134,7 @@ void CommunicationInitializingState::NewSystemState(SystemState systemState)
         // 1. TODO set shared_future
         // 2. TODO await all queued futures
         std::stringstream ss;
-        ss << "New SystemState '" << systemState << "' received" << std::endl;
+        ss << "Received SystemState::" << systemState;
         _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), ss.str());
     }
     else
@@ -159,7 +159,7 @@ void CommunicationInitializedState::NewSystemState(SystemState systemState)
     if (IsAnyOf(systemState, {SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
     {
         std::stringstream ss;
-        ss << "New SystemState '" << systemState << "' received";
+        ss << "Received SystemState::" << systemState;
         // Next state is set by context (Error or Initialized)
         _lifecycleManager->HandleCommunicationReady(ss.str());
     }
@@ -178,7 +178,6 @@ auto CommunicationInitializedState::GetParticipantState() -> ParticipantState
 // ReadyToRunState
 void ReadyToRunState::NewSystemState(SystemState systemState)
 {
-    // TODO how would this be reset upon restart?
     if (IsAnyOf(systemState, {SystemState::ReadyToRun, SystemState::Running}))
     {
         if (_receivedRunCommand)
