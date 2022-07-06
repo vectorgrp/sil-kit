@@ -56,7 +56,7 @@ def buildConfigs = [
     ,[
         Name: "MinGW", // We cross compile from ubuntu to windows
         NodeLabel: "docker && windows",
-        DockerImage: "vib-windows",
+        DockerImage: "silkit-windows",
         //DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: true,
         CmakeArgs: " -D CMAKE_C_COMPILER=C:/mingw64/bin/x86_64-w64-mingw32-gcc.exe  -D CMAKE_CXX_COMPILER=C:/mingw64/bin/x86_64-w64-mingw32-g++.exe",
@@ -67,7 +67,7 @@ def buildConfigs = [
     ,[
         Name: "Ubuntu-18.04-clang",
         NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
+        DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
         PublishArtifacts: false,
         CmakeArgs: "-D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++",
@@ -75,7 +75,7 @@ def buildConfigs = [
     ,[
         Name: "Ubuntu-18.04-gcc",
         NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
+        DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
         PublishArtifacts: true,
         CmakeArgs: "-D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++",
@@ -83,7 +83,7 @@ def buildConfigs = [
     ,[
         Name: "Ubuntu-20.04-gcc-10",
         NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
+        DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
         CmakeArgs: "-D CMAKE_C_COMPILER=gcc-10 -D CMAKE_CXX_COMPILER=g++-10",
@@ -91,7 +91,7 @@ def buildConfigs = [
     ,[
         Name: "Ubuntu-20.04-clang-12",
         NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
+        DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
         CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12",
@@ -100,7 +100,7 @@ def buildConfigs = [
     ,[
         Name: "Ubuntu-thread-sanitizer",
         NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
+        DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
         CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D SILKIT_ENABLE_THREADSAN=ON",
@@ -108,7 +108,7 @@ def buildConfigs = [
     ,[
         Name: "Ubuntu-address-sanitizer",
         NodeLabel: "docker && linux",
-        DockerImage: "vib-ubuntu",
+        DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
         CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D SILKIT_ENABLE_ASAN=ON",
