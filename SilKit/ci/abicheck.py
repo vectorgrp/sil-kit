@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ABI check a current build DLL against a published release
 # usage:
-# ./IntegrationBus/ci/abicheck.py  ../vib-delivery/Release_v3.0.4/IntegrationBus-3.0.4-gcc-Linux.zip _build_linux/Release/libIntegrationBus.so  -v
+# ./SilKit/ci/abicheck.py  ../vib-delivery/Release_v3.0.4/SilKit-3.0.4-gcc-Linux.zip _build_linux/Release/libSilKit.so  -v
 #
 # Algorithm:
 # Unzip the release package
@@ -72,7 +72,7 @@ def get_cmake_flags(filename):
         "VS2017-Win64": ["-GVisual Studio 15 2017 Win64"], 
     }
     #NB: we implictly raise if match fails
-    m = re.match(r'.*IntegrationBus-\d+\.\d+\.\d+-(.*)\.zip', filename)
+    m = re.match(r'.*SilKit-\d+\.\d+\.\d+-(.*)\.zip', filename)
     debug(f"filename={filename}")
     used_gen = gen[m[1]]
     debug(f"package arch: {m[1]}, generator: {used_gen}")
@@ -120,7 +120,7 @@ def unpack(workdir, cpack):
 
 def get_version(filename):
     filename = os.path.basename(filename)
-    m = re.match(r'.*IntegrationBus-(\d+\.\d+\.\d+)-.*\.zip', filename)
+    m = re.match(r'.*SilKit-(\d+\.\d+\.\d+)-.*\.zip', filename)
     return m[1]
 
 
@@ -143,7 +143,7 @@ def backup_and_replace_dll(version, bindir, dll):
 def main():
     ap = argparse.ArgumentParser("ABI check", 
             description="""
-            Extracts the packaged zip file and builds demos against the included IntegrationBus DLL.
+            Extracts the packaged zip file and builds demos against the included SIL kit DLL.
             Then, the DLL is replaced with the one provided on the command line, and a demo is executed for 5 seconds.
 
             Note: make sure to use matching Release/Debug builds of the package and your DLL.
@@ -152,7 +152,7 @@ def main():
     )
     ap.add_argument("PACKAGE_ZIP", type=str, help="the URL of the release package to download")
     ap.add_argument("DLL_PATH", type=str, 
-        help="local Path to the IntegrationBus dll that shall be subsituted for building")
+        help="local Path to the SIL Kit dll that shall be subsituted for building")
     ap.add_argument("-v", "--verbose", action="store_true", help="enable verbose output")
     args = ap.parse_args()
     if args.verbose:
@@ -163,7 +163,7 @@ def main():
     pkg_url = args.PACKAGE_ZIP
     #check DLL 
     if not os.path.exists(args.DLL_PATH):
-        die(f"Path \"{args.DLL_PATH}\" to IntegrationBus DLL does not exist")
+        die(f"Path \"{args.DLL_PATH}\" to SIL Kit DLL does not exist")
     dll_path = os.path.realpath(args.DLL_PATH)
    
     #temporary workdir
@@ -187,8 +187,8 @@ def main():
     else:
         info("Skipping unzip (already exists: f{workdir})")
 
-    demodir = os.path.join(workdir, 'IntegrationBus-Demos')
-    bindir = os.path.join(workdir, 'IntegrationBus', 'bin')
+    demodir = os.path.join(workdir, 'SilKit-Demos')
+    bindir = os.path.join(workdir, 'SilKit', 'bin')
 
     debug(f"tempdir: {tempdir}")
     debug(f"workdir: {workdir}")
@@ -207,7 +207,7 @@ def main():
         iblauncher = [iblauncher]
     run(bindir, iblauncher +
             ["-c", "Installation",
-                "../../IntegrationBus-Demos/Ethernet/IbConfig_DemoEthernet.json"]
+                "../../SilKit-Demos/Ethernet/IbConfig_DemoEthernet.json"]
         , timeout=5
     )
 

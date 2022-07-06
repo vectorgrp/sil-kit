@@ -12,7 +12,7 @@ publishToArtifactory=false
 buildDebugBin=false //debug binaries are only build when doing a release to customers
 buildWarningsAsErrors=true // compiler warnings are treated as errors
 // artifactory for archiving / packaging
-artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
+artifactoryServer = Artifactory.server('SilKitArtifactory')
 artifactoryBuildInfo = Artifactory.newBuildInfo()
 
 def gitBranch="master" // overriden in parallel pipeline based on scm vars
@@ -216,7 +216,7 @@ def archiveToArtifactory(config, scm, pattern) {
 def buildDocker(config) {
     stage("Building Docker Image") {
         def dockerImage = config["DockerImage"]
-        def dockerDir = "./IntegrationBus/ci/docker"
+        def dockerDir = "./SilKit/ci/docker"
         def buildArgs = "--build-arg ARTIFACTORY=${artifactoryServer.url} "
 
         configFileProvider([
@@ -453,7 +453,7 @@ def doBuild(Map config) {
 
         if(publishToArtifactory ) {
             stage(" Bundle and Archive Packages (${buildName})") {
-                run "python ./IntegrationBus/ci/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
+                run "python ./SilKit/ci/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                 archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
 
                 // safe the PDB files on windows

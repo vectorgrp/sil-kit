@@ -51,7 +51,7 @@ minor = 0
 patch = 0
 
 # determine current version number and increment it
-with open('../cmake/IntegrationBusVersion.cmake','r') as f:
+with open('../cmake/SilKitVersion.cmake','r') as f:
     newlines = []
     for line in f.readlines():
         if("set(IB_VERSION_MAJOR" in line):
@@ -69,7 +69,7 @@ with open('../cmake/IntegrationBusVersion.cmake','r') as f:
         else:
             newlines.append(line)
 
-with open('../cmake/IntegrationBusVersion.cmake', 'w') as f:
+with open('../cmake/SilKitVersion.cmake', 'w') as f:
     for line in newlines:
         f.write(line)
 
@@ -78,7 +78,7 @@ print("repo url: "+git_remote_url)
 print("number of arguments: "+str(len(sys.argv)))
 git_remote_url_cred = git_remote_url.replace("https://", "https://"+urllib.parse.quote(sys.argv[1])+":"+urllib.parse.quote(sys.argv[2])+"@");
 rc = subprocess.call("git status")
-rc = subprocess.call("git add ../cmake/IntegrationBusVersion.cmake")
+rc = subprocess.call("git add ../cmake/SilKitVersion.cmake")
 rc = subprocess.call("git commit -m \""+COMMIT_MESSAGE+str(major)+"."+str(minor)+"."+str(patch)+" (nightly build)\"")
 rc = subprocess.call("git remote set-url origin "+git_remote_url_cred)
 rc = subprocess.call("git push --set-upstream origin "+branch_name, stdout=subprocess.DEVNULL)

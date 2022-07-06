@@ -26,7 +26,7 @@ pipeline {
         stage('Increment Patch Version') {
             steps {
                 echo "Incrementing Patch Version"
-                dir("IntegrationBus/ci"){
+                dir("SilKit/ci"){
                     script {
                         configFileProvider([configFile(fileId: 'vib_main_credentials', variable: 'CREDENTIALS_FILE')]) {
                             def credentials_id = readFile(file: CREDENTIALS_FILE).trim()
