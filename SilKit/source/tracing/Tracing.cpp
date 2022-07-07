@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "silkit/cfg/Config.hpp"
+#include "silkit/config/Config.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/extensions/string_utils.hpp"
 

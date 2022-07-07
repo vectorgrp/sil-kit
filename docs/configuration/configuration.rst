@@ -83,7 +83,7 @@ Configuration Options
    * - $schema
      - The location of the participant configuration schema file. The ``ParticipantConfiguration.schema.json`` is
        part of the SILKIT sources and can be found in the folder
-       ``./SilKit/source/cfg/``.
+       ``./SilKit/source/config/``.
 
    * - schemaVersion
      - The version of the used participant configuration schema. Current version is 1.

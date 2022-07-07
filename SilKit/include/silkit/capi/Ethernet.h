@@ -121,7 +121,6 @@ typedef void (*SilKit_EthernetBitrateChangeHandler_t)(void* context, SilKit_Ethe
 * \result A return code identifying the success/failure of the call.
 * ! \note The object returned must not be deallocated using free()!
 * 
-* \see SilKit::IParticipant::CreateEthernetController
 */
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_Create(
   SilKit_EthernetController** outController,
@@ -141,9 +140,8 @@ typedef SilKit_ReturnCode(*SilKit_EthernetController_Create_t)(
 * 
 * \param controller The Ethernet controller to be activated.
 * \result A return code identifying the success/failure of the call.
-* 
-* \see SilKit::Services::Ethernet::IEthernetController::Activate
 */
+
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_Activate(SilKit_EthernetController* controller);
 
 typedef SilKit_ReturnCode(*SilKit_EthernetController_Activate_t)(SilKit_EthernetController* controller);
@@ -157,7 +155,6 @@ typedef SilKit_ReturnCode(*SilKit_EthernetController_Activate_t)(SilKit_Ethernet
 * \param controller The Ethernet controller to be deactivated.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see SilKit::Services::Ethernet::IEthernetController::Deactivate
 */
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_Deactivate(SilKit_EthernetController* controller);
 
@@ -172,8 +169,6 @@ typedef SilKit_ReturnCode(*SilKit_EthernetController_Deactivate_t)(SilKit_Ethern
 * \param handler The handler to be called on reception.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
-* 
-* \see SilKit::Services::Ethernet::IEthernetController::AddFrameHandler
 * 
 */
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller,
@@ -211,7 +206,6 @@ typedef SilKit_ReturnCode (*SilKit_EthernetController_RemoveFrameHandler_t)(SilK
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see SilKit::Services::Ethernet::IEthernetController::AddFrameTransmitHandler
 */
 SilKitAPI SilKit_ReturnCode
 SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller, void* context,
@@ -247,7 +241,6 @@ typedef SilKit_ReturnCode (*SilKit_EthernetController_RemoveFrameTransmitHandler
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see SilKit::Services::Ethernet::IEthernetController::AddStateChangeHandler
 */
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_AddStateChangeHandler(SilKit_EthernetController* controller,
                                                                              void* context,
@@ -282,7 +275,6 @@ typedef SilKit_ReturnCode (*SilKit_EthernetController_RemoveStateChangeHandler_t
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 * \result A return code identifying the success/failure of the call.
 * 
-* \see SilKit::Services::Ethernet::IEthernetController::AddBitrateChangeHandler
 */
 SilKitAPI SilKit_ReturnCode
 SilKit_EthernetController_AddBitrateChangeHandler(SilKit_EthernetController* controller, void* context,
@@ -323,7 +315,6 @@ typedef SilKit_ReturnCode (*SilKit_EthernetController_RemoveBitrateChangeHandler
 * \param userContext The user provided context pointer, that is reobtained in the frame ack handler
 * \result A return code identifying the success/failure of the call.
 * 
-* \see SilKit::Services::Ethernet::IEthernetController::SendFrame
 */
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_SendFrame(
   SilKit_EthernetController* controller,

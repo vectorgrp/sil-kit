@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "silkit/cfg/IParticipantConfiguration.hpp"
+#include "silkit/config/IParticipantConfiguration.hpp"
 
 /*! \brief Dummy compilation unit to pull in exports from other silkit libs
  *

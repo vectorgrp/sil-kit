@@ -14,9 +14,6 @@ class IRpcClient;
 class IRpcServer;
 class IRpcCallHandle;
 
-// SilKitMessages
-//-----------
-
 struct FunctionCall;
 struct FunctionCallResponse;
 

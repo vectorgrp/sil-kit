@@ -3,7 +3,7 @@
 #include <memory>
 #include <future>
 
-#include "silkit/cfg/Config.hpp"
+#include "silkit/config/Config.hpp"
 #include "silkit/core/EndpointAddress.hpp"
 #include "silkit/util/functional.hpp"
 

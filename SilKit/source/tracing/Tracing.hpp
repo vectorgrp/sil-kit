@@ -10,7 +10,7 @@
 
 #include "silkit/services/fwd_decl.hpp"
 
-#include "silkit/cfg/fwd_decl.hpp"
+#include "silkit/config/fwd_decl.hpp"
 #include "silkit/services/logging/fwd_decl.hpp"
 
 #include "silkit/extensions/ITraceMessageSink.hpp"

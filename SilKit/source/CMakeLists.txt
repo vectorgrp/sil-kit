@@ -1,5 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
-add_subdirectory(cfg)
+add_subdirectory(config)
 add_subdirectory(tracing)
 add_subdirectory(core)
 add_subdirectory(services)

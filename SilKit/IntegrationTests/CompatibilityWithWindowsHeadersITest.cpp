@@ -7,7 +7,7 @@
 #include <windows.h>
 
 // 2. include all SILKIT headers
-#include "silkit/cfg/all.hpp"
+#include "silkit/config/all.hpp"
 #include "silkit/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/SilKit.hpp"

@@ -43,10 +43,6 @@ public:
     virtual void RemoveExplicitDataMessageHandler(HandlerId handlerId) = 0;
 };
 
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-
 } // namespace PubSub
 } // namespace Services
 } // namespace SilKit

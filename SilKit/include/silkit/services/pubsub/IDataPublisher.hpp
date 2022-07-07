@@ -36,10 +36,6 @@ public:
     virtual void Publish(const uint8_t* data, std::size_t size) = 0;
 };
 
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-
 } // namespace PubSub
 } // namespace Services
 } // namespace SilKit

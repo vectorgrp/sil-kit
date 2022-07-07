@@ -7,7 +7,7 @@
 
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/IParticipant.hpp"
-#include "silkit/cfg/IParticipantConfiguration.hpp"
+#include "silkit/config/IParticipantConfiguration.hpp"
 
 namespace SilKit {
 

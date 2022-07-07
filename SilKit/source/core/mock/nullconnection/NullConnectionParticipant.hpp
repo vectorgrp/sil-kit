@@ -3,7 +3,7 @@
 #pragma once
 
 #include "IParticipantInternal.hpp"
-#include "silkit/cfg/IParticipantConfiguration.hpp"
+#include "silkit/config/IParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Core {

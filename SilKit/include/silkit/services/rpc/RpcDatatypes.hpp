@@ -53,9 +53,6 @@ struct RpcDiscoveryResult
 
 using RpcDiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResults)>;
 
-// SilKitMessages
-//-----------
-
 struct CallUUID
 {
     uint64_t ab;
@@ -87,6 +84,7 @@ struct FunctionCallResponse
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
 inline bool operator==(const CallUUID& lhs, const CallUUID& rhs)
 {
     return lhs.ab == rhs.ab && lhs.cd == rhs.cd;

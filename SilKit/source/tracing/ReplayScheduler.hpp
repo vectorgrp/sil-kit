@@ -8,7 +8,7 @@
 
 #include "ITimeProvider.hpp"
 #include "silkit/IParticipant.hpp"
-#include "silkit/cfg/fwd_decl.hpp"
+#include "silkit/config/fwd_decl.hpp"
 
 #include "IReplayDataController.hpp"
 

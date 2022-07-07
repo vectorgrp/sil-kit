@@ -6,7 +6,7 @@
 #include <chrono>
 #include <sstream>
 
-#include "silkit/cfg/Config.hpp"
+#include "silkit/config/Config.hpp"
 #include "silkit/IParticipant.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 #include "silkit/services/all.hpp"

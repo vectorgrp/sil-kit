@@ -14,7 +14,6 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-// RpcSilKitMessages
 inline std::string   to_string(const CallUUID& msg);
 inline std::ostream& operator<<(std::ostream& out, const CallUUID& msg);
 
@@ -24,12 +23,10 @@ inline std::ostream& operator<<(std::ostream& out, const FunctionCall& msg);
 inline std::string   to_string(const FunctionCallResponse& msg);
 inline std::ostream& operator<<(std::ostream& out, const FunctionCallResponse& msg);
 
-// RpcDatatypes
 inline std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels);
 
 inline std::string to_string(const RpcDiscoveryResult& discoveryResult);
 inline std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult);
-
 
 // ================================================================================
 //  Inline Implementations

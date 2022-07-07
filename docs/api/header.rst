@@ -27,7 +27,7 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
     * - silkit/util
       - ``SilKit::Util``
       - Generic programming utilities
-    * - silkit/cfg
+    * - silkit/config
       - ``SilKit::Config``
       - Data structures representing the SILKIT :doc:`../configuration/configuration`.
 

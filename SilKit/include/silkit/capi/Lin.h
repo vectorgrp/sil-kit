@@ -98,8 +98,7 @@ typedef uint8_t SilKit_LinFrameResponseType;
  * registered \ref SilKit_LinFrameStatusHandler_t.
  *
  * *Note:* the enumeration values directly correspond to the AUTOSAR
- *  type Lin_StatusType. Not all values are used in the Integration
- *  Bus.
+ *  type Lin_StatusType. Not all values are used in the SIL Kit.
  *
  * *AUTOSAR Doc:* Lin operation states for a Lin channel or frame, as
  * returned by the API service Lin_GetStatus().
