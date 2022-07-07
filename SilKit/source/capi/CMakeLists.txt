@@ -1,4 +1,5 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
+add_silkit_test(TestCapi_Interfaces SOURCES CapiInterfacesTest.cpp LIBS SilKit)
 add_silkit_test(TestCapiCan SOURCES CapiCanTest.cpp LIBS SilKitSimCan SilKitMwMockParticipant SilKit)
 add_silkit_test(TestCapiEthernet SOURCES CapiEthernetTest.cpp LIBS SilKitSimEthernet SilKitMwMockParticipant SilKit)
 add_silkit_test(TestCapiFlexray SOURCES CapiFlexrayTest.cpp LIBS SilKitSimFlexray SilKitMwMockParticipant SilKit)
