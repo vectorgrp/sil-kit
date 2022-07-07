@@ -16,7 +16,8 @@ class ITimeSyncService
 {
 public:
     using SimTaskT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
-
+public:
+    virtual ~ITimeSyncService() = default;
 public:
     /*! \brief Set the task to be executed with each grant / tick
      *

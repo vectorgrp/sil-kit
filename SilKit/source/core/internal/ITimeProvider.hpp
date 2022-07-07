@@ -12,6 +12,12 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
+enum class TimeProviderKind : uint8_t
+{
+    NoSync = 0,
+    WallClock = 1,
+    SyncTime = 2
+};
 /*!
 * \brief Virtual time provider. Used for send timestamps.
 * 
@@ -41,6 +47,7 @@ public:
     virtual void RemoveNextSimStepHandler(HandlerId handlerId) = 0;
 
     virtual void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) = 0;
+    virtual void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) = 0;
 };
 
 

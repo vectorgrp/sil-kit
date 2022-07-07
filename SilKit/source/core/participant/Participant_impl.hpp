@@ -115,7 +115,6 @@ void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
 
     _connection.SetTimeSyncService(timeSyncService);
 
-    _timeProvider = timeSyncService;
 
     //// Enable replaying mechanism.
     //const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
@@ -246,7 +245,7 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
 
     auto controller = CreateController<SilKit::Config::CanController, Can::CanController>(
         controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider);
+        &_timeProvider);
 
     controller->RegisterServiceDiscovery();
     
@@ -273,7 +272,7 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
 
     auto controller = CreateController<SilKit::Config::EthernetController, Ethernet::EthController>(
         controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider);
+        &_timeProvider);
 
     controller->RegisterServiceDiscovery();
     return controller;
@@ -297,7 +296,7 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& 
 
     auto controller = CreateController<SilKit::Config::FlexrayController, Flexray::FlexrayController>(
         controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider);
+        &_timeProvider);
 
     controller->RegisterServiceDiscovery();
     return controller;
@@ -321,7 +320,7 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
 
     auto controller = CreateController<SilKit::Config::LinController, Lin::LinController>(
         controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        _timeProvider);
+        &_timeProvider);
 
     controller->RegisterServiceDiscovery();
 
@@ -351,7 +350,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     std::string network = linkName;
 
     return CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         topic, mediaType, publisherLabels, defaultHandler, parent);
 }
 
@@ -379,7 +378,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<SilKit::Config::DataPublisher, SilKit::Services::PubSub::DataPublisher>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         controllerConfig.topic.value(), mediaType, labels, network);
 
     _connection.SetHistoryLengthForLink(network, history, controller);
@@ -412,7 +411,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(const std::string& can
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriber;
 
     auto controller = CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriber>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         controllerConfig.topic.value(), mediaType, labels, defaultDataHandler, newDataSourceHandler);
 
     controller->RegisterServiceDiscovery();
@@ -446,7 +445,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerInternalClientUUID] = clientUUID;
 
     return CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServerInternal>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         functionName, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
@@ -471,7 +470,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;
 
     auto controller = CreateController<SilKit::Config::RpcClient, SilKit::Services::Rpc::RpcClient>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, _timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         controllerConfig.functionName.value(), mediaType, labels, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
@@ -507,7 +506,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] = labelStr;
 
     auto controller = CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServer>(
-        controllerConfig, network, Core::ServiceType::Controller, supplementalData, true, _timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, supplementalData, true, &_timeProvider,
         controllerConfig.functionName.value(), mediaType, labels, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
@@ -547,8 +546,9 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
 
     timeSyncService = CreateInternalController<Orchestration::TimeSyncService>(
         SilKit::Core::Discovery::controllerTypeTimeSyncService, Core::ServiceType::InternalController,
-        std::move(timeSyncSupplementalData), false, service, _participantConfig.healthCheck);
+        std::move(timeSyncSupplementalData), false, &_timeProvider, _participantConfig.healthCheck);
 
+    timeSyncService->SetLifecycleService(service);
     return timeSyncService;
 }
 

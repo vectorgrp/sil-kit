@@ -351,8 +351,7 @@ private:
     const SilKit::Config::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
-    Services::Orchestration::WallclockProvider _wallclockTimeProvider{1ms};
-    Services::Orchestration::ITimeProvider* _timeProvider{&_wallclockTimeProvider};
+    Services::Orchestration::TimeProvider _timeProvider;
 
     std::unique_ptr<Services::Logging::ILogger> _logger;
     std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;

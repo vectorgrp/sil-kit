@@ -189,11 +189,12 @@ private:
     TimeConfiguration* _configuration;
 };
 
-TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, LifecycleService* lifecycleService,
+TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
                                  const Config::HealthCheck& healthCheckConfig)
     : _participant{participant}
-    , _lifecycleService{lifecycleService}
+    , _lifecycleService{nullptr}
     , _logger{participant->GetLogger()}
+    , _timeProvider{timeProvider}
     , _watchDog{healthCheckConfig}
 {
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
@@ -335,31 +336,6 @@ void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint*, const System
     }
 }
 
-auto TimeSyncService::Now() const -> std::chrono::nanoseconds
-{
-    return _timeProvider->Now();
-}
-
-auto TimeSyncService::TimeProviderName() const -> const std::string&
-{
-    return _timeProvider->TimeProviderName();
-}
-
-auto TimeSyncService::AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId
-{
-    return _timeProvider->AddNextSimStepHandler(std::move(handler));
-}
-
-void TimeSyncService::RemoveNextSimStepHandler(HandlerId handlerId) 
-{
-    _timeProvider->RemoveNextSimStepHandler(std::move(handlerId));
-}
-
-void TimeSyncService::SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) 
-{
-    _timeProvider->SetTime(now, duration);
-}
-
 void TimeSyncService::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
     assert(_simTask);
@@ -417,21 +393,18 @@ void TimeSyncService::ResetTime()
 
 void TimeSyncService::ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind)
 {
-    switch (timeProviderKind)
-    {
-    case Orchestration::TimeProviderKind::NoSync:
-        _timeProvider = std::make_unique<Orchestration::NoSyncProvider>(); 
-        break;
-    case Orchestration::TimeProviderKind::WallClock: 
-        _timeProvider = std::make_unique<Orchestration::WallclockProvider>(1ms); 
-        break;
-    case Orchestration::TimeProviderKind::SyncTime: 
-        _timeProvider = std::make_unique<Orchestration::SynchronizedVirtualTimeProvider>(); 
-        break;
-    default: break;
-    }
+    _timeProvider->ConfigureTimeProvider(timeProviderKind);
 }
 
+auto TimeSyncService::Now() const -> std::chrono::nanoseconds
+{
+    return _timeProvider->Now();
+}
+
+void TimeSyncService::SetLifecycleService(LifecycleService* lifecycleService)
+{
+    _lifecycleService = lifecycleService;
+}
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

@@ -16,12 +16,14 @@ add_library(SilKitMwSync
     SystemMonitor.cpp
     WatchDog.hpp
     WatchDog.cpp
-    TimeProvider.hpp
     TimeSyncService.hpp
     TimeSyncService.cpp
     
     SyncSerdes.hpp
     SyncSerdes.cpp
+
+    TimeProvider.hpp
+    TimeProvider.cpp
 )
 
 target_include_directories(SilKitMwSync

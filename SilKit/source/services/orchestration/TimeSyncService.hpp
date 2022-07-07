@@ -30,7 +30,6 @@ class TimeSyncService
     : public ITimeSyncService
     , public IMsgForTimeSyncService
     , public Core::IServiceEndpoint
-    , public ITimeProvider
 {
     friend struct DistributedTimeQuantumPolicy;
 
@@ -40,7 +39,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    TimeSyncService(Core::IParticipantInternal* participant, LifecycleService* lifecycleService,
+    TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
                     const Config::HealthCheck& healthCheckConfig);
 
 public:
@@ -64,13 +63,7 @@ public:
 
     void ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& task) override;
 
-    
-    // ITimeProvider
     auto Now() const -> std::chrono::nanoseconds override;
-    auto TimeProviderName() const -> const std::string& override;
-    auto AddNextSimStepHandler(NextSimStepHandlerT handler) -> HandlerId override;
-    void RemoveNextSimStepHandler(HandlerId handlerId) override;
-    void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override;
 
     // Used by Policies
     template <class MsgT>
@@ -80,7 +73,6 @@ public:
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     void InitializeTimeSyncPolicy(bool isSynchronized);
     void ResetTime();
-    auto GetTimeProvider() -> std::shared_ptr<Orchestration::ITimeProvider>;
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
 
     // IServiceEndpoint
@@ -94,6 +86,8 @@ public:
 
     bool IsSynchronized();
 
+    void SetLifecycleService(LifecycleService* lifecycleService);
+
 private:
     // ----------------------------------------
     // private methods
@@ -106,7 +100,7 @@ private:
     Core::ServiceDescriptor _serviceDescriptor{};
     LifecycleService* _lifecycleService{nullptr};
     Services::Logging::ILogger* _logger{nullptr};
-    std::unique_ptr<ITimeProvider> _timeProvider{nullptr};
+    ITimeProvider* _timeProvider{nullptr};
     std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
 
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
