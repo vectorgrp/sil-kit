@@ -1,7 +1,7 @@
 Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 
-The Integration Bus uses the following third party software components:
+The SIL Kit uses the following third party software components:
 
  1. Google Test
  2. Asio C++ Library

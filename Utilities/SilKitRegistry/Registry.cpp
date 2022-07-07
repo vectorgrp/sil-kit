@@ -76,7 +76,7 @@ int main(int argc, char** argv)
         "-s, --use-signal-handler: Exit this process when a signal is received. If not set, the process runs infinitely.");
     commandlineParser.Add<CliParser::Option>(
         "listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
-        "-u, --listen-uri <vib-uri>: The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.");
+        "-u, --listen-uri <silkit-uri>: The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "

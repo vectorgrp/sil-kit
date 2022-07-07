@@ -35,7 +35,7 @@ SilKitRegistry
       - -v, --version                         Get version info.
         -h, --help                            Show the help of the SilKitRegistry.
         -s, --use-signal-handler              Exit this process when a signal is received. If not set, the process runs infinitely.
-        -u, --listen-uri <vib-uri>            The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
+        -u, --listen-uri <silkit-uri>         The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
         -l, --log <level>                     Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
         -c, --configuration <configuration>   Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.
 

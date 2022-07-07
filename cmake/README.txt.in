@@ -10,7 +10,7 @@ The layout of this release bundle is as follows:
     the C++ interface headers and CMake exported targets.
 
 + SilKit-Demos/
-  - Integrationbus Demos in source form. The demos are preconfigured to use
+  - SIL Kit Demos in source form. The demos are preconfigured to use
     the pre-built binary distribution of the SilKit/ directory.
 
 + SilKit-Documentation/

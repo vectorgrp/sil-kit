@@ -120,8 +120,7 @@ struct LinFrameResponse
  * registered \ref ILinController::FrameStatusHandler.
  *
  * *Note:* the enumeration values directly correspond to the AUTOSAR
- *  type Lin_StatusType. Not all values are used in the Integration
- *  Bus.
+ *  type Lin_StatusType. Not all values are used in the SIL Kit.
  *
  * *AUTOSAR Doc:* LIN operation states for a LIN channel or frame, as
  * returned by the API service Lin_GetStatus().

@@ -49,7 +49,7 @@ running on localhost listening on Port 8500. These values can be changed via the
    * - RegistryUri
      - The URI used by participants when connecting to the SilKitRegistry.
        By default, the registry is expected to be running on "localhost" with port 8500.
-       The URI uses a scheme of 'vib', i.e. ``silkit://localhost:8500``.
+       The URI uses a scheme of 'silkit', i.e. ``silkit://localhost:8500``.
 
    * - ConnectAttempts
      - Number of connects to the registry a participant should attempt before giving up and signaling an error.
