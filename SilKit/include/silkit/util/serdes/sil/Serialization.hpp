@@ -8,9 +8,8 @@
 namespace SilKit {
 namespace Util {
 namespace SerDes {
-namespace sil {
 
-inline namespace v4 {
+inline namespace v1 {
 
 /*! \brief The data media / mime type the serializer / deserializer can be used for.
  *  \returns the data media / mime type the serializer / deserializer can be used for. */
@@ -26,9 +25,8 @@ constexpr auto MediaTypeRpc() -> const char*
     return "application/vnd.vector.sil.rpc; protocolVersion=1";
 }
 
-} // namespace v4
+} // namespace v1
 
-} // namespace sil
 } // namespace SerDes
 } // namespace Util
 } // namespace SilKit

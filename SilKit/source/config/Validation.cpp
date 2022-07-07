@@ -12,11 +12,11 @@ using namespace std::chrono_literals;
 namespace SilKit {
 namespace Config {
 
-inline namespace v4 {
+inline namespace v1 {
 
 namespace {
 
-void ValidateTraceSinks(const SilKit::Config::v4::ParticipantConfiguration& configuration)
+void ValidateTraceSinks(const SilKit::Config::v1::ParticipantConfiguration& configuration)
 {
     std::set<std::string> sinkNames;
     for (const auto& sink : configuration.tracing.traceSinks)
@@ -76,7 +76,7 @@ void ValidateTraceSinks(const SilKit::Config::v4::ParticipantConfiguration& conf
     validateController(configuration.rpcClients);
 }
 
-void ValidateTraceSources(const SilKit::Config::v4::ParticipantConfiguration& configuration)
+void ValidateTraceSources(const SilKit::Config::v1::ParticipantConfiguration& configuration)
 {
     std::set<std::string> sourceNames;
     for (const auto& source : configuration.tracing.traceSources)
@@ -137,13 +137,13 @@ void ValidateTraceSources(const SilKit::Config::v4::ParticipantConfiguration& co
 
 } // anonymous namespace
 
-void Validate(const SilKit::Config::v4::ParticipantConfiguration& configuration)
+void Validate(const SilKit::Config::v1::ParticipantConfiguration& configuration)
 {
     ValidateTraceSinks(configuration);
     ValidateTraceSources(configuration);
 }
 
-} // namespace v4
+} // namespace v1
 
 } // namespace Config
 } // namespace SilKit

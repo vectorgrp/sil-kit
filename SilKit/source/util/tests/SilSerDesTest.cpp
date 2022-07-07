@@ -4,7 +4,7 @@
 
 #include "silkit/util/serdes/sil/Serializer.hpp"
 #include "silkit/util/serdes/sil/Deserializer.hpp"
-using namespace SilKit::Util::SerDes::sil;
+using namespace SilKit::Util::SerDes;
 
 namespace {
 

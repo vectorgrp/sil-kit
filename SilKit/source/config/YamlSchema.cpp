@@ -4,7 +4,7 @@
 
 namespace SilKit {
 namespace Config {
-inline namespace v4 {
+inline namespace v1 {
 
 //!< Create the YAML schema for VAsio ParticipantConfigurations.
 auto MakeYamlSchema() -> YamlSchemaElem
@@ -211,6 +211,6 @@ auto MakeYamlSchema() -> YamlSchemaElem
     return yamlSchema;
 }
 
-} // inline namespace v4
+} // inline namespace v1
 } // namespace Config
 } // namespace SilKit

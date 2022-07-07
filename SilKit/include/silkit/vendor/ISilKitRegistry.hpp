@@ -8,7 +8,7 @@
 
 namespace SilKit {
 namespace Vendor {
-inline namespace Vector {
+namespace Vector {
 
 //! \brief Dedicated SilKit registry for the VAsio middleware.
 //         This is a loadable runtime extension that is non-redistributable.

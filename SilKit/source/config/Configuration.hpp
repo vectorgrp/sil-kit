@@ -17,7 +17,7 @@
 namespace SilKit {
 namespace Config {
 
-inline namespace v4 {
+inline namespace v1 {
 
 // ================================================================================
 //  Shared configuration declarations
@@ -170,7 +170,7 @@ auto to_string(NetworkType networkType) -> std::string
     }
 }
 
-} // inline namespace v4
+} // inline namespace v1
 
 } // namespace Config
 } // namespace SilKit

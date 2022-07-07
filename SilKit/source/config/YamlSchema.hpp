@@ -35,9 +35,9 @@ struct YamlSchemaElem
     }
 };
 
-inline namespace v4 {
+inline namespace v1 {
 auto MakeYamlSchema() -> YamlSchemaElem;
-} // inline namespace v4
+} // inline namespace v1
 
 } // namespace Config
 } // namespace SilKit

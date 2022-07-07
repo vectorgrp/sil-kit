@@ -349,9 +349,9 @@ int main(int argc, char** argv)
 
     try
     {
-        std::unique_ptr<SilKit::Vendor::ISilKitRegistry> registry;
+        std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
         // TODO use new config
-        registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(config));
+        registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(config));
         registry->ProvideDomain(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;

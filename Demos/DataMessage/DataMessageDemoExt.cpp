@@ -35,14 +35,14 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
 
     std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
 
-    SilKit::Util::SerDes::sil::Serializer serializer;
+    SilKit::Util::SerDes::Serializer serializer;
     serializer.Serialize(message);
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
 void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [DefaultDataHandler] Received new Message: with data=\""
               << message << "\"" << std::endl;
@@ -50,7 +50,7 @@ void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent&
 
 void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher1] Received new Message: with data=\""
               << message << std::endl;
@@ -58,7 +58,7 @@ void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessa
 
 void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher2] Received new Message: with data=\""
               << message << "\"" << std::endl;
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
             std::cout << "Shutting down..." << std::endl;
         });
 
-        const std::string mediaType{ SilKit::Util::SerDes::sil::MediaTypeData() };
+        const std::string mediaType{ SilKit::Util::SerDes::MediaTypeData() };
 
         timeSyncService->SetPeriod(1s);
         if (participantName == "Publisher1")

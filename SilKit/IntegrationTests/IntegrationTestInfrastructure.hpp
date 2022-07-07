@@ -53,7 +53,7 @@ private:
 
     void RunRegistry(const std::string& registryUri)
     {
-        _registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+        _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
         _registry->ProvideDomain(registryUri);
     }
 
@@ -99,7 +99,7 @@ private:
         });
     }
 
-    std::unique_ptr<SilKit::Vendor::ISilKitRegistry> _registry;
+    std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
 
     struct SystemMaster
     {

@@ -12,7 +12,7 @@
 namespace SilKit {
 namespace Config {
 
-inline namespace v4 {
+inline namespace v1 {
 
 // ================================================================================
 //  Helper functions
@@ -47,8 +47,8 @@ auto Parse(const std::string& text) -> SilKit::Config::ParticipantConfiguration
     YAML::Node doc = YAML::Load(text);
 
     auto configuration = !doc.IsNull() ?
-        SilKit::Config::from_yaml<SilKit::Config::v4::ParticipantConfiguration>(doc) :
-        SilKit::Config::v4::ParticipantConfiguration{};
+        SilKit::Config::from_yaml<SilKit::Config::v1::ParticipantConfiguration>(doc) :
+        SilKit::Config::v1::ParticipantConfiguration{};
     configuration.configurationFilePath.clear();
 
     return configuration;
@@ -185,7 +185,7 @@ constexpr NetworkType RpcServer::networkType;
 constexpr NetworkType RpcClient::networkType;
 #endif
 
-} // inline namespace v4
+} // inline namespace v1
 
 auto ParticipantConfigurationFromString(const std::string& text)
     -> std::shared_ptr<SilKit::Config::IParticipantConfiguration>

@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 
 #include "silkit/util/serdes/sil/Serializer.hpp"
-using namespace SilKit::Util::SerDes::sil;
+using namespace SilKit::Util::SerDes;
 
 namespace {
 

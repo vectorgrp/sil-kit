@@ -12,7 +12,7 @@
 
 namespace SilKit {
 namespace Vendor {
-inline namespace Vector {
+namespace Vector {
 
 /*! \brief Create an instance of ISilKitRegistry.
 *

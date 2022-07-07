@@ -5,7 +5,7 @@
 namespace SilKit {
 namespace Config {
 
-inline namespace v4 {
+inline namespace v1 {
 
 bool operator==(const Sink& lhs, const Sink& rhs)
 {
@@ -52,7 +52,7 @@ bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
         && lhs.groupPath == rhs.groupPath;
 }
 
-} // inline namespace v4
+} // inline namespace v1
 
 } // namespace Config
 } // namespace SilKit

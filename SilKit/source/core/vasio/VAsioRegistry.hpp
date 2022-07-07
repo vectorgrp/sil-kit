@@ -13,7 +13,7 @@ namespace SilKit {
 namespace Core {
 
 class VAsioRegistry
-    : public SilKit::Vendor::ISilKitRegistry
+    : public SilKit::Vendor::Vector::ISilKitRegistry
 {
 public: // CTor
     VAsioRegistry() = delete;

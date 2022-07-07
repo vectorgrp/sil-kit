@@ -13,10 +13,10 @@
 
 namespace SilKit {
 namespace Vendor {
-inline namespace Vector {
+namespace Vector {
 
 auto CreateSilKitRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
-    -> std::unique_ptr<Vendor::ISilKitRegistry>
+    -> std::unique_ptr<ISilKitRegistry>
 {
     return std::make_unique<Core::VAsioRegistry>(config);
 }

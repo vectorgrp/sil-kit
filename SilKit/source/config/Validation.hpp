@@ -7,11 +7,11 @@
 namespace SilKit {
 namespace Config {
 
-inline namespace v4 {
+inline namespace v1 {
 
-void Validate(const SilKit::Config::v4::ParticipantConfiguration& configuration);
+void Validate(const SilKit::Config::v1::ParticipantConfiguration& configuration);
 
-} // namespace v4
+} // namespace v1
 
 } // namespace Config
 } // namespace SilKit

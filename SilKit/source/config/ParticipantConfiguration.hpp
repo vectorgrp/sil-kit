@@ -20,7 +20,7 @@
 namespace SilKit {
 namespace Config {
 
-inline namespace v4 {
+inline namespace v1 {
 
 // ================================================================================
 //  Internal controller service
@@ -265,7 +265,7 @@ bool operator==(const Extensions& lhs, const Extensions& rhs);
 bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 
-} // namespace v4
+} // namespace v1
 
 } // namespace Config
 } // namespace SilKit

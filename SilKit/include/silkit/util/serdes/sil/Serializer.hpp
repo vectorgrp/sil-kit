@@ -12,9 +12,8 @@
 namespace SilKit {
 namespace Util {
 namespace SerDes {
-namespace sil {
 
-inline namespace v4 {
+inline namespace v1 {
 
 class Serializer
 {
@@ -223,8 +222,7 @@ private:
     uint8_t mUnalignedBits = 0;
 };
 
-} // namespace v4
-} // namespace sil
+} // namespace v1
 } // namespace SerDes
 } // namespace Util
 } // namespace SilKit

@@ -24,14 +24,14 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
 
     std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
 
-    SilKit::Util::SerDes::sil::Serializer serializer;
+    SilKit::Util::SerDes::Serializer serializer;
     serializer.Serialize(message);
     publisher->Publish(serializer.ReleaseBuffer());
 }
 
 void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::sil::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> Received new Message: with data=\"" << message << "\"" << std::endl;
 }

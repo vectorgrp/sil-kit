@@ -241,7 +241,7 @@ protected:
     {
         try
         {
-            registry = SilKit::Vendor::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+            registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
             registry->ProvideDomain(registryUri);
         }
         catch (const SilKit::ConfigurationError& error)
@@ -383,7 +383,7 @@ protected:
 
 protected:
     std::vector<std::string> syncParticipantNames;
-    std::unique_ptr<SilKit::Vendor::ISilKitRegistry> registry;
+    std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     SystemMaster systemMaster;
     std::vector<std::thread> syncParticipantThreads;
     std::vector<std::thread> asyncParticipantThreads;
