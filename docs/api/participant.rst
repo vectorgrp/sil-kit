@@ -14,7 +14,7 @@ to a simulation is established and the configured participant joins the simulati
 Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
-:ref:`silkit/SilKit.hpp<sec:header-vib-main>` and call the Participant API
+:ref:`silkit/SilKit.hpp<sec:header-silkit-main>` and call the Participant API
 factory function::
 
     auto config = SilKit::Config::ParticipantConfigurationFromFile("your_config.yaml");

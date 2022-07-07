@@ -28,11 +28,11 @@ pipeline {
                 echo "Incrementing Patch Version"
                 dir("SilKit/ci"){
                     script {
-                        configFileProvider([configFile(fileId: 'vib_main_credentials', variable: 'CREDENTIALS_FILE')]) {
+                        configFileProvider([configFile(fileId: 'silkit_main_credentials', variable: 'CREDENTIALS_FILE')]) {
                             def credentials_id = readFile(file: CREDENTIALS_FILE).trim()
-                            withCredentials([usernamePassword(credentialsId: credentials_id, usernameVariable: 'VIB_PUSH_USERNAME', passwordVariable: 'VIB_PUSH_PASSWORD')]){
+                            withCredentials([usernamePassword(credentialsId: credentials_id, usernameVariable: 'SILKIT_PUSH_USERNAME', passwordVariable: 'SILKIT_PUSH_PASSWORD')]){
                                 try {
-                                    bat "python ./incrementPatchLevel.py \"$VIB_PUSH_USERNAME\" \"$VIB_PUSH_PASSWORD\""
+                                    bat "python ./incrementPatchLevel.py \"$SILKIT_PUSH_USERNAME\" \"$SILKIT_PUSH_PASSWORD\""
                                 }catch(all) {
                                     currentBuild.result='ABORTED'
                                     error("Aborting the build because version increment failed.")
@@ -62,8 +62,8 @@ pipeline {
         success {
             echo 'I succeeded!'
             configFileProvider([
-                configFile(fileId: 'vib_main_success_webhook', variable: 'WEBHOOK_SUCCESS_FILE'),
-                configFile(fileId: 'vib_main_artifactory_base_link', variable: 'ARTIFACTORY_BASE_LINK')]) {
+                configFile(fileId: 'silkit_main_success_webhook', variable: 'WEBHOOK_SUCCESS_FILE'),
+                configFile(fileId: 'silkit_main_artifactory_base_link', variable: 'ARTIFACTORY_BASE_LINK')]) {
 
                 script {
                     def webhook_teams = readFile(file: WEBHOOK_SUCCESS_FILE).trim()

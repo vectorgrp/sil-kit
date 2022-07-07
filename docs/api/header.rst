@@ -37,7 +37,7 @@ The subdirectory layout follows mostly a uniform scheme for substantial SILKIT c
  - Datatypes are declared in ``silkit/<component>/<Component>Datatypes.hpp``.
 
 
-.. _sec:header-vib-main:
+.. _sec:header-silkit-main:
 
 Using the SILKIT Headers
 ---------------------
