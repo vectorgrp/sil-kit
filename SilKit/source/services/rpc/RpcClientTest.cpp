@@ -11,6 +11,7 @@
 #include "gmock/gmock.h"
 
 #include "RpcTestUtilities.hpp"
+#include "MockTimeProvider.hpp"
 
 #include "silkit/util/functional.hpp"
 
@@ -38,8 +39,9 @@ TEST_F(RpcClientTest, rpc_client_calls_result_handler_with_error_when_no_server_
 
 TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_data)
 {
-    FixedTimeProvider fixedTimeProvider;
+    SilKit::Core::Tests::MockTimeProvider fixedTimeProvider;
     fixedTimeProvider.now = std::chrono::nanoseconds{123456};
+    ON_CALL(fixedTimeProvider, Now()).WillByDefault(testing::Return(fixedTimeProvider.now));
 
     CreateRpcServer();
     IRpcClient* iRpcClient = CreateRpcClient();

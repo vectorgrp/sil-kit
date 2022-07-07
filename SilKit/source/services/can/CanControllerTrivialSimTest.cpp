@@ -84,7 +84,7 @@ TEST(CanControllerTrivialSimTest, send_can_frame)
 
     EXPECT_CALL(mockParticipant, SendMsg(&canController, testFrameEvent))
         .Times(1);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(mockParticipant.mockTimeProvider, Now())
         .Times(1);
 
     canController.SendFrame(testFrameEvent.frame);
@@ -201,7 +201,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(1);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider, Now()).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
@@ -229,7 +229,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter2)
 
     EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
         .Times(0);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(mockParticipant.mockTimeProvider, Now()).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
@@ -351,7 +351,7 @@ TEST(CanControllerTrivialSimTest, DISABLED_cancontroller_uses_tracing)
     const EndpointAddress controllerAddress = {1,2};
     const EndpointAddress otherAddress = {2,2};
 
-    ON_CALL(participant.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(now));
 
 
@@ -364,7 +364,7 @@ TEST(CanControllerTrivialSimTest, DISABLED_cancontroller_uses_tracing)
     CanFrameEvent testFrameEvent{};
 
     //Send direction
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, testFrameEvent.frame))
@@ -372,7 +372,7 @@ TEST(CanControllerTrivialSimTest, DISABLED_cancontroller_uses_tracing)
     controller.SendFrame(testFrameEvent.frame);
 
     // Receive direction
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, testFrameEvent.frame))
@@ -401,7 +401,7 @@ TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)
     testFrameEvent.userContext = 0;
 
     EXPECT_CALL(mockParticipant, SendMsg(&canController, testFrameEvent)).Times(0);
-    EXPECT_CALL(mockParticipant.mockTimeProvider.mockTime, Now()).Times(0);
+    EXPECT_CALL(mockParticipant.mockTimeProvider, Now()).Times(0);
 
     // controller is not started when sending can frame
     canController.SendFrame(testFrameEvent.frame);

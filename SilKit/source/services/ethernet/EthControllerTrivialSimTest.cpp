@@ -111,7 +111,7 @@ protected:
 */
 TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
 {
-    ON_CALL(participant.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
@@ -124,7 +124,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack))).Times(1);
 
     // once for activate and once for sending the frame
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(2);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
 
     EthernetFrame frame{};
     SetSourceMac(frame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
@@ -136,7 +136,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
 */
 TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
 {
-    ON_CALL(participant.mockTimeProvider.mockTime, Now()).WillByDefault(testing::Return(42ns));
+    ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(42ns));
 
     const auto now = 42ns;
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now))).Times(0);
@@ -148,7 +148,7 @@ TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(nack))).Times(1);
 
     // once for the nack
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
 
     EthernetFrame frame{};
@@ -195,7 +195,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
         .Times(1);
 
     // once for activate and once for sending the frame
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(2);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
     controller.Activate();
     controller.SendFrameEvent(msg);
 }
@@ -258,7 +258,7 @@ TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
     
 
     const auto now = 1337ns;
-    ON_CALL(participant.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(now));
 
     SilKit::Config::EthernetController config{};
@@ -272,7 +272,7 @@ TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
     SetSourceMac(frame, EthernetMac{ 9, 8, 7, 6, 5, 4 });
 
     //Send direction
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, frame))

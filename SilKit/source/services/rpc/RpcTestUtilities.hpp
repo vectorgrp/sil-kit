@@ -139,25 +139,6 @@ inline auto MakeMockConnectionParticipant(std::shared_ptr<SilKit::Config::IParti
     return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName);
 }
 
-struct FixedTimeProvider : SilKit::Services::Orchestration::ITimeProvider
-{
-    auto Now() const -> std::chrono::nanoseconds override { return now; }
-
-    auto TimeProviderName() const -> const std::string& override
-    {
-        static std::string name = "FixedTimeProvider";
-        return name;
-    };
-
-    HandlerId AddNextSimStepHandler(NextSimStepHandlerT) override { return {}; }
-
-    void RemoveNextSimStepHandler(HandlerId) override {}
-
-    std::chrono::nanoseconds now;
-
-    void SetTime(std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) override {}
-};
-
 struct Callbacks
 {
     MOCK_METHOD(void, CallHandler, (IRpcServer* /*rpcServer*/, RpcCallEvent /*event*/));

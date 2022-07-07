@@ -23,10 +23,10 @@
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
-#include "TimeProvider.hpp"
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 #include "SynchronizedHandlers.hpp"
+#include "MockTimeProvider.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -49,44 +49,6 @@ public:
 protected:
     bool ShouldLog(Services::Logging::Level) const override { return true; }
 };
-
-
-class MockTimeProvider : public Services::Orchestration::ITimeProvider
-{
-public:
-    struct MockTime
-    {
-        MOCK_METHOD0(Now, std::chrono::nanoseconds());
-    };
-
-    void SetTime(std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) override {}
-
-    //XXX gtest 1.10 has a MOCK_METHOD macro with specifiers like const, noexcept.
-    //    until then we use an auxiliary struct mockTime to get rid of "const this".
-    auto Now() const -> std::chrono::nanoseconds override
-    {
-        return mockTime.Now();
-    }
-    auto TimeProviderName() const -> const std::string& override
-    {
-        return _name;
-    }
-
-    HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override
-    {
-        return _handlers.Add(std::move(handler));
-    }
-
-    void RemoveNextSimStepHandler(HandlerId handlerId) override
-    {
-        _handlers.Remove(handlerId);
-    }
-
-    Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
-    const std::string _name = "MockTimeProvider";
-    mutable MockTime mockTime;
-};
-
 
 class MockLifecycleService : public Services::Orchestration::ILifecycleService {
 public:

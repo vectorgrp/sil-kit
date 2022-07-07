@@ -51,7 +51,7 @@ protected:
         
         controller.SetServiceDescriptor(from_endpointAddress(addr1));
 
-        ON_CALL(participant.mockTimeProvider.mockTime, Now())
+        ON_CALL(participant.mockTimeProvider, Now())
             .WillByDefault(testing::Return(35s));
 
         controller2.SetServiceDescriptor(from_endpointAddress(addr2));
@@ -95,7 +95,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_master_response)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, LinFrameStatus::LIN_TX_OK))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SendFrame(frame, LinFrameResponseType::MasterResponse);
@@ -117,7 +117,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_without_configured_response)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
@@ -150,7 +150,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, LinFrameStatus::LIN_RX_OK))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
@@ -188,7 +188,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_multiple_slave_responses)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), LinFrameStatus::LIN_RX_ERROR))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
@@ -224,7 +224,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_sleeping)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
@@ -255,7 +255,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_removed)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, response.frame, LinFrameStatus::LIN_RX_OK))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 
@@ -272,7 +272,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_removed)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SendFrame(frame, LinFrameResponseType::SlaveResponse);
@@ -294,7 +294,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_response)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, LinFrameStatus::LIN_TX_OK))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SetFrameResponse(frame, LinFrameResponseMode::TxUnconditional);
@@ -316,7 +316,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_remove_master_response)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, frame, LinFrameStatus::LIN_TX_OK))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SetFrameResponse(frame, LinFrameResponseMode::TxUnconditional);
@@ -329,7 +329,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_remove_master_response)
         .Times(1);
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, AFrameWithId(17), LinFrameStatus::LIN_RX_NO_RESPONSE))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.SetFrameResponse(frame, LinFrameResponseMode::Unused);
@@ -516,7 +516,7 @@ TEST_F(LinControllerTrivialSimTest, wake_up)
         .Times(1);
     EXPECT_CALL(participant, SendMsg(&controller, AControllerStatusUpdateWith(LinControllerStatus::Operational)))
         .Times(1);
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
 
     controller.Wakeup();
@@ -643,7 +643,7 @@ TEST_F(LinControllerTrivialSimTest, DISABLED_send_with_tracing)
     
 
     const auto now = 0x0815ns;
-    ON_CALL(participant.mockTimeProvider.mockTime, Now())
+    ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(now));
 
     controller.AddSink(&traceSink);
@@ -652,7 +652,7 @@ TEST_F(LinControllerTrivialSimTest, DISABLED_send_with_tracing)
     controller.Init(config);
     LinFrame frame = MakeFrame(17, LinChecksumModel::Enhanced);
 
-    EXPECT_CALL(participant.mockTimeProvider.mockTime, Now())
+    EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
         Trace(SilKit::Services::TransmitDirection::TX, addr1, now, frame))
