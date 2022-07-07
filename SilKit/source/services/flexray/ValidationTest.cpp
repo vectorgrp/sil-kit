@@ -9,7 +9,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/exception.hpp"
 
 namespace {

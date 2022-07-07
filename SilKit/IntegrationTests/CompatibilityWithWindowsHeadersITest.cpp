@@ -17,8 +17,8 @@
 #include "silkit/services/all.hpp"
 #include "silkit/services/exceptions.hpp"
 #include "silkit/services/can/string_utils.hpp"
-#include "silkit/services/eth/string_utils.hpp"
-#include "silkit/services/fr/string_utils.hpp"
+#include "silkit/services/ethernet/string_utils.hpp"
+#include "silkit/services/flexray/string_utils.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 
 #include "silkit/util/functional.hpp"

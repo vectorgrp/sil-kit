@@ -5,7 +5,7 @@
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
-#include "silkit/services/fr/all.hpp"
+#include "silkit/services/flexray/all.hpp"
 
 #include "IParticipantInternal.hpp"
 #include "CapiImpl.hpp"

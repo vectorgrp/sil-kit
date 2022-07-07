@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

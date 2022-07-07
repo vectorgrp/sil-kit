@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "silkit/config/IParticipantConfiguration.hpp"
-#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"

@@ -10,7 +10,7 @@
 #include "SimBehaviorDetailed.hpp"
 #include "SimBehaviorTrivial.hpp"
 
-#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "IServiceEndpoint.hpp"
 
 namespace SilKit {

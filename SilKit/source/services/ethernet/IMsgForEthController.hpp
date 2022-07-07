@@ -4,7 +4,7 @@
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
-#include "silkit/services/eth/fwd_decl.hpp"
+#include "silkit/services/ethernet/fwd_decl.hpp"
 
 namespace SilKit {
 namespace Services {

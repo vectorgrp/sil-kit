@@ -4,7 +4,7 @@
 
 #include "MessageBuffer.hpp"
 
-#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/flexray/FlexrayDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

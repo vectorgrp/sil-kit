@@ -3,7 +3,7 @@
 #include <iostream>
 
 // concrete type needed for interface
-#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
 

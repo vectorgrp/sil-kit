@@ -4,7 +4,7 @@
 
 #include <cstring>
 
-#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

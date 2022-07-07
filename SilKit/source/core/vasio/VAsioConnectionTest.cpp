@@ -1,8 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 //XXX fowards required for TestDataTypes because of  SilKitMsgTraits
 #include "silkit/services/can/fwd_decl.hpp"
-#include "silkit/services/eth/fwd_decl.hpp"
-#include "silkit/services/fr/fwd_decl.hpp"
+#include "silkit/services/ethernet/fwd_decl.hpp"
+#include "silkit/services/flexray/fwd_decl.hpp"
 #include "silkit/services/lin/fwd_decl.hpp"
 #include "silkit/services/pubsub/fwd_decl.hpp"
 #include "silkit/services/rpc/fwd_decl.hpp"

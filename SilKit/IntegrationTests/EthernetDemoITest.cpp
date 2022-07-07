@@ -7,7 +7,7 @@
 #include <unordered_map> //remove this after rebase on cmake-cleanup-branch
 
 
-#include "silkit/services/eth/all.hpp"
+#include "silkit/services/ethernet/all.hpp"
 
 #include "gtest/gtest.h"
 

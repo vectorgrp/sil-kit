@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "silkit/capi/Flexray.h"
 #include "silkit/capi/SilKit.h"
-#include "silkit/services/fr/all.hpp"
+#include "silkit/services/flexray/all.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "MockParticipant.hpp"

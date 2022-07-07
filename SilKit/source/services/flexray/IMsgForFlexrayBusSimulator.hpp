@@ -6,7 +6,7 @@
 #include "ISender.hpp"
 #include "IServiceEndpoint.hpp"
 
-#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/flexray/FlexrayDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

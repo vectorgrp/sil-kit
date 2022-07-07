@@ -11,7 +11,7 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/services/fr/all.hpp"
+#include "silkit/services/flexray/all.hpp"
 #include "silkit/util/functional.hpp"
 
 

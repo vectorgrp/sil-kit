@@ -4,7 +4,7 @@
 
 #include "MessageBuffer.hpp"
 
-#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

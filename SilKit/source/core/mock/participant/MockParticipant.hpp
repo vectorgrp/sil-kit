@@ -17,8 +17,8 @@
 
 #include "silkit/services/fwd_decl.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
-#include "silkit/services/eth/EthernetDatatypes.hpp"
-#include "silkit/services/fr/FlexrayDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
+#include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "silkit/services/fr/IFlexrayController.hpp"
+#include "silkit/services/flexray/IFlexrayController.hpp"
 
 #include <tuple>
 #include <vector>

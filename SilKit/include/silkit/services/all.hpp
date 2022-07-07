@@ -3,8 +3,8 @@
 #include "exceptions.hpp"
 
 #include "can/all.hpp"
-#include "eth/all.hpp"
-#include "fr/all.hpp"
+#include "ethernet/all.hpp"
+#include "flexray/all.hpp"
 #include "pubsub/all.hpp"
 #include "lin/all.hpp"
 #include "rpc/all.hpp"

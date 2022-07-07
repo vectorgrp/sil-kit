@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 #include "PcapReader.hpp"
 
-#include "silkit/services/eth/EthernetDatatypes.hpp"
+#include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
 #include "Pcap.hpp"
 

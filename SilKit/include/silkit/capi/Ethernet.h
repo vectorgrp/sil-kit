@@ -140,8 +140,8 @@ typedef SilKit_ReturnCode(*SilKit_EthernetController_Create_t)(
 * 
 * \param controller The Ethernet controller to be activated.
 * \result A return code identifying the success/failure of the call.
+* 
 */
-
 SilKitAPI SilKit_ReturnCode SilKit_EthernetController_Activate(SilKit_EthernetController* controller);
 
 typedef SilKit_ReturnCode(*SilKit_EthernetController_Activate_t)(SilKit_EthernetController* controller);

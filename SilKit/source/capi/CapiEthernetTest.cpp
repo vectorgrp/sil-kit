@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
-#include "silkit/services/eth/all.hpp"
+#include "silkit/services/ethernet/all.hpp"
 #include "EthDatatypeUtils.hpp"
 #include "MockParticipant.hpp"
 

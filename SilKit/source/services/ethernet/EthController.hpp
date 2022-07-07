@@ -4,7 +4,7 @@
 
 #include <map>
 
-#include "silkit/services/eth/IEthernetController.hpp"
+#include "silkit/services/ethernet/IEthernetController.hpp"
 #include "ITimeConsumer.hpp"
 
 #include "IParticipantInternal.hpp"

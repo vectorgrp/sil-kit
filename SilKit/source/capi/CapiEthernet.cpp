@@ -5,8 +5,8 @@
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/services/eth/all.hpp"
-#include "silkit/services/eth/string_utils.hpp"
+#include "silkit/services/ethernet/all.hpp"
+#include "silkit/services/ethernet/string_utils.hpp"
 
 #include <string>
 #include <iostream>
