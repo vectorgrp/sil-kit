@@ -155,7 +155,7 @@ The final simulation setup can be run through the following commands:
 
       # Start the application running the two participants
       # Make sure that the SilKit.dll and simple.json are available 
-      ./SampleVib.exe
+      ./SampleSilKit.exe
 
 The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_silkit/CMakeLists.txt>`
 :download:`simple.cpp<sample_silkit/simple.cpp>` :download:`simple.yaml<sample_silkit/simple.yaml>`

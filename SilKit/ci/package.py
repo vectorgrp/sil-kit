@@ -136,7 +136,7 @@ def hashFile(fname):
 #################################################
 def parseArgs():
     abspath = os.path.abspath
-    parser = argparse.ArgumentParser(description='VIB distribution packaging tool. It allows bundling and merging multiple CPack generated zip files into a single release zip file')
+    parser = argparse.ArgumentParser(description='SIL Kit distribution packaging tool. It allows bundling and merging multiple CPack generated zip files into a single release zip file')
     parser.add_argument('--projectroot', metavar='PROJECT_ROOT', type=str,
             help="the toplevel project directory containing the source")
     parser.add_argument('zipfiles', metavar='SilKit-<CONFIG>.zip', type=str,
