@@ -29,6 +29,7 @@ using testing::NiceMock;
 
 using namespace SilKit::Core;
 using namespace SilKit::Services::Can;
+using SilKit::Util::HandlerId;
 
 using SilKit::Core::Tests::DummyParticipant;
 

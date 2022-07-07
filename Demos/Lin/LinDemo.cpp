@@ -12,7 +12,7 @@
 #include "silkit/util/functional.hpp"
 
 using namespace SilKit;
-using namespace SilKit::Core;
+
 using namespace SilKit::Services;
 using namespace SilKit::Services::Lin;
 

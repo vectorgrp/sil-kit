@@ -10,7 +10,7 @@
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/util/serdes/sil/Serialization.hpp"
 
-using namespace SilKit::Core;
+
 using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
 

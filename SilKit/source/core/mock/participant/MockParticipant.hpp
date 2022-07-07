@@ -32,6 +32,8 @@ namespace SilKit {
 namespace Core {
 namespace Tests {
 
+using SilKit::Util::HandlerId;
+
 class DummyLogger : public Services::Logging::ILogger
 {
 public:

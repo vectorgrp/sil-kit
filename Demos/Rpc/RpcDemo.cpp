@@ -10,7 +10,7 @@
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-using namespace SilKit::Core;
+
 using namespace SilKit::Services::Rpc;
 using namespace std::chrono_literals;
 

@@ -16,7 +16,7 @@
 #include "silkit/services/can/all.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
-using namespace SilKit::Core;
+
 using namespace SilKit::Services;
 using namespace SilKit::Services::Can;
 

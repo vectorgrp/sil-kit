@@ -13,7 +13,7 @@
 
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-using namespace SilKit::Core;
+
 using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Config;
 using namespace SilKit::Services::PubSub;

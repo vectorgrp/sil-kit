@@ -18,7 +18,6 @@
 #include "CommandlineParser.hpp"
 
 using namespace SilKit;
-using namespace SilKit::Core;
 using namespace SilKit::Services::Orchestration;
 
 using namespace std::chrono_literals;

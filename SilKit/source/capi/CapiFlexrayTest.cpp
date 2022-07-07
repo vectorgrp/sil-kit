@@ -11,6 +11,7 @@ namespace
 using namespace SilKit::Core;
 using namespace SilKit::Config;
 using namespace SilKit::Services::Flexray;
+using SilKit::Util::HandlerId;
 using ::SilKit::Core::Tests::DummyParticipant;
 using ::testing::_;
 

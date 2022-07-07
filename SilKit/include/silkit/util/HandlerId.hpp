@@ -22,10 +22,3 @@ using SilKit::Util::HandlerId;
 } // namespace Services
 } // namespace SilKit
 
-namespace SilKit {
-namespace Core {
-
-using SilKit::Util::HandlerId;
-
-} // namespace Core
-} // namespace SilKit
