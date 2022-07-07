@@ -276,7 +276,8 @@ public:
                 _result.numberReceived++;
                 if (_result.numberReceived == _controllerConfig.frameResponses.size())
                 {
-                  //Test finished
+                    //Test finished
+                    Stop();
                 }
             }
         }

@@ -259,10 +259,12 @@ using asio::ip::tcp;
 
 VAsioConnection::VAsioConnection(SilKit::Config::ParticipantConfiguration config,
     std::string participantName, ParticipantId participantId,
+    Services::Orchestration::ITimeProvider* timeProvider,
     ProtocolVersion version)
     : _config{std::move(config)}
     , _participantName{std::move(participantName)}
     , _participantId{participantId}
+    , _timeProvider{timeProvider}
     , _tcp4Acceptor{_ioContext}
     , _tcp6Acceptor{_ioContext}
     , _localAcceptor{_ioContext}
@@ -291,17 +293,6 @@ VAsioConnection::~VAsioConnection()
 void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
 {
     _logger = logger;
-}
-
-void VAsioConnection::SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService)
-{
-    _timeSyncService = timeSyncService;
-    Util::tuple_tools::for_each(_links, [timeSyncService](auto&& linkMap) {
-        for (auto&& link : linkMap)
-        {
-            link.second->SetTimeSyncService(timeSyncService);
-        }
-    });
 }
 
 void VAsioConnection::JoinDomain(std::string connectUri)
@@ -949,7 +940,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
         auto& link = linkMap[subscriber.networkName];
         if (!link)
         {
-            link = std::make_shared<LinkType>(subscriber.networkName, _logger, _timeSyncService);
+            link = std::make_shared<LinkType>(subscriber.networkName, _logger, _timeProvider);
         }
 
         link->AddRemoteReceiver(from, subscriber.receiverIdx);

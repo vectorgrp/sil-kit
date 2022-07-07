@@ -68,7 +68,6 @@ public:
     MOCK_METHOD(Services::Orchestration::ParticipantState, State, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), (override, const));
-    MOCK_METHOD(void, ConfigureTimeProvider, (Services::Orchestration::TimeProviderKind timeProviderKind), (override));
 };
 
 class MockTimeSyncService : public Services::Orchestration::ITimeSyncService

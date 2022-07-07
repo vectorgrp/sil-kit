@@ -20,6 +20,7 @@
 #include "MockParticipant.hpp" // for DummyLogger
 #include "VAsioSerdes.hpp"
 #include "SerializedMessage.hpp"
+#include "TimeProvider.hpp"
 
 #include <chrono>
 
@@ -170,10 +171,11 @@ class VAsioConnectionTest : public testing::Test
 {
 protected:
     VAsioConnectionTest()
-        : _connection({}, "VAsioConnectionTest", 1)
+        : _connection({}, "VAsioConnectionTest", 1, &_timeProvider)
     {
         _connection.SetLogger(&_dummyLogger);
     }
+    Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
     MockVAsioPeer _from;
     Tests::DummyLogger _dummyLogger;

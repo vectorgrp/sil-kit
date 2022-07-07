@@ -8,6 +8,7 @@
 #include "silkit/vendor/ISilKitRegistry.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "ProtocolVersion.hpp"
+#include "TimeProvider.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -55,6 +56,7 @@ private:
     std::function<void()> _onAllParticipantsConnected;
     std::function<void()> _onAllParticipantsDisconnected;
     std::shared_ptr<SilKit::Config::ParticipantConfiguration> _vasioConfig;
+    Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
 };
 

@@ -368,10 +368,13 @@ void TimeSyncService::CompleteSimulationTask()
 void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
 {
     _isSynchronized = isSynchronized;
+    _timeProvider->SetSynchronized(isSynchronized);
+
     if (_timeSyncPolicy != nullptr)
     {
         return;
     }
+
 
     try
     {

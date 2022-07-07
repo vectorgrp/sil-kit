@@ -48,6 +48,8 @@ public:
 
     virtual void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) = 0;
     virtual void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) = 0;
+    virtual void SetSynchronized(bool isSynchronized) = 0;
+    virtual bool IsSynchronized() const = 0;
 };
 
 

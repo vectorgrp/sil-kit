@@ -26,6 +26,10 @@ public:
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
     MOCK_METHOD(const std::string&, TimeProviderName, (), (override, const));
     MOCK_METHOD(void, SetTime, (std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/), (override));
+    MOCK_METHOD(void, ConfigureTimeProvider, (Services::Orchestration::TimeProviderKind timeProviderKind), (override));
+
+    MOCK_METHOD(void, SetSynchronized,(bool isSynchronized), (override));
+    MOCK_METHOD(bool, IsSynchronized,(),(const, override));
 
     Services::HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override
     {

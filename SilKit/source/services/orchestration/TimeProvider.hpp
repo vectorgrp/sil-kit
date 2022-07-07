@@ -28,6 +28,8 @@ public:
     inline HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override;
     inline void RemoveNextSimStepHandler(HandlerId handlerId) override;
     inline void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override;
+    inline void SetSynchronized(bool isSynchronized) override;
+    inline bool IsSynchronized() const override;
 
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) override;
 
@@ -59,6 +61,14 @@ void TimeProvider::RemoveNextSimStepHandler(HandlerId handlerId)
 void TimeProvider::SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
     _currentProvider->SetTime(now, duration);
+}
+void TimeProvider::SetSynchronized(bool isSynchronized)
+{
+    _currentProvider->SetSynchronized(isSynchronized);
+}
+bool TimeProvider::IsSynchronized() const
+{
+    return _currentProvider->IsSynchronized();
 }
 
 } // namespace Orchestration

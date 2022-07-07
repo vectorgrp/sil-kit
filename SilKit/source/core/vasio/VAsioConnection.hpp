@@ -51,7 +51,8 @@ public:
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
     VAsioConnection(SilKit::Config::ParticipantConfiguration config, std::string participantName,
-        ParticipantId participantId, ProtocolVersion version = CurrentProtocolVersion());
+                    ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
+                    ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection();
 
 public:
@@ -64,7 +65,6 @@ public:
     // ----------------------------------------
     // Public methods
     void SetLogger(Services::Logging::ILogger* logger);
-    void SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService);
     void JoinDomain(std::string registryUri);
 
     template <class SilKitServiceT>
@@ -243,7 +243,7 @@ private:
         auto& link = std::get<SilKitLinkMap<SilKitMessageT>>(_links)[networkName];
         if (!link)
         {
-            link = std::make_shared<SilKitLink<SilKitMessageT>>(networkName, _logger, _timeSyncService);
+            link = std::make_shared<SilKitLink<SilKitMessageT>>(networkName, _logger, _timeProvider);
         }
         return link;
     }
@@ -392,7 +392,7 @@ private:
     std::string _participantName;
     ParticipantId _participantId{0};
     Services::Logging::ILogger* _logger{nullptr};
-    Services::Orchestration::TimeSyncService* _timeSyncService{nullptr};
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 
     //! \brief Virtual SilKit links by networkName according to SilKitConfig.
     Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;

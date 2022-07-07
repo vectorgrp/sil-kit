@@ -64,7 +64,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     : _participantName{participantName}
     , _participantConfig{participantConfig}
     , _participantId{Util::Hash::Hash(participantName)}
-    , _connection{_participantConfig, participantName, _participantId, version}
+    , _connection{_participantConfig, participantName, _participantId, &_timeProvider, version}
 {
     std::string logParticipantNotice; //!< We defer logging the notice until the logger is created
     if (!_participantConfig.participantName.empty() && _participantConfig.participantName != participantName)
@@ -111,9 +111,7 @@ void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     auto* lifecycleService = GetLifecycleService();
-    auto* timeSyncService = dynamic_cast<Services::Orchestration::TimeSyncService*>(lifecycleService->GetTimeSyncService());
-
-    _connection.SetTimeSyncService(timeSyncService);
+    (void)lifecycleService->GetTimeSyncService();
 
 
     //// Enable replaying mechanism.
@@ -548,6 +546,7 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
         SilKit::Core::Discovery::controllerTypeTimeSyncService, Core::ServiceType::InternalController,
         std::move(timeSyncSupplementalData), false, &_timeProvider, _participantConfig.healthCheck);
 
+    //Ensure that the TimeSyncService is able to affect the life cycle
     timeSyncService->SetLifecycleService(service);
     return timeSyncService;
 }

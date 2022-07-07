@@ -32,7 +32,7 @@ namespace Core {
 
 VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> cfg, ProtocolVersion version) :
     _vasioConfig{ std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(cfg) },
-    _connection{ *_vasioConfig, "SilKitRegistry", VAsioConnection::RegistryParticipantId, version}
+    _connection{ *_vasioConfig, "SilKitRegistry", VAsioConnection::RegistryParticipantId, &_timeProvider, version}
 {
     _logger = std::make_unique<Services::Logging::Logger>("SilKitRegistry", _vasioConfig->logging);
     _connection.SetLogger(_logger.get());

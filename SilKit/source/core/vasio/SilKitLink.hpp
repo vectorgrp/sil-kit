@@ -22,7 +22,7 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    SilKitLink(std::string name, Services::Logging::ILogger* logger, Services::Orchestration::TimeSyncService* timeSyncService);
+    SilKitLink(std::string name, Services::Logging::ILogger* logger, Services::Orchestration::ITimeProvider* timeProvider);
 
 public:
     // ----------------------------------------
@@ -41,8 +41,6 @@ public:
 
     void DispatchSilKitMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg);
 
-    void SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService);
-
 private:
     // ----------------------------------------
     // private methods
@@ -53,7 +51,7 @@ private:
     // private members
     std::string _name;
     Services::Logging::ILogger* _logger;
-    Services::Orchestration::TimeSyncService* _timeSyncService;
+    Services::Orchestration::ITimeProvider* _timeProvider;
 
     std::vector<ReceiverT*> _localReceivers;
     VAsioTransmitter<MsgT> _vasioTransmitter;
@@ -63,10 +61,10 @@ private:
 //  Inline Implementations
 // ================================================================================
 template <class MsgT>
-SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILogger* logger, Services::Orchestration::TimeSyncService* timeSyncService)
+SilKitLink<MsgT>::SilKitLink(std::string name, Services::Logging::ILogger* logger, Services::Orchestration::ITimeProvider* timeProvider)
     : _name{std::move(name)}
     , _logger{logger}
-    , _timeSyncService{timeSyncService}
+    , _timeProvider{timeProvider}
 {
 }
 
@@ -106,9 +104,9 @@ void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/, std::enable
 template <class MsgT>
 void SilKitLink<MsgT>::DistributeRemoteSilKitMessage(const IServiceEndpoint* from, MsgT&& msg)
 {
-    if (_timeSyncService && _timeSyncService->IsSynchronized())
+    if (_timeProvider->IsSynchronized())
     {
-        SetTimestamp(msg, _timeSyncService->Now());
+        SetTimestamp(msg, _timeProvider->Now());
     }
 
     for (auto&& receiver : _localReceivers)
@@ -159,12 +157,6 @@ template <class MsgT>
 void SilKitLink<MsgT>::DispatchSilKitMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
 {
     _vasioTransmitter.SendMessageToTarget(from, targetParticipantName, msg);
-}
-
-template <class MsgT>
-void SilKitLink<MsgT>::SetTimeSyncService(Services::Orchestration::TimeSyncService* timeSyncService)
-{
-    _timeSyncService = timeSyncService;
 }
 
 template <class MsgT>

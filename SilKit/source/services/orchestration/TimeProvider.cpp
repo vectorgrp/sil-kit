@@ -5,10 +5,11 @@
 
 using namespace std::chrono_literals;
 namespace SilKit {
-namespace Core {
+namespace Services {
 namespace Orchestration {
 // Actual Provider Implementations
 namespace detail {
+
 struct ProviderBase : ITimeProvider
 {
     std::chrono::nanoseconds _now{};
@@ -52,7 +53,7 @@ struct ProviderBase : ITimeProvider
         _isSynchronized = isSynchronized;
     }
 
-    virtual bool IsSynchronized() const
+    virtual bool IsSynchronized() const override
     {
         return _isSynchronized;
     }
@@ -108,9 +109,6 @@ public:
         // always return std::chrono::nanoseconds::min
         return std::chrono::nanoseconds::duration::min();
     }
-
-private:
-    const std::string _name{"NoSyncProvider"};
 };
 
 
@@ -144,7 +142,6 @@ public:
     }
 
 private:
-    const std::string _name{"ParticipantTimeProvider"};
     Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
 };
 
@@ -158,6 +155,8 @@ TimeProvider::TimeProvider()
 
 void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind)
 {
+    const auto isSynchronized = _currentProvider->IsSynchronized();
+
     switch (timeProviderKind)
     {
     case Orchestration::TimeProviderKind::NoSync:
@@ -171,8 +170,9 @@ void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timePro
         break;
     default: break;
     }
+    _currentProvider->SetSynchronized(isSynchronized);
 }
 
 } // namespace Orchestration
-} // namespace Core
+} // namespace Services
 } // namespace SilKit
