@@ -14,7 +14,7 @@ Build) and is provided in pre-built form with the SilKit packages.
 Getting Started - GIT Clone
 ----------------------------------------
 
-This section specifies the necessary steps to build the integration bus if you
+This section specifies the necessary steps to build the SIL Kit if you
 have just cloned the repository.
 
 
@@ -45,7 +45,7 @@ directory and configure cmake::
 
 It is often helpful to specify a directory where the build should be
 installed. With cmake, this can be configured via the variable
-CMAKE_INSTALL_PREFIX. E.g., to installed the integration bus into a folder
+CMAKE_INSTALL_PREFIX. E.g., to installed the SIL Kit into a folder
 called "install" next to the build folder, run cmake as follows::
 
     cmake -DCMAKE_INSTALL_PREFIX=../install ..

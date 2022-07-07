@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# This tool packages the final deliverables for integration bus releases for a given target (VS2017, Linux etc.)
+# This tool packages the final deliverables for SIL Kit releases for a given target (VS2017, Linux etc.)
 # the simplified cpack usage results in separate Debug and Release zip files.
 # this tool is used to combine Debug and Release distribution zipfiles and make some
 # additional changes: adjusting paths, adding directories/files etc.

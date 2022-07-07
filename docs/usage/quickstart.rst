@@ -66,7 +66,7 @@ From CMake this can be easily used via the  ``find_package(SilKit CONFIG)`` mech
 For example, the following CMakeLists.txt is able to import the SilKit library based on its filesystem path.
 
 .. literalinclude::
-   sample_vib/CMakeLists.txt
+   sample_silkit/CMakeLists.txt
    :language: cmake
 
 Properties, like include directories and compile flags, are automatically handled by the imported target.
@@ -94,14 +94,14 @@ The configuration file itself contains an empty JSON object, that later on can b
 without recompiling it.
 
 .. literalinclude::
-   sample_vib/simple.yaml
+   sample_silkit/simple.yaml
    :language: yaml
 
 The application will run two participants concurrently, each in their own thread.
 One thread will act as a publisher by sending a test string to its subscribers:
 
 .. literalinclude::
-   sample_vib/simple.cpp
+   sample_silkit/simple.cpp
    :language: cpp
    :lines: 14-40
 
@@ -124,7 +124,7 @@ time synchronization service's
 The subscriber runs in its own thread, too:
 
 .. literalinclude::
-   sample_vib/simple.cpp
+   sample_silkit/simple.cpp
    :language: cpp
    :lines: 42-68
 
@@ -157,8 +157,8 @@ The final simulation setup can be run through the following commands:
       # Make sure that the SilKit.dll and simple.json are available 
       ./SampleVib.exe
 
-The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_vib/CMakeLists.txt>`
-:download:`simple.cpp<sample_vib/simple.cpp>` :download:`simple.yaml<sample_vib/simple.yaml>`
+The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_silkit/CMakeLists.txt>`
+:download:`simple.cpp<sample_silkit/simple.cpp>` :download:`simple.yaml<sample_silkit/simple.yaml>`
 
 
 Further Reading

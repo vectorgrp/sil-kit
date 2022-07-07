@@ -755,7 +755,7 @@
       "properties": {
         "RegistryUri": {
           "type": "string",
-          "default": "vib://localhost:8500"
+          "default": "silkit://localhost:8500"
         },
         "ConnectAttempts": {
           "type": "integer",

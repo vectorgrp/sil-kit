@@ -65,6 +65,6 @@ if(${SILKIT_BUILD_DOCS})
     )
 
     #add sample code so it shows in the IDE, but don't build or install it
-    add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL usage/sample_vib/simple.cpp)
+    add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL usage/sample_silkit/simple.cpp)
     target_link_libraries(sample_silkit_new_config PRIVATE SilKit)
 endif()

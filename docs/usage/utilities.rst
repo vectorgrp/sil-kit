@@ -86,7 +86,7 @@ SilKitSystemController
             SilKitSystemController Participant1 Participant2
    *  -  Notes
       -  * The distribution package contains the SilKitSystemController in the
-           ``Integrationbus/bin/`` directory.
+           ``SilKit/bin/`` directory.
 
 
 
@@ -124,7 +124,7 @@ SilKitSystemControllerInteractive
             SilKitSystemControllerInteractive Participant1 Participant2
    *  -  Notes
       -  * The distribution package contains the SilKitSystemControllerInteractive
-           in the ``Integrationbus/bin/`` directory.
+           in the ``SilKit/bin/`` directory.
 
 
 .. _sec:util-system-monitor:
@@ -156,7 +156,5 @@ SilKitSystemMonitor
             # Start SystemMonitor
             SilKitSystemMonitor
    *  -  Notes
-      -  * The distribution package contains the SilKitSystemMonitor in the
-           ``Integrationbus/bin/`` directory.
-         * The SystemMonitor represents a passive participant in an Integration
-           Bus system. Thus, it can be (re)started at any time.
+      -  * The distribution package contains the SilKitSystemMonitor in the ``SilKit/bin/`` directory.
+         * The SystemMonitor represents a passive participant in an SIL Kit system. Thus, it can be (re)started at any time.

@@ -81,13 +81,13 @@ Its contents are as follows:
      - Documented changes
    * - SilKit/
      - 
-     - The integration bus binaries and cmake config export
+     - The SIL Kit binaries and cmake config export
    * - SilKit-Demos/
      - SILKIT_INSTALL_SOURCE
      - Source code of the demos. builds against ../SilKit
    * - SilKit-Source/
      - SILKIT_INSTALL_SOURCE
-     - The integration bus sources.
+     - The SIL Kit sources.
    * - SilKit-Documentation/
      - SILKIT_BUILD_DOCS
      - Html documentation

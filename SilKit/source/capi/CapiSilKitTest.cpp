@@ -60,7 +60,7 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         }
     };
 
-    TEST_F(CapiSilKitTest, integration_bus_function_mapping)
+    TEST_F(CapiSilKitTest, silkit_function_mapping)
     {
         SilKit_ReturnCode returnCode;
 
@@ -76,7 +76,7 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
     }
 
 
-    TEST_F(CapiSilKitTest, integration_bus_bad_params)
+    TEST_F(CapiSilKitTest, silkit_bad_params)
     {
         SilKit_ReturnCode returnCode;
 
