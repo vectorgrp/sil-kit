@@ -186,6 +186,11 @@ void LifecycleManagement::SetStateError(std::string reason)
     _currentState->Error(std::move(reason));
 }
 
+ILifecycleState* LifecycleManagement::GetCurrentState()
+{
+    return _currentState;
+}
+
 ILifecycleState* LifecycleManagement::GetInvalidState()
 {
     return _invalidState.get();

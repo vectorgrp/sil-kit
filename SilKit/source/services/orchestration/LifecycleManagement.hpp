@@ -62,6 +62,8 @@ public: //Methods
     void SetState(ILifecycleState* state, std::string message);
     void SetStateError(std::string reason);
 
+    ILifecycleState* GetCurrentState();
+
     ILifecycleState* GetInvalidState();
     ILifecycleState* GetOperationalState();
     ILifecycleState* GetErrorState();

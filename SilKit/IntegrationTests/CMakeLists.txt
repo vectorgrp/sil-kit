@@ -92,6 +92,14 @@ add_silkit_test(ITestHopOnHopOff
         SilKitConfigurationTestUtils
 )
 
+add_silkit_test(ITest_CommunicationReady
+    SOURCES
+      ITest_CommunicationReady.cpp
+    LIBS
+        SilKit
+        SilKitConfigurationTestUtils
+)
+
 add_silkit_test(ITestDataPubSub
     SOURCES
       DataPubSubITest.cpp

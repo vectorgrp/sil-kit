@@ -63,6 +63,7 @@ public:
     * The handler is called after \ref SystemState::CommunicationReady is reached.
     * The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
     * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
+    * The CommunicationReadyHandler is executed in an internal thread and must not be blocked by the user.
     * The participant remains in its state until \ref CompleteCommunicationReadyHandlerAsync() is invoked,
     * in another thread and then switches to the \ref ParticipantState::ReadyToRun.
     */ 
@@ -191,6 +192,7 @@ public:
     * The handler is called after \ref SystemState::CommunicationReady is reached.
     * The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
     * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
+    * The CommunicationReadyHandler is executed in an internal thread and must not be blocked by the user.
     * The participant remains in its state until \ref CompleteCommunicationReadyHandlerAsync() is invoked,
     * in another thread and then switches to the \ref ParticipantState::ReadyToRun.
     */ 

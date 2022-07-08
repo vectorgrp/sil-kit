@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <tuple>
 #include <map>
 #include <mutex>
+#include <atomic>
 
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 
@@ -177,6 +178,7 @@ private:
     //Async communication handler support
     CommunicationReadyHandler _commReadyHandler;
     bool _commReadyHandlerIsAsync{false};
+    std::atomic<bool> _commReadyHandlerInvoked{false};
     std::thread _commReadyHandlerThread;
 
     StartingHandler _startingHandler;

@@ -140,7 +140,7 @@ void PrepareLifecycle(LifecycleService* lifecycleService)
 
 auto StartCoordinated() 
 {
-    LifecycleConfiguration sc;
+    LifecycleConfiguration sc{};
     sc.coordinatedStart = true;
     sc.coordinatedStop = true;
     return sc;
@@ -863,7 +863,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
     lifecycleService.ReceiveMsg(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
     lifecycleService.ReceiveMsg(&masterId, stopCommand);
-    ParticipantCommand shutdownCommand;
+    ParticipantCommand shutdownCommand{};
     shutdownCommand.participant = descriptor.GetParticipantId();
     shutdownCommand.kind=ParticipantCommand::Kind::Shutdown;
     lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
@@ -1036,7 +1036,11 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
     }};
 
 
-    lifecycleService.StartLifecycle({});
+    lifecycleService.StartLifecycle({true, true});
+
+    lifecycleService.NewSystemState(SystemState::ServicesCreated);
+    lifecycleService.NewSystemState(SystemState::CommunicationInitializing);
+    lifecycleService.NewSystemState(SystemState::CommunicationInitialized);
 
     if(completer.joinable())
     {

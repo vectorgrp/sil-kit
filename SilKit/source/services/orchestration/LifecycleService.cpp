@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/participant/exception.hpp"
 
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
@@ -52,11 +53,6 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
 
  LifecycleService::~LifecycleService()
 {
-     if(_commReadyHandlerThread.joinable())
-     {
-         _logger->Debug("LifecycleService::~LifecycleService: joining commReadyHandlerThread");
-         _commReadyHandlerThread.join();
-     }
 }
 
 void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandler handler)
@@ -73,14 +69,16 @@ void LifecycleService::SetCommunicationReadyHandlerAsync(CommunicationReadyHandl
 void LifecycleService::CompleteCommunicationReadyHandlerAsync()
 {
     _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: enter");
-    const auto myself = std::this_thread::get_id();
-    if(_commReadyHandlerThread.joinable()
-        && (myself  != _commReadyHandlerThread.get_id()))
+    // async handler is finished, now continue to the Running state without triggering the CommunicationReadyHandler again
+    if(!_commReadyHandlerInvoked)
     {
-        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: joining commReadyHandlerThread");
-        _commReadyHandlerThread.join();
-        _commReadyHandlerThread = {};
-        // async handler is finished, now continue to the Running state without triggering the CommunicationReadyHandler again
+        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: Handler invoked is false, exiting.");
+    }
+    if((_lifecycleManagement.GetCurrentState() == _lifecycleManagement.GetCommunicationInitializedState())
+        || (_lifecycleManagement.GetCurrentState() == _lifecycleManagement.GetServicesCreatedState())
+        )
+    {
+        _commReadyHandlerInvoked = true;
         _lifecycleManagement.SetState(_lifecycleManagement.GetReadyToRunState(),
             "LifecycleService::CompleteCommunicationReadyHandler: triggering communication ready transition.");
     }
@@ -245,17 +243,13 @@ bool LifecycleService::TriggerCommunicationReadyHandler(std::string)
     {
         if(_commReadyHandlerIsAsync)
         {
-            if(_commReadyHandlerThread.joinable())
+            if(!_commReadyHandlerInvoked)
             {
-                _logger->Debug("LifecycleServiec::TriggerCommunicationReadyHandler:"
-                    " commReadyHandlerThread is already joinable. Ensure you called CompleteCommunicationReadyHandler.");
-                return false;
-            }
-
-            _commReadyHandlerThread = std::thread{[this]{
-                Util::SetThreadName("SKCommReadyHdlr");
+                _commReadyHandlerInvoked=true;
                 _commReadyHandler();
-            }};
+            }
+            // Tell the LifecycleManager to not advance to the next state
+            // until CompleteCommunicationReadyHandlerAsync is called.
             return false;
         }
         else
