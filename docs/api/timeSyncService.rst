@@ -51,14 +51,14 @@ That is, the application wants to execute some code between time steps (given by
 than where the simulation task is executing.
 To achieve this, use :cpp:func:`SetSimulationTaskAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTaskAsync()>` to assign
 the simulation task function, and :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>` to let
-the SILKIT continue the simulation. 
+the SIL Kit continue the simulation. 
 If the simulation task has been assigned using that function, execution will stop after the simulation task has finished executing.
-By invoking :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>` SILKIT's simulation loop 
+By invoking :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>` SIL Kit's simulation loop 
 (implemented in :cpp:func:`RunAsync<SilKit::Services::Orchestration::ITimeSyncService::RunAsync()>`) will continue to the next time step.
 
 Changing simulation task duration
 """"""""""""""""""""""""""""""""""
-Within the SILKIT, :cpp:func:`SetPeriod()<SilKit::Services::Orchestration::ITimeSyncService::SetPeriod()>` specifies the simulation 
+Within the SIL Kit, :cpp:func:`SetPeriod()<SilKit::Services::Orchestration::ITimeSyncService::SetPeriod()>` specifies the simulation 
 time duration of each simulation task invocation. It corresponds to the simulation time difference between each 
 task execution.
 The simulation task duration can be changed at any time by calling
@@ -74,7 +74,7 @@ API and Data Type Reference
 Usage Example
 --------------
 The following example is based on the ``SilKitCanDemo`` source code which is
-distributed with the SILKIT, and slightly abridged for clarity.
+distributed with the SIL Kit, and slightly abridged for clarity.
 It demonstrates how to setup a life cycle service and register callbacks
 to monitor participant state changes.
 

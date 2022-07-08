@@ -8,11 +8,11 @@ Quick Start
    :local:
    :depth: 3
 
-The Vector SilKit is a C++ library for the distributed simulation of automotive networks.
+The Vector SIL Kit is a C++ library for the distributed simulation of automotive networks.
 It is designed to work on Windows and Linux.
-This quick start demonstrates how to get started using the pre-built SILKIT release distribution.
+This quick start demonstrates how to get started using the pre-built SIL Kit release distribution.
 
-This guide will walk you through setting up a SILKIT project from scratch. First, the terminology
+This guide will walk you through setting up a SIL Kit project from scratch. First, the terminology
 required to understand the functionality is briefly discussed, then the build process and the actual code.
 
 .. _sec:quickstart-terminology:
@@ -24,7 +24,7 @@ Terminology
  :widths: 20 80
 
  * - :doc:`Participant<../api/participant>`
-   - A communication node in the distributed simulation and entry point to the SILKIT library. 
+   - A communication node in the distributed simulation and entry point to the SIL Kit library. 
      Allows creation of vehicle network controllers and other services. 
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services, e.g.,
@@ -48,22 +48,22 @@ A simulation consists of participants which all connect to the same registry URI
 The participants might be physically distributed in a network or running on the same host.
 
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
-Some participants can have special roles, depending on e.g. the synchronization and detail of the simulation.
-Additionally the :ref:`VAsio Middleware<sec:mwcfg-vasio>` of the Vector SilKit requires the
+Some participants can have special roles, depending on e.g., the synchronization and detail of the simulation.
+Additionally the :ref:`VAsio Middleware<sec:mwcfg-vasio>` of the SIL Kit requires the
 :ref:`sec:util-registry` to work properly.
 
-Writing your first SILKIT application
-----------------------------------
+Writing your first SIL Kit application
+--------------------------------------
 This tutorial assumes that you are familiar with `CMake (https://cmake.org) <https://cmake.org>`_ and C++.
 
-Using the SILKIT package
-~~~~~~~~~~~~~~~~~~~~~
-The SILKIT distribution contains a self-contained and deployable installation in the *SilKit* directory.
+Using the SIL Kit package
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The SIL Kit distribution contains a self-contained and deployable installation in the *SilKit* directory.
 The  CMake build configuration required is exported to ``SilKit/lib/cmake/SilKit`` and
 defines the ``SilKit::SilKit`` target. 
 
 From CMake this can be easily used via the  ``find_package(SilKit CONFIG)`` mechanism.
-For example, the following CMakeLists.txt is able to import the SilKit library based on its filesystem path.
+For example, the following CMakeLists.txt is able to import the SIL Kit library based on its filesystem path.
 
 .. literalinclude::
    sample_silkit/CMakeLists.txt
@@ -76,12 +76,12 @@ If you use another method to build your software you can directly use the ``SilK
 .. _sec:quickstart-simple:
 
 A simple Data Message application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained SILKIT application that uses :doc:`Data Messages<../api/datamessage>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We'll create a simple, self-contained SIL Kit application that uses :doc:`Data Messages<../api/datamessage>`
 to exchange user-defined data among its participants.
 The messages are exchanged using a publish / subscribe pattern.
 
-To use the SILKIT, you first have to create a valid configuration.  This can 
+To use the SIL Kit, you first have to create a valid configuration.  This can 
 be done by loading an existing :ref:`YAML file<sec:ibconfig-json>`.
 
 We use a configuration file ``simple.yaml`` for creating our simulation.
@@ -107,7 +107,7 @@ One thread will act as a publisher by sending a test string to its subscribers:
 
 
 First, the simulation is joined by creating a participant ``PublisherParticipant``.
-Creating the Participant properly initializes the SILKIT library and allows to instantiate
+Creating the Participant properly initializes the SIL Kit library and allows to instantiate
 :doc:`Services<../api/api>` and offers access to the
 :doc:`Life Cycle Service<../api/lifecycleService>`.
 
@@ -116,8 +116,8 @@ This allows sending data through its :cpp:func:`Publish()<SilKit::Services::gene
 method, when we are in an active simulation.
 
 The actual simulation is performed in the simulation task. The simulation task
-is a callback that is executed by the SILKIT runtime whenever the the simulation
-time of the SILKIT is advanced. This callback has to be registered with the
+is a callback that is executed by the SIL Kit runtime whenever the the simulation
+time of the SIL Kit is advanced. This callback has to be registered with the
 time synchronization service's
 :cpp:func:`SetSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTask()>`.
 
@@ -148,10 +148,10 @@ The final simulation setup can be run through the following commands:
 .. code-block::
       
       # Start the VAsio Registry
-      ./SilKitRegistry.exe
+      ./sil-kit-registry.exe
 
       # Start the System Controller and tell it to wait for PublisherParticipant and SubscriberParticipant
-      ./SilKitSystemController PublisherParticipant SubscriberParticipant
+      ./sil-kit-system-controller.exe PublisherParticipant SubscriberParticipant
 
       # Start the application running the two participants
       # Make sure that the SilKit.dll and simple.json are available 

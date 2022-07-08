@@ -3,14 +3,14 @@ Demos
 ======================
 
 This document describes the usage of the demo projects that are
-included with the Vector SilKit project and what their
+included with the Vector SIL Kit project and what their
 expected output and or results are. All demo source code is located in
 the Git repository in the folder Demos.
 
 .. |UtilDir| replace:: build/Release
 .. |DemoDir| replace:: build/Release
-.. |SystemMonitor| replace::  |UtilDir|/SilKitSystemMonitor
-.. |SystemController| replace::  |UtilDir|/SilKitSystemController
+.. |SystemMonitor| replace::  |UtilDir|/sil-kit-system-monitor
+.. |SystemController| replace::  |UtilDir|/sil-kit-system-controller
 
 .. admonition:: Note
 
@@ -38,7 +38,7 @@ The individual demos are build as a dependency.
 .. admonition:: Note
    
    The distributed Demos, as packaged by CPack, are preconfigured to build against 
-   a copy of the SILKIT binaries in ``../SilKit/`` .
+   a copy of the SIL Kit binaries in ``../SilKit/`` .
    This can be overriden by providing your own ``SilKit`` CMake target library,
    before the demos are configured by cmake.
    Or by changing the ``find_package(SilKit ... PATHS path/to/SILKIT)`` statement directly
@@ -59,8 +59,8 @@ CAN Demo
    *  -  Source location
       -  Demos/Can
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
          * network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -73,7 +73,7 @@ CAN Demo
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
-           the SystemController to start.
+           the |SystemController| to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
             
@@ -119,8 +119,8 @@ Ethernet Demo
    *  -  Source location
       -  Demos/Ethernet
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
          * Network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -133,7 +133,7 @@ Ethernet Demo
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
-           the SystemController to start.
+           the |SystemController| to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -183,8 +183,8 @@ LIN Demo
    *  -  Source location
       -  Demos/Lin
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
          * Network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -231,9 +231,9 @@ FlexRay Demo
    *  -  Source location
       -  Demos/FlexRay
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>`
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
          * Network simulator (mandatory)
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -283,8 +283,8 @@ Data Message Demo
    *  -  Source location
       -  Demos/DataMessage
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -336,8 +336,8 @@ RPC Demo
    *  -  Source location
       -  Demos/DataMessage
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>`
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -414,7 +414,7 @@ Benchmark Demo
 
 
 Life Cycle Demo
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. list-table::
    :widths: 17 220
@@ -425,8 +425,8 @@ Life Cycle Demo
    *  -  Source location
       -  Demos/Lifecycle
    *  -  Requirements
-      -  * :ref:`SystemController<sec:util-system-controller>` (not needed for unsynchronized execution)
-         * :ref:`SystemMonitor<sec:util-system-monitor>` (optional)
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml>
            File name of the ParticipantConfiguration to be used;

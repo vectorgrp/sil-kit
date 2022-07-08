@@ -18,7 +18,7 @@ the System Controller, so that no erroneous state changes occur and the transiti
 
 .. admonition:: Note
 
-  The SILKIT provides a utility called :ref:`SilKitSystemController<sec:util-system-controller>`, that provides a basic
+  The SIL Kit provides a utility called :ref:`sil-kit-system-controller<sec:util-system-controller>`, that provides a basic
   implementation that can be used to start a simulation. In most cases this utility can be used and no own 
   implementation is needed.
 

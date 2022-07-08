@@ -35,6 +35,7 @@ Participants can synchronize their time with other participants (see :ref:`synch
     lifecycleService->StartLifecycleWithTimeSync(...);
 
 Alternatively, participants can run asynchronously (regarding the time synchronization)::
+
     lifecycleService->StartLifecycleNoTimeSync(...);
 
 The other callbacks, which are triggered on state transitions, are always executed
@@ -91,7 +92,7 @@ method.
 To abort the simulation and report an error message use the 
 :cpp:func:`ReportError()<SilKit::Services::Orchestration::ILifecycleService::ReportError()>` method.
 This will change the current participant state to :cpp:enumerator:`Error<SilKit::Services::Orchestration::Error>` and report the error message
-to the SILKIT runtime system.
+to the SIL Kit runtime system.
 ReportError is also called when the invocation of a registered handler throws an exception.
 
 To stop a particular participant, use the :cpp:func:`Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`
@@ -122,7 +123,7 @@ API and Data Type Reference
 Usage Example
 --------------
 The following example is based on the ``SilKitCanDemo`` source code which is
-distributed with the SILKIT, and slightly adapted for clarity.
+distributed with the SIL Kit, and slightly adapted for clarity.
 It demonstrates how to setup a life cycle service and register callbacks
 to monitor participant state changes.
 

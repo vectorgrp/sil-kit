@@ -1,6 +1,6 @@
-======================================
-!!! Getting Started as a SILKIT Developer
-======================================
+==========================================
+!!! Getting Started as a SIL Kit Developer
+==========================================
 
 .. contents::
 
@@ -17,13 +17,13 @@ To get started developing you'll need the following prerequisites:
 
 For generating the documentation, you will require:
  - Python3
- - Sphinx  (e.g. install with *pip install sphinx* version >= 3.0)
+ - Sphinx  (e.g., install with *pip install sphinx* version >= 3.0)
  - doxygen
 
 
 !!! Build Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~
-The SILKIT build system is based on CMake and can be customized at configuration time.
+The SIL Kit build system is based on CMake and can be customized at configuration time.
 The following options are available:
 
 .. list-table:: CMake Options
@@ -60,7 +60,7 @@ Refer to :doc:`rst-help` for guidelines on formatting the documentation.
 
 !!! Packaging
 ~~~~~~~~~~~~~
-SILKIT uses CPack to generate the release distributions in ZIP form.
+SIL Kit uses CPack to generate the release distributions in ZIP form.
 It can be packaged using the *package* target::
     
     cmake --build . --target package
@@ -101,7 +101,7 @@ just build the  ``Demos`` CMake target.
 The individual demos are build as a dependency.
 
 The distributed Demos, as packaged by CPack, are preconfigured to build against 
-a copy of the SILKIT binaries in ``../SilKit/`` .
+a copy of the SIL Kit binaries in ``../SilKit/`` .
 This can be overriden by providing your own ``SilKit`` CMake target library,
 before the demos are configured by cmake.
 Or by changing the ``find_package(SilKit ... PATHS path/to/SILKIT)`` statement directly

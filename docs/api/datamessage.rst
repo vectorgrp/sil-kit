@@ -74,7 +74,7 @@ publishers.
 
     auto newDataPublisherHandler = [](IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource)
     {
-        // handle new sources, e.g. by adding an explicit handler for this set of media type and labels:
+        // handle new sources, e.g., by adding an explicit handler for this set of media type and labels:
         subscriber->AddExplicitDataMessageHandler(dataHandler, mediaType, labels);
     });
     auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", "", {}, defaultDataHandler, 

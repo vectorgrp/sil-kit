@@ -7,7 +7,7 @@
 Third-Party Licenses
 ====================
 
-The SilKit uses third party software components. The full and
+The SIL Kit uses third party software components. The full and
 unmodified license of each component is printed below.
 
 .. contents:: :local:

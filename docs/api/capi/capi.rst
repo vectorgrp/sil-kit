@@ -11,8 +11,8 @@ C API
 
 .. highlight:: c
 
-SILKIT Entry Point and API Organization
-====================================
+SIL Kit Entry Point and API Organization
+========================================
 
 The main entry point of the C API is the function to obtain a SilKit_Participant::
 
@@ -23,11 +23,11 @@ The main entry point of the C API is the function to obtain a SilKit_Participant
     SilKit_ReturnCode result = SilKit_Participant_Create(&participant, configString,
                                                             participantName, registryUri, SilKit_False);
 
-All further services of the C API of the SilKit are requested through this Participant.
+All further services of the C API of the SIL Kit are requested through this Participant.
 
 Entities obtained through the Participant must not be destroyed/deleted by the user of the API.
 All entities, that are provided through the API expect for the SilKit_Participant are destroyed through
-the internals of the SilKit implementation.
+the internals of the SIL Kit implementation.
 
 After creation of a Participant it must be ensured that eventually SilKit_Participant_Destroy is called
 with the corresponding pointer to the SilKit_Participant entity.

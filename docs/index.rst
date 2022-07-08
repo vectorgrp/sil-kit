@@ -1,9 +1,9 @@
 =============================================
-Vector SilKit
+Vector SIL Kit
 =============================================
 
-The Vector SilKit is a runtime component that enables distributed simulation for
-automotive applications. For this, the Vector SilKit provides:
+The Vector SIL Kit is a runtime component that enables distributed simulation for
+automotive applications. For this, the Vector SIL Kit provides:
 
 * Communication on different abstraction levels including
 
@@ -20,14 +20,14 @@ automotive applications. For this, the Vector SilKit provides:
   compile time
 
 
-For getting started developing with the Vector SilKit, see the :doc:`quickstart guide <usage/quickstart>`.
+For getting started developing with the Vector SIL Kit, see the :doc:`quickstart guide <usage/quickstart>`.
 
 .. _base-architecture:
 
 Architecture
 ----------------------------
 
-The Vector SilKit implements a layered architecture comprising three layers:
+The Vector SIL Kit implements a layered architecture comprising three layers:
 
 .. figure:: _static/SilKitArchitecture.svg
     :align: center
@@ -35,16 +35,16 @@ The Vector SilKit implements a layered architecture comprising three layers:
 Supported Services
 ------------------
 
-The currently supported services of the SILKIT consist of the following categories:
+The currently supported services of the SIL Kit consist of the following categories:
 
-* **Vehicle Network Controllers:** CAN / CAN FD, Ethernet, FlexRay and LIN
+* **Vehicle Network Controllers:** CAN / CAN FD, Ethernet, FlexRay, and LIN
 * **Data Messages:** without any data type constraints
 * **RPC Servers/Clients:** for remote procedure call functionality
 
 Vehicle Networks
 ~~~~~~~~~~~~~~~~
 
-The SILKIT provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
+The SIL Kit provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
 All networks can be simulated with two different levels of detail: simple, functional simulation
 or high detail, timing accurate simulation. Timing accurate simulation requires the detailed simulation, which  
 needs an additional network simulator.
@@ -56,7 +56,7 @@ Applications access vehicle networks using matching controller models. The
 controller interfaces are the same for simple and detailed simulation. As a result,
 an application that works in the simple use case does also work when switching to
 a high detail simulation using the network simulator. The CAN, LIN, and Ethernet demos 
-provided with the SILKIT have all been tested both with and without a network simulator. 
+provided with the SIL Kit have all been tested both with and without a network simulator. 
 The FlexRay feature is only available in the detailed simulation based on a network simulator.
 
 The section :ref:`sec:api-services` describes how to configure and use Vehicle Network Controllers in detail. 
@@ -72,4 +72,4 @@ Prerequisites for Usage
     * GCC 7.4.0 **or**
     * Clang 6.0
 
-These are specific versions the Vector SilKit is tested and built against.
+These are specific versions the Vector SIL Kit is tested and built against.

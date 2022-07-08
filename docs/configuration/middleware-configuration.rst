@@ -10,10 +10,10 @@ Middleware Configuration
 Overview
 --------------------
 
-The Vector SilKit is powered by the Vector VAsio middleware. 
-This middleware is open source and included in the sources of the Vector SilKit.
+The Vector SIL Kit is powered by the Vector VAsio middleware. 
+This middleware is open source and included in the sources of the Vector SIL Kit.
 The currently supported middleware is *Boost.Asio* based and was specifically designed for the Vector
-SilKit as a transport layer.
+SIL Kit as a transport layer.
 
 The middleware can be configured as follows.
 
@@ -22,10 +22,10 @@ The middleware can be configured as follows.
 Configuration
 --------------------
 
-For the initial discovery of the SILKIT participants, the SILKIT uses a central registry
+For the initial discovery of the SIL Kit participants, the SIL Kit uses a central registry
 process at a preconfigured hostname and port. By default, the registry is expected to be
 running on localhost listening on Port 8500. These values can be changed via the
-`RegistryUri`, e.g.:
+`RegistryUri`, for example:
 
 
 .. code-block:: yaml
@@ -47,9 +47,9 @@ running on localhost listening on Port 8500. These values can be changed via the
      - Description
 
    * - RegistryUri
-     - The URI used by participants when connecting to the SilKitRegistry.
+     - The URI used by participants when connecting to the SIL Kit Registry.
        By default, the registry is expected to be running on "localhost" with port 8500.
-       The URI uses a scheme of 'silkit', i.e. ``silkit://localhost:8500``.
+       The URI uses a scheme of 'silkit', i.e., ``silkit://localhost:8500``.
 
    * - ConnectAttempts
      - Number of connects to the registry a participant should attempt before giving up and signaling an error.

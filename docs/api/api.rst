@@ -6,14 +6,14 @@ API
 
 
 This document describes the user available programming interfaces of the Vector
-SilKit (SILKIT). If you are not yet familiar with the SILKIT, have a look at
+SIL Kit (SIL Kit). If you are not yet familiar with the SIL Kit, have a look at
 the :doc:`Quick Start<../usage/quickstart>`.
 
 
 API Entry Point and API Organization
 ------------------------------------
 
-The Participant constitutes the main entry point into the SilKit API.
+The Participant constitutes the main entry point into the SIL Kit API.
 
 .. toctree::
    :maxdepth: 1
@@ -67,7 +67,7 @@ management.
 C-API
 ------------------------------------
 
-The Vector SilKit provides an additional C API, that allows to use the Vector SilKit directly
+The Vector SIL Kit provides an additional C API, that allows to use the Vector SIL Kit directly
 with the C programming language:
 
 .. toctree::

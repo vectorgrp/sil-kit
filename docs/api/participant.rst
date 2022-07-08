@@ -5,7 +5,7 @@ Participant
 .. contents:: :local:
    :depth: 1
 
-This document describes the main entry point to the SILKIT simulation, the participant.
+This document describes the main entry point to the SIL Kit simulation, the participant.
 By creating a participant with a given configuration, a connection 
 to a simulation is established and the configured participant joins the simulation.
 
@@ -29,7 +29,7 @@ The IParticipant API
 ~~~~~~~~~~~~~~~~~~~~
 
 The instantiated |IParticipant| can then be used to access the other services
-of the SILKIT.
+of the SIL Kit.
 
 .. admonition:: Warning.
 
@@ -44,9 +44,9 @@ of the SILKIT.
    :members:
 
 
-SILKIT Version
-~~~~~~~~~~~
-Version information about the currently running SILKIT instance
+SIL Kit Version
+~~~~~~~~~~~~~~~
+Version information about the currently running SIL Kit instance
 can be queried using the following functions:
 
     .. doxygenfunction:: SilKit::Version::Major()

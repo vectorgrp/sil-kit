@@ -34,7 +34,7 @@ struct CanFrame
     std::vector<uint8_t> dataField; //!< The raw CAN data field
 };
 
-/*! \brief //! \brief The event of an incoming CAN frame including transmit ID, timestamp and the actual frame
+/*! \brief The event of an incoming CAN frame including transmit ID, timestamp and the actual frame
  */
 struct CanFrameEvent
 {

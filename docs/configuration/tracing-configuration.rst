@@ -11,7 +11,7 @@ Tracing and Replay Configuration
 Overview
 ========================================
 
-The Vector SilKit contains features for tracing and replaying within the simulation.
+The Vector SIL Kit contains features for tracing and replaying within the simulation.
 :doc:`Trace and Replay<../usage/replay>` describes these features in detail. 
 This section of the documentation explains how these features can be configured through the participant configuration
 file.
@@ -74,7 +74,7 @@ configuration<configuration>`.
       OutputPath: Filesystem/Path/MyTrace.pcap
 
 
-It allows to trace the SILKIT simulation messages into binary files.
+It allows to trace the SIL Kit simulation messages into binary files.
 
 .. list-table:: TraceSink Configuration
    :widths: 15 85
@@ -89,7 +89,7 @@ It allows to trace the SILKIT simulation messages into binary files.
      - The type specifies the format of the output stream. Supported formats
        are: PcapFile, PcapPipe, Mdf4File.
    * - OutputPath
-     - A filesystem path where the SILKIT messages are traced to.
+     - A filesystem path where the SIL Kit messages are traced to.
 
 
 .. _sec:cfg-participant-replaying:
@@ -139,7 +139,7 @@ configuration<configuration>`.
       InputPath: Filesystem/Path/MyTrace.pcap
 
 
-This specifies a trace data source for replaying SILKIT simulation messages during
+This specifies a trace data source for replaying SIL Kit simulation messages during
 live simulations.
 
 .. list-table:: TraceSource Configuration
@@ -155,7 +155,7 @@ live simulations.
      - The type specifies the format of the input stream. Supported formats
        are: PcapFile, Mdf4File.
    * - InputPath
-     - A filesystem path where the SILKIT messages are loaded from.
+     - A filesystem path where the SIL Kit messages are loaded from.
 
 
 .. _sec:cfg-participant-replay:
@@ -209,6 +209,6 @@ Refer to :ref:`sec:replay-foreign` for guidelines on how to use the ``MdfChannel
     Please note, that all members of ``MdfChannel`` are optional and that the empty string is a valid configuration choice.
     The empty string matches the empty text value, or it indicates the absence of the corresponding MDF meta data.
     To ensure that a ``MdfChannel`` member is not part of MDF channel selection, remove it from the configuration.
-    If no ``MdfChannel`` members are specified, the channel selection will use SILKIT internal criteria.
+    If no ``MdfChannel`` members are specified, the channel selection will use SIL Kit internal criteria.
 
 

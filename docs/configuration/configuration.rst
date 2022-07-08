@@ -19,7 +19,7 @@ Configuration
 The Participant Configuration File
 =======================================
 
-Simulation participants of the Vector SilKit can be configured via a YAML/JSON file, often
+Simulation participants of the Vector SIL Kit can be configured via a YAML/JSON file, often
 referred to as *participant configuration*, ``SilKitConfig.json``, or ``SilKitConfig.yaml``. A configuration file is optional, 
 it is intended to be used to configure behavior and connections of a simulation participant that was distributed in 
 binary form.
@@ -27,11 +27,11 @@ A participant configuration can be passed to a simulation when a simulation part
 through :cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>`
 
 Configuration parameters that are specified within the participant configuration override corresponding 
-programmatically defined values, i.e. the ``ParticipantName`` field of the participant configuration overrides the 
-participant name that is provided through the API of the Vector SilKit when the participant is created. 
+programmatically defined values, i.e., the ``ParticipantName`` field of the participant configuration overrides the 
+participant name that is provided through the API of the Vector SIL Kit when the participant is created. 
 
 An ``SilKitConfig.yaml`` begins with some general information about the configuration file itself, followed by several 
-subsections for the different services of the Vector SilKit.
+subsections for the different services of the Vector SIL Kit.
 
 The outline of a SilKitConfig.yaml file is as follows:
 
@@ -82,14 +82,14 @@ Configuration Options
 
    * - $schema
      - The location of the participant configuration schema file. The ``ParticipantConfiguration.schema.json`` is
-       part of the SILKIT sources and can be found in the folder
+       part of the SIL Kit sources and can be found in the folder
        ``./SilKit/source/config/``.
 
    * - schemaVersion
      - The version of the used participant configuration schema. Current version is 1.
        
    * - ParticipantName
-     - The name of the simulation participant that joins the Vector SilKit simulation. Overrides a programmatically
+     - The name of the simulation participant that joins the Vector SIL Kit simulation. Overrides a programmatically
        defined participant name.
 
    * - :doc:`CanControllers<configuration-services>`, 
@@ -109,14 +109,14 @@ Configuration Options
      - Configuration concerning soft and hard timeouts for simulation task execution.
 
    * - :doc:`Tracing<tracing-configuration>`
-     - Describes relevant configuration aspects for the tracing features of the Vector SilKit. The TraceSinks
+     - Describes relevant configuration aspects for the tracing features of the Vector SIL Kit. The TraceSinks
        and TraceSources used for Tracing and Replaying are defined here. 
 
    * - :doc:`Extensions<extension-configuration>`
-     - Configuration of optional extensions to the Vector SilKit and where to find them.
+     - Configuration of optional extensions to the Vector SIL Kit and where to find them.
 
    * - :doc:`Middleware<middleware-configuration>`
-     - This optional section can be used to configure Vector VAsio, the middleware running the Vector SilKit.
+     - This optional section can be used to configure Vector VAsio, the middleware running the Vector SIL Kit.
        If this section is omitted, defaults will be used.
 
 

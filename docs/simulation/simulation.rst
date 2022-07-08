@@ -4,7 +4,7 @@ Simulation
   macros for internal use
 ..
   General macros
-.. |ProductName| replace:: SilKit
+.. |ProductName| replace:: SIL Kit
 ..
   API references
 .. |LifecycleServiceAPI| replace:: :cpp:class:`ILifecycleService<SilKit::Services::Orchestration::ILifecycleService>`
@@ -24,7 +24,7 @@ Simulation
 
 ..
   Reference implementations, etc.
-.. |SilKitSystemController| replace:: :ref:`SILKIT SystemController Utility<sec:util-system-controller>`
+.. |SilKitSystemController| replace:: :ref:`SIL Kit System Controller Utility<sec:util-system-controller>`
 
 
 The following chapter explains, how a simulation using the |ProductName| works.
@@ -182,7 +182,7 @@ Synchronized Simulation Run
 
 The following first gives a general overview of a simulation run using the |ProductName|. 
 Afterwards, possibilities to configure the period length of a simulation step and to define the simulation task that is being executed during a simulation step are introduced.
-The last part details what time information SILKIT clients provide, depending on their synchronization mode.
+The last part details what time information |ProductName| clients provide, depending on their synchronization mode.
 
 Simulation Overview
 -------------------
@@ -243,7 +243,7 @@ Timestamps in Messages
    The following describes the current behavior and will change in the foreseeable future.
 
 Each sent bus event is annotated with a timestamp, at which it was sent. 
-The timestamp is set automatically by the SILKIT client.
+The timestamp is set automatically by the |ProductName| client.
 Users do not have to (and should not try to) manually set the timestamp of a message.
 Depending on the mode of the participant (synchronized/unsynchronized) and whether the network is managed by a a network simulator, the timestamp's meaning and precision may differ.
 If a network simulator is available for a given network, it takes precedence of the timestamp control and overrides the timestamps of any bus message.
@@ -273,7 +273,7 @@ Implementation Example: VAsio as Middleware
   
    The following section will be improved in the foreseeable future.
 
-The provided implementation of the SILKIT headers uses VAsio as a middleware.
+The provided implementation of the |ProductName| headers uses VAsio as a middleware.
 In VAsio, all participants exchange their messages via direct messaging based on TCP connections or Unix domain sockets.
 
 In VAsio, the requested next point in time to execute a simulation task is distributed through a specific message that is distributed to all other participants.

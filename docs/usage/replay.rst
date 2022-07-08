@@ -10,13 +10,13 @@ Trace and Replay
 .. |PCAP| replace:: :ref:`PCAP<sec:api-ethernet-tracing>`
 
 This document describes the tracing and replaying feature of the Vector
-SilKit.
-The tracing feature enables users of the SILKIT to store bus frames and generic data types 
+SIL Kit.
+The tracing feature enables users of the SIL Kit to store bus frames and generic data types 
 unmodified, including accurate simulation time stamps, into binary trace files.
 This enables offline analysis, debugging and also replaying of messages into
 live simulations.
 Multiple trace file formats are supported.
-PCAP is supported natively by the SilKit and the MDF4 file format is supported by the :ref:`VIBE-MDF4Tracing<mdf4tracing>` extension.
+PCAP is supported natively by the SIL Kit and the MDF4 file format is supported by the :ref:`VIBE-MDF4Tracing<mdf4tracing>` extension.
 
 .. contents:: :local:
    :depth: 1
@@ -27,7 +27,7 @@ PCAP is supported natively by the SilKit and the MDF4 file format is supported b
 Overview
 ~~~~~~~~~~~~~
 This section introduces the technical terms used in the following sections.
-For SILKIT specific terminology, please refer to the :ref:`generic SILKIT introduction<sec:quickstart-terminology>`.
+For SIL Kit specific terminology, please refer to the :ref:`generic SIL Kit introduction<sec:quickstart-terminology>`.
 
 .. _table-terminology:
 
@@ -38,7 +38,7 @@ For SILKIT specific terminology, please refer to the :ref:`generic SILKIT introd
    * - Term
      - Description
    * - Trace Message
-     - An SilKit data type referring to a bus frame or generic data
+     - An SIL Kit data type referring to a bus frame or generic data
        message, which can be serialized and deserialized.
    * - Trace Sink
      - Allows saving Trace Messages to permanent storage.
@@ -59,7 +59,7 @@ For SILKIT specific terminology, please refer to the :ref:`generic SILKIT introd
    * - Replay Channel
      - Refers to a data stream inside of a Trace File.
        The data stream is usually encoded with meta data that allows identifying
-       a SILKIT bus or a controller, to which a data stream should be attached during
+       a SIL Kit bus or a controller, to which a data stream should be attached during
        replay.
    * - Replay Controller
      - A bus or service controller that implements replaying specific behavior.
@@ -69,7 +69,7 @@ For SILKIT specific terminology, please refer to the :ref:`generic SILKIT introd
      - The task responsible for dispatching Trace Messages during a replaying
        simulation run.
        It also creates and configures Replay Controllers transparently to 
-       users of the SILKIT API.
+       users of the SIL Kit API.
 
 
 The following :ref:`section<sec:replay-getting_started>` gives a short usage
@@ -80,10 +80,10 @@ And the design and implementation is discussed in section
 :ref:`sec:replay-architecture`.
 
 .. versionadded:: 3.3.10
-   MDF4 replaying now supports non-SILKIT trace files, for example from other tools such as CANoe.
+   MDF4 replaying now supports non-SIL-Kit trace files, for example from other tools such as CANoe.
 
 Refer to section :ref:`sec:replay-foreign` for information on how to replay trace files that
-do not originate from SILKIT simulation runs.
+do not originate from SIL Kit simulation runs.
 
 
 .. _sec:replay-getting_started:
@@ -102,7 +102,7 @@ Our aim is to trace all bus messages on a service controller and replay the same
 Message data types that are suitable for tracing are listed in the
 :ref:`support table<table-overview>`.
 These data types map to specific bus frame types that are supported by standard MDF channels.
-Internal SilKit data types like simulation control, synchronization and service specific auxiliary data types will not be traced.
+Internal SIL Kit data types like simulation control, synchronization and service specific auxiliary data types will not be traced.
 
 Our task consists of the following steps:
 First, we have to adjust the demo's configuration to contain :ref:`trace sinks<sec:cfg-participant-tracesink>` attached to a controller.
@@ -165,7 +165,7 @@ Running the demo with this configuration will create the trace file in the speci
 
 .. admonition:: Warning
    
-   Ensure that the simulation is stopped cleanly by issuing a simulation stop command using the SilKitSystemController process.
+   Ensure that the simulation is stopped cleanly by issuing a simulation stop command using the sil-kit-system-controller process.
    Just stopping a participant process will result in damaged trace files, because the destructors and clean up routines
    necessary for finalizing a trace file are not called.
 
@@ -212,7 +212,7 @@ the data is used.
 
 As shown in the code listing, the actual configuration statements are similar to
 the one used for tracing.
-When a replay block is declared on a controller, it's SILKIT communications will be
+When a replay block is declared on a controller, it's SIL Kit communications will be
 controlled by a replay controller which acts as a proxy.
 Some of the EthernetController's data transmission APIs are disabled to allow replaying data on unmodified participants.
 The "Direction" configuration statement can be either one of "Send", "Receive",
@@ -220,7 +220,7 @@ or "Both".
 This will limit the replaying of trace messages with the specified direction
 encoded.
 For example, setting it to "Receive" will disable the normal reception of live
-SilKit messages via the callbacks listed in the :ref:`table<table-callbacks>`  and will inject ``EthMessages`` extracted from a trace file instead.
+SIL Kit messages via the callbacks listed in the :ref:`table<table-callbacks>`  and will inject ``EthMessages`` extracted from a trace file instead.
 
 When starting the demo's participants, the simulation should start up and
 continue as before, but depending on how many messages were traced in the
@@ -239,7 +239,7 @@ example:
 
 This execution model allows using unmodified participants in a replay session,
 without their cooperation or code changes.
-The supported SILKIT data types and runtime behaviors are detailed in section
+The supported SIL Kit data types and runtime behaviors are detailed in section
 :ref:`sec:replay`.
 
 
@@ -249,19 +249,19 @@ Replaying Features
 ~~~~~~~~~~~~~~~~~~~~
 The tracing and replaying functionality is built into the Participant and its service controllers.
 Users can trace data frames on the controllers of a participant or on simulated links of the :doc:`/vibes/networksimulator`.
-This functionality is controlled by configuration statements in the :ref:`SILKIT configuration<sec:cfg-participant-tracing>`.
+This functionality is controlled by configuration statements in the :ref:`SIL Kit configuration<sec:cfg-participant-tracing>`.
 
 The replaying mechanism works by instantiating a replay controller that issues
 calls to message transmission APIs on behalf of the user.
 The replay controller also prevents any invocation of these APIs by the user.
 This allows running unmodified participants in a simulation and replacing their
 active communications with a replay of a previously recorded trace file.
-Other SilKit API calls are not prevented, as the trace message replay relies on the collaboration of
+Other SIL Kit API calls are not prevented, as the trace message replay relies on the collaboration of
 the user's application code, for example, for handling auxiliary data types or
 simulation control messages.
 In particular, data handlers registered by an application on a controller are still served on reception or sending replay data.
 
-The following table details which replay and tracing modes are supported by each of the SilKit service types.
+The following table details which replay and tracing modes are supported by each of the SIL Kit service types.
 
 
 .. _table-overview:
@@ -353,7 +353,7 @@ With the following limitations and  notes:
 
 External MDF4 Trace Files
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-For replaying it is possible to use |MDF4| trace files which do not originate from SILKIT simulations.
+For replaying it is possible to use |MDF4| trace files which do not originate from SIL Kit simulations.
 In this case, the MDF channel for a service controller has to be uniquely identified by the user.
 
 .. admonition:: Note
@@ -374,7 +374,7 @@ Additionally, source information objects might be attached to the channel's name
 
    * - MDF Term
      - MDF Data Structure
-     - SILKIT Configuration
+     - SIL Kit Configuration
 
    * - channel name
      - cn_tx_name
@@ -398,15 +398,15 @@ Additionally, source information objects might be attached to the channel's name
 
 
 
-The :ref:`table<table-mdfchannel>` contains the MDF channel identifiers of the MDF specification (v4.1, Chapter 5.4.3) that are supported by the SILKIT configuration.
-When using foreign, non-SILKIT MDF4 trace files for replaying, it is the user's responsibility to provide an MDF channel identification that results in a unique MDF4 channel.
+The :ref:`table<table-mdfchannel>` contains the MDF channel identifiers of the MDF specification (v4.1, Chapter 5.4.3) that are supported by the SIL Kit configuration.
+When using foreign, non-SIL-Kit MDF4 trace files for replaying, it is the user's responsibility to provide an MDF channel identification that results in a unique MDF4 channel.
 
 .. admonition:: Warning
 
    If the specified MDF channel cannot be found or multiple channels matching the ID are found, an exception is thrown.
 
-Please note, that channels suitable for replaying with SILKIT  must adhere to the ``ASAM MDF BusLogging Specification``.
-The mandatory component channels are required for deserializing MDF4 records into SILKIT data structures.
+Please note, that channels suitable for replaying with SIL Kit  must adhere to the ``ASAM MDF BusLogging Specification``.
+The mandatory component channels are required for deserializing MDF4 records into SIL Kit data structures.
 
 Usage example: Replaying CANoe MDF4
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -425,9 +425,9 @@ The :ref:`vibe-mdfinfo<sec:vibe-mdfinfo>` command line utility enables us to enu
        "GroupName": "CAN1",   "GroupSource": "",   "GroupPath": "CAN_DataFrame"
 
 
-Channels that are invalid or not recognized by the SILKIT are not displayed by this tool.
+Channels that are invalid or not recognized by the SIL Kit are not displayed by this tool.
 The MDF channel description displayed is already in a suitable format for
-inclusion in a SILKIT configuration:
+inclusion in a SIL Kit configuration:
 
 .. code-block:: javascript
 
@@ -458,10 +458,10 @@ With the knowledge that the MDF4 only contains one suitable channel, we could re
         [...]
     }
 
-For SilKit native traces and replays, a channel source of ``Link/Participant/Controller`` is used internally.
+For SIL Kit native traces and replays, a channel source of ``Link/Participant/Controller`` is used internally.
 The channel names are set to the recommended names for bus types defined in the MDF standard, cf. the following table.
 
-.. list-table:: MDF Channel Names Used in SILKIT
+.. list-table:: MDF Channel Names Used in SIL Kit
    :width: 70%
    :widths: 10 70
    :header-rows: 1
@@ -491,7 +491,7 @@ The goal is to allow replacing the active communications of a participant
 without the need to modify and recompile the participant.
 Please note, that only the listed methods in :ref:`the following table<table-methods>` are affected in their runtime behavior.
 When the replay direction is set to :cpp:enum:`Direction::Both<SilKit::Config::Replay::Direction::Both>`, then only data originating from a replay file will be issued to the controller.
-That is, user invocations of the transmission APIs and reception of live SILKIT data messages will be disabled.
+That is, user invocations of the transmission APIs and reception of live SIL Kit data messages will be disabled.
 
 The following tables list the APIs affected by setting a :cpp:enum:`Replay::Direction<SilKit::Config::Replay::Direction>` in a replay config block.
 Data transmissions originating from user code will be inhibited if the configured replay direction is ``Send`` or ``Both``.
@@ -547,8 +547,8 @@ It gives access to the current simulation time, or as a fallback the wall-clock 
 
 The actual data flow of messages during tracing is achieved by the  *ITraceMessageSource* and *ITraceMessageSinks* interfaces.
 A controller implementing the *ITraceMessageSource* allows attaching
-*ITraceMessageSinks* which might be implemented in a SILKIT extension. 
-The SILKIT configuration allows attaching several trace sinks to controllers.
+*ITraceMessageSinks* which might be implemented in a SIL Kit extension. 
+The SIL Kit configuration allows attaching several trace sinks to controllers.
 The controllers have specific trace points where messages are pushed into the sinks.
 
 The last building block is the *ReplayScheduler*, which combines the time
@@ -578,7 +578,7 @@ This time provider is used to get the current time stamp when messages are pushe
 
 Trace sinks implement the :cpp:class:`ITraceMessageSink<SilKit::ITraceMessageSink>` interface.
 For MDF4 they are implemented in a shared library, which is automatically loaded
-by the SILKIT extension mechanism.
+by the SIL Kit extension mechanism.
 The service controllers contain trace points, which allows capturing
 the message data along with meta information like the direction of the
 communication and the current time stamp.
@@ -593,7 +593,7 @@ which the frame originates from.
 MDF4 allows encoding several logical data streams, referred to as channels, for
 each controller of a bus.
 It also has rich meta data facilities which allow encoding additional
-information like the original SILKIT configuration, the transmission direction of a frame and information identifying the acquisition source within the SILKIT simulation setup.
+information like the original SIL Kit configuration, the transmission direction of a frame and information identifying the acquisition source within the SIL Kit simulation setup.
 
 The meta data is used by the *ReplayScheduler* to find an appropriate replay channel in a given input trace file and attach this trace data
 source to a *ReplayController*.

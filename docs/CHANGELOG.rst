@@ -3695,7 +3695,7 @@ Complete list of methods removed from the interface ``class IComAdapter`` in ``i
 
 Fixed
 ~~~~~
-- Config: prevent multiple statements of the same keyword, e.g. multiple ``"Links"``
+- Config: prevent multiple statements of the same keyword, e.g., multiple ``"Links"``
   blocks now raise an error (VIB-528).
 - Fix building with ``IB_BUILD_TESTS=OFF`` (VIB-536).
 
@@ -3892,7 +3892,7 @@ Added
   endpoint is used for connecting without raising an error.
   As such, the local domain connectivity is optional and fully transparent to the users.
   Because of the path limitations of domain sockets the socket files are stored
-  in the system temporary directory (e.g. %TEMPDIR% or $TMP).
+  in the system temporary directory (e.g., %TEMPDIR% or $TMP).
   To allow for simulation isolation, the socket files have the participant IDs,
   domain ID, and the simulation's working directory encoded in the file name.
 
@@ -4008,7 +4008,7 @@ Fixed
 - Fix null pointer derference in PcapReader when input file name was missing in configuration.
   Also ensure that the config has non-empty input and output file paths (VIB-156).
 - The Launcher will attempt to clean up the CANoe environment several times when shutting down.
-  This ensures a clean CANoe installation when CANoe is slow to shutdown, e.g. when launcher is interrupted
+  This ensures a clean CANoe installation when CANoe is slow to shutdown, e.g., when launcher is interrupted
   by a user (VIB-153).
 - Fix LIN Sleep frames when using the VIBE Network Simulator.
   When the ``ILinController::GoToSleep()`` was invoked, a `sleep` frame was transmitted and
@@ -4936,7 +4936,7 @@ Added
 - New Ethernet Trace Logging in the PCAP Format. Trace logs can be written to files
   or named pipes.
 - New config parameters are added for EthernetControllers. Here, you can specify
-  the PCAP trace filename or the name of the pipe. E.g.:
+  the PCAP trace filename or the name of the pipe. For example:
   
     .. code-block:: javascript
 

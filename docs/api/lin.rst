@@ -151,7 +151,7 @@ interface:
          master->SendFrameHeader(0x10);
 
 
-A successful transmission is confirmed via the registered callback, e.g.::
+A successful transmission is confirmed via the registered callback, for example::
 
   frameStatusHandler(master, frameStatusEvent);
   // With:

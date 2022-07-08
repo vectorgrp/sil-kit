@@ -2,7 +2,7 @@
 Header Files
 ============
 The header files are organized hierarchically starting with the ``silkit`` directory.
-The subdirectory structure resembles the layered architecture of the SILKIT.
+The subdirectory structure resembles the layered architecture of the SIL Kit.
 As a rule of thumb, each component has a subdirectory with its own namespace:
 
 .. list-table:: Include Directories
@@ -29,9 +29,9 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
       - Generic programming utilities
     * - silkit/config
       - ``SilKit::Config``
-      - Data structures representing the SILKIT :doc:`../configuration/configuration`.
+      - Data structures representing the SIL Kit :doc:`../configuration/configuration`.
 
-The subdirectory layout follows mostly a uniform scheme for substantial SILKIT components:
+The subdirectory layout follows mostly a uniform scheme for substantial SIL Kit components:
  - `silkit/<component>/all.hpp` is sufficient to use the component.
  - `silkit/<component>/fwd_decl.hpp` contains forward declarations. 
  - Datatypes are declared in ``silkit/<component>/<Component>Datatypes.hpp``.
@@ -39,12 +39,12 @@ The subdirectory layout follows mostly a uniform scheme for substantial SILKIT c
 
 .. _sec:header-silkit-main:
 
-Using the SILKIT Headers
----------------------
+Using the SIL Kit Headers
+-------------------------
 The main header file is ``silkit/SilKit.hpp`` which defines the 
 :cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>` function.
 Version information can be retrieved using the ``silkit/version.hpp`` header 
-and its functions, e.g. by using the 
+and its functions, e.g., by using the 
 :cpp:func:`Version::String()<SilKit::Version::String()>` function.
 
 Further Reading

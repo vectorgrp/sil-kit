@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../ThirdParty/breathe/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'SilKit'
+project = 'Vector SIL Kit'
 copyright = 'Vector Informatik GmbH. All rights reserved.'
 author = 'Vector Informatik GmbH'
 version = '4.0.0'

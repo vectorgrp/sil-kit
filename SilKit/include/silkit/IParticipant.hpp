@@ -80,8 +80,14 @@ public:
 
     //! \brief Return the ILifecycleService for the current participant.
     virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+
+    //! \brief Return the ISystemMonitor for the current participant.
     virtual auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
+
+    //! \brief Return the ISystemController for the current participant.
     virtual auto GetSystemController() -> Services::Orchestration::ISystemController* = 0;
+
+    //! \brief Return the ILogger for the current participant.
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 };
 

@@ -160,7 +160,7 @@ When sending frames, the |EthernetTransmitStatus| of the |EthernetFrameTransmitE
 - |ControllerInactive|: The sending Ethernet controller tried to send a frame before |Activate| was called.
 - |LinkDown|: |Activate| has been called but the link to another Ethernet Controller has not yet been established.
 - |Dropped|: Indicates a transmit queue overflow.
-- |InvalidFrameFormat|: The Ethernet frame is invalid, e.g. too small or too large.
+- |InvalidFrameFormat|: The Ethernet frame is invalid, e.g., too small or too large.
 
 .. _sec:api-ethernet-tracing:
 
@@ -227,13 +227,13 @@ has to be specified as "PcapPipe" in the configuration:
   ]
     
 
-The SILKIT process responsible for the Ethernet Controller "ETH0" will open the specified named pipe "EthernetPipe" during
-start up of the Participant. When the SilKit writes the first message to the pipe, the SILKIT process will be 
+The SIL Kit process responsible for the Ethernet Controller "ETH0" will open the specified named pipe "EthernetPipe" during
+start up of the Participant. When the SIL Kit writes the first message to the pipe, the SIL Kit process will be 
 blocked until another process connects to the named pipe and reads the traced messages from the pipe.
 
 The reading process could be a tool like `Wireshark <https://www.wireshark.org/>`_, which allows visualizing live trace
 messages. Under Windows, named pipes reside in a special filesystem namespace prefixed with "\\.\pipe\". The following 
-snippet will attach *wireshark* to the named pipe created by your SILKIT simulation:
+snippet will attach *wireshark* to the named pipe created by your SIL Kit simulation:
 
 .. code-block:: powershell
 
