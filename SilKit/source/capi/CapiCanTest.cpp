@@ -66,20 +66,24 @@ namespace {
         MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId));
     };
 
-    void FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* /*ack*/)
+    void FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* ack)
     {
+        ASSERT_TRUE(SilKit_Struct_GetId(*ack) == SilKit_InterfaceIdentifier_CanFrameTransmitEvent);
     }
 
-    void FrameHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameEvent* /*metaData*/)
+    void FrameHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameEvent* metaData)
     {
+        ASSERT_TRUE(SilKit_Struct_GetId(*metaData) == SilKit_InterfaceIdentifier_CanFrameEvent);
     }
 
-    void StateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanStateChangeEvent* /*state*/)
+    void StateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanStateChangeEvent* state)
     {
+        ASSERT_TRUE(SilKit_Struct_GetId(*state) == SilKit_InterfaceIdentifier_CanStateChangeEvent);
     }
 
-    void ErrorStateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanErrorStateChangeEvent* /*state*/)
+    void ErrorStateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanErrorStateChangeEvent* state)
     {
+        ASSERT_TRUE(SilKit_Struct_GetId(*state) == SilKit_InterfaceIdentifier_CanErrorStateChangeEvent);
     }
 
     class MockParticipant : public DummyParticipant
