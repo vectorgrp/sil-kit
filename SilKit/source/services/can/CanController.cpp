@@ -139,10 +139,10 @@ auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTx
 }
 
 //------------------------
-// ReceiveSilKitMessage
+// ReceiveMsg
 //------------------------
 
-void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const CanFrameEvent& msg)
+void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -153,7 +153,7 @@ void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Can
     CallHandlers(msg);
 }
 
-void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const CanFrameTransmitEvent& msg)
+void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -163,7 +163,7 @@ void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Can
     CallHandlers(msg);
 }
 
-void CanController::ReceiveSilKitMessage(const IServiceEndpoint* from, const CanControllerStatus& msg)
+void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanControllerStatus& msg)
 {
     if (!AllowReception(from))
     {

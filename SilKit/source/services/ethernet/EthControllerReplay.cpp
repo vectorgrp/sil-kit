@@ -57,7 +57,7 @@ void EthControllerReplay::AddBitrateChangeHandler(BitrateChangeHandler handler)
 }
 
 // IMsgForEthController
-void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
+void EthControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
     // ignore messages that do not originate from the replay scheduler 
     //if (tracing::IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Receive))
@@ -65,14 +65,14 @@ void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, con
     //    return;
     //}
 
-    _controller.ReceiveSilKitMessage(from, msg);
+    _controller.ReceiveMsg(from, msg);
 }
 
-void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const EthernetFrameTransmitEvent& /*msg*/)
+void EthControllerReplay::ReceiveMsg(const IServiceEndpoint* /*from*/, const EthernetFrameTransmitEvent& /*msg*/)
 {
 }
 
-void EthControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const EthernetStatus& /*msg*/)
+void EthControllerReplay::ReceiveMsg(const IServiceEndpoint* /*from*/, const EthernetStatus& /*msg*/)
 {
 }
 
@@ -130,7 +130,7 @@ void EthControllerReplay::ReplayReceive(const IReplayMessage* replayMessage)
     Services::Ethernet::EthernetFrameEvent msg{};
     msg.frame = std::move(frame);
     msg.timestamp = replayMessage->Timestamp();
-    _controller.ReceiveSilKitMessage(&replayService, msg);
+    _controller.ReceiveMsg(&replayService, msg);
 }
 
 } // namespace Ethernet

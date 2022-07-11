@@ -93,12 +93,12 @@ public:
     void RemoveCycleStartHandler(HandlerId handlerId) override;
 
     // IMsgForFlexrayController
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
 
     // ITraceMessageSource
     inline void AddSink(ITraceMessageSink* sink) override;

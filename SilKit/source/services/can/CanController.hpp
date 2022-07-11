@@ -82,9 +82,9 @@ public:
     void RemoveFrameTransmitHandler(HandlerId handlerId) override;
 
     // IMsgForCanController
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
 
     //ITraceMessageSource
     inline void AddSink(ITraceMessageSink* sink) override;

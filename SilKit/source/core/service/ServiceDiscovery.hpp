@@ -57,8 +57,8 @@ public: // Interfaces
     auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
     // IReceiver
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ParticipantDiscoveryEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ServiceDiscoveryEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const ParticipantDiscoveryEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const ServiceDiscoveryEvent& msg) override;
 
 private: // Methods
 

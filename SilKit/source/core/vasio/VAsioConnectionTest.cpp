@@ -82,9 +82,9 @@ struct MockSilKitMessageReceiver
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
     // IMessageReceiver<T>
-    MOCK_METHOD(void, ReceiveSilKitMessage, (const SilKit::Core::IServiceEndpoint*, const Tests::Version1::TestMessage&), (override));
-    MOCK_METHOD(void, ReceiveSilKitMessage, (const SilKit::Core::IServiceEndpoint*, const Tests::Version2::TestMessage&), (override));
-    MOCK_METHOD(void, ReceiveSilKitMessage, (const SilKit::Core::IServiceEndpoint*, const Tests::TestFrameEvent&), (override));
+    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::Version1::TestMessage&), (override));
+    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::Version2::TestMessage&), (override));
+    MOCK_METHOD(void, ReceiveMsg, (const SilKit::Core::IServiceEndpoint*, const Tests::TestFrameEvent&), (override));
 
     // IServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));

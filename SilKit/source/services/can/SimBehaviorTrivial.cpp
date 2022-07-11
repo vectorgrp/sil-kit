@@ -20,11 +20,11 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::ReceiveSilKitMessage(const MsgT& msg)
+void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
 {
     auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     assert(receivingController);
-    receivingController->ReceiveSilKitMessage(_parentServiceEndpoint, msg);
+    receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
 auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
@@ -42,7 +42,7 @@ void SimBehaviorTrivial::SendMsg(CanSetControllerMode&& mode)
     newStatus.timestamp = _timeProvider->Now();
     newStatus.controllerState = mode.mode;
 
-    ReceiveSilKitMessage(newStatus);
+    ReceiveMsg(newStatus);
 }
 
 void SimBehaviorTrivial::SendMsg(CanFrameEvent&& canFrameEvent)
@@ -57,7 +57,7 @@ void SimBehaviorTrivial::SendMsg(CanFrameEvent&& canFrameEvent)
         _tracer.Trace(SilKit::Services::TransmitDirection::TX, now, canFrameEvent);
 
         // Self delivery as TX
-        ReceiveSilKitMessage(canFrameEventCpy);
+        ReceiveMsg(canFrameEventCpy);
 
         // Send to others as RX
         canFrameEventCpy.direction = TransmitDirection::RX;
@@ -71,7 +71,7 @@ void SimBehaviorTrivial::SendMsg(CanFrameEvent&& canFrameEvent)
         ack.userContext = canFrameEvent.userContext;
         ack.timestamp = now;
 
-        ReceiveSilKitMessage(ack);
+        ReceiveMsg(ack);
     }
     else
     {

@@ -116,11 +116,11 @@ public:
     {
         SendMsg_proxy(from, msg);
     }
-    MOCK_METHOD2(ReceiveSilKitMessage, void(EndpointAddress, const GenericMessage&));
+    MOCK_METHOD2(ReceiveMsg, void(EndpointAddress, const GenericMessage&));
 
     // CAN
     MOCK_METHOD2(SendMsg_proxy, void(const IServiceEndpoint*, const CanMessage&));
-    MOCK_METHOD2(ReceiveSilKitMessage, void(EndpointAddress, const CanMessage&));
+    MOCK_METHOD2(ReceiveMsg, void(EndpointAddress, const CanMessage&));
     void SendMsg(const IServiceEndpoint* from, CanMessage&& msg) override
     {
         SendMsg_proxy(from, msg);
@@ -503,7 +503,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
         sub.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, ReceiveSilKitMessage(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         sub.ReplayMessage(&msg);
@@ -515,7 +515,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
         sub.SetServiceDescriptor(from_endpointAddress(msg._address));
-        EXPECT_CALL(participant, ReceiveSilKitMessage(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(0);
         sub.ReplayMessage(&msg);
@@ -527,7 +527,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
         sub.SetServiceDescriptor(from_endpointAddress({1,3}));
-        EXPECT_CALL(participant, ReceiveSilKitMessage(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         sub.ReplayMessage(&msg);
@@ -539,7 +539,7 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
 
         Services::generic::GenericSubscriberReplay sub{&participant, cfg, participant.GetTimeProvider()};
         sub.SetServiceDescriptor(from_endpointAddress({1,3}));
-        EXPECT_CALL(participant, ReceiveSilKitMessage(msg._address, AGenericMessage(msg)))
+        EXPECT_CALL(participant, ReceiveMsg(msg._address, AGenericMessage(msg)))
             .Times(0);
         EXPECT_CALL(participant.mockTimeProvider.mockTime, Now()).Times(1);
         sub.ReplayMessage(&msg);

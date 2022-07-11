@@ -141,7 +141,7 @@ void SilKitLink<MsgT>::DispatchSilKitMessage(ReceiverT* to, const IServiceEndpoi
 {
     try
     {
-        to->ReceiveSilKitMessage(from, msg);
+        to->ReceiveMsg(from, msg);
     }
     catch (const std::exception& e)
     {

@@ -23,7 +23,7 @@ RpcServerInternal::RpcServerInternal(Core::IParticipantInternal* participant, Se
 {
 }
 
-void RpcServerInternal::ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const FunctionCall& msg)
+void RpcServerInternal::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const FunctionCall& msg)
 {
     ReceiveMessage(msg);
 }

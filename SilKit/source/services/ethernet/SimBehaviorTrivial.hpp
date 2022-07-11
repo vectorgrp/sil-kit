@@ -29,7 +29,7 @@ public:
 
 private:
     template <typename MsgT>
-    void ReceiveSilKitMessage(const MsgT& msg);
+    void ReceiveMsg(const MsgT& msg);
 
     Core::IParticipantInternal* _participant{nullptr};
     EthController* _parentController{nullptr};

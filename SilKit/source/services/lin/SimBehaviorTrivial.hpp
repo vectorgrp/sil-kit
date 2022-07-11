@@ -36,7 +36,7 @@ public:
 
 private:
     template <typename MsgT>
-    void ReceiveSilKitMessage(const MsgT& msg);
+    void ReceiveMsg(const MsgT& msg);
 
     template <typename MsgT>
     void SendMsgImpl(MsgT&& msg);

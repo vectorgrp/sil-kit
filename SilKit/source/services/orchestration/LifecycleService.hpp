@@ -62,8 +62,8 @@ public:
     auto State() const -> ParticipantState override;
     auto Status() const -> const ParticipantStatus& override;
 
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& msg) override;
 
     // Used by Policies
     template <class MsgT>

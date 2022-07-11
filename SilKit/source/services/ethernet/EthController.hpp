@@ -66,9 +66,9 @@ public:
     void RemoveBitrateChangeHandler(HandlerId handlerId) override;
 
     // IMsgForEthController
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // ITraceMessageSource
     inline void AddSink(ITraceMessageSink* sink) override;

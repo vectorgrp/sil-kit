@@ -13,7 +13,7 @@ LogMsgReceiver::LogMsgReceiver(Core::IParticipantInternal* participant, Logger* 
     (void)_participant;
 }
 
-void LogMsgReceiver::ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const LogMsg& msg)
+void LogMsgReceiver::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const LogMsg& msg)
 {
     _logger->LogReceivedMsg(msg);
 }

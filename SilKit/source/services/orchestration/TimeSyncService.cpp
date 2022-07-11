@@ -311,7 +311,7 @@ void TimeSyncService::AwaitNotPaused()
     }
 }
 
-void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
+void TimeSyncService::ReceiveMsg(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
@@ -319,7 +319,7 @@ void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, con
     //Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
 }
 
-void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint* from, const NextSimTask& task)
+void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task)
 {
     if (_timeSyncPolicy)
     {
@@ -327,7 +327,7 @@ void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint* from, const N
     }
 }
 
-void TimeSyncService::ReceiveSilKitMessage(const IServiceEndpoint*, const SystemCommand& command)
+void TimeSyncService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& command)
 {
     if (command.kind == SystemCommand::Kind::Run && _timeSyncConfigured)
     {

@@ -90,7 +90,7 @@ void RpcClient::SetCallResultHandler(RpcCallResultHandler handler)
     _handler = std::move(handler);
 }
 
-void RpcClient::ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const FunctionCallResponse& msg)
+void RpcClient::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const FunctionCallResponse& msg)
 {
     ReceiveMessage(msg);
 }

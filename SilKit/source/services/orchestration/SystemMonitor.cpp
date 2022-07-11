@@ -19,7 +19,7 @@ SystemMonitor::SystemMonitor(Core::IParticipantInternal* participant)
 {
 }
 
-void SystemMonitor::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/,
+void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/,
                                      const Orchestration::WorkflowConfiguration& workflowConfiguration)
 {
     UpdateRequiredParticipantNames(workflowConfiguration.requiredParticipantNames);
@@ -119,7 +119,7 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantName) const 
     return statusIter->second;
 }
 
-void SystemMonitor::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const Orchestration::ParticipantStatus& newParticipantStatus)
+void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestration::ParticipantStatus& newParticipantStatus)
 {
     auto participantName = newParticipantStatus.participantName;
 

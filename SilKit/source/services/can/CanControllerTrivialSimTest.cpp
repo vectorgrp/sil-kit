@@ -117,7 +117,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message)
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
-    canController.ReceiveSilKitMessage(&canControllerPlaceholder, testFrameEvent);
+    canController.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
 }
 
 TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
@@ -145,7 +145,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
-    canController.ReceiveSilKitMessage(&canControllerPlaceholder, testFrameEvent);
+    canController.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
 }
 
 
@@ -175,7 +175,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter2)
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);
-    canController.ReceiveSilKitMessage(&canControllerPlaceholder, testFrameEvent);
+    canController.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
 }
 
 TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
@@ -380,7 +380,7 @@ TEST(CanControllerTrivialSimTest, DISABLED_cancontroller_uses_tracing)
 
     CanController canControllerPlaceholder(&participant, {}, participant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(otherAddress));
-    controller.ReceiveSilKitMessage(&canControllerPlaceholder, testFrameEvent);
+    controller.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
 }
 
 TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)

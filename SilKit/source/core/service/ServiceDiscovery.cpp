@@ -32,7 +32,7 @@ auto ServiceDiscovery::GetServiceDescriptor() const -> const Core::ServiceDescri
     return _serviceDescriptor;
 }
 
-void ServiceDiscovery::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ParticipantDiscoveryEvent& msg)
+void ServiceDiscovery::ReceiveMsg(const IServiceEndpoint* /*from*/, const ParticipantDiscoveryEvent& msg)
 {
     if (_shuttingDown)
     {
@@ -120,7 +120,7 @@ void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDesc
     _participant->SendMsg(this, std::move(event));
 }
 
-void ServiceDiscovery::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
+void ServiceDiscovery::ReceiveMsg(const IServiceEndpoint* /*from*/, const ServiceDiscoveryEvent& msg)
 {
     if (_shuttingDown)
     {

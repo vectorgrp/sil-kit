@@ -120,7 +120,7 @@ TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
     LinTransmission transmission;
     transmission.frame = rxFrame;
     transmission.status = LinFrameStatus::LIN_RX_OK;
-    controller.ReceiveSilKitMessage(&controllerBusSim, transmission);
+    controller.ReceiveMsg(&controllerBusSim, transmission);
 }
 
 TEST_F(LinControllerDetailedSimTest, set_frame_response)
@@ -196,7 +196,7 @@ TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler)
     EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response2))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controller2, responseUpdate);
+    controller.ReceiveMsg(&controller2, responseUpdate);
 }
 
 TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler_for_slave_config)
@@ -224,7 +224,7 @@ TEST_F(LinControllerDetailedSimTest, trigger_frame_response_update_handler_for_s
     EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response2))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controller2, slaveCfg);
+    controller.ReceiveMsg(&controller2, slaveCfg);
 }
 
 TEST_F(LinControllerDetailedSimTest, go_to_sleep)
@@ -278,7 +278,7 @@ TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
     goToSleep.frame = GoToSleepFrame();
     goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, goToSleep);
+    controller.ReceiveMsg(&controllerBusSim, goToSleep);
 }
 
 TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
@@ -298,7 +298,7 @@ TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
     goToSleep.frame.data[0] = 1;
     goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, goToSleep);
+    controller.ReceiveMsg(&controllerBusSim, goToSleep);
 }
 
 TEST_F(LinControllerDetailedSimTest, wake_up)
@@ -347,7 +347,7 @@ TEST_F(LinControllerDetailedSimTest, call_wakeup_handler)
 
     LinWakeupPulse wakeupPulse;
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, wakeupPulse);
+    controller.ReceiveMsg(&controllerBusSim, wakeupPulse);
 }
 
 // No initialization causes exception

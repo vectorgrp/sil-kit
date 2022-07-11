@@ -434,7 +434,7 @@ TEST_F(FlexrayControllerTest, call_message_handler)
     EXPECT_CALL(callbacks, MessageHandler(&controller, message))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, message);
+    controller.ReceiveMsg(&controllerBusSim, message);
 }
 
 TEST_F(FlexrayControllerTest, call_message_ack_handler)
@@ -451,7 +451,7 @@ TEST_F(FlexrayControllerTest, call_message_ack_handler)
     EXPECT_CALL(callbacks, MessageAckHandler(&controller, ack))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, ack);
+    controller.ReceiveMsg(&controllerBusSim, ack);
 }
 
 TEST_F(FlexrayControllerTest, call_wakeup_handler)
@@ -476,9 +476,9 @@ TEST_F(FlexrayControllerTest, call_wakeup_handler)
     EXPECT_CALL(callbacks, WakeupHandler(&controller, casMts))
         .Times(0);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, wusSymbolEvent);
-    controller.ReceiveSilKitMessage(&controllerBusSim, wudopSymbolEvent);
-    controller.ReceiveSilKitMessage(&controllerBusSim, casMtsSymbolEvent);
+    controller.ReceiveMsg(&controllerBusSim, wusSymbolEvent);
+    controller.ReceiveMsg(&controllerBusSim, wudopSymbolEvent);
+    controller.ReceiveMsg(&controllerBusSim, casMtsSymbolEvent);
 }
 
 TEST_F(FlexrayControllerTest, call_pocstatus_handler)
@@ -492,7 +492,7 @@ TEST_F(FlexrayControllerTest, call_pocstatus_handler)
     EXPECT_CALL(callbacks, PocStatusHandler(&controller, poc))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, poc);
+    controller.ReceiveMsg(&controllerBusSim, poc);
 }
 
 TEST_F(FlexrayControllerTest, call_symbol_handler)
@@ -514,9 +514,9 @@ TEST_F(FlexrayControllerTest, call_symbol_handler)
     EXPECT_CALL(callbacks, SymbolHandler(&controller, casMts))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, wus);
-    controller.ReceiveSilKitMessage(&controllerBusSim, wudop);
-    controller.ReceiveSilKitMessage(&controllerBusSim, casMts);
+    controller.ReceiveMsg(&controllerBusSim, wus);
+    controller.ReceiveMsg(&controllerBusSim, wudop);
+    controller.ReceiveMsg(&controllerBusSim, casMts);
 }
 
 TEST_F(FlexrayControllerTest, call_symbol_ack_handler)
@@ -530,7 +530,7 @@ TEST_F(FlexrayControllerTest, call_symbol_ack_handler)
     EXPECT_CALL(callbacks, SymbolAckHandler(&controller, ack))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, ack);
+    controller.ReceiveMsg(&controllerBusSim, ack);
 }
 
 TEST_F(FlexrayControllerTest, call_cyclestart_handler)
@@ -544,7 +544,7 @@ TEST_F(FlexrayControllerTest, call_cyclestart_handler)
     EXPECT_CALL(callbacks, CycleStartHandler(&controller, cycleStart))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, cycleStart);
+    controller.ReceiveMsg(&controllerBusSim, cycleStart);
 }
 
 /*! \brief Multiple handlers added and removed
@@ -566,7 +566,7 @@ TEST_F(FlexrayControllerTest, add_remove_handler)
     message.frame.payload = referencePayload;
 
     EXPECT_CALL(callbacks, MessageHandler(&controller, message)).Times(numHandlers);
-    controller.ReceiveSilKitMessage(&controllerBusSim, message);
+    controller.ReceiveMsg(&controllerBusSim, message);
 
     for (auto&& handlerId : handlerIds)
     {
@@ -574,7 +574,7 @@ TEST_F(FlexrayControllerTest, add_remove_handler)
     }
 
     EXPECT_CALL(callbacks, MessageHandler(&controller, message)).Times(0);
-    controller.ReceiveSilKitMessage(&controllerBusSim, message);
+    controller.ReceiveMsg(&controllerBusSim, message);
 }
 
 } // namespace

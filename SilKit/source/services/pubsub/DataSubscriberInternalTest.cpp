@@ -58,7 +58,7 @@ TEST_F(DataSubscriberInternalTest, trigger_default_data_handler)
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(nullptr, msg)).Times(1);
 
-    subscriber.ReceiveSilKitMessage(&subscriberOther, msg);
+    subscriber.ReceiveMsg(&subscriberOther, msg);
 }
 
 TEST_F(DataSubscriberInternalTest, trigger_explicit_data_handler_fallback_default_data_handler)
@@ -70,13 +70,13 @@ TEST_F(DataSubscriberInternalTest, trigger_explicit_data_handler_fallback_defaul
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicit(nullptr, msg)).Times(1);
-    subscriber.ReceiveSilKitMessage(&subscriberOther, msg);
+    subscriber.ReceiveMsg(&subscriberOther, msg);
 
     subscriber.RemoveExplicitDataMessageHandler(handlerId);
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(nullptr, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicit(testing::_, testing::_)).Times(0);
-    subscriber.ReceiveSilKitMessage(&subscriberOther, msg);
+    subscriber.ReceiveMsg(&subscriberOther, msg);
 }
 
 } // anonymous namespace

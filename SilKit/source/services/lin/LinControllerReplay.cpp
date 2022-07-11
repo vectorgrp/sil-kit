@@ -136,34 +136,34 @@ void LinControllerReplay::AddFrameResponseUpdateHandler(FrameResponseUpdateHandl
     _controller.AddFrameResponseUpdateHandler(std::move(handler));
 }
 
-void LinControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinTransmission& msg)
+void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg)
 {
     // Transmissions are always issued by a master.
-    _controller.ReceiveSilKitMessage(from, msg);
+    _controller.ReceiveMsg(from, msg);
 }
 
-void LinControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinWakeupPulse& msg)
+void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg)
 {
     //Wakeup pulses are not part of a replay, but are valid during a replay.
-    _controller.ReceiveSilKitMessage(from, msg);
+    _controller.ReceiveMsg(from, msg);
 }
 
-void LinControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerConfig& msg)
+void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg)
 {
     // ControllerConfigs are not part of a replay, but are valid during a replay.
-    _controller.ReceiveSilKitMessage(from, msg);
+    _controller.ReceiveMsg(from, msg);
 }
 
-void LinControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
+void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
 {
     // FrameResponseUpdates are generated from a master during a replay.
-    _controller.ReceiveSilKitMessage(from, msg);
+    _controller.ReceiveMsg(from, msg);
 }
 
-void LinControllerReplay::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg)
+void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg)
 {
     // ControllerStatupsUpdates are not part of a replay, but are valid during a replay.
-    _controller.ReceiveSilKitMessage(from, msg);
+    _controller.ReceiveMsg(from, msg);
 }
 
 // ITraceMessageSource

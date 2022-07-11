@@ -174,7 +174,7 @@ TEST_F(DataSubscriberTest, add_remove_explicit_message_handler_through_data_subs
     EXPECT_CALL(callbacks, ReceiveDataDefault(&subscriber, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
-    subscriberInternal->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal->ReceiveMsg(&publisher, msg);
 
     const auto handlerIdA = subscriber.AddExplicitDataMessageHandler(
         SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataExplicitA), mediaType, labels);
@@ -182,7 +182,7 @@ TEST_F(DataSubscriberTest, add_remove_explicit_message_handler_through_data_subs
     EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(&subscriber, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
-    subscriberInternal->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal->ReceiveMsg(&publisher, msg);
 
     const auto handlerIdB = subscriber.AddExplicitDataMessageHandler(
         SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataExplicitB), mediaType, labels);
@@ -190,7 +190,7 @@ TEST_F(DataSubscriberTest, add_remove_explicit_message_handler_through_data_subs
     EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(&subscriber, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
-    subscriberInternal->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal->ReceiveMsg(&publisher, msg);
 
     // create the second internal subscriber for publisher
     serviceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -201,31 +201,31 @@ TEST_F(DataSubscriberTest, add_remove_explicit_message_handler_through_data_subs
     EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(&subscriber, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
-    subscriberInternal2->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal2->ReceiveMsg(&publisher, msg);
 
     subscriber.RemoveExplicitDataMessageHandler(handlerIdA);
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
-    subscriberInternal->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal->ReceiveMsg(&publisher, msg);
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(&subscriber, msg)).Times(1);
-    subscriberInternal2->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal2->ReceiveMsg(&publisher, msg);
 
     subscriber.RemoveExplicitDataMessageHandler(handlerIdB);
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(&subscriber, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
-    subscriberInternal->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal->ReceiveMsg(&publisher, msg);
 
     EXPECT_CALL(callbacks, ReceiveDataDefault(&subscriber, msg)).Times(1);
     EXPECT_CALL(callbacks, ReceiveDataExplicitA(testing::_, testing::_)).Times(0);
     EXPECT_CALL(callbacks, ReceiveDataExplicitB(testing::_, testing::_)).Times(0);
-    subscriberInternal2->ReceiveSilKitMessage(&publisher, msg);
+    subscriberInternal2->ReceiveMsg(&publisher, msg);
 }
 
 } // anonymous namespace

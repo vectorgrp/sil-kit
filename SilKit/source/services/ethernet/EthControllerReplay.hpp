@@ -45,9 +45,9 @@ public:
     void AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
     // IMsgForEthController
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // SilKit::Services::Orchestration::ITimeConsumer
     void SetTimeProvider(SilKit::Services::Orchestration::ITimeProvider* timeProvider) override;

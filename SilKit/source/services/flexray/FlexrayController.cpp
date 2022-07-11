@@ -192,10 +192,10 @@ void FlexrayController::Wakeup()
 }
 
 //------------------------
-// ReceiveSilKitMessage
+// ReceiveMsg
 //------------------------
 
-void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -206,7 +206,7 @@ void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -222,7 +222,7 @@ void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -244,7 +244,7 @@ void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -254,7 +254,7 @@ void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -264,7 +264,7 @@ void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const
     CallHandlers(msg);
 }
 
-void FlexrayController::ReceiveSilKitMessage(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg)
 {
     if (!AllowReception(from))
     {

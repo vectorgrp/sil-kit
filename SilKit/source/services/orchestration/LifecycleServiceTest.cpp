@@ -253,37 +253,37 @@ TEST_F(LifecycleServiceTest, start_restart_stop_coordinated)
     lifecycleService.NewSystemState(SystemState::ReadyToRun);
     // run, pause & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // transitions to own state must not fail
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Pause("Test");
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Paused);
     lifecycleService.Continue();
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
     // transitions to own state must not fail
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
     // restart
     ParticipantCommand restartCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Restart};
-    lifecycleService.ReceiveSilKitMessage(&masterId, restartCommand);
+    lifecycleService.ReceiveMsg(&masterId, restartCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ServicesCreated);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop again
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
     // shutdown
     ParticipantCommand shutdownCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Shutdown};
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -326,9 +326,9 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run, pause & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Pause("Test");
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Paused);
@@ -380,14 +380,14 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // repeat signal (must be ignored)
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // shutdown (invalid transition -> error)
     ParticipantCommand shutdownCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Shutdown};
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
@@ -437,25 +437,25 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_restart)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & stop
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // repeat signal (must be ignored)
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // shutdown (invalid transition -> error)
     ParticipantCommand shutdownCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Shutdown};
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
     // recover via restart
     ParticipantCommand restartCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Restart};
-    lifecycleService.ReceiveSilKitMessage(&masterId, restartCommand);
+    lifecycleService.ReceiveMsg(&masterId, restartCommand);
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // break it again
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
     // recover via shutdown
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -513,15 +513,15 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // stop - callback throws -> expect error state
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
     // recover via shutdown - callback throws -> expect shutdown state (error will be ignored)
     ParticipantCommand shutdownCommand{descriptor.GetParticipantId(), ParticipantCommand::Kind::Shutdown};
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -562,7 +562,7 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -607,11 +607,11 @@ TEST_F(LifecycleServiceTest, Abort_Running)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -659,11 +659,11 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     lifecycleService.Pause("Test");
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Paused);
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -685,7 +685,7 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
         .WillRepeatedly(Invoke([&]() 
             {
                 SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-                lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+                lifecycleService.ReceiveMsg(&masterId, abortCommand);
                 EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopping);
             }));
     
@@ -723,9 +723,9 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -773,13 +773,13 @@ TEST_F(LifecycleServiceTest, Abort_Stop)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -800,7 +800,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
         .WillRepeatedly(Invoke([&]() 
             {
                 SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-                lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+                lifecycleService.ReceiveMsg(&masterId, abortCommand);
                 EXPECT_EQ(lifecycleService.State(), ParticipantState::ShuttingDown);
             }));
 
@@ -838,13 +838,13 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     ParticipantCommand shutdownCommand;
     shutdownCommand.participant = descriptor.GetParticipantId();
     shutdownCommand.kind=ParticipantCommand::Kind::Shutdown;
-    lifecycleService.ReceiveSilKitMessage(&masterId, shutdownCommand);
+    lifecycleService.ReceiveMsg(&masterId, shutdownCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -892,12 +892,12 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run & pause
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     SystemCommand stopCommand{SystemCommand::Kind::Stop};
-    lifecycleService.ReceiveSilKitMessage(&masterId, stopCommand);
+    lifecycleService.ReceiveMsg(&masterId, stopCommand);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
@@ -932,7 +932,7 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveSilKitMessage(&masterId, abortCommand);
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 }
 
@@ -972,7 +972,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
@@ -1011,7 +1011,7 @@ TEST_F(LifecycleServiceTest, no_starting_callback_call_if_timesync_active)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
     // run
     SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveSilKitMessage(&masterId, runCommand);
+    lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
 }
 

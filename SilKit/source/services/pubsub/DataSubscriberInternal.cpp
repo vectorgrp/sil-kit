@@ -38,7 +38,7 @@ void DataSubscriberInternal::RemoveExplicitDataMessageHandler(HandlerId handlerI
     _explicitDataMessageHandlers.Remove(handlerId);
 }
 
-void DataSubscriberInternal::ReceiveSilKitMessage(const Core::IServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
+void DataSubscriberInternal::ReceiveMsg(const Core::IServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
 {
     if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;

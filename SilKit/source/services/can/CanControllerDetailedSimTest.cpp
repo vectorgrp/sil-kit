@@ -90,7 +90,7 @@ TEST(CanControllerDetailedSimTest, receive_can_message)
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
 
-    canController.ReceiveSilKitMessage(&canControllerFrom, testFrameEvent);
+    canController.ReceiveMsg(&canControllerFrom, testFrameEvent);
 }
 
 TEST(CanControllerDetailedSimTest, start_stop_sleep_reset)
@@ -178,17 +178,17 @@ TEST(CanControllerDetailedSimTest, receive_new_controller_state)
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveSilKitMessage(&canControllerFrom, controllerStatus);
+    canController.ReceiveMsg(&canControllerFrom, controllerStatus);
 
     // only stateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::NotAvailable;
-    canController.ReceiveSilKitMessage(&canControllerFrom, controllerStatus);
+    canController.ReceiveMsg(&canControllerFrom, controllerStatus);
 
     // only errorStateChanged should be called
     controllerStatus.controllerState = CanControllerState::Started;
     controllerStatus.errorState = CanErrorState::ErrorActive;
-    canController.ReceiveSilKitMessage(&canControllerFrom, controllerStatus);
+    canController.ReceiveMsg(&canControllerFrom, controllerStatus);
 }
 
 TEST(CanControllerDetailedSimTest, receive_ack)
@@ -223,8 +223,8 @@ TEST(CanControllerDetailedSimTest, receive_ack)
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
 
-    canController.ReceiveSilKitMessage(&canControllerFrom, ack1);
-    canController.ReceiveSilKitMessage(&canControllerFrom, ack2);
+    canController.ReceiveMsg(&canControllerFrom, ack1);
+    canController.ReceiveMsg(&canControllerFrom, ack2);
 }
 
 /*! \brief Ensure that the proxy does not generate an Ack
@@ -254,7 +254,7 @@ TEST(CanControllerDetailedSimTest, must_not_generate_ack)
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
     canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
 
-    canController.ReceiveSilKitMessage(&canControllerFrom, msg);
+    canController.ReceiveMsg(&canControllerFrom, msg);
 }
 
 } // anonymous namespace

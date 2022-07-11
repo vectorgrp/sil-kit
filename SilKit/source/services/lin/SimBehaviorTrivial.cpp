@@ -61,11 +61,11 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::ReceiveSilKitMessage(const MsgT& msg)
+void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
 {
     auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     assert(receivingController);
-    receivingController->ReceiveSilKitMessage(_parentServiceEndpoint, msg);
+    receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
 auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
@@ -201,7 +201,7 @@ void SimBehaviorTrivial::Wakeup()
     SendMsgImpl(pulse);
 
     // No self delivery: directly call handlers with direction=TX
-    ReceiveSilKitMessage(LinWakeupPulse{pulse.timestamp, TransmitDirection::TX});
+    ReceiveMsg(LinWakeupPulse{pulse.timestamp, TransmitDirection::TX});
     _parentController->WakeupInternal();
 }
 

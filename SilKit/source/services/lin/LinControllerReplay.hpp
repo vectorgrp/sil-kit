@@ -49,11 +49,11 @@ public:
     void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
 
     // IMsgForLinController
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinTransmission& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinWakeupPulse& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerConfig& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
 
 public:
     // ----------------------------------------

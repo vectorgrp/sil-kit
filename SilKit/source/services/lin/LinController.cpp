@@ -307,10 +307,10 @@ auto LinController::GetResponse(LinIdT id) -> std::pair<int, LinFrame>
 }
 
 //------------------------
-// ReceiveSilKitMessage
+// ReceiveMsg
 //------------------------
 
-void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinTransmission& msg)
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg)
 {
     if (!AllowReception(from))
     {
@@ -367,7 +367,7 @@ void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Lin
     }
 }
 
-void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinWakeupPulse& msg)
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg)
 {
     if (!AllowReception(from))
     {
@@ -377,7 +377,7 @@ void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Lin
     CallHandlers(LinWakeupEvent{msg.timestamp, msg.direction});
 }
 
-void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerConfig& msg)
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg)
 {
     // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in detailed simulations.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the detailed simulations.
@@ -396,7 +396,7 @@ void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Lin
     }
 }
 
-void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
 {
     // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in detailed simulations.
     // However, we also want to make users of FrameResponseUpdateHandlers happy when using the detailed simulations.
@@ -413,7 +413,7 @@ void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Lin
     }
 }
 
-void LinController::ReceiveSilKitMessage(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg)
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg)
 {
     auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
     linNode.controllerStatus = msg.status;

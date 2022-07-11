@@ -138,8 +138,8 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
         descr)).Times(1);
 
     // when sending a different service descriptor, we expect a notification once
-    disco.ReceiveSilKitMessage(&otherParticipant, event);
-    disco.ReceiveSilKitMessage(&otherParticipant, event);//should not trigger callback, is cached
+    disco.ReceiveMsg(&otherParticipant, event);
+    disco.ReceiveMsg(&otherParticipant, event);//should not trigger callback, is cached
 }
 TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 {
@@ -171,8 +171,8 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
             ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, descr)
         ).Times(1);
 
-        disco.ReceiveSilKitMessage(&otherParticipant, event);
-        disco.ReceiveSilKitMessage(&otherParticipant, event);//duplicate should not trigger a notification
+        disco.ReceiveMsg(&otherParticipant, event);
+        disco.ReceiveMsg(&otherParticipant, event);//duplicate should not trigger a notification
 
     };
 
@@ -211,7 +211,7 @@ TEST_F(DiscoveryServiceTest, service_removal)
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, descr)
     ).Times(0);
-    disco.ReceiveSilKitMessage(&otherParticipant, event);
+    disco.ReceiveMsg(&otherParticipant, event);
 
     // add a modified one
     event.serviceDescriptor.SetServiceName("Modified");
@@ -222,19 +222,19 @@ TEST_F(DiscoveryServiceTest, service_removal)
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, modifiedDescr)
     ).Times(0);
-    disco.ReceiveSilKitMessage(&otherParticipant, event);
+    disco.ReceiveMsg(&otherParticipant, event);
     // Test removal
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceRemoved, modifiedDescr)
     ).Times(1);
-    disco.ReceiveSilKitMessage(&otherParticipant, event);
+    disco.ReceiveMsg(&otherParticipant, event);
 
     // Nothing to remove, no triggers
     event.type = ServiceDiscoveryEvent::Type::ServiceRemoved;
     EXPECT_CALL(callbacks,
         ServiceDiscoveryHandler(_, _)
     ).Times(0);
-    disco.ReceiveSilKitMessage(&otherParticipant, event);
+    disco.ReceiveMsg(&otherParticipant, event);
 }
 } // anonymous namespace for test

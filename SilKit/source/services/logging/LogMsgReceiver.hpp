@@ -22,7 +22,7 @@ public:
     LogMsgReceiver(Core::IParticipantInternal* participant, Logger* logger);
 
 public:
-    void ReceiveSilKitMessage(const Core::IServiceEndpoint* /*from*/, const LogMsg& msg) override;
+    void ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const LogMsg& msg) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;

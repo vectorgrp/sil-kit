@@ -117,7 +117,7 @@ public:
 public:
     // ----------------------------------------
     // Public interface methods
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const MsgT& msg) override
+    void ReceiveMsg(const IServiceEndpoint* from, const MsgT& msg) override
     {
         _hist.Save(from, msg);
         for (auto& receiver : _remoteReceivers)

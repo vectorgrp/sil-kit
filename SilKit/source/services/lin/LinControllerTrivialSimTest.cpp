@@ -132,7 +132,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response)
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
-    controller.ReceiveSilKitMessage(&controller2, slaveConfig);
+    controller.ReceiveMsg(&controller2, slaveConfig);
 
     // Configure Master
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -165,12 +165,12 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_multiple_slave_responses)
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
-    controller.ReceiveSilKitMessage(&controller2, slaveConfig);
+    controller.ReceiveMsg(&controller2, slaveConfig);
 
     // Configure Slave 2
     slaveConfig.frameResponses[0].frame = MakeFrame(17, LinChecksumModel::Classic, 2, {0,1,0,1,0,1,0,1});
 
-    controller.ReceiveSilKitMessage(&controller3, slaveConfig);
+    controller.ReceiveMsg(&controller3, slaveConfig);
 
     // Configure Master
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -203,11 +203,11 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_sleeping)
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
-    controller.ReceiveSilKitMessage(&controller2, slaveConfig);
+    controller.ReceiveMsg(&controller2, slaveConfig);
 
     LinControllerStatusUpdate slaveStatus;
     slaveStatus.status = LinControllerStatus::Sleep;
-    controller.ReceiveSilKitMessage(&controller2, slaveStatus);
+    controller.ReceiveMsg(&controller2, slaveStatus);
 
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&controller, A<const LinControllerConfig&>()));
@@ -239,7 +239,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_removed)
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     slaveConfig.frameResponses.push_back(response);
 
-    controller.ReceiveSilKitMessage(&controller2, slaveConfig);
+    controller.ReceiveMsg(&controller2, slaveConfig);
 
     // Configure Master
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -263,7 +263,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_removed)
     response.responseMode = LinFrameResponseMode::Unused;
     LinFrameResponseUpdate responseUpdate;
     responseUpdate.frameResponses.push_back(response);
-    controller.ReceiveSilKitMessage(&controller2, responseUpdate);
+    controller.ReceiveMsg(&controller2, responseUpdate);
 
     // Send Frame again
     EXPECT_CALL(participant, SendMsg(&controller, A<const LinFrameResponseUpdate&>()))
@@ -362,29 +362,29 @@ TEST_F(LinControllerTrivialSimTest, trigger_slave_callbacks)
     transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 4, {1,2,3,4,0,0,0,0});
     transmission.status = LinFrameStatus::LIN_RX_OK;
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_OK)).Times(1);
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 
     // Expect LIN_RX_ERRROR due to dataLength mismatch
     transmission.frame = MakeFrame(17, LinChecksumModel::Enhanced, 2, {1,2,0,0,0,0,0,0});
     transmission.status = LinFrameStatus::LIN_RX_OK;
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_ERROR)).Times(1);
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 
     // Expect LIN_RX_ERRROR due to checksumModel mismatch
     transmission.frame = MakeFrame(17, LinChecksumModel::Classic, 4, {1,2,3,4,0,0,0,0});
     transmission.status = LinFrameStatus::LIN_RX_OK;
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_ERROR)).Times(1);
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 
     // Expect LIN_TX_OK
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, txFrame, LinFrameStatus::LIN_TX_OK)).Times(1);
     transmission.frame = txFrame;
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 
     // Expect no callback with LIN_RX_NO_RESPONSE
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, A<const LinFrame&>(), LinFrameStatus::LIN_RX_NO_RESPONSE)).Times(0);
     transmission.frame.id = 19;
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 }
 
 TEST_F(LinControllerTrivialSimTest, distribute_frame_response_updates)
@@ -434,7 +434,7 @@ TEST_F(LinControllerTrivialSimTest, trigger_frame_response_update_handler)
     EXPECT_CALL(callbacks, FrameResponseUpdateHandler(&controller, to_string(controller2.GetServiceDescriptor()), response2))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controller2, responseUpdate);
+    controller.ReceiveMsg(&controller2, responseUpdate);
 }
 
 TEST_F(LinControllerTrivialSimTest, go_to_sleep)
@@ -483,7 +483,7 @@ TEST_F(LinControllerTrivialSimTest, call_gotosleep_handler)
     goToSleep.frame = GoToSleepFrame();
     goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
-    controller.ReceiveSilKitMessage(&controller2, goToSleep);
+    controller.ReceiveMsg(&controller2, goToSleep);
 }
 
 TEST_F(LinControllerTrivialSimTest, not_call_gotosleep_handler)
@@ -503,7 +503,7 @@ TEST_F(LinControllerTrivialSimTest, not_call_gotosleep_handler)
     goToSleep.frame.data[0] = 1; // Invalid GoToSleep-Frame
     goToSleep.status = LinFrameStatus::LIN_RX_OK;
 
-    controller.ReceiveSilKitMessage(&controller2, goToSleep);
+    controller.ReceiveMsg(&controller2, goToSleep);
 }
 
 TEST_F(LinControllerTrivialSimTest, wake_up)
@@ -552,7 +552,7 @@ TEST_F(LinControllerTrivialSimTest, call_wakeup_handler)
 
     LinWakeupPulse wakeupPulse;
 
-    controller.ReceiveSilKitMessage(&controller2, wakeupPulse);
+    controller.ReceiveMsg(&controller2, wakeupPulse);
 }
 
 // No initialization causes exception
@@ -620,7 +620,7 @@ TEST_F(LinControllerTrivialSimTest, add_remove_handler)
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_OK))
         .Times(numHandlers);
 
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 
     for (auto&& handlerId : handlerIds)
     {
@@ -629,7 +629,7 @@ TEST_F(LinControllerTrivialSimTest, add_remove_handler)
 
     EXPECT_CALL(callbacks, FrameStatusHandler(&controller, transmission.frame, LinFrameStatus::LIN_RX_OK))
         .Times(0);
-    controller.ReceiveSilKitMessage(&controller2, transmission);
+    controller.ReceiveMsg(&controller2, transmission);
 }
 
 

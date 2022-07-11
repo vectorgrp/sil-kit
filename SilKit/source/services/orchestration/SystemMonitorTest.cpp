@@ -77,7 +77,7 @@ protected:
 
         monitorFrom.SetServiceDescriptor(from_endpointAddress(from));
 
-        monitor.ReceiveSilKitMessage(&monitorFrom, status);
+        monitor.ReceiveMsg(&monitorFrom, status);
     }
 
     void SetAllParticipantStates(ParticipantState state)

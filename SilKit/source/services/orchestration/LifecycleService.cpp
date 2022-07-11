@@ -261,7 +261,7 @@ auto LifecycleService::Status() const -> const ParticipantStatus&
     return _status;
 }
 
-void LifecycleService::ReceiveSilKitMessage(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
+void LifecycleService::ReceiveMsg(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
 {
     if (command.participant != _serviceDescriptor.GetParticipantId())
         return;
@@ -284,7 +284,7 @@ auto LifecycleService::GetTimeSyncService() const -> ITimeSyncService*
     return _timeSyncService;
 }
 
-void LifecycleService::ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& command)
+void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& command)
 {
     // Ignore messages if the lifecycle is not being executed yet
     if (!_isRunning)

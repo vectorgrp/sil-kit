@@ -57,11 +57,11 @@ public:
 
     void SetPeriod(std::chrono::nanoseconds period) override;
 
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
 
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const NextSimTask& task) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
 
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const SystemCommand& task) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& task) override;
 
     auto Now() const -> std::chrono::nanoseconds override;
 

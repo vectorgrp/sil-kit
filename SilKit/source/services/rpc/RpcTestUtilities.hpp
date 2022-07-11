@@ -70,7 +70,7 @@ struct MockConnection
     {
         for (auto& rpcServerInternal : services.rpcServerInternal)
         {
-            rpcServerInternal->ReceiveSilKitMessage(from, msg);
+            rpcServerInternal->ReceiveMsg(from, msg);
         }
         Mock_SendMsg(from, std::move(msg));
     }
@@ -79,7 +79,7 @@ struct MockConnection
     {
         for (auto& rpcClient : services.rpcClient)
         {
-            rpcClient->ReceiveSilKitMessage(from, msg);
+            rpcClient->ReceiveMsg(from, msg);
         }
         Mock_SendMsg(from, std::move(msg));
     }

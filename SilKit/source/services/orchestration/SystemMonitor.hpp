@@ -51,8 +51,8 @@ public:
     auto SystemState() const -> Orchestration::SystemState override;
     auto ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus& override;
 
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg) override;
-    void ReceiveSilKitMessage(const IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const Orchestration::ParticipantStatus& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const Orchestration::WorkflowConfiguration& msg) override;
 
     void SetParticipantConnectedHandler(ParticipantConnectedHandler handler) override;
     void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) override;

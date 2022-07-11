@@ -11,7 +11,7 @@ template<typename T>
 class IMessageReceiver
 {
 public:
-    virtual void ReceiveSilKitMessage(const SilKit::Core::IServiceEndpoint* from, const T& msg) = 0;
+    virtual void ReceiveMsg(const SilKit::Core::IServiceEndpoint* from, const T& msg) = 0;
 };
 
 } // namespace Core

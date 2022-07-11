@@ -178,7 +178,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_message)
         .Times(1);
 
     controller.Activate();
-    controller.ReceiveSilKitMessage(&controllerOther, msg);
+    controller.ReceiveMsg(&controllerOther, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllers must trigger the registered callback, if
@@ -216,7 +216,7 @@ TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
     EthernetFrameEvent msg;
     SetSourceMac(msg.frame, EthernetMac{0, 0, 0, 0, 0, 0});
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(numHandlers);
-    testController.ReceiveSilKitMessage(&controllerOther, msg);
+    testController.ReceiveMsg(&controllerOther, msg);
 
     for (auto&& handlerId : handlerIds)
     {
@@ -224,7 +224,7 @@ TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
     }
 
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(0);
-    testController.ReceiveSilKitMessage(&controllerOther, msg);
+    testController.ReceiveMsg(&controllerOther, msg);
 }
 
 /*! \brief Removed handler in handler
@@ -245,10 +245,10 @@ TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
     SetSourceMac(msg.frame, EthernetMac{0, 0, 0, 0, 0, 0});
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(1);
     // Calls testHandler and Callbacks::ReceiveMessage, the latter is removed in testHandler 
-    testController.ReceiveSilKitMessage(&controllerOther, msg);
+    testController.ReceiveMsg(&controllerOther, msg);
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, msg)).Times(0);
     // Call testHandler again, handlerIdToRemove is invalid now but should only result in a warning
-    testController.ReceiveSilKitMessage(&controllerOther, msg);
+    testController.ReceiveMsg(&controllerOther, msg);
 }
 
 
@@ -287,7 +287,7 @@ TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
     EthernetFrameEvent ethMsg{};
     ethMsg.frame = frame;
     ethMsg.timestamp = now;
-    ethController.ReceiveSilKitMessage(&controllerOther, ethMsg);
+    ethController.ReceiveMsg(&controllerOther, ethMsg);
 #endif // 0
 }
 

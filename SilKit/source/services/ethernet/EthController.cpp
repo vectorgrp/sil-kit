@@ -123,10 +123,10 @@ auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
 }
 
 //------------------------
-// ReceiveSilKitMessage
+// ReceiveMsg
 //------------------------
 
-void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
+void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -139,7 +139,7 @@ void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Eth
     CallHandlers(msg);
 }
 
-void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)
+void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -150,7 +150,7 @@ void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const Eth
     CallHandlers(msg);
 }
 
-void EthController::ReceiveSilKitMessage(const IServiceEndpoint* from, const EthernetStatus& msg)
+void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetStatus& msg)
 {
     if (!AllowReception(from))
     {

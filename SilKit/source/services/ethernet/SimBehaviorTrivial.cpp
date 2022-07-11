@@ -29,11 +29,11 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
 }
 
 template <typename MsgT>
-void SimBehaviorTrivial::ReceiveSilKitMessage(const MsgT& msg)
+void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
 {
     auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
     assert(receivingController);
-    receivingController->ReceiveSilKitMessage(_parentServiceEndpoint, msg);
+    receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
 auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) const -> bool 
@@ -57,7 +57,7 @@ void SimBehaviorTrivial::SendMsg(EthernetFrameEvent&& ethFrameEvent)
         ack.transmitId = ethFrameEvent.transmitId;
         ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
         ack.status = EthernetTransmitStatus::Transmitted;
-        ReceiveSilKitMessage(ack);
+        ReceiveMsg(ack);
     }
     else
     {
@@ -73,7 +73,7 @@ void SimBehaviorTrivial::SendMsg(EthernetFrameEvent&& ethFrameEvent)
         {
             ack.status = EthernetTransmitStatus::LinkDown;
         }
-        ReceiveSilKitMessage(ack);
+        ReceiveMsg(ack);
     }
 
     
@@ -93,7 +93,7 @@ void SimBehaviorTrivial::SendMsg(EthernetSetMode&& ethSetMode)
     {
         statusReply.state = EthernetState::Inactive;
     }
-    ReceiveSilKitMessage(statusReply);
+    ReceiveMsg(statusReply);
 }
 
 void SimBehaviorTrivial::OnReceiveAck(const EthernetFrameTransmitEvent& /*msg*/)

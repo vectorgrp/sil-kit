@@ -115,10 +115,10 @@ TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
 
     controller.Deactivate();
     controller.Activate();
-    controller.ReceiveSilKitMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::LinkUp, 17 });
+    controller.ReceiveMsg(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::LinkUp, 17 });
     controller.Activate();
     controller.Deactivate();
-    controller.ReceiveSilKitMessage(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::Inactive, 0 });
+    controller.ReceiveMsg(&controllerBusSim, EthernetStatus{ 0ns, EthernetState::Inactive, 0 });
     controller.Deactivate();
 }
 
@@ -158,7 +158,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
     EXPECT_CALL(callbacks, FrameHandler(&controller, msg))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, msg);
+    controller.ReceiveMsg(&controllerBusSim, msg);
 }
 
 /*! \brief Passing an Ack to an EthControllerProxy must trigger the registered callback
@@ -170,7 +170,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
     EXPECT_CALL(callbacks, FrameTransmitHandler(&controller, expectedAck))
         .Times(1);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, expectedAck);
+    controller.ReceiveMsg(&controllerBusSim, expectedAck);
 }
 
 /*! \brief EthControllerProxy must not generate Acks
@@ -187,7 +187,7 @@ TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
     EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), A<const EthernetFrameTransmitEvent&>()))
         .Times(0);
 
-    controller.ReceiveSilKitMessage(&controllerBusSim, msg);
+    controller.ReceiveMsg(&controllerBusSim, msg);
 }
 
 /*! \brief EthControllerProxy must trigger bitrate changed callbacks when necessary
@@ -210,11 +210,11 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_bitrate_change)
         .Times(0);
 
     EthernetStatus newStatus = { 0ns, EthernetState::Inactive, 0 };
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
 
     newStatus.bitrate = 100;
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
 }
 
 /*! \brief EthControllerProxy must trigger state changed callbacks when necessary
@@ -246,18 +246,18 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_state_change)
 
 
     EthernetStatus newStatus = { 0ns, EthernetState::Inactive, 0 };
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::LinkUp;
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::LinkDown;
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
 
     newStatus.state = EthernetState::Inactive;
-    controller.ReceiveSilKitMessage(&controllerBusSim, newStatus);
+    controller.ReceiveMsg(&controllerBusSim, newStatus);
 }
 
 
