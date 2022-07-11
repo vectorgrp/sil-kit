@@ -12,7 +12,7 @@ target_include_directories(SilKitInterface
 file(GLOB_RECURSE SILKIT_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
 add_custom_target(SilKitApi SOURCES ${SILKIT_INTERFACE_SOURCES})
 if(CMAKE_VERSION VERSION_GREATER 3.8.0)
-    # Easy access to SilKit includes for Visual Studio
+    # Easy access to SIL Kit includes for Visual Studio
     source_group(TREE ${CMAKE_CURRENT_LIST_DIR}/silkit PREFIX "silkit" FILES ${SILKIT_INTERFACE_SOURCES})
 endif()
 

@@ -8,7 +8,7 @@
 
 namespace SilKit {
     
-/*! \brief Deprecated identifier for SilKit participants
+/*! \brief Deprecated identifier for SIL Kit participants
  * Will be fully replaced by participant name in future versions. 
 */
 using ParticipantId = uint64_t;

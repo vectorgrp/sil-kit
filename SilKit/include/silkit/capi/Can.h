@@ -164,7 +164,7 @@ typedef void (*SilKit_CanStateChangeHandler_t)(void* context, SilKit_CanControll
 typedef void (*SilKit_CanErrorStateChangeHandler_t)(void* context, SilKit_CanController* controller,
                                                   SilKit_CanErrorStateChangeEvent* errorStateChangeEvent);
 
-/*! \brief Create a CAN controller at this SilKit simulation participant.
+/*! \brief Create a CAN controller at this SIL Kit simulation participant.
  * \param outCanController Pointer that refers to the resulting Can controller (out parameter).
  * \param participant The simulation participant at which the Can controller should be created.
  * \param name The name of the new Can controller.

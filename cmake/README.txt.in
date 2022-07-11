@@ -1,4 +1,4 @@
-Vector SilKit Release Version: @PROJECT_VERSION@
+Vector SIL Kit Release Version: @PROJECT_VERSION@
 ---------------------------------------------
 
 Copyright (c) Vector Informatik GmbH. All rights reserved.
@@ -6,7 +6,7 @@ Copyright (c) Vector Informatik GmbH. All rights reserved.
 The layout of this release bundle is as follows:
 
 + SilKit/
-  - the binary Vector SilKit release including the object files,
+  - the binary Vector SIL Kit release including the object files,
     the C++ interface headers and CMake exported targets.
 
 + SilKit-Demos/
@@ -17,7 +17,7 @@ The layout of this release bundle is as follows:
   - Documentation in HTML and text format.
 
 + SilKit-Source/
-  - The complete source tree of the SilKit with a limited set of
+  - The complete source tree of the SIL Kit with a limited set of
     third-party components.
     Some dependencies, like Fast-RTPS, are fetched by the CMake build system
     in the configuration stage.

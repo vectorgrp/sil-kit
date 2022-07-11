@@ -19,9 +19,9 @@ typedef uint64_t SilKit_NanosecondsTime; //!< Simulation time
 
 typedef uint64_t SilKit_NanosecondsWallclockTime; //!< Wall clock time since epoch
 
-/*! \brief Join the SilKit simulation hosted by the registry listening at URI as a participant.
+/*! \brief Join the SIL Kit simulation hosted by the registry listening at URI as a participant.
 *
-* Join the SilKit simulation and become a participant
+* Join the SIL Kit simulation and become a participant
 * based on the given configuration options.
 *
 * \param outParticipant The pointer through which the simulation participant will be returned (out parameter).

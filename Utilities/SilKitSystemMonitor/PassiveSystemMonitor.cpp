@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
 
-    std::cout << "Vector SilKit -- System Monitor" << std::endl
+    std::cout << "Vector SIL Kit -- System Monitor" << std::endl
         << std::endl;
 
     try

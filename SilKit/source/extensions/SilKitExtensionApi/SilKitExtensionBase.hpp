@@ -2,7 +2,7 @@
 
 #pragma once
 
-/*! SilKit Extension Implementations
+/*! SIL Kit Extension Implementations
  * Use the following SilKitExtensionBase class and to implement
  * shared libraries that act as SILKIT extensions.
  */

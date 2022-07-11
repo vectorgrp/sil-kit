@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
 
-    std::cout << "Vector SilKit -- Registry of the VAsio Middleware" << std::endl
+    std::cout << "Vector SIL Kit -- Registry of the VAsio Middleware" << std::endl
         << std::endl;
 
     try

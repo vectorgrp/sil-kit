@@ -15,7 +15,7 @@
 #include "ISilKitExtension.hpp"
 
 
-/*! SilKit Extensions
+/*! SIL Kit Extensions
  * 
  * The extension mechanism consists of two parts:
  *   1.) loading dynamic, shared library (ie, *.so or *.dll), and

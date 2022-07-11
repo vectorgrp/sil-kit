@@ -7,11 +7,11 @@ cmake_minimum_required(VERSION 3.5)
 
 project("SilKit")
 
-option(SILKIT_BUILD_DEMOS "Build the SilKit Demos" ON)
-option(SILKIT_BUILD_STATIC "Compile the SilKit as a static library" OFF)
-option(SILKIT_BUILD_TESTS "Enable unit and integration tests for the SilKit" ON)
-option(SILKIT_BUILD_UTILITIES "Build the SilKit utility tools" ON)
-option(SILKIT_BUILD_DOCS "Build documentation for the SilKit (requires Doxygen and Sphinx)" OFF)
+option(SILKIT_BUILD_DEMOS "Build the SIL Kit Demos" ON)
+option(SILKIT_BUILD_STATIC "Compile the SIL Kit as a static library" OFF)
+option(SILKIT_BUILD_TESTS "Enable unit and integration tests for the SIL Kit" ON)
+option(SILKIT_BUILD_UTILITIES "Build the SIL Kit utility tools" ON)
+option(SILKIT_BUILD_DOCS "Build documentation for the SIL Kit (requires Doxygen and Sphinx)" OFF)
 option(SILKIT_INSTALL_SOURCE "Install and package the source tree" OFF)
 if(SILKIT_INSTALL_SOURCE)
     set(SILKIT_BUILD_DOCS ON CACHE BOOL "Force SILKIT_BUILD_DOCS ON due to SILKIT_INSTALL_SOURCE" FORCE)
@@ -49,7 +49,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ###############################################################################
-# Include the SilKit projects to be built
+# Include the SIL Kit projects to be built
 ###############################################################################
 # Dependencies
 add_subdirectory(ThirdParty)
@@ -67,7 +67,7 @@ if(MINGW)
     endif()
 endif()
 
-# Have both SilKit library and demo project in a single solution
+# Have both SIL Kit library and demo project in a single solution
 add_subdirectory(SilKit)
 if(SILKIT_BUILD_UTILITIES)
     add_subdirectory(Utilities)
@@ -180,7 +180,7 @@ else()
 endif()
 
 set(CPACK_GENERATOR "ZIP")
-set(CPACK_PACKAGE_DESCRIPTION "binary release of SilKit library and tools")
+set(CPACK_PACKAGE_DESCRIPTION "binary release of SIL Kit library and tools")
 set(CPACK_PACKAGE_NAME "SilKit")
 set(CPACK_PACKAGE_VENDOR "Vector Informatik")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")

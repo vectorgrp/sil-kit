@@ -66,7 +66,7 @@ There are also specific options to toggle details of the build:
     4. SILKIT_BUILD_UTILITIES=OFF (default: ON) disables the generation of utility tools
        (registry, system controller and system monitor).
 
-E.g., if you want to build the SilKit with documentation enabled,
+E.g., if you want to build the SIL Kit with documentation enabled,
 call cmake in your build directory as follows::
        
     cmake -SILKIT_BUILD_DOCS=ON ..

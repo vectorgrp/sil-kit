@@ -362,7 +362,7 @@ void VAsioConnection::JoinDomain(std::string connectUri)
                       " and the middleware configuration ('enableDomainSockets').");
         _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
         _logger->Info("   You can configure the SilKitRegistry hostname and port via the SilKitConfig.");
-        _logger->Info("   The SilKitRegistry executable can be found in your SilKit installation folder:");
+        _logger->Info("   The SilKitRegistry executable can be found in your SIL Kit installation folder:");
         _logger->Info("     INSTALL_DIR/bin/SilKitRegistry[.exe]");
         throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
     }

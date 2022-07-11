@@ -1,15 +1,15 @@
-# SilKit Demos
+# SIL Kit Demos
 
-This directory contains sample projects that demonstrate how the SilKit
+This directory contains sample projects that demonstrate how the SIL Kit
 API can be used:
 
 * **CAN, LIN, FlexRay, Ethernet, DataMessage, RPC**:
-  Write or read participants that are able to connect to SilKit and use buses of
+  Write or read participants that are able to connect to SIL Kit and use buses of
   all supported protocols including CAN, LIN, FlexRay, Ethernet, DataMessage and the RPC service.
 
 
 * **Benchmark**:
-  A simple command line tool that allows to measure SILKIT simulation performance
+  A simple command line tool that allows to measure SIL Kit simulation performance
   with configurable parameters.
 
 The build system is based on cmake.
@@ -33,8 +33,8 @@ directory should work on all supported platforms in a similar way:
 
 The demos will be placed alongside the binaries.
 
-To build the demos as developer from within the SilKit source tree and place them alongside
-the binaries, build the 'Demos' CMake target from the SilKit 'build' directory:
+To build the demos as developer from within the SIL Kit source tree and place them alongside
+the binaries, build the 'Demos' CMake target from the SIL Kit 'build' directory:
 
 > cmake --build . --target Demos
 

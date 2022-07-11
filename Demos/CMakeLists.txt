@@ -39,12 +39,12 @@ endif()
 # Try to resolve from installed packages only if not defined previously via add_library
 if(NOT TARGET SilKit::SilKit)
     foreach(path ${CMAKE_PREFIX_PATH})
-        message(STATUS "Searching for SilKit library at prefix path: " ${path})
+        message(STATUS "Searching for SIL Kit library at prefix path: " ${path})
     endforeach(path)
     message(STATUS "SilKit-Demos: Note: Set '-DCMAKE_PREFIX_PATH=<path>' so that ./cmake/SilKitTargets.cmake resolves.")
     find_package(SilKit ${PROJECT_VERSION} REQUIRED)
 else()
-    message(STATUS "Linking to SilKit library that is built in scope of root project")
+    message(STATUS "Linking to SIL Kit library that is built in scope of root project")
 endif()
 
 #######################################################################################################################
@@ -58,7 +58,7 @@ set(demo_list)
 add_custom_target(Demos COMMENT "Build all available Demos")
 set_property(TARGET Demos PROPERTY FOLDER "Demos")
 
-# Generate SilKit Demo Project
+# Generate SIL Kit Demo Project
 function(make_silkit_demo executableName demoSourceFile)
     add_executable(${executableName}
         ${demoSourceFile}

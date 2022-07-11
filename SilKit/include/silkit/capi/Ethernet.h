@@ -113,7 +113,7 @@ typedef void (*SilKit_EthernetStateChangeHandler_t)(void* context, SilKit_Ethern
 typedef void (*SilKit_EthernetBitrateChangeHandler_t)(void* context, SilKit_EthernetController* controller,
   SilKit_EthernetBitrateChangeEvent* bitrateChangeEvent);
 
-/*! \brief Create an Ethernet controller at this SilKit simulation participant.
+/*! \brief Create an Ethernet controller at this SIL Kit simulation participant.
 * 
 * \param outController A pointer to a pointer in which the Ethernet controller will be stored (out parameter).
 * \param participant The simulation participant for which the Ethernet controller should be created.

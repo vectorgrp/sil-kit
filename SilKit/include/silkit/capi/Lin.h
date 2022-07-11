@@ -278,7 +278,7 @@ typedef void (*SilKit_LinGoToSleepHandler_t)(void* context, SilKit_LinController
 typedef void (*SilKit_LinWakeupHandler_t)(void* context, SilKit_LinController* controller,
                                        const SilKit_LinWakeupEvent* wakeUpEvent);
 
-/*! \brief Create a Lin controller at this SilKit simulation participant.
+/*! \brief Create a Lin controller at this SIL Kit simulation participant.
  *
  * The lifetime of the resulting Lin controller is directly bound to the lifetime of the simulation participant.
  * There is no further cleanup necessary except for destroying the simulation participant at the end of the

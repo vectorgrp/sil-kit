@@ -23,7 +23,7 @@ set_target_properties(sil-kit-registry PROPERTIES
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-# we're linking statically with SilKit components and not with the dll.
+# we're linking statically with SIL Kit components and not with the dll.
 add_definitions(-DEXPORT_SilKitAPI)
 
 target_link_libraries(sil-kit-registry

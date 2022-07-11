@@ -92,7 +92,7 @@ typedef struct SilKit_SystemController SilKit_SystemController;
 typedef struct SilKit_LifecycleService SilKit_LifecycleService;
 typedef struct SilKit_TimeSyncService SilKit_TimeSyncService;
 
-/*! \brief Create a system monitor at this SilKit simulation participant.
+/*! \brief Create a system monitor at this SIL Kit simulation participant.
  * \param outSystemMonitor Pointer that refers to the resulting sytem monitor (out parameter).
  * \param participant The simulation participant at which the system monitor should be created.
  *
@@ -104,7 +104,7 @@ SilKitAPI SilKit_ReturnCode SilKit_SystemMonitor_Create(SilKit_SystemMonitor** o
 typedef SilKit_ReturnCode (*SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outCanController,
                                                            SilKit_Participant* participant);
 
-/*! \brief Create a system controller at this SilKit simulation participant.
+/*! \brief Create a system controller at this SIL Kit simulation participant.
  * \param outSystemController Pointer that refers to the resulting system controller (out parameter).
  * \param participant The simulation participant at which the system controller should be created.
  *
@@ -116,7 +116,7 @@ SilKitAPI SilKit_ReturnCode SilKit_SystemController_Create(SilKit_SystemControll
 typedef SilKit_ReturnCode (*SilKit_SystemController_Create_t)(SilKit_SystemController** outCanController,
                                                               SilKit_Participant* participant);
 
-/*! \brief Create a lifecycle service at this SilKit simulation participant.
+/*! \brief Create a lifecycle service at this SIL Kit simulation participant.
  * \param outLifecycleService Pointer that refers to the resulting lifecycle service (out parameter).
  * \param participant The simulation participant at which the lifecycle service should be created.
  *
@@ -128,7 +128,7 @@ SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleServi
 typedef SilKit_ReturnCode (*SilKit_LifecycleService_Create_t)(SilKit_LifecycleService** outLifecycleService,
                                                               SilKit_Participant* participant);
 
-/*! \brief Create a time sync service at this SilKit simulation participant.
+/*! \brief Create a time sync service at this SIL Kit simulation participant.
  * \param outTimeSyncService Pointer that refers to the resulting time sync service (out parameter).
  * \param lifecycleService The lifecyle service at which the time sync service should be created.
  *

@@ -160,7 +160,7 @@ int main(int argc, char** argv)
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
     std::cout 
-        << "Vector SilKit -- System Controller\n"
+        << "Vector SIL Kit -- System Controller\n"
         << std::endl;
 
     try
