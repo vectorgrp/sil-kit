@@ -190,7 +190,7 @@ void Master_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServ
         return;
     }
     memset(controllerConfig, 0, sizeof(SilKit_LinControllerConfig));
-    controllerConfig->interfaceId = SilKit_InterfaceIdentifier_LinControllerConfig;
+    SilKit_Struct_Init(SilKit_LinControllerConfig, *controllerConfig);
     controllerConfig->controllerMode = SilKit_LinControllerMode_Master;
     controllerConfig->baudRate = 20000;
     controllerConfig->numFrameResponses = 0;
@@ -262,7 +262,7 @@ void Master_SendFrame_16(SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
     SilKit_LinFrame frame;
-    frame.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrame, frame);
     frame.id = 16;
     frame.checksumModel = SilKit_LinChecksumModel_Classic;
     frame.dataLength = 6;
@@ -277,7 +277,7 @@ void Master_SendFrame_17(SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
     SilKit_LinFrame frame;
-    frame.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrame, frame);
     frame.id = 17;
     frame.checksumModel = SilKit_LinChecksumModel_Classic;
     frame.dataLength = 6;
@@ -292,7 +292,7 @@ void Master_SendFrame_18(SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
     SilKit_LinFrame frame;
-    frame.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrame, frame);
     frame.id = 18;
     frame.checksumModel = SilKit_LinChecksumModel_Enhanced;
     frame.dataLength = 8;
@@ -307,7 +307,7 @@ void Master_SendFrame_19(SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
     SilKit_LinFrame frame;
-    frame.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrame, frame);
     frame.id = 19;
     frame.checksumModel = SilKit_LinChecksumModel_Classic;
     frame.dataLength = 8;
@@ -322,7 +322,7 @@ void Master_SendFrame_34(SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(now);
     SilKit_LinFrame frame;
-    frame.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrame, frame);
     frame.id = 34;
     frame.checksumModel = SilKit_LinChecksumModel_Enhanced;
     frame.dataLength = 6;
@@ -347,9 +347,10 @@ void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServi
 
     // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
     SilKit_LinFrameResponse response_16;
-    response_16.interfaceId = SilKit_InterfaceIdentifier_LinFrameResponse;
     SilKit_LinFrame frame16;
-    frame16.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrameResponse, response_16);
+    SilKit_Struct_Init(SilKit_LinFrame, frame16);
+
     frame16.id = 16;
     frame16.checksumModel = SilKit_LinChecksumModel_Classic;
     frame16.dataLength = 6;
@@ -360,9 +361,10 @@ void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServi
     //  - This SilKit_LinFrameResponseMode_Unused causes the controller to ignore
     //    this message and not trigger a callback. This is also the default.
     SilKit_LinFrameResponse response_17;
-    response_17.interfaceId = SilKit_InterfaceIdentifier_LinFrameResponse;
     SilKit_LinFrame frame17;
-    frame17.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrameResponse, response_17);
+    SilKit_Struct_Init(SilKit_LinFrame, frame17);
+
     frame17.id = 17;
     frame17.checksumModel = SilKit_LinChecksumModel_Classic;
     frame17.dataLength = 6;
@@ -372,9 +374,10 @@ void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServi
     // Configure LIN Controller to receive LIN ID 18
     //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
     SilKit_LinFrameResponse response_18;
-    response_18.interfaceId = SilKit_InterfaceIdentifier_LinFrameResponse;
     SilKit_LinFrame frame18;
-    frame18.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrameResponse, response_18);
+    SilKit_Struct_Init(SilKit_LinFrame, frame18);
+
     frame18.id = 18;
     frame18.checksumModel = SilKit_LinChecksumModel_Classic;
     frame18.dataLength = 8;
@@ -384,9 +387,10 @@ void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServi
     // Configure LIN Controller to receive LIN ID 19
     //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
     SilKit_LinFrameResponse response_19;
-    response_19.interfaceId = SilKit_InterfaceIdentifier_LinFrameResponse;
     SilKit_LinFrame frame19;
-    frame19.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrameResponse, response_19);
+    SilKit_Struct_Init(SilKit_LinFrame, frame19);
+
     frame19.id = 19;
     frame19.checksumModel = SilKit_LinChecksumModel_Enhanced;
     frame19.dataLength = 1;
@@ -395,10 +399,10 @@ void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServi
 
     // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
     SilKit_LinFrameResponse response_34;
-    response_34.interfaceId = SilKit_InterfaceIdentifier_LinFrameResponse;
-
     SilKit_LinFrame frame34;
-    frame34.interfaceId = SilKit_InterfaceIdentifier_LinFrame;
+    SilKit_Struct_Init(SilKit_LinFrameResponse, response_34);
+    SilKit_Struct_Init(SilKit_LinFrame, frame34);
+
     frame34.id = 34;
     frame34.checksumModel = SilKit_LinChecksumModel_Enhanced;
     frame34.dataLength = 6;
@@ -415,7 +419,7 @@ void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleServi
         AbortOnFailedAllocation("Schedule");
         return;
     }
-    controllerConfig->interfaceId = SilKit_InterfaceIdentifier_LinControllerConfig;
+    SilKit_Struct_Init(SilKit_LinControllerConfig, *controllerConfig);
     controllerConfig->controllerMode = SilKit_LinControllerMode_Slave;
     controllerConfig->baudRate = 20000;
     controllerConfig->numFrameResponses = numFrameResponses;

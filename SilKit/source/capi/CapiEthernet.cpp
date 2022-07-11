@@ -87,9 +87,11 @@ SilKit_ReturnCode SilKit_EthernetController_AddFrameHandler(SilKit_EthernetContr
                 auto* dataPointer = !cppFrame.raw.empty() ? cppFrame.raw.data() : nullptr;
 
                 SilKit_EthernetFrameEvent frameEvent{};
-                SilKit_EthernetFrame frame{SilKit_InterfaceIdentifier_EthernetFrame, {dataPointer, cppFrame.raw.size()}};
+                SilKit_EthernetFrame frame{};
+                frame.raw = {dataPointer, cppFrame.raw.size()};
 
-                frameEvent.interfaceId = SilKit_InterfaceIdentifier_EthernetFrameEvent;
+                SilKit_Struct_Init(SilKit_EthernetFrameEvent, frameEvent);
+                SilKit_Struct_Init(SilKit_EthernetFrame, frame);
                 frameEvent.ethernetFrame = &frame;
                 frameEvent.timestamp = cppFrameEvent.timestamp.count();
 
@@ -133,7 +135,7 @@ SilKit_ReturnCode SilKit_EthernetController_AddFrameTransmitHandler(SilKit_Ether
                 {
                     pendingEthernetTransmits.callbacksById[ack.transmitId] = [handler, context, controller, ack]() {
                         SilKit_EthernetFrameTransmitEvent eta;
-                        eta.interfaceId = SilKit_InterfaceIdentifier_EthernetFrameTransmitEvent;
+                        SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, eta);
                         eta.status = (SilKit_EthernetTransmitStatus)ack.status;
                         eta.timestamp = ack.timestamp.count();
 
@@ -147,7 +149,7 @@ SilKit_ReturnCode SilKit_EthernetController_AddFrameTransmitHandler(SilKit_Ether
                 else
                 {
                     SilKit_EthernetFrameTransmitEvent eta;
-                    eta.interfaceId = SilKit_InterfaceIdentifier_EthernetFrameTransmitEvent;
+                    SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, eta);
                     eta.status = (SilKit_EthernetTransmitStatus)ack.status;
                     eta.timestamp = ack.timestamp.count();
 
@@ -190,7 +192,7 @@ SilKit_ReturnCode SilKit_EthernetController_AddStateChangeHandler(SilKit_Etherne
             [handler, context, controller](SilKit::Services::Ethernet::IEthernetController*,
                                            const SilKit::Services::Ethernet::EthernetStateChangeEvent& stateChangeEvent) {
                 SilKit_EthernetStateChangeEvent cStateChangeEvent;
-                cStateChangeEvent.interfaceId = SilKit_InterfaceIdentifier_EthernetStateChangeEvent;
+                SilKit_Struct_Init(SilKit_EthernetStateChangeEvent, cStateChangeEvent);
                 cStateChangeEvent.timestamp = stateChangeEvent.timestamp.count();
                 cStateChangeEvent.state = (SilKit_EthernetState)stateChangeEvent.state;
                 handler(context, controller, &cStateChangeEvent);
@@ -227,7 +229,7 @@ SilKit_ReturnCode SilKit_EthernetController_AddBitrateChangeHandler(SilKit_Ether
             [handler, context, controller](SilKit::Services::Ethernet::IEthernetController*,
                                            const SilKit::Services::Ethernet::EthernetBitrateChangeEvent& bitrateChangeEvent) {
                 SilKit_EthernetBitrateChangeEvent cBitrateChangeEvent;
-                cBitrateChangeEvent.interfaceId = SilKit_InterfaceIdentifier_EthernetBitrateChangeEvent;
+                SilKit_Struct_Init(SilKit_EthernetBitrateChangeEvent, cBitrateChangeEvent);
                 cBitrateChangeEvent.timestamp = bitrateChangeEvent.timestamp.count();
                 cBitrateChangeEvent.bitrate = (SilKit_EthernetBitrate)bitrateChangeEvent.bitrate;
 

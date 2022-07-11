@@ -34,8 +34,8 @@ typedef uint64_t SilKit_InterfaceIdentifier;
 #define SK_ID_SERVICE_Participant 7
 #define SK_ID_SERVICE_END 8 //!< sentinel
 
-#define SK_ID_DATATYPE_INVALID 0
-#define SK_ID_VERSION_INVALID 0
+#define SK_INVALID_DATATYPE_ID 0
+#define SK_INVALID_VERSION 0
 
 
 //!< The identifiers service id
@@ -52,17 +52,17 @@ typedef uint64_t SilKit_InterfaceIdentifier;
     (SilKit_InterfaceIdentifier)(\
           ((SilKit_InterfaceIdentifier)83 /*S*/ << 56)\
         | ((SilKit_InterfaceIdentifier)75 /*K*/ << 48)\
-        | ((SilKit_InterfaceIdentifier)(SK_ID_SERVICE_ ## SERVICE_NAME  & 0xFF) << 40)\
-        | ((SilKit_InterfaceIdentifier)(SK_ID_DATATYPE_ ## DATATYPE_NAME & 0xff) << 32)\
-        | ((SilKit_InterfaceIdentifier)(SK_ID_VERSION_ ## DATATYPE_NAME & 0xff) << 24)\
+        | ((SilKit_InterfaceIdentifier)(SK_ID_SERVICE_ ## SERVICE_NAME & 0xFF) << 40)\
+        | ((SilKit_InterfaceIdentifier)(DATATYPE_NAME ## _DATATYPE_ID & 0xff) << 32)\
+        | ((SilKit_InterfaceIdentifier)(DATATYPE_NAME ## _VERSION  & 0xff) << 24)\
         | 0x0)
    
 #define SK_ID_IS_VALID(ID)\
     (\
         (SK_ID_GET_SERVICE(ID) > SK_ID_SERVICE_START)\
         && (SK_ID_GET_SERVICE(ID) < SK_ID_SERVICE_END)\
-        && (SK_ID_GET_DATATYPE(ID) != SK_ID_DATATYPE_INVALID)\
-        && (SK_ID_GET_VERSION(ID) != SK_ID_VERSION_INVALID)\
+        && (SK_ID_GET_DATATYPE(ID) != SK_INVALID_DATATYPE_ID)\
+        && (SK_ID_GET_VERSION(ID) != SK_INVALID_VERSION)\
         && ((ID >> 56 & 0xff) == /*S*/ 83)\
         && ((ID >> 48 & 0xff) == /*K*/ 75)\
     )
@@ -70,168 +70,168 @@ typedef uint64_t SilKit_InterfaceIdentifier;
 //!< Helper to access the Interface ID member
 #define SilKit_Struct_GetId(VALUE) ((VALUE).interfaceId)
 //!< Initialize the struct VALUE with a valid InterfaceId for the given type DATATYPE 
-#define SilKit_Struct_Init(DATATYPE, VALUE) SilKit_Struct_GetId(VALUE) = SilKit_InterfaceIdentifier_ ## DATATYPE
+#define SilKit_Struct_Init(DATATYPE, VALUE) SilKit_Struct_GetId(VALUE) = DATATYPE ## _InterfaceIdentifier
 // CAN
 // CAN data type IDs
-#define SK_ID_DATATYPE_CanFrame 1
-#define SK_ID_DATATYPE_CanFrameTransmitEvent 2
-#define SK_ID_DATATYPE_CanFrameEvent 3
-#define SK_ID_DATATYPE_CanStateChangeEvent 4
-#define SK_ID_DATATYPE_CanErrorStateChangeEvent 5
+#define SilKit_CanFrame_DATATYPE_ID 1
+#define SilKit_CanFrameTransmitEvent_DATATYPE_ID 2
+#define SilKit_CanFrameEvent_DATATYPE_ID 3
+#define SilKit_CanStateChangeEvent_DATATYPE_ID 4
+#define SilKit_CanErrorStateChangeEvent_DATATYPE_ID 5
 
 // CAN data type versions
-#define SK_ID_VERSION_CanFrame 1
-#define SK_ID_VERSION_CanFrameTransmitEvent 1
-#define SK_ID_VERSION_CanFrameEvent 1
-#define SK_ID_VERSION_CanStateChangeEvent 1
-#define SK_ID_VERSION_CanErrorStateChangeEvent 1
+#define SilKit_CanFrame_VERSION 1
+#define SilKit_CanFrameTransmitEvent_VERSION 1
+#define SilKit_CanFrameEvent_VERSION 1
+#define SilKit_CanStateChangeEvent_VERSION 1
+#define SilKit_CanErrorStateChangeEvent_VERSION 1
 
 // CAN make versioned IDs
-#define SilKit_InterfaceIdentifier_CanFrame                     SK_ID_MAKE(Can, CanFrame)
-#define SilKit_InterfaceIdentifier_CanFrameTransmitEvent        SK_ID_MAKE(Can, CanFrameTransmitEvent)
-#define SilKit_InterfaceIdentifier_CanFrameEvent                SK_ID_MAKE(Can, CanFrameEvent)
-#define SilKit_InterfaceIdentifier_CanStateChangeEvent          SK_ID_MAKE(Can, CanStateChangeEvent)
-#define SilKit_InterfaceIdentifier_CanErrorStateChangeEvent     SK_ID_MAKE(Can, CanErrorStateChangeEvent)
+#define SilKit_CanFrame_InterfaceIdentifier                     SK_ID_MAKE(Can, SilKit_CanFrame)
+#define SilKit_CanFrameTransmitEvent_InterfaceIdentifier        SK_ID_MAKE(Can, SilKit_CanFrameTransmitEvent)
+#define SilKit_CanFrameEvent_InterfaceIdentifier                SK_ID_MAKE(Can, SilKit_CanFrameEvent)
+#define SilKit_CanStateChangeEvent_InterfaceIdentifier          SK_ID_MAKE(Can, SilKit_CanStateChangeEvent)
+#define SilKit_CanErrorStateChangeEvent_InterfaceIdentifier     SK_ID_MAKE(Can, SilKit_CanErrorStateChangeEvent)
 
 // Ethernet
 // 
 // Ethernet data type IDs
-#define SK_ID_DATATYPE_EthernetFrameEvent 1
-#define SK_ID_DATATYPE_EthernetFrameTransmitEvent 2
-#define SK_ID_DATATYPE_EthernetStateChangeEvent 3
-#define SK_ID_DATATYPE_EthernetBitrateChangeEvent 4
-#define SK_ID_DATATYPE_EthernetFrame 5
+#define SilKit_EthernetFrameEvent_DATATYPE_ID 1
+#define SilKit_EthernetFrameTransmitEvent_DATATYPE_ID 2
+#define SilKit_EthernetStateChangeEvent_DATATYPE_ID 3
+#define SilKit_EthernetBitrateChangeEvent_DATATYPE_ID 4
+#define SilKit_EthernetFrame_DATATYPE_ID 5
 
 // Ethernet data type versions
-#define SK_ID_VERSION_EthernetFrameEvent 1
-#define SK_ID_VERSION_EthernetFrameTransmitEvent 1
-#define SK_ID_VERSION_EthernetStateChangeEvent 1
-#define SK_ID_VERSION_EthernetBitrateChangeEvent 1
-#define SK_ID_VERSION_EthernetFrame 1
+#define SilKit_EthernetFrameEvent_VERSION 1
+#define SilKit_EthernetFrameTransmitEvent_VERSION 1
+#define SilKit_EthernetStateChangeEvent_VERSION 1
+#define SilKit_EthernetBitrateChangeEvent_VERSION 1
+#define SilKit_EthernetFrame_VERSION 1
 
-#define SilKit_InterfaceIdentifier_EthernetFrameEvent           SK_ID_MAKE(Ethernet, EthernetFrameEvent)
-#define SilKit_InterfaceIdentifier_EthernetFrameTransmitEvent   SK_ID_MAKE(Ethernet, EthernetFrameTransmitEvent)
-#define SilKit_InterfaceIdentifier_EthernetStateChangeEvent     SK_ID_MAKE(Ethernet, EthernetStateChangeEvent)
-#define SilKit_InterfaceIdentifier_EthernetBitrateChangeEvent   SK_ID_MAKE(Ethernet, EthernetBitrateChangeEvent)
-#define SilKit_InterfaceIdentifier_EthernetFrame                SK_ID_MAKE(Ethernet, EthernetFrame)
+#define SilKit_EthernetFrameEvent_InterfaceIdentifier           SK_ID_MAKE(Ethernet, SilKit_EthernetFrameEvent)
+#define SilKit_EthernetFrameTransmitEvent_InterfaceIdentifier   SK_ID_MAKE(Ethernet, SilKit_EthernetFrameTransmitEvent)
+#define SilKit_EthernetStateChangeEvent_InterfaceIdentifier     SK_ID_MAKE(Ethernet, SilKit_EthernetStateChangeEvent)
+#define SilKit_EthernetBitrateChangeEvent_InterfaceIdentifier   SK_ID_MAKE(Ethernet, SilKit_EthernetBitrateChangeEvent)
+#define SilKit_EthernetFrame_InterfaceIdentifier                SK_ID_MAKE(Ethernet, SilKit_EthernetFrame)
 
 // FlexRay
 // FlexRay data type IDs
-#define SK_ID_DATATYPE_FlexrayFrameEvent 1
-#define SK_ID_DATATYPE_FlexrayFrameTransmitEvent 2
-#define SK_ID_DATATYPE_FlexraySymbolEvent 3
-#define SK_ID_DATATYPE_FlexraySymbolTransmitEvent 5
-#define SK_ID_DATATYPE_FlexrayCycleStartEvent 6
-#define SK_ID_DATATYPE_FlexrayPocStatusEvent 7
-#define SK_ID_DATATYPE_FlexrayWakeupEvent 8
-#define SK_ID_DATATYPE_FlexrayControllerConfig 9
-#define SK_ID_DATATYPE_FlexrayClusterParameters 10
-#define SK_ID_DATATYPE_FlexrayNodeParameters 11
-#define SK_ID_DATATYPE_FlexrayHostCommand 12
-#define SK_ID_DATATYPE_FlexrayHeader 13
-#define SK_ID_DATATYPE_FlexrayFrame 14
-#define SK_ID_DATATYPE_FlexrayTxBufferConfig 15
-#define SK_ID_DATATYPE_FlexrayTxBufferUpdate 16
+#define SilKit_FlexrayFrameEvent_DATATYPE_ID 1
+#define SilKit_FlexrayFrameTransmitEvent_DATATYPE_ID 2
+#define SilKit_FlexraySymbolEvent_DATATYPE_ID 3
+#define SilKit_FlexraySymbolTransmitEvent_DATATYPE_ID 5
+#define SilKit_FlexrayCycleStartEvent_DATATYPE_ID 6
+#define SilKit_FlexrayPocStatusEvent_DATATYPE_ID 7
+#define SilKit_FlexrayWakeupEvent_DATATYPE_ID 8
+#define SilKit_FlexrayControllerConfig_DATATYPE_ID 9
+#define SilKit_FlexrayClusterParameters_DATATYPE_ID 10
+#define SilKit_FlexrayNodeParameters_DATATYPE_ID 11
+#define SilKit_FlexrayHostCommand_DATATYPE_ID 12
+#define SilKit_FlexrayHeader_DATATYPE_ID 13
+#define SilKit_FlexrayFrame_DATATYPE_ID 14
+#define SilKit_FlexrayTxBufferConfig_DATATYPE_ID 15
+#define SilKit_FlexrayTxBufferUpdate_DATATYPE_ID 16
 
 // Flexray data type versions
-#define SK_ID_VERSION_FlexrayFrameEvent 1
-#define SK_ID_VERSION_FlexrayFrameTransmitEvent 1
-#define SK_ID_VERSION_FlexraySymbolEvent 1
-#define SK_ID_VERSION_FlexraySymbolTransmitEvent 1
-#define SK_ID_VERSION_FlexrayCycleStartEvent 1
-#define SK_ID_VERSION_FlexrayPocStatusEvent 1
-#define SK_ID_VERSION_FlexrayWakeupEvent 1
-#define SK_ID_VERSION_FlexrayControllerConfig 1
-#define SK_ID_VERSION_FlexrayClusterParameters 1
-#define SK_ID_VERSION_FlexrayNodeParameters 1
-#define SK_ID_VERSION_FlexrayHostCommand 1
-#define SK_ID_VERSION_FlexrayHeader 1
-#define SK_ID_VERSION_FlexrayFrame 1
-#define SK_ID_VERSION_FlexrayTxBufferConfig 1
-#define SK_ID_VERSION_FlexrayTxBufferUpdate 1
+#define SilKit_FlexrayFrameEvent_VERSION 1
+#define SilKit_FlexrayFrameTransmitEvent_VERSION 1
+#define SilKit_FlexraySymbolEvent_VERSION 1
+#define SilKit_FlexraySymbolTransmitEvent_VERSION 1
+#define SilKit_FlexrayCycleStartEvent_VERSION 1
+#define SilKit_FlexrayPocStatusEvent_VERSION 1
+#define SilKit_FlexrayWakeupEvent_VERSION 1
+#define SilKit_FlexrayControllerConfig_VERSION 1
+#define SilKit_FlexrayClusterParameters_VERSION 1
+#define SilKit_FlexrayNodeParameters_VERSION 1
+#define SilKit_FlexrayHostCommand_VERSION 1
+#define SilKit_FlexrayHeader_VERSION 1
+#define SilKit_FlexrayFrame_VERSION 1
+#define SilKit_FlexrayTxBufferConfig_VERSION 1
+#define SilKit_FlexrayTxBufferUpdate_VERSION 1
 
 // Flexray make versioned IDs
-#define SilKit_InterfaceIdentifier_FlexrayFrameEvent            SK_ID_MAKE(Flexray, FlexrayFrameEvent)
-#define SilKit_InterfaceIdentifier_FlexrayFrameTransmitEvent    SK_ID_MAKE(Flexray, FlexrayFrameTransmitEvent)
-#define SilKit_InterfaceIdentifier_FlexraySymbolEvent           SK_ID_MAKE(Flexray, FlexraySymbolEvent)
-#define SilKit_InterfaceIdentifier_FlexraySymbolTransmitEvent   SK_ID_MAKE(Flexray, FlexraySymbolTransmitEvent)
-#define SilKit_InterfaceIdentifier_FlexrayCycleStartEvent       SK_ID_MAKE(Flexray, FlexrayCycleStartEvent)
-#define SilKit_InterfaceIdentifier_FlexrayPocStatusEvent        SK_ID_MAKE(Flexray, FlexrayPocStatusEvent)
-#define SilKit_InterfaceIdentifier_FlexrayWakeupEvent           SK_ID_MAKE(Flexray, FlexrayWakeupEvent)
-#define SilKit_InterfaceIdentifier_FlexrayControllerConfig      SK_ID_MAKE(Flexray, FlexrayControllerConfig)
-#define SilKit_InterfaceIdentifier_FlexrayClusterParameters     SK_ID_MAKE(Flexray, FlexrayClusterParameters)
-#define SilKit_InterfaceIdentifier_FlexrayNodeParameters        SK_ID_MAKE(Flexray, FlexrayNodeParameters)
-#define SilKit_InterfaceIdentifier_FlexrayHostCommand           SK_ID_MAKE(Flexray, FlexrayHostCommand)
-#define SilKit_InterfaceIdentifier_FlexrayHeader                SK_ID_MAKE(Flexray, FlexrayHeader)
-#define SilKit_InterfaceIdentifier_FlexrayFrame                 SK_ID_MAKE(Flexray, FlexrayFrame)
-#define SilKit_InterfaceIdentifier_FlexrayTxBufferConfig        SK_ID_MAKE(Flexray, FlexrayTxBufferConfig)
-#define SilKit_InterfaceIdentifier_FlexrayTxBufferUpdate        SK_ID_MAKE(Flexray, FlexrayTxBufferUpdate)
+#define SilKit_FlexrayFrameEvent_InterfaceIdentifier            SK_ID_MAKE(Flexray, SilKit_FlexrayFrameEvent)
+#define SilKit_FlexrayFrameTransmitEvent_InterfaceIdentifier    SK_ID_MAKE(Flexray, SilKit_FlexrayFrameTransmitEvent)
+#define SilKit_FlexraySymbolEvent_InterfaceIdentifier           SK_ID_MAKE(Flexray, SilKit_FlexraySymbolEvent)
+#define SilKit_FlexraySymbolTransmitEvent_InterfaceIdentifier   SK_ID_MAKE(Flexray, SilKit_FlexraySymbolTransmitEvent)
+#define SilKit_FlexrayCycleStartEvent_InterfaceIdentifier       SK_ID_MAKE(Flexray, SilKit_FlexrayCycleStartEvent)
+#define SilKit_FlexrayPocStatusEvent_InterfaceIdentifier        SK_ID_MAKE(Flexray, SilKit_FlexrayPocStatusEvent)
+#define SilKit_FlexrayWakeupEvent_InterfaceIdentifier           SK_ID_MAKE(Flexray, SilKit_FlexrayWakeupEvent)
+#define SilKit_FlexrayControllerConfig_InterfaceIdentifier      SK_ID_MAKE(Flexray, SilKit_FlexrayControllerConfig)
+#define SilKit_FlexrayClusterParameters_InterfaceIdentifier     SK_ID_MAKE(Flexray, SilKit_FlexrayClusterParameters)
+#define SilKit_FlexrayNodeParameters_InterfaceIdentifier        SK_ID_MAKE(Flexray, SilKit_FlexrayNodeParameters)
+#define SilKit_FlexrayHostCommand_InterfaceIdentifier           SK_ID_MAKE(Flexray, SilKit_FlexrayHostCommand)
+#define SilKit_FlexrayHeader_InterfaceIdentifier                SK_ID_MAKE(Flexray, SilKit_FlexrayHeader)
+#define SilKit_FlexrayFrame_InterfaceIdentifier                 SK_ID_MAKE(Flexray, SilKit_FlexrayFrame)
+#define SilKit_FlexrayTxBufferConfig_InterfaceIdentifier        SK_ID_MAKE(Flexray, SilKit_FlexrayTxBufferConfig)
+#define SilKit_FlexrayTxBufferUpdate_InterfaceIdentifier        SK_ID_MAKE(Flexray, SilKit_FlexrayTxBufferUpdate)
 
 // Lin
 
 // Lin data type IDs
-#define SK_ID_DATATYPE_LinFrame 1
-#define SK_ID_DATATYPE_LinFrameResponse 2
-#define SK_ID_DATATYPE_LinControllerConfig 3
-#define SK_ID_DATATYPE_LinFrameStatusEvent 4
-#define SK_ID_DATATYPE_LinGoToSleepEvent 5
-#define SK_ID_DATATYPE_LinWakeupEvent 6
+#define SilKit_LinFrame_DATATYPE_ID 1
+#define SilKit_LinFrameResponse_DATATYPE_ID 2
+#define SilKit_LinControllerConfig_DATATYPE_ID 3
+#define SilKit_LinFrameStatusEvent_DATATYPE_ID 4
+#define SilKit_LinGoToSleepEvent_DATATYPE_ID 5
+#define SilKit_LinWakeupEvent_DATATYPE_ID 6
 
 // Lin data type versions
-#define SK_ID_VERSION_LinFrame 1
-#define SK_ID_VERSION_LinFrameResponse 1
-#define SK_ID_VERSION_LinControllerConfig 1
-#define SK_ID_VERSION_LinFrameStatusEvent 1
-#define SK_ID_VERSION_LinGoToSleepEvent 1
-#define SK_ID_VERSION_LinWakeupEvent 1
+#define SilKit_LinFrame_VERSION 1
+#define SilKit_LinFrameResponse_VERSION 1
+#define SilKit_LinControllerConfig_VERSION 1
+#define SilKit_LinFrameStatusEvent_VERSION 1
+#define SilKit_LinGoToSleepEvent_VERSION 1
+#define SilKit_LinWakeupEvent_VERSION 1
 
 // Lin make versioned IDs
-#define SilKit_InterfaceIdentifier_LinFrame                     SK_ID_MAKE(Lin, LinFrame)
-#define SilKit_InterfaceIdentifier_LinFrameResponse             SK_ID_MAKE(Lin, LinFrameResponse)
-#define SilKit_InterfaceIdentifier_LinControllerConfig          SK_ID_MAKE(Lin, LinControllerConfig)
-#define SilKit_InterfaceIdentifier_LinFrameStatusEvent          SK_ID_MAKE(Lin, LinFrameStatusEvent)
-#define SilKit_InterfaceIdentifier_LinGoToSleepEvent            SK_ID_MAKE(Lin, LinGoToSleepEvent)
-#define SilKit_InterfaceIdentifier_LinWakeupEvent               SK_ID_MAKE(Lin, LinWakeupEvent)
+#define SilKit_LinFrame_InterfaceIdentifier                     SK_ID_MAKE(Lin, SilKit_LinFrame)
+#define SilKit_LinFrameResponse_InterfaceIdentifier             SK_ID_MAKE(Lin, SilKit_LinFrameResponse)
+#define SilKit_LinControllerConfig_InterfaceIdentifier          SK_ID_MAKE(Lin, SilKit_LinControllerConfig)
+#define SilKit_LinFrameStatusEvent_InterfaceIdentifier          SK_ID_MAKE(Lin, SilKit_LinFrameStatusEvent)
+#define SilKit_LinGoToSleepEvent_InterfaceIdentifier            SK_ID_MAKE(Lin, SilKit_LinGoToSleepEvent)
+#define SilKit_LinWakeupEvent_InterfaceIdentifier               SK_ID_MAKE(Lin, SilKit_LinWakeupEvent)
 
 // Data
 // Data data type IDs
-#define SK_ID_DATATYPE_DataMessageEvent 1
-#define SK_ID_DATATYPE_NewDataPublisherEvent 2
+#define SilKit_DataMessageEvent_DATATYPE_ID 1
+#define SilKit_NewDataPublisherEvent_DATATYPE_ID 2
 
 // Data data type versions
-#define SK_ID_VERSION_DataMessageEvent 1
-#define SK_ID_VERSION_NewDataPublisherEvent 1
+#define SilKit_DataMessageEvent_VERSION 1
+#define SilKit_NewDataPublisherEvent_VERSION 1
 
 // Data public API IDs
-#define SilKit_InterfaceIdentifier_DataMessageEvent             SK_ID_MAKE(Data, DataMessageEvent)
-#define SilKit_InterfaceIdentifier_NewDataPublisherEvent        SK_ID_MAKE(Data, NewDataPublisherEvent)
+#define SilKit_DataMessageEvent_InterfaceIdentifier             SK_ID_MAKE(Data, SilKit_DataMessageEvent)
+#define SilKit_NewDataPublisherEvent_InterfaceIdentifier        SK_ID_MAKE(Data, SilKit_NewDataPublisherEvent)
 
 // Rpc
 // Rpc data type IDs
-#define SK_ID_DATATYPE_RpcDiscoveryResult 1
-#define SK_ID_DATATYPE_RpcCallEvent 2
-#define SK_ID_DATATYPE_RpcCallResultEvent 3
-#define SK_ID_DATATYPE_RpcDiscoveryResultList 4
+#define SilKit_RpcDiscoveryResult_DATATYPE_ID 1
+#define SilKit_RpcCallEvent_DATATYPE_ID 2
+#define SilKit_RpcCallResultEvent_DATATYPE_ID 3
+#define SilKit_RpcDiscoveryResultList_DATATYPE_ID 4
 
 // Rpc data type Versions
-#define SK_ID_VERSION_RpcDiscoveryResult 1
-#define SK_ID_VERSION_RpcCallEvent 1
-#define SK_ID_VERSION_RpcCallResultEvent 1
-#define SK_ID_VERSION_RpcDiscoveryResultList 1
+#define SilKit_RpcDiscoveryResult_VERSION 1
+#define SilKit_RpcCallEvent_VERSION 1
+#define SilKit_RpcCallResultEvent_VERSION 1
+#define SilKit_RpcDiscoveryResultList_VERSION 1
 
 // Rpc public API IDs
-#define SilKit_InterfaceIdentifier_RpcDiscoveryResult           SK_ID_MAKE(Rpc, RpcDiscoveryResult)
-#define SilKit_InterfaceIdentifier_RpcCallEvent                 SK_ID_MAKE(Rpc, RpcCallEvent)
-#define SilKit_InterfaceIdentifier_RpcCallResultEvent           SK_ID_MAKE(Rpc, RpcCallResultEvent)
-#define SilKit_InterfaceIdentifier_RpcDiscoveryResultList       SK_ID_MAKE(Rpc, RpcDiscoveryResultList)
+#define SilKit_RpcDiscoveryResult_InterfaceIdentifier           SK_ID_MAKE(Rpc, SilKit_RpcDiscoveryResult)
+#define SilKit_RpcCallEvent_InterfaceIdentifier                 SK_ID_MAKE(Rpc, SilKit_RpcCallEvent)
+#define SilKit_RpcCallResultEvent_InterfaceIdentifier           SK_ID_MAKE(Rpc, SilKit_RpcCallResultEvent)
+#define SilKit_RpcDiscoveryResultList_InterfaceIdentifier       SK_ID_MAKE(Rpc, SilKit_RpcDiscoveryResultList)
 
 // Participant
 // Participant data type IDs
-#define SK_ID_DATATYPE_ParticipantStatus 1
+#define SilKit_ParticipantStatus_DATATYPE_ID 1
 
 // Participant data type Versions
-#define SK_ID_VERSION_ParticipantStatus 1
+#define SilKit_ParticipantStatus_VERSION 1
 
 // Participant public API IDs
-#define SilKit_InterfaceIdentifier_ParticipantStatus            SK_ID_MAKE(Participant, ParticipantStatus)
+#define SilKit_ParticipantStatus_InterfaceIdentifier            SK_ID_MAKE(Participant, SilKit_ParticipantStatus)
 SILKIT_END_DECLS

@@ -87,4 +87,409 @@ SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit
     CAPI_LEAVE
 }
 
+SilKit_ReturnCode SilKit_Participant_SetCommunicationReadyHandler(SilKit_Participant* participant, void* context,
+                                                          SilKit_ParticipantCommunicationReadyHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifecycleService = cppParticipant->GetLifecycleService();
+
+        lifecycleService->SetCommunicationReadyHandler([handler, context, participant]() {
+            handler(context, participant);
+        });
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_SetStopHandler(SilKit_Participant* participant, void* context,
+                                            SilKit_ParticipantStopHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifecycleService = cppParticipant->GetLifecycleService();
+
+        lifecycleService->SetStopHandler([handler, context, participant]() {
+            handler(context, participant);
+        });
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_SetShutdownHandler(SilKit_Participant* participant, void* context,
+                                                SilKit_ParticipantShutdownHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifecycleService = cppParticipant->GetLifecycleService();
+
+        lifecycleService->SetShutdownHandler([handler, context, participant]() {
+            handler(context, participant);
+        });
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+// Lifecycle async execution
+static std::map<SilKit_Participant*, std::future<SilKit::Services::Orchestration::ParticipantState>> sRunAsyncFuturePerParticipant;
+
+static auto from_c(SilKit_LifecycleConfiguration* csc)
+{
+    SilKit::Services::Orchestration::LifecycleConfiguration cpp;
+    cpp.coordinatedStart = csc->coordinatedStart;
+    cpp.coordinatedStop = csc->coordinatedStop;
+    return cpp;
+}
+SilKit_ReturnCode SilKit_Participant_StartLifecycleNoSyncTime(SilKit_Participant* participant,
+                                                      SilKit_LifecycleConfiguration* startConfiguration)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifecycleService = cppParticipant->GetLifecycleService();
+
+        sRunAsyncFuturePerParticipant[participant] =
+            lifecycleService->StartLifecycleNoSyncTime(from_c(startConfiguration));
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_StartLifecycleWithSyncTime(SilKit_Participant* participant,
+                                                        SilKit_LifecycleConfiguration* startConfiguration)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifecycleService = cppParticipant->GetLifecycleService();
+        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+
+        sRunAsyncFuturePerParticipant[participant] =
+            lifecycleService->StartLifecycleWithSyncTime(timeSyncService, from_c(startConfiguration));
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_WaitForLifecycleToComplete(SilKit_Participant* participant,
+                                                        SilKit_ParticipantState* outParticipantState)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_OUT_PARAMETER(outParticipantState);
+    CAPI_ENTER
+    {
+        if (sRunAsyncFuturePerParticipant.find(participant) == sRunAsyncFuturePerParticipant.end())
+        {
+            SilKit_error_string = "Unknown participant to wait for completion of asynchronous run operation";
+            return SilKit_ReturnCode_BADPARAMETER;
+        }
+        if (!sRunAsyncFuturePerParticipant[participant].valid())
+        {
+            SilKit_error_string = "Failed to access asynchronous run operation";
+            return SilKit_ReturnCode_UNSPECIFIEDERROR;
+        }
+        auto finalState = sRunAsyncFuturePerParticipant[participant].get();
+        *outParticipantState = static_cast<SilKit_ParticipantState>(finalState);
+        sRunAsyncFuturePerParticipant.erase(participant);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_SetPeriod(SilKit_Participant* participant, SilKit_NanosecondsTime period)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipantInternal*>(participant);
+        auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+        timeSyncService->SetPeriod(std::chrono::nanoseconds(period));
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_SetSimulationTask(SilKit_Participant* participant, void* context,
+                                               SilKit_ParticipantSimulationTaskHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipantInternal*>(participant);
+        auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+        timeSyncService->SetSimulationTask(
+            [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
+                handler(context, participant, static_cast<SilKit_NanosecondsTime>(now.count()));
+            });
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_SetSimulationTaskAsync(SilKit_Participant* participant, void* context,
+                                                    SilKit_ParticipantSimulationTaskHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+        timeSyncService->SetSimulationTaskAsync(
+            [handler, context, participant](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
+                handler(context, participant, static_cast<SilKit_NanosecondsTime>(now.count()));
+            });
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_CompleteSimulationTask(SilKit_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* timeSyncService = cppParticipant->GetLifecycleService()->GetTimeSyncService();
+        timeSyncService->CompleteSimulationTask();
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_Pause(SilKit_Participant* participant, const char* reason)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(reason);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifeCycleService = cppParticipant->GetLifecycleService();
+        lifeCycleService->Pause(reason);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_Continue(SilKit_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* lifeCycleService = cppParticipant->GetLifecycleService();
+        lifeCycleService->Continue();
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_Restart(SilKit_Participant* participant, const char* participantName)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(participantName);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemController = cppParticipant->GetSystemController();
+
+        systemController->Restart(participantName);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_RunSimulation(SilKit_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemController = cppParticipant->GetSystemController();
+        systemController->Run();
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_StopSimulation(SilKit_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemController = cppParticipant->GetSystemController();
+        systemController->Stop();
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_Shutdown(SilKit_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::Core::IParticipantInternal*>(participant);
+        auto* systemController = cppParticipant->GetSystemController();
+        systemController->Shutdown(cppParticipant->GetParticipantName());
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_SetWorkflowConfiguration(SilKit_Participant* participant,
+                                                      const SilKit_WorkflowConfiguration* workflowConfigration)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(workflowConfigration);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemController = cppParticipant->GetSystemController();
+        std::vector<std::string> cppNames;
+        assign(cppNames, workflowConfigration->requiredParticipantNames);
+        systemController->SetWorkflowConfiguration({cppNames});
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+// SystemMonitor related functions
+SilKit_ReturnCode SilKit_Participant_GetParticipantState(SilKit_ParticipantState* outParticipantState,
+                                                 SilKit_Participant* participant, const char* participantName)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_OUT_PARAMETER(outParticipantState);
+    ASSERT_VALID_POINTER_PARAMETER(participantName);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+        auto& participantStatus = systemMonitor->ParticipantStatus(participantName);
+        *outParticipantState = (SilKit_ParticipantState)participantStatus.state;
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_GetSystemState(SilKit_SystemState* outParticipantState, SilKit_Participant* participant)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_OUT_PARAMETER(outParticipantState);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+        auto systemState = systemMonitor->SystemState();
+        *outParticipantState = (SilKit_SystemState)systemState;
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_AddSystemStateHandler(SilKit_Participant* participant, void* context,
+                                                   SilKit_SystemStateHandler_t handler, SilKit_HandlerId* outHandlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+
+        auto cppHandlerId = systemMonitor->AddSystemStateHandler(
+            [handler, context, participant](SilKit::Services::Orchestration::SystemState systemState) {
+                handler(context, participant, (SilKit_SystemState)systemState);
+            });
+        *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_RemoveSystemStateHandler(SilKit_Participant* participant, SilKit_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto* cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+
+        systemMonitor->RemoveSystemStateHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_AddParticipantStatusHandler(SilKit_Participant* participant, void* context,
+                                                         SilKit_ParticipantStatusHandler_t handler,
+                                                         SilKit_HandlerId* outHandlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+    CAPI_ENTER
+    {
+        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+
+        auto cppHandlerId = systemMonitor->AddParticipantStatusHandler(
+            [handler, context, participant](SilKit::Services::Orchestration::ParticipantStatus cppStatus) {
+                SilKit_ParticipantStatus cStatus;
+                SilKit_Struct_Init(SilKit_ParticipantStatus, cStatus);
+
+                cStatus.enterReason = cppStatus.enterReason.c_str();
+                cStatus.enterTime =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.enterTime.time_since_epoch())
+                        .count();
+                cStatus.participantName = cppStatus.participantName.c_str();
+                cStatus.participantState = (SilKit_ParticipantState)cppStatus.state;
+                cStatus.refreshTime =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.refreshTime.time_since_epoch())
+                        .count();
+                handler(context, participant, cppStatus.participantName.c_str(), &cStatus);
+            });
+        *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+SilKit_ReturnCode SilKit_Participant_RemoveParticipantStatusHandler(SilKit_Participant* participant, SilKit_HandlerId handlerId)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    CAPI_ENTER
+    {
+        auto* cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+        auto* systemMonitor = cppParticipant->GetSystemMonitor();
+
+        systemMonitor->RemoveParticipantStatusHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 } //extern "C"

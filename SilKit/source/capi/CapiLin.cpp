@@ -220,7 +220,7 @@ SilKit_ReturnCode SilKit_LinController_AddFrameStatusHandler(SilKit_LinControlle
                 memcpy(cFrame.data, cppFrameStatusEvent.frame.data.data(), 8);
 
                 SilKit_LinFrameStatusEvent cFrameStatusEvent{};
-                cFrameStatusEvent.interfaceId = SilKit_InterfaceIdentifier_LinFrameStatusEvent;
+                SilKit_Struct_Init(SilKit_LinFrameStatusEvent, cFrameStatusEvent);
                 cFrameStatusEvent.timestamp = (SilKit_NanosecondsTime)cppFrameStatusEvent.timestamp.count();
                 cFrameStatusEvent.frame = &cFrame;
                 cFrameStatusEvent.status = (SilKit_LinFrameStatus)cppFrameStatusEvent.status;
@@ -256,8 +256,9 @@ SilKit_ReturnCode SilKit_LinController_AddGoToSleepHandler(SilKit_LinController*
         *outHandlerId = (SilKit_HandlerId)linController->AddGoToSleepHandler(
             [handler, context, controller](SilKit::Services::Lin::ILinController* /*ctrl*/,
                                            const SilKit::Services::Lin::LinGoToSleepEvent& cppGoToSleepEvent) {
-                SilKit_LinGoToSleepEvent goToSleepEvent{SilKit_InterfaceIdentifier_LinGoToSleepEvent,
-                                                     (SilKit_NanosecondsTime)cppGoToSleepEvent.timestamp.count()};
+                SilKit_LinGoToSleepEvent goToSleepEvent{};
+                SilKit_Struct_Init(SilKit_LinGoToSleepEvent, goToSleepEvent);
+                goToSleepEvent.timestamp = (SilKit_NanosecondsTime)cppGoToSleepEvent.timestamp.count();
                 handler(context, controller, &goToSleepEvent);
             });
         return SilKit_ReturnCode_SUCCESS;
@@ -289,7 +290,7 @@ SilKit_ReturnCode SilKit_LinController_AddWakeupHandler(SilKit_LinController* co
         *outHandlerId = (SilKit_HandlerId)linController->AddWakeupHandler(
             [handler, context, controller](SilKit::Services::Lin::ILinController* /*ctrl*/,
                                            const SilKit::Services::Lin::LinWakeupEvent& cppWakeupEvent) {
-                SilKit_LinWakeupEvent wakeupEvent{SilKit_InterfaceIdentifier_LinWakeupEvent,
+                SilKit_LinWakeupEvent wakeupEvent{SilKit_LinWakeupEvent_InterfaceIdentifier,
                                                (SilKit_NanosecondsTime)cppWakeupEvent.timestamp.count(),
                                                (SilKit_Direction)cppWakeupEvent.direction};
                 handler(context, controller, &wakeupEvent);

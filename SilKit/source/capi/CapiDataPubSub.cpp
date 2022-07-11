@@ -82,7 +82,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscr
             }
 
             SilKit_DataMessageEvent cDataMessageEvent;
-            cDataMessageEvent.interfaceId = SilKit_InterfaceIdentifier_DataMessageEvent;
+            SilKit_Struct_Init(SilKit_DataMessageEvent, cDataMessageEvent);
             cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
             cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
             
@@ -98,7 +98,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscr
             assign(&cLabels, cppNewDataPublisherEvent.labels);
 
             SilKit_NewDataPublisherEvent cNewDataPublisherEvent;
-            cNewDataPublisherEvent.interfaceId = SilKit_InterfaceIdentifier_NewDataPublisherEvent;
+            SilKit_Struct_Init(SilKit_NewDataPublisherEvent, cNewDataPublisherEvent);
             cNewDataPublisherEvent.timestamp = cppNewDataPublisherEvent.timestamp.count();
             cNewDataPublisherEvent.topic = cppNewDataPublisherEvent.topic.c_str();
             cNewDataPublisherEvent.mediaType = cppNewDataPublisherEvent.mediaType.c_str();
@@ -133,7 +133,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_SetDefaultDataMessageHandler(SilKit_Data
                     payloadPointer = (uint8_t*)&(cppDataMessageEvent.data[0]);
                 }
                 SilKit_DataMessageEvent cDataMessageEvent;
-                cDataMessageEvent.interfaceId = SilKit_InterfaceIdentifier_DataMessageEvent;
+                SilKit_Struct_Init(SilKit_DataMessageEvent, cDataMessageEvent);
                 cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
                 cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
 
@@ -169,7 +169,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_AddExplicitDataMessageHandler(SilKit_Dat
                     payloadPointer = (uint8_t* ) &(cppDataMessageEvent.data[0]);
                 }
                 SilKit_DataMessageEvent cDataMessageEvent;
-                cDataMessageEvent.interfaceId = SilKit_InterfaceIdentifier_DataMessageEvent;
+                SilKit_Struct_Init(SilKit_DataMessageEvent, cDataMessageEvent);
                 cDataMessageEvent.timestamp = cppDataMessageEvent.timestamp.count();
                 cDataMessageEvent.data = { payloadPointer, cppDataMessageEvent.data.size() };
 

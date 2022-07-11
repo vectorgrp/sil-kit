@@ -225,6 +225,10 @@ extern "C"
                     SilKit_FlexrayFrame frame;
                     SilKit_FlexrayHeader header;
 
+                    SilKit_Struct_Init(SilKit_FlexrayFrameEvent, message);
+                    SilKit_Struct_Init(SilKit_FlexrayFrame, frame);
+                    SilKit_Struct_Init(SilKit_FlexrayHeader, header);
+
                     header.cycleCount = msg.frame.header.cycleCount;
                     header.frameId = msg.frame.header.frameId;
                     header.flags = msg.frame.header.flags;
@@ -235,7 +239,6 @@ extern "C"
                     frame.payload.data = (uint8_t*)msg.frame.payload.data();
                     frame.payload.size = (uint32_t)msg.frame.payload.size();
 
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexrayFrameEvent;
                     message.timestamp = msg.timestamp.count();
                     message.channel = (SilKit_FlexrayChannel)msg.channel;
                     message.frame = &frame;
@@ -277,6 +280,10 @@ extern "C"
                     SilKit_FlexrayFrame frame;
                     SilKit_FlexrayHeader header;
 
+                    SilKit_Struct_Init(SilKit_FlexrayFrameEvent, message);
+                    SilKit_Struct_Init(SilKit_FlexrayFrame, frame);
+                    SilKit_Struct_Init(SilKit_FlexrayHeader, header);
+
                     header.cycleCount = msg.frame.header.cycleCount;
                     header.frameId = msg.frame.header.frameId;
                     header.flags = msg.frame.header.flags;
@@ -287,7 +294,6 @@ extern "C"
                     frame.payload.size = (uint32_t)msg.frame.payload.size();
                     frame.header = &header;
 
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexrayFrameTransmitEvent;
                     message.timestamp = msg.timestamp.count();
                     message.txBufferIndex = msg.txBufferIndex;
                     message.channel = (SilKit_FlexrayChannel)msg.channel;
@@ -324,8 +330,9 @@ extern "C"
                 reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
             *outHandlerId = (SilKit_HandlerId)cppController->AddWakeupHandler(
                 [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexrayWakeupEvent& msg) {
-                    SilKit_FlexraySymbolEvent message;
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexrayWakeupEvent;
+                    SilKit_FlexrayWakeupEvent message;
+                    SilKit_Struct_Init(SilKit_FlexrayWakeupEvent, message);
+
                     message.timestamp = msg.timestamp.count();
                     message.channel = (SilKit_FlexrayChannel)msg.channel;
                     message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
@@ -363,7 +370,7 @@ extern "C"
                 [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
                                    const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg) {
                     SilKit_FlexrayPocStatusEvent message;
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexrayPocStatusEvent;
+                    SilKit_Struct_Init(SilKit_FlexrayPocStatusEvent, message);
                     message.timestamp = msg.timestamp.count();
                     message.state = (SilKit_FlexrayPocState)msg.state;
                     message.chiHaltRequest = msg.chiHaltRequest;
@@ -407,7 +414,7 @@ extern "C"
             *outHandlerId = (SilKit_HandlerId)cppController->AddSymbolHandler(
                 [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexraySymbolEvent& msg) {
                     SilKit_FlexraySymbolEvent message;
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexraySymbolEvent;
+                    SilKit_Struct_Init(SilKit_FlexraySymbolEvent, message);
                     message.timestamp = msg.timestamp.count();
                     message.channel = (SilKit_FlexrayChannel)msg.channel;
                     message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
@@ -445,7 +452,7 @@ extern "C"
                 [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
                                    const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg) {
                     SilKit_FlexraySymbolTransmitEvent message;
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexraySymbolTransmitEvent;
+                    SilKit_Struct_Init(SilKit_FlexraySymbolTransmitEvent, message);
                     message.timestamp = msg.timestamp.count();
                     message.channel = (SilKit_FlexrayChannel)msg.channel;
                     message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
@@ -484,7 +491,7 @@ extern "C"
                 [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
                                    const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg) {
                     SilKit_FlexrayCycleStartEvent message;
-                    message.interfaceId = SilKit_InterfaceIdentifier_FlexrayCycleStartEvent;
+                    SilKit_Struct_Init(SilKit_FlexrayCycleStartEvent, message);
                     message.timestamp = msg.timestamp.count();
                     message.cycleCounter = msg.cycleCounter;
                     handler(context, ctrl, &message);

@@ -30,7 +30,7 @@ void assign(SilKit_RpcDiscoveryResultList** cResultList, const std::vector<SilKi
             uint32_t i = 0;
             for (auto&& r : cppDiscoveryResults)
             {
-                (*cResultList)->results[i].interfaceId = SilKit_InterfaceIdentifier_RpcDiscoveryResult;
+                SilKit_Struct_Init(SilKit_RpcDiscoveryResult, (*cResultList)->results[i]);
                 (*cResultList)->results[i].functionName = r.functionName.c_str();
         		(*cResultList)->results[i].mediaType = r.mediaType.c_str();
                 assign(&(*cResultList)->results[i].labelList, r.labels);
@@ -54,7 +54,7 @@ SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* conte
     return [handler, context](SilKit::Services::Rpc::IRpcClient* cppClient, const SilKit::Services::Rpc::RpcCallResultEvent& event) {
         auto* cClient = reinterpret_cast<SilKit_RpcClient*>(cppClient);
         SilKit_RpcCallResultEvent cEvent;
-        cEvent.interfaceId = SilKit_InterfaceIdentifier_RpcCallResultEvent;
+        SilKit_Struct_Init(SilKit_RpcCallResultEvent, cEvent);
         cEvent.timestamp = event.timestamp.count();
         cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
         cEvent.callStatus = (SilKit_RpcCallStatus)event.callStatus;
@@ -68,7 +68,7 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
     return [handler, context](SilKit::Services::Rpc::IRpcServer* cppServer, const SilKit::Services::Rpc::RpcCallEvent& event) {
         auto* cServer = reinterpret_cast<SilKit_RpcServer*>(cppServer);
         SilKit_RpcCallEvent cEvent;
-        cEvent.interfaceId = SilKit_InterfaceIdentifier_RpcCallEvent;
+        SilKit_Struct_Init(SilKit_RpcCallEvent, cEvent);
         cEvent.timestamp = event.timestamp.count();
         cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
         cEvent.argumentData = SilKit_ByteVector{GetDataOrNullptr(event.argumentData), event.argumentData.size()};
@@ -205,6 +205,7 @@ SilKit_ReturnCode SilKit_DiscoverServers(SilKit_Participant* participant, const 
             [resultHandler, context](const std::vector<SilKit::Services::Rpc::RpcDiscoveryResult>& cppDiscoveryResults) {
                 SilKit_RpcDiscoveryResultList* results;
                 assign(&results, cppDiscoveryResults);
+                SilKit_Struct_Init(SilKit_RpcDiscoveryResultList, *results);
                 resultHandler(context, results);
             });
         return SilKit_ReturnCode_SUCCESS;

@@ -81,7 +81,9 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
     using SilKit::Util::HandlerId;
 
     std::array<uint8_t, 60> buffer;
-    SilKit_EthernetFrame ef = {SilKit_InterfaceIdentifier_EthernetFrame, {buffer.data(), buffer.size()}};
+    SilKit_EthernetFrame ef{};
+    SilKit_Struct_Init(SilKit_EthernetFrame, ef);
+    ef.raw = {buffer.data(), buffer.size()};
 
     SilKit_ReturnCode returnCode;
     MockParticipant mockParticipant;
@@ -199,7 +201,8 @@ TEST_F(CapiEthernetTest, ethernet_controller_nullptr_params)
     returnCode = SilKit_EthernetController_RemoveBitrateChangeHandler(nullptr, handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    SilKit_EthernetFrame ef{SilKit_InterfaceIdentifier_EthernetFrame, {0, 0}};
+    SilKit_EthernetFrame ef{};
+    SilKit_Struct_Init(SilKit_EthernetFrame, ef);
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, nullptr, NULL);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_EthernetController_SendFrame(nullptr, &ef, NULL);
@@ -232,8 +235,9 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
         "This is the demonstration ethernet frame number %i.",
          ethernetMessageCounter);
 
-    SilKit_EthernetFrame ef = {SilKit_InterfaceIdentifier_EthernetFrame,
-                            {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize}};
+    SilKit_EthernetFrame ef{};
+    SilKit_Struct_Init(SilKit_EthernetFrame, ef);
+    ef.raw = {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize};
 
     EthernetFrame refFrame{};
     std::vector<uint8_t> rawFrame(ef.raw.data, ef.raw.data + ef.raw.size);

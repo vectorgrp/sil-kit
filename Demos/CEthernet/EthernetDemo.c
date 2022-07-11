@@ -149,7 +149,10 @@ void SendFrame()
         exit(-2);
     }
 
-    SilKit_EthernetFrame ef = {SilKit_InterfaceIdentifier_EthernetFrame, {(const uint8_t*)buffer, PAYLOAD_OFFSET + payloadSize}};
+    SilKit_EthernetFrame ef;
+    SilKit_Struct_Init(SilKit_EthernetFrame, ef);
+    ef.raw.data = (const uint8_t*)buffer;
+    ef.raw.size = PAYLOAD_OFFSET + payloadSize;
 
     transmitContext.someInt = ethernetFrameCounter;
     SilKit_EthernetController_SendFrame(ethernetController1, &ef, (void*)&transmitContext);

@@ -66,24 +66,20 @@ namespace {
         MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId));
     };
 
-    void FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* ack)
+    void FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* /*ack*/)
     {
-        ASSERT_TRUE(SilKit_Struct_GetId(*ack) == SilKit_InterfaceIdentifier_CanFrameTransmitEvent);
     }
 
-    void FrameHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameEvent* metaData)
+    void FrameHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameEvent* /*metaData*/)
     {
-        ASSERT_TRUE(SilKit_Struct_GetId(*metaData) == SilKit_InterfaceIdentifier_CanFrameEvent);
     }
 
-    void StateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanStateChangeEvent* state)
+    void StateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanStateChangeEvent* /*state*/)
     {
-        ASSERT_TRUE(SilKit_Struct_GetId(*state) == SilKit_InterfaceIdentifier_CanStateChangeEvent);
     }
 
-    void ErrorStateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanErrorStateChangeEvent* state)
+    void ErrorStateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanErrorStateChangeEvent* /*state*/)
     {
-        ASSERT_TRUE(SilKit_Struct_GetId(*state) == SilKit_InterfaceIdentifier_CanErrorStateChangeEvent);
     }
 
     class MockParticipant : public DummyParticipant
@@ -133,7 +129,8 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, SendFrame(testing::_, testing::_)).Times(testing::Exactly(1));
-        SilKit_CanFrame cf{ SilKit_InterfaceIdentifier_CanFrame, 0,0,0,{0,0} };
+        SilKit_CanFrame cf{};
+        SilKit_Struct_Init(SilKit_CanFrame, cf);
         cf.id = 1;
         returnCode = SilKit_CanController_SendFrame((SilKit_CanController*)&mockController, &cf, NULL);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
@@ -240,7 +237,8 @@ namespace {
         returnCode = SilKit_CanController_Sleep(nullptr);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-        SilKit_CanFrame cf{ SilKit_InterfaceIdentifier_CanFrame, 1,0,0,{0,0} };
+        SilKit_CanFrame cf{};
+        SilKit_Struct_Init(SilKit_CanFrame, cf);
         cf.id = 1;
         returnCode = SilKit_CanController_SendFrame(nullptr, &cf, NULL);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);

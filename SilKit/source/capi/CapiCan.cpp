@@ -66,7 +66,7 @@ SilKit_ReturnCode SilKit_CanController_AddFrameHandler(SilKit_CanController* con
                 };
 
                 SilKit_CanFrameEvent frameEvent{};
-                SilKit_Struct_Init(CanFrameEvent, frameEvent);
+                SilKit_Struct_Init(SilKit_CanFrameEvent, frameEvent);
                 frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
                 frameEvent.frame = &frame;
                 frameEvent.userContext = cppCanFrameEvent.userContext;
@@ -104,7 +104,7 @@ SilKit_ReturnCode SilKit_CanController_AddFrameTransmitHandler(SilKit_CanControl
                 [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
                     const SilKit::Services::Can::CanFrameTransmitEvent& cppFrameTransmitEvent) {
                 SilKit_CanFrameTransmitEvent frameTransmitEvent{};
-                SilKit_Struct_Init(CanFrameTransmitEvent, frameTransmitEvent);
+                SilKit_Struct_Init(SilKit_CanFrameTransmitEvent, frameTransmitEvent);
                 frameTransmitEvent.userContext = cppFrameTransmitEvent.userContext;
                 frameTransmitEvent.timestamp = cppFrameTransmitEvent.timestamp.count();
                 frameTransmitEvent.status = (SilKit_CanTransmitStatus)cppFrameTransmitEvent.status;
@@ -141,7 +141,7 @@ SilKit_ReturnCode SilKit_CanController_AddStateChangeHandler(SilKit_CanControlle
                 [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
                     const SilKit::Services::Can::CanStateChangeEvent cppStateChangeEvent) {
                 SilKit_CanStateChangeEvent stateChangeEvent;
-                SilKit_Struct_Init(CanStateChangeEvent, stateChangeEvent);
+                SilKit_Struct_Init(SilKit_CanStateChangeEvent, stateChangeEvent);
                 stateChangeEvent.timestamp = cppStateChangeEvent.timestamp.count();
                 stateChangeEvent.state = (SilKit_CanControllerState)cppStateChangeEvent.state;
                 callback(context, controller, &stateChangeEvent);
@@ -177,7 +177,7 @@ SilKit_ReturnCode SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanCont
                 [callback, context, controller](SilKit::Services::Can::ICanController* /*ctrl*/,
                     const SilKit::Services::Can::CanErrorStateChangeEvent cppErrorStateChangeEvent) {
                 SilKit_CanErrorStateChangeEvent errorStateChangeEvent;
-                SilKit_Struct_Init(CanErrorStateChangeEvent, errorStateChangeEvent);
+                SilKit_Struct_Init(SilKit_CanErrorStateChangeEvent, errorStateChangeEvent);
                 errorStateChangeEvent.timestamp = cppErrorStateChangeEvent.timestamp.count();
                 errorStateChangeEvent.errorState = (SilKit_CanErrorState)cppErrorStateChangeEvent.errorState;
                 callback(context, controller, &errorStateChangeEvent);
