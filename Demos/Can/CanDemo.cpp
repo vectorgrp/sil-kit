@@ -195,6 +195,9 @@ int main(int argc, char** argv)
             bool isStopped = false;
             std::thread workerThread;
 
+            canController->SetBaudRate(10'000, 1'000'000);
+            canController->Start();
+
             if (participantName == "CanWriter")
             {
                 workerThread = std::thread{[&]() {
@@ -205,20 +208,14 @@ int main(int argc, char** argv)
                     }
                 }};
             }
-            else
-            {
-                workerThread = std::thread{[&]() {
-                    while (!isStopped)
-                    {
-                        std::this_thread::sleep_for(sleepTimePerTick);
-                    }
-                }};
-            }
 
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
             isStopped = true;
-            workerThread.join();
+            if (workerThread.joinable())
+            {
+                workerThread.join();
+            }
         }
     }
     catch (const SilKit::ConfigurationError& error)

@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([&participantName, ethernetController]() {
-                std::cout << "Initializing " << participantName << std::endl;
+                std::cout << "Communication ready for " << participantName << std::endl;
                 ethernetController->Activate();
             });
 
@@ -234,6 +234,8 @@ int main(int argc, char** argv)
             bool isStopped = false;
             std::thread workerThread;
 
+            ethernetController->Activate();
+
             if (participantName == "EthernetWriter")
             {
                 workerThread = std::thread{[&]() {
@@ -244,20 +246,14 @@ int main(int argc, char** argv)
                     }
                 }};
             }
-            else
-            {
-                workerThread = std::thread{[&]() {
-                    while (!isStopped)
-                    {
-                        std::this_thread::sleep_for(1s);
-                    }
-                }};
-            }
 
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
             isStopped = true;
-            workerThread.join();
+            if (workerThread.joinable())
+            {
+                workerThread.join();
+            }
         }
 
     }
