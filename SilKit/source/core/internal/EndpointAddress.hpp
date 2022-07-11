@@ -3,7 +3,7 @@
 #pragma once
 #include <cstdint>
 
-#include "silkit/ParticipantId.hpp"
+#include "silkit/services/orchestration/SyncDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

@@ -6,9 +6,13 @@
 #include <string>
 #include <vector>
 
-#include "silkit/ParticipantId.hpp"
-
 namespace SilKit {
+    
+/*! \brief Deprecated identifier for SilKit participants
+ * Will be fully replaced by participant name in future versions. 
+*/
+using ParticipantId = uint64_t;
+
 namespace Services {
 namespace Orchestration {
 
