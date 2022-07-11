@@ -150,7 +150,7 @@ struct CanConfigureBaudrate
  */
 struct CanSetControllerMode
 {
-    struct Flags
+    struct ControllerModeFlag
     {
         uint8_t resetErrorHandling : 1; //!< Reset the error counters to zero and the error state to error active.
         uint8_t cancelTransmitRequests : 1; //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
