@@ -52,13 +52,13 @@ protected:
 
         controller.SetServiceDescriptor(from_endpointAddress(addr1_proxy));
         controller2.SetServiceDescriptor(from_endpointAddress(addr2_proxy));
-        controllerBusSim.SetServiceDescriptor(from_endpointAddress(addr1_vibe));
-        controller.SetDetailedBehavior(from_endpointAddress(addr1_vibe));
-        controller2.SetDetailedBehavior(from_endpointAddress(addr1_vibe));
+        controllerBusSim.SetServiceDescriptor(from_endpointAddress(addr1_netsim));
+        controller.SetDetailedBehavior(from_endpointAddress(addr1_netsim));
+        controller2.SetDetailedBehavior(from_endpointAddress(addr1_netsim));
     }
 
 protected:
-    const EndpointAddress addr1_vibe{4, 5};
+    const EndpointAddress addr1_netsim{4, 5};
     const EndpointAddress addr1_proxy{7, 5};
     const EndpointAddress addr2_proxy{4, 9};
 

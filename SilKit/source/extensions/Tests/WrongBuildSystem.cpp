@@ -23,12 +23,12 @@ extern "C" const SilKitExtensionDescriptor_t silkit_extension_descriptor
     SILKIT_MAKE_BUILDINFOS(),
 };
 
-VIBE_API VIBE_EXTENSION_HANDLE VIBE_CABI CreateExtension()
+SILEXT_API SILEXT_EXTENSION_HANDLE SILEXT_CABI CreateExtension()
 {
     return new WrongBuildSystem();
 }
 
-VIBE_API void VIBE_CABI ReleaseExtension(VIBE_EXTENSION_HANDLE extension)
+SILEXT_API void SILEXT_CABI ReleaseExtension(SILEXT_EXTENSION_HANDLE extension)
 {
     auto* instance = static_cast<WrongBuildSystem *>(extension);
     delete instance;

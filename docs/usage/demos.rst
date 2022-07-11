@@ -458,7 +458,7 @@ Life Cycle Demo
             # Life cycle with synchronized time, but without coordinated start and stop (i.e., switches directly to the Running state):
             |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json AnotherParticipant --syncTime
 
-            # System Controller (add NetworkSimulator as third parameter if using Network Simulator):
+            # System Controller (add NetworkSimulator as third parameter if using the Network Simulator):
             |SystemController| EthernetReader Ethernet Writer
 
    *  -  Notes

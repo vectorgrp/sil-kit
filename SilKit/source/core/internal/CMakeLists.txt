@@ -1,5 +1,5 @@
 # The Participant's connection interfaces are collected in this folder
-# for easy consumption from external VIBE projects
+# for easy consumption from external projects
 add_library(SilKitInternal INTERFACE)
 target_include_directories(SilKitInternal 
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}

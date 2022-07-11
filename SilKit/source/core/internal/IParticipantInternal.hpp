@@ -29,7 +29,7 @@ public:
     */
     virtual void JoinSilKitDomain(const std::string& registryUri) = 0;
 
-    // For VIBE-NetworkSimulator integration:
+    // For NetworkSimulator integration:
     virtual void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
     virtual void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
     virtual void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;

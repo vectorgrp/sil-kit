@@ -30,7 +30,7 @@
             SILKIT_MAKE_BUILDINFOS()\
         };\
     }\
-    VIBE_API VIBE_EXTENSION_HANDLE VIBE_CABI CreateExtension()\
+    SILEXT_API SILEXT_EXTENSION_HANDLE SILEXT_CABI CreateExtension()\
     {\
         try {\
             SilKit::ISilKitExtension* instance = new CLASS_NAME();\
@@ -38,10 +38,10 @@
         } \
         catch(...) \
         { \
-            return VIBE_INVALID_HANDLE;\
+            return SILEXT_INVALID_HANDLE;\
         }\
     }\
-    VIBE_API void VIBE_CABI ReleaseExtension(VIBE_EXTENSION_HANDLE extension)\
+    SILEXT_API void SILEXT_CABI ReleaseExtension(SILEXT_EXTENSION_HANDLE extension)\
     {\
         auto* instance = static_cast<CLASS_NAME *>(extension);\
         delete instance;\
