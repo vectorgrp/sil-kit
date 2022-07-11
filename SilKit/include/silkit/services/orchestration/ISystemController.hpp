@@ -38,7 +38,7 @@ public:
      */
     virtual void Stop() const = 0;
 
-    /*! \brief Send \ref SystemCommand::Kind::Shutdown to all participants
+    /*! \brief Send \ref ParticipantCommand::Kind::Shutdown to a given participant
      *
      *  The command is only allowed if system is in
      *  SystemState::Stopped or SystemState::Error.

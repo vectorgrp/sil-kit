@@ -135,6 +135,7 @@ typedef struct SilKit_CanController SilKit_CanController;
 * \param context The by the user provided context on registration.
 * \param controller The Can controller that received the acknowledge.
 * \param acknowledge The acknowledge and its data.
+* \param frameTransmitEvent The incoming CAN frame transmit event.
 */
 typedef void (*SilKit_CanFrameTransmitHandler_t)(void* context, SilKit_CanController* controller,
                                               SilKit_CanFrameTransmitEvent* frameTransmitEvent);

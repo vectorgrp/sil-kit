@@ -29,6 +29,7 @@ public:
     auto operator=(Serializer&& other) -> Serializer& = default;
 
     /*! \brief Serializes an uint8_t to uint64_t, int8_t to int64_t
+     *  \param data The data to be serialized.
      *  \param bitSize The number of bits which shall be serialized.
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value
