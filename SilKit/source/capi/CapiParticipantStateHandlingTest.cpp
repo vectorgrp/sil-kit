@@ -57,6 +57,8 @@ protected:
         {
             Create_StringList(&workflowConfiguration->requiredParticipantNames, names, numNames);
         }
+
+        SilKit_Struct_Init(SilKit_WorkflowConfiguration, *workflowConfiguration);
     }
 
     SilKit_WorkflowConfiguration* workflowConfiguration;
@@ -288,6 +290,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     state.set_value(ParticipantState::Shutdown);
 
     SilKit_LifecycleConfiguration startConfig;
+    SilKit_Struct_Init(SilKit_LifecycleConfiguration,startConfig);
 
     EXPECT_CALL(mockParticipant.mockLifecycleService,
         StartLifecycleWithSyncTime(_, _)
@@ -323,6 +326,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     SilKit_ParticipantStatus participantStatus;
+    SilKit_Struct_Init(SilKit_ParticipantStatus, participantStatus);
     EXPECT_CALL(mockParticipant.mockSystemMonitor, ParticipantStatus(testing::_)).Times(testing::Exactly(1));
     returnCode = SilKit_SystemMonitor_GetParticipantStatus(&participantStatus, systemMonitor, "participant");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);

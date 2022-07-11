@@ -66,6 +66,7 @@ SilKit_ReturnCode SilKit_LinController_Init(SilKit_LinController* controller, co
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(config);
+    ASSERT_VALID_STRUCT_HEADER(config);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
@@ -95,6 +96,7 @@ SilKit_ReturnCode SilKit_LinController_SendFrame(SilKit_LinController* controlle
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frame);
+    ASSERT_VALID_STRUCT_HEADER(frame);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
@@ -123,6 +125,8 @@ SilKit_ReturnCode SilKit_LinController_SetFrameResponse(SilKit_LinController* co
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frameResponse);
+    ASSERT_VALID_STRUCT_HEADER(frameResponse);
+    ASSERT_VALID_STRUCT_HEADER(frameResponse->frame);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
@@ -141,10 +145,17 @@ SilKit_ReturnCode SilKit_LinController_SetFrameResponses(SilKit_LinController* c
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frameResponses);
+    ASSERT_VALID_STRUCT_HEADER(frameResponses);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
         std::vector<SilKit::Services::Lin::LinFrameResponse> cppFrameResponses;
+
+        for(auto i = 0u; i < numFrameResponses; i++)
+        {
+            ASSERT_VALID_STRUCT_HEADER(&frameResponses[i]);
+        }
+
         assign(cppFrameResponses, frameResponses, numFrameResponses);
         linController->SetFrameResponses(std::move(cppFrameResponses));
         return SilKit_ReturnCode_SUCCESS;

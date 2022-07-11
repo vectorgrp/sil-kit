@@ -180,6 +180,7 @@ namespace {
         SilKit_ReturnCode returnCode;
 
         SilKit_CanFrame cf1{};
+        SilKit_Struct_Init(SilKit_CanFrame, cf1);
         cf1.id = 1;
         cf1.data = { 0,0 };
         cf1.dlc = 1;
@@ -195,6 +196,7 @@ namespace {
         SilKit_ReturnCode returnCode;
 
         SilKit_CanFrame cf1{};
+        SilKit_Struct_Init(SilKit_CanFrame, cf1);
         cf1.id = 1;
         cf1.data = { 0,0 };
         cf1.dlc = 1;
@@ -210,6 +212,7 @@ namespace {
         SilKit_ReturnCode returnCode;
 
         SilKit_CanFrame cf1{};
+        SilKit_Struct_Init(SilKit_CanFrame, cf1);
         cf1.id = 1;
         cf1.data = { 0,0 };
         cf1.dlc = 1;
@@ -298,4 +301,12 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
 
+TEST_F(CapiCanTest, send_with_invalud_struct_header)
+{
+    SilKit_CanFrame cf{};// we do not call SilKit_Struct_Init(SilKit_CanFrame, cf) here
+    cf.id = 1;
+    auto returnCode = SilKit_CanController_SendFrame((SilKit_CanController*)&mockController, &cf, nullptr);
+    ASSERT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
+
+} //namespace

@@ -229,10 +229,17 @@ typedef struct
 // Participant
 // Participant data type IDs
 #define SilKit_ParticipantStatus_DATATYPE_ID 1
+#define SilKit_LifecycleConfiguration_DATATYPE_ID 2
+#define SilKit_WorkflowConfiguration_DATATYPE_ID 3
 
 // Participant data type Versions
 #define SilKit_ParticipantStatus_VERSION 1
+#define SilKit_LifecycleConfiguration_VERSION 1
+#define SilKit_WorkflowConfiguration_VERSION 3
 
 // Participant public API IDs
 #define SilKit_ParticipantStatus_STRUCT_VERSION            SK_ID_MAKE(Participant, SilKit_ParticipantStatus)
+#define SilKit_LifecycleConfiguration_STRUCT_VERSION       SK_ID_MAKE(Participant, SilKit_LifecycleConfiguration)
+#define SilKit_WorkflowConfiguration_STRUCT_VERSION        SK_ID_MAKE(Participant, SilKit_WorkflowConfiguration)
+
 SILKIT_END_DECLS

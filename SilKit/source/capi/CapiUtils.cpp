@@ -14,9 +14,9 @@
 #include <cstring>
 #include "CapiImpl.hpp"
 
+thread_local std::string SilKit_error_string = "";
 extern "C" {
 
-thread_local std::string SilKit_error_string = "";
 
 #define SilKit_ReturnCode_SUCCESS_str "Operation succeeded."
 #define SilKit_ReturnCode_UNSPECIFIEDERROR_str "An unspecified error occured."

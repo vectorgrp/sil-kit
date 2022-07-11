@@ -216,8 +216,10 @@ SilKit_ReturnCode SilKit_CanController_SendFrame(SilKit_CanController* controlle
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(message);
+    ASSERT_VALID_STRUCT_HEADER(message);
     CAPI_ENTER
     {
+
         using std::chrono::duration;
         auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
 

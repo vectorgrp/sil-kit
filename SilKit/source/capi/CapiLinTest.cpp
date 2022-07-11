@@ -58,12 +58,17 @@ TEST_F(CapiLinTest, lin_controller_function_mapping)
 
     SilKit_ReturnCode returnCode;
     auto cMockController = (SilKit_LinController*)&mockController;
-    SilKit_LinFrame frame;
+    SilKit_LinFrame frame{};
     SilKit_LinFrameResponse frameResponses[1] = {SilKit_LinFrameResponse{}};
     frameResponses[0].frame = &frame;
+
+    SilKit_Struct_Init(SilKit_LinFrame, frame);
+    SilKit_Struct_Init(SilKit_LinFrameResponse, frameResponses[0]);
+
     auto cfg = SilKit_LinControllerConfig{};
-    SilKit_LinControllerStatus status;
-    SilKit_HandlerId handlerId;
+    SilKit_Struct_Init(SilKit_LinControllerConfig, cfg);
+    SilKit_LinControllerStatus status{};
+    SilKit_HandlerId handlerId{};
 
     EXPECT_CALL(mockController, Init(testing::_)).Times(testing::Exactly(1));
     returnCode = SilKit_LinController_Init(cMockController, &cfg);

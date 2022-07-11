@@ -125,6 +125,10 @@ TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
     cfg.clusterParams = &clusterParameters;
     cfg.nodeParams = &nodeParameters;
 
+    SilKit_Struct_Init(SilKit_FlexrayClusterParameters, clusterParameters);
+    SilKit_Struct_Init(SilKit_FlexrayNodeParameters, nodeParameters);
+    SilKit_Struct_Init(SilKit_FlexrayControllerConfig, cfg);
+
     EXPECT_CALL(mockController, Configure(_)).Times(testing::Exactly(1));
     returnCode = SilKit_FlexrayController_Configure((SilKit_FlexrayController*)&mockController, &cfg);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);

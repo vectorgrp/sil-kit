@@ -292,6 +292,7 @@ void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, SilKit_NanosecondsTime
     sprintf(payloadString, "FlexrayFrameEvent#%d sent from buffer %d", msgNumber, bufferIdx);
 
     SilKit_FlexrayTxBufferUpdate update;
+    SilKit_Struct_Init(SilKit_FlexrayTxBufferUpdate, update);
     update.payload.size = strlen(payloadString + 1);
     update.payload.data = (uint8_t*)payloadString;
     update.payloadDataValid = SilKit_True;
@@ -405,6 +406,7 @@ int main(int argc, char** argv)
     SilKit_Participant* participant;
 
     SilKit_FlexrayClusterParameters clusterParams;
+    SilKit_Struct_Init(SilKit_FlexrayClusterParameters, clusterParams);
     clusterParams.gColdstartAttempts = 8;
     clusterParams.gCycleCountMax = 63;
     clusterParams.gdActionPointOffset = 2;
@@ -427,6 +429,7 @@ int main(int argc, char** argv)
     clusterParams.gSyncFrameIDCountMax = 15;
 
     SilKit_FlexrayNodeParameters nodeParams;
+    SilKit_Struct_Init(SilKit_FlexrayClusterParameters, nodeParams);
     nodeParams.pAllowHaltDueToClock = 1;
     nodeParams.pAllowPassiveToActive = 0;
     nodeParams.pChannels = SilKit_FlexrayChannel_AB;
@@ -503,6 +506,7 @@ int main(int argc, char** argv)
     {
         // initialize bufferConfig to send some FrMessages
         SilKit_FlexrayTxBufferConfig cfg;
+        SilKit_Struct_Init(SilKit_FlexrayTxBufferConfig, cfg);
         cfg.channels = SilKit_FlexrayChannel_AB;
         cfg.slotId = 10;
         cfg.offset = 0;
@@ -526,6 +530,7 @@ int main(int argc, char** argv)
 
         // initialize bufferConfig to send some FrMessages
         SilKit_FlexrayTxBufferConfig cfg;
+        SilKit_Struct_Init(SilKit_FlexrayTxBufferConfig, cfg);
         cfg.channels = SilKit_FlexrayChannel_AB;
         cfg.slotId = 11;
         cfg.offset = 0;
@@ -626,6 +631,7 @@ int main(int argc, char** argv)
 
     SilKit_ParticipantState finalState;
     SilKit_LifecycleConfiguration startConfig;
+    SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
 

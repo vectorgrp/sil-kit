@@ -60,8 +60,9 @@ constexpr uint64_t allSilkidIds[]= {
     SilKit_RpcCallResultEvent_STRUCT_VERSION,
     SilKit_RpcDiscoveryResultList_STRUCT_VERSION,
     SilKit_ParticipantStatus_STRUCT_VERSION,
+    SilKit_LifecycleConfiguration_STRUCT_VERSION,
 };
-constexpr auto allSilkidIdsSize = sizeof(allSilkidIds) / sizeof(SilKit_StructHeader);
+constexpr auto allSilkidIdsSize = sizeof(allSilkidIds) / sizeof(uint64_t);
 
 TEST(TestCapi_Interfaces, interface_identifiers_are_unique)
 {

@@ -106,6 +106,7 @@ target_link_libraries(SilKit
     SilKitConfiguration
     SilKitMwParticipant
     SilKitExtensions
+    SilKitUtil
 )
 
 add_library(SilKitVersion STATIC

@@ -8,6 +8,30 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.27] - unreleased
 ----------------------
 
+Changed
+~~~~~~~
+- C-API: improvements for longterm ABI stability.
+  The ``interfaceId`` member was replaced with a more versatile structHeader of type SilKit_StructHeader.
+  This is a private field and not ment to be changed by the user directly.
+  It is now necessary to initialize data structures before passing them to the C-API using the `SilKit_Struct_Init` macro.
+  For example:
+
+    + old:
+  
+      .. code-block:: c
+ 
+        SilKit_CanFrame canFrame;
+        /* we could pass uninitialized data to SIL Kit */
+        SilKit_CanController_SendFrame(canController, &canFrame, NULL);
+    + new:
+  
+      .. code-block:: c
+
+        SilKit_CanFrame canFrame;
+        /* we must initialize the data structures header before use */
+        SilKit_Struct_Init(SilKit_CanFrame, canFrame);
+        SilKit_CanController_SendFrame(canController, &canFrame, NULL);
+  
 Compatibility with 3.99.26
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 

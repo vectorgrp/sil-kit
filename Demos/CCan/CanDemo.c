@@ -109,6 +109,7 @@ void FrameHandler(void* context, SilKit_CanController* controller, SilKit_CanFra
 void SendFrame()
 {
     SilKit_CanFrame canFrame;
+    SilKit_Struct_Init(SilKit_CanFrame, canFrame);
     canFrame.id = 17;
     canFrame.flags = SilKit_CanFrameFlag_brs;
 

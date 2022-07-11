@@ -120,6 +120,11 @@ extern "C"
         ASSERT_VALID_POINTER_PARAMETER(config);
         ASSERT_VALID_POINTER_PARAMETER(config->clusterParams);
         ASSERT_VALID_POINTER_PARAMETER(config->nodeParams);
+        // Versioning checks
+        ASSERT_VALID_STRUCT_HEADER(config);
+        ASSERT_VALID_STRUCT_HEADER(config->clusterParams);
+        ASSERT_VALID_STRUCT_HEADER(config->nodeParams);
+
         CAPI_ENTER
         {
             SilKit::Services::Flexray::IFlexrayController* cppController =
@@ -138,6 +143,7 @@ extern "C"
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
         ASSERT_VALID_POINTER_PARAMETER(config);
+        ASSERT_VALID_STRUCT_HEADER(config);
         CAPI_ENTER
         {
             SilKit::Services::Flexray::IFlexrayController* cppController =

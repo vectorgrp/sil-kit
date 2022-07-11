@@ -168,6 +168,7 @@ SilKit_ReturnCode SilKit_LifecycleService_StartLifecycleNoSyncTime(SilKit_Lifecy
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
+    ASSERT_VALID_STRUCT_HEADER(startConfiguration);
     CAPI_ENTER
     {
         auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(clifecycleService);
@@ -185,6 +186,7 @@ SilKit_ReturnCode SilKit_LifecycleService_StartLifecycleWithSyncTime(SilKit_Life
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
+    ASSERT_VALID_STRUCT_HEADER(startConfiguration);
     CAPI_ENTER
     {
         auto* cppLifecycleService =
@@ -378,6 +380,7 @@ SilKit_ReturnCode SilKit_SystemController_SetWorkflowConfiguration(
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemController);
     ASSERT_VALID_POINTER_PARAMETER(workflowConfigration);
+    ASSERT_VALID_STRUCT_HEADER(workflowConfigration);
     CAPI_ENTER
     {
         auto* systemController = reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
@@ -397,6 +400,7 @@ SilKit_ReturnCode SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantSt
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
     ASSERT_VALID_POINTER_PARAMETER(participantName);
+    ASSERT_VALID_STRUCT_HEADER(outParticipantState);
     CAPI_ENTER
     {
         auto* systemMonitor = reinterpret_cast<SilKit::Services::Orchestration::ISystemMonitor*>(csystemMonitor);

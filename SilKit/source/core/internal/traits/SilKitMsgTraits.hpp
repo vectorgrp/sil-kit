@@ -6,22 +6,10 @@
 
 #include "SilKitMsgVersion.hpp"
 #include "SilKitMsgSerdesName.hpp"
+#include "TypeUtils.hpp"
 
 namespace SilKit {
 namespace Core {
-// ==================================================================
-//  Workaround for C++14 (Helper Type Alias)
-// ==================================================================
-
-// Implements std::void_t from C++17
-template <typename...>
-struct MakeVoidT
-{
-    using type = void;
-};
-template <typename... Ts>
-using VoidT = typename MakeVoidT<Ts...>::type;
-
 // ==================================================================
 //  Trait which checks that '.timestamp' works
 // ==================================================================
@@ -32,7 +20,7 @@ struct HasTimestamp : std::false_type
 };
 
 template <typename T>
-struct HasTimestamp<T, VoidT<decltype(std::declval<std::decay_t<T>>().timestamp = std::chrono::nanoseconds{})>>
+struct HasTimestamp<T, Util::VoidT<decltype(std::declval<std::decay_t<T>>().timestamp = std::chrono::nanoseconds{})>>
     : std::true_type
 {
 };
