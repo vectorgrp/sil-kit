@@ -245,18 +245,6 @@ Adding a handler will return a |HandlerId| which can be used to remove the handl
 - |RemoveSymbolTransmitHandler|
 - |RemoveCycleStartHandler|
 
-Message Tracing
-~~~~~~~~~~~~~~~
-
-.. admonition:: Note
-
-  Currently the Message Tracing functionality is not available, but it will be reintegrated in the future.
-
-
-The FrController supports message tracing in MDF4 format.
-This is provided by the :ref:`VIBE MDF4Tracing<mdf4tracing>` extension.
-Refer to the :ref:`sec:cfg-participant-tracing` configuration section for usage instructions.
-
 API and Data Type Reference
 ---------------------------
 

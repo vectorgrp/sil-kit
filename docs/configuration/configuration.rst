@@ -8,7 +8,6 @@ Configuration
    :maxdepth: 2
 
    configuration-services
-   tracing-configuration
    logging-configuration
    healthcheck-configuration
    extension-configuration
@@ -62,8 +61,6 @@ The outline of a SilKitConfig.yaml file is as follows:
     - ...
     HealthCheck: 
     - ...
-    Tracing: 
-    - ...
     Extensions: 
     - ...
     Middleware: 
@@ -107,10 +104,6 @@ Configuration Options
 
    * - :ref:`HealthCheck<sec:cfg-participant-healthcheck>`
      - Configuration concerning soft and hard timeouts for simulation task execution.
-
-   * - :doc:`Tracing<tracing-configuration>`
-     - Describes relevant configuration aspects for the tracing features of the Vector SIL Kit. The TraceSinks
-       and TraceSources used for Tracing and Replaying are defined here. 
 
    * - :doc:`Extensions<extension-configuration>`
      - Configuration of optional extensions to the Vector SIL Kit and where to find them.

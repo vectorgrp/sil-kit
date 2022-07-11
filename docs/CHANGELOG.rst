@@ -122,20 +122,22 @@ Removed
 
 - The documentation of the network simulator has been moved to its own repository.
 
-  - Removed simple Create...Controller API for a more compact API
+- The documentation of the tracing and replay features were removed.
 
-    - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
+- Removed simple Create...Controller API for a more compact API
 
-      .. code-block:: c++
+  - ``IntegrationBus/include/ib/mw/IParticipant.hpp``
 
-        virtual auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* = 0;
-        virtual auto CreateEthernetController(const std::string& canonicalName) -> sim::eth::IEthernetController* = 0;
-        virtual auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFlexrayController* = 0;
-        virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;
-        virtual auto CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher* = 0;
-        virtual auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* = 0;
-        virtual auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* = 0;
-        virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
+    .. code-block:: c++
+
+      virtual auto CreateCanController(const std::string& canonicalName) -> sim::can::ICanController* = 0;
+      virtual auto CreateEthernetController(const std::string& canonicalName) -> sim::eth::IEthernetController* = 0;
+      virtual auto CreateFlexrayController(const std::string& canonicalName) -> sim::fr::IFlexrayController* = 0;
+      virtual auto CreateLinController(const std::string& canonicalName) -> sim::lin::ILinController* = 0;
+      virtual auto CreateDataPublisher(const std::string& canonicalName) -> sim::data::IDataPublisher* = 0;
+      virtual auto CreateDataSubscriber(const std::string& canonicalName) -> sim::data::IDataSubscriber* = 0;
+      virtual auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* = 0;
+      virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
 
 
 [3.99.26] - 2022-06-29

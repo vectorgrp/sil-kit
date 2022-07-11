@@ -33,13 +33,6 @@ CanControllers
      - The name of the CAN Controller
    * - Network
      - The name of the CAN Network to connect to (optional)
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this controller. Trace sinks are referred to by their name and can be used
-       by multiple controllers. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this controller. (optional)
 
 .. _sec:cfg-participant-lin:
 
@@ -63,13 +56,6 @@ LinControllers
      - The name of the LIN Controller
    * - Network
      - The name of the LIN Network to connect to (optional)
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this controller. Trace sinks are referred to by their name and can be used
-       by multiple controllers. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this controller. (optional)
 
 
 .. _sec:cfg-participant-ethernet:
@@ -83,8 +69,6 @@ EthernetControllers
      - Name: ETH1
        Network: Ethernet1
      - Name: ETH2
-       UseTraceSinks:
-       - MyPcapSink
 
 
 
@@ -98,13 +82,6 @@ EthernetControllers
      - The name of the Ethernet Controller
    * - Network
      - The name of the Ethernet Network to connect to (optional)
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this controller. Trace sinks are referred to by their name and can be used
-       by multiple controllers. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this controller. (optional)
 
 
 .. _sec:cfg-participant-flexray:
@@ -139,13 +116,6 @@ FlexrayControllers
      - Allows to configure TXBuffers by specifying "channels" (A, B, AB, None), 
        "slotId", "offset", "repetition", "PPindicator", "headerCrc" 
        and "transmissionMode" (SingleShot, Continuous). (optional)
-   * - UseTraceSinks
-     - A list of :ref:`trace sinks<sec:cfg-participant-tracesink>` to be used by
-       this controller. Trace sinks are referred to by their name and can be used
-       by multiple controllers. (optional)
-   * - Replay
-     - A :ref:`replay configuration <sec:cfg-participant-replay>` to be used
-       by this controller. (optional)
 
 .. _sec:cfg-participant-data-publishers:
 

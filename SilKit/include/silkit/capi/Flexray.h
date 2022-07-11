@@ -696,7 +696,6 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemovePocStatusHandler_t)(S
 
 /*! \brief Notification that the controller has received a symbol.
   *
-  * This callback is primarily intended for tracing. There is no need to react on it.
   * The symbols relevant for interaction trigger also an additional callback,
   * e.g., \ref WakeupHandler.
   *
@@ -725,7 +724,6 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolHandler_t)(SilK
 
 /*! \brief Notification that the controller has sent a symbol.
   *
-  * This callback is primarily intended for tracing. There is no need to react on it.
   * Currently, the following SymbolPatterns can occur:
   *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus, if the bus is idle.
   *  - Run() will cause the transmission of FlexraySymbolPattern::CasMts if configured to coldstart the bus.
