@@ -10,7 +10,7 @@
 #include <sstream>
 #include <ctime>
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Services {

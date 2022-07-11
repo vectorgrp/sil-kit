@@ -8,7 +8,7 @@
 
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
 #include "silkit/capi/Participant.h"
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 
 #include "SyncDatatypes.hpp"
 

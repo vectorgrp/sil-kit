@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Vector Informatik GmbH. All rights reserved.
 
-#include "silkit/version.hpp"
+#include "silkit/SilKitVersion.hpp"
 
 #include "SilKitExtensionBase.hpp"
 #include "SilKitExtensionMacros.hpp"

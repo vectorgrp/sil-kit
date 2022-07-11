@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "datatypes.hpp"
 
 namespace SilKit {

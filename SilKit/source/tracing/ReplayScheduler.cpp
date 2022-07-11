@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "silkit/config/Config.hpp"
-#include "silkit/IParticipant.hpp"
+#include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/extensions/string_utils.hpp"

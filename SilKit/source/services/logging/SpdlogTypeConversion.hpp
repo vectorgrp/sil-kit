@@ -4,7 +4,7 @@
 
 #include "spdlog/details/log_msg.h"
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
 namespace SilKit {

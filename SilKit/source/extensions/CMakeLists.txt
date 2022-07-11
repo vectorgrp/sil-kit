@@ -1,6 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 # the SilKitExtension is a standalone library except for its dependency on
-# silkit/version.hpp
+# silkit/SilKitVersion.hpp
 
 add_library(SilKitExtensions STATIC
     SilKitExtensions.cpp

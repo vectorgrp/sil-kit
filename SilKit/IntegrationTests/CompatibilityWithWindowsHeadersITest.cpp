@@ -8,7 +8,7 @@
 
 // 2. include all SILKIT headers
 #include "silkit/config/all.hpp"
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/SilKit.hpp"
 
@@ -24,7 +24,7 @@
 #include "silkit/util/functional.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 #include "silkit/util/vector_view.hpp"
-#include "silkit/version.hpp"
+#include "silkit/SilKitVersion.hpp"
 
 // 3. Provide a dummy test for proper integration with our test runner.
 #include "gtest/gtest.h"

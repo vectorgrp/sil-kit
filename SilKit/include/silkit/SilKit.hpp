@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "silkit/SilKitMacros.hpp"
-#include "silkit/IParticipant.hpp"
+#include "silkit/participant/IParticipant.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 
 namespace SilKit {

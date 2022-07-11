@@ -3,7 +3,7 @@
 #include <tuple>
 #include <iostream>
 
-#include "silkit/version.hpp"
+#include "silkit/SilKitVersion.hpp"
 #include "ParticipantConfiguration.hpp"
 
 #include "gtest/gtest.h"

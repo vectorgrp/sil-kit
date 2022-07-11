@@ -7,7 +7,7 @@
 
 #include "LinDatatypes.hpp"
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 
 namespace SilKit {

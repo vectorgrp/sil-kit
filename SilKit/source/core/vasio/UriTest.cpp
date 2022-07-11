@@ -2,7 +2,7 @@
 
 #include "Uri.hpp"
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 
 #include "gtest/gtest.h"
 

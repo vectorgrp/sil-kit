@@ -3,7 +3,7 @@
 #pragma once
 #include <atomic>
 
-#include "silkit/IParticipant.hpp"
+#include "silkit/participant/IParticipant.hpp"
 
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"

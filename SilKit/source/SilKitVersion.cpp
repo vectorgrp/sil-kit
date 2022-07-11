@@ -1,6 +1,6 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "version.hpp"
+#include "SilKitVersion.hpp"
 #include "version_macros.hpp"
 
 namespace SilKit {

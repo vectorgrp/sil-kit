@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 

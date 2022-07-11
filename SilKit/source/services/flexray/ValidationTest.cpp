@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 
 namespace {
 

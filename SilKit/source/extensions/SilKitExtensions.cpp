@@ -11,7 +11,7 @@
 #include <iostream>
 #include <type_traits>
 
-#include "silkit/version.hpp"
+#include "silkit/SilKitVersion.hpp"
 
 #include "detail/LoadExtension.hpp"
 #include "SilKitExtensionBase.hpp"

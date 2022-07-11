@@ -12,7 +12,7 @@
 #include <iterator>
 #include <thread>
 
-#include "silkit/version.hpp"
+#include "silkit/SilKitVersion.hpp"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"

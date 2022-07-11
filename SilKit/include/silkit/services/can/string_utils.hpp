@@ -5,7 +5,7 @@
 #include <ostream>
 #include <sstream>
 
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 #include "silkit/services/string_utils.hpp"
 

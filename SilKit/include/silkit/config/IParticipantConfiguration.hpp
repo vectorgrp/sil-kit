@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "silkit/SilKitMacros.hpp"
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Config {

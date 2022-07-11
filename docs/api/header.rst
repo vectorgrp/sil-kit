@@ -43,7 +43,7 @@ Using the SIL Kit Headers
 -------------------------
 The main header file is ``silkit/SilKit.hpp`` which defines the 
 :cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>` function.
-Version information can be retrieved using the ``silkit/version.hpp`` header 
+Version information can be retrieved using the ``silkit/SilKitVersion.hpp`` header 
 and its functions, e.g., by using the 
 :cpp:func:`Version::String()<SilKit::Version::String()>` function.
 

@@ -9,7 +9,7 @@
 #include <functional>
 
 #include "ParticipantConfiguration.hpp"
-#include "silkit/exception.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "ISilKitExtension.hpp"

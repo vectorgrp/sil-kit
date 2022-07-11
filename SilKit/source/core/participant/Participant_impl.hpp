@@ -33,7 +33,7 @@
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/predicative_get.hpp"
 
-#include "silkit/version.hpp"
+#include "silkit/SilKitVersion.hpp"
 
 #include "Participant.hpp"
 

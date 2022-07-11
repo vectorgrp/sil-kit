@@ -109,8 +109,8 @@ target_link_libraries(SilKit
 )
 
 add_library(SilKitVersion STATIC
-    version.cpp
-    version.hpp
+    SilKitVersion.cpp
+    SilKitVersion.hpp
     ${VERSION_MACROS_HPP}
 )
 target_link_libraries(SilKitVersion
