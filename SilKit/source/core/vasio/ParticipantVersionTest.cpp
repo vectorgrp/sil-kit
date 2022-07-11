@@ -75,7 +75,7 @@ protected:
         auto&& sender = _participants.at(0);
         auto&& receiver = _participants.at(1);
 
-        auto* recvCan = receiver->CreateCanController("CAN1");
+        auto* recvCan = receiver->CreateCanController("CAN1", "CAN1");
         recvCan->Start();
 
         uint8_t lastIter = 0;
@@ -90,7 +90,7 @@ protected:
             }
         });
 
-        auto* sendCan = sender->CreateCanController("CAN1");
+        auto* sendCan = sender->CreateCanController("CAN1", "CAN1");
         sendCan->Start();
         for (auto i = 1; i <= 10; i++)
         {

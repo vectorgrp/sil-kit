@@ -174,7 +174,7 @@ int main(int argc, char** argv)
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-        auto* ethernetController = participant->CreateEthernetController("Eth1");
+        auto* ethernetController = participant->CreateEthernetController("Eth1", "Eth1");
 
         ethernetController->AddFrameHandler(&FrameHandler);
         ethernetController->AddFrameTransmitHandler(&FrameTransmitHandler);

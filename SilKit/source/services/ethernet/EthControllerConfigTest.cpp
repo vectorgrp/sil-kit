@@ -38,22 +38,6 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::Partic
     return mockConfig;
 }
 
-TEST(EthernetControllerConfigTest, create_controller_unconfigured)
-{
-    auto controllerName = "Controller";
-    auto expectedNetworkName = "Controller";
-
-    auto&& config = PrepareParticipantConfiguration();
-
-    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
-
-    auto controller =
-        dynamic_cast<EthController*>(participant->CreateEthernetController(controllerName));
-    auto serviceDescr = controller->GetServiceDescriptor();
-    EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
-    EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
-}
-
 TEST(EthernetControllerConfigTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";

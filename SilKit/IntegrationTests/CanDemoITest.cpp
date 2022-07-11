@@ -50,7 +50,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       auto&& participant = simParticipant->Participant();
       auto&& lifecycleService = participant->GetLifecycleService();
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
-      auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
+      auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       canController->AddFrameTransmitHandler([&, participant](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
         if (frameTransmitEvent.status == Can::CanTransmitStatus::Transmitted)
@@ -101,7 +101,7 @@ TEST_F(SimTestHarnessITest, can_demo)
         //Normal transmission
         if (now > 20ms)
         {
-          auto* canController1 = participant->CreateCanController("CanController1", "CAN_1");
+          auto* canController1 = participant->CreateCanController("CanController1", "CAN1");
           Log() << "---   CanWriter sending CanFrame";
           canController1->SendFrame(msg, reinterpret_cast<void*>(participant));
           std::this_thread::sleep_for(10ms);//don't starve other threads on the CI build server
@@ -134,7 +134,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       auto&& participant = simParticipant->Participant();
       auto&& lifecycleService = participant->GetLifecycleService();
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
-      auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
+      auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << participantName << ": Init called, setting baud rate and starting";
@@ -189,7 +189,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
       auto&& lifecycleService = participant->GetLifecycleService();
-      auto&& canController = participant->CreateCanController("CanController1", "CAN_1");
+      auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << participantName << ": Init called, setting baud rate and starting";

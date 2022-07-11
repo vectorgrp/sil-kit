@@ -65,7 +65,8 @@ protected:
         
         auto participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "EthWriter", _registryUri);
-        auto* controller = dynamic_cast<SilKit::Services::Ethernet::EthController*>(participant->CreateEthernetController("ETH1"));
+        auto* controller = dynamic_cast<SilKit::Services::Ethernet::EthController*>(
+            participant->CreateEthernetController("ETH1", "ETH1"));
 
         controller->Activate();
 
@@ -98,7 +99,7 @@ protected:
         std::promise<void> ethReaderAllReceivedPromiseLocal;
         auto participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "EthReader", _registryUri);
-        auto* controller = participant->CreateEthernetController("ETH1");
+        auto* controller = participant->CreateEthernetController("ETH1", "ETH1");
 
         controller->Activate();
 

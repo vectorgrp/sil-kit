@@ -41,7 +41,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto* senderLifecycleService = senderCom->GetLifecycleService();
     auto* senderTimeSyncService = senderLifecycleService->GetTimeSyncService();
 
-    auto* senderCan = dynamic_cast<SilKit::Services::Can::CanController*>(senderCom->CreateCanController("CAN1"));
+    auto* senderCan = dynamic_cast<SilKit::Services::Can::CanController*>(senderCom->CreateCanController("CAN1", "CAN1"));
     senderCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
@@ -71,7 +71,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
     });
 
-    auto* receiverCan = receiverCom->CreateCanController("CAN1");
+    auto* receiverCan = receiverCom->CreateCanController("CAN1", "CAN1");
 
     receiverCan->AddFrameHandler(
         [&receiveCount](SilKit::Services::Can::ICanController* controller, auto msg) {
@@ -89,7 +89,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     otherTimeSyncService->SetSimulationTask(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {});
 
-    auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1");
+    auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1", "CAN1");
 
     otherReceiverCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << "'otherReceiver' received targeted message from controller '" << controller << "'";

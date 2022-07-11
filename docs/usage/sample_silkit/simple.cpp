@@ -43,16 +43,17 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
 void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
 {
     auto participant = SilKit::CreateParticipant(config, "SubscriberParticipant", registryUri);
-    auto* subscriber = participant->CreateDataSubscriber("DataService");
+    auto* subscriber = participant->CreateDataSubscriber(
+        "DataService", "TestTopic", "text/plain", {},
+        [](ib::sim::data::IDataSubscriber* subscriber, const ib::sim::data::DataMessageEvent& dataMessageEvent) {
+            std::string message{ dataMessageEvent.data.begin(), dataMessageEvent.data.end() };
+            std::cout << " <- Received data=\"" << message << "\"" << std::endl;
+        });
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    //Register callback for reception of messages
-    subscriber->SetDefaultDataMessageHandler(
-        [](SilKit::Services::PubSub::IDataSubscriber* subscriber, const SilKit::Services::PubSub::DataMessageEvent& dataMessageEvent) {
-            std::string message{dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
-            std::cout << " <- Received data=\"" << message << "\"" << std::endl;
-        });
+    auto* lifecycleService = participant->GetLifecycleService();
+    auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     timeSyncService->SetSimulationTask([](std::chrono::nanoseconds) {
         //simulation task must be defined, even an empty one

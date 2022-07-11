@@ -136,19 +136,7 @@ public:
     {
         return nullptr;
     }
-    auto CreateCanController(const std::string & /*canonicalName*/) -> Services::Can::ICanController* override
-    {
-        return nullptr;
-    }
     auto CreateEthernetController(const std::string & /*canonicalName*/, const std::string& /*networkName*/) -> Services::Ethernet::IEthernetController* override
-    {
-        return nullptr;
-    }
-    auto CreateEthernetController(const std::string & /*canonicalName*/) -> Services::Ethernet::IEthernetController* override
-    {
-        return nullptr;
-    }
-    auto CreateFlexrayController(const std::string& /*canonicalName*/) -> Services::Flexray::IFlexrayController* override
     {
         return nullptr;
     }
@@ -162,17 +150,9 @@ public:
     {
         return nullptr;
     }
-    auto CreateLinController(const std::string & /*canonicalName*/) -> Services::Lin::ILinController* override
-    {
-        return nullptr;
-    }
     auto CreateDataPublisher(const std::string& /*controllerName*/, const std::string& /*topic*/,
                              const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
                              size_t /* history */) -> SilKit::Services::PubSub::IDataPublisher* override
-    {
-        return nullptr;
-    }
-    auto CreateDataPublisher(const std::string& /*controllerName*/) -> SilKit::Services::PubSub::IDataPublisher* override
     {
         return nullptr;
     }
@@ -181,10 +161,6 @@ public:
                               SilKit::Services::PubSub::DataMessageHandlerT /* callback*/,
                               SilKit::Services::PubSub::NewDataPublisherHandlerT /*newDataSourceHandler*/)
         -> SilKit::Services::PubSub::IDataSubscriber* override
-    {
-        return nullptr;
-    }
-    auto CreateDataSubscriber(const std::string& /*controllerName*/) -> SilKit::Services::PubSub::IDataSubscriber* override
     {
         return nullptr;
     }
@@ -204,17 +180,9 @@ public:
     {
         return nullptr;
     }
-    auto CreateRpcClient(const std::string& /*controllerName*/) -> SilKit::Services::Rpc::IRpcClient* override
-    {
-        return nullptr;
-    }
     auto CreateRpcServer(const std::string& /*controllerName*/, const std::string& /*functionName*/,
                          const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
                          SilKit::Services::Rpc::RpcCallHandler /*handler*/) -> SilKit::Services::Rpc::IRpcServer* override
-    {
-        return nullptr;
-    }
-    auto CreateRpcServer(const std::string& /*controllerName*/) -> SilKit::Services::Rpc::IRpcServer* override
     {
         return nullptr;
     }

@@ -53,7 +53,7 @@ The CAN Service API provides a CAN bus abstraction through the |ICanController| 
 A CAN controller is created by calling |CreateCanController| given a controller name and (optional) network 
 name::
 
-  auto* canController = participant->CreateCanController("Can1", "CAN");
+  auto* canController = participant->CreateCanController("CAN1", "CAN");
 
 CAN controllers will only communicate within the same network. If no network name is provided, the controller name
 will be used as the network name.

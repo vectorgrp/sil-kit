@@ -90,22 +90,17 @@ public:
     // IParticipant
     auto CreateCanController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Can::ICanController* override;
-    auto CreateCanController(const std::string& canonicalName) -> Services::Can::ICanController* override;
     auto CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Ethernet::IEthernetController* override;
-    auto CreateEthernetController(const std::string& canonicalName) -> Services::Ethernet::IEthernetController* override;
     auto CreateFlexrayController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Flexray::IFlexrayController* override;
-    auto CreateFlexrayController(const std::string& canonicalName) -> Services::Flexray::IFlexrayController* override;
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Lin::ILinController* override;
-    auto CreateLinController(const std::string& canonicalName) -> Services::Lin::ILinController* override;
 
     auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
                              const std::string& mediaType,
                              const std::map<std::string, std::string>& labels, size_t history = 0)
         -> Services::PubSub::IDataPublisher* override;
-    auto CreateDataPublisher(const std::string& canonicalName) -> Services::PubSub::IDataPublisher* override;
 
     auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
                               const std::string& mediaType,
@@ -113,7 +108,6 @@ public:
                               Services::PubSub::DataMessageHandlerT defaultDataHandler,
                               Services::PubSub::NewDataPublisherHandlerT newDataSourceHandler = nullptr)
         -> Services::PubSub::IDataSubscriber* override;
-    auto CreateDataSubscriber(const std::string& canonicalName) -> Services::PubSub::IDataSubscriber* override;
 
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
                                       const std::string& mediaType,
@@ -124,12 +118,10 @@ public:
     auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
                          const std::map<std::string, std::string>& labels, Services::Rpc::RpcCallResultHandler handler)
         -> Services::Rpc::IRpcClient* override;
-    auto CreateRpcClient(const std::string& canonicalName) -> Services::Rpc::IRpcClient* override;
 
     auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
                          const std::map<std::string, std::string>& labels, Services::Rpc::RpcCallHandler handler)
         -> Services::Rpc::IRpcServer* override;
-    auto CreateRpcServer(const std::string& canonicalName) -> Services::Rpc::IRpcServer* override;
 
     auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                  const std::string& mediaType, const std::map<std::string, std::string>& labels,

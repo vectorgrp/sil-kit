@@ -56,7 +56,7 @@ TEST_F(ParticipantTest, make_basic_controller)
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
 
-    auto* canController = participant->CreateCanController("CAN1");
+    auto* canController = participant->CreateCanController("CAN1", "CAN1");
     auto basicCanController = dynamic_cast<SilKit::Services::Can::CanController*>(canController);
 
     EXPECT_NE(basicCanController, nullptr);

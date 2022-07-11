@@ -60,7 +60,7 @@ protected:
     void SetupWriter(SilKit::Tests::SimParticipant* participant)
     {
 
-        auto* canController = participant->Participant()->CreateCanController("CAN1");
+        auto* canController = participant->Participant()->CreateCanController("CAN1", "CAN1");
         canController->AddFrameTransmitHandler(
             [this, participant](ICanController* /*ctrl*/, const CanFrameTransmitEvent& ack) {
                 callbacks.AckHandler(ack);

@@ -250,14 +250,6 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
     return controller;
 }
 
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateCanController(const std::string& canonicalName)
-    -> Can::ICanController*
-{
-    return CreateCanController(canonicalName, canonicalName);
-}
-
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
     -> Ethernet::IEthernetController*
@@ -274,12 +266,6 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
 
     controller->RegisterServiceDiscovery();
     return controller;
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string& canonicalName) -> Ethernet::IEthernetController*
-{
-    return CreateEthernetController(canonicalName, canonicalName);
 }
 
 template <class SilKitConnectionT>
@@ -301,12 +287,6 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& 
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& canonicalName) -> Services::Flexray::IFlexrayController*
-{
-    return CreateFlexrayController(canonicalName, canonicalName);
-}
-
-template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateLinController(const std::string& canonicalName, const std::string& networkName)
     -> Lin::ILinController*
 {
@@ -323,12 +303,6 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
     controller->RegisterServiceDiscovery();
 
     return controller;
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateLinController(const std::string& canonicalName) -> Lin::ILinController*
-{
-    return CreateLinController(canonicalName, canonicalName);
 }
 
 template <class SilKitConnectionT>
@@ -385,11 +359,6 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     
 }
 
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& canonicalName) -> Services::PubSub::IDataPublisher*
-{
-    return CreateDataPublisher(canonicalName, canonicalName, { "" }, {}, 0);
-}
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
@@ -415,12 +384,6 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(const std::string& can
     controller->RegisterServiceDiscovery();
 
     return controller;
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateDataSubscriber(const std::string& canonicalName) -> Services::PubSub::IDataSubscriber*
-{
-    return CreateDataSubscriber(canonicalName, canonicalName, { "" }, {}, nullptr, nullptr);
 }
 
 template <class SilKitConnectionT>
@@ -478,12 +441,6 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonicalName) -> Services::Rpc::IRpcClient*
-{
-    return CreateRpcClient(canonicalName, canonicalName, { "" }, {}, nullptr);
-}
-
-template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
                                                  const std::string& mediaType,
                                                  const std::map<std::string, std::string>& labels,
@@ -511,12 +468,6 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
     controller->RegisterServiceDiscovery();
 
     return controller;
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonicalName) -> Services::Rpc::IRpcServer*
-{
-    return CreateRpcServer(canonicalName, canonicalName, { "" }, {}, nullptr);
 }
 
 template <class SilKitConnectionT>

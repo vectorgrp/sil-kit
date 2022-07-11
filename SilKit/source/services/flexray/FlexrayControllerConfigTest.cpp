@@ -38,21 +38,6 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::Partic
     return mockConfig;
 }
 
-TEST(FlexrayControllerConfigTest, create_controller_unconfigured)
-{
-    auto controllerName = "Controller";
-    auto expectedNetworkName = "Controller";
-
-    auto&& config = PrepareParticipantConfiguration();
-
-    auto participant = SilKit::Core::CreateNullConnectionParticipantImpl(config, "TestParticipant");
-
-    auto controller = dynamic_cast<FlexrayController*>(participant->CreateFlexrayController(controllerName));
-    auto serviceDescr = controller->GetServiceDescriptor();
-    EXPECT_EQ(serviceDescr.GetServiceName(), controllerName);
-    EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
-}
-
 TEST(FlexrayControllerConfigTest, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";

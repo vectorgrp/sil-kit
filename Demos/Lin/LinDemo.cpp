@@ -309,7 +309,7 @@ int main(int argc, char** argv) try
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
-    auto* linController = participant->CreateLinController("LIN1");
+    auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
     // Set a Stop and Shutdown Handler
     lifecycleService->SetStopHandler([]() {

@@ -395,7 +395,7 @@ TEST_F(SimTestHarnessITest, lin_demo)
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
-        auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
+        auto&& linController = participant->CreateLinController("LinController1", "LIN1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
 
             Log() << "Initializing " << participantName;
@@ -427,7 +427,7 @@ TEST_F(SimTestHarnessITest, lin_demo)
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
         auto* lifecycleService = participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
-        auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
+        auto&& linController = participant->CreateLinController("LinController1", "LIN1");
 
 
         auto config = MakeControllerConfig(participantName);

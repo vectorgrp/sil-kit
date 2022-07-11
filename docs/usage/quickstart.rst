@@ -126,7 +126,7 @@ The subscriber runs in its own thread, too:
 .. literalinclude::
    sample_silkit/simple.cpp
    :language: cpp
-   :lines: 42-68
+   :lines: 42-69
 
 The setup is similar to the publisher, except that we instantiate a 
 :cpp:class:`subscriber<SilKit::Services::PubSub::IDataSubscriber>` interface.

@@ -158,7 +158,7 @@ public:
     {
         if (_rpcClient == nullptr)
         {
-            _rpcClient = participant->CreateRpcClient("RpcClient");
+            _rpcClient = participant->CreateRpcClient("RpcClient", "FunctionA", "application/octet-stream", {}, nullptr);
         }
         return _rpcClient;
     }
@@ -167,7 +167,8 @@ public:
     {
         if (_rpcServer == nullptr)
         {
-            _rpcServer = participant->CreateRpcServer("RpcServer");
+            _rpcServer =
+                participant->CreateRpcServer("RpcServer", "FunctionA", "application/octet-stream", {}, nullptr);
         }
         return _rpcServer;
     }

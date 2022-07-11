@@ -79,7 +79,7 @@ protected:
 
         auto participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "CanWriter", _registryUri);
-        auto* controller = participant->CreateCanController("CAN1");
+        auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameTransmitHandler(
             [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](SilKit::Services::Can::ICanController* /*ctrl*/, const SilKit::Services::Can::CanFrameTransmitEvent& ack) {

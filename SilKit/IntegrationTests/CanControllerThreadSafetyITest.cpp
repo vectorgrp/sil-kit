@@ -72,7 +72,7 @@ protected:
         {
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
-            participant.canController = participant.participant->CreateCanController("Can");
+            participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 
             while (runAsync)
@@ -107,7 +107,7 @@ protected:
         {
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
-            participant.canController = participant.participant->CreateCanController("Can");
+            participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 
             auto frameHandler = [&participant](ICanController*, const CanFrameEvent& /*msg*/) {
