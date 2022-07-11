@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 
@@ -76,15 +77,15 @@ public:
 
     /*! \brief Invokes the handler set by \ref SetParticipantConnectedHandler
      *
-     * @param participantName The name of participant that connected
+     * @param participantConnectionInformation The struct that provides information about the connected participant
      */
-    void OnParticipantConnected(const std::string& participantName);
+    void OnParticipantConnected(const ParticipantConnectionInformation& participantConnectionInformation);
 
     /*! \brief Invokes the handler set by \ref SetParticipantDisconnectedHandler
      *
-     * @param participantName The name of participant that disconnected
+     * @param participantConnectionInformation The struct that provides information about the disconnected participant
      */
-    void OnParticipantDisconnected(const std::string& participantName);
+    void OnParticipantDisconnected(const ParticipantConnectionInformation& participantConnectionInformation);
 
 private:
     // ----------------------------------------
@@ -112,7 +113,7 @@ private:
 
     ParticipantConnectedHandler _participantConnectedHandler;
     ParticipantDisconnectedHandler _participantDisconnectedHandler;
-    std::unordered_set<std::string> _connectedParticipantNames;
+    std::unordered_map<std::string, ParticipantConnectionInformation> _connectedParticipants;
 };
 
 // ================================================================================

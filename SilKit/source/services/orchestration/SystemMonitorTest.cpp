@@ -35,8 +35,8 @@ protected:
         MOCK_METHOD1(SystemStateHandler, void(SystemState));
         MOCK_METHOD1(ParticipantStatusHandler, void(ParticipantStatus));
 
-        MOCK_METHOD(void, ParticipantConnectedHandler, (const std::string &), (const));
-        MOCK_METHOD(void, ParticipantDisconnectedHandler, (const std::string &), (const));
+        MOCK_METHOD(void, ParticipantConnectedHandler, (const ParticipantConnectionInformation &), (const));
+        MOCK_METHOD(void, ParticipantDisconnectedHandler, (const ParticipantConnectionInformation &), (const));
     };
 
 protected:
@@ -717,30 +717,29 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initialized_after_invalid)
 
 TEST_F(SystemMonitorTest, check_on_partitipant_connected_triggers_callback)
 {
-    monitor.SetParticipantConnectedHandler([this](const std::string &participantName) {
-        callbacks.ParticipantConnectedHandler(participantName);
+    monitor.SetParticipantConnectedHandler([this](const ParticipantConnectionInformation& participantInformation) {
+        callbacks.ParticipantConnectedHandler(participantInformation);
     });
+    const ParticipantConnectionInformation pci{"test participant"};
+    EXPECT_CALL(callbacks, ParticipantConnectedHandler(pci));
 
-    const auto participantName = "test participant";
-    EXPECT_CALL(callbacks, ParticipantConnectedHandler(participantName));
-
-    EXPECT_FALSE(monitor.IsParticipantConnected(participantName));
-    monitor.OnParticipantConnected(participantName);
-    EXPECT_TRUE(monitor.IsParticipantConnected(participantName));
+    EXPECT_FALSE(monitor.IsParticipantConnected(pci.participantName));
+    monitor.OnParticipantConnected(pci);
+    EXPECT_TRUE(monitor.IsParticipantConnected(pci.participantName));
 }
 
 TEST_F(SystemMonitorTest, check_on_partitipant_disconnected_triggers_callback)
 {
-    monitor.SetParticipantDisconnectedHandler([this](const std::string &participantName) {
-        callbacks.ParticipantDisconnectedHandler(participantName);
+    monitor.SetParticipantDisconnectedHandler([this](const ParticipantConnectionInformation& participantInformation) {
+        callbacks.ParticipantDisconnectedHandler(participantInformation);
     });
 
-    const auto participantName = "test participant";
-    EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(participantName));
+    const ParticipantConnectionInformation pci{"test participant"};
+    EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(pci));
 
-    EXPECT_FALSE(monitor.IsParticipantConnected(participantName));
-    monitor.OnParticipantDisconnected(participantName);
-    EXPECT_FALSE(monitor.IsParticipantConnected(participantName));
+    EXPECT_FALSE(monitor.IsParticipantConnected(pci.participantName));
+    monitor.OnParticipantDisconnected(pci);
+    EXPECT_FALSE(monitor.IsParticipantConnected(pci.participantName));
 }
 
 TEST_F(SystemMonitorTest, add_and_remove_system_state_and_participant_status_handlers)

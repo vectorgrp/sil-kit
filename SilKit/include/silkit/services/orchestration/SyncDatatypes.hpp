@@ -94,6 +94,11 @@ struct LifecycleConfiguration
     bool coordinatedStop;
 };
 
+struct ParticipantConnectionInformation
+{
+    std::string participantName;
+};
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

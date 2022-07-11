@@ -29,12 +29,14 @@ public:
     /*! Callback type to indicate that a participant has been connected.
      * Cf., \ref SetParticipantConnectedHandler(ParticipantConnectedHandler);
      */
-    using ParticipantConnectedHandler = std::function<void(const std::string& participantName)>;
+    using ParticipantConnectedHandler =
+        std::function<void(const ParticipantConnectionInformation& participantInformation)>;
 
     /*! Callback type to indicate that a participant has been disconnected.
      * Cf., \ref SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler);
      */
-    using ParticipantDisconnectedHandler = std::function<void(const std::string& participantName)>;
+    using ParticipantDisconnectedHandler =
+        std::function<void(const ParticipantConnectionInformation& participantInformation)>;
 
 public:
     /*! \brief Register a callback for ::SystemState changes
@@ -76,7 +78,8 @@ public:
      * \throw std::runtime_error If the participantId does not
      *        identify a participant that participates in synchronization.
      */
-    virtual auto ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus& = 0;
+    virtual auto ParticipantStatus(const std::string& participantName) const
+        -> const Orchestration::ParticipantStatus& = 0;
 
     /*! \brief Set a callback for participants being connected.
      *

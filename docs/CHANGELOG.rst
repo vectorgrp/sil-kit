@@ -21,13 +21,11 @@ Changed
 
 - The trivial simulation and the detailed simulation have been made more consistent:
 
-   + ``ILinController::SendFrame``, ``ILinController::SendFrameHeader``, and ``ILinController::SetResponses`` now 
-       throw an ib::StateError if the controller has not been initialized
+  + ``ILinController::SendFrame``, ``ILinController::SendFrameHeader``, and ``ILinController::SetResponses`` now throw an ib::StateError if the controller has not been initialized
 
-   + ``IEthernetController::SendFrame`` now triggers a TransmitFrameEvent with TransmitState::ControllerInactive
-       if the controller has not been activated
+  + ``IEthernetController::SendFrame`` now triggers a TransmitFrameEvent with TransmitState::ControllerInactive if the controller has not been activated
 
-   + ``ICanController::SendFrame`` does not send a frame, but prints a warning if the controller has not been started
+  + ``ICanController::SendFrame`` does not send a frame, but prints a warning if the controller has not been started
 
 - The timestamps for received events is now dependent on the synchronization mode of the sender and the receiver
 
@@ -49,9 +47,9 @@ Changed
   The API of the system controller, system monitor, lifecycle service, and the time sync service are now provided through
   SilKit_SystemController, SilKit_SystemMonitor, SilKit_LifecycleService, and SilKit_TimeSyncService:
 
-   + ``SilKit/include/capi/Orchestration.h``
+  + ``SilKit/include/capi/Orchestration.h``
 
-       .. code-block:: c++
+    .. code-block:: c++
 
       SilKit_ReturnCode SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
                                                         SilKit_Participant* participant);
@@ -64,7 +62,7 @@ Changed
       SilKit_ReturnCode SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTimeSyncService,
                                                                SilKit_LifecycleService* lifecycleService);
       typedef void (*SilKit_LifecycleService_CommunicationReadyHandler_t)(void* context, SilKit_LifecycleService* lifecycleService);
-      
+
       SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandler(
              SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
       SilKit_ReturnCode SilKit_LifecycleService_SetStopHandler(SilKit_LifecycleService* lifecycleService, void* context,
@@ -115,11 +113,14 @@ Changed
       SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_WaitForLifecycleToComplete(
                              SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
 
+- The callbacks of ``ISystemMonitor::OnParticipantConnected`` and ``ISystemMonitor::OnParticipantDisConnected`` now return a struct that contains the information about the (dis)connected participant instead of a string.
+  
+  + Currently, the only information in this struct is the name of the participant 
 
 Removed
 ~~~~~~~
 
-  - The documentation of the network simulator has been moved to its own repository.
+- The documentation of the network simulator has been moved to its own repository.
 
   - Removed simple Create...Controller API for a more compact API
 

@@ -535,11 +535,13 @@ auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestrati
                                                                    std::move(supplementalData), true);
 
         _connection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
-            controller->OnParticipantConnected(peer->GetInfo().participantName);
+            controller->OnParticipantConnected(
+                Services::Orchestration::ParticipantConnectionInformation{peer->GetInfo().participantName});
         });
 
         _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
-            controller->OnParticipantDisconnected(peer->GetInfo().participantName);
+            controller->OnParticipantDisconnected(
+                Services::Orchestration::ParticipantConnectionInformation{peer->GetInfo().participantName});
         });
     }
     return controller;

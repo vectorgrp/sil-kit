@@ -30,6 +30,11 @@ bool operator==(const WorkflowConfiguration& lhs, const WorkflowConfiguration& r
     return lhs.requiredParticipantNames == rhs.requiredParticipantNames;
 }
 
+bool operator==(const ParticipantConnectionInformation& lhs, const ParticipantConnectionInformation& rhs)
+{
+    return lhs.participantName == rhs.participantName;
+}
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

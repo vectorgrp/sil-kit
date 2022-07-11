@@ -12,6 +12,7 @@ bool operator==(const ParticipantCommand& lhs, const ParticipantCommand& rhs);
 bool operator==(const ParticipantStatus& lhs, const ParticipantStatus& rhs);
 bool operator==(const SystemCommand& lhs, const SystemCommand& rhs);
 bool operator==(const WorkflowConfiguration& lhs, const WorkflowConfiguration& rhs);
+bool operator==(const ParticipantConnectionInformation& lhs, const ParticipantConnectionInformation& rhs);
 
 } // namespace Orchestration
 } // namespace Services

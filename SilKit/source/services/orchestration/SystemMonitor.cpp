@@ -165,33 +165,33 @@ void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHan
 
 auto SystemMonitor::IsParticipantConnected(const std::string& participantName) const -> bool
 {
-    const auto it = _connectedParticipantNames.find(participantName);
-    return it != _connectedParticipantNames.end();
+    const auto it = _connectedParticipants.find(participantName);
+    return it != _connectedParticipants.end();
 }
 
-void SystemMonitor::OnParticipantConnected(const std::string& participantName)
+void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
-    // Add the participant name to the set of connected participant names
-    _connectedParticipantNames.emplace(participantName);
+    // Add the participant name to the map of connected participant names/connections
+    _connectedParticipants.emplace(participantConnectionInformation.participantName, participantConnectionInformation);
     // Call the handler if set
     if (_participantConnectedHandler)
     {
-        _participantConnectedHandler(participantName);
+        _participantConnectedHandler(participantConnectionInformation);
     }
 }
 
-void SystemMonitor::OnParticipantDisconnected(const std::string& participantName)
+void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
-    // Remove the participant name from the set of connected participant names
-    auto it = _connectedParticipantNames.find(participantName);
-    if (it != _connectedParticipantNames.end())
+    // Remove the participant name from the map of connected participant names/connections
+    auto it = _connectedParticipants.find(participantConnectionInformation.participantName);
+    if (it != _connectedParticipants.end())
     {
-        _connectedParticipantNames.erase(it);
+        _connectedParticipants.erase(it);
     }
     // Call the handler if set
     if (_participantDisconnectedHandler)
     {
-        _participantDisconnectedHandler(participantName);
+        _participantDisconnectedHandler(participantConnectionInformation);
     }
 }
 
