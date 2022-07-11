@@ -30,7 +30,7 @@ public:
 
     void RemoveExplicitDataMessageHandler(HandlerId handlerId);
 
-    //! \brief Accepts messages originating from SilKit communications.
+    //! \brief Accepts messages originating from SIL Kit communications.
     void ReceiveMsg(const Core::IServiceEndpoint* from, const DataMessageEvent& dataMessageEvent) override;
 
     void ReceiveMessage(const DataMessageEvent& dataMessageEvent);

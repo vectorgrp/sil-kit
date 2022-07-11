@@ -39,7 +39,7 @@ public:
 
     void SetCallResultHandler(RpcCallResultHandler handler) override;
 
-    //! \brief Accepts messages originating from SilKit communications.
+    //! \brief Accepts messages originating from SIL Kit communications.
     void ReceiveMsg(const Core::IServiceEndpoint* from, const FunctionCallResponse& msg) override;
     void ReceiveMessage(const FunctionCallResponse& msg);
 

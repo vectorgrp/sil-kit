@@ -103,7 +103,7 @@ public:
     /*! \brief Abort current simulation run due to an error.
      *
      * Switch to the \ref ParticipantState::Error state and
-     * report the error message in the SilKit system.
+     * report the error message in the SIL Kit system.
      */
     virtual void ReportError(std::string errorMsg) = 0;
     

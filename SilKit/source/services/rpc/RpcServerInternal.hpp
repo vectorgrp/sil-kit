@@ -32,7 +32,7 @@ public:
 
     void SubmitResult(IRpcCallHandle* callHandlePtr, const std::vector<uint8_t>& resultData);
 
-    //! \brief Accepts messages originating from SilKit communications.
+    //! \brief Accepts messages originating from SIL Kit communications.
     void ReceiveMsg(const Core::IServiceEndpoint* from, const FunctionCall& msg) override;
     void ReceiveMessage(const FunctionCall& msg);
 

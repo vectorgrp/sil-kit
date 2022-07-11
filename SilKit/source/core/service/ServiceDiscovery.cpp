@@ -17,7 +17,7 @@ ServiceDiscovery::ServiceDiscovery(IParticipantInternal* participant, const std:
 
 ServiceDiscovery::~ServiceDiscovery() noexcept
 {
-    // We might still receive asynchronous SilKit messages or callbacks
+    // We might still receive asynchronous SIL Kit messages or callbacks
     // when shutting down. we set a  guard here and prevent mutating our internal maps
     _shuttingDown = true;
 }

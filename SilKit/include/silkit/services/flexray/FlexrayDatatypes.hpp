@@ -514,7 +514,7 @@ enum class FlexrayWakeupStatusType : uint8_t
  */
 struct FlexrayPocStatusEvent
 {
-    std::chrono::nanoseconds timestamp; //!< SilKit timestamp
+    std::chrono::nanoseconds timestamp; //!< SIL Kit timestamp
 
     FlexrayPocState state; //!< Status of the Protocol Operation Control (POC).
     bool chiHaltRequest; //!< indicates whether a halt request was received from the CHI

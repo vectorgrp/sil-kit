@@ -90,7 +90,7 @@ protected:
 };
 
 
-// Stress testing the discovery mechanism, it shouldn't slow down the SilKit performance
+// Stress testing the discovery mechanism, it shouldn't slow down the SIL Kit performance
 
 TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_10services)
 {

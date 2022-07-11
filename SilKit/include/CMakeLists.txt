@@ -8,7 +8,7 @@ target_include_directories(SilKitInterface
         $<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIR}>
 )
 
-# Add a custom project SilKitApi for quick access to SilKit Headers in Visual Studio
+# Add a custom project SilKitApi for quick access to SIL Kit Headers in Visual Studio
 file(GLOB_RECURSE SILKIT_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
 add_custom_target(SilKitApi SOURCES ${SILKIT_INTERFACE_SOURCES})
 if(CMAKE_VERSION VERSION_GREATER 3.8.0)
@@ -17,9 +17,9 @@ if(CMAKE_VERSION VERSION_GREATER 3.8.0)
 endif()
 
 ################################################################################
-# add to install targets of the SilKit
+# add to install targets of the SIL Kit
 ################################################################################
-# Mark the SilKit headers for export by adding it to the target container
+# Mark the SIL Kit headers for export by adding it to the target container
 # SilKitTargets
 install(
     TARGETS SilKitInterface

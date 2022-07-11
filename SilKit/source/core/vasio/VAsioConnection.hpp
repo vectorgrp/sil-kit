@@ -394,7 +394,7 @@ private:
     Services::Logging::ILogger* _logger{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 
-    //! \brief Virtual SilKit links by networkName according to SilKitConfig.
+    //! \brief Virtual SIL Kit links by networkName according to SilKitConfig.
     Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;
     //! \brief Lookup for links by name.
     Util::tuple_tools::wrapped_tuple<SilKitServiceToLinkMap, SilKitMessageTypes> _serviceToLinkMap;
@@ -425,7 +425,7 @@ private:
     std::vector<IVAsioPeer*> _pendingParticipantReplies;
     std::promise<void> _receivedAllParticipantReplies;
 
-    // Keep track of the sent Subscriptions when Registering an SilKit Service
+    // Keep track of the sent Subscriptions when Registering an SIL Kit Service
     std::vector<std::pair<IVAsioPeer*, VAsioMsgSubscriber>> _pendingSubscriptionAcknowledges;
     std::promise<void> _receivedAllSubscriptionAcknowledges;
 

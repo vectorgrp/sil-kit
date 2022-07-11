@@ -10,7 +10,7 @@ namespace Core {
 
 /*! \brief Participant specific identifier for its communication endpoints.
  *
- *   One SilKit participant can have multiple communication objects,
+ *   One SIL Kit participant can have multiple communication objects,
  *   e.g., multiple CAN controllers attached to different buses. A EndpointId
  *   is only valid in the scope of a specific Instruction Bus participant.
  */

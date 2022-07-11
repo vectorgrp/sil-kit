@@ -16,8 +16,8 @@ namespace Vector {
 
 /*! \brief Create an instance of ISilKitRegistry.
 *
-* This API is specific to the Vector Informatik implementation of the SilKit.
-* It is required as a central service for other SILKIT participants to register with.
+* This API is specific to the Vector Informatik implementation of the SIL Kit.
+* It is required as a central service for other SIL Kit participants to register with.
 * Throws std::runtime_error on error.
 */
 

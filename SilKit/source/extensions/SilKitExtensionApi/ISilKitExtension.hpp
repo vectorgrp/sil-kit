@@ -4,7 +4,7 @@
 
 namespace SilKit { 
 
-//! \brief The interface for all SilKit extensions.
+//! \brief The interface for all SIL Kit extensions.
 
 class ISilKitExtension
 {

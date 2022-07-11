@@ -208,7 +208,7 @@ void LinControllerReplay::ReplayMessage(const IReplayMessage* replayMessage)
 
     if (_mode == LinControllerMode::Master)
     {
-        // When we are a master, also synthesize the frame header (SilKit type LinTransmission) based on the replay data.
+        // When we are a master, also synthesize the frame header (SIL Kit type LinTransmission) based on the replay data.
         // NB: the actual transmission is always in RX-direction, only the callback handlers will see the actual
         //     direction.
         LinTransmission tm{};

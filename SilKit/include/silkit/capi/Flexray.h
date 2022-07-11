@@ -501,7 +501,7 @@ typedef uint8_t SilKit_FlexrayWakeupStatusType;
 struct SilKit_FlexrayPocStatusEvent
 {
   SilKit_InterfaceIdentifier      interfaceId;     //!< The interface id specifying which version of this struct was obtained
-  SilKit_NanosecondsTime          timestamp;       //!< SilKit timestamp
+  SilKit_NanosecondsTime          timestamp;       //!< SIL Kit timestamp
   SilKit_FlexrayPocState         state;           /* = SilKit_FlexrayPocState_DefaultConfig; */     //!< Status of the Protocol Operation Control (POC).
   SilKit_Bool                     chiHaltRequest;  /* = false; */                                 //!< indicates whether a halt request was received from the CHI
   SilKit_Bool                     coldstartNoise;  /* = false; */                                 //!< indicates noisy channel conditions during coldstart

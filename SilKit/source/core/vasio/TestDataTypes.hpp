@@ -7,7 +7,7 @@
 
 #include "traits/SilKitMsgTraits.hpp"
 
-// Datatypes for testing versioning and renaming of SilKit messages.
+// Datatypes for testing versioning and renaming of SIL Kit messages.
 namespace SilKit {
 namespace Core {
 namespace Tests {

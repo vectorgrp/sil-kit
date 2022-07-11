@@ -24,7 +24,7 @@ enum class SinkType
 };
 
 //! \brief Messages traces are written to a message sink.
-//         It might be provided by an SilKit extension or built into SilKit
+//         It might be provided by an SIL Kit extension or built into SilKit
 
 class ITraceMessageSink
 {
