@@ -1,11 +1,13 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <set>
+#include <functional>
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
+
 
 namespace {
 
@@ -62,9 +64,18 @@ constexpr SilKit_InterfaceIdentifier allSilkidIds[]= {
 };
 constexpr auto allSilkidIdsSize = sizeof(allSilkidIds) / sizeof(SilKit_InterfaceIdentifier);
 
+// Helper for std::set<>
+struct Compare
+{
+    constexpr bool operator()(const SilKit_StructHeader& lhs, const SilKit_StructHeader& rhs) const
+    {
+        return lhs.version < rhs.version;
+    }
+};
+
 TEST(TestCapi_Interfaces, interface_identifiers_are_unique)
 {
-    std::set<SilKit_InterfaceIdentifier> all{std::begin(allSilkidIds), std::end(allSilkidIds)};
+    std::set<SilKit_InterfaceIdentifier, Compare> all{std::begin(allSilkidIds), std::end(allSilkidIds)};
     ASSERT_EQ(allSilkidIdsSize, all.size()) << "The IDs must not be duplicate";
 }
 

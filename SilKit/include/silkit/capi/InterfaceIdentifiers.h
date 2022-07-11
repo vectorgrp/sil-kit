@@ -9,19 +9,15 @@
 
 SILKIT_BEGIN_DECLS
 
-/*
-typedef struct SilKit_StructHeader
+typedef struct
 {
     uint64_t version; // version 
     uint64_t nextPointer; //!< For future expansions
-} SilKit_StructHeader_t;
+} SilKit_StructHeader;
 
-#define SK_STRUCT_HEADER_MAGIC "SK"
-*/
 
 // Backward source compatibility for <3.99.27: [[deprecated]]
-//typedef SilKit_StructHeader_t SilKit_InterfaceIdentifier;
-typedef uint64_t SilKit_InterfaceIdentifier;
+typedef SilKit_StructHeader SilKit_InterfaceIdentifier;
 
 //Service Ids
 #define SK_ID_SERVICE_START 0 //!< sentinel
@@ -49,12 +45,12 @@ typedef uint64_t SilKit_InterfaceIdentifier;
     ((ID >> 24)  & 0xFF)
 
 #define SK_ID_MAKE(SERVICE_NAME, DATATYPE_NAME) \
-    (SilKit_InterfaceIdentifier)(\
-          ((SilKit_InterfaceIdentifier)83 /*S*/ << 56)\
-        | ((SilKit_InterfaceIdentifier)75 /*K*/ << 48)\
-        | ((SilKit_InterfaceIdentifier)(SK_ID_SERVICE_ ## SERVICE_NAME & 0xFF) << 40)\
-        | ((SilKit_InterfaceIdentifier)(DATATYPE_NAME ## _DATATYPE_ID & 0xff) << 32)\
-        | ((SilKit_InterfaceIdentifier)(DATATYPE_NAME ## _VERSION  & 0xff) << 24)\
+    (uint64_t)(\
+          ((uint64_t)83 /*S*/ << 56)\
+        | ((uint64_t)75 /*K*/ << 48)\
+        | ((uint64_t)(SK_ID_SERVICE_ ## SERVICE_NAME & 0xFF) << 40)\
+        | ((uint64_t)(DATATYPE_NAME ## _DATATYPE_ID & 0xff) << 32)\
+        | ((uint64_t)(DATATYPE_NAME ## _VERSION  & 0xff) << 24)\
         | 0x0)
    
 #define SK_ID_IS_VALID(ID)\
@@ -68,9 +64,16 @@ typedef uint64_t SilKit_InterfaceIdentifier;
     )
 
 //!< Helper to access the Interface ID member
-#define SilKit_Struct_GetId(VALUE) ((VALUE).interfaceId)
-//!< Initialize the struct VALUE with a valid InterfaceId for the given type DATATYPE 
-#define SilKit_Struct_Init(DATATYPE, VALUE) SilKit_Struct_GetId(VALUE) = DATATYPE ## _InterfaceIdentifier
+#define SilKit_Struct_GetHeader(VALUE) ((VALUE).interfaceId)
+//!< Helper to access the Interface ID member
+#define SilKit_Struct_GetId(VALUE) (SilKit_Struct_GetHeader(VALUE).version)
+//!< Initialize the struct VALUE with a valid type specific struct header for the given type DATATYPE 
+#define SilKit_Struct_Init(DATATYPE, VALUE)\
+    do {\
+       memset(&(SilKit_Struct_GetHeader(VALUE)), 0x0, sizeof(SilKit_StructHeader));\
+       SilKit_Struct_GetId(VALUE) = DATATYPE ## _InterfaceIdentifier; \
+    } while(0)
+
 // CAN
 // CAN data type IDs
 #define SilKit_CanFrame_DATATYPE_ID 1
