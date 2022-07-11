@@ -201,6 +201,7 @@ int main(int argc, char** argv)
         {
             bool isStopped = false;
             std::promise<void> startSending;
+            std::promise<void> stopped;
             std::thread workerThread;
 
             // Set a Starting Handler (only triggers for asynchronous participants)
@@ -228,13 +229,9 @@ int main(int argc, char** argv)
             else
             {
                 workerThread = std::thread{[&]() {
-                    auto startSendingFuture = startSending.get_future();
-                    startSendingFuture.get();
+                    startSending.get_future().wait();
+                    stopped.get_future().wait();
 
-                    while (!isStopped)
-                    {
-                        std::this_thread::sleep_for(sleepTimePerTick);
-                    }
                     std::cout << "Sending stop signal..." << std::endl;
                     lifecycleService->Stop("Manual stop.");
                 }};
@@ -245,6 +242,7 @@ int main(int argc, char** argv)
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
             isStopped = true;
+            stopped.set_value();
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             workerThread.join();
