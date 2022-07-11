@@ -314,10 +314,10 @@ std::ostream& operator<<(std::ostream& out, const FlexrayHeader& header)
 {
     return out
         << "Flexray::FlexrayHeader{f=["
-        << (header.IsSet(FlexrayHeader::Flag::SuFIndicator) ? "U" : "-")
-        << (header.IsSet(FlexrayHeader::Flag::SyFIndicator) ? "Y" : "-")
-        << (header.IsSet(FlexrayHeader::Flag::NFIndicator) ? "-" : "N")
-        << (header.IsSet(FlexrayHeader::Flag::PPIndicator) ? "P" : "-")
+        << (header.IsSet(FlexrayHeader::HeaderFlag::SuFIndicator) ? "U" : "-")
+        << (header.IsSet(FlexrayHeader::HeaderFlag::SyFIndicator) ? "Y" : "-")
+        << (header.IsSet(FlexrayHeader::HeaderFlag::NFIndicator) ? "-" : "N")
+        << (header.IsSet(FlexrayHeader::HeaderFlag::PPIndicator) ? "P" : "-")
         << "],s=" << header.frameId
         << ",l=" << (uint32_t)header.payloadLength
         << ",crc=" << std::hex << header.headerCrc << std::dec
@@ -358,7 +358,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
         << "ch=" << msg.channel
         << ", " << msg.frame.header
         << " @" << timestamp.count() << "ms";
-    if (msg.frame.header.IsSet(FlexrayHeader::Flag::NFIndicator))
+    if (msg.frame.header.IsSet(FlexrayHeader::HeaderFlag::NFIndicator))
     {
         // if payload is valid, provide it as hex dump
         out << ", payload="

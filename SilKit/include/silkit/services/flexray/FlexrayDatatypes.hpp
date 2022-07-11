@@ -337,7 +337,7 @@ struct FlexrayHeader
     // --------------------------------------------------------------------------------
 
     //! Flag BitMask definition for helper methods
-    enum class Flag : uint8_t
+    enum class HeaderFlag : uint8_t
     {
         SuFIndicator = 1 << 0,
         SyFIndicator = 1 << 1,
@@ -346,16 +346,16 @@ struct FlexrayHeader
     };
 
     //! Convenience helper to check if a Flag is set
-    inline bool IsSet(Flag flag) const;
+    inline bool IsSet(HeaderFlag flag) const;
 
     //! Convenience helper to set a Flag
-    inline void Set(Flag flag);
+    inline void Set(HeaderFlag flag);
 
     //! Convenience helper to clear a Flag
-    inline void Clear(Flag flag);
+    inline void Clear(HeaderFlag flag);
 
     //! Convenience helper to set or clear a Flag according to a condition
-    inline void Set(Flag flag, bool condition);
+    inline void Set(HeaderFlag flag, bool condition);
 };
 
 struct FlexrayFrame
@@ -531,22 +531,22 @@ struct FlexrayPocStatusEvent
 //  Inline Implementations
 // ================================================================================
 
-bool FlexrayHeader::IsSet(Flag flag) const
+bool FlexrayHeader::IsSet(HeaderFlag flag) const
 {
     return (flags & static_cast<uint8_t>(flag)) > 0;
 }
 
-void FlexrayHeader::Set(Flag flag)
+void FlexrayHeader::Set(HeaderFlag flag)
 {
     flags |= static_cast<uint8_t>(flag);
 }
 
-void FlexrayHeader::Clear(Flag flag)
+void FlexrayHeader::Clear(HeaderFlag flag)
 {
     flags &= ~static_cast<uint8_t>(flag);
 }
 
-void FlexrayHeader::Set(Flag flag, bool condition)
+void FlexrayHeader::Set(HeaderFlag flag, bool condition)
 {
     if (condition)
         Set(flag);
