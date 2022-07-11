@@ -109,7 +109,7 @@ public:
     {
         dummyCallHandle = std::make_unique<CallHandleImpl>(SilKit::Services::Rpc::CallUUID{ 1, 1 });
         callHandlePtr = dummyCallHandle.get();
-        callHandle = reinterpret_cast<SilKit_CallHandle*>(callHandlePtr);
+        callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(callHandlePtr);
 
         uint32_t numLabels = 1;
         SilKit_KeyValuePair labels[1] = {{"KeyA", "ValA"}};
@@ -123,7 +123,7 @@ public:
 
     std::unique_ptr<CallHandleImpl> dummyCallHandle;
     IRpcCallHandle* callHandlePtr;
-    SilKit_CallHandle* callHandle;
+    SilKit_RpcCallHandle* callHandle;
 
     typedef struct
     {
@@ -138,15 +138,15 @@ public:
 
 };
 
-void CallHandler(void* /*context*/, SilKit_RpcServer* /*server*/, const SilKit_CallEvent* /*event*/)
+void CallHandler(void* /*context*/, SilKit_RpcServer* /*server*/, const SilKit_RpcCallEvent* /*event*/)
 {
 }
 
-void CallReturnHandler(void* /*context*/, SilKit_RpcClient* /*client*/, const SilKit_CallResultEvent* /*event*/)
+void CallReturnHandler(void* /*context*/, SilKit_RpcClient* /*client*/, const SilKit_RpcCallResultEvent* /*event*/)
 {
 }
 
-void DiscoveryResultHandler(void* /*context*/, const SilKit_DiscoveryResultList* /*discoveryResults*/)
+void DiscoveryResultHandler(void* /*context*/, const SilKit_RpcDiscoveryResultList* /*discoveryResults*/)
 {
 }
 
@@ -304,7 +304,7 @@ TEST_F(CapiRpcTest, rpc_discovery_query)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-void CallHandlerWithStringContext(void* context, SilKit_RpcServer* /*server*/, const SilKit_CallEvent* /*event*/)
+void CallHandlerWithStringContext(void* context, SilKit_RpcServer* /*server*/, const SilKit_RpcCallEvent* /*event*/)
 {
     if (context == nullptr)
     {
@@ -330,7 +330,7 @@ TEST_F(CapiRpcTest, rpc_server_set_call_handler_wraps_c_handler_and_passes_conte
 }
 
 void CallResultHandlerWithStringContext(void* context, SilKit_RpcClient* /*client*/,
-                                        const SilKit_CallResultEvent* /*event*/)
+                                        const SilKit_RpcCallResultEvent* /*event*/)
 {
     if (context == nullptr)
     {

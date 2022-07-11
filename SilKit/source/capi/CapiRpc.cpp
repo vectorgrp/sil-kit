@@ -17,14 +17,14 @@
 #include <cstring>
 
 namespace {
-void assign(SilKit_DiscoveryResultList** cResultList, const std::vector<SilKit::Services::Rpc::RpcDiscoveryResult>& cppDiscoveryResults)
+void assign(SilKit_RpcDiscoveryResultList** cResultList, const std::vector<SilKit::Services::Rpc::RpcDiscoveryResult>& cppDiscoveryResults)
 {
     size_t numResults = cppDiscoveryResults.size();
-    *cResultList = (SilKit_DiscoveryResultList*)malloc(sizeof(SilKit_DiscoveryResultList));
+    *cResultList = (SilKit_RpcDiscoveryResultList*)malloc(sizeof(SilKit_RpcDiscoveryResultList));
     if (*cResultList != NULL)
     {
         (*cResultList)->numResults = numResults;
-        (*cResultList)->results = (SilKit_DiscoveryResult*)malloc(numResults * sizeof(SilKit_DiscoveryResult));
+        (*cResultList)->results = (SilKit_RpcDiscoveryResult*)malloc(numResults * sizeof(SilKit_RpcDiscoveryResult));
         if ((*cResultList)->results != NULL)
         {
             uint32_t i = 0;
@@ -49,28 +49,28 @@ auto GetDataOrNullptr(const std::vector<std::uint8_t>& vector) -> const std::uin
     return vector.data();
 }
 
-SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, SilKit_CallResultHandler_t handler)
+SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, SilKit_RpcCallResultHandler_t handler)
 {
     return [handler, context](SilKit::Services::Rpc::IRpcClient* cppClient, const SilKit::Services::Rpc::RpcCallResultEvent& event) {
         auto* cClient = reinterpret_cast<SilKit_RpcClient*>(cppClient);
-        SilKit_CallResultEvent cEvent;
+        SilKit_RpcCallResultEvent cEvent;
         cEvent.interfaceId = SilKit_InterfaceIdentifier_RpcCallResultEvent;
         cEvent.timestamp = event.timestamp.count();
-        cEvent.callHandle = reinterpret_cast<SilKit_CallHandle*>(event.callHandle);
-        cEvent.callStatus = (SilKit_CallStatus)event.callStatus;
+        cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
+        cEvent.callStatus = (SilKit_RpcCallStatus)event.callStatus;
         cEvent.resultData = SilKit_ByteVector{GetDataOrNullptr(event.resultData), event.resultData.size()};
         handler(context, cClient, &cEvent);
     };
 }
 
-SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_CallHandler_t handler)
+SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_RpcCallHandler_t handler)
 {
     return [handler, context](SilKit::Services::Rpc::IRpcServer* cppServer, const SilKit::Services::Rpc::RpcCallEvent& event) {
         auto* cServer = reinterpret_cast<SilKit_RpcServer*>(cppServer);
-        SilKit_CallEvent cEvent;
+        SilKit_RpcCallEvent cEvent;
         cEvent.interfaceId = SilKit_InterfaceIdentifier_RpcCallEvent;
         cEvent.timestamp = event.timestamp.count();
-        cEvent.callHandle = reinterpret_cast<SilKit_CallHandle*>(event.callHandle);
+        cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
         cEvent.argumentData = SilKit_ByteVector{GetDataOrNullptr(event.argumentData), event.argumentData.size()};
         handler(context, cServer, &cEvent);
     };
@@ -82,7 +82,7 @@ extern "C" {
 
 SilKit_ReturnCode SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
                                    const char* functionName, const char* mediaType, const SilKit_KeyValueList* labels,
-                                   void* context, SilKit_CallHandler_t callHandler)
+                                   void* context, SilKit_RpcCallHandler_t callHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -104,7 +104,7 @@ SilKit_ReturnCode SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Partici
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_CallHandle* callHandle,
+SilKit_ReturnCode SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
                                          const SilKit_ByteVector* returnData)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -122,7 +122,7 @@ SilKit_ReturnCode SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_C
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_CallHandler_t handler)
+SilKit_ReturnCode SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_RpcCallHandler_t handler)
         {
             ASSERT_VALID_POINTER_PARAMETER(self);
             ASSERT_VALID_POINTER_PARAMETER(handler);
@@ -137,7 +137,7 @@ SilKit_ReturnCode SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* 
 
 SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
                                    const char* functionName, const char* mediaType, const SilKit_KeyValueList* labels,
-                                   void* context, SilKit_CallResultHandler_t resultHandler)
+                                   void* context, SilKit_RpcCallResultHandler_t resultHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -159,7 +159,7 @@ SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Partici
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, SilKit_CallHandle** outHandle, const SilKit_ByteVector* argumentData)
+SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, SilKit_RpcCallHandle** outHandle, const SilKit_ByteVector* argumentData)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_OUT_PARAMETER(outHandle);
@@ -169,13 +169,13 @@ SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, SilKit_CallHandl
         auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
         auto cppCallHandle = cppClient->Call(
             std::vector<uint8_t>(argumentData->data, argumentData->data + argumentData->size));
-        *outHandle = reinterpret_cast<SilKit_CallHandle*>(cppCallHandle);
+        *outHandle = reinterpret_cast<SilKit_RpcCallHandle*>(cppCallHandle);
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_CallResultHandler_t handler)
+SilKit_ReturnCode SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(handler);
@@ -190,7 +190,7 @@ SilKit_ReturnCode SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, 
 
 SilKit_ReturnCode SilKit_DiscoverServers(SilKit_Participant* participant, const char* functionName, const char* mediaType,
                                      const SilKit_KeyValueList* labels, void* context,
-                                     SilKit_DiscoveryResultHandler_t resultHandler)
+                                     SilKit_RpcDiscoveryResultHandler_t resultHandler)
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
@@ -203,7 +203,7 @@ SilKit_ReturnCode SilKit_DiscoverServers(SilKit_Participant* participant, const 
         cppParticipant->DiscoverRpcServers(
             functionName, cppMediaType, cppLabels,
             [resultHandler, context](const std::vector<SilKit::Services::Rpc::RpcDiscoveryResult>& cppDiscoveryResults) {
-                SilKit_DiscoveryResultList* results;
+                SilKit_RpcDiscoveryResultList* results;
                 assign(&results, cppDiscoveryResults);
                 resultHandler(context, results);
             });

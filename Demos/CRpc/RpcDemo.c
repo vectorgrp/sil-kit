@@ -79,7 +79,7 @@ void PrintByteVector(const SilKit_ByteVector* data)
     printf("\n");
 }
 
-void CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_CallEvent* event)
+void CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_RpcCallEvent* event)
 {
     UNUSED_ARG(context);
 
@@ -102,7 +102,7 @@ void CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_CallEve
     free(tmp);
 }
 
-void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_CallResultEvent* event)
+void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_RpcCallResultEvent* event)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbClient);
@@ -118,7 +118,7 @@ void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_C
     }
 }
 
-void DiscoveryResultHandler(void* context, const SilKit_DiscoveryResultList* discoveryResults)
+void DiscoveryResultHandler(void* context, const SilKit_RpcDiscoveryResultList* discoveryResults)
 {
     UNUSED_ARG(context);
 
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
             SilKit_ByteVector argumentData = { &buffer[0], 3 };
             printf("[Client] Call dispatched: ");
             PrintByteVector(&argumentData);
-            SilKit_CallHandle* callHandle;
+            SilKit_RpcCallHandle* callHandle;
             SilKit_RpcClient_Call(client, &callHandle, &argumentData);
         }
     }
