@@ -24,6 +24,7 @@ typedef int32_t SilKit_ParticipantId;
 //!< A command sent to a participant by a system controller.
 struct SilKit_ParticipantCommand
 {
+    SilKit_StructHeader structHeader;
     SilKit_ParticipantCommand_Kind kind;
 };
 
@@ -70,7 +71,7 @@ typedef uint64_t SilKit_NanosecondsWallclockTime; //!< Wall clock time since epo
 //!< Details about a status change of a participant.
 typedef struct
 {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     const char* participantName; //!< Name of the participant.
     SilKit_ParticipantState participantState; //!< The new state of the participant.
     const char* enterReason; //!< The reason for the participant to enter the new state.
@@ -81,7 +82,7 @@ typedef struct
 //!< Details about a status change of a participant.
 typedef struct
 {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     SilKit_StringList*
         requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
 
@@ -498,7 +499,7 @@ typedef SilKit_ReturnCode (*SilKit_SystemController_SetWorkflowConfiguration_t)(
 //!< The LifecycleLifecycle options
 typedef struct SilKit_LifecycleConfiguration
 {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     SilKit_Bool coordinatedStart;
     SilKit_Bool coordinatedStop;
 } SilKit_LifecycleConfiguration;

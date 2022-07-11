@@ -155,7 +155,7 @@ typedef uint8_t SilKit_LinDataLength;
  */
 struct SilKit_LinFrame
 {
-    SilKit_InterfaceIdentifier interfaceId;   //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader;   //!< The interface id specifying which version of this struct was obtained
     SilKit_LinId               id;            //!< Lin Identifier
     SilKit_LinChecksumModel    checksumModel; //!< Checksum Model
     SilKit_LinDataLength       dataLength;    //!< Data length
@@ -167,7 +167,7 @@ typedef struct SilKit_LinFrame SilKit_LinFrame;
 //! 
 struct SilKit_LinFrameStatusEvent
 {
-    SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Time of the event.
     SilKit_LinFrame* frame;
     SilKit_LinFrameStatus status;
@@ -177,7 +177,7 @@ typedef struct SilKit_LinFrameStatusEvent SilKit_LinFrameStatusEvent;
 //! \brief A LIN wakeup event delivered in the \ref SilKit_LinWakeupHandler_t.
 struct SilKit_LinWakeupEvent
 {
-    SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Time of the event.
     SilKit_Direction direction; //!< The direction of the event.
 };
@@ -186,7 +186,7 @@ typedef struct SilKit_LinWakeupEvent SilKit_LinWakeupEvent;
 //! \brief A LIN goToSleep event delivered in the \ref SilKit_LinGoToSleepHandler_t
 struct SilKit_LinGoToSleepEvent
 {
-    SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Time of the event.
 };
 typedef struct SilKit_LinGoToSleepEvent SilKit_LinGoToSleepEvent;
@@ -195,7 +195,7 @@ typedef struct SilKit_LinGoToSleepEvent SilKit_LinGoToSleepEvent;
  */
 struct SilKit_LinFrameResponse
 {
-    SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     /*! frame must provide the Lin \ref SilKit_LinId for which the response is
      *  configured.
      *
@@ -214,7 +214,7 @@ typedef struct SilKit_LinFrameResponse SilKit_LinFrameResponse;
  */
 struct SilKit_LinControllerConfig
 {
-    SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     //! Configure as Lin master or Lin slave
     SilKit_LinControllerMode controllerMode;
     /*! The operational baud rate of the controller.

@@ -41,7 +41,7 @@ typedef uint32_t SilKit_FlexrayClockPeriod;
 struct SilKit_FlexrayClusterParameters
 {
   //! The interface id specifying which version of this struct was obtained
-  SilKit_InterfaceIdentifier interfaceId;
+  SilKit_StructHeader structHeader;
 
   //! Number of attempts for a cold start before giving up (range 2-31).
   uint8_t gColdstartAttempts;
@@ -131,7 +131,7 @@ typedef struct SilKit_FlexrayClusterParameters SilKit_FlexrayClusterParameters;
 struct SilKit_FlexrayNodeParameters
 {
   //! The interface id specifying which version of this struct was obtained
-  SilKit_InterfaceIdentifier interfaceId;
+  SilKit_StructHeader structHeader;
 
   // ----------------------------------------------------------------------
   // Parameters according to B.3.2.1
@@ -252,7 +252,7 @@ typedef uint8_t SilKit_FlexrayTransmissionMode;
 struct SilKit_FlexrayTxBufferConfig
 {
   //! The interface id specifying which version of this struct was obtained
-  SilKit_InterfaceIdentifier interfaceId;
+  SilKit_StructHeader structHeader;
 
   //! (values FlexrayChannel::A, FlexrayChannel::B, FlexrayChannel::AB)
   SilKit_FlexrayChannel channels;
@@ -281,7 +281,7 @@ typedef struct SilKit_FlexrayTxBufferConfig SilKit_FlexrayTxBufferConfig;
 struct SilKit_FlexrayControllerConfig
 {
   //! The interface id specifying which version of this struct was obtained
-  SilKit_InterfaceIdentifier interfaceId;
+  SilKit_StructHeader structHeader;
   //! FlexRay cluster parameters
   SilKit_FlexrayClusterParameters* clusterParams;
   //! FlexRay node parameters
@@ -297,7 +297,7 @@ typedef struct SilKit_FlexrayControllerConfig SilKit_FlexrayControllerConfig;
 struct SilKit_FlexrayTxBufferUpdate
 {
   //! The interface id specifying which version of this struct was obtained
-  SilKit_InterfaceIdentifier interfaceId;
+  SilKit_StructHeader structHeader;
 
   //! Index of the TX Buffers according to the configured buffers (cf. FlexrayControllerConfig).
   uint16_t txBufferIndex;
@@ -322,7 +322,7 @@ typedef uint8_t SilKit_FlexrayChiCommand;
 struct SilKit_FlexrayHostCommand
 {
     //! The interface id specifying which version of this struct was obtained
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
 
     SilKit_FlexrayChiCommand command;
 };
@@ -335,7 +335,7 @@ typedef uint8_t SilKit_FlexrayHeader_Flag;
 
 struct SilKit_FlexrayHeader
 {
-  SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
   /*!
     * \brief Flags bit map according to FlagMask. Description:
     *  - [7-5]: unused
@@ -355,7 +355,7 @@ typedef struct SilKit_FlexrayHeader SilKit_FlexrayHeader;
 
 struct SilKit_FlexrayFrame
 {
-  SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
   SilKit_FlexrayHeader* header;  //!< Header flags, slot, crc, and cycle indidcators
   SilKit_ByteVector     payload;
 };
@@ -363,7 +363,7 @@ typedef struct SilKit_FlexrayFrame SilKit_FlexrayFrame;
 
 struct SilKit_FlexrayFrameEvent
 {
-  SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+  SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
   SilKit_NanosecondsTime     timestamp;   //!< Time at end of frame transmission
   SilKit_FlexrayChannel     channel;     //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
   SilKit_FlexrayFrame*      frame;       //!< Received FlexRay frame
@@ -375,7 +375,7 @@ typedef struct SilKit_FlexrayFrameEvent SilKit_FlexrayFrameEvent;
  */
 struct SilKit_FlexrayFrameTransmitEvent
 {
-  SilKit_InterfaceIdentifier interfaceId;   //!< The interface id specifying which version of this struct was obtained
+  SilKit_StructHeader structHeader;   //!< The interface id specifying which version of this struct was obtained
   SilKit_NanosecondsTime     timestamp;     //!< Time at end of frame transmission
   uint16_t               txBufferIndex; //!< Tx buffer, that was used for the transmission
   SilKit_FlexrayChannel     channel;       //!< FlexRay channel A or B. (Valid values: FlexrayChannel::A, FlexrayChannel::B).
@@ -399,9 +399,9 @@ typedef uint8_t SilKit_FlexraySymbolPattern;
  */
 struct SilKit_FlexraySymbolEvent
 {
-  SilKit_InterfaceIdentifier   interfaceId; //!< The interface id specifying which version of this struct was obtained
-  SilKit_NanosecondsTime       timestamp;   //!< End time of symbol reception.
-  SilKit_FlexrayChannel       channel;     //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
+  SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime timestamp;   //!< End time of symbol reception.
+  SilKit_FlexrayChannel channel;     //!< FlexRay channel A or B (values: FlexrayChannel::A, FlexrayChannel::B).
   SilKit_FlexraySymbolPattern pattern;     //!< The received symbol, e.g. wakeup pattern
 };
 typedef struct SilKit_FlexraySymbolEvent SilKit_FlexraySymbolEvent;
@@ -413,9 +413,9 @@ typedef struct SilKit_FlexraySymbolEvent SilKit_FlexrayWakeupEvent;
  */
 struct SilKit_FlexrayCycleStartEvent
 {
-  SilKit_InterfaceIdentifier interfaceId;  //!< The interface id specifying which version of this struct was obtained
-  SilKit_NanosecondsTime     timestamp;    //!< Cycle starting time.
-  uint8_t                cycleCounter; //!< Counter of FlexRay cycles.
+  SilKit_StructHeader structHeader;  //!< The interface id specifying which version of this struct was obtained
+  SilKit_NanosecondsTime timestamp;    //!< Cycle starting time.
+  uint8_t cycleCounter; //!< Counter of FlexRay cycles.
 };
 typedef struct SilKit_FlexrayCycleStartEvent SilKit_FlexrayCycleStartEvent;
 
@@ -500,7 +500,7 @@ typedef uint8_t SilKit_FlexrayWakeupStatusType;
  */
 struct SilKit_FlexrayPocStatusEvent
 {
-  SilKit_InterfaceIdentifier      interfaceId;     //!< The interface id specifying which version of this struct was obtained
+  SilKit_StructHeader structHeader;     //!< The interface id specifying which version of this struct was obtained
   SilKit_NanosecondsTime          timestamp;       //!< SIL Kit timestamp
   SilKit_FlexrayPocState         state;           /* = SilKit_FlexrayPocState_DefaultConfig; */     //!< Status of the Protocol Operation Control (POC).
   SilKit_Bool                     chiHaltRequest;  /* = false; */                                 //!< indicates whether a halt request was received from the CHI

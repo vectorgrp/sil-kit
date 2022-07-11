@@ -13,7 +13,7 @@ namespace {
 
 TEST(TestCapi_Interfaces, compile_test_capi_interface_ids)
 {
-	constexpr const auto foo = SilKit_CanStateChangeEvent_InterfaceIdentifier;
+	constexpr const auto foo = SilKit_CanStateChangeEvent_STRUCT_VERSION;
     static_assert(SK_ID_GET_SERVICE(foo) == SK_ID_SERVICE_Can, "service id extraction");
 	static_assert(SK_ID_GET_DATATYPE(foo) == SilKit_CanStateChangeEvent_DATATYPE_ID, "datatype id extraction");
 	static_assert(SK_ID_GET_VERSION(foo) == SilKit_CanStateChangeEvent_VERSION, "datatype version extraction");
@@ -21,61 +21,51 @@ TEST(TestCapi_Interfaces, compile_test_capi_interface_ids)
 }
 
 // Generate this table by script, to verify that there are no copy-pastos.
-// E.g. awk '/^#define SilKit_Interface.*SK_ID_MAKE/{print $2}' InterfaceIdentifiers.h
-constexpr SilKit_InterfaceIdentifier allSilkidIds[]= {
-    SilKit_CanFrame_InterfaceIdentifier,
-    SilKit_CanFrameTransmitEvent_InterfaceIdentifier,
-    SilKit_CanFrameEvent_InterfaceIdentifier,
-    SilKit_CanStateChangeEvent_InterfaceIdentifier,
-    SilKit_CanErrorStateChangeEvent_InterfaceIdentifier,
-    SilKit_EthernetFrameEvent_InterfaceIdentifier,
-    SilKit_EthernetFrameTransmitEvent_InterfaceIdentifier,
-    SilKit_EthernetStateChangeEvent_InterfaceIdentifier,
-    SilKit_EthernetBitrateChangeEvent_InterfaceIdentifier,
-    SilKit_EthernetFrame_InterfaceIdentifier,
-    SilKit_FlexrayFrameEvent_InterfaceIdentifier,
-    SilKit_FlexrayFrameTransmitEvent_InterfaceIdentifier,
-    SilKit_FlexraySymbolEvent_InterfaceIdentifier,
-    SilKit_FlexraySymbolTransmitEvent_InterfaceIdentifier,
-    SilKit_FlexrayCycleStartEvent_InterfaceIdentifier,
-    SilKit_FlexrayPocStatusEvent_InterfaceIdentifier,
-    SilKit_FlexrayWakeupEvent_InterfaceIdentifier,
-    SilKit_FlexrayControllerConfig_InterfaceIdentifier,
-    SilKit_FlexrayClusterParameters_InterfaceIdentifier,
-    SilKit_FlexrayNodeParameters_InterfaceIdentifier,
-    SilKit_FlexrayHostCommand_InterfaceIdentifier,
-    SilKit_FlexrayHeader_InterfaceIdentifier,
-    SilKit_FlexrayFrame_InterfaceIdentifier,
-    SilKit_FlexrayTxBufferConfig_InterfaceIdentifier,
-    SilKit_FlexrayTxBufferUpdate_InterfaceIdentifier,
-    SilKit_LinFrame_InterfaceIdentifier,
-    SilKit_LinFrameResponse_InterfaceIdentifier,
-    SilKit_LinControllerConfig_InterfaceIdentifier,
-    SilKit_LinFrameStatusEvent_InterfaceIdentifier,
-    SilKit_LinGoToSleepEvent_InterfaceIdentifier,
-    SilKit_LinWakeupEvent_InterfaceIdentifier,
-    SilKit_DataMessageEvent_InterfaceIdentifier,
-    SilKit_NewDataPublisherEvent_InterfaceIdentifier,
-    SilKit_RpcDiscoveryResult_InterfaceIdentifier,
-    SilKit_RpcCallEvent_InterfaceIdentifier,
-    SilKit_RpcCallResultEvent_InterfaceIdentifier,
-    SilKit_RpcDiscoveryResultList_InterfaceIdentifier,
-    SilKit_ParticipantStatus_InterfaceIdentifier,
+constexpr uint64_t allSilkidIds[]= {
+    SilKit_CanFrame_STRUCT_VERSION,
+    SilKit_CanFrameTransmitEvent_STRUCT_VERSION,
+    SilKit_CanFrameEvent_STRUCT_VERSION,
+    SilKit_CanStateChangeEvent_STRUCT_VERSION,
+    SilKit_CanErrorStateChangeEvent_STRUCT_VERSION,
+    SilKit_EthernetFrameEvent_STRUCT_VERSION,
+    SilKit_EthernetFrameTransmitEvent_STRUCT_VERSION,
+    SilKit_EthernetStateChangeEvent_STRUCT_VERSION,
+    SilKit_EthernetBitrateChangeEvent_STRUCT_VERSION,
+    SilKit_EthernetFrame_STRUCT_VERSION,
+    SilKit_FlexrayFrameEvent_STRUCT_VERSION,
+    SilKit_FlexrayFrameTransmitEvent_STRUCT_VERSION,
+    SilKit_FlexraySymbolEvent_STRUCT_VERSION,
+    SilKit_FlexraySymbolTransmitEvent_STRUCT_VERSION,
+    SilKit_FlexrayCycleStartEvent_STRUCT_VERSION,
+    SilKit_FlexrayPocStatusEvent_STRUCT_VERSION,
+    SilKit_FlexrayWakeupEvent_STRUCT_VERSION,
+    SilKit_FlexrayControllerConfig_STRUCT_VERSION,
+    SilKit_FlexrayClusterParameters_STRUCT_VERSION,
+    SilKit_FlexrayNodeParameters_STRUCT_VERSION,
+    SilKit_FlexrayHostCommand_STRUCT_VERSION,
+    SilKit_FlexrayHeader_STRUCT_VERSION,
+    SilKit_FlexrayFrame_STRUCT_VERSION,
+    SilKit_FlexrayTxBufferConfig_STRUCT_VERSION,
+    SilKit_FlexrayTxBufferUpdate_STRUCT_VERSION,
+    SilKit_LinFrame_STRUCT_VERSION,
+    SilKit_LinFrameResponse_STRUCT_VERSION,
+    SilKit_LinControllerConfig_STRUCT_VERSION,
+    SilKit_LinFrameStatusEvent_STRUCT_VERSION,
+    SilKit_LinGoToSleepEvent_STRUCT_VERSION,
+    SilKit_LinWakeupEvent_STRUCT_VERSION,
+    SilKit_DataMessageEvent_STRUCT_VERSION,
+    SilKit_NewDataPublisherEvent_STRUCT_VERSION,
+    SilKit_RpcDiscoveryResult_STRUCT_VERSION,
+    SilKit_RpcCallEvent_STRUCT_VERSION,
+    SilKit_RpcCallResultEvent_STRUCT_VERSION,
+    SilKit_RpcDiscoveryResultList_STRUCT_VERSION,
+    SilKit_ParticipantStatus_STRUCT_VERSION,
 };
-constexpr auto allSilkidIdsSize = sizeof(allSilkidIds) / sizeof(SilKit_InterfaceIdentifier);
-
-// Helper for std::set<>
-struct Compare
-{
-    constexpr bool operator()(const SilKit_StructHeader& lhs, const SilKit_StructHeader& rhs) const
-    {
-        return lhs.version < rhs.version;
-    }
-};
+constexpr auto allSilkidIdsSize = sizeof(allSilkidIds) / sizeof(SilKit_StructHeader);
 
 TEST(TestCapi_Interfaces, interface_identifiers_are_unique)
 {
-    std::set<SilKit_InterfaceIdentifier, Compare> all{std::begin(allSilkidIds), std::end(allSilkidIds)};
+    std::set<uint64_t> all{std::begin(allSilkidIds), std::end(allSilkidIds)};
     ASSERT_EQ(allSilkidIdsSize, all.size()) << "The IDs must not be duplicate";
 }
 

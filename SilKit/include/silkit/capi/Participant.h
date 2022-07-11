@@ -5,7 +5,6 @@
 #include <limits.h>
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
-#include "silkit/capi/InterfaceIdentifiers.h"
 
 
 #pragma pack(push)

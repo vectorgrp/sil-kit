@@ -14,7 +14,7 @@ SILKIT_BEGIN_DECLS
 //! \brief An incoming DataMessage of a DataPublisher containing raw data and timestamp
 typedef struct
 {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     //! Send timestamp of the event
     SilKit_NanosecondsTime timestamp;
     //! Data field containing the payload
@@ -24,7 +24,7 @@ typedef struct
 //! \brief Information about a newly discovered DataPublisher
 typedef struct
 {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     //! Reception timestamp of the event
     SilKit_NanosecondsTime timestamp;
     //! The topic string of the discovered DataPublisher.

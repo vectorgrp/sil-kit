@@ -402,6 +402,8 @@ SilKit_ReturnCode SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantSt
         auto* systemMonitor = reinterpret_cast<SilKit::Services::Orchestration::ISystemMonitor*>(csystemMonitor);
         auto& participantStatus = systemMonitor->ParticipantStatus(participantName);
         SilKit_ParticipantStatus cstatus {};
+        SilKit_Struct_Init(SilKit_ParticipantStatus, cstatus);
+
         cstatus.enterReason = participantStatus.enterReason.c_str();
         cstatus.enterTime = participantStatus.enterTime.time_since_epoch().count();
         cstatus.participantName = participantStatus.participantName.c_str();
@@ -475,7 +477,8 @@ SilKit_ReturnCode SilKit_SystemMonitor_AddParticipantStatusHandler(SilKit_System
         auto cppHandlerId = systemMonitor->AddParticipantStatusHandler(
             [handler, context, csystemMonitor](SilKit::Services::Orchestration::ParticipantStatus cppStatus) {
                 SilKit_ParticipantStatus cStatus;
-                cStatus.interfaceId = SilKit_InterfaceIdentifier_ParticipantStatus;
+                SilKit_Struct_Init(SilKit_ParticipantStatus, cStatus);
+
                 cStatus.enterReason = cppStatus.enterReason.c_str();
                 cStatus.enterTime =
                     std::chrono::duration_cast<std::chrono::nanoseconds>(cppStatus.enterTime.time_since_epoch())

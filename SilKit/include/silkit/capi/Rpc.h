@@ -27,7 +27,7 @@ typedef struct SilKit_RpcClient SilKit_RpcClient;
 */
 typedef struct SilKit_RpcDiscoveryResult
 {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     const char* functionName;
     const char* mediaType;
     SilKit_KeyValueList* labelList;
@@ -39,7 +39,7 @@ typedef struct SilKit_RpcDiscoveryResult
 */
 typedef struct SilKit_RpcDiscoveryResultList
 {
-    SilKit_InterfaceIdentifier interfaceId; //!< The interface id specifying which version of this struct was obtained
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     size_t numResults;
     SilKit_RpcDiscoveryResult* results;
 } SilKit_RpcDiscoveryResultList;
@@ -52,7 +52,7 @@ typedef uint32_t SilKit_RpcCallStatus;
 #define SilKit_CallStatus_UNDEFINED_ERROR       ((uint32_t) 2)
 
 typedef struct {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     //! Send timestamp of the event
     SilKit_NanosecondsTime timestamp;
     //! The handle of this call, used to submit results
@@ -62,7 +62,7 @@ typedef struct {
 } SilKit_RpcCallEvent;
 
 typedef struct {
-    SilKit_InterfaceIdentifier interfaceId;
+    SilKit_StructHeader structHeader;
     //! Send timestamp of the event
     SilKit_NanosecondsTime timestamp;
     //! The call handle that uniquely identifies the call

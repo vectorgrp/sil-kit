@@ -290,9 +290,10 @@ SilKit_ReturnCode SilKit_LinController_AddWakeupHandler(SilKit_LinController* co
         *outHandlerId = (SilKit_HandlerId)linController->AddWakeupHandler(
             [handler, context, controller](SilKit::Services::Lin::ILinController* /*ctrl*/,
                                            const SilKit::Services::Lin::LinWakeupEvent& cppWakeupEvent) {
-                SilKit_LinWakeupEvent wakeupEvent{SilKit_LinWakeupEvent_InterfaceIdentifier,
-                                               (SilKit_NanosecondsTime)cppWakeupEvent.timestamp.count(),
-                                               (SilKit_Direction)cppWakeupEvent.direction};
+                SilKit_LinWakeupEvent wakeupEvent{};
+                SilKit_Struct_Init(SilKit_LinWakeupEvent, wakeupEvent);
+                wakeupEvent.timestamp = (SilKit_NanosecondsTime)cppWakeupEvent.timestamp.count();
+                wakeupEvent.direction = (SilKit_Direction)cppWakeupEvent.direction;
                 handler(context, controller, &wakeupEvent);
         });
         return SilKit_ReturnCode_SUCCESS;
