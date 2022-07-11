@@ -14,6 +14,7 @@
 #include "silkit/capi/Logger.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
 #include "silkit/capi/Participant.h"
+#include "silkit/capi/Orchestration.h"
 
 
 SILKIT_BEGIN_DECLS

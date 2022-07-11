@@ -8,15 +8,17 @@ Participant Controller C API
 The features of the ParticipantController in the Cpp API are not provided through a ParticipantController abstraction 
 in the C API but directly provided through the SilKit_Participant.
 
-.. doxygenfunction:: SilKit_Participant_SetCommunicationReadyHandler
-.. doxygenfunction:: SilKit_Participant_SetStopHandler
-.. doxygenfunction:: SilKit_Participant_SetShutdownHandler
-.. doxygenfunction:: SilKit_Participant_Run
-.. doxygenfunction:: SilKit_Participant_RunAsync
-.. doxygenfunction:: SilKit_Participant_WaitForRunAsyncToComplete
-.. doxygenfunction:: SilKit_Participant_SetPeriod
-.. doxygenfunction:: SilKit_Participant_SetSimulationTask
-.. doxygenfunction:: SilKit_Participant_SetSimulationTaskAsync
-.. doxygenfunction:: SilKit_Participant_CompleteSimulationTask
-.. doxygenfunction:: SilKit_Participant_Pause
-.. doxygenfunction:: SilKit_Participant_Continue
+.. doxygenfunction:: SilKit_LifecycleService_SetCommunicationReadyHandler
+.. doxygenfunction:: SilKit_LifecycleService_SetStartingHandler
+.. doxygenfunction:: SilKit_LifecycleService_SetStopHandler
+.. doxygenfunction:: SilKit_LifecycleService_SetShutdownHandler
+.. doxygenfunction:: SilKit_LifecycleService_StartLifecycleNoSyncTime
+.. doxygenfunction:: SilKit_LifecycleService_StartLifecycleWithSyncTime
+.. doxygenfunction:: SilKit_LifecycleService_WaitForLifecycleToComplete
+.. doxygenfunction:: SilKit_LifecycleService_Pause
+.. doxygenfunction:: SilKit_LifecycleService_Continue
+
+.. doxygenfunction:: SilKit_TimeSyncService_SetPeriod
+.. doxygenfunction:: SilKit_TimeSyncService_SetSimulationTask
+.. doxygenfunction:: SilKit_TimeSyncService_SetSimulationTaskAsync
+.. doxygenfunction:: SilKit_TimeSyncService_CompleteSimulationTask

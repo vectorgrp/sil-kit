@@ -356,9 +356,9 @@ void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controll
     SilKit_FlexrayController_ExecuteCmd(controller, SilKit_FlexrayChiCommand_RUN);
 }
 
-void FlexrayNode_SimulationTask(void* context, SilKit_Participant* participant, SilKit_NanosecondsTime time)
+void FlexrayNode_SimulationTask(void* context, SilKit_TimeSyncService* timeSyncService, SilKit_NanosecondsTime time)
 {
-    UNUSED_ARG(participant);
+    UNUSED_ARG(timeSyncService);
 
     FlexrayNode* node = (FlexrayNode*)context;
     uint64_t nowMs = time / 1000000ULL;
@@ -479,6 +479,13 @@ int main(int argc, char** argv)
         return 2;
     }
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
+
+    SilKit_LifecycleService* lifecycleService;
+    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+
+    SilKit_TimeSyncService* timeSyncService;
+    returnCode = SilKit_TimeSyncService_Create(&timeSyncService, lifecycleService);
+
     const char* flexrayControllerName = "FlexRay1";
     const char* flexrayNetworkName = "FlexRay1";
 
@@ -610,10 +617,10 @@ int main(int argc, char** argv)
         return 2;
     }
 
-    returnCode = SilKit_Participant_SetSimulationTask(participant, frNode, &FlexrayNode_SimulationTask);
+    returnCode = SilKit_TimeSyncService_SetSimulationTask(timeSyncService, frNode, &FlexrayNode_SimulationTask);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("SilKit_Participant_SetSimulationTask => %s\n", SilKit_GetLastErrorString());
+        printf("SilKit_TimeSyncService_SetSimulationTask => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
 
@@ -622,16 +629,16 @@ int main(int argc, char** argv)
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
 
-    returnCode = SilKit_Participant_StartLifecycleWithSyncTime(participant, &startConfig);
+    returnCode = SilKit_LifecycleService_StartLifecycleWithSyncTime(lifecycleService, &startConfig);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("SilKit_Participant_StartLifecycleWithSyncTime => %s\n", SilKit_GetLastErrorString());
+        printf("SilKit_LifecycleService_StartLifecycleWithSyncTime => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    returnCode = SilKit_Participant_WaitForLifecycleToComplete(participant, &finalState);
+    returnCode = SilKit_LifecycleService_WaitForLifecycleToComplete(lifecycleService, &finalState);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("SilKit_Participant_WaitForLifecycleToComplete => %s\n", SilKit_GetLastErrorString());
+        printf("SilKit_LifecycleService_WaitForLifecycleToComplete => %s\n", SilKit_GetLastErrorString());
         return 3;
     }
     printf("Simulation stopped. Final State: %d\n", finalState);

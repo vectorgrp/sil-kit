@@ -164,6 +164,9 @@ int main(int argc, char* argv[])
     const char* canController2Name = "CAN2";
     returnCode = SilKit_CanController_Create(&canController2, participant, canController2Name, canNetworkName);
 
+    returnCode = SilKit_CanController_Start(canController);
+    returnCode = SilKit_CanController_Start(canController2);
+
     SilKit_HandlerId frameTransmitHandlerId;
     SilKit_CanController_AddFrameTransmitHandler(
         canController, (void*)&transmitContext, &FrameTransmitHandler,

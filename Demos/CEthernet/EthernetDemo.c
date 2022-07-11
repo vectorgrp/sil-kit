@@ -192,6 +192,9 @@ int main(int argc, char* argv[])
     returnCode = SilKit_EthernetController_Create(&ethernetController1, participant, "ETH0", "Ethernet1");
     returnCode = SilKit_EthernetController_Create(&ethernetController2, participant, "ETH1", "Ethernet1");
 
+    returnCode = SilKit_EthernetController_Activate(ethernetController1);
+    returnCode = SilKit_EthernetController_Activate(ethernetController2);
+
     SilKit_HandlerId frameTransmitHandlerId;
     SilKit_EthernetController_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler,
                                                    &frameTransmitHandlerId);

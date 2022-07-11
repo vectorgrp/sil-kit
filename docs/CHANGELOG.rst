@@ -45,11 +45,75 @@ Changed
        - Undefined
        - Use timestamp of sender
 
+- The orchestration services were restructured in the  C API such that they are more consistent with the Cpp API.
+  The API of the system controller, system monitor, lifecycle service, and the time sync service are now provided through
+  SilKit_SystemController, SilKit_SystemMonitor, SilKit_LifecycleService, and SilKit_TimeSyncService:
 
-Removed
-~~~~~~~
+   + ``SilKit/include/capi/Orchestration.h``
 
+       .. code-block:: c++
 
+      SilKit_ReturnCode SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
+                                                        SilKit_Participant* participant);
+      SilKit_ReturnCode SilKit_SystemController_Create(SilKit_SystemController** outSystemController,
+                                                        SilKit_Participant* participant);
+      SilKit_ReturnCode SilKit_SystemController_Create(SilKit_SystemController** outSystemController,
+                                                        SilKit_Participant* participant);
+      SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
+                                                           SilKit_Participant* participant);
+      SilKit_ReturnCode SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTimeSyncService,
+                                                               SilKit_LifecycleService* lifecycleService);
+      typedef void (*SilKit_LifecycleService_CommunicationReadyHandler_t)(void* context, SilKit_LifecycleService* lifecycleService);
+      
+      SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandler(
+             SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
+      SilKit_ReturnCode SilKit_LifecycleService_SetStopHandler(SilKit_LifecycleService* lifecycleService, void* context,
+                                                              SilKit_LifecycleService_StopHandler_t handler);
+      SilKit_ReturnCode SilKit_LifecycleService_SetShutdownHandler(
+                 SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_ShutdownHandler_t handler);
+      SilKit_ReturnCode SilKit_TimeSyncService_SetPeriod(SilKit_TimeSyncService* timeSyncService,
+                                                         SilKit_NanosecondsTime period);
+      typedef void (*SilKit_TimeSyncService_SimulationTaskHandler_t)(void* context, SilKit_TimeSyncService* timeSyncService,
+                                                          SilKit_NanosecondsTime now);
+      SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationTask(
+              SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler);
+      SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationTaskAsync(
+              SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler);
+      SilKit_ReturnCode SilKit_TimeSyncService_CompleteSimulationTask(SilKit_TimeSyncService* timeSyncService);
+      SilKit_ReturnCode SilKit_SystemController_Restart(SilKit_SystemController* systemController, const char* participantName);
+      SilKit_ReturnCode SilKit_SystemController_Run(SilKit_SystemController* systemController);
+      SilKit_ReturnCode SilKit_SystemController_Stop(SilKit_SystemController* systemController);
+      SilKit_ReturnCode SilKit_SystemController_Shutdown(SilKit_SystemController* systemController,
+                                                             const char* participantName);
+      SilKit_ReturnCode SilKit_LifecycleService_Pause(SilKit_LifecycleService* lifecycleService, const char* reason);
+      SilKit_ReturnCode SilKit_LifecycleService_Continue(SilKit_LifecycleService* lifecycleService);
+      SilKit_ReturnCode SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantStatus* outParticipantState,
+                                                                   SilKit_Participant* participant,
+                                                                   const char* participantName);
+      SilKitAPI SilKit_ReturnCode SilKit_SystemMonitor_GetSystemState(SilKit_SystemState* outSystemState,
+                                                              SilKit_Participant* participant);
+      SilKit_ReturnCode SilKit_SystemMonitor_AddSystemStateHandler(SilKit_SystemMonitor* systemMonitor,
+                                                                       void* context,
+                                                                       SilKit_SystemStateHandler_t handler,
+                                                                       SilKit_HandlerId* outHandlerId);
+      SilKit_ReturnCode SilKit_SystemMonitor_RemoveSystemStateHandler(SilKit_SystemMonitor* systemMonitor,
+                                                                          SilKit_HandlerId handlerId);
+      typedef void (*SilKit_ParticipantStatusHandler_t)(void* context, SilKit_SystemMonitor* systemMonitor,
+                                                  const char* participantName, SilKit_ParticipantStatus* status);
+      SilKit_ReturnCode SilKit_SystemMonitor_AddParticipantStatusHandler(SilKit_SystemMonitor* systemMonitor,
+                                                                             void* context,
+                                                                             SilKit_ParticipantStatusHandler_t handler,
+                                                                             SilKit_HandlerId* outHandlerId);
+      SilKit_ReturnCode SilKit_SystemMonitor_RemoveParticipantStatusHandler(SilKit_SystemMonitor* systemMonitor,
+                                                                                SilKit_HandlerId handlerId);
+      SilKit_ReturnCode SilKit_SystemController_SetWorkflowConfiguration(
+                 SilKit_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfigration);
+      SilKit_ReturnCode SilKit_LifecycleService_StartLifecycleNoSyncTime(
+                        SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startconfiguration);
+      SilKit_LifecycleService_StartLifecycleWithSyncTime(
+                        SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startConfiguration);
+      SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_WaitForLifecycleToComplete(
+                             SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
 
 
 Removed

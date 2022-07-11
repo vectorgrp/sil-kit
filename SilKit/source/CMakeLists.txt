@@ -52,6 +52,7 @@ add_library(SilKit ${silkitLibType}
     capi/CapiFlexray.cpp
     capi/CapiLogger.cpp
     capi/CapiLin.cpp
+    capi/CapiOrchestration.cpp
     capi/CapiDataPubSub.cpp
     capi/CapiRpc.cpp
     capi/CapiUtils.cpp

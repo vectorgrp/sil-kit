@@ -72,7 +72,7 @@ typedef struct {
 } SimTaskContext;
 SimTaskContext simTaskContext;
 
-void CommunicationReadyCallback(void* context, SilKit_Participant* cbParticipant)
+void CommunicationReadyCallback(void* context, SilKit_LifecycleService* cbParticipant)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbParticipant);
@@ -86,16 +86,16 @@ void CommunicationReadyCallback(void* context, SilKit_Participant* cbParticipant
     (void)SilKit_CanController_Start(canController2);
 }
 
-void StopCallback(void* context, SilKit_Participant* cbParticipant)
+void StopCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
-    UNUSED_ARG(cbParticipant);
+    UNUSED_ARG(cbLifecycleService);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> StopCallback with context=%i\n", tc->someInt);
 }
 
-void ShutdownCallback(void* context, SilKit_Participant* cbParticipant)
+void ShutdownCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
-    UNUSED_ARG(cbParticipant);
+    UNUSED_ARG(cbLifecycleService);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
 }
@@ -157,9 +157,9 @@ void SendFrame()
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
-void SimTask(void* context, SilKit_Participant* cbParticipant, SilKit_NanosecondsTime now)
+void SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now)
 {
-    UNUSED_ARG(cbParticipant);
+    UNUSED_ARG(cbTimeSyncService);
     SimTaskContext* tc = (SimTaskContext*)context;
     printf(">> Simulation task now=%"PRIu64" with context=%i\n", now, tc->someInt);
 
@@ -197,10 +197,16 @@ int main(int argc, char* argv[])
     }
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
+    SilKit_LifecycleService* lifecycleService;
+    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+
+    SilKit_TimeSyncService* timesyncService;
+    returnCode = SilKit_TimeSyncService_Create(&timesyncService, lifecycleService);
+
     participantHandlerContext.someInt = 123;
-    SilKit_Participant_SetCommunicationReadyHandler(participant, (void*)&participantHandlerContext, &CommunicationReadyCallback);
-    SilKit_Participant_SetStopHandler(participant, (void*)&participantHandlerContext, &StopCallback);
-    SilKit_Participant_SetShutdownHandler(participant, (void*)&participantHandlerContext, &ShutdownCallback);
+    SilKit_LifecycleService_SetCommunicationReadyHandler(lifecycleService, (void*)&participantHandlerContext, &CommunicationReadyCallback);
+    SilKit_LifecycleService_SetStopHandler(lifecycleService, (void*)&participantHandlerContext, &StopCallback);
+    SilKit_LifecycleService_SetShutdownHandler(lifecycleService, (void*)&participantHandlerContext, &ShutdownCallback);
 
     const char* canNetworkName = "CAN1";
     const char* canControllerName = "CAN1";
@@ -219,24 +225,24 @@ int main(int argc, char* argv[])
     SilKit_CanController_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, SilKit_Direction_SendReceive,
                                       &frameHandlerId);
     simTaskContext.someInt = 456;
-    SilKit_Participant_SetPeriod(participant, 1000000);
-    SilKit_Participant_SetSimulationTask(participant, (void*)&simTaskContext, &SimTask);
+    SilKit_TimeSyncService_SetPeriod(timesyncService, 1000000);
+    SilKit_TimeSyncService_SetSimulationTask(timesyncService, (void*)&simTaskContext, &SimTask);
 
     SilKit_ReturnCode result;
     SilKit_LifecycleConfiguration startConfig;
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
-    result = SilKit_Participant_StartLifecycleWithSyncTime(participant, &startConfig);
+    result = SilKit_LifecycleService_StartLifecycleWithSyncTime(lifecycleService, &startConfig);
     if(result != SilKit_ReturnCode_SUCCESS)
     {
-        printf("Error: SilKit_Participant_StartLifecycleWithSyncTime failed: %s\n", SilKit_GetLastErrorString());
+        printf("Error: SilKit_LifecycleService_StartLifecycleWithSyncTime failed: %s\n", SilKit_GetLastErrorString());
         exit(1);
     }
     SilKit_ParticipantState outFinalParticipantState;
-    result = SilKit_Participant_WaitForLifecycleToComplete(participant, &outFinalParticipantState);
+    result = SilKit_LifecycleService_WaitForLifecycleToComplete(lifecycleService, &outFinalParticipantState);
     if(result != SilKit_ReturnCode_SUCCESS)
     {
-        printf("Error: SilKit_Participant_WaitForLifecycleToComplete failed: %s\n", SilKit_GetLastErrorString());
+        printf("Error: SilKit_LifecycleService_WaitForLifecycleToComplete failed: %s\n", SilKit_GetLastErrorString());
         exit(1);
     }
 

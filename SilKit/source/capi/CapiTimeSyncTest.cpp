@@ -19,17 +19,17 @@ protected:
 
 };
 
-void SimTask(void* /*context*/, SilKit_Participant* /*participant*/, SilKit_NanosecondsTime /*now*/) {}
+void SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncService*/, SilKit_NanosecondsTime /*now*/) {}
 
 TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
 {
     SilKit_ReturnCode returnCode;
-    returnCode = SilKit_Participant_SetPeriod(nullptr, 1000);
+    returnCode = SilKit_TimeSyncService_SetPeriod(nullptr, 1000);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_Participant_SetSimulationTask(nullptr, nullptr, &SimTask);
+    returnCode = SilKit_TimeSyncService_SetSimulationTask(nullptr, nullptr, &SimTask);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_Participant_SetSimulationTask((SilKit_Participant*)&mockParticipant, nullptr, nullptr);
+    returnCode = SilKit_TimeSyncService_SetSimulationTask((SilKit_TimeSyncService*)(mockParticipant.GetLifecycleService()->GetTimeSyncService()), nullptr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
@@ -39,12 +39,13 @@ TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
     EXPECT_CALL(mockParticipant.mockTimeSyncService,
         SetPeriod(testing::_)
     ).Times(testing::Exactly(1));
-    returnCode = SilKit_Participant_SetPeriod((SilKit_Participant*)&mockParticipant, 1000);
+    returnCode = SilKit_TimeSyncService_SetPeriod((SilKit_TimeSyncService*)(mockParticipant.GetLifecycleService()->GetTimeSyncService()), 1000);
 
     EXPECT_CALL(mockParticipant.mockTimeSyncService,
         SetSimulationTask(testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimTaskT>(testing::_))
     ).Times(testing::Exactly(1));
-    returnCode = SilKit_Participant_SetSimulationTask((SilKit_Participant*)&mockParticipant, nullptr, &SimTask);
+    returnCode = SilKit_TimeSyncService_SetSimulationTask(
+        (SilKit_TimeSyncService*)(mockParticipant.GetLifecycleService()->GetTimeSyncService()), nullptr, &SimTask);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
