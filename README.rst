@@ -58,7 +58,7 @@ There are also specific options to toggle details of the build:
 
     2. SILKIT_BUILD_TESTS=OFF (default: ON) disables the generation of unit and
        integration tests. The tests are based on the google test framework,
-       which is bundled with the SilKit.
+       which is bundled with the SIL Kit.
 
     3. SILKIT_BUILD_DEMOS=OFF (default: ON) disables the generation of demo
        applications for the SIL Kit.
