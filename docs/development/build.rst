@@ -104,7 +104,7 @@ The distributed Demos, as packaged by CPack, are preconfigured to build against
 a copy of the SIL Kit binaries in ``../SilKit/`` .
 This can be overriden by providing your own ``SilKit`` CMake target library,
 before the demos are configured by cmake.
-Or by changing the ``find_package(SilKit ... PATHS path/to/SILKIT)`` statement directly
+Or by changing the ``find_package(SilKit ... PATHS path/to/SilKit)`` statement directly
 in the ``SilKit-Demos/CMakeLists.txt`` directory.
 
 

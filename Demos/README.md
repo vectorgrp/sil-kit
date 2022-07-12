@@ -43,8 +43,8 @@ compilation.
 
 * **Note:**
   By default, the demo build system assumes that it resides next to a binary
-  release of the SILKIT in a directory 'SilKit' which contains a properly
-  exported build of the SILKIT. You can override this by providing your own
+  release of the SIL Kit in a directory 'SilKit' which contains a properly
+  exported build of the SIL Kit. You can override this by providing your own
   SilKit::SilKit target in cmake.
 
 * **Windows: VisualStudio 2015 and VisualStudio 2017**

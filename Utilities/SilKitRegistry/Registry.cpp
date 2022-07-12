@@ -138,7 +138,7 @@ int main(int argc, char** argv)
 
         ConfigureLogging(configuration, logLevel);
 
-        std::cout << "SilKitRegistry listening on " << listenUri << std::endl;
+        std::cout << "SIL Kit Registry listening on " << listenUri << std::endl;
         VAsioRegistry registry{ configuration };
         registry.ProvideDomain(listenUri);
         

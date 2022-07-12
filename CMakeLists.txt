@@ -58,7 +58,7 @@ add_subdirectory(ThirdParty)
 silkit_enable_warnings(${SILKIT_WARNINGS_AS_ERRORS})
 
 if(MINGW)
-    set(CMAKE_SHARED_LIBRARY_PREFIX "") #skip 'lib' prefix for extensions and SilKit
+    set(CMAKE_SHARED_LIBRARY_PREFIX "") #skip 'lib' prefix for extensions and SIL Kit
     set(CMAKE_STATIC_LIBRARY_PREFIX "") #skip 'lib' prefix for import libs
     # Debug builds grow too big for the assembler, add flags to reduce size
     if(CMAKE_BUILD_TYPE MATCHES "Debug")

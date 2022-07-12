@@ -9,7 +9,7 @@ and message type indicators. See `SerializedMessage` for reference.
 
 During the inital handshake a number of messages are exchanged.
 First, the `ParticipantAnnouncement` message is transmitted.
-When connecting to the SilKitRegistry a `KnownParticipants` message is returned.
+When connecting to the SIL Kit Registry a `KnownParticipants` message is returned.
 In any case, a `ParticipantAnnouncementReply` is returned.
 
 All three message types contain a header of type `RegistryMsgHeader`.

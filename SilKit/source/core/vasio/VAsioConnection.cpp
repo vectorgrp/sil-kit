@@ -355,16 +355,16 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     {
         _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
                        _config.middleware.connectAttempts);
-        _logger->Info("   Make sure that the SilKitRegistry is up and running and is listening on the following URIs: {}.",
+        _logger->Info("   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",
             printUris(attemptedUris));
         _logger->Info("   If a registry is unable to open a listening socket it will only be reachable"
                       " via local domain sockets, which depend on the working directory"
                       " and the middleware configuration ('enableDomainSockets').");
         _logger->Info("   Make sure that the hostname can be resolved and is reachable.");
-        _logger->Info("   You can configure the SilKitRegistry hostname and port via the SilKitConfig.");
-        _logger->Info("   The SilKitRegistry executable can be found in your SIL Kit installation folder:");
-        _logger->Info("     INSTALL_DIR/bin/SilKitRegistry[.exe]");
-        throw std::runtime_error{"ERROR: Failed to connect to VAsio registry"};
+        _logger->Info("   You can configure the SIL Kit Registry hostname and port via the SilKitConfig.");
+        _logger->Info("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:");
+        _logger->Info("     INSTALL_DIR/bin/sil-kit-registry[.exe]");
+        throw std::runtime_error{"ERROR: Failed to connect to SIL Kit Registry"};
     }
 
     _logger->Info("Connected to registry {}", printUris(registry->GetInfo().acceptorUris));
@@ -381,8 +381,8 @@ void VAsioConnection::JoinDomain(std::string connectUri)
     auto waitOk = receivedAllReplies.wait_for(5s);
     if(waitOk == std::future_status::timeout)
     {
-        _logger->Error("SILKIT timeout during connection handshake with SilKitRegistry.");
-        throw ProtocolError("SILKIT timeout during connection handshake with SilKitRegistry.");
+        _logger->Error("Timeout during connection handshake with SIL Kit Registry.");
+        throw ProtocolError("Timeout during connection handshake with SIL Kit Registry.");
     }
     // check if an exception was set:
     receivedAllReplies.get();
@@ -506,7 +506,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
 
         if(from->GetInfo().participantId == RegistryParticipantId)
         {
-            // handshake with SilKitRegistry failed, we need to abort.
+            // handshake with SIL Kit Registry failed, we need to abort.
             auto error = ProtocolError(msg);
             _receivedAllParticipantReplies.set_exception(std::make_exception_ptr(error)); //propagate to main thread
             throw error; // for I/O thread

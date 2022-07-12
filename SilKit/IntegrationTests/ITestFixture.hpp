@@ -79,7 +79,7 @@ protected: //CTor and operators
     void SetupFromParticipantList(std::vector<std::string> participantNames)
     {
         // create test harness with deferred participant creation.
-        // Will only create the SilKitRegistry and tell the SystemController the participantNames
+        // Will only create the SIL Kit Registry and tell the SystemController the participantNames
         _simTestHarness = std::make_unique<SimTestHarness>(participantNames, _registryUri, true);
 
     }

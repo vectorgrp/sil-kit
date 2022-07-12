@@ -12,7 +12,7 @@ if(NOT TARGET SilKit)
     #assuming we are standalone but still within the original distribution directory layout
     #so the source release should be located in ../${INSTALL_SOURCE_DIR}
     message(STATUS "<-> no SilKit-Library target found. working in distribution mode")
-    message(STATUS "<-> using deployed SilKit")
+    message(STATUS "<-> using deployed SIL Kit")
     #NB: as of SILKIT 3.0.2 FMT is optional
     include(
         ${CMAKE_CURRENT_LIST_DIR}/../SilKit-Source/ThirdParty/fmt.cmake

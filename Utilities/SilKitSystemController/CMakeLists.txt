@@ -1,6 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
 cmake_minimum_required(VERSION 3.8)
-project("SilKit-SystemController" LANGUAGES CXX C)
+project("sil-kit-system-controller" LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 14)
 
 include(SilKitInstall)

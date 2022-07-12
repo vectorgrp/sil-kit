@@ -66,11 +66,11 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
 
         SilKit_Participant* participant = nullptr;
         returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "Participant1", "42", SilKit_False);
-        // since there is no SilKitRegistry, the call should fail
+        // since there is no SIL Kit Registry, the call should fail
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
         EXPECT_TRUE(participant == nullptr);
 
-        // since there is no SilKitRegistry with which one could create a Participant, we check against nullptr
+        // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
         returnCode = SilKit_Participant_Destroy(nullptr);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
@@ -98,7 +98,7 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
             SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "ParticipantNotExisting", "42", SilKit_False);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
 
-        // since there is no SilKitRegistry with which one could create a Participant, we check against nullptr
+        // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
         returnCode = SilKit_Participant_Destroy(nullptr);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
