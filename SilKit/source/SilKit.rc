@@ -38,7 +38,7 @@ BEGIN
             VALUE "CompanyName", ASSEMBLYINFO_COMPANY
             VALUE "FileDescription", ASSEMBLYINFO_FILEDESCRIPTION
             VALUE "FileVersion", ASSEMBLYINFO_VERSIONSTRING
-            VALUE "InternalName", "SilKit"
+            VALUE "InternalName", "Vector SIL Kit"
             VALUE "LegalCopyright", ASSEMBLYINFO_COPYRIGHT
             VALUE "OriginalFilename", "SilKit.dll"
             VALUE "ProductName", ASSEMBLYINFO_PRODUCT
