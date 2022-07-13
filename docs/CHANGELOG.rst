@@ -8,8 +8,63 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.27] - unreleased
 ----------------------
 
+Please note that the Vector IntegrationBus was renamed to Vector SIL Kit.
+All APIs and documentation have been updated to reflect this.
+
+Fixed
+~~~~~
+- Ensure that the SynchronizedPolicy object does not modify the Timeconfiguration.
+  This prevents multiple invocations of an async SimTask (VIB-847).
 Changed
 ~~~~~~~
+- Renaming the IntegrationBus to SIL Kit affects all APIs.
+
+    - In general, **File names** and **symbols** were renamed from the prefixes ``Ib``
+      and ``IntegrationBus`` to the prefix ``SilKit``.
+
+    - The main source directory was renamed from ``IntegrationBus`` to ``SilKit``
+      and the include directories are now consistently in lower-case and with a
+      root directory of ``silkit``.
+
+    - Packages are now named ``SilKit-X.Y.Z-tool-platform.zip``.
+
+    - C++ namespaces were renamed:
+
+      .. list-table:: : C++ namespace changes
+         :widths: 40 40
+         :header-rows: 1
+      
+         * - Old
+           - New
+         * - ``ib::``
+           - ``SilKit::``
+         * - ``ib::mw``
+           - not public anymore
+         * - ``ib::sim``
+           - ``SilKit::Services``
+         * - ``ib::sim::eth``
+           - ``SilKit::Services::Ethernet``
+         * - ``ib::sim::can``
+           - ``SilKit::Services::Can``
+         * - ``ib::sim::lin``
+           - ``SilKit::Services::Lin``
+         * - ``ib::sim::fr``
+           - ``SilKit::Services::Flexray``
+         * - ``ib::sim::data``
+           - ``SilKit::Services::PubSub``
+         * - ``ib::sim::rpc``
+           - ``SilKit::Services::Rpc``
+         * - ``ib::mw::sync``
+           - ``SilKit::Services::Orchestration``
+         * - ``ib::mw::logging``
+           - ``SilKit::Services::Logging``
+         * - ``ib::cfg``
+           - ``SilKit::Config``
+
+- C++ general cleanup:
+    - renamed ``ib/version.hpp`` to ``silkit/SilKitVersion.hpp``
+    - moved ``ib/IParticipant.hpp`` and ``ib/exception.hpp`` to ``silkit/participant/``
+
 - C-API: improvements for longterm ABI stability.
   The ``interfaceId`` member was replaced with a more versatile structHeader of type SilKit_StructHeader.
   This is a private field and not ment to be changed by the user directly.
@@ -31,13 +86,23 @@ Changed
         /* we must initialize the data structures header before use */
         SilKit_Struct_Init(SilKit_CanFrame, canFrame);
         SilKit_CanController_SendFrame(canController, &canFrame, NULL);
-  
+ 
+- C-API: the C symbols have been stream lined. The naming convention was changed from 
+  ``ib_Namespace_EntityWithoutPrefix_Function`` to resemble the C++ API:
+  ``SilKit_Entity_Function``.
+
+- The domain ID integer was removed and replaced with a registry URI string.
+  The command line tools were updated to accept a new parameter for this.
+- The command line tools were modified to use lower case names with dashes:
+  E.g., the ``IbRegistry`` is now called ``sil-kit-registry``.
+  See  :doc:`./usage/utilities`  for details.
+
 Compatibility with 3.99.26
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): 
+- Application binary interface (ABI): No
 - Application software interface (API): No
-- Middleware network protocol (VAsio): 
+- Middleware network protocol: No
 
 
 Changed
