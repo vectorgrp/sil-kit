@@ -1,8 +1,8 @@
 .. _sec:api-lifecycle-service:
 
-==============================
+==================
 Life Cycle Service
-==============================
+==================
 .. |ILifecycleService| replace:: :cpp:class:`ILifecycleService<SilKit::Services::Orchestration::ILifecycleService>`
 .. |Participant| replace:: :doc:`Participant<participant>`
 
@@ -12,19 +12,16 @@ Life Cycle Service
 
 .. highlight:: cpp
 
-The life cycle service is the main interface to model a member of a simulation.
-It provides access to the  :cpp:class:`time synchronization service <SilKit::Services::Orchestration::ITimeSyncService>`, register callbacks for state changes, query the participant's state and issue commands to change the state.
+The life cycle service is used to orchestrate the workflow and states of a simulation participant.
+It provides access to the :cpp:class:`time synchronization service <SilKit::Services::Orchestration::ITimeSyncService>`
+, registers callbacks for state changes, queries the participant's state and issues commands to change the state.
 For an overview of a participant's state and its relation to the simulation
 refer to the :ref:`participant life cycle section<sec:sim-lifecycle-syncParticipants>`.
 
 Using the Life Cycle Service
 ----------------------------
 
-.. admonition:: Note
-  
-   The following describes the current behavior and will change in the foreseeable future.
-   
-An |ILifecycleService| instance can be retrieved from a connected |Participant|::
+An |ILifecycleService| instance can be retrieved from a |Participant|::
    
     auto* lifecycleService = participant->GetLifecycleService();
 
@@ -46,7 +43,6 @@ in the middleware's worker thread::
             std::cout << "Stopping" << std::endl;
         }
     );
-
 
     lifecycleService->SetShutdownHandler(
         []() {
@@ -89,17 +85,15 @@ method can be invoked with a human readable explanation as a string argument.
 Execution can be resumed using the :cpp:func:`Continue()<SilKit::Services::Orchestration::ILifecycleService::Continue()>`
 method.
 
-To abort the simulation and report an error message use the 
+To abort the simulation and report an error message, use the 
 :cpp:func:`ReportError()<SilKit::Services::Orchestration::ILifecycleService::ReportError()>` method.
 This will change the current participant state to :cpp:enumerator:`Error<SilKit::Services::Orchestration::Error>` and report the error message
-to the SIL Kit runtime system.
-ReportError is also called when the invocation of a registered handler throws an exception.
+to the SIL Kit runtime system. ReportError is also called when the invocation of a registered handler throws an exception.
 
 To stop a particular participant, use the :cpp:func:`Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`
-method.
-This will exit the :cpp:func:`StartLifecycleNoTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` (or :cpp:func:`StartLifecycleWithTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`) loop,
-call a registered StopHandler and switch to
-the :cpp:enumerator:`Stopped<SilKit::Services::Orchestration::Stopped>` state.
+method. This will exit the :cpp:func:`StartLifecycleNoTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` 
+(or :cpp:func:`StartLifecycleWithTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`) loop,
+call a registered StopHandler and switch to the :cpp:enumerator:`Stopped<SilKit::Services::Orchestration::Stopped>` state.
 
 .. admonition:: Note
 

@@ -29,7 +29,7 @@ Building the Demos
 ~~~~~~~~~~~~~~~~~~
 
 Building the demos from within the source tree is straight forward,
-just build the  ``Demos`` CMake target:
+just build the  ``Demos`` CMake target::
     
     cmake --build . --target Demos
 

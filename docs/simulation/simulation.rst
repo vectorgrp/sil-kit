@@ -38,11 +38,11 @@ The chapter closes with details about the middleware that the reference implemen
 Properties of Participants
 ==========================
 
-Generally, a |ProductName| participant can communicate with other participants without them knowing of its existence.
-However, participants can register a :cpp:func:`SetParticipantConnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantConnectedHandler()>`  callback that notifies them once a new participant connects to them.
+Generally, a |ProductName| participant can communicate with other participants without knowledge about their existence.
+However, participants can register a :cpp:func:`SetParticipantConnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantConnectedHandler()>`  callback that notifies them once a new participant connects.
 Analogously, they can register a :cpp:func:`SetParticipantDisconnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantDisconnectedHandler()>` callback that notifies them when a participant disconnects.
 
-However, participants can also publish a life cycle that allows them to coordinate their startup and shutdown phase with other participants (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-management>`).
+However, participants can also use a life cycle service that allows them to coordinate their startup and shutdown phase with other participants (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-management>`).
 In addition, participants with a life cycle can use the virtual time synchronization (see :ref:`Synchronized Simulation Run<sec:sim-synchronization>`).
 
 .. _sec:sim-lifecycle-management:
@@ -57,7 +57,7 @@ Afterwards, the life cycle of synchronized participants and the life cycle of th
 Life Cycle Control
 ------------------
 
-There are two levels of granularity when it comes to life cycle management: a local life cycle that affects the state of an individual participant and a simulation wide life cycle.
+There are two levels of granularity when it comes to life cycle management: a local life cycle that affects the state of an individual participant and a simulation-wide system life cycle.
 The following introduces the three components that can affect and observe the individual and global life cycle.
 
 .. _subsubsec:sim-lifecycle-lifecycleService:
@@ -67,7 +67,7 @@ The |LifecycleServiceAPI| interface allows each participant to access various fu
 Users can register callbacks that trigger once a participant reaches certain states.
 Available callbacks are :cpp:func:`SetCommunicationReadyHandler()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandler()>`, :cpp:func:`SetStopHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStopHandler()>`, and :cpp:func:`SetShutdownHandler()<SilKit::Services::Orchestration::ILifecycleService::SetShutdownHandler()>`.
 Further, the life cycle service provides access to the |TimeSyncServiceAPI| interface (see below).
-Once all needed controllers are registered and, if need be, the time synchronization service was retrieved and configured, the participant's life cycle (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`) can be published by either calling |StartLifecycleNoSyncTime| or |StartLifecycleWithSyncTime|.
+Once all needed controllers are registered and, if needed, the time synchronization service was retrieved and configured, the participants' life cycle can be published by either calling |StartLifecycleNoSyncTime| or |StartLifecycleWithSyncTime| (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`).
 
 .. _subsubsec:sim-lifecycle-timeSyncService:
 

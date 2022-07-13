@@ -34,9 +34,11 @@ Terminology
  * - :doc:`Configuration<../configuration/configuration>`
    - The optional participant configuration file allows to easily configure a participant and its interconnection within the 
      simulation. It can be used to change a participants behavior without needing to recompile its sources.
+ * - Registry
+   - The registry is a central service that enables participant discovery in a distributed simulation.
  * - Registry URI
-   - The registry URI which specifies where the registry can be reached.
-     It defaults to 'silkit://localhost:8500'.
+   - The registry URI specifies where the registry can be reached.
+     It defaults to 'silkit://localhost:8500', that is, the registry is reachable via TCP on the localhost on port 8500.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
@@ -45,12 +47,11 @@ Terminology
      unsynchronized.
 
 A simulation consists of participants which all connect to the same registry URI.
+An instance of the registry is required for coordination, either as a standalone process (see :ref:`sec:util-registry`) or created programmatically.
 The participants might be physically distributed in a network or running on the same host.
 
 Thus, it is feasible to have multiple simulations running in parallel on the same host computer.
 Some participants can have special roles, depending on e.g., the synchronization and detail of the simulation.
-Additionally the :ref:`VAsio Middleware<sec:mwcfg-vasio>` of the SIL Kit requires the
-:ref:`sec:util-registry` to work properly.
 
 Writing your first SIL Kit application
 --------------------------------------
@@ -136,9 +137,9 @@ callback to receive data value updates.
 The simulation task has to be defined, even though no simulation work is performed.
 
 To run this sample, you have to use the :ref:`sec:util-registry` and
-:ref:`sec:util-system-controller` processes.  The registry is required by the
-:ref:`VAsio middleware<sec:mwcfg-vasio>` for connecting the participants.  The
-:ref:`sec:util-system-controller` initializes the connected participants and starts the
+:ref:`sec:util-system-controller` processes.
+The registry is required for participants discovery.
+The :ref:`sec:util-system-controller` initializes the connected participants and starts the
 simulation until the return key is pressed. For convenience and to reduce code
 duplication, these utility programs are implemented in separate executables and
 distributed in binary forms.
@@ -164,10 +165,10 @@ The complete source code of this sample can be found here: :download:`CMakeLists
 Further Reading
 ---------------
 
-More real-world examples, involving time synchronization and simulated
+More real-world examples involving time synchronization and simulated
 automotive networks, can be found in the :doc:`API sections<../api/api>`.  Also,
 studying the source code of the bundled :doc:`demo applications<demos>` is a
 good start. The simulation lifecycle and supported simulation time
 synchronization are discussed in :doc:`../simulation/simulation`. 
-Additionally, :doc:`../configuration/configuration` describes how the participant configuration file can be used
-to change the behavior of participants.
+Additionally, :doc:`../configuration/configuration` describes how the participant
+configuration file can be used to change the behavior of participants.

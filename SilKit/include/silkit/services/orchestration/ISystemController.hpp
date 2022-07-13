@@ -16,13 +16,8 @@ public:
      *  The command is only allowed if the participant is in the
      *  ParticipantState::Stopped or ParticipantState::Error state.
      *
-     *  \param participantName identifies the participant to be initialized
+     *  \param participantName identifies the participant to be restarted
      *
-     *  NB:
-     *   - Parametrization is yet to be determined.
-     *   - Restart is still subject to changed! It might be changed to
-     *     a SystemCommand to Restart all participants without sending
-     *     new parameters.
      */
     virtual void Restart(const std::string& participantName) const = 0;
 
@@ -34,7 +29,7 @@ public:
 
     /*! \brief Send \ref SystemCommand::Kind::Stop to all participants
      *
-     *  The command is only allowed if system is in SystemState::Running.
+     *  The command is only allowed if system is in SystemState::ReadyToRun.
      */
     virtual void Stop() const = 0;
 
@@ -42,7 +37,7 @@ public:
      *
      *  The command is only allowed if system is in
      *  SystemState::Stopped or SystemState::Error.
-     *  \param participantName identifies the participant to be initialized
+     *  \param participantName identifies the participant to be shut down
      */
     virtual void Shutdown(const std::string& participantName) const = 0;
 

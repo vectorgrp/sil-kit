@@ -12,10 +12,10 @@ System Monitor
 Using the System Monitor
 -------------------------
 
-Each participant does have access to a System Monitor and can register callbacks to get informed about
+Each participant has access to a System Monitor and can register callbacks to get informed about
 changes of the ParticipantState or the SystemState that occur during the simulation.
 
-Register callbacks for state transitions
+Register Callbacks for State Transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To be notified about transitions of the ParticipantState, a ParticipantStatusHandler has to be registered. The
@@ -31,7 +31,7 @@ about the transition such as the name of the participant, the reason for the sta
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->AddParticipantStatusHandler(participantStatusHandler);
 
-Last but not least a SystemStateHandler can be registered to get informed about system state transitions:
+A SystemStateHandler can be registered to get informed about system state transitions:
 
 .. code-block:: c++
 
@@ -42,8 +42,8 @@ Last but not least a SystemStateHandler can be registered to get informed about 
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->AddSystemStateHandler(systemStateHandler);
 
-Register callbacks for new network connections to and disconnects from other participants
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Register Callbacks for Other Participants 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A :cpp:class:`ParticipantConnectedHandler` and :cpp:class:`ParticipantDisconnectedHandler` can be registered.
 They report the name of any other participant connecting and disconnecting from the participant:

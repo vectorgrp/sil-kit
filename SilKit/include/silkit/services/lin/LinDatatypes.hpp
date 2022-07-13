@@ -70,7 +70,7 @@ inline auto GoToSleepFrame() -> LinFrame;
  */ 
 enum class LinFrameResponseType : uint8_t
 {
-    //! Response is generated from this (master) node 
+    //! Response is generated from this master node 
     MasterResponse = 0,
     
     //! Response is generated from a remote slave node
@@ -258,7 +258,7 @@ enum class LinControllerStatus
     //  is enabled.
     Sleep = 2,
 
-    //! Sleep Pending state is reached when a GoToSleep is issued.
+    //! Sleep pending state is reached when a GoToSleep is issued.
     //  This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
     //  before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
     //  This is only used when using detailed simulations with a network simulator.

@@ -11,18 +11,16 @@ automotive applications. For this, the Vector SIL Kit provides:
   * High level data messages for arbitrary application specific communication in a publish / subscribe pattern
   * Remote Procedure Calls for calling arbitrary procedures on remote participants
 
-* Synchronization of simulation time implementing different protocols
+* Synchronization of virtual simulation time ??implementing different protocols??
 
   * Event based synchronization according to lower bound event time
 
 * State handling to control and observe execution of the simulated system
-* An optional participant configuration YAML/JSON file to configure simulation participants behavior even after
+* An optional participant configuration YAML/JSON file to configure simulation participants behavior after
   compile time
 
 
-For getting started developing with the Vector SIL Kit, see the :doc:`quickstart guide <usage/quickstart>`.
-
-.. _base-architecture:
+For getting started developing with the Vector SIL Kit, see the :doc:`quick start guide <usage/quickstart>`.
 
 Architecture
 ----------------------------
@@ -38,15 +36,15 @@ Supported Services
 The currently supported services of the SIL Kit consist of the following categories:
 
 * **Vehicle Network Controllers:** CAN / CAN FD, Ethernet, FlexRay, and LIN
-* **Data Messages:** without any data type constraints
+* **Data Publish/Subscribe:** without any data type constraints
 * **RPC Servers/Clients:** for remote procedure call functionality
 
 Vehicle Networks
 ~~~~~~~~~~~~~~~~
 
 The SIL Kit provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
-All networks can be simulated with two different levels of detail: simple, functional simulation
-or high detail, timing accurate simulation. Timing accurate simulation requires the detailed simulation, which  
+All networks can be simulated with two different levels of detail: a simple, functional simulation
+or a detailed simulation with accurate timings. Simulating accurate timings requires the detailed simulation, which  
 needs an additional network simulator.
 
 Vehicle Network Controllers
@@ -54,13 +52,13 @@ Vehicle Network Controllers
 
 Applications access vehicle networks using matching controller models. The
 controller interfaces are the same for simple and detailed simulation. As a result,
-an application that works in the simple use case does also work when switching to
-a high detail simulation using the network simulator. The CAN, LIN, and Ethernet demos 
+an application that works in the simple use case also works when switching to
+a detailed simulation using the network simulator. The CAN, LIN, and Ethernet demos 
 provided with the SIL Kit have all been tested both with and without a network simulator. 
 The FlexRay feature is only available in the detailed simulation based on a network simulator.
 
 The section :ref:`sec:api-services` describes how to configure and use Vehicle Network Controllers in detail. 
-In addition, the use of other services (Data Message, Rpc, ...) is presented as well.
+In addition, the use of other services (Data Message, RPC, ...) is presented as well.
 
 
 Prerequisites for Usage

@@ -37,8 +37,6 @@ The subdirectory layout follows mostly a uniform scheme for substantial SIL Kit 
  - Datatypes are declared in ``silkit/<component>/<Component>Datatypes.hpp``.
 
 
-.. _sec:header-silkit-main:
-
 Using the SIL Kit Headers
 -------------------------
 The main header file is ``silkit/SilKit.hpp`` which defines the 

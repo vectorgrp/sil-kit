@@ -7,7 +7,7 @@ LIN Service API
 .. Macros for docs use
 .. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>`
 .. |CreateLinController| replace:: :cpp:func:`CreateLinController<SilKit::IParticipant::CreateLinController()>`
-.. |ILinController| replace:: :cpp:class:`ILinController<SilKit::Services::Ethernet::ILinController>`
+.. |ILinController| replace:: :cpp:class:`ILinController<SilKit::Services::Lin::ILinController>`
 
 .. |Init| replace:: :cpp:func:`Init()<SilKit::Services::Lin::ILinController::Init>`
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Lin::ILinController::SendFrame>`
@@ -73,8 +73,7 @@ name::
 
   auto* linMasterController = participant->CreateLinController("LinMaster", "LIN1");
 
-LIN controllers will only communicate within the same network. If no network name is provided, the controller name
-will be used as the network name.
+LIN controllers will only communicate within the same network.
 
 Initialization
 ~~~~~~~~~~~~~~
@@ -278,7 +277,7 @@ Assumptions:
 
 - *master*, *slave*, *slave1*, and *slave2* are of type |ILinController|.
 - *timeEndOfFrame* indicates the end of frame time stamp when using the detiled simulation. Otherwise the value of 
-  *timeEndofFrame* is undefined.
+  *timeEndOfFrame* is undefined.
 - *UseAutosarInterface* is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API. 
   It will most likely not be used in practice and it merely intended to show the different usages of the API.
   

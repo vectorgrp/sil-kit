@@ -70,7 +70,7 @@ public:
 
     /*! \brief Initialize the LIN controller
      * 
-     * \param config The Controller configuration contains:
+     * \param config The controller configuration contains:
      *  - controllerMode, either sets LIN master or LIN slave mode
      *  - baudRate, determine transmission speeds (only used for detailed simulation)
      *  - frameResponses, an optional set of initial FrameResponses
@@ -108,7 +108,7 @@ public:
     virtual void SendFrameHeader(LinIdT linId) = 0;
 
     /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN
-     *  Masters The corresponding LIN ID does not need to be
+     *  Masters. The corresponding LIN ID does not need to be
      *  previously configured. 
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized.
@@ -179,7 +179,7 @@ public:
     virtual void RemoveFrameStatusHandler(HandlerId handlerId) = 0;
 
     /*! \brief The GoToSleepHandler is called whenever a go-to-sleep frame
-     * was received.
+     * is received.
      *
      * Note: The LIN controller does not automatically enter sleep
      * mode up reception of a go-to-sleep frame. I.e.,

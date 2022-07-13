@@ -53,13 +53,12 @@ Using the FlexRay Controller
 ----------------------------
 
 The FlexRay Service API provides an FlexRay bus abstraction through the |IFlexrayController| interface.
-A FlexRay controller is created by calling |CreateFlexrayController| given a controller name and (optional) network 
+A FlexRay controller is created by calling |CreateFlexrayController| given a controller name and network 
 name::
 
   auto* flexrayController = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
   
-FlexRay controllers will only communicate within the same network. If no network name is provided, the controller name
-will be used as the network name.
+FlexRay controllers will only communicate within the same network.
 
 .. admonition:: Note
 
@@ -69,8 +68,8 @@ will be used as the network name.
 Initialization
 ~~~~~~~~~~~~~~
 
-Before the FlexRay controller can be used and participate in the FlexRay communication cycles,
-it must be configured, and then a Startup phase must take place at the beginning of the simulation.
+Before the FlexRay controller can be used and participate in FlexRay communication cycles,
+it must be configured and a startup phase must take place at the beginning of the simulation.
 
 Configuration
 _____________
@@ -124,7 +123,7 @@ The two participants responsible for startup are also called coldstart nodes. Th
   // The leading controllers FlexrayPocState will change from
   // Ready to Wakeup triggering the PocStatusHandler.
 
-The response of the following cold startnode must be the |AllowColdstart| and |Run| command that can be send in the 
+The response of the following coldstart node must be the |AllowColdstart| and |Run| command that can be send in the 
 WakeupHandler callback::
 
   void WakeupHandler(IFlexrayController* controller, const FlexraySymbolEvent& symbol)
@@ -189,7 +188,7 @@ by the FlexRay controller whenever a |FlexrayFrameEvent| is received::
 
 .. _sec:poc-status-changes:
 
-Receiving POC status changes
+Receiving POC Status Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The protocol operation control (POC) status is a structure consisting of status variables, substates and flags. It is 
@@ -232,7 +231,7 @@ handlers added with a call to |AddPocStatusHandler|::
 
 The handler will be invoked whenever the controller's POC status is updated.
 
-Managing the event handlers
+Managing the Event Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adding a handler will return a |HandlerId| which can be used to remove the handler via:

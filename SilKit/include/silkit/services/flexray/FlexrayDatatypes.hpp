@@ -345,16 +345,16 @@ struct FlexrayHeader
         PPIndicator = 1 << 3
     };
 
-    //! Convenience helper to check if a Flag is set
+    //! Convenience helper to check if a HeaderFlag is set
     inline bool IsSet(HeaderFlag flag) const;
 
-    //! Convenience helper to set a Flag
+    //! Convenience helper to set a HeaderFlag
     inline void Set(HeaderFlag flag);
 
-    //! Convenience helper to clear a Flag
+    //! Convenience helper to clear a HeaderFlag
     inline void Clear(HeaderFlag flag);
 
-    //! Convenience helper to set or clear a Flag according to a condition
+    //! Convenience helper to set or clear a HeaderFlag according to a condition
     inline void Set(HeaderFlag flag, bool condition);
 };
 

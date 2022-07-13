@@ -725,7 +725,7 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolHandler_t)(SilK
 /*! \brief Notification that the controller has sent a symbol.
   *
   * Currently, the following SymbolPatterns can occur:
-  *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus, if the bus is idle.
+  *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus if the bus is idle.
   *  - Run() will cause the transmission of FlexraySymbolPattern::CasMts if configured to coldstart the bus.
   *
   * \param controller The FlexRay controller for which the callback should be registered.

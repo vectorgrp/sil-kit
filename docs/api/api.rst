@@ -1,6 +1,6 @@
-=======
+===
 API
-=======
+===
 .. |Participant| replace:: :doc:`Participant<participant>`
 .. |header| replace:: :doc:`header<header>`
 
@@ -38,8 +38,8 @@ controller interfaces.
   flexray
   ethernet
 
-Data Messages and Rpc
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Data Publish/Subscribe and RPC
+~~~~~~~~~~~~~~~~~~~~~
 
 These services do not model a real-world bus and can be used for
 generic programming and interoperability tasks.
@@ -47,7 +47,7 @@ generic programming and interoperability tasks.
 .. toctree::
   :maxdepth: 1
   
-  datamessage
+  pubsub
   rpc
 
 State Handling and Synchronization
@@ -64,10 +64,10 @@ management.
   systemcontroller
   systemmonitor
 
-C-API
-------------------------------------
+C API
+-----
 
-The Vector SIL Kit provides an additional C API, that allows to use the Vector SIL Kit directly
+The SIL Kit provides an additional API that allows to use the SIL Kit directly
 with the C programming language:
 
 .. toctree::

@@ -32,7 +32,7 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
     try
     {
         auto result = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
-        std::cout << "Publisher: result: " << result << std::endl;
+        std::cout << "Publisher: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)
     {
@@ -45,7 +45,7 @@ void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
     auto participant = SilKit::CreateParticipant(config, "SubscriberParticipant", registryUri);
     auto* subscriber = participant->CreateDataSubscriber(
         "DataService", "TestTopic", "text/plain", {},
-        [](ib::sim::data::IDataSubscriber* subscriber, const ib::sim::data::DataMessageEvent& dataMessageEvent) {
+        [](auto* subscriber, const auto& dataMessageEvent) {
             std::string message{ dataMessageEvent.data.begin(), dataMessageEvent.data.end() };
             std::cout << " <- Received data=\"" << message << "\"" << std::endl;
         });
@@ -62,7 +62,7 @@ void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
     try
     {
         auto result = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
-        std::cout << "Subscriber: result: " << result << std::endl;
+        std::cout << "Subscriber: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)
     {

@@ -12,7 +12,8 @@ System Controller
 Using the System Controller
 -------------------------------
 
-Each participant has access to the system controller and is able to initiate a new system state.
+The system controller API can be used to control the simulation flow such as starting and stoping a simulation.
+Each participant has access to the system controller API and is able to initiate a new system state.
 But the simpler alternative is rather that one participant is solely responsible for using
 the System Controller, so that no erroneous state changes occur and the transitions remain clear.
 
@@ -25,7 +26,7 @@ the System Controller, so that no erroneous state changes occur and the transiti
 Before the system controller can be used to initiate state transisitions, 
 :cpp:func:`SetWorkflowConfiguration()<SilKit::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>` must be called
 with a :cpp:class:`WorkflowConfiguration<SilKit::Services::Orchestration::WorkflowConfiguration>` containing the set of 
-required participants within the simulation.
+required participants within the simulation. This set of required participants must contain all participants that take part in the simulation.
 
 Initiate state transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,7 +38,7 @@ the participant states will progress automatically either to :cpp:enumerator:`Pa
 (for coordinated participants) or :cpp:enumerator:`ParticipantState::Running<SilKit::Services::Orchestration::Running>`  (for non-coordinated participants).
 
 Once all required participants reached at least :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>` 
-(and therefore the system is in :cpp:enumerator:`SystemState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>`, the next transition can be initiated
+(and therefore the system is in :cpp:enumerator:`SystemState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>`), the next transition can be initiated
 by calling the :cpp:func:`Run()<SilKit::Services::Orchestration::ISystemController::Run()>` command::
 
   // Initiate state transition from ReadyToRun to Running for all coordinated participants.
