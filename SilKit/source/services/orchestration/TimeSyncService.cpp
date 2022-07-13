@@ -97,7 +97,6 @@ public:
         , _participant(participant)
         , _configuration(configuration)
     {
-        _configuration->SetBlockingMode(true);
     }
 
     void Initialize() override
