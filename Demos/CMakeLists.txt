@@ -9,11 +9,11 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(_is_standalone FALSE)
 if(NOT TARGET SilKit)
-    #assuming we are standalone but still within the original distribution directory layout
-    #so the source release should be located in ../${INSTALL_SOURCE_DIR}
+    # Assuming we are standalone but still within the original distribution directory layout
+    # so the source release should be located in ../${INSTALL_SOURCE_DIR}
     message(STATUS "<-> no SilKit-Library target found. working in distribution mode")
     message(STATUS "<-> using deployed SIL Kit")
-    #NB: as of SILKIT 3.0.2 FMT is optional
+    # NB: As of SIL Kit 3.0.2, FMT is optional
     include(
         ${CMAKE_CURRENT_LIST_DIR}/../SilKit-Source/ThirdParty/fmt.cmake
         OPTIONAL)
@@ -76,13 +76,13 @@ function(make_silkit_demo executableName demoSourceFile)
         RUNTIME_OUTPUT_DIRECTORY "${_DEMO_OUTPUT_DIR}"
         )
 
-	foreach(_build_type ${CMAKE_CONFIGURATION_TYPES})
-		string( TOUPPER ${_build_type} _build_type )
-		set_target_properties(${executableName} PROPERTIES
-			"RUNTIME_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}"
-			"LIBRARY_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}"
-			"ARCHIVE_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}")
-	endforeach()
+    foreach(_build_type ${CMAKE_CONFIGURATION_TYPES})
+        string( TOUPPER ${_build_type} _build_type )
+        set_target_properties(${executableName} PROPERTIES
+            "RUNTIME_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}"
+            "LIBRARY_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}"
+            "ARCHIVE_OUTPUT_DIRECTORY_${_build_type}" "${_DEMO_OUTPUT_DIR}")
+    endforeach()
 
     find_package(Threads)
     target_link_libraries(${executableName}
