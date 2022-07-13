@@ -1,4 +1,3 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
 auto participant1 = SilKit::CreateParticipant(config, participantName1, registryUri);
@@ -15,7 +14,6 @@ systemMonitor->RegisterParticipantStatusHandler(participantStatusHandler);
 auto systemStateHandler =
     [](SystemState state) {};
 systemMonitor->RegisterSystemStateHandler(systemStateHandler);
-
 
 // ------------------------------------------------------------
 // Transition from Invalid to ServicesCreated.

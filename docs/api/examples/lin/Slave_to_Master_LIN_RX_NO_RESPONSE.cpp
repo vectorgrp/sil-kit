@@ -1,4 +1,3 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Slave Setup
 LinControllerConfig slaveConfig;

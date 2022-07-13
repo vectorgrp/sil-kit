@@ -40,16 +40,15 @@ Using the Ethernet Controller
 -----------------------------
 
 The Ethernet Service API provides an Ethernet bus abstraction through the |IEthernetController| interface.
-An Ethernet controller is created by calling |CreateEthernetController| given a controller name and (optional) network 
+An Ethernet controller is created by calling |CreateEthernetController| given a controller name and network 
 name::
 
   auto* ethernetController = participant->CreateEthernetController("Eth1", "Eth");
 
-Ethernet controllers will only communicate within the same network. If no network name is provided, the controller name
-will be used as the network name.
+Ethernet controllers will only communicate within the same network.
 
 Initialization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 The Ethernet controller first has to call |Activate| before being able to
 send frames. Note that |Activate| can be called in the CommunicationReadyHandler of a LifecycleService.
@@ -123,7 +122,7 @@ an Ethernet frame is received::
   };
   ethernetController->AddFrameHandler(frameHandler);
 
-Managing the event handlers
+Managing the Event Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Adding a handler will return a |HandlerId| which can be used to remove the handler via:
@@ -138,8 +137,8 @@ ________
 Switches can be used in a detailed simulation. 
 Refer to the documentation of the network simulator for further information.
 
-Receive State Change Events
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Receiving State Change Events
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To receive state changes of an Ethernet 
 controller, a ``StateChangeHandler`` must be registered using |AddStateChangeHandler|::
@@ -151,12 +150,12 @@ controller, a ``StateChangeHandler`` must be registered using |AddStateChangeHan
   ethernetController->AddStateChangeHandler(stateChangedHandler);
 
 Acknowledgements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 When sending frames, the |EthernetTransmitStatus| of the |EthernetFrameTransmitEvent| received in the
 ``FrameTransmitHandler`` will be one of the following values:
 
-- |Transmitted|: Successful transmission.
+- |Transmitted|: Transmission was successful.
 - |ControllerInactive|: The sending Ethernet controller tried to send a frame before |Activate| was called.
 - |LinkDown|: |Activate| has been called but the link to another Ethernet Controller has not yet been established.
 - |Dropped|: Indicates a transmit queue overflow.
@@ -207,7 +206,7 @@ Assumptions:
 - All Ethernet controllers are connected to the same switch.
 
 Simple Ethernet Sender / Receiver Example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from one Ethernet controller to another. 
 
@@ -215,9 +214,8 @@ This example shows a successful data transfer from one Ethernet controller to an
    examples/eth/ETH_Sender_Receiver.cpp
    :language: cpp
 
-
 State Transition Example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows the possible state transitions for an Ethernet controller.
 
@@ -226,8 +224,8 @@ This example shows the possible state transitions for an Ethernet controller.
    :language: cpp
 
 
-Erroneous Transmissions (detailed simulation only)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Erroneous Transmissions (Detailed Simulation only)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows different possible erroneous Ethernet transmissions.
 

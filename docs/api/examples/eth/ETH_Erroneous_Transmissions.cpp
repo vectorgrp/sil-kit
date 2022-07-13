@@ -1,4 +1,3 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Receiver Setup
 ethernetReceiver->Activate();
@@ -32,7 +31,6 @@ ethernetSender->SendFrame(frame);
 sender_FrameTransmitHandler(ethernetSender, frameTransmitEvent);
 // with frameTransmitEvent.status == EthernetTransmitStatus::ControllerInactive
 
-
 // ------------------------------------------------------------
 // Erroneous Transmission: EthernetTransmitStatus::LinkDown
 ethernetSender->Activate();
@@ -54,7 +52,6 @@ for (auto i = 0; i < 50; i++)
 // Sending 50 messages directly one after the other will call the registered sender_MessageAckHandler
 // positively with some EthernetTransmitStatus::Transmitted until the transmit queue overflows
 // and the Ethernet messages are acknowledged with status EthernetTransmitStatus::Dropped.
-
 
 // ------------------------------------------------------------
 // Erroneous Transmission: EthernetTransmitStatus::InvalidFrameFormat

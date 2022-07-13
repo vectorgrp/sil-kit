@@ -1,4 +1,3 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Setup of the Participants
 auto participant1 = SilKit::CreateParticipant(config, participantName1, registryUri);
@@ -52,11 +51,11 @@ auto status1 = lifecycleService1 -> StartLifecycleWithSyncTime(timeSyncService1,
 auto status2 = lifecycleService2 -> StartLifecycleWithSyncTime(timeSyncService2, true, true);
 
 // As soon as all participants are in ParticipantState::ServicesCreated, the system transitions to SystemState::ServicesCreated
-// and the systemController calls Run() to start the simulation.
+// and the SystemController calls Run() to start the simulation.
 std::this_thread::sleep_for(5s); //give the system some time to run
 // ------------------------------------------------------------
 // Stopping the simulation (Transition from SystemState::Running to SystemState::Stopped).
 systemController->Stop();
 
-// As soon as all participants did stop the simulation and the system is in SystemState::Stopped,
-// the systemController calls the final Shutdown() command.
+// As soon as all participants stopped the simulation and the system is in SystemState::Stopped,
+// the SystemController calls the final Shutdown() command.

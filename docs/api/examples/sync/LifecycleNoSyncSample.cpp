@@ -1,15 +1,14 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
 auto participant = SilKit::CreateParticipant(config, participantName, registryUri);
 auto* lifecycleService = participant->GetLifecycleService();
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
 canController->AddFrameTransmitHandler(
 	[](Can::ICanController* /*ctrl*/, const Can::CanFrameTransmitEvent& ack) {
-		//async handle transmit status
+		// Asynchroneously handle transmit status
 });
 canController->AddFrameHandler(
 	[](Can::ICanController* /*ctrl*/, const Can::CanFrameEvent& frameEvent) {
-		//async handle message reception
+		// Asynchroneously handle message reception
 });
 
 // Set an Init Handler

@@ -50,13 +50,12 @@ Using the CAN Controller
 -------------------------
 
 The CAN Service API provides a CAN bus abstraction through the |ICanController| interface.
-A CAN controller is created by calling |CreateCanController| given a controller name and (optional) network 
+A CAN controller is created by calling |CreateCanController| given a controller name and network 
 name::
 
   auto* canController = participant->CreateCanController("CAN1", "CAN");
 
-CAN controllers will only communicate within the same network. If no network name is provided, the controller name
-will be used as the network name.
+CAN controllers will only communicate within the same network.
 
 Sending CAN Frames
 ~~~~~~~~~~~~~~~~~~
@@ -70,13 +69,13 @@ with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlags|
   canFrame.ide = 0;  // Identifier Extension
   canFrame.rtr = 0;  // Remote Transmission Request
   canFrame.fdf = 0;  // FD Format Indicator
-  canFrame.brs = 1;  // Bit Rate Switch  (for FD Format only)
+  canFrame.brs = 1;  // Bit Rate Switch (for FD Format only)
   canFrame.esi = 0;  // Error State indicator (for FD Format only)
   canFrame.dataField = {'d', 'a', 't', 'a', 0, 1, 2, 3};
 
   canController.SendFrame(canFrame);
 
-Transmission acknowledgement
+Transmission Acknowledgement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To be notified of the success or failure of the transmission, a ``FrameTransmitHandler`` can be registered using
@@ -106,11 +105,11 @@ frame, a timestamp and the actual |CanFrame|. The handler is called whenever a |
   };
   canController->AddFrameHandler(frameHandler);
 
-An optional second parameter of |AddFrameHandler| allows to specify the direction (TX, RX, TX/RX) of the CanFrames to be
-received. By default, only frames of the direction RX are handled.
+An optional second parameter of |AddFrameHandler| allows to specify the direction (TX, RX, TX/RX) of the CAN frames to be
+received. By default, only frames of RX direction are handled.
 
-Receive state change events
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Receiving State Change Events
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To receive changes of the |CanControllerState|,
 a ``StateChangeHandler`` must be registered using |AddStateChangeHandler|::
@@ -126,9 +125,9 @@ Similarly, changes in the |CanErrorState| can be tracked with |AddErrorStateChan
 Initialization
 ~~~~~~~~~~~~~~
 
-Before one can use a CAN controller, its baud rate must be set by passing it to |SetBaudRate|.
-Furthermore, the CAN controller has to be started explicitly by calling 
-|Start| before using it. Additional control commands are |Stop| and |Reset|. 
+A CAN controller's baud rate must first be configured by passing a value to |SetBaudRate|.
+Then, the controller must be started explicitly by calling |Start|. Now the controller can be used. 
+Additional control commands are |Stop| and |Reset|. 
 
 The following example configures a CAN controller with a baud rate of 10'000 baud for regular CAN messages and a baud 
 rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
@@ -142,10 +141,10 @@ rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
    :cpp:func:`communication ready handler<SilKit::Core::synd::ILifecycleService::SetCommunicationReadyHandler()>`. Otherwise, it is not guaranteed 
    that all participants are already connected, which can cause the call to have no effect.
 
-Managing the event handlers
+Managing the Event Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Adding a handler will return a |HandlerId| which can be used to remove the handler via:
+Adding a handler will return a |HandlerId|. This ID can be used to remove the handler via:
 
 - |RemoveFrameTransmitHandler|  
 - |RemoveStateChangeHandler|
@@ -153,14 +152,14 @@ Adding a handler will return a |HandlerId| which can be used to remove the handl
 - |RemoveFrameHandler|
 
 API and Data Type Reference
---------------------------------------------------
+---------------------------
 CAN Controller API
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: SilKit::Services::Can::ICanController
    :members:
 
 Data Structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 .. doxygenstruct:: SilKit::Services::Can::CanFrame
    :members:
 .. doxygenstruct:: SilKit::Services::Can::CanFrameEvent
@@ -173,7 +172,7 @@ Data Structures
    :members:
 
 Enumerations and Typedefs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. doxygenenum:: SilKit::Services::Can::CanControllerState
 .. doxygenenum:: SilKit::Services::Can::CanErrorState
@@ -181,7 +180,7 @@ Enumerations and Typedefs
 .. doxygentypedef:: SilKit::Services::Can::CanTxId
 
 Usage Examples
-----------------------------------------------------
+--------------
 
 This section contains complete examples that show the usage of the CAN controller and the interaction of two or more 
 controllers. Although the CAN controllers would typically belong to different participants and reside in different
@@ -193,7 +192,7 @@ Assumptions:
 - All CAN controllers use the same CAN network.
 
 Simple CAN Sender / Receiver Example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from one CAN controller to another CAN controller connected on the same 
 CAN network.

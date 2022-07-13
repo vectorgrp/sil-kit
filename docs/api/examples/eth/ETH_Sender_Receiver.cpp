@@ -1,4 +1,3 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
 // ------------------------------------------------------------
 // Receiver Setup
 // Register FrameHandler to receive Ethernet messages.
