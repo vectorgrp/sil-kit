@@ -40,6 +40,12 @@ public:
     using std::runtime_error::runtime_error;
 };
 
+//!< AssertionError is a replacement for cassert's assert.
+class AssertionError: public std::runtime_error
+{
+public:
+    using std::runtime_error::runtime_error;
+};
  
 //! \brief ExtensionError is thrown when an extension could not be loaded
 class ExtensionError : public std::runtime_error

@@ -18,6 +18,7 @@
 #include "Filesystem.hpp"
 #include "SetThreadName.hpp"
 #include "Uri.hpp"
+#include "Assert.hpp"
 
 using namespace std::chrono_literals;
 namespace fs = SilKit::Filesystem;
@@ -297,7 +298,7 @@ void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
 
 void VAsioConnection::JoinDomain(std::string connectUri)
 {
-    assert(_logger);
+    SILKIT_ASSERT(_logger);
 
     if (_config.middleware.enableDomainSockets)
     {
@@ -627,7 +628,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
             _hashToParticipantName.insert({SilKit::Util::Hash::Hash(peerUri.participantName), peerUri.participantName});
         if (result.second == false)
         {
-            assert(false);
+            SILKIT_ASSERT(false);
         }
 
 

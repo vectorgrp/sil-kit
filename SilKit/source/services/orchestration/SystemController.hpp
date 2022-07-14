@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include <cassert>
 
 #include "silkit/services/orchestration/ISystemController.hpp"
 
 #include "IMsgForSystemController.hpp"
 #include "IParticipantInternal.hpp"
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -69,7 +69,7 @@ private:
 template <class MsgT>
 void SystemController::SendMsg(MsgT&& msg) const
 {
-    assert(_participant);
+    SILKIT_ASSERT(_participant);
     _participant->SendMsg(this, std::forward<MsgT>(msg));
 }
 

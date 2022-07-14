@@ -2,7 +2,6 @@
 
 #pragma once
 #include <string>
-#include <cassert>
 #include <sstream>
 #include <map>
 

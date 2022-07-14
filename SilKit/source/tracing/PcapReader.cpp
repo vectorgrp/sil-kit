@@ -4,6 +4,7 @@
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
 #include "Pcap.hpp"
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace tracing {
@@ -111,7 +112,7 @@ void PcapReader::Reset()
         }
     }
 
-    assert(_stream != nullptr);
+    SILKIT_ASSERT(_stream != nullptr);
 
     //seek stream to first packet and cache first message
     ReadGlobalHeader();

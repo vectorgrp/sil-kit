@@ -1,6 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include <cassert>
 #include <future>
 
 #include "silkit/services/logging/ILogger.hpp"
@@ -9,6 +8,7 @@
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
 #include "SynchronizedHandlers.hpp"
+#include "Assert.hpp"
 
 using namespace std::chrono_literals;
 
@@ -330,14 +330,14 @@ void TimeSyncService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& c
 {
     if (command.kind == SystemCommand::Kind::Run && _timeSyncConfigured)
     {
-        assert(_timeSyncPolicy);
+        SILKIT_ASSERT(_timeSyncPolicy);
         _timeSyncPolicy->RequestInitialStep();
     }
 }
 
 void TimeSyncService::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
-    assert(_simTask);
+    SILKIT_ASSERT(_simTask);
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
 
     _waitTimeMonitor.StopMeasurement();

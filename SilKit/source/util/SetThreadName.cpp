@@ -1,7 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "SetThreadName.hpp"
-#include <cassert>
+#include "Assert.hpp"
 
 #if _WIN32
 #include <windows.h> // HANDLE, PCWSTR
@@ -54,7 +54,7 @@ void SetThreadName(const std::string& threadName)
         std::wstring threadnameW = ToWString(threadName.c_str());
         HRESULT      hr = (*sSetThreadDescriptionProc)(threadHandle, threadnameW.c_str());
         (void)hr;
-        assert(SUCCEEDED(hr));
+        SILKIT_ASSERT(SUCCEEDED(hr));
     }
 }
 
@@ -63,14 +63,14 @@ void SetThreadName(const std::string& threadName)
 void SetThreadName(const std::string& threadName)
 {
     // NB: On Linux the length of a thread name is restricted to 16 characters including the terminating null byte.
-    assert(threadName.size() < 16);
+    SILKIT_ASSERT(threadName.size() < 16);
 
     pthread_t thisThread = pthread_self();
 
     int rc = pthread_setname_np(thisThread, threadName.c_str());
     // The function pthread_setname_np fails if the length of the specified name exceeds the allowed
     // limit. (16 characters including the terminating null byte)
-    assert(rc == 0); 
+    SILKIT_ASSERT(rc == 0); 
     (void)rc;
 }
 

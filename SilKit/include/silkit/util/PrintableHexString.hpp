@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <limits>
 #include <iomanip>
 #include <ostream>
@@ -38,8 +37,6 @@ public:
 
     inline void to_ostream(std::ostream& out) const
     {
-        assert(_maxLength <= _iterable.end() - _iterable.begin());
-
         if (_maxLength <= 0)
             return;
 

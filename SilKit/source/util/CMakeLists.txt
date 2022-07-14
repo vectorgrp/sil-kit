@@ -25,6 +25,8 @@ add_library(SilKitSetThreadName STATIC
 target_include_directories(SilKitSetThreadName
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
+target_link_libraries(SilKitSetThreadName
+    PRIVATE SilKitInterface)
 
 add_library(SilKitUuid STATIC
     UuidRandom.hpp

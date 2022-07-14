@@ -1,6 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include <cassert>
 #include <sstream>
 #include <chrono>
 #include <string>
@@ -39,6 +38,7 @@
 
 #include "MessageTracing.hpp"
 #include "UuidRandom.hpp"
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -1154,7 +1154,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
                                                   const bool publishService,
                                                   Arg&&... arg) -> ControllerT*
 {
-    assert(config.network.has_value());
+    SILKIT_ASSERT(config.network.has_value());
     return CreateController<ConfigT, ControllerT>(config, *config.network, serviceType, supplementalData,
                                                   publishService, std::forward<Arg>(arg)...);
 }

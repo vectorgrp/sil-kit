@@ -9,6 +9,7 @@
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
 #include "Uri.hpp"
+#include "Assert.hpp"
 
 using namespace asio::ip;
 
@@ -401,7 +402,7 @@ void VAsioTcpPeer::StartAsyncRead()
 
 void VAsioTcpPeer::ReadSomeAsync()
 {
-    assert(_msgBuffer.size() > 0);
+    SILKIT_ASSERT(_msgBuffer.size() > 0);
     auto* wPtr = _msgBuffer.data() + _wPos;
     auto  size = _msgBuffer.size() - _wPos;
 

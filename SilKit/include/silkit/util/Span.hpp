@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <algorithm>
 #include <vector>
 #include <array>
@@ -11,6 +10,7 @@
 #include <type_traits>
 
 #include "silkit/capi/Types.h"
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Util {
@@ -290,7 +290,10 @@ auto Span<T>::size() const -> size_t
 template <typename T>
 void Span<T>::trim_front(size_t len)
 {
-    assert(len <= _size);
+    if(!(len <= _size))
+    {
+        throw AssertionError("Span::trim_front assertion 'len <= _size' failed");
+    }
     _data += len;
     _size -= len;
 }
@@ -298,7 +301,10 @@ void Span<T>::trim_front(size_t len)
 template <typename T>
 void Span<T>::trim_back(size_t len)
 {
-    assert(len <= _size);
+    if(!(len <= _size))
+    {
+        throw AssertionError("Span::trim_back assertion 'len <= _size' failed");
+    }
     _size -= len;
 }
 

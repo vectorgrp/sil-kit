@@ -35,6 +35,7 @@
 
 #include "ProtocolVersion.hpp"
 #include "SerializedMessage.hpp"
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -73,7 +74,7 @@ public:
         std::future<void> allAcked;
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
-            assert(_pendingSubscriptionAcknowledges.empty());
+            SILKIT_ASSERT(_pendingSubscriptionAcknowledges.empty());
             _receivedAllSubscriptionAcknowledges = std::promise<void>{};
             allAcked = _receivedAllSubscriptionAcknowledges.get_future();
         }
@@ -251,7 +252,7 @@ private:
     template<class SilKitMessageT, class SilKitServiceT>
     void RegisterSilKitMsgReceiver(const std::string& networkName, SilKit::Core::IMessageReceiver<SilKitMessageT>* receiver)
     {
-        assert(_logger);
+        SILKIT_ASSERT(_logger);
 
         auto link = GetLinkByName<SilKitMessageT>(networkName);
         link->AddLocalReceiver(receiver);

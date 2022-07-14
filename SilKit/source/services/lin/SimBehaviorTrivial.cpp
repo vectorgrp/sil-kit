@@ -2,6 +2,7 @@
 
 #include "LinController.hpp"
 #include "SimBehaviorTrivial.hpp"
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -64,7 +65,7 @@ template <typename MsgT>
 void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
 {
     auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
-    assert(receivingController);
+    SILKIT_ASSERT(receivingController);
     receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 

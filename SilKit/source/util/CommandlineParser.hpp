@@ -7,7 +7,8 @@
 #include <iostream>
 #include <algorithm>
 #include <memory>
-#include <assert.h>
+
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace Util {
@@ -90,7 +91,7 @@ public:
                 }
                 else
                 {
-                    assert((*positionalArgumentIt)->Kind() == ArgumentKind::PositionalList);
+                    SILKIT_ASSERT((*positionalArgumentIt)->Kind() == ArgumentKind::PositionalList);
                     auto* positionalArgument = static_cast<PositionalList*>(positionalArgumentIt->get());
                     positionalArgument->_values.push_back(std::move(arg));
                 }

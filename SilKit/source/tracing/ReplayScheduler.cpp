@@ -2,7 +2,6 @@
 #include "ReplayScheduler.hpp"
 
 #include <string>
-#include <cassert>
 #include <chrono>
 #include <sstream>
 
@@ -14,6 +13,7 @@
 
 #include "IReplayDataController.hpp"
 #include "Tracing.hpp"
+#include "Assert.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -537,7 +537,7 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
     }
 
     const auto relativeNow = now - _startTime;
-    assert(relativeNow.count() >= 0);
+    SILKIT_ASSERT(relativeNow.count() >= 0);
     const auto relativeEnd = relativeNow + duration;
     for (auto& task : _replayTasks)
     {

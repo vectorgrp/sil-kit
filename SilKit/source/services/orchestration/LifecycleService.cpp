@@ -1,6 +1,5 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include <cassert>
 #include <future>
 
 #include "silkit/services/logging/ILogger.hpp"
