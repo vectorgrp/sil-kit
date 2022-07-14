@@ -297,7 +297,7 @@ int main(int argc, char** argv) try
     std::string participantConfigurationFilename(argv[1]);
     std::string participantName(argv[2]);
 
-    auto registryUri = "silkit://localdomain:8500";
+    auto registryUri = "silkit://localhost:8500";
     if (argc >= 4)
     {
         registryUri = argv[3];

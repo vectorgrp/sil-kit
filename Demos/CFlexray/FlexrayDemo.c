@@ -499,6 +499,7 @@ int main(int argc, char** argv)
         return 2;
     }
     memset(config, 0, sizeof(SilKit_FlexrayControllerConfig));
+    SilKit_Struct_Init(SilKit_FlexrayControllerConfig, *config);
     config->clusterParams = &clusterParams;
     config->nodeParams = &nodeParams;
 
