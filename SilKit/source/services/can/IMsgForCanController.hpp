@@ -6,6 +6,7 @@
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
+#include "WireCanMessages.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -16,8 +17,8 @@ namespace Can {
  *  Used by the Participant, implemented by the CanController
  */
 class IMsgForCanController
-    : public Core::IReceiver<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
-    , public Core::ISender<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
+    : public Core::IReceiver<WireCanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
+    , public Core::ISender<WireCanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
 {
 };
 

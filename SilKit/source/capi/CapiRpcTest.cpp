@@ -30,14 +30,13 @@ MATCHER_P(PayloadMatcher, controlPayload, "") {
 
 class MockRpcClient : public SilKit::Services::Rpc::IRpcClient {
 public:
-    MOCK_METHOD1(Call, SilKit::Services::Rpc::IRpcCallHandle*(std::vector<uint8_t> data));
-    virtual SilKit::Services::Rpc::IRpcCallHandle* Call(const uint8_t* /*data*/, std::size_t /*size*/) { return nullptr; };
+    MOCK_METHOD(SilKit::Services::Rpc::IRpcCallHandle*, Call, (SilKit::Util::Span<const uint8_t> data), (override));
 
     MOCK_METHOD1(SetCallResultHandler, void(RpcCallResultHandler handler));
 };
 class MockRpcServer : public SilKit::Services::Rpc::IRpcServer{
 public:
-    MOCK_METHOD2(SubmitResult, void(SilKit::Services::Rpc::IRpcCallHandle* callHandle, std::vector<uint8_t> resultData));
+    MOCK_METHOD(void, SubmitResult, (SilKit::Services::Rpc::IRpcCallHandle* callHandle, SilKit::Util::Span<const uint8_t> resultData), (override));
 
     MOCK_METHOD1(SetCallHandler, void(RpcCallHandler handler));
 };

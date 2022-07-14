@@ -8,6 +8,7 @@
 #include "silkit/util/HandlerId.hpp"
 
 #include "Hash.hpp"
+#include "WireDataMessages.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -16,6 +17,8 @@ namespace PubSub {
 class DataSubscriberInternal;
 
 bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs);
+
+bool operator==(const WireDataMessageEvent& lhs, const WireDataMessageEvent& rhs);
 
 bool MatchMediaType(const std::string& subMediaType, const std::string& pubMediaType);
 

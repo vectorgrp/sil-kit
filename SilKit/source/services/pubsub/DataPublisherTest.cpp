@@ -24,8 +24,7 @@ using ::SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
-
-    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, DataMessageEvent&&));
+    MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const WireDataMessageEvent&), (override));
 };
 
 class DataPublisherTest : public ::testing::Test
@@ -45,24 +44,14 @@ protected:
     DataPublisher publisher;
 };
 
-TEST_F(DataPublisherTest, publish_vector)
+TEST_F(DataPublisherTest, publish)
 {
-    DataMessageEvent msg{0ns, sampleData};
+    WireDataMessageEvent msg{0ns, sampleData};
 
-    EXPECT_CALL(participant, SendMsg(&publisher, std::move(msg)))
+    EXPECT_CALL(participant, SendMsg(&publisher, msg))
         .Times(1);
 
     publisher.Publish(sampleData);
-}
-
-TEST_F(DataPublisherTest, publish_raw)
-{
-    DataMessageEvent msg{0ns, sampleData};
-
-    EXPECT_CALL(participant, SendMsg(&publisher, std::move(msg)))
-        .Times(1);
-
-    publisher.Publish(sampleData.data(), sampleData.size());
 }
 
 } // anonymous namespace

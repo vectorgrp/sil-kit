@@ -36,9 +36,14 @@ TEST_F(SimTestHarnessITest, can_demo)
 
     //Test data
     const std::string payload = "Hallo Welt";
+
+    std::vector<uint8_t> payloadBytes;
+    payloadBytes.resize(payload.size());
+    std::copy(payload.begin(), payload.end(), payloadBytes.begin());
+
     CanFrame msg;
     msg.canId = 123;
-    std::copy(payload.begin(), payload.end(), std::back_inserter(msg.dataField));
+    msg.dataField = payloadBytes;
 
     //Set up the Sending and receiving participants
     {
@@ -153,7 +158,7 @@ TEST_F(SimTestHarnessITest, can_demo)
         });
 
       canController->AddFrameHandler(
-        [&](auto, const Can::CanFrameEvent& frameEvent)
+        [&, lifecycleService](auto, const Can::CanFrameEvent& frameEvent)
         {
           if (frameEvent.userContext == nullptr)
           {

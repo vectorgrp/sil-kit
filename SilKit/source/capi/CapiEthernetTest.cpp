@@ -139,9 +139,9 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
     returnCode = SilKit_EthernetController_RemoveBitrateChangeHandler((SilKit_EthernetController*)&mockController, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    EthernetFrame referenceFrame{};
-    referenceFrame.raw = { buffer.data(), buffer.data() + buffer.size() };
-    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(referenceFrame))).Times(testing::Exactly(1));
+    WireEthernetFrame referenceFrame{};
+    referenceFrame.raw = SilKit::Util::SharedVector<uint8_t>{SilKit::Util::MakeSpan(buffer)};
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(ToEthernetFrame(referenceFrame)))).Times(testing::Exactly(1));
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, NULL);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }

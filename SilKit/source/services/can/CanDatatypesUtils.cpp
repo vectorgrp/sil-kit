@@ -20,7 +20,7 @@ bool operator==(const CanFrame& lhs, const CanFrame& rhs)
     return lhs.canId == rhs.canId 
         && lhs.flags == rhs.flags 
         && lhs.dlc == rhs.dlc 
-        && lhs.dataField == rhs.dataField;
+        && Util::ItemsAreEqual(lhs.dataField, rhs.dataField);
 }
 
 bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs)
@@ -63,7 +63,11 @@ bool operator==(const CanErrorStateChangeEvent& lhs, const CanErrorStateChangeEv
         && lhs.errorState == rhs.errorState;
 }
 
+bool operator==(const WireCanFrameEvent& lhs, const WireCanFrameEvent&rhs)
+{
+    return ToCanFrameEvent(lhs) == ToCanFrameEvent(rhs);
+}
 
-}
-}
-}
+} // namespace can
+} // namespace sim
+} // namespace ib

@@ -20,7 +20,7 @@ public:
     SimBehaviorDetailed(Core::IParticipantInternal* participant, EthController* ethController,
                        const Core::ServiceDescriptor& serviceDescriptor);
 
-    void SendMsg(EthernetFrameEvent&& msg) override;
+    void SendMsg(WireEthernetFrameEvent&& msg) override;
     void SendMsg(EthernetSetMode&& msg) override;
     void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;
     
@@ -37,7 +37,7 @@ private:
     const Core::ServiceDescriptor* _parentServiceDescriptor{nullptr};
     Core::ServiceDescriptor _simulatedLink;
     Tracer _tracer;
-    std::map<EthernetTxId, EthernetFrame> _transmittedMessages;
+    std::map<EthernetTxId, WireEthernetFrame> _transmittedMessages;
 };
 
 

@@ -145,30 +145,26 @@ public:
     void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) override;
     void RegisterLinSimulator(Services::Lin::IMsgForLinSimulator* busSim, const std::vector<std::string>& networkNames) override;
 
-    void SendMsg(const IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, Services::Can::CanFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Can::WireCanFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanConfigureBaudrate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanSetControllerMode& msg) override;
 
-    void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetFrameEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, Services::Ethernet::EthernetFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::WireEthernetFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetStatus& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Ethernet::EthernetSetMode& msg) override;
 
-    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameEvent&& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameTransmitEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameTransmitEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::WireFlexrayFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::WireFlexrayFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexraySymbolEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexraySymbolTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayCycleStartEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayHostCommand& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayControllerConfig& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Flexray::WireFlexrayTxBufferUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayPocStatusEvent& msg) override;
 
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinSendFrameRequest& msg) override;
@@ -188,8 +184,7 @@ public:
     void SendMsg(const IServiceEndpoint*, const Services::Logging::LogMsg& msg) override;
     void SendMsg(const IServiceEndpoint*, Services::Logging::LogMsg&& msg) override;
 
-    void SendMsg(const IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::PubSub::WireDataMessageEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg) override;
     void SendMsg(const IServiceEndpoint* from, Services::Rpc::FunctionCall&& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Rpc::FunctionCallResponse& msg) override;
@@ -199,30 +194,26 @@ public:
     void SendMsg(const IServiceEndpoint*, const Discovery::ServiceDiscoveryEvent& msg) override;
 
     // targeted messaging
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Can::CanFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::WireCanFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanControllerStatus& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanConfigureBaudrate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanSetControllerMode& msg) override;
 
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Ethernet::EthernetFrameEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::WireEthernetFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetStatus& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetSetMode& msg) override;
 
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameEvent&& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameTransmitEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameTransmitEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayFrameEvent& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayCycleStartEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayHostCommand& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayControllerConfig& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferUpdate& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayTxBufferUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayPocStatusEvent& msg) override;
 
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameRequest& msg) override;
@@ -242,8 +233,7 @@ public:
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Logging::LogMsg& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, Services::Logging::LogMsg&& msg) override;
 
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::DataMessageEvent& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::PubSub::DataMessageEvent&& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::WireDataMessageEvent& msg) override;
 
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCall& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCall&& msg) override;

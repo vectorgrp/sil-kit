@@ -612,15 +612,9 @@ void Participant<SilKitConnectionT>::RegisterLinSimulator(Services::Lin::IMsgFor
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::CanFrameEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Can::WireCanFrameEvent& msg)
 {
     SendMsgImpl(from, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Can::CanFrameEvent&& msg)
-{
-    SendMsgImpl(from, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -648,15 +642,9 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Ethernet::EthernetFrameEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Ethernet::WireEthernetFrameEvent& msg)
 {
     SendMsgImpl(from, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Ethernet::EthernetFrameEvent&& msg)
-{
-    SendMsgImpl(from, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -678,27 +666,15 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::WireFlexrayFrameEvent& msg)
 {
     SendMsgImpl(from, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameEvent&& msg)
-{
-    SendMsgImpl(from, std::move(msg));
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayFrameTransmitEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::WireFlexrayFrameTransmitEvent& msg)
 {
     SendMsgImpl(from, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::Flexray::FlexrayFrameTransmitEvent&& msg)
-{
-    SendMsgImpl(from, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -738,7 +714,7 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferUpdate& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Flexray::WireFlexrayTxBufferUpdate& msg)
 {
     SendMsgImpl(from, msg);
 }
@@ -792,15 +768,9 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::PubSub::WireDataMessageEvent& msg)
 {
     SendMsgImpl(from, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg)
-{
-    SendMsgImpl(from, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -892,15 +862,9 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, S
 
 // targeted messaging
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::CanFrameEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::WireCanFrameEvent& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Can::CanFrameEvent&& msg)
-{
-    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -928,15 +892,9 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Ethernet::EthernetFrameEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Ethernet::WireEthernetFrameEvent& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Ethernet::EthernetFrameEvent&& msg)
-{
-    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -958,27 +916,15 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayFrameEvent& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameEvent&& msg)
-{
-    SendMsgImpl(from, targetParticipantName, std::move(msg));
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameTransmitEvent& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayFrameTransmitEvent& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameTransmitEvent&& msg)
-{
-    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class SilKitConnectionT>
@@ -1018,7 +964,7 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferUpdate& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayTxBufferUpdate& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }
@@ -1073,16 +1019,9 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
-                                              const Services::PubSub::DataMessageEvent& msg)
+                                              const Services::PubSub::WireDataMessageEvent& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName,
-                                              Services::PubSub::DataMessageEvent&& msg)
-{
-    SendMsgImpl(from, targetParticipantName, std::move(msg));
 }
 
 template <class SilKitConnectionT>

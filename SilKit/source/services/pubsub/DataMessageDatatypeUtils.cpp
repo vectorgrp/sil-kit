@@ -8,7 +8,12 @@ namespace PubSub {
 
 bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs)
 {
-    return lhs.data == rhs.data;
+    return Util::ItemsAreEqual(lhs.data, rhs.data);
+}
+
+bool operator==(const WireDataMessageEvent& lhs, const WireDataMessageEvent& rhs)
+{
+    return ToDataMessageEvent(lhs) == ToDataMessageEvent(rhs);
 }
 
 bool MatchMediaType(const std::string& subMediaType, const std::string& pubMediaType)

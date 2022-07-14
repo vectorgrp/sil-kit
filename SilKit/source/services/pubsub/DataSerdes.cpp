@@ -6,24 +6,27 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const DataMessageEvent& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireDataMessageEvent& msg)
 {
     buffer << msg.data
            << msg.timestamp;
     return buffer;
 }
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, DataMessageEvent& msg)
+
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireDataMessageEvent& msg)
 {
     buffer >> msg.data
            >> msg.timestamp;
     return buffer;
 }
-void Serialize(SilKit::Core::MessageBuffer& buffer, const DataMessageEvent& msg)
+
+void Serialize(SilKit::Core::MessageBuffer& buffer, const WireDataMessageEvent& msg)
 {
     buffer << msg;
     return;
 }
-void Deserialize(SilKit::Core::MessageBuffer& buffer, DataMessageEvent& out)
+
+void Deserialize(SilKit::Core::MessageBuffer& buffer, WireDataMessageEvent& out)
 {
     buffer >> out;
 }

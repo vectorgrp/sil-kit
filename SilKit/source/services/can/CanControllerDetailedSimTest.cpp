@@ -32,7 +32,7 @@ using ::SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanFrameEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const WireCanFrameEvent&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanFrameTransmitEvent&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanConfigureBaudrate&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const CanSetControllerMode&));
@@ -57,13 +57,13 @@ TEST(CanControllerDetailedSimTest, send_can_message)
     canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    CanFrameEvent testFrameEvent{};
+    WireCanFrameEvent testFrameEvent{};
     testFrameEvent.transmitId = 1;
 
     EXPECT_CALL(mockParticipant, SendMsg(&canController, testFrameEvent))
         .Times(1);
 
-    canController.SendFrame(testFrameEvent.frame);
+    canController.SendFrame(ToCanFrame(testFrameEvent.frame));
 }
 
 TEST(CanControllerDetailedSimTest, receive_can_message)
@@ -81,10 +81,10 @@ TEST(CanControllerDetailedSimTest, receive_can_message)
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
     canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
 
-    CanFrameEvent testFrameEvent{};
+    WireCanFrameEvent testFrameEvent{};
     testFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
 
-    EXPECT_CALL(callbackProvider, FrameHandler(&canController, testFrameEvent))
+    EXPECT_CALL(callbackProvider, FrameHandler(&canController, ToCanFrameEvent(testFrameEvent)))
         .Times(1);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
@@ -247,7 +247,7 @@ TEST(CanControllerDetailedSimTest, must_not_generate_ack)
     canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    CanFrameEvent msg{};
+    WireCanFrameEvent msg{};
     EXPECT_CALL(mockParticipant, SendMsg(An<const IServiceEndpoint*>(), A<const CanFrameTransmitEvent&>()))
         .Times(0);
 

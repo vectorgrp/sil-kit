@@ -3,9 +3,9 @@
 #pragma once
 
 #include <chrono>
-#include <vector>
 
 #include "silkit/services/datatypes.hpp"
+#include "silkit/util/Span.hpp"
 
 // ================================================================================
 //  CAN specific data types
@@ -31,7 +31,7 @@ struct CanFrame
         uint8_t esi : 1; //!< Error State indicator (for FD Format only)
     } flags; //!< CAN Arbitration and Control Field Flags
     uint8_t dlc : 4; //!< Data Length Code - determined by a network simulator
-    std::vector<uint8_t> dataField; //!< The raw CAN data field
+    Util::Span<const uint8_t> dataField; //!< The raw CAN data field
 };
 
 /*! \brief The event of an incoming CAN frame including transmit ID, timestamp and the actual frame
@@ -41,7 +41,7 @@ struct CanFrameEvent
     CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
     std::chrono::nanoseconds timestamp; //!< Send time
     CanFrame frame; //!< The incoming CAN Frame
-    TransmitDirection direction{TransmitDirection::Undefined}; //!< Receive/Transmit direction
+    TransmitDirection direction; //!< Receive/Transmit direction
     void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
@@ -92,15 +92,6 @@ enum class CanErrorState : uint8_t
   BusOff = 3,
 };
 
-/*! \brief The CAN controller status, sent to the controller
- */
-struct CanControllerStatus
-{
-    std::chrono::nanoseconds timestamp; //!< Timestamp of the status change
-    CanControllerState controllerState; //!< General State of the CAN controller
-    CanErrorState errorState; //!< State of Error Handling
-};
-
 using  CanTransmitStatusMask = uint16_t;
 /*! \brief Transfer status of a CAN node according to CAN specification
  */
@@ -136,26 +127,6 @@ struct CanFrameTransmitEvent
     std::chrono::nanoseconds timestamp; //!< Timestamp of the CAN acknowledge.
     CanTransmitStatus status; //!< Status of the CanTransmitRequest.
     void* userContext; //!< Optional pointer provided by user when sending the frame
-};
-
-/*! \brief The baud rate, sent to the simulator
- */
-struct CanConfigureBaudrate
-{
-    uint32_t baudRate;   //!< Specifies the baud rate of the controller in bps (range 0..2000000).
-    uint32_t fdBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN FD(range 0..16000000).
-};
-
-/*! \brief The CAN controller mode, sent to the simulator
- */
-struct CanSetControllerMode
-{
-    struct ControllerModeFlag
-    {
-        uint8_t resetErrorHandling : 1; //!< Reset the error counters to zero and the error state to error active.
-        uint8_t cancelTransmitRequests : 1; //!< Cancel all outstanding transmit requests (flush transmit queue of controller).
-    } flags;
-    CanControllerState mode; //!< State that the CAN controller should reach.
 };
 
 /*! \brief An incoming state change event

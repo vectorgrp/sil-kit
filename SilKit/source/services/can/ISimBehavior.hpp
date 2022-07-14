@@ -16,7 +16,7 @@ public:
     virtual auto AllowReception(const Core::IServiceEndpoint* from) const -> bool = 0;
     virtual void SendMsg(CanConfigureBaudrate&& msg) = 0;
     virtual void SendMsg(CanSetControllerMode&& msg) = 0;
-    virtual void SendMsg(CanFrameEvent&& msg) = 0;
+    virtual void SendMsg(WireCanFrameEvent&& msg) = 0;
 };
 
 } // namespace Can

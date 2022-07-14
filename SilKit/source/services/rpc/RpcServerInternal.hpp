@@ -30,7 +30,7 @@ public:
 
     void SetRpcHandler(RpcCallHandler handler);
 
-    void SubmitResult(IRpcCallHandle* callHandlePtr, const std::vector<uint8_t>& resultData);
+    void SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<const uint8_t> resultData);
 
     //! \brief Accepts messages originating from SIL Kit communications.
     void ReceiveMsg(const Core::IServiceEndpoint* from, const FunctionCall& msg) override;

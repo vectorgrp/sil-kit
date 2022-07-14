@@ -4,6 +4,7 @@
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
+#include "WireRpcMessages.hpp"
 
 #include "silkit/services/rpc/fwd_decl.hpp"
 

@@ -15,8 +15,8 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
     using namespace SilKit::Services::Ethernet;
     SilKit::Core::MessageBuffer buffer;
 
-    EthernetFrameEvent in;
-    EthernetFrameEvent out;
+    WireEthernetFrameEvent in;
+    WireEthernetFrameEvent out;
 
     EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
     EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
@@ -32,7 +32,7 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
 
     EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
-    ASSERT_THAT(in.frame.raw, testing::ContainerEq(out.frame.raw));
+    ASSERT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.raw.AsSpan(), out.frame.raw.AsSpan()));
 }
 
 TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)

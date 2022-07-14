@@ -11,15 +11,16 @@
 #include <stdexcept>
 #include <map>
 
-#include "silkit/util/vector_view.hpp"
+#include "silkit/util/Span.hpp"
 
 #include "ProtocolVersion.hpp"
+#include "SharedVector.hpp"
 
 namespace SilKit {
 namespace Core {
 
 // The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
-struct end_of_buffer : public std::exception {};    
+struct end_of_buffer : public std::exception {};
 
 
 class MessageBuffer
@@ -48,7 +49,7 @@ public:
     // Public methods for backward compatibility.
 
     // peek into raw data, e.g. for retrieving headers without modifying the buffer
-    inline auto PeekData() const  -> SilKit::Util::vector_view<const uint8_t>;
+    inline auto PeekData() const  -> SilKit::Util::Span<const uint8_t>;
     inline auto ReadPos() const -> size_t;
 
     //! Set the format version to use for ser/des.
@@ -77,7 +78,7 @@ public:
             _storage.resize(_storage.size() + sizeof(IntegerT));
         }
         std::memcpy(_storage.data() + _wPos, &t, sizeof(IntegerT));
-        
+
         _wPos += sizeof(IntegerT);
 
         return *this;
@@ -158,6 +159,12 @@ public:
     template<typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
+    // ib::util::SharedVector<T>
+    template <typename ValueT>
+    inline MessageBuffer& operator<<(const Util::SharedVector<ValueT>& sharedData);
+    template <typename ValueT>
+    inline MessageBuffer& operator>>(Util::SharedVector<ValueT>& sharedData);
+    // --------------------------------------------------------------------------------
     // std::array<uint8_t, SIZE>
     template<size_t SIZE>
     inline MessageBuffer& operator<<(const std::array<uint8_t, SIZE>& array);
@@ -185,7 +192,7 @@ public:
     inline MessageBuffer& operator>>(void*& t);
 
     // --------------------------------------------------------------------------------
-    // std::map<string,string> 
+    // std::map<string,string>
     inline MessageBuffer& operator<<(const std::map<std::string, std::string>& msg);
     inline MessageBuffer& operator>>(std::map<std::string, std::string>& updatedMsg);
 
@@ -320,6 +327,40 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<ValueT>& vector)
 }
 
 // --------------------------------------------------------------------------------
+// ib::util::SharedVector<T>
+
+template <typename ValueT>
+inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedVector<ValueT>& sharedData)
+{
+    const auto span = sharedData.AsSpan();
+
+    if (span.size() > std::numeric_limits<uint32_t>::max())
+    {
+        throw end_of_buffer{};
+    }
+
+    *this << static_cast<uint32_t>(span.size());
+
+    for (auto&& value : span)
+    {
+        *this << value;
+    }
+
+    return *this;
+}
+
+template <typename ValueT>
+inline MessageBuffer& MessageBuffer::operator>>(Util::SharedVector<ValueT>& sharedData)
+{
+    std::vector<ValueT> vector;
+    *this >> vector;
+
+    sharedData = Util::SharedVector<ValueT>{std::move(vector)};
+
+    return *this;
+}
+
+// --------------------------------------------------------------------------------
 // std::array<uint8_t, SIZE>
 template<size_t SIZE>
 MessageBuffer& MessageBuffer::operator<<(const std::array<uint8_t, SIZE>& array)
@@ -432,7 +473,7 @@ inline MessageBuffer& MessageBuffer::operator>>(void*& t)
 // ...
 // 2N    STRING keyN
 // 2N+1  STRING valueN
-// 
+//
 // NB: for a generic approach we would have to encode the key type and the element type somehow
 
 inline MessageBuffer& MessageBuffer::operator<<(const std::map<std::string, std::string>& msg)
@@ -476,11 +517,11 @@ inline auto MessageBuffer::GetProtocolVersion() -> ProtocolVersion
 {
     return _protocolVersion;
 }
- 
 
-inline auto MessageBuffer::PeekData() const  -> SilKit::Util::vector_view<const uint8_t>
+
+inline auto MessageBuffer::PeekData() const  -> SilKit::Util::Span<const uint8_t>
 {
-    return SilKit::Util::make_vector_view(_storage);
+    return _storage;
 }
 inline auto MessageBuffer::ReadPos() const -> size_t
 {

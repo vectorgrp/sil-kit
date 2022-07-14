@@ -12,7 +12,7 @@
 
 namespace SilKit {
 namespace Services {
-namespace Lin { 
+namespace Lin {
 
 inline std::string to_string(LinChecksumModel model);
 inline std::string to_string(LinFrameResponseType responseType);
@@ -22,34 +22,22 @@ inline std::string to_string(LinControllerMode mode);
 inline std::string to_string(LinControllerStatus status);
 
 inline std::string to_string(const LinFrame& frame);
-inline std::string to_string(const LinSendFrameRequest& request);
-inline std::string to_string(const LinSendFrameHeaderRequest& request);
-inline std::string to_string(const LinTransmission& transmission);
-inline std::string to_string(const LinWakeupPulse& pulse);
 inline std::string to_string(const LinControllerConfig& controllerConfig);
-inline std::string to_string(const LinControllerStatusUpdate& controllerStatusUpdate);
-inline std::string to_string(const LinFrameResponseUpdate& frameResponseUpdate);
 
 inline std::ostream& operator<<(std::ostream& out, LinChecksumModel model);
 inline std::ostream& operator<<(std::ostream& out, LinFrameResponseType responseType);
 inline std::ostream& operator<<(std::ostream& out, LinFrameResponseMode responseMode);
-inline std::ostream& operator<<(std::ostream& out, LinFrameStatus frameStatus);       
-inline std::ostream& operator<<(std::ostream& out, LinControllerMode mode);           
+inline std::ostream& operator<<(std::ostream& out, LinFrameStatus frameStatus);
+inline std::ostream& operator<<(std::ostream& out, LinControllerMode mode);
 inline std::ostream& operator<<(std::ostream& out, LinControllerStatus status);
 
 inline std::ostream& operator<<(std::ostream& out, const LinFrame& frame);
-inline std::ostream& operator<<(std::ostream& out, const LinSendFrameRequest& request);
-inline std::ostream& operator<<(std::ostream& out, const LinSendFrameHeaderRequest& request);
-inline std::ostream& operator<<(std::ostream& out, const LinTransmission& transmission);
-inline std::ostream& operator<<(std::ostream& out, const LinWakeupPulse& pulse);
 inline std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controllerConfig);
-inline std::ostream& operator<<(std::ostream& out, const LinControllerStatusUpdate& controllerStatusUpdate);
-inline std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameResponseUpdate);
-
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
 std::string to_string(LinChecksumModel model)
 {
     switch (model)
@@ -157,56 +145,12 @@ std::string to_string(const LinFrame& frame)
     return out.str();
 }
 
-std::string to_string(const LinSendFrameRequest& request)
-{
-    std::stringstream out;
-    out << request;
-    return out.str();
-}
-
-std::string to_string(const LinSendFrameHeaderRequest& request)
-{
-    std::stringstream out;
-    out << request;
-    return out.str();
-}
-
-std::string to_string(const LinTransmission& transmission)
-{
-    std::stringstream out;
-    out << transmission;
-    return out.str();
-}
-
-std::string to_string(const LinWakeupPulse& pulse)
-{
-    std::stringstream out;
-    out << pulse;
-    return out.str();
-}
-
 std::string to_string(const LinControllerConfig& controllerConfig)
 {
     std::stringstream out;
     out << controllerConfig;
     return out.str();
 }
-
-std::string to_string(const LinControllerStatusUpdate& controllerStatusUpdate)
-{
-    std::stringstream out;
-    out << controllerStatusUpdate;
-    return out.str();
-}
-
-std::string to_string(const LinFrameResponseUpdate& frameResponseUpdate)
-{
-    std::stringstream out;
-    out << frameResponseUpdate;
-    return out.str();
-}
-
-
 
 std::ostream& operator<<(std::ostream& out, LinChecksumModel model)
 {
@@ -219,6 +163,7 @@ std::ostream& operator<<(std::ostream& out, LinChecksumModel model)
         return out << "LinChecksumModel{" << static_cast<uint32_t>(model) << "}";
     }
 }
+
 std::ostream& operator<<(std::ostream& out, LinFrameResponseType responseType)
     {
     try
@@ -281,7 +226,7 @@ std::ostream& operator<<(std::ostream& out, LinControllerStatus status)
 
 std::ostream& operator<<(std::ostream& out, const LinFrame& frame)
 {
-    //instead of ios::copyfmt (which set badbit) we use a temporary stream 
+    //instead of ios::copyfmt (which set badbit) we use a temporary stream
     std::stringstream buf;
     buf
         << "Lin::LinFrame{id=" << static_cast<uint16_t>(frame.id)
@@ -290,32 +235,6 @@ std::ostream& operator<<(std::ostream& out, const LinFrame& frame)
         << ", d={" << Util::AsHexString(frame.data).WithSeparator(" ")
         << "}}";
     return out << buf.str();
-}
-
-std::ostream& operator<<(std::ostream& out, const LinSendFrameRequest& request)
-{
-    return out
-        << "Lin::LinSendFrameRequest{fr=" << request.frame
-        << ", rt=" << request.responseType
-        << "}";
-}
-
-std::ostream& operator<<(std::ostream& out, const LinSendFrameHeaderRequest& request)
-{
-    return out << "Lin::LinSendFrameHeaderRequest{id=" << static_cast<uint16_t>(request.id) << "}";
-}
-
-std::ostream& operator<<(std::ostream& out, const LinTransmission& transmission)
-{
-    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(transmission.timestamp);
-    return out
-        << "Lin::LinTransmission{" << transmission.frame
-        << ", status=" << transmission.status
-        << ", time=" << timestamp.count() << "ms}";
-}
-std::ostream& operator<<(std::ostream& out, const LinWakeupPulse& pulse)
-{
-    return out << "Lin::LinWakeupPulse{@" << pulse.timestamp.count() << "ms}";
 }
 
 std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controllerConfig)
@@ -335,34 +254,7 @@ std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controlle
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const LinControllerStatusUpdate& controllerStatusUpdate)
-{
-    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(controllerStatusUpdate.timestamp);
-    return out
-        << "Lin::LinControllerStatusUpdate{" << controllerStatusUpdate.status
-        << " @" << timestamp.count() << "ms}";
-}
 
-std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameResponseUpdate)
-{
-    auto& responses = frameResponseUpdate.frameResponses;
-    out << "Lin::LinFrameResponseUpdate{ids=[";
-
-    if (responses.size() > 0)
-    {
-        out << static_cast<uint16_t>(responses[0].frame.id);
-        for (auto i = 1u; i < responses.size(); ++i)
-        {
-            out << "," << static_cast<uint16_t>(responses[1].frame.id);
-        }
-    }
-
-    out << "]}";
-    return out;
-}
-
-
-    
 } // namespace Lin
 } // namespace Services
 } // namespace SilKit

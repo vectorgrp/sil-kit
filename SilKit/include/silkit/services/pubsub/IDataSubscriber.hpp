@@ -3,6 +3,7 @@
 #pragma once
 
 #include "DataMessageDatatypes.hpp"
+
 #include "silkit/util/HandlerId.hpp"
 
 namespace SilKit {
@@ -11,7 +12,6 @@ namespace PubSub {
 
 class IDataSubscriber
 {
-
 public:
     virtual ~IDataSubscriber() = default;
 

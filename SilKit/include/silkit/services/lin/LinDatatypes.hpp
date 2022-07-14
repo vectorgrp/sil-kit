@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "silkit/services/datatypes.hpp"
+#include "silkit/util/Span.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -235,12 +236,12 @@ struct LinControllerConfig
      */
     LinBaudRateT baudRate{0};
     /*! Optional LinFrameResponse configuration.
-     *  
+     *
      * FrameResponses can also be configured at a later point using
      * ILinController::SetFrameResponse() and
      * ILinController::SetFrameResponses().
      */
-    std::vector<LinFrameResponse> frameResponses; 
+    std::vector<LinFrameResponse> frameResponses;
 };
 
 /*! The operational state of the controller, i.e., operational or
@@ -300,59 +301,9 @@ struct LinFrameResponseUpdateEvent
 };
 
 // ================================================================================
-//  Messages used at the Participant Interface
-// ================================================================================
-//! \brief Data type representing a finished LIN transmission, independent of success or error.
-struct LinTransmission
-{
-    std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in a detailed simulation.
-    LinFrame frame;                        //!< The transmitted frame
-    LinFrameStatus status;                 //!< The status of the transmitted frame
-};
-
-/*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
- *
- * Used internally.
- */
-struct LinSendFrameRequest
-{
-    LinFrame frame;                    //!< Provide the LIN ID, checksum model, expected data length and optional data.
-    LinFrameResponseType responseType; //!< Determines whether to provide a frame response or not.
-};
-
-/*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
-*
-* Used internally.
-*/
-struct LinSendFrameHeaderRequest
-{
-    LinIdT id; //!< The LinIdT of the header to be transmitted
-};
-
-//! \brief Data type used to inform other LIN participants about changed LinFrameResponse data.
-struct LinFrameResponseUpdate
-{
-    std::vector<LinFrameResponse> frameResponses; //!< Vector of new FrameResponses.
-};
-
-//! \brief Data type used to inform other LIN participants about changed LinControllerStatus.
-struct LinControllerStatusUpdate
-{
-    std::chrono::nanoseconds timestamp; //!< Time of the controller status change.
-    LinControllerStatus status;            //!< The new controller status
-};
-
-//! \brief Data type representing a LIN WakeUp pulse.
-struct LinWakeupPulse
-{
-    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in a detailed simulation.
-    TransmitDirection direction; //!< The direction of the wakeup pulse.
-};
-
-
-// ================================================================================
 //  Inline Implementations
 // ================================================================================
+
 //! \brief Factory method for a LinFrame representing a Go-To-Sleep signal
 inline auto GoToSleepFrame() -> LinFrame
 {
@@ -371,29 +322,6 @@ inline bool operator==(const LinFrame& lhs, const LinFrame& rhs)
         && lhs.dataLength == rhs.dataLength
         && lhs.data == rhs.data;
 }
-//! \brief operator== for LinSendFrameRequest
-inline bool operator==(const LinSendFrameRequest& lhs, const LinSendFrameRequest& rhs)
-{
-    return lhs.frame == rhs.frame
-        && lhs.responseType == rhs.responseType;
-}
-//! \brief operator== for LinSendFrameHeaderRequest
-inline bool operator==(const LinSendFrameHeaderRequest& lhs, const LinSendFrameHeaderRequest& rhs)
-{
-    return lhs.id == rhs.id;
-}
-//! \brief operator== for LinTransmission
-inline bool operator==(const LinTransmission& lhs, const LinTransmission& rhs)
-{
-    return lhs.timestamp == rhs.timestamp
-        && lhs.frame == rhs.frame
-        && lhs.status == rhs.status;
-}
-//! \brief operator== for LinWakeupPulse
-inline bool operator==(const LinWakeupPulse& lhs, const LinWakeupPulse& rhs)
-{
-    return lhs.timestamp == rhs.timestamp;
-}
 //! \brief operator== for LinFrameResponse
 inline bool operator==(const LinFrameResponse& lhs, const LinFrameResponse& rhs)
 {
@@ -406,17 +334,6 @@ inline bool operator==(const LinControllerConfig& lhs, const LinControllerConfig
     return lhs.controllerMode == rhs.controllerMode
         && lhs.baudRate == rhs.baudRate
         && lhs.frameResponses == rhs.frameResponses;
-}
-//! \brief operator== for LinControllerStatusUpdate
-inline bool operator==(const LinControllerStatusUpdate& lhs, const LinControllerStatusUpdate& rhs)
-{
-    return lhs.timestamp == rhs.timestamp
-        && lhs.status == rhs.status;
-}
-//! \brief operator== for LinFrameResponseUpdate
-inline bool operator==(const LinFrameResponseUpdate& lhs, const LinFrameResponseUpdate& rhs)
-{
-    return lhs.frameResponses == rhs.frameResponses;
 }
 
 } // namespace Lin

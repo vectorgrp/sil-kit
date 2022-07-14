@@ -47,7 +47,7 @@ SilKit_ReturnCode SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const
     CAPI_ENTER
     {
         auto cppPublisher = reinterpret_cast<SilKit::Services::PubSub::IDataPublisher*>(self);
-        cppPublisher->Publish(std::vector<uint8_t>(data->data, data->data + data->size));
+        cppPublisher->Publish(SilKit::Util::ToSpan(*data));
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

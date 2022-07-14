@@ -14,9 +14,6 @@ class IRpcClient;
 class IRpcServer;
 class IRpcCallHandle;
 
-struct FunctionCall;
-struct FunctionCallResponse;
-
 } // namespace Rpc
 } // namespace Services
 } // namespace SilKit

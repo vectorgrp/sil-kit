@@ -34,15 +34,15 @@ using namespace SilKit::Services::Ethernet;
 
 using ::SilKit::Core::Tests::DummyParticipant;
 
-auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const EthernetFrameEvent&>
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const WireEthernetFrameEvent&>
 {
-    return testing::Field(&EthernetFrameEvent::timestamp, timestamp);
+    return testing::Field(&WireEthernetFrameEvent::timestamp, timestamp);
 }
 
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameEvent&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const WireEthernetFrameEvent&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetFrameTransmitEvent&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetStatus&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetSetMode&));
@@ -153,9 +153,9 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
  */
 TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
 {
-    EthernetFrameEvent msg;
+    WireEthernetFrameEvent msg{};
 
-    EXPECT_CALL(callbacks, FrameHandler(&controller, msg))
+    EXPECT_CALL(callbacks, FrameHandler(&controller, ToEthernetFrameEvent(msg)))
         .Times(1);
 
     controller.ReceiveMsg(&controllerBusSim, msg);
@@ -181,7 +181,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
  */
 TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
 {
-    EthernetFrameEvent msg;
+    WireEthernetFrameEvent msg{};
     msg.transmitId = 17;
 
     EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), A<const EthernetFrameTransmitEvent&>()))

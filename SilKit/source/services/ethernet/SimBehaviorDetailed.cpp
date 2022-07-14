@@ -21,7 +21,7 @@ void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
     _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
 }
 
-void SimBehaviorDetailed::SendMsg(EthernetFrameEvent&& msg)
+void SimBehaviorDetailed::SendMsg(WireEthernetFrameEvent&& msg)
 {
     // We keep a copy until the transmission was acknowledged before tracing the message
     _transmittedMessages[msg.transmitId] = msg.frame;
@@ -42,14 +42,14 @@ void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
     {
         if (msg.status == EthernetTransmitStatus::Transmitted)
         {
-            _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, transmittedMsg->second);
+            _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, ToEthernetFrame(transmittedMsg->second));
         }
 
         _transmittedMessages.erase(msg.transmitId);
     }
 }
 
-auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool 
+auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool
 {
     // If simulated, only allow reception from NetSim.
     // NetSim internally sets the ServiceId of this controller and sends messages with it,

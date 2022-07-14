@@ -22,7 +22,7 @@ public:
                       Services::Orchestration::ITimeProvider* timeProvider);
 
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
-    void SendMsg(EthernetFrameEvent&& ethFrameEvent) override;
+    void SendMsg(WireEthernetFrameEvent&& ethFrameEvent) override;
     void SendMsg(EthernetSetMode&& ethFrameEvent) override;
 
     void OnReceiveAck(const EthernetFrameTransmitEvent& msg) override;

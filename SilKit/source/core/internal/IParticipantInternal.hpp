@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #pragma once
+
 #include <atomic>
 
 #include "silkit/participant/IParticipant.hpp"
@@ -8,6 +9,12 @@
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDatatypes.hpp"
+#include "WireCanMessages.hpp"
+#include "WireDataMessages.hpp"
+#include "WireEthernetMessages.hpp"
+#include "WireFlexrayMessages.hpp"
+#include "WireLinMessages.hpp"
+#include "WireRpcMessages.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -38,30 +45,26 @@ public:
     // The SendMsgs are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Can::CanFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::WireCanFrameEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanConfigureBaudrate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Can::CanSetControllerMode& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetFrameEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Ethernet::EthernetFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::WireEthernetFrameEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetFrameTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetStatus& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Ethernet::EthernetSetMode& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayFrameEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Flexray::FlexrayFrameEvent&& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayFrameTransmitEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Flexray::FlexrayFrameTransmitEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::WireFlexrayFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::WireFlexrayFrameTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexraySymbolEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexraySymbolTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayCycleStartEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayHostCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayControllerConfig& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayTxBufferUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::WireFlexrayTxBufferUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Flexray::FlexrayPocStatusEvent& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinSendFrameRequest& msg) = 0;
@@ -72,8 +75,7 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::PubSub::DataMessageEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::PubSub::DataMessageEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::PubSub::WireDataMessageEvent& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Rpc::FunctionCall& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, Services::Rpc::FunctionCall&& msg) = 0;
@@ -93,30 +95,26 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ServiceDiscoveryEvent& msg) = 0;
 
     // targeted messaging
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Can::CanFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::WireCanFrameEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanControllerStatus& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanConfigureBaudrate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanSetControllerMode& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Ethernet::EthernetFrameEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::WireEthernetFrameEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetFrameTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetStatus& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Ethernet::EthernetSetMode& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameEvent&& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayFrameTransmitEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Flexray::FlexrayFrameTransmitEvent&& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayFrameEvent& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayFrameTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexraySymbolTransmitEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayCycleStartEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayHostCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayControllerConfig& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferConfigUpdate& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayTxBufferUpdate& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::WireFlexrayTxBufferUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Flexray::FlexrayPocStatusEvent& msg) = 0;
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameRequest& msg) = 0;
@@ -127,9 +125,8 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::DataMessageEvent& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::PubSub::DataMessageEvent&& msg) = 0;
-    
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::PubSub::WireDataMessageEvent& msg) = 0;
+
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCall& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, Services::Rpc::FunctionCall&& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Rpc::FunctionCallResponse& msg) = 0;

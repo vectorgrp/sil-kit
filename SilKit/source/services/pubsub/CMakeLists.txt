@@ -19,6 +19,7 @@ target_include_directories(SilKitSimDataMessage
 )
 
 target_link_libraries(SilKitSimDataMessage
+    PUBLIC  SilKitWireData
     PRIVATE SilKitInterface
             SilKitSetThreadName
             SilKitInternal

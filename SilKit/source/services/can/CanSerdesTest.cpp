@@ -13,8 +13,8 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;
 
-    CanFrameEvent in;
-    CanFrameEvent out;
+    WireCanFrameEvent in;
+    WireCanFrameEvent out;
 
     std::string payload{"TEST"};
     in.transmitId = 5;
@@ -41,7 +41,7 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     EXPECT_EQ(in.frame.flags.brs, out.frame.flags.brs);
     EXPECT_EQ(in.frame.flags.esi, out.frame.flags.esi);
     EXPECT_EQ(in.frame.dlc, out.frame.dlc);
-    EXPECT_EQ(in.frame.dataField, out.frame.dataField);
+    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.dataField, out.frame.dataField));
     EXPECT_EQ(in.userContext, out.userContext);
 }
 

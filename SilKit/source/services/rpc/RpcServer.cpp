@@ -59,7 +59,7 @@ void RpcServer::RegisterServiceDiscovery()
         }, Core::Discovery::controllerTypeRpcClient, _functionName);
 }
 
-void RpcServer::SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData)
+void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData)
 {
     if (callHandle != nullptr)
     {

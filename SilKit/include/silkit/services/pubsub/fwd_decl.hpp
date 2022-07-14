@@ -6,11 +6,12 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-struct PublisherAnnouncement;
 struct DataMessageEvent;
 
 class IDataPublisher;
 class IDataSubscriber;
+
+struct NewDataPublisherEvent;
 
 } // namespace PubSub
 } // namespace Services

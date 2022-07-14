@@ -5,6 +5,8 @@
 #include "silkit/services/rpc/IRpcCallHandle.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
+#include "WireRpcMessages.hpp"
+
 namespace SilKit {
 namespace Services {
 namespace Rpc {

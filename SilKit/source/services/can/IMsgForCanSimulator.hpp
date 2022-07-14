@@ -5,6 +5,7 @@
 #include "IReceiver.hpp"
 #include "ISender.hpp"
 #include "IServiceEndpoint.hpp"
+#include "WireCanMessages.hpp"
 
 #include "silkit/services/can/CanDatatypes.hpp"
 
@@ -17,8 +18,8 @@ namespace Can {
  *  Used by the Participant
  */
 class IMsgForCanSimulator
-    : public Core::IReceiver<CanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
-    , public Core::ISender<CanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
+    : public Core::IReceiver<WireCanFrameEvent, CanConfigureBaudrate, CanSetControllerMode>
+    , public Core::ISender<WireCanFrameEvent, CanFrameTransmitEvent, CanControllerStatus>
 {
 public:
     ~IMsgForCanSimulator() = default;

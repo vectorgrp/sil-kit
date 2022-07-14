@@ -13,7 +13,6 @@ struct FlexrayNodeParameters;
 struct FlexrayTxBufferConfig;
 
 struct FlexrayControllerConfig;
-struct FlexrayTxBufferConfigUpdate;
 struct FlexrayTxBufferUpdate;
 
 struct FlexrayHeader;
@@ -24,10 +23,10 @@ struct FlexrayFrameTransmitEvent;
 
 struct FlexraySymbolEvent;
 struct FlexraySymbolTransmitEvent;
+struct FlexrayWakeupEvent;
 
 struct FlexrayCycleStartEvent;
 
-struct FlexrayHostCommand;
 struct FlexrayPocStatusEvent;
 
 class IFlexrayController;

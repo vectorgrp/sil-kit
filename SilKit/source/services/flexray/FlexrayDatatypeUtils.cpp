@@ -18,7 +18,7 @@ bool operator==(const FlexrayHeader& lhs, const FlexrayHeader& rhs)
 bool operator==(const FlexrayFrame& lhs, const FlexrayFrame& rhs)
 {
     return lhs.header == rhs.header
-        && lhs.payload == rhs.payload;
+        && Util::ItemsAreEqual(lhs.payload, rhs.payload);
 }
 
 bool operator==(const FlexrayFrameEvent& lhs, const FlexrayFrameEvent& rhs)
@@ -52,11 +52,11 @@ bool operator==(const FlexrayTxBufferConfigUpdate& lhs, const FlexrayTxBufferCon
         && lhs.txBufferConfig == rhs.txBufferConfig;
 }
 
-bool operator==(const FlexrayTxBufferUpdate& lhs, const FlexrayTxBufferUpdate& rhs)
+bool operator==(const WireFlexrayTxBufferUpdate& lhs, const WireFlexrayTxBufferUpdate& rhs)
 {
     return lhs.txBufferIndex == rhs.txBufferIndex
         && lhs.payloadDataValid == rhs.payloadDataValid
-        && lhs.payload == rhs.payload;
+        && Util::ItemsAreEqual(lhs.payload, rhs.payload);
 }
 
 bool operator==(const FlexrayControllerConfig& lhs, const FlexrayControllerConfig& rhs)

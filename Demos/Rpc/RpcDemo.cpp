@@ -16,13 +16,18 @@ using namespace std::chrono_literals;
 
 std::chrono::milliseconds callReturnTimeout{ 5000ms };
 
-std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
+static std::ostream& operator<<(std::ostream& os, const SilKit::Util::Span<const uint8_t>& v)
 {
     os << "[ ";
     for (auto i : v)
         os << static_cast<int>(i) << " ";
     os << "]";
     return os;
+}
+
+static std::ostream& operator<<(std::ostream& os, const std::vector<uint8_t>& v)
+{
+    return os << SilKit::Util::ToSpan(v);
 }
 
 void Call(IRpcClient* client)
@@ -57,7 +62,7 @@ void CallReturn(IRpcClient* /*cbClient*/, RpcCallResultEvent event)
 
 void RemoteFunc_Add100(IRpcServer* server, RpcCallEvent event)
 {
-    auto returnData{event.argumentData};
+    auto returnData = SilKit::Util::ToStdVector(event.argumentData);
     for (auto& v : returnData)
     {
         v += 100;
@@ -71,7 +76,7 @@ void RemoteFunc_Add100(IRpcServer* server, RpcCallEvent event)
 
 void RemoteFunc_Sort(IRpcServer* server, RpcCallEvent event)
 {
-    auto returnData{event.argumentData};
+    auto returnData = SilKit::Util::ToStdVector(event.argumentData);
     std::sort(returnData.begin(), returnData.end());
     std::cout << ">> Received call with argumentData=" << event.argumentData
               << ", returning resultData=" << returnData << std::endl;

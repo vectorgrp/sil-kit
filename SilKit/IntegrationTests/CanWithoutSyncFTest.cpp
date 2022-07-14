@@ -23,13 +23,13 @@ namespace {
 using namespace std::chrono_literals;
 
 // basically the same as the normal == operator, but it doesn't compare timestamps
-bool Matches(const SilKit::Services::Can::CanFrameEvent& lhs, const SilKit::Services::Can::CanFrameEvent& rhs)
+bool Matches(const SilKit::Services::Can::WireCanFrameEvent& lhs, const SilKit::Services::Can::WireCanFrameEvent& rhs)
 {
     return lhs.transmitId == rhs.transmitId 
         && lhs.frame.canId == rhs.frame.canId
         && lhs.frame.flags == rhs.frame.flags
         && lhs.frame.dlc == rhs.frame.dlc
-        && lhs.frame.dataField == rhs.frame.dataField
+        && SilKit::Util::ItemsAreEqual(lhs.frame.dataField, rhs.frame.dataField)
         && lhs.userContext == rhs.userContext 
         && lhs.direction == rhs.direction;
 }
@@ -53,10 +53,15 @@ protected:
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
+
+            std::vector<uint8_t> messageBytes;
+            messageBytes.resize(messageString.size());
+            std::copy(messageString.begin(), messageString.end(), messageBytes.begin());
+
             auto& canmsg = _testMessages[index].expectedMsg;
             canmsg.frame.canId = index;
-            canmsg.frame.dataField.assign(messageString.begin(), messageString.end());
-            canmsg.frame.dlc = canmsg.frame.dataField.size();
+            canmsg.frame.dataField = messageBytes;
+            canmsg.frame.dlc = canmsg.frame.dataField.AsSpan().size();
             canmsg.frame.flags = SilKit::Services::Can::CanFrame::CanFrameFlags{ 1,0,1,0,1 };
             canmsg.timestamp = 1s;
             canmsg.transmitId = index + 1;
@@ -98,7 +103,7 @@ protected:
 
         while (numSent < _testMessages.size())
         {
-            controller->SendFrame(_testMessages.at(numSent).expectedMsg.frame, (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
+            controller->SendFrame(ToCanFrame(_testMessages.at(numSent).expectedMsg.frame), (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
             numSent++;
         }
         std::cout << "All can messages sent" << std::endl;
@@ -118,7 +123,7 @@ protected:
         controller->AddFrameHandler(
             [this, &canReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Can::ICanController*, const SilKit::Services::Can::CanFrameEvent& msg) {
 
-                _testMessages.at(numReceived++).receivedMsg = msg;
+                _testMessages.at(numReceived++).receivedMsg = MakeWireCanFrameEvent(msg);
                 if (numReceived >= _testMessages.size())
                 {
                     std::cout << "All can messages received" << std::endl;
@@ -151,8 +156,8 @@ protected:
 
     struct Testmessage
     {
-        SilKit::Services::Can::CanFrameEvent expectedMsg;
-        SilKit::Services::Can::CanFrameEvent receivedMsg;
+        SilKit::Services::Can::WireCanFrameEvent expectedMsg;
+        SilKit::Services::Can::WireCanFrameEvent receivedMsg;
         SilKit::Services::Can::CanFrameTransmitEvent expectedAck;
         SilKit::Services::Can::CanFrameTransmitEvent receivedAck;
     };

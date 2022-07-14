@@ -9,15 +9,12 @@ namespace Services {
 namespace Lin { 
 
 struct LinFrame;
-struct LinTransmission;
-struct LinWakeupPulse;
-struct LinSendFrameRequest;
-struct LinSendFrameHeaderRequest;
+struct LinFrameResponse;
 struct LinControllerConfig;
-struct LinControllerStatusUpdate;
-struct LinFrameResponseUpdate;
-
 struct LinFrameStatusEvent;
+struct LinWakeupEvent;
+struct LinGoToSleepEvent;
+struct LinFrameResponseUpdateEvent;
 
 class ILinController;
 

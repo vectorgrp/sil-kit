@@ -24,7 +24,7 @@ public:
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     void SendMsg(CanConfigureBaudrate&& /*baudRate*/) override;
     void SendMsg(CanSetControllerMode&& mode) override;
-    void SendMsg(CanFrameEvent&& canFrameEvent) override;
+    void SendMsg(WireCanFrameEvent&& canFrameEvent) override;
 
 private:
     template <typename MsgT>

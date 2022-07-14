@@ -4,13 +4,15 @@
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
+#include "WireEthernetMessages.hpp"
+
 namespace SilKit {
 namespace Services {
 namespace Ethernet {
 
 inline bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs)
 {
-    return lhs.raw == rhs.raw;
+    return Util::ItemsAreEqual(lhs.raw, rhs.raw);
 }
 
 inline bool operator==(const EthernetFrameEvent& lhs, const EthernetFrameEvent& rhs)
@@ -69,19 +71,19 @@ inline auto CreateEthernetFrame(const SilKit::Services::Ethernet::EthernetMac& d
     const SilKit::Services::Ethernet::EthernetMac& sourceMac,
     const SilKit::Services::Ethernet::EthernetEtherType& etherType,
     const std::string& payload)
-    -> SilKit::Services::Ethernet::EthernetFrame
+    -> SilKit::Services::Ethernet::WireEthernetFrame
 {
-    SilKit::Services::Ethernet::EthernetFrame frame{};
+    std::vector<uint8_t> raw;
 
-    frame.raw.reserve(EthernetFrameHeaderSize + payload.size());
-    std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(frame.raw));
-    std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(frame.raw));
+    raw.reserve(EthernetFrameHeaderSize + payload.size());
+    std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(raw));
+    std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(raw));
     auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-    frame.raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
-    frame.raw.push_back(etherTypeBytes[0]);
-    std::copy(payload.begin(), payload.end(), std::back_inserter(frame.raw));
+    raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeBytes[0]);
+    std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
-    return frame;
+    return WireEthernetFrame{raw};
 }
 
 //! \brief Build an Ethernet level 2 frame with VLAN tag
@@ -90,25 +92,25 @@ inline auto CreateEthernetFrameWithVlanTag(const SilKit::Services::Ethernet::Eth
     const SilKit::Services::Ethernet::EthernetEtherType& etherType,
     const std::string& payload,
     const EthernetVlanTagControlIdentifier& tci)
-    -> SilKit::Services::Ethernet::EthernetFrame
+    -> SilKit::Services::Ethernet::WireEthernetFrame
 {
-    SilKit::Services::Ethernet::EthernetFrame frame{};
+    std::vector<uint8_t> raw;
 
-    frame.raw.reserve(EthernetFrameHeaderSize + payload.size());
-    std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(frame.raw));
-    std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(frame.raw));
+    raw.reserve(EthernetFrameHeaderSize + payload.size());
+    std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(raw));
+    std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(raw));
     auto etherTypeVlanTagBytes = reinterpret_cast<const uint8_t*>(&EthernetEtherTypeVlanTag);
-    frame.raw.push_back(etherTypeVlanTagBytes[1]);  // We assume our platform to be little-endian
-    frame.raw.push_back(etherTypeVlanTagBytes[0]);
+    raw.push_back(etherTypeVlanTagBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeVlanTagBytes[0]);
     auto tciBytes = reinterpret_cast<const uint8_t*>(&tci);
-    frame.raw.push_back(tciBytes[1]);  // We assume our platform to be little-endian
-    frame.raw.push_back(tciBytes[0]);
+    raw.push_back(tciBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(tciBytes[0]);
     auto etherTypeBytes = reinterpret_cast<const uint8_t*>(&etherType);
-    frame.raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
-    frame.raw.push_back(etherTypeBytes[0]);
-    std::copy(payload.begin(), payload.end(), std::back_inserter(frame.raw));
+    raw.push_back(etherTypeBytes[1]);  // We assume our platform to be little-endian
+    raw.push_back(etherTypeBytes[0]);
+    std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
-    return frame;
+    return WireEthernetFrame{raw};
 }
 
 } // namespace SilKit

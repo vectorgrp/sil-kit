@@ -42,7 +42,7 @@ void PublishMessage(IDataPublisher* publisher, std::string msg)
 
 void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(SilKit::Util::ToStdVector(dataMessageEvent.data));
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [DefaultDataHandler] Received new Message: with data=\""
               << message << "\"" << std::endl;
@@ -50,7 +50,7 @@ void DefaultDataHandler(IDataSubscriber* /*subscriber*/, const DataMessageEvent&
 
 void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(SilKit::Util::ToStdVector(dataMessageEvent.data));
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher1] Received new Message: with data=\""
               << message << std::endl;
@@ -58,7 +58,7 @@ void SpecificDataHandlerForPub1(IDataSubscriber* /*subscriber*/, const DataMessa
 
 void SpecificDataHandlerForPub2(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(SilKit::Util::ToStdVector(dataMessageEvent.data));
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> [SpecificDataHandlerForPublisher2] Received new Message: with data=\""
               << message << "\"" << std::endl;

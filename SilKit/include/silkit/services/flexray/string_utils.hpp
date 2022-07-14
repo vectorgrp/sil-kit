@@ -17,7 +17,6 @@ namespace Flexray {
 inline std::string to_string(FlexrayChannel channel);
 inline std::string to_string(FlexrayClockPeriod period);
 inline std::string to_string(FlexrayTransmissionMode mode);
-inline std::string to_string(FlexrayChiCommand command);
 inline std::string to_string(FlexraySymbolPattern pattern);
 inline std::string to_string(FlexrayPocState state);
 inline std::string to_string(const FlexrayHeader& header);
@@ -26,10 +25,8 @@ inline std::string to_string(const FlexraySymbolTransmitEvent& symbol);
 inline std::string to_string(const FlexrayCycleStartEvent& cycleStart);
 inline std::string to_string(const FlexrayFrameEvent& msg);
 inline std::string to_string(const FlexrayFrameTransmitEvent& msg);
-inline std::string to_string(const FlexrayHostCommand& msg);
 inline std::string to_string(const FlexrayControllerConfig& msg);
 inline std::string to_string(const FlexrayTxBufferConfig& msg);
-inline std::string to_string(const FlexrayTxBufferConfigUpdate& msg);
 inline std::string to_string(const FlexrayTxBufferUpdate& msg);
 inline std::string to_string(const FlexrayPocStatusEvent& msg);
 inline std::string to_string(FlexraySlotModeType msg);
@@ -37,11 +34,9 @@ inline std::string to_string(FlexrayErrorModeType msg);
 inline std::string to_string(FlexrayStartupStateType msg);
 inline std::string to_string(FlexrayWakeupStatusType msg);
 
-
 inline std::ostream& operator<<(std::ostream& out, FlexrayChannel channel);
 inline std::ostream& operator<<(std::ostream& out, FlexrayClockPeriod period);
 inline std::ostream& operator<<(std::ostream& out, FlexrayTransmissionMode mode);
-inline std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command);
 inline std::ostream& operator<<(std::ostream& out, FlexraySymbolPattern pattern);
 inline std::ostream& operator<<(std::ostream& out, FlexrayPocState state);
 
@@ -51,10 +46,8 @@ inline std::ostream& operator<<(std::ostream& out, const FlexraySymbolTransmitEv
 inline std::ostream& operator<<(std::ostream& out, const FlexrayCycleStartEvent& cycleStart);
 inline std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg);
 inline std::ostream& operator<<(std::ostream& out, const FlexrayFrameTransmitEvent& msg);
-inline std::ostream& operator<<(std::ostream& out, const FlexrayHostCommand& msg);
 inline std::ostream& operator<<(std::ostream& out, const FlexrayControllerConfig& msg);
 inline std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg);
-inline std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg);
 inline std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferUpdate& msg);
 inline std::ostream& operator<<(std::ostream& out, const FlexrayPocStatusEvent& msg);
 inline std::ostream& operator<<(std::ostream& out, FlexraySlotModeType msg);
@@ -98,34 +91,14 @@ std::string to_string(FlexrayTransmissionMode mode)
     };
     throw SilKit::TypeConversionError{};
 }
-    
-std::string to_string(FlexrayChiCommand command)
-{
-    switch (command)
-    {
-    case FlexrayChiCommand::RUN:
-        return "RUN";
-    case FlexrayChiCommand::DEFERRED_HALT:
-        return "DEFERRED_HALT";
-    case FlexrayChiCommand::FREEZE:
-        return "FREEZE";
-    case FlexrayChiCommand::ALLOW_COLDSTART:
-        return "ALLOW_COLDSTART";
-    case FlexrayChiCommand::ALL_SLOTS:
-        return "ALL_SLOTS";
-    case FlexrayChiCommand::WAKEUP:
-        return "WAKEUP";
-    };
-    throw SilKit::TypeConversionError{};
-}
-    
+
 std::string to_string(FlexraySymbolPattern pattern)
 {
     std::stringstream out;
     out << pattern;
     return out.str();
 }
-    
+
 std::string to_string(FlexrayPocState state)
 {
     switch (state)
@@ -156,14 +129,14 @@ std::string to_string(const FlexrayHeader& header)
     out << header;
     return out.str();
 }
-    
+
 std::string to_string(const FlexraySymbolEvent& symbol)
 {
     std::stringstream out;
     out << symbol;
     return out.str();
 }
-    
+
 std::string to_string(const FlexraySymbolTransmitEvent& symbol)
 {
     std::stringstream out;
@@ -192,13 +165,6 @@ std::string to_string(const FlexrayFrameTransmitEvent& msg)
     return out.str();
 }
 
-std::string to_string(const FlexrayHostCommand& msg)
-{
-    std::stringstream out;
-    out << msg;
-    return out.str();
-}
-
 std::string to_string(const FlexrayControllerConfig& msg)
 {
     std::stringstream out;
@@ -207,13 +173,6 @@ std::string to_string(const FlexrayControllerConfig& msg)
 }
 
 std::string to_string(const FlexrayTxBufferConfig& msg)
-{
-    std::stringstream out;
-    out << msg;
-    return out.str();
-}
-
-std::string to_string(const FlexrayTxBufferConfigUpdate& msg)
 {
     std::stringstream out;
     out << msg;
@@ -262,8 +221,6 @@ std::string to_string(FlexrayWakeupStatusType msg)
     return out.str();
 }
 
-
-    
 std::ostream& operator<<(std::ostream& out, FlexrayChannel channel)
 {
     switch (channel)
@@ -287,10 +244,6 @@ std::ostream& operator<<(std::ostream& out, FlexrayClockPeriod period)
 std::ostream& operator<<(std::ostream& out, FlexrayTransmissionMode mode)
 {
     return out << to_string(mode);
-}
-std::ostream& operator<<(std::ostream& out, FlexrayChiCommand command)
-{
-    return out << to_string(command);
 }
 std::ostream& operator<<(std::ostream& out, FlexraySymbolPattern pattern)
 {
@@ -377,13 +330,6 @@ std::ostream& operator<<(std::ostream& out, const FlexrayFrameTransmitEvent& msg
         << " @" << timestamp.count() << "ms}";
 }
 
-std::ostream& operator<<(std::ostream& out, const FlexrayHostCommand& msg)
-{
-    return out << "Flexray::FlexrayHostCommand{"
-        << msg.command
-        << "}";
-}
-
 std::ostream& operator<<(std::ostream& out, const FlexrayControllerConfig& /*msg*/)
 {
     return out << "Flexray::FlexrayControllerConfig{...}";
@@ -399,14 +345,6 @@ std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfig& msg)
         << ", off=" << msg.offset
         << ", rep=" << msg.repetition
         << ", txMode=" << msg.transmissionMode
-        << "}";
-}
-
-std::ostream& operator<<(std::ostream& out, const FlexrayTxBufferConfigUpdate& msg)
-{
-    return out << "Flexray::FlexrayTxBufferConfigUpdate{"
-        << "idx=" << msg.txBufferIndex
-        << " " << msg.txBufferConfig
         << "}";
 }
 

@@ -28,9 +28,9 @@ void SimBehavior::SendMsgImpl(MsgT&& msg)
     _currentBehavior->SendMsg(std::forward<MsgT>(msg));
 }
 
-void SimBehavior::SendMsg(EthernetFrameEvent&& msg) 
+void SimBehavior::SendMsg(WireEthernetFrameEvent&& msg)
 { 
-    SendMsgImpl(std::move(msg)); 
+    SendMsgImpl(std::move(msg));
 }
 
 void SimBehavior::SendMsg(EthernetSetMode&& msg)

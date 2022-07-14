@@ -172,7 +172,7 @@ extern "C"
             if (update->payloadDataValid)
             {
                 ASSERT_VALID_POINTER_PARAMETER(update->payload.data);
-                cppUpdate.payload.assign(update->payload.data, update->payload.data + update->payload.size);
+                cppUpdate.payload = SilKit::Util::ToSpan(update->payload);
             }
             cppController->UpdateTxBuffer(cppUpdate);
             return SilKit_ReturnCode_SUCCESS;

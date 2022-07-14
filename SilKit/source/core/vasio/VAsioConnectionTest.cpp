@@ -8,6 +8,15 @@
 #include "silkit/services/rpc/fwd_decl.hpp"
 #include "silkit/services/orchestration/fwd_decl.hpp"
 #include "silkit/services/logging/fwd_decl.hpp"
+
+//XXX internal types required for TestDataTypes because of SilKitMsgTraits
+#include "WireCanMessages.hpp"
+#include "WireDataMessages.hpp"
+#include "WireEthernetMessages.hpp"
+#include "WireFlexrayMessages.hpp"
+#include "WireLinMessages.hpp"
+#include "WireRpcMessages.hpp"
+
 #include "ServiceDatatypes.hpp" //concrete, no forwards
 
 #include "ProtocolVersion.hpp"

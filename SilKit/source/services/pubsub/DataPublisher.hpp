@@ -24,9 +24,8 @@ public:
     DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
                   const std::string& mediaType, const std::map<std::string, std::string>& labels,
                   const std::string& pubUUID);
-    
-    void Publish(std::vector<uint8_t> data) override;
-    void Publish(const uint8_t* data, std::size_t size) override;
+
+    void Publish(Util::Span<const uint8_t> data) override;
 
     //SilKit::Services::Orchestration::ITimeConsumer
     void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;

@@ -28,7 +28,7 @@ public:
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
     void SendMsg(CanConfigureBaudrate&& msg) override;
     void SendMsg(CanSetControllerMode&& msg) override;
-    void SendMsg(CanFrameEvent&& msg) override;
+    void SendMsg(WireCanFrameEvent&& msg) override;
 
     void SetDetailedBehavior(const Core::ServiceDescriptor& simulatedLink);
     void SetTrivialBehavior();

@@ -59,7 +59,7 @@ void RpcClient::RegisterServiceDiscovery()
         Core::Discovery::controllerTypeRpcServerInternal, _clientUUID);
 }
 
-IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
+IRpcCallHandle* RpcClient::Call(Util::Span<const uint8_t> data)
 {
     if (_numCounterparts == 0)
     {
@@ -74,15 +74,10 @@ IRpcCallHandle* RpcClient::Call(std::vector<uint8_t> data)
         auto callHandle = std::make_unique<CallHandleImpl>(callUUID);
         auto* callHandlePtr = callHandle.get();
         _detachedCallHandles[to_string(callUUID)] = std::make_pair(_numCounterparts, std::move(callHandle));
-        FunctionCall msg{_timeProvider->Now(), std::move(callUUID), std::move(data)};
+        FunctionCall msg{_timeProvider->Now(), std::move(callUUID), Util::ToStdVector(data)};
         _participant->SendMsg(this, std::move(msg));
         return callHandlePtr;
     }
-}
-
-IRpcCallHandle* RpcClient::Call(const uint8_t* data, std::size_t size)
-{
-    return Call({data, data + size});
 }
 
 void RpcClient::SetCallResultHandler(RpcCallResultHandler handler)

@@ -23,7 +23,7 @@
 
 #include "silkit/util/functional.hpp"
 #include "silkit/util/PrintableHexString.hpp"
-#include "silkit/util/vector_view.hpp"
+#include "silkit/util/Span.hpp"
 #include "silkit/SilKitVersion.hpp"
 
 // 3. Provide a dummy test for proper integration with our test runner.

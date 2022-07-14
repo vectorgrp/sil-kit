@@ -4,6 +4,8 @@
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
+#include "WireEthernetMessages.hpp"
+
 #include "silkit/services/ethernet/fwd_decl.hpp"
 
 namespace SilKit {
@@ -15,8 +17,8 @@ namespace Ethernet {
  *  Used by the Participant, implemented by the EthController
  */
 class IMsgForEthController
-    : public Core::IReceiver<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
-    , public Core::ISender<EthernetFrameEvent, EthernetSetMode>
+    : public Core::IReceiver<WireEthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
+    , public Core::ISender<WireEthernetFrameEvent, EthernetSetMode>
 {
 };
 

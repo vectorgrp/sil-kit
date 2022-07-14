@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "silkit/services/datatypes.hpp"
+#include "silkit/util/Span.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -277,15 +278,6 @@ struct FlexrayControllerConfig
     std::vector<FlexrayTxBufferConfig> bufferConfigs;
 };
 
-//! Update the configuration of a particular FlexRay TX-Buffer
-struct FlexrayTxBufferConfigUpdate
-{
-    //! Index of the TX-Buffers according to the configured buffers (cf. FlexrayControllerConfig).
-    uint16_t txBufferIndex;
-    //! The new configuration of the Tx-Buffer
-    FlexrayTxBufferConfig txBufferConfig;
-};
-
 //! Update the content of a FlexRay TX-Buffer
 struct FlexrayTxBufferUpdate
 {
@@ -296,22 +288,7 @@ struct FlexrayTxBufferUpdate
     bool payloadDataValid;
 
     //! Raw payload containing 0 to 254 bytes.
-    std::vector<uint8_t> payload;
-};
-
-enum class FlexrayChiCommand : uint8_t
-{
-    RUN, //!< ChiCommand RUN
-    DEFERRED_HALT, //!< ChiCommand DEFERRED_HALT
-    FREEZE, //!< ChiCommand FREEZE
-    ALLOW_COLDSTART, //!< ChiCommand ALLOW_COLDSTART
-    ALL_SLOTS, //!< ChiCommand ALL_SLOTS
-    WAKEUP //!< ChiCommand WAKEUP
-};
-
-struct FlexrayHostCommand
-{
-    FlexrayChiCommand command;
+    Util::Span<const uint8_t> payload;
 };
 
 struct FlexrayHeader
@@ -361,7 +338,7 @@ struct FlexrayHeader
 struct FlexrayFrame
 {
     FlexrayHeader header; //!< Header flags, slot, crc, and cycle indidcators
-    std::vector<uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
+    Util::Span<const uint8_t> payload; //!< Raw payload containing 0 to 254 bytes
 };
 
 // Receive a frame from the Bus.

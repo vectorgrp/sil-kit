@@ -38,7 +38,7 @@ void SimBehavior::SendMsg(CanSetControllerMode&& msg)
     SendMsgImpl(std::move(msg));
 }
 
-void SimBehavior::SendMsg(CanFrameEvent&& msg)
+void SimBehavior::SendMsg(WireCanFrameEvent&& msg)
 {
     SendMsgImpl(std::move(msg));
 }

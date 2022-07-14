@@ -83,9 +83,14 @@ protected:
             if (numSent < testMessages.size())
             {
                 const auto& message = testMessages.at(numSent);
+
+                std::vector<uint8_t> expectedData;
+                expectedData.resize(message.expectedData.size());
+                std::copy(message.expectedData.begin(), message.expectedData.end(), expectedData.begin());
+
                 CanFrame msg;
                 msg.canId = 1;
-                msg.dataField.assign(message.expectedData.begin(), message.expectedData.end());
+                msg.dataField = expectedData;
                 msg.dlc = msg.dataField.size();
 
                 canController->SendFrame(std::move(msg));

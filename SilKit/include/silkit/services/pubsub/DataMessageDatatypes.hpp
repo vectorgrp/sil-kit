@@ -3,18 +3,18 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 #include <functional>
 #include <map>
 #include <string>
 #include <chrono>
 
+#include "fwd_decl.hpp"
+
+#include "silkit/util/Span.hpp"
+
 namespace SilKit {
 namespace Services {
 namespace PubSub {
-
-class IDataSubscriber;
-class IDataPublisher;
 
 //! \brief An incoming DataMessage of a DataPublisher containing raw data and timestamp
 struct DataMessageEvent
@@ -22,7 +22,7 @@ struct DataMessageEvent
     //! Send timestamp of the event
     std::chrono::nanoseconds timestamp;
     //! Data field containing the payload
-    std::vector<uint8_t> data;
+    Util::Span<const uint8_t> data;
 };
 
 //! \brief Callback type for new data reception callbacks

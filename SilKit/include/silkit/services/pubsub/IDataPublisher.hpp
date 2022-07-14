@@ -2,7 +2,10 @@
 
 #pragma once
 
-#include "DataMessageDatatypes.hpp"
+#include <cstdint>
+#include <vector>
+
+#include "silkit/util/Span.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -15,25 +18,14 @@ public:
 
     /*! \brief Publish a new value
      *
-     * This is the preferred publishing method as C-style methods with
-     * pointer and size are generally disregarded in modern C++. The
-     * vector is passed to the underlying middleware using std::move.
-     *
-     * \param data An opaque block of raw data
-     */
-    virtual void Publish(std::vector<uint8_t> data) = 0;
-    
-    /*! \brief Publish a new value
-     *
      * Convenience method to publish data. Creates a new std::vector
      * with content copied from \p data. For highest efficiency,
      * use \ref Publish(std::vector<uint8_t>) in combination with
      * std::move.
      *
-     * \param data C-style pointer to an opaque block of data
-     * \param size Size of the data block to be copied
+     * \param data A non-owning reference to an opaque block of raw data
      */
-    virtual void Publish(const uint8_t* data, std::size_t size) = 0;
+    virtual void Publish(Util::Span<const uint8_t> data) = 0;
 };
 
 } // namespace PubSub

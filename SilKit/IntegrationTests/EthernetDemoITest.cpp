@@ -30,8 +30,9 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
     const SilKit::Services::Ethernet::EthernetEtherType etherType{ 0x0800 };
 
     //Test Data
-    auto frame = SilKit::Services::Ethernet::CreateEthernetFrame(readerMac, writerMac, etherType,
+    auto wireFrame = SilKit::Services::Ethernet::CreateEthernetFrame(readerMac, writerMac, etherType,
       "Hello World! We need a minimum size of 64 bytes for the frame so here is some useless data");
+    auto frame = ToEthernetFrame(wireFrame);
 
     //Test Results
     auto receivedLinkDown = false;
@@ -135,7 +136,7 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         });
 
         ethernetController->AddFrameHandler(
-            [&readerTime, &receivedMessage, &frame, &receiveCount, &lifecycleService](auto, const auto& netsimMessage) {
+            [&readerTime, &receivedMessage, &frame, &receiveCount, lifecycleService](auto, const auto& netsimMessage) {
             if (readerTime < 55ms)
             {
               // ignore the messages from the Queue-overflow attempt and LinkUp

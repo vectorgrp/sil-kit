@@ -21,7 +21,7 @@ public:
 
     void SendMsg(CanConfigureBaudrate&& msg) override;
     void SendMsg(CanSetControllerMode&& msg) override;
-    void SendMsg(CanFrameEvent&& msg) override;
+    void SendMsg(WireCanFrameEvent&& msg) override;
     
     auto AllowReception(const Core::IServiceEndpoint* from) const -> bool override;
 

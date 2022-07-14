@@ -93,8 +93,8 @@ public:
     void RemoveCycleStartHandler(HandlerId handlerId) override;
 
     // IMsgForFlexrayController
-    void ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameEvent& msg) override;
-    void ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const WireFlexrayFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const WireFlexrayFrameTransmitEvent& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolEvent& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolTransmitEvent& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const FlexrayCycleStartEvent& msg) override;

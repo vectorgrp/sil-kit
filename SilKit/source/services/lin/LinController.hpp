@@ -13,6 +13,7 @@
 #include "IMsgForLinController.hpp"
 #include "SimBehavior.hpp"
 #include "SynchronizedHandlers.hpp"
+#include "WireLinMessages.hpp"
 
 namespace SilKit {
 namespace Services {

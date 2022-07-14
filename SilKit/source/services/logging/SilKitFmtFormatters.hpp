@@ -19,6 +19,12 @@
 #include "string_utils_sync.hpp"
 #include "ServiceDatatypes.hpp"
 
+#include "WireCanMessages.hpp"
+#include "WireEthernetMessages.hpp"
+#include "WireFlexrayMessages.hpp"
+#include "WireLinMessages.hpp"
+#include "WireRpcMessages.hpp"
+
 // Template helpers
 template<class Query, class...List>
 struct is_one_of : std::false_type 

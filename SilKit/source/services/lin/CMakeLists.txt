@@ -20,6 +20,7 @@ target_include_directories(SilKitSimLin
 
 target_link_libraries(SilKitSimLin
     PUBLIC  SilKitInterface
+            SilKitWireLin
     PRIVATE SilKitInterface
             SilKitInternal
             SilKitMwLogging

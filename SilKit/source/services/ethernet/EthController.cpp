@@ -110,7 +110,7 @@ auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
     auto txId = MakeTxId();
     msg.transmitId = txId;
 
-    SendMsg(std::move(msg));
+    SendMsg(MakeWireEthernetFrameEvent(msg));
 
     return txId;
 }
@@ -126,17 +126,16 @@ auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
 // ReceiveMsg
 //------------------------
 
-void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameEvent& msg)
+void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
         return;
     }
 
-    _tracer.Trace(SilKit::Services::TransmitDirection::RX,
-        msg.timestamp, msg.frame);
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, ToEthernetFrame(msg.frame));
 
-    CallHandlers(msg);
+    CallHandlers(ToEthernetFrameEvent(msg));
 }
 
 void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)

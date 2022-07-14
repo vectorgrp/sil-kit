@@ -67,7 +67,11 @@ void SendFrame(ICanController* controller, Logging::ILogger* logger)
     payloadBuilder << "CAN " << (msgId++)%100;
     auto payloadStr = payloadBuilder.str();
 
-    canFrame.dataField.assign(payloadStr.begin(), payloadStr.end());
+    std::vector<uint8_t> payloadBytes;
+    payloadBytes.resize(payloadStr.size());
+    std::copy(payloadStr.begin(), payloadStr.end(), payloadBytes.begin());
+
+    canFrame.dataField = payloadBytes;
     canFrame.dlc = canFrame.dataField.size();
 
     auto transmitId = controller->SendFrame(std::move(canFrame));

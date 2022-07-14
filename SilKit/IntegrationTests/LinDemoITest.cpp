@@ -122,6 +122,8 @@ struct LinNode
     {
     }
 
+    virtual ~LinNode() = default;
+
     void Stop()
     {
       _participant->GetSystemController()->Stop();

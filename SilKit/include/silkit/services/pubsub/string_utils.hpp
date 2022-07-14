@@ -5,7 +5,6 @@
 #include <ostream>
 #include <sstream>
 
-#include "silkit/participant/exception.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 
 #include "DataMessageDatatypes.hpp"
@@ -20,12 +19,14 @@ inline std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg);
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
 std::string to_string(const DataMessageEvent& msg)
 {
     std::stringstream out;
     out << msg;
     return out.str();
 }
+
 std::ostream& operator<<(std::ostream& out, const DataMessageEvent& msg)
 {
     return out << "PubSub::DataMessageEvent{data="

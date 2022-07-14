@@ -13,8 +13,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
-    FlexrayFrameEvent in;
-    FlexrayFrameEvent out;
+    WireFlexrayFrameEvent in;
+    WireFlexrayFrameEvent out;
 
     in.timestamp = 12ns;
     in.channel = FlexrayChannel::AB;
@@ -44,15 +44,15 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
     EXPECT_EQ(in.frame.header.headerCrc, out.frame.header.headerCrc);
     EXPECT_EQ(in.frame.header.cycleCount, out.frame.header.cycleCount);
 
-    EXPECT_EQ(in.frame.payload, out.frame.payload);
+    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.payload, out.frame.payload));
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
-    FlexrayFrameTransmitEvent in;
-    FlexrayFrameTransmitEvent out;
+    WireFlexrayFrameTransmitEvent in;
+    WireFlexrayFrameTransmitEvent out;
 
     in.timestamp = 23ns;
     in.txBufferIndex = 20000;
@@ -84,7 +84,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     EXPECT_EQ(in.frame.header.headerCrc, out.frame.header.headerCrc);
     EXPECT_EQ(in.frame.header.cycleCount, out.frame.header.cycleCount);
 
-    EXPECT_EQ(in.frame.payload, out.frame.payload);
+    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.payload, out.frame.payload));
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
@@ -309,8 +309,8 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
-    FlexrayTxBufferUpdate in;
-    FlexrayTxBufferUpdate out;
+    WireFlexrayTxBufferUpdate in;
+    WireFlexrayTxBufferUpdate out;
 
     in.txBufferIndex = 23000;
     in.payloadDataValid = true;
@@ -321,7 +321,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
 
     EXPECT_EQ(in.txBufferIndex, out.txBufferIndex);
     EXPECT_EQ(in.payloadDataValid, out.payloadDataValid);
-    EXPECT_EQ(in.payload, out.payload);
+    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.payload, out.payload));
 }
 
 TEST(MwVAsioSerdes, SimFlexray_FlexrayPocStatusEvent) {

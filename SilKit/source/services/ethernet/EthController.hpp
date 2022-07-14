@@ -66,7 +66,7 @@ public:
     void RemoveBitrateChangeHandler(HandlerId handlerId) override;
 
     // IMsgForEthController
-    void ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const WireEthernetFrameEvent& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 

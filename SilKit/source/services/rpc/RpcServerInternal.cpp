@@ -40,14 +40,14 @@ void RpcServerInternal::ReceiveMessage(const FunctionCall& msg)
     }
 }
 
-void RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, const std::vector<uint8_t>& resultData)
+void RpcServerInternal::SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<const uint8_t> resultData)
 {
     auto callHandle = static_cast<const CallHandleImpl&>(*callHandlePtr);
     auto callHandleStr = to_string(callHandle._callUUID);
     auto it = _receivedCallHandles.find(callHandleStr);
     if (it != _receivedCallHandles.end())
     {
-        _participant->SendMsg(this, FunctionCallResponse{_timeProvider->Now(), callHandle._callUUID, resultData});
+        _participant->SendMsg(this, FunctionCallResponse{_timeProvider->Now(), callHandle._callUUID, Util::ToStdVector(resultData)});
         _receivedCallHandles.erase(callHandleStr);
     }
 }

@@ -1,4 +1,6 @@
 # Copyright (c) Vector Informatik GmbH. All rights reserved.
+
+add_subdirectory(wire)
 add_subdirectory(config)
 add_subdirectory(tracing)
 add_subdirectory(core)

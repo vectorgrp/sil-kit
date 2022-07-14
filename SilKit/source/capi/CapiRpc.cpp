@@ -40,15 +40,6 @@ void assign(SilKit_RpcDiscoveryResultList** cResultList, const std::vector<SilKi
     }
 }
 
-auto GetDataOrNullptr(const std::vector<std::uint8_t>& vector) -> const std::uint8_t*
-{
-    if (vector.empty())
-    {
-        return nullptr;
-    }
-    return vector.data();
-}
-
 SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, SilKit_RpcCallResultHandler_t handler)
 {
     return [handler, context](SilKit::Services::Rpc::IRpcClient* cppClient, const SilKit::Services::Rpc::RpcCallResultEvent& event) {
@@ -58,7 +49,7 @@ SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* conte
         cEvent.timestamp = event.timestamp.count();
         cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
         cEvent.callStatus = (SilKit_RpcCallStatus)event.callStatus;
-        cEvent.resultData = SilKit_ByteVector{GetDataOrNullptr(event.resultData), event.resultData.size()};
+        cEvent.resultData = ToSilKitByteVector(event.resultData);
         handler(context, cClient, &cEvent);
     };
 }
@@ -71,7 +62,7 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
         SilKit_Struct_Init(SilKit_RpcCallEvent, cEvent);
         cEvent.timestamp = event.timestamp.count();
         cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
-        cEvent.argumentData = SilKit_ByteVector{GetDataOrNullptr(event.argumentData), event.argumentData.size()};
+        cEvent.argumentData = ToSilKitByteVector(event.argumentData);
         handler(context, cServer, &cEvent);
     };
 }
@@ -114,9 +105,7 @@ SilKit_ReturnCode SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_R
     {
         auto cppServer = reinterpret_cast<SilKit::Services::Rpc::IRpcServer*>(self);
         auto cppCallHandle = reinterpret_cast<SilKit::Services::Rpc::IRpcCallHandle*>(callHandle);
-        auto cppReturnData =
-            std::vector<uint8_t>(returnData->data, returnData->data+ returnData->size);
-        cppServer->SubmitResult(cppCallHandle, cppReturnData);
+        cppServer->SubmitResult(cppCallHandle, SilKit::Util::ToSpan(*returnData));
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -167,8 +156,7 @@ SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, SilKit_RpcCallHa
     CAPI_ENTER
     {
         auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
-        auto cppCallHandle = cppClient->Call(
-            std::vector<uint8_t>(argumentData->data, argumentData->data + argumentData->size));
+        auto cppCallHandle = cppClient->Call(SilKit::Util::ToSpan(*argumentData));
         *outHandle = reinterpret_cast<SilKit_RpcCallHandle*>(cppCallHandle);
         return SilKit_ReturnCode_SUCCESS;
     }

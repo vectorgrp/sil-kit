@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "silkit/util/vector_view.hpp"
+#include "silkit/util/Span.hpp"
 
 namespace SilKit {
 namespace Util {
@@ -20,8 +20,7 @@ using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Throw;
 
-    
-TEST(SilKitVectorViewTest, test_view_data_and_size)
+TEST(SilKitSpanTest, test_view_data_and_size)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -29,18 +28,18 @@ TEST(SilKitVectorViewTest, test_view_data_and_size)
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
 
-    auto intSequenceView = make_vector_view(intSequence);
+    auto intSequenceView = ToSpan(intSequence);
     EXPECT_EQ(intSequenceView.size(), intSequence.size());
     EXPECT_EQ(intSequenceView.data(), intSequence.data());
 
     const std::vector<int>& constIntSequence = intSequence;
-    auto constIntSequenceView = make_vector_view(constIntSequence);
+    auto constIntSequenceView = ToSpan(constIntSequence);
 
     EXPECT_EQ(constIntSequenceView.size(), constIntSequence.size());
     EXPECT_EQ(constIntSequenceView.data(), constIntSequence.data());
 }
 
-TEST(SilKitVectorViewTest, test_view_content_equals_sourcevector)
+TEST(SilKitSpanTest, test_view_content_equals_sourcevector)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -48,15 +47,14 @@ TEST(SilKitVectorViewTest, test_view_content_equals_sourcevector)
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
 
-    auto intSequenceView = make_vector_view(intSequence);
+    auto intSequenceView = ToSpan(intSequence);
     for (size_t i = 0; i < intSequence.size(); i++)
     {
         EXPECT_EQ(intSequenceView[i], intSequence[i]);
     }
-
 }
 
-TEST(SilKitVectorViewTest, test_trim_view)
+TEST(SilKitSpanTest, test_trim_view)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -64,7 +62,7 @@ TEST(SilKitVectorViewTest, test_trim_view)
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
 
-    auto intSequenceView = make_vector_view(intSequence);
+    auto intSequenceView = ToSpan(intSequence);
 
     intSequenceView.trim_front(2);
     ASSERT_EQ(intSequenceView.size(), static_cast<size_t>(8));
@@ -78,7 +76,7 @@ TEST(SilKitVectorViewTest, test_trim_view)
     }
 }
 
-TEST(SilKitVectorViewTest, test_iterators)
+TEST(SilKitSpanTest, test_iterators)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -86,7 +84,7 @@ TEST(SilKitVectorViewTest, test_iterators)
     std::vector<int> intSequence(10);
     std::iota(intSequence.begin(), intSequence.end(), 0);
 
-    auto intSequenceView = make_vector_view(intSequence);
+    auto intSequenceView = ToSpan(intSequence);
 
     auto vectorIter = intSequence.cbegin();
     auto viewIter = intSequenceView.cbegin();
@@ -106,8 +104,7 @@ TEST(SilKitVectorViewTest, test_iterators)
     }
 }
 
-
-TEST(SilKitVectorViewTest, test_modify_view)
+TEST(SilKitSpanTest, test_modify_view)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -120,7 +117,7 @@ TEST(SilKitVectorViewTest, test_modify_view)
         ASSERT_EQ(elem, 0);
     }
 
-    auto intSequenceView = make_vector_view(intSequence);
+    auto intSequenceView = ToSpan(intSequence);
     std::iota(intSequenceView.begin(), intSequenceView.end(), 0);
 
     // check source vector for modifications
@@ -130,9 +127,71 @@ TEST(SilKitVectorViewTest, test_modify_view)
         EXPECT_EQ(elem, expectedValue);
         expectedValue++;
     }
-
 }
-    
+
+TEST(SilKitSpanTest, test_ctor_vector)
+{
+    std::vector<uint8_t> bytes{1, 2, 3, 4, 5};
+
+    {
+        std::vector<uint8_t>& mlref = bytes;
+
+        Span<const uint8_t> cs{mlref};
+        ASSERT_EQ(cs.size(), mlref.size());
+        ASSERT_EQ(ToStdVector(cs), mlref);
+
+        Span<uint8_t> ms{mlref};
+        ASSERT_EQ(ms.size(), mlref.size());
+        ASSERT_EQ(ToStdVector(ms), mlref);
+    }
+
+    {
+        const std::vector<uint8_t>& clref = bytes;
+
+        Span<const uint8_t> cs{clref};
+        ASSERT_EQ(cs.size(), clref.size());
+        ASSERT_EQ(ToStdVector(cs), clref);
+
+        ASSERT_FALSE((std::is_constructible<Span<uint8_t>, const std::vector<uint8_t>&>::value));
+    }
+}
+
+TEST(SilKitSpanTest, test_assign_vector)
+{
+    std::vector<uint8_t> bytes{1, 2, 3, 4, 5};
+
+    {
+        std::vector<uint8_t>& mlref = bytes;
+
+        Span<const uint8_t> cs;
+        ASSERT_TRUE(cs.empty());
+
+        cs = mlref;
+        ASSERT_EQ(cs.size(), mlref.size());
+        ASSERT_EQ(ToStdVector(cs), mlref);
+
+        Span<uint8_t> ms;
+        ASSERT_TRUE(ms.empty());
+
+        ms = mlref;
+        ASSERT_EQ(ms.size(), mlref.size());
+        ASSERT_EQ(ToStdVector(ms), mlref);
+    }
+
+    {
+        const std::vector<uint8_t>& clref = bytes;
+
+        Span<const uint8_t> cs;
+        ASSERT_TRUE(cs.empty());
+
+        cs = clref;
+        ASSERT_EQ(cs.size(), clref.size());
+        ASSERT_EQ(ToStdVector(cs), clref);
+
+        ASSERT_FALSE((std::is_assignable<Span<uint8_t>, const std::vector<uint8_t>&>::value));
+    }
+}
+
 } // namespace tests
 } // namespace Util
 } // namespace SilKit

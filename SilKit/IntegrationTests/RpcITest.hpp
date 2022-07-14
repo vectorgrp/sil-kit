@@ -318,7 +318,7 @@ protected:
                     {
                         if (event.callStatus == RpcCallStatus::Success)
                         {
-                            c.OnCallReturned(event.resultData);
+                            c.OnCallReturned(SilKit::Util::ToStdVector(event.resultData));
                         }
                     }
                     participant.CheckAllCallsReturnedPromise();
@@ -335,7 +335,7 @@ protected:
 
                 auto processCalls = [&participant, &s](IRpcServer* server, RpcCallEvent event) {
                     // Increment data
-                    std::vector<uint8_t> returnData{event.argumentData};
+                    auto returnData = SilKit::Util::ToStdVector(event.argumentData);
                     for (auto& d : returnData)
                     {
                         d += rpcFuncIncrement;
@@ -343,7 +343,7 @@ protected:
                     server->SubmitResult(event.callHandle, returnData);
 
                     // Evaluate data and reception count
-                    s.ReceiveCall(event.argumentData);
+                    s.ReceiveCall(SilKit::Util::ToStdVector(event.argumentData));
                     participant.CheckAllCallsReceivedPromise();
                 };
 

@@ -119,13 +119,15 @@ struct FlexrayNode
                       << "; bufferId=" << bufferIdx;
         auto payloadString = payloadStream.str();
 
+        std::vector<uint8_t> payloadBytes;
+        payloadBytes.resize(payloadString.size());
+
+        std::copy(payloadString.begin(), payloadString.end(), payloadBytes.begin());
 
         Flexray::FlexrayTxBufferUpdate update;
-        update.payload.resize(payloadString.size());
+        update.payload = payloadBytes;
         update.payloadDataValid = true;
         update.txBufferIndex = static_cast<decltype(update.txBufferIndex)>(bufferIdx);
-
-        std::copy(payloadString.begin(), payloadString.end(), update.payload.begin());
 
         controller->UpdateTxBuffer(update);
     }

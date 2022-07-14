@@ -146,7 +146,7 @@ void FlexrayController::UpdateTxBuffer(const FlexrayTxBufferUpdate& update)
         throw std::out_of_range{"Unconfigured txBufferIndex!"};
     }
 
-    SendMsg(update);
+    SendMsg(MakeWireFlexrayTxBufferUpdate(update));
 }
 
 void FlexrayController::Run()
@@ -195,18 +195,18 @@ void FlexrayController::Wakeup()
 // ReceiveMsg
 //------------------------
 
-void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const WireFlexrayFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
         return;
     }
 
-    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, msg);
-    CallHandlers(msg);
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, ToFlexrayFrameEvent(msg));
+    CallHandlers(ToFlexrayFrameEvent(msg));
 }
 
-void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayFrameTransmitEvent& msg)
+void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const WireFlexrayFrameTransmitEvent& msg)
 {
     if (!AllowReception(from))
     {
@@ -214,12 +214,12 @@ void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexrayFr
     }
 
     FlexrayFrameEvent tmp;
-    tmp.frame = msg.frame;
+    tmp.frame = ToFlexrayFrame(msg.frame);
     tmp.channel = msg.channel;
     tmp.timestamp = msg.timestamp;
     _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, tmp);
 
-    CallHandlers(msg);
+    CallHandlers(ToFlexrayFrameTransmitEvent(msg));
 }
 
 void FlexrayController::ReceiveMsg(const IServiceEndpoint* from, const FlexraySymbolEvent& msg)

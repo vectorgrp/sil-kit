@@ -5,6 +5,7 @@
 #include "IReceiver.hpp"
 #include "ISender.hpp"
 #include "IServiceEndpoint.hpp"
+#include "WireFlexrayMessages.hpp"
 
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 
@@ -18,9 +19,9 @@ namespace Flexray {
  */
 class IMsgForFlexrayBusSimulator
     : public Core::IReceiver<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,
-                             FlexrayTxBufferUpdate>
-    , public Core::ISender<FlexrayFrameEvent, FlexrayFrameTransmitEvent, FlexraySymbolEvent, FlexraySymbolTransmitEvent,
-                           FlexrayCycleStartEvent, FlexrayPocStatusEvent>
+                             WireFlexrayTxBufferUpdate>
+    , public Core::ISender<WireFlexrayFrameEvent, WireFlexrayFrameTransmitEvent, FlexraySymbolEvent,
+                           FlexraySymbolTransmitEvent, FlexrayCycleStartEvent, FlexrayPocStatusEvent>
 {
 public:
     ~IMsgForFlexrayBusSimulator() = default;

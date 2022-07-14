@@ -238,7 +238,8 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
 
     // required for MockSystemMonitor::ParticipantStatus
-    testing::DefaultValue<const SilKit::Services::Orchestration::ParticipantStatus&>::Set(SilKit::Services::Orchestration::ParticipantStatus());
+    SilKit::Services::Orchestration::ParticipantStatus mockParticipantStatus{};
+    testing::DefaultValue<const SilKit::Services::Orchestration::ParticipantStatus&>::Set(mockParticipantStatus);
 
     EXPECT_CALL(mockParticipant.mockLifecycleService,
         SetCommunicationReadyHandler(testing::_)

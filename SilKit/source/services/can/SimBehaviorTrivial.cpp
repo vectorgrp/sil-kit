@@ -45,16 +45,16 @@ void SimBehaviorTrivial::SendMsg(CanSetControllerMode&& mode)
     ReceiveMsg(newStatus);
 }
 
-void SimBehaviorTrivial::SendMsg(CanFrameEvent&& canFrameEvent)
+void SimBehaviorTrivial::SendMsg(WireCanFrameEvent&& canFrameEvent)
 {
     if (_parentController->GetState() == CanControllerState::Started)
     {
         auto now = _timeProvider->Now();
-        CanFrameEvent canFrameEventCpy = canFrameEvent;
+        WireCanFrameEvent canFrameEventCpy = canFrameEvent;
         canFrameEventCpy.direction = TransmitDirection::TX;
         canFrameEventCpy.timestamp = now;
 
-        _tracer.Trace(SilKit::Services::TransmitDirection::TX, now, canFrameEvent);
+        _tracer.Trace(SilKit::Services::TransmitDirection::TX, now, ToCanFrameEvent(canFrameEvent));
 
         // Self delivery as TX
         ReceiveMsg(canFrameEventCpy);

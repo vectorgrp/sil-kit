@@ -41,7 +41,7 @@ auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) 
     return true; 
 }
 
-void SimBehaviorTrivial::SendMsg(EthernetFrameEvent&& ethFrameEvent)
+void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
 {
     EthernetState controllerState = _parentController->GetState();
 
@@ -49,13 +49,13 @@ void SimBehaviorTrivial::SendMsg(EthernetFrameEvent&& ethFrameEvent)
     {
         // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
         ethFrameEvent.timestamp = _timeProvider->Now();
-        _tracer.Trace(SilKit::Services::TransmitDirection::TX, ethFrameEvent.timestamp, ethFrameEvent.frame);
+        _tracer.Trace(SilKit::Services::TransmitDirection::TX, ethFrameEvent.timestamp, ToEthernetFrame(ethFrameEvent.frame));
         _participant->SendMsg(_parentServiceEndpoint, ethFrameEvent);
 
         EthernetFrameTransmitEvent ack;
         ack.timestamp = ethFrameEvent.timestamp;
         ack.transmitId = ethFrameEvent.transmitId;
-        ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
+        ack.sourceMac = GetSourceMac(ToEthernetFrame(ethFrameEvent.frame));
         ack.status = EthernetTransmitStatus::Transmitted;
         ReceiveMsg(ack);
     }
@@ -64,7 +64,7 @@ void SimBehaviorTrivial::SendMsg(EthernetFrameEvent&& ethFrameEvent)
         EthernetFrameTransmitEvent ack;
         ack.timestamp = _timeProvider->Now();
         ack.transmitId = ethFrameEvent.transmitId;
-        ack.sourceMac = GetSourceMac(ethFrameEvent.frame);
+        ack.sourceMac = GetSourceMac(ToEthernetFrame(ethFrameEvent.frame));
         if (controllerState == EthernetState::Inactive)
         {
             ack.status = EthernetTransmitStatus::ControllerInactive;

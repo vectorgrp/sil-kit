@@ -99,7 +99,7 @@ public:
 
         Util::tuple_tools::for_each(sendMessageTypes, [this, &networkName, historyLength](auto&& message) {
             using SilKitMessageT = std::decay_t<decltype(message)>;
-            auto link = this->GetLinkByName<SilKitMessageT>(networkName); 
+            auto link = this->GetLinkByName<SilKitMessageT>(networkName);
             link->SetHistoryLength(historyLength);
         });
     }
@@ -173,15 +173,15 @@ private:
         Services::Orchestration::ParticipantCommand,
         Services::Orchestration::ParticipantStatus,
         Services::Orchestration::WorkflowConfiguration,
-        Services::PubSub::DataMessageEvent,
+        Services::PubSub::WireDataMessageEvent,
         Services::Rpc::FunctionCall,
         Services::Rpc::FunctionCallResponse,
-        Services::Can::CanFrameEvent,
+        Services::Can::WireCanFrameEvent,
         Services::Can::CanFrameTransmitEvent,
         Services::Can::CanControllerStatus,
         Services::Can::CanConfigureBaudrate,
         Services::Can::CanSetControllerMode,
-        Services::Ethernet::EthernetFrameEvent,
+        Services::Ethernet::WireEthernetFrameEvent,
         Services::Ethernet::EthernetFrameTransmitEvent,
         Services::Ethernet::EthernetStatus,
         Services::Ethernet::EthernetSetMode,
@@ -192,15 +192,15 @@ private:
         Services::Lin::LinControllerConfig,
         Services::Lin::LinControllerStatusUpdate,
         Services::Lin::LinFrameResponseUpdate,
-        Services::Flexray::FlexrayFrameEvent,
-        Services::Flexray::FlexrayFrameTransmitEvent,
+        Services::Flexray::WireFlexrayFrameEvent,
+        Services::Flexray::WireFlexrayFrameTransmitEvent,
         Services::Flexray::FlexraySymbolEvent,
         Services::Flexray::FlexraySymbolTransmitEvent,
         Services::Flexray::FlexrayCycleStartEvent,
         Services::Flexray::FlexrayHostCommand,
         Services::Flexray::FlexrayControllerConfig,
         Services::Flexray::FlexrayTxBufferConfigUpdate,
-        Services::Flexray::FlexrayTxBufferUpdate,
+        Services::Flexray::WireFlexrayTxBufferUpdate,
         Services::Flexray::FlexrayPocStatusEvent,
         Core::Discovery::ParticipantDiscoveryEvent,
         Core::Discovery::ServiceDiscoveryEvent,

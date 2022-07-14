@@ -5,9 +5,10 @@
 namespace SilKit {
 namespace Services {
 namespace Flexray {
+
 using SilKit::Core::MessageBuffer;
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayHeader& header)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayHeader& header)
 {
     buffer
         << header.flags
@@ -18,7 +19,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayHeader& header)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayHeader& header)
 {
     buffer
         >> header.flags
@@ -29,7 +30,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayFrame& frame)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireFlexrayFrame& frame)
 {
     buffer
         << frame.header
@@ -37,7 +38,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayFrame& frame)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireFlexrayFrame& frame)
 {
     buffer
         >> frame.header
@@ -45,7 +46,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayFrameEvent& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireFlexrayFrameEvent& msg)
 {
     buffer
         << msg.timestamp
@@ -54,7 +55,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayFrameEvent& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireFlexrayFrameEvent& msg)
 {
     buffer
         >> msg.timestamp
@@ -63,7 +64,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireFlexrayFrameTransmitEvent& msg)
 {
     buffer
         << msg.timestamp
@@ -73,7 +74,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayFrameTransmitEvent& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireFlexrayFrameTransmitEvent& msg)
 {
     buffer
         >> msg.timestamp
@@ -83,7 +84,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexraySymbolEvent& symbol)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexraySymbolEvent& symbol)
 {
     buffer
         << symbol.timestamp
@@ -92,7 +93,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexraySymbolEvent& symbol)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexraySymbolEvent& symbol)
 {
     buffer
         >> symbol.timestamp
@@ -101,7 +102,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexraySymbolTransmitEvent& ack)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexraySymbolTransmitEvent& ack)
 {
     auto&& symbol = static_cast<const FlexraySymbolEvent&>(ack);
     buffer
@@ -109,7 +110,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexraySymbolTransmitEvent& ack)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexraySymbolTransmitEvent& ack)
 {
     auto&& symbol = static_cast<FlexraySymbolEvent&>(ack);
     buffer
@@ -117,7 +118,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
                                          const FlexrayCycleStartEvent& flexrayCycleStartEvent)
 {
     buffer
@@ -126,7 +127,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayCycleStartEvent& flexrayCycleStartEvent)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayCycleStartEvent& flexrayCycleStartEvent)
 {
     buffer
         >> flexrayCycleStartEvent.timestamp
@@ -134,21 +135,21 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayHostCommand& cmd)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayHostCommand& cmd)
 {
     buffer
         << cmd.command;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayHostCommand& cmd)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayHostCommand& cmd)
 {
     buffer
         >> cmd.command;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayClusterParameters& clusterParam)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayClusterParameters& clusterParam)
 {
     buffer
         << clusterParam.gColdstartAttempts
@@ -174,7 +175,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayClusterParameters& clusterParam)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayClusterParameters& clusterParam)
 {
     buffer
         >> clusterParam.gColdstartAttempts
@@ -200,7 +201,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayNodeParameters& nodeParams)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayNodeParameters& nodeParams)
 {
     buffer
         << nodeParams.pAllowHaltDueToClock
@@ -229,7 +230,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayNodeParameters& nodeParams)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayNodeParameters& nodeParams)
 {
     buffer
         >> nodeParams.pAllowHaltDueToClock
@@ -258,7 +259,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferConfig& config)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferConfig& config)
 {
     buffer
         << config.channels
@@ -271,7 +272,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfig& config)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfig& config)
 {
     buffer
         >> config.channels
@@ -284,7 +285,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayControllerConfig& config)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayControllerConfig& config)
 {
     buffer
         << config.clusterParams
@@ -293,7 +294,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayControllerConfig& config)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayControllerConfig& config)
 {
     buffer
         >> config.clusterParams
@@ -302,7 +303,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& update)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& update)
 {
     buffer
         << update.txBufferIndex
@@ -310,7 +311,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& update)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& update)
 {
     buffer
         >> update.txBufferIndex
@@ -318,7 +319,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FlexrayTxBufferUpdate& update)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireFlexrayTxBufferUpdate& update)
 {
     buffer
         << update.txBufferIndex
@@ -327,7 +328,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayTxBufferUpdate& update)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireFlexrayTxBufferUpdate& update)
 {
     buffer
         >> update.txBufferIndex
@@ -336,7 +337,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
                                          const FlexrayPocStatusEvent& flexrayPocStatusEvent)
 {
     buffer
@@ -353,7 +354,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayPocStatusEvent& flexrayPocStatusEvent)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FlexrayPocStatusEvent& flexrayPocStatusEvent)
 {
     buffer
       >> flexrayPocStatusEvent.timestamp
@@ -370,13 +371,13 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Fle
 }
 
 
-void Serialize(MessageBuffer& buffer, const FlexrayFrameEvent& msg)
+void Serialize(MessageBuffer& buffer, const WireFlexrayFrameEvent& msg)
 {
     buffer << msg;
     return;
 }
 
-void Serialize(MessageBuffer& buffer, const FlexrayFrameTransmitEvent& msg)
+void Serialize(MessageBuffer& buffer, const WireFlexrayFrameTransmitEvent& msg)
 {
     buffer << msg;
     return;
@@ -418,7 +419,7 @@ void Serialize(MessageBuffer& buffer, const FlexrayTxBufferConfigUpdate& msg)
     return;
 }
 
-void Serialize(MessageBuffer& buffer, const FlexrayTxBufferUpdate& msg)
+void Serialize(MessageBuffer& buffer, const WireFlexrayTxBufferUpdate& msg)
 {
     buffer << msg;
     return;
@@ -430,12 +431,12 @@ void Serialize(MessageBuffer& buffer, const FlexrayPocStatusEvent& msg)
     return;
 }
 
-void Deserialize(MessageBuffer& buffer, FlexrayFrameEvent& out)
+void Deserialize(MessageBuffer& buffer, WireFlexrayFrameEvent& out)
 {
     buffer >> out;
 }
 
-void Deserialize(MessageBuffer& buffer, FlexrayFrameTransmitEvent& out)
+void Deserialize(MessageBuffer& buffer, WireFlexrayFrameTransmitEvent& out)
 {
     buffer >> out;
 }
@@ -470,7 +471,7 @@ void Deserialize(MessageBuffer& buffer, FlexrayTxBufferConfigUpdate& out)
     buffer >> out;
 }
 
-void Deserialize(MessageBuffer& buffer, FlexrayTxBufferUpdate& out)
+void Deserialize(MessageBuffer& buffer, WireFlexrayTxBufferUpdate& out)
 {
     buffer >> out;
 }

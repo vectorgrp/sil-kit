@@ -1,14 +1,15 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
-#include "MessageBuffer.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
+
+#include "MessageBuffer.hpp"
 #include "CanSerdes.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Can {
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanFrameEvent& msg)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireCanFrameEvent& msg)
 {
     buffer << msg.transmitId
         << msg.timestamp
@@ -22,7 +23,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanFrameEvent& msg)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireCanFrameEvent& msg)
 {
     uint8_t flags;
     uint8_t dlc;
@@ -113,40 +114,37 @@ using namespace SilKit::Core;
 //////////////////////////////////////////////////////////////////////
 // Serialize
 //////////////////////////////////////////////////////////////////////
-void Serialize(MessageBuffer& buffer, const Services::Can::CanFrameEvent& msg)
+
+void Serialize(MessageBuffer& buffer, const Services::Can::WireCanFrameEvent& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const Services::Can::CanFrameTransmitEvent& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const Services::Can::CanControllerStatus& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const Services::Can::CanConfigureBaudrate& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const Services::Can::CanSetControllerMode& msg)
 {
     buffer << msg;
-    return;
 }
 
 //////////////////////////////////////////////////////////////////////
 // Deserialize
 //////////////////////////////////////////////////////////////////////
-void Deserialize(MessageBuffer& buffer, Services::Can::CanFrameEvent& out)
+
+void Deserialize(MessageBuffer& buffer, Services::Can::WireCanFrameEvent& out)
 {
    buffer >> out;
 }
@@ -171,6 +169,6 @@ void Deserialize(MessageBuffer& buffer, Services::Can::CanSetControllerMode& out
    buffer >> out;
 }
 
-} // namespace Can    
+} // namespace Can
 } // namespace Services
 } // namespace SilKit

@@ -8,9 +8,6 @@ namespace Can {
 
 struct CanFrame;
 struct CanFrameEvent;
-struct CanControllerStatus;
-struct CanConfigureBaudrate;
-struct CanSetControllerMode;
 struct CanFrameTransmitEvent;
 struct CanStateChangeEvent;
 struct CanErrorStateChangeEvent;

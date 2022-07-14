@@ -4,6 +4,7 @@
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
+#include "WireDataMessages.hpp"
 
 #include "silkit/services/pubsub/fwd_decl.hpp"
 
@@ -14,7 +15,7 @@ namespace PubSub {
 //! \brief IMsgForDataSubscriber interface used by the Participant
 class IMsgForDataPublisher
     : public Core::IReceiver<>
-    , public Core::ISender<DataMessageEvent>
+    , public Core::ISender<WireDataMessageEvent>
 {
 };
 

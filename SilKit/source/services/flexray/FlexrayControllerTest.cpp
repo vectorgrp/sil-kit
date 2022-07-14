@@ -40,7 +40,7 @@ public:
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const FlexrayHostCommand&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const FlexrayControllerConfig&));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const FlexrayTxBufferConfigUpdate&));
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const FlexrayTxBufferUpdate&));
+    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const WireFlexrayTxBufferUpdate&));
 };
 
 class FlexrayControllerTest : public testing::Test
@@ -77,7 +77,7 @@ protected:
     const EndpointAddress controllerAddress{4, 5};
     const EndpointAddress busSimAddress{9, 5};
 
-    decltype(FlexrayTxBufferUpdate::payload) referencePayload;
+    std::vector<uint8_t> referencePayload;
 
     MockParticipant participant;
     FlexrayController controller;
@@ -340,7 +340,7 @@ TEST_F(FlexrayControllerTest, send_txbuffer_update)
     EXPECT_CALL(participant, SendMsg(&controller, controllerCfg)).Times(1);
     controller.Configure(controllerCfg);
 
-    FlexrayTxBufferUpdate update{};
+    WireFlexrayTxBufferUpdate update{};
     update.txBufferIndex = 0;
     update.payload = referencePayload;
     update.payloadDataValid = true;
@@ -348,7 +348,7 @@ TEST_F(FlexrayControllerTest, send_txbuffer_update)
     EXPECT_CALL(participant, SendMsg(&controller, update))
         .Times(1);
 
-    controller.UpdateTxBuffer(update);
+    controller.UpdateTxBuffer(ToFlexrayTxBufferUpdate(update));
 }
 
 
@@ -424,14 +424,14 @@ TEST_F(FlexrayControllerTest, call_message_handler)
 {
     controller.AddFrameHandler(bind_method(&callbacks, &Callbacks::MessageHandler));
 
-    FlexrayFrameEvent message;
+    WireFlexrayFrameEvent message;
     message.timestamp = 17ns;
     message.channel = FlexrayChannel::A;
     message.frame.header.frameId = 13;
     message.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
     message.frame.payload = referencePayload;
 
-    EXPECT_CALL(callbacks, MessageHandler(&controller, message))
+    EXPECT_CALL(callbacks, MessageHandler(&controller, ToFlexrayFrameEvent(message)))
         .Times(1);
 
     controller.ReceiveMsg(&controllerBusSim, message);
@@ -441,14 +441,14 @@ TEST_F(FlexrayControllerTest, call_message_ack_handler)
 {
     controller.AddFrameTransmitHandler(bind_method(&callbacks, &Callbacks::MessageAckHandler));
 
-    FlexrayFrameTransmitEvent ack;
+    WireFlexrayFrameTransmitEvent ack;
     ack.timestamp = 17ns;
     ack.channel = FlexrayChannel::A;
     ack.frame.header.frameId = 13;
     ack.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
     ack.frame.payload = referencePayload;
 
-    EXPECT_CALL(callbacks, MessageAckHandler(&controller, ack))
+    EXPECT_CALL(callbacks, MessageAckHandler(&controller, ToFlexrayFrameTransmitEvent(ack)))
         .Times(1);
 
     controller.ReceiveMsg(&controllerBusSim, ack);
@@ -558,14 +558,14 @@ TEST_F(FlexrayControllerTest, add_remove_handler)
         handlerIds.push_back(controller.AddFrameHandler(bind_method(&callbacks, &Callbacks::MessageHandler)));
     }
 
-    FlexrayFrameEvent message;
+    WireFlexrayFrameEvent message;
     message.timestamp = 17ns;
     message.channel = FlexrayChannel::A;
     message.frame.header.frameId = 13;
     message.frame.header.payloadLength = static_cast<uint8_t>(referencePayload.size() / 2);
     message.frame.payload = referencePayload;
 
-    EXPECT_CALL(callbacks, MessageHandler(&controller, message)).Times(numHandlers);
+    EXPECT_CALL(callbacks, MessageHandler(&controller, ToFlexrayFrameEvent(message))).Times(numHandlers);
     controller.ReceiveMsg(&controllerBusSim, message);
 
     for (auto&& handlerId : handlerIds)
@@ -573,7 +573,7 @@ TEST_F(FlexrayControllerTest, add_remove_handler)
         controller.RemoveFrameHandler(handlerId);
     }
 
-    EXPECT_CALL(callbacks, MessageHandler(&controller, message)).Times(0);
+    EXPECT_CALL(callbacks, MessageHandler(&controller, ToFlexrayFrameEvent(message))).Times(0);
     controller.ReceiveMsg(&controllerBusSim, message);
 }
 

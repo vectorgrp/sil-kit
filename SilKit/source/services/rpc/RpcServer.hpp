@@ -33,7 +33,7 @@ public:
 
     void SetCallHandler(RpcCallHandler handler) override;
 
-    void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) override;
+    void SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData) override;
 
     //SilKit::Services::Orchestration::ITimeConsumer
     void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;

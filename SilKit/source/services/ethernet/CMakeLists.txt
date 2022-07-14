@@ -20,6 +20,7 @@ add_library(SilKitSimEthernet STATIC
 target_link_libraries(SilKitSimEthernet
     PUBLIC
         SilKitTracing
+        SilKitWireEthernet
     PRIVATE
         SilKitInternal
         SilKitInterface

@@ -137,11 +137,14 @@ protected:
                 {
                     auto expectedData =
                         std::vector<uint8_t>(messageSizeInBytes, static_cast<uint8_t>(receiveMsgCounter));
-                    EXPECT_EQ(dataMessageEvent.data, expectedData);
+                    EXPECT_TRUE(SilKit::Util::ItemsAreEqual(dataMessageEvent.data, SilKit::Util::ToSpan(expectedData)));
                 }
                 else
                 {
-                    auto foundDataIter = std::find(expectedDataUnordered.begin(), expectedDataUnordered.end(), dataMessageEvent.data);
+                    auto foundDataIter = std::find_if(expectedDataUnordered.begin(), expectedDataUnordered.end(),
+                                                      [&dataMessageEvent](const auto& expectedData) -> bool {
+                                                          return SilKit::Util::ItemsAreEqual(SilKit::Util::ToSpan(expectedData), dataMessageEvent.data);
+                                                      });
                     EXPECT_EQ(foundDataIter != expectedDataUnordered.end(), true);
                     if (foundDataIter != expectedDataUnordered.end())
                     {

@@ -94,9 +94,11 @@ protected:
         sendCan->Start();
         for (auto i = 1; i <= 10; i++)
         {
+            const auto frameDataField = std::array<uint8_t, 7>{1, 2, 3, 4, 5, 6, (uint8_t)i};
+
             SilKit::Services::Can::CanFrame frame;
             frame.canId = 5;
-            frame.dataField = {1, 2, 3, 4, 5, 6, (uint8_t)i};
+            frame.dataField = SilKit::Util::MakeSpan(frameDataField);
             frame.dlc = frame.dataField.size();
             sendCan->SendFrame(frame);
         }

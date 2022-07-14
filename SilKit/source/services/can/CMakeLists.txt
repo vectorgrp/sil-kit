@@ -21,6 +21,7 @@ target_include_directories(SilKitSimCan
 )
 
 target_link_libraries(SilKitSimCan
+    PUBLIC  SilKitWireCan
     PRIVATE SilKitInterface
             SilKitInternal
             SilKitTracing
@@ -35,7 +36,7 @@ add_silkit_test(TestSimCanController
         CanControllerDetailedSimTest.cpp 
         CanControllerTrivialSimTest.cpp
     LIBS 
-        SilKitSimCan 
+        SilKitSimCan
         SilKitMwMockParticipant
         SilKitTracing
         SilKitMwMockNullConnection

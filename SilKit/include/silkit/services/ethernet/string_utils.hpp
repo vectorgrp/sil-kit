@@ -16,28 +16,22 @@ namespace Ethernet {
 
 inline std::string to_string(EthernetTransmitStatus value);
 inline std::string to_string(EthernetState value);
-inline std::string to_string(EthernetMode value);
 
 inline std::string to_string(const EthernetFrame& msg);
 inline std::string to_string(const EthernetFrameEvent& msg);
 inline std::string to_string(const EthernetFrameTransmitEvent& msg);
-inline std::string to_string(const EthernetStatus& msg);
-inline std::string to_string(const EthernetSetMode& msg);
-
 
 inline std::ostream& operator<<(std::ostream& out, EthernetTransmitStatus value);
 inline std::ostream& operator<<(std::ostream& out, EthernetState value);
-inline std::ostream& operator<<(std::ostream& out, EthernetMode value);
 
 inline std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg);
 inline std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg);
 inline std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& msg);
-inline std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg);
-inline std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg);
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
+
 std::string to_string(EthernetTransmitStatus value)
 {
     switch (value)
@@ -72,18 +66,6 @@ std::string to_string(EthernetState value)
     throw SilKit::TypeConversionError{};
 }
 
-std::string to_string(EthernetMode value)
-{
-    switch (value)
-    {
-    case EthernetMode::Inactive:
-        return "Inactive";
-    case EthernetMode::Active:
-        return "Active";
-    };
-    throw SilKit::TypeConversionError{};
-}
-
 std::string to_string(const EthernetFrame& msg)
 {
     std::stringstream out;
@@ -105,59 +87,42 @@ std::string to_string(const EthernetFrameTransmitEvent& msg)
     return out.str();
 }
 
-std::string to_string(const EthernetStatus& msg)
-{
-    std::stringstream out;
-    out << msg;
-    return out.str();
-}
-
-std::string to_string(const EthernetSetMode& msg)
-{
-    std::stringstream out;
-    out << msg;
-    return out.str();
-}
-
 std::ostream& operator<<(std::ostream& out, EthernetTransmitStatus value)
 {
     return out << to_string(value);
 }
+
 std::ostream& operator<<(std::ostream& out, EthernetState value)
 {
     return out << to_string(value);
 }
-std::ostream& operator<<(std::ostream& out, EthernetMode value)
-{
-    return out << to_string(value);
-}
 
-std::ostream& operator<<(std::ostream& out, const EthernetFrame& frame)
+std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg)
 {
-    if (frame.raw.size() == 0)
+    if (msg.raw.size() == 0)
     {
         return out
             << "EthernetFrame{size=0}";
     }
     else
     {
-        out << "EthernetFrame{size=" << frame.raw.size();
-        if (frame.raw.size() >= 2 * sizeof(EthernetMac))
+        out << "EthernetFrame{size=" << msg.raw.size();
+        if (msg.raw.size() >= 2 * sizeof(EthernetMac))
         {
             EthernetMac destinationMac;
             EthernetMac sourceMac;
             std::copy(
-                frame.raw.begin(),
-                frame.raw.begin() + sizeof(EthernetMac), destinationMac.begin());
+                msg.raw.begin(),
+                msg.raw.begin() + sizeof(EthernetMac), destinationMac.begin());
             std::copy(
-                frame.raw.begin() + sizeof(EthernetMac),
-                frame.raw.begin() + 2 * sizeof(EthernetMac), sourceMac.begin());
+                msg.raw.begin() + sizeof(EthernetMac),
+                msg.raw.begin() + 2 * sizeof(EthernetMac), sourceMac.begin());
 
             out << ", src = " << Util::AsHexString(sourceMac).WithSeparator(":")
                 << ", dst=" << Util::AsHexString(destinationMac).WithSeparator(":");
         }
         return out
-            << ", data=[" << Util::AsHexString(frame.raw).WithSeparator(" ").WithMaxLength(8)
+            << ", data=[" << Util::AsHexString(msg.raw).WithSeparator(" ").WithMaxLength(8)
             << "]}";
     }
 }
@@ -183,23 +148,6 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& ms
         << "}";
 
     return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg)
-{
-    auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
-    return out
-        << "EthernetStatus{"
-        << "state=" << msg.state
-        << "bitrate=" << msg.bitrate
-        << " @" << timestamp.count() << "ms"
-        << "}";
-}
-
-std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg)
-{
-    return out
-        << "EthernetSetMode{" << msg.mode << "}";
 }
 
 } // namespace Ethernet

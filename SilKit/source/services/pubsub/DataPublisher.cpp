@@ -3,6 +3,7 @@
 #include "DataPublisher.hpp"
 #include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
+#include "WireDataMessages.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -20,15 +21,10 @@ DataPublisher::DataPublisher(Core::IParticipantInternal* participant, Services::
 {
 }
 
-void DataPublisher::Publish(std::vector<uint8_t> data)
+void DataPublisher::Publish(Util::Span<const uint8_t> data)
 {
-    DataMessageEvent msg{_timeProvider->Now(), std::move(data)};
-    _participant->SendMsg(this, std::move(msg));
-}
-
-void DataPublisher::Publish(const uint8_t* data, std::size_t size)
-{
-    Publish({data, data + size});
+    WireDataMessageEvent msg{_timeProvider->Now(), data};
+    _participant->SendMsg(this, msg);
 }
 
 void DataPublisher::SetTimeProvider(Services::Orchestration::ITimeProvider* provider)

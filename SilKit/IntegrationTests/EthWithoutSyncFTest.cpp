@@ -85,7 +85,7 @@ protected:
 
         while (numSent < _testFrames.size())
         {
-            controller->SendFrameEvent(_testFrames.at(numSent++).expectedFrameEvent); // Don't move the event to test the altered transmitID
+            controller->SendFrameEvent(ToEthernetFrameEvent(_testFrames.at(numSent++).expectedFrameEvent)); // Don't move the event to test the altered transmitID
         }
         std::cout << "All eth messages sent" << std::endl;
 
@@ -106,7 +106,7 @@ protected:
         controller->AddFrameHandler(
             [this, &ethReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Ethernet::IEthernetController*, const SilKit::Services::Ethernet::EthernetFrameEvent& msg) {
 
-                _testFrames.at(numReceived++).receivedFrameEvent = msg;
+                _testFrames.at(numReceived++).receivedFrameEvent = MakeWireEthernetFrameEvent(msg);
                 if (numReceived >= _testFrames.size())
                 {
                     std::cout << "All eth messages received" << std::endl;
@@ -133,15 +133,15 @@ protected:
             // Without sync: Do not test the timestamps
             message.receivedFrameEvent.timestamp = 0ns;
             message.receivedAck.timestamp = 0ns;
-            EXPECT_EQ(message.expectedFrameEvent, message.receivedFrameEvent);
+            EXPECT_EQ(ToEthernetFrameEvent(message.expectedFrameEvent), ToEthernetFrameEvent(message.receivedFrameEvent));
             EXPECT_EQ(message.expectedAck, message.receivedAck);
         }
     }
 
     struct TestFrame
     {
-        SilKit::Services::Ethernet::EthernetFrameEvent expectedFrameEvent;
-        SilKit::Services::Ethernet::EthernetFrameEvent receivedFrameEvent;
+        SilKit::Services::Ethernet::WireEthernetFrameEvent expectedFrameEvent;
+        SilKit::Services::Ethernet::WireEthernetFrameEvent receivedFrameEvent;
         SilKit::Services::Ethernet::EthernetFrameTransmitEvent expectedAck;
         SilKit::Services::Ethernet::EthernetFrameTransmitEvent receivedAck;
     };

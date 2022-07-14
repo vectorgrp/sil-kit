@@ -8,7 +8,7 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, 
+DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                                                const std::string& topic, const std::string& mediaType,
                                                const std::map<std::string, std::string>& labels,
                                                DataMessageHandlerT defaultHandler, IDataSubscriber* parent)
@@ -38,7 +38,7 @@ void DataSubscriberInternal::RemoveExplicitDataMessageHandler(HandlerId handlerI
     _explicitDataMessageHandlers.Remove(handlerId);
 }
 
-void DataSubscriberInternal::ReceiveMsg(const Core::IServiceEndpoint* from, const DataMessageEvent& dataMessageEvent)
+void DataSubscriberInternal::ReceiveMsg(const Core::IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent)
 {
     if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
         return;
@@ -46,13 +46,13 @@ void DataSubscriberInternal::ReceiveMsg(const Core::IServiceEndpoint* from, cons
     ReceiveMessage(dataMessageEvent);
 }
 
-void DataSubscriberInternal::ReceiveMessage(const DataMessageEvent& dataMessageEvent)
+void DataSubscriberInternal::ReceiveMessage(const WireDataMessageEvent& dataMessageEvent)
 {
-    const auto anySpecificHandlerExecuted = _explicitDataMessageHandlers.InvokeAll(_parent, dataMessageEvent);
+    const auto anySpecificHandlerExecuted = _explicitDataMessageHandlers.InvokeAll(_parent, ToDataMessageEvent(dataMessageEvent));
 
     if (_defaultHandler && !anySpecificHandlerExecuted)
     {
-        _defaultHandler(_parent, dataMessageEvent);
+        _defaultHandler(_parent, ToDataMessageEvent(dataMessageEvent));
     }
 
     if (!_defaultHandler && !anySpecificHandlerExecuted)

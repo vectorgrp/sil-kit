@@ -82,7 +82,7 @@ public:
     void RemoveFrameTransmitHandler(HandlerId handlerId) override;
 
     // IMsgForCanController
-    void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanFrameEvent& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::WireCanFrameEvent& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
 

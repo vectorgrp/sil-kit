@@ -2,25 +2,25 @@
 
 #include "EthernetSerdes.hpp"
 
-
 namespace SilKit {
 namespace Services {
 namespace Ethernet {
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrame& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireEthernetFrame& msg)
 {
     buffer << msg.raw;
 
     return buffer;
 }
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrame& msg)
+
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireEthernetFrame& msg)
 {
     buffer >> msg.raw;
 
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrameEvent& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireEthernetFrameEvent& msg)
 {
     buffer << msg.transmitId
            << msg.timestamp
@@ -29,7 +29,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrameEvent& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireEthernetFrameEvent& msg)
 {
     buffer >> msg.transmitId
            >> msg.timestamp
@@ -38,7 +38,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Eth
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrameTransmitEvent& ack)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrameTransmitEvent& ack)
 {
     buffer << ack.transmitId
            << ack.sourceMac
@@ -47,7 +47,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
 {
     buffer >> ack.transmitId
            >> ack.sourceMac
@@ -56,7 +56,7 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Eth
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetStatus& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetStatus& msg)
 {
     buffer << msg.timestamp
            << msg.state
@@ -64,7 +64,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetStatus& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetStatus& msg)
 {
     buffer >> msg.timestamp
            >> msg.state
@@ -72,13 +72,13 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Eth
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetSetMode& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetSetMode& msg)
 {
     buffer << msg.mode;
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetSetMode& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetSetMode& msg)
 {
     buffer >> msg.mode;
     return buffer;
@@ -86,31 +86,27 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Eth
 
 using SilKit::Core::MessageBuffer;
 
-void Serialize(MessageBuffer& buffer, const EthernetFrameEvent& msg)
+void Serialize(MessageBuffer& buffer, const WireEthernetFrameEvent& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const EthernetFrameTransmitEvent& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const EthernetStatus& msg)
 {
     buffer << msg;
-    return;
 }
 
 void Serialize(MessageBuffer& buffer, const EthernetSetMode& msg)
 {
     buffer << msg;
-    return;
 }
 
-void Deserialize(MessageBuffer& buffer, EthernetFrameEvent& out)
+void Deserialize(MessageBuffer& buffer, WireEthernetFrameEvent& out)
 {
     buffer >> out;
 }
@@ -130,6 +126,6 @@ void Deserialize(MessageBuffer& buffer, EthernetSetMode& out)
     buffer >> out;
 }
 
-} // namespace Ethernet    
+} // namespace Ethernet
 } // namespace Services
 } // namespace SilKit

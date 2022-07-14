@@ -34,8 +34,7 @@ public:
 
     void RegisterServiceDiscovery();
 
-    auto Call(std::vector<uint8_t> data) -> IRpcCallHandle* override;
-    auto Call(const uint8_t* data, std::size_t size) -> IRpcCallHandle* override;
+    auto Call(Util::Span<const uint8_t> data) -> IRpcCallHandle* override;
 
     void SetCallResultHandler(RpcCallResultHandler handler) override;
 

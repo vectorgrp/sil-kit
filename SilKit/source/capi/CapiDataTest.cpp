@@ -34,8 +34,7 @@ MATCHER_P(PayloadMatcher, controlPayload, "")
 class MockDataPublisher : public SilKit::Services::PubSub::IDataPublisher
 {
 public:
-    MOCK_METHOD1(Publish, void(std::vector<uint8_t> data));
-    virtual void Publish(const uint8_t* /*data*/, std::size_t /*size*/){};
+    MOCK_METHOD(void, Publish, (SilKit::Util::Span<const uint8_t> data), (override));
 };
 
 class MockDataSubscriber : public SilKit::Services::PubSub::IDataSubscriber

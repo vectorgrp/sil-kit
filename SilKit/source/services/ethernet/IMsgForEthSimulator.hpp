@@ -5,6 +5,8 @@
 #include "IReceiver.hpp"
 #include "ISender.hpp"
 #include "IServiceEndpoint.hpp"
+#include "WireEthernetMessages.hpp"
+
 #include "silkit/services/ethernet/fwd_decl.hpp"
 
 namespace SilKit {
@@ -16,8 +18,8 @@ namespace Ethernet {
 *  Used by the Participant, implemented by the EthSimulator
 */
 class IMsgForEthSimulator
-    : public Core::IReceiver<EthernetFrameEvent, EthernetSetMode>
-    , public Core::ISender<EthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
+    : public Core::IReceiver<WireEthernetFrameEvent, EthernetSetMode>
+    , public Core::ISender<WireEthernetFrameEvent, EthernetFrameTransmitEvent, EthernetStatus>
 {
 public:
     virtual ~IMsgForEthSimulator() = default;

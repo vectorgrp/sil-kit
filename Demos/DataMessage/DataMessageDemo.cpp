@@ -31,7 +31,7 @@ void PublishMessage(IDataPublisher* publisher, std::string topicname)
 
 void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
-    SilKit::Util::SerDes::Deserializer deserializer(dataMessageEvent.data);
+    SilKit::Util::SerDes::Deserializer deserializer(SilKit::Util::ToStdVector(dataMessageEvent.data));
     const auto message = deserializer.Deserialize<std::string>();
     std::cout << ">> Received new Message: with data=\"" << message << "\"" << std::endl;
 }

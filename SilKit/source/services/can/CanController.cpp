@@ -129,28 +129,28 @@ void CanController::ChangeControllerMode(CanControllerState state)
 
 auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTxId
 {
-    CanFrameEvent canFrameEvent{};
-    canFrameEvent.frame = frame;
-    canFrameEvent.transmitId = MakeTxId();
-    canFrameEvent.userContext = userContext;
+    WireCanFrameEvent wireCanFrameEvent{};
+    wireCanFrameEvent.transmitId = MakeTxId();
+    wireCanFrameEvent.frame = MakeWireCanFrame(frame);
+    wireCanFrameEvent.userContext = userContext;
 
-    SendMsg(canFrameEvent);
-    return canFrameEvent.transmitId;
+    SendMsg(wireCanFrameEvent);
+    return wireCanFrameEvent.transmitId;
 }
 
 //------------------------
 // ReceiveMsg
 //------------------------
 
-void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanFrameEvent& msg)
+void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameEvent& msg)
 {
     if (!AllowReception(from))
     {
         return;
     }
 
-    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, msg);
-    CallHandlers(msg);
+    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, ToCanFrameEvent(msg));
+    CallHandlers(ToCanFrameEvent(msg));
 }
 
 void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanFrameTransmitEvent& msg)

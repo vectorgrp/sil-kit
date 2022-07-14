@@ -4,6 +4,7 @@
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"
+#include "WireFlexrayMessages.hpp"
 
 #include "silkit/services/flexray/fwd_decl.hpp"
 
@@ -16,10 +17,10 @@ namespace Flexray {
  *  Used by the Participant, implemented by the FlexrayController
  */
 class IMsgForFlexrayController
-    : public Core::IReceiver<FlexrayFrameEvent, FlexrayFrameTransmitEvent, FlexraySymbolEvent,
+    : public Core::IReceiver<WireFlexrayFrameEvent, WireFlexrayFrameTransmitEvent, FlexraySymbolEvent,
                              FlexraySymbolTransmitEvent, FlexrayCycleStartEvent, FlexrayPocStatusEvent>
     , public Core::ISender<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,
-                           FlexrayTxBufferUpdate>
+                           WireFlexrayTxBufferUpdate>
 {
 };
 

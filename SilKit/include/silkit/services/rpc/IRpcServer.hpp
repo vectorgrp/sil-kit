@@ -6,6 +6,8 @@
 
 #include "RpcDatatypes.hpp"
 
+#include "silkit/util/Span.hpp"
+
 namespace SilKit {
 namespace Services {
 namespace Rpc {
@@ -23,7 +25,7 @@ public:
     * \param callHandle A unique identifier of this call
     * \param resultData The byte vector to be returned to the client
     */
-    virtual void SubmitResult(IRpcCallHandle* callHandle, std::vector<uint8_t> resultData) = 0;
+    virtual void SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData) = 0;
 
     /*! \brief Overwrite the call handler of this server
      *

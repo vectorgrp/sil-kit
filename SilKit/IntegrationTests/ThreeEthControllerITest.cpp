@@ -91,7 +91,7 @@ protected:
                     EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
                     auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
-                    controller->SendFrame(ethernetFrame);
+                    controller->SendFrame(ToEthernetFrame(ethernetFrame));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }

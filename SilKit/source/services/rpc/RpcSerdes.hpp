@@ -3,6 +3,7 @@
 #pragma once
 
 #include "MessageBuffer.hpp"
+#include "WireRpcMessages.hpp"
 
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 

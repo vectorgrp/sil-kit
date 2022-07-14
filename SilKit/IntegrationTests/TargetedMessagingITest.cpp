@@ -52,7 +52,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
             if (now == 0ms)
             {
-                SilKit::Services::Can::CanFrameEvent msg{};
+                SilKit::Services::Can::WireCanFrameEvent msg{};
                 msg.direction = SilKit::Services::TransmitDirection::RX;
                 msg.frame.canId = 42;
                 senderCom->SendMsg(senderCan, "TargetReceiver", msg);
