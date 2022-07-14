@@ -42,7 +42,7 @@ void SimBehaviorTrivial::SendMsg(CanConfigureBaudrate&& /*baudRate*/)
 
 void SimBehaviorTrivial::SendMsg(CanSetControllerMode&& mode)
 {
-    CanControllerStatus newStatus;
+    CanControllerStatus newStatus{};
     newStatus.timestamp = _timeProvider->Now();
     newStatus.controllerState = mode.mode;
 
