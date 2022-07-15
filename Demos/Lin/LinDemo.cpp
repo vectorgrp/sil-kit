@@ -471,7 +471,7 @@ int main(int argc, char** argv) try
             }, 1ms);
     }
 
-    auto lifecycleFuture = lifecycleService->StartLifecycle({true, true});
+    auto lifecycleFuture = lifecycleService->StartLifecycle({true});
     auto finalState = lifecycleFuture.get();
 
     std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

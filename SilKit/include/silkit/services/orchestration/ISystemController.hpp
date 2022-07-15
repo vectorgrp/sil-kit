@@ -30,35 +30,7 @@ namespace Orchestration {
 class ISystemController
 {
 public:
-    /*! \brief Send \ref ParticipantCommand::Kind::Restart to a specific participant
-     *
-     *  The command is only allowed if the participant is in the
-     *  ParticipantState::Stopped or ParticipantState::Error state.
-     *
-     *  \param participantName identifies the participant to be restarted
-     *
-     */
-    virtual void Restart(const std::string& participantName) const = 0;
-
-    /*! \brief Send \ref SystemCommand::Kind::Run to all participants
-     *
-     *  The command is only allowed if system is in SystemState::Initialized.
-     */
-    virtual void Run() const = 0;
-
-    /*! \brief Send \ref SystemCommand::Kind::Stop to all participants
-     *
-     *  The command is only allowed if system is in SystemState::ReadyToRun.
-     */
-    virtual void Stop() const = 0;
-
-    /*! \brief Send \ref ParticipantCommand::Kind::Shutdown to a given participant
-     *
-     *  The command is only allowed if system is in
-     *  SystemState::Stopped or SystemState::Error.
-     *  \param participantName identifies the participant to be shut down
-     */
-    virtual void Shutdown(const std::string& participantName) const = 0;
+    virtual ~ISystemController() = default;
 
     /*! \brief Send \ref SystemCommand::Kind::AbortSimulation to all participants
     *

@@ -116,7 +116,6 @@ public:
     auto State() const -> ParticipantState override;
     auto Status() const -> const ParticipantStatus& override;
 
-    void ReceiveMsg(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& msg) override;
 
     void SetTimeSyncActive(bool isTimeSyncActive) override;
@@ -131,10 +130,10 @@ public:
 
 public:
     //!< Returns true if we are ready to leave the CommunicationReady state (i.e. handler invocation is done).
-    bool TriggerCommunicationReadyHandler(std::string reason);
-    void TriggerStartingHandler(std::string reason);
-    void TriggerStopHandler(std::string reason);
-    void TriggerShutdownHandler(std::string reason);
+    bool TriggerCommunicationReadyHandler();
+    void TriggerStartingHandler();
+    void TriggerStopHandler();
+    void TriggerShutdownHandler();
 
     void ChangeState(ParticipantState newState, std::string reason);
 
@@ -144,15 +143,15 @@ public:
 
     bool IsTimeSyncActive() const;
 
+    void Shutdown(std::string reason);
+    void Restart(std::string reason);
 
 private:
     // ----------------------------------------
     // private methods
-    auto StartLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+    auto StartLifecycle(bool isCoordinated)
         -> std::future<ParticipantState>;
 
-    void Shutdown(std::string reason);
-    void Restart(std::string reason);
     void AbortSimulation(std::string reason);
 
 private:
@@ -164,8 +163,7 @@ private:
 
     TimeSyncService* _timeSyncService;
 
-    bool _hasCoordinatedSimulationStart = false;
-    bool _hasCoordinatedSimulationStop = false;
+    bool _isCoordinated = false;
 
     bool _isRunning{false};
     ParticipantStatus _status;

@@ -96,7 +96,7 @@ public:
     {
         auto* lifecycleService = _participant->GetLifecycleService();
         lifecycleService->SetTimeSyncActive(true);
-        _simulationFuture = lifecycleService->StartLifecycle({true, true});
+        _simulationFuture = lifecycleService->StartLifecycle({true});
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -146,10 +146,9 @@ public:
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({syncParticipantNames});
 
+        _lifecycleService = _participant->GetLifecycleService();
+
         _monitor = _participant->GetSystemMonitor();
-        _monitor->AddSystemStateHandler([this](SystemState newState) {
-            this->OnSystemStateChanged(newState);
-        });
 
         auto* lifecycleService = _participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -177,7 +176,7 @@ public:
     {
         auto* lifecycleService = _participant->GetLifecycleService();
         lifecycleService->SetTimeSyncActive(true);
-        return lifecycleService->StartLifecycle({true, true});
+        return lifecycleService->StartLifecycle({true});
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)
@@ -186,21 +185,6 @@ public:
     }
 
 private:
-    void OnSystemStateChanged(SystemState newState)
-    {
-        if (newState == SystemState::ReadyToRun)
-        {
-            _systemController->Run();
-        }
-        else if (newState == SystemState::Stopped)
-        {
-            for(auto&& name: syncParticipantNames)
-            {
-                _systemController->Shutdown(name);
-            }
-        }
-    }
-
     void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent, const uint32_t publisherIndex)
     {
         auto& messageIndex = _messageIndexes[publisherIndex];
@@ -218,11 +202,7 @@ private:
         catch (std::runtime_error& /*error*/)
         {
             std::cout << "ERROR: Received message does not match the expected format" << std::endl;
-            for(auto&& name: syncParticipantNames)
-            {
-                _systemController->Shutdown(name);
-            }
-            _systemController->Stop();
+            _systemController->AbortSimulation();
             return;
         }
 
@@ -246,17 +226,14 @@ private:
         const auto sumOfIndexes = std::accumulate(_messageIndexes.begin(), _messageIndexes.end(), 0u);
         if (sumOfIndexes == _testSize * _publisherCount)
         {
-            _systemController->Stop();
-            for(auto&& name: syncParticipantNames)
-            {
-                _systemController->Shutdown(name);
-            }
+            _lifecycleService->Stop("End Test");
         }
     }
 
 private:
     std::unique_ptr<IParticipantInternal> _participant{nullptr};
     ISystemController* _systemController{nullptr};
+    ILifecycleServiceInternal* _lifecycleService{nullptr};
     ISystemMonitor* _monitor{nullptr};
 
     uint32_t _publisherCount{0u};

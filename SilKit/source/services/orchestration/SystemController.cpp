@@ -31,26 +31,6 @@ SystemController::SystemController(Core::IParticipantInternal* participant)
 {
 }
 
-void SystemController::Restart(const std::string& participantName) const
-{
-    SendParticipantCommand(Util::Hash::Hash(participantName), ParticipantCommand::Kind::Restart);
-}
-
-void SystemController::Run() const
-{
-    SendSystemCommand(SystemCommand::Kind::Run);
-}
-
-void SystemController::Stop() const
-{
-    SendSystemCommand(SystemCommand::Kind::Stop);
-}
-
-void SystemController::Shutdown(const std::string& participantName) const
-{
-    SendParticipantCommand(Util::Hash::Hash(participantName), ParticipantCommand::Kind::Shutdown);
-}
-
 void SystemController::AbortSimulation() const
 {
     SendSystemCommand(SystemCommand::Kind::AbortSimulation);

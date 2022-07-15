@@ -97,7 +97,7 @@ public:
     {
         auto* lifecycleService = _participant->GetLifecycleService();
         lifecycleService->SetTimeSyncActive(true);
-        _simulationFuture = lifecycleService->StartLifecycle({true, true});
+        _simulationFuture = lifecycleService->StartLifecycle({true});
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -150,9 +150,8 @@ public:
         _systemController->SetWorkflowConfiguration({_syncParticipantNames});
 
         _monitor = _participant->GetSystemMonitor();
-        _monitor->AddSystemStateHandler([this](SystemState newState) {
-            this->OnSystemStateChanged(newState);
-        });
+
+        _lifecycleService = _participant->GetLifecycleService();
 
         auto* lifecycleService = _participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -178,7 +177,7 @@ public:
     {
         auto* lifecycleService = _participant->GetLifecycleService();
         lifecycleService->SetTimeSyncActive(true);
-        return lifecycleService->StartLifecycle({true, true});
+        return lifecycleService->StartLifecycle({true});
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)
@@ -187,20 +186,6 @@ public:
     }
 
 private:
-    void OnSystemStateChanged(SystemState newState)
-    {
-        if (newState == SystemState::ReadyToRun)
-        {
-            _systemController->Run();
-        }
-        else if (newState == SystemState::Stopped)
-        {
-            for(auto&& name: _syncParticipantNames)
-            {
-                _systemController->Shutdown(name);
-            }
-        }
-    }
 
     void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent,
                         const uint32_t publisherIndex)
@@ -220,7 +205,7 @@ private:
         catch (std::runtime_error& /*error*/)
         {
             std::cout << "ERROR: Received message does not match the expected format" << std::endl;
-            _systemController->Stop();
+            _lifecycleService->Stop("Test");
             return;
         }
 
@@ -241,7 +226,7 @@ private:
         const auto sumOfIndexes = std::accumulate(_messageIndexes.begin(), _messageIndexes.end(), 0u);
         if (sumOfIndexes == _numMessages * _publisherCount)
         {
-            _systemController->Stop();
+            _lifecycleService->Stop("Test");
         }
     }
 
@@ -252,6 +237,7 @@ private:
     std::vector<std::string> _syncParticipantNames;
     std::unique_ptr<IParticipantInternal> _participant{nullptr};
     ISystemController* _systemController{nullptr};
+    SilKit::Services::Orchestration::ILifecycleServiceInternal* _lifecycleService{nullptr};
     ISystemMonitor* _monitor{nullptr};
 
     std::chrono::nanoseconds _currentTime{0ns};

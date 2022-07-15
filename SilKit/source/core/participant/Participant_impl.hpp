@@ -870,12 +870,6 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::ParticipantCommand& msg)
-{
-    SendMsgImpl(from, msg);
-}
-
-template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Orchestration::SystemCommand& msg)
 {
     SendMsgImpl(from, msg);
@@ -1121,12 +1115,6 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantStatus& msg)
-{
-    SendMsgImpl(from, targetParticipantName, msg);
-}
-
-template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantCommand& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }

@@ -162,7 +162,7 @@ int main(int argc, char** argv)
                     }
                 }, 5ms);
             auto finalStateFuture = lifecycleService->StartLifecycle(
-                Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
+                Orchestration::LifecycleConfiguration{coordinateStartAndStop});
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;
@@ -199,7 +199,7 @@ int main(int argc, char** argv)
             });
 
             auto finalStateFuture = lifecycleService->StartLifecycle(
-                Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
+                Orchestration::LifecycleConfiguration{coordinateStartAndStop});
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;

@@ -30,7 +30,7 @@ namespace Services {
 namespace Orchestration {
 
 class IMsgForTimeSyncService
-    : public Core::IReceiver<ParticipantCommand, NextSimTask, SystemCommand>
+    : public Core::IReceiver<NextSimTask>
     , public Core::ISender<ParticipantStatus, NextSimTask>
 {
 };

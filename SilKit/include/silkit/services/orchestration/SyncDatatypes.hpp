@@ -35,32 +35,6 @@ using ParticipantId = uint64_t;
 namespace Services {
 namespace Orchestration {
 
-struct ParticipantCommand
-{
-    //! The different kinds of a ParticipantCommand
-    enum class Kind : uint8_t {
-        Invalid = 0, //!< An invalid command
-        Restart = 1, //!< The restart command
-        Shutdown = 2 //!< The shutdown command
-    };
-
-    ParticipantId participant; //!< The specific participant that receives this command.
-    Kind kind; //!< The kind of participant command that is sent.
-};
-
-struct SystemCommand
-{
-    //! The different kinds of a SystemCommand
-    enum class Kind : uint8_t {
-        Invalid = 0, //!< An invalid command
-        Run = 1, //!< The run command
-        Stop = 2, //!< The stop command
-        AbortSimulation = 6 //!< The abort simulation command
-    };
-
-    Kind kind; //!< The kind of system command that is sent.
-};
-
 // note: always increase number (never reuse old ones!)
 enum class ParticipantState : uint8_t {
     Invalid                     =   0, //!< An invalid participant state
@@ -75,7 +49,6 @@ enum class ParticipantState : uint8_t {
     Error                       =  90, //!< The error state
     ShuttingDown                = 100, //!< The shutting down state
     Shutdown                    = 110, //!< The shutdown state
-    Reinitializing              = 120, //!< The reinitializing state
 };
 
 struct ParticipantStatus
@@ -101,7 +74,6 @@ enum class SystemState : uint8_t {
     Error                       =  90, //!< The error state
     ShuttingDown                = 100, //!< The shutting down state
     Shutdown                    = 110, //!< The shutdown state
-    Reinitializing              = 120, //!< The reinitializing state
 };
 
 //! \brief Details of the simulation workflow regarding lifecycle and participant coordination.
@@ -113,8 +85,7 @@ struct WorkflowConfiguration
 //!< The lifecycle start configuration.
 struct LifecycleConfiguration
 {
-    bool coordinatedStart;
-    bool coordinatedStop;
+    bool isCoordinated;
 };
 
 struct ParticipantConnectionInformation

@@ -123,6 +123,14 @@ protected:
             controller->Start();
         });
 
+        auto name = writer->Name();
+        lifecycleService->SetStopHandler([name]() {
+            std::cout << "Stop received by participant " << name << std::endl;
+        });
+        lifecycleService->SetShutdownHandler([name]() {
+            std::cout << "Shutdown received by participant " << name << std::endl;
+        });
+
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         timeSyncService->SetSimulationStepHandler(
             [this, controller](auto, auto)
@@ -181,6 +189,14 @@ protected:
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Start();
+        });
+
+        auto name = reader->Name();
+        lifecycleService->SetStopHandler([name]() {
+            std::cout << "Stop received by participant " << name << std::endl;
+        });
+        lifecycleService->SetShutdownHandler([name]() {
+            std::cout << "Shutdown received by participant " << name << std::endl;
         });
     }
 

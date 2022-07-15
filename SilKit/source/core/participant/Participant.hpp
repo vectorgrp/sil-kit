@@ -192,7 +192,6 @@ public:
 
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::NextSimTask& msg) override;
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::ParticipantStatus& msg) override;
-    void SendMsg(const IServiceEndpoint*, const Services::Orchestration::ParticipantCommand& msg) override;
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::SystemCommand& msg) override;
     void SendMsg(const IServiceEndpoint*, const Services::Orchestration::WorkflowConfiguration& msg) override;
 
@@ -241,7 +240,6 @@ public:
 
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::NextSimTask& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::ParticipantStatus& msg) override;
-    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::ParticipantCommand& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::SystemCommand& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Services::Orchestration::WorkflowConfiguration& msg) override;
 

@@ -61,7 +61,7 @@ auto SimParticipant::Result() -> std::future<SilKit::Services::Orchestration::Pa
 
 void SimParticipant::Stop()
 {
-    GetOrCreateSystemController()->Stop();
+    GetOrCreateLifecycleServiceWithTimeSync()->Stop("Stop");
 }
 
 auto SimParticipant::GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*
@@ -143,7 +143,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     {
         auto& participant = kv.second;
         auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
-        participant->_result = lifecycleService->StartLifecycle({true, true});
+        participant->_result = lifecycleService->StartLifecycle({true});
     }
 
     // wait until simulation is finished or timeout is reached
@@ -209,11 +209,6 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
 
     participant->_participant =
         SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participantName, _registryUri);
-
-    //    Let's make sure the SystemController is cached, in case the user
-    //    needs it during simulation (e.g., calling Stop()).
-    auto* systemCtrl = participant->GetOrCreateSystemController();
-    (void)systemCtrl;
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this

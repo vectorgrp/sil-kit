@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 #include "silkit/services/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
@@ -168,8 +169,8 @@ public:
                 AwaitCommunication();
             }
 
-            AffirmAllDone();
             lifecycleService->CompleteCommunicationReadyHandlerAsync();
+            AffirmAllDone();
         }};
 
         lifecycleService->SetCommunicationReadyHandlerAsync([this]() {
@@ -235,7 +236,9 @@ public:
                 std::cout << ss.str();
             }, 1s);
 
-        auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
+        LifecycleConfiguration lc{};
+        lc.isCoordinated = true;
+        auto finalStateFuture = lifecycleService->StartLifecycle(lc);
         std::cout << "[" << name << "] Started Lifecycle" << std::endl;
 
         finalStateFuture.get();
@@ -282,60 +285,37 @@ protected:
 
     struct SystemMaster
     {
+        ILifecycleServiceNoTimeSync* lifecycleService;
         std::unique_ptr<IParticipant> participant;
-        ISystemController*           systemController;
-        ISystemMonitor*              systemMonitor;
+        ISystemController* systemController;
+        ISystemMonitor* systemMonitor;
+
+        std::promise<void> waitForStopPromise;
+        std::future<void> waitForStopFuture;
     };
-
-    void ParticipantStatusHandler(const ParticipantStatus& newStatus)
-    {
-        switch (newStatus.state)
-        {
-        case ParticipantState::Error:
-            //systemMaster.systemController->Shutdown();
-            break;
-
-        default:
-            break;
-        }
-    }
 
     void SystemStateHandler(SystemState newState)
     {
         switch (newState)
         {
-        case SystemState::ReadyToRun:
-            systemMaster.systemController->Run();
-            break;
-
-        case SystemState::Stopped:
-            for (auto&& name : participantNames)
-            {
-                systemMaster.systemController->Shutdown(name);
-            }
-            systemMaster.systemController->Shutdown(systemMasterName);
-            break;
-
         case SystemState::Error:
-            for (auto&& name : participantNames)
-            {
-                systemMaster.systemController->Shutdown(name);
-            }
-            systemMaster.systemController->Shutdown(systemMasterName);
+            std::cout << "State = " << newState << std::endl;
+            AbortAndFailTest("Reached SystemState::Error");
             break;
-
-        default:
+        case SystemState::Running:
+            std::cout << "State = " << newState << std::endl;
+            systemMaster.lifecycleService->Stop("End of test");
+            systemMaster.waitForStopPromise.set_value();
+            break;
+        default: 
+            std::cout << "State = " << newState << std::endl;
             break;
         }
     }
 
-    void ShutdownAndFailTest(const std::string& reason)
+    void AbortAndFailTest(const std::string& reason)
     {
-
-        for (auto&& name : participantNames)
-        {
-            systemMaster.systemController->Shutdown(name);
-        }
+        systemMaster.systemController->AbortSimulation();
         FAIL() << reason;
     }
 
@@ -351,8 +331,11 @@ protected:
         systemMaster.participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
+        systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleServiceNoTimeSync();
         systemMaster.systemController = systemMaster.participant->CreateSystemController();
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
+
+        systemMaster.waitForStopFuture = systemMaster.waitForStopPromise.get_future();
 
         systemMaster.systemController->SetWorkflowConfiguration({participantNames});
 
@@ -360,9 +343,9 @@ protected:
             SystemStateHandler(newState);
         });
 
-        systemMaster.systemMonitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
-            ParticipantStatusHandler(newStatus);
-        });
+        LifecycleConfiguration lc;
+        lc.isCoordinated = true;
+        systemMaster.lifecycleService->StartLifecycle(lc);
     }
 
     void RunParticipantThreads(std::vector<TestParticipant>& participants, const std::string& registryUri)
@@ -390,6 +373,7 @@ protected:
         {
             participantNames.push_back(p.Name());
         }
+        participantNames.push_back(systemMasterName);
 
         RunRegistry(registryUri);
         RunSystemMaster(registryUri);
@@ -451,7 +435,7 @@ try {
     for (auto& p : participants)
         p.AwaitAllDone();
 
-    systemMaster.systemController->Stop();
+    systemMaster.waitForStopFuture.wait_for(10s);
 
     JoinParticipantThreads();
 
@@ -461,7 +445,7 @@ catch (const std::exception& error)
 {
     std::stringstream ss;
     ss << "Something went wrong: " << error.what() << std::endl;
-    ShutdownAndFailTest(ss.str());
+    AbortAndFailTest(ss.str());
 }
 
 } // anonymous namespace

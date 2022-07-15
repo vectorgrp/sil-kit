@@ -207,7 +207,7 @@ int main(int argc, char** argv)
                     }, 5ms);
             }
 
-            auto finalStateFuture = lifecycleService->StartLifecycle({runCoordinated, runCoordinated});
+            auto finalStateFuture = lifecycleService->StartLifecycle({runCoordinated});
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
@@ -275,7 +275,7 @@ int main(int argc, char** argv)
             }
 
             auto finalStateFuture =
-                lifecycleService->StartLifecycle({runCoordinated, runCoordinated});
+                lifecycleService->StartLifecycle({runCoordinated});
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
             isStopped = true;

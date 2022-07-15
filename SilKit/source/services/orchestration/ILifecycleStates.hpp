@@ -26,26 +26,46 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
+enum class CallbackResult
+{
+    Error,
+    Completed,
+    Deferred
+};
+
 class ILifecycleState
 {
 public:
     virtual ~ILifecycleState() = default;
+    // Switch from Invalid to ServicesCreated; Fail otherwise
+    virtual void InitializeLifecycle(std::string reason) = 0;
+
+    // SystemState::ServicesCreated reached -> Switch to Comm.Initializing
+    virtual void ServicesCreated(std::string reason) = 0;
+    
+    // Initiate local communication initialization
+    virtual void CommunicationInitializing(std::string reason) = 0;
+    // SystemState::Comm.Initialized reached -> Trigger callback and go to ReadyToRun
+    virtual void CommunicationInitialized(std::string reason) = 0;
+
+    // SystemState::ReadyToRun reached -> Trigger callback and go to Running
+    virtual void ReadyToRun(std::string reason) = 0;
+
+    // Initiate virtual time synchronization
     virtual void RunSimulation(std::string reason) = 0;
+
     virtual void PauseSimulation(std::string reason) = 0;
     virtual void ContinueSimulation(std::string reason) = 0;
 
-    virtual void StopNotifyUser(std::string reason) = 0;
-    virtual void StopHandlerDone(std::string reason) = 0;
+    // SystemState::Stopping reached -> Trigger callback and go to Running
+    virtual void StopSimulation(std::string reason) = 0;
 
-    virtual void Restart(std::string reason) = 0;
+    virtual void RestartParticipant(std::string reason) = 0;
+    virtual bool ShutdownParticipant(std::string reason) = 0;
 
-    virtual void ShutdownNotifyUser(std::string reason) = 0;
-    virtual void ShutdownHandlerDone(std::string reason) = 0;
-
-    virtual void AbortSimulation(std::string reason) = 0;
+    virtual void AbortSimulation() = 0;
+    virtual void ResolveAbortSimulation(std::string reason) = 0;
     virtual void Error(std::string reason) = 0;
-
-    virtual void NewSystemState(SystemState systemState) = 0;
 
     virtual auto toString() -> std::string = 0;
     virtual auto GetParticipantState() -> ParticipantState = 0;

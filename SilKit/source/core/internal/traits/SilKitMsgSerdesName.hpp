@@ -38,7 +38,6 @@ template <class MsgT> struct SilKitMsgTraitSerdesName { static constexpr const c
     }
 
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Logging::LogMsg, "LOGMSG" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::ParticipantCommand, "PARTICIPANTCOMMAND" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::SystemCommand, "SYSTEMCOMMAND" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::ParticipantStatus, "PARTICIPANTSTATUS" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Orchestration::WorkflowConfiguration, "WORKFLOWCONFIGURATION" );

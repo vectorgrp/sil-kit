@@ -82,6 +82,7 @@ protected:
 
     void ParticipantStateHandler(const ParticipantState& state)
     {
+        std::cout << "current state = " << state << std::endl;
         callbacks.ParticipantStateHandler(state);
         _currentState = state;
 
@@ -121,7 +122,7 @@ TEST_F(ITest_VAsioNetwork, vasio_state_machine)
     auto participantTestUnit =
         CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit", registryUri);
     participantTestUnit->JoinSilKitSimulation();
-    auto* lifecycleService = participantTestUnit->GetLifecycleService();
+    auto* lifecycleService = participantTestUnit->CreateLifecycleServiceWithTimeSync();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     lifecycleService->SetCommunicationReadyHandler([&callbacks = callbacks]() {
@@ -157,19 +158,18 @@ TEST_F(ITest_VAsioNetwork, vasio_state_machine)
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::ServicesCreated);
-    auto finalState = lifecycleService->StartLifecycle({true, true});
+    auto finalState = lifecycleService->StartLifecycle({true});
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Running);
-    systemController->Run();
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Stopped);
-    systemController->Stop();
-    EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
+    lifecycleService->Stop("Test");
+    auto status = stateReached.wait_for(5s);
+    EXPECT_EQ(status, std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Shutdown);
-    systemController->Shutdown(participantName);
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     ASSERT_EQ(finalState.wait_for(5s), std::future_status::ready);

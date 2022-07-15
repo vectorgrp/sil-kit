@@ -25,11 +25,6 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-bool operator==(const ParticipantCommand& lhs, const ParticipantCommand& rhs)
-{
-    return lhs.kind == rhs.kind;
-}
-
 bool operator==(const ParticipantStatus& lhs, const ParticipantStatus& rhs)
 {
     return lhs.participantName == rhs.participantName

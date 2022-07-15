@@ -372,11 +372,6 @@ TEST_F(SystemMonitorTest, DISABLED_detect_reinitializing_after_stopped)
     EXPECT_EQ(monitor.SystemState(), SystemState::Stopped);
 
     AddSystemStateHandler();
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Reinitializing)).Times(1);
-
-    SetParticipantStatus(1, ParticipantState::Reinitializing);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Reinitializing);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Reinitializing);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
@@ -388,7 +383,6 @@ TEST_F(SystemMonitorTest, detect_controllers_com_initialized_after_stopped)
     SetAllParticipantStates(ParticipantState::ReadyToRun);
     SetAllParticipantStates(ParticipantState::Running);
     SetAllParticipantStates(ParticipantState::Stopped);
-    SetAllParticipantStates(ParticipantState::Reinitializing);
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
     SetAllParticipantStates(ParticipantState::CommunicationInitialized);
@@ -643,11 +637,6 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_error)
     EXPECT_EQ(monitor.SystemState(), SystemState::Error);
 
     AddSystemStateHandler();
-    EXPECT_CALL(callbacks, SystemStateHandler(SystemState::Reinitializing)).Times(1);
-
-    SetParticipantStatus(1, ParticipantState::Reinitializing);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Reinitializing);
-    EXPECT_EQ(monitor.SystemState(), SystemState::Reinitializing);
 
     SetParticipantStatus(1, ParticipantState::ServicesCreated);
     EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::ServicesCreated);

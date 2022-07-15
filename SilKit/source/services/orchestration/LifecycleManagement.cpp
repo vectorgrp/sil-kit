@@ -24,12 +24,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LifecycleManagement.hpp"
 #include "LifecycleService.hpp"
 #include "LifecycleStates.hpp"
+#include "TimeSyncService.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-// LifecycleManagement
 LifecycleManagement::LifecycleManagement(Services::Logging::ILogger* logger, LifecycleService* parentService)
     : _parentService(parentService)
     , _logger(logger)
@@ -50,30 +50,52 @@ LifecycleManagement::LifecycleManagement(Services::Logging::ILogger* logger, Lif
     _currentState = _invalidState.get();
 }
 
+// ILifecycleManagement
 void LifecycleManagement::InitLifecycleManagement(std::string reason)
 {
-    _currentState = GetServicesCreatedState();
-    _parentService->ChangeState(GetServicesCreatedState()->GetParticipantState(), std::move(reason));
+    _currentState->InitializeLifecycle(std::move(reason));
 }
 
-void LifecycleManagement::SkipSetupPhase(std::string reason)
+void LifecycleManagement::SystemwideServicesCreated(std::string reason)
 {
-    _currentState->NewSystemState(SystemState::ServicesCreated);
-    _currentState->NewSystemState(SystemState::CommunicationInitializing);
-    _currentState->NewSystemState(SystemState::CommunicationInitialized);
-    _currentState->NewSystemState(SystemState::ReadyToRun);
-    _currentState->RunSimulation(std::move(reason));
+    _currentState->ServicesCreated(std::move(reason));
+    // This will provide the communication guarantee
+    CommunicationInitializing("Services created. Initializing communication.");
 }
 
-void LifecycleManagement::NewSystemState(SystemState systemState)
+void LifecycleManagement::SystemwideCommunicationInitialized(std::string reason)
 {
-    _currentState->NewSystemState(systemState);
+    _currentState->CommunicationInitialized(std::move(reason));
 }
 
-void LifecycleManagement::Run(std::string reason)
+void LifecycleManagement::SystemwideReadyToRun(std::string reason)
 {
-    _currentState->RunSimulation(std::move(reason));
+    _currentState->ReadyToRun(std::move(reason));
+    _currentState->RunSimulation("Run after ReadyToRun");
 }
+
+void LifecycleManagement::SystemwideStopping(std::string reason)
+{
+    // will request stop callback
+    auto compareVal = false;
+    auto trueVar = true;
+    if (_stopInitialized.compare_exchange_strong(compareVal, trueVar))
+    {
+        _currentState->StopSimulation(std::move(reason));
+    }
+}
+
+void LifecycleManagement::Restart(std::string reason)
+{
+    _stopInitialized = false;
+    _currentState->RestartParticipant(std::move(reason));
+}
+
+bool LifecycleManagement::Shutdown(std::string reason) 
+{
+    return _currentState->ShutdownParticipant(std::move(reason));
+}
+
 
 void LifecycleManagement::Pause(std::string reason)
 {
@@ -85,22 +107,49 @@ void LifecycleManagement::Continue(std::string reason)
     _currentState->ContinueSimulation(std::move(reason));
 }
 
-void LifecycleManagement::Stop(std::string reason)
+void LifecycleManagement::UserStop(std::string reason)
 {
-    _currentState->StopNotifyUser(reason);
-    // Could be Stopping or Error state
-    _currentState->StopHandlerDone("Finished StopHandle execution.");
+    // will request stop callback
+    auto compareVal = false;
+    auto trueVar = true;
+    if (_stopInitialized.compare_exchange_strong(compareVal, trueVar))
+    {
+        _currentState->StopSimulation(std::move(reason));
+    }
 }
 
-bool LifecycleManagement::Shutdown(std::string reason)
+void LifecycleManagement::ContinueAfterStop()
 {
-    _currentState->ShutdownNotifyUser(reason);
-    return (_currentState != GetErrorState());
+    // Note: currently, all paths after stop will trigger a shutdown
+    // to change this behavior, add more logic here!
+    ShutdownAfterStop("Participant stopped. Shutting down.");
 }
 
-void LifecycleManagement::Restart(std::string reason)
+void LifecycleManagement::ResolveAbortSimulation(std::string reason)
 {
-    _currentState->Restart(std::move(reason));
+    _currentState->ResolveAbortSimulation(std::move(reason));
+}
+
+void LifecycleManagement::RestartAfterStop(std::string reason)
+{
+    // for now, the participant will always shut down after stopping
+    _parentService->Restart(std::move(reason));
+}
+
+void LifecycleManagement::ShutdownAfterStop(std::string reason)
+{
+    // for now, the participant will always shut down after stopping
+    _parentService->Shutdown(std::move(reason));
+}
+
+
+
+void LifecycleManagement::StartUncoordinated(std::string reason)
+{
+    _currentState->ServicesCreated(reason);
+    SetState(GetCommunicationInitializedState(), "LifecycleService is uncoordinated. Skipping communication guarantee.");
+    _currentState->CommunicationInitialized(reason);
+    _currentState->ReadyToRun(std::move(reason));
 }
 
 void LifecycleManagement::Error(std::string reason)
@@ -108,70 +157,106 @@ void LifecycleManagement::Error(std::string reason)
     _currentState->Error(std::move(reason));
 }
 
-bool LifecycleManagement::AbortSimulation(std::string reason)
+void LifecycleManagement::AbortSimulation(std::string /*reason*/)
 {
-    _currentState->AbortSimulation(std::move(reason));
-    return (_currentState != GetErrorState());
+    _currentState->AbortSimulation();
+    if (_currentState != GetErrorState())
+    {
+        GetLogger()->Warn("AbortSimulation caused a transition to an error state");
+    }
 }
 
-void LifecycleManagement::HandleCommunicationReady(std::string reason)
+void LifecycleManagement::CommunicationInitializing(std::string reason)
+{
+    _currentState->CommunicationInitializing(std::move(reason));
+}
+
+void LifecycleManagement::Stop(std::string reason)
+{
+    _currentState->StopSimulation(std::move(reason));
+    if (_currentState != GetErrorState() && _currentState != GetShutdownState())
+    {
+        ContinueAfterStop();
+    }
+}
+
+// Callback handling
+CallbackResult LifecycleManagement::HandleCommunicationReady()
 {
     try
     {
-        auto handlerDone = _parentService->TriggerCommunicationReadyHandler(reason);
+        auto handlerDone = _parentService->TriggerCommunicationReadyHandler();
         if(handlerDone)
         {
-            SetState(GetReadyToRunState(), std::move(reason));
+            return CallbackResult::Completed;
+        }
+        else
+        {
+            return CallbackResult::Deferred;
         }
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
-        // Switch to error state if handle triggers error
-        SetStateError("Exception during CommunicationReadyHandle execution.");
-        return;
+        std::stringstream ss;
+        ss << "Detected exception in callback:\n" << e.what();
+        _logger->Warn(ss.str());
+        return CallbackResult::Error;
     }
 }
 
-void LifecycleManagement::HandleStarting(std::string reason)
+bool LifecycleManagement::HandleStarting()
 {
     try
     {
-        _parentService->TriggerStartingHandler(
-            "Transition to ParticipantState::Running imminent and virtual timeSync inactive.");
+        _parentService->TriggerStartingHandler();
+        return true;
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
-        // Switch to error state if handle triggers error
-        SetStateError("Exception during CommunicationReadyHandle execution.");
-        return;
-    }
-    SetState(GetRunningState(), std::move(reason));
-}
-
-void LifecycleManagement::HandleStop(std::string reason)
-{
-    try
-    {
-        _parentService->TriggerStopHandler(std::move(reason));
-    }
-    catch (const std::exception&)
-    {
-        // Switch to error state if handle triggers error
-        SetStateError("Exception during StopHandle execution.");
+        std::stringstream ss;
+        ss << "Detected exception in callback:\n" << e.what();
+        _logger->Warn(ss.str());
+        return false;
     }
 }
 
-void LifecycleManagement::HandleShutdown(std::string reason)
+bool LifecycleManagement::HandleStop()
 {
     try
     {
-        _parentService->TriggerShutdownHandler(std::move(reason));
-        _currentState->ShutdownHandlerDone("Finished ShutdownHandle execution.");
+        _parentService->TriggerStopHandler();
+        return true;
     }
-    catch (const std::exception&)
+    catch (const std::exception& e)
     {
-        _currentState->ShutdownHandlerDone("Exception during ShutdownHandle execution - shutting down anyway.");
+        std::stringstream ss;
+        ss << "Detected exception in callback:\n" << e.what();
+        _logger->Warn(ss.str());
+        return false;
     }
+}
+
+bool LifecycleManagement::HandleShutdown()
+{
+    try
+    {
+        _parentService->TriggerShutdownHandler();
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        std::stringstream ss;
+        ss << "Detected exception in callback:\n" << e.what();
+        _logger->Warn(ss.str());
+        return false;
+    }
+}
+
+
+
+void LifecycleManagement::StartRunning()
+{
+    (dynamic_cast<TimeSyncService*>(_parentService->GetTimeSyncService()))->StartTime();
 }
 
 void LifecycleManagement::SetState(ILifecycleState* state, std::string message)

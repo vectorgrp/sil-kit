@@ -27,7 +27,6 @@ namespace Orchestration {
 
 struct NextSimTask;
 
-struct ParticipantCommand;
 struct SystemCommand;
 struct ParticipantStatus;
 struct WorkflowConfiguration;

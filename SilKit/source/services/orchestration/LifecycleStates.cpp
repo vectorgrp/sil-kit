@@ -28,6 +28,27 @@ namespace Services {
 namespace Orchestration {
 
 // State
+
+void State::InitializeLifecycle(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+void State::ServicesCreated(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+void State::CommunicationInitializing(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+void State::CommunicationInitialized(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+void State::ReadyToRun(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
 void State::RunSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -43,47 +64,25 @@ void State::ContinueSimulation(std::string reason)
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::StopNotifyUser(std::string reason)
+void State::StopSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::StopHandlerDone(std::string reason)
+void State::RestartParticipant(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-void State::Restart(std::string reason)
+bool State::ShutdownParticipant(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void State::ShutdownNotifyUser(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void State::ShutdownHandlerDone(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void State::AbortSimulation(std::string reason)
-{
-    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), reason);
-    _lifecycleManager->Shutdown(std::move(reason));
+    return false;
 }
 
 void State::Error(std::string reason)
 {
     _lifecycleManager->SetStateError(std::move(reason));
-}
-
-void State::NewSystemState(SystemState systemState)
-{
-    std::stringstream ss;
-    ss << toString() << " received SystemState::" << systemState;
-    _lifecycleManager->GetLogger()->Info(ss.str());
 }
 
 void State::InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason)
@@ -111,7 +110,29 @@ bool State::IsAnyOf(SystemState state, std::initializer_list<SystemState> stateL
     });
 }
 
+
+void State::ProcessAbortCommand()
+{
+    _abortRequested = false;
+    _lifecycleManager->ResolveAbortSimulation("Received SystemCommand::AbortSimulation during callback.");
+}
+
 // InvalidState
+void InvalidState::InitializeLifecycle(std::string reason)
+{
+    _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
+}
+
+void InvalidState::AbortSimulation()
+{
+    // NOP -- we are not even initialized yet...
+}
+
+void InvalidState::ResolveAbortSimulation(std::string)
+{
+    // NOP -- we are not even initialized yet...
+}
+
 std::string InvalidState::toString()
 {
     return "Invalid";
@@ -123,15 +144,21 @@ auto InvalidState::GetParticipantState() -> ParticipantState
 }
 
 // ServicesCreatedState
-void ServicesCreatedState::NewSystemState(SystemState systemState)
+void ServicesCreatedState::ServicesCreated(std::string reason)
 {
-    if (IsAnyOf(systemState, {SystemState::ServicesCreated, SystemState::CommunicationInitializing,
-                              SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
-    {
-        std::stringstream ss;
-        ss << "Received SystemState::" << systemState;
-        _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializingState(), ss.str());
-    }
+    _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializingState(), std::move(reason));
+}
+
+void ServicesCreatedState::AbortSimulation()
+{
+    ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+}
+
+void ServicesCreatedState::ResolveAbortSimulation(std::string reason)
+{
+    // Skip stopping as the simulation was not running yet
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), reason);
+    _lifecycleManager->AbortSimulation(std::move(reason));
 }
 
 auto ServicesCreatedState::toString() -> std::string
@@ -145,22 +172,25 @@ auto ServicesCreatedState::GetParticipantState() -> ParticipantState
 }
 
 // CommunicationInitializingState
-void CommunicationInitializingState::NewSystemState(SystemState systemState)
+void CommunicationInitializingState::CommunicationInitializing(std::string reason)
 {
-    if (IsAnyOf(systemState, {SystemState::CommunicationInitializing, SystemState::CommunicationInitialized,
-                              SystemState::ReadyToRun, SystemState::Running}))
-    {
-        // TODO Resolve waitforme
-        // 1. TODO set shared_future
-        // 2. TODO await all queued futures
-        std::stringstream ss;
-        ss << "Received SystemState::" << systemState;
-        _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), ss.str());
-    }
-    else
-    {
-        _lifecycleManager->GetLogger()->Warn("Received illegal new system state in state '{}'", this->toString());
-    }
+    // TODO Resolve waitforme
+    // 1. TODO set shared_future
+    // 2. TODO await all queued futures
+    _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), std::move(reason));
+}
+
+void CommunicationInitializingState::AbortSimulation()
+{
+    // TODO check if this makes sense while initializing...
+    ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+}
+
+void CommunicationInitializingState::ResolveAbortSimulation(std::string reason)
+{
+    // Skip stopping as the simulation was not running yet
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), reason);
+    _lifecycleManager->AbortSimulation(std::move(reason));
 }
 
 auto CommunicationInitializingState::toString() -> std::string
@@ -174,15 +204,46 @@ auto CommunicationInitializingState::GetParticipantState() -> ParticipantState
 }
 
 // CommunicationInitializedState
-void CommunicationInitializedState::NewSystemState(SystemState systemState)
+void CommunicationInitializedState::CommunicationInitialized(std::string reason) 
 {
-    if (IsAnyOf(systemState, {SystemState::CommunicationInitialized, SystemState::ReadyToRun, SystemState::Running}))
+    auto success = _lifecycleManager->HandleCommunicationReady();
+    switch (success)
     {
-        std::stringstream ss;
-        ss << "Received SystemState::" << systemState;
-        // Next state is set by context (Error or Initialized)
-        _lifecycleManager->HandleCommunicationReady(ss.str());
+    case SilKit::Services::Orchestration::CallbackResult::Error:
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
+        else
+        {
+            // Switch to error state if handle triggers error
+            _lifecycleManager->SetStateError("Exception during CommunicationReadyHandle execution.");
+        }
+        break;
+    case SilKit::Services::Orchestration::CallbackResult::Completed:
+        _lifecycleManager->SetState(_lifecycleManager->GetReadyToRunState(), std::move(reason));
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
+        break;
+    case SilKit::Services::Orchestration::CallbackResult::Deferred: 
+        _lifecycleManager->GetLogger()->Debug("Deferred CommunicationReady callback.");
+        break;
+    default: break;
     }
+}
+
+void CommunicationInitializedState::AbortSimulation()
+{
+    _abortRequested = true;
+}
+
+void CommunicationInitializedState::ResolveAbortSimulation(std::string /*reason*/)
+{
+    _lifecycleManager->GetLogger()->Warn(
+        "Reached CommunicationInitializedState::ResolveAbortSimulation. Discarding call.");
+    // NOP 
 }
 
 auto CommunicationInitializedState::toString() -> std::string
@@ -196,56 +257,66 @@ auto CommunicationInitializedState::GetParticipantState() -> ParticipantState
 }
 
 // ReadyToRunState
-void ReadyToRunState::NewSystemState(SystemState systemState)
+void ReadyToRunState::ReadyToRun(std::string reason) 
 {
-    if (IsAnyOf(systemState, {SystemState::ReadyToRun, SystemState::Running}))
+    // TODO check which cases need actual abort handling
+    if (!_lifecycleManager->GetService()->IsTimeSyncActive())
     {
-        if (_receivedRunCommand)
+        std::stringstream ss;
+        ss << "Participant is about to start running and virtual time synchronization is inactive";
+
+        _handlerExecuting.store(true);
+        auto success = _lifecycleManager->HandleStarting();
+        _handlerExecuting.store(false);
+        if (success)
         {
-            std::stringstream ss;
-            ss << "Received SystemCommand::Run and SystemState::" << systemState;
-            _receivedRunCommand = false;
-            _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), ss.str());
+            _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), "Finished StartingHandler execution.");
+            if (_abortRequested)
+            {
+                ProcessAbortCommand();
+            }
         }
         else
         {
-            _isSystemReadyToRun = true;
+            if (_abortRequested)
+            {
+                ProcessAbortCommand();
+            }
+            else
+            {
+                // Switch to error state if handle triggers error
+                _lifecycleManager->SetStateError("Exception during StartingHandler execution.");
+            }
         }
     }
     else
     {
-        _isSystemReadyToRun = false;
-    }
-}
-
-void ReadyToRunState::RunSimulation(std::string reason)
-{
-    if (_isSystemReadyToRun)
-    {
-        _isSystemReadyToRun = false;
-
-        if (!_lifecycleManager->GetService()->IsTimeSyncActive())
-        {
-            _lifecycleManager->HandleStarting(std::move(reason));
-            // state transition handled by lifecycle manager - could be running or error
-            return;
-        }
-
         _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), std::move(reason));
-        return;
-    }
-    else
-    {
-        _receivedRunCommand = true;
-        return;
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
     }
 }
 
-void ReadyToRunState::AbortSimulation(std::string reason)
+void ReadyToRunState::AbortSimulation()
 {
-    _receivedRunCommand = false;
-    _isSystemReadyToRun = false;
-    State::AbortSimulation(std::move(reason));
+    if (_handlerExecuting.load())
+    {
+        _abortRequested = true;
+    }
+    else
+    {
+        // if we are still waiting for a system state update and receive an abort command, execute immediately.
+        ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+    }
+}
+
+void ReadyToRunState::ResolveAbortSimulation(std::string reason)
+{
+    // Skip stopping as the simulation was not running yet
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), reason);
+    _lifecycleManager->ResolveAbortSimulation(std::move(reason));
 }
 
 std::string ReadyToRunState::toString()
@@ -259,9 +330,9 @@ auto ReadyToRunState::GetParticipantState() -> ParticipantState
 }
 
 // RunningState
-void RunningState::RunSimulation(std::string reason)
+void RunningState::RunSimulation(std::string /*reason*/) 
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    _lifecycleManager->StartRunning();
 }
 
 void RunningState::PauseSimulation(std::string reason)
@@ -274,12 +345,38 @@ void RunningState::ContinueSimulation(std::string reason)
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
-void RunningState::StopNotifyUser(std::string reason)
+void RunningState::StopSimulation(std::string reason)
 {
     _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), reason);
-    // Context will set next state
-    _lifecycleManager->HandleStop(std::move(reason));
+    _lifecycleManager->Stop(std::move(reason));
 }
+
+void RunningState::AbortSimulation()
+{
+    // TODO handle abort during executeSimStep
+    // For now, just abort and hope for the best...
+    ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+}
+
+void RunningState::ResolveAbortSimulation(std::string reason)
+{
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), std::move(reason));
+    auto success = _lifecycleManager->HandleStop();
+    if (success)
+    {
+        // NOP -> continue to shutting down no matter the result of the callback
+    }
+    else
+    {
+        std::string msg = "StopHandler threw an exception. This is ignored as the simulation is being aborted. The "
+                          "participant will continue to shut down.";
+        _lifecycleManager->GetLogger()->Warn(std::move(msg));
+    }
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(),
+                                "Finished StopHandler execution during abort.");
+    _lifecycleManager->Shutdown("Shutdown after abort.");
+}
+
 
 auto RunningState::toString() -> std::string
 {
@@ -302,11 +399,56 @@ void PausedState::ContinueSimulation(std::string reason)
     _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), std::move(reason));
 }
 
-void PausedState::StopNotifyUser(std::string reason)
+void PausedState::StopSimulation(std::string reason)
 {
     _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), std::move(reason));
-    // Context will set next state
-    _lifecycleManager->HandleStop(std::move(reason));
+    auto success = _lifecycleManager->HandleStop();
+    if (success)
+    {
+        _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), "Finished StopHandler execution.");
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
+    }
+    else
+    {
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
+        else
+        {
+            // Switch to error state if handle triggers error
+            _lifecycleManager->SetStateError("Exception during StopHandler execution.");
+        }
+    }
+}
+
+void PausedState::AbortSimulation()
+{
+    // TODO handle abort during executeSimStep
+    // For now, just abort and hope for the best...
+    ResolveAbortSimulation("Received abort simulation.");
+}
+
+void PausedState::ResolveAbortSimulation(std::string reason)
+{
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), std::move(reason));
+    auto success = _lifecycleManager->HandleStop();
+    if (success)
+    {
+        // NOP -> continue to shutting down no matter the result of the callback
+    }
+    else
+    {
+        std::string msg = "StopHandler threw an exception. This is ignored as the simulation is being aborted. The "
+                          "participant will continue to shut down.";
+        _lifecycleManager->GetLogger()->Warn(std::move(msg));
+    }
+    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(),
+                                "Finished StopHandler execution during abort.");
+    _lifecycleManager->Shutdown("Shutdown after abort.");
 }
 
 auto PausedState::toString() -> std::string
@@ -320,26 +462,39 @@ auto PausedState::GetParticipantState() -> ParticipantState
 }
 
 // StoppingState
-void StoppingState::StopNotifyUser(std::string reason)
+void StoppingState::StopSimulation(std::string reason)
 {
-    // NOP
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void StoppingState::StopHandlerDone(std::string reason)
-{
-    _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), std::move(reason));
-    if (_abortRequested)
+    auto success = _lifecycleManager->HandleStop();
+    if (success)
     {
-        _abortRequested = false;
-        _lifecycleManager->Shutdown("Received SystemCommand::AbortSimulation during callback.");
+        _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), std::move(reason));
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
+    }
+    else
+    {
+        if (_abortRequested)
+        {
+            ProcessAbortCommand();
+        }
+        else
+        {
+            // Switch to error state if handle triggers error
+            _lifecycleManager->SetStateError("Exception during StopHandler execution.");
+        }
     }
 }
 
-void StoppingState::AbortSimulation(std::string reason)
+void StoppingState::AbortSimulation()
 {
     _abortRequested = true;
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+}
+
+void StoppingState::ResolveAbortSimulation(std::string /*reason*/)
+{
+    // NOP - TODO check
 }
 
 auto StoppingState::toString() -> std::string
@@ -353,30 +508,34 @@ auto StoppingState::GetParticipantState() -> ParticipantState
 }
 
 // StoppedState
-void StoppedState::StopNotifyUser(std::string reason)
+void StoppedState::StopSimulation(std::string /*reason*/)
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    // NOP - stop was already processed (e.g., via a userStop)
 }
 
-void StoppedState::StopHandlerDone(std::string reason)
+
+void StoppedState::RestartParticipant(std::string /*reason*/)
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    throw std::runtime_error("Restart is currently not supported.");
+
+    //_lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
+    //_lifecycleManager->Restart(std::move(reason));
 }
 
-void StoppedState::Restart(std::string reason)
-{
-    _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), reason);
-}
-
-void StoppedState::ShutdownNotifyUser(std::string reason)
+bool StoppedState::ShutdownParticipant(std::string reason)
 {
     _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), reason);
-    _lifecycleManager->HandleShutdown(std::move(reason));
+    return _lifecycleManager->Shutdown(std::move(reason));
 }
 
-void StoppedState::AbortSimulation(std::string reason)
+void StoppedState::AbortSimulation()
 {
-    _lifecycleManager->Shutdown(std::move(reason));
+    ResolveAbortSimulation("Received abort simulation.");
+}
+
+void StoppedState::ResolveAbortSimulation(std::string reason)
+{
+    _lifecycleManager->GetService()->Shutdown(std::move(reason));
 }
 
 auto StoppedState::toString() -> std::string
@@ -390,19 +549,30 @@ auto StoppedState::GetParticipantState() -> ParticipantState
 }
 
 // ShuttingDownState
-void ShuttingDownState::ShutdownNotifyUser(std::string reason)
+bool ShuttingDownState::ShutdownParticipant(std::string reason)
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ShuttingDownState::ShutdownHandlerDone(std::string reason)
-{
+    auto success = _lifecycleManager->HandleShutdown();
+    if (success)
+    {
+        // NOP
+    }
+    else
+    {
+        std::string msg = "ShutdownHandler threw an exception. This is ignored. The participant will now shut down.";
+        _lifecycleManager->GetLogger()->Warn(msg);
+    }
     _lifecycleManager->SetState(_lifecycleManager->GetShutdownState(), std::move(reason));
+    return true;
 }
 
-void ShuttingDownState::AbortSimulation(std::string reason)
+void ShuttingDownState::AbortSimulation()
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    // NOP - we are already shutting down
+}
+
+void ShuttingDownState::ResolveAbortSimulation(std::string /*reason*/)
+{
+    // NOP - we are already shutting down
 }
 
 auto ShuttingDownState::toString() -> std::string
@@ -416,19 +586,14 @@ auto ShuttingDownState::GetParticipantState() -> ParticipantState
 }
 
 // ShutdownState
-void ShutdownState::ShutdownNotifyUser(std::string reason)
+void ShutdownState::AbortSimulation()
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    // NOP - we are already shut down
 }
 
-void ShutdownState::ShutdownHandlerDone(std::string reason)
+void ShutdownState::ResolveAbortSimulation(std::string /*reason*/)
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ShutdownState::AbortSimulation(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    // NOP - we are already shut down
 }
 
 auto ShutdownState::toString() -> std::string
@@ -442,50 +607,34 @@ auto ShutdownState::GetParticipantState() -> ParticipantState
 }
 
 // ErrorState
-void ErrorState::RunSimulation(std::string reason)
+void ErrorState::RestartParticipant(std::string /*reason*/)
 {
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
+    throw std::runtime_error("Restart feature is currently not supported.");
+
+    //_lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
 }
 
-void ErrorState::PauseSimulation(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ErrorState::ContinueSimulation(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ErrorState::StopNotifyUser(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ErrorState::StopHandlerDone(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
-}
-
-void ErrorState::Restart(std::string reason)
-{
-    _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
-}
-
-void ErrorState::ShutdownNotifyUser(std::string reason)
-{
-    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), std::move(reason));
-    _lifecycleManager->HandleShutdown(std::move(reason));
-}
-
-void ErrorState::ShutdownHandlerDone(std::string reason)
-{
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-}
-
-void ErrorState::AbortSimulation(std::string reason)
+void ErrorState::StopSimulation(std::string reason)
 {
     _lifecycleManager->Shutdown(std::move(reason));
+}
+
+bool ErrorState::ShutdownParticipant(std::string reason)
+{
+    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), std::move(reason));
+    _lifecycleManager->Shutdown("Error recovery via shutdown.");
+    return true;
+}
+
+void ErrorState::AbortSimulation()
+{
+    ResolveAbortSimulation("Received abort simulation.");
+}
+
+void ErrorState::ResolveAbortSimulation(std::string reason)
+{
+    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), std::move(reason));
+    _lifecycleManager->Shutdown("Error recovery via abort simulation.");
 }
 
 void ErrorState::Error(std::string reason)

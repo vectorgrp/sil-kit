@@ -191,7 +191,6 @@ private:
         Services::Logging::LogMsg,
         Services::Orchestration::NextSimTask,
         Services::Orchestration::SystemCommand,
-        Services::Orchestration::ParticipantCommand,
         Services::Orchestration::ParticipantStatus,
         Services::Orchestration::WorkflowConfiguration,
         Services::PubSub::WireDataMessageEvent,

@@ -78,8 +78,7 @@ const std::string controllerTypeTimeSyncService = "TimeSyncService";
 const std::string controllerTypeOther = "Other";
 
 // Lifecycle & TimeSync
-const std::string lifecycleHasCoordinatedStart = "LifecycleHasCoordinatedStart";
-const std::string lifecycleHasCoordinatedStop = "LifecycleHasCoordinatedStop";
+const std::string lifecycleIsCoordinated = "LifecycleIsCoordinated";
 const std::string timeSyncActive = "TimeSyncActive";
 
 } // namespace Discovery

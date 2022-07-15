@@ -37,21 +37,13 @@ namespace Orchestration {
 
 inline std::string to_string(ParticipantState state);
 inline std::string to_string(SystemState state);
-inline std::string to_string(ParticipantCommand::Kind command);
-inline std::string to_string(SystemCommand::Kind command);
 
-inline std::string to_string(const ParticipantCommand& command);
-inline std::string to_string(const SystemCommand& command);
 inline std::string to_string(const ParticipantStatus& status);
 inline std::string to_string(const WorkflowConfiguration& participantNames);
 
 inline std::ostream& operator<<(std::ostream& out, ParticipantState state);
 inline std::ostream& operator<<(std::ostream& out, SystemState state);
-inline std::ostream& operator<<(std::ostream& out, ParticipantCommand::Kind command);
-inline std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command);
 
-inline std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command);
-inline std::ostream& operator<<(std::ostream& out, const SystemCommand& command);
 inline std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status);
 inline std::ostream& operator<<(std::ostream& out, const WorkflowConfiguration& workflowConfiguration);
 
@@ -86,8 +78,6 @@ std::string to_string(ParticipantState state)
         return "ShuttingDown";
     case ParticipantState::Shutdown:
         return "Shutdown";
-    case ParticipantState::Reinitializing:
-        return "Reinitializing";
     }
     throw SilKit::TypeConversionError{};
 }
@@ -120,54 +110,8 @@ std::string to_string(SystemState state)
         return "ShuttingDown";
     case SystemState::Shutdown:
         return "Shutdown";
-    case SystemState::Reinitializing:
-        return "Reinitializing";
     }
     throw SilKit::TypeConversionError{};
-}
-
-std::string to_string(ParticipantCommand::Kind command)
-{
-    switch (command)
-    {
-    case ParticipantCommand::Kind::Invalid:
-        return "Invalid";
-    case ParticipantCommand::Kind::Restart:
-        return "Restart";
-    case ParticipantCommand::Kind::Shutdown:
-        return "Shutdown";
-    }
-    throw SilKit::TypeConversionError{};
-}
-    
-std::string to_string(SystemCommand::Kind command)
-{
-    switch (command)
-    {
-    case SystemCommand::Kind::Invalid:
-        return "Invalid";
-    case SystemCommand::Kind::Run:
-        return "Run";
-    case SystemCommand::Kind::Stop:
-        return "Stop";
-    case SystemCommand::Kind::AbortSimulation:
-        return "AbortSimulation";
-    }
-    throw SilKit::TypeConversionError{};
-}
-
-std::string to_string(const ParticipantCommand& command)
-{
-    std::stringstream outStream;
-    outStream << command;
-    return outStream.str();
-}
-
-std::string to_string(const SystemCommand& command)
-{
-    std::stringstream outStream;
-    outStream << command;
-    return outStream.str();
 }
 
 std::string to_string(const ParticipantStatus& status)
@@ -199,42 +143,6 @@ std::ostream& operator<<(std::ostream& out, SystemState state)
     {
         return out << "SystemState{" << static_cast<uint32_t>(state) << "}";
     }
-}
-
-std::ostream& operator<<(std::ostream& out, ParticipantCommand::Kind command)
-{
-    try
-    {
-        return out << to_string(command);
-    }
-    catch (const SilKit::TypeConversionError&)
-    {
-        return out << "ParticipantCommand::Kind{" << static_cast<uint32_t>(command) << "}";
-    }
-}
-
-std::ostream& operator<<(std::ostream& out, SystemCommand::Kind command)
-{
-    try
-    {
-        return out << to_string(command);
-    }
-    catch (const SilKit::TypeConversionError&)
-    {
-        return out << "SystemCommand::Kind{" << static_cast<uint32_t>(command) << "}";
-    }
-}
-
-std::ostream& operator<<(std::ostream& out, const ParticipantCommand& command)
-{
-    out << "Orchestration::ParticipantCommand{" << command.kind << "}";
-    return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const SystemCommand& command)
-{
-    out << "Orchestration::SystemCommand{" << command.kind << "}";
-    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const ParticipantStatus& status)

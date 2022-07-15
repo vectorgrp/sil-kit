@@ -37,7 +37,6 @@ template <class MsgT> struct SilKitMsgTraitVersion { static constexpr VersionT V
     }
 
 DefineSilKitMsgTrait_Version(SilKit::Services::Logging::LogMsg, 1);
-DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::ParticipantCommand, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::SystemCommand, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::ParticipantStatus, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Orchestration::WorkflowConfiguration, 1);

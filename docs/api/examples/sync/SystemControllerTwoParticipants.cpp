@@ -67,8 +67,8 @@ timeSyncService2->SetSimulationStepHandler(
   [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}, 1ms
 );
 
-auto status1 = lifecycleService1 -> StartLifecycle({true, true});
-auto status2 = lifecycleService2 -> StartLifecycle({true, true});
+auto status1 = lifecycleService1 -> StartLifecycle({true});
+auto status2 = lifecycleService2 -> StartLifecycle({true});
 
 // As soon as all participants are in ParticipantState::ServicesCreated, the system transitions to SystemState::ServicesCreated
 // and the SystemController calls Run() to start the simulation.

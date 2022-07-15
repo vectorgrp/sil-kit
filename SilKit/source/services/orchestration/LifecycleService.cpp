@@ -61,6 +61,7 @@ void LifecycleService::SetCommunicationReadyHandlerAsync(CommunicationReadyHandl
     _commReadyHandlerIsAsync = true;
     _commReadyHandler = std::move(handler);
 }
+
 void LifecycleService::CompleteCommunicationReadyHandlerAsync()
 {
     _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: enter");
@@ -80,7 +81,6 @@ void LifecycleService::CompleteCommunicationReadyHandlerAsync()
     }
 }
 
-
 void LifecycleService::SetStartingHandler(StartingHandler handler)
 {
     _startingHandler = std::move(handler);
@@ -96,7 +96,7 @@ void LifecycleService::SetShutdownHandler(ShutdownHandler handler)
     _shutdownHandler = std::move(handler);
 }
 
-auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool hasCoordinatedSimulationStop)
+auto LifecycleService::StartLifecycle(bool isCoordinated)
     -> std::future<ParticipantState>
 {
     if (_timeSyncActive)
@@ -109,14 +109,11 @@ auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool h
     }
     _timeSyncService->InitializeTimeSyncPolicy(_timeSyncActive);
 
-    _hasCoordinatedSimulationStart = hasCoordinatedSimulationStart;
-    _hasCoordinatedSimulationStop = hasCoordinatedSimulationStop;
+    _isCoordinated = isCoordinated;
 
     // Update ServiceDescriptor
-    _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleHasCoordinatedStart,
-                                               std::to_string(hasCoordinatedSimulationStart));
-    _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleHasCoordinatedStop,
-                                               std::to_string(hasCoordinatedSimulationStop));
+    _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleIsCoordinated,
+                                               std::to_string(_isCoordinated));
 
     // Publish services
     auto serviceDiscovery = _participant->GetServiceDiscovery();
@@ -128,20 +125,19 @@ auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool h
     });
 
     _isRunning = true;
-    _lifecycleManagement.InitLifecycleManagement("LifecycleService::StartLifecycle... was called.");
-    if (!hasCoordinatedSimulationStart)
+    _lifecycleManagement.InitLifecycleManagement("LifecycleService::StartLifecycle was called.");
+    if (!_isCoordinated)
     {
         // Skip state guarantees if start is uncoordinated
-        _lifecycleManagement.SkipSetupPhase(
-            "LifecycleService::StartLifecycle... was called without start coordination.");
+        _lifecycleManagement.StartUncoordinated(
+            "LifecycleService::StartLifecycle was called without start coordination.");
     }
     return _finalStatePromise.get_future();
 }
 
 auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState>
 {
-    return StartLifecycle(startConfiguration.coordinatedStart,
-            startConfiguration.coordinatedStop);
+    return StartLifecycle(startConfiguration.isCoordinated);
 }
 
 void LifecycleService::ReportError(std::string errorMsg)
@@ -194,12 +190,7 @@ void LifecycleService::Continue()
 
 void LifecycleService::Stop(std::string reason)
 {
-    _lifecycleManagement.Stop(reason);
-
-    if (!_hasCoordinatedSimulationStop) 
-    {
-        Shutdown("Shutdown after LifecycleService::Stop without stop coordination.");
-    }
+    _lifecycleManagement.UserStop(reason);
 }
 
 void LifecycleService::Shutdown(std::string reason)
@@ -209,6 +200,9 @@ void LifecycleService::Shutdown(std::string reason)
     {
         try
         {
+            std::stringstream ss;
+            ss << "Confirming shutdown of " << _participant->GetParticipantName();
+            _logger->Debug(ss.str()); 
             _finalStatePromise.set_value(State());
         }
         catch (const std::future_error&)
@@ -223,20 +217,20 @@ void LifecycleService::Shutdown(std::string reason)
     }
 }
 
-void LifecycleService::Restart(std::string reason)
+void LifecycleService::Restart(std::string /*reason*/)
 {
-    //Reset CommunicationReadyHandlerAsync
-    _commReadyHandlerInvoked = false;
+    // Currently inoperable
+    throw std::runtime_error("Restarting is currently deactivated.");
 
-    _lifecycleManagement.Restart(reason);
-
-    if (!_hasCoordinatedSimulationStart)
-    {
-        _lifecycleManagement.Run("LifecycleService::Restart() was called without start coordination.");
-    }
+    //_lifecycleManagement.Restart(reason);
+    //
+    //if (!_hasCoordinatedSimulationStart)
+    //{
+    //    _lifecycleManagement->Run("LifecycleService::Restart() was called without start coordination.");
+    //}
 }
 
-bool LifecycleService::TriggerCommunicationReadyHandler(std::string)
+bool LifecycleService::TriggerCommunicationReadyHandler()
 {
     if(_commReadyHandler)
     {
@@ -259,7 +253,7 @@ bool LifecycleService::TriggerCommunicationReadyHandler(std::string)
     return true;
 }
 
-void LifecycleService::TriggerStartingHandler(std::string)
+void LifecycleService::TriggerStartingHandler()
 {
     if (_startingHandler)
     {
@@ -267,7 +261,7 @@ void LifecycleService::TriggerStartingHandler(std::string)
     }
 }
 
-void LifecycleService::TriggerStopHandler(std::string)
+void LifecycleService::TriggerStopHandler()
 {
     if (_stopHandler)
     {
@@ -275,7 +269,7 @@ void LifecycleService::TriggerStopHandler(std::string)
     }
 }
 
-void LifecycleService::TriggerShutdownHandler(std::string)
+void LifecycleService::TriggerShutdownHandler()
 {
     if (_shutdownHandler)
     {
@@ -285,18 +279,7 @@ void LifecycleService::TriggerShutdownHandler(std::string)
 
 void LifecycleService::AbortSimulation(std::string reason)
 {
-    auto success = _lifecycleManagement.AbortSimulation(reason);
-    if (success)
-    {
-        try
-        {
-            _finalStatePromise.set_value(State());
-        }
-        catch (const std::future_error&)
-        {
-            // NOP - received shutdown multiple times
-        }
-    }
+    _lifecycleManagement.AbortSimulation(reason);
 }
 
 auto LifecycleService::State() const -> ParticipantState
@@ -307,24 +290,6 @@ auto LifecycleService::State() const -> ParticipantState
 auto LifecycleService::Status() const -> const ParticipantStatus&
 {
     return _status;
-}
-
-void LifecycleService::ReceiveMsg(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
-{
-    if (command.participant != _serviceDescriptor.GetParticipantId())
-        return;
-    
-    if (_hasCoordinatedSimulationStop)
-    {
-        if (command.kind == ParticipantCommand::Kind::Restart)
-        {
-            Restart(std::string{"Received ParticipantCommand::"} + to_string(command.kind));
-        }
-        else if (command.kind == ParticipantCommand::Kind::Shutdown)
-        {
-            Shutdown("Received ParticipantCommand::Shutdown");
-        }
-    }
 }
 
 auto LifecycleService::GetTimeSyncService() const -> ITimeSyncService*
@@ -350,31 +315,6 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
     switch (command.kind)
     {
     case SystemCommand::Kind::Invalid: break;
-
-    case SystemCommand::Kind::Run:
-        if (!_hasCoordinatedSimulationStart)
-        {
-            _logger->Info(
-                "Received SystemCommand::Start, but ignored it because coordinatedSimulationStart was not set.");
-            return;
-        }
-        else
-        {
-            _lifecycleManagement.Run("Received SystemCommand::Run");
-            return;
-        }
-        break;
-
-    case SystemCommand::Kind::Stop:
-
-        if (!_hasCoordinatedSimulationStop)
-        {
-            _logger->Info(
-                "Received SystemCommand::Stop, but ignored it because coordinatedSimulationStop was not set.");
-            return;
-        }
-        Stop("Received SystemCommand::Stop");
-        return;
 
     case SystemCommand::Kind::AbortSimulation:
         AbortSimulation("Received SystemCommand::AbortSimulation");
@@ -408,7 +348,40 @@ void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
 
 void LifecycleService::NewSystemState(SystemState systemState)
 {
-    _lifecycleManagement.NewSystemState(systemState);
+    if (!_isCoordinated)
+    {
+        // uncoordinated participants do not react to system states changes!
+        return;
+    }
+
+    std::stringstream ss;
+    ss << "Received new system state: " << systemState;
+
+    switch (systemState)
+    {
+    case SystemState::Invalid: break; // NOP
+    case SystemState::ServicesCreated: 
+        _lifecycleManagement.SystemwideServicesCreated(ss.str());
+        break;
+    case SystemState::CommunicationInitializing: break; // ignore
+    case SystemState::CommunicationInitialized: 
+        _lifecycleManagement.SystemwideCommunicationInitialized(ss.str());
+        break;
+    case SystemState::ReadyToRun: 
+        _lifecycleManagement.SystemwideReadyToRun(ss.str()); 
+        break;
+    case SystemState::Running: break; // ignore
+    case SystemState::Paused: break; // ignore
+    case SystemState::Stopping: 
+        _lifecycleManagement.SystemwideStopping(ss.str()); 
+        break;
+    case SystemState::Stopped: break; // To Sync or not to Sync - that is the question -- for now don't
+    case SystemState::Error: 
+        _lifecycleManagement.Error(ss.str());
+        break; // ignore
+    case SystemState::ShuttingDown: break; // ignore
+    case SystemState::Shutdown: break; // ignore
+    }
 }
 
 void LifecycleService::SetTimeSyncActive(bool isTimeSyncAcvice)

@@ -108,7 +108,6 @@ public:
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::NextSimTask& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::ParticipantStatus& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::ParticipantCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::SystemCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Orchestration::WorkflowConfiguration& msg) = 0;
 
@@ -158,7 +157,6 @@ public:
 
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::NextSimTask& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantStatus& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::ParticipantCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::SystemCommand& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Orchestration::WorkflowConfiguration& msg) = 0;
 

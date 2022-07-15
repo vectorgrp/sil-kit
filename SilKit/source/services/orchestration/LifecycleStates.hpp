@@ -43,29 +43,48 @@ public:
 public:
     virtual ~State() = default;
 
+    // Switch from Invalid to ServicesCreated; Fail otherwise
+    virtual void InitializeLifecycle(std::string reason) override;
+
+    // SystemState::ServicesCreated reached -> Switch to Comm.Initializing
+    virtual void ServicesCreated(std::string reason) override;
+
+    // Initiate local communication initialization
+    virtual void CommunicationInitializing(std::string reason) override;
+
+    // SystemState::Comm.Initialized reached -> Trigger callback and go to ReadyToRun
+    virtual void CommunicationInitialized(std::string reason) override;
+
+    // SystemState::ReadyToRun reached -> Trigger callback and go to Running
+    virtual void ReadyToRun(std::string reason) override;
+
+    // Initiate virtual time synchronization
     virtual void RunSimulation(std::string reason) override;
+
     virtual void PauseSimulation(std::string reason) override;
     virtual void ContinueSimulation(std::string reason) override;
 
-    virtual void StopNotifyUser(std::string reason) override;
-    virtual void StopHandlerDone(std::string reason) override;
+    virtual void StopSimulation(std::string reason) override;
 
-    virtual void Restart(std::string reason) override;
+    virtual void RestartParticipant(std::string reason) override;
+    virtual bool ShutdownParticipant(std::string reason) override;
 
-    virtual void ShutdownNotifyUser(std::string reason) override;
-    virtual void ShutdownHandlerDone(std::string reason) override;
-
-    virtual void AbortSimulation(std::string reason) override;
+    //virtual void AbortSimulation() override;
+    //virtual void ResolveAbortSimulation(std::string reason) override;
     virtual void Error(std::string reason) override;
 
-    virtual void NewSystemState(SystemState systemState) override;
+    //virtual auto toString() -> std::string = 0;
+    //virtual auto GetParticipantState() -> ParticipantState = 0;
 
 protected:
     void InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason);
     bool IsAnyOf(SystemState state, std::initializer_list<SystemState> stateList);
 
+    void ProcessAbortCommand();
+
 protected:
     LifecycleManagement* _lifecycleManager;
+    bool _abortRequested{false};
 };
     
 class InvalidState : public State
@@ -75,6 +94,10 @@ public:
         : State(lifecycleManager)
     {
     }
+    void InitializeLifecycle(std::string reason) override;
+
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -87,8 +110,10 @@ public:
         : State(lifecycleManager)
     {
     }
+    void ServicesCreated(std::string reason) override;
 
-    void NewSystemState(SystemState systemState) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -101,8 +126,10 @@ public:
         : State(lifecycleManager)
     {
     }
+    void CommunicationInitializing(std::string reason) override;
 
-    void NewSystemState(SystemState systemState) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -115,8 +142,10 @@ public:
         : State(lifecycleManager)
     {
     }
+    void CommunicationInitialized(std::string reason) override;
 
-    void NewSystemState(SystemState systemState) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -127,22 +156,18 @@ class ReadyToRunState : public State
 public:
     ReadyToRunState(LifecycleManagement* lifecycleManager)
         : State(lifecycleManager)
-        , _isSystemReadyToRun(false)
-        , _receivedRunCommand(false)
     {
     }
+    void ReadyToRun(std::string reason) override;
 
-    void NewSystemState(SystemState systemState) override;
-
-    void RunSimulation(std::string reason) override;
-    void AbortSimulation(std::string reason) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
 
 private:
-    bool _isSystemReadyToRun;
-    bool _receivedRunCommand;
+    std::atomic<bool> _handlerExecuting{false};
 };
 
 class RunningState : public State
@@ -152,11 +177,15 @@ public:
         : State(lifecycleManager)
     {
     }
-
     void RunSimulation(std::string reason) override;
+
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
-    void StopNotifyUser(std::string reason) override;
+
+    void StopSimulation(std::string reason) override;
+
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -169,10 +198,13 @@ public:
         : State(lifecycleManager)
     {
     }
-
     void PauseSimulation(std::string reason) override;
     void ContinueSimulation(std::string reason) override;
-    void StopNotifyUser(std::string reason) override;
+
+    void StopSimulation(std::string reason) override;
+
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -185,16 +217,13 @@ public:
         : State(lifecycleManager)
     {
     }
+    void StopSimulation(std::string reason) override;
 
-    void StopNotifyUser(std::string reason) override;
-    void StopHandlerDone(std::string reason) override;
-    void AbortSimulation(std::string reason) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
-
-private:
-    bool _abortRequested = false;
 };
 
 class StoppedState : public State
@@ -204,15 +233,13 @@ public:
         : State(lifecycleManager)
     {
     }
+    void StopSimulation(std::string reason) override;
 
-    void StopNotifyUser(std::string reason) override;
-    void StopHandlerDone(std::string reason) override;
+    void RestartParticipant(std::string reason) override;
+    bool ShutdownParticipant(std::string reason) override;
 
-    void Restart(std::string reason) override;
-
-    void ShutdownNotifyUser(std::string reason) override;
-
-    void AbortSimulation(std::string reason) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -226,10 +253,10 @@ public:
     {
     }
 
-    void ShutdownNotifyUser(std::string reason) override;
-    void ShutdownHandlerDone(std::string reason) override;
+    bool ShutdownParticipant(std::string reason) override;
 
-    void AbortSimulation(std::string reason) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -242,11 +269,8 @@ public:
         : State(lifecycleManager)
     {
     }
-
-    void ShutdownNotifyUser(std::string reason) override;
-    void ShutdownHandlerDone(std::string reason) override;
-
-    void AbortSimulation(std::string reason) override;
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
 
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -259,16 +283,13 @@ public:
         : State(lifecycleManager)
     {
     }
+    void StopSimulation(std::string reason) override;
 
-    void RunSimulation(std::string reason) override;
-    void PauseSimulation(std::string reason) override;
-    void ContinueSimulation(std::string reason) override;
-    void StopNotifyUser(std::string reason) override;
-    void StopHandlerDone(std::string reason) override;
-    void Restart(std::string reason) override;
-    void ShutdownNotifyUser(std::string reason) override;
-    void ShutdownHandlerDone(std::string reason) override;
-    void AbortSimulation(std::string reason) override;
+    void RestartParticipant(std::string reason) override;
+    bool ShutdownParticipant(std::string reason) override;
+
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
     void Error(std::string reason) override;
 
     auto toString() -> std::string override;

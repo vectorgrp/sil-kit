@@ -71,7 +71,6 @@ template <class MsgT> struct SilKitMsgTraits
     };
 
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg)
-DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, ParticipantCommand)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, SystemCommand)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, ParticipantStatus)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Orchestration, WorkflowConfiguration)
@@ -116,7 +115,6 @@ DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, WorkflowConfigura
 DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, LinControllerConfig, 1)
 
 // Messages with enforced self delivery
-DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantCommand)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, SystemCommand)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Lin, LinSendFrameHeaderRequest)

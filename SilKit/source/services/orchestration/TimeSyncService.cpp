@@ -315,28 +315,11 @@ void TimeSyncService::AwaitNotPaused()
     }
 }
 
-void TimeSyncService::ReceiveMsg(const IServiceEndpoint* /*from*/, const ParticipantCommand& command)
-{
-    if (command.participant != _serviceDescriptor.GetParticipantId())
-        return;
-
-    //Initialize(command, std::string{"Received ParticipantCommand::"} + to_string(command.kind));
-}
-
 void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task)
 {
     if (_timeSyncPolicy)
     {
         _timeSyncPolicy->ReceiveNextSimTask(from, task);
-    }
-}
-
-void TimeSyncService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& command)
-{
-    if (command.kind == SystemCommand::Kind::Run && _timeSyncConfigured)
-    {
-        SILKIT_ASSERT(_timeSyncPolicy);
-        _timeSyncPolicy->RequestInitialStep();
     }
 }
 
@@ -401,6 +384,15 @@ void TimeSyncService::ResetTime()
 void TimeSyncService::ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind)
 {
     _timeProvider->ConfigureTimeProvider(timeProviderKind);
+}
+
+void TimeSyncService::StartTime()
+{
+    if (_timeSyncConfigured)
+    {
+        assert(_timeSyncPolicy);
+        _timeSyncPolicy->RequestInitialStep();
+    }
 }
 
 auto TimeSyncService::Now() const -> std::chrono::nanoseconds

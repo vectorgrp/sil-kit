@@ -56,8 +56,6 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto* senderComSimPart = testHarness.GetParticipant("Sender");
     auto* senderCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(senderComSimPart->Participant());
 
-    auto systemCtrl = senderComSimPart->GetOrCreateSystemController();
-
     auto* senderLifecycleService = senderComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
     auto* senderTimeSyncService = senderLifecycleService->GetTimeSyncService();
 
@@ -68,18 +66,22 @@ TEST(TargetedMessagingITest, targeted_messaging)
     });
 
     senderTimeSyncService->SetSimulationStepHandler(
-        [&systemCtrl, &senderCan, &senderCom](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+        [&senderLifecycleService, &senderCan, &senderCom](std::chrono::nanoseconds now,
+                                                          std::chrono::nanoseconds /*duration*/) {
             auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
             if (now == 0ms)
-            {
-                SilKit::Services::Can::WireCanFrameEvent msg{};
-                msg.direction = SilKit::Services::TransmitDirection::RX;
-                msg.frame.canId = 42;
-                senderCom->SendMsg(senderCan, "TargetReceiver", msg);
-            }
+        {
+            SilKit::Services::Can::WireCanFrameEvent msg{};
+            msg.direction = SilKit::Services::TransmitDirection::RX;
+            msg.frame.canId = 42;
+            senderCom->SendMsg(senderCan, "TargetReceiver", msg);
+        }
 
-            if (now == 3ms) { systemCtrl->Stop(); }
+        if (now == 3ms)
+        {
+            senderLifecycleService->Stop("Test");
+        }
         }, 1ms);
 
     

@@ -237,7 +237,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const Orchestration::Partici
     switch (newStatus.state)
     {
     case Orchestration::ParticipantState::ServicesCreated:
-        if (is_any_of(oldState, {Orchestration::ParticipantState::Invalid, Orchestration::ParticipantState::Reinitializing}))
+        if (is_any_of(oldState, {Orchestration::ParticipantState::Invalid}))
             return;
 
     case Orchestration::ParticipantState::CommunicationInitializing:
@@ -274,10 +274,6 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const Orchestration::Partici
 
     case Orchestration::ParticipantState::Shutdown:
         if (oldState == Orchestration::ParticipantState::ShuttingDown)
-            return;
-
-    case Orchestration::ParticipantState::Reinitializing:
-        if (is_any_of(oldState, {Orchestration::ParticipantState::Error, Orchestration::ParticipantState::Stopped}))
             return;
 
     case Orchestration::ParticipantState::Error:

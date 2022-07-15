@@ -38,6 +38,18 @@ struct NextSimTask
     std::chrono::nanoseconds duration{0};
 };
 
+struct SystemCommand
+{
+    //! The different kinds of a SystemCommand
+    enum class Kind : uint8_t
+    {
+        Invalid = 0, //!< An invalid command
+        AbortSimulation = 1 //!< The abort simulation command
+    };
+
+    Kind kind; //!< The kind of system command that is sent.
+};
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

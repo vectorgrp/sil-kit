@@ -29,27 +29,12 @@ using namespace std::chrono_literals;
 
 namespace {
 
-TEST(MwVAsioSerdes, MwSync_ParticipantCommand)
-{
-    using namespace SilKit::Services::Orchestration;
-    SilKit::Core::MessageBuffer buffer;
-
-    ParticipantCommand in{7, ParticipantCommand::Kind::Restart};
-    ParticipantCommand out{0, ParticipantCommand::Kind::Invalid};
-
-    Serialize(buffer , in);
-    Deserialize(buffer,out);
-
-    EXPECT_EQ(in.participant, out.participant);
-    EXPECT_EQ(in.kind, out.kind);
-}
-
 TEST(MwVAsioSerdes, MwSync_SystemCommand)
 {
     using namespace SilKit::Services::Orchestration;
     SilKit::Core::MessageBuffer buffer;
 
-    SystemCommand in{SystemCommand::Kind::Run};
+    SystemCommand in{SystemCommand::Kind::AbortSimulation};
     SystemCommand out{SystemCommand::Kind::Invalid};
 
     Serialize(buffer , in);

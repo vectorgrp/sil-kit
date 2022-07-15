@@ -31,24 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 SILKIT_BEGIN_DECLS
 
-//!< The kind of participant command that is sent.
-typedef int8_t SilKit_ParticipantCommand_Kind;
-#define SilKit_ParticipantCommand_Kind_Invalid ((SilKit_ParticipantCommand_Kind)0) //!< An invalid command
-#define SilKit_ParticipantCommand_Kind_Restart ((SilKit_ParticipantCommand_Kind)1) //!< The restart command
-#define SilKit_ParticipantCommand_Kind_Shutdown ((SilKit_ParticipantCommand_Kind)2) //!< The shutdown command
-
-//!< The numeric participant id.
-typedef int32_t SilKit_ParticipantId;
-
-//!< A command sent to a participant by a system controller.
-struct SilKit_ParticipantCommand
-{
-    SilKit_StructHeader structHeader;
-    SilKit_ParticipantCommand_Kind kind;
-};
-
-typedef struct SilKit_ParticipantCommand SilKit_ParticipantCommand;
-
 //!< The state of a participant.
 typedef int8_t SilKit_ParticipantState;
 #define SilKit_ParticipantState_Invalid ((SilKit_ParticipantState)0) //!< An invalid participant state
@@ -370,53 +352,6 @@ SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_CompleteSimulationStep(SilKit
 
 typedef SilKit_ReturnCode (*SilKit_TimeSyncService_CompleteSimulationStep_t)(SilKit_TimeSyncService* timeSyncService);
 
-/*! \brief Send \ref the Restart command to a specific participant
-  *
-  *  The command is only allowed if the participant is in the
-  *  SilKit_ParticipantState_Stopped or SilKit_ParticipantState_Error state.
-  *
-  *  \param participantName identifies the participant to be initialized
-  *
-  *  NB:
-  *   - Parametrization is yet to be determined.
-  *   - Restart is still subject to changed! It might be changed to
-  *     a SystemCommand to Restart all participants without sending
-  *     new parameters.
-  */
-SilKitAPI SilKit_ReturnCode SilKit_SystemController_Restart(SilKit_SystemController* systemController,
-                                                            const char* participantName);
-
-typedef SilKit_ReturnCode (*SilKit_SystemController_Restart_t)(SilKit_SystemController* systemController,
-                                                               const char* participantName);
-
-/*! \brief Send \ref the Run command to all participants
-  *
-  *  The command is only allowed if system is in state SilKit_SystemState_Initialized.
-  */
-SilKitAPI SilKit_ReturnCode SilKit_SystemController_Run(SilKit_SystemController* systemController);
-
-typedef SilKit_ReturnCode (*SilKit_SystemController_Run_t)(SilKit_Participant* participant);
-
-/*! \brief Send \ref the Stop command to all participants
-  *
-  *  The command is only allowed if system is in SilKit_SystemState_Running.
-  */
-SilKitAPI SilKit_ReturnCode SilKit_SystemController_Stop(SilKit_SystemController* systemController);
-
-typedef SilKit_ReturnCode (*SilKit_SystemController_Stop_t)(SilKit_SystemController* systemController);
-
-/*! \brief Send \ref the Shutdown command to all participants
-  *
-  *  The command is only allowed if system is in
-  *  SilKit_SystemState_Stopped or SilKit_SystemState_Error.
-  */
-SilKitAPI SilKit_ReturnCode SilKit_SystemController_Shutdown(SilKit_SystemController* systemController,
-                                                             const char* participantName);
-
-typedef SilKit_ReturnCode (*SilKit_SystemController_Shutdown_t)(SilKit_SystemController* systemController,
-                                                                const char* participantName);
-
-
 /*! \brief Send \ref SystemCommand::Kind::AbortSimulation to all participants
  *
  *  The abort simulation command signals all participants to terminate their
@@ -555,8 +490,7 @@ typedef SilKit_ReturnCode (*SilKit_SystemController_SetWorkflowConfiguration_t)(
 typedef struct SilKit_LifecycleConfiguration
 {
     SilKit_StructHeader structHeader;
-    SilKit_Bool coordinatedStart;
-    SilKit_Bool coordinatedStop;
+    SilKit_Bool isCoordinated;
 } SilKit_LifecycleConfiguration;
 
 /*! \brief Start the lifecycle with the given parameters with simulation time synchronization.

@@ -81,6 +81,8 @@ protected:
         bool simtimePassed{false};
         std::promise<void>           simtimePassedPromise;
 
+        SilKit::Services::Orchestration::ILifecycleServiceNoTimeSync* lifecycleService{nullptr};
+
         void ResetReception()
         {
             receivedIds.clear();
@@ -99,59 +101,28 @@ protected:
     struct SystemMaster
     {
         std::unique_ptr<IParticipant> participant;
-        ISystemController*           systemController;
-        ISystemMonitor*              systemMonitor;
+        ISystemController*            systemController;
+        ISystemMonitor*               systemMonitor;
+        ILifecycleServiceNoTimeSync* lifecycleService;
+        std::future<ParticipantState> finalState;
     };
-
-    void ParticipantStatusHandler(const ParticipantStatus& newStatus)
-    {
-        switch (newStatus.state)
-        {
-        case ParticipantState::Error:
-            //systemMaster.systemController->Shutdown();
-            break;
-
-        default:
-            break;
-        }
-    }
 
     void SystemStateHandler(SystemState newState)
     {
         switch (newState)
         {
-        case SystemState::ReadyToRun:
-            systemMaster.systemController->Run();
-            break;
-
-        case SystemState::Stopped:
-            for (auto&& name : syncParticipantNames)
-            {
-                systemMaster.systemController->Shutdown(name);
-            }
-            systemMaster.systemController->Shutdown(systemMasterName);
-            break;
-
         case SystemState::Error:
-            for (auto&& name : syncParticipantNames)
-            {
-                systemMaster.systemController->Shutdown(name);
-            }
-            systemMaster.systemController->Shutdown(systemMasterName);
+            std::cout << "SystemState::Error -> Aborting simulation" << std ::endl; 
+            systemMaster.systemController->AbortSimulation();
             break;
 
-        default:
-            break;
+        default: break;
         }
     }
 
-    void ShutdownAndFailTest(const std::string& reason)
+    void AbortAndFailTest(const std::string& reason)
     {
-
-        for (auto&& name : syncParticipantNames)
-        {
-            systemMaster.systemController->Shutdown(name);
-        }
+        systemMaster.systemController->AbortSimulation();
         FAIL() << reason;
     }
 
@@ -192,20 +163,20 @@ protected:
                         participant.simtimePassedPromise.set_value();
                     }
                 }, 1s);
-            auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
+            auto finalStateFuture = lifecycleService->StartLifecycle({true});
             finalStateFuture.get();
         }
         catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
         catch (const std::exception& error)
         {
             std::stringstream ss;
             ss << "Something went wrong: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
 
     }
@@ -245,13 +216,13 @@ protected:
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
         catch (const std::exception& error)
         {
             std::stringstream ss;
             ss << "Something went wrong: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
 
         // Explicitly delete the com adapter to end the async participant
@@ -262,20 +233,20 @@ protected:
     {
         try
         {
-            registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+            registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeParticipantConfigurationWithLogging(Services::Logging::Level::Info));
             registry->StartListening(registryUri);
         }
         catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
         catch (const std::exception& error)
         {
             std::stringstream ss;
             ss << "Something went wrong: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
     }
 
@@ -288,6 +259,7 @@ protected:
 
             systemMaster.systemController = systemMaster.participant->CreateSystemController();
             systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
+            systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleServiceNoTimeSync();
 
             systemMaster.systemController->SetWorkflowConfiguration({syncParticipantNames});
 
@@ -295,21 +267,19 @@ protected:
                 SystemStateHandler(newState);
             });
 
-            systemMaster.systemMonitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
-                ParticipantStatusHandler(newStatus);
-            });
+            systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle({true});
         }
         catch (const SilKit::ConfigurationError& error)
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
         catch (const std::exception& error)
         {
             std::stringstream ss;
             ss << "Something went wrong: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
     }
 
@@ -328,13 +298,13 @@ protected:
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
         catch (const std::exception& error)
         {
             std::stringstream ss;
             ss << "Something went wrong: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
     }
 
@@ -353,13 +323,13 @@ protected:
         {
             std::stringstream ss;
             ss << "Invalid configuration: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
         catch (const std::exception& error)
         {
             std::stringstream ss;
             ss << "Something went wrong: " << error.what() << std::endl;
-            ShutdownAndFailTest(ss.str());
+            AbortAndFailTest(ss.str());
         }
     }
 
@@ -388,10 +358,10 @@ protected:
         {
             syncParticipantNames.push_back(p.name);
         }
+        syncParticipantNames.push_back(systemMasterName);
 
         RunRegistry(registryUri);
         RunSystemMaster(registryUri);
-        
     }
 
     void ShutdownSystem()
@@ -403,7 +373,7 @@ protected:
     }
 
 protected:
-    std::vector<std::string> syncParticipantNames;
+    std::vector<std::string> syncParticipantNames{};
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     SystemMaster systemMaster;
     std::vector<std::thread> syncParticipantThreads;
@@ -478,12 +448,8 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
             p.ResetReception();
     }
 
-    // Stop sync participants
-    for (auto&& name : syncParticipantNames)
-    {
-        systemMaster.systemController->Shutdown(name);
-    }
-    systemMaster.systemController->Shutdown(systemMasterName);
+    std::cout << ">> Cycles done" << std::endl;
+    systemMaster.lifecycleService->Stop("Stop Test.");
 
     StopSyncParticipants();
 

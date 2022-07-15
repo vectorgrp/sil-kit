@@ -82,7 +82,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         {
             //Only allow time progress up to expectedTime
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateSystemController()->Stop();
+            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Stop Test");
             {
                 std::unique_lock<decltype(mx)> lock(mx);
                 done = true;
@@ -159,7 +159,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateSystemController()->Stop();
+            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
         }
         if (now < expectedTime)
         {
@@ -229,7 +229,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_completion_from_foreign_thread)
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateSystemController()->Stop();
+            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
             startupPromise.set_value(true);
             return;
         }
@@ -290,7 +290,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
         countAsync++;
         if (countAsync > periodFactor * 100000)
         {
-            asyncParticipant->GetOrCreateSystemController()->Stop();
+            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
         }
         async->CompleteSimulationStep();
         },
@@ -328,7 +328,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
         countAsync++;
         if (countAsync > periodFactor * 100000)
         {
-            asyncParticipant->GetOrCreateSystemController()->Stop();
+            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
         }
         async->CompleteSimulationStep();
         async->CompleteSimulationStep();

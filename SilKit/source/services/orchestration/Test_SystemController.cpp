@@ -49,7 +49,6 @@ using ::SilKit::Core::Tests::DummyParticipant;
 class MockParticipant : public DummyParticipant
 {
 public:
-    MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const ParticipantCommand& msg));
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const SystemCommand& msg));
 };
 
@@ -81,28 +80,4 @@ TEST_F(SystemControllerTest, configure_serviceDescriptor)
 {
     EXPECT_EQ(controller.GetServiceDescriptor(), from_endpointAddress(addr));
 }
-
-TEST_F(SystemControllerTest, send_restart)
-{
-    std::string name = "Participant";
-    auto nameHash = Util::Hash::Hash(name);
-    ParticipantCommand cmd{ nameHash, ParticipantCommand::Kind::Restart};
-    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
-    controller.Restart(name);
-}
-
-TEST_F(SystemControllerTest, send_run)
-{
-    SystemCommand cmd{SystemCommand::Kind::Run};
-    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
-    controller.Run();
-}
-    
-TEST_F(SystemControllerTest, send_stop)
-{
-    SystemCommand cmd{SystemCommand::Kind::Stop};
-    EXPECT_CALL(participant, SendMsg(&controller, cmd)).Times(1);
-    controller.Stop();
-}
-    
 } // anonymous namespace

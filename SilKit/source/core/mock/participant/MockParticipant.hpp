@@ -122,11 +122,9 @@ public:
 
 class MockSystemController : public Services::Orchestration::ISystemController {
 public:
-    MOCK_METHOD(void, Restart, (const std::string& participantId), (const, override));
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());
     MOCK_CONST_METHOD0(AbortSimulation, void());
-    MOCK_METHOD(void, Shutdown, (const std::string&), (const, override));
     MOCK_METHOD((void), SetWorkflowConfiguration, (const SilKit::Services::Orchestration::WorkflowConfiguration& workflowConfiguration));
 };
 
@@ -272,7 +270,6 @@ public:
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::NextSimTask& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::ParticipantStatus& /*msg*/)  override{}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::ParticipantCommand& /*msg*/)  override{}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::SystemCommand& /*msg*/)  override{}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Orchestration::WorkflowConfiguration& /*msg*/)  override{}
 
@@ -323,7 +320,6 @@ public:
 
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::NextSimTask& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::ParticipantStatus& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::ParticipantCommand& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::SystemCommand& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Services::Orchestration::WorkflowConfiguration& /*msg*/) override {}
 

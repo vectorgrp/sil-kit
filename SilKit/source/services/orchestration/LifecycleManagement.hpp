@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <memory>
+#include <atomic>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -39,24 +40,50 @@ class LifecycleManagement
 {
 public: //CTors
     LifecycleManagement(Services::Logging::ILogger* logger, LifecycleService* parentService);
-public: //Methods
+
     void InitLifecycleManagement(std::string reason);
-    void SkipSetupPhase(std::string reason);
-    void NewSystemState(SystemState systemState);
-    void Run(std::string reason);
+
+    void SystemwideServicesCreated(std::string reason);
+    void SystemwideCommunicationInitialized(std::string reason);
+    void SystemwideReadyToRun(std::string reason);
+    void SystemwideStopping(std::string reason);
+
+    void Restart(std::string reason);
+    bool Shutdown(std::string reason);
+
+
+    // Actions during simulation
     void Pause(std::string reason);
     void Continue(std::string reason);
-    void Stop(std::string reason);
-    bool Shutdown(std::string reason);
-    void Restart(std::string reason);
+    void UserStop(std::string reason);
+
+    // Error / Abort handling
     void Error(std::string reason);
-    bool AbortSimulation(std::string reason);
+    void AbortSimulation(std::string reason);
 
-    void HandleCommunicationReady(std::string reason);
-    void HandleStarting(std::string reason);
-    void HandleStop(std::string reason);
+    // uncoordinated lifecycle state initialization
+    void StartUncoordinated(std::string reason);
 
-    void HandleShutdown(std::string reason);
+public:
+    // internal intermediate step between ServicesCreated and Comm.Initialized
+    void CommunicationInitializing(std::string reason);
+
+    void Stop(std::string reason);
+
+    CallbackResult HandleCommunicationReady();
+    bool HandleStarting();
+    bool HandleStop();
+    bool HandleShutdown();
+
+    void StartRunning();
+
+    void ContinueAfterStop();
+
+    void ResolveAbortSimulation(std::string reason);
+
+    // (Internal) Action after Stop
+    void RestartAfterStop(std::string reason);
+    void ShutdownAfterStop(std::string reason);
 
     // Internal state handling
     void SetState(ILifecycleState* state, std::string message);
@@ -103,6 +130,7 @@ private:
     LifecycleService* _parentService;
 
     Services::Logging::ILogger* _logger;
+    std::atomic<bool> _stopInitialized{false};
 };
 
 } // namespace Orchestration

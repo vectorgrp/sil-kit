@@ -96,14 +96,13 @@ protected: // Methods
     void PrepareLifecycle()
     {
         lifecycleService->SetTimeSyncActive(true);
-        (void)lifecycleService->StartLifecycle({true, true});
+        (void)lifecycleService->StartLifecycle(LifecycleConfiguration{true});
         // skip uninteresting states
         lifecycleService->NewSystemState(SystemState::ServicesCreated);
         lifecycleService->NewSystemState(SystemState::CommunicationInitializing);
         lifecycleService->NewSystemState(SystemState::CommunicationInitialized);
         lifecycleService->NewSystemState(SystemState::ReadyToRun);
         lifecycleService->NewSystemState(SystemState::Running);
-        lifecycleService->ReceiveMsg(&endpoint, {SystemCommand::Kind::Run});
     }
 protected:
     // ----------------------------------------
@@ -130,12 +129,12 @@ auto makeTask(std::chrono::milliseconds timepoint)
 
 TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
 {
-    PrepareLifecycle();
-
     auto numAsyncTaskCalled{0};
     timeSyncService.SetSimulationStepHandlerAsync([&](auto, auto){
         numAsyncTaskCalled++;
     }, 1ms);
+
+    PrepareLifecycle();
 
     auto task =  makeTask(0ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
@@ -150,12 +149,12 @@ TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
 
 TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
 {
-    PrepareLifecycle();
-
     auto numAsyncTaskCalled{0};
     timeSyncService.SetSimulationStepHandlerAsync([&](auto, auto){
         numAsyncTaskCalled++;
     }, 1ms);
+
+    PrepareLifecycle();
 
     auto task = makeTask(0ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
@@ -175,12 +174,12 @@ TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
 TEST_F(TimeSyncServiceTest, async_simtask_mismatching_number_of_complete_calls)
 {
     // What happens when the User calls CompleteSimulationStep() multiple times?
-    PrepareLifecycle();
-
     auto numAsyncTaskCalled{0};
     timeSyncService.SetSimulationStepHandlerAsync([&](auto, auto){
         numAsyncTaskCalled++;
     }, 1ms);
+
+    PrepareLifecycle();
 
     auto task = makeTask(0ms);
     timeSyncService.ReceiveMsg(&endpoint, task);

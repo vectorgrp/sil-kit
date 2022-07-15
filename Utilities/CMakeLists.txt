@@ -21,5 +21,4 @@
 
 add_subdirectory(SilKitRegistry)
 add_subdirectory(SilKitSystemController)
-add_subdirectory(SilKitSystemControllerInteractive)
 add_subdirectory(SilKitSystemMonitor)

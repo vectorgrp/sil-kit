@@ -457,7 +457,7 @@ protected:
                     }
                     participant.CheckAllCalledPromise();
                 }, 1s);
-                auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
+                auto finalStateFuture = lifecycleService->StartLifecycle({true});
                 finalStateFuture.get();
             }
             else
@@ -587,7 +587,7 @@ protected:
                 requiredParticipantNames.push_back(p.name);
             }
 
-            _testSystem.SetupRegistryAndSystemMaster(registryUri, true, requiredParticipantNames);
+        _testSystem.SetupRegistryAndSystemMaster(registryUri, true, std::move(requiredParticipantNames));
             RunParticipants(rpcs, registryUri, true);
             WaitForAllServersDiscovered(rpcs);
             StopSimOnallCalledAndReceived(rpcs, true);

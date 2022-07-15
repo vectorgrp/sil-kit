@@ -28,13 +28,11 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-void Serialize(SilKit::Core::MessageBuffer& buffer, const ParticipantCommand& msg);
 void Serialize(SilKit::Core::MessageBuffer& buffer, const SystemCommand& msg);
 void Serialize(SilKit::Core::MessageBuffer& buffer, const ParticipantStatus& msg);
 void Serialize(SilKit::Core::MessageBuffer& buffer, const WorkflowConfiguration& msg);
 void Serialize(SilKit::Core::MessageBuffer& buffer, const NextSimTask& msg);
 
-void Deserialize(SilKit::Core::MessageBuffer& buffer, ParticipantCommand& out);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, SystemCommand& out);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, ParticipantStatus& out);
 void Deserialize(SilKit::Core::MessageBuffer& buffer, WorkflowConfiguration& out);

@@ -30,7 +30,7 @@ namespace Services {
 namespace Orchestration {
 
 class IMsgForLifecycleService
-    : public Core::IReceiver<ParticipantCommand, SystemCommand>
+    : public Core::IReceiver<SystemCommand>
     , public Core::ISender<ParticipantStatus>
 {
 };

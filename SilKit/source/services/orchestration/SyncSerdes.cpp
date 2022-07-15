@@ -40,20 +40,6 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
 }
 
     
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const SilKit::Services::Orchestration::ParticipantCommand& cmd)
-{
-    buffer << cmd.participant
-           << cmd.kind;
-    return buffer;
-}
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, SilKit::Services::Orchestration::ParticipantCommand& cmd)
-{
-    buffer >> cmd.participant
-           >> cmd.kind;
-    return buffer;
-}
-
-    
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const SilKit::Services::Orchestration::SystemCommand& cmd)
 {
     buffer << cmd.kind;
@@ -64,7 +50,7 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
     buffer >> cmd.kind;
     return buffer;
 }
-    
+
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const SilKit::Services::Orchestration::ParticipantStatus& status)
 {
@@ -99,11 +85,6 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
     return buffer;
 }
 
-void Serialize(SilKit::Core::MessageBuffer& buffer, const ParticipantCommand& msg)
-{
-    buffer << msg;
-    return;
-}
 void Serialize(SilKit::Core::MessageBuffer& buffer, const SystemCommand& msg)
 {
     buffer << msg;
@@ -125,10 +106,6 @@ void Serialize(SilKit::Core::MessageBuffer& buffer, const NextSimTask& msg)
     return;
 }
 
-void Deserialize(SilKit::Core::MessageBuffer& buffer, ParticipantCommand& out)
-{
-    buffer >> out;
-}
 void Deserialize(SilKit::Core::MessageBuffer& buffer, SystemCommand& out)
 {
     buffer >> out;

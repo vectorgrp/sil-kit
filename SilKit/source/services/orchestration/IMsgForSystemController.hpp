@@ -22,8 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "silkit/services/orchestration/SyncDatatypes.hpp"
+
 #include "IReceiver.hpp"
 #include "ISender.hpp"
+#include "string_utils_sync.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -31,7 +33,7 @@ namespace Orchestration {
 
 class IMsgForSystemController
     : public Core::IReceiver<>
-    , public Core::ISender<ParticipantCommand, SystemCommand, WorkflowConfiguration>
+    , public Core::ISender<SystemCommand, WorkflowConfiguration>
 {
 };
 

@@ -59,92 +59,30 @@ public:
         _controller = participant->CreateSystemController();
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
 
-        _monitor = participant->CreateSystemMonitor();
-        _monitor->AddSystemStateHandler([this](SystemState newState) {
-            this->OnSystemStateChanged(newState);
-        });
-        _monitor->AddParticipantStatusHandler([this](const ParticipantStatus& newStatus) {
-            this->OnParticipantStatusChanged(newStatus);
-        });
-    }
-
-    void OnSystemStateChanged(SystemState newState)
-    {
-        switch (newState)
-        {
-        case SystemState::ReadyToRun:
-            std::cout << "Sending SystemCommand::Run" << std::endl;
-            _controller->Run();
-            return;
-        case SystemState::Stopping:
-            return;
-
-        case SystemState::Stopped:
-            std::cout << "Sending ParticipantCommand::Shutdown" << std::endl;
-            for (auto&& name: _expectedParticipantNames)
-            {
-                _controller->Shutdown(name);
-            }
-            return;
-
-        case SystemState::Shutdown:
-            _shutdownPromise.set_value(true);
-            return;
-        default:
-            //not handled
-            break;
-        }
-    }
-
-    void OnParticipantStatusChanged(const ParticipantStatus& newStatus)
-    {
-        switch (newStatus.state)
-        {
-        case ParticipantState::Stopped:
-            if (!_stopInitiated)
-            {
-                // We did not initiate this Stop, so some Participant must have called ParticipantClient::Stop().
-                // --> Propagate the Stop to all participants.
-                std::cout << "Detected voluntary stop by participant " << newStatus.participantName << std::endl;
-                Stop();
-            }
-            break;
-        default:
-            // not handled
-            break;
-        }
-    }
-
-    void Stop()
-    {
-        std::cout << "Sending SystemCommand::Stop" << std::endl;
-        _stopInitiated = true;
-        _controller->Stop();
+        _lifecycleService = participant->CreateLifecycleServiceNoTimeSync();
+        _finalStatePromise = _lifecycleService->StartLifecycle({true});
     }
 
     void Shutdown()
     {
         if (_monitor->SystemState() == SystemState::Running)
         {
-            Stop();
+            _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
         else
         {
             std::cerr << "SilKit is not Running. Terminating Process without Stopping." << std::endl;
-            std::cout << "Sending SystemCommand::Shutdown" << std::endl;
-            for (auto&& name: _expectedParticipantNames)
-            {
-                _controller->Shutdown(name);
-            }
+            std::cout << "Sending SystemCommand::AbortSimulation" << std::endl;
+            _controller->AbortSimulation();
             std::this_thread::sleep_for(1s);
             return;
         }
 
-        auto future = _shutdownPromise.get_future();
-        auto status = future.wait_for(5s);
+        auto status = _finalStatePromise.wait_for(5s);
         if (status != std::future_status::ready)
         {
-            std::cerr << "SilKit did not shut down in 5s... Terminating Process." << std::endl;
+            std::cerr << "SilKit did not shut down in 5s... Sending AbortSimulation and Terminating Process." << std::endl;
+            _controller->AbortSimulation();
             std::this_thread::sleep_for(1s);
             return;
         }
@@ -153,11 +91,11 @@ public:
 private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
-    bool _stopInitiated{false};
-    std::promise<bool> _shutdownPromise;
 
     ISystemController* _controller;
     ISystemMonitor* _monitor;
+    ILifecycleServiceNoTimeSync* _lifecycleService;
+    std::future<ParticipantState> _finalStatePromise;
 };
 
 int main(int argc, char** argv)
@@ -254,6 +192,7 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
 
+        expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
         std::cout << "Press enter to shutdown the SilKit..." << std::endl;

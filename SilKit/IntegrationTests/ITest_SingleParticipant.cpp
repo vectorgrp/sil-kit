@@ -97,26 +97,28 @@ protected:
             canController->Start();
         });
 
-        timeSyncService->SetSimulationStepHandler([this, canController, lifecycleService](auto, auto) {
-            EXPECT_EQ(lifecycleService->State(), Services::Orchestration::ParticipantState::Running);
-            if (numSent < testMessages.size())
-            {
-                const auto& message = testMessages.at(numSent);
+        timeSyncService->SetSimulationStepHandler(
+            [this, canController, lifecycleService](auto, auto) {
+                EXPECT_EQ(lifecycleService->State(), Services::Orchestration::ParticipantState::Running);
+                if (numSent < testMessages.size())
+                {
+                    const auto& message = testMessages.at(numSent);
 
-                std::vector<uint8_t> expectedData;
-                expectedData.resize(message.expectedData.size());
-                std::copy(message.expectedData.begin(), message.expectedData.end(), expectedData.begin());
+                    std::vector<uint8_t> expectedData;
+                    expectedData.resize(message.expectedData.size());
+                    std::copy(message.expectedData.begin(), message.expectedData.end(), expectedData.begin());
 
-                CanFrame msg;
-                msg.canId = 1;
-                msg.dataField = expectedData;
-                msg.dlc = static_cast<uint16_t>(msg.dataField.size());
-
-                canController->SendFrame(std::move(msg), (void*)(static_cast<uintptr_t>(numSent + 1)));
-                numSent++;
-                std::this_thread::sleep_for(100ms);
-            }
-        }, 1ms);
+                    CanFrame msg;
+                    msg.canId = 1;
+                    msg.dataField = expectedData;
+                    msg.dlc = static_cast<uint16_t>(msg.dataField.size());
+                    
+                    numSent++;
+                    canController->SendFrame(std::move(msg), (void*)(static_cast<uintptr_t>(numSent)));
+                    std::this_thread::sleep_for(100ms);
+                }
+            },
+            1ms);
     }
 
     void ExecuteTest()
@@ -134,12 +136,11 @@ protected:
         EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)uintptr_t(0)))).Times(0);
         EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)uintptr_t(6)))).Times(0);
 
-        EXPECT_TRUE(testHarness.Run(30s))
+        EXPECT_TRUE(testHarness.Run(10s))
             << "TestHarness timeout occurred!"
             << " numSent=" << numSent
             << " numAcked=" << numAcked
             ;
-
         EXPECT_EQ(numSent, testMessages.size());
         EXPECT_EQ(numAcked, testMessages.size());
     }

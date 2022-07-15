@@ -233,8 +233,7 @@ static std::map<SilKit_LifecycleService*, std::future<SilKit::Services::Orchestr
 static auto from_c(SilKit_LifecycleConfiguration* csc)
 {
     SilKit::Services::Orchestration::LifecycleConfiguration cpp;
-    cpp.coordinatedStart = csc->coordinatedStart;
-    cpp.coordinatedStop = csc->coordinatedStop;
+    cpp.isCoordinated = csc->isCoordinated;
     return cpp;
 }
 SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService,
@@ -357,58 +356,6 @@ SilKit_ReturnCode SilKit_LifecycleService_Continue(SilKit_LifecycleService* clif
         auto* lifeCycleService =
             reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(clifecycleService);
         lifeCycleService->Continue();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKit_SystemController_Restart(SilKit_SystemController* csystemController, const char* participantName)
-{
-    ASSERT_VALID_POINTER_PARAMETER(csystemController);
-    ASSERT_VALID_POINTER_PARAMETER(participantName);
-    CAPI_ENTER
-    {
-        auto* systemController = reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
-
-        systemController->Restart(participantName);
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKit_SystemController_Run(SilKit_SystemController* csystemController)
-{
-    ASSERT_VALID_POINTER_PARAMETER(csystemController);
-    CAPI_ENTER
-    {
-        auto* systemController = reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
-        systemController->Run();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKit_SystemController_Stop(SilKit_SystemController* csystemController)
-{
-    ASSERT_VALID_POINTER_PARAMETER(csystemController);
-    CAPI_ENTER
-    {
-        auto* systemController = reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
-        systemController->Stop();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKit_SystemController_Shutdown(SilKit_SystemController* csystemController, const char* participantName)
-{
-    ASSERT_VALID_POINTER_PARAMETER(csystemController);
-    ASSERT_VALID_POINTER_PARAMETER(participantName);
-    CAPI_ENTER
-    {
-        auto* systemController =
-            reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
-        systemController->Shutdown(participantName);
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

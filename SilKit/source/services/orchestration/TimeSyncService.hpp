@@ -79,11 +79,7 @@ public:
 
     void SetPeriod(std::chrono::nanoseconds period);
 
-    void ReceiveMsg(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
-
     void ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task) override;
-
-    void ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& task) override;
 
     auto Now() const -> std::chrono::nanoseconds override;
 
@@ -96,6 +92,7 @@ public:
     void InitializeTimeSyncPolicy(bool isSynchronized);
     void ResetTime();
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
+    void StartTime();
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;

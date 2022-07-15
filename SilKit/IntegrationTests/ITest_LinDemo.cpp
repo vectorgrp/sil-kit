@@ -135,31 +135,33 @@ struct TestResult
 
 struct LinNode
 {
-    LinNode(IParticipant* participant, ILinController* controller, const std::string& name, Orchestration::ISystemController* systemController)
+    LinNode(IParticipant* participant, ILinController* controller, const std::string& name,
+            Orchestration::ILifecycleServiceWithTimeSync* lifecycleService)
         : _controller{controller}
         , _participant{participant}
         , _name{name}
-        , _systemController{systemController}
+        , _lifecycleService{lifecycleService}
     {
     }
 
     virtual ~LinNode() = default;
 
-    void Stop() { _systemController->Stop(); }
+    void Stop() { _lifecycleService->Stop("Stop"); }
 
     ILinController* _controller{nullptr};
     IParticipant* _participant{nullptr};
     LinControllerConfig _controllerConfig;
     std::string _name;
     TestResult _result;
-    Orchestration::ISystemController* _systemController{nullptr};
+    Orchestration::ILifecycleServiceWithTimeSync* _lifecycleService{nullptr};
 };
 
 class LinMaster : public LinNode
 {
 public:
-    LinMaster(IParticipant* participant, ILinController* controller, Orchestration::ISystemController* systemController)
-        : LinNode(participant, controller, "LinMaster", systemController)
+    LinMaster(IParticipant* participant, ILinController* controller,
+              Orchestration::ILifecycleServiceWithTimeSync* lifecycleService)
+        : LinNode(participant, controller, "LinMaster", lifecycleService)
     {
         schedule = {
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
@@ -288,8 +290,9 @@ private:
 class LinSlave : public LinNode
 {
 public:
-    LinSlave(IParticipant* participant, ILinController* controller, Orchestration::ISystemController* systemController)
-        : LinNode(participant, controller, "LinSlave", systemController)
+    LinSlave(IParticipant* participant, ILinController* controller,
+             Orchestration::ILifecycleServiceWithTimeSync* lifecycleService)
+        : LinNode(participant, controller, "LinSlave", lifecycleService)
     {
     }
 
@@ -419,7 +422,6 @@ TEST_F(ITest_SimTestHarness, lin_demo)
         auto&& lifecycleService =
             _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleServiceWithTimeSync();
         auto&& timeSyncService = lifecycleService->GetTimeSyncService();
-        auto&& systemController = _simTestHarness->GetParticipant(participantName)->GetOrCreateSystemController();
         auto&& linController = participant->CreateLinController("LinController1", "LIN1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
 
@@ -430,7 +432,7 @@ TEST_F(ITest_SimTestHarness, lin_demo)
 
             });
 
-        auto master = std::make_unique<LinMaster>(participant, linController, systemController);
+        auto master = std::make_unique<LinMaster>(participant, linController, lifecycleService);
 
         linController->AddFrameStatusHandler(Util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
         linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
@@ -453,7 +455,6 @@ TEST_F(ITest_SimTestHarness, lin_demo)
         auto&& lifecycleService =
             _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleServiceWithTimeSync();
         auto&& timeSyncService = lifecycleService->GetTimeSyncService();
-        auto&& systemController = _simTestHarness->GetParticipant(participantName)->GetOrCreateSystemController();
         auto&& linController = participant->CreateLinController("LinController1", "LIN1");
 
 
@@ -466,7 +467,7 @@ TEST_F(ITest_SimTestHarness, lin_demo)
 
           });
 
-        auto slave = std::make_unique<LinSlave>(participant, linController, systemController);
+        auto slave = std::make_unique<LinSlave>(participant, linController, lifecycleService);
         linController->AddFrameStatusHandler(Util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
         linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
         linController->AddWakeupHandler(Util::bind_method(slave.get(), &LinSlave::WakeupHandler));

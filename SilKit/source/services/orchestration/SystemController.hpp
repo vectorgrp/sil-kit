@@ -55,10 +55,6 @@ public:
     // ----------------------------------------
     // Public Methods
     // ISystemController
-    void Restart(const std::string& participantName) const override;
-    void Run() const override;
-    void Stop() const override;
-    void Shutdown(const std::string& participantName) const override;
     void AbortSimulation() const override;
     void SetWorkflowConfiguration(const WorkflowConfiguration& workflowConfiguration) override;
 
@@ -72,7 +68,6 @@ private:
     template <class MsgT>
     inline void SendMsg(MsgT&& msg) const;
 
-    inline void SendParticipantCommand(ParticipantId participantId, ParticipantCommand::Kind kind) const;
     inline void SendSystemCommand(SystemCommand::Kind kind) const;
     
 private:
@@ -90,15 +85,6 @@ void SystemController::SendMsg(MsgT&& msg) const
 {
     SILKIT_ASSERT(_participant);
     _participant->SendMsg(this, std::forward<MsgT>(msg));
-}
-
-void SystemController::SendParticipantCommand(ParticipantId participantId, ParticipantCommand::Kind kind) const
-{
-    ParticipantCommand cmd;
-    cmd.participant = participantId;
-    cmd.kind = kind;
-
-    SendMsg(std::move(cmd));
 }
     
 void SystemController::SendSystemCommand(SystemCommand::Kind kind) const

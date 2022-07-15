@@ -265,32 +265,12 @@ void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>&
     // do nothing
 }
 
-void ParticipantStatusHandler(ISystemController* controller, const ParticipantStatus& newStatus)
+void ParticipantStatusHandler(ILifecycleServiceWithTimeSync* service, const ParticipantStatus& newStatus)
 {
     switch (newStatus.state)
     {
     case ParticipantState::Stopped:
-        controller->Stop();
-        break;
-
-    default:
-        break;
-    }
-}
-
-void SystemStateHandler(ISystemController* controller, SystemState newState, const std::vector<std::string>& expectedParticipants)
-{
-    switch (newState)
-    {
-    case SystemState::ReadyToRun:
-        controller->Run();
-        break;
-
-    case SystemState::Stopped:
-        for (auto&& name : expectedParticipants)
-        {
-            controller->Shutdown(name);
-        }
+        service->Stop("Stop Participant");
         break;
 
     default:
@@ -341,7 +321,7 @@ void ParticipantsThread(
         PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
     }, 1ms);
 
-    lifecycleService->StartLifecycle({true, true});
+    lifecycleService->StartLifecycle({true});
 }
 const auto config = "{}";
 
@@ -388,15 +368,12 @@ int main(int argc, char** argv)
             auto participant = SilKit::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
             auto controller = participant->CreateSystemController();
             auto monitor = participant->CreateSystemMonitor();
+            auto lifecycle = participant->CreateLifecycleServiceWithTimeSync();
 
             controller->SetWorkflowConfiguration({participantNames});
 
-            monitor->AddSystemStateHandler([controller, participantNames](SystemState newState) {
-                SystemStateHandler(controller, newState, participantNames);
-            });
-
-            monitor->AddParticipantStatusHandler([controller](const ParticipantStatus& newStatus) {
-                ParticipantStatusHandler(controller, newStatus);
+            monitor->AddParticipantStatusHandler([lifecycle](const ParticipantStatus& newStatus) {
+                ParticipantStatusHandler(lifecycle, newStatus);
             });
 
             for (auto&& thread : threads)
