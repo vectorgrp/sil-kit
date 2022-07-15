@@ -21,7 +21,10 @@
     } \
     catch (const std::exception&) { \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
-    }
+    } \
+    catch (...) { \
+        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
+    } \
 
 #define kInvalidFunctionPointer  "Handler function parameter must not be null."
 
