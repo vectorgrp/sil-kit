@@ -39,17 +39,17 @@ protected:
         SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
 
         // Subscriber
-        auto&& subscriber = testHarness.GetParticipant("Subscriber")->Participant();
-        auto subLogger = subscriber->GetLogger();
+        auto&& subscriber = testHarness.GetParticipant("Subscriber");
+        auto subLogger = subscriber->GetOrCreateLogger();
         subLogger->Info(">>> Created Subscriber participant");
 
         int receptionCount = 0;
-        auto* subLifecycleService = subscriber->GetLifecycleService();
+        auto* subLifecycleService = subscriber->GetOrCreateLifecycleServiceWithTimeSync();
         for (auto i = 0; i < numberOfTopics; i++)
         {
             const auto controllerName = "Sub-" + std::to_string(i);
             const auto topic = "TopicName-" + std::to_string(i);
-            (void)subscriber->CreateDataSubscriber(
+            (void)subscriber->Participant()->CreateDataSubscriber(
                 controllerName, topic, "", {},
                 [&receptionCount, subLogger, numberOfTopics, &subLifecycleService](
                     SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
@@ -64,8 +64,8 @@ protected:
         subLogger->Info(">>> Created DataSubscriber controllers");
 
         // Publisher
-        auto&& publisher = testHarness.GetParticipant("Publisher")->Participant();
-        auto pubLogger = publisher->GetLogger();
+        auto&& publisher = testHarness.GetParticipant("Publisher");
+        auto pubLogger = publisher->GetOrCreateLogger();
         pubLogger->Info(">>> Created Publisher participant");
         std::vector<SilKit::Services::PubSub::IDataPublisher*> pubController;
         std::vector<uint8_t> testData = {1, 1, 1};
@@ -75,11 +75,11 @@ protected:
         {
             const auto controllerName = "Pub-" + std::to_string(i);
             const auto topic = "TopicName-" + std::to_string(i);
-            pubController.push_back(publisher->CreateDataPublisher(controllerName, topic, "", {}, 0));
+            pubController.push_back(publisher->Participant()->CreateDataPublisher(controllerName, topic, "", {}, 0));
         }
-        auto* lifecycleService = publisher->GetLifecycleService();
+        auto* lifecycleService = publisher->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [&allPublished, testData, pubController, pubLogger](auto, auto) {
                 if (!allPublished)
                 {
@@ -91,7 +91,7 @@ protected:
                     pubLogger->Info(">>> Publish complete");
                     allPublished = true;
                 }
-            });
+            }, 1ms);
         pubLogger->Info(">>> Created DataPublisher controllers");
 
         pubLogger->Info(">>> Run");

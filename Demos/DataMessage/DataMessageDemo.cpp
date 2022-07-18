@@ -94,7 +94,7 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* lifecycleService = participant->GetLifecycleService();
+        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([&participantName]() {
@@ -108,14 +108,13 @@ int main(int argc, char** argv)
             std::cout << "Shutting down..." << std::endl;
         });
 
-        timeSyncService->SetPeriod(1s);
         if (participantName == "PubSub1")
         {
             auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaTypeA, labelsEmpty, 0);
             auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", "Topic2", mediaTypeA, labelsEmpty, 0);
             participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
@@ -123,7 +122,7 @@ int main(int argc, char** argv)
                     PublishMessage(PubTopic2, "Topic2_from_Pub1");
                     std::this_thread::sleep_for(1s);
 
-            });
+            }, 1s);
         }
         else if (participantName == "PubSub2")
         {
@@ -131,41 +130,41 @@ int main(int argc, char** argv)
             auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", "Topic3", mediaTypeA, labelsEmpty, 0);
             participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     PublishMessage(PubTopic1, "Topic1_from_Pub2");
                     PublishMessage(PubTopic3, "Topic3_from_Pub2");
                     std::this_thread::sleep_for(1s);
-                });
+                }, 1s);
         }
         else if (participantName == "Subscriber1")
         {
             participant->CreateDataSubscriber("SubCtrl1", "Topic1", mediaTypeAll, labelsEmpty, ReceiveMessage);
             participant->CreateDataSubscriber("SubCtrl2", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(1s);
-            });
+            }, 1s);
         }
         else if (participantName == "Subscriber2")
         {
             participant->CreateDataSubscriber("SubCtrl1", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
             participant->CreateDataSubscriber("SubCtrl2", "Topic3", mediaTypeB, labelsEmpty, ReceiveMessage);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(1s);
-                });
+                }, 1s);
         }
 
-        auto lifecycleFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+        auto lifecycleFuture = lifecycleService->StartLifecycle({true, true});
         auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

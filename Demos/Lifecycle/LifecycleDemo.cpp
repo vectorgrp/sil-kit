@@ -97,41 +97,30 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        // In this demo, the life cycle service will always be used
-        auto* lifecycleService = participant->GetLifecycleService();
-
-        // Set a CommunicationReady Handler
-        lifecycleService->SetCommunicationReadyHandler([]() {
-            std::cout << "CommunicationReady..." << std::endl;
-        });
-
-        // Set a Starting Handler (only triggers for asynchronous participants)
-        lifecycleService->SetStartingHandler([&]() {
-            std::cout << "Starting..." << std::endl;
-            workerThread = std::thread{[&]() {
-                std::this_thread::sleep_for(2s);
-                std::cout << "Stopping participants after 2s manually..." << std::endl;
-                lifecycleService->Stop("Manual stop.");
-            }};
-        });
-
-        // Set a Stop Handler
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stopping..." << std::endl;
-        });
-
-        // Set a Shutdown Handler
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutdown..." << std::endl;
-        });
-
         if (runSync)
         {
+            // In this demo, the life cycle service will always be used
+            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
+
+            // Set a CommunicationReady Handler
+            lifecycleService->SetCommunicationReadyHandler([]() {
+                std::cout << "CommunicationReady..." << std::endl;
+            });
+
+            // Set a Stop Handler
+            lifecycleService->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
+
+            // Set a Shutdown Handler
+            lifecycleService->SetShutdownHandler([]() {
+                std::cout << "Shutdown..." << std::endl;
+            });
+
             // configure time synchronization
             auto timeSyncService = lifecycleService->GetTimeSyncService();
 
-            timeSyncService->SetPeriod(5ms);
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [&, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
                     std::cout << "now=" << now << ", duration=" << duration << std::endl;
                     std::this_thread::sleep_for(sleepTimePerTick);
@@ -152,9 +141,9 @@ int main(int argc, char** argv)
                             std::cout << "Continuing after " << diffTimeInSeconds.count() << "s..." << std::endl;
                         }
                     }
-                });
-            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(
-                timeSyncService, Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
+                }, 5ms);
+            auto finalStateFuture = lifecycleService->StartLifecycle(
+                Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;
@@ -162,7 +151,35 @@ int main(int argc, char** argv)
         }
         else
         {
-            auto finalStateFuture = lifecycleService->StartLifecycleNoSyncTime(
+            // In this demo, the life cycle service will always be used
+            auto* lifecycleService = participant->CreateLifecycleServiceNoTimeSync();
+
+            // Set a CommunicationReady Handler
+            lifecycleService->SetCommunicationReadyHandler([]() {
+                std::cout << "CommunicationReady..." << std::endl;
+            });
+
+            // Set a Starting Handler (only triggers for asynchronous participants)
+            lifecycleService->SetStartingHandler([&]() {
+                std::cout << "Starting..." << std::endl;
+                workerThread = std::thread{[&]() {
+                    std::this_thread::sleep_for(2s);
+                    std::cout << "Stopping participants after 2s manually..." << std::endl;
+                    lifecycleService->Stop("Manual stop.");
+                }};
+            });
+
+            // Set a Stop Handler
+            lifecycleService->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
+
+            // Set a Shutdown Handler
+            lifecycleService->SetShutdownHandler([]() {
+                std::cout << "Shutdown..." << std::endl;
+            });
+
+            auto finalStateFuture = lifecycleService->StartLifecycle(
                 Orchestration::LifecycleConfiguration{coordinateStartAndStop, coordinateStartAndStop});
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

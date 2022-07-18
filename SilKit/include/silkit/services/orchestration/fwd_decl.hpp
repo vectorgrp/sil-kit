@@ -13,7 +13,8 @@ struct SystemCommand;
 struct ParticipantStatus;
 struct WorkflowConfiguration;
 
-class ILifecycleService;
+class ILifecycleServiceNoTimeSync;
+class ILifecycleServiceWithTimeSync;
 class ITimeSyncService;
 
 class ISystemMonitor;

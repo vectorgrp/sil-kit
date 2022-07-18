@@ -503,7 +503,7 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestration::ILifecycleService*
+auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal*
 {
     auto* lifecycleService =
         GetController<Orchestration::LifecycleService>("default", SilKit::Core::Discovery::controllerTypeLifecycleService);
@@ -521,6 +521,35 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
     return lifecycleService;
 }
 
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*
+{
+    if (_isLifecycleServiceCreated)
+    {
+        throw std::runtime_error("You may not create the lifecycle service more than once.");
+    }
+    _isLifecycleServiceCreated = true;
+
+    auto* lcs = GetLifecycleService();
+    lcs->SetTimeSyncActive(true);
+
+    return lcs;
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*
+{
+    if (_isLifecycleServiceCreated)
+    {
+        throw std::runtime_error("You may not create the lifecycle service more than once.");
+    }
+    _isLifecycleServiceCreated = true;
+
+    auto* lcs = GetLifecycleService();
+    lcs->SetTimeSyncActive(false);
+
+    return lcs;
+}
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestration::ISystemMonitor*
@@ -545,6 +574,17 @@ auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestrati
         });
     }
     return controller;
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*
+{
+    if (_isSystemMonitorCreated)
+    {
+        throw std::runtime_error("You may not create the system monitor more than once.");
+    }
+    _isSystemMonitorCreated = true;
+    return GetSystemMonitor();
 }
 
 template <class SilKitConnectionT>
@@ -582,9 +622,31 @@ auto Participant<SilKitConnectionT>::GetSystemController() -> Services::Orchestr
 }
 
 template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateSystemController() -> Services::Orchestration::ISystemController*
+{
+    if (_isSystemControllerCreated)
+    {
+        throw std::runtime_error("You may not create the system controller more than once.");
+    }
+    _isSystemControllerCreated = true;
+    return GetSystemController();
+}
+
+template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetLogger() -> Services::Logging::ILogger*
 {
     return _logger.get();
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateLogger() -> Services::Logging::ILogger*
+{
+    if (_isLoggerCreated)
+    {
+        throw std::runtime_error("You may not create the logger more than once.");
+    }
+    _isLoggerCreated = true;
+    return GetLogger();
 }
 
 template <class SilKitConnectionT>

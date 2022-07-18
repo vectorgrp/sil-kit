@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 
         if (runSync)
         {
-            auto* lifecycleService = participant->GetLifecycleService();
+            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
             // Set a CommunicationReady Handler
@@ -202,29 +202,28 @@ int main(int argc, char** argv)
                 std::cout << "Shutting down..." << std::endl;
             });
 
-            timeSyncService->SetPeriod(1ms);
             if (participantName == "EthernetWriter")
             {
-                timeSyncService->SetSimulationTask(
+                timeSyncService->SetSimulationStepHandler(
                     [ethernetController, WriterMacAddr, destinationAddress = BroadcastMacAddr](
                         std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
                         SendFrame(ethernetController, WriterMacAddr, destinationAddress);
                         std::this_thread::sleep_for(100ms);
-                    });
+                    }, 1ms);
             }
             else
             {
-                timeSyncService->SetSimulationTask(
+                timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
                         std::this_thread::sleep_for(100ms);
-                    });
+                    }, 1ms);
             }
 
-            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+            auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

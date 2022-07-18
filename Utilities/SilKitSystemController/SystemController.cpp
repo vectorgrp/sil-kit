@@ -37,10 +37,10 @@ public:
         : _config{std::move(config)}
         , _expectedParticipantNames{expectedParticipantNames}
     {
-        _controller = participant->GetSystemController();
+        _controller = participant->CreateSystemController();
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
 
-        _monitor = participant->GetSystemMonitor();
+        _monitor = participant->CreateSystemMonitor();
         _monitor->AddSystemStateHandler([this](SystemState newState) {
             this->OnSystemStateChanged(newState);
         });

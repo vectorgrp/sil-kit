@@ -79,16 +79,19 @@ public:
                                     Services::Rpc::RpcDiscoveryResultHandler handler) = 0;
 
     //! \brief Return the ILifecycleService at this SIL Kit participant.
-    virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+    virtual auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* = 0;
+
+    //! \brief Return the ILifecycleService at this SIL Kit participant.
+    virtual auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* = 0;
 
     //! \brief Return the ISystemMonitor at this SIL Kit participant.
-    virtual auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
+    virtual auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
 
     //! \brief Return the ISystemController at this SIL Kit participant.
-    virtual auto GetSystemController() -> Services::Orchestration::ISystemController* = 0;
+    virtual auto CreateSystemController() -> Services::Orchestration::ISystemController* = 0;
 
     //! \brief Return the ILogger at this SIL Kit participant.
-    virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
+    virtual auto CreateLogger() -> Services::Logging::ILogger* = 0;
 };
 
 } // namespace SilKit

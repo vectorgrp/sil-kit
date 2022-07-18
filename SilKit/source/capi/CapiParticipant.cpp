@@ -43,7 +43,7 @@ SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
             return SilKit_ReturnCode_UNSPECIFIEDERROR;
         }
 
-        auto* logger = participant->GetLogger();
+        auto* logger = participant->CreateLogger();
         if (logger)
         {
             logger->Info("Creating participant '{}' in domain {}", cParticipantName, cRegistryUri);
@@ -73,14 +73,14 @@ SilKit_ReturnCode SilKit_Participant_Destroy(SilKit_Participant* participant)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
+SilKit_ReturnCode SilKit_Participant_CreateLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
 {
     ASSERT_VALID_OUT_PARAMETER(outLogger);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto logger = cppParticipant->GetLogger();
+        auto logger = cppParticipant->CreateLogger();
         *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
         return SilKit_ReturnCode_SUCCESS;
     }

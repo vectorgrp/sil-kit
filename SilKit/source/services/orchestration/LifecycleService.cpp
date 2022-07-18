@@ -30,22 +30,22 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
     (void)healthCheckConfig;
 }
 
-void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandlerT handler)
+void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandler handler)
 {
     _commReadyHandler = std::move(handler);
 }
 
-void LifecycleService::SetStartingHandler(StartingHandlerT handler)
+void LifecycleService::SetStartingHandler(StartingHandler handler)
 {
     _startingHandler = std::move(handler);
 }
 
-void LifecycleService::SetStopHandler(StopHandlerT handler)
+void LifecycleService::SetStopHandler(StopHandler handler)
 {
     _stopHandler = std::move(handler);
 }
 
-void LifecycleService::SetShutdownHandler(ShutdownHandlerT handler)
+void LifecycleService::SetShutdownHandler(ShutdownHandler handler)
 {
     _shutdownHandler = std::move(handler);
 }
@@ -92,23 +92,8 @@ auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool h
     return _finalStatePromise.get_future();
 }
 
-auto LifecycleService::StartLifecycleNoSyncTime(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState>
+auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState>
 {
-    _timeSyncActive = false;
-
-    return StartLifecycle(startConfiguration.coordinatedStart,
-            startConfiguration.coordinatedStop);
-}
-
-auto LifecycleService::StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService, LifecycleConfiguration startConfiguration) -> std::future<ParticipantState>
-{
-    if (_timeSyncService != timeSyncService)
-    {
-        throw std::runtime_error("Failed to validate the provided timeSyncService pointer.");
-    }
-
-    _timeSyncActive = true;
-
     return StartLifecycle(startConfiguration.coordinatedStart,
             startConfiguration.coordinatedStop);
 }
@@ -283,6 +268,8 @@ auto LifecycleService::GetTimeSyncService() const -> ITimeSyncService*
     return _timeSyncService;
 }
 
+
+
 void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& command)
 {
     // Ignore messages if the lifecycle is not being executed yet
@@ -291,7 +278,7 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
         // TODO this should be handled as a late joining scenario instead of an error...
         std::stringstream msg;
         msg << "Received SystemCommand::" << command.kind
-            << " before LifecycleService::StartLifecycleSyncTime(...) or StartLifecycleNoSyncTime(...) was called."
+            << " before LifecycleService::StartLifecycle(...) was called."
             << " Origin of current command was " << from->GetServiceDescriptor();
         ReportError(msg.str());
         return;
@@ -361,7 +348,12 @@ void LifecycleService::NewSystemState(SystemState systemState)
     _lifecycleManagement->NewSystemState(systemState);
 }
 
-bool LifecycleService::IsTimeSyncActive()
+void LifecycleService::SetTimeSyncActive(bool isTimeSyncAcvice)
+{
+    _timeSyncActive = isTimeSyncAcvice;
+}
+
+bool LifecycleService::IsTimeSyncActive() const
 {
     return _timeSyncActive;
 }

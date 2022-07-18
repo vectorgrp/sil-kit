@@ -5,18 +5,122 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.27] - unreleased
+
+[3.99.28] - unreleased
+----------------------
+
+Compatibility with 3.99.27
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): xxx
+- Application software interface (API): xxx
+- Middleware network protocol: xxx
+
+Changed
+~~~~~~~
+
+- Renamed SimulationTask to SimulationStep and added the initial step size (formerly period length) as a parameter
+  
+  - ``IntegrationBus/include/silkit/services/orchestration/ITimeSyncService.hpp``
+  
+    + old:
+  
+      .. code-block:: c++
+
+        virtual void SetSimulationTask(SimTaskT task) = 0;
+        virtual void SetSimulationTaskAsync(SimTaskT task) = 0;
+
+    + new:
+  
+      .. code-block:: c++
+
+        virtual void SetSimulationStepHandler(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
+        virtual void SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
+
+- Changed access to services that are meant to exist only once (SystemController, SystemMonitor, Logger, LifecycleService)
+  
+  - Methods to access these services were renamed from ``Get[Service]()`` to ``Create[Service]()``
+  - ``IntegrationBus/include/silkit/participant/IParticipant.hpp``
+  
+    + old:
+  
+      .. code-block:: c++
+
+        virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+        virtual auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
+        virtual auto GetSystemController() -> Services::Orchestration::ISystemController* = 0;
+        virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
+
+    + new:
+  
+      .. code-block:: c++
+
+        virtual auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+        virtual auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
+        virtual auto CreateSystemController() -> Services::Orchestration::ISystemController* = 0;
+        virtual auto CreateLogger() -> Services::Logging::ILogger* = 0;
+
+  - The changed methods can only be called once per participant. Further calls throw a runtime_error.  
+  
+- Instead of setting the time synchronization behavior when starting the lifecycle (``ILifecycleService::StartLifecycleNoTimeSync`` or ``ILifecycleService::StartLifecycleWithTimeSync``), the synchronization behavior is now determined when creating the lifecycle service 
+  
+  - ``IntegrationBus/include/silkit/participant/IParticipant.hpp``
+  
+    + old:
+    
+      .. code-block:: c++
+         
+        virtual auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+           
+    + new:
+  
+      .. code-block:: c++
+
+        virtual auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* = 0;
+        virtual auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* = 0;
+
+  - ``IntegrationBus/include/silkit/services/orchestration/ILifecycleService.hpp``
+  
+    + old:
+    
+      .. code-block:: c++
+         
+        virtual auto StartLifecycleNoSyncTime(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState> = 0;
+        virtual auto StartLifecycleWithSyncTime(LifecycleConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
+           
+           
+    + new:
+  
+      .. code-block:: c++
+        
+        virtual auto StartLifecycle(LifecycleConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
+
+  - The new create method returns interfaces that only comprises available methods
+    -  ``ILifecycleServiceNoTimeSync::SetStartingHandler()`` without time synchronization
+    -  ``ILifecycleServiceWithTimeSync::GetTimeSyncService()`` with time synchronization
+
+Removed
+~~~~~~~
+
+- Removed ``ITimeSyncService::SetPeriod()`` (now provided via ``ITimeSyncService::SetSimulationStepHandler()``)
+
+
+[3.99.27] - 2022-07-14
 ----------------------
 
 Please note that the Vector IntegrationBus was renamed to Vector SIL Kit.
 All APIs and documentation have been updated to reflect this.
 
-Fixed
-~~~~~
-- Ensure that the SynchronizedPolicy object does not modify the Timeconfiguration.
-  This prevents multiple invocations of an async SimTask (VIB-847).
+Compatibility with 3.99.26
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: No
+
 Changed
 ~~~~~~~
+
 - Renaming the IntegrationBus to SIL Kit affects all APIs.
 
     - In general, **File names** and **symbols** were renamed from the prefixes ``Ib``
@@ -96,17 +200,6 @@ Changed
 - The command line tools were modified to use lower case names with dashes:
   E.g., the ``IbRegistry`` is now called ``sil-kit-registry``.
   See  :doc:`./usage/utilities`  for details.
-
-Compatibility with 3.99.26
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Application binary interface (ABI): No
-- Application software interface (API): No
-- Middleware network protocol: No
-
-
-Changed
-~~~~~~~
 
 - The trivial simulation and the detailed simulation have been made more consistent:
 
@@ -228,6 +321,10 @@ Removed
       virtual auto CreateRpcClient(const std::string& canonicalName) -> sim::rpc::IRpcClient* = 0;
       virtual auto CreateRpcServer(const std::string& canonicalName) -> sim::rpc::IRpcServer* = 0;
 
+Fixed
+~~~~~
+- Ensure that the SynchronizedPolicy object does not modify the Timeconfiguration.
+  This prevents multiple invocations of an async SimTask (VIB-847).
 
 [3.99.26] - 2022-06-29
 ----------------------

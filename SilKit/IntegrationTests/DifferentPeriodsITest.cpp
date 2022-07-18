@@ -62,22 +62,21 @@ public:
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto* publisher = _participant->CreateDataPublisher("PubCtrl1", topicName, {}, {}, 0);
 
-        timeSyncService->SetPeriod(period);
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [this, publisher, period](const nanoseconds now, nanoseconds /*duration*/) {
                 ASSERT_TRUE((now.count() % period.count()) == 0);
                 if (_messageIndex < _numMessages)
                 {
                     PublishMessage(publisher, now, _messageIndex++);
                 }
-            });
+            }, period);
     }
 
     void RunAsync()
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        _simulationFuture =
-            lifecycleService->StartLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), {true, true});
+        lifecycleService->SetTimeSyncActive(true);
+        _simulationFuture = lifecycleService->StartLifecycle({true, true});
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -145,18 +144,19 @@ public:
                     ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
                 });
         }
-        timeSyncService->SetPeriod(subscriberPeriod);
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [this](const nanoseconds now, nanoseconds /*duration*/) {
             _currentTime = now;
             ASSERT_TRUE((_currentTime.count() % subscriberPeriod.count()) == 0);
-        });
+            },
+            subscriberPeriod);
     }
 
     std::future<ParticipantState> RunAsync() const
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        return lifecycleService->StartLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), {true, true});
+        lifecycleService->SetTimeSyncActive(true);
+        return lifecycleService->StartLifecycle({true, true});
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)

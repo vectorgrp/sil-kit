@@ -120,7 +120,7 @@ The actual simulation is performed in the simulation task. The simulation task
 is a callback that is executed by the SIL Kit runtime whenever the the simulation
 time of the SIL Kit is advanced. This callback has to be registered with the
 time synchronization service's
-:cpp:func:`SetSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTask()>`.
+:cpp:func:`SetSimulationStepHandler()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`.
 
 The subscriber runs in its own thread, too:
 

@@ -110,7 +110,7 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* lifecycleService = participant->GetLifecycleService();
+        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         lifecycleService->SetStopHandler([]() {
@@ -120,7 +120,6 @@ int main(int argc, char** argv)
             std::cout << "Shutting down..." << std::endl;
         });
 
-        timeSyncService->SetPeriod(1s);
         if (participantName == "Client")
         {
             std::string clientAFunctionName = "Add100";
@@ -144,7 +143,7 @@ int main(int argc, char** argv)
                     }
                 };
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [clientA, clientB, &participant, &discoveryResultsHandler](std::chrono::nanoseconds now,
                                                                            std::chrono::nanoseconds /*duration*/) {
                     if (now == 0ms) 
@@ -156,7 +155,7 @@ int main(int argc, char** argv)
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     Call(clientA);
                     Call(clientB);
-                });
+                }, 1s);
         }
         else // "Server"
         {
@@ -168,16 +167,16 @@ int main(int argc, char** argv)
             std::map<std::string, std::string> labelsServerB{{"KeyC", "ValC"}, {"KeyD", "ValD"}};
             participant->CreateRpcServer("ServerCtrl2", "Sort", mediaTypeServerB, labelsServerB, &RemoteFunc_Sort);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
 
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(3s);
-            });
+            }, 1s);
         }
 
-        auto lifecycleFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+        auto lifecycleFuture = lifecycleService->StartLifecycle({true, true});
         auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

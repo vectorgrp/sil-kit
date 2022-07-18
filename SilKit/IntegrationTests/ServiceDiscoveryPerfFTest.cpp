@@ -38,23 +38,23 @@ protected:
         auto registryUri = MakeTestRegistryUri();
 
         SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, true);
-        auto&& publisher = testHarness.GetParticipant("Publisher")->Participant();
+        auto&& publisher = testHarness.GetParticipant("Publisher");
         
         for (auto i = 0; i < numberOfServices; i++)
         {
             const auto topic = "TopicName-" + std::to_string(i);
             const auto controllerName = "PubCtrl" + std::to_string(i);
-            (void)publisher->CreateDataPublisher(controllerName, topic, {}, {}, 0); 
+            (void)publisher->Participant()->CreateDataPublisher(controllerName, topic, {}, {}, 0); 
         }
 
-        auto logger = publisher->GetLogger();
-        auto* lifecycleService = publisher->GetLifecycleService();
+        auto logger = publisher->GetOrCreateLogger();
+        auto* lifecycleService = publisher->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-        timeSyncService->SetSimulationTask([&logger, &lifecycleService](auto, auto) {
+        timeSyncService->SetSimulationStepHandler([&logger, &lifecycleService](auto, auto) {
             logger->Info("::::::::::: Sending STOP");
             lifecycleService->Stop("Test complete");
-        });
+        }, 1ms);
     
         auto makeSubscriber = [&](auto subscriberName)
         {

@@ -71,14 +71,14 @@ protected:
                 }
             });
 
-        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([canController]() {
             canController->Start();
         });
 
-        timeSyncService->SetSimulationTask([this, canController, lifecycleService](auto, auto) {
+        timeSyncService->SetSimulationStepHandler([this, canController, lifecycleService](auto, auto) {
             EXPECT_EQ(lifecycleService->State(), Services::Orchestration::ParticipantState::Running);
             if (numSent < testMessages.size())
             {
@@ -97,7 +97,7 @@ protected:
                 numSent++;
                 std::this_thread::sleep_for(100ms);
             }
-        });
+        }, 1ms);
     }
 
     void ExecuteTest()

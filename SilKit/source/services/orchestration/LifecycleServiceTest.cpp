@@ -35,11 +35,14 @@ public:
     using TimeSyncService::TimeSyncService;
 
 public:
-    MOCK_METHOD(void, SetSimulationTask, (SimTaskT task), (override));
-    MOCK_METHOD(void, SetSimulationTaskAsync, (SimTaskT task), (override));
+    MOCK_METHOD(void, SetSimulationStepHandler, (SimTaskT task, std::chrono::nanoseconds initialStepSize), (override));
+    MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimTaskT task, std::chrono::nanoseconds initialStepSize),
+                (override));
     MOCK_METHOD(void, CompleteSimulationTask, (), (override));
-    MOCK_METHOD(void, SetSimulationTask, (std::function<void(std::chrono::nanoseconds now)> task), (override));
-    MOCK_METHOD(void, SetPeriod, (std::chrono::nanoseconds), (override));
+    MOCK_METHOD(void, SetSimulationStepHandler,
+                (std::function<void(std::chrono::nanoseconds now)> task, std::chrono::nanoseconds initialStepSize),
+                (override));
+    MOCK_METHOD(void, SetPeriod, (std::chrono::nanoseconds));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };
 
@@ -177,7 +180,7 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime({});
+    lifecycleService.StartLifecycle({});
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Stop("");
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
@@ -241,7 +244,7 @@ TEST_F(LifecycleServiceTest, start_restart_stop_coordinated)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ServicesCreated);
     lifecycleService.NewSystemState(SystemState::ServicesCreated);
@@ -320,7 +323,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -374,7 +377,7 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -431,7 +434,7 @@ TEST_F(LifecycleServiceTest, error_handling_error_recovery_restart)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -507,7 +510,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -556,7 +559,7 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
     EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -601,7 +604,7 @@ TEST_F(LifecycleServiceTest, Abort_Running)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -653,7 +656,7 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -717,7 +720,7 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -767,7 +770,7 @@ TEST_F(LifecycleServiceTest, Abort_Stop)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -832,7 +835,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -886,7 +889,7 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -966,7 +969,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
     EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(1);
 
-    lifecycleService.StartLifecycleNoSyncTime(
+    lifecycleService.StartLifecycle(
         StartCoordinated());
     PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
@@ -974,45 +977,6 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
     SystemCommand runCommand{SystemCommand::Kind::Run};
     lifecycleService.ReceiveMsg(&masterId, runCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
-}
-
-TEST_F(LifecycleServiceTest, no_starting_callback_call_if_timesync_active)
-{
-    LifecycleService lifecycleService(&participant, healthCheckConfig);
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
-    lifecycleService.SetTimeSyncService(&mockTimeSync);
-    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
-
-    lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
-    EXPECT_CALL(callbacks, StartingHandler())
-        .Times(0);
-
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
-
-    EXPECT_CALL(participant,
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
-        .Times(1);
-    EXPECT_CALL(participant, SendMsg(&lifecycleService,
-                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
-        .Times(1);
-    EXPECT_CALL(participant, SendMsg(&lifecycleService,
-                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
-        .Times(1);
-    EXPECT_CALL(participant, SendMsg(&lifecycleService,
-                                           AParticipantStatusWithState(ParticipantState::ReadyToRun)))
-        .Times(1);
-    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
-        .Times(1);
-
-    auto* timeSyncService = lifecycleService.GetTimeSyncService();
-    lifecycleService.StartLifecycleWithSyncTime(timeSyncService, StartCoordinated());
-    PrepareLifecycle(&lifecycleService);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
-    // run
-    SystemCommand runCommand{SystemCommand::Kind::Run};
-    lifecycleService.ReceiveMsg(&masterId, runCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
 }
 
 } // namespace

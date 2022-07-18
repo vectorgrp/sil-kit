@@ -523,7 +523,7 @@ int main(int argc, char* argv[])
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     SilKit_LifecycleService* lifecycleService;
-    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+    returnCode = SilKit_LifecycleServiceWithTimeSync_Create(&lifecycleService, participant);
 
     SilKit_TimeSyncService* timeSyncService;
     returnCode = SilKit_TimeSyncService_Create(&timeSyncService, lifecycleService);
@@ -534,7 +534,6 @@ int main(int argc, char* argv[])
 
     SilKit_LifecycleService_SetStopHandler(lifecycleService, NULL, &StopCallback);
     SilKit_LifecycleService_SetShutdownHandler(lifecycleService, NULL, &ShutdownCallback);
-    SilKit_TimeSyncService_SetPeriod(timeSyncService, 1000000);
     
     if (strcmp(participantName, "LinMaster") == 0)
     {
@@ -547,7 +546,7 @@ int main(int argc, char* argv[])
         SilKit_LinController_AddFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus, &frameStatusHandlerId);
         SilKit_HandlerId wakeupHandlerId;
         SilKit_LinController_AddWakeupHandler(linController, NULL, &Master_WakeupHandler, &wakeupHandlerId);
-        SilKit_TimeSyncService_SetSimulationTask(timeSyncService, NULL, &Master_SimTask);
+        SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Master_SimTask, 1000000);
     }
     else
     {
@@ -558,7 +557,7 @@ int main(int argc, char* argv[])
         SilKit_LinController_AddGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler, &goToSleepHandlerId);
         SilKit_HandlerId wakeupHandlerId;
         SilKit_LinController_AddWakeupHandler(linController, NULL, &Slave_WakeupHandler, &wakeupHandlerId);
-        SilKit_TimeSyncService_SetSimulationTask(timeSyncService, NULL, &Slave_SimTask);
+        SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Slave_SimTask, 1000000);
     }
 
     SilKit_ParticipantState outFinalParticipantState;
@@ -567,10 +566,10 @@ int main(int argc, char* argv[])
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
 
-    returnCode = SilKit_LifecycleService_StartLifecycleWithSyncTime(lifecycleService, &startConfig);
+    returnCode = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
     if(returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("Error: SilKit_LifecycleService_StartLifecycleWithSyncTime failed: %s\n", SilKit_GetLastErrorString());
+        printf("Error: SilKit_LifecycleService_StartLifecycle failed: %s\n", SilKit_GetLastErrorString());
         exit(1);
     }
 

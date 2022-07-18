@@ -151,7 +151,7 @@ public:
 
     //Service discovery for dynamic, configuration-less simulations
     virtual auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* = 0;
-	
+
 	// Internal DataSubscriber that is only created on a matching data connection
     virtual auto CreateDataSubscriberInternal(
         const std::string& topic, const std::string& linkName,
@@ -165,7 +165,23 @@ public:
                                          Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
         -> SilKit::Services::Rpc::RpcServerInternal* = 0;
 
-    virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService* = 0;
+    //! \brief Return the ISystemMonitor at this SIL Kit participant.
+    virtual auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
+
+    //! \brief Return the ISystemController at this SIL Kit participant.
+    virtual auto GetSystemController() -> Services::Orchestration::ISystemController* = 0;
+
+    //! \brief Return the ILogger at this SIL Kit participant.
+    virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
+
+    //! \brief Return the LifecycleService at this SIL Kit participant.
+    virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* = 0;
+
+    //! \brief Create the ITimeSyncService for the given lifecycle service (one time per lifecycle service).
+    virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
+        -> Services::Orchestration::TimeSyncService* = 0;
+
+
 
 protected:
     std::atomic<EndpointId> _localEndpointId{ 0 };

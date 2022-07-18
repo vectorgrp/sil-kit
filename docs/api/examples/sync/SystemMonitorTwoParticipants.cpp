@@ -18,21 +18,21 @@ systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 // ------------------------------------------------------------
 // Transition from Invalid to ServicesCreated.
 
-// LifecycleService needs to call StartLifecycleWithSyncTime or StartLifecycleNoSyncTime for a transition to ParticipantState::ServicesCreated.
+// LifecycleService needs to call StartLifecycle for a transition to ParticipantState::ServicesCreated.
 // For more information about the use of the life cycle service and time synchronization service refer to the corresponding section.
 auto* lifecycleService1 = participant1 -> GetLifecycleService();
 auto* timeSyncService1 = lifecycleService1 -> GetTimeSynchrService();
 auto* lifecycleService2 = participant2 -> GetLifecycleService();
 auto* timeSyncService2 = lifecycleService2 -> GetTimeSynchrService();
 
-timeSyncService1->SetSimulationTask(
-    [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}
+timeSyncService1->SetSimulationStepHandler(
+    [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}, 1ms
 );
-timeSyncService2->SetSimulationTask(
-  [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}
+timeSyncService2->SetSimulationStepHandler(
+  [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}, 1ms
 );
 
-lifecycleService1 -> StartLifecycleWithSyncTime(timeSyncService1, true, true);
+lifecycleService1->StartLifecycle({true, true});
 
 // The call of Run() leads to a participant state transition from Invalid to ServicesCreated
 // and will trigger the callback of the ParticipantStatusHandler:
@@ -44,7 +44,7 @@ participantStatusHandler(participantStatus);
 //  - participantStatus.enterTime == enter time_point
 //  - participantStatus.refreshTime == enter time_point
 
-lifecycleService2 -> StartLifecycleWithSyncTime(timeSyncService2, true, true);
+lifecycleService2->StartLifecycle({true, true});
 
 // The call of Run() by the second participant again triggers
 // the callback of the ParticipantStatusHandler:

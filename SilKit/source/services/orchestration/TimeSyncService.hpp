@@ -48,14 +48,16 @@ public:
     // ITimeSyncService
     auto State() const -> ParticipantState;
 
-    void SetSimulationTask(
-        std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task) override;
-    void SetSimulationTaskAsync(SimTaskT task) override;
+    void SetSimulationStepHandler(
+        std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task,
+        std::chrono::nanoseconds initialStepSize) override;
+    void SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize) override;
     void CompleteSimulationTask() override;
 
-    void SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task) override;
+    void SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
+                                  std::chrono::nanoseconds initialStepSize) override;
 
-    void SetPeriod(std::chrono::nanoseconds period) override;
+    void SetPeriod(std::chrono::nanoseconds period);
 
     void ReceiveMsg(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
 

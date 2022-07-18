@@ -33,15 +33,15 @@ lifecycleService->SetShutdownHandler([]() {
 timeSyncService->SetPeriod(200us);
 if (participantName == "CanWriter")
 {
-	timeSyncService->SetSimulationTask(
+	timeSyncService->SetSimulationStepHandler(
 		[canController, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
 			std::cout << "now=" << now << ", duration=" << duration << std::endl;
 			SilKit::Core::Services::Can::CanFrame msg;
 			msg.timestamp = now;
 			msg.canId = 17;
 			canController->SendFrame(std::move(msg));
-	});
+	}, 1ms);
 }
 
-auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
+auto finalStateFuture = lifecycleService->StartLifecycle(true, true);
 auto finalState = finalStateFuture.get();

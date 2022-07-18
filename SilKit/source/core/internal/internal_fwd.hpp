@@ -30,6 +30,7 @@ class RpcServerInternal;
 class RpcDiscoverer;
 } // namespace Rpc
 namespace Orchestration {
+class ILifecycleServiceInternal;
 class LifecycleService;
 class TimeSyncService;
 } // namespace Orchestration

@@ -118,10 +118,11 @@ struct TestResult
 
 struct LinNode
 {
-    LinNode(IParticipant* participant, ILinController* controller, const std::string& name)
+    LinNode(IParticipant* participant, ILinController* controller, const std::string& name, Orchestration::ISystemController* systemController)
         : controller{controller}
         , _name{name}
         , _participant{participant}
+        , _systemController{systemController}
     {
     }
 
@@ -129,7 +130,7 @@ struct LinNode
 
     void Stop() 
     { 
-        _participant->GetSystemController()->Stop(); 
+        _systemController->Stop();
     }
 
     ILinController* controller{nullptr};
@@ -137,13 +138,14 @@ struct LinNode
     LinControllerConfig _controllerConfig;
     TestResult _result;
     IParticipant* _participant{nullptr};
+    Orchestration::ISystemController* _systemController{nullptr};
 };
 
 class LinMaster : public LinNode
 {
 public:
-    LinMaster(IParticipant* participant, ILinController* controller)
-        : LinNode(participant, controller, "LinMaster")
+    LinMaster(IParticipant* participant, ILinController* controller, Orchestration::ISystemController* systemController)
+        : LinNode(participant, controller, "LinMaster", systemController)
     {
         schedule = {
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
@@ -252,8 +254,8 @@ private:
 class LinSlave : public LinNode
 {
 public:
-    LinSlave(IParticipant* participant, ILinController* controller)
-        : LinNode(participant, controller, "LinSlave")
+    LinSlave(IParticipant* participant, ILinController* controller, Orchestration::ISystemController* systemController)
+        : LinNode(participant, controller, "LinSlave", systemController)
     {
     }
 
@@ -379,31 +381,35 @@ TEST_F(LinITest, sync_lin_simulation)
     {
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto* lifecycleService = participant->GetLifecycleService();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto&& lifecycleService =
+            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleServiceWithTimeSync();
+        auto&& timeSyncService = lifecycleService->GetTimeSyncService();
+        auto&& systemController = _simTestHarness->GetParticipant(participantName)->GetOrCreateSystemController();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
             auto config = MakeControllerConfig(participantName);
             linController->Init(config);
             });
 
-        auto master = std::make_unique<LinMaster>(participant, linController);
+        auto master = std::make_unique<LinMaster>(participant, linController, systemController);
 
         linController->AddFrameStatusHandler(Util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
         linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now) {
                 master->doAction(now);
-            });
+            }, 1ms);
         linNodes.emplace_back(std::move(master));
     }
 
     {
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
-        auto* lifecycleService = participant->GetLifecycleService();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto&& lifecycleService =
+            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleServiceWithTimeSync();
+        auto&& timeSyncService = lifecycleService->GetTimeSyncService();
+        auto&& systemController = _simTestHarness->GetParticipant(participantName)->GetOrCreateSystemController();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
 
@@ -412,17 +418,17 @@ TEST_F(LinITest, sync_lin_simulation)
             linController->Init(config);
           });
 
-        auto slave = std::make_unique<LinSlave>(participant, linController);
+        auto slave = std::make_unique<LinSlave>(participant, linController, systemController);
         linController->AddFrameStatusHandler(Util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
         linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
 
         //to validate the inputs
         slave->_controllerConfig = config;
 
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [slave = slave.get()](auto now) {
                 slave->DoAction(now);
-            });
+            }, 1ms);
         linNodes.emplace_back(std::move(slave));
     }
 

@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* logger = participant->GetLogger();
+        auto* logger = participant->CreateLogger();
         auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
         canController->AddFrameTransmitHandler(
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
 
         if (runSync)
         {
-            auto* lifecycleService = participant->GetLifecycleService();
+            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
             
             // Set a CommunicationReady Handler
@@ -167,27 +167,26 @@ int main(int argc, char** argv)
                 std::cout << "Shutting down..." << std::endl;
             });
 
-            timeSyncService->SetPeriod(5ms);
             if (participantName == "CanWriter")
             {
-                timeSyncService->SetSimulationTask(
+                timeSyncService->SetSimulationStepHandler(
                     [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
                                                               std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         SendFrame(canController, logger);
                         std::this_thread::sleep_for(sleepTimePerTick);
-                    });
+                    }, 5ms);
             }
             else
             {
-                timeSyncService->SetSimulationTask(
+                timeSyncService->SetSimulationStepHandler(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         std::this_thread::sleep_for(sleepTimePerTick);
-                    });
+                    }, 5ms);
             }
 
-            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+            auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

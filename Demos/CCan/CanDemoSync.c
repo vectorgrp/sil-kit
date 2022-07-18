@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     SilKit_LifecycleService* lifecycleService;
-    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+    returnCode = SilKit_LifecycleServiceWithTimeSync_Create(&lifecycleService, participant);
 
     SilKit_TimeSyncService* timesyncService;
     returnCode = SilKit_TimeSyncService_Create(&timesyncService, lifecycleService);
@@ -225,17 +225,17 @@ int main(int argc, char* argv[])
     SilKit_CanController_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, SilKit_Direction_SendReceive,
                                       &frameHandlerId);
     simTaskContext.someInt = 456;
-    SilKit_TimeSyncService_SetPeriod(timesyncService, 1000000);
-    SilKit_TimeSyncService_SetSimulationTask(timesyncService, (void*)&simTaskContext, &SimTask);
+
+    SilKit_TimeSyncService_SetSimulationStepHandler(timesyncService, (void*)&simTaskContext, &SimTask, 1000000);
 
     SilKit_ReturnCode result;
     SilKit_LifecycleConfiguration startConfig;
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
-    result = SilKit_LifecycleService_StartLifecycleWithSyncTime(lifecycleService, &startConfig);
+    result = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
     if(result != SilKit_ReturnCode_SUCCESS)
     {
-        printf("Error: SilKit_LifecycleService_StartLifecycleWithSyncTime failed: %s\n", SilKit_GetLastErrorString());
+        printf("Error: SilKit_LifecycleService_StartLifecycle failed: %s\n", SilKit_GetLastErrorString());
         exit(1);
     }
     SilKit_ParticipantState outFinalParticipantState;

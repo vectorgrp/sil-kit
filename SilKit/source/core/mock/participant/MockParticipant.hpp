@@ -25,6 +25,7 @@
 
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
+#include "LifecycleService.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "MockTimeProvider.hpp"
 
@@ -50,17 +51,16 @@ protected:
     bool ShouldLog(Services::Logging::Level) const override { return true; }
 };
 
-class MockLifecycleService : public Services::Orchestration::ILifecycleService {
+class MockLifecycleService
+    : public Services::Orchestration::ILifecycleServiceInternal
+{
 public:
-    MOCK_METHOD(void, SetCommunicationReadyHandler, (CommunicationReadyHandlerT), (override));
-    MOCK_METHOD(void, SetStartingHandler, (StartingHandlerT), (override));
-    MOCK_METHOD(void, SetStopHandler, (StopHandlerT), (override));
-    MOCK_METHOD(void, SetShutdownHandler, (ShutdownHandlerT), (override));
-    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycleNoSyncTime,
+    MOCK_METHOD(void, SetCommunicationReadyHandler, (SilKit::Services::Orchestration::CommunicationReadyHandler), (override));
+    MOCK_METHOD(void, SetStartingHandler, (SilKit::Services::Orchestration::StartingHandler), (override));
+    MOCK_METHOD(void, SetStopHandler, (SilKit::Services::Orchestration::StopHandler), (override));
+    MOCK_METHOD(void, SetShutdownHandler, (SilKit::Services::Orchestration::ShutdownHandler), (override));
+    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycle,
                 (Services::Orchestration::LifecycleConfiguration), (override));
-    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycleWithSyncTime,
-                (Services::Orchestration::ITimeSyncService*, Services::Orchestration::LifecycleConfiguration),
-                (override));
     MOCK_METHOD(void, ReportError, (std::string /*errorMsg*/), (override));
     MOCK_METHOD(void, Pause, (std::string /*reason*/), (override));
     MOCK_METHOD(void, Continue, (), (override));
@@ -68,16 +68,19 @@ public:
     MOCK_METHOD(Services::Orchestration::ParticipantState, State, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), (override, const));
+    MOCK_METHOD(void, SetTimeSyncActive, (bool /*isTimeSyncActive*/), (override));
 };
 
 class MockTimeSyncService : public Services::Orchestration::ITimeSyncService
 {
 public:
-    MOCK_METHOD(void, SetSimulationTask, (SimTaskT task), (override));
-    MOCK_METHOD(void, SetSimulationTaskAsync, (SimTaskT task), (override));
+    MOCK_METHOD(void, SetSimulationStepHandler, (SimTaskT task, std::chrono::nanoseconds initialStepSize), (override));
+    MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimTaskT task, std::chrono::nanoseconds initialStepSize),
+                (override));
     MOCK_METHOD(void, CompleteSimulationTask, (), (override));
-    MOCK_METHOD(void, SetSimulationTask, (std::function<void(std::chrono::nanoseconds now)>), (override));
-    MOCK_METHOD(void, SetPeriod, (std::chrono::nanoseconds period), (override));
+    MOCK_METHOD(void, SetSimulationStepHandler,
+                (std::function<void(std::chrono::nanoseconds now)>, std::chrono::nanoseconds initialStepSize),
+                (override));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };
 
@@ -198,13 +201,21 @@ public:
                             const std::map<std::string, std::string>& /*labels*/,
                             Services::Rpc::RpcDiscoveryResultHandler /*handler*/) override{};
 
-    auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override { return &mockLifecycleService; }
+    auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* override 
+    {
+        return &mockLifecycleService;
+    }
+    auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* override { return &mockLifecycleService; }
+    auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* override { return &mockLifecycleService; }
     // TODO mock this?
     auto CreateTimeSyncService(Services::Orchestration::LifecycleService*) -> Services::Orchestration::TimeSyncService* override { return nullptr; };
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
+    auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
     auto GetSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
+    auto CreateSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
+    auto CreateLogger() -> Services::Logging::ILogger* override { return &logger; }
 
     void RegisterCanSimulator(Services::Can::IMsgForCanSimulator*, const std::vector<std::string>& ) override {}
     void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* , const std::vector<std::string>&) override {}

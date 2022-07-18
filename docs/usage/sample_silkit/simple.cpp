@@ -18,7 +18,7 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    timeSyncService->SetSimulationTask([publisher](std::chrono::nanoseconds now) {
+    timeSyncService->SetSimulationStepHandler([publisher](std::chrono::nanoseconds now) {
         static auto msgIdx = 0;
 
         //generate some random data
@@ -27,11 +27,11 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
 
         //publish the raw bytes of the message to all subscribers
         publisher->Publish(std::move(data));
-    });
+    }, 1ms);
     //run the simulation main loop forever
     try
     {
-        auto result = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
+        auto result = lifecycleService->StartLifecycle({true, true});
         std::cout << "Publisher: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)
@@ -55,13 +55,13 @@ void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
     auto* lifecycleService = participant->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-    timeSyncService->SetSimulationTask([](std::chrono::nanoseconds) {
+    timeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds) {
         //simulation task must be defined, even an empty one
-    });
+    }, 1ms);
 
     try
     {
-        auto result = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, true, true);
+        auto result = lifecycleService->StartLifecycle({true, true});
         std::cout << "Subscriber: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)

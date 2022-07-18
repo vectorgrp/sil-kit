@@ -12,8 +12,7 @@ Simulation
 .. |SystemControllerAPI| replace:: :cpp:class:`ISystemController<SilKit::Services::Orchestration::ISystemController>`
 .. |SystemMonitorAPI| replace:: :cpp:class:`ISystemMonitor<SilKit::Services::Orchestration::ISystemMonitor>`
 .. |CompleteSimulationTask| replace:: :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>`
-.. |StartLifecycleNoSyncTime| replace:: :cpp:func:`StartLifecycleNoSyncTime()<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleNoSyncTime()>`
-.. |StartLifecycleWithSyncTime| replace:: :cpp:func:`StartLifecycleWithSyncTime()<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleWithSyncTime()>`
+.. |StartLifecycle| replace:: :cpp:func:`StartLifecycle()<SilKit::Services::Orchestration::ILifecycleService::StartLifecycle()>`
 
 .. 
   Section references 
@@ -67,7 +66,7 @@ The |LifecycleServiceAPI| interface allows each participant to access various fu
 Users can register callbacks that trigger once a participant reaches certain states.
 Available callbacks are :cpp:func:`SetCommunicationReadyHandler()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandler()>`, :cpp:func:`SetStopHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStopHandler()>`, and :cpp:func:`SetShutdownHandler()<SilKit::Services::Orchestration::ILifecycleService::SetShutdownHandler()>`.
 Further, the life cycle service provides access to the |TimeSyncServiceAPI| interface (see below).
-Once all needed controllers are registered and, if needed, the time synchronization service was retrieved and configured, the participants' life cycle can be published by either calling |StartLifecycleNoSyncTime| or |StartLifecycleWithSyncTime| (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`).
+Once all needed controllers are registered and, if needed, the time synchronization service was retrieved and configured, the participants' life cycle can be published by calling |StartLifecycle| (see :ref:`Life Cycle Coordination Between Participants<sec:sim-lifecycle-syncParticipants>`).
 
 .. _subsubsec:sim-lifecycle-timeSyncService:
 
@@ -114,7 +113,7 @@ For all phases, the |LifecycleService| or |TimeSyncService| allow setting callba
 
    : |ProductName| participant state machine.
 
-A participant enters the distributed state machine by either calling |StartLifecycleNoSyncTime| or |StartLifecycleWithSyncTime|.
+A participant enters the distributed state machine by calling |StartLifecycle|.
 This will cause the |LifecycleService| to anounce its state as :cpp:enumerator:`ServicesCreated<SilKit::Services::Orchestration::ParticipantState::ServicesCreated>`, indicating that all services were created and announced to other participants.
 
 A participant that uses the life cycle service may choose to coordinate its state with other participants from the start of the life cycle until the simulation is running.
@@ -209,16 +208,16 @@ Configuration of the Simulation Task
 ------------------------------------
 Each synchronized participant **must** define a simulation task that will be executed at the start of each simulation step (see :ref:`above<subsec:sim-simulationPeriod>`).
 Users can provide the simulation task either as a synchronous or an asynchronous task.
-The synchronous task is set by calling :cpp:func:`SetSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTask()>`
+The synchronous task is set by calling :cpp:func:`SetSimulationStepHandler()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`
 and providing the task to be executed as a delegate function.
 Note that the simulation task is not necessarily executed on the main thread of the application.
 After the execution of the simulation task is finished, the other participants are informed about the next point in time at which the participant intends to execute its task.
-Users can exchange the task by calling SetSimulationTask again, but they cannot intervene during its execution.
+Users can exchange the task by calling SetSimulationStepHandler again, but they cannot intervene during its execution.
 
 Sometimes, it may be desirable to have more control about the simulation task execution.
 In these cases, the asynchronous simulation task execution may be preferable.
 
-Similar to the synchronous case, an asynchronous simulation task is set by calling :cpp:func:`SetSimulationTaskAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTaskAsync()>`.
+Similar to the synchronous case, an asynchronous simulation task is set by calling :cpp:func:`SetSimulationStepHandlerAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandlerAsync()>`.
 It is executed at the start of each simulation step, but it does not automatically signal other participants that the current simulation task is finished.
 Instead, the user is required to call |CompleteSimulationTask| to signal the completion of the current simulation step.
 This enables the user to have fine-grained control over the synchronous simulation progress.

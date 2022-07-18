@@ -142,7 +142,7 @@ protected:
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
 
-            auto* lifecycleService = participant.participant->GetLifecycleService();
+            auto* lifecycleService = participant.participant->CreateLifecycleServiceWithTimeSync();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
@@ -162,8 +162,7 @@ protected:
                 },
                 nullptr);
 
-            timeSyncService->SetPeriod(1s);
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [&participant, this](std::chrono::nanoseconds now) {
                     participant.publisher->Publish(std::vector<uint8_t>{participant.id});
                     if (!participant.simtimePassed && now > simtimeToPass)
@@ -171,8 +170,8 @@ protected:
                         participant.simtimePassed = true;
                         participant.simtimePassedPromise.set_value();
                     }
-                });
-            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+                }, 1s);
+            auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
             finalStateFuture.get();
         }
         catch (const SilKit::ConfigurationError& error)
@@ -265,8 +264,8 @@ protected:
             systemMaster.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
-            systemMaster.systemController = systemMaster.participant->GetSystemController();
-            systemMaster.systemMonitor = systemMaster.participant->GetSystemMonitor();
+            systemMaster.systemController = systemMaster.participant->CreateSystemController();
+            systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
 
             systemMaster.systemController->SetWorkflowConfiguration({syncParticipantNames});
 

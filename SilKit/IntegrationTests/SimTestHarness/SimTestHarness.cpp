@@ -25,27 +25,70 @@ auto Now()
 namespace SilKit {
 namespace Tests {
 
-const std::string& SimParticipant::Name() const
+auto SimParticipant::Name() const -> const std::string&
 {
     return _name;
 }
 
-SilKit::IParticipant* SimParticipant::Participant() const
+auto SimParticipant::Participant() const -> SilKit::IParticipant*
 {
     return _participant.get();
 }
 
-std::future<SilKit::Services::Orchestration::ParticipantState>& SimParticipant::Result()
+auto SimParticipant::Result() -> std::future<SilKit::Services::Orchestration::ParticipantState>&
 {
     return _result;
 }
 
 void SimParticipant::Stop()
 {
-    Participant()->GetSystemController()->Stop();
+    GetOrCreateSystemController()->Stop();
 }
 
+auto SimParticipant::GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*
+{
+    if (!_systemMonitor)
+    {
+        _systemMonitor = _participant->CreateSystemMonitor();
+    }
+    return _systemMonitor;
+}
 
+auto SimParticipant::GetOrCreateSystemController() -> Services::Orchestration::ISystemController*
+{
+    if (!_systemController)
+    {
+        _systemController = _participant->CreateSystemController();
+    }
+    return _systemController;
+}
+
+auto SimParticipant::GetOrCreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*
+{
+    if (!_lifecycleServiceNoTimeSync)
+    {
+        _lifecycleServiceNoTimeSync = _participant->CreateLifecycleServiceNoTimeSync();
+    }
+    return _lifecycleServiceNoTimeSync;
+}
+
+auto SimParticipant::GetOrCreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*
+{
+    if (!_lifecycleServiceWithTimeSync)
+    {
+        _lifecycleServiceWithTimeSync = _participant->CreateLifecycleServiceWithTimeSync();
+    }
+    return _lifecycleServiceWithTimeSync;
+}
+
+auto SimParticipant::GetOrCreateLogger() -> Services::Logging::ILogger*
+{
+    if (!_logger)
+    {
+        _logger = _participant->CreateLogger();
+    }
+    return _logger;
+}
 
 ////////////////////////////////////////
 // SimTestHarness
@@ -80,8 +123,8 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     for (auto& kv : _simParticipants)
     {
         auto& participant = kv.second;
-        auto* lifecycleService = participant->Participant()->GetLifecycleService();
-        participant->_result = lifecycleService->StartLifecycleWithSyncTime(lifecycleService->GetTimeSyncService(), {true, true});
+        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
+        participant->_result = lifecycleService->StartLifecycle({true, true});
     }
 
     // wait until simulation is finished or timeout is reached
@@ -150,15 +193,15 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
 
     //    Let's make sure the SystemController is cached, in case the user
     //    needs it during simulation (e.g., calling Stop()).
-    auto* systemCtrl = participant->Participant()->GetSystemController();
+    auto* systemCtrl = participant->GetOrCreateSystemController();
     (void)systemCtrl;
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
-    auto* lifecycleService = participant->Participant()->GetLifecycleService();
+    auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
-    timeSyncService->SetSimulationTask([name = participant->Name()](auto, auto) {
-    });
+    timeSyncService->SetSimulationStepHandler([name = participant->Name()](auto, auto) {
+    }, 1ms);
 
     lifecycleService->SetCommunicationReadyHandler([name = participantName]() {
     });

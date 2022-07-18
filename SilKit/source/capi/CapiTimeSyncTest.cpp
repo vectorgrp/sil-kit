@@ -24,28 +24,26 @@ void SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncService*/, Sil
 TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
 {
     SilKit_ReturnCode returnCode;
-    returnCode = SilKit_TimeSyncService_SetPeriod(nullptr, 1000);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_TimeSyncService_SetSimulationTask(nullptr, nullptr, &SimTask);
+    returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(nullptr, nullptr, &SimTask, 1000000);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_TimeSyncService_SetSimulationTask((SilKit_TimeSyncService*)(mockParticipant.GetLifecycleService()->GetTimeSyncService()), nullptr, nullptr);
+    returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(
+        (SilKit_TimeSyncService*)(mockParticipant.CreateLifecycleServiceWithTimeSync()->GetTimeSyncService()), nullptr,
+        nullptr, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
 TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
 {
     SilKit_ReturnCode returnCode;
-    EXPECT_CALL(mockParticipant.mockTimeSyncService,
-        SetPeriod(testing::_)
-    ).Times(testing::Exactly(1));
-    returnCode = SilKit_TimeSyncService_SetPeriod((SilKit_TimeSyncService*)(mockParticipant.GetLifecycleService()->GetTimeSyncService()), 1000);
 
     EXPECT_CALL(mockParticipant.mockTimeSyncService,
-        SetSimulationTask(testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimTaskT>(testing::_))
+                SetSimulationStepHandler(
+            testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimTaskT>(testing::_), testing ::_)
     ).Times(testing::Exactly(1));
-    returnCode = SilKit_TimeSyncService_SetSimulationTask(
-        (SilKit_TimeSyncService*)(mockParticipant.GetLifecycleService()->GetTimeSyncService()), nullptr, &SimTask);
+    returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(
+        (SilKit_TimeSyncService*)(mockParticipant.CreateLifecycleServiceWithTimeSync()->GetTimeSyncService()), nullptr,
+        &SimTask, 1000000);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 

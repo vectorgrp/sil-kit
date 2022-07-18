@@ -62,4 +62,184 @@ TEST_F(ParticipantTest, make_basic_controller)
     EXPECT_NE(basicCanController, nullptr);
 }
 
+TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    EXPECT_NO_THROW(
+        {
+            try
+            {
+                participant->CreateSystemMonitor(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                participant->CreateSystemMonitor(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
+}
+
+TEST_F(ParticipantTest, error_on_create_system_controller_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    EXPECT_NO_THROW({
+        try
+        {
+            participant->CreateSystemController(); // ignore returned controller
+        }
+        catch (const std::exception&)
+        {
+            throw;
+        }
+    });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                participant->CreateSystemController(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
+}
+
+TEST_F(ParticipantTest, error_on_create_lifecycle_service_with_sync_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    EXPECT_NO_THROW({
+        try
+        {
+            participant->CreateLifecycleServiceWithTimeSync(); // ignore returned controller
+        }
+        catch (const std::exception&)
+        {
+            throw;
+        }
+    });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                participant->CreateLifecycleServiceWithTimeSync(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
+}
+
+TEST_F(ParticipantTest, error_on_create_lifecycle_service_no_sync_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    EXPECT_NO_THROW({
+        try
+        {
+            participant->CreateLifecycleServiceNoTimeSync(); // ignore returned controller
+        }
+        catch (const std::exception&)
+        {
+            throw;
+        }
+    });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                participant->CreateLifecycleServiceNoTimeSync(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
+}
+
+TEST_F(ParticipantTest, error_on_create_lifecycle_service_mixed_access_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    EXPECT_NO_THROW({
+        try
+        {
+            participant->CreateLifecycleServiceWithTimeSync(); // ignore returned controller
+        }
+        catch (const std::exception&)
+        {
+            throw;
+        }
+    });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                participant->CreateLifecycleServiceNoTimeSync(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
+}
+
+TEST_F(ParticipantTest, error_on_create_logger_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    EXPECT_NO_THROW({
+        try
+        {
+            participant->CreateLogger(); // ignore returned controller
+        }
+        catch (const std::exception&)
+        {
+            throw;
+        }
+    });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                participant->CreateLogger(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
+}
 } // anonymous namespace

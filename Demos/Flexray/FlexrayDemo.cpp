@@ -294,7 +294,7 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
         auto* controller = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
-        auto* lifecycleService = participant->GetLifecycleService();
+        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         std::vector<Flexray::FlexrayTxBufferConfig> bufferConfigs;
@@ -368,7 +368,7 @@ int main(int argc, char** argv)
         controller->AddSymbolTransmitHandler(&ReceiveMessage<Flexray::FlexraySymbolTransmitEvent>);
         controller->AddCycleStartHandler(&ReceiveMessage<Flexray::FlexrayCycleStartEvent>);
 
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [&frNode](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                 
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -376,9 +376,9 @@ int main(int argc, char** argv)
                 frNode.doAction(now);
                 std::this_thread::sleep_for(500ms);
                 
-        });
+        }, 1ms);
 
-        auto lifecycleFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+        auto lifecycleFuture = lifecycleService->StartLifecycle({true, true});
         auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

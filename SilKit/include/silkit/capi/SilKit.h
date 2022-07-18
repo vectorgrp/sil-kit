@@ -43,7 +43,7 @@ SilKitAPI const char* SilKit_GetLastErrorString();
 
 typedef  const char*(*SilKit_GetLastErrorString_t)();
 
-typedef SilKit_ReturnCode(*SilKit_Participant_GetLogger_t)(
+typedef SilKit_ReturnCode(*SilKit_Participant_CreateLogger_t)(
     SilKit_Logger** outLogger,
     SilKit_Participant* participant);
 
@@ -56,7 +56,7 @@ typedef SilKit_ReturnCode(*SilKit_Participant_GetLogger_t)(
  * There is no futher cleanup necessary, except for destroying the simulation participant at the end of the
  * simulation.
  */
-SilKitAPI SilKit_ReturnCode SilKit_Participant_GetLogger(
+SilKitAPI SilKit_ReturnCode SilKit_Participant_CreateLogger(
     SilKit_Logger** outLogger,
     SilKit_Participant* participant);
 

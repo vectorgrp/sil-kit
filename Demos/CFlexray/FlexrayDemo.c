@@ -484,7 +484,7 @@ int main(int argc, char** argv)
     printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     SilKit_LifecycleService* lifecycleService;
-    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+    returnCode = SilKit_LifecycleServiceWithTimeSync_Create(&lifecycleService, participant);
 
     SilKit_TimeSyncService* timeSyncService;
     returnCode = SilKit_TimeSyncService_Create(&timeSyncService, lifecycleService);
@@ -623,10 +623,10 @@ int main(int argc, char** argv)
         return 2;
     }
 
-    returnCode = SilKit_TimeSyncService_SetSimulationTask(timeSyncService, frNode, &FlexrayNode_SimulationTask);
+    returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, frNode, &FlexrayNode_SimulationTask, 1000000);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("SilKit_TimeSyncService_SetSimulationTask => %s\n", SilKit_GetLastErrorString());
+        printf("SilKit_TimeSyncService_SetSimulationStepHandler => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
 
@@ -636,10 +636,10 @@ int main(int argc, char** argv)
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
 
-    returnCode = SilKit_LifecycleService_StartLifecycleWithSyncTime(lifecycleService, &startConfig);
+    returnCode = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
-        printf("SilKit_LifecycleService_StartLifecycleWithSyncTime => %s\n", SilKit_GetLastErrorString());
+        printf("SilKit_LifecycleService_StartLifecycle => %s\n", SilKit_GetLastErrorString());
         return 2;
     }
     returnCode = SilKit_LifecycleService_WaitForLifecycleToComplete(lifecycleService, &finalState);

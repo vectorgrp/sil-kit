@@ -21,9 +21,9 @@ public:
         _participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
 
-        _controller = _participant->GetSystemController();
+        _controller = _participant->CreateSystemController();
         _controller->SetWorkflowConfiguration({_syncParticipantNames});
-        _monitor = _participant->GetSystemMonitor();
+        _monitor = _participant->CreateSystemMonitor();
         _monitor->AddSystemStateHandler(
             std::bind(&SimSystemController::OnSystemStateChanged, this, std::placeholders::_1));
         _monitor->AddParticipantStatusHandler(

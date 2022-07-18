@@ -104,8 +104,8 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(std::move(configuration), participantName, connectUri);
 
-        auto* logger = participant->GetLogger();
-        auto* systemMonitor = participant->GetSystemMonitor();
+        auto* logger = participant->CreateLogger();
+        auto* systemMonitor = participant->CreateSystemMonitor();
 
         systemMonitor->AddParticipantStatusHandler([logger](const Services::Orchestration::ParticipantStatus& status) {
             std::stringstream buffer;

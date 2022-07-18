@@ -69,14 +69,14 @@ protected:
             EXPECT_EQ(reinterpret_cast<void*>(ctrl), ack.userContext);
         });
 
-        auto* lifecycleService = writer->Participant()->GetLifecycleService();
+        auto* lifecycleService = writer->GetOrCreateLifecycleServiceWithTimeSync();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Start();
         });
 
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [this, controller](auto, auto)
             {
                 if (numSent < testMessages.size())
@@ -96,7 +96,7 @@ protected:
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }
-        });
+        }, 1ms);
     }
 
     void SetupReader(SilKit::Tests::SimParticipant* reader)
@@ -126,7 +126,7 @@ protected:
             }
         });
 
-        auto* lifecycleService = reader->Participant()->GetLifecycleService();
+        auto* lifecycleService = reader->GetOrCreateLifecycleServiceWithTimeSync();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Start();

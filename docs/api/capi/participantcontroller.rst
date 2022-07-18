@@ -12,13 +12,11 @@ in the C API but directly provided through the SilKit_Participant.
 .. doxygenfunction:: SilKit_LifecycleService_SetStartingHandler
 .. doxygenfunction:: SilKit_LifecycleService_SetStopHandler
 .. doxygenfunction:: SilKit_LifecycleService_SetShutdownHandler
-.. doxygenfunction:: SilKit_LifecycleService_StartLifecycleNoSyncTime
-.. doxygenfunction:: SilKit_LifecycleService_StartLifecycleWithSyncTime
+.. doxygenfunction:: SilKit_LifecycleService_StartLifecycle
 .. doxygenfunction:: SilKit_LifecycleService_WaitForLifecycleToComplete
 .. doxygenfunction:: SilKit_LifecycleService_Pause
 .. doxygenfunction:: SilKit_LifecycleService_Continue
 
-.. doxygenfunction:: SilKit_TimeSyncService_SetPeriod
-.. doxygenfunction:: SilKit_TimeSyncService_SetSimulationTask
-.. doxygenfunction:: SilKit_TimeSyncService_SetSimulationTaskAsync
-.. doxygenfunction:: SilKit_TimeSyncService_CompleteSimulationTask
+.. doxygenfunction:: SilKit_TimeSyncService_SetSimulationStepHandler
+.. doxygenfunction:: SilKit_TimeSyncService_SetSimulationStepHandlerAsync
+.. doxygenfunction:: SilKit_TimeSyncService_CompleteSimulationStep

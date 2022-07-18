@@ -99,7 +99,7 @@ int main(int argc, char** argv)
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         // Set an Init Handler
-        auto* lifecycleService = participant->GetLifecycleService();
+        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([&participantName]() {
@@ -115,33 +115,32 @@ int main(int argc, char** argv)
 
         const std::string mediaType{ SilKit::Util::SerDes::MediaTypeData() };
 
-        timeSyncService->SetPeriod(1s);
         if (participantName == "Publisher1")
         {
             std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
             auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     PublishMessage(publisher, "Pub1 on Topic1");
                     std::this_thread::sleep_for(1s);
 
-            });
+            }, 1s);
         }
         else if (participantName == "Publisher2")
         {
             std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
             auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     PublishMessage(publisher, "Pub2 on Topic1");
                     std::this_thread::sleep_for(1s);
-                });
+                }, 1s);
         }
         else //if (participantName == "Subscriber")
         {
@@ -151,14 +150,14 @@ int main(int argc, char** argv)
                                                       {{"KeyA", ""}, {"KeyB", ""}});
             subscriber->AddExplicitDataMessageHandler(SpecificDataHandlerForPub2, mediaType, {{"KeyC", ""}});
 
-            timeSyncService->SetSimulationTask(
+            timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                });
+                }, 1s);
         }
 
-        auto lifecycleFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+        auto lifecycleFuture = lifecycleService->StartLifecycle({true, true});
         auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

@@ -287,7 +287,7 @@ void ParticipantsThread(
     size_t& messageCounter)
 {
     auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
-    auto* lifecycleService = participant->GetLifecycleService();
+    auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
    
    auto publisher = participant->CreateDataPublisher("PubCtrl1", "Topic", {}, {}, 0);
@@ -297,7 +297,7 @@ void ParticipantsThread(
     });
 
     const auto isVerbose = participantIndex == 0;
-   timeSyncService->SetSimulationTask(
+   timeSyncService->SetSimulationStepHandler(
         [=, &publisher](std::chrono::nanoseconds now) {
 
         if (now > benchmark.simulationDuration)
@@ -318,9 +318,9 @@ void ParticipantsThread(
             }
         }
         PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
-    });
+    }, 1ms);
 
-    lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+    lifecycleService->StartLifecycle({true, true});
 }
 const auto config = "{}";
 
@@ -376,8 +376,8 @@ int main(int argc, char** argv)
             }
 
             auto participant = SilKit::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
-            auto controller = participant->GetSystemController();
-            auto monitor = participant->GetSystemMonitor();
+            auto controller = participant->CreateSystemController();
+            auto monitor = participant->CreateSystemMonitor();
 
             controller->SetWorkflowConfiguration({participantNames});
 

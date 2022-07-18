@@ -37,7 +37,7 @@ of the SIL Kit.
     CreateCanController() in the registered callbacks for
     :cpp:func:`CommunicationReadyHandler<SilKit::Services::Orchestration::ILifecycleService::CommunicationReadyHandler()>`
     or even
-    :cpp:func:`SimTask<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTask()>`.
+    :cpp:func:`SimTask<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`.
 
 
 .. doxygenclass:: SilKit::IParticipant

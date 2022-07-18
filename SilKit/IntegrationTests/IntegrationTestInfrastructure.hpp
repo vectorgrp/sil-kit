@@ -62,8 +62,8 @@ private:
         _systemMaster.participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemMaster", registryUri);
 
-        _systemMaster.systemController = _systemMaster.participant->GetSystemController();
-        _systemMaster.systemMonitor = _systemMaster.participant->GetSystemMonitor();
+        _systemMaster.systemController = _systemMaster.participant->CreateSystemController();
+        _systemMaster.systemMonitor = _systemMaster.participant->CreateSystemMonitor();
         _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
 
         _systemMaster.systemMonitor->AddSystemStateHandler([this, requiredParticipantNames](SystemState newState) {

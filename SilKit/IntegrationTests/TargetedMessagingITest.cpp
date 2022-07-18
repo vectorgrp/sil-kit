@@ -34,19 +34,21 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
 
-    auto* senderCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(testHarness.GetParticipant("Sender")->Participant());
+    auto* senderComSimPart = testHarness.GetParticipant("Sender");
+    auto* senderCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(senderComSimPart->Participant());
 
-    auto systemCtrl = senderCom->GetSystemController();
+    auto systemCtrl = senderComSimPart->GetOrCreateSystemController();
 
-    auto* senderLifecycleService = senderCom->GetLifecycleService();
+    auto* senderLifecycleService = senderComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
     auto* senderTimeSyncService = senderLifecycleService->GetTimeSyncService();
 
-    auto* senderCan = dynamic_cast<SilKit::Services::Can::CanController*>(senderCom->CreateCanController("CAN1", "CAN1"));
+    auto* senderCan =
+        dynamic_cast<SilKit::Services::Can::CanController*>(senderCom->CreateCanController("CAN1", "CAN1"));
     senderCan->AddFrameHandler([](auto controller, auto) {
         FAIL() << ": 'Sender' received targeted message from controller '" << controller << "'";
     });
-    senderTimeSyncService->SetPeriod(1ms);
-    senderTimeSyncService->SetSimulationTask(
+
+    senderTimeSyncService->SetSimulationStepHandler(
         [&systemCtrl, &senderCan, &senderCom](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
             auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
             std::cout << "Sender: Current time=" << nowMs.count() << "ms" << std::endl;
@@ -59,17 +61,17 @@ TEST(TargetedMessagingITest, targeted_messaging)
             }
 
             if (now == 3ms) { systemCtrl->Stop(); }
-        });
+        }, 1ms);
 
-    auto* receiverCom =
-        dynamic_cast<SilKit::Core::IParticipantInternal*>(testHarness.GetParticipant("TargetReceiver")->Participant());
-    auto* receiverLifecycleService = receiverCom->GetLifecycleService();
+    
+    auto* receiverComSimPart = testHarness.GetParticipant("TargetReceiver");
+    auto* receiverCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(receiverComSimPart->Participant());
+    auto* receiverLifecycleService = receiverComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
     auto* receiverTimeSyncService = receiverLifecycleService->GetTimeSyncService();
 
-    receiverTimeSyncService->SetPeriod(1ms);
-    receiverTimeSyncService->SetSimulationTask(
+    receiverTimeSyncService->SetSimulationStepHandler(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
-    });
+    }, 1ms);
 
     auto* receiverCan = receiverCom->CreateCanController("CAN1", "CAN1");
 
@@ -81,13 +83,13 @@ TEST(TargetedMessagingITest, targeted_messaging)
             receiveCount++;
         });
 
-    auto* otherReceiverCom =
-        dynamic_cast<SilKit::Core::IParticipantInternal*>(testHarness.GetParticipant("OtherReceiver")->Participant());
-    auto* otherLifecycleService = otherReceiverCom->GetLifecycleService();
+    auto* otherReceiverComSimPart = testHarness.GetParticipant("OtherReceiver");
+    auto* otherReceiverCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(otherReceiverComSimPart->Participant());
+    auto* otherLifecycleService = otherReceiverComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
     auto* otherTimeSyncService = otherLifecycleService->GetTimeSyncService();
-    otherTimeSyncService->SetPeriod(1ms);
-    otherTimeSyncService->SetSimulationTask(
-        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {});
+    
+    otherTimeSyncService->SetSimulationStepHandler(
+        [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1ms);
 
     auto* otherReceiverCan = otherReceiverCom->CreateCanController("CAN1", "CAN1");
 

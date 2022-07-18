@@ -57,7 +57,7 @@ TEST_F(SystemMonitorITest, discover_services)
     auto&& firstParticipant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
                                                         firstParticipantConnection.participantName, registryUri);
 
-    auto* firstSystemMonitor = firstParticipant->GetSystemMonitor();
+    auto* firstSystemMonitor = firstParticipant->CreateSystemMonitor();
     firstSystemMonitor->SetParticipantConnectedHandler(
         [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation& participantInformation) {
             callbacks.ParticipantConnectedHandler(participantInformation);
@@ -75,7 +75,7 @@ TEST_F(SystemMonitorITest, discover_services)
         auto&& secondParticipant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
                                                              secondParticipantConnection.participantName, registryUri);
 
-        auto* secondSystemMonitor = secondParticipant->GetSystemMonitor();
+        auto* secondSystemMonitor = secondParticipant->CreateSystemMonitor();
         secondSystemMonitor->SetParticipantConnectedHandler(
             [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation&
                        participantConnectionInformation) {

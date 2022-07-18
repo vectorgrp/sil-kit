@@ -53,7 +53,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanWriter";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& lifecycleService = participant->GetLifecycleService();
+      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
@@ -85,7 +85,7 @@ TEST_F(SimTestHarnessITest, can_demo)
         canController->Start();
       });
 
-      timeSyncService->SetSimulationTask(
+      timeSyncService->SetSimulationStepHandler(
       [participant, &msg, canController] (auto now) {
         //Cause transmit queue overrun
         if (now == 0ms)
@@ -111,7 +111,7 @@ TEST_F(SimTestHarnessITest, can_demo)
           canController1->SendFrame(msg, reinterpret_cast<void*>(participant));
           std::this_thread::sleep_for(10ms);//don't starve other threads on the CI build server
         }
-      });
+      }, 1ms);
 
       canController->AddFrameHandler([&writerHasReceivedTx, &writerHasReceivedRx](auto, const Can::CanFrameEvent& frameEvent) {
         //ignore early test messages
@@ -137,7 +137,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanReader";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& lifecycleService = participant->GetLifecycleService();
+      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
       auto&& timeSyncService = lifecycleService->GetTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
@@ -147,7 +147,7 @@ TEST_F(SimTestHarnessITest, can_demo)
         canController->Start();
       });
 
-      timeSyncService->SetSimulationTask([canController, &msg, &receiveTime](auto now) {
+      timeSyncService->SetSimulationStepHandler([canController, &msg, &receiveTime](auto now) {
         receiveTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         //Cause a collision
         if (now == 10ms)
@@ -155,7 +155,7 @@ TEST_F(SimTestHarnessITest, can_demo)
           canController->SendFrame(msg);
         }
 
-        });
+        }, 1ms);
 
       canController->AddFrameHandler(
         [&, lifecycleService](auto, const Can::CanFrameEvent& frameEvent)
@@ -193,7 +193,7 @@ TEST_F(SimTestHarnessITest, can_demo)
       const auto participantName = "CanMonitor";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& lifecycleService = participant->GetLifecycleService();
+      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {

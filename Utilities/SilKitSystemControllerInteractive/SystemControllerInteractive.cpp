@@ -292,13 +292,14 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
 
-        auto systemMonitor = participant->GetSystemMonitor();
-        auto systemController = participant->GetSystemController();
+        auto systemMonitor = participant->CreateSystemMonitor();
+        auto systemController = participant->CreateSystemController();
         systemController->SetWorkflowConfiguration({expectedParticipantNames});
         systemMonitor->AddParticipantStatusHandler(&ReportParticipantStatus);
         systemMonitor->AddSystemStateHandler(&ReportSystemState);
 
-        InteractiveSystemController interactiveSystemController(participant->GetSystemController(), configuration, participantName, expectedParticipantNames);
+        InteractiveSystemController interactiveSystemController(systemController, configuration, participantName,
+                                                                expectedParticipantNames);
         interactiveSystemController.RunInteractiveLoop();
     }
     catch (const std::exception& error)

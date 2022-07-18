@@ -137,7 +137,7 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* logger = participant->GetLogger();
+        auto* logger = participant->CreateLogger();
         auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
         canController->AddFrameTransmitHandler(
@@ -149,51 +149,50 @@ int main(int argc, char** argv)
                 FrameHandler(frameEvent, logger);
             });
 
-        // always use life cycle
-        auto* lifecycleService = participant->GetLifecycleService();
-
-        // Set a CommunicationReady Handler
-        lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
-            std::cout << "Communication ready for " << participantName << std::endl;
-            canController->SetBaudRate(10'000, 1'000'000);
-            canController->Start();
-        });
-
-        // Set a Stop Handler
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stopping..." << std::endl;
-        });
-
-        // Set a Shutdown Handler
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutting down..." << std::endl;
-        });
-
         if (runSync)
         {
+            // always use life cycle
+            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
+
+            // Set a CommunicationReady Handler
+            lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
+                std::cout << "Communication ready for " << participantName << std::endl;
+                canController->SetBaudRate(10'000, 1'000'000);
+                canController->Start();
+            });
+
+            // Set a Stop Handler
+            lifecycleService->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
+
+            // Set a Shutdown Handler
+            lifecycleService->SetShutdownHandler([]() {
+                std::cout << "Shutting down..." << std::endl;
+            });
+
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
-            timeSyncService->SetPeriod(5ms);
 
             if (participantName == "Sender")
             {
-                timeSyncService->SetSimulationTask(
+                timeSyncService->SetSimulationStepHandler(
                     [canController, logger, sleepTimePerTick](std::chrono::nanoseconds now,
                                                               std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         SendFrame(canController, logger);
                         std::this_thread::sleep_for(sleepTimePerTick);
-                    });
+                    }, 5ms);
             }
             else
             {
-                timeSyncService->SetSimulationTask(
+                timeSyncService->SetSimulationStepHandler(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         std::this_thread::sleep_for(sleepTimePerTick);
-                    });
+                    }, 5ms);
             }
 
-            auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {runCoordinated, runCoordinated});
+            auto finalStateFuture = lifecycleService->StartLifecycle({runCoordinated, runCoordinated});
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
@@ -202,6 +201,26 @@ int main(int argc, char** argv)
         }
         else
         {
+            // always use life cycle
+            auto* lifecycleService = participant->CreateLifecycleServiceNoTimeSync();
+
+            // Set a CommunicationReady Handler
+            lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
+                std::cout << "Communication ready for " << participantName << std::endl;
+                canController->SetBaudRate(10'000, 1'000'000);
+                canController->Start();
+            });
+
+            // Set a Stop Handler
+            lifecycleService->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
+
+            // Set a Shutdown Handler
+            lifecycleService->SetShutdownHandler([]() {
+                std::cout << "Shutting down..." << std::endl;
+            });
+
             bool isStopped = false;
             std::promise<void> startSending;
             std::promise<void> stopped;
@@ -241,7 +260,7 @@ int main(int argc, char** argv)
             }
 
             auto finalStateFuture =
-                lifecycleService->StartLifecycleNoSyncTime({runCoordinated, runCoordinated});
+                lifecycleService->StartLifecycle({runCoordinated, runCoordinated});
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
             isStopped = true;

@@ -50,7 +50,7 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         /////////////////////////////////////////////////////////////////////////
         auto&& simParticipant = _simTestHarness->GetParticipant("EthernetWriter");
         auto&& participant = simParticipant->Participant();
-        auto* lifecycleService = participant->GetLifecycleService();
+        auto* lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
         
@@ -86,7 +86,7 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         });
 
 
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
           [ethernetController, &sendCount, &frame](auto now) {
             // Send while link is down
             if (now == 10ms)
@@ -113,7 +113,7 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
             }
             //Throttle this thread, so it does not starve other participants on the CI
             std::this_thread::sleep_for(10ms);
-        });
+        }, 1ms);
     }
     auto readerTime = 0ms;
     {
@@ -122,13 +122,13 @@ TEST_F(SimTestHarnessITest, ethernet_demo)
         /////////////////////////////////////////////////////////////////////////
         auto&& simParticipant = _simTestHarness->GetParticipant("EthernetReader");
         auto&& participant = simParticipant->Participant();
-        auto* lifecycleService = participant->GetLifecycleService();
+        auto* lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController2", "ETH1");
 
-        timeSyncService->SetSimulationTask([&](auto now) {
+        timeSyncService->SetSimulationStepHandler([&](auto now) {
           readerTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-        });
+        }, 1ms);
 
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() {
             Log() << "---   EthernetReader: Init called, setting baud rate and starting";

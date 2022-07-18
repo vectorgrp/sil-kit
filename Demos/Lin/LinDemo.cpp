@@ -307,7 +307,7 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-    auto* lifecycleService = participant->GetLifecycleService();
+    auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
@@ -318,7 +318,6 @@ int main(int argc, char** argv) try
     lifecycleService->SetShutdownHandler([]() {
         std::cout << "Shutting down..." << std::endl;
     });
-    timeSyncService->SetPeriod(1ms);
 
     LinMaster master{linController};
     LinSlave slave;
@@ -336,13 +335,13 @@ int main(int argc, char** argv) try
         linController->AddFrameStatusHandler(Util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
         linController->AddWakeupHandler(Util::bind_method(&master, &LinMaster::WakeupHandler));
 
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
                 master.DoAction(now);
-            });
+            }, 1ms);
     }
     else
     {
@@ -405,17 +404,17 @@ int main(int argc, char** argv) try
         linController->AddGoToSleepHandler(Util::bind_method(&slave, &LinSlave::GoToSleepHandler));
         linController->AddWakeupHandler(Util::bind_method(&slave, &LinSlave::WakeupHandler));
 
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
 
                 std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
                 slave.DoAction(now);
 
                 std::this_thread::sleep_for(500ms);
-            });
+            }, 1ms);
     }
 
-    auto lifecycleFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+    auto lifecycleFuture = lifecycleService->StartLifecycle({true, true});
     auto finalState = lifecycleFuture.get();
 
     std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

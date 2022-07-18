@@ -28,10 +28,10 @@ The simulation task will be executed asynchronously::
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
     // Set simulation task to a lambda
-    timeSyncService->SetSimulationTask(
+    timeSyncService->SetSimulationStepHandler(
         [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
             // Do simulation computation at timepoint 'now'
-        }
+        }, 1ms
     );
 
 Controlling the Participant
@@ -47,7 +47,7 @@ Synchronizing an Application Thread with the Simulation Task
 In special cases, it may be required to synchronize an application thread with the execution of the simulation task. 
 That is, the application wants to execute some code between time steps (given by invocations of the simulation task), *but on a different thread*
 than where the simulation task is executing.
-To achieve this, use :cpp:func:`SetSimulationTaskAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationTaskAsync()>` to assign
+To achieve this, use :cpp:func:`SetSimulationStepHandlerAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandlerAsync()>` to assign
 the simulation task function, and :cpp:func:`CompleteSimulationTask()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationTask()>` to let
 the SIL Kit continue the simulation. 
 If the simulation task has been assigned using that function, execution will stop after the simulation task has finished executing.

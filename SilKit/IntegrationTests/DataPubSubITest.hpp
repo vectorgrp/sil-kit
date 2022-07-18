@@ -362,17 +362,17 @@ protected:
 
             if (sync)
             {
-                auto* lifecycleService = participant.participant->GetLifecycleService();
+                auto* lifecycleService = participant.participant->CreateLifecycleServiceWithTimeSync();
                 auto* timeSyncService = lifecycleService->GetTimeSyncService();
-                timeSyncService->SetPeriod(1s);
-                timeSyncService->SetSimulationTask([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
+
+                timeSyncService->SetSimulationStepHandler([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
                     if (!participant.dataPublishers.empty())
                     {
                         publishTask();
                         participant.CheckAllSentPromise();
                     }
-                });
-                auto finalStateFuture = lifecycleService->StartLifecycleWithSyncTime(timeSyncService, {true, true});
+                }, 1s);
+                auto finalStateFuture = lifecycleService->StartLifecycle({true, true});
                 finalStateFuture.get();
             }
             else

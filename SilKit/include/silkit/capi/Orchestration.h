@@ -123,10 +123,22 @@ typedef SilKit_ReturnCode (*SilKit_SystemController_Create_t)(SilKit_SystemContr
  *
  * The object returned must not be deallocated using free()!
  */
-SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleServiceNoTimeSync_Create(SilKit_LifecycleService** outLifecycleService,
                                                            SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode (*SilKit_LifecycleService_Create_t)(SilKit_LifecycleService** outLifecycleService,
+typedef SilKit_ReturnCode (*SilKit_LifecycleServiceNoTimeSync_Create_t)(SilKit_LifecycleService** outLifecycleService,
+                                                              SilKit_Participant* participant);
+
+/*! \brief Create a lifecycle service at this SIL Kit simulation participant.
+ * \param outLifecycleService Pointer that refers to the resulting lifecycle service (out parameter).
+ * \param participant The simulation participant at which the lifecycle service should be created.
+ *
+ * The object returned must not be deallocated using free()!
+ */
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleServiceWithTimeSync_Create(SilKit_LifecycleService** outLifecycleService,
+                                                           SilKit_Participant* participant);
+
+typedef SilKit_ReturnCode (*SilKit_LifecycleServiceWithTimeSync_Create_t)(SilKit_LifecycleService** outLifecycleService,
                                                               SilKit_Participant* participant);
 
 /*! \brief Create a time sync service at this SIL Kit simulation participant.
@@ -249,22 +261,9 @@ SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_SetShutdownHandler(
 typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetShutdownHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_ShutdownHandler_t handler);
 
-/*! \brief Set the simulation duration to be requested
- *
- * Can only be used with time quantum synchronization.
- * 
- * \param participant The simulation participant
- * \param period The cycle time of the simulation task
- */
-SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetPeriod(SilKit_TimeSyncService* timeSyncService,
-                                                             SilKit_NanosecondsTime period);
-
-typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetPeriod_t)(SilKit_TimeSyncService* timeSyncService,
-                                                                SilKit_NanosecondsTime period);
-
 /*! \brief The handler to be called if the simulation task is due
  *
- * \param context The user provided context passed in \ref SilKit_TimeSyncService_SetSimulationTask
+ * \param context The user provided context passed in \ref SilKit_TimeSyncService_SetSimulationStepHandler
  * \param timeSyncService The time sync service
  * \param now The current simulation time
  */
@@ -278,20 +277,21 @@ typedef void (*SilKit_TimeSyncService_SimulationTaskHandler_t)(void* context, Si
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called if the simulation task is due
  */
-SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationTask(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler);
+SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandler(
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler, SilKit_NanosecondsTime initialStepSize);
 
-typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationTask_t)(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler);
+typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationStepHandler_t)(
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_NanosecondsTime initialStepSize);
 
 /*! \brief Set the task to be executed with each grant / tick
  *
  * Can be changed at runtime. Execution context depends on the run type.
  *
- * The difference to SetSimulationTask is, that after execution of the simulation task
+ * The difference to SetSimulationStepHandler is, that after execution of the simulation task
  * the advance in simulation time will NOT be signaled to other participants.
  * Progress in simulation time (including all other participants) will cease.
- * Instead, SilKit_TimeSyncService_CompleteSimulationTask must be called
+ * Instead, SilKit_TimeSyncService_CompleteSimulationStep must be called
  * FROM ANY OTHER THREAD to 'unlock' the thread executing the simulation task, and let it execute again.
  * Thus, a fine grained control over the whole simulation time progress can be achieved
  * by calling CompleteSimulationTask from an application thread.
@@ -301,19 +301,21 @@ typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationTask_t)(
  * \param context A user provided context accessible in the handler
  * \param handler The handler to be called if the simulation task is due
  */
-SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationTaskAsync(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler);
+SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandlerAsync(
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_NanosecondsTime initialStepSize);
 
-typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationTaskAsync_t)(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler);
+typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationStepHandlerAsync_t)(
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_NanosecondsTime initialStepSize);
 
 /*! \brief Complete the current step of a non-blocking simulation task.
  *
  * \param timeSyncService The time sync service
  */
-SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_CompleteSimulationTask(SilKit_TimeSyncService* timeSyncService);
+SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_CompleteSimulationStep(SilKit_TimeSyncService* timeSyncService);
 
-typedef SilKit_ReturnCode (*SilKit_TimeSyncService_CompleteSimulationTask_t)(SilKit_TimeSyncService* timeSyncService);
+typedef SilKit_ReturnCode (*SilKit_TimeSyncService_CompleteSimulationStep_t)(SilKit_TimeSyncService* timeSyncService);
 
 /*! \brief Send \ref the Restart command to a specific participant
   *
@@ -504,30 +506,16 @@ typedef struct SilKit_LifecycleConfiguration
     SilKit_Bool coordinatedStop;
 } SilKit_LifecycleConfiguration;
 
-/*! \brief Start the lifecycle with the given parameters without simulation time synchronization.
-*  Requires a call to SilKit_LifecycleService_WaitForLifecycleToComplete to retrieve the final state.
-* 
-* \param participant the instance of the participant.
-* \param startConfiguration contains the desired start configuration of the lifecycle.
-* 
-*/
-
-SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_StartLifecycleNoSyncTime(
-    SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startconfiguration);
-
-typedef SilKit_ReturnCode (*SilKit_LifecycleService_StartLifecycleNoSyncTime_t)(
-    SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startconfiguration);
-
 /*! \brief Start the lifecycle with the given parameters with simulation time synchronization.
 * 
 * \param lifecycleService the instance of the lifecycleService.
 * \param startConfiguration contains the desired start configuration of the lifecycle.
 */
 
-SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_StartLifecycleWithSyncTime(
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(
     SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startConfiguration);
 
-typedef SilKit_ReturnCode (*SilKit_LifecycleService_StartLifecycleWithSyncTime_t)(
+typedef SilKit_ReturnCode (*SilKit_LifecycleService_StartLifecycle_t)(
     SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startConfiguration);
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state

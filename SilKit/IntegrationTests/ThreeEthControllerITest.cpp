@@ -70,14 +70,14 @@ protected:
             callbacks.AckHandler(ack);
             numAcked++;
         });
-        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Activate();
         });
 
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
-        timeSyncService->SetSimulationTask(
+        timeSyncService->SetSimulationStepHandler(
             [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
                 if (numSent < testMessages.size())
                 {
@@ -95,7 +95,7 @@ protected:
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }
-        });
+        }, 1ms);
     }
 
     void SetupReceiver(SilKit::Tests::SimParticipant* participant)
@@ -127,7 +127,7 @@ protected:
                 }
             });
 
-        auto* lifecycleService = participant->Participant()->GetLifecycleService();
+        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Activate();

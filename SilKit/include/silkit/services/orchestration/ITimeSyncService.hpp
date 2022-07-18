@@ -26,7 +26,7 @@ public:
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationTask(SimTaskT task) = 0;
+    virtual void SetSimulationStepHandler(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Set the task to be executed with each grant / tick
      *
      * Can be changed at runtime. Execution context depends on the run type.
@@ -36,22 +36,17 @@ public:
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationTaskAsync(SimTaskT task) = 0;
+    virtual void SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Signal that the current simulation task is finished and the next simulation step can be processed.
      *
-     * This method should only be used after calling SetSimulationTaskAsync.
+     * This method should only be used after calling SetSimulationStepHandlerAsync.
      * Otherwise, undefined runtime behavior will result.
      */
     virtual void CompleteSimulationTask() = 0;
 
     //[[deprecated]]
-    virtual void SetSimulationTask(std::function<void(std::chrono::nanoseconds now)> task) = 0;
-
-    /*! \brief Set the simulation duration to be requested
-     *
-     * Can only be used with time quantum synchronization.
-     */
-    virtual void SetPeriod(std::chrono::nanoseconds period) = 0;
+    virtual void SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
+                                          std::chrono::nanoseconds initialStepSize) = 0;
 
 
     /*! \brief Get the current simulation time

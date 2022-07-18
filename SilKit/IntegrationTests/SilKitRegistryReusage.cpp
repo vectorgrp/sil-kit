@@ -48,7 +48,7 @@ TEST(SilKitRegistryReusageITest, DISABLED_SilKitRegistry_must_be_reusable_after_
     //    auto participant = CreateParticipantImpl(config, name);
     //    participant->JoinSilKitDomain(domainId);
     //    auto participantController = participant->GetParticipantController();
-    //    participantController->SetSimulationTask([](auto /*now*/, auto /*duration*/) {});
+    //    participantController->SetSimulationStepHandler([](auto /*now*/, auto /*duration*/) {}, 1ms);
     //    participantController->RunAsync();
     //    return participant;
     //};

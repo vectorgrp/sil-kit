@@ -31,15 +31,28 @@ public:
     SimParticipant operator=(const SimParticipant&) = delete;
     SimParticipant() = default;
 
-    const std::string& Name() const;
-    SilKit::IParticipant* Participant() const;
-    FutureResult& Result();
+    auto Name() const -> const std::string&;
+    auto Participant() const -> SilKit::IParticipant*;
+    auto Result() -> FutureResult&;
     void Stop();
+
+    // Helpers to circumvent one-time-only orchestration service creation
+    auto GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*;
+    auto GetOrCreateSystemController() -> Services::Orchestration::ISystemController*;
+    auto GetOrCreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*;
+    auto GetOrCreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*;
+    auto GetOrCreateLogger() -> Services::Logging::ILogger*;
 
 private:
     std::string _name;
     FutureResult _result;
     std::unique_ptr<SilKit::IParticipant> _participant;
+
+    Services::Orchestration::ISystemMonitor* _systemMonitor{nullptr};
+    Services::Orchestration::ISystemController* _systemController{nullptr};
+    Services::Orchestration::ILifecycleServiceNoTimeSync* _lifecycleServiceNoTimeSync{nullptr};
+    Services::Orchestration::ILifecycleServiceWithTimeSync* _lifecycleServiceWithTimeSync{nullptr};
+    Services::Logging::ILogger* _logger{nullptr};
 
     friend class SimTestHarness;
 };

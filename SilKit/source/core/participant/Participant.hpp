@@ -132,12 +132,18 @@ public:
                             const std::map<std::string, std::string>& labels,
                             Services::Rpc::RpcDiscoveryResultHandler handler) override;
 
-    auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;
-    auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService* override;
+    auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
+    auto CreateSystemController() -> Services::Orchestration::ISystemController* override;
     auto GetSystemController() -> Services::Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
+    auto CreateLogger() -> Services::Logging::ILogger* override;
     auto GetLogger() -> Services::Logging::ILogger* override;
+    auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* override;
+    auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* override;
+    auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* override;
+    auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
+        -> Services::Orchestration::TimeSyncService* override;
     auto GetParticipantName() const -> const std::string& override { return _participantName; }
 
     void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
@@ -367,6 +373,11 @@ private:
 
     SilKitConnectionT _connection;
 
+    // control variables to prevent multiple create accesses by public API 
+    std::atomic<bool> _isSystemMonitorCreated{false};
+    std::atomic<bool> _isSystemControllerCreated{false};
+    std::atomic<bool> _isLoggerCreated{false};
+    std::atomic<bool> _isLifecycleServiceCreated{false};
 };
 
 } // namespace Core

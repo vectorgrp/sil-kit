@@ -24,8 +24,38 @@ class TimeSyncService;
 class ILifecycleManagement;
 struct LifecycleConfiguration;
 
+class ILifecycleServiceInternal
+    : public ILifecycleServiceWithTimeSync
+    , public ILifecycleServiceNoTimeSync
+{
+public:
+    ~ILifecycleServiceInternal() = default;
+
+public:
+    // ILifecycleServiceWithTimeSync and ILifecycleServiceNoTimeSync
+    virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
+    virtual void SetStopHandler(StopHandler handler) = 0;
+    virtual void SetShutdownHandler(ShutdownHandler handler) = 0;
+    virtual auto StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState> = 0;
+    virtual void ReportError(std::string errorMsg) = 0;
+    virtual void Pause(std::string reason) = 0;
+    virtual void Continue() = 0;
+    virtual void Stop(std::string reason) = 0;
+    virtual auto State() const -> ParticipantState = 0;
+    virtual auto Status() const -> const ParticipantStatus& = 0;
+
+    // ILifecycleServiceNoTimeSync
+    virtual void SetStartingHandler(StartingHandler handler) = 0;
+
+    // ILifecycleServiceWithTimeSync
+    virtual auto GetTimeSyncService() const -> ITimeSyncService* = 0;
+
+    // internal only
+    virtual void SetTimeSyncActive(bool isTimeSyncActive) = 0;
+};
+
 class LifecycleService
-    : public ILifecycleService
+    : public ILifecycleServiceInternal
     , public IMsgForLifecycleService
     , public Core::IServiceEndpoint
 {
@@ -39,17 +69,14 @@ public:
     // ----------------------------------------
     // Public Methods
     // ILifecycleService
-    void SetCommunicationReadyHandler(CommunicationReadyHandlerT handler) override;
-    void SetStartingHandler(StartingHandlerT handler) override;
-    void SetStopHandler(StopHandlerT handler) override;
-    void SetShutdownHandler(ShutdownHandlerT handler) override;
+    void SetCommunicationReadyHandler(CommunicationReadyHandler handler) override;
+    void SetStartingHandler(StartingHandler handler) override;
+    void SetStopHandler(StopHandler handler) override;
+    void SetShutdownHandler(ShutdownHandler handler) override;
 
     auto GetTimeSyncService() const -> ITimeSyncService* override;
 
-    auto StartLifecycleNoSyncTime(LifecycleConfiguration startConfiguration)
-        -> std::future<ParticipantState> override;
-    auto StartLifecycleWithSyncTime(ITimeSyncService* timeSyncService,
-            LifecycleConfiguration startConfiguration)
+    auto StartLifecycle(LifecycleConfiguration startConfiguration)
         -> std::future<ParticipantState> override;
 
     void ReportError(std::string errorMsg) override;
@@ -65,6 +92,7 @@ public:
     void ReceiveMsg(const IServiceEndpoint* from, const ParticipantCommand& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& msg) override;
 
+    void SetTimeSyncActive(bool isTimeSyncActive) override;
     // Used by Policies
     template <class MsgT>
     void SendMsg(MsgT&& msg) const;
@@ -86,7 +114,7 @@ public:
 
     void NewSystemState(SystemState systemState);
 
-    bool IsTimeSyncActive();
+    bool IsTimeSyncActive() const;
 
 
 private:
@@ -118,10 +146,10 @@ private:
 
     std::promise<ParticipantState> _finalStatePromise;
 
-    CommunicationReadyHandlerT _commReadyHandler;
-    StartingHandlerT _startingHandler;
-    StopHandlerT _stopHandler;
-    ShutdownHandlerT _shutdownHandler;
+    CommunicationReadyHandler _commReadyHandler;
+    StartingHandler _startingHandler;
+    StopHandler _stopHandler;
+    ShutdownHandler _shutdownHandler;
     std::future<void> _asyncResult;
 
     // When pausing our participant, message processing is deferred
