@@ -44,8 +44,10 @@ function(addTestProject)
     set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
     set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
 endfunction()
-addTestProject()
 
+if(SILKIT_BUILD_TESTS)
+    addTestProject()
+endif()
 
 # NB: we use a standalone, bundled ASIO now.
 # the binary distribution lacks the Asio sources
