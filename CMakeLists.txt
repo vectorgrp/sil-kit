@@ -76,7 +76,9 @@ if(SILKIT_BUILD_DEMOS)
     add_subdirectory(Demos)
 endif()
 # Include automated documentation with doxygen and sphinx
-add_subdirectory(docs)
+if(SILKIT_BUILD_DOCS)
+    add_subdirectory(docs)
+endif()
 
 ################################################################################
 # Distribution of the source code
