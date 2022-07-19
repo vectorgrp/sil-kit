@@ -109,8 +109,7 @@ private:
     std::vector<std::string> _requiredParticipants;
 
     bool _isRunning{false};
-
-    bool _isSynchronized;
+    bool _isSynchronized{false};
     bool _timeSyncConfigured{false};
 
     SimTaskT _simTask;

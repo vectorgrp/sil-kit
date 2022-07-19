@@ -206,8 +206,8 @@ public:
     }
     auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* override { return &mockLifecycleService; }
     auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* override { return &mockLifecycleService; }
-    // TODO mock this?
-    auto CreateTimeSyncService(Services::Orchestration::LifecycleService*) -> Services::Orchestration::TimeSyncService* override { return nullptr; };
+
+    MOCK_METHOD(Services::Orchestration::TimeSyncService*, CreateTimeSyncService, (Services::Orchestration::LifecycleService*), (override));
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
     auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
     auto GetSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
@@ -324,7 +324,10 @@ public:
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) override {}
     void FlushSendBuffers() override {}
-    void ExecuteDeferred(std::function<void()> /*callback*/) override {}
+    void ExecuteDeferred(std::function<void()> callback) override
+    {
+        callback();
+    }
     auto GetParticipantName() const -> const std::string& override { return _name; }
 
     virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider* { return &mockTimeProvider; }

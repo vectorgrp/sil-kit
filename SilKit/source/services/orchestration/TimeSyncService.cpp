@@ -1,6 +1,8 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <future>
+#include <functional>
+#include <atomic>
 
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
@@ -11,7 +13,6 @@
 #include "Assert.hpp"
 
 using namespace std::chrono_literals;
-
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
@@ -74,6 +75,7 @@ public:
     virtual void Initialize() = 0;
     virtual void RequestInitialStep() = 0;
     virtual void RequestNextStep() = 0;
+    virtual void SetSimTaskCompleted() = 0;
     virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
 };
 
@@ -85,6 +87,7 @@ public:
     void Initialize() override {}
     void RequestInitialStep() override {}
     void RequestNextStep() override {}
+    void SetSimTaskCompleted() override {}
     void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
 };
 
@@ -116,7 +119,19 @@ public:
         });
     }
 
-    void RequestNextStep() override { _controller.SendMsg(_configuration->_myNextTask); }
+    void SetSimTaskCompleted() override
+    {
+        // after completing the SimTask in Async mode, reset the _executingSimtask guard
+        _executingSimtask = false;
+    }
+
+    void RequestNextStep() override
+    {
+        _controller.SendMsg(_configuration->_myNextTask);
+        _participant->ExecuteDeferred([this]() {
+            this->CheckDistributedTimeAdvanceGrant();
+        });
+    }
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
@@ -128,9 +143,12 @@ public:
         case ParticipantState::ServicesCreated: // [[fallthrough]]
         case ParticipantState::CommunicationInitializing: // [[fallthrough]]
         case ParticipantState::CommunicationInitialized: // [[fallthrough]]
-        case ParticipantState::ReadyToRun: return;
+        case ParticipantState::ReadyToRun:
+            return;
         case ParticipantState::Paused: // [[fallthrough]]
-        case ParticipantState::Running: CheckDistributedTimeAdvanceGrant(); return;
+        case ParticipantState::Running:
+            CheckDistributedTimeAdvanceGrant();
+            return;
         case ParticipantState::Stopping: // [[fallthrough]]
         case ParticipantState::Stopped: // [[fallthrough]]
         case ParticipantState::Error: // [[fallthrough]]
@@ -145,6 +163,16 @@ public:
     }
 
 private:
+    bool IsAsync() const
+    {
+        return !IsSync();
+    }
+
+    bool IsSync() const
+    {
+        return _configuration->_blocking;
+    }
+
     void CheckDistributedTimeAdvanceGrant()
     {
         // Deferred execution of this callback was initiated, but simulation stopped in the meantime
@@ -159,30 +187,40 @@ private:
                 return;
         }
 
+        // when running in Async mode, set the _executingSimtask guard
+        // which will be cleared in CompleteSimulationTask()
+        if(IsAsync())
+        {
+            auto test = false;
+            auto newval = true;
+            if(!_executingSimtask.compare_exchange_strong(test, newval))
+            {
+                //_executingSimtask was not modified, it was already true
+                return;
+            }
+        }
+
         // No other participant has a lower time point: It is our turn
         _configuration->_currentTask = _configuration->_myNextTask;
         _configuration->_myNextTask.timePoint =
             _configuration->_currentTask.timePoint + _configuration->_currentTask.duration;
         _controller.ExecuteSimTask(_configuration->_currentTask.timePoint, _configuration->_currentTask.duration);
         _controller.AwaitNotPaused();
-        if (_configuration->_blocking)
+
+        if (IsSync())
         {
             //NB: CompleteSimulationTask does invoke this explicitly on the API caller's request:
             RequestNextStep();
         }
-
-        for (auto&& otherTask : _configuration->_otherNextTasks)
+        else
         {
-            if (_configuration->_myNextTask.timePoint > otherTask.second.timePoint)
-                return;
+            // Do nothing until a user calls CompleteSimulationTask()
+            // This ensures that only one async SimTask is executed until completed by the user
+            return;
         }
-
-        // Still, no other participant has a lower time point: Check again later
-        _participant->ExecuteDeferred([this]() {
-            this->CheckDistributedTimeAdvanceGrant();
-        });
     }
 
+    std::atomic<bool> _executingSimtask{false};
     TimeSyncService& _controller;
     Core::IParticipantInternal* _participant;
     TimeConfiguration* _configuration;
@@ -365,6 +403,7 @@ void TimeSyncService::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::ch
 void TimeSyncService::CompleteSimulationTask()
 {
     _logger->Debug("CompleteSimulationTask: calling _timeSyncPolicy->RequestNextStep");
+    _timeSyncPolicy->SetSimTaskCompleted();
     _timeSyncPolicy->RequestNextStep();
 }
 
@@ -378,7 +417,6 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
     {
         return;
     }
-
 
     try
     {

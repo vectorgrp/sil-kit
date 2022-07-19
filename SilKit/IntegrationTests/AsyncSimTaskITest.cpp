@@ -2,6 +2,10 @@
 
 #include <iostream>
 #include <atomic>
+#include <thread>
+#include <future>
+#include <mutex>
+#include <condition_variable>
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
@@ -18,6 +22,98 @@ using namespace std::chrono_literals;
 using namespace SilKit::Tests;
 
 const std::chrono::nanoseconds expectedTime{10ms};
+
+bool wakeup{false};
+std::mutex mx;
+std::condition_variable cv;
+
+TEST(AsyncSimTaskITest, test_async_simtask_lockstep)
+{
+    // The async participant uses the CompleteSimTask calls to request next simulation step.
+    // The sync participant will run as often as possible.
+    // Async may not start a new SimTask before calling CompleteSimtask to complete the current one
+
+    SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
+
+    auto syncTimeNs{0ns};
+    auto done{false};
+    std::atomic<int> numActiveSimtasks{0};
+    std::atomic<int> numSyncSimtasks{0};
+
+    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* asyncParticipant = testHarness.GetParticipant("Async");
+    auto* async = testHarness.GetParticipant("Async")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+
+    sync->SetSimulationStepHandler([&numSyncSimtasks](auto) {
+        // run as fast as possible
+        numSyncSimtasks++;
+    }, 1ms);
+
+
+    async->SetSimulationStepHandlerAsync([&](auto now, auto) {
+        std::cout << "Async SimTask now=" << now.count()
+            << " numActiveSimtasks=" << numActiveSimtasks
+            << " numSyncSimtasks=" << numSyncSimtasks
+            << std::endl;
+
+        syncTimeNs = now;
+        numActiveSimtasks++;
+
+        if (now == expectedTime)
+        {
+            //Only allow time progress up to expectedTime
+            std::cout << "Stopping simulation at expected time" << std::endl;
+            asyncParticipant->GetOrCreateSystemController()->Stop();
+            {
+                std::unique_lock<decltype(mx)> lock(mx);
+                done = true;
+                wakeup = true;
+            }
+            cv.notify_one();
+        }
+        if (now < expectedTime)
+        {
+            //tell our completer thread that this simTask needs a call to CompleteSimTask
+            {
+                std::unique_lock<decltype(mx)> lock(mx);
+                wakeup = true;
+            }
+            cv.notify_one();
+        }
+    },1ms);
+
+    auto completer = std::thread{[&](){
+        while (!done && (syncTimeNs < expectedTime))
+        {
+            std::unique_lock<decltype(mx)> lock(mx);
+            cv.wait(lock, [] { return wakeup;});
+            wakeup = false;
+            if(done)
+            {
+                return;
+            }
+            std::cout <<"Completer numActiveSimtasks=" << numActiveSimtasks << std::endl;
+            if(numActiveSimtasks != 1)
+            {
+                ASSERT_EQ(numActiveSimtasks,0 ) << "Only one SimTask should be active until CompleteSimTask is called";
+                done = true;
+            }
+            numActiveSimtasks--;
+            async->CompleteSimulationTask();
+        }
+    }};
+    ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout"
+        << " numActiveSimtasks=" << numActiveSimtasks
+        << " numSyncSimtasks=" << numSyncSimtasks
+        ;
+    done=true;
+    wakeup=true;
+    cv.notify_all();
+    if(completer.joinable())
+    {
+        completer.join();
+    }
+}
 
 TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
 {
@@ -222,5 +318,4 @@ TEST(AsyncSimTaskITest, test_async_simtask_multiple_completion_calls)
     // validate that they are called approximately equally often
     ASSERT_TRUE(std::abs(countAsync * periodFactor - countSync) < periodFactor);
 }
-
 } // anonymous namespace

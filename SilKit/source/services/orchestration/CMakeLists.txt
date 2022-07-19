@@ -64,3 +64,4 @@ add_silkit_test(TestMwWatchDog
 )
 add_silkit_test(TestMwSync_Serdes SOURCES SyncSerdesTest.cpp LIBS SilKitMwSync SilKitInternal)
 add_silkit_test(Test_TimeProvider SOURCES TimeProviderTest.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
+add_silkit_test(Test_TimeSyncService SOURCES TimeSyncServiceTest.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
