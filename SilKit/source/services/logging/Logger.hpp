@@ -49,8 +49,7 @@ public:
     void DisableRemoteLogging();
     void LogReceivedMsg(const LogMsg& msg);
 
-protected:
-    bool ShouldLog(Level level) const override;
+    Level GetLogLevel() const override;
 private:
     // ----------------------------------------
     // Private members

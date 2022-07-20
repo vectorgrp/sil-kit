@@ -15,13 +15,13 @@ using log_clock = std::chrono::system_clock;
  */
 enum class Level : uint32_t
 {
-    Trace, //!< Detailed debug-level messages
-    Debug, //!< Normal debug-level messages
-    Info, //!< Informational content
-    Warn, //!< Warnings
-    Error, //!< Non-critical errors
-    Critical, //!< Critical errors
-    Off //!< Logging is disabled
+    Trace = 0, //!< Detailed debug-level messages
+    Debug = 1, //!< Normal debug-level messages
+    Info = 2, //!< Informational content
+    Warn = 3, //!< Warnings
+    Error = 4, //!< Non-critical errors
+    Critical = 5, //!< Critical errors
+    Off = 0xffffffff //!< Logging is disabled
 };
 
 /*! \brief The source location that a log entry refers to

@@ -116,4 +116,26 @@ TEST(LoggerTest, send_log_message_from_logger)
     logger.Critical(payload);
 }
 
+TEST(LoggerTest, get_log_level)
+{
+    std::string loggerName{"ParticipantAndLogger"};
+
+    Config::Logging config;
+    auto sink1 = Config::Sink{};
+    sink1.level = Level::Debug;
+    sink1.type = Config::Sink::Type::Remote;
+
+    auto sink2 = Config::Sink{};
+    sink2.level = Level::Critical;
+    sink2.type = Config::Sink::Type::File;
+
+    config.sinks.push_back(sink1);
+    config.sinks.push_back(sink2);
+
+    Logger logger{loggerName, config};
+
+    // GetLogLevel should return lowest log level of all sinks
+    EXPECT_EQ(logger.GetLogLevel(), Level::Debug);
+}
+
 }  // anonymous namespace

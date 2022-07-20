@@ -47,8 +47,7 @@ public:
     void Critical(const std::string& /*msg*/) override {}
     void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
     void LogReceivedMsg(const Services::Logging::LogMsg& /*msg*/) {}
-protected:
-    bool ShouldLog(Services::Logging::Level) const override { return true; }
+    Services::Logging::Level GetLogLevel() const override { return Services::Logging::Level::Debug; }
 };
 
 class MockLifecycleService

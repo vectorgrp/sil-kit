@@ -18,7 +18,7 @@ namespace {
         MOCK_METHOD1(Error, void(const std::string&));
         MOCK_METHOD1(Critical, void(const std::string&));
 
-        MOCK_CONST_METHOD1(ShouldLog, bool(Level level));
+        MOCK_CONST_METHOD0(GetLogLevel, Level());
     };
 
     class CapiLoggerTest : public testing::Test
@@ -80,6 +80,11 @@ namespace {
 
         EXPECT_CALL(mockLogger, Log(Level::Critical, "Critical message")).Times(testing::Exactly(1));
         returnCode = SilKit_Logger_Log((SilKit_Logger*)&mockLogger, SilKit_LoggingLevel_Critical, "Critical message");
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+        EXPECT_CALL(mockLogger, GetLogLevel()).Times(testing::Exactly(1));
+        SilKit_LoggingLevel logLevel;
+        returnCode = SilKit_Logger_GetLogLevel((SilKit_Logger*)&mockLogger, &logLevel);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
 }

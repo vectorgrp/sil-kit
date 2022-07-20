@@ -118,6 +118,18 @@ Compatibility with 3.99.26
 - Application software interface (API): No
 - Middleware network protocol: No
 
+Added
+~~~~~~~
+
+- Logger now provides an API to get the currently active log level.
+
+  + ``SilKit/include/services/logging/ILogger.h``
+
+    .. code-block:: c++
+
+      virtual Level GetLogLevel() const = 0;
+
+
 Changed
 ~~~~~~~
 

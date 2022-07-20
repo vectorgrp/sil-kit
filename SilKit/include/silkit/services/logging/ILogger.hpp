@@ -53,11 +53,13 @@ public:
     //! \brief Log a message with log level critical.
     virtual void Critical(const std::string& msg) = 0;
 
+    //! \brief Get the lowest configured log level of all sinks
+    virtual Level GetLogLevel() const = 0;
 #ifdef HAVE_FMTLIB
     template<typename... Args>
     void Log(Level level, const char* fmt, const Args&... args)
     {
-        if(ShouldLog(level))
+        if (GetLogLevel() >= level)
         {
             std::string msg = fmt::format(fmt, args...);
             Log(level, msg);
@@ -95,9 +97,6 @@ public:
         Log(Level::Critical, fmt, args...);
     }
 #endif //HAVE_FMTLIB
-
-protected:
-    virtual bool ShouldLog(Level) const = 0;
 };
 
 } // logging

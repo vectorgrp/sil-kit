@@ -19,7 +19,7 @@ typedef uint32_t SilKit_LoggingLevel;
 #define SilKit_LoggingLevel_Warn ((uint32_t) 3) //!< Warnings
 #define SilKit_LoggingLevel_Error ((uint32_t) 4) //!< Non-critical errors
 #define SilKit_LoggingLevel_Critical ((uint32_t) 5) //!< Critical errors
-#define SilKit_LoggingLevel_Off ((uint32_t) 6) //!< Logging is disabled
+#define SilKit_LoggingLevel_Off ((uint32_t) 0xffffffff) //!< Logging is disabled
 
 typedef struct SilKit_Logger SilKit_Logger;
 
@@ -30,6 +30,13 @@ typedef SilKit_ReturnCode(*SilKit_Logger_Log_t)(SilKit_Logger* self, SilKit_Logg
  * \param message The message which shall be logged.
  */
 SilKitAPI SilKit_ReturnCode SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
+
+/*! \brief Get the lowest configured log level of the log sinks
+ *
+ * \param logger The logger for which the log level should be obtained
+ * \param outLevel a pointer to a logging level where the result will be stored
+ */
+SilKitAPI SilKit_ReturnCode SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel);
 
 SILKIT_END_DECLS
 
