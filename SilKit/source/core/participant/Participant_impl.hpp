@@ -59,21 +59,12 @@ struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> :
 } // namespace anonymous
 
 template <class SilKitConnectionT>
-Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig,
-                                        const std::string& participantName, ProtocolVersion version)
+Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig, const std::string& participantName, ProtocolVersion version)
     : _participantName{participantName}
     , _participantConfig{participantConfig}
     , _participantId{Util::Hash::Hash(participantName)}
     , _connection{_participantConfig, participantName, _participantId, &_timeProvider, version}
 {
-    std::string logParticipantNotice; //!< We defer logging the notice until the logger is created
-    if (!_participantConfig.participantName.empty() && _participantConfig.participantName != participantName)
-    {
-        logParticipantNotice = fmt::format(
-            "The provided participant name '{}' differs from the configured name '{}'. The latter will be used.",
-            _participantName, _participantConfig.participantName);
-        _participantName = _participantConfig.participantName;
-    }
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
     _logger = std::make_unique<Services::Logging::Logger>(_participantName, _participantConfig.logging);
@@ -82,10 +73,6 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _logger->Info("Creating Participant for Participant {}, SilKit-Version: {}, Middleware: {}",
                   _participantName, Version::String(), "VAsio");
 
-    if (!logParticipantNotice.empty())
-    {
-        _logger->Info(logParticipantNotice);
-    }
 }
 
 

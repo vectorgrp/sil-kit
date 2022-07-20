@@ -136,7 +136,7 @@ inline auto MakeMockConnectionParticipant(std::shared_ptr<SilKit::Config::IParti
                                           const std::string& participantName)
     -> std::unique_ptr<MockConnectionParticipant>
 {
-    auto&& cfg = SilKit::Core::ValidateAndSanitizeConfig(participantConfig, participantName);
+    auto&& cfg = SilKit::Core::ValidateAndSanitizeConfig(participantConfig);
     return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName);
 }
 

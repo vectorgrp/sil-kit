@@ -6,6 +6,7 @@
 #include "CreateParticipant.hpp"
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
+#include "CreateParticipant_impl.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -46,11 +47,9 @@ struct NullConnection
 } // anonymous namespace
     
 auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                        const std::string& participantName)
-    -> std::unique_ptr<IParticipantInternal>
+                                         const std::string& participantName) -> std::unique_ptr<IParticipantInternal>
 {
-    auto&& cfg = SilKit::Core::ValidateAndSanitizeConfig(participantConfig, participantName);
-    return std::make_unique<Participant<NullConnection>>(std::move(cfg), participantName);
+    return CreateParticipantImplInternal<NullConnection>(std::move(participantConfig), participantName);
 }
 
 } // namespace Core

@@ -3,6 +3,7 @@ add_library(SilKitMwParticipant STATIC
     Participant.hpp
     Participant_impl.hpp
     Participant.cpp
+    CreateParticipant_impl.hpp
     CreateParticipant.hpp
     CreateParticipant.cpp
 )
