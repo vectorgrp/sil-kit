@@ -231,7 +231,7 @@ SilKit_ReturnCode SilKit_LifecycleService_WaitForLifecycleToComplete(SilKit_Life
 }
 
 SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandler(
-    SilKit_TimeSyncService* ctimeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_TimeSyncService* ctimeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize)
 {
     ASSERT_VALID_POINTER_PARAMETER(ctimeSyncService);
@@ -250,7 +250,7 @@ SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandler(
 }
 
 SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandlerAsync(
-    SilKit_TimeSyncService* ctimeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_TimeSyncService* ctimeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize)
 {
     ASSERT_VALID_POINTER_PARAMETER(ctimeSyncService);

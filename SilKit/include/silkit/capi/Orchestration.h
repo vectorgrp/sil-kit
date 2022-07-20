@@ -267,7 +267,7 @@ typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetShutdownHandler_t)(
  * \param timeSyncService The time sync service
  * \param now The current simulation time
  */
-typedef void (*SilKit_TimeSyncService_SimulationTaskHandler_t)(void* context, SilKit_TimeSyncService* timeSyncService,
+typedef void (*SilKit_TimeSyncService_SimulationStepHandler_t)(void* context, SilKit_TimeSyncService* timeSyncService,
                                                                SilKit_NanosecondsTime now);
 /*! \brief Set the task to be executed with each grant / tick
  *
@@ -278,10 +278,10 @@ typedef void (*SilKit_TimeSyncService_SimulationTaskHandler_t)(void* context, Si
  * \param handler The handler to be called if the simulation task is due
  */
 SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandler(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler, SilKit_NanosecondsTime initialStepSize);
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler, SilKit_NanosecondsTime initialStepSize);
 
 typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationStepHandler_t)(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize);
 
 /*! \brief Set the task to be executed with each grant / tick
@@ -294,7 +294,7 @@ typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationStepHandler_t)(
  * Instead, SilKit_TimeSyncService_CompleteSimulationStep must be called
  * FROM ANY OTHER THREAD to 'unlock' the thread executing the simulation task, and let it execute again.
  * Thus, a fine grained control over the whole simulation time progress can be achieved
- * by calling CompleteSimulationTask from an application thread.
+ * by calling CompleteSimulationStep from an application thread.
  * Participants using 'regular' simulation tasks and non-blocking simulation tasks may be freely mixed.
  *
  * \param participant The simulation participant
@@ -302,11 +302,11 @@ typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationStepHandler_t)(
  * \param handler The handler to be called if the simulation task is due
  */
 SilKitAPI SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandlerAsync(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize);
 
 typedef SilKit_ReturnCode (*SilKit_TimeSyncService_SetSimulationStepHandlerAsync_t)(
-    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationTaskHandler_t handler,
+    SilKit_TimeSyncService* timeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize);
 
 /*! \brief Complete the current step of a non-blocking simulation task.
