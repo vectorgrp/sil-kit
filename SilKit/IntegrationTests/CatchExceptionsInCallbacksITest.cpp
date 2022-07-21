@@ -55,17 +55,17 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
     auto registryUri = MakeTestRegistryUri();
 
     auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->ProvideDomain(registryUri);
+    registry->StartListening(registryUri);
 
     std::string participantNameSender = "Sender";
     auto pubParticipant = SilKit::Core::CreateParticipantImpl(
         SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameSender);
-    pubParticipant->JoinSilKitDomain(registryUri);
+    pubParticipant->JoinSilKitSimulation(registryUri);
 
     std::string participantNameReceiver = "Receiver";
     auto subParticipant = SilKit::Core::CreateParticipantImpl(
         SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameReceiver);
-    subParticipant->JoinSilKitDomain(registryUri);
+    subParticipant->JoinSilKitSimulation(registryUri);
 
     publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);
     subscriber = subParticipant->CreateDataSubscriber(

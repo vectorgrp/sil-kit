@@ -331,7 +331,7 @@ public:
     auto GetParticipantName() const -> const std::string& override { return _name; }
 
     virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider* { return &mockTimeProvider; }
-    void JoinSilKitDomain(const std::string& ) override {}
+    void JoinSilKitSimulation(const std::string& ) override {}
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override { return &mockServiceDiscovery; }
 

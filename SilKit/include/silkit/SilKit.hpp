@@ -11,7 +11,7 @@
 
 namespace SilKit {
 
-/*! \brief Join the configured middleware domain as a participant.
+/*! \brief Create a participant and join the simulation.
 *
 * Become a participant based on the the given configuration options.
 *
@@ -24,12 +24,11 @@ namespace SilKit {
 * a valid participant in the config file.
 * \throw std::exception The participant could not be created.
 */
-
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName)
     -> std::unique_ptr<IParticipant>;
 
-/*! \brief Join the configured middleware domain as a participant.
+/*! \brief Create a participant and join the simulation.
 *
 * Become a participant based on the the given configuration options.
 *

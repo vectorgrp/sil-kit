@@ -22,7 +22,7 @@ SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantCon
     -> std::unique_ptr<IParticipant>
 {
     auto participant = Core::CreateParticipantImpl(std::move(participantConfig), participantName);
-    participant->JoinSilKitDomain(registryUri);
+    participant->JoinSilKitSimulation(registryUri);
     return participant;
 }
 

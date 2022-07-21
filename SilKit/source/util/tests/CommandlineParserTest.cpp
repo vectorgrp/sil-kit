@@ -34,7 +34,7 @@ auto BuildArguments(const std::vector<const char*>& arguments) -> std::vector<ch
 
 TEST(SilKitCommandlineParserTest, test_mixed_arguments)
 {
-    auto arguments = { "main", "-d=1234", "XYZ", "--name=Xxxx", "--version" };
+    auto arguments = { "main", "-u=silkit://localhost:8501", "XYZ", "--name=Xxxx", "--version" };
     auto args = BuildArguments(arguments);
     auto argc = static_cast<int>(args.size()) - 1;
     auto argv = args.data();
@@ -46,15 +46,15 @@ TEST(SilKitCommandlineParserTest, test_mixed_arguments)
         "-h, --help: Get this help.");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "NetworkSimulator", "[--name=<participantName>]",
         "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'NetworkSimulator'");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("domain", "d", "42", "[--domain=<domainId>]",
-        "-d, --domain <domainId>: The domain ID which is used by the SilKit. Defaults to 42");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "silkit://localhost:8500", "[--registryUri=<registryUri>]",
+        "-u, --registryUri <registryUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "<configuration>",
         "<configuration>: Path and filename of the network simulator configuration YAML or JSON file. Note that the format was changed in v3.6.11");
 
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value(), false);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value(), false);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").HasValue(), false);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").Value(), "42");
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").HasValue(), false);
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").Value(), "silkit://localhost:8500");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").HasValue(), false);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value(), "NetworkSimulator");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").HasValue(), false);
@@ -64,8 +64,8 @@ TEST(SilKitCommandlineParserTest, test_mixed_arguments)
 
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value(), true);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value(), false);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").HasValue(), true);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").Value(), "1234");
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").HasValue(), true);
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").Value(), "silkit://localhost:8501");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").HasValue(), true);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value(), "Xxxx");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").HasValue(), true);
@@ -74,7 +74,7 @@ TEST(SilKitCommandlineParserTest, test_mixed_arguments)
 
 TEST(SilKitCommandlineParserTest, test_spaced_option_values)
 {
-    auto arguments = { "main", "-d", "1234", "XYZ", "--name", "Xxxx", "--version" };
+    auto arguments = { "main", "-u", "silkit://localhost:8501", "XYZ", "--name", "Xxxx", "--version" };
     auto args = BuildArguments(arguments);
     auto argc = static_cast<int>(args.size()) - 1;
     auto argv = args.data();
@@ -83,15 +83,15 @@ TEST(SilKitCommandlineParserTest, test_spaced_option_values)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "", "", "");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("domain", "d", "", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "", "");
 
     commandlineParser.ParseArguments(argc, argv);
 
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value(), true);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value(), false);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").HasValue(), true);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").Value(), "1234");
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").HasValue(), true);
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").Value(), "silkit://localhost:8501");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").HasValue(), true);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value(), "Xxxx");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").HasValue(), true);
@@ -100,7 +100,7 @@ TEST(SilKitCommandlineParserTest, test_spaced_option_values)
 
 TEST(SilKitCommandlineParserTest, test_bad_argument)
 {
-    auto arguments = { "main", "-domain=1234", "XYZ", "--name=Xxxx", "--version" };
+    auto arguments = { "main", "-registryUri=silkit://localhost:8501", "XYZ", "--name=Xxxx", "--version" };
     auto args = BuildArguments(arguments);
     auto argc = static_cast<int>(args.size()) - 1;
     auto argv = args.data();
@@ -109,7 +109,7 @@ TEST(SilKitCommandlineParserTest, test_bad_argument)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "", "", "");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("domain", "d", "", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "", "");
 
     EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), std::runtime_error);
@@ -126,15 +126,15 @@ TEST(SilKitCommandlineParserTest, test_no_arguments)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "NetworkSimulator", "", "");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("domain", "d", "42", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "silkit://localhost:8500", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "", "");
 
     commandlineParser.ParseArguments(argc, argv);
 
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value(), false);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("help").Value(), false);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").HasValue(), false);
-    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("domain").Value(), "42");
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").HasValue(), false);
+    EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("registryUri").Value(), "silkit://localhost:8500");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").HasValue(), false);
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value(), "NetworkSimulator");
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").HasValue(), false);
@@ -143,13 +143,13 @@ TEST(SilKitCommandlineParserTest, test_no_arguments)
 
 TEST(SilKitCommandlineParserTest, test_missing_option_value)
 {
-    auto arguments = { "main", "--domain" };
+    auto arguments = { "main", "--registryUri" };
     auto args = BuildArguments(arguments);
     auto argc = static_cast<int>(args.size()) - 1;
     auto argv = args.data();
 
     SilKit::Util::CommandlineParser commandlineParser;
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("domain", "d", "", "", "");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "", "", "");
 
     EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), std::runtime_error);
 }

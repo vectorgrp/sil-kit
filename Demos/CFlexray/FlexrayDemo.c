@@ -456,7 +456,7 @@ int main(int argc, char** argv)
 
     if (argc < 3)
     {
-        printf("usage: SilKitDemoCFlexray <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCFlexray <ConfigJsonFile> <ParticipantName> [RegistryUri]\n");
         return 1;
     }
 

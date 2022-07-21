@@ -22,8 +22,8 @@ public:
     virtual void SetAllDisconnectedHandler(std::function<void()> handler) = 0;
     //! \brief Returns the logger that is used by the SIL Kit registry.
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
-    //! \brief Provide the VAsio domain with the given listening URI with scheme silkit://. e.g. silkit://localhost:8500
-    virtual void ProvideDomain(const std::string& listenUri) = 0;
+    //! \brief Start to listen on the URI with scheme silkit://. e.g. silkit://localhost:8500
+    virtual void StartListening(const std::string& listenUri) = 0;
 };
 
 

@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
-        printf("usage: SilKitDemoCCan <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCCan <ConfigJsonFile> <ParticipantName> [RegistryUri]\n");
         return 1;
     }
 

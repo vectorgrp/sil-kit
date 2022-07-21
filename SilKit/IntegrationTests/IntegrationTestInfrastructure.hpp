@@ -54,7 +54,7 @@ private:
     void RunRegistry(const std::string& registryUri)
     {
         _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-        _registry->ProvideDomain(registryUri);
+        _registry->StartListening(registryUri);
     }
 
     void RunSystemMaster(const std::string& registryUri, const std::vector<std::string>& requiredParticipantNames)

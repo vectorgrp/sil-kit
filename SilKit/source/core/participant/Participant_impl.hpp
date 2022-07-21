@@ -77,16 +77,16 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
 
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::JoinSilKitDomain(const std::string& registryUri)
+void Participant<SilKitConnectionT>::JoinSilKitSimulation(const std::string& registryUri)
 {
-    _connection.JoinDomain(registryUri);
-    OnSilKitDomainJoined();
+    _connection.JoinSimulation(registryUri);
+    OnSilKitSimulationJoined();
 
     _logger->Info("Participant {} has connected to {}", _participantName, registryUri);
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::OnSilKitDomainJoined()
+void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 {
     SetupRemoteLogging();
 

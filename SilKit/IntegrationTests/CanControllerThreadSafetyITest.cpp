@@ -156,7 +156,7 @@ protected:
         {
             registry =
                 SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-            registry->ProvideDomain(registryUri);
+            registry->StartListening(registryUri);
         }
         catch (const SilKit::ConfigurationError& error)
         {

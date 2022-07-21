@@ -45,14 +45,14 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
     _connection.RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { OnPeerShutdown(peer); });
 }
 
-void VAsioRegistry::ProvideDomain(const std::string& listenUri)
+void VAsioRegistry::StartListening(const std::string& listenUri)
 {
     auto uri = Uri::Parse(listenUri);
     bool isAccepting{false};
     // accept connection from participants on any interface
     try
     {
-        //Local domain sockets, failure is non fatal for operation.
+        // Local domain sockets, failure is non fatal for operation.
         _connection.AcceptLocalConnections(listenUri);
         isAccepting = true;
     }

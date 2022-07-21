@@ -296,7 +296,7 @@ void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
     _logger = logger;
 }
 
-void VAsioConnection::JoinDomain(std::string connectUri)
+void VAsioConnection::JoinSimulation(std::string connectUri)
 {
     SILKIT_ASSERT(_logger);
 
@@ -309,7 +309,7 @@ void VAsioConnection::JoinDomain(std::string connectUri)
         }
         catch (const std::exception& ex)
         {
-            _logger->Warn("VasioConnection::JoinDomain: Cannot accept local IPC connections: {}, pwd={}",
+            _logger->Warn("VasioConnection::JoinSimulation: Cannot accept local IPC connections: {}, pwd={}",
                 ex.what(), fs::current_path().string());
         }
     }

@@ -46,7 +46,7 @@ SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
         auto* logger = participant->CreateLogger();
         if (logger)
         {
-            logger->Info("Creating participant '{}' in domain {}", cParticipantName, cRegistryUri);
+            logger->Info("Creating participant '{}' with registry URI {}", cParticipantName, cRegistryUri);
         }
 
         *outParticipant = reinterpret_cast<SilKit_Participant*>(participant);

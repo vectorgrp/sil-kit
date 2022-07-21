@@ -289,7 +289,7 @@ int main(int argc, char** argv) try
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri]" << std::endl
                   << "Use \"LinMaster\" or \"LinSlave\" as <ParticipantName>." << std::endl;
         return -1;
     }

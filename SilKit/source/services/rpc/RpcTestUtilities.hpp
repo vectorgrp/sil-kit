@@ -31,8 +31,7 @@ struct MockConnection
 
     void SetLogger(SilKit::Services::Logging::ILogger* /*logger*/) {}
     void SetTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* /*timeSyncService*/) {}
-    void JoinDomain(uint32_t /*domainId*/) {}
-    void JoinDomain(std::string /*domainId*/) {}
+    void JoinSimulation(std::string /*registryUri*/) {}
 
     template <class SilKitServiceT>
     void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/,

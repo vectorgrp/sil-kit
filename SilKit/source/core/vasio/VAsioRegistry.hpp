@@ -24,7 +24,7 @@ public: // CTor
                   ProtocolVersion version = CurrentProtocolVersion());
 
 public: // methods
-    void ProvideDomain(const std::string& listenUri) override;
+    void StartListening(const std::string& listenUri) override;
 
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;

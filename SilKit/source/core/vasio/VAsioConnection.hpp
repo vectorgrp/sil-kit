@@ -66,7 +66,7 @@ public:
     // ----------------------------------------
     // Public methods
     void SetLogger(Services::Logging::ILogger* logger);
-    void JoinDomain(std::string registryUri);
+    void JoinSimulation(std::string registryUri);
 
     template <class SilKitServiceT>
     void RegisterSilKitService(const std::string& link, EndpointId endpointId, SilKitServiceT* service)

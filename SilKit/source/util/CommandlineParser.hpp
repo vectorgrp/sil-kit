@@ -199,7 +199,7 @@ public:
     /*! \brief A positional argument to collect multiple string values
      * 
      * It must be the last positional argument that is added, as it collects any remaining positional arguments.
-     * Usage ("<value1> [<value2> ...]") and description ("<value>, <value2>, ...: Explanation") are used by PrintVersionInfo.
+     * Usage ("<value1> [value2 ...]") and description ("<value>, <value2>, ...: Explanation") are used by PrintVersionInfo.
      */
     struct PositionalList
         : public Argument<PositionalList, std::vector<std::string>>

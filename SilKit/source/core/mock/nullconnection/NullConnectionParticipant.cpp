@@ -22,7 +22,7 @@ struct NullConnection
 
     void SetLogger(Services::Logging::ILogger* /*logger*/) {}
     void SetTimeSyncService(Orchestration::TimeSyncService* /*timeSyncService*/) {}
-    void JoinDomain(std::string /*registryUri*/) {}
+    void JoinSimulation(std::string /*registryUri*/) {}
 
     template<class SilKitServiceT>
     inline void RegisterSilKitService(const std::string& /*topicName*/, Core::EndpointId /*endpointId*/, SilKitServiceT* /*receiver*/) {}

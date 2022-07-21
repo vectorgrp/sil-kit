@@ -26,7 +26,7 @@ public:
     // Public methods
     virtual auto GetParticipantName() const -> const std::string& = 0;
 
-    /*! \brief Join the middleware domain as a participant.
+    /*! \brief Connect to the registry and join the simulation.
     *
     * Connect to the registry listening on registryUri
     * \param registryUri URI of the registry
@@ -34,7 +34,7 @@ public:
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    virtual void JoinSilKitDomain(const std::string& registryUri) = 0;
+    virtual void JoinSilKitSimulation(const std::string& registryUri) = 0;
 
     // For NetworkSimulator integration:
     virtual void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;

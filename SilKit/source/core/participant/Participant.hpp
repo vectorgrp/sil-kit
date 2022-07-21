@@ -257,15 +257,15 @@ public:
     // ----------------------------------------
     // Public methods
 
-    /*! \brief Join the middleware domain as a participant.
-    *
-    * Connect to the registry and join the domain
-    * \param registryUri ID of the domain
+    /*! \brief Connect to the registry and join the simulation.
+    * 
+    * Connect to the registry listening on registryUri
+    * \param registryUri The registry URI to connect to.
     *
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void JoinSilKitDomain(const std::string& registryUri) override;
+    void JoinSilKitSimulation(const std::string& registryUri) override;
 
     // For Testing Purposes:
     inline auto GetSilKitConnection() -> SilKitConnectionT& { return _connection; }
@@ -294,7 +294,7 @@ private:
     void LogMismatchBetweenConfigAndPassedValue(const std::string& controllerName, const ValueT& passedValue,
                                                 const ValueT& configuredValue);
 
-    void OnSilKitDomainJoined();
+    void OnSilKitSimulationJoined();
 
     void SetupRemoteLogging();
 

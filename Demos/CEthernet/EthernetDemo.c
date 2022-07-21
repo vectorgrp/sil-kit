@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
-        printf("usage: SilKitDemoCEthernet <ConfigJsonFile> <ParticipantName> [<DomainId>]\n");
+        printf("usage: SilKitDemoCEthernet <ConfigJsonFile> <ParticipantName> [RegistryUri]\n");
         return 1;
     }
 

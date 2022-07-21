@@ -55,7 +55,7 @@ public:
         _participant =
             SilKit::Core::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), _participantName);
 
-        _participant->JoinSilKitDomain(registryUri);
+        _participant->JoinSilKitSimulation(registryUri);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
@@ -122,7 +122,7 @@ public:
     {
         _participant = SilKit::Core::CreateParticipantImpl(
             SilKit::Config::MakeEmptyParticipantConfiguration(), participantName);
-        _participant->JoinSilKitDomain(registryUri);
+        _participant->JoinSilKitSimulation(registryUri);
 
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({syncParticipantNames});
@@ -272,7 +272,7 @@ TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
     }
 
     VAsioRegistry registry{ SilKit::Config::MakeEmptyParticipantConfiguration() };
-    registry.ProvideDomain(registryUri);
+    registry.StartListening(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
     Subscriber subscriber(subscriberName, registryUri, publisherCount, testSize);

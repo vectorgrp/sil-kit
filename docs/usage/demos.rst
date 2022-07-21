@@ -69,7 +69,7 @@ CAN Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``CanWriter`` or 
            ``CanReader``.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
@@ -132,7 +132,7 @@ Ethernet Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
@@ -196,7 +196,7 @@ LIN Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
    *  -  Parameter Example
       -  .. parsed-literal:: 
@@ -244,7 +244,7 @@ FlexRay Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Node0`` or 
            ``Node1``.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
    *  -  Parameter Example
@@ -295,7 +295,7 @@ Data Message Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``PubSub1``, ``PubSub2``, ``Subscriber1`` or 
            ``Subscriber2``.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
    *  -  Parameter Example
@@ -348,7 +348,7 @@ RPC Demo
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Server`` or 
            ``Client``.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
    *  -  Parameter Example
@@ -436,7 +436,7 @@ Life Cycle Demo
            use ``SilKitConfig_DemoLifecycle.json`` for an example configuration.
          <ParticipantName>
            The name of the participant within the simulation; pauses and continues the simulation three times for five seconds if ``PauseTest``; can be anything otherwise.
-         [registryUri] 
+         [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
          [\-\-async]
            If timeSync flag is set, the participant will run without virtual time synchronization.
@@ -446,7 +446,7 @@ Life Cycle Demo
    *  -  Parameter Example
       -  .. parsed-literal::
 
-            # Creates an Life Cycle Demo Process in the default domain 42:
+            # Start the Life Cycle Demo with the default registryUri 'silkit://localhost:8500':
             |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
 
    *  -  System Example

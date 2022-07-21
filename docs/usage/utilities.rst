@@ -46,7 +46,7 @@ sil-kit-registry
    *  - Notes
       -  * The SIL Kit Registry is packaged in the ``SilKit/bin`` directory.
          * The SIL Kit Registry must be started before other SIL Kit participants,
-           either with this process or using the :cpp:func:`ProvideDomain()<SilKit::Vendor::Vector::ISilKitRegistry::ProvideDomain()>` API.
+           either with this process or using the :cpp:func:`StartListening()<SilKit::Vendor::Vector::ISilKitRegistry::StartListening()>` API.
 
 
 .. _sec:util-system-controller:

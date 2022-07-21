@@ -352,7 +352,7 @@ int main(int argc, char** argv)
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
         // TODO use new config
         registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(config));
-        registry->ProvideDomain(benchmark.registryUri);
+        registry->StartListening(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
         std::vector<std::chrono::nanoseconds> measuredRealDurations;

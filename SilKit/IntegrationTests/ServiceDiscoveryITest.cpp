@@ -41,7 +41,7 @@ TEST_F(ServiceDiscoveryITest, discover_services)
 
     // Registry
     auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->ProvideDomain(registryUri);
+    registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
     auto&& publisher =  SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
@@ -131,7 +131,7 @@ TEST_F(ServiceDiscoveryITest, discover_specific_services)
 
     // Registry
     auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->ProvideDomain(registryUri);
+    registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
     auto&& publisher = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), publisherName, registryUri);

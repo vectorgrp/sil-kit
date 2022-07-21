@@ -156,7 +156,7 @@ protected:
 TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
 {
     auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->ProvideDomain(_registryUri);
+    registry->StartListening(_registryUri);
     ExecuteTest();
 }
 

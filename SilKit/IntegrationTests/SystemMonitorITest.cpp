@@ -51,7 +51,7 @@ TEST_F(SystemMonitorITest, discover_services)
 
     // Registry
     auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->ProvideDomain(registryUri);
+    registry->StartListening(registryUri);
 
     // Create the first participant and register the connect and disconnect callbacks
     auto&& firstParticipant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),

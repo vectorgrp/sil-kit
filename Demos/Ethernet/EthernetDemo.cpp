@@ -134,7 +134,7 @@ int main(int argc, char** argv)
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri] [--async]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri] [--async]" << std::endl
                   << "Use \"EthernetWriter\" or \"EthernetReader\" as <ParticipantName>." << std::endl;
         return -1;
     }
@@ -142,7 +142,7 @@ int main(int argc, char** argv)
     if (argc > 5)
     {
         std::cerr << "Too many arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri] [--async]" << std::endl
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri] [--async]" << std::endl
                   << "Use \"EthernetWriter\" or \"EthernetReader\" as <ParticipantName>." << std::endl;
         return -1;
     }

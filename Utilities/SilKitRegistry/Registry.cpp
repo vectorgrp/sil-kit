@@ -140,7 +140,7 @@ int main(int argc, char** argv)
 
         std::cout << "SIL Kit Registry listening on " << listenUri << std::endl;
         VAsioRegistry registry{ configuration };
-        registry.ProvideDomain(listenUri);
+        registry.StartListening(listenUri);
         
         if (useSignalHandler)
         {

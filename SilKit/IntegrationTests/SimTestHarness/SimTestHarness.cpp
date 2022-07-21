@@ -101,7 +101,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 
     // start registry
     _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
-    _registry->ProvideDomain(_registryUri);
+    _registry->StartListening(_registryUri);
 
     // configure and add participants
     if (!deferParticipantCreation)

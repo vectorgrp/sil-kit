@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri] [--uncoordinated] "
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri] [--uncoordinated] "
                      "[--async]"
                   << std::endl;
         return -1;
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     if (argc > 6)
     {
         std::cerr << "Too many arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [registryUri] [--uncoordinated] "
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri] [--uncoordinated] "
                      "[--async]"
                   << std::endl;
         return -1;

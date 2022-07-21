@@ -49,7 +49,7 @@ protected:
     void SetupRegistry(ProtocolVersion registryVersion)
     {
         _registry = MakeRegistry(registryVersion);
-        _registry->ProvideDomain(registryUri);
+        _registry->StartListening(registryUri);
     }
 
     void SetupParticipants(std::initializer_list<VersionedParticipant> participants)
@@ -60,11 +60,11 @@ protected:
             _participants.emplace_back(std::move(participant));
         }
     }
-    void JoinDomain()
+    void JoinSimulation()
     {
         for (auto&& participant : _participants)
         {
-            participant->JoinSilKitDomain(registryUri);
+            participant->JoinSilKitSimulation(registryUri);
         }
     }
     void ExchangeData()
@@ -120,7 +120,7 @@ TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)
     //SetupParticipants({{"LegacyParticipant", {1,0}}});
     SetupParticipants({VersionedParticipant{"LegacyParticipant", {1, 0}}});
     // do handshake
-    EXPECT_THROW(JoinDomain(), SilKit::ProtocolError);
+    EXPECT_THROW(JoinSimulation(), SilKit::ProtocolError);
 }
 
 TEST_F(ParticipantVersionTest, Registry30_Participant31_Participant30)
@@ -128,7 +128,7 @@ TEST_F(ParticipantVersionTest, Registry30_Participant31_Participant30)
     SetupRegistry({3, 0});
     SetupParticipants(
         {VersionedParticipant{"LegacyParticipant", {3, 0}}, VersionedParticipant{"CurrentParticipant", {3, 1}}});
-    JoinDomain();
+    JoinSimulation();
     ExchangeData();
 }
 
@@ -138,7 +138,7 @@ TEST_F(ParticipantVersionTest, Registry31_Participant31_2xParticipant30)
     SetupParticipants({VersionedParticipant{"LegacyParticipant", {3, 0}},
                        VersionedParticipant{"CurrentParticipant", {3, 1}},
                        VersionedParticipant{"AnotherParticipant", {3, 0}}});
-    JoinDomain();
+    JoinSimulation();
     ExchangeData();
 }
 

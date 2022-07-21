@@ -125,14 +125,6 @@ add_silkit_test(ITestDifferentPeriods
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestSilKitRegistryReusage
-    SOURCES
-      SilKitRegistryReusage.cpp
-    LIBS
-      SilKitMwParticipant
-      SilKitMwVAsio
-)
-
 add_silkit_test(ITestSingleParticipant
     SOURCES
       SingleParticipantITest.cpp

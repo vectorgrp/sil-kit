@@ -84,12 +84,12 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
     auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
-    registry->ProvideDomain(registryUri);
+    registry->StartListening(registryUri);
 
     // Setup Participant for TestController
     auto participant = CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestController");
 
-    participant->JoinSilKitDomain(registryUri);
+    participant->JoinSilKitSimulation(registryUri);
     auto systemController = participant->GetSystemController();
     systemController->SetWorkflowConfiguration({syncParticipantNames});
     auto monitor = participant->GetSystemMonitor();
@@ -99,7 +99,7 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
 
     // Setup Participant for Test Unit
     auto participantTestUnit = CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit");
-    participantTestUnit->JoinSilKitDomain(registryUri);
+    participantTestUnit->JoinSilKitSimulation(registryUri);
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
