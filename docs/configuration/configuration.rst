@@ -23,23 +23,24 @@ referred to as *participant configuration*, ``SilKitConfig.json``, or ``SilKitCo
 it is intended to be used to configure behavior and connections of a simulation participant that was distributed in 
 binary form.
 A participant configuration can be passed to a simulation when a simulation participant is created 
-through :cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>`
+through :cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>`.
 
 Configuration parameters that are specified within the participant configuration override corresponding 
-programmatically defined values, i.e., the ``ParticipantName`` field of the participant configuration overrides the 
-participant name that is provided through the API of the Vector SIL Kit when the participant is created. 
+programmatically defined values. For example, the ``ParticipantName`` field of the participant configuration overrides the 
+participant name that is provided through the API of the Vector SIL Kit when participants are created, namely 
+:cpp:func:`CreateParticipant(..., const std::string& participantName, ...)<SilKit::CreateParticipant()>`.
 
-An ``SilKitConfig.yaml`` begins with some general information about the configuration file itself, followed by several 
+A ``SilKitConfig.yaml`` begins with some general information about the configuration file itself, followed by several 
 subsections for the different services of the Vector SIL Kit.
 
-The outline of a SilKitConfig.yaml file is as follows:
+The outline of a ``SilKitConfig.yaml`` file is as follows:
 
 .. code-block:: yaml
                 
     ---
     "$schema": "./ParticipantConfiguration.schema.json"
     schemaVersion: 1
-    Description: Sample configuration for CAN Demonstrator
+    Description: Sample configuration with all major subsections
     ParticipantName: Participant1
     CanControllers:
     - ...
@@ -109,7 +110,7 @@ Configuration Options
      - Configuration of optional extensions to the Vector SIL Kit and where to find them.
 
    * - :doc:`Middleware<middleware-configuration>`
-     - This optional section can be used to configure Vector VAsio, the middleware running the Vector SIL Kit.
+     - This optional section can be used to configure the middleware running the Vector SIL Kit.
        If this section is omitted, defaults will be used.
 
 

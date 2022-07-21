@@ -10,10 +10,8 @@ Middleware Configuration
 Overview
 --------------------
 
-The Vector SIL Kit is powered by the Vector VAsio middleware. 
+The Vector SIL Kit uses an internal middleware for message exchange. 
 This middleware is open source and included in the sources of the Vector SIL Kit.
-The currently supported middleware is *Boost.Asio* based and was specifically designed for the Vector
-SIL Kit as a transport layer.
 
 The middleware can be configured as follows.
 

@@ -106,6 +106,9 @@ CAN Demo
             # CAN Writer:
             |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanWriter --async
 
+   *  -  Notes
+      -  | \- The writer sends CAN frames at a fixed rate of one frame per simulation step (1ms).
+         | \- Both reader and writer sleep for 1 second per quantum to slow down execution.
 
 Ethernet Demo
 ~~~~~~~~~~~~~
@@ -167,8 +170,8 @@ Ethernet Demo
             |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetWriter --async
 
    *  -  Notes
-      -  | \- The writer sends Ethernet messages at a fixed rate of one message per quantum.
-         | \- Both reader and writer sleep for 1 second per quantum to slow down execution.
+      -  | \- The writer sends Ethernet frames at a fixed rate of one frame per simulation step (1ms).
+         | \- Both reader and writer sleep for 1 second per simulation step to slow down execution.
 
 
 LIN Demo
@@ -216,7 +219,7 @@ LIN Demo
             |SystemController| LinSlave LinMaster
    *  -  Notes
       -  | \- The LIN demo can only run in a synchronized mode.
-         | \- Both Master and Slave sleep for 500 millisecond per simulation task to slow down execution.
+         | \- Both Master and Slave sleep for 500 milliseconds per simulation step to slow down execution.
 
 
 FlexRay Demo

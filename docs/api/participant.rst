@@ -14,14 +14,17 @@ to a simulation is established and the configured participant joins the simulati
 Creating the Participant
 ~~~~~~~~~~~~~~~~~~~~~~~~
 To create an |IParticipant| you have to include the 
-:ref:`silkit/SilKit.hpp<sec:header-silkit-main>` and call the Participant API
+:ref:`silkit/SilKit.hpp<sec:header>` and call the Participant API
 factory function::
 
-    auto config = SilKit::Config::ParticipantConfigurationFromFile("your_config.yaml");
+    auto config = SilKit::Config::ParticipantConfigurationFromFile("my_config.yaml");
     auto participant = SilKit::CreateParticipant(config, "ParticipantName", registryUri);
 
-To take part in the simulation, the Participant needs to be initialized with a proper
-configuration, a participant name and optionally the URI of the registry.
+To take part in the simulation, the participant needs to be initialized with a proper
+configuration, a participant name and optionally the URI of the registry:
+
+.. doxygenfunction:: SilKit::CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig, const std::string &participantName) -> std::unique_ptr<IParticipant>
+.. doxygenfunction:: SilKit::CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig, const std::string &participantName, const std::string &registryUri) -> std::unique_ptr<IParticipant>
 
 .. _sec:iparticipant-api:
 

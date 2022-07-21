@@ -7,8 +7,7 @@ Utilities
    :depth: 1
 
 Running a Vector SIL Kit system is supported by several utilities.
-The registry is a mandatory part of the VAsio middleware -- it implements
-connection and service discovery for participants.
+The registry is a mandatory part of the SIL Kit integrated middleware -- it is needed to establish the connections between simulation participants at the start of a simulation.
 The system monitor and controller are provided for convenience. They implement
 a simulation-wide state tracking and system command handling which is required
 in every simulation. However, using these utilities is not mandatory -- users
@@ -24,8 +23,7 @@ sil-kit-registry
    :stub-columns: 1
 
    *  - Abstract
-      - The Registry enables discovery between SIL Kit participants when using the
-        VAsio middleware. It is mandatory when using the VAsio middleware.
+      - The Registry enables discovery between SIL Kit participants. It is needed for Vector SIL Kit simulations.
 
    *  - Source location
       - ``Utilities/SilKitRegistry``
@@ -137,7 +135,7 @@ sil-kit-system-monitor
    :stub-columns: 1
 
    *  -  Abstract
-      -  The sil-kit-system-monitor visualizes the states of the participants of an
+      -  The sil-kit-system-monitor visualizes the states of the participants of a
          SIL Kit simulation.
    *  -  Source location
       -  ``Utilities/SilKitSystemMonitor``
@@ -157,4 +155,4 @@ sil-kit-system-monitor
             sil-kit-system-monitor
    *  -  Notes
       -  * The distribution package contains the sil-kit-system-monitor in the ``SilKit/bin/`` directory.
-         * The sil-kit-system-monitor represents a passive participant in an SIL Kit system. Thus, it can be (re)started at any time.
+         * The sil-kit-system-monitor represents a passive participant in a SIL Kit system. Thus, it can be (re)started at any time.

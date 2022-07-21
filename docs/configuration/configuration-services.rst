@@ -109,13 +109,13 @@ FlexrayControllers
    * - Name
      - The name of the FlexRay Controller
    * - ClusterParameters
-     - Allows to configure cluster specific settings. (optional)
+     - Allows to configure cluster specific settings. See ParticipantConfiguration.schema.json for a full set of parameters. (optional)
    * - NodeParameters
-     - Allows to configure node specific settings. (optional)
+     - Allows to configure node specific settings. See ParticipantConfiguration.schema.json for a full set of parameters. (optional)
    * - TxBufferConfigurations
      - Allows to configure TXBuffers by specifying "channels" (A, B, AB, None), 
        "slotId", "offset", "repetition", "PPindicator", "headerCrc" 
-       and "transmissionMode" (SingleShot, Continuous). (optional)
+       and "transmissionMode" (SingleShot, Continuous). See ParticipantConfiguration.schema.json for a full set of parameters.(optional)
 
 .. _sec:cfg-participant-data-publishers:
 
@@ -124,7 +124,9 @@ DataPublishers
 
 .. code-block:: yaml
     
-  DataPublishers: []
+  DataPublishers: 
+  - Name: DataPublisher1
+    Topic: SomeTopic1
 
 
 .. list-table:: DataPublisher Configuration
@@ -133,8 +135,10 @@ DataPublishers
 
    * - Property Name
      - Description
-   * - (No fields yet)
-     - 
+   * - Name
+     - The name of the DataPublisher.
+   * - Topic
+     - The topic on which the DataPublisher publishs its information. (optional)
 
 .. _sec:cfg-participant-data-subscribers:
 
@@ -143,7 +147,9 @@ DataSubscribers
 
 .. code-block:: yaml
     
-  DataSubscribers: []
+  DataSubscribers: 
+  - Name: DataSubscriber1
+    Topic: SomeTopic1
 
 
 .. list-table:: DataSubscriber Configuration
@@ -152,8 +158,10 @@ DataSubscribers
 
    * - Property Name
      - Description
-   * - (No fields yet)
-     - 
+   * - Name
+     - The name of the DataSubscriber.
+   * - Topic
+     - The topic on which the DataSubscriber publishs its information. (optional)
 
 .. _sec:cfg-participant-rpc-servers:
 
@@ -163,7 +171,9 @@ RpcServers
 
 .. code-block:: yaml
     
-  RpcServers: []
+  RpcServers:
+  - Name: RpcServer1
+    FunctionName: SomeFunction1
 
 
 .. list-table:: RPC Server Configuration
@@ -172,8 +182,10 @@ RpcServers
 
    * - Property Name
      - Description
-   * - (No fields yet)
-     - 
+   * - Name
+     - The name of the RpcServer.
+   * - FunctionName
+     - The function name on which the RpcServer offers its service. (optional)
 
 
 .. _sec:cfg-participant-rpc-clients:
@@ -183,7 +195,9 @@ RpcClients
 
 .. code-block:: yaml
     
-  DataPublishers: []
+  RpcClients: 
+  - Name: RpcClient1
+    FunctionName: SomeFunction1
 
 
 .. list-table:: RPC Clients Configuration
@@ -192,5 +206,7 @@ RpcClients
 
    * - Property Name
      - Description
-   * - (No fields yet)
-     - 
+   * - Name
+     - The name of the RpcClient.
+   * - FunctionName
+     - The function name to which the RpcClient wants to connect to. (optional)
