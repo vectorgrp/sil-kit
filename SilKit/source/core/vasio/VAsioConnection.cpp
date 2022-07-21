@@ -439,9 +439,12 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
     auto serviceDescriptor = service.GetServiceDescriptor();
     serviceDescriptor.SetParticipantName(announcement.peerInfo.participantName);
     service.SetServiceDescriptor(serviceDescriptor);
-    for (auto&& receiver : _participantAnnouncementReceivers)
     {
-        receiver(from, announcement);
+        std::unique_lock<decltype(_participantAnnouncementReceiversMutex)> lock{_participantAnnouncementReceiversMutex};
+        for (auto&& receiver : _participantAnnouncementReceivers)
+        {
+            receiver(from, announcement);
+        }
     }
     AddParticipantToLookup(announcement.peerInfo.participantName);
 
@@ -977,6 +980,7 @@ void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessag
 
 void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback)
 {
+    std::unique_lock<decltype(_participantAnnouncementReceiversMutex)> lock{_participantAnnouncementReceiversMutex};
     _participantAnnouncementReceivers.emplace_back(std::move(callback));
 }
 
