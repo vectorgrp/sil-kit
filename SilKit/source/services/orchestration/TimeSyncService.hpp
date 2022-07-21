@@ -51,8 +51,8 @@ public:
     void SetSimulationStepHandler(
         std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task,
         std::chrono::nanoseconds initialStepSize) override;
-    void SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize) override;
-    void CompleteSimulationTask() override;
+    void SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize) override;
+    void CompleteSimulationStep() override;
 
     void SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
                                   std::chrono::nanoseconds initialStepSize) override;
@@ -70,7 +70,7 @@ public:
     // Used by Policies
     template <class MsgT>
     void SendMsg(MsgT&& msg) const;
-    void ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
+    void ExecuteSimStep(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
     void InitializeTimeSyncPolicy(bool isSynchronized);
@@ -112,7 +112,7 @@ private:
     bool _isSynchronized{false};
     bool _timeSyncConfigured{false};
 
-    SimTaskT _simTask;
+    SimulationStepT _simTask;
     std::future<void> _asyncResult;
 
     Util::PerformanceMonitor _execTimeMonitor;

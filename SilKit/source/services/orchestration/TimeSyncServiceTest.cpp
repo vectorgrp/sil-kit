@@ -126,7 +126,7 @@ TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
     timeSyncService.ReceiveMsg(&endpoint, task);
     ASSERT_EQ(numAsyncTaskCalled, 1)
         << "SimulationStepHandlerAsync should only be called once"
-        << " until completed with a call to CompleteSimulationTask().";
+        << " until completed with a call to CompleteSimulationStep().";
 }
 
 TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
@@ -140,22 +140,22 @@ TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
 
     auto task = makeTask(0ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationTask();
+    timeSyncService.CompleteSimulationStep();
 
     task = makeTask(1ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationTask();
+    timeSyncService.CompleteSimulationStep();
 
     task = makeTask(2ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationTask();
+    timeSyncService.CompleteSimulationStep();
     ASSERT_EQ(numAsyncTaskCalled, 3)
-        << "SimulationStepHandlerAsync should be called in lockstep with calls to CompleteSimulationTask().";
+        << "SimulationStepHandlerAsync should be called in lockstep with calls to CompleteSimulationStep().";
 }
 
 TEST_F(TimeSyncServiceTest, async_simtask_mismatching_number_of_complete_calls)
 {
-    // What happens when the User calls CompleteSimulationTask() multiple times?
+    // What happens when the User calls CompleteSimulationStep() multiple times?
     PrepareLifecycle();
 
     auto numAsyncTaskCalled{0};
@@ -165,21 +165,21 @@ TEST_F(TimeSyncServiceTest, async_simtask_mismatching_number_of_complete_calls)
 
     auto task = makeTask(0ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationTask();
-    timeSyncService.CompleteSimulationTask();
+    timeSyncService.CompleteSimulationStep();
+    timeSyncService.CompleteSimulationStep();
 
     task = makeTask(1ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationTask();
-    timeSyncService.CompleteSimulationTask();
+    timeSyncService.CompleteSimulationStep();
+    timeSyncService.CompleteSimulationStep();
 
     task = makeTask(2ms);
     timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationTask();
-    timeSyncService.CompleteSimulationTask();
+    timeSyncService.CompleteSimulationStep();
+    timeSyncService.CompleteSimulationStep();
 
     ASSERT_EQ(numAsyncTaskCalled, 3)
-        << "Calling too many CompleteSimulationTask() should not wreak havoc"; 
+        << "Calling too many CompleteSimulationStep() should not wreak havoc"; 
 }
 
 } // namespace

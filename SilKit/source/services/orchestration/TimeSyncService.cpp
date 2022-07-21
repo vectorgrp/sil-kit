@@ -75,7 +75,7 @@ public:
     virtual void Initialize() = 0;
     virtual void RequestInitialStep() = 0;
     virtual void RequestNextStep() = 0;
-    virtual void SetSimTaskCompleted() = 0;
+    virtual void SetSimStepCompleted() = 0;
     virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
 };
 
@@ -87,7 +87,7 @@ public:
     void Initialize() override {}
     void RequestInitialStep() override {}
     void RequestNextStep() override {}
-    void SetSimTaskCompleted() override {}
+    void SetSimStepCompleted() override {}
     void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
 };
 
@@ -119,10 +119,10 @@ public:
         });
     }
 
-    void SetSimTaskCompleted() override
+    void SetSimStepCompleted() override
     {
-        // after completing the SimTask in Async mode, reset the _executingSimtask guard
-        _executingSimtask = false;
+        // after completing the SimTask in Async mode, reset the _isExecutingSimStep guard
+        _isExecutingSimStep = false;
     }
 
     void RequestNextStep() override
@@ -187,15 +187,15 @@ private:
                 return;
         }
 
-        // when running in Async mode, set the _executingSimtask guard
-        // which will be cleared in CompleteSimulationTask()
+        // when running in Async mode, set the _isExecutingSimStep guard
+        // which will be cleared in CompleteSimulationStep()
         if(IsAsync())
         {
             auto test = false;
             auto newval = true;
-            if(!_executingSimtask.compare_exchange_strong(test, newval))
+            if(!_isExecutingSimStep.compare_exchange_strong(test, newval))
             {
-                //_executingSimtask was not modified, it was already true
+                //_isExecutingSimStep was not modified, it was already true
                 return;
             }
         }
@@ -204,23 +204,23 @@ private:
         _configuration->_currentTask = _configuration->_myNextTask;
         _configuration->_myNextTask.timePoint =
             _configuration->_currentTask.timePoint + _configuration->_currentTask.duration;
-        _controller.ExecuteSimTask(_configuration->_currentTask.timePoint, _configuration->_currentTask.duration);
+        _controller.ExecuteSimStep(_configuration->_currentTask.timePoint, _configuration->_currentTask.duration);
         _controller.AwaitNotPaused();
 
         if (IsSync())
         {
-            //NB: CompleteSimulationTask does invoke this explicitly on the API caller's request:
+            //NB: CompleteSimulationStep does invoke this explicitly on the API caller's request:
             RequestNextStep();
         }
         else
         {
-            // Do nothing until a user calls CompleteSimulationTask()
+            // Do nothing until a user calls CompleteSimulationStep()
             // This ensures that only one async SimTask is executed until completed by the user
             return;
         }
     }
 
-    std::atomic<bool> _executingSimtask{false};
+    std::atomic<bool> _isExecutingSimStep{false};
     TimeSyncService& _controller;
     Core::IParticipantInternal* _participant;
     TimeConfiguration* _configuration;
@@ -304,7 +304,7 @@ void TimeSyncService::SetSimulationStepHandler(
     _timeConfiguration->SetStepDuration(initialStepSize);
 }
 
-void TimeSyncService::SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize)
+void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize)
 {
     _simTask = std::move(task);
     _timeConfiguration->SetBlockingMode(false);
@@ -378,7 +378,7 @@ void TimeSyncService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& c
     }
 }
 
-void TimeSyncService::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
+void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
 {
     SILKIT_ASSERT(_simTask);
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
@@ -400,10 +400,10 @@ void TimeSyncService::ExecuteSimTask(std::chrono::nanoseconds timePoint, std::ch
     _waitTimeMonitor.StartMeasurement();
 }
 
-void TimeSyncService::CompleteSimulationTask()
+void TimeSyncService::CompleteSimulationStep()
 {
-    _logger->Debug("CompleteSimulationTask: calling _timeSyncPolicy->RequestNextStep");
-    _timeSyncPolicy->SetSimTaskCompleted();
+    _logger->Debug("CompleteSimulationStep: calling _timeSyncPolicy->RequestNextStep");
+    _timeSyncPolicy->SetSimStepCompleted();
     _timeSyncPolicy->RequestNextStep();
 }
 

@@ -99,7 +99,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_lockstep)
                 done = true;
             }
             numActiveSimtasks--;
-            async->CompleteSimulationTask();
+            async->CompleteSimulationStep();
         }
     }};
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout"
@@ -145,7 +145,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
         if (now < expectedTime)
         {
             //Only allow time progress up to expectedTime
-            async->CompleteSimulationTask();
+            async->CompleteSimulationStep();
         }
     },1ms);
 
@@ -182,7 +182,7 @@ auto BackgroundThread(SilKit::Services::Orchestration::ITimeSyncService* parti)
         else
         {
             std::cout << "Calling CompleteSimulationTask from background thread" << std::endl;
-            parti->CompleteSimulationTask();
+            parti->CompleteSimulationStep();
             startupPromise = decltype(startupPromise){}; // reset for next iteration
             nextIterPromise.set_value();
         }
@@ -272,7 +272,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_different_periods)
         {
             asyncParticipant->GetOrCreateSystemController()->Stop();
         }
-        async->CompleteSimulationTask();
+        async->CompleteSimulationStep();
         },
     periodFactor * 1ms);
     // validate that they are called approximately equally often
@@ -310,9 +310,9 @@ TEST(AsyncSimTaskITest, test_async_simtask_multiple_completion_calls)
         {
             asyncParticipant->GetOrCreateSystemController()->Stop();
         }
-        async->CompleteSimulationTask();
-        async->CompleteSimulationTask();
-        async->CompleteSimulationTask();
+        async->CompleteSimulationStep();
+        async->CompleteSimulationStep();
+        async->CompleteSimulationStep();
         },
         periodFactor * 1ms);
     // validate that they are called approximately equally often

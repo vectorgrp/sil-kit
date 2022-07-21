@@ -15,7 +15,7 @@ namespace Orchestration {
 class ITimeSyncService
 {
 public:
-    using SimTaskT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
+    using SimulationStepT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
 public:
     virtual ~ITimeSyncService() = default;
 public:
@@ -26,23 +26,23 @@ public:
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationStepHandler(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
+    virtual void SetSimulationStepHandler(SimulationStepT task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Set the task to be executed with each grant / tick
      *
      * Can be changed at runtime. Execution context depends on the run type.
      * Execution will perform one simulation step at a time.
-     * CompleteSimulationTask is required to signal completion of the simulation step.
+     * CompleteSimulationStep is required to signal completion of the simulation step.
      *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
+    virtual void SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Signal that the current simulation task is finished and the next simulation step can be processed.
      *
      * This method should only be used after calling SetSimulationStepHandlerAsync.
      * Otherwise, undefined runtime behavior will result.
      */
-    virtual void CompleteSimulationTask() = 0;
+    virtual void CompleteSimulationStep() = 0;
 
     //[[deprecated]]
     virtual void SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,

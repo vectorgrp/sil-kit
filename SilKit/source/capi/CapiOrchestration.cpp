@@ -275,7 +275,7 @@ SilKit_ReturnCode SilKit_TimeSyncService_CompleteSimulationStep(SilKit_TimeSyncS
     CAPI_ENTER
     {
         auto* timeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(ctimeSyncService);
-        timeSyncService->CompleteSimulationTask();
+        timeSyncService->CompleteSimulationStep();
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

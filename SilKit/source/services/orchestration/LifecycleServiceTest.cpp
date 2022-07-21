@@ -35,10 +35,10 @@ public:
     using TimeSyncService::TimeSyncService;
 
 public:
-    MOCK_METHOD(void, SetSimulationStepHandler, (SimTaskT task, std::chrono::nanoseconds initialStepSize), (override));
-    MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimTaskT task, std::chrono::nanoseconds initialStepSize),
+    MOCK_METHOD(void, SetSimulationStepHandler, (SimulationStepT task, std::chrono::nanoseconds initialStepSize), (override));
+    MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimulationStepT task, std::chrono::nanoseconds initialStepSize),
                 (override));
-    MOCK_METHOD(void, CompleteSimulationTask, (), (override));
+    MOCK_METHOD(void, CompleteSimulationStep, (), (override));
     MOCK_METHOD(void, SetSimulationStepHandler,
                 (std::function<void(std::chrono::nanoseconds now)> task, std::chrono::nanoseconds initialStepSize),
                 (override));
