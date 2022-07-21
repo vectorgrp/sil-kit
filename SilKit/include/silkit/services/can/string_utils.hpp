@@ -15,7 +15,7 @@ namespace SilKit {
 namespace Services {
 namespace Can {
 
-inline std::string to_string(CanFrame::CanFrameFlags flags);
+inline std::string to_string(CanFrameFlag flags);
 inline std::string to_string(CanControllerState state);
 inline std::string to_string(CanErrorState state);
 inline std::string to_string(CanTransmitStatus status);
@@ -24,7 +24,7 @@ inline std::string to_string(const CanFrame& msg);
 inline std::string to_string(const CanFrameEvent& msg);
 inline std::string to_string(const CanFrameTransmitEvent& ack);
 
-inline std::ostream& operator<<(std::ostream& out, CanFrame::CanFrameFlags flags);
+inline std::ostream& operator<<(std::ostream& out, CanFrameFlag flag);
 inline std::ostream& operator<<(std::ostream& out, CanControllerState state);
 inline std::ostream& operator<<(std::ostream& out, CanErrorState state);
 inline std::ostream& operator<<(std::ostream& out, CanTransmitStatus status);
@@ -37,7 +37,7 @@ inline std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& 
 //  Inline Implementations
 // ================================================================================
 
-std::string to_string(CanFrame::CanFrameFlags flags)
+std::string to_string(CanFrameFlag flags)
 {
     std::stringstream outStream;
     outStream << flags;
@@ -113,17 +113,20 @@ std::string to_string(const CanFrameTransmitEvent& ack)
     return outStream.str();
 }
 
-std::ostream& operator<<(std::ostream& out, CanFrame::CanFrameFlags flags)
+std::ostream& operator<<(std::ostream& out, CanFrameFlag flag)
 {
-    out << "["
-        << (flags.ide ? "ide," : "")
-        << (flags.rtr ? "rtr," : "")
-        << (flags.fdf ? "fdf," : "")
-        << (flags.brs ? "brs," : "")
-        << (flags.esi ? "esi" : "")
-        << "]";
+    switch (flag)
+    {
+    case CanFrameFlag::Ide: return out << "ide";
+    case CanFrameFlag::Rtr: return out << "rtr";
+    case CanFrameFlag::Fdf: return out << "fdf";
+    case CanFrameFlag::Brs: return out << "brs";
+    case CanFrameFlag::Esi: return out << "esi";
+    case CanFrameFlag::Xlf: return out << "xlf";
+    case CanFrameFlag::Sec: return out << "sec";
+    }
 
-    return out;
+    return out << "unknown(" << static_cast<uint32_t>(flag) << ")";
 }
 
 std::ostream& operator<<(std::ostream& out, CanControllerState state)
@@ -143,11 +146,41 @@ std::ostream& operator<<(std::ostream& out, CanTransmitStatus status)
 
 std::ostream& operator<<(std::ostream& out, const CanFrame& msg)
 {
-    return out
-        << "Can::CanFrame{"
+    out << "Can::CanFrame{"
         << ", canId=" << msg.canId
-        << ", flags=" << msg.flags
+        << ", flags=";
+
+    auto printFlag = [firstFlag = true, &out, &msg](const CanFrameFlag flag) mutable {
+        if (!(msg.flags & static_cast<CanFrameFlagMask>(flag)))
+        {
+            return;
+        }
+
+        if (firstFlag)
+        {
+            firstFlag = false;
+        }
+        else
+        {
+            out << ",";
+        }
+
+        out << flag;
+    };
+
+    // print all flags (including potentially unknown ones)
+    out << '[';
+    for (uint32_t bit = 0; bit != 32u; ++bit)
+    {
+        printFlag(static_cast<CanFrameFlag>(BIT(bit)));
+    }
+    out << ']';
+
+    return out
         << ", dlc=" << static_cast<uint32_t>(msg.dlc)
+        << ", sdt=" << static_cast<uint32_t>(msg.sdt)
+        << ", vcid=" << static_cast<uint32_t>(msg.vcid)
+        << ", af=" << static_cast<uint32_t>(msg.af)
         << ", data=[" << Util::AsHexString(msg.dataField).WithSeparator(" ").WithMaxLength(8)
         << "], data.size=" << msg.dataField.size() << "}";
 }
@@ -156,8 +189,7 @@ std::ostream& operator<<(std::ostream& out, const CanFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "Can::CanFrameEvent{txId=" << msg.transmitId
-        << ", userContext=" << msg.userContext
+        << "Can::CanFrameEvent{userContext=" << msg.userContext
         << ", direction=" << msg.direction
         << ", frame=" << msg.frame
         << " @" << timestamp.count() << "ms}";
@@ -167,8 +199,7 @@ std::ostream& operator<<(std::ostream& out, const CanFrameTransmitEvent& status)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(status.timestamp);
     return out
-        << "Can::CanTtransmitAcknowledge{txId=" << status.transmitId
-        << ", status=" << status.status
+        << "Can::CanTtransmitAcknowledge{status=" << status.status
         << " @" << timestamp.count() << "ms}";
 }
 

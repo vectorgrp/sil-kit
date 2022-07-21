@@ -52,6 +52,9 @@ public:
      * \param fdRate Baud rate for CAN FD messages given in bps; valid
      * range: 0 to 16'000'000
      *
+     * \param xlRate Baud rate for CAN XL messages given in bps; valid
+     * range: 0 to 16'000'000
+     *
      * NB: The baud rate of a CAN controller must be set before using it.
      * 
      * NB: In a detailed simulation, the baud rate is used to calculate
@@ -59,7 +62,7 @@ public:
      * configuration and interoperation of the connected controllers.
      * 
      */
-    virtual void SetBaudRate(uint32_t rate, uint32_t fdRate) = 0;
+    virtual void SetBaudRate(uint32_t rate, uint32_t fdRate, uint32_t xlRate) = 0;
 
     /*! \brief Reset the CAN controller
      *
@@ -102,7 +105,7 @@ public:
      * \return Unique TX identifier to relate the request to following
      * CanFrameTransmitEvent messages.
      */
-    virtual auto SendFrame(const CanFrame& msg, void* userContext = nullptr) -> CanTxId = 0;
+    virtual void SendFrame(const CanFrame& msg, void* userContext = nullptr) = 0;
 
     /*! \brief Register a callback for CAN message reception
      *

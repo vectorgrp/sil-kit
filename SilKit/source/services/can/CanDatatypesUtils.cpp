@@ -6,27 +6,20 @@ namespace SilKit {
 namespace Services {
 namespace Can {
 
-bool operator==(const CanFrame::CanFrameFlags& lhs, const CanFrame::CanFrameFlags& rhs)
-{
-    return lhs.ide == rhs.ide
-        && lhs.rtr == rhs.rtr
-        && lhs.fdf == rhs.fdf
-        && lhs.brs == rhs.brs
-        && lhs.esi == rhs.esi;
-}
-
 bool operator==(const CanFrame& lhs, const CanFrame& rhs)
 {
     return lhs.canId == rhs.canId 
         && lhs.flags == rhs.flags 
-        && lhs.dlc == rhs.dlc 
+        && lhs.dlc == rhs.dlc
+        && lhs.sdt == rhs.sdt
+        && lhs.vcid == rhs.vcid
+        && lhs.af == rhs.af
         && Util::ItemsAreEqual(lhs.dataField, rhs.dataField);
 }
 
 bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs)
 {
-    return lhs.transmitId == rhs.transmitId 
-        && lhs.timestamp == rhs.timestamp 
+    return lhs.timestamp == rhs.timestamp
         && lhs.frame == rhs.frame
         && lhs.userContext == rhs.userContext;
     ;
@@ -34,8 +27,7 @@ bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs)
 
 bool operator==(const CanFrameTransmitEvent& lhs, const CanFrameTransmitEvent& rhs)
 {
-    return lhs.transmitId == rhs.transmitId
-        && lhs.status == rhs.status && lhs.userContext == rhs.userContext;
+    return lhs.status == rhs.status && lhs.userContext == rhs.userContext;
 }
 
 bool operator==(const CanSetControllerMode& lhs, const CanSetControllerMode& rhs)

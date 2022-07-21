@@ -37,8 +37,7 @@ void FrameTransmitHandler(const CanFrameTransmitEvent& ack, Logging::ILogger* lo
 {
     std::stringstream buffer;
     buffer << ">> " << ack.status
-           << " for CAN Message with transmitId=" << ack.transmitId
-           << " timestamp=" << ack.timestamp;
+           << " for CAN Message with timestamp=" << ack.timestamp;
     logger->Info(buffer.str());
 }
 
@@ -56,11 +55,8 @@ void SendFrame(ICanController* controller, Logging::ILogger* logger)
 {
     CanFrame canFrame {};
     canFrame.canId = 3;
-    canFrame.flags.ide = 0; // Identifier Extension
-    canFrame.flags.rtr = 0; // Remote Transmission Request
-    canFrame.flags.fdf = 1; // FD Format Indicator
-    canFrame.flags.brs = 1; // Bit Rate Switch  (for FD Format only)
-    canFrame.flags.esi = 0; // Error State indicator (for FD Format only)
+    canFrame.flags |= static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf) // FD Format Indicator
+                      | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
 
     static int msgId = 0;
     std::stringstream payloadBuilder;
@@ -71,11 +67,11 @@ void SendFrame(ICanController* controller, Logging::ILogger* logger)
     std::copy(payloadStr.begin(), payloadStr.end(), std::back_inserter(payload));
 
     canFrame.dataField = payload;
-    canFrame.dlc = canFrame.dataField.size();
+    canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
 
-    auto transmitId = controller->SendFrame(std::move(canFrame));
+    controller->SendFrame(std::move(canFrame));
     std::stringstream buffer;
-    buffer << "<< CAN Message sent with transmitId=" << transmitId;
+    buffer << "<< CAN Message sent";
     logger->Info(buffer.str());
 }
 
@@ -157,7 +153,7 @@ int main(int argc, char** argv)
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
                 std::cout << "Communication ready for " << participantName << std::endl;
-                canController->SetBaudRate(10'000, 1'000'000);
+                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
                 canController->Start();
             });
 
@@ -207,7 +203,7 @@ int main(int argc, char** argv)
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
                 std::cout << "Communication ready for " << participantName << std::endl;
-                canController->SetBaudRate(10'000, 1'000'000);
+                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
                 canController->Start();
             });
 

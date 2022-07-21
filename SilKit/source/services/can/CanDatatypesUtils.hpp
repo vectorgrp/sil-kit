@@ -10,7 +10,6 @@ namespace SilKit {
 namespace Services {
 namespace Can {
 
-bool operator==(const CanFrame::CanFrameFlags& lhs, const CanFrame::CanFrameFlags& rhs);
 bool operator==(const CanFrame& lhs, const CanFrame& rhs);
 bool operator==(const CanFrameEvent& lhs, const CanFrameEvent& rhs);
 bool operator==(const CanFrameTransmitEvent& lhs, const CanFrameTransmitEvent& rhs);

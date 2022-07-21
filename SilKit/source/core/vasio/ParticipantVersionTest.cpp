@@ -99,7 +99,7 @@ protected:
             SilKit::Services::Can::CanFrame frame;
             frame.canId = 5;
             frame.dataField = SilKit::Util::MakeSpan(frameDataField);
-            frame.dlc = frame.dataField.size();
+            frame.dlc = static_cast<uint16_t>(frame.dataField.size());
             sendCan->SendFrame(frame);
         }
         auto waitResult = isDone.wait_for(100ms);

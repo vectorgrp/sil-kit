@@ -43,3 +43,5 @@ add_silkit_test(TestSimCanController
 )
 
 add_silkit_test(TestSimCan_Serdes  SOURCES CanSerdesTest.cpp LIBS SilKitInternal SilKitSimCan)
+
+add_silkit_test(TestSimCan_StringUtils SOURCES CanStringUtilsTest.cpp LIBS SilKitInternal SilKitSimCan)

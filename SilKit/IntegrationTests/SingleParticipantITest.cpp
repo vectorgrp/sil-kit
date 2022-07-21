@@ -27,12 +27,12 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-auto AnAckWithTxIdAndCanId(CanTxId transmitId, uint32_t canId) -> testing::Matcher<const CanFrameTransmitEvent&>
+auto AnAckWithCanIdAndUserContext(uint32_t canId, void* userContext) -> testing::Matcher<const CanFrameTransmitEvent&>
 {
     using namespace testing;
     return AllOf(
-        Field(&CanFrameTransmitEvent::transmitId, transmitId),
-        Field(&CanFrameTransmitEvent::canId, canId)
+        Field(&CanFrameTransmitEvent::canId, canId),
+        Field(&CanFrameTransmitEvent::userContext, userContext)
     );
 }
 
@@ -91,9 +91,9 @@ protected:
                 CanFrame msg;
                 msg.canId = 1;
                 msg.dataField = expectedData;
-                msg.dlc = msg.dataField.size();
+                msg.dlc = static_cast<uint16_t>(msg.dataField.size());
 
-                canController->SendFrame(std::move(msg));
+                canController->SendFrame(std::move(msg), (void*)(static_cast<uintptr_t>(numSent + 1)));
                 numSent++;
                 std::this_thread::sleep_for(100ms);
             }
@@ -108,12 +108,12 @@ protected:
         auto* canWriter = testHarness.GetParticipant("CanWriter");
         SetupWriter(canWriter);
 
-        for (auto index = 1u; index <= testMessages.size(); index++)
+        for (uintptr_t index = 1u; index <= testMessages.size(); index++)
         {
-            EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(index, 1))).Times(1);
+            EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)index))).Times(1);
         }
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)uintptr_t(0)))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndUserContext(1, (void*)uintptr_t(6)))).Times(0);
 
         EXPECT_TRUE(testHarness.Run(30s))
             << "TestHarness timeout occurred!"

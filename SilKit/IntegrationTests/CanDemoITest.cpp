@@ -81,7 +81,7 @@ TEST_F(SimTestHarnessITest, can_demo)
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << "---   " << participantName << ": Init called, setting baud rate and starting";
-        canController->SetBaudRate(10'000, 1'000'000);
+        canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
         canController->Start();
       });
 
@@ -143,7 +143,7 @@ TEST_F(SimTestHarnessITest, can_demo)
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << participantName << ": Init called, setting baud rate and starting";
-        canController->SetBaudRate(10'000, 1'000'000);
+        canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
         canController->Start();
       });
 
@@ -198,7 +198,7 @@ TEST_F(SimTestHarnessITest, can_demo)
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
         Log() << participantName << ": Init called, setting baud rate and starting";
-        canController->SetBaudRate(10'000, 1'000'000);
+        canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
         canController->Start();
       });
 

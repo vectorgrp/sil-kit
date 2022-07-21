@@ -53,14 +53,14 @@ public:
     // Public interface methods
     //
     // ICanController
-    void SetBaudRate(uint32_t rate, uint32_t fdRate) override;
+    void SetBaudRate(uint32_t rate, uint32_t fdRate, uint32_t xlRate) override;
 
     void Reset() override;
     void Start() override;
     void Stop() override;
     void Sleep() override;
 
-    auto SendFrame(const CanFrame& msg, void* userContext = nullptr) -> CanTxId override;
+    void SendFrame(const CanFrame& msg, void* userContext = nullptr) override;
 
     HandlerId AddFrameHandler(FrameHandler handler,
                               DirectionMask directionMask = (DirectionMask)TransmitDirection::RX
@@ -144,8 +144,6 @@ private:
     auto IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IServiceEndpoint* from) const -> bool;
 
-    inline auto MakeTxId() -> CanTxId;
-
     template <typename MsgT>
     inline void SendMsg(MsgT&& msg);
 
@@ -158,10 +156,9 @@ private:
     Core::ServiceDescriptor _serviceDescriptor;
     Tracer _tracer;
 
-    CanTxId _canTxId = 0;
     CanControllerState _controllerState = CanControllerState::Uninit;
     CanErrorState _errorState = CanErrorState::NotAvailable;
-    CanConfigureBaudrate _baudRate = { 0, 0 };
+    CanConfigureBaudrate _baudRate = { 0, 0, 0 };
 
     template <typename MsgT>
     using FilteredCallbacks = Util::SynchronizedHandlers<FilteredCallback<MsgT>>;
@@ -177,10 +174,6 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-auto CanController::MakeTxId() -> CanTxId
-{
-    return ++_canTxId;
-}
 
 void CanController::AddSink(ITraceMessageSink* sink)
 {

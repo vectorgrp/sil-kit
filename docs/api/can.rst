@@ -29,7 +29,7 @@ CAN Service API
 
 .. |CanControllerState| replace:: :cpp:enum:`CanControllerState<SilKit::Services::Can::CanControllerState>`
 .. |CanErrorState| replace:: :cpp:enum:`CanErrorState<SilKit::Services::Can::CanErrorState>`
-.. |CanFrameFlags| replace:: :cpp:class:`CanFrame::CanFrameFlags<SilKit::Services::Can::CanFrame::CanFrameFlags>`
+.. |CanFrameFlag| replace:: :cpp:class:`CanFrame::CanFrameFlag<SilKit::Services::Can::CanFrame::CanFrameFlag>`
 .. |CanTransmitStatus| replace:: :cpp:enum:`CanTransmitStatus<SilKit::Services::Can::CanTransmitStatus>`
 
 .. |Transmitted| replace:: :cpp:enumerator:`CanTransmitStatus::Transmitted<SilKit::Services::Can::Transmitted>`
@@ -61,7 +61,7 @@ Sending CAN Frames
 ~~~~~~~~~~~~~~~~~~
 
 Data is transfered in the form of a |CanFrame| and received as a |CanFrameEvent|. To send a |CanFrame|, it must be setup 
-with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlags| have to be set::
+with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlag| have to be set::
 
   // Prepare a CAN message with id 0x17
   CanFrame canFrame;

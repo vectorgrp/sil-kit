@@ -13,34 +13,32 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;
 
-    WireCanFrameEvent in;
+    WireCanFrameEvent in{};
     WireCanFrameEvent out;
 
     std::string payload{"TEST"};
-    in.transmitId = 5;
     in.timestamp = 13ns;
     in.frame.canId = 7;
-    in.frame.flags.ide = 1;
-    in.frame.flags.rtr = 0;
-    in.frame.flags.fdf = 1;
-    in.frame.flags.brs = 0;
-    in.frame.flags.esi = 1;
+    in.frame.flags |=
+        static_cast<CanFrameFlagMask>(CanFrameFlag::Ide) | static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
+        | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec);
     in.frame.dlc = 5;
+    in.frame.sdt = 123;
+    in.frame.vcid = 89;
+    in.frame.af = 0xCAFECAFE;
     in.frame.dataField = std::vector<uint8_t>{payload.begin(), payload.end()};
     in.userContext = (void*)((size_t)0xcafecafe);
 
     Serialize(buffer, in);
     Deserialize(buffer, out);
 
-    EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.frame.canId, out.frame.canId);
-    EXPECT_EQ(in.frame.flags.ide, out.frame.flags.ide);
-    EXPECT_EQ(in.frame.flags.rtr, out.frame.flags.rtr);
-    EXPECT_EQ(in.frame.flags.fdf, out.frame.flags.fdf);
-    EXPECT_EQ(in.frame.flags.brs, out.frame.flags.brs);
-    EXPECT_EQ(in.frame.flags.esi, out.frame.flags.esi);
+    EXPECT_EQ(in.frame.flags, out.frame.flags);
     EXPECT_EQ(in.frame.dlc, out.frame.dlc);
+    EXPECT_EQ(in.frame.sdt, out.frame.sdt);
+    EXPECT_EQ(in.frame.vcid, out.frame.vcid);
+    EXPECT_EQ(in.frame.af, out.frame.af);
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.dataField, out.frame.dataField));
     EXPECT_EQ(in.userContext, out.userContext);
 }
@@ -53,7 +51,6 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
     CanFrameTransmitEvent in;
     CanFrameTransmitEvent out;
 
-    in.transmitId = 5;
     in.timestamp = 13ns;
     in.status = CanTransmitStatus::Transmitted;
     in.userContext = (void*)((size_t) 0xcafecafe );
@@ -61,7 +58,6 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
     Serialize(buffer, in);
     Deserialize(buffer, out);
 
-    EXPECT_EQ(in.transmitId, out.transmitId);
     EXPECT_EQ(in.timestamp, out.timestamp);
     EXPECT_EQ(in.status, out.status);
     EXPECT_EQ(in.userContext, out.userContext);

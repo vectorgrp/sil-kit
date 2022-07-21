@@ -1,6 +1,7 @@
 // Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include <iostream>
+#include <unordered_map>
 #include <cstdlib>
 
 #include "silkit/services/all.hpp"
@@ -28,12 +29,37 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-auto AnAckWithTxIdAndCanId(CanTxId transmitId, uint32_t canId) -> testing::Matcher<const CanFrameTransmitEvent&>
+auto MakeUserContext(uint16_t controllerId, uint16_t frameCounter) -> void*
+{
+    return reinterpret_cast<void*>(static_cast<uintptr_t>(controllerId) << 16 | static_cast<uintptr_t>(frameCounter));
+}
+
+bool CheckUserContextContainsControllerId(void* userContext, uint16_t controllerId)
+{
+    return ((reinterpret_cast<uintptr_t>(userContext) >> 16) & 0xFFFF) == controllerId;
+}
+
+bool CheckUserContextContainsFrameCounter(void* userContext, uint16_t frameCounter)
+{
+    return (reinterpret_cast<uintptr_t>(userContext) & 0xFFFF) == frameCounter;
+}
+
+MATCHER_P(UserContextContainsFrameCounter, frameCounter, "") {
+    if (CheckUserContextContainsFrameCounter(arg, frameCounter))
+    {
+        return true;
+    }
+
+    *result_listener << "user context pointer " << arg << " does not contains the frame counter " << frameCounter;
+    return false;
+}
+
+auto AnAckWithCanIdAndFrameCounter(uint32_t canId, uint16_t frameCounter) -> testing::Matcher<const CanFrameTransmitEvent&>
 {
     using namespace testing;
     return AllOf(
-        Field(&CanFrameTransmitEvent::transmitId, transmitId),
-        Field(&CanFrameTransmitEvent::canId, canId)
+        Field(&CanFrameTransmitEvent::canId, canId),
+        Field(&CanFrameTransmitEvent::userContext, UserContextContainsFrameCounter(frameCounter))
     );
 }
 
@@ -63,10 +89,13 @@ protected:
     {
 
         auto* controller = writer->Participant()->CreateCanController("CAN1", "CAN1");
+        controllerToId.emplace(controller, static_cast<uint16_t>(controllerToId.size()));
+        ASSERT_LT(controllerToId[controller], std::numeric_limits<uint16_t>::max());
+
         controller->AddFrameTransmitHandler(
             [this](ICanController* ctrl, const CanFrameTransmitEvent& ack) {
             callbacks.AckHandler(ack);
-            EXPECT_EQ(reinterpret_cast<void*>(ctrl), ack.userContext);
+            EXPECT_TRUE(CheckUserContextContainsControllerId(ack.userContext, controllerToId[ctrl]));
         });
 
         auto* lifecycleService = writer->GetOrCreateLifecycleServiceWithTimeSync();
@@ -90,9 +119,12 @@ protected:
                     CanFrame msg;
                     msg.canId = 1;
                     msg.dataField = expectedData;
-                    msg.dlc = msg.dataField.size();
+                    msg.dlc = static_cast<uint16_t>(msg.dataField.size());
 
-                    controller->SendFrame(msg, reinterpret_cast<void*>(controller));
+                    const auto frameCounter = numSent + 1;
+                    ASSERT_LT(numSent + 1, std::numeric_limits<uint16_t>::max());
+
+                    controller->SendFrame(msg, MakeUserContext(controllerToId[controller], static_cast<uint16_t>(frameCounter)));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }
@@ -147,16 +179,14 @@ protected:
         auto* canReader2 = testHarness.GetParticipant("CanReader2");
         SetupReader(canReader2);
 
-
-        for (auto index = 1u; index <= testMessages.size(); index++)
+        for (uint16_t index = 1u; index <= static_cast<uint16_t>(testMessages.size()); index++)
         {
-            EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(index, 1))).Times(1);
+            EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndFrameCounter(1, index))).Times(1);
         }
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(0, 1))).Times(0);
-        EXPECT_CALL(callbacks, AckHandler(AnAckWithTxIdAndCanId(6, 1))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndFrameCounter(1, 0))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(AnAckWithCanIdAndFrameCounter(1, 6))).Times(0);
 
-
-        EXPECT_TRUE(testHarness.Run(30s)) 
+        EXPECT_TRUE(testHarness.Run(30s))
             << "TestHarness timeout occurred!"
             << " numSent=" << numSent
             << " numReceived=" << numReceived
@@ -181,6 +211,8 @@ protected:
     std::vector<std::string> syncParticipantNames;
 
     std::vector<TestMessage> testMessages;
+
+    std::unordered_map<ICanController *, uint16_t> controllerToId;
 
     unsigned numSent{0},
         numReceived{0},

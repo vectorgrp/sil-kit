@@ -20,30 +20,30 @@ Changed
 ~~~~~~~
 
 - Renamed SimulationTask to SimulationStep and added the initial step size (formerly period length) as a parameter
-  
+
   - ``IntegrationBus/include/silkit/services/orchestration/ITimeSyncService.hpp``
-  
+
     + old:
-  
+
       .. code-block:: c++
 
         virtual void SetSimulationTask(SimTaskT task) = 0;
         virtual void SetSimulationTaskAsync(SimTaskT task) = 0;
 
     + new:
-  
+
       .. code-block:: c++
 
         virtual void SetSimulationStepHandler(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
         virtual void SetSimulationStepHandlerAsync(SimTaskT task, std::chrono::nanoseconds initialStepSize) = 0;
 
 - Changed access to services that are meant to exist only once (SystemController, SystemMonitor, Logger, LifecycleService)
-  
+
   - Methods to access these services were renamed from ``Get[Service]()`` to ``Create[Service]()``
   - ``IntegrationBus/include/silkit/participant/IParticipant.hpp``
-  
+
     + old:
-  
+
       .. code-block:: c++
 
         virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
@@ -52,7 +52,7 @@ Changed
         virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 
     + new:
-  
+
       .. code-block:: c++
 
         virtual auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
@@ -60,44 +60,53 @@ Changed
         virtual auto CreateSystemController() -> Services::Orchestration::ISystemController* = 0;
         virtual auto CreateLogger() -> Services::Logging::ILogger* = 0;
 
-  - The changed methods can only be called once per participant. Further calls throw a runtime_error.  
-  
-- Instead of setting the time synchronization behavior when starting the lifecycle (``ILifecycleService::StartLifecycleNoTimeSync`` or ``ILifecycleService::StartLifecycleWithTimeSync``), the synchronization behavior is now determined when creating the lifecycle service 
-  
+  - The changed methods can only be called once per participant. Further calls throw a runtime_error.
+
+- Instead of setting the time synchronization behavior when starting the lifecycle (``ILifecycleService::StartLifecycleNoTimeSync`` or ``ILifecycleService::StartLifecycleWithTimeSync``), the synchronization behavior is now determined when creating the lifecycle service
+
   - ``IntegrationBus/include/silkit/participant/IParticipant.hpp``
-  
+
     + old:
-    
+
       .. code-block:: c++
-         
+
         virtual auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
-           
+
     + new:
-  
+
       .. code-block:: c++
 
         virtual auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* = 0;
         virtual auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* = 0;
 
   - ``IntegrationBus/include/silkit/services/orchestration/ILifecycleService.hpp``
-  
+
     + old:
-    
+
       .. code-block:: c++
-         
+
         virtual auto StartLifecycleNoSyncTime(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState> = 0;
         virtual auto StartLifecycleWithSyncTime(LifecycleConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
-           
-           
+
+
     + new:
-  
+
       .. code-block:: c++
-        
+
         virtual auto StartLifecycle(LifecycleConfiguration startConfiguration ) -> std::future<ParticipantState> = 0;
 
   - The new create method returns interfaces that only comprises available methods
     -  ``ILifecycleServiceNoTimeSync::SetStartingHandler()`` without time synchronization
     -  ``ILifecycleServiceWithTimeSync::GetTimeSyncService()`` with time synchronization
+
+- C\+\+: Extended the ``CanFrame`` with the required fields for CAN XL.
+  The flags bitfield was replaced with an unsigned integer field (``uint32_t``) and a ``CanFrameFlag`` enumeration.
+
+- C\+\+: Extended the ``ICanController::SetBaudRate`` function with the CAN XL data bit rate.
+
+- C: Extended the ``SilKit_CanFrame`` with the required fields for CAN XL.
+
+- C: Extended the ``SilKit_CanController_SetBaudRate`` function with the CAN XL data bit rate.
 
 Removed
 ~~~~~~~

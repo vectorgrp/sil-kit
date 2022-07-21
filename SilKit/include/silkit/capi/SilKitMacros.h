@@ -3,6 +3,12 @@
 #pragma once
 
 #ifdef __cplusplus
+#include <cstdint>
+#else
+#include <stdint.h>
+#endif
+
+#ifdef __cplusplus
 #define SILKIT_BEGIN_DECLS extern "C" {
 #define SILKIT_END_DECLS }
 #else
@@ -36,7 +42,7 @@
 #endif  
 
 // Utilities for more readable definitions
-#ifndef BIT 
-#    define BIT(X) (1 << (X))
+#ifndef BIT
+#    define BIT(X) (UINTMAX_C(1) << (X))
 #endif
 

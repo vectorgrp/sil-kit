@@ -25,8 +25,7 @@ using namespace std::chrono_literals;
 // basically the same as the normal == operator, but it doesn't compare timestamps
 bool Matches(const SilKit::Services::Can::WireCanFrameEvent& lhs, const SilKit::Services::Can::WireCanFrameEvent& rhs)
 {
-    return lhs.transmitId == rhs.transmitId 
-        && lhs.frame.canId == rhs.frame.canId
+    return lhs.frame.canId == rhs.frame.canId
         && lhs.frame.flags == rhs.frame.flags
         && lhs.frame.dlc == rhs.frame.dlc
         && SilKit::Util::ItemsAreEqual(lhs.frame.dataField, rhs.frame.dataField)
@@ -58,20 +57,23 @@ protected:
             messageBytes.resize(messageString.size());
             std::copy(messageString.begin(), messageString.end(), messageBytes.begin());
 
+            using SilKit::Services::Can::CanFrameFlag;
+            using SilKit::Services::Can::CanFrameFlagMask;
+
             auto& canmsg = _testMessages[index].expectedMsg;
             canmsg.frame.canId = index;
             canmsg.frame.dataField = messageBytes;
-            canmsg.frame.dlc = canmsg.frame.dataField.AsSpan().size();
-            canmsg.frame.flags = SilKit::Services::Can::CanFrame::CanFrameFlags{ 1,0,1,0,1 };
+            canmsg.frame.dlc = static_cast<uint16_t>(canmsg.frame.dataField.AsSpan().size());
+            canmsg.frame.flags |=
+                static_cast<CanFrameFlagMask>(CanFrameFlag::Ide) | static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
+                | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec);
             canmsg.timestamp = 1s;
-            canmsg.transmitId = index + 1;
             canmsg.direction = SilKit::Services::TransmitDirection::RX;
             canmsg.userContext = (void*)((size_t)index+1);
 
             auto& canack = _testMessages[index].expectedAck;
             canack.canId = index;
             canack.timestamp = 1s;
-            canack.transmitId = index + 1;
             canack.status = SilKit::Services::Can::CanTransmitStatus::Transmitted;
             canack.userContext = (void*)((size_t)index+1);
         }

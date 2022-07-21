@@ -84,10 +84,11 @@ void CanController::SendMsg(MsgT&& msg)
 // Public API + Helpers
 //------------------------
 
-void CanController::SetBaudRate(uint32_t rate, uint32_t fdRate)
+void CanController::SetBaudRate(uint32_t rate, uint32_t fdRate, uint32_t xlRate)
 {
     _baudRate.baudRate = rate;
     _baudRate.fdBaudRate = fdRate;
+    _baudRate.xlBaudRate = xlRate;
 
     SendMsg(_baudRate);
 }
@@ -127,15 +128,13 @@ void CanController::ChangeControllerMode(CanControllerState state)
     SendMsg(mode);
 }
 
-auto CanController::SendFrame(const CanFrame& frame, void* userContext) -> CanTxId
+void CanController::SendFrame(const CanFrame& frame, void* userContext)
 {
     WireCanFrameEvent wireCanFrameEvent{};
-    wireCanFrameEvent.transmitId = MakeTxId();
     wireCanFrameEvent.frame = MakeWireCanFrame(frame);
     wireCanFrameEvent.userContext = userContext;
 
     SendMsg(wireCanFrameEvent);
-    return wireCanFrameEvent.transmitId;
 }
 
 //------------------------

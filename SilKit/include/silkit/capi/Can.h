@@ -11,14 +11,16 @@
 
 SILKIT_BEGIN_DECLS
 
-/*! The available flags within the flags member of a Can frame.
+/*! The available flags within the flags member of a CAN frame.
 */
 typedef uint32_t SilKit_CanFrameFlag;
-#define SilKit_CanFrameFlag_ide (((SilKit_CanFrameFlag) 1) << 9) //!< Identifier Extension
-#define SilKit_CanFrameFlag_rtr (((SilKit_CanFrameFlag) 1) << 4) //!< Remote Transmission Request
-#define SilKit_CanFrameFlag_fdf (((SilKit_CanFrameFlag) 1) << 12) //!< FD Format Indicator
-#define SilKit_CanFrameFlag_brs (((SilKit_CanFrameFlag) 1) << 13) //!< Bit Rate Switch  (for FD Format only)
-#define SilKit_CanFrameFlag_esi (((SilKit_CanFrameFlag) 1) << 14) //!< Error State indicator (for FD Format only)
+#define SilKit_CanFrameFlag_ide ((SilKit_CanFrameFlag)BIT(9)) //!< Identifier Extension
+#define SilKit_CanFrameFlag_rtr ((SilKit_CanFrameFlag)BIT(4)) //!< Remote Transmission Request
+#define SilKit_CanFrameFlag_fdf ((SilKit_CanFrameFlag)BIT(12)) //!< FD Format Indicator
+#define SilKit_CanFrameFlag_brs ((SilKit_CanFrameFlag)BIT(13)) //!< Bit Rate Switch  (for FD Format only)
+#define SilKit_CanFrameFlag_esi ((SilKit_CanFrameFlag)BIT(14)) //!< Error State indicator (for FD Format only)
+#define SilKit_CanFrameFlag_xlf ((SilKit_CanFrameFlag)BIT(15)) //!< XL Format Indicator
+#define SilKit_CanFrameFlag_sec ((SilKit_CanFrameFlag)BIT(16)) //!< Simple Extended Content (for XL Format only)
 
 /*! \brief A CAN frame
     */
@@ -27,7 +29,10 @@ struct SilKit_CanFrame
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     uint32_t id; //!< CAN Identifier
     SilKit_CanFrameFlag flags; //!< CAN Arbitration and Control Field Flags; see SilKit_CanFrameFlag
-    uint8_t dlc; //!< Data Length Code - determined by a network simulator if available
+    uint16_t dlc; //!< Data Length Code - determined by a network simulator if available
+    uint8_t sdt; //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
+    uint32_t af; //!< Acceptance field (for XL Format only)
 
     SilKit_ByteVector data; //!< Data field containing the payload
 };
@@ -67,7 +72,7 @@ typedef int32_t SilKit_CanTransmitStatus;
 struct SilKit_CanFrameTransmitEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
-    void* userContext; //!< Value that was provided by user in corresponding parameter on send of Can frame
+    void* userContext; //!< Value that was provided by user in corresponding parameter on send of CAN frame
     SilKit_NanosecondsTime timestamp; //!< Reception time
     SilKit_CanTransmitStatus status; //!< Status of the CanTransmitRequest
 };
@@ -133,7 +138,7 @@ typedef struct SilKit_CanController SilKit_CanController;
 
 /*! Callback type to indicate that a CanTransmitAcknowledge has been received.
 * \param context The by the user provided context on registration.
-* \param controller The Can controller that received the acknowledge.
+* \param controller The CAN controller that received the acknowledge.
 * \param acknowledge The acknowledge and its data.
 * \param frameTransmitEvent The incoming CAN frame transmit event.
 */
@@ -142,34 +147,34 @@ typedef void (*SilKit_CanFrameTransmitHandler_t)(void* context, SilKit_CanContro
 
 /*! Callback type to indicate that a CanMessage has been received.
 * \param context The by the user provided context on registration.
-* \param controller The Can controller that received the message.
+* \param controller The CAN controller that received the message.
 * \param frameEvent The incoming CAN frame event containing timestamp, transmit ID and referencing the CAN frame itself.
 */
 typedef void (*SilKit_CanFrameHandler_t)(void* context, SilKit_CanController* controller,
                                                SilKit_CanFrameEvent* frameEvent);
 
-/*! Callback type to indicate that the State of the Can Controller has changed.
+/*! Callback type to indicate that the State of the CAN Controller has changed.
 * \param context The by the user provided context on registration.
-* \param controller The Can controller that changed its state.
+* \param controller The CAN controller that changed its state.
 * \param stateChangeEvent The state change event containing timestamp and new state.
 */
 typedef void (*SilKit_CanStateChangeHandler_t)(void* context, SilKit_CanController* controller,
                                              SilKit_CanStateChangeEvent* stateChangeEvent);
 
-/*! Callback type to indicate that the controller Can error state has changed.
+/*! Callback type to indicate that the controller CAN error state has changed.
 * \param context The by the user provided context on registration.
-* \param controller The Can controller that received the message.
+* \param controller The CAN controller that received the message.
 * \param errorStateChangeEvent The error state change event containing timestamp and new error state.
 */
 typedef void (*SilKit_CanErrorStateChangeHandler_t)(void* context, SilKit_CanController* controller,
                                                   SilKit_CanErrorStateChangeEvent* errorStateChangeEvent);
 
 /*! \brief Create a CAN controller at this SIL Kit simulation participant.
- * \param outCanController Pointer that refers to the resulting Can controller (out parameter).
- * \param participant The simulation participant at which the Can controller should be created.
- * \param name The name of the new Can controller.
+ * \param outCanController Pointer that refers to the resulting CAN controller (out parameter).
+ * \param participant The simulation participant at which the CAN controller should be created.
+ * \param name The name of the new CAN controller.
  *
- * The lifetime of the resulting Can controller is directly bound to the lifetime of the simulation participant.
+ * The lifetime of the resulting CAN controller is directly bound to the lifetime of the simulation participant.
  * There is no further cleanup necessary except for destroying the simulation participant at the end of the 
  * simulation.
  * The object returned must not be deallocated using free()!
@@ -223,8 +228,8 @@ typedef SilKit_ReturnCode(*SilKit_CanController_Sleep_t)(SilKit_CanController* c
 * ID and valid flags. The controller
 * must be in the Started state to transmit and receive messages.
 *
-* \param controller The Can controller that should send the Can frame.
-* \param frame The Can frame to transmit.
+* \param controller The CAN controller that should send the CAN frame.
+* \param frame The CAN frame to transmit.
 * \param userContext A user provided context pointer, that is
 * reobtained in the SilKit_CanController_AddFrameTransmitHandler
 * handler.
@@ -236,23 +241,27 @@ typedef SilKit_ReturnCode (*SilKit_CanController_SendFrame_t)(SilKit_CanControll
     void* userContext);
 
 /*! \brief Configure the baud rate of the controller
-*
-* \param controller The Can controller for which the baud rate should be changed.
-*
-* \param rate Baud rate for regular (non FD) CAN messages given
-* in bps; valid range: 0 to 2'000'000
-*
-* \param fdRate Baud rate for CAN FD messages given in bps; valid
-* range: 0 to 16'000'000
-*
-* In a detailed simulation, the baud rate is used to calculate
-* transmission delays of CAN messages and to determine proper
-* configuration and interoperation of the connected controllers.
-*/
-SilKitAPI SilKit_ReturnCode SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, 
-    uint32_t fdRate);
+ *
+ * \param controller The CAN controller for which the baud rate should be changed.
+ *
+ * \param rate Baud rate for regular (non FD) CAN messages given
+ * in bps; valid range: 0 to 2'000'000
+ *
+ * \param fdRate Baud rate for CAN FD messages given in bps; valid
+ * range: 0 to 16'000'000
+ *
+ * \param xlRate Baud rate for CAN XL messages given in bps; valid
+ * range: 0 to 16'000'000
+ *
+ * In a detailed simulation, the baud rate is used to calculate
+ * transmission delays of CAN messages and to determine proper
+ * configuration and interoperation of the connected controllers.
+ */
+SilKitAPI SilKit_ReturnCode SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate,
+    uint32_t fdRate, uint32_t xlRate);
 
-typedef SilKit_ReturnCode(*SilKit_CanController_SetBaudRate_t)(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate);
+typedef SilKit_ReturnCode (*SilKit_CanController_SetBaudRate_t)(SilKit_CanController* controller, uint32_t rate,
+    uint32_t fdRate, uint32_t xlRate);
 
 /*! \brief Register a callback for the TX status of sent CAN messages
 *
@@ -262,7 +271,7 @@ typedef SilKit_ReturnCode(*SilKit_CanController_SetBaudRate_t)(SilKit_CanControl
 * NB: Full support in a detailed simulation. In simple simulation, all
 * messages are automatically positively acknowledged.
 *
-* \param controller The Can controller for which the callback should be registered.
+* \param controller The CAN controller for which the callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on transmit acknowledge.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
@@ -290,9 +299,9 @@ typedef SilKit_ReturnCode (*SilKit_CanController_RemoveFrameTransmitHandler_t)(S
 /*! \brief Register a callback for CAN message reception
 *
 * The registered handler is called when the controller receives a
-* new Can frame.
+* new CAN frame.
 *
-* \param controller The Can controller for which the message callback should be registered.
+* \param controller The CAN controller for which the message callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on reception.
 * \param directionMask A bit mask defining the transmit direction of the messages (rx/tx)
@@ -322,7 +331,7 @@ typedef SilKit_ReturnCode (*SilKit_CanController_RemoveFrameHandler_t)(SilKit_Ca
 * state changes from SilKit_CanControllerState_Uninit to
 * SilKit_CanControllerState_Started.
 *
-* \param controller The Can controller for which the state change callback should be registered.
+* \param controller The CAN controller for which the state change callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on state change.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
@@ -352,7 +361,7 @@ typedef SilKit_ReturnCode (*SilKit_CanController_RemoveStateChangeHandler_t)(Sil
 * should be in state SilKit_CanErrorState_ErrorActive. The states correspond
 * to the error state handling protocol of the CAN specification.
 *
-* \param controller The Can controller for which the error state callback should be registered.
+* \param controller The CAN controller for which the error state callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on error state change.
 * \param outHandlerId The handler identifier that can be used to remove the callback.

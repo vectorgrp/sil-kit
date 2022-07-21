@@ -58,7 +58,6 @@ TEST(CanControllerDetailedSimTest, send_can_message)
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
     WireCanFrameEvent testFrameEvent{};
-    testFrameEvent.transmitId = 1;
 
     EXPECT_CALL(mockParticipant, SendMsg(&canController, testFrameEvent))
         .Times(1);
@@ -135,16 +134,16 @@ TEST(CanControllerDetailedSimTest, set_baudrate)
     canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
     canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
 
-    CanConfigureBaudrate baudrate1 = { 3000, 0 };
-    CanConfigureBaudrate baudrate2 = { 3000, 500000 };
+    CanConfigureBaudrate baudrate1 = { 3000, 0, 0 };
+    CanConfigureBaudrate baudrate2 = { 3000, 500000, 0 };
 
     EXPECT_CALL(mockParticipant, SendMsg(&canController, baudrate1))
         .Times(1);
     EXPECT_CALL(mockParticipant, SendMsg(&canController, baudrate2))
         .Times(1);
 
-    canController.SetBaudRate(baudrate1.baudRate, baudrate1.fdBaudRate);
-    canController.SetBaudRate(baudrate2.baudRate, baudrate2.fdBaudRate);
+    canController.SetBaudRate(baudrate1.baudRate, baudrate1.fdBaudRate, baudrate1.xlBaudRate);
+    canController.SetBaudRate(baudrate2.baudRate, baudrate2.fdBaudRate, baudrate2.xlBaudRate);
 }
 
 TEST(CanControllerDetailedSimTest, receive_new_controller_state)
@@ -207,13 +206,10 @@ TEST(CanControllerDetailedSimTest, receive_ack)
     CanControllerCallbacks callbackProvider;
     canController.AddFrameTransmitHandler(std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
 
-    CanFrame msg;
-    auto txId1 = canController.SendFrame(msg);
-    auto txId2 = canController.SendFrame(msg);
-    ASSERT_NE(txId1, txId2);
+    CanFrame msg{};
 
-    CanFrameTransmitEvent ack1{txId1, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr};
-    CanFrameTransmitEvent ack2{txId2, msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr};
+    CanFrameTransmitEvent ack1{msg.canId, 0ns, CanTransmitStatus::Transmitted, (void *)1};
+    CanFrameTransmitEvent ack2{msg.canId, 0ns, CanTransmitStatus::Transmitted, (void *)2};
 
     EXPECT_CALL(callbackProvider, FrameTransmitHandler(&canController, ack1))
         .Times(1);

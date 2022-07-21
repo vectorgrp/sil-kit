@@ -4,6 +4,7 @@
 
 #include <chrono>
 
+#include "silkit/capi/Can.h"
 #include "silkit/services/datatypes.hpp"
 #include "silkit/util/Span.hpp"
 
@@ -14,7 +15,18 @@ namespace SilKit {
 namespace Services {
 namespace Can {
 
-using CanTxId = uint32_t; //!< Set by the CanController, used for acknowledgements
+using CanFrameFlagMask = uint32_t;
+
+enum class CanFrameFlag : CanFrameFlagMask
+{
+    Ide = SilKit_CanFrameFlag_ide, //!< Identifier Extension
+    Rtr = SilKit_CanFrameFlag_rtr, //!< Remote Transmission Request
+    Fdf = SilKit_CanFrameFlag_fdf, //!< FD Format Indicator
+    Brs = SilKit_CanFrameFlag_brs, //!< Bit Rate Switch  (for FD Format only)
+    Esi = SilKit_CanFrameFlag_esi, //!< Error State indicator (for FD Format only)
+    Xlf = SilKit_CanFrameFlag_xlf, //!< XL Format Indicator
+    Sec = SilKit_CanFrameFlag_sec, //!< Simple Extended Content (for XL Format only)
+};
 
 /*! \brief A CAN Frame
  */
@@ -22,15 +34,14 @@ struct CanFrame
 {
     // CAN frame content
     uint32_t canId; //!< CAN Identifier
-    struct CanFrameFlags
-    {
-        uint8_t ide : 1; //!< Identifier Extension
-        uint8_t rtr : 1; //!< Remote Transmission Request
-        uint8_t fdf : 1; //!< FD Format Indicator
-        uint8_t brs : 1; //!< Bit Rate Switch  (for FD Format only)
-        uint8_t esi : 1; //!< Error State indicator (for FD Format only)
-    } flags; //!< CAN Arbitration and Control Field Flags
-    uint8_t dlc : 4; //!< Data Length Code - determined by a network simulator
+    CanFrameFlagMask flags; //!< CAN Arbitration and Control Field Flags
+    //! \brief Data Length Code - describes the length of the dataField
+    //! The acceptable bit-patterns and their semantics differ between CAN, CAN FD and CAN XL. The user is responsible
+    //! for setting this field correctly. Please consult the CAN specifications for further information.
+    uint16_t dlc;
+    uint8_t sdt; //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
+    uint32_t af; //!< Acceptance field (for XL Format only)
     Util::Span<const uint8_t> dataField; //!< The raw CAN data field
 };
 
@@ -38,7 +49,6 @@ struct CanFrame
  */
 struct CanFrameEvent
 {
-    CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
     std::chrono::nanoseconds timestamp; //!< Send time
     CanFrame frame; //!< The incoming CAN Frame
     TransmitDirection direction; //!< Receive/Transmit direction
@@ -93,6 +103,7 @@ enum class CanErrorState : uint8_t
 };
 
 using  CanTransmitStatusMask = uint16_t;
+
 /*! \brief Transfer status of a CAN node according to CAN specification
  */
 enum class CanTransmitStatus : CanTransmitStatusMask
@@ -122,7 +133,6 @@ enum class CanTransmitStatus : CanTransmitStatusMask
  */
 struct CanFrameTransmitEvent
 {
-    CanTxId transmitId; //!< Identifies the CanTransmitRequest to which this CanFrameTransmitEvent refers to.
     uint32_t canId; //!< Identifies the CAN id to which this CanFrameTransmitEvent refers to.
     std::chrono::nanoseconds timestamp; //!< Timestamp of the CAN acknowledge.
     CanTransmitStatus status; //!< Status of the CanTransmitRequest.

@@ -52,18 +52,12 @@ SilKit_ReturnCode SilKit_CanController_AddFrameHandler(SilKit_CanController* con
                     const SilKit::Services::Can::CanFrameEvent& cppCanFrameEvent) {
                 SilKit_CanFrame frame{};
                 frame.id = cppCanFrameEvent.frame.canId;
-                uint32_t flags = 0;
-                flags |= cppCanFrameEvent.frame.flags.ide ? SilKit_CanFrameFlag_ide : 0;
-                flags |= cppCanFrameEvent.frame.flags.rtr ? SilKit_CanFrameFlag_rtr : 0;
-                flags |= cppCanFrameEvent.frame.flags.fdf ? SilKit_CanFrameFlag_fdf : 0;
-                flags |= cppCanFrameEvent.frame.flags.brs ? SilKit_CanFrameFlag_brs : 0;
-                flags |= cppCanFrameEvent.frame.flags.esi ? SilKit_CanFrameFlag_esi : 0;
-                frame.flags = flags;
+                frame.flags = cppCanFrameEvent.frame.flags;
                 frame.dlc = cppCanFrameEvent.frame.dlc;
-                frame.data = {
-                    (uint8_t*)cppCanFrameEvent.frame.dataField.data(),
-                    (uint32_t)cppCanFrameEvent.frame.dataField.size()
-                };
+                frame.sdt = cppCanFrameEvent.frame.sdt;
+                frame.vcid = cppCanFrameEvent.frame.vcid;
+                frame.af = cppCanFrameEvent.frame.af;
+                frame.data = ToSilKitByteVector(cppCanFrameEvent.frame.dataField);
 
                 SilKit_CanFrameEvent frameEvent{};
                 SilKit_Struct_Init(SilKit_CanFrameEvent, frameEvent);
@@ -200,13 +194,13 @@ SilKit_ReturnCode SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanC
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate)
+SilKit_ReturnCode SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate, uint32_t xlRate)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
     {
         auto canController = reinterpret_cast<SilKit::Services::Can::ICanController*>(controller);
-        canController->SetBaudRate(rate, fdRate);
+        canController->SetBaudRate(rate, fdRate, xlRate);
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -225,14 +219,12 @@ SilKit_ReturnCode SilKit_CanController_SendFrame(SilKit_CanController* controlle
 
         SilKit::Services::Can::CanFrame frame{};
         frame.canId = message->id;
-        frame.flags.ide = message->flags & SilKit_CanFrameFlag_ide ? 1 : 0;
-        frame.flags.rtr = message->flags & SilKit_CanFrameFlag_rtr ? 1 : 0;
-        frame.flags.fdf = message->flags & SilKit_CanFrameFlag_fdf ? 1 : 0;
-        frame.flags.brs = message->flags & SilKit_CanFrameFlag_brs ? 1 : 0;
-        frame.flags.esi = message->flags & SilKit_CanFrameFlag_esi ? 1 : 0;
-
+        frame.flags = message->flags;
         frame.dlc = message->dlc;
-        frame.dataField = std::vector<uint8_t>{message->data.data,  message->data.data + message->data.size};
+        frame.sdt = message->sdt;
+        frame.vcid = message->vcid;
+        frame.af = message->af;
+        frame.dataField = SilKit::Util::ToSpan(message->data);
 
         canController->SendFrame(std::move(frame), transmitContext);
         return SilKit_ReturnCode_SUCCESS;

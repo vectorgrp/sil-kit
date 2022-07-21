@@ -11,36 +11,48 @@ namespace {
 
     MATCHER_P(CanFrameMatcher, controlFrame, "") {
         *result_listener << "matches can frames of the c-api to the cpp api";
-        auto frame2 = controlFrame;
-        SilKit::Services::Can::CanFrame frame;
-        auto frame1 = arg;
-        if (frame1.canId != frame2.id || frame1.dlc != frame2.dlc || frame1.dataField.size() != frame2.data.size) 
+        const SilKit_CanFrame& frame2 = controlFrame;
+        const CanFrame& frame1 = arg;
+        if (frame1.canId != frame2.id || frame1.dlc != frame2.dlc || frame1.dataField.size() != frame2.data.size)
         {
             return false;
         }
         for (size_t i = 0; i < frame1.dataField.size(); i++)
         {
-            if (frame1.dataField[i] != frame2.data.data[i]) {
+            if (frame1.dataField[i] != frame2.data.data[i])
+            {
                 return false;
             }
         }
-        if((frame1.flags.ide != 0) != ((frame2.flags & SilKit_CanFrameFlag_ide) != 0))
+        if (frame1.sdt != frame2.sdt || frame1.vcid != frame2.vcid || frame1.af != frame2.af)
         {
             return false;
         }
-        if ((frame1.flags.fdf != 0) != ((frame2.flags & SilKit_CanFrameFlag_fdf) != 0))
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Ide)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_ide) != 0))
         {
             return false;
         }
-        if ((frame1.flags.brs != 0) != ((frame2.flags & SilKit_CanFrameFlag_brs) != 0))
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_fdf) != 0))
         {
             return false;
         }
-        if ((frame1.flags.esi != 0) != ((frame2.flags & SilKit_CanFrameFlag_esi) != 0))
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Brs)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_brs) != 0))
         {
             return false;
         }
-        if ((frame1.flags.rtr != 0) != ((frame2.flags & SilKit_CanFrameFlag_rtr) != 0))
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Esi)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_esi) != 0))
+        {
+            return false;
+        }
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Rtr)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_rtr) != 0))
+        {
+            return false;
+        }
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Xlf)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_xlf) != 0))
+        {
+            return false;
+        }
+        if (((frame1.flags & static_cast<CanFrameFlagMask>(CanFrameFlag::Sec)) != 0) != ((frame2.flags & SilKit_CanFrameFlag_sec) != 0))
         {
             return false;
         }
@@ -50,20 +62,20 @@ namespace {
     class MockCanController : public SilKit::Services::Can::ICanController
     {
     public:
-        MOCK_METHOD(void, SetBaudRate, (uint32_t rate, uint32_t fdRate));
-        MOCK_METHOD(void, Reset, ());
-        MOCK_METHOD(void, Start, ());
-        MOCK_METHOD(void, Stop, ());
-        MOCK_METHOD(void, Sleep, ());
-        MOCK_METHOD(CanTxId,SendFrame, (const CanFrame&, void*));
-        MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHandler, (FrameHandler, SilKit::Services::DirectionMask));
-        MOCK_METHOD(void, RemoveFrameHandler, (SilKit::Services::HandlerId));
-        MOCK_METHOD(SilKit::Services::HandlerId, AddStateChangeHandler, (StateChangeHandler));
-        MOCK_METHOD(void, RemoveStateChangeHandler, (SilKit::Services::HandlerId));
-        MOCK_METHOD(SilKit::Services::HandlerId, AddErrorStateChangeHandler, (ErrorStateChangeHandler));
-        MOCK_METHOD(void, RemoveErrorStateChangeHandler, (SilKit::Services::HandlerId));
-        MOCK_METHOD(SilKit::Services::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler, CanTransmitStatusMask));
-        MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId));
+        MOCK_METHOD(void, SetBaudRate, (uint32_t rate, uint32_t fdRate, uint32_t xlRate), (override));
+        MOCK_METHOD(void, Reset, (), (override));
+        MOCK_METHOD(void, Start, (), (override));
+        MOCK_METHOD(void, Stop, (), (override));
+        MOCK_METHOD(void, Sleep, (), (override));
+        MOCK_METHOD(void, SendFrame, (const CanFrame&, void*), (override));
+        MOCK_METHOD(SilKit::Services::HandlerId, AddFrameHandler, (FrameHandler, SilKit::Services::DirectionMask), (override));
+        MOCK_METHOD(void, RemoveFrameHandler, (SilKit::Services::HandlerId), (override));
+        MOCK_METHOD(SilKit::Services::HandlerId, AddStateChangeHandler, (StateChangeHandler), (override));
+        MOCK_METHOD(void, RemoveStateChangeHandler, (SilKit::Services::HandlerId), (override));
+        MOCK_METHOD(SilKit::Services::HandlerId, AddErrorStateChangeHandler, (ErrorStateChangeHandler), (override));
+        MOCK_METHOD(void, RemoveErrorStateChangeHandler, (SilKit::Services::HandlerId), (override));
+        MOCK_METHOD(SilKit::Services::HandlerId, AddFrameTransmitHandler, (FrameTransmitHandler, CanTransmitStatusMask), (override));
+        MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId), (override));
     };
 
     void FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* /*ack*/)
@@ -112,8 +124,8 @@ namespace {
                                               "NetworkName");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-        EXPECT_CALL(mockController, SetBaudRate(123,456)).Times(testing::Exactly(1));
-        returnCode = SilKit_CanController_SetBaudRate((SilKit_CanController*)&mockController, 123, 456);
+        EXPECT_CALL(mockController, SetBaudRate(123, 456, 789)).Times(testing::Exactly(1));
+        returnCode = SilKit_CanController_SetBaudRate((SilKit_CanController*)&mockController, 123, 456, 789);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
         EXPECT_CALL(mockController, Start()).Times(testing::Exactly(1));
@@ -228,7 +240,7 @@ namespace {
         SilKit_ReturnCode returnCode;
         SilKit_HandlerId handlerId;
 
-        returnCode = SilKit_CanController_SetBaudRate(nullptr, 123, 456);
+        returnCode = SilKit_CanController_SetBaudRate(nullptr, 123, 456, 789);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
         returnCode = SilKit_CanController_Start(nullptr);

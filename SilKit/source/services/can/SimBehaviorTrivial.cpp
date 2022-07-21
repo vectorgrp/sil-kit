@@ -71,7 +71,6 @@ void SimBehaviorTrivial::SendMsg(WireCanFrameEvent&& canFrameEvent)
         CanFrameTransmitEvent ack{};
         ack.canId = canFrameEvent.frame.canId;
         ack.status = CanTransmitStatus::Transmitted;
-        ack.transmitId = canFrameEvent.transmitId;
         ack.userContext = canFrameEvent.userContext;
         ack.timestamp = now;
 

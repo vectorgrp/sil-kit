@@ -18,8 +18,14 @@ struct WireCanFrame
 {
     // CAN frame content
     uint32_t canId; //!< CAN Identifier
-    CanFrame::CanFrameFlags flags; //!< CAN Arbitration and Control Field Flags
-    uint8_t dlc : 4; //!< Data Length Code - determined by the Network Simulator
+    uint32_t flags; //!< CAN Arbitration and Control Field Flags
+    //! \brief Data Length Code - describes the length of the dataField
+    //! The acceptable bit-patterns and their semantics differ between CAN, CAN FD and CAN XL. The user is responsible
+    //! for setting this field correctly. Please consult the CAN specifications for further information.
+    uint16_t dlc;
+    uint8_t sdt; //!< SDU type - describes the structure of the frames Data Field content (for XL Format only)
+    uint8_t vcid; //!< Virtual CAN network ID (for XL Format only)
+    uint32_t af; //!< Acceptance field (for XL Format only)
     Util::SharedVector<uint8_t> dataField; //!< The raw CAN data field
 };
 
@@ -30,7 +36,6 @@ inline auto MakeWireCanFrame(const CanFrame& canFrame) -> WireCanFrame;
  */
 struct WireCanFrameEvent
 {
-    CanTxId transmitId; //!< Set by the CanController, used for acknowledgements
     std::chrono::nanoseconds timestamp; //!< Send time
     WireCanFrame frame; //!< The incoming CAN Frame
     TransmitDirection direction; //!< Receive/Transmit direction
@@ -55,7 +60,9 @@ struct CanConfigureBaudrate
 {
     uint32_t baudRate; //!< Specifies the baud rate of the controller in bps (range 0..2000000).
     uint32_t
-        fdBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN FD(range 0..16000000).
+        fdBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN FD (range 0..16000000).
+    uint32_t
+        xlBaudRate; //!< Specifies the data segment baud rate of the controller in bps for CAN XL (range 0..16000000).
 };
 
 /*! \brief The CAN controller mode, sent to the simulator
@@ -87,24 +94,25 @@ inline std::ostream& operator<<(std::ostream& out, const CanSetControllerMode& m
 
 auto ToCanFrame(const WireCanFrame& wireCanFrame) -> CanFrame
 {
-    return {wireCanFrame.canId, wireCanFrame.flags, wireCanFrame.dlc, wireCanFrame.dataField.AsSpan()};
+    return {wireCanFrame.canId, wireCanFrame.flags, wireCanFrame.dlc, wireCanFrame.sdt, wireCanFrame.vcid,
+            wireCanFrame.af, wireCanFrame.dataField.AsSpan()};
 }
 
 auto MakeWireCanFrame(const CanFrame& canFrame) -> WireCanFrame
 {
-    return {canFrame.canId, canFrame.flags, canFrame.dlc, canFrame.dataField};
+    return {canFrame.canId, canFrame.flags, canFrame.dlc, canFrame.sdt, canFrame.vcid, canFrame.af, canFrame.dataField};
 }
 
 auto ToCanFrameEvent(const WireCanFrameEvent& wireCanFrameEvent) -> CanFrameEvent
 {
-    return {wireCanFrameEvent.transmitId, wireCanFrameEvent.timestamp, ToCanFrame(wireCanFrameEvent.frame),
-            wireCanFrameEvent.direction, wireCanFrameEvent.userContext};
+    return {wireCanFrameEvent.timestamp, ToCanFrame(wireCanFrameEvent.frame), wireCanFrameEvent.direction,
+            wireCanFrameEvent.userContext};
 }
 
 auto MakeWireCanFrameEvent(const CanFrameEvent& canFrameEvent) -> WireCanFrameEvent
 {
-    return {canFrameEvent.transmitId, canFrameEvent.timestamp, MakeWireCanFrame(canFrameEvent.frame),
-            canFrameEvent.direction, canFrameEvent.userContext};
+    return {canFrameEvent.timestamp, MakeWireCanFrame(canFrameEvent.frame), canFrameEvent.direction,
+            canFrameEvent.userContext};
 }
 
 std::string to_string(const WireCanFrame& msg)

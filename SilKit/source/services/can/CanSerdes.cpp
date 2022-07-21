@@ -11,11 +11,14 @@ namespace Can {
 
 SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireCanFrameEvent& msg)
 {
-    buffer << msg.transmitId
+    buffer
         << msg.timestamp
         << msg.frame.canId
-        << *reinterpret_cast<const uint8_t*>(&msg.frame.flags)
+        << msg.frame.flags
         << msg.frame.dlc
+        << msg.frame.sdt
+        << msg.frame.vcid
+        << msg.frame.af
         << msg.frame.dataField
         << msg.direction
         << msg.userContext
@@ -25,26 +28,24 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
 
 SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireCanFrameEvent& msg)
 {
-    uint8_t flags;
-    uint8_t dlc;
-    buffer >> msg.transmitId
+    buffer
         >> msg.timestamp
         >> msg.frame.canId
-        >> flags
-        >> dlc
+        >> msg.frame.flags
+        >> msg.frame.dlc
+        >> msg.frame.sdt
+        >> msg.frame.vcid
+        >> msg.frame.af
         >> msg.frame.dataField
         >> msg.direction
         >> msg.userContext
         ;
-    *reinterpret_cast<uint8_t*>(&msg.frame.flags) = flags;
-    msg.frame.dlc = dlc;
     return buffer;
 }
 
 SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanFrameTransmitEvent& ack)
 {
-    buffer << ack.transmitId
-           << ack.canId
+    buffer << ack.canId
            << ack.timestamp
            << ack.status
            << ack.userContext;
@@ -53,8 +54,7 @@ SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, con
 
 SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanFrameTransmitEvent& ack)
 {
-    buffer >> ack.transmitId
-           >> ack.canId
+    buffer >> ack.canId
            >> ack.timestamp
            >> ack.status
            >> ack.userContext;
@@ -80,14 +80,16 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Can
 SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CanConfigureBaudrate& msg)
 {
     buffer << msg.baudRate
-           << msg.fdBaudRate;
+           << msg.fdBaudRate
+           << msg.xlBaudRate;
     return buffer;
 }
 
 SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CanConfigureBaudrate& msg)
 {
     buffer >> msg.baudRate
-           >> msg.fdBaudRate;
+           >> msg.fdBaudRate
+           >> msg.xlBaudRate;
     return buffer;
 }
 

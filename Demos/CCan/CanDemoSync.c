@@ -80,8 +80,8 @@ void CommunicationReadyCallback(void* context, SilKit_LifecycleService* cbPartic
     printf(">> CommunicationReadyCallback of with context=%i\n", tc->someInt);
 
     /* Set baud rate and start the controllers. We omitted the return value check for brevity.*/
-    (void)SilKit_CanController_SetBaudRate(canController, 10000u, 1000000u);
-    (void)SilKit_CanController_SetBaudRate(canController2, 10000u, 1000000u);
+    (void)SilKit_CanController_SetBaudRate(canController, 10000u, 1000000u, 2000000u);
+    (void)SilKit_CanController_SetBaudRate(canController2, 10000u, 1000000u, 2000000u);
     (void)SilKit_CanController_Start(canController);
     (void)SilKit_CanController_Start(canController2);
 }
