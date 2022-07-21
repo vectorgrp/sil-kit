@@ -3,6 +3,8 @@
 
 #include "TimeProvider.hpp"
 
+#include <mutex>
+
 using namespace std::chrono_literals;
 namespace SilKit {
 namespace Services {
@@ -20,6 +22,8 @@ struct ProviderBase : ITimeProvider
         : _name{std::move(name)}
     {
     }
+
+    virtual ~ProviderBase() = default;
 
     virtual auto Now() const -> std::chrono::nanoseconds override
     {
@@ -157,6 +161,8 @@ void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timePro
 {
     const auto isSynchronized = _currentProvider->IsSynchronized();
 
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
+
     switch (timeProviderKind)
     {
     case Orchestration::TimeProviderKind::NoSync:
@@ -170,6 +176,7 @@ void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timePro
         break;
     default: break;
     }
+
     _currentProvider->SetSynchronized(isSynchronized);
 }
 

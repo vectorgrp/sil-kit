@@ -5,6 +5,7 @@
 #include <chrono>
 #include <string>
 #include <memory>
+#include <mutex>
 
 #include "ITimeProvider.hpp"
 #include "Timer.hpp"
@@ -33,7 +34,8 @@ public:
 
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) override;
 
-private:
+private: //Members
+    mutable std::mutex _mutex;
     std::unique_ptr<ITimeProvider> _currentProvider;
 };
 
@@ -44,30 +46,43 @@ private:
 
 auto TimeProvider::Now() const -> std::chrono::nanoseconds
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     return _currentProvider->Now();
 }
+
 auto TimeProvider::TimeProviderName() const -> const std::string&
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     return _currentProvider->TimeProviderName();
 }
+
 HandlerId TimeProvider::AddNextSimStepHandler(NextSimStepHandlerT handler)
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     return _currentProvider->AddNextSimStepHandler(std::move(handler));
 }
+
 void TimeProvider::RemoveNextSimStepHandler(HandlerId handlerId)
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     _currentProvider->RemoveNextSimStepHandler(handlerId);
 }
+
 void TimeProvider::SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     _currentProvider->SetTime(now, duration);
 }
+
 void TimeProvider::SetSynchronized(bool isSynchronized)
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     _currentProvider->SetSynchronized(isSynchronized);
 }
+
 bool TimeProvider::IsSynchronized() const
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     return _currentProvider->IsSynchronized();
 }
 
