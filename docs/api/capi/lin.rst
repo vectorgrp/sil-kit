@@ -5,13 +5,13 @@ LIN C API
    :local:
    :depth: 3
 
-The Lin API for the C language provides communication in a Lin-Bus master/slave-architecture. 
+The LIN API for the C language provides communication in a LIN-Bus master/slave-architecture. 
 The functionality is analogous to the C++ API described in :ref:`sec:lin`.
   
-Lin Controller
+LIN Controller
 ~~~~~~~~~~~~~~
 
-**A Lin controller is created with the following function:**
+**A LIN controller is created with the following function:**
 
 .. doxygenfunction:: SilKit_LinController_Create
 
@@ -21,9 +21,11 @@ Lin Controller
 
 **The following set of functions can be used to add and remove event handlers on the controller:**
 
+.. doxygenfunction:: SilKit_LinController_AddLinSlaveConfigurationHandler
 .. doxygenfunction:: SilKit_LinController_AddFrameStatusHandler
 .. doxygenfunction:: SilKit_LinController_AddGoToSleepHandler
 .. doxygenfunction:: SilKit_LinController_AddWakeupHandler
+.. doxygenfunction:: SilKit_LinController_RemoveLinSlaveConfigurationHandler
 .. doxygenfunction:: SilKit_LinController_RemoveFrameStatusHandler
 .. doxygenfunction:: SilKit_LinController_RemoveGoToSleepHandler
 .. doxygenfunction:: SilKit_LinController_RemoveWakeupHandler
@@ -39,6 +41,7 @@ Lin Controller
 .. doxygenfunction:: SilKit_LinController_GoToSleepInternal
 .. doxygenfunction:: SilKit_LinController_Wakeup
 .. doxygenfunction:: SilKit_LinController_WakeupInternal
+.. doxygenfunction:: SilKit_LinController_GetSlaveConfiguration
 
 Data Structures
 ~~~~~~~~~~~~~~~
@@ -48,11 +51,15 @@ Data Structures
    :members:
 .. doxygenstruct:: SilKit_LinFrameResponse
    :members:
+.. doxygenstruct:: SilKit_LinSlaveConfiguration
+   :members:
 .. doxygenstruct:: SilKit_LinFrameStatusEvent
    :members:
 .. doxygenstruct:: SilKit_LinWakeupEvent
    :members:
 .. doxygenstruct:: SilKit_LinGoToSleepEvent
+   :members:
+.. doxygenstruct:: SilKit_LinSlaveConfigurationEvent
    :members:
 
 Enumerations and Typedefs
@@ -71,3 +78,4 @@ Enumerations and Typedefs
 .. doxygentypedef:: SilKit_LinFrameStatusHandler_t
 .. doxygentypedef:: SilKit_LinGoToSleepHandler_t
 .. doxygentypedef:: SilKit_LinWakeupHandler_t
+.. doxygentypedef:: SilKit_LinSlaveConfigurationHandler_t

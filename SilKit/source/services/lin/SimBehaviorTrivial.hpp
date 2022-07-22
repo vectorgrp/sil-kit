@@ -30,6 +30,10 @@ public:
     void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) override;
     void SendMsg(LinControllerStatusUpdate&& statusUpdate) override;
 
+    void ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header) override;
+
+    void UpdateTxBuffer(const LinFrame& frame) override;
+
     void GoToSleep() override;
     void Wakeup() override;
     auto CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame) -> LinFrameStatus override;
@@ -40,6 +44,8 @@ private:
 
     template <typename MsgT>
     void SendMsgImpl(MsgT&& msg);
+
+    void SendErrorTransmissionOnHeaderRequest(int numResponses, LinFrame frame);
 
     Core::IParticipantInternal* _participant{nullptr};
     LinController* _parentController{nullptr};

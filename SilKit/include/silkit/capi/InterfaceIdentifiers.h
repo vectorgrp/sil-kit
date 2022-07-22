@@ -168,31 +168,37 @@ typedef struct
 #define SilKit_FlexrayTxBufferConfig_STRUCT_VERSION        SK_ID_MAKE(Flexray, SilKit_FlexrayTxBufferConfig)
 #define SilKit_FlexrayTxBufferUpdate_STRUCT_VERSION        SK_ID_MAKE(Flexray, SilKit_FlexrayTxBufferUpdate)
 
-// Lin
+// LIN
 
-// Lin data type IDs
+// LIN data type IDs
 #define SilKit_LinFrame_DATATYPE_ID 1
 #define SilKit_LinFrameResponse_DATATYPE_ID 2
 #define SilKit_LinControllerConfig_DATATYPE_ID 3
 #define SilKit_LinFrameStatusEvent_DATATYPE_ID 4
 #define SilKit_LinGoToSleepEvent_DATATYPE_ID 5
 #define SilKit_LinWakeupEvent_DATATYPE_ID 6
+#define SilKit_LinSlaveConfigurationEvent_DATATYPE_ID 7
+#define SilKit_LinSlaveConfiguration_DATATYPE_ID 8
 
-// Lin data type versions
+// LIN data type versions
 #define SilKit_LinFrame_VERSION 1
 #define SilKit_LinFrameResponse_VERSION 1
 #define SilKit_LinControllerConfig_VERSION 1
 #define SilKit_LinFrameStatusEvent_VERSION 1
 #define SilKit_LinGoToSleepEvent_VERSION 1
 #define SilKit_LinWakeupEvent_VERSION 1
+#define SilKit_LinSlaveConfigurationEvent_VERSION 1
+#define SilKit_LinSlaveConfiguration_VERSION 1
 
-// Lin make versioned IDs
+// LIN make versioned IDs
 #define SilKit_LinFrame_STRUCT_VERSION                     SK_ID_MAKE(Lin, SilKit_LinFrame)
 #define SilKit_LinFrameResponse_STRUCT_VERSION             SK_ID_MAKE(Lin, SilKit_LinFrameResponse)
 #define SilKit_LinControllerConfig_STRUCT_VERSION          SK_ID_MAKE(Lin, SilKit_LinControllerConfig)
 #define SilKit_LinFrameStatusEvent_STRUCT_VERSION          SK_ID_MAKE(Lin, SilKit_LinFrameStatusEvent)
 #define SilKit_LinGoToSleepEvent_STRUCT_VERSION            SK_ID_MAKE(Lin, SilKit_LinGoToSleepEvent)
 #define SilKit_LinWakeupEvent_STRUCT_VERSION               SK_ID_MAKE(Lin, SilKit_LinWakeupEvent)
+#define SilKit_LinSlaveConfigurationEvent_STRUCT_VERSION   SK_ID_MAKE(Lin, SilKit_LinSlaveConfigurationEvent)
+#define SilKit_LinSlaveConfiguration_STRUCT_VERSION        SK_ID_MAKE(Lin, SilKit_LinSlaveConfiguration)
 
 // Data
 // Data data type IDs

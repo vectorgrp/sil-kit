@@ -23,6 +23,7 @@ inline std::string to_string(LinControllerStatus status);
 
 inline std::string to_string(const LinFrame& frame);
 inline std::string to_string(const LinControllerConfig& controllerConfig);
+inline std::string to_string(const LinSlaveConfiguration& linSlaveConfiguration);
 
 inline std::ostream& operator<<(std::ostream& out, LinChecksumModel model);
 inline std::ostream& operator<<(std::ostream& out, LinFrameResponseType responseType);
@@ -33,6 +34,7 @@ inline std::ostream& operator<<(std::ostream& out, LinControllerStatus status);
 
 inline std::ostream& operator<<(std::ostream& out, const LinFrame& frame);
 inline std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controllerConfig);
+inline std::ostream& operator<<(std::ostream& out, const LinSlaveConfiguration& linSlaveConfiguration);
 
 // ================================================================================
 //  Inline Implementations
@@ -151,6 +153,12 @@ std::string to_string(const LinControllerConfig& controllerConfig)
     out << controllerConfig;
     return out.str();
 }
+std::string to_string(const LinSlaveConfiguration& linSlaveConfiguration)
+{
+    std::stringstream out;
+    out << linSlaveConfiguration;
+    return out.str();
+}
 
 std::ostream& operator<<(std::ostream& out, LinChecksumModel model)
 {
@@ -255,6 +263,25 @@ std::ostream& operator<<(std::ostream& out, const LinControllerConfig& controlle
 }
 
 
+
+std::ostream& operator<<(std::ostream& out, const LinSlaveConfiguration& linSlaveConfiguration)
+{
+    auto& respondingLinIds = linSlaveConfiguration.respondingLinIds;
+    out << "Lin::LinSlaveConfiguration{respondingLinIds=[";
+    if (respondingLinIds.size() > 0)
+    {
+        out << static_cast<uint16_t>(respondingLinIds[0]);
+        for (auto i = 1u; i < respondingLinIds.size(); ++i)
+        {
+            out << "," << static_cast<uint16_t>(respondingLinIds[i]);
+        }
+    }
+
+    out << "]}";
+    return out;
+}
+
+    
 } // namespace Lin
 } // namespace Services
 } // namespace SilKit

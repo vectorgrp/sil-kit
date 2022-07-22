@@ -19,6 +19,23 @@ Compatibility with 3.99.27
 Changed
 ~~~~~~~
 
+- LIN: API Overhaul
+  - Changed behavior of ``ILinController::SendFrame()`` and``ILinController::SendFrameHeader()``:
+    Both now don't use cached responsed but send the LinHeader to the responding LIN node and use the TxBuffer there.
+  - The method ``ILinController::SetFrameResponse()`` and ``ILinController::SetFrameResponses()`` have been removed.
+    LIN controllers now have to hand in their final reponse configuration (Tx/Rx) in ``ILinController::Init()`` and
+    can't reconfigure their configuration afterwards. An exception is the LIN master when using 
+    ``ILinController::SendFrame()`` with ``LinFrameResponseType::MasterResponse`` or 
+    ``LinFrameResponseType::SlaveResponse``, which reconfigures the LIN master during operation.
+  - The new method ``ILinController::UpdateTxBuffer()`` can be used to update the payload for a certain LIN ID,
+    but does not change the response configuration.
+  - The ``FrameResponseUpdateHandler`` has been removed. An alternative way of obtaining knowledge about response
+    configuration of slaves on the master is the ``LinSlaveConfigurationHandler``. This handler triggers when a 
+    LIN slave calls ``ILinController::Init()``. Inside the handler, the new method 
+    ``ILinController::GetSlaveConfiguration()`` can be used to query on which LIN IDs any slave is configure for 
+    response. This allows to implement a bookkeeping mechanism on the master and predict if a slave response is 
+    expected.
+
 - Renamed SimulationTask to SimulationStep and added the initial step size (formerly period length) as a parameter
 
   - ``IntegrationBus/include/silkit/services/orchestration/ITimeSyncService.hpp``

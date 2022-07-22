@@ -23,6 +23,10 @@ public:
     virtual void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) = 0;
     virtual void SendMsg(LinControllerStatusUpdate&& statusUpdate) = 0;
     
+    virtual void ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header) = 0;
+
+    virtual void UpdateTxBuffer(const LinFrame& frame) = 0;
+
     virtual void GoToSleep() = 0;
     virtual void Wakeup() = 0;
 

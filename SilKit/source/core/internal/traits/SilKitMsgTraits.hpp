@@ -100,6 +100,7 @@ DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, LinControllerConfig, 1)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantCommand)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, SystemCommand)
+DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Lin, LinSendFrameHeaderRequest)
 
 } // namespace Core
 } // namespace SilKit

@@ -24,7 +24,7 @@ struct LinTransmission
 
 /*! \brief Data type representing a request to perform an AUTOSAR SendFrame operation.
  *
- * Sent from LinController proxies to the VIBE NetworkSimulator.
+ * Used internally.
  */
 struct LinSendFrameRequest
 {
@@ -34,10 +34,11 @@ struct LinSendFrameRequest
 
 /*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
 *
-* Sent from LinController proxies to the VIBE NetworkSimulator.
+* Used internally.
 */
 struct LinSendFrameHeaderRequest
 {
+    std::chrono::nanoseconds timestamp; //!< Time of the header request.
     LinIdT id; //!< The LinIdT of the header to be transmitted
 };
 
@@ -55,7 +56,7 @@ struct LinControllerStatusUpdate
     LinControllerStatus status; //!< The new controller status
 };
 
-//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed LinFrameResponse data.
+//! \brief Data type used to inform other LIN participants about changed LinFrameResponse data.
 struct LinFrameResponseUpdate
 {
     std::vector<LinFrameResponse> frameResponses; //!< Vector of new FrameResponses.
@@ -162,7 +163,7 @@ std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameR
         out << static_cast<uint16_t>(responses[0].frame.id);
         for (auto i = 1u; i < responses.size(); ++i)
         {
-            out << "," << static_cast<uint16_t>(responses[1].frame.id);
+            out << "," << static_cast<uint16_t>(responses[i].frame.id);
         }
     }
 

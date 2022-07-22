@@ -33,6 +33,10 @@ public:
     void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) override;
     void SendMsg(LinControllerStatusUpdate&& statusUpdate) override;
 
+    void ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header) override;
+
+    void UpdateTxBuffer(const LinFrame& frame) override;
+
     void GoToSleep() override;
     void Wakeup() override;
     auto CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame) -> LinFrameStatus override;

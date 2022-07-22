@@ -47,6 +47,10 @@ public:
         return !_entries.empty();
     }
 
+    auto Size() -> size_t { 
+        return _entries.size();
+    }
+
 private:
     auto MakeUniqueLock() const -> std::unique_lock<Mutex> { return std::unique_lock<Mutex>{_mutex}; }
 

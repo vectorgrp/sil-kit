@@ -52,9 +52,9 @@ using LinDataLengthT = uint8_t;
 */
 struct LinFrame
 {
-    LinIdT                 id{0}; //!< Lin Identifier
-    LinChecksumModel          checksumModel{LinChecksumModel::Undefined}; //!< Checksum Model
-    LinDataLengthT            dataLength{0}; //!< Data length
+    LinIdT id{0}; //!< Lin Identifier
+    LinChecksumModel checksumModel{LinChecksumModel::Undefined}; //!< Checksum Model
+    LinDataLengthT dataLength{0}; //!< Data length
     std::array<uint8_t, 8> data{}; //!< The actual payload
 };
 
@@ -64,8 +64,8 @@ inline auto GoToSleepFrame() -> LinFrame;
 
 /*! \brief Controls the behavior of ILinController::SendFrame()
  *
- * Determines whether the master also provides a frame response or if the frame
- * response is expected to be provided from a slave.
+ * Determines whether the master also provides a frame response or if the frame response is expected to be provided 
+ * from a slave.
  *
  * *AUTOSAR Name:* Lin_FrameResponseType
  */ 
@@ -103,28 +103,24 @@ enum class LinFrameResponseMode : uint8_t
  */
 struct LinFrameResponse
 {
-    /*! frame must provide the LIN \ref LinIdT for which the response is
-     *  configured.
+    /*! frame must provide the LIN \ref LinIdT for which the response is configured.
      *
-     * If responseMode is LinFrameResponseMode::TxUnconditional, the
-     * frame data is used for the transaction.
+     * If responseMode is LinFrameResponseMode::TxUnconditional, the frame data is used for the transaction.
      */
     LinFrame frame;
-    //! Determines if the LinFrameResponse is used for transmission
-    //! (TxUnconditional), reception (Rx) or ignored (Unused).
+    //! Determines if the LinFrameResponse is used for transmission (TxUnconditional), reception (Rx) or 
+    //! ignored (Unused).
     LinFrameResponseMode responseMode{LinFrameResponseMode::Unused};
 };
 
 /*! \brief The state of a LIN transmission
  *
- * Used to indicate the success or failure of a LIN transmission to a
- * registered \ref ILinController::FrameStatusHandler.
+ * Used to indicate the success or failure of a LIN transmission to a registered \ref ILinController::FrameStatusHandler.
  *
- * *Note:* the enumeration values directly correspond to the AUTOSAR
- *  type Lin_StatusType. Not all values are used in the SIL Kit.
+ * *Note:* the enumeration values directly correspond to the AUTOSAR type Lin_StatusType. Not all values are used in 
+ * the SIL Kit.
  *
- * *AUTOSAR Doc:* LIN operation states for a LIN channel or frame, as
- * returned by the API service Lin_GetStatus().
+ * *AUTOSAR Doc:* LIN operation states for a LIN channel or frame, as returned by the API service Lin_GetStatus().
  *
  */
 enum class LinFrameStatus : uint8_t
@@ -139,13 +135,13 @@ enum class LinFrameStatus : uint8_t
      *
      * *AUTOSAR Doc:* Successful transmission.
      */
-    LIN_TX_OK,
+    LIN_TX_OK = 1,
 
     /*! (currently not in use)
      *
      * *AUTOSAR Doc:* Ongoing transmission (Header or Response). 
      */
-    LIN_TX_BUSY,
+    LIN_TX_BUSY = 2,
 
     /*! (currently not in use)
      *
@@ -155,7 +151,7 @@ enum class LinFrameStatus : uint8_t
      *  Identifier parity error, or 
      *  Physical bus error 
      */
-    LIN_TX_HEADER_ERROR,
+    LIN_TX_HEADER_ERROR = 3,
 
     /*! (currently not in use)
      *
@@ -164,20 +160,20 @@ enum class LinFrameStatus : uint8_t
      *  Mismatch between sent and read back data,
      *  Physical bus error 
      */
-    LIN_TX_ERROR,
+    LIN_TX_ERROR = 4,
 
     /*! The controller received a correct frame response.
      *
      * *AUTOSAR Doc:* Reception of correct response.
      */
-    LIN_RX_OK,
+    LIN_RX_OK = 5,
 
     /*! (currently not in use)
      * 
      * *AUTOSAR Doc:* Ongoing reception: at least one response byte has been
      *  received, but the checksum byte has not been received.
      */
-    LIN_RX_BUSY,
+    LIN_RX_BUSY = 6,
 
     /*! The reception of a response failed.
      *
@@ -193,13 +189,13 @@ enum class LinFrameStatus : uint8_t
      *  Checksum error, or
      *  Short response 
      */
-    LIN_RX_ERROR,
+    LIN_RX_ERROR = 7,
 
     /*! No LIN controller did provide a response to the frame header.
      *
      * *AUTOSAR Doc:* No response byte has been received so far. 
      */
-    LIN_RX_NO_RESPONSE
+    LIN_RX_NO_RESPONSE = 8
 };
 
 /*! Used to configure a LIN controller as a master or slave.
@@ -238,7 +234,7 @@ struct LinControllerConfig
     /*! Optional LinFrameResponse configuration.
      *
      * FrameResponses can also be configured at a later point using
-     * ILinController::SetFrameResponse() and
+     * ILinController::UpdateTxBuffer() and
      * ILinController::SetFrameResponses().
      */
     std::vector<LinFrameResponse> frameResponses;
@@ -266,7 +262,6 @@ enum class LinControllerStatus
     SleepPending = 3,
 };
 
-
 //! \brief A LIN frame status event delivered in the \ref ILinController::FrameStatusHandler.
 struct LinFrameStatusEvent
 {
@@ -288,16 +283,22 @@ struct LinGoToSleepEvent
     std::chrono::nanoseconds timestamp; //!< Time of the event.
 };
 
-/*! \brief A LIN frame response update event delivered in the \ref ILinController::FrameResponseUpdateHandler
+/*! \brief A LIN frame response update event delivered in the \ref ILinController::LinSlaveConfigurationHandler
 *
-* The event is received for every LinFrameResponse whenever a LinControllerConfig is received or a controller calls
-* \ref ILinController::SetFrameResponses. This event is mainly for diagnostic purposes and contains no timestamp.
+* The event is received on a LIN Master when a LIN Slave is configured via LinController::Init().
+* This event is mainly for diagnostic purposes and can be used to keep track of LIN Ids, where
+* a response of a LIN Slave is to be expected by using \ref GetSlaveConfiguration() in the handler.
 * 
 */
-struct LinFrameResponseUpdateEvent
+struct LinSlaveConfigurationEvent
 {
-    std::string senderID; //!< String identifier of the controller providing the update.
-    LinFrameResponse frameResponse; //!< The frameResponse of the update.
+    std::chrono::nanoseconds timestamp; //!< Time of the event.
+};
+
+//! \brief The aggregated configuration of all LIN slaves in the network.
+struct LinSlaveConfiguration
+{
+    std::vector<LinIdT> respondingLinIds; //!< A vector of LinIds on which any LIN Slave has configured LinFrameResponseMode::TxUnconditional
 };
 
 // ================================================================================

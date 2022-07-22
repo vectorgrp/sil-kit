@@ -20,8 +20,8 @@ LinController::LinController(Core::IParticipantInternal* participant, SilKit::Co
     , _config{config}
     , _logger{participant->GetLogger()}
     , _simulationBehavior{participant, this, timeProvider}
+    , _timeProvider{timeProvider}
 {
-
 }
 
 //------------------------
@@ -79,20 +79,143 @@ auto LinController::IsRelevantNetwork(const Core::ServiceDescriptor& remoteServi
 template <typename MsgT>
 void LinController::SendMsg(MsgT&& msg)
 {
-    // Detailed: Distribute SilKitMessage
-    // Trivial: 
-    //   LinSendFrameRequest: Call SetFrameResponse and SendFrameHeader
-    //   LinSendFrameHeaderRequest: Send a LinTansmission based on the cached responses and self-deliver LinFrameStatusEvent
-    //   Other: Distribute SilKitMessage
     _simulationBehavior.SendMsg(std::move(msg));
 }
 
 //------------------------
-// Public API + Helpers
+// Error handling
+//------------------------
+
+void LinController::ThrowIfUninitialized(const std::string& callingMethodName) const
+{
+    if (_controllerStatus == LinControllerStatus::Unknown)
+    {
+        std::string errorMsg = callingMethodName
+                               + " must only be called when the controller is initialized! Check "
+                                 "whether a call to LinController::Init is missing.";
+        _logger->Error(errorMsg);
+        throw SilKit::StateError{errorMsg};
+    }
+}
+
+void LinController::ThrowIfNotMaster(const std::string& callingMethodName) const
+{
+    if (_controllerMode != LinControllerMode::Master)
+    {
+        std::string errorMsg = callingMethodName
+                               + " must only be called in master mode!";
+        _logger->Error(errorMsg);
+        throw std::runtime_error{errorMsg};
+    }
+}
+
+void LinController::ThrowIfNotConfiguredTxUnconditional(LinIdT linId)
+{
+    if (GetThisLinNode().responses[linId].responseMode != LinFrameResponseMode::TxUnconditional)
+    {
+        std::string errorMsg = fmt::format("This node must be configured with LinFrameResponseMode::TxUnconditional to "
+                                           "update the TxBuffer for ID {}",
+                                           static_cast<uint16_t>(linId));
+        _logger->Error(errorMsg);
+        throw SilKit::ConfigurationError{errorMsg};
+    }
+}
+
+void LinController::WarnOnWrongDataLength(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
+{
+    std::string errorMsg =
+        fmt::format("Mismatch between configured ({}) and received ({}) LinDataLengthT in LinFrame with ID {}",
+                    configuredFrame.dataLength, receivedFrame.dataLength, static_cast<uint16_t>(receivedFrame.id));
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnWrongChecksum(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
+{
+    std::string errorMsg = fmt::format(
+        "Mismatch between configured ({}) and received ({}) LinChecksumModel in LinFrame with ID {}",
+        configuredFrame.checksumModel, receivedFrame.checksumModel, static_cast<uint16_t>(receivedFrame.id));
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const
+{
+    std::string errorMsg =
+        fmt::format("LinFrame with ID {} has an undefined checksum model, the transmission is rejected.",
+                    static_cast<uint16_t>(frame.id));
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const
+{
+    std::string errorMsg = fmt::format("LinController received transmission but has configured "
+                                       "LinChecksumModel::Undefined. Overwriting with {} for LinIdT {}.",
+                                       frame.checksumModel, static_cast<uint16_t>(frame.id));
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLengthT invalidDataLength,
+                                                         const std::string& fromParticipantName,
+                                                         const std::string& fromServiceName) const
+{
+    std::string errorMsg =
+        fmt::format("LinController received transmission with invalid payload length {} from {{{}, {}}}. This "
+                    "tranmission is ignored.",
+                    static_cast<uint16_t>(invalidDataLength), fromParticipantName, fromServiceName);
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnReceptionWithInvalidLinId(LinIdT invalidLinId, const std::string& fromParticipantName,
+                                                    const std::string& fromServiceName) const
+{
+    std::string errorMsg = fmt::format(
+        "LinController received transmission with invalid LIN ID {} from {{{}, {}}}. This transmission is ignored.",
+        static_cast<uint16_t>(invalidLinId), fromParticipantName, fromServiceName);
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnReceptionWhileInactive() const
+{
+    std::string errorMsg = fmt::format("Inactive LinController received a transmission. This transmission is ignored.");
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnUnneededStatusChange(LinControllerStatus status) const
+{
+    std::string errorMsg =
+        fmt::format("Invalid LinController status change: controller is already in {} mode.", to_string(status));
+    _logger->Warn(errorMsg);
+}
+
+void LinController::ThrowOnErroneousInitialization() const
+{
+    std::string errorMsg{"A LinController can't be initialized with LinControllerMode::Inactive!"};
+    _logger->Error(errorMsg);
+    throw SilKit::StateError{errorMsg};
+}
+
+void LinController::ThrowOnDuplicateInitialization() const
+{
+    std::string errorMsg{"LinController::Init() must only be called once!"};
+    _logger->Error(errorMsg);
+    throw SilKit::StateError{errorMsg};
+}
+
+//------------------------
+// Public API
 //------------------------
 
 void LinController::Init(LinControllerConfig config)
 {
+    if (config.controllerMode == LinControllerMode::Inactive)
+    {
+        ThrowOnErroneousInitialization();
+    }
+
+    if (_controllerStatus != LinControllerStatus::Unknown)
+    {
+        ThrowOnDuplicateInitialization();
+    }
+
     auto& node = GetThisLinNode();
     node.controllerMode = config.controllerMode;
     node.controllerStatus = LinControllerStatus::Operational;
@@ -110,81 +233,80 @@ auto LinController::Status() const noexcept -> LinControllerStatus
 
 void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 {
-    if (_controllerStatus != LinControllerStatus::Operational)
+    ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfNotMaster(__FUNCTION__);
+
+    if (responseType == LinFrameResponseType::MasterResponse)
     {
-        std::string errorMsg{"LinController::SendFrame() must only be called when the controller is operational! Check "
-                             "whether a call to LinController::Init is missing."};
-        _logger->Error(errorMsg);
-        throw SilKit::StateError{errorMsg};
+        // Update local response reconfiguration
+        if (GetThisLinNode().responses[frame.id].responseMode != LinFrameResponseMode::TxUnconditional)
+        {
+            std::vector<LinFrameResponse> responseUpdate;
+            LinFrameResponse response{};
+            response.frame = frame;
+            response.responseMode = LinFrameResponseMode::TxUnconditional;
+            responseUpdate.push_back(response);
+            GetThisLinNode().UpdateResponses(responseUpdate, _logger);
+            _simulationBehavior.UpdateTxBuffer(frame);
+        }
     }
-    if (_controllerMode != LinControllerMode::Master)
+    else
     {
-        std::string errorMsg{"LinController::SendFrame() must only be called in master mode!"};
-        _logger->Error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        // Only allow SendFrame of unconfigured LIN Ids for LinFrameResponseType::MasterResponse
+        // that LinSlaveConfigurationHandler and GetSlaveConfiguration stays valid.
+        if (!HasRespondingSlave(frame.id))
+        {
+            CallLinFrameStatusEventHandler(
+                LinFrameStatusEvent{_timeProvider->Now(), frame, LinFrameStatus::LIN_RX_NO_RESPONSE});
+            return;
+        }
+        
+        if (responseType == LinFrameResponseType::SlaveResponse)
+        {
+            // As the master, we configure for RX in case of SlaveResponse
+            std::vector<LinFrameResponse> responseUpdate;
+            LinFrameResponse response{};
+            response.frame = frame;
+            response.responseMode = LinFrameResponseMode::Rx;
+            responseUpdate.push_back(response);
+            GetThisLinNode().UpdateResponses(responseUpdate, _logger);
+        }
     }
 
-    LinSendFrameRequest sendFrame;
-    sendFrame.frame = frame;
-    sendFrame.responseType = responseType;
-    SendMsg(sendFrame);
+    // Detailed: Send LinSendFrameRequest to BusSim
+    // Trivial: SendFrameHeader
+    SendMsg(LinSendFrameRequest{frame, responseType});
 }
 
 void LinController::SendFrameHeader(LinIdT linId)
 {
-    if (_controllerStatus != LinControllerStatus::Operational)
-    {
-        std::string errorMsg{"LinController::SendFrameHeader() must only be called when the controller is operational! "
-                             "Check whether a call to LinController::Init is missing."};
-        _logger->Error(errorMsg);
-        throw SilKit::StateError{errorMsg};
-    }
-    if (_controllerMode != LinControllerMode::Master)
-    {
-        std::string errorMsg{"LinController::SendFrameHeader() must only be called in master mode!"};
-        _logger->Error(errorMsg);
-        throw std::runtime_error{errorMsg};
-    }
-    LinSendFrameHeaderRequest header;
-    header.id = linId;
-    SendMsg(header);
+    ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfNotMaster(__FUNCTION__);
+
+    // Detailed: Send LinSendFrameHeaderRequest to BusSim
+    // Trivial: Good case (numResponses == 1): Distribute LinSendFrameHeaderRequest, the receiving Tx-Node will generate the LinTransmission.
+    //          Error case: Generate the LinTransmission and trigger a FrameStatusUpdate with 
+    //                      LIN_RX_NO_RESPONSE (numResponses == 0) or LIN_RX_ERROR (numResponses > 1).
+    SendMsg(LinSendFrameHeaderRequest{_timeProvider->Now(), linId});
 }
 
-void LinController::SetFrameResponse(LinFrame frame, LinFrameResponseMode mode)
+void LinController::UpdateTxBuffer(LinFrame frame)
 {
-    LinFrameResponse response;
-    response.frame = std::move(frame);
-    response.responseMode = mode;
+    ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfNotConfiguredTxUnconditional(frame.id);
 
-    std::vector<LinFrameResponse> responses{1, response};
-    SetFrameResponses(std::move(responses));
-}
+    // Update the local payload
+    GetThisLinNode().UpdateTxBuffer(frame.id, std::move(frame.data), _logger);
 
-void LinController::SetFrameResponses(std::vector<LinFrameResponse> responses)
-{
-    if (_controllerStatus != LinControllerStatus::Operational)
-    {
-        std::string errorMsg{"LinController::SetFrameResponses() must only be called when the controller is operational! "
-                             "Check whether a call to LinController::Init is missing."};
-        _logger->Error(errorMsg);
-        throw SilKit::StateError {errorMsg};
-    }
-
-    GetThisLinNode().UpdateResponses(responses, _logger);
-
-    LinFrameResponseUpdate frameResponseUpdate;
-    frameResponseUpdate.frameResponses = std::move(responses);
-    SendMsg(frameResponseUpdate);
+    // Detailed: Send LinFrameResponseUpdate with updated payload to BusSim
+    // Trivial: Nop
+    _simulationBehavior.UpdateTxBuffer(frame);
 }
 
 void LinController::GoToSleep()
 {
-    if (_controllerMode != LinControllerMode::Master)
-    {
-        std::string errorMsg{"LinController::GoToSleep() must not be called for slaves or uninitialized masters!"};
-        _logger->Error(errorMsg);
-        throw SilKit::StateError{errorMsg};
-    }
+    ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfNotMaster(__FUNCTION__);
 
     // Detailed: Send LinSendFrameRequest with GoToSleep-Frame and set LinControllerStatus::SleepPending. BusSim will trigger LinTransmission.
     // Trivial: Directly send LinTransmission with GoToSleep-Frame and call GoToSleepInternal() on this controller.
@@ -195,17 +317,14 @@ void LinController::GoToSleep()
 
 void LinController::GoToSleepInternal()
 {
-    SetControllerStatus(LinControllerStatus::Sleep);
+    ThrowIfUninitialized(__FUNCTION__);
+
+    SetControllerStatusInternal(LinControllerStatus::Sleep);
 }
 
 void LinController::Wakeup()
 {
-    if (_controllerMode == LinControllerMode::Inactive)
-    {
-        std::string errorMsg{"LinController::Wakeup() must not be called before LinController::Init()"};
-        _logger->Error(errorMsg);
-        throw SilKit::StateError{errorMsg};
-    }
+    ThrowIfUninitialized(__FUNCTION__);
 
     // Detailed: Send LinWakeupPulse and call WakeupInternal()
     // Trivial: Send LinWakeupPulse and call WakeupInternal(), self-deliver LinWakeupPulse with TX
@@ -214,21 +333,47 @@ void LinController::Wakeup()
 
 void LinController::WakeupInternal()
 {
-    SetControllerStatus(LinControllerStatus::Operational);
+    ThrowIfUninitialized(__FUNCTION__);
+
+    SetControllerStatusInternal(LinControllerStatus::Operational);
 }
 
-void LinController::SetControllerStatus(LinControllerStatus status)
+LinSlaveConfiguration LinController::GetSlaveConfiguration()
 {
-    if (_controllerMode == LinControllerMode::Inactive)
-    {
-        std::string errorMsg{"LinController::Wakeup()/Sleep() must not be called before LinController::Init()"};
-        _logger->Error(errorMsg);
-        throw SilKit::StateError{errorMsg};
-    }
+    ThrowIfNotMaster(__FUNCTION__);
 
+    return LinSlaveConfiguration{_linIdsRespondedBySlaves};
+}
+
+//------------------------
+// Helpers
+//------------------------
+
+bool LinController::HasRespondingSlave(LinIdT id)
+{
+    auto it = std::find(_linIdsRespondedBySlaves.begin(), _linIdsRespondedBySlaves.end(), id);
+    return it != _linIdsRespondedBySlaves.end();
+}
+
+void LinController::UpdateLinIdsRespondedBySlaves(const std::vector<LinFrameResponse>& responsesUpdate)
+{
+    for (auto&& response : responsesUpdate)
+    {
+        if (response.responseMode == LinFrameResponseMode::TxUnconditional)
+        {
+            if (!HasRespondingSlave(response.frame.id))
+            {
+                _linIdsRespondedBySlaves.push_back(response.frame.id);
+            }
+        }
+    }
+}
+
+void LinController::SetControllerStatusInternal(LinControllerStatus status)
+{
     if (_controllerStatus == status)
     {
-        _logger->Warn("LinController::SetControllerStatus() - controller is already in {} mode.", to_string(status));
+        WarnOnUnneededStatusChange(status);
     }
 
     _controllerStatus = status;
@@ -243,18 +388,29 @@ void LinController::SetControllerStatus(LinControllerStatus status)
 // Node bookkeeping
 //------------------------
 
-void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responses_, Services::Logging::ILogger* logger)
+void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger)
 {
-    for (auto&& response : responses_)
+    for (auto&& response : responsesToUpdate)
     {
         auto linId = response.frame.id;
         if (linId >= responses.size())
         {
-            logger->Warn("Ignoring LinFrameResponse update for linId={}", static_cast<uint16_t>(linId));
+            logger->Warn("Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
             continue;
         }
         responses[linId] = std::move(response);
+   }
+}
+
+void LinController::LinNode::UpdateTxBuffer(LinIdT linId, std::array<uint8_t, 8> data,
+                                            Services::Logging::ILogger* logger)
+{
+    if (linId >= responses.size())
+    {
+        logger->Warn("Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
+        return;
     }
+    responses[linId].frame.data = data;
 }
 
 auto LinController::GetThisLinNode() -> LinNode&
@@ -286,6 +442,7 @@ void LinController::CallLinFrameStatusEventHandler(const LinFrameStatusEvent& ms
 auto LinController::GetResponse(LinIdT id) -> std::pair<int, LinFrame>
 {
     LinFrame responseFrame;
+    responseFrame.id = id;
 
     auto numResponses = 0;
     for (auto&& node : _linNodes)
@@ -306,9 +463,23 @@ auto LinController::GetResponse(LinIdT id) -> std::pair<int, LinFrame>
     return {numResponses, responseFrame};
 }
 
+
 //------------------------
 // ReceiveMsg
 //------------------------
+
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameHeaderRequest& msg)
+{
+    if (!AllowReception(from))
+    {
+        return;
+    }
+
+    // Detailed: Depends on how LinSendFrameHeaderRequest will work with BusSim, currently NOP
+    // Trivial: Generate LinTransmission
+    // In future: Also Trigger OnHeaderCallback
+    _simulationBehavior.ReceiveFrameHeaderRequest(msg);
+}
 
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg)
 {
@@ -317,42 +488,51 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
         return;
     }
 
+    if (_controllerMode == LinControllerMode::Inactive)
+    {
+        WarnOnReceptionWhileInactive();
+        return;
+    }
+    
     auto& frame = msg.frame;
 
-    if (frame.dataLength > 8)
+    if (frame.dataLength > _maxDataLength)
     {
-        _logger->Warn(
-            "LinController received transmission with payload length {} from {{{}, {}}}",
-            static_cast<unsigned int>(frame.dataLength),
-            from->GetServiceDescriptor().GetParticipantName(),
-            from->GetServiceDescriptor().GetServiceName());
+        WarnOnReceptionWithInvalidDataLength(frame.dataLength, from->GetServiceDescriptor().GetParticipantName(),
+                                             from->GetServiceDescriptor().GetServiceName());
         return;
     }
 
-    if (frame.id >= 64)
+    if (frame.id >= _maxLinId)
     {
-        _logger->Warn(
-            "LinController received transmission with invalid LIN ID {} from {{{}, {}}}",
-            frame.id,
-            from->GetServiceDescriptor().GetParticipantName(),
-            from->GetServiceDescriptor().GetServiceName());
+        WarnOnReceptionWithInvalidLinId(frame.id, from->GetServiceDescriptor().GetParticipantName(),
+                                             from->GetServiceDescriptor().GetServiceName());
         return;
     }
-
-    if (_controllerMode == LinControllerMode::Inactive)
-        _logger->Warn("Inactive LinController received a transmission.");
 
     _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, frame);
 
     bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
 
+    // If configured for RX, update undefined checksum
+    auto& response = GetThisLinNode().responses[frame.id];
+    if (!isGoToSleepFrame
+        && response.responseMode == LinFrameResponseMode::Rx
+        && response.frame.checksumModel == LinChecksumModel::Undefined)
+    {
+        WarnOnOverwriteOfUnconfiguredChecksum(frame);
+        response.frame.checksumModel = msg.frame.checksumModel;
+    }
+
     // Detailed: Just use msg.status
     // Trivial: Evaluate status using cached response
     const LinFrameStatus msgStatus = _simulationBehavior.CalcFrameStatus(msg, isGoToSleepFrame);
 
-    // Dispatch frame to handlers
+    // Only use LIN_RX_NO_RESPONSE on locally triggered LinFrameStatusEvent on erroneous SendFrame/SendFrameHeader,
+    // not if received from remote. 
     if (msgStatus != LinFrameStatus::LIN_RX_NO_RESPONSE)
     {
+        // Dispatch frame to handlers
         CallHandlers(LinFrameStatusEvent{msg.timestamp, frame, msgStatus});
     }
 
@@ -379,9 +559,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPuls
 
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg)
 {
-    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in detailed simulations.
-    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the detailed simulations.
-    // NOTE: only self-delivered messages are rejected
+    // NOTE: Self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor)
         return;
 
@@ -390,26 +568,22 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinController
     linNode.controllerStatus = LinControllerStatus::Operational;
     linNode.UpdateResponses(msg.frameResponses, _logger);
 
-    for (auto& response : msg.frameResponses)
+    if (msg.controllerMode == LinControllerMode::Slave)
     {
-        CallHandlers(LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
+        UpdateLinIdsRespondedBySlaves(msg.frameResponses);
     }
-}
-
-void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
-{
-    // We also receive LinFrameResponseUpdate from other controllers, although we would not need them in detailed simulations.
-    // However, we also want to make users of FrameResponseUpdateHandlers happy when using the detailed simulations.
-    // NOTE: only self-delivered messages are rejected
-    if (from->GetServiceDescriptor() == _serviceDescriptor) 
-        return;
-
-    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
-    linNode.UpdateResponses(msg.frameResponses, _logger);
-
-    for (auto& response : msg.frameResponses)
+    if (_controllerMode == LinControllerMode::Master)
     {
-        CallHandlers(LinFrameResponseUpdateEvent{ from->GetServiceDescriptor().to_string(), response});
+        auto& callbacks = std::get<CallbacksT<LinSlaveConfigurationEvent>>(_callbacks);
+
+        auto receptionTime = _timeProvider->Now();
+        if (callbacks.Size() == 0)
+        {
+            // No handlers yet, but received a LinSlaveConfiguration -> trigger upon handler addition
+            _triggerLinSlaveConfigurationHandlers = true;
+            _receptionTimeLinSlaveConfiguration = receptionTime;
+        }
+        CallHandlers(LinSlaveConfigurationEvent{receptionTime});
     }
 }
 
@@ -462,16 +636,26 @@ void LinController::RemoveWakeupHandler(HandlerId handlerId)
     }
 }
 
-HandlerId LinController::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+HandlerId LinController::AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler)
 {
-    return AddHandler(std::move(handler));
+    auto handlerId = AddHandler(std::move(handler));
+
+    // Trigger handler if a LinSlaveConfigurations was received before adding a handler
+    // No need to cache the LinSlaveConfigs (just the reception time), 
+    // as the user has to actively call GetSlaveConfiguration in the callback
+    if (_triggerLinSlaveConfigurationHandlers)
+    {
+        _triggerLinSlaveConfigurationHandlers = false;
+        CallHandlers(LinSlaveConfigurationEvent{_receptionTimeLinSlaveConfiguration});
+    }
+    return handlerId;
 }
 
-void LinController::RemoveFrameResponseUpdateHandler(HandlerId handlerId)
+void LinController::RemoveLinSlaveConfigurationHandler(HandlerId handlerId)
 {
-    if (!RemoveHandler<LinFrameResponseUpdateEvent>(handlerId))
+    if (!RemoveHandler<LinSlaveConfigurationEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameResponseUpdateHandler failed: Unknown HandlerId.");
+        _participant->GetLogger()->Warn("RemoveLinSlaveConfigurationHandler failed: Unknown HandlerId.");
     }
 }
 

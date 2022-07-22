@@ -29,12 +29,21 @@ master->AddFrameStatusHandler(master_FrameStatusHandler);
 // ------------------------------------------------------------
 // Perform TX from slave to master, i.e., the slave /is expected/
 // to provide the frame response.
-LinFrame frameRequest;
-frameRequest.id = 0x11;
-frameRequest.checksumModel = LinChecksumModel::Enhanced;
+if (UseAutosarInterface)
+{
+    // Use AUTOSAR interface to initiate the transmission.
+    LinFrame frameRequest;
+    frameRequest.id = 0x11;
+    frameRequest.checksumModel = LinChecksumModel::Enhanced;
 
-// Use AUTOSAR interface to initiate the transmission.
-master->SendFrame(frameRequest, LinFrameResponseType::SlaveResponse);
+    master->SendFrame(frameRequest, LinFrameResponseType::SlaveResponse);
+}
+else
+{
+    // Alternative, non-AUTOSAR API
+    // Transmit the frame header.
+    master->SendFrameHeader(0x11);
+}
 
 // ------------------------------------------------------------
 // The following master callback will be triggered:

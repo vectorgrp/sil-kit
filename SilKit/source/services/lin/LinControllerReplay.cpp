@@ -70,7 +70,7 @@ void LinControllerReplay::SendFrameHeader(LinIdT)
     return;
 }
 
-void LinControllerReplay::SetFrameResponse(LinFrame, LinFrameResponseMode)
+void LinControllerReplay::UpdateTxBuffer(LinFrame, LinFrameResponseMode)
 {
     // We don't allow mixing user API calls while replaying.
     _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);
@@ -130,10 +130,10 @@ void LinControllerReplay::AddWakeupHandler(WakeupHandler handler)
     _controller.AddWakeupHandler(std::move(handler));
 }
 
-void LinControllerReplay::AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler)
+void LinControllerReplay::AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler)
 {
     // FrameResponseUpdates are not part of the replay, we recreate them based on replay data.
-    _controller.AddFrameResponseUpdateHandler(std::move(handler));
+    _controller.AddLinSlaveConfigurationHandler(std::move(handler));
 }
 
 void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg)
@@ -151,12 +151,6 @@ void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinWake
 void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg)
 {
     // ControllerConfigs are not part of a replay, but are valid during a replay.
-    _controller.ReceiveMsg(from, msg);
-}
-
-void LinControllerReplay::ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
-{
-    // FrameResponseUpdates are generated from a master during a replay.
     _controller.ReceiveMsg(from, msg);
 }
 
@@ -202,9 +196,6 @@ void LinControllerReplay::ReplayMessage(const IReplayMessage* replayMessage)
     LinFrameResponse response;
     response.frame = frame;
     response.responseMode = mode;
-    LinFrameResponseUpdate responseUpdate;
-    responseUpdate.frameResponses.emplace_back(std::move(response));
-    _participant->SendMsg(this, responseUpdate);
 
     if (_mode == LinControllerMode::Master)
     {

@@ -45,7 +45,7 @@ struct SourceInfo
     }
     struct HashFunction
     {
-        size_t operator()(const SourceInfo& s) const { 
+        uint64_t operator()(const SourceInfo& s) const { 
             auto hMediaType = SilKit::Util::Hash::Hash(s.mediaType);
             auto hLabels = SilKit::Util::Hash::Hash(s.labels);
             return SilKit::Util::Hash::HashCombine(hMediaType, hLabels);

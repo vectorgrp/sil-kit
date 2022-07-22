@@ -9,7 +9,6 @@
 #include "silkit/services/lin/string_utils.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/util/functional.hpp"
 
 using namespace SilKit;
 
@@ -103,7 +102,7 @@ private:
 
     Timer _timer;
     std::vector<Task> _schedule;
-    std::vector<Task>::iterator _nextTask;
+    std::vector<Task>::iterator _nextTask;  
     std::chrono::nanoseconds _now = 0ns;
 };
 
@@ -197,7 +196,7 @@ public:
     }
 
 
-    void ReceiveFrameStatus(ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent)
+    void FrameStatusHandler(ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent)
     {
         switch (frameStatusEvent.status)
         {
@@ -224,6 +223,12 @@ public:
         schedule.ScheduleNextTask();
     }
 
+    void LinSlaveConfigurationHandler(ILinController* linController, const LinSlaveConfigurationEvent& /*slaveConfigurationEvent*/)
+    {
+        auto linSlaveConfiguration = linController->GetSlaveConfiguration();
+        std::cout << ">> Received a new LinSlaveConfiguration=" << linSlaveConfiguration << std::endl;
+    }
+
 private:
     ILinController* controller{nullptr};
     Schedule schedule;
@@ -242,8 +247,24 @@ public:
         timer.ExecuteAction(now);
     }
 
-    void FrameStatusHandler(ILinController* /*linController*/, const LinFrameStatusEvent& frameStatusEvent)
+    void UpdateTxBuffer_LinId34(ILinController* linController)
     {
+        LinFrame frame34;
+        frame34.id = 34;
+        frame34.checksumModel = LinChecksumModel::Enhanced;
+        frame34.dataLength = 6;
+        frame34.data = {static_cast<uint8_t>(rand() % 10), 0, 0, 0, 0, 0, 0, 0};
+        linController->UpdateTxBuffer(frame34);
+    }
+
+    void FrameStatusHandler(ILinController* linController, const LinFrameStatusEvent& frameStatusEvent)
+    {
+        // On a TX acknowledge for ID 34, update the TxBuffer for the next transmission
+        if (frameStatusEvent.frame.id == 34)
+        {
+            UpdateTxBuffer_LinId34(linController);
+        }
+
         std::cout << ">> " << frameStatusEvent.frame
                   << " status=" << frameStatusEvent.status
                   << " timestamp=" << frameStatusEvent.timestamp
@@ -332,8 +353,17 @@ int main(int argc, char** argv) try
             config.baudRate = 20'000;
             linController->Init(config);
         });
-        linController->AddFrameStatusHandler(Util::bind_method(&master, &LinMaster::ReceiveFrameStatus));
-        linController->AddWakeupHandler(Util::bind_method(&master, &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(
+            [&master](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+                master.FrameStatusHandler(linController, frameStatusEvent);
+            });
+        linController->AddWakeupHandler([&master](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
+                master.WakeupHandler(linController, wakeupEvent);
+            });
+        linController->AddLinSlaveConfigurationHandler(
+            [&master](ILinController* linController, const LinSlaveConfigurationEvent& slaveConfigurationEvent) {
+                master.LinSlaveConfigurationHandler(linController, slaveConfigurationEvent);
+            });
 
         timeSyncService->SetSimulationStepHandler(
             [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -400,9 +430,17 @@ int main(int argc, char** argv) try
             linController->Init(config);
         });
 
-        linController->AddFrameStatusHandler(Util::bind_method(&slave, &LinSlave::FrameStatusHandler));
-        linController->AddGoToSleepHandler(Util::bind_method(&slave, &LinSlave::GoToSleepHandler));
-        linController->AddWakeupHandler(Util::bind_method(&slave, &LinSlave::WakeupHandler));
+        linController->AddFrameStatusHandler(
+            [&slave](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+                slave.FrameStatusHandler(linController, frameStatusEvent);
+            });
+        linController->AddGoToSleepHandler(
+            [&slave](ILinController* linController, const LinGoToSleepEvent& goToSleepEvent) {
+                slave.GoToSleepHandler(linController, goToSleepEvent);
+            });
+        linController->AddWakeupHandler([&slave](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
+                slave.WakeupHandler(linController, wakeupEvent);
+            });
 
         timeSyncService->SetSimulationStepHandler(
             [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

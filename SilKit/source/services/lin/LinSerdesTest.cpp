@@ -55,6 +55,7 @@ TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
     LinSendFrameHeaderRequest in;
     LinSendFrameHeaderRequest out;
 
+    in.timestamp = 13ns;
     in.id = 49;
 
     Serialize(buffer , in);

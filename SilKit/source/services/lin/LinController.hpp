@@ -3,6 +3,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 
 #include "silkit/services/lin/ILinController.hpp"
 
@@ -54,30 +55,31 @@ public:
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinIdT linId) override;
-    void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) override;
-    void SetFrameResponses(std::vector<LinFrameResponse> responses) override;
+    void UpdateTxBuffer(LinFrame frame) override;
 
     void GoToSleep() override;
     void GoToSleepInternal() override;
     void Wakeup() override;
     void WakeupInternal() override;
 
+    LinSlaveConfiguration GetSlaveConfiguration() override;
+
     HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;
     HandlerId AddGoToSleepHandler(GoToSleepHandler handler) override;
     HandlerId AddWakeupHandler(WakeupHandler handler) override;
-    HandlerId AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
+    HandlerId AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler) override;
 
     void RemoveFrameStatusHandler(HandlerId handlerId) override;
     void RemoveGoToSleepHandler(HandlerId handlerId) override;
     void RemoveWakeupHandler(HandlerId handlerId) override;
-    void RemoveFrameResponseUpdateHandler(HandlerId handlerId) override;
+    void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override;
 
     // IMsgForLinController
     void ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg) override;
-    void ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameHeaderRequest& msg) override;
 
 public:
     // ----------------------------------------
@@ -93,7 +95,7 @@ public:
 public:
     // ----------------------------------------
     // Public methods
-    void SetControllerStatus(LinControllerStatus status);
+    void SetControllerStatusInternal(LinControllerStatus status);
 
     struct LinNode
     {
@@ -102,7 +104,9 @@ public:
         LinControllerStatus controllerStatus{LinControllerStatus::Unknown};
         std::array<LinFrameResponse, 64> responses;
 
-        void UpdateResponses(std::vector<LinFrameResponse> responses_, Services::Logging::ILogger* logger);
+        void UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger);
+        void UpdateTxBuffer(LinIdT linId, std::array<uint8_t, 8> data, Services::Logging::ILogger* logger);
+
     };
     auto GetResponse(LinIdT id) -> std::pair<int, LinFrame>;
     auto GetThisLinNode() -> LinNode&;
@@ -115,6 +119,11 @@ public:
     // Expose the simulated/trivial mode for unit tests
     void SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor);
     void SetTrivialBehavior();
+
+    // Public error handling for use in simulationBehavior
+    void WarnOnWrongDataLength(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const;
+    void WarnOnWrongChecksum(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const;
+    void WarnOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const;
 
 private:
     // ----------------------------------------
@@ -135,6 +144,24 @@ private:
     auto IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IServiceEndpoint* from) const -> bool;
 
+    void ThrowOnErroneousInitialization() const;
+    void ThrowOnDuplicateInitialization() const;
+    void ThrowIfUninitialized(const std::string& callingMethodName) const;
+    void ThrowIfNotMaster(const std::string& callingMethodName) const;
+    void ThrowIfNotConfiguredTxUnconditional(LinIdT linId);
+    void WarnOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const;
+    void WarnOnReceptionWithInvalidDataLength(LinDataLengthT invalidDataLength, const std::string& fromParticipantName,
+                                              const std::string& fromServiceName) const;
+    void WarnOnReceptionWithInvalidLinId(LinIdT invalidLinId, const std::string& fromParticipantName,
+                                         const std::string& fromServiceName) const;
+    void WarnOnReceptionWhileInactive() const;
+    void WarnOnUnneededStatusChange(LinControllerStatus status) const;
+        
+    // Bookkeeping of global view on responding LinIds on any node
+    void UpdateLinIdsRespondedBySlaves(const std::vector<LinFrameResponse>& responsesUpdate);
+
+    bool HasRespondingSlave(LinIdT id);
+
 private:
     // ----------------------------------------
     // private members
@@ -154,12 +181,19 @@ private:
         CallbacksT<LinFrameStatusEvent>,
         CallbacksT<LinGoToSleepEvent>,
         CallbacksT<LinWakeupEvent>,
-        CallbacksT<LinFrameResponseUpdateEvent>
+        CallbacksT<LinSlaveConfigurationEvent>
     > _callbacks;
 
     Tracer _tracer;
+    Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 
     std::vector<LinNode> _linNodes;
+    std::vector<LinIdT> _linIdsRespondedBySlaves{}; // Global view of LinIds with TxUnconditional configured on any node.
+    bool _triggerLinSlaveConfigurationHandlers{false};
+    std::chrono::nanoseconds _receptionTimeLinSlaveConfiguration{};
+
+    const LinIdT _maxDataLength = 8;
+    const LinIdT _maxLinId = 64;
 };
 
 // ==================================================================

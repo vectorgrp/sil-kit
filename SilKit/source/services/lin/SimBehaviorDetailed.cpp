@@ -47,6 +47,21 @@ void SimBehaviorDetailed::SendMsg(LinControllerStatusUpdate&& msg)
     SendMsgImpl(msg);
 }
 
+void SimBehaviorDetailed::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& /*header*/)
+{
+    // NOP
+}
+
+void SimBehaviorDetailed::UpdateTxBuffer(const LinFrame& frame)
+{
+    LinFrameResponseUpdate reponseUpdate{};
+    LinFrameResponse response{};
+    response.frame = frame;
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+    reponseUpdate.frameResponses.push_back(response);
+    SendMsgImpl(reponseUpdate);
+}
+
 void SimBehaviorDetailed::GoToSleep()
 {
     LinSendFrameRequest gotosleepFrame;
@@ -60,7 +75,7 @@ void SimBehaviorDetailed::GoToSleep()
     // cf. AUTOSAR SWS LIN Driver section 7.3.3 [SWS_Lin_00263].
     // Locally, the _controllerStatus is set to Sleep in the LinController
     // so we don't expose the internal SleepPending state to users.
-    _parentController->SetControllerStatus(LinControllerStatus::SleepPending);
+    _parentController->SetControllerStatusInternal(LinControllerStatus::SleepPending);
 }
 
 void SimBehaviorDetailed::Wakeup()
@@ -71,9 +86,20 @@ void SimBehaviorDetailed::Wakeup()
     _parentController->WakeupInternal();
 }
 
-auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission, bool /*isGoToSleepFrame*/)
+auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame)
     -> LinFrameStatus
 {
+    // If GoToSleepFrame comes with RX_OK, use only if configured for RX
+    if (isGoToSleepFrame && linTransmission.status == LinFrameStatus::LIN_RX_OK)
+    {
+        auto& thisLinNode = _parentController->GetThisLinNode();
+        const auto response = thisLinNode.responses[linTransmission.frame.id];
+        if (response.responseMode != LinFrameResponseMode::Rx)
+        {
+            return LinFrameStatus::LIN_RX_NO_RESPONSE;
+        }
+    }
+
     return linTransmission.status;
 }
 

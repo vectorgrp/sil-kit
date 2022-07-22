@@ -147,7 +147,7 @@ public:
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
+            {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(now); }}
         };
     }
 
@@ -223,11 +223,13 @@ public:
         Log() << "<< LIN LinFrame Header sent for ID=" << static_cast<unsigned int>(frame.id) << " now=" << now;
     }
 
-    void GoToSleep()
+    void GoToSleep(std::chrono::nanoseconds now)
     {
         Log() << "<< Sending Go-To-Sleep Command and entering sleep state";
         _controller->GoToSleep();
         _result.gotoSleepSent = true;
+        _result.sendTimes.push_back(now);
+
     }
 
 

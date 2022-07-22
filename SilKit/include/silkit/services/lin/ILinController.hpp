@@ -13,27 +13,22 @@ namespace Services {
 namespace Lin {
 
 /*! 
- * The LIN controller can assume the role of a LIN master or a LIN
- * slave. It provides two kinds of interfaces to perform data
- * transfers and provide frame responses:
+ * The LIN controller can assume the role of a LIN master or a LIN slave. All LIN nodes must be configured with their
+ * respective role using \ref LinController::Init() to perform data transmission and reception.  
  *
- * AUTOSAR-like LIN master interface:
+ * AUTOSAR-like LIN interface:
  *
- * - \ref SendFrame() transfers a frame from or to a LIN
- * master. Requires \ref LinControllerMode::Master.
+ * - \ref SendFrame() initiates a frame transfer for a given \ref LinFrameResponseType.
+ * For LinFrameResponseType::MasterResponse, the controller doesn't need to be configured for transmission on this LIN ID.
+ * Requires \ref LinControllerMode::Master.
  *
+ * non-AUTOSAR LIN interface:
  *
- * non-AUTOSAR interface:
- *
- * - \ref SetFrameResponse() configures
- * the response for a particular LIN identifier. Can be used with \ref
- * LinControllerMode::Master and \ref LinControllerMode::Slave.
- *
- * - \ref SendFrameHeader() initiates the transmission of a
- * LIN frame for a particular LIN identifier. For a successful
- * transmission, exactly one LIN slave or master must have previously
- * set a corresponding frame response for unconditional
- * transmission. Requires \ref LinControllerMode::Master.
+ * - \ref SendFrameHeader() initiates the transmission of a LIN frame for a particular LIN identifier. For a successful
+ * transmission, exactly one LIN slave or master must have previously set a corresponding frame response for 
+ * unconditional transmission. Requires \ref LinControllerMode::Master.
+ * - \ref UpdateTxBuffer() updates the response data for a particular LIN identifier. Can be used with 
+ * \ref LinControllerMode::Master and \ref LinControllerMode::Slave.
  * 
  */
 class ILinController
@@ -60,113 +55,119 @@ public:
      */
     using WakeupHandler = CallbackT<LinWakeupEvent>;
 
-    /*! Callback type to indicate that a frame response update has been received.
-     *  Cf., \ref AddFrameResponseUpdateHandler(WakeupHandler);
+    /*! Callback type to indicate that a LIN Slave configuration has been received.
+     *  
+     * Triggered when a remote LIN Slave calls LinController::Init(LinControllerConfig)
+     *  Cf., \ref AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler);
      */
-    using FrameResponseUpdateHandler = CallbackT<LinFrameResponseUpdateEvent>;
+    using LinSlaveConfigurationHandler = CallbackT<LinSlaveConfigurationEvent>;
 
 public:
     virtual ~ILinController() = default;
 
-    /*! \brief Initialize the LIN controller
+    /*! \brief Initialize the LIN controller defining its role and RX/TX configuration. 
+     * 
+     * All controllers must be initialized exactly once to take part in LIN communication.
      * 
      * \param config The controller configuration contains:
-     *  - controllerMode, either sets LIN master or LIN slave mode
-     *  - baudRate, determine transmission speeds (only used for detailed simulation)
-     *  - frameResponses, an optional set of initial FrameResponses
+     *  - controllerMode, either sets LIN master or LIN slave mode.
+     *  - baudRate, determine transmission speeds (only used for detailed simulation).
+     *  - frameResponses, a vector of LinFrameResponse. This must contain the final configuration
+     * on which LIN Ids the controller will receive (LinFrameResponseMode::Rx) or respond to
+     * (LinFrameResponseMode::TxUnconditional) frames. An exception is the use of \ref SendFrame() for 
+     * LinFrameResponseType::MasterResponse, which allows to extend the configuration during operation. 
      *
      * *AUTOSAR Name:* Lin_Init
+     * 
+     * \throws SilKit::StateError if the LIN Controller is configured with LinControllerMode::Inactive
+     * \throws SilKit::StateError if Init() is called a second time on this LIN Controller.
      */
     virtual void Init(LinControllerConfig config) = 0;
 
     //! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
     virtual auto Status() const noexcept -> LinControllerStatus = 0;
 
-    /*! \brief AUTOSAR LIN master interface
+    /*! \brief Initiate a LIN data transfer of a given LinFrameResponseType (AUTOSAR LIN master interface)
      *
-     * Perform a full LIN data transfer, i.e., frame header + frame
-     * response. The responseType determines if frame.data is used for
-     * the frame response or if a different node has to provide it:
-     *
-     * \li MasterResponse: \ref LinFrame is sent from this controller to
-     *     all connected slaves.
-     * \li SlaveResponse: the frame response must be provided by a
-     *     connected slave and is received by this controller.
-     * \li SlaveToSlave: the frame response must be provided by a
-     *     connected slave and is ignored by this controller.
+     * The responseType determines if frame.data is used for the frame response or if a different node has to provide 
+     * it:
+     * - MasterResponse: \ref LinFrame is sent from this controller to all connected slaves using frame.data. The LIN
+     * Master doesn't have to be configured with LinFrameResponseMode::TxUnconditional on this LIN ID.
+     * - SlaveResponse: the frame response must be provided by a connected slave and is received by this controller.
+     * - SlaveToSlave: the frame response must be provided by a connected slave and is ignored by this controller.
      *
      * *AUTOSAR Name:* Lin_SendFrame
      *
-     * \param frame provides the LIN identifier, checksum model, and optional data
-     * \param responseType determines if *frame.data* must is used for the frame response.
+     * \param frame provides the LIN identifier, checksum model, and optional data.
+     * \param responseType determines which LIN Node will provide the frame response.
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
      */
     virtual void SendFrame(LinFrame frame, LinFrameResponseType responseType) = 0;
 
-    //! Send Interface for a non-AUTOSAR LIN Master
+    /*! \brief Initiate a LIN data transfer by sending a LIN header (AUTOSAR LIN master interface)
+     * 
+     * \param linId provides the LIN header identifier. The node that is configured to respond on this ID will complete
+     * the transmission and provide the response data.
+     *
+     * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
+     */
     virtual void SendFrameHeader(LinIdT linId) = 0;
 
-    /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN
-     *  Masters. The corresponding LIN ID does not need to be
-     *  previously configured. 
+    /*! Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
+     * 
+     * \param frame provides the LIN ID and data used for the update.
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized.
+     * \throws SilKit::ConfigurationError if the LIN Controller is not configured with TxUnconditional on this ID.
      */
-    virtual void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) = 0;
-
-    /*! LinFrameResponse configuration for Slaves or non-AUTOSAR LIN Masters.
-     * 
-     * Configures multiple responses at once. Corresponding IDs do not
-     * need to be previously configured.
-     *
-     * NB: only configures responses for the provided LIN IDs. I.e.,
-     * an empty vector does not clear or reset the currently
-     * configured FrameResponses.
-     * 
-     * \throws SilKit::StateError if the LIN Controller is not initialized.
-     */
-    virtual void SetFrameResponses(std::vector<LinFrameResponse> responses) = 0;
+    virtual void UpdateTxBuffer(LinFrame frame) = 0;
 
     /*! \brief Transmit a go-to-sleep-command and set ControllerState::Sleep and enable wake-up
      *
      * *AUTOSAR Name:* Lin_GoToSleep
-     * \throw SilKit::StateError Command issued with wrong LinControllerMode
+     * 
+     * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
      */
     virtual void GoToSleep() = 0;
+
     /*! \brief Set ControllerState::Sleep without sending a go-to-sleep command.
      *
      * *AUTOSAR Name:* Lin_GoToSleepInternal
-     * \throw SilKit::StateError Command issued with wrong LinControllerMode
+     * 
+     * \throws SilKit::StateError if the LIN Controller is not initialized.
      */
     virtual void GoToSleepInternal() = 0;
+
     /*! \brief Generate a wake up pulse and set ControllerState::Operational.
      *
      * *AUTOSAR Name:* Lin_Wakeup
-     * \throw SilKit::StateError Command issued with wrong LinControllerMode
+     * 
+     * \throws SilKit::StateError if the LIN Controller is not initialized.
      */
     virtual void Wakeup() = 0;
+
     /*! Set ControllerState::Operational without generating a wake up pulse.
      *
      * *AUTOSAR Name:* Lin_WakeupInternal
-     * \throw SilKit::StateError Command issued with wrong LinControllerMode
+     * 
+     * \throws SilKit::StateError if the LIN Controller is not initialized.
      */
     virtual void WakeupInternal() = 0;
 
-    /*! \brief Report the \ref LinFrameStatus of a LIN \ref LinFrame
-     * transmission and provides the transmitted frame.
+    /*! \brief Get the aggregated configuration of all LIN slaves in the network.
      *
-     * The FrameStatusHandler is called once per call to
-     * SendFrame() or call to
-     * SendFrameHeader(). The handler is called independently
-     * of the transmission's success or failure.
+     * Requires \ref LinControllerMode::Master.
+     * 
+     * \return A struct containing all LinIds on which LIN Slaves have configured 
+     * LinFrameResponseMode::TxUnconditional.
+     */
+    virtual LinSlaveConfiguration GetSlaveConfiguration() = 0;
+
+    /*! \brief Reports the \ref LinFrameStatus of a LIN \ref LinFrame transmission and provides the transmitted frame.
      *
-     * The FrameStatusHandler is called for all participating LIN
-     * controllers. I.e., for LIN masters, it is always called, and
-     * for LIN slaves, it is called if the corresponding \ref LinIdT is
-     * configured SlaveFrameResponseMode::Rx or
-     * SlaveFrameResponseMode::TxUnconditional.
-     *
+     * The FrameStatusHandler is used for reception and acknowledgement of LIN frames. The direction (prefixed with 
+     * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the \ref LinFrameStatus. 
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
@@ -182,10 +183,10 @@ public:
      * is received.
      *
      * Note: The LIN controller does not automatically enter sleep
-     * mode up reception of a go-to-sleep frame. I.e.,
-     * GoToSleepInternal() must be called manually
+     * mode on reception of a go-to-sleep frame. I.e.,
+     * GoToSleepInternal() must be called manually.
      *
-     * NB: This handler will always be called, independently of the
+     * Note: This handler will always be called, independently of the
      * \ref LinFrameResponseMode configuration for LIN ID 0x3C. However,
      * regarding the FrameStatusHandler, the go-to-sleep frame is
      * treated like every other frame, i.e. the FrameStatusHandler is
@@ -218,21 +219,26 @@ public:
      */
     virtual void RemoveWakeupHandler(HandlerId handlerId) = 0;
 
-    /*! \brief The FrameResponseUpdateHandler provides direct access
-     * to the LinFrameResponse configuration of other LIN controllers.
+    /*! \brief The LinSlaveConfigurationHandler triggers when a remote LIN Slave is configured via 
+     * LinController::Init(LinControllerConfig) 
      *
-     * NB: This callback is mainly for diagnostic purposes and is NOT
-     * needed for regular LIN controller operation.
+     * This callback is mainly for diagnostic purposes and is NOT needed for regular LIN controller operation. 
+     * It can be used to call \ref LinController::GetSlaveConfiguration to keep track of LIN Ids, where
+     * a response of a LIN Slave is to be expected.
+     * 
+     * Requires \ref LinControllerMode::Master.
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) = 0;
+    virtual HandlerId AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler) = 0;
 
-    /*! \brief Remove a FrameResponseUpdateHandler by HandlerId on this controller 
+    /*! \brief Remove a LinSlaveConfigurationHandler by HandlerId on this controller 
      *
+     * Requires \ref LinControllerMode::Master.
+     * 
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
-    virtual void RemoveFrameResponseUpdateHandler(HandlerId handlerId) = 0;
+    virtual void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) = 0;
 };
 
 } // namespace Lin

@@ -31,7 +31,6 @@ auto master_FrameStatusHandler =
     [](ILinController*, const LinFrameStatusEvent frameStatusEvent) {};
 master->AddFrameStatusHandler(master_FrameStatusHandler);
 
-
 // ------------------------------------------------------------
 // Send a GoToSleep Frame to the LIN bus
 master->GoToSleep();
@@ -43,4 +42,4 @@ assert(master->Status() == LinControllerStatus::Sleep);
 slave_GoToSleepHandler(goToSleepEvent);
 
 // the registered callback sets sleep state for the slave, after which also the slave is in sleep state:
-assert(master->Status() == LinControllerStatus::Sleep);
+assert(slave->Status() == LinControllerStatus::Sleep);

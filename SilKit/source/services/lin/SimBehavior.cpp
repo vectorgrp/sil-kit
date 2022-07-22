@@ -53,6 +53,16 @@ void SimBehavior::SendMsg(LinControllerStatusUpdate&& msg)
     SendMsgImpl(std::move(msg));
 }
 
+void SimBehavior::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header)
+{
+    _currentBehavior->ReceiveFrameHeaderRequest(header);
+}
+
+void SimBehavior::UpdateTxBuffer(const LinFrame& frame)
+{
+    _currentBehavior->UpdateTxBuffer(frame);
+}
+
 void SimBehavior::GoToSleep()
 {
     _currentBehavior->GoToSleep();

@@ -4,6 +4,17 @@ LinControllerConfig slaveConfig;
 slaveConfig.controllerMode = LinControllerMode::Slave;
 slaveConfig.baudRate = 20000;
 
+// Setup LinFrameResponseMode::Rx for LIN ID 0x10 and 0x11 on the slave
+LinFrame slaveFrame;
+slaveFrame.id = 0x10;
+slaveFrame.checksumModel = LinChecksumModel::Enhanced;
+slaveFrame.dataLength = 8;
+slaveFrame.data = {'S', 'L', 'A', 'V', 'E', 0, 0, 0};
+slaveConfig.frameResponses.push_back(LinFrameResponse{slaveFrame, LinFrameResponseMode::Rx});
+
+slaveFrame.id = 0x11;
+slaveConfig.frameResponses.push_back(LinFrameResponse{slaveFrame, LinFrameResponseMode::Rx});
+
 slave->Init(slaveConfig);
 
 // Register FrameStatusHandler to receive data
@@ -11,19 +22,19 @@ auto slave_FrameStatusHandler =
     [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};
 slave->AddFrameStatusHandler(slave_FrameStatusHandler);
 
-// Setup ID 0x10 for reception
-LinFrame rxFrame;
-rxFrame.id = 0x10;
-rxFrame.checksumModel = LinChecksumModel::Enhanced;
-rxFrame.dataLength = 8;
-
-slave->SetFrameResponse(rxFrame, LinFrameResponseMode::Rx);
-
 // ------------------------------------------------------------
 // Master Setup
 LinControllerConfig masterConfig;
 masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
+
+// Setup LinFrameResponseMode::TxUnconditional for LIN ID 0x11 on the master
+LinFrame masterFrame;
+masterFrame.id = 0x11;
+masterFrame.dataLength = 8;
+masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
+masterFrame.checksumModel = LinChecksumModel::Enhanced;
+masterConfig.frameResponses.push_back(LinFrameResponse{masterFrame, LinFrameResponseMode::TxUnconditional});
 
 master->Init(masterConfig);
 
@@ -32,30 +43,23 @@ auto master_FrameStatusHandler =
     [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};
 master->AddFrameStatusHandler(master_FrameStatusHandler);
 
-// ------------------------------------------------------------
-// Perform TX from master to slave, i.e., the master provides the
-// frame response.
-LinFrame masterFrame;
-masterFrame.id = 0x10;
-masterFrame.checksumModel = LinChecksumModel::Enhanced;
-masterFrame.dataLength = 8;
-masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
-
 if (UseAutosarInterface)
-{
+{ 
+    // Transmit the frame 0x10 without configuration on master, slave has configured RX for 0x10.
+    LinFrame masterFrame;
+    masterFrame.id = 0x10;
+    masterFrame.checksumModel = LinChecksumModel::Enhanced;
+    masterFrame.dataLength = 8;
+    masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
+
     // AUTOSAR API
     master->SendFrame(masterFrame, LinFrameResponseType::MasterResponse);
 }
 else
 {
-    // alternative, non-AUTOSAR API
-
-    // 1. setup the master response
-    master->SetFrameResponse(masterFrame, LinFrameResponseMode::TxUnconditional);
-    // 2. transmit the frame header, the master response will be transmitted automatically.
-    master->SendFrameHeader(0x10);
-
-    // Note: SendFrameHeader() can be called again without setting a new LinFrameResponse
+    // Alternative, non-AUTOSAR API
+    // Transmit the frame header, the master response is configured.
+    master->SendFrameHeader(0x11);
 }
 
 // In both cases (AUTOSAR and non-AUTOSAR), the following callbacks will be triggered:

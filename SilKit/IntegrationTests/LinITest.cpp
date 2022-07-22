@@ -135,7 +135,6 @@ struct LinNode
 
     ILinController* controller{nullptr};
     std::string _name;
-    LinControllerConfig _controllerConfig;
     TestResult _result;
     IParticipant* _participant{nullptr};
     Orchestration::ISystemController* _systemController{nullptr};
@@ -153,7 +152,7 @@ public:
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
+            {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(now); }}
         };
     }
 
@@ -224,10 +223,11 @@ public:
         controller->SendFrame(frame, LinFrameResponseType::SlaveResponse);
     }
 
-    void GoToSleep()
+    void GoToSleep(std::chrono::nanoseconds now)
     {
         controller->GoToSleep();
         _result.gotoSleepSent = true;
+        _result.sendTimes.push_back(now);
     }
 
     void ReceiveFrameStatus(ILinController* /*controller*/, const LinFrameStatusEvent& frameStatusEvent)
@@ -269,21 +269,13 @@ public:
     {
         _result.receivedFrames[frameStatusEvent.status].push_back(frameStatusEvent.frame);
 
-        for (const auto& response: _controllerConfig.frameResponses)
+        if (linController->Status() == LinControllerStatus::Sleep)
         {
-            if (linController->Status() == LinControllerStatus::Sleep)
-            {
-              _result.numberReceivedInSleep++;
-            }
-            if (response.frame.id == frameStatusEvent.frame.id && response.frame.checksumModel == frameStatusEvent.frame.checksumModel)
-            {
-                _result.numberReceived++;
-                if (_result.numberReceived == _controllerConfig.frameResponses.size())
-                {
-                    //Test finished
-                    Stop();
-                }
-            }
+            _result.numberReceivedInSleep++;
+        }
+        else
+        {
+            _result.numberReceived++;
         }
     }
 
@@ -353,11 +345,16 @@ auto MakeControllerConfig(const std::string& participantName)
         response_34.frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
         response_34.responseMode = LinFrameResponseMode::TxUnconditional;
 
+        LinFrameResponse response_60;
+        response_60.frame = GoToSleepFrame();
+        response_60.responseMode = LinFrameResponseMode::Rx;
+
         config.frameResponses.push_back(response_16);
         config.frameResponses.push_back(response_17);
         config.frameResponses.push_back(response_18);
         config.frameResponses.push_back(response_19);
         config.frameResponses.push_back(response_34);
+        config.frameResponses.push_back(response_60);
     }
     return config;
 }
@@ -422,9 +419,6 @@ TEST_F(LinITest, sync_lin_simulation)
         linController->AddFrameStatusHandler(Util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
         linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
 
-        //to validate the inputs
-        slave->_controllerConfig = config;
-
         timeSyncService->SetSimulationStepHandler(
             [slave = slave.get()](auto now) {
                 slave->DoAction(now);
@@ -466,11 +460,19 @@ TEST_F(LinITest, sync_lin_simulation)
       << "The master send times and receive times should be equal.";
 
     // The test runs for one schedule cycle with different messages/responses for master/slave
+
+    // Id       Master          Slave
+    // 16       LIN_TX_OK       RX_OK
+    // 17       LIN_TX_OK       IGNORED!
+    // 18       LIN_TX_OK       LIN_RX_ERROR due to checksum
+    // 19       LIN_TX_OK       LIN_RX_ERROR due to datalength
+    // 34       RX_OK           LIN_TX_OK
+
     auto&& masterRecvFrames = linNodes.at(0)->_result.receivedFrames;
     auto&& slaveRecvFrames = linNodes.at(1)->_result.receivedFrames;
 
-    // 4x acks with TX_OK for id 16,17,18,19 on master
-    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 4); 
+    // 5x acks with TX_OK for id 16,17,18,19,60 on master
+    EXPECT_EQ(masterRecvFrames[LinFrameStatus::LIN_TX_OK].size(), 5); 
 
     // LIN_RX_OK for Id 16 and GoToSleep-Frame
     EXPECT_EQ(slaveRecvFrames[LinFrameStatus::LIN_RX_OK].size(), 2);

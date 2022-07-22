@@ -12,30 +12,31 @@ LIN Service API
 .. |Init| replace:: :cpp:func:`Init()<SilKit::Services::Lin::ILinController::Init>`
 .. |SendFrame| replace:: :cpp:func:`SendFrame()<SilKit::Services::Lin::ILinController::SendFrame>`
 .. |SendFrameHeader| replace:: :cpp:func:`SendFrameHeader()<SilKit::Services::Lin::ILinController::SendFrameHeader>`
-.. |SetFrameResponse| replace:: :cpp:func:`SetFrameResponse()<SilKit::Services::Lin::ILinController::SetFrameResponse>`
+.. |UpdateTxBuffer| replace:: :cpp:func:`UpdateTxBuffer()<SilKit::Services::Lin::ILinController::UpdateTxBuffer>`
 
 .. |Wakeup| replace:: :cpp:func:`Wakeup()<SilKit::Services::Lin::ILinController::Wakeup>`
 .. |GoToSleep| replace:: :cpp:func:`GoToSleep()<SilKit::Services::Lin::ILinController::GoToSleep>`
+.. |GetSlaveConfiguration| replace:: :cpp:func:`GetSlaveConfiguration()<SilKit::Services::Lin::ILinController::GetSlaveConfiguration>`
 
 .. |AddFrameStatusHandler| replace:: :cpp:type:`AddFrameStatusHandler()<SilKit::Services::Lin::ILinController::AddFrameStatusHandler>`
 .. |AddGoToSleepHandler| replace:: :cpp:type:`AddGoToSleepHandler()<SilKit::Services::Lin::ILinController::AddGoToSleepHandler>`
 .. |AddWakeupHandler| replace:: :cpp:type:`AddWakeupHandler()<SilKit::Services::Lin::ILinController::AddWakeupHandler>`
-.. |AddFrameResponseUpdateHandler| replace:: :cpp:type:`AddFrameResponseUpdateHandler()<SilKit::Services::Lin::ILinController::AddFrameResponseUpdateHandler>`
+.. |AddLinSlaveConfigurationHandler| replace:: :cpp:type:`AddLinSlaveConfigurationHandler()<SilKit::Services::Lin::ILinController::AddLinSlaveConfigurationHandler>`
 
 .. |RemoveFrameStatusHandler| replace:: :cpp:type:`RemoveFrameStatusHandler()<SilKit::Services::Lin::ILinController::RemoveFrameStatusHandler>`
 .. |RemoveGoToSleepHandler| replace:: :cpp:type:`RemoveGoToSleepHandler()<SilKit::Services::Lin::ILinController::RemoveGoToSleepHandler>`
 .. |RemoveWakeupHandler| replace:: :cpp:type:`RemoveWakeupHandler()<SilKit::Services::Lin::ILinController::RemoveWakeupHandler>`
-.. |RemoveFrameResponseUpdateHandler| replace:: :cpp:type:`RemoveFrameResponseUpdateHandler()<SilKit::Services::Lin::ILinController::RemoveFrameResponseUpdateHandler>`
+.. |RemoveLinSlaveConfigurationHandler| replace:: :cpp:type:`RemoveLinSlaveConfigurationHandler()<SilKit::Services::Lin::ILinController::RemoveLinSlaveConfigurationHandler>`
 
 .. |FrameStatusHandler| replace:: :cpp:type:`FrameStatusHandler<SilKit::Services::Lin::ILinController::FrameStatusHandler>`
 .. |GoToSleepHandler| replace:: :cpp:type:`GoToSleepHandler<SilKit::Services::Lin::ILinController::GoToSleepHandler>`
 .. |WakeupHandler| replace:: :cpp:type:`WakeupHandler<SilKit::Services::Lin::ILinController::WakeupHandler>`
-.. |FrameResponseUpdateHandler| replace:: :cpp:type:`FrameResponseUpdateHandler<SilKit::Services::Lin::ILinController::FrameResponseUpdateHandler>`
+.. |LinSlaveConfigurationHandler| replace:: :cpp:type:`LinSlaveConfigurationHandler<SilKit::Services::Lin::ILinController::LinSlaveConfigurationHandler>`
 
 .. |LinFrameStatusEvent| replace:: :cpp:class:`LinFrameStatusEvent<SilKit::Services::Lin::LinFrameStatusEvent>`
 .. |LinGoToSleepEvent| replace:: :cpp:class:`LinGoToSleepEvent<SilKit::Services::Lin::LinGoToSleepEvent>`
 .. |LinWakeupEvent| replace:: :cpp:class:`LinWakeupEvent<SilKit::Services::Lin::LinWakeupEvent>`
-.. |LinFrameResponseUpdateEvent| replace:: :cpp:class:`LinFrameResponseUpdateEvent<SilKit::Services::Lin::LinFrameResponseUpdateEvent>`
+.. |LinSlaveConfigurationEvent| replace:: :cpp:class:`LinSlaveConfigurationEvent<SilKit::Services::Lin::LinSlaveConfigurationEvent>`
 
 .. |LinControllerConfig| replace:: :cpp:class:`LinControllerConfig<SilKit::Services::Lin::LinControllerConfig>`
 .. |LinFrameResponse| replace:: :cpp:class:`LinFrameResponse<SilKit::Services::Lin::LinFrameResponse>`
@@ -45,12 +46,15 @@ LIN Service API
 .. |LinControllerMode_Master| replace:: :cpp:enumerator:`LinControllerMode::Master<SilKit::Services::Lin::Master>`
 .. |LinControllerMode_Slave| replace:: :cpp:enumerator:`LinControllerMode::Slave<SilKit::Services::Lin::Slave>`
 
-.. |LinFrameResponseType_MasterResponse| replace:: :cpp:enumerator:`LinFrameResponseType::MasterResponse<SilKit::Services::Lin::MasterResponse>`
-.. |LinFrameResponseType_SlaveResponse| replace:: :cpp:enumerator:`LinFrameResponseType::SlaveResponse<SilKit::Services::Lin::SlaveResponse>`
+.. |LinFrameResponseType_MasterResponse| replace:: :cpp:enumerator:`LinFrameResponseType::MasterResponse<SilKit::Services::Lin::LinFrameResponseType::MasterResponse>`
+.. |LinFrameResponseType_SlaveResponse| replace:: :cpp:enumerator:`LinFrameResponseType::SlaveResponse<SilKit::Services::Lin::LinFrameResponseType::SlaveResponse>`
+.. |LinFrameResponseType_SlaveToSlave| replace:: :cpp:enumerator:`LinFrameResponseType::SlaveToSlave<SilKit::Services::Lin::LinFrameResponseType::SlaveToSlave>`
 
-.. |LinFrameResponseMode_Rx| replace:: :cpp:enumerator:`LinFrameResponseMode::Rx<SilKit::Services::Lin::Rx>`
+.. |LinFrameResponseMode_Rx| replace:: :cpp:enumerator:`LinFrameResponseMode::Rx<SilKit::Services::Lin::LinFrameResponseMode::Rx>`
+.. |LinFrameResponseMode_Tx| replace:: :cpp:enumerator:`LinFrameResponseMode::TxUnconditional<SilKit::Services::Lin::LinFrameResponseMode::TxUnconditional>`
 
 .. |LinFrameStatus| replace:: :cpp:enum:`LinFrameStatus<SilKit::Services::Lin::LinFrameStatus>`
+.. |LinFrameStatus_LIN_TX_OK| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<SilKit::Services::Lin::LIN_TX_OK>`
 .. |LinFrameStatus_LIN_TX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<SilKit::Services::Lin::LIN_TX_ERROR>`
 .. |LinFrameStatus_LIN_RX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_ERROR<SilKit::Services::Lin::LIN_RX_ERROR>`
 .. |LinFrameStatus_LIN_RX_NO_RESPONSE| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_NO_RESPONSE<SilKit::Services::Lin::LIN_RX_NO_RESPONSE>`
@@ -68,22 +72,24 @@ Using the LIN Controller
 -------------------------
 
 The LIN Service API provides a LIN bus abstraction through the |ILinController| interface.
-A LIN controller is created by calling |CreateLinController| given a controller name and (optional) network 
-name::
+A LIN controller is created by calling |CreateLinController| given a controller and network name::
 
   auto* linMasterController = participant->CreateLinController("LinMaster", "LIN1");
 
 LIN controllers will only communicate within the same network.
 
+.. _sec:lin-initialization:
+
 Initialization
 ~~~~~~~~~~~~~~
 
 Before the LIN Controller can be used, it must be initialized. The initialization is performed by setting up a
-|LinControllerConfig| and passing it to |Init|.
-
-At a minimum, the |LinControllerMode| must be set to either |LinControllerMode_Master| or |LinControllerMode_Slave| 
-and the baud rate must be specified. In addition, the |LinControllerConfig| allows providing
-an initial set of |LinFrameResponse|, which is particularly useful for LIN slaves.
+|LinControllerConfig| and passing it to |Init|. The |LinControllerMode| must be set to either 
+|LinControllerMode_Master| or |LinControllerMode_Slave| and the baud rate must be specified. Further, the 
+|LinControllerConfig| provides the final configuration on which LIN IDs the controller will receive 
+(|LinFrameResponseMode_Rx|) or respond to (|LinFrameResponseMode_Tx|) frames. This is always true for LIN slaves, 
+an exception is the use of |SendFrame| with |LinFrameResponseType_MasterResponse| or 
+|LinFrameResponseType_SlaveResponse|, which allows to extend the configuration during operation. 
 
 The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID 
 0x11 is configured for transmission::
@@ -93,7 +99,7 @@ The following example configures a LIN controller as a LIN slave with a baud rat
     response.frame.checksumModel = LinChecksumModel::Enhanced;
     response.frame.dataLength = 8;
     response.frame.data = {1, 2, 3, 4, 5, 6, 7, 8};
-    response.responseMode = LinFrameResponseMode::Rx;
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
 
     LinControllerConfig slaveConfig;
     slaveConfig.controllerMode = LinControllerMode::Slave;
@@ -102,26 +108,78 @@ The following example configures a LIN controller as a LIN slave with a baud rat
 
     linController->Init(slaveConfig);
 
-Note that |Init| should be called in the CommunicationReadyHandler of the LifecycleService.
+Note that |Init| must only be called once. For the configuration, also keep in mind that the LIN protocol allows 
+multiple nodes to be configured for reception, but only one node to provide a response. This restriction is not 
+evaluated upon |Init|, but only during operation.
 
 Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Data is transfered in the form of a |LinFrame|. A LIN master can initiate the transmission of a frame using the AUTOSAR 
-API |SendFrame| or using the low-level, non-AUTOSAR API |SendFrameHeader| which requires that a corresponding frame
-response was configured before at any LIN controller using |SetFrameResponse|.
+Data is transfered in the form of a |LinFrame|. A LIN master can initiate the transmission of a frame using the 
+AUTOSAR API |SendFrame|. If a LIN slave provides the response, |SendFrame| requires that a corresponding frame 
+response was configured before at a LIN slave using |Init|. If using |SendFrame| with 
+|LinFrameResponseType_MasterResponse|, the response doesn't have to be preconfigured and the payload provided in 
+the frame parameter of |SendFrame| will be used. If the LIN master uses the non-AUTOSAR API |SendFrameHeader|, 
+a LIN node has to be configured with |LinFrameResponseMode_Tx| on that ID. 
 
-Sending Data to Slaves
-______________________
+In all cases except |SendFrame| with |LinFrameResponseType_MasterResponse|, the responing node will receive the 
+header and complete the transmission using the payload of its current transmit buffer. The buffer can be updated
+with |UpdateTxBuffer| on the node that is configured with |LinFrameResponseMode_Tx| for the corresponding ID.
 
-To send data, a |LinFrame| must be setup with the LIN ID, the data to be transmitted, and the desired checksum model::
+Sending Data
+____________
 
-  // Prepare a frame with id 0x10 for transmission
-  LinFrame masterFrame;
-  masterFrame.id = 0x10;
-  masterFrame.dataLength = 8;
-  masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
-  masterFrame.checksumModel = LinChecksumModel::Enhanced;
+The transmission of a frame can be initiated using |SendFrame| or |SendFrameHeader|:
+
+1. Using |SendFrame| with |LinFrameResponseType_MasterResponse|, the frame can be sent in one call
+    and the master provides both header and response. A |LinFrame| must be setup with the LIN ID,
+    data, dataLength and the desired checksum model::
+
+        // Prepare a frame with id 0x10 for transmission
+        LinFrame masterFrame;
+        masterFrame.id = 0x10;
+        masterFrame.dataLength = 8;
+        masterFrame.data = {'M', 'A', 'S', 'T', 'E', 'R', 0, 0};
+        masterFrame.checksumModel = LinChecksumModel::Enhanced;
+
+        // initiate the frame transmission using the AUTOSAR interface
+        master->SendFrame(masterFrame, LinFrameResponseType::MasterResponse);
+
+2. When using |SendFrame| with |LinFrameResponseType_SlaveResponse| or |LinFrameResponseType_SlaveToSlave|, 
+    a slave has to be preconfigured with |LinFrameResponseMode_Tx| on that ID. With these response types, only the 
+    ID of the |LinFrame| used in |SendFrame| is taken into account. The actual payload and frame settings are provided
+    by the TX buffer of the responing slave. The following example assumes that a slave is configure as seen in 
+    :ref:`Initialization<sec:lin-initialization>`::
+
+        // The slave is configured to respond on ID 0x11
+        LinFrame slaveResponseFrame;
+        slaveResponseFrame.id = 0x11;
+
+        // initiate the frame transmission using the AUTOSAR interface
+        master->SendFrame(slaveResponseFrame, LinFrameResponseType::SlaveResponse);
+       
+    Using |SendFrame| with |LinFrameResponseType_SlaveResponse| assumes that the master is interested in the response
+    and will configure itself for reception (|LinFrameResponseMode_Rx|).
+
+3. Using |SendFrameHeader|, the transmission is initiated by sending the header. The node (either master or slave) configured with
+    |LinFrameResponseMode_Tx| will provide the reponse. The actual payload and frame settings are 
+    provided by the TX buffer of the responing LIN node. The following example also assumes that a slave is 
+    configure as seen in :ref:`Initialization<sec:lin-initialization>`::
+
+        // Slave:
+        LinFrame updatedSlaveResponse;
+        updatedSlaveResponse.id = 0x11;
+        updatedSlaveResponse.dataLength = 8;
+        updatedSlaveResponse.data = {'S', 'L', 'A', 'V', 'E', 1, 2, 3};
+        updatedSlaveResponse.checksumModel = LinChecksumModel::Enhanced;
+        slave->UpdateTxBuffer(updatedSlaveResponse);
+
+        // Master:
+        // Transmit the frame header, the response will be provided by the slave.
+        master->SendFrameHeader(0x11);
+
+Transmission acknowledgement
+____________________________
 
 To be notified for the success or failure of the transmission, a |FrameStatusHandler| should be registered using 
 |AddFrameStatusHandler|::
@@ -131,25 +189,6 @@ To be notified for the success or failure of the transmission, a |FrameStatusHan
       [](ILinController*, const LinFrameStatusEvent& frameStatusEvent) {};
   master->AddFrameStatusHandler(frameStatusHandler);
 
-The transmission of the frame can be initiated using either the AUTOSAR interface or the low-level, non-AUTOSAR 
-interface:
-
-    1. Using the AUTOSAR interface, the frame can be sent in one call with |LinFrameResponseType_MasterResponse| indicating 
-       that the master provides both header and response::
-
-         // send the frame using the AUTOSAR interface
-         master->SendFrame(masterFrame, LinFrameResponseType::MasterResponse);
-
-    2. Using the low-level interface, the frame is sent in two steps. First a |LinFrameResponse| is configured with 
-       TxUnconditional, and then a LIN header with the corresponding id is sent::
-
-         // Setup the master response
-         master->SetFrameResponse(masterFrame, LinFrameResponseMode::TxUnconditional);
-
-         // Transmit the frame header, the response will be transmitted automatically.
-         master->SendFrameHeader(0x10);
-
-
 A successful transmission is confirmed via the registered callback, for example::
 
   frameStatusHandler(master, frameStatusEvent);
@@ -158,57 +197,25 @@ A successful transmission is confirmed via the registered callback, for example:
   // frameStatusEvent.frame: masterFrame;
   // frameStatusEvent.status: LinFrameStatus::LIN_TX_OK;
 
-.. admonition:: Note
+If multiple controllers have configured |LinFrameResponseMode_Tx| on the same LIN ID, a collision occurs on the bus,
+which is indicated by |LinFrameStatus_LIN_TX_ERROR|.
 
-    If another controller also has ID 0x10 configured for transmission, a collision occurs on the bus, which is 
-    indicated by |LinFrameStatus_LIN_TX_ERROR|.
-
-.. admonition:: Note
-
-    The end of frame timestamp is only valid when using the detailed simulation.
-
-Receiving Data from a Slave
+Receiving Data from a slave
 ___________________________
 
-To receive data from a LIN slave, a |FrameStatusHandler| must be registered using |AddFrameStatusHandler|, which is 
-called by the LIN controller whenever a frame is received::
+Beside transmission acknowledgemets, the |FrameStatusHandler| is also used for reception. To receive data, the 
+|FrameStatusHandler| must be registered using |AddFrameStatusHandler|, which is called by the LIN controller when 
+a frame is received and the LIN node is configured for reception with |LinFrameResponseMode_Rx| on that LIN ID::
 
     // Register FrameStatusHandler to receive data from the LIN slave
     auto frameStatusHandler =
         [](ILinController*, const LinFrameStatusEvent& frameStatusEvent) {};
     master->AddFrameStatusHandler(frameStatusHandler);
 
-To initiate the data transfer from slave to master, the master must provide the LIN ID as well as the expected data 
-length and checksum model::
-
-    // Prepare to receive a frame with id 0x11
-    LinFrame frameRequest;
-    frameRequest.id = 0x11;
-    frameRequest.checksumModel = LinChecksumModel::Enhanced;
-    frameRequest.dataLength = 8;
-
-Again, the transmission can be initiated using either the AUTOSAR interface or the low-level, non-AUTOSAR interface.
-
-    1. Using the AUTOSAR interface, the frame can be sent in one call. The |LinFrameResponseType_SlaveResponse| indicates 
-       that the master only provides the frame header and expects a slave to provide the response::
-    
-        // Initiate the transmission
-        master->SendFrame(frameRequest, LinFrameResponseType::SlaveResponse);
-
-    2. Alternatively, the transmission can be initiated using the low-level interface. This requires first to configure 
-       a |LinFrameResponse| with |LinFrameResponseMode_Rx|, and then sending a LIN header with the corresponding id::
-
-        // Configure LIN ID 0x11 for reception
-        master->SetFrameResponse(frameRequest, LinFrameResponseMode::Rx);
-    
-        // Initiate the transmission, a LinFrameResponse must be setup by a LIN slave
-        master->SendFrameHeader(0x11);
-
-The end of the transmission will be confirmed by a call to the registered |FrameStatusHandler|. The incoming 
-|LinFrameStatusEvent| holds a |LinFrameStatus| indicating the success or failure of the transmission.
-
-If a LIN slave has previously setup a matching |LinFrameResponse| for transmission, the registered |FrameStatusHandler| 
-will deliver a |LinFrameStatusEvent| as follows::
+The incoming |LinFrameStatusEvent| holds a |LinFrameStatus| indicating the success (|LinFrameStatus_LIN_RX_OK|) or 
+failure (|LinFrameStatus_LIN_RX_ERROR|) of the transmission. If a LIN slave has previously setup a matching 
+|LinFrameResponse| for transmission, the registered |FrameStatusHandler| will deliver a |LinFrameStatusEvent| as 
+follows::
 
     frameStatusHandler(master, frameStatusEvent);
     // With:
@@ -216,11 +223,8 @@ will deliver a |LinFrameStatusEvent| as follows::
     // frameStatusEvent.frame: slaveFrame;
     // frameStatusEvent.status: LinFrameStatus::LIN_RX_OK;
 
-.. admonition:: Note
-
-    If the frame response provided by the |LinFrame| does not match both expected dataLength and checksumModel, or if 
-    more than one slave provided a response, the |LinFrameStatus_LIN_RX_ERROR| will be used. If no LIN slave provides a 
-    frame response, the |LinFrameStatus_LIN_RX_NO_RESPONSE| will be used.
+If the frame response provided by the |LinFrame| does not match both expected dataLength and checksumModel, or if 
+more than one slave provided a response, the |LinFrameStatus_LIN_RX_ERROR| will be used.
 
 Managing the event handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,7 +234,7 @@ Adding a handler will return a |HandlerId| which can be used to remove the handl
 - |RemoveFrameStatusHandler|
 - |RemoveGoToSleepHandler|
 - |RemoveWakeupHandler|
-- |RemoveFrameResponseUpdateHandler|
+- |RemoveLinSlaveConfigurationHandler|
 
 API and Data Type Reference
 ---------------------------
@@ -281,7 +285,7 @@ Assumptions:
 - *UseAutosarInterface* is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API. 
   It will most likely not be used in practice and it merely intended to show the different usages of the API.
   
-Successful Transmission from Master to Slave
+Successful Transmission from Master to slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows a successful data transfer from a LIN master to a LIN slave. The transmission must be initiated by 
@@ -291,17 +295,17 @@ the master.
    examples/lin/Master_to_Slave_LIN_TX_OK.cpp
    :language: cpp
    
-Successful Transmission from Slave to Master
+Successful Transmission from slave to Master
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows a successful data transfer from a LIN Slave to a LIN master. The transmission must be initiated by 
+This example shows a successful data transfer from a LIN slave to a LIN master. The transmission must be initiated by 
 the master.
 
 .. literalinclude::
    examples/lin/Slave_to_Master_LIN_RX_OK.cpp
    :language: cpp
 
-Successful Transmission from Slave to Slave
+Successful Transmission from slave to slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how data is transferred from one LIN slave to another one. The data transfer must be initiated by a 
@@ -331,10 +335,6 @@ this LIN ID.
    examples/lin/Slave_to_Master_LIN_RX_NO_RESPONSE.cpp
    :language: cpp
 
-.. admonition:: Note
-
-   For simplicity, this example only uses the AUTOSAR interface, the behavior and error code would be the same for the 
-   non-AUTOSAR interface.
 
 Erroneous Transmission from Slave to Master - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -349,7 +349,7 @@ responses for the same LIN ID.
 Go To Sleep
 ~~~~~~~~~~~
 
-This example shows how to initiate a |GoToSleep| and when the controller switch from operational to sleep mode.
+This example shows how to use |GoToSleep| and when the controller will switch from operational to sleep mode.
 
 .. literalinclude::
    examples/lin/Go_To_Sleep.cpp
@@ -358,7 +358,8 @@ This example shows how to initiate a |GoToSleep| and when the controller switch 
 .. admonition:: Note
     
     The |GoToSleepHandler| is triggered even without configuring ID 0x3C for reception. However, the 
-    |FrameStatusHandler| is only called if ID 0x3C is configured for reception.
+    |FrameStatusHandler| for slaves is only called if ID 0x3C is configured for reception. The master initiated
+    the sleep mode, it's |FrameStatusHandler| is called with |LinFrameStatus_LIN_TX_OK|.
 
 Wake Up
 ~~~~~~~
@@ -370,12 +371,12 @@ I.e., the situation corresponds to the end of the previous example.
    examples/lin/Wake_Up.cpp
    :language: cpp
 
-FrameResponseUpdateHandler
+LinSlaveConfigurationHandler
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows how the |FrameResponseUpdateHandler| provides direct access to the |LinFrameResponse| configuration of 
+This example shows how the |LinSlaveConfigurationHandler| provides direct access to the |LinFrameResponse| configuration of 
 all slaves. It is primarily intended for diagnostic purposes and not required for regular operation of a LIN controller.
 
 .. literalinclude::
-   examples/lin/FrameResponseUpdateHandler.cpp
+   examples/lin/LinSlaveConfigurationHandler.cpp
    :language: cpp

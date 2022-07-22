@@ -44,12 +44,14 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Lin
 SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinSendFrameHeaderRequest& header)
 {
     buffer
+        << header.timestamp
         << header.id;
     return buffer;
 }
 SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinSendFrameHeaderRequest& header)
 {
     buffer
+        >> header.timestamp
         >> header.id;
     return buffer;
 }

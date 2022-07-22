@@ -158,12 +158,12 @@ void Schedule_Destroy(Schedule* schedule)
 }
 
 SilKit_Participant* participant;
-SilKit_LinController*         linController;
-SilKit_LinControllerConfig*   controllerConfig;
-char*                     participantName;
-Schedule*                 masterSchedule;
-Timer                     slaveTimer;
-SilKit_NanosecondsTime        slaveNow;
+SilKit_LinController* linController;
+SilKit_LinControllerConfig* controllerConfig;
+char* participantName;
+Schedule* masterSchedule;
+Timer slaveTimer;
+SilKit_NanosecondsTime slaveNow;
 
 void StopCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
@@ -256,6 +256,27 @@ void Master_WakeupHandler(void* context, SilKit_LinController* controller, const
            wakeUpEvent->direction);
     SilKit_LinController_WakeupInternal(controller);
     Schedule_ScheduleNextTask(masterSchedule);
+}
+
+void Master_LinSlaveConfigurationHandler(void* context, SilKit_LinController* controller,
+                                         const SilKit_LinSlaveConfigurationEvent* linSlaveConfiguratioEvent)
+{
+    UNUSED_ARG(context);
+    UNUSED_ARG(linSlaveConfiguratioEvent);
+
+    SilKit_LinSlaveConfiguration* linSlaveConfiguration;
+    SilKit_LinController_GetSlaveConfiguration(controller, &linSlaveConfiguration);
+
+    printf("Received a new SilKit_LinSlaveConfiguration{respondingLinIds=[");
+    if (linSlaveConfiguration->numRespondingLinIds > 0)
+    {
+        printf("%d", linSlaveConfiguration->respondingLinIds[0]);
+        for (size_t i = 1; i < linSlaveConfiguration->numRespondingLinIds; i++)
+        {
+            printf(", %d", linSlaveConfiguration->respondingLinIds[i]);
+        }
+    }
+    printf("]}\n");
 }
 
 void Master_SendFrame_16(SilKit_NanosecondsTime now)
@@ -443,20 +464,39 @@ void Slave_DoAction(SilKit_NanosecondsTime now)
     Timer_ExecuteAction(&slaveTimer, now);
 }
 
-void Slave_SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now)
+void Slave_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbTimeSyncService);
 
     printf("now=%"PRIu64"ms\n", now / 1000000);
+
     Slave_DoAction(now);
     SleepMs(500);
+}
+
+void Slave_UpdateTxBuffer_LinId34()
+{
+    SilKit_LinFrame frame34;
+    SilKit_Struct_Init(SilKit_LinFrame, frame34);
+    frame34.id = 34;
+    frame34.checksumModel = SilKit_LinChecksumModel_Enhanced;
+    frame34.dataLength = 6;
+    uint8_t tmp[8] = {rand() % 10, 0, 0, 0, 0, 0, 0, 0};
+    memcpy(frame34.data, tmp, sizeof(tmp));
+    SilKit_LinController_UpdateTxBuffer(linController, &frame34);
 }
 
 void Slave_FrameStatusHandler(void* context, SilKit_LinController* controller, const SilKit_LinFrameStatusEvent* frameStatusEvent)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
+
+    // On a TX acknowledge for ID 34, update the TxBuffer for the next transmission
+    if (frameStatusEvent->frame->id == 34)
+    {
+        Slave_UpdateTxBuffer_LinId34();
+    }
 
     SilKit_LinFrame* frame = frameStatusEvent->frame;
     printf(">> Lin::Frame{id=%d, cs=%d, dl=%d, d={%d %d %d %d %d %d %d %d}} status=%d timestamp=%"PRIu64"ms\n", frame->id,
@@ -546,6 +586,10 @@ int main(int argc, char* argv[])
         SilKit_LinController_AddFrameStatusHandler(linController, NULL, &Master_ReceiveFrameStatus, &frameStatusHandlerId);
         SilKit_HandlerId wakeupHandlerId;
         SilKit_LinController_AddWakeupHandler(linController, NULL, &Master_WakeupHandler, &wakeupHandlerId);
+        SilKit_HandlerId linSlaveConfigurationHandlerId;
+        SilKit_LinController_AddLinSlaveConfigurationHandler(linController, NULL, &Master_LinSlaveConfigurationHandler,
+                                                             &linSlaveConfigurationHandlerId);
+
         SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Master_SimTask, 1000000);
     }
     else
@@ -557,7 +601,7 @@ int main(int argc, char* argv[])
         SilKit_LinController_AddGoToSleepHandler(linController, NULL, &Slave_GoToSleepHandler, &goToSleepHandlerId);
         SilKit_HandlerId wakeupHandlerId;
         SilKit_LinController_AddWakeupHandler(linController, NULL, &Slave_WakeupHandler, &wakeupHandlerId);
-        SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Slave_SimTask, 1000000);
+        SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Slave_SimulationStepHandler, 1000000);
     }
 
     SilKit_ParticipantState outFinalParticipantState;

@@ -35,7 +35,7 @@ public:
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinIdT linId) override;
-    void SetFrameResponse(LinFrame frame, LinFrameResponseMode mode) override;
+    void UpdateTxBuffer(LinFrame frame, LinFrameResponseMode mode) override;
     void SetFrameResponses(std::vector<LinFrameResponse> responses) override;
 
     void GoToSleep() override;
@@ -46,14 +46,13 @@ public:
     void AddFrameStatusHandler(FrameStatusHandler handler) override;
     void AddGoToSleepHandler(GoToSleepHandler handler) override;
     void AddWakeupHandler(WakeupHandler handler) override;
-    void AddFrameResponseUpdateHandler(FrameResponseUpdateHandler handler) override;
+    void AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler) override;
 
     // IMsgForLinController
     void ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
-    void ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
 
 public:
     // ----------------------------------------

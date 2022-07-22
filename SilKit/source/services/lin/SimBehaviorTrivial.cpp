@@ -9,17 +9,6 @@ namespace Services {
 namespace Lin {
 
 namespace {
-inline auto ToFrameResponseMode(LinFrameResponseType responseType) -> LinFrameResponseMode
-{
-    switch (responseType)
-    {
-    case LinFrameResponseType::MasterResponse: return LinFrameResponseMode::TxUnconditional;
-    case LinFrameResponseType::SlaveResponse: return LinFrameResponseMode::Rx;
-    case LinFrameResponseType::SlaveToSlave: return LinFrameResponseMode::Unused;
-    }
-    return LinFrameResponseMode::Unused;
-}
-
 inline auto ToTxFrameStatus(LinFrameStatus status) -> LinFrameStatus
 {
     switch (status)
@@ -77,39 +66,50 @@ auto SimBehaviorTrivial::AllowReception(const Core::IServiceEndpoint* /*from*/) 
 template <typename MsgT>
 void SimBehaviorTrivial::SendMsgImpl(MsgT&& msg)
 {
-    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg));
+    _participant->SendMsg(_parentServiceEndpoint, std::forward<MsgT>(msg)); 
 }
 
 void SimBehaviorTrivial::SendMsg(LinSendFrameRequest&& msg)
 {
-    _parentController->SetFrameResponse(msg.frame, ToFrameResponseMode(msg.responseType));
     _parentController->SendFrameHeader(msg.frame.id);
 }
+
 void SimBehaviorTrivial::SendMsg(LinTransmission&& msg)
 {
     SendMsgImpl(msg);
 }
+
 void SimBehaviorTrivial::SendMsg(LinControllerConfig&& msg)
 {
     SendMsgImpl(msg);
 }
+
 void SimBehaviorTrivial::SendMsg(LinSendFrameHeaderRequest&& msg)
 {
-    // We answer the call immediately based on the cached responses
-    LinTransmission transmission;
+    LinFrame frame;
     auto numResponses = 0;
-    std::tie(numResponses, transmission.frame) = _parentController->GetResponse(msg.id);
-    transmission.frame.id = msg.id;
-    transmission.timestamp = _timeProvider->Now();
+    std::tie(numResponses, frame) = _parentController->GetResponse(msg.id);
+
+    if (numResponses == 1)
+    {
+        // Send the header, the Tx-Node will generate the LinTransmission (possibly the master itself)
+        SendMsgImpl(msg);
+    }
+    else
+    {
+        // Error case: Send LinTransmission with error status
+        SendErrorTransmissionOnHeaderRequest(numResponses, frame);
+    }
+}
+
+void SimBehaviorTrivial::SendErrorTransmissionOnHeaderRequest(int numResponses, LinFrame frame)
+{
+    LinTransmission transmission{_timeProvider->Now(), frame, LinFrameStatus::NOT_OK};
 
     // Check for status change due to numResponses
     if (numResponses == 0)
     {
         transmission.status = LinFrameStatus::LIN_RX_NO_RESPONSE;
-    }
-    else if (numResponses == 1)
-    {
-        transmission.status = LinFrameStatus::LIN_RX_OK;
     }
     else if (numResponses > 1)
     {
@@ -120,20 +120,21 @@ void SimBehaviorTrivial::SendMsg(LinSendFrameHeaderRequest&& msg)
     SendMsgImpl(transmission);
 
     // Dispatch the LIN transmission to our own callbacks
-    LinFrameResponseMode masterResponseMode =
-        _parentController->GetThisLinNode().responses[msg.id].responseMode;
+    LinFrameResponseMode masterResponseMode = _parentController->GetThisLinNode().responses[frame.id].responseMode;
     LinFrameStatus masterFrameStatus = transmission.status;
     if (masterResponseMode == LinFrameResponseMode::TxUnconditional)
     {
-        masterFrameStatus = ToTxFrameStatus(masterFrameStatus);
+        // This can only happen if the master + another slave have TxUnconditional on this LinId
+        masterFrameStatus = LinFrameStatus::LIN_TX_ERROR;
     }
 
     _tracer.Trace(ToTracingDir(masterFrameStatus), transmission.timestamp, transmission.frame);
 
-    // Dispatch the reply locally
-    _parentController->CallLinFrameStatusEventHandler(LinFrameStatusEvent{transmission.timestamp, transmission.frame, masterFrameStatus});
-
+    // Evoke the callbacks locally
+    _parentController->CallLinFrameStatusEventHandler(
+        LinFrameStatusEvent{transmission.timestamp, transmission.frame, masterFrameStatus});
 }
+
 
 void SimBehaviorTrivial::SendMsg(LinFrameResponseUpdate&& msg)
 {
@@ -145,14 +146,41 @@ void SimBehaviorTrivial::SendMsg(LinControllerStatusUpdate&& msg)
     SendMsgImpl(msg);
 }
 
-auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame)
-    -> LinFrameStatus
+void SimBehaviorTrivial::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header)
 {
-    if (isGoToSleepFrame)
+    LinFrameResponse response = _parentController->GetThisLinNode().responses[header.id];
+    if (response.responseMode != LinFrameResponseMode::TxUnconditional)
     {
-        return LinFrameStatus::LIN_RX_OK;
+        // Ignore headers if not configured to answer
+        return;
+    }
+    if (response.frame.checksumModel == LinChecksumModel::Undefined)
+    {
+        // Reject undefined chaecksum models
+        _parentController->WarnOnSendAttemptWithUndefinedChecksum(response.frame);
+        return;
     }
 
+    LinTransmission transmission{_timeProvider->Now(), response.frame, LinFrameStatus::LIN_RX_OK};
+
+    // Dispatch the LIN transmission to all connected nodes
+    SendMsgImpl(transmission);
+
+    _tracer.Trace(ToTracingDir(LinFrameStatus::LIN_RX_OK), transmission.timestamp, transmission.frame);
+
+    // Evoke the callbacks with LIN_TX_OK locally
+    _parentController->CallLinFrameStatusEventHandler(
+        LinFrameStatusEvent{transmission.timestamp, transmission.frame, LinFrameStatus::LIN_TX_OK});
+}
+
+void SimBehaviorTrivial::UpdateTxBuffer(const LinFrame& /*frame*/)
+{
+    // NOP
+}
+
+auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission, bool /*isGoToSleepFrame*/)
+    -> LinFrameStatus
+{
     // Evaluate locally known response
     auto& thisLinNode = _parentController->GetThisLinNode();
     const auto response = thisLinNode.responses[linTransmission.frame.id];
@@ -164,10 +192,15 @@ auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
         }
         case LinFrameResponseMode::Rx:
         {
-            //Veriy Checksum and DataLength
-            if (response.frame.dataLength != linTransmission.frame.dataLength
-                || response.frame.checksumModel != linTransmission.frame.checksumModel)
+            // Verify Checksum and DataLength
+            if (response.frame.dataLength != linTransmission.frame.dataLength)
             {
+                _parentController->WarnOnWrongDataLength(linTransmission.frame, response.frame);
+                return LinFrameStatus::LIN_RX_ERROR;
+            }
+            if (response.frame.checksumModel != linTransmission.frame.checksumModel)
+            {
+                _parentController->WarnOnWrongChecksum(linTransmission.frame, response.frame);
                 return LinFrameStatus::LIN_RX_ERROR;
             }
             break;
@@ -182,6 +215,7 @@ auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
     return linTransmission.status;
 }
 
+
 void SimBehaviorTrivial::GoToSleep()
 {
     LinTransmission gotosleepTx;
@@ -190,6 +224,10 @@ void SimBehaviorTrivial::GoToSleep()
     gotosleepTx.timestamp = _timeProvider->Now();
 
     SendMsgImpl(gotosleepTx);
+
+    // Evoke the callbacks with LIN_TX_OK locally
+    _parentController->CallLinFrameStatusEventHandler(
+        LinFrameStatusEvent{gotosleepTx.timestamp, gotosleepTx.frame, LinFrameStatus::LIN_TX_OK});
 
     // For trivial simulations we go directly to Sleep state.
     _parentController->GoToSleepInternal();
