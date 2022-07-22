@@ -23,7 +23,7 @@ using namespace SilKit::Tests;
 
 const std::chrono::nanoseconds expectedTime{10ms};
 
-bool wakeup{false};
+std::atomic<bool> wakeup{false};
 std::mutex mx;
 std::condition_variable cv;
 
@@ -35,8 +35,8 @@ TEST(AsyncSimTaskITest, test_async_simtask_lockstep)
 
     SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
 
-    auto syncTimeNs{0ns};
-    auto done{false};
+    std::atomic<std::chrono::nanoseconds> syncTimeNs{0ns};
+    std::atomic<bool> done{false};
     std::atomic<int> numActiveSimtasks{0};
     std::atomic<int> numSyncSimtasks{0};
 
@@ -83,10 +83,10 @@ TEST(AsyncSimTaskITest, test_async_simtask_lockstep)
     },1ms);
 
     auto completer = std::thread{[&](){
-        while (!done && (syncTimeNs < expectedTime))
+        while (!done && (syncTimeNs.load() < expectedTime))
         {
             std::unique_lock<decltype(mx)> lock(mx);
-            cv.wait(lock, [] { return wakeup;});
+            cv.wait(lock, [] { return wakeup.load();});
             wakeup = false;
             if(done)
             {
@@ -196,7 +196,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
 
     SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
 
-    auto syncTime{0ns};
+    std::atomic<std::chrono::nanoseconds> syncTime{0ns};
 
     auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
     auto* asyncParticipant = testHarness.GetParticipant("Async");
@@ -218,7 +218,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
         if (now < expectedTime)
         {
             //Signal other thread to call CompleteSimTask
-            startupPromise.set_value(syncTime == expectedTime);
+            startupPromise.set_value(syncTime.load() == expectedTime);
             //Wait until other thread has signaled
             auto nextIter = nextIterPromise.get_future();
             nextIter.wait();
@@ -234,13 +234,14 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach time out";
 
     thread.join();
-    auto isSame = expectedTime == syncTime;
-    auto isOffByOne = (syncTime == (expectedTime + 1ms)) || (syncTime == (expectedTime - 1ms));
+    const auto currentSyncTime = syncTime.load();
+    auto isSame = expectedTime == currentSyncTime;
+    auto isOffByOne = (currentSyncTime == (expectedTime + 1ms)) || (currentSyncTime == (expectedTime - 1ms));
     ASSERT_TRUE(isSame || isOffByOne)
         << "Simulation time should be at most off by one expectedTime "
         << " (due to NextSimTask handling in distributed participants): "
         << " expectedTime=" << expectedTime.count()
-        << " syncTime=" << syncTime.count();
+        << " syncTime=" << currentSyncTime.count();
 }
 
 TEST(AsyncSimTaskITest, test_async_simtask_different_periods)

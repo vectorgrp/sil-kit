@@ -14,6 +14,7 @@
 #include "ParticipantConfiguration.hpp"
 #include "PerformanceMonitor.hpp"
 #include "TimeProvider.hpp"
+#include "TimeConfiguration.hpp"
 #include "WatchDog.hpp"
 
 namespace SilKit {
@@ -103,7 +104,7 @@ private:
     LifecycleService* _lifecycleService{nullptr};
     Services::Logging::ILogger* _logger{nullptr};
     ITimeProvider* _timeProvider{nullptr};
-    std::shared_ptr<TimeConfiguration> _timeConfiguration{nullptr};
+    TimeConfiguration _timeConfiguration;
 
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
     std::vector<std::string> _requiredParticipants;

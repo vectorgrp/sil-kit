@@ -17,57 +17,6 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-class TimeConfiguration
-{
-public:
-    TimeConfiguration() 
-        : _blocking(false)
-    {
-        _currentTask.timePoint = -1ns;
-        _currentTask.duration = 0ns;
-        _myNextTask.timePoint = 0ns;
-        // NB: This is used when SetPeriod is never called
-        _myNextTask.duration = 1ms;
-    }
-
-    void SetBlockingMode(bool blocking) { _blocking = blocking; }
-
-    void SynchronizedParticipantAdded(const std::string& otherParticipantName)
-    {
-        if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
-        {
-            // ignore already known participants
-            return;
-        }
-        NextSimTask task;
-        task.timePoint = -1ns;
-        task.duration = 0ns;
-        _otherNextTasks[otherParticipantName] = task;
-    }
-
-    void SynchronizedParticipantRemoved(const std::string& otherParticipantName)
-    {
-        if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
-        {
-            const std::string errorMessage{"Participant " + otherParticipantName + " unknown."};
-            throw std::runtime_error{errorMessage};
-        }
-        auto it = _otherNextTasks.find(otherParticipantName);
-        if (it != _otherNextTasks.end())
-        {
-            _otherNextTasks.erase(it);
-        }
-    }
-    void SetStepDuration(std::chrono::nanoseconds duration) { _myNextTask.duration = duration; }
-
-    // TODO make private and create getters/setters
-public:
-    NextSimTask _currentTask;
-    NextSimTask _myNextTask;
-    std::map<std::string, NextSimTask> _otherNextTasks;
-    bool _blocking;
-};
-
 struct ITimeSyncPolicy
 {
 public:
@@ -104,14 +53,12 @@ public:
 
     void Initialize() override
     {
-        _configuration->_currentTask.timePoint = -1ns;
-        _configuration->_currentTask.duration = 0ns;
-        _configuration->_myNextTask.timePoint = 0ns;
+        _configuration->Initialize();
     }
 
     void RequestInitialStep() override
     {
-        _controller.SendMsg(_configuration->_myNextTask);
+        _controller.SendMsg(_configuration->NextSimStep());
         // Bootstrap checked execution, in case there is no other participant.
         // Else, checked execution is initiated when we receive their NextSimTask messages.
         _participant->ExecuteDeferred([this]() {
@@ -127,7 +74,7 @@ public:
 
     void RequestNextStep() override
     {
-        _controller.SendMsg(_configuration->_myNextTask);
+        _controller.SendMsg(_configuration->NextSimStep());
         _participant->ExecuteDeferred([this]() {
             this->CheckDistributedTimeAdvanceGrant();
         });
@@ -135,7 +82,7 @@ public:
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
     {
-        _configuration->_otherNextTasks[from->GetServiceDescriptor().GetParticipantName()] = task;
+        _configuration->OnReceiveNextSimStep(from->GetServiceDescriptor().GetParticipantName(), task);
 
         switch (_controller.State())
         {
@@ -170,7 +117,7 @@ private:
 
     bool IsSync() const
     {
-        return _configuration->_blocking;
+        return _configuration->IsBlocking();
     }
 
     void CheckDistributedTimeAdvanceGrant()
@@ -181,10 +128,9 @@ private:
             return;
         }
 
-        for (auto&& otherTask : _configuration->_otherNextTasks)
+        if(_configuration->OtherParticipantHasHigherTimepoint())
         {
-            if (_configuration->_myNextTask.timePoint > otherTask.second.timePoint)
-                return;
+            return;
         }
 
         // when running in Async mode, set the _isExecutingSimStep guard
@@ -201,10 +147,9 @@ private:
         }
 
         // No other participant has a lower time point: It is our turn
-        _configuration->_currentTask = _configuration->_myNextTask;
-        _configuration->_myNextTask.timePoint =
-            _configuration->_currentTask.timePoint + _configuration->_currentTask.duration;
-        _controller.ExecuteSimStep(_configuration->_currentTask.timePoint, _configuration->_currentTask.duration);
+        _configuration->AdvanceTimeStep();
+        auto currentStep = _configuration->CurrentSimStep();
+        _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
         _controller.AwaitNotPaused();
 
         if (IsSync())
@@ -246,7 +191,6 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     });
 
     ConfigureTimeProvider(TimeProviderKind::NoSync);
-    _timeConfiguration = std::make_shared<TimeConfiguration>();
 
     participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const Core::ServiceDescriptor& descriptor) {
             if (descriptor.GetServiceType() == Core::ServiceType::InternalController)
@@ -265,7 +209,7 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                         // ignore self
                         return;
                     }
-                    _timeConfiguration->SynchronizedParticipantAdded(descriptorParticipantName);
+                    _timeConfiguration.SynchronizedParticipantAdded(descriptorParticipantName);
                 }
             }
         }
@@ -300,15 +244,15 @@ void TimeSyncService::SetSimulationStepHandler(
     std::chrono::nanoseconds initialStepSize)
 {
     _simTask = std::move(task);
-    _timeConfiguration->SetBlockingMode(true);
-    _timeConfiguration->SetStepDuration(initialStepSize);
+    _timeConfiguration.SetBlockingMode(true);
+    _timeConfiguration.SetStepDuration(initialStepSize);
 }
 
 void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize)
 {
     _simTask = std::move(task);
-    _timeConfiguration->SetBlockingMode(false);
-    _timeConfiguration->SetStepDuration(initialStepSize);
+    _timeConfiguration.SetBlockingMode(false);
+    _timeConfiguration.SetStepDuration(initialStepSize);
 }
 
 void TimeSyncService::SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
@@ -317,13 +261,13 @@ void TimeSyncService::SetSimulationStepHandler(std::function<void(std::chrono::n
     _simTask = [task = std::move(task)](auto now, auto /*duration*/) {
         task(now);
     };
-    _timeConfiguration->SetBlockingMode(true);
-    _timeConfiguration->SetStepDuration(initialStepSize);
+    _timeConfiguration.SetBlockingMode(true);
+    _timeConfiguration.SetStepDuration(initialStepSize);
 }
 
 void TimeSyncService::SetPeriod(std::chrono::nanoseconds period)
 {
-    _timeConfiguration->SetStepDuration(period);
+    _timeConfiguration.SetStepDuration(period);
 }
 
 auto TimeSyncService::MakeTimeSyncPolicy(bool isSynchronized) -> std::shared_ptr<ITimeSyncPolicy>
@@ -331,8 +275,7 @@ auto TimeSyncService::MakeTimeSyncPolicy(bool isSynchronized) -> std::shared_ptr
     _timeSyncConfigured = true;
     if (isSynchronized)
     {
-        // TODO FIXME get on shared pointer?
-        return std::make_shared<SynchronizedPolicy>(*this, _participant, _timeConfiguration.get());
+        return std::make_shared<SynchronizedPolicy>(*this, _participant, &_timeConfiguration);
     }
     else
     {

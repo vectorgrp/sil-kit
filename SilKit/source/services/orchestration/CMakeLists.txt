@@ -24,6 +24,9 @@ add_library(SilKitMwSync
 
     TimeProvider.hpp
     TimeProvider.cpp
+
+    TimeConfiguration.hpp
+    TimeConfiguration.cpp
 )
 
 target_include_directories(SilKitMwSync
