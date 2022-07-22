@@ -434,7 +434,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcClient;
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientFunctionName] = controllerConfig.functionName.value();
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientMediaType] = dataSpec.MediaType();
-    auto labels = dataSpec.Labels();
+    const auto& labels = dataSpec.Labels();
     auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] = labelStr;
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;

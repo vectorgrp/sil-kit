@@ -998,4 +998,51 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
+TEST_F(LifecycleServiceTest, async_comm_ready_handler)
+{
+    // Goal: ensure that the basic calls to SetCommunicationReadyHandlerAsync() and
+    // CompleteCommunicationReadyHandler() are working as expected.
+    LifecycleService lifecycleService(&participant, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
+    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
+
+    auto descriptor = from_endpointAddress(addr);
+    lifecycleService.SetServiceDescriptor(descriptor);
+
+    std::promise<void> myPromise;
+    auto completed = myPromise.get_future();
+
+    lifecycleService.SetCommunicationReadyHandlerAsync([&myPromise] {
+        std::cout <<"async_comm_ready_handler: signaling myPromise" << std::endl;
+        myPromise.set_value();
+    });
+
+
+    std::thread completer{[&completed, &lifecycleService]{
+        std::cout <<"async_comm_ready_handler: completer waiting"
+            " after call to CompleteCommReadyHandler" << std::endl;
+        auto status = completed.wait_for(5s);
+        EXPECT_EQ(status, std::future_status::ready)
+            << "Error: CommunicationReadyHandler async should have been called";
+
+        std::cout <<"async_comm_ready_Handler: completer calling CommunicationReadyHandler 1st" << std::endl;
+        lifecycleService.CompleteCommunicationReadyHandlerAsync();
+        // A user accidentally calling this multiple times should not
+        // result in an error:
+        std::cout <<"async_comm_ready_Handler: completer calling CommunicationReadyHandler 2nd" << std::endl;
+        lifecycleService.CompleteCommunicationReadyHandlerAsync();
+
+    }};
+
+
+    lifecycleService.StartLifecycle({});
+
+    if(completer.joinable())
+    {
+        completer.join();
+    }
+    ASSERT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
+}
+
 } // namespace

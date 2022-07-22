@@ -263,7 +263,7 @@ protected:
         }
         void CheckAllSentPromise()
         {
-            if (!allSent && std::all_of(dataPublishers.begin(), dataPublishers.end(), [](DataPublisherInfo dp) {
+            if (!allSent && std::all_of(dataPublishers.begin(), dataPublishers.end(), [](const auto& dp) {
                     return dp.allSent;
                 }))
             {

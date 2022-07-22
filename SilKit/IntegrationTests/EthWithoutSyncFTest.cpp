@@ -56,7 +56,7 @@ protected:
     void SetupTestData()
     {
         _testFrames.resize(10);
-        for (auto index = 0u; index < _testFrames.size(); index++)
+        for (size_t index = 0u; index < _testFrames.size(); index++)
         {
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;

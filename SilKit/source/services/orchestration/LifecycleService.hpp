@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <tuple>
 #include <map>
+#include <mutex>
 
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 
@@ -32,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "IMsgForLifecycleService.hpp"
 #include "IParticipantInternal.hpp"
+#include "LifecycleManagement.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -40,7 +42,6 @@ namespace Orchestration {
 //forward declarations
 class SynchronizedVirtualTimeProvider;
 class TimeSyncService;
-class ILifecycleManagement;
 struct LifecycleConfiguration;
 
 class ILifecycleServiceInternal
@@ -53,6 +54,8 @@ public:
 public:
     // ILifecycleServiceWithTimeSync and ILifecycleServiceNoTimeSync
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
+    virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
+    virtual void CompleteCommunicationReadyHandlerAsync() = 0;
     virtual void SetStopHandler(StopHandler handler) = 0;
     virtual void SetShutdownHandler(ShutdownHandler handler) = 0;
     virtual auto StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState> = 0;
@@ -62,6 +65,7 @@ public:
     virtual void Stop(std::string reason) = 0;
     virtual auto State() const -> ParticipantState = 0;
     virtual auto Status() const -> const ParticipantStatus& = 0;
+
 
     // ILifecycleServiceNoTimeSync
     virtual void SetStartingHandler(StartingHandler handler) = 0;
@@ -84,11 +88,15 @@ public:
     LifecycleService(Core::IParticipantInternal* participant,
                      const Config::HealthCheck& healthCheckConfig);
 
+    ~LifecycleService();
 public:
     // ----------------------------------------
     // Public Methods
     // ILifecycleService
     void SetCommunicationReadyHandler(CommunicationReadyHandler handler) override;
+    void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) override;
+    void CompleteCommunicationReadyHandlerAsync() override;
+
     void SetStartingHandler(StartingHandler handler) override;
     void SetStopHandler(StopHandler handler) override;
     void SetShutdownHandler(ShutdownHandler handler) override;
@@ -122,7 +130,8 @@ public:
 
 
 public:
-    void TriggerCommunicationReadyHandler(std::string reason);
+    //!< Returns true if we are ready to leave the CommunicationReady state (i.e. handler invocation is done).
+    bool TriggerCommunicationReadyHandler(std::string reason);
     void TriggerStartingHandler(std::string reason);
     void TriggerStopHandler(std::string reason);
     void TriggerShutdownHandler(std::string reason);
@@ -160,12 +169,16 @@ private:
 
     bool _isRunning{false};
     ParticipantStatus _status;
-    std::shared_ptr<ILifecycleManagement> _lifecycleManagement;
+    LifecycleManagement _lifecycleManagement;
     bool _timeSyncActive = false;
 
     std::promise<ParticipantState> _finalStatePromise;
 
+    //Async communication handler support
     CommunicationReadyHandler _commReadyHandler;
+    bool _commReadyHandlerIsAsync{false};
+    std::thread _commReadyHandlerThread;
+
     StartingHandler _startingHandler;
     StopHandler _stopHandler;
     ShutdownHandler _shutdownHandler;

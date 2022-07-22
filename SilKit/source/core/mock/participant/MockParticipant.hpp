@@ -74,6 +74,8 @@ class MockLifecycleService
 {
 public:
     MOCK_METHOD(void, SetCommunicationReadyHandler, (SilKit::Services::Orchestration::CommunicationReadyHandler), (override));
+    MOCK_METHOD(void, SetCommunicationReadyHandlerAsync, (SilKit::Services::Orchestration::CommunicationReadyHandler), (override));
+    MOCK_METHOD(void, CompleteCommunicationReadyHandlerAsync, (), (override));
     MOCK_METHOD(void, SetStartingHandler, (SilKit::Services::Orchestration::StartingHandler), (override));
     MOCK_METHOD(void, SetStopHandler, (SilKit::Services::Orchestration::StopHandler), (override));
     MOCK_METHOD(void, SetShutdownHandler, (SilKit::Services::Orchestration::ShutdownHandler), (override));

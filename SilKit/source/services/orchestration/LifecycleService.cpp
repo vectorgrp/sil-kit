@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
 #include "LifecycleManagement.hpp"
+#include "SetThreadName.hpp"
 
 using namespace std::chrono_literals;
 
@@ -39,20 +40,52 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
                                    const Config::HealthCheck& healthCheckConfig)
     : _participant{participant}
     , _logger{participant->GetLogger()}
+    ,_lifecycleManagement{participant->GetLogger(), this}
 {
     _timeSyncService = _participant->CreateTimeSyncService(this);
 
     _status.participantName = _participant->GetParticipantName();
-    _lifecycleManagement = std::make_shared<LifecycleManagement>(participant->GetLogger(), this);
 
     // TODO healthCheckConfig needed?
     (void)healthCheckConfig;
 }
 
+ LifecycleService::~LifecycleService()
+{
+     if(_commReadyHandlerThread.joinable())
+     {
+         _logger->Debug("LifecycleService::~LifecycleService: joining commReadyHandlerThread");
+         _commReadyHandlerThread.join();
+     }
+}
+
 void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandler handler)
 {
+    _commReadyHandlerIsAsync = false;
     _commReadyHandler = std::move(handler);
 }
+
+void LifecycleService::SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler)
+{
+    _commReadyHandlerIsAsync = true;
+    _commReadyHandler = std::move(handler);
+}
+void LifecycleService::CompleteCommunicationReadyHandlerAsync()
+{
+    _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: enter");
+    const auto myself = std::this_thread::get_id();
+    if(_commReadyHandlerThread.joinable()
+        && (myself  != _commReadyHandlerThread.get_id()))
+    {
+        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: joining commReadyHandlerThread");
+        _commReadyHandlerThread.join();
+        _commReadyHandlerThread = {};
+        // async handler is finished, now continue to the Running state without triggering the CommunicationReadyHandler again
+        _lifecycleManagement.SetState(_lifecycleManagement.GetReadyToRunState(),
+            "LifecycleService::CompleteCommunicationReadyHandler: triggering communication ready transition.");
+    }
+}
+
 
 void LifecycleService::SetStartingHandler(StartingHandler handler)
 {
@@ -101,11 +134,11 @@ auto LifecycleService::StartLifecycle(bool hasCoordinatedSimulationStart, bool h
     });
 
     _isRunning = true;
-    _lifecycleManagement->InitLifecycleManagement("LifecycleService::StartLifecycle... was called.");
+    _lifecycleManagement.InitLifecycleManagement("LifecycleService::StartLifecycle... was called.");
     if (!hasCoordinatedSimulationStart)
     {
         // Skip state guarantees if start is uncoordinated
-        _lifecycleManagement->SkipSetupPhase(
+        _lifecycleManagement.SkipSetupPhase(
             "LifecycleService::StartLifecycle... was called without start coordination.");
     }
     return _finalStatePromise.get_future();
@@ -134,7 +167,7 @@ void LifecycleService::ReportError(std::string errorMsg)
         return;
     }
 
-    _lifecycleManagement->Error(std::move(errorMsg));
+    _lifecycleManagement.Error(std::move(errorMsg));
 }
 
 void LifecycleService::Pause(std::string reason)
@@ -148,7 +181,7 @@ void LifecycleService::Pause(std::string reason)
     }
     _pauseDonePromise = decltype(_pauseDonePromise){};
     _timeSyncService->SetPaused(_pauseDonePromise.get_future());
-    _lifecycleManagement->Pause(reason);
+    _lifecycleManagement.Pause(reason);
 }
 
 void LifecycleService::Continue()
@@ -161,13 +194,13 @@ void LifecycleService::Continue()
         throw std::runtime_error(errorMessage);
     }
 
-    _lifecycleManagement->Continue("Pause finished");
+    _lifecycleManagement.Continue("Pause finished");
     _pauseDonePromise.set_value();
 }
 
 void LifecycleService::Stop(std::string reason)
 {
-    _lifecycleManagement->Stop(reason);
+    _lifecycleManagement.Stop(reason);
 
     if (!_hasCoordinatedSimulationStop) 
     {
@@ -177,7 +210,7 @@ void LifecycleService::Stop(std::string reason)
 
 void LifecycleService::Shutdown(std::string reason)
 {
-    auto success = _lifecycleManagement->Shutdown(reason);
+    auto success = _lifecycleManagement.Shutdown(reason);
     if (success)
     {
         try
@@ -198,20 +231,39 @@ void LifecycleService::Shutdown(std::string reason)
 
 void LifecycleService::Restart(std::string reason)
 {
-    _lifecycleManagement->Restart(reason);
+    _lifecycleManagement.Restart(reason);
 
     if (!_hasCoordinatedSimulationStart)
     {
-        _lifecycleManagement->Run("LifecycleService::Restart() was called without start coordination.");
+        _lifecycleManagement.Run("LifecycleService::Restart() was called without start coordination.");
     }
 }
 
-void LifecycleService::TriggerCommunicationReadyHandler(std::string)
+bool LifecycleService::TriggerCommunicationReadyHandler(std::string)
 {
-    if (_commReadyHandler)
+    if(_commReadyHandler)
     {
-        _commReadyHandler();
+        if(_commReadyHandlerIsAsync)
+        {
+            if(_commReadyHandlerThread.joinable())
+            {
+                _logger->Debug("LifecycleServiec::TriggerCommunicationReadyHandler:"
+                    " commReadyHandlerThread is already joinable. Ensure you called CompleteCommunicationReadyHandler.");
+                return false;
+            }
+
+            _commReadyHandlerThread = std::thread{[this]{
+                Util::SetThreadName("SKCommReadyHdlr");
+                _commReadyHandler();
+            }};
+            return false;
+        }
+        else
+        {
+            _commReadyHandler();
+        }
     }
+    return true;
 }
 
 void LifecycleService::TriggerStartingHandler(std::string)
@@ -240,7 +292,7 @@ void LifecycleService::TriggerShutdownHandler(std::string)
 
 void LifecycleService::AbortSimulation(std::string reason)
 {
-    auto success = _lifecycleManagement->AbortSimulation(reason);
+    auto success = _lifecycleManagement.AbortSimulation(reason);
     if (success)
     {
         try
@@ -316,7 +368,7 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
         }
         else
         {
-            _lifecycleManagement->Run("Received SystemCommand::Run");
+            _lifecycleManagement.Run("Received SystemCommand::Run");
             return;
         }
         break;
@@ -364,7 +416,7 @@ void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
 
 void LifecycleService::NewSystemState(SystemState systemState)
 {
-    _lifecycleManagement->NewSystemState(systemState);
+    _lifecycleManagement.NewSystemState(systemState);
 }
 
 void LifecycleService::SetTimeSyncActive(bool isTimeSyncAcvice)

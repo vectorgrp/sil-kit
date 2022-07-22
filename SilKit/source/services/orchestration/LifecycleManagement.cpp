@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 
 #include "LifecycleManagement.hpp"
+#include "LifecycleService.hpp"
 #include "LifecycleStates.hpp"
 
 namespace SilKit {
@@ -117,7 +118,11 @@ void LifecycleManagement::HandleCommunicationReady(std::string reason)
 {
     try
     {
-        _parentService->TriggerCommunicationReadyHandler(std::move(reason));
+        auto handlerDone = _parentService->TriggerCommunicationReadyHandler(reason);
+        if(handlerDone)
+        {
+            SetState(GetReadyToRunState(), std::move(reason));
+        }
     }
     catch (const std::exception&)
     {
@@ -125,7 +130,6 @@ void LifecycleManagement::HandleCommunicationReady(std::string reason)
         SetStateError("Exception during CommunicationReadyHandle execution.");
         return;
     }
-    SetState(GetReadyToRunState(), std::move(reason));
 }
 
 void LifecycleManagement::HandleStarting(std::string reason)

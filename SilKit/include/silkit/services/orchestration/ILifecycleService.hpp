@@ -51,11 +51,27 @@ public:
      *
      * The handler is called after \ref SystemState::CommunicationReady
      * is reached.
-     * TODO fill in on which thread this is executed.
-     * After the handler has been processed, the participant
-     * switches to the \ref ParticipantState::ReadyToRun state.
+     * This handler is invoked on the SilKit I/O worker thread, and receiving messages during the handler invocation is not possible.
+     * For an asynchronous invocation, see \ref SetCommunicationReadyHandlerAsync and \ref CompleteCommunicationReadyHandler.
+     * After the handler has been processed, the participant switches to the \ref ParticipantState::ReadyToRun state.
      */
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
+
+    /*! \brief Register a callback that is executed once all communication channels between participants
+    *          with a lifecycle have been set up and are ready for communication.
+    *
+    * The handler is called after \ref SystemState::CommunicationReady is reached.
+    * The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
+    * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
+    * The participant remains in its state until \ref CompleteCommunicationReadyHandlerAsync() is invoked,
+    * in another thread and then switches to the \ref ParticipantState::ReadyToRun.
+    */ 
+    virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
+
+    //!< Notify that the async CommunicationReadyHandler is completed.
+    //! 
+    //! This method must not be invoked from within a CommunicationReadyHandler.
+    virtual void CompleteCommunicationReadyHandlerAsync() = 0;
 
     /*! \brief Register a callback that is executed on simulation stop.
      *
@@ -163,11 +179,27 @@ public:
      *
      * The handler is called after \ref SystemState::CommunicationReady
      * is reached.
-     * TODO fill in on which thread this is executed.
-     * After the handler has been processed, the participant
-     * switches to the \ref ParticipantState::ReadyToRun state.
+     * This handler is invoked on the SilKit I/O worker thread, and receiving messages during the handler invocation is not possible.
+     * For an asynchronous invocation, see \ref SetCommunicationReadyHandlerAsync and \ref CompleteCommunicationReadyHandlerAsync.
+     * After the handler has been processed, the participant switches to the \ref ParticipantState::ReadyToRun state.
      */
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
+
+    /*! \brief Register a callback that is executed once all communication channels between participants
+    *          with a lifecycle have been set up and are ready for communication.
+    *
+    * The handler is called after \ref SystemState::CommunicationReady is reached.
+    * The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
+    * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
+    * The participant remains in its state until \ref CompleteCommunicationReadyHandlerAsync() is invoked,
+    * in another thread and then switches to the \ref ParticipantState::ReadyToRun.
+    */ 
+    virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
+
+    //!< Notify that the async CommunicationReadyHandler is completed.
+    //! 
+    //! This method must not be invoked from within a CommunicationReadyHandler.
+    virtual void CompleteCommunicationReadyHandlerAsync() = 0;
 
     /*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters ParticipantState::Run.
      *

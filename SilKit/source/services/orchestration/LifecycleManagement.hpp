@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "LifecycleService.hpp"
 #include "SyncDatatypes.hpp"
 #include "ILifecycleStates.hpp"
 
@@ -33,44 +32,26 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-class ILifecycleManagement
-{
-public:
-    virtual ~ILifecycleManagement() = default;
-
-public:
-    virtual void InitLifecycleManagement(std::string reason) = 0;
-    virtual void SkipSetupPhase(std::string reason) = 0;
-    virtual void NewSystemState(SystemState systemState) = 0;
-    virtual void Run(std::string reason) = 0;
-    virtual void Pause(std::string reason) = 0;
-    virtual void Continue(std::string reason) = 0;
-    virtual void Stop(std::string reason) = 0;
-    virtual bool Shutdown(std::string reason) = 0; // shutdown successful?
-    virtual void Restart(std::string reason) = 0;
-    virtual void Error(std::string reason) = 0;
-    virtual bool AbortSimulation(std::string reason) = 0; // Abort->Shutdown successful?
-};
+//forwards
+class LifecycleService;
 
 class LifecycleManagement 
-    : public ILifecycleManagement
 {
-public:
+public: //CTors
     LifecycleManagement(Services::Logging::ILogger* logger, LifecycleService* parentService);
+public: //Methods
+    void InitLifecycleManagement(std::string reason);
+    void SkipSetupPhase(std::string reason);
+    void NewSystemState(SystemState systemState);
+    void Run(std::string reason);
+    void Pause(std::string reason);
+    void Continue(std::string reason);
+    void Stop(std::string reason);
+    bool Shutdown(std::string reason);
+    void Restart(std::string reason);
+    void Error(std::string reason);
+    bool AbortSimulation(std::string reason);
 
-    void InitLifecycleManagement(std::string reason) override;
-    void SkipSetupPhase(std::string reason) override;
-    void NewSystemState(SystemState systemState) override;
-    void Run(std::string reason) override;
-    void Pause(std::string reason) override;
-    void Continue(std::string reason) override;
-    void Stop(std::string reason) override;
-    bool Shutdown(std::string reason) override;
-    void Restart(std::string reason) override;
-    void Error(std::string reason) override;
-    bool AbortSimulation(std::string reason) override;
-
-public:
     void HandleCommunicationReady(std::string reason);
     void HandleStarting(std::string reason);
     void HandleStop(std::string reason);
