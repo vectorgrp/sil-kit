@@ -124,21 +124,13 @@ void EthController::Deactivate()
     SendMsg(msg);
 }
 
-auto EthController::SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId
+void EthController::SendFrame(EthernetFrame frame, void* userContext)
 {
-    auto txId = MakeTxId();
-    msg.transmitId = txId;
+    WireEthernetFrameEvent msg{};
+    msg.frame = MakeWireEthernetFrame(frame);
+    msg.userContext = userContext;
 
-    SendMsg(MakeWireEthernetFrameEvent(msg));
-
-    return txId;
-}
-
-auto EthController::SendFrame(EthernetFrame frame) -> EthernetTxId
-{
-    EthernetFrameEvent msg{};
-    msg.frame = std::move(frame);
-    return SendFrameEvent(std::move(msg));
+    SendMsg(std::move(msg));
 }
 
 //------------------------
@@ -152,8 +144,7 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
         return;
     }
 
-    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, ToEthernetFrame(msg.frame));
-
+    _tracer.Trace(msg.direction, msg.timestamp, ToEthernetFrame(msg.frame));
     CallHandlers(ToEthernetFrameEvent(msg));
 }
 
@@ -194,9 +185,15 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetStatu
 // Handlers
 //------------------------
 
-HandlerId EthController::AddFrameHandler(FrameHandler handler)
+HandlerId EthController::AddFrameHandler(FrameHandler handler, DirectionMask directionMask)
 {
-    return AddHandler(std::move(handler));
+    return AddHandler(FrameHandler{[handler = std::move(handler), directionMask](
+                                       IEthernetController* controller, const EthernetFrameEvent& ethernetFrameEvent) {
+        if (static_cast<DirectionMask>(ethernetFrameEvent.direction) & directionMask)
+        {
+            handler(controller, ethernetFrameEvent);
+        }
+    }});
 }
 
 void EthController::RemoveFrameHandler(HandlerId handlerId)
@@ -207,9 +204,16 @@ void EthController::RemoveFrameHandler(HandlerId handlerId)
     }
 }
 
-HandlerId EthController::AddFrameTransmitHandler(FrameTransmitHandler handler)
+HandlerId EthController::AddFrameTransmitHandler(FrameTransmitHandler handler, EthernetTransmitStatusMask transmitStatusMask)
 {
-    return AddHandler(std::move(handler));
+    return AddHandler(FrameTransmitHandler{
+        [handler = std::move(handler), transmitStatusMask](
+            IEthernetController* controller, const EthernetFrameTransmitEvent& ethernetFrameTransmitEvent) {
+            if (static_cast<EthernetTransmitStatusMask>(ethernetFrameTransmitEvent.status) & transmitStatusMask)
+            {
+                handler(controller, ethernetFrameTransmitEvent);
+            }
+        }});
 }
 
 void EthController::RemoveFrameTransmitHandler(HandlerId handlerId)

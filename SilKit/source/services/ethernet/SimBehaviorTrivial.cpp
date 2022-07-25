@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 
 namespace {
+
 auto GetSourceMac(const SilKit::Services::Ethernet::EthernetFrame& frame) -> SilKit::Services::Ethernet::EthernetMac
 {
     SilKit::Services::Ethernet::EthernetMac source{};
@@ -32,6 +33,24 @@ auto GetSourceMac(const SilKit::Services::Ethernet::EthernetFrame& frame) -> Sil
 
     return source;
 }
+
+using SilKit::Services::Ethernet::EthernetState;
+using SilKit::Services::Ethernet::EthernetTransmitStatus;
+
+auto ControllerStateToTransmitStatus(const EthernetState ethernetState) -> EthernetTransmitStatus
+{
+    switch (ethernetState) {
+    case EthernetState::LinkUp:
+        return EthernetTransmitStatus::Transmitted;
+    case EthernetState::LinkDown:
+        return EthernetTransmitStatus::LinkDown;
+    case EthernetState::Inactive:
+        return EthernetTransmitStatus::ControllerInactive;
+    }
+
+    throw SilKit::StateError{"unknown EthernetState value"};
+}
+
 } // namespace
 
 namespace SilKit {
@@ -51,8 +70,7 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
 template <typename MsgT>
 void SimBehaviorTrivial::ReceiveMsg(const MsgT& msg)
 {
-    auto receivingController = dynamic_cast<Core::IMessageReceiver<MsgT>*>(_parentController);
-    SILKIT_ASSERT(receivingController);
+    auto receivingController = static_cast<Core::IMessageReceiver<MsgT> *>(_parentController);
     receivingController->ReceiveMsg(_parentServiceEndpoint, msg);
 }
 
@@ -65,38 +83,26 @@ void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
 {
     EthernetState controllerState = _parentController->GetState();
 
+    // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
+    ethFrameEvent.timestamp = _timeProvider->Now();
+
     if (controllerState == EthernetState::LinkUp)
     {
-        // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
-        ethFrameEvent.timestamp = _timeProvider->Now();
-        _tracer.Trace(SilKit::Services::TransmitDirection::TX, ethFrameEvent.timestamp, ToEthernetFrame(ethFrameEvent.frame));
+        // Trace and self delivery as TX
+        ethFrameEvent.direction = TransmitDirection::TX;
+        ReceiveMsg(ethFrameEvent);
+
+        // Send to others as RX
+        ethFrameEvent.direction = TransmitDirection::RX;
         _participant->SendMsg(_parentServiceEndpoint, ethFrameEvent);
-
-        EthernetFrameTransmitEvent ack;
-        ack.timestamp = ethFrameEvent.timestamp;
-        ack.transmitId = ethFrameEvent.transmitId;
-        ack.sourceMac = GetSourceMac(ToEthernetFrame(ethFrameEvent.frame));
-        ack.status = EthernetTransmitStatus::Transmitted;
-        ReceiveMsg(ack);
-    }
-    else
-    {
-        EthernetFrameTransmitEvent ack;
-        ack.timestamp = _timeProvider->Now();
-        ack.transmitId = ethFrameEvent.transmitId;
-        ack.sourceMac = GetSourceMac(ToEthernetFrame(ethFrameEvent.frame));
-        if (controllerState == EthernetState::Inactive)
-        {
-            ack.status = EthernetTransmitStatus::ControllerInactive;
-        }
-        else if(controllerState == EthernetState::LinkDown)
-        {
-            ack.status = EthernetTransmitStatus::LinkDown;
-        }
-        ReceiveMsg(ack);
     }
 
-    
+    EthernetFrameTransmitEvent ack;
+    ack.timestamp = ethFrameEvent.timestamp;
+    ack.sourceMac = GetSourceMac(ToEthernetFrame(ethFrameEvent.frame));
+    ack.status = ControllerStateToTransmitStatus(controllerState);
+    ack.userContext = ethFrameEvent.userContext;
+    ReceiveMsg(ack);
 }
 
 void SimBehaviorTrivial::SendMsg(EthernetSetMode&& ethSetMode)

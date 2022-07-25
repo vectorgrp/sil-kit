@@ -36,15 +36,13 @@ inline bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs)
 
 inline bool operator==(const EthernetFrameEvent& lhs, const EthernetFrameEvent& rhs)
 {
-    return lhs.transmitId == rhs.transmitId
-        && lhs.timestamp == rhs.timestamp
+    return lhs.timestamp == rhs.timestamp
         && lhs.frame == rhs.frame;
 }
 
 inline bool operator==(const EthernetFrameTransmitEvent& lhs, const EthernetFrameTransmitEvent& rhs)
 {
-    return lhs.transmitId == rhs.transmitId
-        && lhs.timestamp == rhs.timestamp
+    return lhs.timestamp == rhs.timestamp
         && lhs.status == rhs.status;
 }
 

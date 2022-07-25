@@ -220,9 +220,13 @@ int main(int argc, char* argv[])
 
     SilKit_HandlerId frameTransmitHandlerId;
     SilKit_EthernetController_AddFrameTransmitHandler(ethernetController1, NULL, &FrameTransmitHandler,
-                                                   &frameTransmitHandlerId);
+        SilKit_EthernetTransmitStatus_Transmitted | SilKit_EthernetTransmitStatus_ControllerInactive
+            | SilKit_EthernetTransmitStatus_LinkDown | SilKit_EthernetTransmitStatus_Dropped
+            | SilKit_EthernetTransmitStatus_InvalidFrameFormat,
+        &frameTransmitHandlerId);
     SilKit_HandlerId frameHandlerId;
-    SilKit_EthernetController_AddFrameHandler(ethernetController2, NULL, &FrameHandler, &frameHandlerId);
+    SilKit_EthernetController_AddFrameHandler(ethernetController2, NULL, &FrameHandler, SilKit_Direction_Receive,
+                                              &frameHandlerId);
 
     for (int i = 0; i < 10; i ++) 
     {

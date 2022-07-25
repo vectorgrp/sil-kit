@@ -27,25 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/ethernet/all.hpp"
 #include "silkit/services/ethernet/string_utils.hpp"
 
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <map>
-#include <mutex>
 #include <cstring>
 #include "CapiImpl.hpp"
-
-std::map<uint32_t, void*> ethernetTransmitContextMap;
-std::map<uint32_t, int> ethernetTransmitContextMapCounter;
-int transmitAckListeners = 0;
-
-struct PendingEthernetTransmits
-{
-    std::map<uint32_t, void*> userContextById;
-    std::map<uint32_t, std::function<void()>> callbacksById;
-    std::mutex mutex;
-};
-PendingEthernetTransmits pendingEthernetTransmits;
 
 #define ETHERNET_MIN_FRAME_SIZE 60
 
@@ -91,7 +74,9 @@ SilKit_ReturnCode SilKit_EthernetController_Deactivate(SilKit_EthernetController
 }
 
 SilKit_ReturnCode SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller, void* context,
-                                                     SilKit_EthernetFrameHandler_t handler, SilKit_HandlerId* outHandlerId)
+                                                            SilKit_EthernetFrameHandler_t handler,
+                                                            SilKit_Direction directionMask,
+                                                            SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -115,7 +100,7 @@ SilKit_ReturnCode SilKit_EthernetController_AddFrameHandler(SilKit_EthernetContr
                 frameEvent.timestamp = cppFrameEvent.timestamp.count();
 
                 handler(context, controller, &frameEvent);
-            });
+            }, directionMask);
         *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
         return SilKit_ReturnCode_SUCCESS;
     }
@@ -134,51 +119,31 @@ SilKit_ReturnCode SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetCo
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller, void* context,
-                                                             SilKit_EthernetFrameTransmitHandler_t handler,
-                                                             SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller,
+                                                                    void* context,
+                                                                    SilKit_EthernetFrameTransmitHandler_t handler,
+                                                                    SilKit_EthernetTransmitStatus transmitStatusMask,
+                                                                    SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
     ASSERT_VALID_OUT_PARAMETER(outHandlerId);
     CAPI_ENTER
     {
-        auto cppController = reinterpret_cast<SilKit::Services::Ethernet::IEthernetController*>(controller);
+        using SilKit::Services::Ethernet::IEthernetController;
+        using SilKit::Services::Ethernet::EthernetFrameTransmitEvent;
+        using SilKit::Services::Ethernet::EthernetTransmitStatusMask;
+
+        auto cppController = reinterpret_cast<IEthernetController*>(controller);
         auto cppHandlerId = cppController->AddFrameTransmitHandler(
-            [handler, context, controller](auto*,
-                                           const auto& ack) {
-                std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
-
-                auto transmitContext = pendingEthernetTransmits.userContextById[ack.transmitId];
-                if (transmitContext == nullptr)
-                {
-                    pendingEthernetTransmits.callbacksById[ack.transmitId] = [handler, context, controller, ack]() {
-                        SilKit_EthernetFrameTransmitEvent eta;
-                        SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, eta);
-                        eta.status = (SilKit_EthernetTransmitStatus)ack.status;
-                        eta.timestamp = ack.timestamp.count();
-
-                        auto tmpContext = pendingEthernetTransmits.userContextById[ack.transmitId];
-                        pendingEthernetTransmits.userContextById.erase(ack.transmitId);
-                        eta.userContext = tmpContext;
-
-                        handler(context, controller, &eta);
-                    };
-                }
-                else
-                {
-                    SilKit_EthernetFrameTransmitEvent eta;
-                    SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, eta);
-                    eta.status = (SilKit_EthernetTransmitStatus)ack.status;
-                    eta.timestamp = ack.timestamp.count();
-
-                    auto tmpContext = pendingEthernetTransmits.userContextById[ack.transmitId];
-                    pendingEthernetTransmits.userContextById.erase(ack.transmitId);
-                    eta.userContext = tmpContext;
-
-                    handler(context, controller, &eta);
-                }
-            });
+            [context, handler](IEthernetController* controller, const EthernetFrameTransmitEvent& frameTransmitEvent) {
+                SilKit_EthernetFrameTransmitEvent cEvent;
+                SilKit_Struct_Init(SilKit_EthernetFrameTransmitEvent, cEvent);
+                cEvent.status = (SilKit_EthernetTransmitStatus)frameTransmitEvent.status;
+                cEvent.timestamp = frameTransmitEvent.timestamp.count();
+                cEvent.userContext = frameTransmitEvent.userContext;
+                handler(context, reinterpret_cast<SilKit_EthernetController*>(controller), &cEvent);
+            }, transmitStatusMask);
         *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
         return SilKit_ReturnCode_SUCCESS;
     }
@@ -290,15 +255,8 @@ SilKit_ReturnCode SilKit_EthernetController_SendFrame(SilKit_EthernetController*
         SilKit::Services::Ethernet::EthernetFrame ef;
         std::vector<uint8_t> rawFrame(frame->raw.data, frame->raw.data + frame->raw.size);
         ef.raw = rawFrame;
-        auto transmitId = cppController->SendFrame(ef);
+        cppController->SendFrame(ef, userContext);
 
-        std::unique_lock<std::mutex> lock(pendingEthernetTransmits.mutex);
-        pendingEthernetTransmits.userContextById[transmitId] = userContext;
-        for (auto pendingTransmitId : pendingEthernetTransmits.callbacksById)
-        {
-            pendingTransmitId.second();
-        }
-        pendingEthernetTransmits.callbacksById.clear();
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

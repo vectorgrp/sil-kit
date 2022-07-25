@@ -66,11 +66,8 @@ with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlag| 
   // Prepare a CAN message with id 0x17
   CanFrame canFrame;
   canFrame.canId = 3;
-  canFrame.ide = 0;  // Identifier Extension
-  canFrame.rtr = 0;  // Remote Transmission Request
-  canFrame.fdf = 0;  // FD Format Indicator
-  canFrame.brs = 1;  // Bit Rate Switch (for FD Format only)
-  canFrame.esi = 0;  // Error State indicator (for FD Format only)
+  canFrame.flags = static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)  // FD Format Indicator
+                 | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
   canFrame.dataField = {'d', 'a', 't', 'a', 0, 1, 2, 3};
 
   canController.SendFrame(canFrame);
@@ -87,10 +84,13 @@ To be notified of the success or failure of the transmission, a ``FrameTransmitH
   };
   canController->AddFrameTransmitHandler(frameTransmitHandler);
 
+An optional second parameter of |AddFrameTransmitHandler| allows to specify the status (|Transmitted|, ...) of the
+|CanFrameTransmitEvent| to be received. By default, each status is enabled.
+
 .. admonition:: Note
 
   In a simple simulation without the network simulator, the |CanTransmitStatus| of the |CanFrameTransmitEvent| will
-  always be |Transmitted|. If adetailed simulation is used, it is possible that the transmit queue overflows 
+  always be |Transmitted|. If a detailed simulation is used, it is possible that the transmit queue overflows
   causing the handler to be called with |TransmitQueueFull| signaling a transmission failure.
 
 Receiving CAN FrameEvents

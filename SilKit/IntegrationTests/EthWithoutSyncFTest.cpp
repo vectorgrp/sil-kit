@@ -69,11 +69,12 @@ protected:
             SilKit::Services::Ethernet::EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
             frameEvent.frame = SilKit::Services::Ethernet::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
-            frameEvent.transmitId = index + 1;
+            frameEvent.userContext = reinterpret_cast<void *>(index + 1);
 
             auto& ethack = _testFrames[index].expectedAck;
             ethack.sourceMac = sourceMac;
-            ethack.transmitId = index + 1;
+            ethack.userContext = reinterpret_cast<void *>(index + 1);
+            ethack.status = SilKit::Services::Ethernet::EthernetTransmitStatus::Transmitted;
         }
     }
 
@@ -104,7 +105,9 @@ protected:
 
         while (numSent < _testFrames.size())
         {
-            controller->SendFrameEvent(ToEthernetFrameEvent(_testFrames.at(numSent++).expectedFrameEvent)); // Don't move the event to test the altered transmitID
+            const auto& frameEvent = _testFrames.at(numSent).expectedFrameEvent;
+            controller->SendFrame(ToEthernetFrame(frameEvent.frame), reinterpret_cast<void*>(frameEvent.userContext));
+            ++numSent;
         }
         std::cout << "All eth messages sent" << std::endl;
 

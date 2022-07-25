@@ -199,6 +199,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_message)
 
     WireEthernetFrameEvent msg{};
     msg.frame = WireEthernetFrame{rawFrame};
+    msg.direction = TransmitDirection::RX;
 
     EXPECT_CALL(callbacks, ReceiveMessage(&controller, ToEthernetFrameEvent(msg)))
         .Times(1);
@@ -219,14 +220,14 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
     msg.frame.raw = rawFrame;
 
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
-    EthernetFrameTransmitEvent ack{ 0, EthernetMac{ 1, 2, 3, 4, 5, 6 }, 0ms, EthernetTransmitStatus::Transmitted };
+    EthernetFrameTransmitEvent ack{ EthernetMac{ 1, 2, 3, 4, 5, 6 }, 0ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(0) };
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
 
     // once for activate and once for sending the frame
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
     controller.Activate();
-    controller.SendFrameEvent(msg);
+    controller.SendFrame(EthernetFrame{rawFrame});
 }
 
 /*! \brief Multiple handlers added and removed
@@ -247,6 +248,8 @@ TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
 
     WireEthernetFrameEvent msg{};
     msg.frame.raw = rawFrame;
+    msg.direction = TransmitDirection::RX;
+
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, ToEthernetFrameEvent(msg))).Times(numHandlers);
     testController.ReceiveMsg(&controllerOther, msg);
 
@@ -278,6 +281,7 @@ TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
 
     WireEthernetFrameEvent msg{};
     msg.frame.raw = rawFrame;
+    msg.direction = TransmitDirection::RX;
 
     EXPECT_CALL(callbacks, ReceiveMessage(&testController, ToEthernetFrameEvent(msg))).Times(1);
     // Calls testHandler and Callbacks::ReceiveMessage, the latter is removed in testHandler 

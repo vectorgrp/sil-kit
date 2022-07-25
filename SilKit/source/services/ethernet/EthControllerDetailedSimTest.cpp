@@ -144,15 +144,13 @@ TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
 
 TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
 {
-    const auto now = 12345ns;
-    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now)))
+    EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns)))
         .Times(1);
 
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(0);
 
-    EthernetFrameEvent msg{};
-    msg.timestamp = now;
-    controller.SendFrameEvent(msg);
+    EthernetFrame frame{};
+    controller.SendFrame(frame);
 }
 
 /*! \brief SendFrame must not invoke the TimeProvider and triggers SendMsg on the participant
@@ -173,6 +171,7 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
 TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
 {
     WireEthernetFrameEvent msg{};
+    msg.direction = TransmitDirection::RX;
 
     EXPECT_CALL(callbacks, FrameHandler(&controller, ToEthernetFrameEvent(msg)))
         .Times(1);
@@ -184,7 +183,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
  */
 TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
 {
-    EthernetFrameTransmitEvent expectedAck{ 17,  EthernetMac{}, 42ms, EthernetTransmitStatus::Transmitted };
+    EthernetFrameTransmitEvent expectedAck{ EthernetMac{}, 42ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(17) };
 
     EXPECT_CALL(callbacks, FrameTransmitHandler(&controller, expectedAck))
         .Times(1);
@@ -201,7 +200,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
 TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
 {
     WireEthernetFrameEvent msg{};
-    msg.transmitId = 17;
+    msg.userContext = reinterpret_cast<void *>(17);
 
     EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), A<const EthernetFrameTransmitEvent&>()))
         .Times(0);

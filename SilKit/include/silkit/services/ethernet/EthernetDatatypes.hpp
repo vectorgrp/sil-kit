@@ -24,6 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <array>
 #include <chrono>
 
+#include "silkit/capi/Ethernet.h"
+
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/services/datatypes.hpp"
 #include "silkit/util/Span.hpp"
@@ -48,54 +50,54 @@ struct EthernetFrame
     Util::Span<const uint8_t> raw; //!< The Ethernet raw frame without the frame check sequence
 };
 
-//! \brief An Ethernet transmit id
-using EthernetTxId = uint32_t;
-
 //! \brief An Ethernet frame including the raw frame, Transmit ID and timestamp
 struct EthernetFrameEvent
 {
-    EthernetTxId transmitId; //!< Set by the EthController, used for acknowledgments
     std::chrono::nanoseconds timestamp; //!< Reception time
     EthernetFrame frame; //!< The Ethernet frame
+    TransmitDirection direction; //!< Receive/Transmit direction
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
+using EthernetTransmitStatusMask = uint32_t;
+
 //! \brief Acknowledgment status for an EthernetTransmitRequest
-enum class EthernetTransmitStatus : uint8_t
+enum class EthernetTransmitStatus : EthernetTransmitStatusMask
 {
     /*! The message was successfully transmitted on the Ethernet link.
     */
-    Transmitted = 0,
+    Transmitted = SilKit_EthernetTransmitStatus_Transmitted,
 
     /*! The transmit request was rejected, because the Ethernet controller is not active.
     */
-    ControllerInactive = 1,
+    ControllerInactive = SilKit_EthernetTransmitStatus_ControllerInactive,
 
     /*! The transmit request was rejected, because the Ethernet link is down.
     */
-    LinkDown = 2,
+    LinkDown = SilKit_EthernetTransmitStatus_LinkDown,
 
     /*! The transmit request was dropped, because the transmit queue is full.
     */
-    Dropped = 3,
+    Dropped = SilKit_EthernetTransmitStatus_Dropped,
 
     /*! (currently not in use)
      *
      * The transmit request was rejected, because there is already another request with the same transmitId.
     */
-    DuplicatedTransmitId = 4,
+    DuplicatedTransmitId = SilKit_EthernetTransmitStatus_DuplicatedTransmitId,
 
     /*! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, wrong order of VLAN tags).
     */
-    InvalidFrameFormat = 5
+    InvalidFrameFormat = SilKit_EthernetTransmitStatus_InvalidFrameFormat,
 };
 
 //! \brief Publishes status of the simulated Ethernet controller
 struct EthernetFrameTransmitEvent
 {
-    EthernetTxId transmitId; //!< Identifies the EthernetTransmitRequest, to which this EthernetFrameTransmitEvent refers to.
     EthernetMac sourceMac; //!< The source MAC address encoded as integral data type
     std::chrono::nanoseconds timestamp; //!< Timestamp of the Ethernet acknowledge.
     EthernetTransmitStatus status; //!< Status of the EthernetTransmitRequest.
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 //! \brief State of the Ethernet controller

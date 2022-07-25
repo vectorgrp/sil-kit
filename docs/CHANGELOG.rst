@@ -125,7 +125,20 @@ Changed
 
 - C: Extended the ``SilKit_CanController_SetBaudRate`` function with the CAN XL data bit rate.
 
-- C: Added the simulation step duration to the ``SilKit_TimeSyncService_SimulationStepHandler_t`` callback 
+- C: Added the simulation step duration to the ``SilKit_TimeSyncService_SimulationStepHandler_t`` callback
+
+- C\+\+: Extended the ``IEthernetController::AddFrameHandler`` function with the ``directionMask`` filter, similar to ``ICanController::AddFrameHandler``.
+
+- C\+\+: Extended the ``IEthernetController::AddFrameTransmitHandler`` function with the ``transmitStatusMask`` filter, similar to ``ICanController::AddFrameTransmitHandler``.
+
+- C\+\+: Extended the ``IEthernetController::SendFrame`` function with the ``userContext`` argument, similar to ``ICanController::SendFrame``.
+
+- C\+\+: The ``EthernetTransmitStatus`` enumerators are now individual bits and can be used in the ``transmitStatusMask`` argument.
+
+- C: Extended ``SilKit_EthernetController_AddFrameHandler`` with the ``directionMask`` filter.
+
+- C: Extended ``SilKit_EthernetController_AddFrameTransmitHandler`` with the ``transmitStatusMask`` filter.
+
 Removed
 ~~~~~~~
 

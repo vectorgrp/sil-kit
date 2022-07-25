@@ -102,6 +102,9 @@ To be notified of the success or failure of the transmission, a ``FrameTransmitH
   };
   ethernetController->AddFrameTransmitHandler(frameTransmitHandler);
 
+An optional second parameter of |AddFrameTransmitHandler| allows to specify the status (|Transmitted|, ...) of the
+|EthernetFrameTransmitEvent| to be received. By default, each status is enabled.
+
 .. admonition:: Note
 
   In a simple simulation, the |EthernetTransmitStatus| of the 
@@ -121,6 +124,9 @@ an Ethernet frame is received::
     // Handle frameEvent
   };
   ethernetController->AddFrameHandler(frameHandler);
+
+An optional second parameter of |AddFrameHandler| allows to specify the direction (TX, RX, TX/RX) of the Ethernet frames to be
+received. By default, only frames of RX direction are handled.
 
 Managing the Event Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

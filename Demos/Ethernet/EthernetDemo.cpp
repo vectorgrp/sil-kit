@@ -86,11 +86,11 @@ void FrameTransmitHandler(Ethernet::IEthernetController* /*controller*/, const E
 {
     if (frameTransmitEvent.status == Ethernet::EthernetTransmitStatus::Transmitted)
     {
-        std::cout << ">> ACK for Ethernet frame with transmitId=" << frameTransmitEvent.transmitId << std::endl;
+        std::cout << ">> ACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext << std::endl;
     }
     else
     {
-        std::cout << ">> NACK for Ethernet frame with transmitId=" << frameTransmitEvent.transmitId;
+        std::cout << ">> NACK for Ethernet frame with userContext=" << frameTransmitEvent.userContext;
         switch (frameTransmitEvent.status)
         {
         case Ethernet::EthernetTransmitStatus::Transmitted:
@@ -136,9 +136,11 @@ void SendFrame(Ethernet::IEthernetController* controller, const Ethernet::Ethern
     std::vector<uint8_t> payload(payloadString.size() + 1);
     memcpy(payload.data(), payloadString.c_str(), payloadString.size() + 1);
 
+    const auto userContext = reinterpret_cast<void *>(frameId);
+
     auto frame = CreateFrame(to, from, payload);
-    auto transmitId = controller->SendFrame(Ethernet::EthernetFrame{frame});
-    std::cout << "<< ETH Frame sent with transmitId=" << transmitId << std::endl;
+    controller->SendFrame(Ethernet::EthernetFrame{frame}, userContext);
+    std::cout << "<< ETH Frame sent with userContext=" << userContext << std::endl;
 }
 
 /**************************************************************************************************

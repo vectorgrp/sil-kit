@@ -72,10 +72,10 @@ public:
     void Activate() override;
     void Deactivate() override;
 
-    auto SendFrame(EthernetFrame frame) -> EthernetTxId override;
+    void SendFrame(EthernetFrame frame, void* userContext = nullptr) override;
 
-    HandlerId AddFrameHandler(FrameHandler handler) override;
-    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) override;
+    HandlerId AddFrameHandler(FrameHandler handler, DirectionMask directionMask = 0xFF) override;
+    HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler, EthernetTransmitStatusMask transmitStatusMask = 0xFFFF'FFFF) override;
     HandlerId AddStateChangeHandler(StateChangeHandler handler) override;
     HandlerId AddBitrateChangeHandler(BitrateChangeHandler handler) override;
 
@@ -103,7 +103,6 @@ public:
     void RegisterServiceDiscovery();
 
     // Expose for unit tests
-    auto SendFrameEvent(EthernetFrameEvent msg) -> EthernetTxId;
     void SetDetailedBehavior(const Core::ServiceDescriptor& remoteServiceDescriptor);
     void SetTrivialBehavior();
 
@@ -125,8 +124,6 @@ private:
     auto IsRelevantNetwork(const Core::ServiceDescriptor& remoteServiceDescriptor) const -> bool;
     auto AllowReception(const IServiceEndpoint* from) const -> bool;
 
-    inline auto MakeTxId() -> EthernetTxId;
-
     template <typename MsgT>
     inline void SendMsg(MsgT&& msg);
 
@@ -138,7 +135,6 @@ private:
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
     SimBehavior _simulationBehavior;
 
-    EthernetTxId _ethernetTxId = 0;
     EthernetState _ethState = EthernetState::Inactive;
     uint32_t _ethBitRate = 0;
     Tracer _tracer;
@@ -157,10 +153,6 @@ private:
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-auto EthController::MakeTxId() -> EthernetTxId
-{
-    return ++_ethernetTxId;
-}
 
 void EthController::AddSink(ITraceMessageSink* sink)
 {

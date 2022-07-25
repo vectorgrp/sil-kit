@@ -48,10 +48,9 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-auto MatchTxId(EthernetTxId transmitId) -> testing::Matcher<const EthernetFrameTransmitEvent&>
+auto MatchUserContext(void* userContext) -> testing::Matcher<const EthernetFrameTransmitEvent&>
 {
-    using namespace testing;
-    return Field(&EthernetFrameTransmitEvent::transmitId, transmitId);
+    return testing::Field(&EthernetFrameTransmitEvent::userContext, userContext);
 }
 
 class ThreeEthControllerITest : public testing::Test
@@ -110,7 +109,7 @@ protected:
                     EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
                     auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
-                    controller->SendFrame(ToEthernetFrame(ethernetFrame));
+                    controller->SendFrame(ToEthernetFrame(ethernetFrame), reinterpret_cast<void *>(numSent + 1));
                     numSent++;
                     std::this_thread::sleep_for(100ms);
                 }
@@ -176,9 +175,9 @@ protected:
         // run the simulation and check invariants
         for (auto index = 1u; index <= testMessages.size(); index++)
         {
-            EXPECT_CALL(callbacks, AckHandler(MatchTxId(index))).Times(1);
+            EXPECT_CALL(callbacks, AckHandler(MatchUserContext(reinterpret_cast<void *>(index))));
         }
-        EXPECT_CALL(callbacks, AckHandler(MatchTxId(0))).Times(0);
+        EXPECT_CALL(callbacks, AckHandler(MatchUserContext(nullptr))).Times(0);
 
         EXPECT_TRUE(testHarness.Run(30s))
             << "TestHarness Timeout occurred!"

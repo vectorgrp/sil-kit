@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/participant/exception.hpp"
 #include "silkit/util/PrintableHexString.hpp"
+#include "silkit/services/string_utils.hpp"
 
 #include "EthernetDatatypes.hpp"
 
@@ -150,8 +151,9 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameEvent& msg)
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     return out
-        << "EthernetFrameEvent{txId=" << msg.transmitId
-        << ", " << msg.frame
+        << "EthernetFrameEvent{" << msg.frame
+        << ", direction=" << msg.direction
+        << ", userContext=" << msg.userContext
         << " @" << timestamp.count() << "ms"
         << "}";
 }
@@ -160,9 +162,9 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& ms
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     out
-        << "EthernetFrameTransmitEvent{txId=" << msg.transmitId
-        << ", src=" << Util::AsHexString(msg.sourceMac).WithSeparator(":")
+        << "EthernetFrameTransmitEvent{src=" << Util::AsHexString(msg.sourceMac).WithSeparator(":")
         << ", status=" << msg.status
+        << ", userContext=" << msg.userContext
         << " @" << timestamp.count() << "ms"
         << "}";
 

@@ -41,37 +41,47 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireEthernetFrameEvent& msg)
 {
-    buffer << msg.transmitId
-           << msg.timestamp
-           << msg.frame;
+    buffer
+        << msg.timestamp
+        << msg.frame
+        << msg.direction
+        << msg.userContext
+        ;
 
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireEthernetFrameEvent& msg)
 {
-    buffer >> msg.transmitId
-           >> msg.timestamp
-           >> msg.frame;
+    buffer
+        >> msg.timestamp
+        >> msg.frame
+        >> msg.direction
+        >> msg.userContext
+        ;
 
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrameTransmitEvent& ack)
 {
-    buffer << ack.transmitId
-           << ack.sourceMac
-           << ack.timestamp
-           << ack.status;
+    buffer
+        << ack.sourceMac
+        << ack.timestamp
+        << ack.status
+        << ack.userContext
+        ;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
 {
-    buffer >> ack.transmitId
-           >> ack.sourceMac
-           >> ack.timestamp
-           >> ack.status;
+    buffer
+        >> ack.sourceMac
+        >> ack.timestamp
+        >> ack.status
+        >> ack.userContext
+        ;
     return buffer;
 }
 

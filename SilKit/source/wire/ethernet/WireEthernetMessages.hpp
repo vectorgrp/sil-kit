@@ -43,9 +43,10 @@ inline auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEth
 
 struct WireEthernetFrameEvent
 {
-    EthernetTxId transmitId; //!< Set by the EthController, used for acknowledgments
     std::chrono::nanoseconds timestamp; //!< Reception time
     WireEthernetFrame frame; //!< The Ethernet frame
+    TransmitDirection direction; //!< Receive/Transmit direction
+    void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
 inline auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent;
@@ -98,14 +99,14 @@ auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEthernetFr
 
 auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent
 {
-    return {wireEthernetFrameEvent.transmitId, wireEthernetFrameEvent.timestamp,
-            ToEthernetFrame(wireEthernetFrameEvent.frame)};
+    return {wireEthernetFrameEvent.timestamp, ToEthernetFrame(wireEthernetFrameEvent.frame),
+            wireEthernetFrameEvent.direction, wireEthernetFrameEvent.userContext};
 }
 
 auto MakeWireEthernetFrameEvent(const EthernetFrameEvent& ethernetFrameEvent) -> WireEthernetFrameEvent
 {
-    return {ethernetFrameEvent.transmitId, ethernetFrameEvent.timestamp,
-            MakeWireEthernetFrame(ethernetFrameEvent.frame)};
+    return {ethernetFrameEvent.timestamp, MakeWireEthernetFrame(ethernetFrameEvent.frame), ethernetFrameEvent.direction,
+            ethernetFrameEvent.userContext};
 }
 
 std::string to_string(const WireEthernetFrame& msg)

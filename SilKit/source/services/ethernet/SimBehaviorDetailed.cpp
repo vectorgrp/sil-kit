@@ -42,9 +42,6 @@ void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
 
 void SimBehaviorDetailed::SendMsg(WireEthernetFrameEvent&& msg)
 {
-    // We keep a copy until the transmission was acknowledged before tracing the message
-    _transmittedMessages[msg.transmitId] = msg.frame;
-
     SendMsgImpl(msg);
 }
 
@@ -53,19 +50,8 @@ void SimBehaviorDetailed::SendMsg(EthernetSetMode&& msg)
     SendMsgImpl(msg);
 }
 
-void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent& msg)
+void SimBehaviorDetailed::OnReceiveAck(const EthernetFrameTransmitEvent&)
 {
-    // Detailed Sim: Check if frame originates from this controller to trace the correct direction
-    auto transmittedMsg = _transmittedMessages.find(msg.transmitId);
-    if (transmittedMsg != _transmittedMessages.end())
-    {
-        if (msg.status == EthernetTransmitStatus::Transmitted)
-        {
-            _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, ToEthernetFrame(transmittedMsg->second));
-        }
-
-        _transmittedMessages.erase(msg.transmitId);
-    }
 }
 
 auto SimBehaviorDetailed::AllowReception(const Core::IServiceEndpoint* from) const -> bool

@@ -56,7 +56,6 @@ private:
     const Core::ServiceDescriptor* _parentServiceDescriptor{nullptr};
     Core::ServiceDescriptor _simulatedLink;
     Tracer _tracer;
-    std::map<EthernetTxId, WireEthernetFrame> _transmittedMessages;
 };
 
 

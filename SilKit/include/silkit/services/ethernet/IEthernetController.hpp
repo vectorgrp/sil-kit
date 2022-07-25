@@ -87,7 +87,8 @@ public:
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameHandler(FrameHandler handler) = 0;
+    virtual HandlerId AddFrameHandler(
+        FrameHandler handler, DirectionMask directionMask = static_cast<DirectionMask>(TransmitDirection::RX)) = 0;
 
     /*! \brief Remove a FrameHandler by HandlerId on this controller 
      *
@@ -107,7 +108,14 @@ public:
      * 
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
+    virtual HandlerId AddFrameTransmitHandler(
+        FrameTransmitHandler handler,
+        EthernetTransmitStatusMask transmitStatusMask =
+            static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::Transmitted)
+            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::ControllerInactive)
+            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::LinkDown)
+            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::Dropped)
+            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::InvalidFrameFormat)) = 0;
 
     /*! \brief Remove a FrameTransmitHandler by HandlerId on this controller 
      *
@@ -156,7 +164,7 @@ public:
      *
      * \param msg The Ethernet frame to send.
      */
-    virtual auto SendFrame(EthernetFrame msg) -> EthernetTxId = 0;
+    virtual void SendFrame(EthernetFrame msg, void* userContext = nullptr) = 0;
 };
 
 } // namespace Ethernet
