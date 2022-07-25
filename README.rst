@@ -10,6 +10,8 @@ For documentation on using the Vector SIL Kit, see the html documentation,
 which can be generated when building the Vector SIL Kit (cf. Customizing the
 Build) and is provided in pre-built form with the SIL Kit packages.
 
+The SIL Kit source and documentation is licensed under a permissable open 
+source license, see LICENSE file.
 
 Getting Started - GIT Clone
 ----------------------------------------
