@@ -357,13 +357,15 @@ void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controll
     SilKit_FlexrayController_ExecuteCmd(controller, SilKit_FlexrayChiCommand_RUN);
 }
 
-void FlexrayNode_SimulationTask(void* context, SilKit_TimeSyncService* timeSyncService, SilKit_NanosecondsTime time)
+void FlexrayNode_SimulationStep(void* context, SilKit_TimeSyncService* timeSyncService, SilKit_NanosecondsTime time,
+                                SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(timeSyncService);
 
     FlexrayNode* node = (FlexrayNode*)context;
     uint64_t nowMs = time / 1000000ULL;
-    printf("now=%" PRIu64 "ms\n", nowMs);
+    uint64_t durationMs = duration / 1000000ULL;
+    printf("now=%" PRIu64 "ms; duration=%" PRIu64 "ms\n", nowMs, durationMs);
     FlexrayNode_DoAction(node, time);
     SleepMs(500);
 }
@@ -623,7 +625,7 @@ int main(int argc, char** argv)
         return 2;
     }
 
-    returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, frNode, &FlexrayNode_SimulationTask, 1000000);
+    returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, frNode, &FlexrayNode_SimulationStep, 1000000);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
         printf("SilKit_TimeSyncService_SetSimulationStepHandler => %s\n", SilKit_GetLastErrorString());

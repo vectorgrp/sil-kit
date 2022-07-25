@@ -240,8 +240,9 @@ SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandler(
     {
         auto* timeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(ctimeSyncService);
         timeSyncService->SetSimulationStepHandler(
-            [handler, context, ctimeSyncService](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
-                handler(context, ctimeSyncService, static_cast<SilKit_NanosecondsTime>(now.count()));
+            [handler, context, ctimeSyncService](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                handler(context, ctimeSyncService, static_cast<SilKit_NanosecondsTime>(now.count()),
+                        static_cast<SilKit_NanosecondsTime>(duration.count()));
             },
             std::chrono::nanoseconds(initialStepSize));
         return SilKit_ReturnCode_SUCCESS;
@@ -260,8 +261,9 @@ SilKit_ReturnCode SilKit_TimeSyncService_SetSimulationStepHandlerAsync(
         auto* timeSyncService = reinterpret_cast<SilKit::Services::Orchestration::ITimeSyncService*>(ctimeSyncService);
 
         timeSyncService->SetSimulationStepHandlerAsync(
-            [handler, context, ctimeSyncService](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
-                handler(context, ctimeSyncService, static_cast<SilKit_NanosecondsTime>(now.count()));
+            [handler, context, ctimeSyncService](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                handler(context, ctimeSyncService, static_cast<SilKit_NanosecondsTime>(now.count()),
+                        static_cast<SilKit_NanosecondsTime>(duration.count()));
             },
             std::chrono::nanoseconds(initialStepSize));
         return SilKit_ReturnCode_SUCCESS;

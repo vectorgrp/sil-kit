@@ -157,11 +157,12 @@ void SendFrame()
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
-void SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now)
+void SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
+             SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(cbTimeSyncService);
     SimTaskContext* tc = (SimTaskContext*)context;
-    printf(">> Simulation task now=%"PRIu64" with context=%i\n", now, tc->someInt);
+    printf(">> Simulation task now=%"PRIu64" and duration=%"PRIu64" with context=%i\n", now, duration, tc->someInt);
 
     SendFrame();
     SleepMs(100);

@@ -208,11 +208,12 @@ void Master_doAction(SilKit_NanosecondsTime now)
     Schedule_ExecuteTask(masterSchedule, now);
 }
 
-void Master_SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now)
+void Master_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
+                    SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbTimeSyncService);
-    printf("now%"PRIu64"ms\n", now / 1000000);
+    printf("now%" PRIu64 "ms; duration=%" PRIu64 "ms\n", now / 1000000, duration / 1000000);
     Master_doAction(now);
 }
 
@@ -464,12 +465,13 @@ void Slave_DoAction(SilKit_NanosecondsTime now)
     Timer_ExecuteAction(&slaveTimer, now);
 }
 
-void Slave_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now)
+void Slave_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
+                   SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbTimeSyncService);
 
-    printf("now=%"PRIu64"ms\n", now / 1000000);
+    printf("now=%" PRIu64 "ms; duration=%" PRIu64 "ms\n", now / 1000000, duration / 1000000);
 
     Slave_DoAction(now);
     SleepMs(500);
@@ -590,7 +592,7 @@ int main(int argc, char* argv[])
         SilKit_LinController_AddLinSlaveConfigurationHandler(linController, NULL, &Master_LinSlaveConfigurationHandler,
                                                              &linSlaveConfigurationHandlerId);
 
-        SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Master_SimTask, 1000000);
+        SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Master_SimulationStepHandler, 1000000);
     }
     else
     {

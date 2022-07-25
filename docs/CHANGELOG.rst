@@ -125,6 +125,7 @@ Changed
 
 - C: Extended the ``SilKit_CanController_SetBaudRate`` function with the CAN XL data bit rate.
 
+- C: Added the simulation step duration to the ``SilKit_TimeSyncService_SimulationStepHandler_t`` callback 
 Removed
 ~~~~~~~
 

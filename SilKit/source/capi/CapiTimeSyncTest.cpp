@@ -19,7 +19,10 @@ protected:
 
 };
 
-void SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncService*/, SilKit_NanosecondsTime /*now*/) {}
+void SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncService*/, SilKit_NanosecondsTime /*now*/,
+             SilKit_NanosecondsTime /*duration*/)
+{
+}
 
 TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
 {

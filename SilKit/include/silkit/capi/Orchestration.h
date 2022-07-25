@@ -266,9 +266,10 @@ typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetShutdownHandler_t)(
  * \param context The user provided context passed in \ref SilKit_TimeSyncService_SetSimulationStepHandler
  * \param timeSyncService The time sync service
  * \param now The current simulation time
+ * \param duration The duration of the simulation step
  */
 typedef void (*SilKit_TimeSyncService_SimulationStepHandler_t)(void* context, SilKit_TimeSyncService* timeSyncService,
-                                                               SilKit_NanosecondsTime now);
+                                                               SilKit_NanosecondsTime now, SilKit_NanosecondsTime duration);
 /*! \brief Set the task to be executed with each grant / tick
  *
  * Can be changed at runtime. Execution context depends on the run type.
