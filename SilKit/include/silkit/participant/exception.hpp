@@ -26,51 +26,74 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 
-class TypeConversionError : public std::runtime_error
+//!< Base class of all SilKit exceptions
+class SilKitError: public std::exception
 {
+protected:
+    std::string _what;
 public:
-    using runtime_error::runtime_error;
 
-    TypeConversionError() : runtime_error("Invalid type conversion.") { }
-};
-
-class ConfigurationError : public std::runtime_error
-{
-public:
-    using std::runtime_error::runtime_error;
-
-    ConfigurationError() : ConfigurationError("Configuration has syntactical or semantical errors.") { }
-};
-
-class StateError : public std::logic_error
-{
-public:
-    using std::logic_error::logic_error;
-
-    StateError(const std::string& what = "The requested operation is not valid in the current state.")
-        : std::logic_error(what.c_str())
+    SilKitError(std::string message)
+        :_what{std::move(message)}
     {
+    }
+
+    SilKitError(const char* message)
+        :_what{message}
+    {
+    }
+
+    const char* what() const noexcept override
+    {
+        return _what.c_str();
     }
 };
 
-class ProtocolError: public std::runtime_error
+class TypeConversionError : public SilKitError
 {
 public:
-    using std::runtime_error::runtime_error;
+    using SilKitError::SilKitError;
+
+    TypeConversionError() : SilKitError("SilKit: Invalid type conversion.") { }
+};
+
+class ConfigurationError : public SilKitError
+{
+public:
+    using SilKitError::SilKitError;
+
+    ConfigurationError() : ConfigurationError("SilKit: Configuration has syntactical or semantical errors.") { }
+};
+
+class StateError : public SilKitError
+{
+public:
+    using SilKitError::SilKitError;
+};
+
+class ProtocolError: public SilKitError
+{
+public:
+    using SilKitError::SilKitError;
 };
 
 //!< AssertionError is a replacement for cassert's assert.
-class AssertionError: public std::runtime_error
+class AssertionError: public SilKitError
 {
 public:
-    using std::runtime_error::runtime_error;
+    using SilKitError::SilKitError;
 };
  
 //! \brief ExtensionError is thrown when an extension could not be loaded
-class ExtensionError : public std::runtime_error
+class ExtensionError : public SilKitError
 {
-    using std::runtime_error::runtime_error;
+    using SilKitError::SilKitError;
 };
 
+//! \brief LogicError is thrown when an extension could not be loaded
+class LogicError : public SilKitError
+{
+    using SilKitError::SilKitError;
+};
 
 } // namespace SilKit
