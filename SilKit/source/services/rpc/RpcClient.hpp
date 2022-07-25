@@ -47,8 +47,7 @@ class RpcClient
 {
 public:
     RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-              const std::string& functionName, const std::string& mediaType,
-              const std::map<std::string, std::string>& labels, const std::string& clientUUID,
+              const SilKit::Services::Rpc::RpcClientSpec& dataSpec, const std::string& clientUUID,
               RpcCallResultHandler handler);
 
     void RegisterServiceDiscovery();
@@ -69,9 +68,7 @@ public:
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
-    std::string _functionName;
-    std::string _mediaType;
-    std::map<std::string, std::string> _labels;
+    SilKit::Services::Rpc::RpcClientSpec _dataSpec;
     std::string _clientUUID;
 
     RpcCallResultHandler _handler;

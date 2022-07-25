@@ -48,37 +48,38 @@ matching requirements regarding topic and media type, DataSubscribers will only 
 their labels apply the following matching rules:
 
 * A DataSubscriber without labels matches any DataPublisher.
-* If labels are specified on a DataSubscriber, all of the labels must be found on a DataPublisher.
-* An empty label value on a DataSubscriber is a wildcard for the DataPublisher label value of their common label key.
+* A mandatory label matches, if a label of the same key and value ist found on the corresponding DataPublisher.
+* A preferred label matches, if the label key does not exist on the DataPublisher or both its key and value are equal.
 
-Explicit Handlers
-~~~~~~~~~~~~~~~~~
+The following table shows how DataPublishers and DataSubscribers with matching topics and matching media type would match corresponding to their labels.
 
-In a scenario where multiple DataPublishers publish on a common topic but a DataSubscriber wants to treat the incoming
-messages differently, the DataSubscriber can route the publications to explicit data handlers based on the
-DataPublishers labels and media type using the |AddExplicitDataMessageHandler| method on a DataSubscriber instance. The
-labels and media type given there will be used to redirect incoming messages by matching DataPublishers to one or more
-explicit data handlers instead of the default handler. The latter will not be invoked if a specific handler is
-availabe. Note that the wildcard patters for DataSubscribers also apply to labels/media type given to
-|AddExplicitDataMessageHandler|: An empty string in a label value or the media type is a wildcard.
+.. list-table:: Label combinations
+   :header-rows: 1
 
-Source Discovery
-~~~~~~~~~~~~~~~~
+   * - 
+     - Sub {"KeyA", "Val1", Preferred}
+     - Sub {"KeyA", "Val1", Mandatory}
+   * - Pub {}
+     - Match
+     - Match
+   * - Pub {"KeyA", "Val1"}
+     - Match
+     - Match
+   * - Pub {"KeyA", "Val2"}
+     - No Match
+     - No Match
+   * - Pub {"KeyB", "Val1"}
+     - Match
+     - No Match
 
-If the labels/media type of DataPublishers are unknown beforehand, this information can be obtained by a  
-handler on the DataSubscriber that notifies about new DataPublishers on its topic. Note that the source discovery
-handler will only be invoked once per uniqe set of media type and labels, even if this set is used by multiple data 
-publishers.
+The following code snippet shows how the labels of a DataSubscriber can be set.
 
 .. code-block:: cpp
 
-    auto newDataPublisherHandler = [](IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource)
-    {
-        // handle new sources, e.g., by adding an explicit handler for this set of media type and labels:
-        subscriber->AddExplicitDataMessageHandler(dataHandler, mediaType, labels);
-    });
-    auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", "", {}, defaultDataHandler, 
-                                                         newDataPublisherHandler);
+    SilKit::Services::PubSub::DataSubscriberSpec subDataSpec{"Topic1", "application/json"};
+    subDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::Label::Kind::Preferred);
+    auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", subDataSpec, defaultDataHandler);
+
 
 History
 ~~~~~~~
@@ -124,8 +125,9 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
 
     // Participant1 (Publisher)
     // ------------------------
-
-    auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", "application/json", {"KeyA", "ValA"}, 1);
+    SilKit::Services::PubSub::DataPublisherSpec pubDataSpec{"Topic1", "application/json"};
+    pubDataSpec.AddLabel("KeyA", "ValA");
+    auto* publisher = participant->CreateDataPublisher("PubCtrl1", pubDataSpec, 1);
     publisher->Publish(user_data);
 
     // Participant2 (Subscriber)
@@ -136,18 +138,9 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
         // publication timestamp in dataMessageEvent.timestamp
         // raw data in dataMessageEvent.data
     });
-    auto newDataPublisherHandler = [](IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource)
-    {
-        // handle new sources
-    });
-
-    auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", "", {}, defaultDataHandler, newDataPublisherHandler);
-
-    auto explicitDataHandler = [](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) 
-    {
-        // handle data for publishers with label key "KeyB"
-    });
-    subscriber->AddExplicitDataMessageHandler("", {{"KeyB", ""}}, explicitDataHandler);
+    SilKit::Services::PubSub::DataSubscriberSpec subDataSpec{"Topic1", "application/json"};
+    subDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::Label::Kind::Preferred);
+    auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", subDataSpec, defaultDataHandler);
 
 
 API and Data Type Reference
@@ -176,6 +169,13 @@ Data Structures
 
 .. doxygenstruct:: SilKit::Services::PubSub::DataMessageEvent
    :members:
-.. doxygenstruct:: SilKit::Services::PubSub::NewDataPublisherEvent
+
+.. doxygenstruct:: SilKit::Services::Label
+   :members:
+
+.. doxygenclass:: SilKit::Services::PubSub::DataPublisherSpec
+   :members:
+
+.. doxygenclass:: SilKit::Services::PubSub::DataSubscriberSpec
    :members:
        

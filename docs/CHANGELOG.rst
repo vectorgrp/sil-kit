@@ -125,6 +125,55 @@ Changed
 
 - C: Extended the ``SilKit_CanController_SetBaudRate`` function with the CAN XL data bit rate.
 
+- Changed RPC label matching
+  
+  - ``IntegrationBus/include/silkit/participant/Iparticipant.hpp``
+  
+    + old:
+  
+      .. code-block:: c++
+
+        virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName,
+                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+                                 Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient* = 0;
+        virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
+                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+                                 Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer* = 0;
+
+    + new:
+  
+      .. code-block:: c++
+
+        virtual auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcClientSpec& dataSpec,
+                                 Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient* = 0;
+        virtual auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcServerSpec& dataSpec,
+                                 Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer* = 0;
+
+- Changed Data Publish Subscribe label matching
+  
+  - ``IntegrationBus/include/silkit/participant/Iparticipant.hpp``
+  
+    + old:
+  
+      .. code-block:: c++
+
+        virtual auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
+                                     const std::string& mediaType,
+                                     const std::map<std::string, std::string>& labels, size_t history = 0)
+        virtual auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
+                                      const std::string& mediaType,
+                                      const std::map<std::string, std::string>& labels,
+                                      Services::PubSub::DataMessageHandlerT defaultDataMessageHandler,
+                                      Services::PubSub::NewDataPublisherHandlerT newDataPublisherHandler = nullptr)
+
+    + new:
+  
+      .. code-block:: c++
+
+        virtual auto CreateDataPublisher(const std::string& canonicalName, SilKit::Services::PubSub::DataPublisherSpec& dataSpec, size_t history = 0)
+        virtual auto CreateDataSubscriber(const std::string& canonicalName, SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+                                      Services::PubSub::DataMessageHandlerT dataMessageHandler)
+
 - C: Added the simulation step duration to the ``SilKit_TimeSyncService_SimulationStepHandler_t`` callback
 
 - C\+\+: Extended the ``IEthernetController::AddFrameHandler`` function with the ``directionMask`` filter, similar to ``ICanController::AddFrameHandler``.
@@ -143,6 +192,8 @@ Removed
 ~~~~~~~
 
 - Removed ``ITimeSyncService::SetPeriod()`` (now provided via ``ITimeSyncService::SetSimulationStepHandler()``)
+
+- Removed RPC Discovery functionalities
 
 
 [3.99.27] - 2022-07-14

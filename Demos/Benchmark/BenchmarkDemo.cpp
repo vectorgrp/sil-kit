@@ -309,8 +309,10 @@ void ParticipantsThread(
     auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
    
-   auto publisher = participant->CreateDataPublisher("PubCtrl1", "Topic", {}, {}, 0);
-   participant->CreateDataSubscriber("SubCtrl1", "Topic", {}, {}, [&messageCounter](auto*, auto&) {
+   SilKit::Services::PubSub::DataPublisherSpec dataSpec{"Topic", {}};
+    SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{"Topic", {}};
+   auto publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
+    participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
         messageCounter++;
     });

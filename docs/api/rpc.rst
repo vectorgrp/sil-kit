@@ -27,11 +27,11 @@ about the incoming return data in his call return handler (4). These steps const
 handlers (2,4) are provided on instantiation and call / submit (1,3) are commands of the RpcClient / RpcServer 
 instances. 
 
-Function name
+Topic
 ~~~~~~~~~~~~~
 
-RpcClients and RpcServers are linked by a string-based function name. For a server to receive a rpc call, the 
-function name must match the function name of the client triggering the call.
+RpcClients and RpcServers are linked by a string-based topic. For a server to receive a rpc call, the 
+topic must match the function name of the client triggering the call.
 
 Media Type
 ~~~~~~~~~~
@@ -46,12 +46,12 @@ Labels
 ~~~~~~
 
 RpcClients and RpcServers can be annotated with string-based key-value pairs (labels).
-Additional to the matching  requirements regarding functionName and mediaType, RpcServers will only receive calls by
+Additional to the matching  requirements regarding topic and mediaType, RpcServers will only receive calls by
 RpcClients if their labels conform to the following matching rules:
 
-* A RpcClient without labels matches any other RpcServer.
-* If labels are specified on a RpcClients, all of the labels must be found on a RpcServer.
-* An empty value string on a RpcClients's label is a wildcard.
+* A RpcServer without labels matches any other RpcClient.
+* A mandatory label matches, if a label of the same key and value ist found on the corresponding RpcClient.
+* A preferred label matches, if the label key does not exist on the RpcClient or both its key and value are equal.
 
 Usage
 ~~~~~
@@ -88,7 +88,9 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // ------------------
 
     auto participant = SilKit::CreateParticipant(std::move(config), participant_name, registryUri);
-    auto* client = participant->CreateRpcClient("TestFunc", "application/octet-stream",
+
+    SilKit::Services::Rpc::RpcClientSpec dataSpecClient{"TestFunc", "application/octet-stream"};
+    auto client = participant->CreateRpcClient("ClientCtrl1", dataSpecClient, 
         [](IRpcClient* client, RpcCallResultEvent event) {
             // handle resultData
         });
@@ -102,7 +104,9 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // ------------------
 
     auto participant = SilKit::CreateParticipant(std::move(config), participant_name, registryUri);
-    auto* server = participant->CreateRpcServer("TestFunc", "application/octet-stream",
+    SilKit::Services::Rpc::RpcServerSpec dataSpecServer{"TestFunc", "application/octet-stream"};
+            
+    auto* server = participant->CreateRpcServer("ServerCtrl1", dataSpecServer, 
         [](IRpcServer* server, RpcCallEvent event) {
             // handle argumentData
             // define resultData
@@ -121,3 +125,21 @@ RpcServers API
 .. doxygenclass:: SilKit::Services::Rpc::IRpcServer
    :members:
 
+
+Data Structures
+~~~~~~~~~~~~~~~
+
+.. doxygenstruct:: SilKit::Services::Rpc::RpcCallEvent
+   :members:
+
+.. doxygenstruct:: SilKit::Services::Rpc::RpcCallResultEvent
+   :members:
+
+.. doxygenstruct:: SilKit::Services::Label
+   :members:
+
+.. doxygenclass:: SilKit::Services::Rpc::RpcClientSpec
+   :members:
+
+.. doxygenclass:: SilKit::Services::Rpc::RpcServerSpec
+   :members:

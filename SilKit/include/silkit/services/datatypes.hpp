@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 namespace SilKit {
 namespace Services {
@@ -40,6 +41,31 @@ enum class TransmitDirection : uint8_t
     TXRX = 3,
 };
 using DirectionMask = uint8_t;
+
+/*! \brief Struct that contains a label as used in PubSub and RPC for matching publisher, subscribers, servers, and clients
+*/
+struct Label
+{
+    std::string key;
+    std::string value;
+};
+
+/*! \brief Struct that contains a label as used in PubSub and RPC for matching publisher, subscribers, servers, and clients
+*/
+struct MatchingLabel
+{
+    /*! \brief Enum defining the matching kind to apply for this label
+    */
+    enum class Kind : uint32_t
+    {
+        Preferred = 1, //!< If this label is available, its value must match
+        Mandatory = 2 //!< This label must be available and its value must match
+    };
+
+    std::string key;
+    std::string value;
+    Kind kind;
+};
 
 } // namespace Services
 } // namespace SilKit

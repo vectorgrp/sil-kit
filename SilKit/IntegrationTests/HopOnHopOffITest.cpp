@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/services/all.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
@@ -164,9 +165,11 @@ protected:
             auto* lifecycleService = participant.participant->CreateLifecycleServiceWithTimeSync();
             auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
-            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
+            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, mediaType};
+            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
-				"TestSubscriber", topic, mediaType, {},
+                "TestSubscriber", matchingDataSpec,
                 [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
                     if (!participant.allReceived)
                     {
@@ -178,8 +181,7 @@ protected:
                             participant.allReceivedPromise.set_value();
                         }
                     }
-                },
-                nullptr);
+                });
 
             timeSyncService->SetSimulationStepHandler(
                 [&participant, this](std::chrono::nanoseconds now) {
@@ -214,9 +216,11 @@ protected:
         {
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
-            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", topic, mediaType, {}, 0);
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
+            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, mediaType};
+            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
-                "TestSubscriber", topic, mediaType, {},
+                "TestSubscriber", matchingDataSpec,
                 [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
                     if (!participant.allReceived)
                     {
@@ -228,8 +232,7 @@ protected:
                             participant.allReceivedPromise.set_value();
                         }
                     }
-                },
-                nullptr);
+                });
 
             while (runAsync)
             {

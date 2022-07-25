@@ -59,19 +59,27 @@ struct SilKit_ByteVector
 typedef struct SilKit_ByteVector SilKit_ByteVector;
 
 
-/*! \brief Key-value pair */
-typedef struct SilKit_KeyValuePair
+/*! \brief Information level of log messages
+*/
+typedef uint32_t SilKit_LabelKind;
+#define SilKit_LabelKind_Undefined ((uint32_t) 0) //!< Undefined
+#define SilKit_LabelKind_Preferred ((uint32_t) 0) //!< If this label is available, its value must match
+#define SilKit_LabelKind_Mandatory ((uint32_t) 1) //!< This label must be available and its value must match
+
+/*! \brief Struct that contains a label as used in PubSub and RPC for matching publisher, subscribers, servers, and clients */
+typedef struct SilKit_Label
 {
     const char* key;
     const char* value;
-} SilKit_KeyValuePair;
+    SilKit_LabelKind kind;
+} SilKit_Label;
 
-/*! \brief Key-value list */
-typedef struct SilKit_KeyValueList
+/*! \brief A list of data labels */
+typedef struct SilKit_LabelList
 {
     size_t numLabels;
-    SilKit_KeyValuePair* labels;
-} SilKit_KeyValueList;
+    SilKit_Label* labels;
+} SilKit_LabelList;
 
 /*! \brief String list */
 typedef struct SilKit_StringList

@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/util/serdes/sil/Serialization.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
 
 
 using namespace SilKit::Services::PubSub;
@@ -129,9 +130,14 @@ int main(int argc, char** argv)
 
         if (participantName == "PubSub1")
         {
-            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaTypeA, labelsEmpty, 0);
-            auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", "Topic2", mediaTypeA, labelsEmpty, 0);
-            participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec1{"Topic1", mediaTypeA};
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec2{"Topic2", mediaTypeA};
+            SilKit::Services::PubSub::DataSubscriberSpec dataSpec3{"Topic3", mediaTypeA};
+
+            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpec1, 0);
+            auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", dataSpec2, 0);
+
+            participant->CreateDataSubscriber("SubCtrl1", dataSpec3, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -145,9 +151,14 @@ int main(int argc, char** argv)
         }
         else if (participantName == "PubSub2")
         {
-            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaTypeA, labelsEmpty, 0);
-            auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", "Topic3", mediaTypeA, labelsEmpty, 0);
-            participant->CreateDataSubscriber("SubCtrl1", "Topic3", mediaTypeA, {}, ReceiveMessage);
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec1{"Topic1", mediaTypeA};
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec2{"Topic3", mediaTypeA};
+            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec2{"Topic3", mediaTypeA};
+
+            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpec1, 0);
+            auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", dataSpec2, 0);
+
+            participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec2, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -160,8 +171,11 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber1")
         {
-            participant->CreateDataSubscriber("SubCtrl1", "Topic1", mediaTypeAll, labelsEmpty, ReceiveMessage);
-            participant->CreateDataSubscriber("SubCtrl2", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
+            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec1{"Topic1", mediaTypeAll};
+            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec2{"Topic2", mediaTypeA};
+
+            participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec1, ReceiveMessage);
+            participant->CreateDataSubscriber("SubCtrl2", matchingDataSpec2, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -172,8 +186,11 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber2")
         {
-            participant->CreateDataSubscriber("SubCtrl1", "Topic2", mediaTypeA, labelsEmpty, ReceiveMessage);
-            participant->CreateDataSubscriber("SubCtrl2", "Topic3", mediaTypeB, labelsEmpty, ReceiveMessage);
+            SilKit::Services::PubSub::DataSubscriberSpec dataSpec1{"Topic2", mediaTypeA};
+            SilKit::Services::PubSub::DataSubscriberSpec dataSpec2{"Topic3", mediaTypeB};
+
+            participant->CreateDataSubscriber("SubCtrl1", dataSpec1, ReceiveMessage);
+            participant->CreateDataSubscriber("SubCtrl2", dataSpec2, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

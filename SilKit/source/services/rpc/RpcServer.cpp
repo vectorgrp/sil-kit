@@ -32,11 +32,8 @@ namespace Services {
 namespace Rpc {
 
 RpcServer::RpcServer(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                     const std::string& functionName, const std::string& mediaType,
-                     const std::map<std::string, std::string>& labels, RpcCallHandler handler)
-    : _functionName{functionName}
-    , _mediaType{mediaType}
-    , _labels{labels}
+                     const SilKit::Services::Rpc::RpcServerSpec& dataSpec, RpcCallHandler handler)
+    : _dataSpec{dataSpec}
     , _handler{std::move(handler)}
     , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider}
@@ -66,16 +63,16 @@ void RpcServer::RegisterServiceDiscovery()
                 auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
                 auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
                 std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
-                std::map<std::string, std::string> clientLabels =
-                    SilKit::Config::Deserialize<std::map<std::string, std::string>>(labelsStr);
+                auto clientLabels =
+                    SilKit::Config::Deserialize<std::vector<SilKit::Services::Label>>(labelsStr);
 
-                if (functionName == _functionName && MatchMediaType(clientMediaType, _mediaType)
-                    && MatchLabels(clientLabels, _labels))
+                if (functionName == _dataSpec.Topic() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
+                    && MatchLabels(_dataSpec.Labels(), clientLabels))
                 {
                     AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
                 }
             }
-        }, Core::Discovery::controllerTypeRpcClient, _functionName);
+        }, Core::Discovery::controllerTypeRpcClient, _dataSpec.Topic());
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData)
@@ -96,10 +93,10 @@ void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_
 }
 
 void RpcServer::AddInternalRpcServer(const std::string& clientUUID, std::string joinedMediaType,
-                                     const std::map<std::string, std::string>& clientLabels)
+                                     const std::vector<SilKit::Services::Label>& clientLabels)
 {
     auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
-        _functionName, clientUUID, joinedMediaType, clientLabels, _handler, this));
+        _dataSpec.Topic(), clientUUID, joinedMediaType, clientLabels, _handler, this));
     _internalRpcServers.push_back(internalRpcServer);
 }
 

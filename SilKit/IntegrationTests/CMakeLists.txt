@@ -97,6 +97,7 @@ add_silkit_test(ITestDataPubSub
       DataPubSubITest.cpp
     LIBS
         SilKit
+        SilKitInternal
         SilKitConfigurationTestUtils
 )
 
@@ -115,6 +116,7 @@ add_silkit_test(ITestRpc
       RpcITest.cpp
     LIBS
       SilKit
+      SilKitInternal
       SilKitConfigurationTestUtils
 )
 

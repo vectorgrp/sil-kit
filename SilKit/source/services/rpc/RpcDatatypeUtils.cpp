@@ -20,6 +20,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "RpcDatatypeUtils.hpp"
+#include "silkit/services/datatypes.hpp"
+#include "Optional.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -30,25 +32,47 @@ bool MatchMediaType(const std::string& clientMediaType, const std::string& serve
     return clientMediaType == "" || clientMediaType == serverMediaType;
 }
 
-bool MatchLabels(const std::map<std::string, std::string>& clientLabels,
-                 const std::map<std::string, std::string>& serverLabels)
+SilKit::Util::Optional<SilKit::Services::Label> findLabel(
+    std::vector<SilKit::Services::Label> dataLabels, std::string key)
 {
-    if (clientLabels.size() == 0)
+    for (auto it : dataLabels)
+    {
+        if (it.key == key)
+        {
+            return {it};
+        }
+    }
+    return SilKit::Util::Optional<SilKit::Services::Label>();
+}
+
+bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& serverLabels,
+                 const std::vector<SilKit::Services::Label>& clientLabels)
+{
+    if (serverLabels.size() == 0)
         return true; // clientLabels empty -> match
 
-    if (clientLabels.size() > serverLabels.size())
-        return false; // clientLabels more labels than outer set -> no match
-
-    for (auto&& kv : clientLabels)
+    for (auto&& kv : serverLabels)
     {
-        auto it = serverLabels.find(kv.first);
-        if (it == serverLabels.end() || // Key not found -> no match
-            (kv.second != "" && kv.second != (*it).second)) // Value does not match (and no wildcard given) -> no match
+        auto optionalLabel = findLabel(clientLabels, kv.key);
+        if (!optionalLabel.has_value())
+        {
+            if (kv.kind == SilKit::Services::MatchingLabel::Kind::Mandatory)
+            {
+                // mandatory labels must exist
+                return false;
+            }
+            else if (kv.kind == SilKit::Services::MatchingLabel::Kind::Preferred)
+            {
+                // prefered labels that do not exist are ignored
+                continue;
+            }
+        }
+        else if (kv.value != optionalLabel.value().value) // Value does not match -> no match
         {
             return false;
         }
     }
-    return true; // All of clientLabels are there -> match
+    return true; // All of clientLabels match according to their rules -> match
 }
 
 } // namespace Rpc

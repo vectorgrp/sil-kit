@@ -33,20 +33,9 @@ namespace Rpc {
 // RpcDatatypes
 inline std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels);
 
-inline std::string to_string(const RpcDiscoveryResult& discoveryResult);
-inline std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult);
-
-
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-
-std::string to_string(const RpcDiscoveryResult& discoveryResult)
-{
-    std::stringstream out;
-    out << discoveryResult;
-    return out.str();
-}
 
 std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels)
 {
@@ -55,14 +44,6 @@ std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::str
         out << "{\"" << kvp.first << "\", \"" << kvp.second << "\"}";
     out << "}";
     return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const RpcDiscoveryResult& discoveryResult)
-{
-    return out << "Rpc::RpcDiscoveryResult{"
-               << "functionName=\"" << discoveryResult.functionName << "\", mediaType=" << discoveryResult.mediaType
-               << ", labels=" << discoveryResult.labels
-               << "}";
 }
 
 } // namespace Rpc

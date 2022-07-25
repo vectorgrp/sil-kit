@@ -29,9 +29,7 @@ add_library(SilKitSimRpc STATIC
     RpcClient.cpp
     RpcServerInternal.hpp
     RpcServerInternal.cpp
-    RpcDiscoverer.hpp
-    RpcDiscoverer.cpp
-
+    
     RpcSerdes.hpp
     RpcSerdes.cpp
 )
@@ -51,6 +49,7 @@ add_silkit_test(TestSimRpc
     SOURCES
         RpcClientTest.cpp
         RpcServerTest.cpp
+        RpcMatchingTest.cpp
     LIBS
         SilKitSimRpc
         SilKitMwMockParticipant

@@ -26,6 +26,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 
 #include "ConfigurationTestUtils.hpp"
+#include "IParticipantInternal.hpp"
+#include "IServiceDiscovery.hpp"
+#include "ServiceDatatypes.hpp"
 
 #include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
@@ -94,10 +97,9 @@ protected:
     struct DataSubscriberInfo
     {
         DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
-                           const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
-                           uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
-                           const std::map<std::string, std::string>& newExpectedLabels,
-                           const std::vector<SpecificDataHandlerInfo>& newSpecificDataHandlers)
+                           const std::vector<SilKit::Services::MatchingLabel>& newLabels,
+                           size_t newMessageSizeInBytes,
+                           uint32_t newNumMsgToReceive, uint32_t newExpectedSources)
         {
             expectIncreasingData = true;
             controllerName = newControllerName;
@@ -107,15 +109,11 @@ protected:
             messageSizeInBytes = newMessageSizeInBytes;
             numMsgToReceive = newNumMsgToReceive;
             expectedSources = newExpectedSources;
-            expectedLabels = newExpectedLabels;
-            specificDataHandlers = newSpecificDataHandlers;
         }
-        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
-                           const std::map<std::string, std::string>& newLabels, size_t newMessageSizeInBytes,
+        DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType, const std::vector<SilKit::Services::MatchingLabel>& newLabels,
+                           size_t newMessageSizeInBytes,
                            uint32_t newNumMsgToReceive, uint32_t newExpectedSources,
-                           const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered,
-                           const std::map<std::string, std::string>& newExpectedLabels,
-                           const std::vector<SpecificDataHandlerInfo>& newSpecificDataHandlers)
+                           const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
         {
             expectIncreasingData = false;
             controllerName = newControllerName;
@@ -126,20 +124,16 @@ protected:
             numMsgToReceive = newNumMsgToReceive;
             expectedSources = newExpectedSources;
             expectedDataUnordered = newExpectedDataUnordered;
-            expectedLabels = newExpectedLabels;
-            specificDataHandlers = newSpecificDataHandlers;
         }
 
         std::string controllerName;
         std::string topic;
         std::string mediaType;
-        std::map<std::string, std::string> labels;
-        std::map<std::string, std::string> expectedLabels;
+        std::vector<SilKit::Services::MatchingLabel> labels;
         size_t messageSizeInBytes;
         uint32_t numMsgToReceive;
         bool expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedDataUnordered;
-        std::vector<SpecificDataHandlerInfo> specificDataHandlers;
 
         uint32_t expectedSources;
         uint32_t newSourceCounter{0};
@@ -179,28 +173,13 @@ protected:
             }
         }
 
-        void OnNewDataSource(IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource,
-                             SilKit::Services::PubSub::DataMessageHandlerT receptionHandler)
-        {
+        void OnNewServiceDiscovery(const SilKit::Core::ServiceDescriptor /*sd*/) {
             newSourceCounter++;
             if (!allDiscovered)
             {
                 if (newSourceCounter >= expectedSources)
                 {
                     allDiscovered = true;
-                }
-            }
-
-            for (auto const& kv : dataSource.labels)
-            {
-                EXPECT_EQ(expectedLabels[kv.first], kv.second);
-            }
-
-            for (auto const& sp : specificDataHandlers)
-            {
-                if (sp.labels == dataSource.labels)
-                {
-                    subscriber->AddExplicitDataMessageHandler(receptionHandler, sp.mediaType, sp.labels);
                 }
             }
         }
@@ -224,7 +203,8 @@ protected:
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
         std::vector<DataPublisherInfo> dataPublishers;
-        std::unique_ptr<IParticipant> participant;
+        std::unique_ptr<SilKit::IParticipant> participant;
+        SilKit::Core::IParticipantInternal* participantImpl;
 
         // Common
         std::promise<void> participantCreatedPromise;
@@ -320,6 +300,8 @@ protected:
         try
         {
             participant.participant = SilKit::CreateParticipant(participant.config, participant.name, registryUri);
+            participant.participantImpl =
+                dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.participant.get());
 
             participant.participantCreatedPromise.set_value();
 
@@ -336,41 +318,47 @@ protected:
                     participant.CheckAllReceivedPromise();
                 };
 
-                auto newDataSourceHandler = [&participant, &ds, receptionHandler](
-                                                IDataSubscriber* subscriber, const NewDataPublisherEvent& dataSource) {
-                    ds.OnNewDataSource(subscriber, dataSource, receptionHandler);
-                    participant.CheckAllDiscoveredPromise();
-                };
+                participant.participantImpl->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+                    [&ds, &participant](auto type, auto&& serviceDescr) {
+                        if (type == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+                        {
+                            if (serviceDescr._networkType == SilKit::Config::NetworkType::Data)
+                            {
+                                ds.OnNewServiceDiscovery(serviceDescr);
+                                participant.CheckAllDiscoveredPromise();
+                            }
+                        }
+                });
 
-                if (ds.specificDataHandlers.empty())
+                SilKit::Services::PubSub::DataSubscriberSpec dataSpec{ds.topic, ds.mediaType};
+                for (auto label : ds.labels)
                 {
-                    // Create DataSubscriber with default handler
-                    if(participant.delayedDefaultDataHandler)
-                    {
-                        ds.dataSubscriber = participant.participant->CreateDataSubscriber(
-                            ds.controllerName, ds.topic, ds.mediaType, ds.labels, nullptr,
-                            newDataSourceHandler);
-                        ds.dataSubscriber->SetDefaultDataMessageHandler(receptionHandler);
-                    }
-                    else
-                    {
-                        ds.dataSubscriber = participant.participant->CreateDataSubscriber(
-                            ds.controllerName, ds.topic, ds.mediaType, ds.labels, receptionHandler,
-                            newDataSourceHandler);
-                    }
+                    dataSpec.AddLabel(label);
+                }
+
+                // Create DataSubscriber with default handler
+                if(participant.delayedDefaultDataHandler)
+                {
+                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(
+                        ds.controllerName, dataSpec, nullptr);
+                    ds.dataSubscriber->SetDefaultDataMessageHandler(receptionHandler);
                 }
                 else
                 {
-                    // Create DataSubscriber without default handler
-                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(ds.controllerName, ds.topic, ds.mediaType, ds.labels,
-                                                                                     nullptr, newDataSourceHandler);
+                    ds.dataSubscriber = participant.participant->CreateDataSubscriber(
+                        ds.controllerName, dataSpec, receptionHandler);
                 }
             }
 
             // Setup/Create Publishers
             for (auto& dp : participant.dataPublishers)
             {
-                dp.dataPublisher = participant.participant->CreateDataPublisher(dp.controllerName, dp.topic, dp.mediaType, dp.labels, dp.history);
+                SilKit::Services::PubSub::DataPublisherSpec dataSpec{dp.topic, dp.mediaType};
+                for (auto label : dp.labels)
+                {
+                    dataSpec.AddLabel(label.first, label.second);
+                }
+                dp.dataPublisher = participant.participant->CreateDataPublisher(dp.controllerName, dataSpec, dp.history);
             }
             auto publishTask = [&participant]() {
                 for (auto& dp : participant.dataPublishers)
@@ -463,6 +451,7 @@ protected:
                 ps.WaitForAllDiscovered();
             }
         }
+        //std::this_thread::sleep_for(2000ms);
     }
 
     void StopSimOnAllSentAndReceived(std::vector<PubSubParticipant>& pubsubs, bool sync)

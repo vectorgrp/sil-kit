@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp"
 
 #include "DataMessageDatatypeUtils.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
 
 namespace {
 
@@ -46,11 +47,13 @@ public:
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const WireDataMessageEvent&), (override));
 };
 
+SilKit::Services::PubSub::DataPublisherSpec testDataNodeSpec{"Topic", {}};
+
 class DataPublisherTest : public ::testing::Test
 {
 protected:
     DataPublisherTest()
-        : publisher{ &participant, participant.GetTimeProvider(), "Topic", {}, {}, "pubUUID" }
+        : publisher{&participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID"}
     {
         publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }

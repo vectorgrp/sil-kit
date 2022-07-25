@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ConfigurationTestUtils.hpp"
 
 #include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
 #include "silkit/services/all.hpp"
 
 #include "gmock/gmock.h"
@@ -79,7 +80,8 @@ public:
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
-        auto* publisher = _participant->CreateDataPublisher("PubCtrl1", topicName, {}, {}, 0);
+        SilKit::Services::PubSub::DataPublisherSpec dataSpec{topicName, {}};
+        auto* publisher = _participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
 
         timeSyncService->SetSimulationStepHandler(
             [this, publisher, period](const nanoseconds now, nanoseconds /*duration*/) {
@@ -157,8 +159,9 @@ public:
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
+            SilKit::Services::PubSub::DataSubscriberSpec dataSpec{"Topic" + std::to_string(publisherIndex), {}};
             _participant->CreateDataSubscriber(
-                "SubCtrl1", "Topic" + std::to_string(publisherIndex), {}, {},
+                "SubCtrl1", dataSpec,
                 [this, publisherIndex](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) {
                     ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
                 });

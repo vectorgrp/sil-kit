@@ -1,44 +1,25 @@
-/* Copyright (c) 2022 Vector Informatik GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+// Copyright (c) Vector Informatik GmbH. All rights reserved.
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include <unordered_set>
 
-#include "DataMessageDatatypeUtils.hpp"
+#include "RpcDatatypeUtils.hpp"
 
 namespace {
 
 using namespace testing;
 
-using namespace SilKit::Services::PubSub;
+using namespace SilKit::Services::Rpc;
 
-class PubSubMatchingTest : public ::testing::Test
+class RpcMatchingTest : public ::testing::Test
 {
 protected:
-    PubSubMatchingTest() {}
+    RpcMatchingTest() {}
 };
 
-TEST_F(PubSubMatchingTest, match_mediatype)
+TEST_F(RpcMatchingTest, match_mediatype)
 {
     std::string mediaTypePub{"A"};
     std::string mediaTypeSub{"A"};
@@ -54,7 +35,7 @@ TEST_F(PubSubMatchingTest, match_mediatype)
     EXPECT_EQ(MatchMediaType(mediaTypeSub, mediaTypePub), false); // empty publisher mediaType != wildcard, no match
 }
 
-TEST_F(PubSubMatchingTest, match_labels_mandatory)
+TEST_F(RpcMatchingTest, match_labels_mandatory)
 {
     std::vector<SilKit::Services::MatchingLabel> innerSet{};
     std::vector<SilKit::Services::Label> outerSet{
@@ -98,7 +79,7 @@ TEST_F(PubSubMatchingTest, match_labels_mandatory)
     EXPECT_EQ(MatchLabels(innerSet, outerSet), false); // Wrong key, no match
 }
 
-TEST_F(PubSubMatchingTest, match_labels_preferred)
+TEST_F(RpcMatchingTest, match_labels_preferred)
 {
     std::vector<SilKit::Services::MatchingLabel> innerSet{};
     std::vector<SilKit::Services::Label> outerSet{{"KeyA", "ValA"}, {"KeyB", "ValB"}, {"KeyC", "ValC"}};
@@ -135,51 +116,5 @@ TEST_F(PubSubMatchingTest, match_labels_preferred)
     outerSet = {{"KeyA", "ValA"}};
     EXPECT_EQ(MatchLabels(innerSet, outerSet), true); // Wrong key,  match
 }
-
-TEST_F(PubSubMatchingTest, announced_sources_same_labels_different_order)
-{
-    std::map<std::string, std::string> labels1{{"K1", "V1"}, {"K2", "V2"}};
-    std::map<std::string, std::string> labels2{{"K2", "V2"}, {"K1", "V1"}};
-    EXPECT_EQ(labels1, labels2);
-
-    std::unordered_set<SourceInfo, SourceInfo::HashFunction> announced;
-    announced.emplace(SourceInfo{"M", labels1});
-    announced.emplace(SourceInfo{"M", labels2}); // Is same, no emplace
-    EXPECT_EQ(announced.size(), 1);
-}
-
-TEST_F(PubSubMatchingTest, announced_sources_different_labels)
-{
-    std::map<std::string, std::string> labels1{{"K1", "V1"}};
-    std::map<std::string, std::string> labels2{{"K2", "V2"}};
-
-    std::unordered_set<SourceInfo, SourceInfo::HashFunction> announced;
-    announced.emplace(SourceInfo{"M", labels1});
-    announced.emplace(SourceInfo{"M", labels2});
-    EXPECT_EQ(announced.size(), 2);
-}
-
-TEST_F(PubSubMatchingTest, announced_sources_empty_labels)
-{
-    std::map<std::string, std::string> labels1{};
-    std::map<std::string, std::string> labels2{};
-
-    std::unordered_set<SourceInfo, SourceInfo::HashFunction> announced;
-    announced.emplace(SourceInfo{"M", labels1});
-    announced.emplace(SourceInfo{"M", labels2}); // Is same, no emplace
-    EXPECT_EQ(announced.size(), 1);
-}
-
-TEST_F(PubSubMatchingTest, announced_sources_different_mediaype)
-{
-    std::map<std::string, std::string> labels1{{"K1", "V1"}};
-    std::map<std::string, std::string> labels2{{"K1", "V1"}};
-
-    std::unordered_set<SourceInfo, SourceInfo::HashFunction> announced;
-    announced.emplace(SourceInfo{"M1", labels1});
-    announced.emplace(SourceInfo{"M2", labels2});
-    EXPECT_EQ(announced.size(), 2);
-}
-
 
 } // anonymous namespace

@@ -92,36 +92,6 @@ const int numPublications = 30;
 
 char* participantName;
 
-void NewDataSourceHandler(void* context, SilKit_DataSubscriber* cbDataSubscriber, const SilKit_NewDataPublisherEvent* newDataPublisherEvent)
-{
-    UNUSED_ARG(context);
-    UNUSED_ARG(cbDataSubscriber);
-
-    printf("<< Received new data source: topic=\"%s\", mediaType=\"%s\", labels={", newDataPublisherEvent->topic, newDataPublisherEvent->mediaType);
-    for (uint32_t i = 0; i < newDataPublisherEvent->labels->numLabels; i++)
-    {
-        printf("{%s, %s}", newDataPublisherEvent->labels->labels[i].key, newDataPublisherEvent->labels->labels[i].value);
-    }
-    printf("}\n");
-
-}
-
-void SpecificDataHandler(void* context, SilKit_DataSubscriber* subscriber, const SilKit_DataMessageEvent* dataMessageEvent)
-{
-    UNUSED_ARG(context);
-    UNUSED_ARG(subscriber);
-
-    receiveCount += 1;
-    printf("<< [SpecificDataHandler] Data received: ");
-
-    for (size_t i = 0; i < dataMessageEvent->data.size; i++)
-    {
-        char ch = dataMessageEvent->data.data[i];
-        printf("%c", ch);
-    }
-    printf("\n");
-}
-
 void DefaultDataHandler(void* context, SilKit_DataSubscriber* subscriber, const SilKit_DataMessageEvent* dataMessageEvent)
 {
     UNUSED_ARG(context);
@@ -150,7 +120,7 @@ void PublishMessage()
     printf(">> Data Message published: %i\n", publishCount);
 }
 
-void Copy_Label(SilKit_KeyValuePair* dst, const SilKit_KeyValuePair* src)
+void Copy_Label(SilKit_Label* dst, const SilKit_Label* src)
 {
     dst->key = malloc(strlen(src->key) + 1);
     dst->value = malloc(strlen(src->value) + 1);
@@ -161,22 +131,23 @@ void Copy_Label(SilKit_KeyValuePair* dst, const SilKit_KeyValuePair* src)
     }
     strcpy((char*)dst->key, src->key);
     strcpy((char*)dst->value, src->value);
+    dst->kind = src->kind;
 }
 
-void Create_Labels(SilKit_KeyValueList** outLabelList, const SilKit_KeyValuePair* labels, size_t numLabels)
+void Create_Labels(SilKit_LabelList** outLabelList, const SilKit_Label* labels, size_t numLabels)
 {
-    SilKit_KeyValueList* newLabelList;
-    newLabelList = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
+    SilKit_LabelList* newLabelList;
+    newLabelList = (SilKit_LabelList*)malloc(sizeof(SilKit_LabelList));
     if (newLabelList == NULL)
     {
-        AbortOnFailedAllocation("SilKit_KeyValueList");
+        AbortOnFailedAllocation("SilKit_LabelList");
         return;
     }
     newLabelList->numLabels = numLabels;
-    newLabelList->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
+    newLabelList->labels = (SilKit_Label*)malloc(numLabels * sizeof(SilKit_Label));
     if (newLabelList->labels == NULL)
     {
-        AbortOnFailedAllocation("SilKit_KeyValuePair");
+        AbortOnFailedAllocation("SilKit_Label");
         return;
     }
     for (size_t i = 0; i < numLabels; i++)
@@ -186,7 +157,7 @@ void Create_Labels(SilKit_KeyValueList** outLabelList, const SilKit_KeyValuePair
     *outLabelList = newLabelList;
 }
 
-void Labels_Destroy(SilKit_KeyValueList* labelList)
+void Labels_Destroy(SilKit_LabelList* labelList)
 {
     if (labelList)
     {
@@ -238,26 +209,22 @@ int main(int argc, char* argv[])
         // The key must appear in the publisher's labels for communication to take place.
         // No labels at all is wildcard.
         // The label's value for a given key must match, empty value is wildcard.
-        SilKit_KeyValueList* subLabelList;
+        SilKit_LabelList* subLabelList;
         size_t numSubLabels = 1;
-        SilKit_KeyValuePair subLabels[1] = { {"KeyA", "ValA"} };
+        SilKit_Label subLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Preferred}};
         Create_Labels(&subLabelList, subLabels, numSubLabels);
+
+        SilKit_DataSpec dataSpec;
+        SilKit_Struct_Init(SilKit_DataSpec, dataSpec);
+        dataSpec.topic = "TopicA";
+        dataSpec.mediaType = subMediaType;
+        dataSpec.labelList.numLabels = subLabelList->numLabels;
+        dataSpec.labelList.labels = subLabelList->labels;
+
         transmitContext.someInt = 1234;
 
-        returnCode = SilKit_DataSubscriber_Create(&dataSubscriber, participant, "SubCtrl1", "TopicA", subMediaType,
-                                               subLabelList, (void*)&transmitContext, &DefaultDataHandler,
-                                               (void*)&transmitContext, &NewDataSourceHandler);
-
-        SilKit_HandlerId handlerId;
-
-        // This redirects publications by dataPublisher2 (label {"KeyA", "ValA"}, {"KeyB", "ValB"})
-        // to the SpecificDataHandler (empty value is wildcard)
-        SilKit_KeyValueList* specificLabelList;
-        numSubLabels = 2;
-        SilKit_KeyValuePair specificLabels[2] = { {"KeyA", ""}, {"KeyB", ""} };
-        Create_Labels(&specificLabelList, specificLabels, numSubLabels);
-        SilKit_DataSubscriber_AddExplicitDataMessageHandler(dataSubscriber, (void*)&transmitContext, &SpecificDataHandler,
-														 subMediaType, specificLabelList, &handlerId);
+        returnCode = SilKit_DataSubscriber_Create(&dataSubscriber, participant, "SubCtrl1", &dataSpec,
+                                                  (void*)&transmitContext, &DefaultDataHandler);
 
         if (returnCode)
         {
@@ -271,27 +238,39 @@ int main(int argc, char* argv[])
             SleepMs(100);
         }
         Labels_Destroy(subLabelList);
-        Labels_Destroy(specificLabelList);
     }
     else if (strcmp(participantName, "Publisher1") == 0)
     {
         const char * pubMediaType = "text/plain";
         uint8_t history = 1;
 
-        SilKit_KeyValueList* pubLabelList1;
+        SilKit_LabelList* pubLabelList1;
         size_t numPubLabels1 = 1;
-        SilKit_KeyValuePair pubLabels1[1] = { {"KeyA", "ValA"} };
+        SilKit_Label pubLabels1[1] = { {"KeyA", "ValA", SilKit_LabelKind_Mandatory} };
         Create_Labels(&pubLabelList1, pubLabels1, numPubLabels1);
-        returnCode = SilKit_DataPublisher_Create(&dataPublisher1, participant, "PubCtrl1", "TopicA", pubMediaType,
-                                             pubLabelList1, history);
 
-        SilKit_KeyValueList* pubLabelList2;
+        SilKit_DataSpec dataSpec;
+        SilKit_Struct_Init(SilKit_DataSpec, dataSpec);
+        dataSpec.topic = "TopicA";
+        dataSpec.mediaType = pubMediaType;
+        dataSpec.labelList.numLabels = pubLabelList1->numLabels;
+        dataSpec.labelList.labels = pubLabelList1->labels;
+
+        returnCode = SilKit_DataPublisher_Create(&dataPublisher1, participant, "PubCtrl1", &dataSpec, history);
+
+        SilKit_LabelList* pubLabelList2;
         size_t numPubLabels2 = 2;
-        SilKit_KeyValuePair pubLabels2[2] = { {"KeyA", "ValA"}, {"KeyB", "ValB"} };
+        SilKit_Label pubLabels2[2] = {{"KeyA", "ValA", SilKit_LabelKind_Mandatory},
+                                          {"KeyB", "ValB", SilKit_LabelKind_Mandatory}};
         Create_Labels(&pubLabelList2, pubLabels2, numPubLabels2);
+        SilKit_DataSpec dataSpec2;
+        SilKit_Struct_Init(SilKit_DataSpec, dataSpec2);
+        dataSpec2.topic = "TopicA";
+        dataSpec2.mediaType = pubMediaType;
+        dataSpec2.labelList.numLabels = pubLabelList2->numLabels;
+        dataSpec2.labelList.labels = pubLabelList2->labels;
 
-        returnCode = SilKit_DataPublisher_Create(&dataPublisher2, participant, "PubCtrl2", "TopicA", pubMediaType,
-                                             pubLabelList2, history);
+        returnCode = SilKit_DataPublisher_Create(&dataPublisher2, participant, "PubCtrl2", &dataSpec2, history);
         if (returnCode)
         {
             printf("%s\n", SilKit_GetLastErrorString());

@@ -35,6 +35,9 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
+class IDataSubscriber;
+class IDataPublisher; 
+
 //! \brief An incoming DataMessage of a DataPublisher containing raw data and timestamp
 struct DataMessageEvent
 {

@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 #include <chrono>
 #include <type_traits>
+#include <silkit/capi/Types.h>
 
 using namespace SilKit::Config;
 using namespace SilKit;
@@ -1069,6 +1070,55 @@ bool Converter::decode(const Node& node, ParticipantConfiguration& obj)
     optional_decode(obj.tracing, node, "Tracing");
     optional_decode(obj.extensions, node, "Extensions");
     optional_decode(obj.middleware, node, "Middleware");
+    return true;
+}
+
+template <>
+Node Converter::encode(const SilKit::Services::MatchingLabel::Kind& obj)
+{
+    Node node;
+    node = static_cast<std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>>(obj);
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, SilKit::Services::MatchingLabel::Kind& obj)
+{
+    obj = static_cast<SilKit::Services::MatchingLabel::Kind>(
+        parse_as<std::underlying_type_t<SilKit::Services::MatchingLabel::Kind>>(node));
+    return true;
+}
+
+template <>
+Node Converter::encode(const SilKit::Services::MatchingLabel& obj)
+{
+    Node node;
+    node["key"] = obj.key;
+    node["value"] = obj.value;
+    node["kind"] = encode(obj.kind);
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, SilKit::Services::MatchingLabel& obj)
+{
+    optional_decode(obj.key, node, "key");
+    optional_decode(obj.value, node, "value");
+    optional_decode(obj.kind, node, "kind");
+    return true;
+}
+
+template <>
+Node Converter::encode(const SilKit::Services::Label &obj)
+{
+    Node node;
+    node["key"] = obj.key;
+    node["value"] = obj.value;
+    return node;
+}
+template <>
+bool Converter::decode(const Node& node, SilKit::Services::Label& obj)
+{
+    optional_decode(obj.key, node, "key");
+    optional_decode(obj.value, node, "value");
     return true;
 }
 

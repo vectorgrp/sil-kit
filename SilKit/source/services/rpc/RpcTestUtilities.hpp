@@ -176,7 +176,8 @@ public:
     {
         if (_rpcClient == nullptr)
         {
-            _rpcClient = participant->CreateRpcClient("RpcClient", "FunctionA", "application/octet-stream", {}, nullptr);
+            SilKit::Services::Rpc::RpcClientSpec dataSpec{"FunctionA", "application/octet-stream"};
+            _rpcClient = participant->CreateRpcClient("RpcClient", dataSpec, nullptr);
         }
         return _rpcClient;
     }
@@ -185,8 +186,9 @@ public:
     {
         if (_rpcServer == nullptr)
         {
+            SilKit::Services::Rpc::RpcServerSpec dataSpec{"FunctionA", "application/octet-stream"};
             _rpcServer =
-                participant->CreateRpcServer("RpcServer", "FunctionA", "application/octet-stream", {}, nullptr);
+                participant->CreateRpcServer("RpcServer", dataSpec, nullptr);
         }
         return _rpcServer;
     }

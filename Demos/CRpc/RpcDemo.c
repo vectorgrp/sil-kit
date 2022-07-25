@@ -138,47 +138,34 @@ void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_R
     }
 }
 
-void DiscoveryResultHandler(void* context, const SilKit_RpcDiscoveryResultList* discoveryResults)
-{
-    UNUSED_ARG(context);
-
-    for (uint32_t i = 0; i < discoveryResults->numResults; i++)
-    {
-        printf("Discovered RpcServer with functionName=\"%s\", mediaType=\"%s\", labels={",
-               discoveryResults->results[i].functionName, discoveryResults->results[i].mediaType);
-        for (uint32_t j = 0; j < discoveryResults->results[i].labelList->numLabels; j++)
-        {
-            printf("{\"%s\", \"%s\"}", discoveryResults->results[i].labelList->labels[j].key, discoveryResults->results[i].labelList->labels[j].value);
-        }
-        printf("}\n");
-    }
-}
-
-void Copy_Label(SilKit_KeyValuePair* dst, const SilKit_KeyValuePair* src)
+void Copy_Label(SilKit_Label* dst, const SilKit_Label* src)
 {
     dst->key = malloc(strlen(src->key) + 1);
     dst->value = malloc(strlen(src->value) + 1);
-    if (dst->key != NULL && dst->value != NULL)
+    if (dst->key == NULL || dst->value == NULL)
     {
-        strcpy((char*)dst->key, src->key);
-        strcpy((char*)dst->value, src->value);
+        AbortOnFailedAllocation("SilKit_KeyValuePair");
+        return;
     }
+    strcpy((char*)dst->key, src->key);
+    strcpy((char*)dst->value, src->value);
+    dst->kind = src->kind;
 }
 
-void Create_Labels(SilKit_KeyValueList** outLabelList, const SilKit_KeyValuePair* labels, size_t numLabels)
+void Create_Labels(SilKit_LabelList** outLabelList, const SilKit_Label* labels, size_t numLabels)
 {
-    SilKit_KeyValueList* newLabelList;
-    newLabelList = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
+    SilKit_LabelList* newLabelList;
+    newLabelList = (SilKit_LabelList*)malloc(sizeof(SilKit_LabelList));
     if (newLabelList == NULL)
     {
-        AbortOnFailedAllocation("SilKit_KeyValueList");
+        AbortOnFailedAllocation("SilKit_LabelList");
         return;
     }
     newLabelList->numLabels = numLabels;
-    newLabelList->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
+    newLabelList->labels = (SilKit_Label*)malloc(numLabels * sizeof(SilKit_Label));
     if (newLabelList->labels == NULL)
     {
-        AbortOnFailedAllocation("SilKit_KeyValuePair");
+        AbortOnFailedAllocation("SilKit_Label");
         return;
     }
     for (size_t i = 0; i < numLabels; i++)
@@ -188,7 +175,7 @@ void Create_Labels(SilKit_KeyValueList** outLabelList, const SilKit_KeyValuePair
     *outLabelList = newLabelList;
 }
 
-void Labels_Destroy(SilKit_KeyValueList* labelList)
+void Labels_Destroy(SilKit_LabelList* labelList)
 {
     if (labelList)
     {
@@ -205,7 +192,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 3)
     {
-        printf("usage: SilKitDemoCData <ConfigJsonFile> <ParticipantName> [RegistryUri]\n");
+        printf("usage: SilKitDemoCRpc <ConfigJsonFile> <ParticipantName> [RegistryUri]\n");
         return 1;
     }
 
@@ -233,23 +220,20 @@ int main(int argc, char* argv[])
 
     if (strcmp(participantName, "Client") == 0)
     {
-        const char* filterFunctionName = "";
-        const char* filterMediaType = "";
-        SilKit_KeyValueList* filterLabelList;
-        size_t numLabels = 1;
-        SilKit_KeyValuePair filterLabels[1] = {{"KeyA", "ValA"}};
-        Create_Labels(&filterLabelList, filterLabels, numLabels);
+        const char* mediaType = "application/octet-stream";
+        SilKit_LabelList* clientLabelList;
+        size_t numClientLabels = 1;
+        SilKit_Label clientLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Undefined}};
+        Create_Labels(&clientLabelList, clientLabels, numClientLabels);
 
-        returnCode = SilKit_DiscoverServers(participant, filterFunctionName, filterMediaType, filterLabelList, NULL,
-                                            &DiscoveryResultHandler);
+        SilKit_RpcSpec rpcSpec;
+        SilKit_Struct_Init(SilKit_RpcSpec, rpcSpec);
+        rpcSpec.functionName = "TopicA";
+        rpcSpec.mediaType = mediaType;
+        rpcSpec.labelList.numLabels = clientLabelList->numLabels;
+        rpcSpec.labelList.labels = clientLabelList->labels;
 
-        const char* mediaType = "A";
-        SilKit_KeyValueList* labelList;
-        numLabels = 1;
-        SilKit_KeyValuePair labels[1] = { {"KeyA", "ValA"} };
-        Create_Labels(&labelList, labels, numLabels);
-
-        returnCode = SilKit_RpcClient_Create(&client, participant, "ClientCtrl1", "TestFunc", mediaType, labelList, NULL,
+        returnCode = SilKit_RpcClient_Create(&client, participant, "ClientCtrl1", &rpcSpec, NULL,
                                           &CallReturnHandler);
 
         for (uint8_t i = 0; i < numCalls; i++)
@@ -267,13 +251,21 @@ int main(int argc, char* argv[])
     }
     else if (strcmp(participantName, "Server") == 0)
     {
-        const char* mediaType = "A";
-        SilKit_KeyValueList* labelList;
-        size_t numLabels = 2;
-        SilKit_KeyValuePair labels[2] = {{"KeyA", "ValA"}, {"KeyB", "ValB"}};
-        Create_Labels(&labelList, labels, numLabels);
+        const char* mediaType = "application/octet-stream";
+        SilKit_LabelList* serverLabelList;
+        size_t numServerLabels = 1;
+        SilKit_Label serverLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Preferred}};
+        Create_Labels(&serverLabelList, serverLabels, numServerLabels);
 
-        returnCode = SilKit_RpcServer_Create(&server, participant, "ServerCtrl1", "TestFunc", mediaType, labelList, NULL,
+        SilKit_RpcSpec rpcSpec;
+        SilKit_Struct_Init(SilKit_RpcSpec, rpcSpec);
+        rpcSpec.functionName = "TopicA";
+        rpcSpec.mediaType = mediaType;
+        rpcSpec.labelList.numLabels = serverLabelList->numLabels;
+        rpcSpec.labelList.labels = serverLabelList->labels;
+
+
+        returnCode = SilKit_RpcServer_Create(&server, participant, "ServerCtrl1", &rpcSpec, NULL,
                                           &CallHandler);
 
         while (receiveCallCount < numCalls)

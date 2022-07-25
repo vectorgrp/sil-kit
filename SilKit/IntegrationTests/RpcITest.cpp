@@ -223,9 +223,66 @@ TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
 
     std::vector<RpcParticipant> rpcs;
     rpcs.push_back(
-        { "Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {{"KeyA", ""},{"KeyB", "ValB"}}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncA"} });
-    rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {{"KeyA", "ValA"}, {"KeyB", "ValB"}}, defaultMsgSize, numCallsToReceive}}, {}, {}});
-    rpcs.push_back({"Server2", {{"ServerCtrl1", "TestFuncA", "A", {{"KeyC", "ValC"}}, defaultMsgSize, 0}}, {}, {}});
+        { "Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {{"KeyA", "ValA"},{"KeyB", "ValB"}}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncA"} });
+    rpcs.push_back({"Server1",
+                    {{"ServerCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Preferred}},
+                      defaultMsgSize,
+                      numCallsToReceive}},
+                    {},
+                    {}});
+    rpcs.push_back({"Server2",
+                    {{"ServerCtrl2",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Mandatory}},
+                      defaultMsgSize,
+                      0}},
+                    {},
+                    {}});
+
+    RunSyncTest(rpcs);
+}
+
+// Wrong labels on server2
+TEST_F(RpcITest, test_1client_1server_wrongPreferredLabels_sync_vasio)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValWrong"}, {"KeyB", "ValB"}},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn}},
+                    {"TestFuncA", "TestFuncA"}});
+    rpcs.push_back({"Server1",
+                    {{"ServerCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Preferred}},
+                      defaultMsgSize,
+                      0}},
+                    {},
+                    {}});
+    rpcs.push_back({"Server2",
+                    {{"ServerCtrl2",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Preferred}},
+                      defaultMsgSize,
+                      numCallsToReceive}},
+                    {},
+                    {}});
 
     RunSyncTest(rpcs);
 }

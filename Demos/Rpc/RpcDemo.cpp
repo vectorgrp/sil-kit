@@ -141,35 +141,19 @@ int main(int argc, char** argv)
 
         if (participantName == "Client")
         {
-            std::string clientAFunctionName = "Add100";
-            auto mediaTypeClientA = std::string{"application/octet-stream"};
-            std::map<std::string, std::string> labelsClientA{{"KeyA", "ValA"}};
-            auto clientA = participant->CreateRpcClient("ClientCtrl1", clientAFunctionName, mediaTypeClientA,
-                                                        labelsClientA, &CallReturn);
+            SilKit::Services::Rpc::RpcClientSpec dataSpecAdd100{"Add100", "application/octet-stream"};
+            dataSpecAdd100.AddLabel("KeyA", "ValA");
+            auto clientA = participant->CreateRpcClient("ClientCtrl1", dataSpecAdd100, &CallReturn);
 
-            std::string clientBFunctionName = "Sort";
-            auto mediaTypeClientB = std::string{""};
-            std::map<std::string, std::string> labelsClientB{{"KeyC", "ValC"}};
+            SilKit::Services::Rpc::RpcClientSpec dataSpecSort{"Sort", "application/octet-stream"};
+            dataSpecAdd100.AddLabel("KeyC", "ValC");
             auto clientB =
-                participant->CreateRpcClient("ClientCtrl2", "Sort", mediaTypeClientB, labelsClientB, &CallReturn);
+                participant->CreateRpcClient("ClientCtrl2", dataSpecSort, &CallReturn);
 
-            RpcDiscoveryResultHandler discoveryResultsHandler =
-                [](const std::vector<RpcDiscoveryResult>& discoveryResults) {
-                    std::cout << ">> Found remote RpcServers:" << std::endl;
-                    for (const auto& entry : discoveryResults)
-                    {
-                        std::cout << "   " << entry << std::endl;
-                    }
-                };
 
             timeSyncService->SetSimulationStepHandler(
-                [clientA, clientB, &participant, &discoveryResultsHandler](std::chrono::nanoseconds now,
+                [clientA, clientB](std::chrono::nanoseconds now,
                                                                            std::chrono::nanoseconds /*duration*/) {
-                    if (now == 0ms) 
-                    {
-                        participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
-                    }
-
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     Call(clientA);
@@ -178,13 +162,16 @@ int main(int argc, char** argv)
         }
         else // "Server"
         {
-            auto mediaTypeServerA = std::string{"application/octet-stream"};
-            std::map<std::string, std::string> labelsServerA{{"KeyA", "ValA"}, {"KeyB", "ValB"}};
-            participant->CreateRpcServer("ServerCtrl1", "Add100", mediaTypeServerA, labelsServerA, &RemoteFunc_Add100);
+            SilKit::Services::Rpc::RpcServerSpec dataSpecAdd100{"Add100", "application/octet-stream"};
+            dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred);
+            dataSpecAdd100.AddLabel("KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Preferred);
 
-            auto mediaTypeServerB = std::string{"application/json"};
-            std::map<std::string, std::string> labelsServerB{{"KeyC", "ValC"}, {"KeyD", "ValD"}};
-            participant->CreateRpcServer("ServerCtrl2", "Sort", mediaTypeServerB, labelsServerB, &RemoteFunc_Sort);
+            participant->CreateRpcServer("ServerCtrl1", dataSpecAdd100, &RemoteFunc_Add100);
+
+            SilKit::Services::Rpc::RpcServerSpec dataSpecSort{"Sort", "application/octet-stream"};
+            dataSpecSort.AddLabel("KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Preferred);
+            dataSpecSort.AddLabel("KeyD", "ValD", SilKit::Services::MatchingLabel::Kind::Preferred);
+            participant->CreateRpcServer("ServerCtrl2", dataSpecSort, &RemoteFunc_Sort);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

@@ -25,33 +25,41 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-inline void assign(std::map<std::string, std::string>& cppLabels, const SilKit_KeyValueList* cLabels)
+inline void assign(SilKit::Services::PubSub::DataPublisherSpec& cppDataSpec, SilKit_DataSpec* dataSpec)
 {
-    if (cLabels)
+    cppDataSpec = {dataSpec->topic, dataSpec->mediaType};
+    for (size_t i = 0; i < dataSpec->labelList.numLabels; i++)
     {
-        for (uint32_t i = 0; i < cLabels->numLabels; i++)
-        {
-            cppLabels.insert({cLabels->labels[i].key, cLabels->labels[i].value});
-        }
+        cppDataSpec.AddLabel(dataSpec->labelList.labels[i].key, dataSpec->labelList.labels[i].value);
     }
 }
 
-inline void assign(SilKit_KeyValueList** cLabels, const std::map<std::string, std::string>& cppLabels)
+inline void assign(SilKit::Services::PubSub::DataSubscriberSpec& cppDataNodeSpec, SilKit_DataSpec* dataSpec)
 {
-    size_t numLabels = cppLabels.size();
-    *cLabels = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
-    if (*cLabels != NULL)
+    cppDataNodeSpec = {dataSpec->topic, dataSpec->mediaType};
+    for (size_t i = 0; i < dataSpec->labelList.numLabels; i++)
     {
-        (*cLabels)->numLabels = numLabels;
-        (*cLabels)->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
-        if ((*cLabels)->labels != NULL)
-        {
-            uint32_t i = 0;
-            for (auto&& kv : cppLabels)
-            {
-                (*cLabels)->labels[i++] = { kv.first.c_str(), kv.second.c_str() };
-            }
-        }
+        cppDataNodeSpec.AddLabel(dataSpec->labelList.labels[i].key, dataSpec->labelList.labels[i].value,
+                                 (SilKit::Services::MatchingLabel::Kind)dataSpec->labelList.labels[i].kind);
+    }
+}
+
+inline void assign(SilKit::Services::Rpc::RpcClientSpec& cppRpcSpec, SilKit_RpcSpec* rpcSpec)
+{
+    cppRpcSpec = {rpcSpec->functionName, rpcSpec->mediaType};
+    for (size_t i = 0; i < rpcSpec->labelList.numLabels; i++)
+    {
+        cppRpcSpec.AddLabel(rpcSpec->labelList.labels[i].key, rpcSpec->labelList.labels[i].value);
+    }
+}
+
+inline void assign(SilKit::Services::Rpc::RpcServerSpec& cppRpcSpec, SilKit_RpcSpec* rpcSpec)
+{
+    cppRpcSpec = {rpcSpec->functionName, rpcSpec->mediaType};
+    for (size_t i = 0; i < rpcSpec->labelList.numLabels; i++)
+    {
+        cppRpcSpec.AddLabel(rpcSpec->labelList.labels[i].key, rpcSpec->labelList.labels[i].value,
+                            (SilKit::Services::MatchingLabel::Kind)rpcSpec->labelList.labels[i].kind);
     }
 }
 

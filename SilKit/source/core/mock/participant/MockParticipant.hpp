@@ -171,23 +171,20 @@ public:
     {
         return nullptr;
     }
-    auto CreateDataPublisher(const std::string& /*controllerName*/, const std::string& /*topic*/,
-                             const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
-                             size_t /* history */) -> SilKit::Services::PubSub::IDataPublisher* override
+    auto CreateDataPublisher(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::DataPublisherSpec& /*dataSpec*/,
+                             size_t /*history*/ = 0) -> SilKit::Services::PubSub::IDataPublisher* override
     {
         return nullptr;
     }
-    auto CreateDataSubscriber(const std::string& /*controllerName*/, const std::string& /*topic*/,
-                              const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
-                              SilKit::Services::PubSub::DataMessageHandlerT /* callback*/,
-                              SilKit::Services::PubSub::NewDataPublisherHandlerT /*newDataSourceHandler*/)
+    auto CreateDataSubscriber(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::DataSubscriberSpec& /*dataSpec*/,
+                              Services::PubSub::DataMessageHandlerT /*dataMessageHandler*/)
         -> SilKit::Services::PubSub::IDataSubscriber* override
     {
         return nullptr;
     }
     auto CreateDataSubscriberInternal(const std::string& /*topic*/, const std::string& /*linkName*/,
                                       const std::string& /*mediaType*/,
-                                      const std::map<std::string, std::string>& /*publisherLabels*/,
+                                      const std::vector<SilKit::Services::Label>& /*publisherLabels*/,
                                       Services::PubSub::DataMessageHandlerT /*callback*/,
                                       Services::PubSub::IDataSubscriber* /*parent*/)
         -> Services::PubSub::DataSubscriberInternal* override
@@ -195,29 +192,24 @@ public:
         return nullptr;
     }
 
-    auto CreateRpcClient(const std::string& /*controllerName*/, const std::string& /*functionName*/,
-                         const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
+    auto CreateRpcClient(const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcClientSpec& /*dataSpec*/,
                          SilKit::Services::Rpc::RpcCallResultHandler /*handler*/) -> SilKit::Services::Rpc::IRpcClient* override
     {
         return nullptr;
     }
-    auto CreateRpcServer(const std::string& /*controllerName*/, const std::string& /*functionName*/,
-                         const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
+    auto CreateRpcServer(const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcServerSpec& /*dataSpec*/,
                          SilKit::Services::Rpc::RpcCallHandler /*handler*/) -> SilKit::Services::Rpc::IRpcServer* override
     {
         return nullptr;
     }
     auto CreateRpcServerInternal(const std::string& /*functionName*/, const std::string& /*linkName*/,
-                                 const std::string& /*mediaType*/, const std::map<std::string, std::string>& /*labels*/,
+                                 const std::string& /*mediaType*/,
+                                 const std::vector<SilKit::Services::Label>& /*labels*/,
                                  Services::Rpc::RpcCallHandler /*handler*/, Services::Rpc::IRpcServer* /*parent*/)
         -> SilKit::Services::Rpc::RpcServerInternal* override
     {
         return nullptr;
     }
-
-    void DiscoverRpcServers(const std::string& /*functionName*/, const std::string& /*mediaType*/,
-                            const std::map<std::string, std::string>& /*labels*/,
-                            Services::Rpc::RpcDiscoveryResultHandler /*handler*/) override{};
 
     auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* override 
     {

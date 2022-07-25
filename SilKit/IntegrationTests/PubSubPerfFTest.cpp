@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "silkit/util/functional.hpp"
 #include "silkit/services/logging/ILogger.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -68,8 +69,9 @@ protected:
         {
             const auto controllerName = "Sub-" + std::to_string(i);
             const auto topic = "TopicName-" + std::to_string(i);
-            (void)subscriber->Participant()->CreateDataSubscriber(
-                controllerName, topic, "", {},
+            SilKit::Services::PubSub::DataSubscriberSpec dataSpec{topic, ""};
+
+            (void)subscriber->Participant()->CreateDataSubscriber(controllerName, dataSpec,
                 [&receptionCount, subLogger, numberOfTopics, &subLifecycleService](
                     SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
                     receptionCount++;
@@ -94,7 +96,9 @@ protected:
         {
             const auto controllerName = "Pub-" + std::to_string(i);
             const auto topic = "TopicName-" + std::to_string(i);
-            pubController.push_back(publisher->Participant()->CreateDataPublisher(controllerName, topic, "", {}, 0));
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, ""};
+
+            pubController.push_back(publisher->Participant()->CreateDataPublisher(controllerName, dataSpec, 0));
         }
         auto* lifecycleService = publisher->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
@@ -128,7 +132,7 @@ TEST_F(PubSubPerfFTest, test_pubsub_performance)
     ExecuteTest(1, 10s);
     ExecuteTest(10, 10s);
     ExecuteTest(100, 10s);
-    //ExecuteTest(1000, 10s);
+    ExecuteTest(1000, 10s);
     //ExecuteTest(10000, 100s);
     //ExecuteTest(100000, 100s);
     //ExecuteTest(200000, 100s);

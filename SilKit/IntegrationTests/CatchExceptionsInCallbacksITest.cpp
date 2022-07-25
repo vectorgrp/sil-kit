@@ -86,14 +86,15 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
         SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameReceiver);
     subParticipant->JoinSilKitSimulation(registryUri);
 
-    publisher = pubParticipant->CreateDataPublisher("PubCtrl1", "CrashTopic", {}, {}, 0);
+    SilKit::Services::PubSub::DataPublisherSpec dataSpec{"CrashTopic", {}};
+    SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{"CrashTopic", {}};
+    publisher = pubParticipant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
     subscriber = subParticipant->CreateDataSubscriber(
-        "SubCtrl1", "CrashTopic", {}, {},
+        "SubCtrl1", matchingDataSpec,
         [this](auto* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
             this->testOk.set_value(true);
             throw std::runtime_error{"CrashTest"};
-        },
-        nullptr);
+        });
 
     std::this_thread::sleep_for(500ms);
     std::thread publishThread{[this] { this->Publish(); }};

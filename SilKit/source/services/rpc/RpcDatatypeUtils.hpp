@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 
 #include "silkit/services/rpc/RpcDatatypes.hpp"
+#include "silkit/services/datatypes.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -32,8 +33,8 @@ namespace Rpc {
 
 bool MatchMediaType(const std::string& clientMediaType, const std::string& serverMediaType);
 
-bool MatchLabels(const std::map<std::string, std::string>& clientLabels,
-                 const std::map<std::string, std::string>& serverLabels);
+bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& subscriberLabels,
+                 const std::vector<SilKit::Services::Label>& publisherLabels);
 
 
 } // namespace Rpc

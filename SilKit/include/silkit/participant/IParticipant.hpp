@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/fwd_decl.hpp"
 
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/rpc/RpcSpec.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
 namespace SilKit {
@@ -69,33 +71,21 @@ public:
         -> Services::Lin::ILinController* = 0;
 
     //! \brief Create a data publisher at this SIL Kit participant.
-    virtual auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
-                                     const std::string& mediaType,
-                                     const std::map<std::string, std::string>& labels, size_t history = 0)
+    virtual auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::DataPublisherSpec& dataSpec, size_t history = 0)
         -> Services::PubSub::IDataPublisher* = 0;
 
     //! \brief Create a data subscriber at this SIL Kit participant.
-    virtual auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
-                                      const std::string& mediaType,
-                                      const std::map<std::string, std::string>& labels,
-                                      Services::PubSub::DataMessageHandlerT defaultDataMessageHandler,
-                                      Services::PubSub::NewDataPublisherHandlerT newDataPublisherHandler = nullptr)
+    virtual auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+                                      Services::PubSub::DataMessageHandlerT dataMessageHandler)
         -> Services::PubSub::IDataSubscriber* = 0;
 
     //! \brief Create a Rpc client at this SIL Kit participant.
-    virtual auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName,
-                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+    virtual auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcClientSpec& dataSpec,
                                  Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient* = 0;
 
     //! \brief Create a Rpc server at this SIL Kit participant.
-    virtual auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName,
-                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+    virtual auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcServerSpec& dataSpec,
                                  Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer* = 0;
-
-    //! \brief Discover available Rpc servers and their properties.
-    virtual void DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
-                                    const std::map<std::string, std::string>& labels,
-                                    Services::Rpc::RpcDiscoveryResultHandler handler) = 0;
 
     //! \brief Return the ILifecycleService at this SIL Kit participant.
     virtual auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* = 0;

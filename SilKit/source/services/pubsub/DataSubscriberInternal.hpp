@@ -38,27 +38,22 @@ class DataSubscriberInternal
     , public Core::IServiceEndpoint
 {
 public:
-    DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                           const std::string& topic, const std::string& mediaType,
-                           const std::map<std::string, std::string>& labels, DataMessageHandlerT defaultHandler,
+    DataSubscriberInternal(Core::IParticipantInternal* participant,
+                           Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
+                           const std::string& mediaType, const std::vector<SilKit::Services::Label>& labels,
+                           DataMessageHandlerT defaultHandler,
                            IDataSubscriber* parent);
 
     void SetDefaultDataMessageHandler(DataMessageHandlerT handler);
-
-    auto AddExplicitDataMessageHandler(DataMessageHandlerT handler) -> HandlerId;
-
-    void RemoveExplicitDataMessageHandler(HandlerId handlerId);
-
-    //! \brief Accepts messages originating from SIL Kit communications.
-    void ReceiveMsg(const Core::IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent) override;
-
-    void ReceiveMessage(const WireDataMessageEvent& dataMessageEvent);
+    
+    //! \brief Accepts messages originating from SilKit communications.
+    void ReceiveMsg(const IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent) override;
 
     //SilKit::Services::Orchestration::ITimeConsumer
     void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
 
     std::string GetMediaType() { return _mediaType; };
-    std::map <std::string, std::string> GetLabels() { return _labels; };
+    auto GetLabels() -> const std::vector<SilKit::Services::Label>& { return _labels; };
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -67,9 +62,8 @@ public:
 private:
     std::string _topic;
     std::string _mediaType;
-    std::map<std::string, std::string> _labels;
+    std::vector<SilKit::Services::Label> _labels;
     DataMessageHandlerT _defaultHandler;
-    Util::SynchronizedHandlers<DataMessageHandlerT> _explicitDataMessageHandlers;
 
     IDataSubscriber* _parent{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};

@@ -40,8 +40,7 @@ class DataPublisher
     , public Core::IServiceEndpoint
 {
 public:
-    DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
-                  const std::string& mediaType, const std::map<std::string, std::string>& labels,
+    DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, const SilKit::Services::PubSub::DataPublisherSpec& dataSpec,
                   const std::string& pubUUID);
 
     void Publish(Util::Span<const uint8_t> data) override;
@@ -57,7 +56,7 @@ public:
 private:
     std::string _topic;
     std::string _mediaType;
-    std::map<std::string, std::string> _labels;
+    std::vector<SilKit::Services::Label> _labels;
     std::string _pubUUID;
 
     Core::ServiceDescriptor _serviceDescriptor{};

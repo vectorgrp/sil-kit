@@ -29,11 +29,10 @@ namespace Services {
 namespace PubSub {
 
 DataPublisher::DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                             const std::string& topic, const std::string& mediaType,
-                             const std::map<std::string, std::string>& labels, const std::string& pubUUID)
-    : _topic{topic}
-    , _mediaType{mediaType}
-    , _labels{labels}
+                             const SilKit::Services::PubSub::DataPublisherSpec& dataSpec, const std::string& pubUUID)
+    : _topic{dataSpec.Topic()}
+    , _mediaType{dataSpec.MediaType()}
+    , _labels{dataSpec.Labels()}
     , _pubUUID{pubUUID}
     , _timeProvider{timeProvider}
     , _participant{participant}

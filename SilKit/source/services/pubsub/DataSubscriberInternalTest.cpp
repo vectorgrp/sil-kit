@@ -79,23 +79,4 @@ TEST_F(DataSubscriberInternalTest, trigger_default_data_handler)
 
     subscriber.ReceiveMsg(&subscriberOther, msg);
 }
-
-TEST_F(DataSubscriberInternalTest, trigger_explicit_data_handler_fallback_default_data_handler)
-{
-    const WireDataMessageEvent msg{0ns, {0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u}};
-
-    const auto handlerId =
-        subscriber.AddExplicitDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataExplicit));
-
-    EXPECT_CALL(callbacks, ReceiveDataDefault(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(callbacks, ReceiveDataExplicit(nullptr, ToDataMessageEvent(msg))).Times(1);
-    subscriber.ReceiveMsg(&subscriberOther, msg);
-
-    subscriber.RemoveExplicitDataMessageHandler(handlerId);
-
-    EXPECT_CALL(callbacks, ReceiveDataDefault(nullptr, ToDataMessageEvent(msg))).Times(1);
-    EXPECT_CALL(callbacks, ReceiveDataExplicit(testing::_, testing::_)).Times(0);
-    subscriber.ReceiveMsg(&subscriberOther, msg);
-}
-
 } // anonymous namespace

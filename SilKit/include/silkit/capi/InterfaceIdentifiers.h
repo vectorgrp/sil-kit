@@ -222,34 +222,31 @@ typedef struct
 // Data
 // Data data type IDs
 #define SilKit_DataMessageEvent_DATATYPE_ID 1
-#define SilKit_NewDataPublisherEvent_DATATYPE_ID 2
+#define SilKit_DataSpec_DATATYPE_ID 2
 
 // Data data type versions
 #define SilKit_DataMessageEvent_VERSION 1
-#define SilKit_NewDataPublisherEvent_VERSION 1
+#define SilKit_DataSpec_VERSION 1
 
 // Data public API IDs
 #define SilKit_DataMessageEvent_STRUCT_VERSION             SK_ID_MAKE(Data, SilKit_DataMessageEvent)
-#define SilKit_NewDataPublisherEvent_STRUCT_VERSION        SK_ID_MAKE(Data, SilKit_NewDataPublisherEvent)
+#define SilKit_DataSpec_STRUCT_VERSION                     SK_ID_MAKE(Data, SilKit_DataSpec)
 
 // Rpc
 // Rpc data type IDs
-#define SilKit_RpcDiscoveryResult_DATATYPE_ID 1
-#define SilKit_RpcCallEvent_DATATYPE_ID 2
-#define SilKit_RpcCallResultEvent_DATATYPE_ID 3
-#define SilKit_RpcDiscoveryResultList_DATATYPE_ID 4
+#define SilKit_RpcCallEvent_DATATYPE_ID 1
+#define SilKit_RpcCallResultEvent_DATATYPE_ID 2
+#define SilKit_RpcSpec_DATATYPE_ID 3
 
 // Rpc data type Versions
-#define SilKit_RpcDiscoveryResult_VERSION 1
 #define SilKit_RpcCallEvent_VERSION 1
 #define SilKit_RpcCallResultEvent_VERSION 1
-#define SilKit_RpcDiscoveryResultList_VERSION 1
+#define SilKit_RpcSpec_VERSION 1
 
 // Rpc public API IDs
-#define SilKit_RpcDiscoveryResult_STRUCT_VERSION           SK_ID_MAKE(Rpc, SilKit_RpcDiscoveryResult)
 #define SilKit_RpcCallEvent_STRUCT_VERSION                 SK_ID_MAKE(Rpc, SilKit_RpcCallEvent)
 #define SilKit_RpcCallResultEvent_STRUCT_VERSION           SK_ID_MAKE(Rpc, SilKit_RpcCallResultEvent)
-#define SilKit_RpcDiscoveryResultList_STRUCT_VERSION       SK_ID_MAKE(Rpc, SilKit_RpcDiscoveryResultList)
+#define SilKit_RpcSpec_STRUCT_VERSION                      SK_ID_MAKE(Rpc, SilKit_RpcSpec)
 
 // Participant
 // Participant data type IDs

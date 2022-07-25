@@ -20,6 +20,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "DataMessageDatatypeUtils.hpp"
+#include "silkit/services/datatypes.hpp"
+#include "Optional.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -40,24 +42,45 @@ bool MatchMediaType(const std::string& subMediaType, const std::string& pubMedia
     return subMediaType == "" || subMediaType == pubMediaType;
 }
 
-bool MatchLabels(const std::map<std::string, std::string>& subscriberLabels, const std::map<std::string, std::string>& publisherLabels)
+SilKit::Util::Optional<SilKit::Services::Label> findLabel(
+    std::vector<SilKit::Services::Label> dataLabels, const std::string& key)
 {
-    if (subscriberLabels.size() == 0)
-        return true; // subscriberLabels empty -> match
+    for (auto it : dataLabels)
+    {
+        if (it.key == key)
+        {
+            return {it};
+        }
+    }
+    return SilKit::Util::Optional<SilKit::Services::Label>();
+}
 
-    if (subscriberLabels.size() > publisherLabels.size())
-        return false; // subscriberLabels more labels than outer set -> no match
-
+bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& subscriberLabels,
+                 const std::vector<SilKit::Services::Label>& publisherLabels)
+{
     for (auto&& kv : subscriberLabels)
     {
-        auto it = publisherLabels.find(kv.first);
-        if (it == publisherLabels.end() || // Key not found -> no match
-            (kv.second != "" && kv.second != (*it).second)) // Value does not match (and no wildcard given) -> no match
+        auto optionalLabel = findLabel(publisherLabels, kv.key);
+        if (!optionalLabel.has_value())
+        {
+            if (kv.kind == SilKit::Services::MatchingLabel::Kind::Mandatory)
+            {
+                // mandatory labels must exist
+                return false;
+            }
+            else if (kv.kind == SilKit::Services::MatchingLabel::Kind::Preferred)
+            {
+                // prefered labels that do not exist are ignored
+                continue;
+            }
+            
+        }
+        else if (kv.value != optionalLabel.value().value) // Value does not match -> no match
         {
             return false;
         }
     }
-    return true; // All of subscriberLabels is there -> match
+    return true; // All of subscriberLabels match according to their rules -> match
 }
 
 } // namespace PubSub

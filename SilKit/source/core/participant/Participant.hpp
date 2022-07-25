@@ -116,40 +116,31 @@ public:
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Lin::ILinController* override;
 
-    auto CreateDataPublisher(const std::string& canonicalName, const std::string& topic,
-                             const std::string& mediaType,
-                             const std::map<std::string, std::string>& labels, size_t history = 0)
+    auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::DataPublisherSpec& dataSpec, size_t history = 0)
         -> Services::PubSub::IDataPublisher* override;
 
-    auto CreateDataSubscriber(const std::string& canonicalName, const std::string& topic,
-                              const std::string& mediaType,
-                              const std::map<std::string, std::string>& labels,
-                              Services::PubSub::DataMessageHandlerT defaultDataHandler,
-                              Services::PubSub::NewDataPublisherHandlerT newDataSourceHandler = nullptr)
+    auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+                              Services::PubSub::DataMessageHandlerT defaultDataHandler)
         -> Services::PubSub::IDataSubscriber* override;
 
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
                                       const std::string& mediaType,
-                                      const std::map<std::string, std::string>& publisherLabels,
+                                      const std::vector<SilKit::Services::Label>& publisherLabels,
                                       Services::PubSub::DataMessageHandlerT callback, Services::PubSub::IDataSubscriber* parent)
         -> Services::PubSub::DataSubscriberInternal* override;
 
-    auto CreateRpcClient(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
-                         const std::map<std::string, std::string>& labels, Services::Rpc::RpcCallResultHandler handler)
+    auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcClientSpec& dataSpec, Services::Rpc::RpcCallResultHandler handler)
         -> Services::Rpc::IRpcClient* override;
 
-    auto CreateRpcServer(const std::string& canonicalName, const std::string& functionName, const std::string& mediaType,
-                         const std::map<std::string, std::string>& labels, Services::Rpc::RpcCallHandler handler)
+    auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcServerSpec& dataSpec,
+                         Services::Rpc::RpcCallHandler handler)
         -> Services::Rpc::IRpcServer* override;
 
     auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
-                                 const std::string& mediaType, const std::map<std::string, std::string>& labels,
+                                 const std::string& mediaType,
+                                 const std::vector<SilKit::Services::Label>& clientLabels,
                                  Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
         -> Services::Rpc::RpcServerInternal* override;
-
-    void DiscoverRpcServers(const std::string& functionName, const std::string& mediaType,
-                            const std::map<std::string, std::string>& labels,
-                            Services::Rpc::RpcDiscoveryResultHandler handler) override;
 
     auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;

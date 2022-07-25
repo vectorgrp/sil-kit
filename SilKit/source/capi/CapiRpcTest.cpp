@@ -64,58 +64,15 @@ class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
     MOCK_METHOD(SilKit::Services::Rpc::IRpcClient*, CreateRpcClient,
-                (const std::string& /*controllerName*/, const std::string& /*functionName*/,
-                 const std::string& /*mediaType*/, (const std::map<std::string, std::string>& /*labels*/),
+                (const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcClientSpec& /*rpcSpec*/,
                  SilKit::Services::Rpc::RpcCallResultHandler /*handler*/),
                 (override));
 
     MOCK_METHOD(SilKit::Services::Rpc::IRpcServer*, CreateRpcServer,
-                (const std::string& /*controllerName*/, const std::string& /*functionName*/,
-                 const std::string& /*mediaType*/, (const std::map<std::string, std::string>& /*labels*/),
+                (const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcServerSpec& /*rpcSpec*/,
                  SilKit::Services::Rpc::RpcCallHandler /*handler*/),
                 (override));
-
-    MOCK_METHOD(void, DiscoverRpcServers,
-                (const std::string& /*functionName*/, const std::string& /*mediaType*/,
-                 (const std::map<std::string, std::string>& /*labels*/),
-                 SilKit::Services::Rpc::RpcDiscoveryResultHandler /*handler*/),
-                (override));
 };
-
-void Copy_Label(SilKit_KeyValuePair* dst, const SilKit_KeyValuePair* src)
-{
-    auto lenKey = strlen(src->key) + 1;
-    auto lenVal = strlen(src->value) + 1;
-    dst->key = (const char*)malloc(lenKey);
-    dst->value = (const char*)malloc(lenVal);
-    if (dst->key == nullptr || dst->value == nullptr)
-    {
-        throw std::bad_alloc();
-    }
-    strcpy((char*)dst->key, src->key);
-    strcpy((char*)dst->value, src->value);
-}
-
-void Create_Labels(SilKit_KeyValueList** outLabels, const SilKit_KeyValuePair* labels, uint32_t numLabels)
-{
-    SilKit_KeyValueList* newLabels;
-    newLabels = (SilKit_KeyValueList*)malloc(sizeof(SilKit_KeyValueList));
-    if (newLabels == nullptr)
-    {
-        throw std::bad_alloc();
-    }
-    newLabels->numLabels = numLabels;
-    newLabels->labels = (SilKit_KeyValuePair*)malloc(numLabels * sizeof(SilKit_KeyValuePair));
-    if (newLabels->labels == nullptr)
-    {
-        throw std::bad_alloc();
-    }
-    for (uint32_t i = 0; i < numLabels; i++)
-    {
-        Copy_Label(&newLabels->labels[i], &labels[i]);
-    }
-    *outLabels = newLabels;
-}
 
 class CapiRpcTest : public testing::Test
 {
@@ -128,10 +85,6 @@ public:
         dummyCallHandle = std::make_unique<CallHandleImpl>(SilKit::Services::Rpc::CallUUID{ 1, 1 });
         callHandlePtr = dummyCallHandle.get();
         callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(callHandlePtr);
-
-        uint32_t numLabels = 1;
-        SilKit_KeyValuePair labels[1] = {{"KeyA", "ValA"}};
-        Create_Labels(&labelList, labels, numLabels);
 
         mediaType = "A";
 
@@ -152,7 +105,6 @@ public:
     void* dummyContextPtr;
 
     const char* mediaType;
-    SilKit_KeyValueList* labelList;
 
 };
 
@@ -164,18 +116,20 @@ void CallReturnHandler(void* /*context*/, SilKit_RpcClient* /*client*/, const Si
 {
 }
 
-void DiscoveryResultHandler(void* /*context*/, const SilKit_RpcDiscoveryResultList* /*discoveryResults*/)
-{
-}
-
 TEST_F(CapiRpcTest, rpc_client_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     SilKit_RpcClient* client;
-    const char* rpcMediaType = "A";
-    EXPECT_CALL(mockParticipant, CreateRpcClient("client", "functionName", testing::_, testing::_, testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", "functionName", rpcMediaType,
-                                      labelList, nullptr, &CallReturnHandler);
+    SilKit_RpcSpec rpcSpec;
+    SilKit_Struct_Init(SilKit_RpcSpec, rpcSpec);
+    rpcSpec.functionName = "TopicA";
+    rpcSpec.mediaType = mediaType;
+    rpcSpec.labelList.numLabels = 0;
+    rpcSpec.labelList.labels = 0;
+
+    EXPECT_CALL(mockParticipant, CreateRpcClient("client", testing::_, testing::_)).Times(testing::Exactly(1));
+    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", &rpcSpec, nullptr,
+                                         &CallReturnHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     SilKit_ByteVector data = { 0, 0 };
@@ -188,12 +142,19 @@ TEST_F(CapiRpcTest, rpc_server_function_mapping)
 {
     SilKit_ReturnCode returnCode;
 
+    
+    SilKit_RpcSpec rpcSpec;
+    SilKit_Struct_Init(SilKit_RpcSpec, rpcSpec);
+    rpcSpec.functionName = "TopicA";
+    rpcSpec.mediaType = mediaType;
+    rpcSpec.labelList.numLabels = 0;
+    rpcSpec.labelList.labels = 0;
+
     SilKit_RpcServer* server;
-    const char* rpcMediaType = "A";
-    EXPECT_CALL(mockParticipant, CreateRpcServer("server", "functionName", testing::_, testing::_, testing::_))
+    EXPECT_CALL(mockParticipant, CreateRpcServer("server", testing::_, testing::_))
         .Times(testing::Exactly(1));
-    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", "functionName", rpcMediaType,
-                                      labelList, nullptr, &CallHandler);
+    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", &rpcSpec, nullptr,
+                                         &CallHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     SilKit_ByteVector data = {0, 0};
@@ -207,28 +168,30 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
     SilKit_ReturnCode returnCode;
     SilKit_RpcClient* client;
 
-    returnCode = SilKit_RpcClient_Create(nullptr, (SilKit_Participant*)&mockParticipant, "client", "functionName", mediaType,
-                                      labelList, dummyContextPtr, &CallReturnHandler);
+    SilKit_RpcSpec rpcSpec;
+    SilKit_Struct_Init(SilKit_RpcSpec, rpcSpec);
+    rpcSpec.functionName = "TopicA";
+    rpcSpec.mediaType = mediaType;
+    rpcSpec.labelList.numLabels = 0;
+    rpcSpec.labelList.labels = 0;
+
+    returnCode = SilKit_RpcClient_Create(nullptr, (SilKit_Participant*)&mockParticipant, "client", &rpcSpec,
+                                         dummyContextPtr, &CallReturnHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcClient_Create(&client, nullptr, "client", "functionName", mediaType, labelList, dummyContextPtr,
+    returnCode = SilKit_RpcClient_Create(&client, nullptr, "client", &rpcSpec, dummyContextPtr,
                                       &CallReturnHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, nullptr, "functionName", mediaType,
-                                      labelList, dummyContextPtr, &CallReturnHandler);
+    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, nullptr, &rpcSpec,
+                                         dummyContextPtr, &CallReturnHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", nullptr, mediaType,
-                                      labelList, dummyContextPtr, &CallReturnHandler);
+    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", nullptr, dummyContextPtr, &CallReturnHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", "functionName",
-                                      nullptr, labelList, dummyContextPtr, &CallReturnHandler);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", "functionName", mediaType,
-                                      labelList, dummyContextPtr, nullptr);
+    returnCode = SilKit_RpcClient_Create(&client, (SilKit_Participant*)&mockParticipant, "client", &rpcSpec,
+                                         dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     SilKit_ByteVector data = {0, 0};
@@ -245,24 +208,26 @@ TEST_F(CapiRpcTest, rpc_server_bad_parameters)
     SilKit_ReturnCode returnCode;
     SilKit_RpcServer* server;
 
-    returnCode = SilKit_RpcServer_Create(nullptr, (SilKit_Participant*)&mockParticipant, "server", "functionName", mediaType,
-                                      labelList, dummyContextPtr, &CallHandler);
+    SilKit_RpcSpec rpcSpec;
+    SilKit_Struct_Init(SilKit_RpcSpec, rpcSpec);
+    rpcSpec.functionName = "TopicA";
+    rpcSpec.mediaType = mediaType;
+    rpcSpec.labelList.numLabels = 0;
+    rpcSpec.labelList.labels = 0;
+
+    returnCode = SilKit_RpcServer_Create(nullptr, (SilKit_Participant*)&mockParticipant, "server", &rpcSpec,
+                                         dummyContextPtr, &CallHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcServer_Create(&server, nullptr, "server", "functionName", mediaType, labelList, dummyContextPtr,
+    returnCode = SilKit_RpcServer_Create(&server, nullptr, "server", &rpcSpec, dummyContextPtr,
                                       &CallHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", nullptr, mediaType,
-                                      labelList, dummyContextPtr, &CallHandler);
+    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", nullptr, dummyContextPtr, &CallHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", "functionName",
-                                      nullptr, labelList, dummyContextPtr, &CallHandler);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", "functionName", mediaType,
-                                      labelList, dummyContextPtr, nullptr);
+    returnCode = SilKit_RpcServer_Create(&server, (SilKit_Participant*)&mockParticipant, "server", &rpcSpec,
+                                         dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     SilKit_ByteVector     data = {0, 0};
@@ -302,23 +267,6 @@ TEST_F(CapiRpcTest, rpc_server_submit)
     std::vector<uint8_t> refData(&(data.data[0]), &(data.data[0]) + data.size);
     EXPECT_CALL(mockRpcServer, SubmitResult(callHandlePtr, PayloadMatcher(refData))).Times(testing::Exactly(1));
     returnCode = SilKit_RpcServer_SubmitResult((SilKit_RpcServer*)&mockRpcServer, callHandle, &data);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-}
-
-TEST_F(CapiRpcTest, rpc_discovery_query)
-{
-    SilKit_ReturnCode returnCode = 0;
-    returnCode =
-        SilKit_DiscoverServers(nullptr, "functionName", mediaType, labelList, dummyContextPtr, &DiscoveryResultHandler);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_DiscoverServers((SilKit_Participant*)&mockParticipant, "functionName", mediaType, labelList,
-                                        dummyContextPtr, nullptr);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-    EXPECT_CALL(mockParticipant, DiscoverRpcServers(testing::_, testing::_, testing::_, testing::_))
-        .Times(testing::Exactly(1));
-    returnCode = SilKit_DiscoverServers((SilKit_Participant*)&mockParticipant, "functionName", mediaType, labelList,
-                                        dummyContextPtr, &DiscoveryResultHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 

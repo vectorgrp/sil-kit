@@ -32,12 +32,9 @@ namespace Services {
 namespace Rpc {
 
 RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                     const std::string& functionName, const std::string& mediaType,
-                     const std::map<std::string, std::string>& labels, const std::string& clientUUID,
+                     const SilKit::Services::Rpc::RpcClientSpec& dataSpec, const std::string& clientUUID,
                      RpcCallResultHandler handler)
-    : _functionName{functionName}
-    , _mediaType{mediaType}
-    , _labels{labels}
+    : _dataSpec{dataSpec}
     , _clientUUID{clientUUID}
     , _handler{std::move(handler)}
     , _logger{participant->GetLogger()}

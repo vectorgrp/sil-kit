@@ -61,6 +61,9 @@ DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayClockPeriod);
 DEFINE_SILKIT_CONVERT(SilKit::Services::Flexray::FlexrayTransmissionMode);
 DEFINE_SILKIT_CONVERT(FlexrayController);
 
+DEFINE_SILKIT_CONVERT(SilKit::Services::MatchingLabel::Kind);
+DEFINE_SILKIT_CONVERT(SilKit::Services::MatchingLabel);
+DEFINE_SILKIT_CONVERT(SilKit::Services::Label);
 DEFINE_SILKIT_CONVERT(DataPublisher);
 DEFINE_SILKIT_CONVERT(DataSubscriber);
 DEFINE_SILKIT_CONVERT(RpcServer);

@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <unordered_map>
 
+#include "silkit/services/datatypes.hpp"
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/util/HandlerId.hpp"
 
@@ -41,7 +42,7 @@ bool operator==(const WireDataMessageEvent& lhs, const WireDataMessageEvent& rhs
 
 bool MatchMediaType(const std::string& subMediaType, const std::string& pubMediaType);
 
-bool MatchLabels(const std::map<std::string, std::string>& innerSet, const std::map<std::string, std::string>& outerSet);
+bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& innerSet, const std::vector<SilKit::Services::Label>& outerSet);
 
 struct ExplicitDataMessageHandlerInfo
 {

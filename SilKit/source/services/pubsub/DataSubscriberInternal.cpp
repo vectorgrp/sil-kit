@@ -29,7 +29,7 @@ namespace PubSub {
 
 DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                                                const std::string& topic, const std::string& mediaType,
-                                               const std::map<std::string, std::string>& labels,
+                                               const std::vector<SilKit::Services::Label>& labels,
                                                DataMessageHandlerT defaultHandler, IDataSubscriber* parent)
     : _topic{topic}
     , _mediaType{mediaType}
@@ -47,36 +47,16 @@ void DataSubscriberInternal::SetDefaultDataMessageHandler(DataMessageHandlerT ha
     _defaultHandler = std::move(handler);
 }
 
-auto DataSubscriberInternal::AddExplicitDataMessageHandler(DataMessageHandlerT handler) -> HandlerId
+void DataSubscriberInternal::ReceiveMsg(const IServiceEndpoint* /*from*/, const WireDataMessageEvent& dataMessageEvent)
 {
-    return _explicitDataMessageHandlers.Add(std::move(handler));
-}
-
-void DataSubscriberInternal::RemoveExplicitDataMessageHandler(HandlerId handlerId)
-{
-    _explicitDataMessageHandlers.Remove(handlerId);
-}
-
-void DataSubscriberInternal::ReceiveMsg(const Core::IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent)
-{
-    if (AllowMessageProcessing(from->GetServiceDescriptor(), _serviceDescriptor))
-        return;
-
-    ReceiveMessage(dataMessageEvent);
-}
-
-void DataSubscriberInternal::ReceiveMessage(const WireDataMessageEvent& dataMessageEvent)
-{
-    const auto anySpecificHandlerExecuted = _explicitDataMessageHandlers.InvokeAll(_parent, ToDataMessageEvent(dataMessageEvent));
-
-    if (_defaultHandler && !anySpecificHandlerExecuted)
+    if (_defaultHandler)
     {
         _defaultHandler(_parent, ToDataMessageEvent(dataMessageEvent));
     }
 
-    if (!_defaultHandler && !anySpecificHandlerExecuted)
+    if (!_defaultHandler)
     {
-        _participant->GetLogger()->Warn("DataSubscriber on topic " + _topic + " received data, but has no default or specific handler assigned");
+        _participant->GetLogger()->Warn("DataSubscriber on topic " + _topic + " received data, but has no default handler assigned");
     }
 }
 

@@ -36,28 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cstring>
 
 namespace {
-void assign(SilKit_RpcDiscoveryResultList** cResultList, const std::vector<SilKit::Services::Rpc::RpcDiscoveryResult>& cppDiscoveryResults)
-{
-    size_t numResults = cppDiscoveryResults.size();
-    *cResultList = (SilKit_RpcDiscoveryResultList*)malloc(sizeof(SilKit_RpcDiscoveryResultList));
-    if (*cResultList != NULL)
-    {
-        (*cResultList)->numResults = numResults;
-        (*cResultList)->results = (SilKit_RpcDiscoveryResult*)malloc(numResults * sizeof(SilKit_RpcDiscoveryResult));
-        if ((*cResultList)->results != NULL)
-        {
-            uint32_t i = 0;
-            for (auto&& r : cppDiscoveryResults)
-            {
-                SilKit_Struct_Init(SilKit_RpcDiscoveryResult, (*cResultList)->results[i]);
-                (*cResultList)->results[i].functionName = r.functionName.c_str();
-        		(*cResultList)->results[i].mediaType = r.mediaType.c_str();
-                assign(&(*cResultList)->results[i].labelList, r.labels);
-                i++;
-            };
-        }
-    }
-}
 
 SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, SilKit_RpcCallResultHandler_t handler)
 {
@@ -91,21 +69,19 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
 extern "C" {
 
 SilKit_ReturnCode SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
-                                   const char* functionName, const char* mediaType, const SilKit_KeyValueList* labels,
-                                   void* context, SilKit_RpcCallHandler_t callHandler)
+    SilKit_RpcSpec* rpcSpec, void* context, SilKit_RpcCallHandler_t callHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(controllerName);
-    ASSERT_VALID_POINTER_PARAMETER(functionName);
-    ASSERT_VALID_POINTER_PARAMETER(mediaType);
+    ASSERT_VALID_POINTER_PARAMETER(rpcSpec);
     ASSERT_VALID_HANDLER_PARAMETER(callHandler);
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        std::map<std::string, std::string> cppLabels;
-        assign(cppLabels, labels);
-        auto rcpServer = cppParticipant->CreateRpcServer(controllerName, functionName, mediaType, cppLabels,
+        SilKit::Services::Rpc::RpcServerSpec cppDataSpec;
+        assign(cppDataSpec, rpcSpec);
+        auto rcpServer = cppParticipant->CreateRpcServer(controllerName, cppDataSpec,
                                                          MakeRpcCallHandler(context, callHandler));
 
         *out = reinterpret_cast<SilKit_RpcServer*>(rcpServer);
@@ -144,21 +120,20 @@ SilKit_ReturnCode SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* 
         }
 
 SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
-                                   const char* functionName, const char* mediaType, const SilKit_KeyValueList* labels,
+                                   SilKit_RpcSpec* rpcSpec,
                                    void* context, SilKit_RpcCallResultHandler_t resultHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(controllerName);
-    ASSERT_VALID_POINTER_PARAMETER(functionName);
-    ASSERT_VALID_POINTER_PARAMETER(mediaType);
+    ASSERT_VALID_POINTER_PARAMETER(rpcSpec);
     ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        std::map<std::string, std::string> cppLabels;
-        assign(cppLabels, labels);
-        auto rcpClient = cppParticipant->CreateRpcClient(controllerName, functionName, mediaType, cppLabels,
+        SilKit::Services::Rpc::RpcClientSpec cppRpcSpec;
+        assign(cppRpcSpec, rpcSpec);
+        auto rcpClient = cppParticipant->CreateRpcClient(controllerName, cppRpcSpec,
                                                          MakeRpcCallResultHandler(context, resultHandler));
 
         *out = reinterpret_cast<SilKit_RpcClient*>(rcpClient);
@@ -190,31 +165,6 @@ SilKit_ReturnCode SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, 
     {
         auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
         cppClient->SetCallResultHandler(MakeRpcCallResultHandler(context, handler));
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKit_DiscoverServers(SilKit_Participant* participant, const char* functionName, const char* mediaType,
-                                     const SilKit_KeyValueList* labels, void* context,
-                                     SilKit_RpcDiscoveryResultHandler_t resultHandler)
-{
-    ASSERT_VALID_POINTER_PARAMETER(participant);
-    ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
-    CAPI_ENTER
-    {
-        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto cppMediaType = std::string(mediaType);
-        std::map<std::string, std::string> cppLabels;
-        assign(cppLabels, labels);
-        cppParticipant->DiscoverRpcServers(
-            functionName, cppMediaType, cppLabels,
-            [resultHandler, context](const std::vector<SilKit::Services::Rpc::RpcDiscoveryResult>& cppDiscoveryResults) {
-                SilKit_RpcDiscoveryResultList* results;
-                assign(&results, cppDiscoveryResults);
-                SilKit_Struct_Init(SilKit_RpcDiscoveryResultList, *results);
-                resultHandler(context, results);
-            });
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

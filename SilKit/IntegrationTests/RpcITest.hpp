@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
+#include "IParticipantInternal.hpp"
+#include "IServiceDiscovery.hpp"
 
 using namespace std::chrono_literals;
 using namespace SilKit;
@@ -138,7 +140,7 @@ protected:
     struct RpcServerInfo
     {
         RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName,
-                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      const std::string& newMediaType, const std::vector<SilKit::Services::MatchingLabel>& newLabels,
                       size_t newMessageSizeInBytes, uint32_t newNumCallsToReceive)
         {
             expectIncreasingData = true;
@@ -150,7 +152,8 @@ protected:
             numCallsToReceive = newNumCallsToReceive;
         }
         RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName,
-                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      const std::string& newMediaType,
+                      const std::vector<SilKit::Services::MatchingLabel>& newLabels,
                       size_t newMessageSizeInBytes, uint32_t newNumCallsToReceive,
                       const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
         {
@@ -167,7 +170,7 @@ protected:
         std::string controllerName;
         std::string functionName;
         std::string mediaType;
-        std::map<std::string, std::string> labels;
+        std::vector<SilKit::Services::MatchingLabel> labels;
         size_t messageSizeInBytes;
         uint32_t numCallsToReceive;
         bool expectIncreasingData;
@@ -227,6 +230,8 @@ protected:
         std::vector<RpcClientInfo> rpcClients;
         std::vector<RpcServerInfo> rpcServers;
         std::unique_ptr<IParticipant> participant;
+        SilKit::Core::IParticipantInternal* participantImpl;
+
         std::vector<std::string> expectedFunctionNames;
         bool allCalled{false};
         std::promise<void> allCalledPromise;
@@ -303,86 +308,98 @@ protected:
             EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting server discovery timed out";
         }
 
-        void OnRpcDiscovery(const std::vector<RpcDiscoveryResult>& discoveryResults)
+        void OnNewServiceDiscovery(const SilKit::Core::ServiceDescriptor sd)
         {
-            for (const auto& entry : discoveryResults)
+            std::string functionName = sd.GetSupplementalData()["Rpc::server::functionName"];
+            auto foundFunctionNameIter =
+                std::find(expectedFunctionNames.begin(), expectedFunctionNames.end(), functionName);
+            if (foundFunctionNameIter != expectedFunctionNames.end())
             {
-                auto foundFunctionNameIter =
-                    std::find(expectedFunctionNames.begin(), expectedFunctionNames.end(), entry.functionName);
-                if (foundFunctionNameIter != expectedFunctionNames.end())
-                {
-                    expectedFunctionNames.erase(foundFunctionNameIter);
-                }
+                expectedFunctionNames.erase(foundFunctionNameIter);
             }
+
             if (expectedFunctionNames.empty())
             {
+                expectedFunctionNames.push_back("AlreadyTriggered");
                 allDiscovered = true;
                 allDiscoveredPromise.set_value();
             }
         }
     };
 
-    void ParticipantThread(RpcParticipant& participant, const std::string& registryUri, bool sync)
-    {
-        try
+        void ParticipantThread(RpcParticipant& participant, const std::string& registryUri, bool sync)
         {
-            participant.participant = SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Services::Logging::Level::Info),
-                                                                     participant.name, registryUri);
-
-            // Create Clients
-            for (auto& c : participant.rpcClients)
+            try
             {
-                auto callReturnHandler = [&participant, &c](IRpcClient* /*client*/, RpcCallResultEvent event) {
-                    if (!c.allCallsReturned)
-                    {
-                        if (event.callStatus == RpcCallStatus::Success)
+                participant.participant = SilKit::CreateParticipant(
+                    SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Services::Logging::Level::Info),
+                    participant.name, registryUri);
+                participant.participantImpl =
+                    dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.participant.get());
+
+                participant.participantImpl->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+                    [&participant](auto type, auto&& serviceDescr) {
+                        if (type == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                         {
-                            c.OnCallReturned(SilKit::Util::ToStdVector(event.resultData));
+                            if (serviceDescr._networkType == SilKit::Config::NetworkType::RPC)
+                            {
+                                participant.OnNewServiceDiscovery(serviceDescr);
+                            }
                         }
-                    }
-                    participant.CheckAllCallsReturnedPromise();
-                };
+                    });
 
-                c.rpcClient = participant.participant->CreateRpcClient(c.controllerName, c.functionName, c.mediaType,
-                                                                       c.labels, callReturnHandler);
-            }
 
-            // Create Servers
-            for (auto& s : participant.rpcServers)
-            {
-                participant.PrepareAllReceivedPromise();
-
-                auto processCalls = [&participant, &s](IRpcServer* server, RpcCallEvent event) {
-                    // Increment data
-                    auto returnData = SilKit::Util::ToStdVector(event.argumentData);
-                    for (auto& d : returnData)
-                    {
-                        d += rpcFuncIncrement;
-                    }
-                    server->SubmitResult(event.callHandle, returnData);
-
-                    // Evaluate data and reception count
-                    s.ReceiveCall(SilKit::Util::ToStdVector(event.argumentData));
-                    participant.CheckAllCallsReceivedPromise();
-                };
-
-                s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, s.functionName, s.mediaType,
-                                                                       s.labels, processCalls);
-            }
-
-            // Check RpcDiscovery after creating the local servers to discover them as well
-            if (!participant.expectedFunctionNames.empty())
-            {
-                RpcDiscoveryResultHandler discoveryResultsHandler =
-                    [&participant](const std::vector<RpcDiscoveryResult>& discoveryResults) {
-                        participant.OnRpcDiscovery(discoveryResults);
+                // Create Clients
+                for (auto& c : participant.rpcClients)
+                {
+                    auto callReturnHandler = [&participant, &c](IRpcClient* /*client*/, RpcCallResultEvent event) {
+                        if (!c.allCallsReturned)
+                        {
+                            if (event.callStatus == RpcCallStatus::Success)
+                            {
+                                c.OnCallReturned(SilKit::Util::ToStdVector(event.resultData));
+                            }
+                        }
+                        participant.CheckAllCallsReturnedPromise();
                     };
 
-                while (!participant.allDiscovered)
-                {
-                    participant.participant->DiscoverRpcServers("", "", {}, discoveryResultsHandler);
+                    SilKit::Services::Rpc::RpcClientSpec dataSpec{c.functionName, c.mediaType};
+                    for (auto label : c.labels)
+                    {
+                        dataSpec.AddLabel(label.first, label.second);
+                    }
+
+                    c.rpcClient =
+                        participant.participant->CreateRpcClient(c.controllerName, dataSpec, callReturnHandler);
                 }
-            }
+
+                // Create Servers
+                for (auto& s : participant.rpcServers)
+                {
+                    participant.PrepareAllReceivedPromise();
+
+                    auto processCalls = [&participant, &s](IRpcServer* server, RpcCallEvent event) {
+                        // Increment data
+                        auto returnData = SilKit::Util::ToStdVector(event.argumentData);
+                        for (auto& d : returnData)
+                        {
+                            d += rpcFuncIncrement;
+                        }
+                        server->SubmitResult(event.callHandle, returnData);
+
+                        // Evaluate data and reception count
+                        s.ReceiveCall(SilKit::Util::ToStdVector(event.argumentData));
+                        participant.CheckAllCallsReceivedPromise();
+                    };
+
+                    SilKit::Services::Rpc::RpcServerSpec dataSpec{s.functionName, s.mediaType};
+                    for (auto label : s.labels)
+                    {
+                        dataSpec.AddLabel(label);
+                    }
+
+                    s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, dataSpec, processCalls);
+                }
 
             if (sync)
             {
@@ -429,126 +446,125 @@ protected:
                 }
             }
 
-            for (const auto& c : participant.rpcClients)
-            {
-                EXPECT_EQ(c.callCounter, c.numCalls);
-                EXPECT_EQ(c.callReturnedSuccessCounter, c.numCallsToReturn);
+                for (const auto& c : participant.rpcClients)
+                {
+                    EXPECT_EQ(c.callCounter, c.numCalls);
+                    EXPECT_EQ(c.callReturnedSuccessCounter, c.numCallsToReturn);
+                }
+                for (const auto& s : participant.rpcServers)
+                {
+                    EXPECT_EQ(s.receiveCallCounter, s.numCallsToReceive);
+                }
             }
-            for (const auto& s : participant.rpcServers)
+            catch (const std::exception& error)
             {
-                EXPECT_EQ(s.receiveCallCounter, s.numCallsToReceive);
-            }
-        }
-        catch (const std::exception& error)
-        {
-            _testSystem.ShutdownOnException(error);
-        }
-    }
-
-    void RunParticipants(std::vector<RpcParticipant>& rpcs, const std::string& registryUri, bool sync)
-    {
-        try
-        {
-            for (auto& participant : rpcs)
-            {
-                _rpcThreads.emplace_back([this, &participant, registryUri, sync] {
-                    ParticipantThread(participant, registryUri, sync);
-                });
+                _testSystem.ShutdownOnException(error);
             }
         }
-        catch (const std::exception& error)
-        {
-            _testSystem.ShutdownOnException(error);
-        }
-    }
 
-    void JoinRpcThreads()
-    {
-        for (auto&& thread : _rpcThreads)
+        void RunParticipants(std::vector<RpcParticipant>& rpcs, const std::string& registryUri, bool sync)
         {
-            thread.join();
-        }
-    }
-
-    void WaitForAllServersDiscovered(std::vector<RpcParticipant>& rpcs)
-    {
-        for (auto& r : rpcs)
-        {
-            if (!r.rpcClients.empty())
+            try
             {
-                r.WaitForAllDiscovered();
+                for (auto& participant : rpcs)
+                {
+                    _rpcThreads.emplace_back([this, &participant, registryUri, sync] {
+                        ParticipantThread(participant, registryUri, sync);
+                    });
+                }
+            }
+            catch (const std::exception& error)
+            {
+                _testSystem.ShutdownOnException(error);
             }
         }
-    }
 
-    void StopSimOnallCalledAndReceived(std::vector<RpcParticipant>& rpcs, bool sync)
-    {
-        if (sync)
+        void JoinRpcThreads()
+        {
+            for (auto&& thread : _rpcThreads)
+            {
+                thread.join();
+            }
+        }
+
+        void WaitForAllServersDiscovered(std::vector<RpcParticipant>& rpcs)
         {
             for (auto& r : rpcs)
             {
                 if (!r.rpcClients.empty())
                 {
-                    r.WaitForAllCalled();
+                    r.WaitForAllDiscovered();
                 }
             }
-            for (auto& r : rpcs)
-            {
-                if (!r.rpcServers.empty())
-                {
-                    r.WaitForAllCallsReceived();
-                }
-            }
-            for (auto& r : rpcs)
-            {
-                if (!r.rpcClients.empty())
-                {
-                    r.WaitForAllCallsReturned();
-                }
-            }
-            _testSystem.SystemMasterStop();
         }
-    }
 
-    void ShutdownSystem()
-    {
-        _rpcThreads.clear();
-        _testSystem.ShutdownInfrastructure();
-    }
-
-    void RunSyncTest(std::vector<RpcParticipant>& rpcs)
-    {
-        auto registryUri = MakeTestRegistryUri();
-
-        std::vector<std::string> requiredParticipantNames;
-        for (const auto& p : rpcs)
+        void StopSimOnallCalledAndReceived(std::vector<RpcParticipant>& rpcs, bool sync)
         {
-            requiredParticipantNames.push_back(p.name);
+            if (sync)
+            {
+                for (auto& r : rpcs)
+                {
+                    if (!r.rpcClients.empty())
+                    {
+                        r.WaitForAllCalled();
+                    }
+                }
+                for (auto& r : rpcs)
+                {
+                    if (!r.rpcServers.empty())
+                    {
+                        r.WaitForAllCallsReceived();
+                    }
+                }
+                for (auto& r : rpcs)
+                {
+                    if (!r.rpcClients.empty())
+                    {
+                        r.WaitForAllCallsReturned();
+                    }
+                }
+                _testSystem.SystemMasterStop();
+            }
         }
 
-        _testSystem.SetupRegistryAndSystemMaster(registryUri, true, requiredParticipantNames);
-        RunParticipants(rpcs, registryUri, true);
-        WaitForAllServersDiscovered(rpcs);
-        StopSimOnallCalledAndReceived(rpcs, true);
-        JoinRpcThreads();
-        ShutdownSystem();
-    }
+        void ShutdownSystem()
+        {
+            _rpcThreads.clear();
+            _testSystem.ShutdownInfrastructure();
+        }
 
-    void RunAsyncTest(std::vector<RpcParticipant>& rpcs)
-    {
-        auto registryUri = MakeTestRegistryUri();
+        void RunSyncTest(std::vector<RpcParticipant>& rpcs)
+        {
+            auto registryUri = MakeTestRegistryUri();
 
-        _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
-        RunParticipants(rpcs, registryUri, false);
-        WaitForAllServersDiscovered(rpcs);
-        JoinRpcThreads();
-        ShutdownSystem();
-    }
+            std::vector<std::string> requiredParticipantNames;
+            for (const auto& p : rpcs)
+            {
+                requiredParticipantNames.push_back(p.name);
+            }
 
-protected:
-    std::vector<std::thread> _rpcThreads;
+            _testSystem.SetupRegistryAndSystemMaster(registryUri, true, requiredParticipantNames);
+            RunParticipants(rpcs, registryUri, true);
+            WaitForAllServersDiscovered(rpcs);
+            StopSimOnallCalledAndReceived(rpcs, true);
+            JoinRpcThreads();
+            ShutdownSystem();
+        }
 
-private:
-    TestInfrastructure _testSystem;
+        void RunAsyncTest(std::vector<RpcParticipant>& rpcs)
+        {
+            auto registryUri = MakeTestRegistryUri();
 
-};
+            _testSystem.SetupRegistryAndSystemMaster(registryUri, false, {});
+            RunParticipants(rpcs, registryUri, false);
+            WaitForAllServersDiscovered(rpcs);
+            JoinRpcThreads();
+            ShutdownSystem();
+        }
+
+    protected:
+        std::vector<std::thread> _rpcThreads;
+
+    private:
+        TestInfrastructure _testSystem;
+    };

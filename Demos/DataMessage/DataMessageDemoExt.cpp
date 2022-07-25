@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/util/serdes/sil/Serialization.hpp"
+#include "silkit/services/pubsub/DataSpec.hpp"
 
 
 using namespace SilKit::Services::PubSub;
@@ -136,8 +137,11 @@ int main(int argc, char** argv)
 
         if (participantName == "Publisher1")
         {
-            std::map<std::string, std::string> labels{{"KeyA", "ValA"}, {"KeyB", "ValB"} };
-            auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec{"Topic1", mediaType};
+            dataSpec.AddLabel("KeyA", "ValA");
+            dataSpec.AddLabel("KeyB", "ValB");
+
+            auto* publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
 
             timeSyncService->SetSimulationStepHandler(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -150,8 +154,11 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Publisher2")
         {
-            std::map<std::string, std::string> labels{ {"KeyB", "ValB"}, {"KeyC", "ValC"} };
-            auto* publisher = participant->CreateDataPublisher("PubCtrl1", "Topic1", mediaType, labels, 0);
+            SilKit::Services::PubSub::DataPublisherSpec dataSpec{"Topic1", mediaType};
+            dataSpec.AddLabel("KeyB", "ValB");
+            dataSpec.AddLabel("KeyC", "ValC");
+
+            auto* publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
 
             timeSyncService->SetSimulationStepHandler(
                 [publisher](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -163,11 +170,8 @@ int main(int argc, char** argv)
         }
         else //if (participantName == "Subscriber")
         {
-            auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", "Topic1", mediaType, {}, DefaultDataHandler, NewDataSource);
-           
-            subscriber->AddExplicitDataMessageHandler(SpecificDataHandlerForPub1, mediaType,
-                                                      {{"KeyA", ""}, {"KeyB", ""}});
-            subscriber->AddExplicitDataMessageHandler(SpecificDataHandlerForPub2, mediaType, {{"KeyC", ""}});
+            SilKit::Services::PubSub::DataSubscriberSpec dataSpec{"Topic1", mediaType};
+            participant->CreateDataSubscriber("SubCtrl1", dataSpec, DefaultDataHandler);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

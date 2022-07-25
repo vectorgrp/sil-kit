@@ -46,33 +46,32 @@ enum class RpcCallStatus : uint8_t
     UndefinedError
 };
 
+//! \brief An incoming rpc call from a RpcClient with call data and timestamp
 struct RpcCallEvent
 {
+    //! Send timestamp of the event
     std::chrono::nanoseconds timestamp;
+    //! Handle of the rpc call by which the call can be identified and its result can be submitted
     IRpcCallHandle* callHandle;
+    //! Data of the rpc call as provided by the client on call
     Util::Span<const uint8_t> argumentData;
 };
 
 using RpcCallHandler = std::function<void(IRpcServer* server, const RpcCallEvent& event)>;
 
+//! \brief An incoming rpc call result of a RpcServer containing result data and timestamp
 struct RpcCallResultEvent
 {
+    //! Send timestamp of the event
     std::chrono::nanoseconds timestamp;
+    //! Handle of the rpc call as it was provided when the call was triggered
     IRpcCallHandle* callHandle;
     RpcCallStatus callStatus;
+    //! Data of the rpc call result as provided by the server
     Util::Span<const uint8_t> resultData;
 };
 
 using RpcCallResultHandler = std::function<void(IRpcClient* client, const RpcCallResultEvent& event)>;
-
-struct RpcDiscoveryResult
-{
-    std::string functionName;
-    std::string mediaType;
-    std::map<std::string, std::string> labels;
-};
-
-using RpcDiscoveryResultHandler = std::function<void(const std::vector<RpcDiscoveryResult>& discoveryResult)>;
 
 } // namespace Rpc
 } // namespace Services

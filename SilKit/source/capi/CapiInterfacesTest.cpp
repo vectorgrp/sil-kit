@@ -73,11 +73,10 @@ constexpr uint64_t allSilkidIds[]= {
     SilKit_LinGoToSleepEvent_STRUCT_VERSION,
     SilKit_LinWakeupEvent_STRUCT_VERSION,
     SilKit_DataMessageEvent_STRUCT_VERSION,
-    SilKit_NewDataPublisherEvent_STRUCT_VERSION,
-    SilKit_RpcDiscoveryResult_STRUCT_VERSION,
+    SilKit_DataSpec_STRUCT_VERSION,
+    SilKit_RpcSpec_STRUCT_VERSION,
     SilKit_RpcCallEvent_STRUCT_VERSION,
     SilKit_RpcCallResultEvent_STRUCT_VERSION,
-    SilKit_RpcDiscoveryResultList_STRUCT_VERSION,
     SilKit_ParticipantStatus_STRUCT_VERSION,
     SilKit_LifecycleConfiguration_STRUCT_VERSION,
 };
