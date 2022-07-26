@@ -9,6 +9,15 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.28] - 2022-07-26
 ----------------------
 
+Added
+~~~~~~~
+- Added a :cpp:func:`SetCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::SetCommunicationReadyHandlerAsync>`
+  method to the lifecycle interfaces.
+  It will invoke the :cpp:type:`CommunicationReadyHandler<SilKit::Services::Orchestration::CommunicationReadyHandler>` callback in a separate thread.
+  This allows the user to do early communication in a simulation run, for example, to
+  exchange configuration values before the actual simulation starts.
+  The user is required to call :cpp:func:`CompleteCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::CompleteCommunicationReadyHandlerAsync>` when the handler is finished.
+
 Compatibility with 3.99.27
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -20,8 +29,10 @@ Changed
 ~~~~~~~
 
 - LIN: API Overhaul
-  - Changed behavior of ``ILinController::SendFrame()`` and``ILinController::SendFrameHeader()``:
+
+  - Changed behavior of ``ILinController::SendFrame()`` and ``ILinController::SendFrameHeader()``:
     Both now don't use cached responsed but send the LinHeader to the responding LIN node and use the TxBuffer there.
+
   - The method ``ILinController::SetFrameResponse()`` and ``ILinController::SetFrameResponses()`` have been removed.
     LIN controllers now have to hand in their final reponse configuration (Tx/Rx) in ``ILinController::Init()`` and
     can't reconfigure their configuration afterwards. An exception is the LIN master when using 
