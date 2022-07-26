@@ -528,8 +528,7 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
 
         lifecycleService = CreateInternalController<Orchestration::LifecycleService>(
             SilKit::Core::Discovery::controllerTypeLifecycleService, Core::ServiceType::InternalController,
-            std::move(lifecycleSupplementalData), false,
-            _participantConfig.healthCheck);
+            std::move(lifecycleSupplementalData), false );
     }
     return lifecycleService;
 }

@@ -86,8 +86,7 @@ class LifecycleService
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    LifecycleService(Core::IParticipantInternal* participant,
-                     const Config::HealthCheck& healthCheckConfig);
+    LifecycleService(Core::IParticipantInternal* participant);
 
     ~LifecycleService();
 public:

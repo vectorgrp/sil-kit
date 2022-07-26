@@ -90,7 +90,7 @@ protected: // CTor
         });
 
         // this CTor calls CreateTimeSyncService implicitly
-        lifecycleService = std::make_unique<LifecycleService>(&participant, healthCheckConfig);
+        lifecycleService = std::make_unique<LifecycleService>(&participant);
     }
 protected: // Methods
     void PrepareLifecycle()

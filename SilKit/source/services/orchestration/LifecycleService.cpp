@@ -36,8 +36,7 @@ using namespace std::chrono_literals;
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
-LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
-                                   const Config::HealthCheck& healthCheckConfig)
+LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
     : _participant{participant}
     , _logger{participant->GetLogger()}
     ,_lifecycleManagement{participant->GetLogger(), this}
@@ -45,9 +44,6 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
     _timeSyncService = _participant->CreateTimeSyncService(this);
 
     _status.participantName = _participant->GetParticipantName();
-
-    // TODO healthCheckConfig needed?
-    (void)healthCheckConfig;
 }
 
  LifecycleService::~LifecycleService()
