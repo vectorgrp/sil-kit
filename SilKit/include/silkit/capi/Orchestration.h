@@ -199,6 +199,39 @@ SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandler
 typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetCommunicationReadyHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
 
+/*! \brief Register a callback that is executed once all communication channels between participants
+*          with a lifecycle have been set up and are ready for communication.
+*
+* The handler is called after \ref SystemState::CommunicationReady is reached.
+* The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
+* Note that \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync may not be called from within any SilKit_LifecycleService_CommunicationReadyHandler.
+* The participant remains in its state until \ref CompleteCommunicationReadyHandlerAsync() is invoked,
+* in another thread and then switches to the \ref SilKit_ParticipantState_ReadyToRun.
+* 
+* \param lifecycleService The lifecycle service receiving the (re-)initialization command
+* \param context A user provided context accessible in the handler
+* \param handler The handler to be called on initialization
+*/ 
+
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
+
+typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetCommunicationReadyHandlerAsync_t)(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
+
+/*!< Notify that the async \ref SilKit_LifecycleService_CommunicationReadyHandler is completed.
+* 
+* This method must not be invoked from within a SilKit_LifecycleService_CommunicationReadyHandler.
+* \param lifecycleService The lifecycle service receiving the update
+* \return \ref SilKit_ReturnCode
+*/
+
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync(
+    SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode (*SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync_t)(
+    SilKit_LifecycleService* lifecycleService);
+
 /*! \brief  This handler is triggered just before the lifecylce service changes to ParticipantState::Running.
  * It is only triggered if the participant does NOT use virtual time synchronization.
  * It does not block other participants from changing to ParticipantState::Running and should only be used for lightweight operations such as starting timers.

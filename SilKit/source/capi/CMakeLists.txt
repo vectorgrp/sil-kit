@@ -31,4 +31,5 @@ add_silkit_test(TestCapiSilKit SOURCES CapiSilKitTest.cpp LIBS SilKitMwMockParti
 add_silkit_test(TestCapiParticipantStateHandling SOURCES CapiParticipantStateHandlingTest.cpp LIBS SilKitMwMockParticipant SilKit)
 add_silkit_test(TestCapiTimeSync SOURCES CapiTimeSyncTest.cpp LIBS SilKitMwMockParticipant SilKit)
 add_silkit_test(TestCapiLin SOURCES CapiLinTest.cpp LIBS SilKitSimLin SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiSymbols SOURCES Test_CapiSymbols.cpp LIBS SilKit)
 

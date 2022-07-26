@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
 #include "LifecycleManagement.hpp"
-#include "SetThreadName.hpp"
 
 using namespace std::chrono_literals;
 
@@ -73,6 +72,7 @@ void LifecycleService::CompleteCommunicationReadyHandlerAsync()
     if(!_commReadyHandlerInvoked)
     {
         _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: Handler invoked is false, exiting.");
+        return;
     }
     if((_lifecycleManagement.GetCurrentState() == _lifecycleManagement.GetCommunicationInitializedState())
         || (_lifecycleManagement.GetCurrentState() == _lifecycleManagement.GetServicesCreatedState())
@@ -229,6 +229,9 @@ void LifecycleService::Shutdown(std::string reason)
 
 void LifecycleService::Restart(std::string reason)
 {
+    //Reset CommunicationReadyHandlerAsync
+    _commReadyHandlerInvoked = false;
+
     _lifecycleManagement.Restart(reason);
 
     if (!_hasCoordinatedSimulationStart)

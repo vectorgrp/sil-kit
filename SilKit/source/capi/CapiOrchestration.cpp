@@ -138,6 +138,39 @@ SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandler(SilKit_Li
     CAPI_LEAVE
 }
 
+SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(SilKit_LifecycleService* lifecycleService, void* context,
+                                                          SilKit_LifecycleService_CommunicationReadyHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
+        
+        cppLifecycleService->SetCommunicationReadyHandlerAsync([handler, context, lifecycleService]() {
+            handler(context, lifecycleService);
+        });
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+
+SilKit_ReturnCode SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync(SilKit_LifecycleService* lifecycleService)
+{
+    ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
+    CAPI_ENTER
+    {
+        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
+        
+        cppLifecycleService->CompleteCommunicationReadyHandlerAsync();
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 SilKit_ReturnCode SilKit_LifecycleService_SetStartingHandler(
     SilKit_LifecycleService* lifecycleService, void* context,
     SilKit_LifecycleService_StartingHandler_t handler)
