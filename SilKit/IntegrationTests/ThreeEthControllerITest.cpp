@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 
 #include "silkit/services/all.hpp"
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"

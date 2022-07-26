@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 #include "MockParticipant.hpp"
 

@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
 
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 namespace {
 

@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioRegistry.hpp"
 
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

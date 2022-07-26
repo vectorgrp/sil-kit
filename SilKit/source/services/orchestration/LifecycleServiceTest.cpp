@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 #include "LifecycleService.hpp"
 #include "MockParticipant.hpp"

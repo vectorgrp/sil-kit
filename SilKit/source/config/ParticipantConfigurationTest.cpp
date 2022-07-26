@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "NullConnectionParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "silkit/services/all.hpp"
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

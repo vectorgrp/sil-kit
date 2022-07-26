@@ -31,7 +31,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/flexray/all.hpp"
-#include "silkit/util/functional.hpp"
 
 
 using namespace SilKit::Services;
@@ -379,10 +378,16 @@ int main(int argc, char** argv)
             frNode.SetStartupDelay(0ms);
         }
 
-        controller->AddPocStatusHandler(bind_method(&frNode, &FlexrayNode::PocStatusHandler));
+        controller->AddPocStatusHandler([&frNode](Flexray::IFlexrayController* linController,
+                                                  const Flexray::FlexrayPocStatusEvent& pocStatusEvent) {
+            frNode.PocStatusHandler(linController, pocStatusEvent);
+        });
         controller->AddFrameHandler(&ReceiveMessage<Flexray::FlexrayFrameEvent>);
         controller->AddFrameTransmitHandler(&ReceiveMessage<Flexray::FlexrayFrameTransmitEvent>);
-        controller->AddWakeupHandler(bind_method(&frNode, &FlexrayNode::WakeupHandler));
+        controller->AddWakeupHandler([&frNode](Flexray::IFlexrayController* linController,
+                                               const Flexray::FlexrayWakeupEvent& wakeupEvent) {
+                frNode.WakeupHandler(linController, wakeupEvent);
+        });
         controller->AddSymbolHandler(&ReceiveMessage<Flexray::FlexraySymbolEvent>);
         controller->AddSymbolTransmitHandler(&ReceiveMessage<Flexray::FlexraySymbolTransmitEvent>);
         controller->AddCycleStartHandler(&ReceiveMessage<Flexray::FlexrayCycleStartEvent>);

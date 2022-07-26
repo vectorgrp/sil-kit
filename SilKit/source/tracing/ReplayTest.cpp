@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/config/Config.hpp"
 #include "silkit/core/EndpointAddress.hpp"
-#include "silkit/util/functional.hpp"
+#include "functional.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"

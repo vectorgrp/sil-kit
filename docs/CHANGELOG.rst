@@ -211,6 +211,8 @@ Removed
 
 - Removed specific data handler functionality
 
+- Removed functional.hpp utility header
+
 
 [3.99.27] - 2022-07-14
 ----------------------
