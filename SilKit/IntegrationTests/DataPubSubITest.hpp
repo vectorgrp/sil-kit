@@ -341,7 +341,7 @@ protected:
                 {
                     ds.dataSubscriber = participant.participant->CreateDataSubscriber(
                         ds.controllerName, dataSpec, nullptr);
-                    ds.dataSubscriber->SetDefaultDataMessageHandler(receptionHandler);
+                    ds.dataSubscriber->SetDataMessageHandler(receptionHandler);
                 }
                 else
                 {

@@ -42,7 +42,7 @@ DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* parti
     (void)_participant;
 }
 
-void DataSubscriberInternal::SetDefaultDataMessageHandler(DataMessageHandlerT handler)
+void DataSubscriberInternal::SetDataMessageHandler(DataMessageHandlerT handler)
 {
     _defaultHandler = std::move(handler);
 }

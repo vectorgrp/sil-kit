@@ -114,7 +114,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscr
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_DataSubscriber_SetDefaultDataMessageHandler(SilKit_DataSubscriber* self, void* context,
+SilKit_ReturnCode SilKit_DataSubscriber_SetDataMessageHandler(SilKit_DataSubscriber* self, void* context,
                                                       SilKit_DataMessageHandler_t dataHandler)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -122,7 +122,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_SetDefaultDataMessageHandler(SilKit_Data
     CAPI_ENTER
     {
         auto cppSubscriber = reinterpret_cast<SilKit::Services::PubSub::IDataSubscriber*>(self);
-    cppSubscriber->SetDefaultDataMessageHandler(
+    cppSubscriber->SetDataMessageHandler(
         [dataHandler, context](SilKit::Services::PubSub::IDataSubscriber* cppSubscriberHandler,
             const SilKit::Services::PubSub::DataMessageEvent& cppDataMessageEvent) {
                 auto* cSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(cppSubscriberHandler);

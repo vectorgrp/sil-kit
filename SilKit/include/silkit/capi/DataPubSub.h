@@ -91,7 +91,7 @@ typedef SilKit_ReturnCode (*SilKit_DataPublisher_Create_t)(SilKit_DataPublisher*
 * \param labels A list of key-value pairs used to annotate which publications this subscriber is interested in.
 * \param defaultDataHandlerContext A user provided context that is reobtained on data reception in the dataHandler.
 * \param defaultDataHandler The default handler that is called on data reception as long as no explicit handler on 
-* certain labels is registered. Can be overwritten by \ref SilKit_DataSubscriber_SetDefaultDataMessageHandler.
+* certain labels is registered. Can be overwritten by \ref SilKit_DataSubscriber_SetDataMessageHandler.
 * \param newDataSourceContext A user provided context that is reobtained on invocation of the newDataSourceHandler.
 * \param newDataSourceHandler A handler that is called if a new matching publisher is discovered.
 */
@@ -120,10 +120,10 @@ typedef SilKit_ReturnCode (*SilKit_DataPublisher_Publish_t)(SilKit_DataPublisher
 * \param context A user provided context, that is reobtained on data reception in the dataHandler.
 * \param dataHandler A handler that is called on data reception.
 */
-SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_SetDefaultDataMessageHandler(
+SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_SetDataMessageHandler(
     SilKit_DataSubscriber* self, void* context, SilKit_DataMessageHandler_t dataHandler);
 
-typedef SilKit_ReturnCode (*SilKit_DataSubscriber_SetDefaultDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
+typedef SilKit_ReturnCode (*SilKit_DataSubscriber_SetDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
                                                                            SilKit_DataMessageHandler_t dataHandler);
 
 SILKIT_END_DECLS

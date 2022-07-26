@@ -7,7 +7,7 @@ Data Publish/Subscribe API
 .. |CreateDataPublisher| replace:: :cpp:func:`CreateDataPublisher()<SilKit::IParticipant::CreateDataPublisher()>`
 .. |CreateDataSubscriber| replace:: :cpp:func:`CreateDataSubscriber()<SilKit::IParticipant::CreateDataSubscriber()>`
 .. |Publish| replace:: :cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>`
-.. |SetDefaultDataMessageHandler| replace:: :cpp:func:`SetDefaultDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDefaultDataMessageHandler()>`
+.. |SetDataMessageHandler| replace:: :cpp:func:`SetDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDataMessageHandler()>`
 .. |AddExplicitDataMessageHandler| replace:: :cpp:func:`AddExplicitDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::AddExplicitDataMessageHandler()>`
 .. |IDataPublisher| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataPublisher>`
 .. |IDataSubscriber| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataSubscriber>`
@@ -114,7 +114,7 @@ The Publisher and Subscriber interfaces are instantiated from an |IParticipant| 
 
 The simplified overloads only need a controller name as a single argument, which will be used as topic. Media type, 
 labels and handlers are left emtpy in this variant. Note that in this case, the DataSubscriber still has to provide a 
-handler for incoming messages via |SetDefaultDataMessageHandler|.
+handler for incoming messages via |SetDataMessageHandler|.
 
 Usage Examples
 ~~~~~~~~~~~~~~
@@ -150,7 +150,7 @@ The |IDataPublisher| provides a simple publish interface for standard vector. An
 pointer and size exists for ease of use.
 
 The |IDataSubscriber| provides a callback registration mechanism for the default callback via 
-|SetDefaultDataMessageHandler| and for targeting explicit DataPublishers via |AddExplicitDataMessageHandler|.
+|SetDataMessageHandler| and for targeting explicit DataPublishers via |AddExplicitDataMessageHandler|.
 
 Data Publisher API
 ~~~~~~~~~~~~~~~~~~

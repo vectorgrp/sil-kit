@@ -44,7 +44,7 @@ public:
                            DataMessageHandlerT defaultHandler,
                            IDataSubscriber* parent);
 
-    void SetDefaultDataMessageHandler(DataMessageHandlerT handler);
+    void SetDataMessageHandler(DataMessageHandlerT handler);
     
     //! \brief Accepts messages originating from SilKit communications.
     void ReceiveMsg(const IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent) override;

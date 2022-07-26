@@ -55,10 +55,10 @@ protected:
         , subscriberOther{&participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr}
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
-        subscriber.SetDefaultDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault));
+        subscriber.SetDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault));
 
         subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
-        subscriberOther.SetDefaultDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault));
+        subscriberOther.SetDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault));
     }
 
 protected:

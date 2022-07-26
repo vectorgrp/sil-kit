@@ -51,7 +51,7 @@ public:
 public:
     void RegisterServiceDiscovery();
 
-    void SetDefaultDataMessageHandler(DataMessageHandlerT callback) override;
+    void SetDataMessageHandler(DataMessageHandlerT callback) override;
 
     // SilKit::Services::Orchestration::ITimeConsumer
     inline void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;

@@ -132,7 +132,7 @@ The subscriber runs in its own thread, too:
 The setup is similar to the publisher, except that we instantiate a 
 :cpp:class:`subscriber<SilKit::Services::PubSub::IDataSubscriber>` interface.
 This allows us to register a
-:cpp:func:`SetDefaultDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDefaultDataMessageHandler()>`
+:cpp:func:`SetDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDataMessageHandler()>`
 callback to receive data value updates.
 The simulation task has to be defined, even though no simulation work is performed.
 

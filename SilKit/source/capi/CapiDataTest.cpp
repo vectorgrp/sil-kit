@@ -60,7 +60,7 @@ public:
 class MockDataSubscriber : public SilKit::Services::PubSub::IDataSubscriber
 {
 public:
-    MOCK_METHOD1(SetDefaultDataMessageHandler, void(DataMessageHandlerT callback));
+    MOCK_METHOD1(SetDataMessageHandler, void(DataMessageHandlerT callback));
 };
 
 class MockParticipant : public SilKit::Core::Tests::DummyParticipant
@@ -178,8 +178,8 @@ TEST_F(CapiDataTest, data_subscriber_function_mapping)
                                               &dataSpec, nullptr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    EXPECT_CALL(mockDataSubscriber, SetDefaultDataMessageHandler(testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_DataSubscriber_SetDefaultDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, nullptr,
+    EXPECT_CALL(mockDataSubscriber, SetDataMessageHandler(testing::_)).Times(testing::Exactly(1));
+    returnCode = SilKit_DataSubscriber_SetDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, nullptr,
                                                           &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
@@ -247,11 +247,11 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
                                            &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_DataSubscriber_SetDefaultDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
+    returnCode = SilKit_DataSubscriber_SetDataMessageHandler(nullptr, dummyContextPtr, &DefaultDataHandler);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode =
-        SilKit_DataSubscriber_SetDefaultDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
+        SilKit_DataSubscriber_SetDataMessageHandler((SilKit_DataSubscriber*)&mockDataSubscriber, dummyContextPtr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 

@@ -174,6 +174,20 @@ Changed
         virtual auto CreateDataSubscriber(const std::string& canonicalName, SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
                                       Services::PubSub::DataMessageHandlerT dataMessageHandler)
 
+  - ``IntegrationBus/include/silkit/services/pubsub/IDataSubscriber.hpp``
+  
+    + old:
+  
+      .. code-block:: c++
+
+        virtual void SetDefaultDataMessageHandler(DataMessageHandlerT callback) = 0;
+
+    + new:
+  
+      .. code-block:: c++
+
+        virtual void SetDataMessageHandler(DataMessageHandlerT callback) = 0;
+
 - C: Added the simulation step duration to the ``SilKit_TimeSyncService_SimulationStepHandler_t`` callback
 
 - C\+\+: Extended the ``IEthernetController::AddFrameHandler`` function with the ``directionMask`` filter, similar to ``ICanController::AddFrameHandler``.
@@ -194,6 +208,8 @@ Removed
 - Removed ``ITimeSyncService::SetPeriod()`` (now provided via ``ITimeSyncService::SetSimulationStepHandler()``)
 
 - Removed RPC Discovery functionalities
+
+- Removed specific data handler functionality
 
 
 [3.99.27] - 2022-07-14

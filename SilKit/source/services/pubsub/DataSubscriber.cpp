@@ -85,14 +85,14 @@ void DataSubscriber::RegisterServiceDiscovery()
         }, Core::Discovery::controllerTypeDataPublisher, _topic);
 }
 
-void DataSubscriber::SetDefaultDataMessageHandler(DataMessageHandlerT callback)
+void DataSubscriber::SetDataMessageHandler(DataMessageHandlerT callback)
 {
     std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
     _defaultDataHandler = callback;
     for (auto internalSubscriber : _internalSubscribers)
     {
-        internalSubscriber.second->SetDefaultDataMessageHandler(callback);
+        internalSubscriber.second->SetDataMessageHandler(callback);
     }
 }
 
