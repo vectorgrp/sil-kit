@@ -26,6 +26,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <stdexcept>
 #include <vector>
 
+#include "silkit/participant/exception.hpp"
+
 namespace SilKit {
 namespace Util {
 namespace SerDes {
@@ -254,7 +256,7 @@ private:
     void AssertCapacity(std::size_t requiredSize)
     {
         if (mBuffer.size() - mReadPos < requiredSize)
-            throw std::runtime_error{"end of buffer"}; // FIXME: introduce dedicated exception?
+            throw SilKit::SilKitError{"SilKit::Util::Serdes::Deserializer::AssertCapacity: end of buffer"};
     }
 
 private:
