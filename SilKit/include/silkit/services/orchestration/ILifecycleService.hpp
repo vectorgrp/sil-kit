@@ -77,7 +77,7 @@ public:
     /*! \brief Register a callback that is executed on simulation stop.
      *
      * The handler is called when a \ref SystemCommand::Kind::Stop has been
-     * received. It is executed in the context of the middleware
+     * received. It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Stopped state.
@@ -90,7 +90,7 @@ public:
     /*! \brief Register a callback that is executed on simulation shutdown.
      *
      * The handler is called when the \ref SystemCommand::Kind::Shutdown
-     * has been received. It is executed in the context of the middleware
+     * has been received. It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Shutdown state and is allowed to terminate.
@@ -102,9 +102,8 @@ public:
 
     /*! \brief Start non blocking operation; returns immediately.
      *
-     * TODO fix this text!
      * Starts simulation with virtual time synchronization until shutdown is received. The simulation
-     * task is executed in the context of the middleware thread that
+     * task is executed in the context of an internal thread that
      * receives the grant or tick.
      *
      * \param startConfiguration the simulation start configuration.
@@ -208,7 +207,7 @@ public:
      * This handler is triggered just before the participant changes to ParticipantState::Running.
      * It is only triggered if the participant does NOT use virtual time synchronization.
      * It does not block other participants from changing to ParticipantState::Running and should only be used for lightweight operations such as starting timers.
-     * TODO fill in on which thread this is executed.
+     * It is executed in the context of an internal thread that received the command. 
      * After the handler has been processed, the participant
      * switches to the \ref ParticipantState::Running state.
      */
@@ -217,7 +216,7 @@ public:
     /*! \brief Register a callback that is executed on simulation stop.
      *
      * The handler is called when a \ref SystemCommand::Kind::Stop has been
-     * received. It is executed in the context of the middleware
+     * received. It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Stopped state.
@@ -230,7 +229,7 @@ public:
     /*! \brief Register a callback that is executed on simulation shutdown.
      *
      * The handler is called when the \ref SystemCommand::Kind::Shutdown
-     * has been received. It is executed in the context of the middleware
+     * has been received. It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Shutdown state and is allowed to terminate.
@@ -242,9 +241,8 @@ public:
 
     /*! \brief Start non blocking operation; returns immediately.
      *
-     * TODO fix this text!
      * Starts simulation with virtual time synchronization until shutdown is received. The simulation
-     * task is executed in the context of the middleware thread that
+     * task is executed in the context of an internal thread that
      * receives the grant or tick.
      *
      * \param startConfiguration the simulation start configuration.
