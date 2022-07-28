@@ -88,8 +88,8 @@ if(SILKIT_BUILD_COMPONENT_TRACING)
         message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
     endif()
 
-    add_silkit_test(TestTracing_Replay SOURCES ReplayTest.cpp LIBS SilKitMwMockParticipant SilKitTracing )
-    add_silkit_test(TestTracing_Pcap SOURCES PcapTest.cpp LIBS SilKitTracing SilKitMwMockParticipant )
+    add_silkit_test(Test_Replay SOURCES Test_Replay.cpp LIBS SilKitMwMockParticipant SilKitTracing )
+    add_silkit_test(Test_Pcap SOURCES Test_Pcap.cpp LIBS SilKitTracing SilKitMwMockParticipant )
 else()
     # At least provide some mocks for testing
     add_library(SilKitTracing INTERFACE)

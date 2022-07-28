@@ -64,8 +64,8 @@ if (MSVC)
     target_compile_options(SilKitMwParticipant PRIVATE "/bigobj")
 endif (MSVC)
 
-add_silkit_test(TestMwParticipant 
-    SOURCES ParticipantTest.cpp 
+add_silkit_test(Test_MwParticipant 
+    SOURCES Test_Participant.cpp 
     LIBS SilKitMwMockNullConnection SilKitConfigurationTestUtils
 )
 

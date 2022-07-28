@@ -47,20 +47,20 @@ target_link_libraries(SilKitSimDataMessage
             SilKitUtil
 )
 
-add_silkit_test(TestSimDataPublisher 
-    SOURCES DataPublisherTest.cpp 
+add_silkit_test(Test_SimDataPublisher 
+    SOURCES Test_DataPublisher.cpp 
     LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal 
 )
-add_silkit_test(TestSimDataSubscriber
-    SOURCES DataSubscriberTest.cpp
+add_silkit_test(Test_SimDataSubscriber
+    SOURCES Test_DataSubscriber.cpp
     LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal 
 )
-add_silkit_test(TestSimDataSubscriberInternal
-    SOURCES DataSubscriberInternalTest.cpp
+add_silkit_test(Test_SimDataSubscriberInternal
+    SOURCES Test_DataSubscriberInternal.cpp
     LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal
 )
-add_silkit_test(TestPubSubMatching
-    SOURCES PubSubMatchingTest.cpp 
+add_silkit_test(Test_PubSubMatching
+    SOURCES Test_PubSubMatching.cpp 
     LIBS SilKitSimDataMessage SilKitUtil
 )
-add_silkit_test(TestSimData_Serdes SOURCES DataSerdesTest.cpp LIBS SilKitSimDataMessage SilKitInternal)
+add_silkit_test(Test_SimData_Serdes SOURCES Test_DataSerdes.cpp LIBS SilKitSimDataMessage SilKitInternal)

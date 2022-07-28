@@ -49,13 +49,13 @@ target_include_directories(SilKitConfiguration
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_silkit_test(TestMwCfgValidation 
-    SOURCES ValidationTest.cpp 
+add_silkit_test(Test_MwCfgValidation 
+    SOURCES Test_Validation.cpp 
     LIBS SilKitConfiguration
 )
 
-add_silkit_test(TestParticipantConfiguration 
-    SOURCES ParticipantConfigurationTest.cpp
+add_silkit_test(Test_ParticipantConfiguration 
+    SOURCES Test_ParticipantConfiguration.cpp
     LIBS SilKitMwMockNullConnection
     CONFIGS
         ParticipantConfiguration_Minimal.json
@@ -63,13 +63,13 @@ add_silkit_test(TestParticipantConfiguration
         ParticipantConfiguration_Logging_Without_File.json
 )
 
-add_silkit_test(TestMwCfgYamlParser 
-    SOURCES YamlParserTest.cpp 
+add_silkit_test(Test_MwCfgYamlParser 
+    SOURCES Test_YamlParser.cpp 
     LIBS SilKitConfiguration yaml-cpp
 )
 
-add_silkit_test(TestMwCfgYamlValidator 
-    SOURCES YamlValidatorTest.cpp 
+add_silkit_test(Test_MwCfgYamlValidator 
+    SOURCES Test_YamlValidator.cpp 
     LIBS SilKitConfiguration yaml-cpp
 )
 

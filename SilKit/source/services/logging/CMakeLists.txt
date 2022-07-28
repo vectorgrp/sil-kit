@@ -85,8 +85,8 @@ if(UNIX)
     )
 endif()
 
-add_silkit_test(TestMwLoggingLogger 
-    SOURCES LoggerTest.cpp 
+add_silkit_test(Test_MwLoggingLogger 
+    SOURCES Test_Logger.cpp 
     LIBS SilKitMwLogging SilKitMwMockParticipant
 )
-add_silkit_test(TestMwLogging_Serdes SOURCES LoggingSerdesTest.cpp LIBS SilKitMwLogging )
+add_silkit_test(Test_MwLogging_Serdes SOURCES Test_LoggingSerdes.cpp LIBS SilKitMwLogging )

@@ -45,15 +45,15 @@ target_link_libraries(SilKitSimRpc
             SilKitConfiguration
 )
 
-add_silkit_test(TestSimRpc
+add_silkit_test(Test_SimRpc
     SOURCES
-        RpcClientTest.cpp
-        RpcServerTest.cpp
-        RpcMatchingTest.cpp
+        Test_RpcClient.cpp
+        Test_RpcServer.cpp
+        Test_RpcMatching.cpp
     LIBS
         SilKitSimRpc
         SilKitMwMockParticipant
         SilKitInternal
         SilKitMwMockNullConnection
 )
-add_silkit_test(TestSimRpc_Serdes SOURCES RpcSerdesTest.cpp LIBS SilKitInternal SilKitSimRpc)
+add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS SilKitInternal SilKitSimRpc)

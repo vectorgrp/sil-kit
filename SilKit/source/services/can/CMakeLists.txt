@@ -50,11 +50,11 @@ target_link_libraries(SilKitSimCan
             SilKitConfiguration
 )
 
-add_silkit_test(TestSimCanController
+add_silkit_test(Test_SimCanController
     SOURCES 
-        CanControllerConfigTest.cpp
-        CanControllerDetailedSimTest.cpp 
-        CanControllerTrivialSimTest.cpp
+        Test_CanControllerConfig.cpp
+        Test_CanControllerDetailedSim.cpp 
+        Test_CanControllerTrivialSim.cpp
     LIBS 
         SilKitSimCan
         SilKitMwMockParticipant
@@ -62,6 +62,6 @@ add_silkit_test(TestSimCanController
         SilKitMwMockNullConnection
 )
 
-add_silkit_test(TestSimCan_Serdes  SOURCES CanSerdesTest.cpp LIBS SilKitInternal SilKitSimCan)
+add_silkit_test(Test_SimCan_Serdes  SOURCES Test_CanSerdes.cpp LIBS SilKitInternal SilKitSimCan)
 
-add_silkit_test(TestSimCan_StringUtils SOURCES CanStringUtilsTest.cpp LIBS SilKitInternal SilKitSimCan)
+add_silkit_test(Test_SimCan_StringUtils SOURCES Test_CanStringUtils.cpp LIBS SilKitInternal SilKitSimCan)

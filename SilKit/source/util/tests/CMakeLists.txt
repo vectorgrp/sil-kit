@@ -19,7 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_silkit_test(TestUtilsSpan SOURCES SpanTest.cpp)
-add_silkit_test(TestUtilsSilSerDes SOURCES SilSerializerTest.cpp SilSerDesTest.cpp)
-add_silkit_test(TestUtilsCommandlineParser SOURCES CommandlineParserTest.cpp LIBS SilKitUtil)
-add_silkit_test(TestUtilsSynchronizedHandlers SOURCES SynchronizedHandlersTest.cpp LIBS SilKitUtil)
+add_silkit_test(Test_UtilsSpan SOURCES Test_Span.cpp)
+add_silkit_test(Test_UtilsSilSerDes SOURCES Test_SilSerializer.cpp Test_SilSerDes.cpp)
+add_silkit_test(Test_UtilsCommandlineParser SOURCES Test_CommandlineParser.cpp LIBS SilKitUtil)
+add_silkit_test(Test_UtilsSynchronizedHandlers SOURCES Test_SynchronizedHandlers.cpp LIBS SilKitUtil)

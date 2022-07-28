@@ -19,17 +19,17 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_silkit_test(TestCapi_Interfaces SOURCES CapiInterfacesTest.cpp LIBS SilKit)
-add_silkit_test(TestCapiCan SOURCES CapiCanTest.cpp LIBS SilKitSimCan SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiEthernet SOURCES CapiEthernetTest.cpp LIBS SilKitSimEthernet SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiFlexray SOURCES CapiFlexrayTest.cpp LIBS SilKitSimFlexray SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiData SOURCES CapiDataTest.cpp LIBS SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiRpc SOURCES CapiRpcTest.cpp LIBS SilKitSimRpc SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiLogger SOURCES CapiLoggerTest.cpp LIBS SilKitMwLogging SilKit)
+add_silkit_test(Test_Capi_Interfaces SOURCES Test_CapiInterfaces.cpp LIBS SilKit)
+add_silkit_test(Test_CapiCan SOURCES Test_CapiCan.cpp LIBS SilKitSimCan SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiEthernet SOURCES Test_CapiEthernet.cpp LIBS SilKitSimEthernet SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiFlexray SOURCES Test_CapiFlexray.cpp LIBS SilKitSimFlexray SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiData SOURCES Test_CapiData.cpp LIBS SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiRpc SOURCES Test_CapiRpc.cpp LIBS SilKitSimRpc SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiLogger SOURCES Test_CapiLogger.cpp LIBS SilKitMwLogging SilKit)
 
-add_silkit_test(TestCapiSilKit SOURCES CapiSilKitTest.cpp LIBS SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiParticipantStateHandling SOURCES CapiParticipantStateHandlingTest.cpp LIBS SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiTimeSync SOURCES CapiTimeSyncTest.cpp LIBS SilKitMwMockParticipant SilKit)
-add_silkit_test(TestCapiLin SOURCES CapiLinTest.cpp LIBS SilKitSimLin SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiSilKit SOURCES Test_CapiSilKit.cpp LIBS SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiParticipantStateHandling SOURCES Test_CapiParticipantStateHandling.cpp LIBS SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiTimeSync SOURCES Test_CapiTimeSync.cpp LIBS SilKitMwMockParticipant SilKit)
+add_silkit_test(Test_CapiLin SOURCES Test_CapiLin.cpp LIBS SilKitSimLin SilKitMwMockParticipant SilKit)
 add_silkit_test(Test_CapiSymbols SOURCES Test_CapiSymbols.cpp LIBS SilKit)
 

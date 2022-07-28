@@ -47,16 +47,16 @@ target_link_libraries(SilKitSimLin
             SilKitTracing
 )
 
-add_silkit_test(TestSimLin
+add_silkit_test(Test_SimLin
     SOURCES
         LinTestUtils.hpp
-        LinControllerDetailedSimTest.cpp
-        LinControllerTrivialSimTest.cpp
-        LinControllerConfigTest.cpp
+        Test_LinControllerDetailedSim.cpp
+        Test_LinControllerTrivialSim.cpp
+        Test_LinControllerConfig.cpp
     LIBS
         SilKitSimLin
         SilKitMwMockParticipant
         SilKitTracing
         SilKitMwMockNullConnection
 )
-add_silkit_test(TestSimLin_Serdes  SOURCES LinSerdesTest.cpp LIBS SilKitInternal SilKitSimLin)
+add_silkit_test(Test_SimLin_Serdes  SOURCES Test_LinSerdes.cpp LIBS SilKitInternal SilKitSimLin)

@@ -38,5 +38,5 @@ target_link_libraries(
     INTERFACE SilKitWireRpc
 )
 
-add_silkit_test(TestMwVAsio_MessageBuffer SOURCES MessageBufferTest.cpp LIBS SilKitInternal)
-add_silkit_test(TestMwInternal_Serdes  SOURCES InternalSerdesTest.cpp LIBS SilKitInternal)
+add_silkit_test(Test_MwVAsio_MessageBuffer SOURCES Test_MessageBuffer.cpp LIBS SilKitInternal)
+add_silkit_test(Test_MwInternal_Serdes  SOURCES Test_InternalSerdes.cpp LIBS SilKitInternal)

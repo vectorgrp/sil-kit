@@ -43,11 +43,11 @@ target_link_libraries(SilKitSimFlexray
             SilKitConfiguration
 )
 
-add_silkit_test(TestSimFlexrayValidation SOURCES ValidationTest.cpp LIBS SilKitSimFlexray)
-add_silkit_test(TestSimFlexrayController
+add_silkit_test(Test_SimFlexrayValidation SOURCES Test_Validation.cpp LIBS SilKitSimFlexray)
+add_silkit_test(Test_SimFlexrayController
     SOURCES
-        FlexrayControllerTest.cpp
-        FlexrayControllerConfigTest.cpp
+        Test_FlexrayController.cpp
+        Test_FlexrayControllerConfig.cpp
     LIBS 
         SilKitSimFlexray
         SilKitMwMockParticipant
@@ -55,4 +55,4 @@ add_silkit_test(TestSimFlexrayController
         SilKitConfiguration
         SilKitMwMockNullConnection
 )
-add_silkit_test(TestSimFlexray_Serdes SOURCES FlexraySerdesTest.cpp LIBS SilKitInternal SilKitSimFlexray)
+add_silkit_test(Test_SimFlexray_Serdes SOURCES Test_FlexraySerdes.cpp LIBS SilKitInternal SilKitSimFlexray)

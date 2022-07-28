@@ -69,22 +69,22 @@ target_link_libraries(SilKitMwSync
         SilKitConfiguration
 )
 
-add_silkit_test(TestMwLifecycleService
-    SOURCES LifecycleServiceTest.cpp 
+add_silkit_test(Test_MwLifecycleService
+    SOURCES Test_LifecycleService.cpp 
     LIBS SilKitMwSync SilKitMwMockParticipant
 )
-add_silkit_test(TestMwSystemController 
-    SOURCES SystemControllerTest.cpp 
+add_silkit_test(Test_MwSystemController 
+    SOURCES Test_SystemController.cpp 
     LIBS SilKitMwSync SilKitMwMockParticipant
 )
-add_silkit_test(TestMwSystemMonitor 
-    SOURCES SystemMonitorTest.cpp 
+add_silkit_test(Test_MwSystemMonitor 
+    SOURCES Test_SystemMonitor.cpp 
     LIBS SilKitMwSync SilKitMwMockParticipant
 )
-add_silkit_test(TestMwWatchDog
-    SOURCES WatchDogTest.cpp
+add_silkit_test(Test_MwWatchDog
+    SOURCES Test_WatchDog.cpp
     LIBS SilKitMwSync
 )
-add_silkit_test(TestMwSync_Serdes SOURCES SyncSerdesTest.cpp LIBS SilKitMwSync SilKitInternal)
-add_silkit_test(Test_TimeProvider SOURCES TimeProviderTest.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
-add_silkit_test(Test_TimeSyncService SOURCES TimeSyncServiceTest.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
+add_silkit_test(Test_MwSync_Serdes SOURCES Test_SyncSerdes.cpp LIBS SilKitMwSync SilKitInternal)
+add_silkit_test(Test_TimeProvider SOURCES Test_TimeProvider.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
+add_silkit_test(Test_TimeSyncService SOURCES Test_TimeSyncService.cpp LIBS SilKitMwSync SilKitMwMockParticipant)

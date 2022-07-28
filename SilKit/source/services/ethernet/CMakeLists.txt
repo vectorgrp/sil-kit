@@ -52,15 +52,15 @@ target_include_directories(SilKitSimEthernet
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_silkit_test(TestSimEthController
+add_silkit_test(Test_SimEthController
     SOURCES 
-        EthControllerTrivialSimTest.cpp
-        EthControllerDetailedSimTest.cpp
-        EthControllerConfigTest.cpp
+        Test_EthControllerTrivialSim.cpp
+        Test_EthControllerDetailedSim.cpp
+        Test_EthControllerConfig.cpp
     LIBS
         SilKitSimEthernet
         SilKitMwMockParticipant
         SilKitTracing
         SilKitMwMockNullConnection
 )
-add_silkit_test(TestSimEthernet_Serdes  SOURCES EthernetSerdesTest.cpp LIBS SilKitSimEthernet)
+add_silkit_test(Test_SimEthernet_Serdes  SOURCES Test_EthernetSerdes.cpp LIBS SilKitSimEthernet)

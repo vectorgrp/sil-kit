@@ -88,13 +88,13 @@ if(MINGW)
     target_link_libraries(SilKitMwVAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
 endif()
 
-add_silkit_test(TestMwVAsioConnection SOURCES VAsioConnectionTest.cpp LIBS SilKitMwVAsio SilKitMwMockParticipant)
+add_silkit_test(Test_MwVAsioConnection SOURCES Test_VAsioConnection.cpp LIBS SilKitMwVAsio SilKitMwMockParticipant)
 
-add_silkit_test(TestMwVAsio_Serdes  SOURCES VAsioSerdesTest.cpp LIBS SilKitMwVAsio)
-add_silkit_test(TestMwVAsio_SerializedMessage  SOURCES SerializedMessageTest.cpp LIBS SilKitMwVAsio)
-add_silkit_test(TestMwVAsio_Uri  SOURCES UriTest.cpp LIBS SilKitMwVAsio)
+add_silkit_test(Test_MwVAsio_Serdes  SOURCES Test_VAsioSerdes.cpp LIBS SilKitMwVAsio)
+add_silkit_test(Test_MwVAsio_SerializedMessage  SOURCES Test_SerializedMessage.cpp LIBS SilKitMwVAsio)
+add_silkit_test(Test_MwVAsio_Uri  SOURCES Test_Uri.cpp LIBS SilKitMwVAsio)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version
 # and do integration tests here
-add_silkit_test(ITest_ParticipantVersion  SOURCES ParticipantVersionTest.cpp LIBS SilKitMwParticipant SilKitSimTestHarness)
+add_silkit_test(ITest_ParticipantVersion  SOURCES Test_ParticipantVersion.cpp LIBS SilKitMwParticipant SilKitSimTestHarness)

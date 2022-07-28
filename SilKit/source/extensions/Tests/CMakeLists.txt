@@ -49,10 +49,10 @@ set_target_properties(WrongBuildSystem PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-add_silkit_test(TestSilKitExtensions SOURCES SilKitExtensionsTest.cpp LIBS SilKitExtensions SilKitFilesystem SilKitMwMockParticipant)
+add_silkit_test(Test_SilKitExtensions SOURCES Test_SilKitExtensions.cpp LIBS SilKitExtensions SilKitFilesystem SilKitMwMockParticipant)
 
 if(${SILKIT_BUILD_TESTS})
-    add_dependencies(TestSilKitExtensions
+    add_dependencies(Test_SilKitExtensions
         DummyExtension
         WrongVersionExtension
         WrongBuildSystem

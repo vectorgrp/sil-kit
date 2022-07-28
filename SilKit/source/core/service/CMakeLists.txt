@@ -47,8 +47,8 @@ target_link_libraries(SilKitMwService
 )
 
 
-add_silkit_test(TestMwServiceDiscovery
-    SOURCES ServiceDiscoveryTest.cpp 
+add_silkit_test(Test_MwServiceDiscovery
+    SOURCES Test_ServiceDiscovery.cpp 
     LIBS SilKitMwService SilKitMwMockParticipant SilKitUuid)
 
-add_silkit_test(TestMwService_Serdes SOURCES ServiceSerdesTest.cpp LIBS SilKitMwService)
+add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS SilKitMwService)
