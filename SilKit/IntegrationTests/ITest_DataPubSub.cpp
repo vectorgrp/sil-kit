@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "DataPubSubITest.hpp"
+#include "ITest_DataPubSub.hpp"
 
 namespace {
 
@@ -31,7 +31,7 @@ namespace {
 //--------------------------------------
 
 // One publisher participant, one subscriber participant
-TEST_F(DataPubSubITest, test_1pub_1sub_delayed_default_handler)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_delayed_default_handler)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -47,7 +47,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_delayed_default_handler)
 }
 
 // One publisher participant, one subscriber participant
-TEST_F(DataPubSubITest, test_1pub_1sub_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -60,7 +60,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sync)
 }
 
 // Two mixed pub/sub participants
-TEST_F(DataPubSubITest, test_2_mixed_participants)
+TEST_F(ITest_DataPubSub, test_2_mixed_participants)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -82,7 +82,7 @@ TEST_F(DataPubSubITest, test_2_mixed_participants)
 }
 
 // Two mixed pub/sub participants with configuration
-TEST_F(DataPubSubITest, test_2_mixed_participants_configured)
+TEST_F(ITest_DataPubSub, test_2_mixed_participants_configured)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -137,7 +137,7 @@ DataSubscribers:
 }
 
 // Large messages
-TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_largemsg_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -151,7 +151,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_largemsg_sync)
 }
 
 // Two publishers/subscribers with same topic on one participant
-TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sametopic_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
@@ -182,7 +182,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_sametopic_sync)
 
 
 // 100 topics on one publisher/subscriber participant
-TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_100topics_sync)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -208,7 +208,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_100topics_sync)
 
 
 // One publisher participant, two subscribers participants on same topic
-TEST_F(DataPubSubITest, test_1pub_2sub_sync)
+TEST_F(ITest_DataPubSub, test_1pub_2sub_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -222,7 +222,7 @@ TEST_F(DataPubSubITest, test_1pub_2sub_sync)
 }
 
 // Two publisher participants, one subscriber participant on same topic: Expect all to arrive but arbitrary reception order
-TEST_F(DataPubSubITest, test_2pub_1sub_sync)
+TEST_F(ITest_DataPubSub, test_2pub_1sub_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
@@ -254,7 +254,7 @@ TEST_F(DataPubSubITest, test_2pub_1sub_sync)
 }
 
 // Seven participants, multiple topics
-TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync)
+TEST_F(ITest_DataPubSub, test_3pub_4sub_4topics_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -293,7 +293,7 @@ TEST_F(DataPubSubITest, test_3pub_4sub_4topics_sync)
 }
 
 // Wrong topic -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_topic_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -306,7 +306,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_topic_sync)
 }
 
 // Matching labels
-TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_mandatory)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_label_sync_mandatory)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -327,7 +327,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_mandatory)
     RunSyncTest(pubsubs);
 }
 
-TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_preferred_missing_label)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_label_sync_preferred_missing_label)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -352,7 +352,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_label_sync_preferred_missing_label)
 }
 
 // Wrong label value -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_mandatory)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_labels_sync_mandatory)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -372,7 +372,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_mandatory)
     RunSyncTest(pubsubs);
 }
 
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_mandatory_missing)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_labels_sync_mandatory_missing)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -392,7 +392,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_mandatory_missing)
     RunSyncTest(pubsubs);
 }
 
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_preferred)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_labels_sync_preferred)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -413,7 +413,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_labels_sync_preferred)
 }
 
 // Wrong mediatype -> Expect no reception
-TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_mediatype_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -426,7 +426,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wrong_mediatype_sync)
 }
 
 // Wildcard mediatype on subscriber
-TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_wildcard_mediatype_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -443,7 +443,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_wildcard_mediatype_sync)
 //--------------------
 
 // 1 pub, 1 sub on a single participant
-TEST_F(DataPubSubITest, test_1_participant_selfdelivery)
+TEST_F(ITest_DataPubSub, test_1_participant_selfdelivery)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -457,7 +457,7 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery)
 }
 
 // 2 pub, 2 sub on a single participant with same topic
-TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
+TEST_F(ITest_DataPubSub, test_1_participant_selfdelivery_same_topic)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -502,7 +502,7 @@ TEST_F(DataPubSubITest, test_1_participant_selfdelivery_same_topic)
 //-----------------------------------------------------
 
 // Async with history: Wait for publication before starting the subscriber
-TEST_F(DataPubSubITest, test_1pub_1sub_async_history)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_async_history)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -516,7 +516,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history)
 }
 
 // Async with history and specific data handler
-TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_async_history_specifichandler)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -533,7 +533,7 @@ TEST_F(DataPubSubITest, test_1pub_1sub_async_history_specifichandler)
 }
 
 // Async rejoin
-TEST_F(DataPubSubITest, test_1pub_1sub_async_rejoin)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_async_rejoin)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numRejoins = 10;

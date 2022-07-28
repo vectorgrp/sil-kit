@@ -51,7 +51,7 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-class VAsioNetworkITest : public testing::Test
+class ITest_VAsioNetwork : public testing::Test
 {
 protected:
     struct Callbacks
@@ -63,7 +63,7 @@ protected:
     };
 
 protected:
-    VAsioNetworkITest() = default;
+    ITest_VAsioNetwork() = default;
 
     auto SetTargetState(ParticipantState state)
     {
@@ -97,7 +97,7 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(VAsioNetworkITest, vasio_state_machine)
+TEST_F(ITest_VAsioNetwork, vasio_state_machine)
 {
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};

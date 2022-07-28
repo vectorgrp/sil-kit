@@ -49,10 +49,10 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
-class CatchExceptionsInCallbacksITest : public testing::Test
+class ITest_CatchExceptionsInCallbacks : public testing::Test
 {
 protected:
-    CatchExceptionsInCallbacksITest()
+    ITest_CatchExceptionsInCallbacks()
     {
     }
 
@@ -69,7 +69,7 @@ protected:
 };
 
 
-TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
+TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
 

@@ -52,11 +52,11 @@ bool Matches(const SilKit::Services::Can::WireCanFrameEvent& lhs, const SilKit::
         && lhs.direction == rhs.direction;
 }
 
-class CanWithoutSyncFTest : public testing::Test
+class FTest_CanWithoutSync : public testing::Test
 {
 protected:
 
-    CanWithoutSyncFTest()
+    FTest_CanWithoutSync()
     {
         _registryUri = MakeTestRegistryUri();
         SetupTestData();
@@ -190,7 +190,7 @@ protected:
     std::promise<void> _canWriterAllAcksReceivedPromise;
 };
 
-TEST_F(CanWithoutSyncFTest, can_communication_no_simulation_flow_vasio)
+TEST_F(FTest_CanWithoutSync, can_communication_no_simulation_flow_vasio)
 {
     auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::ParticipantConfigurationFromString("ParticipantName: Registry"));
     registry->StartListening(_registryUri);

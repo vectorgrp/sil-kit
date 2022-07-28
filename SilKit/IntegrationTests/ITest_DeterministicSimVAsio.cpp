@@ -267,10 +267,10 @@ private:
     std::string _participantName;
 };
 
-class DeterministicSimVAsioITest : public testing::Test
+class ITest_DeterministicSimVAsio : public testing::Test
 {
 protected:
-    DeterministicSimVAsioITest()
+    ITest_DeterministicSimVAsio()
     {
         registryUri = MakeTestRegistryUri();
     }
@@ -279,7 +279,7 @@ protected:
     std::string registryUri;
 };
 
-TEST_F(DeterministicSimVAsioITest, deterministic_simulation_vasio)
+TEST_F(ITest_DeterministicSimVAsio, deterministic_simulation_vasio)
 {
     const uint32_t publisherCount = 3;
     const uint32_t testSize = 5000;

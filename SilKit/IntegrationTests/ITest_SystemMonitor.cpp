@@ -39,7 +39,7 @@ namespace {
 using namespace std::chrono_literals;
 using namespace SilKit::Core;
 
-class SystemMonitorITest : public testing::Test
+class ITest_SystemMonitor : public testing::Test
 {
 protected:
     struct Callbacks
@@ -51,7 +51,7 @@ protected:
                     (const SilKit::Services::Orchestration::ParticipantConnectionInformation&), (const));
     };
 
-    SystemMonitorITest()
+    ITest_SystemMonitor()
     {
     }
 
@@ -61,7 +61,7 @@ protected:
 
 // Tests that the service discovery handler fires for created services
 // All created should be removed as well if a participant leaves
-TEST_F(SystemMonitorITest, discover_services)
+TEST_F(ITest_SystemMonitor, discover_services)
 {
     auto registryUri = MakeTestRegistryUri();
     const SilKit::Services::Orchestration::ParticipantConnectionInformation& firstParticipantConnection{"First"};

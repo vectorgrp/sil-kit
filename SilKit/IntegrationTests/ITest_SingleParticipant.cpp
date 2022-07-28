@@ -55,7 +55,7 @@ auto AnAckWithCanIdAndUserContext(uint32_t canId, void* userContext) -> testing:
     );
 }
 
-class SingleParticipantITest : public testing::Test
+class ITest_SingleParticipant : public testing::Test
 {
 protected:
     struct Callbacks
@@ -64,7 +64,7 @@ protected:
     };
 
 protected:
-    SingleParticipantITest()
+    ITest_SingleParticipant()
     {
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
@@ -160,7 +160,7 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(SingleParticipantITest, test_single_participant_vasio)
+TEST_F(ITest_SingleParticipant, test_single_participant_vasio)
 {
     ExecuteTest();
 }

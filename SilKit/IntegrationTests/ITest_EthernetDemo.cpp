@@ -40,7 +40,7 @@ using namespace SilKit::Config;
 using namespace SilKit::Services;
 
 
-TEST_F(SimTestHarnessITest, ethernet_demo)
+TEST_F(ITest_SimTestHarness, ethernet_demo)
 {
     //Create a simulation setup with 2 participants 
     SetupFromParticipantList({"EthernetReader", "EthernetWriter"});

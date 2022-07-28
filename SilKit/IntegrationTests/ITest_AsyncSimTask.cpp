@@ -46,7 +46,7 @@ std::atomic<bool> wakeup{false};
 std::mutex mx;
 std::condition_variable cv;
 
-TEST(AsyncSimTaskITest, test_async_simtask_lockstep)
+TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
 {
     // The async participant uses the CompleteSimTask calls to request next simulation step.
     // The sync participant will run as often as possible.
@@ -134,7 +134,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_lockstep)
     }
 }
 
-TEST(AsyncSimTaskITest, test_async_simtask_nodeadlock)
+TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
 {
     // The async participant uses the CompleteSimTask calls to request next simulation step.
     // The sync participant will be used to check the time progress
@@ -208,7 +208,7 @@ auto BackgroundThread(SilKit::Services::Orchestration::ITimeSyncService* parti)
     }
 }
 
-TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
+TEST(ITest_AsyncSimTask, test_async_simtask_completion_from_foreign_thread)
 {
     // The async participant uses the ExecuteSimtaskNonBlocking and CompleteSimTask calls
     // The sync participant will be used to check the time progress
@@ -263,7 +263,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_completion_from_foreign_thread)
         << " syncTime=" << currentSyncTime.count();
 }
 
-TEST(AsyncSimTaskITest, test_async_simtask_different_periods)
+TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
 {
     // The async and sync participant use different time periods to validate the that a slower participant does
     // not execute its simtask too often.
@@ -300,7 +300,7 @@ TEST(AsyncSimTaskITest, test_async_simtask_different_periods)
 }
 
 
-TEST(AsyncSimTaskITest, test_async_simtask_multiple_completion_calls)
+TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
 {
     // Verify that multiple CompleteSimTask calls do not trigger malicious behaviour
 

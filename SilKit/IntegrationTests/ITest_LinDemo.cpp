@@ -406,7 +406,7 @@ auto MakeControllerConfig(const std::string& participantName)
     return config;
 }
 
-TEST_F(SimTestHarnessITest, lin_demo)
+TEST_F(ITest_SimTestHarness, lin_demo)
 {
     // Create required setup
     SetupFromParticipantList({"LinMaster", "LinSlave"});

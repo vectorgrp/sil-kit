@@ -82,7 +82,7 @@ auto AnAckWithCanIdAndFrameCounter(uint32_t canId, uint16_t frameCounter) -> tes
     );
 }
 
-class ThreeCanControllerITest : public testing::Test
+class ITest_ThreeCanController : public testing::Test
 {
 protected:
     struct Callbacks
@@ -91,7 +91,7 @@ protected:
     };
 
 protected:
-    ThreeCanControllerITest()
+    ITest_ThreeCanController()
     {
         testMessages.resize(5);
         for (auto index = 0u; index < testMessages.size(); index++)
@@ -240,7 +240,7 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ThreeCanControllerITest, test_can_ack_callbacks)
+TEST_F(ITest_ThreeCanController, test_can_ack_callbacks)
 {
     ExecuteTest();
 }

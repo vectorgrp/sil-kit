@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "RpcITest.hpp"
+#include "ITest_Rpc.hpp"
 
 namespace {
 
@@ -31,7 +31,7 @@ namespace {
 //--------------------------------------
 
 // One client participant, one server participant
-TEST_F(RpcITest, test_1client_1server_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -45,7 +45,7 @@ TEST_F(RpcITest, test_1client_1server_sync_vasio)
 
 
 // Two mixed participants
-TEST_F(RpcITest, test_2_mixed_participants)
+TEST_F(ITest_Rpc, test_2_mixed_participants)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -63,7 +63,7 @@ TEST_F(RpcITest, test_2_mixed_participants)
 }
 
 // Large messages
-TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_largemsg_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -77,7 +77,7 @@ TEST_F(RpcITest, test_1client_1server_largemsg_sync_vasio)
 }
 
 // 100 functions and one client/server participant
-TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_100functions_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -104,7 +104,7 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
 }
 
 // Two clients/servers with same functionName on one participant
-TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_samefunctionname_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls * 2;
     const uint32_t numCallsToReturn = defaultNumCalls * 2;
@@ -138,7 +138,7 @@ TEST_F(RpcITest, test_1client_1server_samefunctionname_sync_vasio)
 
 
 // One client participant, two server participants
-TEST_F(RpcITest, test_1client_2server_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_2server_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls*2;
@@ -159,7 +159,7 @@ TEST_F(RpcITest, test_1client_2server_sync_vasio)
 }
 
 // Two client participants, one server participant
-TEST_F(RpcITest, test_Nclient_1server_sync_vasio)
+TEST_F(ITest_Rpc, test_Nclient_1server_sync_vasio)
 {
     const uint32_t numClients = 2;
     const uint32_t numCallsToReceive = defaultNumCalls * numClients;
@@ -186,7 +186,7 @@ TEST_F(RpcITest, test_Nclient_1server_sync_vasio)
 }
 
 // Wrong functionName on server2
-TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_2server_wrongFunctionName_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -200,7 +200,7 @@ TEST_F(RpcITest, test_1client_2server_wrongFunctionName_sync_vasio)
 }
 
 // Wrong mediaType on server2
-TEST_F(RpcITest, test_1client_1server_wrongDataMediaType_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_wrongDataMediaType_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls; 
@@ -214,7 +214,7 @@ TEST_F(RpcITest, test_1client_1server_wrongDataMediaType_sync_vasio)
 }
 
 // Wrong labels on server2
-TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_wrongLabels_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -246,7 +246,7 @@ TEST_F(RpcITest, test_1client_1server_wrongLabels_sync_vasio)
 }
 
 // Wrong labels on server2
-TEST_F(RpcITest, test_1client_1server_wrongPreferredLabels_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_wrongPreferredLabels_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -286,7 +286,7 @@ TEST_F(RpcITest, test_1client_1server_wrongPreferredLabels_sync_vasio)
 }
 
 // Wildcard mediaType on server
-TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_wildcardDxf_sync_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -303,7 +303,7 @@ TEST_F(RpcITest, test_1client_1server_wildcardDxf_sync_vasio)
 //--------------------
 
 // 1 server, 1 client on a single participant
-TEST_F(RpcITest, test_1_participant_selfdelivery)
+TEST_F(ITest_Rpc, test_1_participant_selfdelivery)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -317,7 +317,7 @@ TEST_F(RpcITest, test_1_participant_selfdelivery)
 }
 
 // 2 servers, 2 clients on a single participant with same functionName
-TEST_F(RpcITest, test_1_participant_selfdelivery_same_functionname)
+TEST_F(ITest_Rpc, test_1_participant_selfdelivery_same_functionname)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -350,7 +350,7 @@ TEST_F(RpcITest, test_1_participant_selfdelivery_same_functionname)
 //-----------------------------------------------------
 
 // Async: Start servers first, call with delay to ensure reception
-TEST_F(RpcITest, test_1client_1server_async_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_async_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;

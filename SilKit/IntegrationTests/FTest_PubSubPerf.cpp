@@ -42,11 +42,11 @@ auto Now()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now);
 }
 
-class PubSubPerfFTest : public testing::Test
+class FTest_PubSubPerf : public testing::Test
 {
 protected:
 
-    PubSubPerfFTest()
+    FTest_PubSubPerf()
     {
     }
 
@@ -126,7 +126,7 @@ protected:
 };
 
 
-TEST_F(PubSubPerfFTest, test_pubsub_performance)
+TEST_F(FTest_PubSubPerf, test_pubsub_performance)
 {
     std::cout << "#NumberOfTopics Runtime(s)" << std::endl;
     ExecuteTest(1, 10s);

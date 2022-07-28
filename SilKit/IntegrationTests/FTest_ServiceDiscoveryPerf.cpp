@@ -42,11 +42,11 @@ auto Now()
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now);
 }
 
-class ServiceDiscoveryPerfFTest : public testing::Test
+class FTest_ServiceDiscoveryPerf : public testing::Test
 {
 protected:
 
-    ServiceDiscoveryPerfFTest()
+    FTest_ServiceDiscoveryPerf()
     {
     }
 
@@ -114,16 +114,16 @@ protected:
 
 // Stress testing the discovery mechanism, it shouldn't slow down the SIL Kit performance
 
-TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_10services)
+TEST_F(FTest_ServiceDiscoveryPerf, test_discovery_performance_10services)
 {
     ExecuteTest(10, 1s);
 }
-TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_100services)
+TEST_F(FTest_ServiceDiscoveryPerf, test_discovery_performance_100services)
 {
     ExecuteTest(100, 5s);
 }
 
-TEST_F(ServiceDiscoveryPerfFTest, test_discovery_performance_200services)
+TEST_F(FTest_ServiceDiscoveryPerf, test_discovery_performance_200services)
 {
     ExecuteTest(200, 25s);
 }

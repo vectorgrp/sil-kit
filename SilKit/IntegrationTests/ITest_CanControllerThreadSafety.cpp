@@ -54,11 +54,11 @@ std::chrono::milliseconds communicationTimeout{20000ms};
 const int numHandlersPerLoop = 100;
 const int stopAfterReceptions = 100;
 
-class CanControllerThreadSafetyITest : public testing::Test
+class ITest_CanControllerThreadSafety : public testing::Test
 {
 
 protected:
-    CanControllerThreadSafetyITest()
+    ITest_CanControllerThreadSafety()
     {
     }
 
@@ -269,7 +269,7 @@ protected:
 };
 
 
-TEST_F(CanControllerThreadSafetyITest, add_remove_handler_during_reception)
+TEST_F(ITest_CanControllerThreadSafety, add_remove_handler_during_reception)
 {
     numParticipants = 0;
     auto registryUri = MakeTestRegistryUri();

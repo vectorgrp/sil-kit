@@ -43,10 +43,10 @@ const uint8_t rpcFuncIncrement = 100u;
 const size_t defaultMsgSize = 3;
 const uint32_t defaultNumCalls = 3;
 
-class RpcITest : public testing::Test
+class ITest_Rpc : public testing::Test
 {
 protected:
-    RpcITest() {}
+    ITest_Rpc() {}
 
     struct RpcClientInfo
     {

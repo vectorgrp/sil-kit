@@ -53,7 +53,7 @@ auto MatchUserContext(void* userContext) -> testing::Matcher<const EthernetFrame
     return testing::Field(&EthernetFrameTransmitEvent::userContext, userContext);
 }
 
-class ThreeEthControllerITest : public testing::Test
+class ITest_ThreeEthController : public testing::Test
 {
 protected:
     struct Callbacks
@@ -62,7 +62,7 @@ protected:
     };
 
 protected:
-    ThreeEthControllerITest()
+    ITest_ThreeEthController()
     {
         registryUri = MakeTestRegistryUri();
 
@@ -213,7 +213,7 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ThreeEthControllerITest, test_eth_ack_callbacks)
+TEST_F(ITest_ThreeEthController, test_eth_ack_callbacks)
 {
     ExecuteTest();
 }

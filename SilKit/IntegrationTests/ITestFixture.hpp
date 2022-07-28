@@ -83,10 +83,10 @@ inline auto Log() -> ThreadSafeLogger
 }
 
 
-class SimTestHarnessITest : public testing::Test
+class ITest_SimTestHarness : public testing::Test
 {
 protected: //CTor and operators
-    SimTestHarnessITest()
+    ITest_SimTestHarness()
     : _registryUri{MakeTestRegistryUri()}
     {
     }

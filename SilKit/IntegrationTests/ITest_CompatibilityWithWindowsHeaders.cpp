@@ -47,7 +47,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // 3. Provide a dummy test for proper integration with our test runner.
 #include "gtest/gtest.h"
-TEST(WindowsHeaderCompatibility, min_max_macros_still_work)
+TEST(ITest_CompatibilityWithWindowsHeaders, min_max_macros_still_work)
 {
 #ifndef min
     ASSERT_FALSE();

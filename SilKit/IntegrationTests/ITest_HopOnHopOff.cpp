@@ -54,11 +54,11 @@ static size_t numParticipants;
 std::chrono::milliseconds communicationTimeout{2000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 
-class HopOnHopOffITest : public testing::Test
+class ITest_HopOnHopOff : public testing::Test
 {
 
 protected:
-    HopOnHopOffITest()
+    ITest_HopOnHopOff()
     {
     }
 
@@ -416,7 +416,7 @@ protected:
 };
 
 
-TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
+TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 {
     numParticipants = 0;
     auto registryUri = MakeTestRegistryUri();
@@ -491,7 +491,7 @@ TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToSynced)
 }
 
 
-TEST_F(HopOnHopOffITest, test_Async_HopOnHopOff_ToEmpty)
+TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
 {
     numParticipants = 0;
     auto registryUri = MakeTestRegistryUri();

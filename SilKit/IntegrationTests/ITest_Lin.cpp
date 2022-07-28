@@ -379,15 +379,15 @@ auto MakeControllerConfig(const std::string& participantName)
     return config;
 }
 
-class LinITest : public testing::Test
+class ITest_Lin : public testing::Test
 {
 protected:
-    LinITest() {}
+    ITest_Lin() {}
 
     std::unique_ptr<SimTestHarness> _simTestHarness;
 };
 
-TEST_F(LinITest, sync_lin_simulation)
+TEST_F(ITest_Lin, sync_lin_simulation)
 {
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> participantNames = { "LinMaster", "LinSlave" };

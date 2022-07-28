@@ -22,15 +22,15 @@
 # local headers as interface lib
 add_subdirectory(SimTestHarness)
 
-add_library(ITestUtils INTERFACE)
-target_include_directories(ITestUtils
+add_library(ITest_Utils INTERFACE)
+target_include_directories(ITest_Utils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 set(itest_extra_libs SilKitMwVAsio)
 
-add_silkit_test(FTestCanWithoutSync
+add_silkit_test(FTest_CanWithoutSync
     SOURCES
-      CanWithoutSyncFTest.cpp
+      FTest_CanWithoutSync.cpp
     LIBS
       SilKitSimCan
       ${itest_extra_libs}
@@ -38,9 +38,9 @@ add_silkit_test(FTestCanWithoutSync
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(FTestEthWithoutSync
+add_silkit_test(FTest_EthWithoutSync
     SOURCES
-      EthWithoutSyncFTest.cpp
+      FTest_EthWithoutSync.cpp
     LIBS
       SilKitSimEthernet
       ${itest_extra_libs}
@@ -48,26 +48,26 @@ add_silkit_test(FTestEthWithoutSync
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestThreeCanController
+add_silkit_test(ITest_ThreeCanController
     SOURCES
-      ThreeCanControllerITest.cpp
+      ITest_ThreeCanController.cpp
     LIBS
         SilKitMwParticipant
         SilKitSimTestHarness
         ${itest_extra_libs}
 )
 
-add_silkit_test(FTestCanControllerThreadSafety
+add_silkit_test(FTest_CanControllerThreadSafety
     SOURCES
-      CanControllerThreadSafetyITest.cpp
+      ITest_CanControllerThreadSafety.cpp
     LIBS
         SilKit
         SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestThreeEthController
+add_silkit_test(ITest_ThreeEthController
     SOURCES
-      ThreeEthControllerITest.cpp
+      ITest_ThreeEthController.cpp
     LIBS
       SilKitSimTestHarness
       SilKitMwParticipant
@@ -75,18 +75,18 @@ add_silkit_test(ITestThreeEthController
       ${itest_extra_libs}
 )
 
-add_silkit_test(ITestCatchExceptionsInCallbacks
+add_silkit_test(ITest_CatchExceptionsInCallbacks
     SOURCES
-      CatchExceptionsInCallbacksITest.cpp
+      ITest_CatchExceptionsInCallbacks.cpp
     LIBS
       SilKitMwParticipant
       SilKitConfigurationTestUtils
       ${itest_extra_libs}
 )
 
-add_silkit_test(ITestHopOnHopOff
+add_silkit_test(ITest_HopOnHopOff
     SOURCES
-      HopOnHopOffITest.cpp
+      ITest_HopOnHopOff.cpp
     LIBS
         SilKit
         SilKitConfigurationTestUtils
@@ -100,18 +100,18 @@ add_silkit_test(ITest_CommunicationReady
         SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestDataPubSub
+add_silkit_test(ITest_DataPubSub
     SOURCES
-      DataPubSubITest.cpp
+      ITest_DataPubSub.cpp
     LIBS
         SilKit
         SilKitInternal
         SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestTargetedMessaging
+add_silkit_test(ITest_TargetedMessaging
     SOURCES
-      TargetedMessagingITest.cpp
+      ITest_TargetedMessaging.cpp
     LIBS
       SilKitTracing
       SilKitSimCan
@@ -119,99 +119,99 @@ add_silkit_test(ITestTargetedMessaging
       SilKitInternal
 )
 
-add_silkit_test(ITestRpc
+add_silkit_test(ITest_Rpc
     SOURCES
-      RpcITest.cpp
+      ITest_Rpc.cpp
     LIBS
       SilKit
       SilKitInternal
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestStateMachineVAsio
+add_silkit_test(ITest_StateMachineVAsio
     SOURCES
-      StateMachineVAsioITest.cpp
+      ITest_StateMachineVAsio.cpp
     LIBS
       SilKitMwParticipant
       SilKitMwVAsio
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestDeterministicSimVAsio
+add_silkit_test(ITest_DeterministicSimVAsio
     SOURCES
-      DeterministicSimVAsioITest.cpp
+      ITest_DeterministicSimVAsio.cpp
     LIBS
       SilKitMwParticipant
       SilKitMwVAsio
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestDifferentPeriods
+add_silkit_test(ITest_DifferentPeriods
     SOURCES
-      DifferentPeriodsITest.cpp
+      ITest_DifferentPeriods.cpp
     LIBS
       SilKitMwParticipant
       SilKitMwVAsio
       SilKitConfigurationTestUtils
 )
 
-add_silkit_test(ITestSingleParticipant
+add_silkit_test(ITest_SingleParticipant
     SOURCES
-      SingleParticipantITest.cpp
+      ITest_SingleParticipant.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
       SilKitMwVAsio
 )
 
-add_silkit_test(ITestServiceDiscovery
+add_silkit_test(ITest_ServiceDiscovery
     SOURCES
-      ServiceDiscoveryITest.cpp
+      ITest_ServiceDiscovery.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_silkit_test(FTestServiceDiscoveryPerf
+add_silkit_test(FTest_ServiceDiscoveryPerf
     SOURCES
-      ServiceDiscoveryPerfFTest.cpp
+      FTest_ServiceDiscoveryPerf.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_silkit_test(ITestSystemMonitor
+add_silkit_test(ITest_SystemMonitor
     SOURCES
-      SystemMonitorITest.cpp
+      ITest_SystemMonitor.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_silkit_test(FTestPubSubPerf
+add_silkit_test(FTest_PubSubPerf
     SOURCES
-      PubSubPerfFTest.cpp
+      FTest_PubSubPerf.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_silkit_test(ITestAsyncSimTask
+add_silkit_test(ITest_AsyncSimTask
     SOURCES
-      AsyncSimTaskITest.cpp
+      ITest_AsyncSimTask.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
       ${itest_extra_libs}
 )
 
-add_silkit_test(ITestLin
+add_silkit_test(ITest_Lin
     SOURCES
-      LinITest.cpp
+      ITest_Lin.cpp
     LIBS
       SilKitMwParticipant
       SilKitSimTestHarness
@@ -220,17 +220,17 @@ add_silkit_test(ITestLin
 
 # Windows specific tests
 if(MSVC)
-    add_silkit_test(ITestCompatibilityWithWindowsHeaders
+    add_silkit_test(ITest_CompatibilityWithWindowsHeaders
         SOURCES
-        CompatibilityWithWindowsHeadersITest.cpp
+        ITest_CompatibilityWithWindowsHeaders.cpp
         LIBS
         SilKitMwParticipant
         )
 endif()
 
 
-# ITests based on demos
+# ITest_s based on demos
 
-add_silkit_test(ITestLinDemo SOURCES LinDemoITest.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
-add_silkit_test(ITestCanDemo SOURCES CanDemoITest.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
-add_silkit_test(ITestEthernetDemo SOURCES EthernetDemoITest.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
+add_silkit_test(ITest_LinDemo SOURCES ITest_LinDemo.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
+add_silkit_test(ITest_CanDemo SOURCES ITest_CanDemo.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
+add_silkit_test(ITest_EthernetDemo SOURCES ITest_EthernetDemo.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})

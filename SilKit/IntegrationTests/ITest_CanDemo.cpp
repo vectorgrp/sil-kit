@@ -38,7 +38,7 @@ using namespace SilKit::Config;
 using namespace SilKit::Services;
 using namespace SilKit::Services::Can;
 
-TEST_F(SimTestHarnessITest, can_demo)
+TEST_F(ITest_SimTestHarness, can_demo)
 {
     //Create a simulation setup with 2 participants and the netsim
     SetupFromParticipantList({"CanReader", "CanWriter", "CanMonitor"});

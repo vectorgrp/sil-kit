@@ -43,11 +43,11 @@ namespace {
 
 using namespace std::chrono_literals;
 
-class EthWithoutSyncFTest : public testing::Test
+class FTest_EthWithoutSync : public testing::Test
 {
 protected:
 
-    EthWithoutSyncFTest()
+    FTest_EthWithoutSync()
     {
         _registryUri = MakeTestRegistryUri();
         SetupTestData();
@@ -175,7 +175,7 @@ protected:
     std::promise<void> _ethWriterAllAcksReceivedPromise;
 };
 
-TEST_F(EthWithoutSyncFTest, eth_communication_no_simulation_flow_vasio)
+TEST_F(FTest_EthWithoutSync, eth_communication_no_simulation_flow_vasio)
 {
     auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->StartListening(_registryUri);

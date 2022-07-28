@@ -258,10 +258,10 @@ private:
     std::string _participantName;
 };
 
-class DifferentPeriodsITest : public testing::Test
+class ITest_DifferentPeriods : public testing::Test
 {
 protected:
-    DifferentPeriodsITest()
+    ITest_DifferentPeriods()
     {
         registryUri = MakeTestRegistryUri();
     }
@@ -274,7 +274,7 @@ protected:
 
 // Tests for deterministic reception of messages using participants
 // with different periods
-TEST_F(DifferentPeriodsITest, different_simtask_periods)
+TEST_F(ITest_DifferentPeriods, different_simtask_periods)
 {
     const uint32_t publisherCount = 3;
     const uint32_t numMessages = 350;
