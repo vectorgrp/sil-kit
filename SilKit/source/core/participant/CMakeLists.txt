@@ -23,9 +23,12 @@ add_library(SilKitMwParticipant STATIC
     Participant.hpp
     Participant_impl.hpp
     Participant.cpp
-    CreateParticipant_impl.hpp
-    CreateParticipant.hpp
-    CreateParticipant.cpp
+    CreateParticipantInternal.hpp
+    CreateParticipantInternal.cpp
+    ValidateAndSanitizeConfig.hpp
+    ValidateAndSanitizeConfig.cpp
+    CreateParticipantT.hpp
+    CreateParticipantT.cpp
 )
 
 target_link_libraries(SilKitMwParticipant
@@ -64,4 +67,10 @@ endif (MSVC)
 add_silkit_test(TestMwParticipant 
     SOURCES ParticipantTest.cpp 
     LIBS SilKitMwMockNullConnection SilKitConfigurationTestUtils
+)
+
+add_silkit_test(
+    Test_ValidateAndSanitizeConfig
+    SOURCES Test_ValidateAndSanitizeConfig.cpp
+    LIBS SilKitMwParticipant
 )

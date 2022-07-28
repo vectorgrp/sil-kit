@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <future>
 
-#include "CreateParticipant.hpp"
+#include "CreateParticipantInternal.hpp"
 #include "VAsioRegistry.hpp"
 
 #include "silkit/services/orchestration/all.hpp"
@@ -106,9 +106,10 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     registry->StartListening(registryUri);
 
     // Setup Participant for TestController
-    auto participant = CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestController");
+    auto participant =
+        CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestController", registryUri);
 
-    participant->JoinSilKitSimulation(registryUri);
+    participant->JoinSilKitSimulation();
     auto systemController = participant->GetSystemController();
     systemController->SetWorkflowConfiguration({syncParticipantNames});
     auto monitor = participant->GetSystemMonitor();
@@ -117,8 +118,9 @@ TEST_F(VAsioNetworkITest, vasio_state_machine)
     });
 
     // Setup Participant for Test Unit
-    auto participantTestUnit = CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit");
-    participantTestUnit->JoinSilKitSimulation(registryUri);
+    auto participantTestUnit =
+        CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit", registryUri);
+    participantTestUnit->JoinSilKitSimulation();
     auto* lifecycleService = participantTestUnit->GetLifecycleService();
     auto* timeSyncService = lifecycleService->GetTimeSyncService();
 

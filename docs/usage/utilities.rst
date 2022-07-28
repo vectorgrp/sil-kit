@@ -36,17 +36,19 @@ sil-kit-registry
         -u, --listen-uri <silkit-uri>         The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
         -l, --log <level>                     Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
         -c, --configuration <configuration>   Path and filename of the participant configuration YAML or JSON file.
+        -g, --generate-configuration <path>   Path and filename of a participant configuration file to generate containing the URI the registry is using.
 
    *  - Usage Example
       - .. code-block:: powershell
 
-            # Start the SIL Kit Registry
-            sil-kit-registry
-
+           # Start the SIL Kit Registry
+           sil-kit-registry
    *  - Notes
       -  * The SIL Kit Registry is packaged in the ``SilKit/bin`` directory.
          * The SIL Kit Registry must be started before other SIL Kit participants,
            either with this process or using the :cpp:func:`StartListening()<SilKit::Vendor::Vector::ISilKitRegistry::StartListening()>` API.
+         * When the port ``0`` is specified in the URI (``--listen-uri``) the operating system will choose a random port for the registry.
+           This port is used in the generated configuration file (``--generate-configuration``) for use in CI environments.
 
 
 .. _sec:util-system-controller:

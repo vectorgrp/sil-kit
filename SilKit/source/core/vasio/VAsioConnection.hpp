@@ -159,7 +159,7 @@ public:
 
     // Listening Sockets (acceptors)
     void AcceptLocalConnections(const std::string& uniqueId);
-    void AcceptTcpConnectionsOn(const std::string& hostname, uint16_t port);
+    auto AcceptTcpConnectionsOn(const std::string& hostname, uint16_t port) -> std::pair<std::string, uint16_t>;
 
     void StartIoWorker();
 
@@ -173,7 +173,7 @@ public: //members
 private:
 
     template<typename AcceptorT, typename EndpointT>
-    void AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint);
+    auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
 
     // ----------------------------------------
     // private data types

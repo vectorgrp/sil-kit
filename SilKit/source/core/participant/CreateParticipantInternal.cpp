@@ -19,31 +19,18 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#pragma once
+#include "CreateParticipantInternal.hpp"
 
-#include "CreateParticipant.hpp"
-#include "Participant.hpp"
+#include "CreateParticipantT.hpp"
 
 namespace SilKit {
 namespace Core {
 
-template <typename ConnectionT>
-auto CreateParticipantImplInternal(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                   const std::string& participantName) -> std::unique_ptr<Participant<ConnectionT>>
+auto CreateParticipantInternal(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+                               const std::string& participantName, const std::string& registryUri)
+    -> std::unique_ptr<IParticipantInternal>
 {
-    auto&& cfg = ValidateAndSanitizeConfig(std::move(participantConfig));
-    auto&& participantNameValidationResult = ValidateAndSanitizeParticipantName(cfg, participantName);
-
-    auto&& participant =
-        std::make_unique<Participant<ConnectionT>>(std::move(cfg), participantNameValidationResult.participantName);
-
-    auto* logger = participant->GetLogger();
-    for (const auto& logMessage : participantNameValidationResult.logMessages)
-    {
-        logger->Log(logMessage.first, logMessage.second);
-    }
-
-    return std::move(participant);
+    return CreateParticipantT<VAsioConnection>(std::move(participantConfig), participantName, registryUri);
 }
 
 } // namespace Core

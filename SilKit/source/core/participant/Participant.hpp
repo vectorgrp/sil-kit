@@ -93,8 +93,7 @@ public:
     Participant() = default;
     Participant(const Participant&) = default;
     Participant(Participant&&) = default;
-    Participant(Config::ParticipantConfiguration participantConfig, const std::string& participantName,
-                ProtocolVersion version = CurrentProtocolVersion());
+    Participant(Config::ParticipantConfiguration participantConfig, ProtocolVersion version = CurrentProtocolVersion());
 
 public:
     // ----------------------------------------
@@ -154,7 +153,8 @@ public:
     auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* override;
     auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
         -> Services::Orchestration::TimeSyncService* override;
-    auto GetParticipantName() const -> const std::string& override { return _participantName; }
+    auto GetParticipantName() const -> const std::string& override { return _participantConfig.participantName; }
+    auto GetRegistryUri() const -> const std::string& override { return _participantConfig.middleware.registryUri; }
 
     void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
     void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim, const std::vector<std::string>& networkNames) override;
@@ -268,14 +268,11 @@ public:
     // Public methods
 
     /*! \brief Connect to the registry and join the simulation.
-    * 
-    * Connect to the registry listening on registryUri
-    * \param registryUri The registry URI to connect to.
     *
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    void JoinSilKitSimulation(const std::string& registryUri) override;
+    void JoinSilKitSimulation() override;
 
     // For Testing Purposes:
     inline auto GetSilKitConnection() -> SilKitConnectionT& { return _connection; }
@@ -345,7 +342,6 @@ private:
 private:
     // ----------------------------------------
     // private members
-    std::string _participantName;
     const SilKit::Config::ParticipantConfiguration _participantConfig;
     ParticipantId _participantId{0};
 
@@ -373,6 +369,8 @@ private:
         ControllerMap<Services::Orchestration::IMsgForTimeSyncService>,
         ControllerMap<Discovery::ServiceDiscovery>
     > _controllers;
+
+    std::atomic<EndpointId> _localEndpointId{ 0 };
 
     std::tuple<
         Services::Can::IMsgForCanSimulator*,

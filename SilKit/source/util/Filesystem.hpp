@@ -77,5 +77,8 @@ path temp_directory_path();
 //!< Remove a file or directory.
 bool remove(const path&);
 
+//!< Rename a file.
+void rename(const path& old_p, const path& new_p);
+
 } // namespace Filesystem
 } // namespace SilKit

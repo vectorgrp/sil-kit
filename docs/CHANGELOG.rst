@@ -5,18 +5,29 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-
-[3.99.28] - 2022-07-26
+[3.99.29] - UNRELEASED
 ----------------------
 
 Added
-~~~~~~~
+~~~~~
+
 - Added a :cpp:func:`SetCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::SetCommunicationReadyHandlerAsync>`
   method to the lifecycle interfaces.
   It will invoke the :cpp:type:`CommunicationReadyHandler<SilKit::Services::Orchestration::CommunicationReadyHandler>` callback in a separate thread.
   This allows the user to do early communication in a simulation run, for example, to
   exchange configuration values before the actual simulation starts.
   The user is required to call :cpp:func:`CompleteCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::CompleteCommunicationReadyHandlerAsync>` when the handler is finished.
+
+Changed
+~~~~~~~
+
+- ``sil-kit-registry`` now has an addition argument ``--generate-configuration`` which can be used in CI environments
+  together with a OS generated port in the URI (i.e. ``silkit://localhost:0``) to create a basic configuration file
+  containing the actual port on which the registry is reachable.
+
+
+[3.99.28] - 2022-07-26
+----------------------
 
 Compatibility with 3.99.27
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

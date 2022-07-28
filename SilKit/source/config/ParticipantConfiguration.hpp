@@ -220,7 +220,7 @@ struct Extensions
 
 struct Middleware
 {
-    std::string registryUri{ "silkit://localhost:8500" }; //!< Default registry URI to connect to
+    std::string registryUri{}; //!< Registry URI to connect to (configuration has priority)
     int connectAttempts{ 1 }; //!<  Number of connection attempts to the registry a participant should perform.
     int tcpReceiveBufferSize{ -1 };
     int tcpSendBufferSize{ -1 };
@@ -249,7 +249,7 @@ struct ParticipantConfiguration
     //! \brief An optional file path.
     std::string configurationFilePath;
 
-    //! \brief The participant name. Mandatory.
+    //! \brief The participant name (configuration has priority)
     std::string participantName;
 
     std::vector<CanController> canControllers;

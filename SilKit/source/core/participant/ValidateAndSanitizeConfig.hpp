@@ -21,26 +21,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "IParticipantInternal.hpp"
+#include <string>
+#include <vector>
+#include <memory>
+#include <utility>
+
+#include "silkit/config/IParticipantConfiguration.hpp"
+#include "silkit/services/logging/LoggingDatatypes.hpp"
+
 #include "ParticipantConfiguration.hpp"
 
 namespace SilKit {
 namespace Core {
 
-auto CreateParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                           const std::string& participantName) -> std::unique_ptr<IParticipantInternal>;
-
-auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig)
-    -> SilKit::Config::ParticipantConfiguration;
-
-struct ParticipantNameValidationResult
+struct ValidateAndSanitizeConfigResult
 {
-    std::string participantName;
+    SilKit::Config::ParticipantConfiguration participantConfiguration;
     std::vector<std::pair<Services::Logging::Level, std::string>> logMessages;
 };
 
-auto ValidateAndSanitizeParticipantName(Config::ParticipantConfiguration participantConfig,
-                                        const std::string& participantName) -> ParticipantNameValidationResult;
+auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+                               const std::string& participantName, const std::string& registryUri)
+    -> ValidateAndSanitizeConfigResult;
 
 } // namespace Core
 } // namespace SilKit

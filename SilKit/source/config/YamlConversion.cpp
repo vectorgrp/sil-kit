@@ -1030,8 +1030,14 @@ Node Converter::encode(const ParticipantConfiguration& obj)
     static const ParticipantConfiguration defaultObj{};
     Node node;
     node["SchemaVersion"] = obj.schemaVersion;
-    node["Description"] = obj.description;
-    node["ParticipantName"] = obj.participantName;
+    if (!obj.description.empty())
+    {
+        node["Description"] = obj.description;
+    }
+    if (!obj.participantName.empty())
+    {
+        node["ParticipantName"] = obj.participantName;
+    }
 
     optional_encode(obj.canControllers, node, "CanControllers");
     optional_encode(obj.linControllers, node, "LinControllers");

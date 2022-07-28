@@ -42,10 +42,14 @@ namespace {
 
 using namespace SilKit::Core;
 
-auto MakeParticipant(std::string participantName, ProtocolVersion version) -> std::shared_ptr<IParticipantInternal>
+auto MakeParticipant(std::string participantName, std::string registryUri, ProtocolVersion version)
+    -> std::shared_ptr<IParticipantInternal>
 {
-    return std::make_shared<Participant<VAsioConnection>>(SilKit::Config::ParticipantConfiguration{},
-                                                          std::move(participantName), version);
+    auto cfg = SilKit::Config::ParticipantConfiguration{};
+    cfg.participantName = std::move(participantName);
+    cfg.middleware.registryUri = std::move(registryUri);
+
+    return std::make_shared<Participant<VAsioConnection>>(std::move(cfg), version);
 }
 
 auto MakeRegistry(ProtocolVersion version) -> std::shared_ptr<VAsioRegistry>
@@ -75,7 +79,7 @@ protected:
     {
         for (auto&& p : participants)
         {
-            auto participant = MakeParticipant(p.name, p.version);
+            auto participant = MakeParticipant(p.name, registryUri, p.version);
             _participants.emplace_back(std::move(participant));
         }
     }
@@ -83,7 +87,7 @@ protected:
     {
         for (auto&& participant : _participants)
         {
-            participant->JoinSilKitSimulation(registryUri);
+            participant->JoinSilKitSimulation();
         }
     }
     void ExchangeData()

@@ -19,31 +19,4 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#include "SilKit.hpp"
-
-#include "Validation.hpp"
-#include "CreateParticipantInternal.hpp"
-#include "ParticipantConfiguration.hpp"
-
-
-namespace SilKit {
-
-auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                       const std::string& participantName)
-    -> std::unique_ptr<IParticipant>
-{
-    const auto uri = dynamic_cast<Config::ParticipantConfiguration&>(*participantConfig).middleware.registryUri;
-    return CreateParticipant(participantConfig, participantName, uri);
-}
-
-SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
-                                         const std::string& participantName, const std::string& registryUri)
-    -> std::unique_ptr<IParticipant>
-{
-    auto participant = Core::CreateParticipantInternal(std::move(participantConfig), participantName, registryUri);
-    participant->JoinSilKitSimulation();
-    return participant;
-}
-
-}//namespace SilKit
-
+#include "CreateParticipantT.hpp"

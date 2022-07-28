@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <typeinfo>
 
 #include "ITimeProvider.hpp"
-#include "CreateParticipant.hpp"
+#include "CreateParticipantT.hpp"
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
 #include "ProtocolVersion.hpp"
@@ -154,8 +154,8 @@ inline auto MakeMockConnectionParticipant(std::shared_ptr<SilKit::Config::IParti
                                           const std::string& participantName)
     -> std::unique_ptr<MockConnectionParticipant>
 {
-    auto&& cfg = SilKit::Core::ValidateAndSanitizeConfig(participantConfig);
-    return std::make_unique<MockConnectionParticipant>(std::move(cfg), participantName);
+    return SilKit::Core::CreateParticipantT<MockConnection>(std::move(participantConfig), participantName,
+                                                            "silkit://mock.connection.silkit:0");
 }
 
 struct Callbacks

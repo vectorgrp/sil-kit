@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <future>
 
-#include "CreateParticipant.hpp"
+#include "CreateParticipantInternal.hpp"
 
 #include "silkit/services/all.hpp"
 #include "functional.hpp"
@@ -77,14 +77,14 @@ TEST_F(CatchExceptionsInCallbacksITest, please_dont_crash_vasio)
     registry->StartListening(registryUri);
 
     std::string participantNameSender = "Sender";
-    auto pubParticipant = SilKit::Core::CreateParticipantImpl(
-        SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameSender);
-    pubParticipant->JoinSilKitSimulation(registryUri);
+    auto pubParticipant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                                                  participantNameSender, registryUri);
+    pubParticipant->JoinSilKitSimulation();
 
     std::string participantNameReceiver = "Receiver";
-    auto subParticipant = SilKit::Core::CreateParticipantImpl(
-        SilKit::Config::MakeEmptyParticipantConfiguration(), participantNameReceiver);
-    subParticipant->JoinSilKitSimulation(registryUri);
+    auto subParticipant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                                                  participantNameReceiver, registryUri);
+    subParticipant->JoinSilKitSimulation();
 
     SilKit::Services::PubSub::DataPublisherSpec dataSpec{"CrashTopic", {}};
     SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{"CrashTopic", {}};

@@ -45,15 +45,20 @@ public:
     // Public methods
     virtual auto GetParticipantName() const -> const std::string& = 0;
 
+    /*! \brief Returns the URI of the registry this participant is connecting to.
+     *
+     * The URI must be specified in the configuration (which has priority) or the CreateParticipant call.
+     *
+     * @return the URI of the registry
+     */
+    virtual auto GetRegistryUri() const -> const std::string& = 0;
+
     /*! \brief Connect to the registry and join the simulation.
-    *
-    * Connect to the registry listening on registryUri
-    * \param registryUri URI of the registry
     *
     * \throw std::exception A participant was created previously, or a
     * participant could not be created.
     */
-    virtual void JoinSilKitSimulation(const std::string& registryUri) = 0;
+    virtual void JoinSilKitSimulation() = 0;
 
     // For NetworkSimulator integration:
     virtual void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
@@ -201,11 +206,6 @@ public:
     //! \brief Create the ITimeSyncService for the given lifecycle service (one time per lifecycle service).
     virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
         -> Services::Orchestration::TimeSyncService* = 0;
-
-
-
-protected:
-    std::atomic<EndpointId> _localEndpointId{ 0 };
 };
 
 } // namespace Core

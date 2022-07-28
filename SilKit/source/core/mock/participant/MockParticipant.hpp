@@ -341,14 +341,17 @@ public:
     {
         callback();
     }
+
     auto GetParticipantName() const -> const std::string& override { return _name; }
+    auto GetRegistryUri() const -> const std::string& override { return _registryUri; }
 
     virtual auto GetTimeProvider() -> Services::Orchestration::ITimeProvider* { return &mockTimeProvider; }
-    void JoinSilKitSimulation(const std::string& ) override {}
+    void JoinSilKitSimulation() override {}
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
     const std::string _name = "MockParticipant";
+    const std::string _registryUri = "silkit://mock.participant.silkit:0";
     DummyLogger logger;
     MockTimeProvider mockTimeProvider;
     MockLifecycleService mockLifecycleService;

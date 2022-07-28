@@ -48,6 +48,7 @@ add_definitions(-DEXPORT_SilKitAPI)
 
 target_link_libraries(sil-kit-registry
     SilKitMwVAsio
+    SilKitMwParticipant
     SilKitConfiguration
     SilKitVersion
 )

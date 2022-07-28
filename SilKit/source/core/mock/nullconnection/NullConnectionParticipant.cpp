@@ -22,10 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "NullConnectionParticipant.hpp"
-#include "CreateParticipant.hpp"
 #include "Participant.hpp"
 #include "Participant_impl.hpp"
-#include "CreateParticipant_impl.hpp"
+#include "CreateParticipantT.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -68,7 +67,8 @@ struct NullConnection
 auto CreateNullConnectionParticipantImpl(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName) -> std::unique_ptr<IParticipantInternal>
 {
-    return CreateParticipantImplInternal<NullConnection>(std::move(participantConfig), participantName);
+    return CreateParticipantT<NullConnection>(std::move(participantConfig), participantName,
+                                              "silkit://null.connection.silkit:0");
 }
 
 } // namespace Core

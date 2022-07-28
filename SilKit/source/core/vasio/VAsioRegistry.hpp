@@ -43,7 +43,7 @@ public: // CTor
                   ProtocolVersion version = CurrentProtocolVersion());
 
 public: // methods
-    void StartListening(const std::string& listenUri) override;
+    auto StartListening(const std::string& listenUri) -> std::string override;
 
     void SetAllConnectedHandler(std::function<void()> handler) override;
     void SetAllDisconnectedHandler(std::function<void()> handler) override;

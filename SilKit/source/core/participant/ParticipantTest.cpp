@@ -52,15 +52,14 @@ TEST_F(ParticipantTest, throw_on_empty_participant_name)
 TEST_F(ParticipantTest, support_nullptr_in_IParticipantConfiguration)
 {
     EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(nullptr, "TestParticipant"));
-    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(std::make_shared<SilKit::Config::IParticipantConfiguration>(),
-                                                       "TestParticipant"));
+    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(std::make_shared<SilKit::Config::ParticipantConfiguration>(),
+                                                        "TestParticipant"));
 }
 
 TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 {
     const auto configuredParticipantName = "ConfiguredParticipantName";
-    auto mockConfig =
-        std::make_shared<SilKit::Config::ParticipantConfiguration>(SilKit::Config::ParticipantConfiguration());
+    auto mockConfig = std::make_shared<SilKit::Config::ParticipantConfiguration>();
     mockConfig->participantName = configuredParticipantName;
 
 

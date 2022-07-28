@@ -77,30 +77,29 @@ struct IsControllerMap<std::unordered_map<std::string, std::unique_ptr<T>>, U> :
 } // namespace anonymous
 
 template <class SilKitConnectionT>
-Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig, const std::string& participantName, ProtocolVersion version)
-    : _participantName{participantName}
-    , _participantConfig{participantConfig}
-    , _participantId{Util::Hash::Hash(participantName)}
-    , _connection{_participantConfig, participantName, _participantId, &_timeProvider, version}
+Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig, ProtocolVersion version)
+    : _participantConfig{participantConfig}
+    , _participantId{Util::Hash::Hash(participantConfig.participantName)}
+    , _connection{_participantConfig, participantConfig.participantName, _participantId, &_timeProvider, version}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.
-    _logger = std::make_unique<Services::Logging::Logger>(_participantName, _participantConfig.logging);
+    _logger = std::make_unique<Services::Logging::Logger>(GetParticipantName(), _participantConfig.logging);
     _connection.SetLogger(_logger.get());
 
     _logger->Info("Creating Participant for Participant {}, SilKit-Version: {}, Middleware: {}",
-                  _participantName, Version::String(), "VAsio");
+                  GetParticipantName(), Version::String(), "VAsio");
 
 }
 
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::JoinSilKitSimulation(const std::string& registryUri)
+void Participant<SilKitConnectionT>::JoinSilKitSimulation()
 {
-    _connection.JoinSimulation(registryUri);
+    _connection.JoinSimulation(GetRegistryUri());
     OnSilKitSimulationJoined();
 
-    _logger->Info("Participant {} has connected to {}", _participantName, registryUri);
+    _logger->Info("Participant {} has connected to {}", GetParticipantName(), GetRegistryUri());
 }
 
 template <class SilKitConnectionT>
@@ -120,7 +119,7 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 
 
     //// Enable replaying mechanism.
-    //const auto& participantConfig = get_by_name(_config.simulationSetup.participants, _participantName);
+    //const auto& participantConfig = get_by_name(_config.simulationSetup.participants, GetParticipantName());
     //if (tracing::HasReplayConfig(participantConfig))
     //{
     //    _replayScheduler = std::make_unique<tracing::ReplayScheduler>(_config,
@@ -177,7 +176,7 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
     }
     else
     {
-        _logger->Warn("Failed to setup remote logging. Participant {} will not send and receive remote logs.", _participantName);
+        _logger->Warn("Failed to setup remote logging. Participant {} will not send and receive remote logs.", GetParticipantName());
     }
 }
 
@@ -609,7 +608,7 @@ auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServic
         supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeServiceDiscovery;
 
         controller = CreateInternalController<Discovery::ServiceDiscovery>(
-            "ServiceDiscovery", Core::ServiceType::InternalController, std::move(supplementalData), true, _participantName);
+            "ServiceDiscovery", Core::ServiceType::InternalController, std::move(supplementalData), true, GetParticipantName());
         
         _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticpantRemoval(peer->GetInfo().participantName);
@@ -1262,7 +1261,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
 
     auto descriptor = ServiceDescriptor{};
     descriptor.SetNetworkName(network);
-    descriptor.SetParticipantName(_participantName);
+    descriptor.SetParticipantName(GetParticipantName());
     descriptor.SetServiceName(config.name);
     descriptor.SetNetworkType(config.networkType);
     descriptor.SetServiceId(localEndpoint);
@@ -1294,7 +1293,7 @@ void Participant<SilKitConnectionT>::AddTraceSinksToSource(ITraceMessageSource* 
 {
     if (config.useTraceSinks.empty())
     {
-        GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", _participantName, config.name);
+        GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", GetParticipantName(), config.name);
         return;
     }
     auto findSinkByName = [this](const auto& name)

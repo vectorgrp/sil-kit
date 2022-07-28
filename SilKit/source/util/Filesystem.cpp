@@ -112,6 +112,23 @@ bool remove(const path& p)
     return e == 0;
 }
 
+void rename(const path& old_p, const path& new_p)
+{
+#if defined(_WIN32)
+    // Attempt to mirror the behavior of the POSIX remove function (https://en.cppreference.com/w/cpp/filesystem/rename)
+    // which removes new_p prior to moving old_p into new_p. Failure of remove includes non-existing new_p, therefore
+    // we ignore the failure.
+    (void)remove(new_p);
+#endif
+
+    // NB: On POSIX systems rename already removes new_p and handles the rename atomically.
+    if (::rename(old_p.c_str(), new_p.c_str()) != 0)
+    {
+        std::perror("rename");
+        throw std::runtime_error("filesystem::rename: Couldn't rename the old filename to the new filename");
+    }
+}
+
 bool create_directory(const path& where)
 {
     auto status = ::mkdir(where.c_str(), 0755);

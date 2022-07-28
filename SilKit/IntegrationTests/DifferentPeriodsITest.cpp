@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 #include <numeric>
 
-#include "CreateParticipant.hpp"
+#include "CreateParticipantInternal.hpp"
 #include "VAsioRegistry.hpp"
 #include "ConfigurationTestUtils.hpp"
 
@@ -72,10 +72,10 @@ public:
         : _numMessages{numMessages}
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
-        _participant =
-            SilKit::Core::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), _participantName);
+        _participant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                                               _participantName, registryUri);
 
-        _participant->JoinSilKitSimulation(registryUri);
+        _participant->JoinSilKitSimulation();
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
@@ -142,9 +142,9 @@ public:
         , _syncParticipantNames { syncParticipantNames }
         , _participantName{participantName}
     {
-        _participant = SilKit::Core::CreateParticipantImpl(
-            SilKit::Config::MakeEmptyParticipantConfiguration(), participantName);
-        _participant->JoinSilKitSimulation(registryUri);
+        _participant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                                               participantName, registryUri);
+        _participant->JoinSilKitSimulation();
 
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({_syncParticipantNames});

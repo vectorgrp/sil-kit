@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <array>
 #include <functional>
 #include <cctype>
+#include <map>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -237,6 +238,41 @@ bool connectWithRetry(SilKit::Core::VAsioTcpPeer* peer, const SilKit::Core::VAsi
         }
     }
     return false;
+}
+
+auto selectBestEndpointFromResolverResults(const asio::ip::tcp::resolver::results_type& resolverResults)
+    -> asio::ip::tcp::endpoint
+{
+    // NB: IPv4 should be preferred over IPv6
+
+    std::multimap<int, asio::ip::tcp::endpoint> endpointsByPenalty;
+
+    for (const auto& result : resolverResults)
+    {
+        const auto resolvedEndpoint = result.endpoint();
+        const auto resolvedEndpointAddress = resolvedEndpoint.address();
+
+        if (resolvedEndpointAddress.is_v4())
+        {
+            endpointsByPenalty.emplace(2000, resolvedEndpoint);
+        }
+        else if (resolvedEndpointAddress.is_v6())
+        {
+            endpointsByPenalty.emplace(4000, resolvedEndpoint);
+        }
+        else
+        {
+            endpointsByPenalty.emplace(6000, resolvedEndpoint);
+        }
+    }
+
+    if (endpointsByPenalty.empty())
+    {
+        throw SilKit::StateError{"Unable to find suitable endpoint."};
+    }
+
+    // select the endpoint with the smallest penalty
+    return endpointsByPenalty.begin()->second;
 }
 
 } // namespace
@@ -697,7 +733,8 @@ void VAsioConnection::AcceptLocalConnections(const std::string& uniqueId)
     AcceptConnectionsOn(_localAcceptor, localEndpoint);
 }
 
-void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
+auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
+    -> std::pair<std::string, uint16_t>
 {
     // Default to TCP IPv4 catchall
     tcp::endpoint endpoint(tcp::v4(), port);
@@ -713,33 +750,36 @@ void VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
         try
         {
             resolverResults = resolver.resolve(hostName,std::to_string(static_cast<int>(port)));
-            _logger->Debug( "Accepting connections at {}:{} @{}",
-                resolverResults->host_name(),
-                resolverResults->service_name(),
-                (isIpv4(resolverResults->endpoint()) ? "TCPv4" : "TCPv6"));
         }
         catch (const asio::system_error& err)
         {
-            _logger->Error("VAsioConnection::AcceptConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName,
+            _logger->Error("VAsioConnection::AcceptTcpConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName,
                            port, err.what());
-            return;
+            throw SilKit::StateError{"Unable to resolve hostname and service."};
         }
 
-         endpoint = resolverResults->endpoint();
+        endpoint = selectBestEndpointFromResolverResults(resolverResults);
+
+        _logger->Debug("Accepting connections at {}:{} @{}",
+                       resolverResults->host_name(),
+                       resolverResults->service_name(),
+                       (isIpv4(endpoint) ? "TCPv4" : "TCPv6"));
     }
 
     if (isIpv4(endpoint))
     {
-        AcceptConnectionsOn(_tcp4Acceptor, endpoint);
+        const auto localEndpoint = AcceptConnectionsOn(_tcp4Acceptor, endpoint);
+        return std::make_pair(localEndpoint.address().to_string(), localEndpoint.port());
     }
     else
     {
-        AcceptConnectionsOn(_tcp6Acceptor, endpoint);
+        const auto localEndpoint = AcceptConnectionsOn(_tcp6Acceptor, endpoint);
+        return std::make_pair("[" + localEndpoint.address().to_string() + "]", localEndpoint.port());
     }
 }
 
 template<typename AcceptorT, typename EndpointT>
-void VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint)
+auto VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT
 {
     if (acceptor.is_open())
     {
@@ -768,6 +808,8 @@ void VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoin
     _logger->Debug("VAsioConnection is listening on {}", acceptor.local_endpoint());
 
     AcceptNextConnection(acceptor);
+
+    return acceptor.local_endpoint();
 }
 
 template<typename AcceptorT>

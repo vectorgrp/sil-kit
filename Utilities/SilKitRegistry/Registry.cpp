@@ -19,6 +19,9 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include <fstream>
+#include <random>
+
 #include "silkit/SilKitVersion.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/logging/string_utils.hpp"
@@ -27,6 +30,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioRegistry.hpp"
 #include "CommandlineParser.hpp"
 #include "ParticipantConfiguration.hpp"
+#include "Filesystem.hpp"
+#include "YamlParser.hpp"
+#include "ValidateAndSanitizeConfig.hpp"
 
 using namespace SilKit::Core;
 
@@ -55,15 +61,15 @@ auto isValidLogLevel(const std::string& levelStr)
         || logLevel == "off";
 }
 
-auto ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
-    const std::string& logLevel)
+void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
+                      const std::string& logLevel)
 {
-    auto config = std::static_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    SILKIT_ASSERT(config != nullptr);
 
-    auto it = std::find_if(config->logging.sinks.begin(),
-        config->logging.sinks.end(),
-        [](auto const& el) { return el.type == SilKit::Config::Sink::Type::Stdout;}
-    );
+    auto it = std::find_if(config->logging.sinks.begin(), config->logging.sinks.end(), [](auto const& el) {
+        return el.type == SilKit::Config::Sink::Type::Stdout;
+    });
 
     auto level = SilKit::Services::Logging::from_string(logLevel);
 
@@ -78,6 +84,34 @@ auto ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
         newSink.level = level;
         config->logging.sinks.emplace_back(std::move(newSink));
     }
+}
+
+void SanitizeConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
+                           const std::string& listenUri)
+{
+    auto originalConfiguration = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    SILKIT_ASSERT(originalConfiguration != nullptr);
+
+    // generate a dummy participant name to satisfy the constraints of the sanitization function
+    const std::string participantName =
+        originalConfiguration->participantName.empty() ? "SIL Kit Registry" : originalConfiguration->participantName;
+
+    // sanitize the configuration to select the correct listenUri
+    auto result = ValidateAndSanitizeConfig(configuration, participantName, listenUri);
+
+    // reset the participant name in the resulting configuration
+    result.participantConfiguration.participantName = originalConfiguration->participantName;
+
+    *originalConfiguration = result.participantConfiguration;
+}
+
+auto ExtractRegistryUriFromConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration)
+    -> std::string
+{
+    auto cfg = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    SILKIT_ASSERT(cfg != nullptr);
+
+    return cfg->middleware.registryUri;
 }
 
 } //namespace
@@ -100,6 +134,10 @@ int main(int argc, char** argv)
         "configuration", "c", "", "[--configuration <configuration>]",
         "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
         "format was changed in v3.6.11.");
+    commandlineParser.Add<CliParser::Option>(
+        "generate-configuration", "g", "", "[--generate-configuration <configuration>]",
+        "-g, --generate-configuration <configuration>: Generate a configuration file which includes the URI the "
+        "registry listens on. ");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
 
@@ -156,11 +194,71 @@ int main(int argc, char** argv)
             SilKit::Config::ParticipantConfigurationFromString("");
 
         ConfigureLogging(configuration, logLevel);
+        SanitizeConfiguration(configuration, listenUri);
 
-        std::cout << "SIL Kit Registry listening on " << listenUri << std::endl;
-        VAsioRegistry registry{ configuration };
-        registry.StartListening(listenUri);
-        
+        listenUri = ExtractRegistryUriFromConfiguration(configuration);
+
+        VAsioRegistry registry{configuration};
+        const auto chosenListenUri = registry.StartListening(listenUri);
+
+        std::cout << "SIL Kit Registry listening on " << chosenListenUri << std::endl;
+
+        const auto generatedConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("generate-configuration");
+        if (generatedConfigurationPathOpt.HasValue())
+        {
+            SilKit::Config::ParticipantConfiguration generatedConfiguration;
+            generatedConfiguration.middleware.registryUri = chosenListenUri;
+
+            const auto generateRandomCharacters = [&generatedConfigurationPathOpt] (std::size_t count) {
+                std::mt19937_64 gen{std::hash<std::string>{}(generatedConfigurationPathOpt.Value())
+                                    ^ std::hash<std::chrono::steady_clock::rep>{}(
+                                        std::chrono::steady_clock::now().time_since_epoch().count())};
+                std::uniform_int_distribution<char> dis;
+
+                std::string result;
+                while (result.size() != count)
+                {
+                    const char ch = dis(gen);
+                    if (std::isalnum(ch, std::locale::classic()))
+                    {
+                        result.push_back(ch);
+                    }
+                }
+                return result;
+            };
+
+            namespace fs = SilKit::Filesystem;
+
+            auto tmpPath = fs::path(generatedConfigurationPathOpt.Value() + "." + generateRandomCharacters(8) + ".tmp");
+
+            const auto serializedConfiguration = [&generatedConfiguration,
+                                                  path = generatedConfigurationPathOpt.Value()]() -> std::string {
+                const auto yamlNode = SilKit::Config::to_yaml(generatedConfiguration);
+
+                const auto jsonSuffix = std::string{".json"};
+                const auto pathHasJsonSuffix =
+                    path.size() >= jsonSuffix.size()
+                    && (path.compare(path.size() - jsonSuffix.size(), std::string::npos, jsonSuffix) == 0);
+
+                if (pathHasJsonSuffix)
+                {
+                    return SilKit::Config::yaml_to_json(yamlNode);
+                }
+                else
+                {
+                    return YAML::Dump(yamlNode);
+                }
+            }();
+
+            auto file = std::ofstream{tmpPath.string(), std::ios::out | std::ios::trunc};
+            file << serializedConfiguration << std::endl;
+            file.close();
+
+            const auto newPath = fs::path(generatedConfigurationPathOpt.Value());
+
+            fs::rename(tmpPath, newPath);
+        }
+
         if (useSignalHandler)
         {
             using namespace SilKit::registry;
