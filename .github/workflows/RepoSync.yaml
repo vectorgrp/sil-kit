@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
 jobs:
   sync_repo:
     name: Sync branch to remote Git project
@@ -17,4 +17,4 @@ jobs:
           app-id:           ${{ secrets.VECTOR_APP_ID }}
           remote-repo-url:  ${{ secrets.REMOTE_REPO_URL }}
           remote-branch:    ${{ secrets.REMOTE_BRANCH }}
-          local-branch:     origin/master
+          local-branch:     origin/main
