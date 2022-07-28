@@ -176,7 +176,6 @@ int main(int argc, char* argv[])
         printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     const char* canNetworkName = "CAN1";
 
@@ -198,7 +197,7 @@ int main(int argc, char* argv[])
     SilKit_CanController_AddFrameHandler(canController2, (void*)&transmitContext, &FrameHandler, SilKit_Direction_SendReceive,
                                       &frameHandlerId);
 
-    SilKit_Participant_CreateLogger(&logger, participant);
+    SilKit_Participant_GetLogger(&logger, participant);
 
     for (int i = 0; i < 10; i++) {
         SendFrame();

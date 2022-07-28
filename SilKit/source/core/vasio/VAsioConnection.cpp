@@ -141,22 +141,12 @@ auto printableName(const std::string& participantName) -> std::string
 //Debug  print of given peer infos
 auto printUris(const SilKit::Core::VAsioPeerInfo& info)
 {
-    std::stringstream ss;
-    for (auto& uri : info.acceptorUris)
-    {
-        ss << uri << ", ";
-    }
-    return ss.str();
+    return fmt::format("{}", fmt::join(info.acceptorUris, ", "));
 }
 
 auto printUris(const std::vector<std::string>& uris)
 {
-    std::stringstream ss;
-    for(auto&& uri: uris)
-    {
-        ss << uri << ", ";
-    }
-    return ss.str();
+    return fmt::format("{}", fmt::join(uris, ", "));
 }
 
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
@@ -423,7 +413,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
         throw std::runtime_error{"ERROR: Failed to connect to SIL Kit Registry"};
     }
 
-    _logger->Info("Connected to registry {}", printUris(registry->GetInfo().acceptorUris));
+    _logger->Info("Connected to registry '{}'", printUris(registry->GetInfo().acceptorUris));
     registry->StartAsyncRead();
 
     SendParticipantAnnouncement(registry.get());

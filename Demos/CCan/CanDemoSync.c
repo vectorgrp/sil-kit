@@ -216,7 +216,6 @@ int main(int argc, char* argv[])
         printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     SilKit_LifecycleService* lifecycleService;
     returnCode = SilKit_LifecycleServiceWithTimeSync_Create(&lifecycleService, participant);
@@ -251,6 +250,7 @@ int main(int argc, char* argv[])
 
     SilKit_ReturnCode result;
     SilKit_LifecycleConfiguration startConfig;
+    SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
     startConfig.coordinatedStart = SilKit_True;
     startConfig.coordinatedStop = SilKit_True;
     result = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);

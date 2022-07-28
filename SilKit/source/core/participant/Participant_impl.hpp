@@ -87,8 +87,8 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _logger = std::make_unique<Services::Logging::Logger>(GetParticipantName(), _participantConfig.logging);
     _connection.SetLogger(_logger.get());
 
-    _logger->Info("Creating Participant for Participant {}, SilKit-Version: {}, Middleware: {}",
-                  GetParticipantName(), Version::String(), "VAsio");
+    _logger->Info("Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
+                  _participantConfig.middleware.registryUri, Version::String());
 
 }
 
@@ -98,8 +98,6 @@ void Participant<SilKitConnectionT>::JoinSilKitSimulation()
 {
     _connection.JoinSimulation(GetRegistryUri());
     OnSilKitSimulationJoined();
-
-    _logger->Info("Participant {} has connected to {}", GetParticipantName(), GetRegistryUri());
 }
 
 template <class SilKitConnectionT>
@@ -647,17 +645,6 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetLogger() -> Services::Logging::ILogger*
 {
     return _logger.get();
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateLogger() -> Services::Logging::ILogger*
-{
-    if (_isLoggerCreated)
-    {
-        throw std::runtime_error("You may not create the logger more than once.");
-    }
-    _isLoggerCreated = true;
-    return GetLogger();
 }
 
 template <class SilKitConnectionT>

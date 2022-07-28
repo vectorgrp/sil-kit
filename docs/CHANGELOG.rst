@@ -8,6 +8,32 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [3.99.29] - UNRELEASED
 ----------------------
 
+Compatibility with 3.99.28
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): 
+- Application software interface (API): 
+- Middleware network protocol: 
+
+Changed
+~~~~~~~
+
+- Changed access to Logger so that it can be obtained at every time
+
+  - ``IntegrationBus/include/silkit/participant/IParticipant.hpp``
+
+    + old:
+
+      .. code-block:: c++
+
+        virtual auto CreateLogger() -> Services::Logging::ILogger* = 0;
+
+    + new:
+
+      .. code-block:: c++
+
+        virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
+
 Added
 ~~~~~
 

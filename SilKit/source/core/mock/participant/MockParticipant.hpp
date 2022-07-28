@@ -227,7 +227,6 @@ public:
     auto CreateSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
-    auto CreateLogger() -> Services::Logging::ILogger* override { return &logger; }
 
     void RegisterCanSimulator(Services::Can::IMsgForCanSimulator*, const std::vector<std::string>& ) override {}
     void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* , const std::vector<std::string>&) override {}

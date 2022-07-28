@@ -209,8 +209,6 @@ int main(int argc, char* argv[])
         printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
-
 
     returnCode = SilKit_EthernetController_Create(&ethernetController1, participant, "ETH0", "Ethernet1");
     returnCode = SilKit_EthernetController_Create(&ethernetController2, participant, "ETH1", "Ethernet1");

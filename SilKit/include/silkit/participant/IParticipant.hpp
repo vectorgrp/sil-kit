@@ -100,7 +100,7 @@ public:
     virtual auto CreateSystemController() -> Services::Orchestration::ISystemController* = 0;
 
     //! \brief Return the ILogger at this SIL Kit participant.
-    virtual auto CreateLogger() -> Services::Logging::ILogger* = 0;
+    virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 };
 
 } // namespace SilKit

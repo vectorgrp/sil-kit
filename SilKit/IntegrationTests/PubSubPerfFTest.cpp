@@ -60,7 +60,7 @@ protected:
 
         // Subscriber
         auto&& subscriber = testHarness.GetParticipant("Subscriber");
-        auto subLogger = subscriber->GetOrCreateLogger();
+        auto subLogger = subscriber->GetOrGetLogger();
         subLogger->Info(">>> Created Subscriber participant");
 
         int receptionCount = 0;
@@ -86,7 +86,7 @@ protected:
 
         // Publisher
         auto&& publisher = testHarness.GetParticipant("Publisher");
-        auto pubLogger = publisher->GetOrCreateLogger();
+        auto pubLogger = publisher->GetOrGetLogger();
         pubLogger->Info(">>> Created Publisher participant");
         std::vector<SilKit::Services::PubSub::IDataPublisher*> pubController;
         std::vector<uint8_t> testData = {1, 1, 1};

@@ -60,7 +60,7 @@ public:
     auto GetOrCreateSystemController() -> Services::Orchestration::ISystemController*;
     auto GetOrCreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*;
     auto GetOrCreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*;
-    auto GetOrCreateLogger() -> Services::Logging::ILogger*;
+    auto GetOrGetLogger() -> Services::Logging::ILogger*;
 
 private:
     std::string _name;

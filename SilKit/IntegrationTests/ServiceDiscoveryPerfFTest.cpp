@@ -68,7 +68,7 @@ protected:
             (void)publisher->Participant()->CreateDataPublisher(controllerName, dataSpec, 0);
         }
 
-        auto logger = publisher->GetOrCreateLogger();
+        auto logger = publisher->GetOrGetLogger();
         auto* lifecycleService = publisher->GetOrCreateLifecycleServiceWithTimeSync();
         auto* timeSyncService = lifecycleService->GetTimeSyncService();
 

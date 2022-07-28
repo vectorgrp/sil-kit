@@ -100,11 +100,11 @@ auto SimParticipant::GetOrCreateLifecycleServiceWithTimeSync() -> Services::Orch
     return _lifecycleServiceWithTimeSync;
 }
 
-auto SimParticipant::GetOrCreateLogger() -> Services::Logging::ILogger*
+auto SimParticipant::GetOrGetLogger() -> Services::Logging::ILogger*
 {
     if (!_logger)
     {
-        _logger = _participant->CreateLogger();
+        _logger = _participant->GetLogger();
     }
     return _logger;
 }

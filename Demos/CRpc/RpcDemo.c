@@ -216,7 +216,6 @@ int main(int argc, char* argv[])
         printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
-    printf("Creating participant '%s' for simulation '%s'\n", participantName, registryUri);
 
     if (strcmp(participantName, "Client") == 0)
     {

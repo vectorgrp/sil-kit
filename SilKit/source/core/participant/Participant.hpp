@@ -146,7 +146,6 @@ public:
     auto CreateSystemController() -> Services::Orchestration::ISystemController* override;
     auto GetSystemController() -> Services::Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
-    auto CreateLogger() -> Services::Logging::ILogger* override;
     auto GetLogger() -> Services::Logging::ILogger* override;
     auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* override;
     auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* override;

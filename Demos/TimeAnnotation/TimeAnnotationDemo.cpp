@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* logger = participant->CreateLogger();
+        auto* logger = participant->GetLogger();
         auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
         canController->AddFrameTransmitHandler(

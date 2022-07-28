@@ -58,14 +58,8 @@ SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
         if (participant == nullptr)
         {
             SilKit_error_string =
-                "Creating Simulation Participant failed due to unknown error and returned null pointer.";
+                "Creating simulation participant failed due to an unknown error and returned null pointer.";
             return SilKit_ReturnCode_UNSPECIFIEDERROR;
-        }
-
-        auto* logger = participant->CreateLogger();
-        if (logger)
-        {
-            logger->Info("Creating participant '{}' with registry URI {}", cParticipantName, cRegistryUri);
         }
 
         *outParticipant = reinterpret_cast<SilKit_Participant*>(participant);
@@ -92,14 +86,14 @@ SilKit_ReturnCode SilKit_Participant_Destroy(SilKit_Participant* participant)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Participant_CreateLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
+SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
 {
     ASSERT_VALID_OUT_PARAMETER(outLogger);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto logger = cppParticipant->CreateLogger();
+        auto logger = cppParticipant->GetLogger();
         *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
         return SilKit_ReturnCode_SUCCESS;
     }

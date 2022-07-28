@@ -143,7 +143,7 @@ SilKit_HandlerId id;
 (void) SilKit_RpcClient_Call(nullptr, nullptr, nullptr);
 (void) SilKit_RpcClient_SetCallResultHandler(nullptr, nullptr, nullptr);
 (void) SilKit_ReturnCodeToString(nullptr, SilKit_ReturnCode_BADPARAMETER);
-(void) SilKit_Participant_CreateLogger(nullptr, nullptr);
+(void) SilKit_Participant_GetLogger(nullptr, nullptr);
 (void)SilKit_GetLastErrorString();
 }
 

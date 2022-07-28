@@ -231,33 +231,14 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_mixed_access_twice)
         std::runtime_error);
 }
 
-TEST_F(ParticipantTest, error_on_create_logger_twice)
+TEST_F(ParticipantTest, no_error_on_create_logger_twice)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
 
     EXPECT_NO_THROW({
-        try
-        {
-            participant->CreateLogger(); // ignore returned controller
-        }
-        catch (const std::exception&)
-        {
-            throw;
-        }
+        participant->GetLogger();
+        participant->GetLogger();
     });
-
-    EXPECT_THROW(
-        {
-            try
-            {
-                participant->CreateLogger(); // ignore returned controller
-            }
-            catch (const std::exception&)
-            {
-                throw;
-            }
-        },
-        std::runtime_error);
 }
 } // anonymous namespace
