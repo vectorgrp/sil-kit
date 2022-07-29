@@ -55,7 +55,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Participant.hpp"
 
 #include "MessageTracing.hpp"
-#include "UuidRandom.hpp"
+#include "Uuid.hpp"
 #include "Assert.hpp"
 
 namespace SilKit {
@@ -320,7 +320,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
 
     SilKit::Config::DataSubscriber controllerConfig;
     // Use a unique name to avoid collisions of several subscribers on same topic on one participant
-    controllerConfig.name = Util::Uuid::to_string(Util::Uuid::generate());
+    controllerConfig.name = to_string(Util::Uuid::GenerateRandom());
     std::string network = linkName;
 
     return CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
@@ -338,7 +338,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
         throw SilKit::ConfigurationError("DataPublishers do not support history > 1.");
     }
 
-    std::string network = Util::Uuid::to_string(Util::Uuid::generate());
+    std::string network = to_string(Util::Uuid::GenerateRandom());
 
     SilKit::Config::DataPublisher controllerConfig = GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
@@ -378,7 +378,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     }
 
     // Use unique network name that same topic for multiple DataSubscribers on one participant works
-    std::string network = Util::Uuid::to_string(Util::Uuid::generate());
+    std::string network = to_string(Util::Uuid::GenerateRandom());
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriber;
@@ -403,7 +403,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
 
     SilKit::Config::RpcServer controllerConfig;
     // Use a unique name to avoid collisions of several RpcSevers on same functionName on one participant
-    controllerConfig.name = Util::Uuid::to_string(Util::Uuid::generate());
+    controllerConfig.name = to_string(Util::Uuid::GenerateRandom());
     std::string network = clientUUID;
 
     // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
@@ -421,7 +421,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
                                                      const SilKit::Services::Rpc::RpcClientSpec& dataSpec,
                                                  Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient*
 {
-    auto network = Util::Uuid::to_string(Util::Uuid::generate());
+    auto network = to_string(Util::Uuid::GenerateRandom());
 
     SilKit::Config::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.Topic());
@@ -458,7 +458,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
                                                  Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer*
 {
     // Use unique network name that same functionName for multiple RpcServers on one participant works
-    std::string network = Util::Uuid::to_string(Util::Uuid::generate());
+    std::string network = to_string(Util::Uuid::GenerateRandom());
 
     SilKit::Config::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.Topic());

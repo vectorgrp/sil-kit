@@ -62,7 +62,9 @@ TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_d
     fixedTimeProvider.now = std::chrono::nanoseconds{123456};
     ON_CALL(fixedTimeProvider, Now()).WillByDefault(testing::Return(fixedTimeProvider.now));
 
-    CreateRpcServer();
+    IRpcServer* iRpcServer = CreateRpcServer();
+    iRpcServer->SetCallHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallHandler));
+
     IRpcClient* iRpcClient = CreateRpcClient();
 
     EXPECT_CALL(participant->GetSilKitConnection(), Mock_SendMsg(testing::_, testing::A<FunctionCall>()))
@@ -76,6 +78,33 @@ TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_d
     participant->GetSilKitConnection().Test_SetTimeProvider(&fixedTimeProvider);
 
     iRpcClient->Call(sampleData);
+}
+
+TEST_F(RpcClientTest, rpc_client_call_receives_internal_server_error_when_server_has_no_handler)
+{
+    SilKit::Core::Tests::MockTimeProvider fixedTimeProvider;
+    fixedTimeProvider.now = std::chrono::nanoseconds{123456};
+    ON_CALL(fixedTimeProvider, Now()).WillByDefault(testing::Return(fixedTimeProvider.now));
+
+    CreateRpcServer();
+    IRpcClient* iRpcClient = CreateRpcClient();
+    iRpcClient->SetCallResultHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallResultHandler));
+
+    const auto userContext = reinterpret_cast<void*>(uintptr_t(12345));
+
+    const auto rpcCallResultEventMatcher = testing::Matcher<RpcCallResultEvent>{
+        testing::AllOf(testing::Field(&RpcCallResultEvent::timestamp, fixedTimeProvider.now),
+                       testing::Field(&RpcCallResultEvent::userContext, userContext),
+                       testing::Field(&RpcCallResultEvent::resultData, testing::IsEmpty()),
+                       testing::Field(&RpcCallResultEvent::callStatus, RpcCallStatus::InternalServerError))};
+
+    EXPECT_CALL(callbacks, CallResultHandler(testing::Eq(iRpcClient), rpcCallResultEventMatcher)).Times(1);
+
+    // HACK: Change the time provider for the captured services. Must happen _after_ the RpcServer and RpcClient (and
+    //       therefore the RpcServerInternal) have been created.
+    participant->GetSilKitConnection().Test_SetTimeProvider(&fixedTimeProvider);
+
+    iRpcClient->Call(sampleData, userContext);
 }
 
 } // anonymous namespace

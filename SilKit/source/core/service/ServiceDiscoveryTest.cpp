@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ServiceDiscovery.hpp"
 #include "string_utils_internal.hpp"
-#include "UuidRandom.hpp"
+#include "Uuid.hpp"
 #include "MockParticipant.hpp"
 
 namespace {
@@ -102,12 +102,11 @@ protected:
 
 TEST(ServiceDescriptor, portable_hash_function)
 {
-    using namespace SilKit::Util::Uuid;
     const auto numStrings = 1000;
     std::vector<std::string> testStrings;
     for (auto i = 0; i < numStrings; i++)
     {
-        testStrings.push_back(to_string(generate()));
+        testStrings.push_back(to_string(Uuid::GenerateRandom()));
     }
     std::set<uint64_t> hashes;
     for (const auto& s: testStrings)

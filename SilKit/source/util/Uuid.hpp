@@ -21,30 +21,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <iomanip>
-#include <iostream>
-#include <random>
-#include <sstream>
 #include <string>
+#include <iosfwd>
+
+#include <cstdint>
 
 namespace SilKit {
 namespace Util {
-namespace Uuid {
 
-// UUID implementation based on 2x64bit random numbers
-struct UUID
+//! Represents a 128 bit UUID.
+struct Uuid
 {
     uint64_t ab;
     uint64_t cd;
+
+    //! Generate a random Uuid.
+    static auto GenerateRandom() -> Uuid;
 };
 
-bool        operator==(const UUID& lhs, const UUID& rhs);
-bool        operator!=(const UUID& lhs, const UUID& rhs);
-bool        operator<(const UUID& lhs, const UUID& rhs);
+bool operator==(const Uuid& lhs, const Uuid& rhs);
+bool operator!=(const Uuid& lhs, const Uuid& rhs);
+bool operator<(const Uuid& lhs, const Uuid& rhs);
 
-UUID        generate();
-std::string to_string(const UUID& u);
+auto operator<<(std::ostream& ostream, const Uuid& uuid) -> std::ostream&;
 
-} // namespace Uuid
+auto to_string(const Uuid& uuid) -> std::string;
+
 } // namespace Util
 } // namespace SilKit

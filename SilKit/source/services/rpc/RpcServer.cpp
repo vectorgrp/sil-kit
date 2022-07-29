@@ -24,8 +24,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "RpcServer.hpp"
 #include "RpcDatatypeUtils.hpp"
-#include "UuidRandom.hpp"
+#include "Uuid.hpp"
 #include "YamlParser.hpp"
+#include "Assert.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -54,7 +55,7 @@ void RpcServer::RegisterServiceDiscovery()
                     std::string tmp;
                     if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
                     {
-                        throw std::runtime_error{"Unknown key in supplementalData"};
+                        throw SilKit::StateError{"Unknown key in supplementalData"};
                     }
                     return tmp;
                 };
@@ -77,18 +78,30 @@ void RpcServer::RegisterServiceDiscovery()
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData)
 {
-    if (callHandle != nullptr)
+    if (callHandle == nullptr)
     {
+        std::string errorMsg = "RpcServer::SubmitResult() must not be called with an invalid call handle!";
+        _logger->Error(errorMsg);
+        throw SilKit::StateError{std::move(errorMsg)};
+    }
+
+    // counts the number of RpcServerInternal's living within this RpcServer that returned the FunctionCall
+    uint32_t submitResultCounter = 0;
+
+    {
+        std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
         for (auto* internalRpcServer : _internalRpcServers)
         {
-            internalRpcServer->SubmitResult(callHandle, resultData);
+            submitResultCounter += (internalRpcServer->SubmitResult(callHandle, resultData) ? 1 : 0);
         }
     }
-    else
+
+    if (submitResultCounter != 1)
     {
-        std::string errorMsg{"RpcServer::SubmitResult() must not be called with an invalid call handle!"};
+        // NB: Multiple returns are possible, but only from _different_ RpcServers
+        std::string errorMsg = "RpcServer::SubmitResult() returned to multiple clients";
         _logger->Error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        throw SilKit::StateError{std::move(errorMsg)};
     }
 }
 
@@ -97,12 +110,16 @@ void RpcServer::AddInternalRpcServer(const std::string& clientUUID, std::string 
 {
     auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
         _dataSpec.Topic(), clientUUID, joinedMediaType, clientLabels, _handler, this));
+
+    std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
     _internalRpcServers.push_back(internalRpcServer);
 }
 
 void RpcServer::SetCallHandler(RpcCallHandler handler)
 {
     _handler = handler;
+
+    std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
     for (auto* internalRpcServer : _internalRpcServers)
     {
         internalRpcServer->SetRpcHandler(handler);

@@ -96,10 +96,8 @@ TEST_F(RpcITest, test_1client_1server_100functions_sync_vasio)
         std::string functionName = std::to_string(i);
         std::string clientControllerName = "ClientCtrl" + std::to_string(i);
         std::string serverControllerName = "ServerCtrl" + std::to_string(i);
-        RpcClientInfo cInfo{clientControllerName, functionName, "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn};
-        RpcServerInfo sInfo{serverControllerName, functionName, "A", {}, defaultMsgSize, numCallsToReceive};
-        rpcs[0].rpcClients.push_back(std::move(cInfo));
-        rpcs[1].rpcServers.push_back(std::move(sInfo));
+        rpcs[0].AddRpcClient({clientControllerName, functionName, "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn});
+        rpcs[1].AddRpcServer({serverControllerName, functionName, "A", {}, defaultMsgSize, numCallsToReceive});
     }
 
     RunSyncTest(rpcs);

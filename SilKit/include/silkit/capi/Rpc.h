@@ -55,6 +55,7 @@ typedef uint32_t SilKit_RpcCallStatus;
 #define SilKit_CallStatus_SUCCESS               ((uint32_t) 0)
 #define SilKit_CallStatus_SERVER_NOT_REACHABLE  ((uint32_t) 1)
 #define SilKit_CallStatus_UNDEFINED_ERROR       ((uint32_t) 2)
+#define SilKit_CallStatus_INTERNAL_SERVER_ERROR ((uint32_t) 3)
 
 typedef struct {
     SilKit_StructHeader structHeader;
@@ -70,8 +71,8 @@ typedef struct {
     SilKit_StructHeader structHeader;
     //! Send timestamp of the event
     SilKit_NanosecondsTime timestamp;
-    //! The call handle that uniquely identifies the call
-    SilKit_RpcCallHandle* callHandle;
+    //! The user context pointer as it was provided when the call was triggered
+    void* userContext;
     //! The status of the RPC invocation. Communicates whether the call failed or succeeded
     SilKit_RpcCallStatus callStatus;
     //! The data of the call result
@@ -156,11 +157,11 @@ typedef SilKit_ReturnCode (*SilKit_RpcClient_Create_t)(SilKit_RpcClient** out, S
 * \param outHandle The handle by which future results of this call can be identified.
 * \param argumentData The data that should be transmitted to the RPC server for this call
 */
-SilKitAPI SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, SilKit_RpcCallHandle** outHandle,
-    const SilKit_ByteVector* argumentData);
+SilKitAPI SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self,
+    const SilKit_ByteVector* argumentData, void* userContext);
 
-typedef SilKit_ReturnCode(*SilKit_RpcClient_Call_t)(SilKit_RpcClient* self, SilKit_RpcCallHandle** outHandle,
-    const SilKit_ByteVector* argumentData);
+typedef SilKit_ReturnCode(*SilKit_RpcClient_Call_t)(SilKit_RpcClient* self,
+    const SilKit_ByteVector* argumentData, void* userContext);
 
 /*! \brief Overwrite the call result handler of this client
 * \param self The RPC client that should trigger the remote procedure call.

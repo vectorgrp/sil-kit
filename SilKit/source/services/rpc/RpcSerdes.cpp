@@ -25,39 +25,39 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const CallUUID& msg)
+inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const Util::Uuid& uuid)
 {
-    buffer << msg.ab << msg.cd;
+    buffer << uuid.ab << uuid.cd;
     return buffer;
 }
 
-inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, CallUUID& msg)
+inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Util::Uuid& uuid)
 {
-    buffer >> msg.ab >> msg.cd;
+    buffer >> uuid.ab >> uuid.cd;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FunctionCall& msg)
 {
-    buffer << msg.timestamp << msg.callUUID << msg.data;
+    buffer << msg.timestamp << msg.callUuid << msg.data;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FunctionCall& msg)
 {
-    buffer >> msg.timestamp >> msg.callUUID >> msg.data;
+    buffer >> msg.timestamp >> msg.callUuid >> msg.data;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const FunctionCallResponse& msg)
 {
-    buffer << msg.timestamp << msg.callUUID << msg.data;
+    buffer << msg.timestamp << msg.callUuid << msg.data << msg.status;
     return buffer;
 }
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, FunctionCallResponse& msg)
 {
-    buffer >> msg.timestamp >> msg.callUUID >> msg.data;
+    buffer >> msg.timestamp >> msg.callUuid >> msg.data >> msg.status;
     return buffer;
 }
 

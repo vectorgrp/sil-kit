@@ -25,29 +25,30 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
 #include "WireRpcMessages.hpp"
+#include "Uuid.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-class CallHandleImpl : public IRpcCallHandle
+class IRpcCallHandle
 {
-  public:
-    CallHandleImpl(CallUUID callUUID) : _callUUID{ callUUID.ab, callUUID.cd } {}
+public:
+    virtual ~IRpcCallHandle() = default;
+};
 
-    // Operators for IRpcCallHandle
-    bool operator==(const IRpcCallHandle& other) const override 
-    { 
-        auto otherCallUUID = static_cast<const CallHandleImpl&>(other)._callUUID; 
-        return otherCallUUID.ab == _callUUID.ab && otherCallUUID.cd == _callUUID.cd;
-    }
-    bool operator!=(const IRpcCallHandle& other) const override
+class RpcCallHandle : public IRpcCallHandle
+{
+public:
+    RpcCallHandle(Util::Uuid callUuid)
+        : _callUuid{callUuid}
     {
-        auto otherCallUUID = static_cast<const CallHandleImpl&>(other)._callUUID;
-        return otherCallUUID.ab != _callUUID.ab || otherCallUUID.cd != _callUUID.cd;
     }
-    
-    CallUUID _callUUID;
+
+    auto GetCallUuid() const -> const Util::Uuid& { return _callUuid; }
+
+private:
+    Util::Uuid _callUuid{};
 };
 
 } // namespace Rpc

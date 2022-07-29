@@ -25,11 +25,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "IParticipantInternal.hpp"
 #include "RpcDatatypeUtils.hpp"
-#include "UuidRandom.hpp"
+#include "Uuid.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Rpc {
+
+namespace {
+
+auto ToRpcCallStatus(const FunctionCallResponse::Status status) -> RpcCallStatus
+{
+    switch (status)
+    {
+    case FunctionCallResponse::Status::Success: return RpcCallStatus::Success;
+    case FunctionCallResponse::Status::InternalError: return RpcCallStatus::InternalServerError;
+    }
+
+    return RpcCallStatus::UndefinedError;
+}
+
+} // namespace
 
 RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                      const SilKit::Services::Rpc::RpcClientSpec& dataSpec, const std::string& clientUUID,
@@ -53,7 +68,7 @@ void RpcClient::RegisterServiceDiscovery()
                 std::string tmp;
                 if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
                 {
-                    throw std::runtime_error{"Unknown key in supplementalData"};
+                    throw SilKit::StateError{"Unknown key in supplementalData"};
                 }
                 return tmp;
             };
@@ -75,24 +90,27 @@ void RpcClient::RegisterServiceDiscovery()
         Core::Discovery::controllerTypeRpcServerInternal, _clientUUID);
 }
 
-IRpcCallHandle* RpcClient::Call(Util::Span<const uint8_t> data)
+void RpcClient::Call(Util::Span<const uint8_t> data, void* userContext)
 {
     if (_numCounterparts == 0)
     {
         if (_handler)
-            _handler(this, RpcCallResultEvent{_timeProvider->Now(), nullptr, RpcCallStatus::ServerNotReachable, {}});
-        return nullptr;
+        {
+            _handler(this,
+                     RpcCallResultEvent{_timeProvider->Now(), userContext, RpcCallStatus::ServerNotReachable, {}});
+        }
     }
     else
     {
-        Util::Uuid::UUID uuid = Util::Uuid::generate();
-        auto callUUID = CallUUID{uuid.ab, uuid.cd};
-        auto callHandle = std::make_unique<CallHandleImpl>(callUUID);
-        auto* callHandlePtr = callHandle.get();
-        _detachedCallHandles[to_string(callUUID)] = std::make_pair(_numCounterparts, std::move(callHandle));
-        FunctionCall msg{_timeProvider->Now(), std::move(callUUID), Util::ToStdVector(data)};
+        const auto callUuid = Util::Uuid::GenerateRandom();
+
+        {
+            std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
+            _activeCalls.emplace(callUuid, RpcCallInfo{static_cast<int32_t>(_numCounterparts), userContext});
+        }
+
+        FunctionCall msg{_timeProvider->Now(), callUuid, Util::ToStdVector(data)};
         _participant->SendMsg(this, std::move(msg));
-        return callHandlePtr;
     }
 }
 
@@ -108,26 +126,33 @@ void RpcClient::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const Functio
 
 void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
 {
-    auto it = _detachedCallHandles.find(to_string(msg.callUUID));
-    if (it != _detachedCallHandles.end())
-    {
-        if (_handler)
+    auto it = [this, &msg] {
+        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
+
+        auto it = _activeCalls.find(msg.callUuid);
+
+        if (it == _activeCalls.end())
         {
-            _handler(this,
-                     RpcCallResultEvent{msg.timestamp, (*it).second.second.get(), RpcCallStatus::Success, msg.data});
+            std::string errorMsg{"RpcClient: Received function call response with an unknown uuid"};
+            _logger->Error(errorMsg);
+            throw SilKit::StateError{errorMsg};
         }
-        // NB: Possibly multiple responses are received (e.g. 1 client, 2 servers).
-        // Decrease the count of responses and erase the call handle if all arrived.
-        auto* numReceived = &(*it).second.first;
-        (*numReceived)--;
-        if (*numReceived <= 0)
-            _detachedCallHandles.erase(it);
-    }
-    else
+
+        return it;
+    }();
+
+    if (_handler)
     {
-        std::string errorMsg{"RpcClient: Received unknown function call response."};
-        _logger->Error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        _handler(this,
+                 RpcCallResultEvent{msg.timestamp, it->second.GetUserContext(), ToRpcCallStatus(msg.status), msg.data});
+    }
+
+    // NB: If the call was made to multiple servers, multiple returns will be received. Only forget about the call
+    //     after all returns have been received.
+    if (it->second.DecrementRemainingReturnCount() <= 0)
+    {
+        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
+        _activeCalls.erase(it);
     }
 }
 

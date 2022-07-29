@@ -129,7 +129,7 @@ void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_R
 
     if (event->callStatus == SilKit_CallStatus_SUCCESS)
     {
-        printf("[client] Call returned: ");
+        printf("[client] Call %u returned: ", (unsigned)(uintptr_t)event->userContext);
         PrintByteVector(&event->resultData);
     }
     else
@@ -242,10 +242,9 @@ int main(int argc, char* argv[])
             buffer[1] = i;
             buffer[2] = i;
             SilKit_ByteVector argumentData = { &buffer[0], 3 };
-            printf("[Client] Call dispatched: ");
+            printf("[Client] Call %u dispatched: ", (unsigned)i);
             PrintByteVector(&argumentData);
-            SilKit_RpcCallHandle* callHandle;
-            SilKit_RpcClient_Call(client, &callHandle, &argumentData);
+            SilKit_RpcClient_Call(client, &argumentData, (void*)(uintptr_t)i);
         }
     }
     else if (strcmp(participantName, "Server") == 0)

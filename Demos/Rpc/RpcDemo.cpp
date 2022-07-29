@@ -56,11 +56,11 @@ void Call(IRpcClient* client)
         static_cast<uint8_t>(rand() % 10),
         static_cast<uint8_t>(rand() % 10) };
 
-    auto callHandle = client->Call(argumentData);
-    if (callHandle)
-    {
-        std::cout << "<< Calling with argumentData=" << argumentData << std::endl;
-    }
+    const auto userContext = reinterpret_cast<void*>(uintptr_t(rand()));
+
+    client->Call(argumentData, userContext);
+
+    std::cout << "<< Calling with argumentData=" << argumentData << " and userContext=" << userContext << std::endl;
 }
 
 void CallReturn(IRpcClient* /*cbClient*/, RpcCallResultEvent event)
@@ -68,13 +68,16 @@ void CallReturn(IRpcClient* /*cbClient*/, RpcCallResultEvent event)
     switch (event.callStatus)
     {
     case RpcCallStatus::Success:
-        std::cout << ">> Call returned with resultData=" << event.resultData << std::endl;
+        std::cout << ">> Call " << event.userContext << " returned with resultData=" << event.resultData << std::endl;
         break;
     case RpcCallStatus::ServerNotReachable:
-        std::cout << "Warning: Call failed with RpcCallStatus::ServerNotReachable" << std::endl;
+        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::ServerNotReachable" << std::endl;
         break;
     case RpcCallStatus::UndefinedError:
-        std::cout << "Warning: Call failed with RpcCallStatus::UndefinedError" << std::endl;
+        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::UndefinedError" << std::endl;
+        break;
+    case RpcCallStatus::InternalServerError:
+        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::InternalServerError" << std::endl;
         break;
     }
 }

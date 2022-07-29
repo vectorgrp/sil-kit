@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IMsgForRpcClient.hpp"
 #include "IParticipantInternal.hpp"
 #include "RpcCallHandle.hpp"
+#include "Uuid.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -52,7 +53,7 @@ public:
 
     void RegisterServiceDiscovery();
 
-    auto Call(Util::Span<const uint8_t> data) -> IRpcCallHandle* override;
+    void Call(Util::Span<const uint8_t> data, void* userContext = nullptr) override;
 
     void SetCallResultHandler(RpcCallResultHandler handler) override;
 
@@ -68,17 +69,38 @@ public:
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
+    class RpcCallInfo
+    {
+    public:
+        RpcCallInfo(int32_t remainingReturnCount, void* userContext)
+            : _remainingReturnCount{remainingReturnCount}
+            , _userContext{userContext}
+        {
+        }
+
+        auto DecrementRemainingReturnCount() -> int32_t { return --_remainingReturnCount; }
+
+        auto GetUserContext() const -> void* { return _userContext; }
+
+    private:
+        int32_t _remainingReturnCount = 0;
+        void* _userContext = nullptr;
+    };
+
     SilKit::Services::Rpc::RpcClientSpec _dataSpec;
     std::string _clientUUID;
 
     RpcCallResultHandler _handler;
 
     Core::ServiceDescriptor _serviceDescriptor{};
-    uint32_t _numCounterparts{0};
-    std::map<std::string, std::pair<uint32_t, std::unique_ptr<CallHandleImpl>>> _detachedCallHandles;
+    std::atomic<uint32_t> _numCounterparts{0};
+    std::map<std::string, std::pair<uint32_t, std::unique_ptr<RpcCallHandle>>> _detachedCallHandles;
     Services::Logging::ILogger* _logger;
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
+
+    std::mutex _activeCallsMx;
+    std::map<Util::Uuid, RpcCallInfo> _activeCalls;
 };
 
 // ================================================================================

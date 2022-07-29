@@ -5,6 +5,24 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.30] - UNRELEASED
+----------------------
+
+Compatibility with 3.99.29
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: No
+
+Changed
+~~~~~~~
+
+- RPC
+    - Added new ``RpcCallStatus::InternalServerError`` and ``SilKit_CallStatus_INTERNAL_SERVER_ERROR``.
+    - ``IRpcClient::Call`` now takes an additional ``userContext`` parameter and does not return a ``IRpcCallHandle *`` anymore.
+      The ``userContext`` is presented in the ``RpcCallReturnHandler`` in the ``RpcCallReturnEvent`` structure instead of the ``callHandle``.
+
 [3.99.29] - 28-07-2022
 ----------------------
 

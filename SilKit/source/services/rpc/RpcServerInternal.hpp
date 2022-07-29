@@ -49,7 +49,11 @@ public:
 
     void SetRpcHandler(RpcCallHandler handler);
 
-    void SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<const uint8_t> resultData);
+    //! \brief Tries to submit the result to the call associated with the call handle.
+    //! \param callHandlePtr The call handle identifying the call to submit a result for
+    //! \param resultData The result of the call
+    //! \returns true if the call was handled, false if the call was unknown to this RpcServerInternal
+    bool SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<const uint8_t> resultData);
 
     //! \brief Accepts messages originating from SIL Kit communications.
     void ReceiveMsg(const Core::IServiceEndpoint* from, const FunctionCall& msg) override;
@@ -71,7 +75,7 @@ private:
     IRpcServer* _parent;
 
     Core::ServiceDescriptor _serviceDescriptor{};
-    std::map<std::string, std::unique_ptr<CallHandleImpl>> _receivedCallHandles;
+    std::map<Util::Uuid, std::shared_ptr<RpcCallHandle>> _activeCalls;
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
 };

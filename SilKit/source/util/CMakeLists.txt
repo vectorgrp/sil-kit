@@ -49,8 +49,8 @@ target_link_libraries(SilKitSetThreadName
     PRIVATE SilKitInterface)
 
 add_library(SilKitUuid STATIC
-    UuidRandom.hpp
-    UuidRandom.cpp
+    Uuid.hpp
+    Uuid.cpp
 )
 target_include_directories(SilKitUuid
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}

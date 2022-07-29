@@ -20,12 +20,12 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
+add_subdirectory(util)
 add_subdirectory(wire)
 add_subdirectory(config)
 add_subdirectory(tracing)
 add_subdirectory(core)
 add_subdirectory(services)
-add_subdirectory(util)
 add_subdirectory(extensions)
 add_subdirectory(capi)
 

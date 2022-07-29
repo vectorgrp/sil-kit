@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ConfigurationTestUtils.hpp"
 
+#include "functional.hpp"
 #include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
 #include "IParticipantInternal.hpp"
@@ -62,6 +63,7 @@ protected:
             numCalls = newNumCalls;
             numCallsToReturn = newNumCallsToReturn;
         }
+
         RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName,
                       const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
                       size_t newMessageSizeInBytes, uint32_t newNumCalls, uint32_t newNumCallsToReturn,
@@ -78,6 +80,7 @@ protected:
             expectedReturnDataUnordered = newExpectedReturnDataUnordered;
         }
 
+        bool expectIncreasingData;
         std::string controllerName;
         std::string functionName;
         std::string mediaType;
@@ -85,52 +88,62 @@ protected:
         size_t messageSizeInBytes;
         uint32_t numCalls;
         uint32_t numCallsToReturn;
-        bool expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
-        uint32_t callCounter{0};
-        uint32_t callReturnedSuccessCounter{0};
-        bool allCalled{false};
-        bool allCallsReturned{false};
-        IRpcClient* rpcClient;
+    };
+
+    class RpcClientState
+    {
+    public:
+        RpcClientState(RpcClientInfo info)
+            : info{std::move(info)}
+        {
+        }
+
+        RpcClientInfo info;
+
+        std::atomic<uint32_t> callCounter{0};
+        std::atomic<uint32_t> callReturnedSuccessCounter{0};
+        std::atomic<bool> allCalled{false};
+        std::atomic<bool> allCallsReturned{false};
+
+        IRpcClient* rpcClient = nullptr;
 
         void Call()
         {
             if (!allCalled)
             {
-                auto argumentData = std::vector<uint8_t>(messageSizeInBytes, static_cast<uint8_t>(callCounter));
-                auto callHandle = rpcClient->Call(argumentData);
-                if (callHandle)
+                auto argumentData = std::vector<uint8_t>(info.messageSizeInBytes, static_cast<uint8_t>(callCounter));
+                rpcClient->Call(argumentData, reinterpret_cast<void*>(uintptr_t(callCounter)));
+
+                callCounter++;
+                if (callCounter >= info.numCalls)
                 {
-                    callCounter++;
-                    if (callCounter >= numCalls)
-                    {
-                        allCalled = true;
-                    }
+                    allCalled = true;
                 }
             }
         }
 
         void OnCallReturned(const std::vector<uint8_t>& returnData)
         {
-            if (expectIncreasingData)
+            if (info.expectIncreasingData)
             {
                 auto expectedData = std::vector<uint8_t>(
-                    messageSizeInBytes, static_cast<uint8_t>(callReturnedSuccessCounter + rpcFuncIncrement));
+                    info.messageSizeInBytes, static_cast<uint8_t>(callReturnedSuccessCounter + rpcFuncIncrement));
                 EXPECT_EQ(returnData, expectedData);
             }
             else
             {
-                auto foundDataIter =
-                    std::find(expectedReturnDataUnordered.begin(), expectedReturnDataUnordered.end(), returnData);
-                EXPECT_EQ(foundDataIter != expectedReturnDataUnordered.end(), true);
-                if (foundDataIter != expectedReturnDataUnordered.end())
+                auto foundDataIter = std::find(info.expectedReturnDataUnordered.begin(),
+                                               info.expectedReturnDataUnordered.end(), returnData);
+                EXPECT_EQ(foundDataIter != info.expectedReturnDataUnordered.end(), true);
+                if (foundDataIter != info.expectedReturnDataUnordered.end())
                 {
-                    expectedReturnDataUnordered.erase(foundDataIter);
+                    info.expectedReturnDataUnordered.erase(foundDataIter);
                 }
             }
 
             callReturnedSuccessCounter++;
-            if (callReturnedSuccessCounter >= numCallsToReturn)
+            if (callReturnedSuccessCounter >= info.numCallsToReturn)
             {
                 allCallsReturned = true;
             }
@@ -152,8 +165,7 @@ protected:
             numCallsToReceive = newNumCallsToReceive;
         }
         RpcServerInfo(const std::string& newControllerName, const std::string& newFunctionName,
-                      const std::string& newMediaType,
-                      const std::vector<SilKit::Services::MatchingLabel>& newLabels,
+                      const std::string& newMediaType, const std::vector<SilKit::Services::MatchingLabel>& newLabels,
                       size_t newMessageSizeInBytes, uint32_t newNumCallsToReceive,
                       const std::vector<std::vector<uint8_t>>& newExpectedDataUnordered)
         {
@@ -175,33 +187,46 @@ protected:
         uint32_t numCallsToReceive;
         bool expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedDataUnordered;
-        uint32_t receiveCallCounter{0};
-        bool allReceived{false};
-        IRpcServer* rpcServer;
+        IRpcServer* rpcServer = nullptr;
+    };
+
+    struct RpcServerState
+    {
+        RpcServerState(RpcServerInfo info)
+            : info{std::move(info)}
+        {
+        }
+
+        RpcServerInfo info;
+
+        std::atomic<uint32_t> receiveCallCounter{0};
+        std::atomic<bool> allReceived{false};
+
+        IRpcServer* rpcServer = nullptr;
 
         void ReceiveCall(const std::vector<uint8_t>& argumentData)
         {
             if (!allReceived)
             {
-                if (expectIncreasingData)
+                if (info.expectIncreasingData)
                 {
                     auto expectedData =
-                        std::vector<uint8_t>(messageSizeInBytes, static_cast<uint8_t>(receiveCallCounter));
+                        std::vector<uint8_t>(info.messageSizeInBytes, static_cast<uint8_t>(receiveCallCounter));
                     EXPECT_EQ(argumentData, expectedData);
                 }
                 else
                 {
                     auto foundDataIter =
-                        std::find(expectedDataUnordered.begin(), expectedDataUnordered.end(), argumentData);
-                    EXPECT_EQ(foundDataIter != expectedDataUnordered.end(), true);
-                    if (foundDataIter != expectedDataUnordered.end())
+                        std::find(info.expectedDataUnordered.begin(), info.expectedDataUnordered.end(), argumentData);
+                    EXPECT_EQ(foundDataIter != info.expectedDataUnordered.end(), true);
+                    if (foundDataIter != info.expectedDataUnordered.end())
                     {
-                        expectedDataUnordered.erase(foundDataIter);
+                        info.expectedDataUnordered.erase(foundDataIter);
                     }
                 }
 
                 receiveCallCounter++;
-                if (receiveCallCounter >= numCallsToReceive)
+                if (receiveCallCounter >= info.numCallsToReceive)
                 {
                     allReceived = true;
                 }
@@ -216,21 +241,27 @@ protected:
             name = newName;
             expectedFunctionNames = newExpectedFunctionNames;
         }
-        RpcParticipant(const std::string& newName, const std::vector<RpcServerInfo>& newRpcServers,
-                       const std::vector<RpcClientInfo>& newRpcClients,
-                       const std::vector<std::string>& newExpectedFunctionNames)
+
+        RpcParticipant(const std::string& newName, std::vector<RpcServerInfo> newRpcServers,
+                       std::vector<RpcClientInfo> newRpcClients, std::vector<std::string> newExpectedFunctionNames)
+            : expectedFunctionNames{std::move(newExpectedFunctionNames)}
         {
             name = newName;
-            rpcClients = newRpcClients;
-            rpcServers = newRpcServers;
-            expectedFunctionNames = newExpectedFunctionNames;
+
+            std::for_each(newRpcServers.begin(), newRpcServers.end(), [this](const auto& info) {
+                AddRpcServer(info);
+            });
+
+            std::for_each(newRpcClients.begin(), newRpcClients.end(), [this](const auto& info) {
+                AddRpcClient(info);
+            });
         }
 
         std::string name;
-        std::vector<RpcClientInfo> rpcClients;
-        std::vector<RpcServerInfo> rpcServers;
+        std::vector<std::unique_ptr<RpcClientState>> rpcClients;
+        std::vector<std::unique_ptr<RpcServerState>> rpcServers;
         std::unique_ptr<IParticipant> participant;
-        SilKit::Core::IParticipantInternal* participantImpl;
+        SilKit::Core::IParticipantInternal* participantImpl = nullptr;
 
         std::vector<std::string> expectedFunctionNames;
         bool allCalled{false};
@@ -245,10 +276,20 @@ protected:
 
         std::chrono::milliseconds communicationTimeout{20000ms};
 
+        void AddRpcClient(const RpcClientInfo& info)
+        {
+            rpcClients.emplace_back(std::make_unique<RpcClientState>(info));
+        }
+
+        void AddRpcServer(const RpcServerInfo& info)
+        {
+            rpcServers.emplace_back(std::make_unique<RpcServerState>(info));
+        }
+
         void PrepareAllReceivedPromise()
         {
-            if (std::all_of(rpcServers.begin(), rpcServers.end(), [](RpcServerInfo s) {
-                    return s.numCallsToReceive == 0;
+            if (std::all_of(rpcServers.begin(), rpcServers.end(), [](const auto& s) -> bool {
+                    return s->info.numCallsToReceive == 0;
                 }))
             {
                 allReceived = true;
@@ -258,29 +299,32 @@ protected:
 
         void CheckAllCalledPromise()
         {
-            if (!allCalled && std::all_of(rpcClients.begin(), rpcClients.end(), [](RpcClientInfo c) {
-                    return c.allCalled;
+            if (!allCalled && std::all_of(rpcClients.begin(), rpcClients.end(), [](const auto& c) -> bool {
+                    return c->allCalled;
                 }))
             {
                 allCalled = true;
                 allCalledPromise.set_value();
             }
         }
+
         void CheckAllCallsReceivedPromise()
         {
-            if (!allReceived && std::all_of(rpcServers.begin(), rpcServers.end(), [](RpcServerInfo s) {
-                    return s.allReceived;
+            if (!allReceived && std::all_of(rpcServers.begin(), rpcServers.end(), [](const auto& s) -> bool {
+                    return s->allReceived;
                 }))
             {
                 allReceived = true;
                 allReceivedPromise.set_value();
             }
         }
+
         void CheckAllCallsReturnedPromise()
         {
-            if (!allCallsReturned && std::all_of(rpcClients.begin(), rpcClients.end(), [](RpcClientInfo clientInfo) {
-                    return clientInfo.allCallsReturned;
-                }))
+            if (!allCallsReturned
+                && std::all_of(rpcClients.begin(), rpcClients.end(), [](const auto& clientInfo) -> bool {
+                       return clientInfo->allCallsReturned;
+                   }))
             {
                 allCallsReturned = true;
                 allCallsReturnedPromise.set_value();
@@ -350,31 +394,31 @@ protected:
 
 
                 // Create Clients
-                for (auto& c : participant.rpcClients)
+                for (const auto& c : participant.rpcClients)
                 {
                     auto callReturnHandler = [&participant, &c](IRpcClient* /*client*/, RpcCallResultEvent event) {
-                        if (!c.allCallsReturned)
+                        if (!c->allCallsReturned)
                         {
                             if (event.callStatus == RpcCallStatus::Success)
                             {
-                                c.OnCallReturned(SilKit::Util::ToStdVector(event.resultData));
+                                c->OnCallReturned(SilKit::Util::ToStdVector(event.resultData));
                             }
                         }
                         participant.CheckAllCallsReturnedPromise();
                     };
 
-                    SilKit::Services::Rpc::RpcClientSpec dataSpec{c.functionName, c.mediaType};
-                    for (auto label : c.labels)
+                    SilKit::Services::Rpc::RpcClientSpec dataSpec{c->info.functionName, c->info.mediaType};
+                    for (const auto& label : c->info.labels)
                     {
                         dataSpec.AddLabel(label.first, label.second);
                     }
 
-                    c.rpcClient =
-                        participant.participant->CreateRpcClient(c.controllerName, dataSpec, callReturnHandler);
+                    c->rpcClient =
+                        participant.participant->CreateRpcClient(c->info.controllerName, dataSpec, callReturnHandler);
                 }
 
                 // Create Servers
-                for (auto& s : participant.rpcServers)
+                for (const auto& s : participant.rpcServers)
                 {
                     participant.PrepareAllReceivedPromise();
 
@@ -388,17 +432,17 @@ protected:
                         server->SubmitResult(event.callHandle, returnData);
 
                         // Evaluate data and reception count
-                        s.ReceiveCall(SilKit::Util::ToStdVector(event.argumentData));
+                        s->ReceiveCall(SilKit::Util::ToStdVector(event.argumentData));
                         participant.CheckAllCallsReceivedPromise();
                     };
 
-                    SilKit::Services::Rpc::RpcServerSpec dataSpec{s.functionName, s.mediaType};
-                    for (auto label : s.labels)
+                    SilKit::Services::Rpc::RpcServerSpec dataSpec{s->info.functionName, s->info.mediaType};
+                    for (const auto& label : s->info.labels)
                     {
                         dataSpec.AddLabel(label);
                     }
 
-                    s.rpcServer = participant.participant->CreateRpcServer(s.controllerName, dataSpec, processCalls);
+                    s->rpcServer = participant.participant->CreateRpcServer(s->info.controllerName, dataSpec, processCalls);
                 }
 
             if (sync)
@@ -407,9 +451,9 @@ protected:
                 auto* timeSyncService = lifecycleService->GetTimeSyncService();
 
                 timeSyncService->SetSimulationStepHandler([&participant](std::chrono::nanoseconds /*now*/) {
-                    for (auto& client : participant.rpcClients)
+                    for (const auto& client : participant.rpcClients)
                     {
-                        client.Call();
+                        client->Call();
                     }
                     participant.CheckAllCalledPromise();
                 }, 1s);
@@ -421,15 +465,15 @@ protected:
                 // Call by client
                 if (!participant.rpcClients.empty())
                 {
-                    while (
-                        std::none_of(participant.rpcClients.begin(), participant.rpcClients.end(), [](RpcClientInfo c) {
-                            return c.allCalled;
-                        }))
+                    while (std::none_of(participant.rpcClients.begin(), participant.rpcClients.end(),
+                                        [](const auto& c) -> bool {
+                                            return c->allCalled;
+                                        }))
                     {
                         std::this_thread::sleep_for(500ms);
                         for (auto& client : participant.rpcClients)
                         {
-                            client.Call();
+                            client->Call();
                         };
                     }
                     participant.allCalledPromise.set_value();
@@ -448,12 +492,12 @@ protected:
 
                 for (const auto& c : participant.rpcClients)
                 {
-                    EXPECT_EQ(c.callCounter, c.numCalls);
-                    EXPECT_EQ(c.callReturnedSuccessCounter, c.numCallsToReturn);
+                    EXPECT_EQ(c->callCounter, c->info.numCalls);
+                    EXPECT_EQ(c->callReturnedSuccessCounter, c->info.numCallsToReturn);
                 }
                 for (const auto& s : participant.rpcServers)
                 {
-                    EXPECT_EQ(s.receiveCallCounter, s.numCallsToReceive);
+                    EXPECT_EQ(s->receiveCallCounter, s->info.numCallsToReceive);
                 }
             }
             catch (const std::exception& error)

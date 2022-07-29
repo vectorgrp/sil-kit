@@ -10,7 +10,6 @@ RPC (Remote Procedure Call) API
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<SilKit::Services::Rpc::IRpcServer::SubmitResult()>`
 .. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<SilKit::Services::Rpc::IRpcServer::SetCallHandler()>`
 .. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<SilKit::Services::Rpc::IRpcClient::SetCallResultHandler()>`
-.. |DiscoverRpcServers| replace:: :cpp:func:`DiscoverRpcServers()<SilKit::IParticipant::DiscoverRpcServers()>`
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcServer>`
 .. contents::
@@ -59,22 +58,29 @@ Usage
 The RpcClient and RpcServer interfaces are instantiated from an |IParticipant| interface by calling 
 |CreateRpcClient| and |CreateRpcServer|, respectively. 
 
-The RpcClient can trigger a call using the |Call| method providing argument data as a vector of bytes. The |Call| method is
-non-blocking and returns a call handle which can be used for later identification of the call. The call arrives at the 
-RpcServer and is delivered via a callback, which has to be specified on creation of the RpcServer and can be 
-overwritten using the |SetCallHandler| method. There, the argument data and call handle arrive and can be processed.
-The RpcServer must submit the answer to the call at a later point in time with the call handle obtained in the 
-RpcHandler by using the |SubmitResult| method providing the return data for the calling RpcClient. 
-The RpcClient receives the call return in a callback which is also specified on creation and can be overwritten with
-|SetCallResultHandler|. The callback provides the original call handle, the return data and a call status
-indicating success or an error during the procedure.
+The RpcClient can trigger a call using the |Call| method providing argument data as a vector of bytes.
+The |Call| method is non-blocking and allows for later identification of the call through an
+additional user context pointer passed as an optional second argument.
+The call arrives at the RpcServer and is delivered via a callback, which has to be specified on
+creation of the RpcServer and can be overwritten using the |SetCallHandler| method.
+There, the argument data and call handle arrive and can be processed.
+The RpcServer must submit the answer to the call at a later point in time with the call handle
+obtained in the RpcCallHandler by using the |SubmitResult| method providing the return data for the
+calling RpcClient.
+The RpcClient receives the call return in a callback which is also specified on creation and can
+be overwritten with |SetCallResultHandler|.
+The callback provides the user context pointer passed to |Call|, the return data and a call status indicating
+success or an error during the procedure.
 
 Error handling
 ~~~~~~~~~~~~~~
 
-* If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with a nullptr
-  call handle and RpcCallStatus::ServerNotReachable. In this case, the call handle returned by |Call| is also nullptr.
+* If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with
+  ``RpcCallStatus::ServerNotReachable``.
 * |SubmitResult| must only be used with a valid call handle received in the RpcHandler.
+* The ``RpcCallResultEvent::resultData`` member is only valid if ``callStatus == RpcCallStatus::Success``.
+* If the RpcServer receives a call but does not have a valid call handler, the RpcClient will receive a
+  ``RpcCallResultEvent`` with ``callStatus == RpcCallStatus::InternalServerError``.
 
 Usage Example
 ~~~~~~~~~~~~~
@@ -92,12 +98,15 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     SilKit::Services::Rpc::RpcClientSpec dataSpecClient{"TestFunc", "application/octet-stream"};
     auto client = participant->CreateRpcClient("ClientCtrl1", dataSpecClient, 
         [](IRpcClient* client, RpcCallResultEvent event) {
-            // handle resultData
+            // handle event.callStatus and/or event.resultData
         });
     );
 
     // define argumentData
-    auto callHandle = client->Call(argumentData)
+    client->Call(argumentData);
+
+    // define userContext (void *)
+    client->Call(argumentData, userContext);
 
     // ------------------
     // Server participant

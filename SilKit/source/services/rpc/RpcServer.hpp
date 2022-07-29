@@ -68,10 +68,12 @@ private:
     RpcCallHandler _handler;
 
     Core::ServiceDescriptor _serviceDescriptor{};
-    std::vector<RpcServerInternal*> _internalRpcServers;
     Services::Logging::ILogger* _logger;
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
+
+    std::mutex _internalRpcServersMx;
+    std::vector<RpcServerInternal*> _internalRpcServers;
 };
 
 // ================================================================================

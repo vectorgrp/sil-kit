@@ -25,15 +25,7 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-class IRpcCallHandle
-{
-public:
-
-    virtual ~IRpcCallHandle() = default;
-
-    virtual bool operator==(const IRpcCallHandle& other) const = 0;
-    virtual bool operator!=(const IRpcCallHandle& other) const = 0;
-};
+class IRpcCallHandle;
 
 } // namespace Rpc
 } // namespace Services

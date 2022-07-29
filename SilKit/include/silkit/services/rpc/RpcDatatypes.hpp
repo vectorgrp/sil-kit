@@ -43,7 +43,8 @@ enum class RpcCallStatus : uint8_t
 {
     Success,
     ServerNotReachable,
-    UndefinedError
+    UndefinedError,
+    InternalServerError,
 };
 
 //! \brief An incoming rpc call from a RpcClient with call data and timestamp
@@ -64,8 +65,9 @@ struct RpcCallResultEvent
 {
     //! Send timestamp of the event
     std::chrono::nanoseconds timestamp;
-    //! Handle of the rpc call as it was provided when the call was triggered
-    IRpcCallHandle* callHandle;
+    //! The user context pointer as it was provided when the call was triggered
+    void* userContext;
+    //! The status of the call, resultData is only valid if callStats == RpcCallStatus::Success
     RpcCallStatus callStatus;
     //! Data of the rpc call result as provided by the server
     Util::Span<const uint8_t> resultData;

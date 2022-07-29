@@ -44,7 +44,7 @@ SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* conte
         SilKit_RpcCallResultEvent cEvent;
         SilKit_Struct_Init(SilKit_RpcCallResultEvent, cEvent);
         cEvent.timestamp = event.timestamp.count();
-        cEvent.callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(event.callHandle);
+        cEvent.userContext = event.userContext;
         cEvent.callStatus = (SilKit_RpcCallStatus)event.callStatus;
         cEvent.resultData = ToSilKitByteVector(event.resultData);
         handler(context, cClient, &cEvent);
@@ -142,16 +142,14 @@ SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Partici
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, SilKit_RpcCallHandle** outHandle, const SilKit_ByteVector* argumentData)
+SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData, void* userContext)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
-    ASSERT_VALID_OUT_PARAMETER(outHandle);
     ASSERT_VALID_POINTER_PARAMETER(argumentData);
     CAPI_ENTER
     {
         auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
-        auto cppCallHandle = cppClient->Call(SilKit::Util::ToSpan(*argumentData));
-        *outHandle = reinterpret_cast<SilKit_RpcCallHandle*>(cppCallHandle);
+        cppClient->Call(SilKit::Util::ToSpan(*argumentData), userContext);
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

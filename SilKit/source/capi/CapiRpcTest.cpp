@@ -49,7 +49,7 @@ MATCHER_P(PayloadMatcher, controlPayload, "") {
 
 class MockRpcClient : public SilKit::Services::Rpc::IRpcClient {
 public:
-    MOCK_METHOD(SilKit::Services::Rpc::IRpcCallHandle*, Call, (SilKit::Util::Span<const uint8_t> data), (override));
+    MOCK_METHOD(void, Call, (SilKit::Util::Span<const uint8_t> data, void* userContext), (override));
 
     MOCK_METHOD1(SetCallResultHandler, void(RpcCallResultHandler handler));
 };
@@ -82,7 +82,7 @@ public:
     MockParticipant mockParticipant;
     CapiRpcTest()
     {
-        dummyCallHandle = std::make_unique<CallHandleImpl>(SilKit::Services::Rpc::CallUUID{ 1, 1 });
+        dummyCallHandle = std::make_unique<RpcCallHandle>(SilKit::Util::Uuid{ 1, 1 });
         callHandlePtr = dummyCallHandle.get();
         callHandle = reinterpret_cast<SilKit_RpcCallHandle*>(callHandlePtr);
 
@@ -92,7 +92,7 @@ public:
         dummyContextPtr = (void*)&dummyContext;
     }
 
-    std::unique_ptr<CallHandleImpl> dummyCallHandle;
+    std::unique_ptr<RpcCallHandle> dummyCallHandle;
     IRpcCallHandle* callHandlePtr;
     SilKit_RpcCallHandle* callHandle;
 
@@ -133,8 +133,15 @@ TEST_F(CapiRpcTest, rpc_client_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     SilKit_ByteVector data = { 0, 0 };
-    EXPECT_CALL(mockRpcClient, Call(testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &callHandle, &data);
+
+    EXPECT_CALL(mockRpcClient, Call(testing::_, nullptr)).Times(testing::Exactly(1));
+    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &data, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+    const auto userContext = reinterpret_cast<void*>(uintptr_t{12345});
+
+    EXPECT_CALL(mockRpcClient, Call(testing::_, userContext)).Times(testing::Exactly(1));
+    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &data, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
@@ -195,11 +202,18 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     SilKit_ByteVector data = {0, 0};
-    returnCode = SilKit_RpcClient_Call(nullptr, &callHandle, &data);
+    const auto userContext = reinterpret_cast<void*>(uintptr_t(12345));
+
+    returnCode = SilKit_RpcClient_Call(nullptr, &data, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, nullptr, &data);
+
+    returnCode = SilKit_RpcClient_Call(nullptr, &data, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &callHandle, nullptr);
+
+    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, nullptr, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, nullptr, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
@@ -250,8 +264,11 @@ TEST_F(CapiRpcTest, rpc_client_call)
     SilKit_ByteVector data = { &buffer[0], payloadSize };
 
     std::vector<uint8_t> refData(&(data.data[0]), &(data.data[0]) + data.size);
-    EXPECT_CALL(mockRpcClient, Call(PayloadMatcher(refData))).Times(testing::Exactly(1));
-    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &callHandle, &data);
+
+    const auto userContext = reinterpret_cast<void*>(uintptr_t(12345));
+
+    EXPECT_CALL(mockRpcClient, Call(PayloadMatcher(refData), userContext)).Times(testing::Exactly(1));
+    returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &data, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 

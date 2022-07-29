@@ -19,23 +19,26 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#include "UuidRandom.hpp"
+#include "Uuid.hpp"
+
 #include <limits>
+#include <random>
+#include <iomanip>
+#include <sstream>
 
 namespace SilKit {
 namespace Util {
-namespace Uuid {
 
-bool operator==(const UUID& lhs, const UUID& rhs)
+bool operator==(const Uuid& lhs, const Uuid& rhs)
 {
     return lhs.ab == rhs.ab && lhs.cd == rhs.cd;
 }
-bool operator!=(const UUID& lhs, const UUID& rhs)
+bool operator!=(const Uuid& lhs, const Uuid& rhs)
 {
     return lhs.ab != rhs.ab || lhs.cd != rhs.cd;
 }
 
-bool operator<(const UUID& lhs, const UUID& rhs)
+bool operator<(const Uuid& lhs, const Uuid& rhs)
 {
     if (lhs.ab < rhs.ab)
     {
@@ -52,12 +55,12 @@ bool operator<(const UUID& lhs, const UUID& rhs)
 }
 
 // Version 4, variant 8 UUID Generator
-UUID generate()
+auto Uuid::GenerateRandom() -> Uuid
 {
-    thread_local static std::mt19937                            gen(std::random_device{}()); // Seed with random_device
+    thread_local static std::mt19937 gen(std::random_device{}()); // Seed with random_device
     thread_local static std::uniform_int_distribution<uint64_t> dist(0, std::numeric_limits<uint64_t>::max());
 
-    UUID res;
+    Uuid res;
     res.ab = dist(gen);
     res.cd = dist(gen);
 
@@ -69,7 +72,12 @@ UUID generate()
     return res;
 }
 
-std::string to_string(const UUID& u)
+auto operator<<(std::ostream& ostream, const Uuid& uuid) -> std::ostream&
+{
+    return ostream << to_string(uuid);
+}
+
+auto to_string(const Uuid& u) -> std::string
 {
     std::stringstream ss;
     ss << std::hex << std::nouppercase << std::setfill('0');
@@ -89,6 +97,5 @@ std::string to_string(const UUID& u)
     return ss.str();
 }
 
-} // namespace Uuid
 } // namespace Util
 } // namespace SilKit

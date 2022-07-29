@@ -36,16 +36,13 @@ class IRpcClient
 public:
     virtual ~IRpcClient() = default;
 
-    /*! \brief Convenience method for a remote procedure call
-     *
-     * Creates a new std::vector with content copied from \p data. For highest efficiency,
-     * use \ref Call(std::vector<uint8_t>) in combination with std::move.
+    /*! \brief Initiate a remote procedure call.
      *
      * \param data A non-owning reference to an opaque block of raw data
-     *
-     * \return A call handle that can be used to identify this call in the CallReturnHandler
+     * \param userContext An optional user provided pointer that is
+     * reobtained when receiving the call result.
      */
-    virtual auto Call(Util::Span<const uint8_t> data) -> IRpcCallHandle* = 0;
+    virtual void Call(Util::Span<const uint8_t> data, void* userContext = nullptr) = 0;
 
     /*! \brief Overwrite the call return handler of this client
      *
