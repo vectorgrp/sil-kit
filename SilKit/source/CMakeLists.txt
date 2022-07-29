@@ -57,6 +57,14 @@ else()
         ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
         @ONLY)
 endif()
+# now install the configured version_macros.hpp as a header into the `include/silkit/capi` directory.
+# NB please keep the version_macros.hpp C11 compatible!
+install(FILES
+    ${VERSION_MACROS_HPP}
+    DESTINATION ${INSTALL_INCLUDE_DIR}/silkit/capi
+    RENAME SilKitVersionMacros.h
+    COMPONENT SilKit
+)
 
 set(silkitLibType SHARED)
 if(SILKIT_BUILD_STATIC)
