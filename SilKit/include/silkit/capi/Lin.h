@@ -413,7 +413,7 @@ typedef SilKit_ReturnCode(*SilKit_LinController_SendFrameHeader_t)(SilKit_LinCon
  */
 SilKitAPI SilKit_ReturnCode SilKit_LinController_UpdateTxBuffer(SilKit_LinController* controller,
                                                                    const SilKit_LinFrame* frame);
-typedef SilKit_ReturnCode (*SilKit_LinController_UpdateTxBuffer)(SilKit_LinController* controller,
+typedef SilKit_ReturnCode (*SilKit_LinController_UpdateTxBuffer_t)(SilKit_LinController* controller,
                                                                      const SilKit_LinFrame* frame);
 
 /*! \brief Transmit a go-to-sleep-command and set SilKit_LinControllerStatus_Sleep and enable wake-up
