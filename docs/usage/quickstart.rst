@@ -148,7 +148,7 @@ The final simulation setup can be run through the following commands:
 
 .. code-block::
       
-      # Start the VAsio Registry
+      # Start the Middleware Registry
       ./sil-kit-registry.exe
 
       # Start the System Controller and tell it to wait for PublisherParticipant and SubscriberParticipant

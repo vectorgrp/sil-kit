@@ -357,17 +357,6 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    if (benchmark.disableLocaldomainSockets)
-    {
-        //config.middlewareConfig.vasio.enableDomainSockets = false;
-    }
-
-    if (benchmark.tcpNoDelay)
-    {
-        //config.middlewareConfig.vasio.tcpNoDelay = true;
-        //config.middlewareConfig.vasio.tcpQuickAck = true;
-    }
-
     try
     {
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;

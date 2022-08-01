@@ -265,40 +265,25 @@ The following table provides an overview of the behavior, if no network simulato
 
 .. _subsec:sim-syncExample:
 
-Implementation Example: VAsio as Middleware
+SIL Kit Middleware
 -------------------------------------------
 
-.. admonition:: Note
-  
-   The following section will be improved in the foreseeable future.
+The provided implementation of the |ProductName| headers uses an internal middleware that is provided with the |ProductName|.
+Within it, all participants exchange their messages via direct messaging based on TCP connections or Unix domain sockets.
 
-The provided implementation of the |ProductName| headers uses VAsio as a middleware.
-In VAsio, all participants exchange their messages via direct messaging based on TCP connections or Unix domain sockets.
-
-In VAsio, the requested next point in time to execute a simulation task is distributed through a specific message that is distributed to all other participants.
-In the following, the message that comprises the next requested timestamp is called ``next`` message.
-Setting the period length affects the global time coordination by changing the timespan from the current to the next requested simulation task.
-
-For example, if a participant has no work to compute for the forseeable (virtual) next time steps, it can change its simulation period.
-This allows other participants to run up to the end of the new period, without further synchronization.
-Let us assume that we have two participants ``A`` and ``B``. 
-``A`` sets its period to ``1000ms`` and ``B`` sets it to ``200ms``.
-After exchanging their ``next`` messages, B is now free to execute five of its ``SimTasks`` (that is, simulation periods) until it has to synchronize with ``A`` again.
-Refer to the :cpp:func:`ITimeSyncService::SetPeriod()<SilKit::Services::Orchestration::ITimeSyncService::SetPeriod()>` method for details.
-
-The VAsio middleware guarantees message delivery to always be in-order.
+The internal middleware guarantees message delivery to always be in-order.
 This enables the usage of a distributed synchronization algorithm.
-:numref:`label:sim-vasio-messageDelivery` shows the VAsio algorithm:
+:numref:`label:sim-messageDelivery` shows the synchronization algorithm:
 
 
-.. _label:sim-vasio-messageDelivery:
-.. figure:: ../_static/sim-vasio-inorder-strict.png
-   :alt: VAsio message delivery
+.. _label:sim-messageDelivery:
+.. figure:: ../_static/sim-inorder-strict.png
+   :alt: Vector SIL Kit message delivery
    :align: center
    :width: 90%
 
-   : VAsio delivery of messages.
+   : |ProductName| delivery of messages.
 
-The algorithm reports the start time of the next due SimTask to all other participants (``next@`` messages in the figure).
-By taking the other participants' next SimTask into account, a participant knows when it can safely execute its next SimTask.
-That is, when there are no more SimTasks of other participants with an earlier timestamp than its own next SimTask.
+The algorithm reports the start time of the next due simulation step to all other participants (``next@`` messages in the figure).
+By taking the other participants' next simulation step into account, a participant knows when it can safely execute its next simulation step.
+That is, when there are no more simulation steps of other participants with an earlier timestamp than its own next simulation step.

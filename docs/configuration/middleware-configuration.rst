@@ -15,8 +15,6 @@ This middleware is open source and included in the sources of the Vector SIL Kit
 
 The middleware can be configured as follows.
 
-.. _sec:mwcfg-vasio:
-
 Configuration
 --------------------
 
@@ -37,7 +35,7 @@ running on localhost listening on Port 8500. These values can be changed via the
       TcpReceiveBufferSize: 1024
 
 
-.. list-table:: VAsio Configuration
+.. list-table:: Middleware Configuration
    :widths: 15 85
    :header-rows: 1
 

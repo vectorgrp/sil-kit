@@ -390,8 +390,6 @@ Benchmark Demo
       -  There are up to 7 positional arguments. All of them are optional and the defaults are used for the unspecified ones.
          For convenience long command options are supported with the syntax ``--option value``
          
-         #. The middleware to be used (optional); must be ``VAsio``; defaults to ``VAsio``.
-             - ``--middleware VAsio``
          #. Number of simulations (optional); must be at least ``1``; defaults to ``5``.
              - ``--number-simulations NUM``
          #. Duration of the simulation in seconds (optional); must be at least ``1``; defaults to ``1``.
@@ -407,13 +405,13 @@ Benchmark Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a benchmark process, which runs the same simulation (VAsio middleware, 5s duration,
+            # Creates a benchmark process, which runs the same simulation (5s duration,
             # 10 participants, 1 message of 200 bytes per participant pair per tick) a hundred times.
-            |DemoDir|/SilKitDemoBenchmark VAsio 100 5 10 1 200 50
+            |DemoDir|/SilKitDemoBenchmark 100 5 10 1 200 50
    *  -  Notes
       -  | \- DataPublisher / DataSubscribers are used in the participants.
          | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
-         | \- All participants and the VAsio registry (VAsio only) run in the same process.
+         | \- All participants and the registry run in the same process.
 
 
 Life Cycle Demo

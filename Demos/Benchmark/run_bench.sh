@@ -13,8 +13,7 @@ do
 	do
 		for part in  2 4 8
 		do
-			$EXE  --middleware VAsio \
-                --number-simulations ${REPEAT} \
+			$EXE --number-simulations ${REPEAT} \
                 --simulation-duration ${SIMTIME} \
                 --number-participants ${part} \
                 --message-count ${msg} \

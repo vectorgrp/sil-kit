@@ -29,7 +29,7 @@ namespace SilKit {
 namespace Vendor {
 namespace Vector {
 
-//! \brief Dedicated SIL Kit registry for the VAsio middleware.
+//! \brief Dedicated SIL Kit registry for the Vector SIL Kit middleware.
 //         This is a loadable runtime extension that is non-redistributable.
 class ISilKitRegistry
 {
