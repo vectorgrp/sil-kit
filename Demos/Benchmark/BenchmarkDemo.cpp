@@ -371,7 +371,7 @@ int main(int argc, char** argv)
     try
     {
         std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
-        // TODO use new config
+        
         registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(config));
         registry->StartListening(benchmark.registryUri);
 

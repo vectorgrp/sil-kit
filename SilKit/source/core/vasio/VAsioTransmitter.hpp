@@ -110,7 +110,6 @@ public:
 
     void SendMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
     {
-        // TODO  what do we do with the history for targeted messaging?
         _hist.Save(from, msg);
         auto&& receiverIter = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [targetParticipantName](auto&& receiver) 
             {

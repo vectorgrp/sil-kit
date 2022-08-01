@@ -1261,12 +1261,14 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
     const auto qualifiedName = network + "/" + config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
-    // TODO uncomment once trace & replay work again
-    //auto* traceSource = dynamic_cast<ITraceMessageSource*>(controllerPtr);
-    //if (traceSource)
-    //{
-    //    AddTraceSinksToSource(traceSource, config);
-    //}
+    #ifdef SILKIT_HAVE_TRACING
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controllerPtr);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, config);
+    }
+    #endif
+
     if (publishService)
     {
         GetServiceDiscovery()->NotifyServiceCreated(controllerPtr->GetServiceDescriptor());

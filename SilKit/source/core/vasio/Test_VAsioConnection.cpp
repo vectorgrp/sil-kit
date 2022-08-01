@@ -18,7 +18,8 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
-//XXX fowards required for TestDataTypes because of  SilKitMsgTraits
+
+// fowards required for TestDataTypes because of  SilKitMsgTraits
 #include "silkit/services/can/fwd_decl.hpp"
 #include "silkit/services/ethernet/fwd_decl.hpp"
 #include "silkit/services/flexray/fwd_decl.hpp"
@@ -28,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/fwd_decl.hpp"
 #include "silkit/services/logging/fwd_decl.hpp"
 
-//XXX internal types required for TestDataTypes because of SilKitMsgTraits
+// internal types required for TestDataTypes because of SilKitMsgTraits
 #include "WireCanMessages.hpp"
 #include "WireDataMessages.hpp"
 #include "WireEthernetMessages.hpp"

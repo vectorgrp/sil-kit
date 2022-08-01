@@ -218,19 +218,4 @@ TEST_F(ITest_ThreeEthController, test_eth_ack_callbacks)
     ExecuteTest();
 }
 
-//AFTMAGT-252: debug messages caused a segfault when the LogMsg RTPS topic
-//             was already destroyed during teardown.
-//   We are adding debug loggers here to verify that the logging
-//   mechanism isn't affected by the Participant' connection lifecycle and its
-//   internal debugging/tracing calls.
-
-// TODO Reactivate after logging can be configured
-//TEST_F(ThreeEthControllerITest, DISABLED_test_vasio_logging_orthogonal)
-//{
-//    config = makeLoggingConfig();
-//    config.middlewareConfig.activeMiddleware = SilKit::Config::Middleware::VAsio;
-//
-//    ExecuteTest();
-//}
-
 } // anonymous namespace

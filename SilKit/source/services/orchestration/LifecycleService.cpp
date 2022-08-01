@@ -339,7 +339,6 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
     // Ignore messages if the lifecycle is not being executed yet
     if (!_isRunning)
     {
-        // TODO this should be handled as a late joining scenario instead of an error...
         std::stringstream msg;
         msg << "Received SystemCommand::" << command.kind
             << " before LifecycleService::StartLifecycle(...) was called."

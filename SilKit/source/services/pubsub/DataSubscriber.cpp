@@ -112,7 +112,6 @@ void DataSubscriber::RemoveInternalSubscriber(const std::string& pubUUID)
     {
         _internalSubscribers.erase(pubUUID);
     }
-    // TODO: Actual controller is still alive, need to remove controller added via CreateDataSubscriberInternal
 }
 
 } // namespace PubSub

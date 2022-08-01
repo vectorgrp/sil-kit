@@ -42,7 +42,6 @@ auto CreateMdf4Tracing(Config::ParticipantConfiguration config,
     const std::string& sinkName)
     -> std::unique_ptr<ITraceMessageSink>
 {
-    // TODO fix factory analogous to CreateSilKitRegistry once tracing will be reinstated
     auto& factory = FactorySingleton<ITraceMessageSinkFactory>(logger, "vibe-mdf4tracing", config.extensions);
     return factory.Create(/*std::move(config), */logger, participantName, sinkName);
 }
@@ -51,7 +50,6 @@ auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services:
                       const std::string& fileName)
     -> std::shared_ptr<IReplayFile>
 {
-    // TODO fix factory analogous to CreateSilKitRegistry once tracing will be reinstated
     auto& factory = FactorySingleton<IReplayDataProvider>(logger, "vibe-mdf4tracing", config.extensions);
     return factory.OpenFile(/*config, */fileName, logger);
 }

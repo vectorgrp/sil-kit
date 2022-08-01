@@ -42,7 +42,9 @@ enum class TraceMessageType
     LinFrame,
     FlexrayFrameEvent,
     InvalidReplayData,
-    //TODO FlexraySymbolEvent, FlexrayPocStatusEvent, FlexrayTxBufferConfigUpdate, FlexrayTxBufferUpdate ?
+    #ifdef SILKIT_HAVE_TRACING
+    FlexraySymbolEvent, FlexrayPocStatusEvent, FlexrayTxBufferConfigUpdate, FlexrayTxBufferUpdate
+    #endif
 };
 
 template<TraceMessageType id>

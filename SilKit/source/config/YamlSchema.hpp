@@ -29,7 +29,6 @@ namespace SilKit {
 namespace Config {
 
 //!< A single element in a schema tree.
-// TODO might be extended to support type hints for parsing
 struct YamlSchemaElem
 {
     std::string name;

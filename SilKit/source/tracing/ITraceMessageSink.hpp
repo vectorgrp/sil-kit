@@ -68,7 +68,6 @@ class ITraceMessageSinkFactory
 {
 public:
     virtual ~ITraceMessageSinkFactory() = default;
-    // TODO
     virtual auto Create(/*Config::Config config, */
             SilKit::Services::Logging::ILogger* logger,
             std::string participantName,

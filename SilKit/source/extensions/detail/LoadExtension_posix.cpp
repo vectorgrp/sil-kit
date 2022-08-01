@@ -87,7 +87,7 @@ std::string GetProcessPath()
     auto nb = readlink(proc.c_str(), buf.data(), buf.size());
     if ( nb < 0)
     {
-        return "."; //XXX better than empty string
+        return ".";
     }
     auto unb = static_cast<size_t>(nb);
     buf.at(unb) = '\0';

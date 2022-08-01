@@ -121,7 +121,7 @@ protected:
 
 auto makeTask(std::chrono::milliseconds timepoint)
 {
-    //XXX remove this once we get rid of VS2015, initalizer_list is broken there
+    // remove this once we get rid of VS2015, initalizer_list is broken there
     NextSimTask task;
     task.timePoint = timepoint;
     task.duration = 0ms;

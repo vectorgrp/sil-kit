@@ -122,7 +122,6 @@ void ServiceDiscovery::NotifyServiceCreated(const ServiceDescriptor& serviceDesc
     _participant->SendMsg(this, std::move(event));
 }
 
-// TODO: Is never called, connect once services can be removed
 void ServiceDiscovery::NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor)
 {
     if (_shuttingDown)

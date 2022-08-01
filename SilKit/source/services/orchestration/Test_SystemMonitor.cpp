@@ -304,7 +304,6 @@ TEST_F(SystemMonitorTest, detect_multiple_paused_clients)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-// TODO does not make sense
 TEST_F(SystemMonitorTest, DISABLED_detect_system_stopping)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
@@ -362,7 +361,6 @@ TEST_F(SystemMonitorTest, detect_system_stopped)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-// TODO clarify, what should happen here
 TEST_F(SystemMonitorTest, DISABLED_detect_reinitializing_after_stopped)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
@@ -635,7 +633,6 @@ TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-// TODO clarify, what should happen here
 TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_error)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
@@ -678,7 +675,6 @@ TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-// TODO why would this be an error? (CommunicationReady used to be initializing)
 TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_invalid)
 {
     // Test that the monitor recovers from seemingly erroneous state transitions.
@@ -703,7 +699,6 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_invalid)
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitializing);
 }
 
-// TODO clarify the purpose of this test
 TEST_F(SystemMonitorTest, DISABLED_detect_initialized_after_invalid)
 {
     // Test that the monitor recovers from seemingly erroneous state transitions.

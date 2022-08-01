@@ -423,7 +423,6 @@ private:
     std::vector<std::unique_ptr<IVAsioReceiver>> _vasioReceivers;
     std::unordered_set<std::string> _vasioUniqueReceiverIds;
 
-    // FIXME: generalize the reception of registry data
     std::mutex _participantAnnouncementReceiversMutex;
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
     std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;

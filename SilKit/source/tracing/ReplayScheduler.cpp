@@ -349,7 +349,6 @@ void ReplayScheduler::ConfigureNetworkSimulators(const Config::Config& config, c
     _knownSimulators.push_back(participantConfig.name);
 
     // when using the participant time provider we have exact, absolute time stamps of simulated time
-    // TODO replace participantController
     const bool useAbsoluteTimestamps = participantConfig.participantController.has_value();
 
 
@@ -536,11 +535,12 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
     };
 
     // Bus Controllers
-    // TODO FIXME Replay is currently not working so this will be commented out
-    //makeTasks(participantConfig.ethernetControllers, &IParticipant::CreateEthernetController);
-    //makeTasks(participantConfig.canControllers, &IParticipant::CreateCanController);
-    //TODO makeTasks(participantConfig.flexrayControllers, &IParticipant::CreateFlexrayController);
-    //makeTasks(participantConfig.linControllers, &IParticipant::CreateLinController);
+    #ifdef SILKIT_HAVE_TRACING
+    makeTasks(participantConfig.ethernetControllers, &IParticipant::CreateEthernetController);
+    makeTasks(participantConfig.canControllers, &IParticipant::CreateCanController);
+    makeTasks(participantConfig.flexrayControllers, &IParticipant::CreateFlexrayController);
+    makeTasks(participantConfig.linControllers, &IParticipant::CreateLinController);
+    #endif
 }
 
 ReplayScheduler::~ReplayScheduler()
