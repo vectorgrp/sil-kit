@@ -111,7 +111,6 @@ protected:
                     auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
                     controller->SendFrame(ToEthernetFrame(ethernetFrame), reinterpret_cast<void *>(numSent + 1));
                     numSent++;
-                    std::this_thread::sleep_for(100ms);
                 }
         }, 1ms);
     }

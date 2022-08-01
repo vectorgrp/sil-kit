@@ -470,7 +470,7 @@ protected:
                                             return c->allCalled;
                                         }))
                     {
-                        std::this_thread::sleep_for(500ms);
+                        std::this_thread::sleep_for(50ms);
                         for (auto& client : participant.rpcClients)
                         {
                             client->Call();

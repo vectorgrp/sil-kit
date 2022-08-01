@@ -391,7 +391,6 @@ protected:
                                             return dp.allSent;
                                         }))
                     {
-                        //std::this_thread::sleep_for(10ms);
                         publishTask();
                     }
                     participant.allSentPromise.set_value();
@@ -451,7 +450,6 @@ protected:
                 ps.WaitForAllDiscovered();
             }
         }
-        //std::this_thread::sleep_for(2000ms);
     }
 
     void StopSimOnAllSentAndReceived(std::vector<PubSubParticipant>& pubsubs, bool sync)

@@ -143,7 +143,6 @@ TEST_F(ITest_SimTestHarness, can_demo)
           auto* canController1 = participant->CreateCanController("CanController1", "CAN1");
           Log() << "---   CanWriter sending CanFrame";
           canController1->SendFrame(state->msg, (void*)(intptr_t)(0xDEADBEEF));
-          std::this_thread::sleep_for(10ms);//don't starve other threads on the CI build server
         }
       }, 1ms);
 

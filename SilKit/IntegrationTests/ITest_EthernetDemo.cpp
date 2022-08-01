@@ -131,8 +131,6 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
               Log() << "---   EthernetWriter sending EthernetFrame";
               ethernetController->SendFrame(frame);
             }
-            //Throttle this thread, so it does not starve other participants on the CI
-            std::this_thread::sleep_for(10ms);
         }, 1ms);
     }
     auto readerTime = 0ms;

@@ -47,8 +47,6 @@ using namespace SilKit::Config;
 using namespace SilKit::Services::Can;
 
 static size_t numParticipants;
-std::chrono::microseconds asyncDelayCanWriter{1us};
-std::chrono::microseconds asyncDelayCanReader{1us};
 std::chrono::milliseconds communicationTimeout{20000ms};
 
 const int numHandlersPerLoop = 100;
@@ -99,7 +97,6 @@ protected:
                 CanFrame frame{};
                 frame.canId = increasingCanId++;
                 participant.canController->SendFrame(frame);
-                std::this_thread::sleep_for(asyncDelayCanWriter);
             }
 
         }
@@ -136,7 +133,6 @@ protected:
                     participant.allReceived = true;
                     participant.allReceivedPromise.set_value();
                 }
-                std::this_thread::sleep_for(asyncDelayCanReader);
             };
 
             while (runAsync)

@@ -115,7 +115,6 @@ protected:
                     
                     numSent++;
                     canController->SendFrame(std::move(msg), (void*)(static_cast<uintptr_t>(numSent)));
-                    std::this_thread::sleep_for(100ms);
                 }
             },
             1ms);

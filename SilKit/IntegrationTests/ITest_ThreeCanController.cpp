@@ -153,7 +153,6 @@ protected:
 
                     controller->SendFrame(msg, MakeUserContext(controllerToId[controller], static_cast<uint16_t>(frameCounter)));
                     numSent++;
-                    std::this_thread::sleep_for(100ms);
                 }
         }, 1ms);
     }
