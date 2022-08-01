@@ -95,7 +95,7 @@ public:
     void RunAsync()
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        _simulationFuture = lifecycleService->StartLifecycle({true});
+        _simulationFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -174,7 +174,7 @@ public:
     std::future<ParticipantState> RunAsync() const
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        return lifecycleService->StartLifecycle({true});
+        return lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)

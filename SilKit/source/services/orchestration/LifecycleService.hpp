@@ -118,9 +118,6 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    auto StartLifecycle(bool isCoordinated)
-        -> std::future<ParticipantState>;
-
     void AbortSimulation(std::string reason);
 
 private:
@@ -132,7 +129,7 @@ private:
 
     TimeSyncService* _timeSyncService;
 
-    bool _isCoordinated = false;
+    OperationMode _operationMode = OperationMode::Coordinated;
 
     bool _isRunning{false};
     ParticipantStatus _status;

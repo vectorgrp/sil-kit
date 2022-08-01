@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <vector>
 
+#include "silkit/capi/Orchestration.h"
+
 namespace SilKit {
     
 /*! \brief Deprecated identifier for SIL Kit participants
@@ -36,7 +38,8 @@ namespace Services {
 namespace Orchestration {
 
 // note: always increase number (never reuse old ones!)
-enum class ParticipantState : uint8_t {
+enum class ParticipantState : SilKit_ParticipantState
+{
     Invalid                     =   0, //!< An invalid participant state
     ServicesCreated             =  10, //!< The controllers created state
     CommunicationInitializing   =  20, //!< The communication initializing state
@@ -61,7 +64,8 @@ struct ParticipantStatus
 };
 
 // note: always increase number (never reuse old ones!)
-enum class SystemState : uint8_t {
+enum class SystemState : SilKit_SystemState
+{
     Invalid                     =   0, //!< An invalid participant state
     ServicesCreated             =  10, //!< The controllers created state
     CommunicationInitializing   =  20, //!< The communication initializing state
@@ -82,10 +86,17 @@ struct WorkflowConfiguration
     std::vector<std::string> requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
 };
 
+enum class OperationMode : SilKit_OperationMode
+{
+    Invalid = 0,
+    Coordinated = 10, 
+    Autonomous = 20
+};
+
 //!< The lifecycle start configuration.
 struct LifecycleConfiguration
 {
-    bool isCoordinated;
+    OperationMode operationMode;
 };
 
 struct ParticipantConnectionInformation

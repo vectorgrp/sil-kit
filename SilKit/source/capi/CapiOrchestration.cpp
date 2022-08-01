@@ -217,7 +217,7 @@ static std::map<SilKit_LifecycleService*, std::future<SilKit::Services::Orchestr
 static auto from_c(SilKit_LifecycleConfiguration* csc)
 {
     SilKit::Services::Orchestration::LifecycleConfiguration cpp;
-    cpp.isCoordinated = csc->isCoordinated;
+    cpp.operationMode = static_cast<decltype(cpp.operationMode)>(csc->operationMode);
     return cpp;
 }
 SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService,

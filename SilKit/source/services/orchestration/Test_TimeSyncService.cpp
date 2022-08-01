@@ -96,7 +96,8 @@ protected: // Methods
     void PrepareLifecycle()
     {
         lifecycleService->SetTimeSyncActive(true);
-        (void)lifecycleService->StartLifecycle(LifecycleConfiguration{true});
+        (void)lifecycleService->StartLifecycle(
+            LifecycleConfiguration{OperationMode::Coordinated});
         // skip uninteresting states
         lifecycleService->NewSystemState(SystemState::ServicesCreated);
         lifecycleService->NewSystemState(SystemState::CommunicationInitializing);

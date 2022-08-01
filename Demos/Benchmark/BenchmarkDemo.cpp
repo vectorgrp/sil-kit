@@ -321,7 +321,7 @@ void ParticipantsThread(
         PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
     }, 1ms);
 
-    lifecycleService->StartLifecycle({true});
+    lifecycleService->StartLifecycle({OperationMode::Coordinated});
 }
 const auto config = "{}";
 

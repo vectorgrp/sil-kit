@@ -653,7 +653,7 @@ int main(int argc, char** argv)
     SilKit_ParticipantState finalState;
     SilKit_LifecycleConfiguration startConfig;
     SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
-    startConfig.isCoordinated = SilKit_True;
+    startConfig.operationMode = SilKit_OperationMode_Coordinated;
 
     returnCode = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
     if (returnCode != SilKit_ReturnCode_SUCCESS)

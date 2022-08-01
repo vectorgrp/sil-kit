@@ -163,7 +163,7 @@ protected:
                         participant.simtimePassedPromise.set_value();
                     }
                 }, 1s);
-            auto finalStateFuture = lifecycleService->StartLifecycle({true});
+            auto finalStateFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
             finalStateFuture.get();
         }
         catch (const SilKit::ConfigurationError& error)
@@ -267,7 +267,7 @@ protected:
                 SystemStateHandler(newState);
             });
 
-            systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle({true});
+            systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
         }
         catch (const SilKit::ConfigurationError& error)
         {

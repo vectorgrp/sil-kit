@@ -180,7 +180,7 @@ int main(int argc, char** argv)
                 }, 1s);
         }
 
-        auto lifecycleFuture = lifecycleService->StartLifecycle({true});
+        auto lifecycleFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
         auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

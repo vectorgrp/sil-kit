@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 SILKIT_BEGIN_DECLS
 
 //!< The state of a participant.
-typedef int8_t SilKit_ParticipantState;
+typedef int16_t SilKit_ParticipantState;
 #define SilKit_ParticipantState_Invalid ((SilKit_ParticipantState)0) //!< An invalid participant state
 #define SilKit_ParticipantState_ServicesCreated ((SilKit_ParticipantState)10) //!< The controllers created state
 #define SilKit_ParticipantState_CommunicationInitializing \
@@ -50,7 +50,7 @@ typedef int8_t SilKit_ParticipantState;
 #define SilKit_ParticipantState_Reinitializing ((SilKit_ParticipantState)120) //!< The reinitializing state
 
 //!< The state of a system, deduced by states of the required participants.
-typedef int8_t SilKit_SystemState;
+typedef int16_t SilKit_SystemState;
 #define SilKit_SystemState_Invalid ((SilKit_SystemState)0) //!< An invalid participant state
 #define SilKit_SystemState_ServicesCreated ((SilKit_SystemState)10) //!< The controllers created state
 #define SilKit_SystemState_CommunicationInitializing ((SilKit_SystemState)20) //!< The communication initializing state
@@ -64,6 +64,14 @@ typedef int8_t SilKit_SystemState;
 #define SilKit_SystemState_ShuttingDown ((SilKit_SystemState)100) //!< The shutting down state
 #define SilKit_SystemState_Shutdown ((SilKit_SystemState)110) //!< The shutdown state
 #define SilKit_SystemState_Reinitializing ((SilKit_SystemState)120) //!< The reinitializing state
+
+
+//!< The OperationMode for lifecycle service.
+typedef int8_t SilKit_OperationMode;
+#define SilKit_OperationMode_Invalid ((SilKit_OperationMode)0) //!< An invalid operation mode
+#define SilKit_OperationMode_Coordinated ((SilKit_OperationMode)10) //!< The coordinated operation mode
+#define SilKit_OperationMode_Autonomous ((SilKit_OperationMode)20) //!< The autonomous operation mode
+
 
 typedef uint64_t SilKit_NanosecondsTime; //!< Simulation time
 
@@ -478,7 +486,7 @@ typedef SilKit_ReturnCode (*SilKit_SystemController_SetWorkflowConfiguration_t)(
 typedef struct SilKit_LifecycleConfiguration
 {
     SilKit_StructHeader structHeader;
-    SilKit_Bool isCoordinated;
+    SilKit_OperationMode operationMode;
 } SilKit_LifecycleConfiguration;
 
 /*! \brief Start the lifecycle with the given parameters with simulation time synchronization.

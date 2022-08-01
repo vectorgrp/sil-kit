@@ -124,7 +124,8 @@ int main(int argc, char** argv)
         std::string registryUri = "silkit://localhost:8500";
 
         bool runSync = true;
-        bool runCoordinated = true;
+        SilKit::Services::Orchestration::OperationMode runCoordinated =
+            SilKit::Services::Orchestration::OperationMode::Coordinated;
 
         std::vector<std::string> args;
         std::copy((argv + 3), (argv + argc), std::back_inserter(args));
@@ -135,9 +136,9 @@ int main(int argc, char** argv)
             {
                 runSync = false;
             }
-            else if (arg == "--uncoordinated")
+            else if (arg == "--autonomous")
             {
-                runCoordinated = false;
+                runCoordinated = SilKit::Services::Orchestration::OperationMode::Autonomous;
             }
             else
             {

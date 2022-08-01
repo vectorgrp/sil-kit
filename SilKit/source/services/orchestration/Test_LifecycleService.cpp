@@ -141,14 +141,14 @@ void PrepareLifecycle(LifecycleService* lifecycleService)
 auto StartCoordinated() 
 {
     LifecycleConfiguration sc{};
-    sc.isCoordinated = true;
+    sc.operationMode = OperationMode::Coordinated;
     return sc;
 }
 
 auto StartUncoordinated()
 {
     LifecycleConfiguration sc;
-    sc.isCoordinated = false;
+    sc.operationMode = OperationMode::Autonomous;
     return sc;
 }
 
@@ -195,7 +195,7 @@ TEST_F(LifecycleServiceTest, uncoordinated_must_not_react_to_system_states)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(0);
 
-    LifecycleConfiguration lc{false};
+    LifecycleConfiguration lc{OperationMode::Autonomous};
     lifecycleService.StartLifecycle(lc);
     // coordinated participants stay in ServicesCreated
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
@@ -276,7 +276,7 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
-    LifecycleConfiguration lc{false};
+    LifecycleConfiguration lc{OperationMode::Autonomous};
     lifecycleService.StartLifecycle(lc);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Stop("");
@@ -1131,7 +1131,7 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
 
 
     SilKit::Services::Orchestration::LifecycleConfiguration lc;
-    lc.isCoordinated = true;
+    lc.operationMode = OperationMode::Coordinated;
     lifecycleService.StartLifecycle(std::move(lc));
 
     lifecycleService.NewSystemState(SystemState::ServicesCreated);
@@ -1143,6 +1143,36 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
         completer.join();
     }
     ASSERT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
+}
+
+TEST_F(LifecycleServiceTest, error_on_create_time_sync_service_twice)
+{
+    // Goal: make sure that CreateTimeSync cannot be called more than once (must throw exception)
+    LifecycleService lifecycleService(&participant);
+
+    EXPECT_NO_THROW({
+        try
+        {
+            lifecycleService.CreateTimeSyncService(); // ignore returned controller
+        }
+        catch (const std::exception&)
+        {
+            throw;
+        }
+    });
+
+    EXPECT_THROW(
+        {
+            try
+            {
+                lifecycleService.CreateTimeSyncService(); // ignore returned controller
+            }
+            catch (const std::exception&)
+            {
+                throw;
+            }
+        },
+        std::runtime_error);
 }
 
 } // namespace

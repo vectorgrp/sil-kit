@@ -237,7 +237,7 @@ public:
             }, 1s);
 
         LifecycleConfiguration lc{};
-        lc.isCoordinated = true;
+        lc.operationMode = OperationMode::Coordinated;
         auto finalStateFuture = lifecycleService->StartLifecycle(lc);
         std::cout << "[" << name << "] Started Lifecycle" << std::endl;
 
@@ -344,7 +344,7 @@ protected:
         });
 
         LifecycleConfiguration lc;
-        lc.isCoordinated = true;
+        lc.operationMode = OperationMode::Coordinated;
         systemMaster.lifecycleService->StartLifecycle(lc);
     }
 

@@ -158,7 +158,7 @@ TEST_F(ITest_VAsioNetwork, vasio_state_machine)
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::ServicesCreated);
-    auto finalState = lifecycleService->StartLifecycle({true});
+    auto finalState = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Running);

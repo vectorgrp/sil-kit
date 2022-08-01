@@ -84,7 +84,8 @@ int main(int argc, char** argv)
 
         std::string registryUri = "silkit://localhost:8500";
 
-        bool coordinateStartAndStop = true;
+        SilKit::Services::Orchestration::OperationMode coordinateStartAndStop =
+            SilKit::Services::Orchestration::OperationMode::Coordinated;
         bool runSync = true;
 
         std::vector<std::string> args;
@@ -94,7 +95,7 @@ int main(int argc, char** argv)
         {
             if (arg == "--uncoordinated")
             {
-                coordinateStartAndStop = false;
+                coordinateStartAndStop = SilKit::Services::Orchestration::OperationMode::Autonomous;
             }
             else if (arg == "--async")
             {

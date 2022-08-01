@@ -143,7 +143,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     {
         auto& participant = kv.second;
         auto* lifecycleService = participant->GetOrCreateLifecycleService();
-        participant->_result = lifecycleService->StartLifecycle({true});
+        participant->_result = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
     }
 
     // wait until simulation is finished or timeout is reached

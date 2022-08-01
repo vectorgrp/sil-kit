@@ -379,7 +379,7 @@ protected:
                         participant.CheckAllSentPromise();
                     }
                 }, 1s);
-                auto finalStateFuture = lifecycleService->StartLifecycle({true});
+                auto finalStateFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
                 finalStateFuture.get();
             }
             else

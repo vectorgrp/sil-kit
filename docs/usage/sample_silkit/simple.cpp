@@ -50,7 +50,7 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
     //run the simulation main loop forever
     try
     {
-        auto result = lifecycleService->StartLifecycle({true});
+        auto result = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
         std::cout << "Publisher: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)
@@ -80,7 +80,7 @@ void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
 
     try
     {
-        auto result = lifecycleService->StartLifecycle({true});
+        auto result = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
         std::cout << "Subscriber: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)

@@ -52,7 +52,7 @@ timeSyncService2->SetSimulationStepHandler(
   [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}, 1ms
 );
 
-lifecycleService1->StartLifecycle({true});
+lifecycleService1->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
 // The call of Run() leads to a participant state transition from Invalid to ServicesCreated
 // and will trigger the callback of the ParticipantStatusHandler:
@@ -64,7 +64,7 @@ participantStatusHandler(participantStatus);
 //  - participantStatus.enterTime == enter time_point
 //  - participantStatus.refreshTime == enter time_point
 
-lifecycleService2->StartLifecycle({true});
+lifecycleService2->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
 // The call of Run() by the second participant again triggers
 // the callback of the ParticipantStatusHandler:

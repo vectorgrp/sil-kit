@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     SilKit_ReturnCode result;
     SilKit_LifecycleConfiguration startConfig;
     SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
-    startConfig.isCoordinated = SilKit_True;
+    startConfig.operationMode = SilKit_OperationMode_Coordinated;
     result = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
     if(result != SilKit_ReturnCode_SUCCESS)
     {

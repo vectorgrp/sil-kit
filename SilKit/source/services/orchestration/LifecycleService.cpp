@@ -96,7 +96,7 @@ void LifecycleService::SetShutdownHandler(ShutdownHandler handler)
     _shutdownHandler = std::move(handler);
 }
 
-auto LifecycleService::StartLifecycle(bool isCoordinated)
+auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration)
     -> std::future<ParticipantState>
 {
     if (_timeSyncActive)
@@ -109,11 +109,11 @@ auto LifecycleService::StartLifecycle(bool isCoordinated)
     }
     _timeSyncService->InitializeTimeSyncPolicy(_timeSyncActive);
 
-    _isCoordinated = isCoordinated;
+    _operationMode = startConfiguration.operationMode;
 
     // Update ServiceDescriptor
     _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleIsCoordinated,
-                                               std::to_string(_isCoordinated));
+                                               std::to_string(static_cast<int>(_operationMode)));
 
     // Publish services
     auto serviceDiscovery = _participant->GetServiceDiscovery();
@@ -126,18 +126,19 @@ auto LifecycleService::StartLifecycle(bool isCoordinated)
 
     _isRunning = true;
     _lifecycleManagement.InitLifecycleManagement("LifecycleService::StartLifecycle was called.");
-    if (!_isCoordinated)
+    switch (_operationMode)
     {
-        // Skip state guarantees if start is uncoordinated
+    case OperationMode::Invalid: 
+        throw std::runtime_error("OperationMode was not set. This is mandatory.");
+    case OperationMode::Coordinated: 
+        break;
+    case OperationMode::Autonomous:
+        // Skip state guarantees if start is autonomous
         _lifecycleManagement.StartUncoordinated(
             "LifecycleService::StartLifecycle was called without start coordination.");
+        break;
     }
     return _finalStatePromise.get_future();
-}
-
-auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState>
-{
-    return StartLifecycle(startConfiguration.isCoordinated);
 }
 
 void LifecycleService::ReportError(std::string errorMsg)
@@ -359,8 +360,14 @@ void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)
 
 void LifecycleService::NewSystemState(SystemState systemState)
 {
-    if (!_isCoordinated)
+    switch (_operationMode)
     {
+    case OperationMode::Invalid: 
+        // ignore
+        return;
+    case OperationMode::Coordinated: 
+        break;
+    case OperationMode::Autonomous:
         // uncoordinated participants do not react to system states changes!
         return;
     }

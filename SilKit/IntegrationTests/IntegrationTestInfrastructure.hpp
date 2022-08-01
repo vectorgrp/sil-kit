@@ -106,7 +106,7 @@ private:
             }
         });
 
-        _systemMaster.lifecycleService->StartLifecycle({true});
+        _systemMaster.lifecycleService->StartLifecycle({OperationMode::Coordinated});
     }
 
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
