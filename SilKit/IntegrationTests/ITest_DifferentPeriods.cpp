@@ -79,7 +79,7 @@ public:
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         auto* lifecycleService = _participant->GetLifecycleService();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
         SilKit::Services::PubSub::DataPublisherSpec dataSpec{topicName, {}};
         auto* publisher = _participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
 
@@ -96,7 +96,6 @@ public:
     void RunAsync()
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        lifecycleService->SetTimeSyncActive(true);
         _simulationFuture = lifecycleService->StartLifecycle({true});
     }
 
@@ -154,7 +153,7 @@ public:
         _lifecycleService = _participant->GetLifecycleService();
 
         auto* lifecycleService = _participant->GetLifecycleService();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
@@ -176,7 +175,6 @@ public:
     std::future<ParticipantState> RunAsync() const
     {
         auto* lifecycleService = _participant->GetLifecycleService();
-        lifecycleService->SetTimeSyncActive(true);
         return lifecycleService->StartLifecycle({true});
     }
 
@@ -237,7 +235,7 @@ private:
     std::vector<std::string> _syncParticipantNames;
     std::unique_ptr<IParticipantInternal> _participant{nullptr};
     ISystemController* _systemController{nullptr};
-    SilKit::Services::Orchestration::ILifecycleServiceInternal* _lifecycleService{nullptr};
+    SilKit::Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
     ISystemMonitor* _monitor{nullptr};
 
     std::chrono::nanoseconds _currentTime{0ns};

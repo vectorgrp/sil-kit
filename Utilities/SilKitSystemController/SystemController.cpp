@@ -59,7 +59,7 @@ public:
         _controller = participant->CreateSystemController();
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
 
-        _lifecycleService = participant->CreateLifecycleServiceNoTimeSync();
+        _lifecycleService = participant->CreateLifecycleService();
         _finalStatePromise = _lifecycleService->StartLifecycle({true});
     }
 
@@ -94,7 +94,7 @@ private:
 
     ISystemController* _controller;
     ISystemMonitor* _monitor;
-    ILifecycleServiceNoTimeSync* _lifecycleService;
+    ILifecycleService* _lifecycleService;
     std::future<ParticipantState> _finalStatePromise;
 };
 

@@ -83,7 +83,7 @@ private:
 
         _systemMaster.systemController = _systemMaster.participant->CreateSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->CreateSystemMonitor();
-        _systemMaster.lifecycleService = _systemMaster.participant->CreateLifecycleServiceNoTimeSync();
+        _systemMaster.lifecycleService = _systemMaster.participant->CreateLifecycleService();
 
         requiredParticipantNames.push_back(systemMasterName);
         _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
@@ -117,7 +117,7 @@ private:
         std::unique_ptr<IParticipant> participant;
         ISystemController* systemController;
         ISystemMonitor* systemMonitor;
-        ILifecycleServiceNoTimeSync* lifecycleService;
+        ILifecycleService* lifecycleService;
     };
 
     SystemMaster _systemMaster;

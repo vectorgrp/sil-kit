@@ -167,7 +167,7 @@ int main(int argc, char** argv)
         if (runSync)
         {
             // always use life cycle
-            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
+            auto* lifecycleService = participant->CreateLifecycleService();
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
@@ -186,7 +186,7 @@ int main(int argc, char** argv)
                 std::cout << "Shutting down..." << std::endl;
             });
 
-            auto* timeSyncService = lifecycleService->GetTimeSyncService();
+            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             if (participantName == "Sender")
             {
@@ -217,7 +217,7 @@ int main(int argc, char** argv)
         else
         {
             // always use life cycle
-            auto* lifecycleService = participant->CreateLifecycleServiceNoTimeSync();
+            auto* lifecycleService = participant->CreateLifecycleService();
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {

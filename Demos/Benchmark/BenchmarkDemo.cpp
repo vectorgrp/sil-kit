@@ -265,7 +265,7 @@ void ReceiveMessage(IDataSubscriber* /*subscriber*/, const std::vector<uint8_t>&
     // do nothing
 }
 
-void ParticipantStatusHandler(ILifecycleServiceWithTimeSync* service, const ParticipantStatus& newStatus)
+void ParticipantStatusHandler(ILifecycleService* service, const ParticipantStatus& newStatus)
 {
     switch (newStatus.state)
     {
@@ -286,8 +286,8 @@ void ParticipantsThread(
     size_t& messageCounter)
 {
     auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
-    auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    auto* lifecycleService = participant->CreateLifecycleService();
+    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
    
    SilKit::Services::PubSub::DataPublisherSpec dataSpec{"Topic", {}};
     SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{"Topic", {}};
@@ -368,7 +368,7 @@ int main(int argc, char** argv)
             auto participant = SilKit::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
             auto controller = participant->CreateSystemController();
             auto monitor = participant->CreateSystemMonitor();
-            auto lifecycle = participant->CreateLifecycleServiceWithTimeSync();
+            auto lifecycle = participant->CreateLifecycleService();
 
             controller->SetWorkflowConfiguration({participantNames});
 

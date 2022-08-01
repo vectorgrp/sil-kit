@@ -199,7 +199,7 @@ public:
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 
     //! \brief Return the LifecycleService at this SIL Kit participant.
-    virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* = 0;
+    virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
 
     //! \brief Create the ITimeSyncService for the given lifecycle service (one time per lifecycle service).
     virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)

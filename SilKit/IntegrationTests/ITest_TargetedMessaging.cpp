@@ -56,8 +56,8 @@ TEST(TargetedMessagingITest, targeted_messaging)
     auto* senderComSimPart = testHarness.GetParticipant("Sender");
     auto* senderCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(senderComSimPart->Participant());
 
-    auto* senderLifecycleService = senderComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
-    auto* senderTimeSyncService = senderLifecycleService->GetTimeSyncService();
+    auto* senderLifecycleService = senderComSimPart->GetOrCreateLifecycleService();
+    auto* senderTimeSyncService = senderComSimPart->GetOrCreateTimeSyncService();
 
     auto* senderCan =
         dynamic_cast<SilKit::Services::Can::CanController*>(senderCom->CreateCanController("CAN1", "CAN1"));
@@ -87,8 +87,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
     
     auto* receiverComSimPart = testHarness.GetParticipant("TargetReceiver");
     auto* receiverCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(receiverComSimPart->Participant());
-    auto* receiverLifecycleService = receiverComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
-    auto* receiverTimeSyncService = receiverLifecycleService->GetTimeSyncService();
+    auto* receiverTimeSyncService = receiverComSimPart->GetOrCreateTimeSyncService();
 
     receiverTimeSyncService->SetSimulationStepHandler(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
@@ -106,8 +105,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto* otherReceiverComSimPart = testHarness.GetParticipant("OtherReceiver");
     auto* otherReceiverCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(otherReceiverComSimPart->Participant());
-    auto* otherLifecycleService = otherReceiverComSimPart->GetOrCreateLifecycleServiceWithTimeSync();
-    auto* otherTimeSyncService = otherLifecycleService->GetTimeSyncService();
+    auto* otherTimeSyncService = otherReceiverComSimPart->GetOrCreateTimeSyncService();
     
     otherTimeSyncService->SetSimulationStepHandler(
         [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {}, 1ms);

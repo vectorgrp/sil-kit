@@ -73,7 +73,7 @@ SilKit_ReturnCode SilKit_SystemController_Create(SilKit_SystemController** outSy
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LifecycleServiceNoTimeSync_Create(SilKit_LifecycleService** outLifecycleService,
+SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
                                                  SilKit_Participant* participant)
 {
     ASSERT_VALID_OUT_PARAMETER(outLifecycleService);
@@ -81,25 +81,9 @@ SilKit_ReturnCode SilKit_LifecycleServiceNoTimeSync_Create(SilKit_LifecycleServi
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto cppLifecycleService = cppParticipant->CreateLifecycleServiceNoTimeSync();
+        auto cppLifecycleService = cppParticipant->CreateLifecycleService();
         *outLifecycleService = reinterpret_cast<SilKit_LifecycleService*>(
-            static_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(cppLifecycleService));
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKit_LifecycleServiceWithTimeSync_Create(SilKit_LifecycleService** outLifecycleService,
-                                                           SilKit_Participant* participant)
-{
-    ASSERT_VALID_OUT_PARAMETER(outLifecycleService);
-    ASSERT_VALID_POINTER_PARAMETER(participant);
-    CAPI_ENTER
-    {
-        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto cppLifecycleService = cppParticipant->CreateLifecycleServiceWithTimeSync();
-        *outLifecycleService = reinterpret_cast<SilKit_LifecycleService*>(
-            static_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(cppLifecycleService));
+            static_cast<SilKit::Services::Orchestration::ILifecycleService*>(cppLifecycleService));
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -112,8 +96,8 @@ SilKit_ReturnCode SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTime
     CAPI_ENTER
     {
         auto cppLifecycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
-        auto timeSyncService = cppLifecycleService->GetTimeSyncService();
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
+        auto timeSyncService = dynamic_cast<SilKit::Services::Orchestration::LifecycleService*>(cppLifecycleService)->CreateTimeSyncService();
         *outTimeSyncService = reinterpret_cast<SilKit_TimeSyncService*>(timeSyncService);
         return SilKit_ReturnCode_SUCCESS;
     }
@@ -127,7 +111,7 @@ SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandler(SilKit_Li
     ASSERT_VALID_HANDLER_PARAMETER(handler);
     CAPI_ENTER
     {
-        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
+        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
         
         cppLifecycleService->SetCommunicationReadyHandler([handler, context, lifecycleService]() {
             handler(context, lifecycleService);
@@ -145,7 +129,7 @@ SilKit_ReturnCode SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(SilK
     ASSERT_VALID_HANDLER_PARAMETER(handler);
     CAPI_ENTER
     {
-        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
+        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
         
         cppLifecycleService->SetCommunicationReadyHandlerAsync([handler, context, lifecycleService]() {
             handler(context, lifecycleService);
@@ -162,7 +146,7 @@ SilKit_ReturnCode SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
     CAPI_ENTER
     {
-        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
+        auto* cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
         
         cppLifecycleService->CompleteCommunicationReadyHandlerAsync();
 
@@ -180,7 +164,7 @@ SilKit_ReturnCode SilKit_LifecycleService_SetStartingHandler(
     CAPI_ENTER
     {
         auto* cppLifecycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(lifecycleService);
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
 
         cppLifecycleService->SetStartingHandler([handler, context, lifecycleService]() {
             handler(context, lifecycleService);
@@ -199,7 +183,7 @@ SilKit_ReturnCode SilKit_LifecycleService_SetStopHandler(SilKit_LifecycleService
     CAPI_ENTER
     {
         auto* cppLifecycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(clifecycleService);
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(clifecycleService);
 
         cppLifecycleService->SetStopHandler([handler, context, clifecycleService]() {
             handler(context, clifecycleService);
@@ -217,7 +201,7 @@ SilKit_ReturnCode SilKit_LifecycleService_SetShutdownHandler(SilKit_LifecycleSer
     CAPI_ENTER
     {
         auto* cppLifecycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(clifecycleService);
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(clifecycleService);
 
         cppLifecycleService->SetShutdownHandler([handler, context, clifecycleService]() {
             handler(context, clifecycleService);
@@ -245,7 +229,7 @@ SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService
     CAPI_ENTER
     {
         auto* cppLifecycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(
                 clifecycleService);
 
         sRunAsyncFuturePerParticipant[clifecycleService] =
@@ -341,7 +325,7 @@ SilKit_ReturnCode SilKit_LifecycleService_Pause(SilKit_LifecycleService* clifecy
     CAPI_ENTER
     {
         auto* lifeCycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(clifecycleService);
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(clifecycleService);
         lifeCycleService->Pause(reason);
         return SilKit_ReturnCode_SUCCESS;
     }
@@ -354,7 +338,7 @@ SilKit_ReturnCode SilKit_LifecycleService_Continue(SilKit_LifecycleService* clif
     CAPI_ENTER
     {
         auto* lifeCycleService =
-            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(clifecycleService);
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(clifecycleService);
         lifeCycleService->Continue();
         return SilKit_ReturnCode_SUCCESS;
     }

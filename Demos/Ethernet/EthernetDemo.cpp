@@ -204,8 +204,8 @@ int main(int argc, char** argv)
 
         if (runSync)
         {
-            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-            auto* timeSyncService = lifecycleService->GetTimeSyncService();
+            auto* lifecycleService = participant->CreateLifecycleService();
+            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([&participantName, ethernetController]() {

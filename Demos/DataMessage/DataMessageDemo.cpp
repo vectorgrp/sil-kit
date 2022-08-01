@@ -114,8 +114,8 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = participant->CreateLifecycleService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([&participantName]() {
             std::cout << "Communication ready for " << participantName << std::endl;

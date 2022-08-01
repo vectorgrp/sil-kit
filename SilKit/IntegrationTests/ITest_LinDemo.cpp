@@ -136,7 +136,7 @@ struct TestResult
 struct LinNode
 {
     LinNode(IParticipant* participant, ILinController* controller, const std::string& name,
-            Orchestration::ILifecycleServiceWithTimeSync* lifecycleService)
+            Orchestration::ILifecycleService* lifecycleService)
         : _controller{controller}
         , _participant{participant}
         , _name{name}
@@ -153,14 +153,14 @@ struct LinNode
     LinControllerConfig _controllerConfig;
     std::string _name;
     TestResult _result;
-    Orchestration::ILifecycleServiceWithTimeSync* _lifecycleService{nullptr};
+    Orchestration::ILifecycleService* _lifecycleService{nullptr};
 };
 
 class LinMaster : public LinNode
 {
 public:
     LinMaster(IParticipant* participant, ILinController* controller,
-              Orchestration::ILifecycleServiceWithTimeSync* lifecycleService)
+              Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, "LinMaster", lifecycleService)
     {
         schedule = {
@@ -291,7 +291,7 @@ class LinSlave : public LinNode
 {
 public:
     LinSlave(IParticipant* participant, ILinController* controller,
-             Orchestration::ILifecycleServiceWithTimeSync* lifecycleService)
+             Orchestration::ILifecycleService* lifecycleService)
         : LinNode(participant, controller, "LinSlave", lifecycleService)
     {
     }
@@ -420,8 +420,8 @@ TEST_F(ITest_SimTestHarness, lin_demo)
         const std::string participantName = "LinMaster";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
         auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleServiceWithTimeSync();
-        auto&& timeSyncService = lifecycleService->GetTimeSyncService();
+            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN1");
         lifecycleService->SetCommunicationReadyHandler([participantName, linController]() {
 
@@ -453,8 +453,8 @@ TEST_F(ITest_SimTestHarness, lin_demo)
         const std::string participantName = "LinSlave";
         auto&& participant = _simTestHarness->GetParticipant(participantName)->Participant();
         auto&& lifecycleService =
-            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleServiceWithTimeSync();
-        auto&& timeSyncService = lifecycleService->GetTimeSyncService();
+            _simTestHarness->GetParticipant(participantName)->GetOrCreateLifecycleService();
+        auto&& timeSyncService = _simTestHarness->GetParticipant(participantName)->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN1");
 
 

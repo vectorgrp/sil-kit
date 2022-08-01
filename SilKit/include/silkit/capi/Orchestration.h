@@ -124,22 +124,10 @@ typedef SilKit_ReturnCode (*SilKit_SystemController_Create_t)(SilKit_SystemContr
  *
  * The object returned must not be deallocated using free()!
  */
-SilKitAPI SilKit_ReturnCode SilKit_LifecycleServiceNoTimeSync_Create(SilKit_LifecycleService** outLifecycleService,
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
                                                            SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode (*SilKit_LifecycleServiceNoTimeSync_Create_t)(SilKit_LifecycleService** outLifecycleService,
-                                                              SilKit_Participant* participant);
-
-/*! \brief Create a lifecycle service at this SIL Kit simulation participant.
- * \param outLifecycleService Pointer that refers to the resulting lifecycle service (out parameter).
- * \param participant The simulation participant at which the lifecycle service should be created.
- *
- * The object returned must not be deallocated using free()!
- */
-SilKitAPI SilKit_ReturnCode SilKit_LifecycleServiceWithTimeSync_Create(SilKit_LifecycleService** outLifecycleService,
-                                                           SilKit_Participant* participant);
-
-typedef SilKit_ReturnCode (*SilKit_LifecycleServiceWithTimeSync_Create_t)(SilKit_LifecycleService** outLifecycleService,
+typedef SilKit_ReturnCode (*SilKit_LifecycleService_Create_t)(SilKit_LifecycleService** outLifecycleService,
                                                               SilKit_Participant* participant);
 
 /*! \brief Create a time sync service at this SIL Kit simulation participant.

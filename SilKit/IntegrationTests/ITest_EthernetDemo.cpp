@@ -70,8 +70,8 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
         /////////////////////////////////////////////////////////////////////////
         auto&& simParticipant = _simTestHarness->GetParticipant("EthernetWriter");
         auto&& participant = simParticipant->Participant();
-        auto* lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = simParticipant->GetOrCreateLifecycleService();
+        auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
         
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() {
@@ -142,8 +142,8 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
         /////////////////////////////////////////////////////////////////////////
         auto&& simParticipant = _simTestHarness->GetParticipant("EthernetReader");
         auto&& participant = simParticipant->Participant();
-        auto* lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = simParticipant->GetOrCreateLifecycleService();
+        auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController2", "ETH1");
 
         timeSyncService->SetSimulationStepHandler([&](auto now) {

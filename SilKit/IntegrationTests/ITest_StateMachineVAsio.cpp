@@ -122,8 +122,8 @@ TEST_F(ITest_VAsioNetwork, vasio_state_machine)
     auto participantTestUnit =
         CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit", registryUri);
     participantTestUnit->JoinSilKitSimulation();
-    auto* lifecycleService = participantTestUnit->CreateLifecycleServiceWithTimeSync();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    auto* lifecycleService = participantTestUnit->CreateLifecycleService();
+    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
     lifecycleService->SetCommunicationReadyHandler([&callbacks = callbacks]() {
         callbacks.CommunicationReadyHandler();

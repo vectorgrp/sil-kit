@@ -69,8 +69,8 @@ protected:
         }
 
         auto logger = publisher->GetOrGetLogger();
-        auto* lifecycleService = publisher->GetOrCreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = publisher->GetOrCreateLifecycleService();
+        auto* timeSyncService = publisher->GetOrCreateTimeSyncService();
 
         timeSyncService->SetSimulationStepHandler([&logger, &lifecycleService](auto, auto) {
             logger->Info("::::::::::: Sending STOP");

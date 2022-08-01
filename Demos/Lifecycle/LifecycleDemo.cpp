@@ -119,7 +119,7 @@ int main(int argc, char** argv)
         if (runSync)
         {
             // In this demo, the life cycle service will always be used
-            auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
+            auto* lifecycleService = participant->CreateLifecycleService();
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([]() {
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
             });
 
             // configure time synchronization
-            auto timeSyncService = lifecycleService->GetTimeSyncService();
+            auto timeSyncService = lifecycleService->CreateTimeSyncService();
 
             timeSyncService->SetSimulationStepHandler(
                 [&, sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
@@ -171,7 +171,7 @@ int main(int argc, char** argv)
         else
         {
             // In this demo, the life cycle service will always be used
-            auto* lifecycleService = participant->CreateLifecycleServiceNoTimeSync();
+            auto* lifecycleService = participant->CreateLifecycleService();
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([]() {

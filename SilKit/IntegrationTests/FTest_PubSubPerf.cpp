@@ -64,7 +64,7 @@ protected:
         subLogger->Info(">>> Created Subscriber participant");
 
         int receptionCount = 0;
-        auto* subLifecycleService = subscriber->GetOrCreateLifecycleServiceWithTimeSync();
+        auto* subLifecycleService = subscriber->GetOrCreateLifecycleService();
         for (auto i = 0; i < numberOfTopics; i++)
         {
             const auto controllerName = "Sub-" + std::to_string(i);
@@ -100,8 +100,7 @@ protected:
 
             pubController.push_back(publisher->Participant()->CreateDataPublisher(controllerName, dataSpec, 0));
         }
-        auto* lifecycleService = publisher->GetOrCreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* timeSyncService = publisher->GetOrCreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler(
             [&allPublished, testData, pubController, pubLogger](auto, auto) {
                 if (!allPublished)

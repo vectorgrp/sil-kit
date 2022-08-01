@@ -45,41 +45,8 @@ class SynchronizedVirtualTimeProvider;
 class TimeSyncService;
 struct LifecycleConfiguration;
 
-class ILifecycleServiceInternal
-    : public ILifecycleServiceWithTimeSync
-    , public ILifecycleServiceNoTimeSync
-{
-public:
-    ~ILifecycleServiceInternal() = default;
-
-public:
-    // ILifecycleServiceWithTimeSync and ILifecycleServiceNoTimeSync
-    virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
-    virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
-    virtual void CompleteCommunicationReadyHandlerAsync() = 0;
-    virtual void SetStopHandler(StopHandler handler) = 0;
-    virtual void SetShutdownHandler(ShutdownHandler handler) = 0;
-    virtual auto StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState> = 0;
-    virtual void ReportError(std::string errorMsg) = 0;
-    virtual void Pause(std::string reason) = 0;
-    virtual void Continue() = 0;
-    virtual void Stop(std::string reason) = 0;
-    virtual auto State() const -> ParticipantState = 0;
-    virtual auto Status() const -> const ParticipantStatus& = 0;
-
-
-    // ILifecycleServiceNoTimeSync
-    virtual void SetStartingHandler(StartingHandler handler) = 0;
-
-    // ILifecycleServiceWithTimeSync
-    virtual auto GetTimeSyncService() const -> ITimeSyncService* = 0;
-
-    // internal only
-    virtual void SetTimeSyncActive(bool isTimeSyncActive) = 0;
-};
-
 class LifecycleService
-    : public ILifecycleServiceInternal
+    : public ILifecycleService
     , public IMsgForLifecycleService
     , public Core::IServiceEndpoint
 {
@@ -101,7 +68,8 @@ public:
     void SetStopHandler(StopHandler handler) override;
     void SetShutdownHandler(ShutdownHandler handler) override;
 
-    auto GetTimeSyncService() const -> ITimeSyncService* override;
+    auto CreateTimeSyncService() -> ITimeSyncService* override;
+    auto GetTimeSyncService() -> ITimeSyncService*;
 
     auto StartLifecycle(LifecycleConfiguration startConfiguration)
         -> std::future<ParticipantState> override;
@@ -118,7 +86,8 @@ public:
 
     void ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& msg) override;
 
-    void SetTimeSyncActive(bool isTimeSyncActive) override;
+    void SetTimeSyncActive(bool isTimeSyncActive);
+
     // Used by Policies
     template <class MsgT>
     void SendMsg(MsgT&& msg) const;

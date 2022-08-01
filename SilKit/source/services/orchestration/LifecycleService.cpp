@@ -292,12 +292,23 @@ auto LifecycleService::Status() const -> const ParticipantStatus&
     return _status;
 }
 
-auto LifecycleService::GetTimeSyncService() const -> ITimeSyncService*
+auto LifecycleService::GetTimeSyncService() -> ITimeSyncService*
 {
     return _timeSyncService;
 }
 
-
+auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
+{
+    if (!_timeSyncActive)
+    {
+        _timeSyncActive = true;
+        return _timeSyncService;
+    }
+    else
+    {
+        throw std::runtime_error("You may not create the time synchronization service more than once.");
+    }
+}
 
 void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& command)
 {
@@ -384,9 +395,9 @@ void LifecycleService::NewSystemState(SystemState systemState)
     }
 }
 
-void LifecycleService::SetTimeSyncActive(bool isTimeSyncAcvice)
+void LifecycleService::SetTimeSyncActive(bool isTimeSyncActive)
 {
-    _timeSyncActive = isTimeSyncAcvice;
+    _timeSyncActive = isTimeSyncActive;
 }
 
 bool LifecycleService::IsTimeSyncActive() const

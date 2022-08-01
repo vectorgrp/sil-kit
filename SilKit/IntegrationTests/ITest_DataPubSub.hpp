@@ -369,8 +369,8 @@ protected:
 
             if (sync)
             {
-                auto* lifecycleService = participant.participant->CreateLifecycleServiceWithTimeSync();
-                auto* timeSyncService = lifecycleService->GetTimeSyncService();
+                auto* lifecycleService = participant.participant->CreateLifecycleService();
+                auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
                 timeSyncService->SetSimulationStepHandler([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
                     if (!participant.dataPublishers.empty())

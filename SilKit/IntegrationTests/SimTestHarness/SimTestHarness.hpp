@@ -58,8 +58,8 @@ public:
     // Helpers to circumvent one-time-only orchestration service creation
     auto GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*;
     auto GetOrCreateSystemController() -> Services::Orchestration::ISystemController*;
-    auto GetOrCreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*;
-    auto GetOrCreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*;
+    auto GetOrCreateLifecycleService() -> Services::Orchestration::ILifecycleService*;
+    auto GetOrCreateTimeSyncService() -> Services::Orchestration::ITimeSyncService*;
     auto GetOrGetLogger() -> Services::Logging::ILogger*;
 
 private:
@@ -69,8 +69,8 @@ private:
 
     Services::Orchestration::ISystemMonitor* _systemMonitor{nullptr};
     Services::Orchestration::ISystemController* _systemController{nullptr};
-    Services::Orchestration::ILifecycleServiceNoTimeSync* _lifecycleServiceNoTimeSync{nullptr};
-    Services::Orchestration::ILifecycleServiceWithTimeSync* _lifecycleServiceWithTimeSync{nullptr};
+    Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
+    Services::Orchestration::ITimeSyncService* _timeSyncService{nullptr};
     Services::Logging::ILogger* _logger{nullptr};
 
     friend class SimTestHarness;

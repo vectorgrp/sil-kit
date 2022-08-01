@@ -61,7 +61,7 @@ auto SimParticipant::Result() -> std::future<SilKit::Services::Orchestration::Pa
 
 void SimParticipant::Stop()
 {
-    GetOrCreateLifecycleServiceWithTimeSync()->Stop("Stop");
+    GetOrCreateLifecycleService()->Stop("Stop");
 }
 
 auto SimParticipant::GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*
@@ -82,22 +82,22 @@ auto SimParticipant::GetOrCreateSystemController() -> Services::Orchestration::I
     return _systemController;
 }
 
-auto SimParticipant::GetOrCreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*
+auto SimParticipant::GetOrCreateLifecycleService() -> Services::Orchestration::ILifecycleService*
 {
-    if (!_lifecycleServiceNoTimeSync)
+    if (!_lifecycleService)
     {
-        _lifecycleServiceNoTimeSync = _participant->CreateLifecycleServiceNoTimeSync();
+        _lifecycleService = _participant->CreateLifecycleService();
     }
-    return _lifecycleServiceNoTimeSync;
+    return _lifecycleService;
 }
 
-auto SimParticipant::GetOrCreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*
+auto SimParticipant::GetOrCreateTimeSyncService() -> Services::Orchestration::ITimeSyncService*
 {
-    if (!_lifecycleServiceWithTimeSync)
+    if (!_timeSyncService)
     {
-        _lifecycleServiceWithTimeSync = _participant->CreateLifecycleServiceWithTimeSync();
+        _timeSyncService = GetOrCreateLifecycleService()->CreateTimeSyncService();
     }
-    return _lifecycleServiceWithTimeSync;
+    return _timeSyncService;
 }
 
 auto SimParticipant::GetOrGetLogger() -> Services::Logging::ILogger*
@@ -142,7 +142,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     for (auto& kv : _simParticipants)
     {
         auto& participant = kv.second;
-        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
+        auto* lifecycleService = participant->GetOrCreateLifecycleService();
         participant->_result = lifecycleService->StartLifecycle({true});
     }
 
@@ -212,8 +212,8 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
-    auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    auto* lifecycleService = participant->GetOrCreateLifecycleService();
+    auto* timeSyncService = participant->GetOrCreateTimeSyncService();
     timeSyncService->SetSimulationStepHandler([name = participant->Name()](auto, auto) {
     }, 1ms);
 

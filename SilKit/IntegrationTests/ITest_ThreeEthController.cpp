@@ -88,13 +88,13 @@ protected:
             callbacks.AckHandler(ack);
             numAcked++;
         });
-        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
+        auto* lifecycleService = participant->GetOrCreateLifecycleService();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Activate();
         });
 
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* timeSyncService = participant->GetOrCreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler(
             [this, participant, controller](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
                 if (numSent < testMessages.size())
@@ -145,7 +145,7 @@ protected:
                 }
             });
 
-        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
+        auto* lifecycleService = participant->GetOrCreateLifecycleService();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Activate();

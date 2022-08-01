@@ -90,8 +90,8 @@ protected:
                 }
             });
 
-        auto* lifecycleService = participant->GetOrCreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = participant->GetOrCreateLifecycleService();
+        auto* timeSyncService = participant->GetOrCreateTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([canController]() {
             canController->Start();

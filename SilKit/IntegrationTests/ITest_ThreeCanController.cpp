@@ -117,7 +117,7 @@ protected:
             EXPECT_TRUE(CheckUserContextContainsControllerId(ack.userContext, controllerToId[ctrl]));
         });
 
-        auto* lifecycleService = writer->GetOrCreateLifecycleServiceWithTimeSync();
+        auto* lifecycleService = writer->GetOrCreateLifecycleService();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Start();
@@ -131,7 +131,7 @@ protected:
             std::cout << "Shutdown received by participant " << name << std::endl;
         });
 
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* timeSyncService = writer->GetOrCreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler(
             [this, controller](auto, auto)
             {
@@ -185,7 +185,7 @@ protected:
             }
         });
 
-        auto* lifecycleService = reader->GetOrCreateLifecycleServiceWithTimeSync();
+        auto* lifecycleService = reader->GetOrCreateLifecycleService();
 
         lifecycleService->SetCommunicationReadyHandler([controller]() {
             controller->Start();

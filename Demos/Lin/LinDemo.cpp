@@ -347,8 +347,8 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-    auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    auto* lifecycleService = participant->CreateLifecycleService();
+    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
     // Set a Stop and Shutdown Handler

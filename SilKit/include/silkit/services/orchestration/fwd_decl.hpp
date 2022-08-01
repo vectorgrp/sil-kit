@@ -31,8 +31,7 @@ struct SystemCommand;
 struct ParticipantStatus;
 struct WorkflowConfiguration;
 
-class ILifecycleServiceNoTimeSync;
-class ILifecycleServiceWithTimeSync;
+class ILifecycleService;
 class ITimeSyncService;
 
 class ISystemMonitor;

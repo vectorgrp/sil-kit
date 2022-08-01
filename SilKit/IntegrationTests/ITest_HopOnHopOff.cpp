@@ -81,7 +81,7 @@ protected:
         bool simtimePassed{false};
         std::promise<void>           simtimePassedPromise;
 
-        SilKit::Services::Orchestration::ILifecycleServiceNoTimeSync* lifecycleService{nullptr};
+        SilKit::Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
 
         void ResetReception()
         {
@@ -103,7 +103,7 @@ protected:
         std::unique_ptr<IParticipant> participant;
         ISystemController*            systemController;
         ISystemMonitor*               systemMonitor;
-        ILifecycleServiceNoTimeSync* lifecycleService;
+        ILifecycleService* lifecycleService;
         std::future<ParticipantState> finalState;
     };
 
@@ -133,8 +133,8 @@ protected:
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
 
-            auto* lifecycleService = participant.participant->CreateLifecycleServiceWithTimeSync();
-            auto* timeSyncService = lifecycleService->GetTimeSyncService();
+            auto* lifecycleService = participant.participant->CreateLifecycleService();
+            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
             SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, mediaType};
@@ -259,7 +259,7 @@ protected:
 
             systemMaster.systemController = systemMaster.participant->CreateSystemController();
             systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
-            systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleServiceNoTimeSync();
+            systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService();
 
             systemMaster.systemController->SetWorkflowConfiguration({syncParticipantNames});
 

@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
     }
 
     SilKit_LifecycleService* lifecycleService;
-    returnCode = SilKit_LifecycleServiceWithTimeSync_Create(&lifecycleService, participant);
+    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
 
     SilKit_TimeSyncService* timesyncService;
     returnCode = SilKit_TimeSyncService_Create(&timesyncService, lifecycleService);

@@ -88,10 +88,7 @@ public:
                                  Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer* = 0;
 
     //! \brief Return the ILifecycleService at this SIL Kit participant.
-    virtual auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* = 0;
-
-    //! \brief Return the ILifecycleService at this SIL Kit participant.
-    virtual auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* = 0;
+    virtual auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
 
     //! \brief Return the ISystemMonitor at this SIL Kit participant.
     virtual auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;

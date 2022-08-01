@@ -312,8 +312,8 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
         auto* controller = participant->CreateFlexrayController("FlexRay1", "PowerTrain1");
-        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = participant->CreateLifecycleService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         std::vector<Flexray::FlexrayTxBufferConfig> bufferConfigs;
 

@@ -147,9 +147,8 @@ public:
     auto GetSystemController() -> Services::Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
     auto GetLogger() -> Services::Logging::ILogger* override;
-    auto CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync* override;
-    auto CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync* override;
-    auto GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal* override;
+    auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* override;
+    auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;
     auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
         -> Services::Orchestration::TimeSyncService* override;
     auto GetParticipantName() const -> const std::string& override { return _participantConfig.participantName; }

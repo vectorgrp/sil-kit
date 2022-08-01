@@ -447,8 +447,8 @@ protected:
 
             if (sync)
             {
-                auto* lifecycleService = participant.participant->CreateLifecycleServiceWithTimeSync();
-                auto* timeSyncService = lifecycleService->GetTimeSyncService();
+                auto* lifecycleService = participant.participant->CreateLifecycleService();
+                auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
                 timeSyncService->SetSimulationStepHandler([&participant](std::chrono::nanoseconds /*now*/) {
                     for (const auto& client : participant.rpcClients)

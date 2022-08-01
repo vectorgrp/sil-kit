@@ -119,8 +119,8 @@ int main(int argc, char** argv)
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         // Set an Init Handler
-        auto* lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        auto* lifecycleService = participant->CreateLifecycleService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([&participantName]() {
             std::cout << "Communication ready for " << participantName << std::endl;

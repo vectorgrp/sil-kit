@@ -236,7 +236,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_no_time_sync
 {
     SilKit_ReturnCode returnCode;
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
-    auto* lifecycleService = (SilKit_LifecycleService*)(static_cast<SilKit::Services::Orchestration::ILifecycleServiceInternal*>(mockParticipant.CreateLifecycleServiceNoTimeSync()));
+    auto* lifecycleService = (SilKit_LifecycleService*)(static_cast<SilKit::Services::Orchestration::ILifecycleService*>(mockParticipant.CreateLifecycleService()));
 
     EXPECT_CALL(mockParticipant.mockLifecycleService, SetStartingHandler(testing::_)).Times(testing::Exactly(1));
 
@@ -288,7 +288,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
 {
     SilKit_ReturnCode returnCode;
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
-    auto* lifecycleService = (SilKit_LifecycleService*)(mockParticipant.CreateLifecycleServiceWithTimeSync());
+    auto* lifecycleService = (SilKit_LifecycleService*)(mockParticipant.CreateLifecycleService());
 
     // required for MockSystemMonitor::ParticipantStatus
     SilKit::Services::Orchestration::ParticipantStatus mockParticipantStatus{};

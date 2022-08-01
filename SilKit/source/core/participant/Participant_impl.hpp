@@ -113,7 +113,7 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     auto* lifecycleService = GetLifecycleService();
-    (void)lifecycleService->GetTimeSyncService();
+    (void)(dynamic_cast<Services::Orchestration::LifecycleService*>(lifecycleService)->GetTimeSyncService());
 
 
     //// Enable replaying mechanism.
@@ -513,7 +513,7 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestration::ILifecycleServiceInternal*
+auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestration::ILifecycleService*
 {
     auto* lifecycleService =
         GetController<Orchestration::LifecycleService>("default", SilKit::Core::Discovery::controllerTypeLifecycleService);
@@ -531,7 +531,7 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateLifecycleServiceWithTimeSync() -> Services::Orchestration::ILifecycleServiceWithTimeSync*
+auto Participant<SilKitConnectionT>::CreateLifecycleService() -> Services::Orchestration::ILifecycleService*
 {
     if (_isLifecycleServiceCreated)
     {
@@ -539,25 +539,11 @@ auto Participant<SilKitConnectionT>::CreateLifecycleServiceWithTimeSync() -> Ser
     }
     _isLifecycleServiceCreated = true;
 
-    auto* lcs = GetLifecycleService();
-    lcs->SetTimeSyncActive(true);
+    // TODO set SetTimeSyncActive in CreateTimeSyncService!
+    //auto* lcs = GetLifecycleService();
+    //lcs->SetTimeSyncActive(false);
 
-    return lcs;
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateLifecycleServiceNoTimeSync() -> Services::Orchestration::ILifecycleServiceNoTimeSync*
-{
-    if (_isLifecycleServiceCreated)
-    {
-        throw std::runtime_error("You may not create the lifecycle service more than once.");
-    }
-    _isLifecycleServiceCreated = true;
-
-    auto* lcs = GetLifecycleService();
-    lcs->SetTimeSyncActive(false);
-
-    return lcs;
+    return GetLifecycleService();
 }
 
 template <class SilKitConnectionT>

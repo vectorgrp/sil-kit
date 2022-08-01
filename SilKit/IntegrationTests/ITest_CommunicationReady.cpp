@@ -146,8 +146,8 @@ public:
         participant =
             SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(Services::Logging::Level::Warn), name, registryUri);
 
-        lifecycleService = participant->CreateLifecycleServiceWithTimeSync();
-        auto* timeSyncService = lifecycleService->GetTimeSyncService();
+        lifecycleService = participant->CreateLifecycleService();
+        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         // We need to create a dedicated thread, so we do not block the 
         // CommunicationReadyHandlerAsync when we communication becomes ready.
@@ -251,7 +251,7 @@ public:
 private://Members
     std::string name;
     std::unique_ptr<IParticipant> participant;
-    Services::Orchestration::ILifecycleServiceWithTimeSync* lifecycleService{nullptr};
+    Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
     std::vector<IDataPublisher*> pubControllers;
     std::vector<IDataSubscriber*> subControllers;
     std::vector<std::string> pubTopics;
@@ -285,7 +285,7 @@ protected:
 
     struct SystemMaster
     {
-        ILifecycleServiceNoTimeSync* lifecycleService;
+        ILifecycleService* lifecycleService;
         std::unique_ptr<IParticipant> participant;
         ISystemController* systemController;
         ISystemMonitor* systemMonitor;
@@ -331,7 +331,7 @@ protected:
         systemMaster.participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
-        systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleServiceNoTimeSync();
+        systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService();
         systemMaster.systemController = systemMaster.participant->CreateSystemController();
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
 

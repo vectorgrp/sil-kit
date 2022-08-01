@@ -73,8 +73,8 @@ TEST_F(ITest_SimTestHarness, can_demo)
       const auto participantName = "CanWriter";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
-      auto&& timeSyncService = lifecycleService->GetTimeSyncService();
+      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+      auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       canController->AddFrameTransmitHandler([&, participant](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
@@ -157,8 +157,8 @@ TEST_F(ITest_SimTestHarness, can_demo)
       const auto participantName = "CanReader";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
-      auto&& timeSyncService = lifecycleService->GetTimeSyncService();
+      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+      auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
@@ -213,7 +213,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
       const auto participantName = "CanMonitor";
       auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
       auto&& participant = simParticipant->Participant();
-      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleServiceWithTimeSync();
+      auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
       lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {

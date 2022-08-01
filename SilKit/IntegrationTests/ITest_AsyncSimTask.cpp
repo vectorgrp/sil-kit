@@ -59,9 +59,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
     std::atomic<int> numActiveSimtasks{0};
     std::atomic<int> numSyncSimtasks{0};
 
-    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateTimeSyncService();
     auto* asyncParticipant = testHarness.GetParticipant("Async");
-    auto* async = testHarness.GetParticipant("Async")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
 
     sync->SetSimulationStepHandler([&numSyncSimtasks](auto) {
         // run as fast as possible
@@ -82,7 +82,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         {
             //Only allow time progress up to expectedTime
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Stop Test");
+            asyncParticipant->GetOrCreateLifecycleService()->Stop("Stop Test");
             {
                 std::unique_lock<decltype(mx)> lock(mx);
                 done = true;
@@ -143,9 +143,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
 
     auto syncTimeNs{0ns};
 
-    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateTimeSyncService();
     auto* asyncParticipant = testHarness.GetParticipant("Async");
-    auto* async = testHarness.GetParticipant("Async")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
 
     sync->SetSimulationStepHandler([&syncTimeNs](auto now) {
         std::cout << "Sync SimTask now=" << now.count() << std::endl;
@@ -159,7 +159,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
+            asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
         }
         if (now < expectedTime)
         {
@@ -217,9 +217,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_completion_from_foreign_thread)
 
     std::atomic<std::chrono::nanoseconds> syncTime{0ns};
 
-    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateTimeSyncService();
     auto* asyncParticipant = testHarness.GetParticipant("Async");
-    auto* async = testHarness.GetParticipant("Async")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
 
     sync->SetSimulationStepHandler([&syncTime](auto now) {
         syncTime = now;
@@ -229,7 +229,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_completion_from_foreign_thread)
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
+            asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
             startupPromise.set_value(true);
             return;
         }
@@ -274,9 +274,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
     auto asyncTime{0ns};
     const int periodFactor = 10;
 
-    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateTimeSyncService();
     auto* asyncParticipant = testHarness.GetParticipant("Async");
-    auto* async = testHarness.GetParticipant("Async")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
     int countSync = 0;
     int countAsync = 0;
 
@@ -290,7 +290,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
         countAsync++;
         if (countAsync > periodFactor * 100000)
         {
-            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
+            asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
         }
         async->CompleteSimulationStep();
         },
@@ -310,9 +310,9 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
     auto asyncTime{0ns};
     const int periodFactor = 7;
 
-    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateTimeSyncService();
     auto* asyncParticipant = testHarness.GetParticipant("Async");
-    auto* async = testHarness.GetParticipant("Async")->GetOrCreateLifecycleServiceWithTimeSync()->GetTimeSyncService();
+    auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
     int countSync = 0;
     int countAsync = 0;
 
@@ -328,7 +328,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
         countAsync++;
         if (countAsync > periodFactor * 100000)
         {
-            asyncParticipant->GetOrCreateLifecycleServiceWithTimeSync()->Stop("Test");
+            asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
         }
         async->CompleteSimulationStep();
         async->CompleteSimulationStep();
