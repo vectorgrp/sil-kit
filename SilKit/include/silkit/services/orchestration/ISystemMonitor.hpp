@@ -94,7 +94,7 @@ public:
     /*! \brief Get the current \ref ParticipantStatus of specific participant
      *
      * \param participantName The name of the participant for which the status is queried.
-     * \throw std::runtime_error If the participantId does not
+     * \throw std::runtime_error If the participant name does not
      *        identify a participant that participates in synchronization.
      */
     virtual auto ParticipantStatus(const std::string& participantName) const

@@ -129,7 +129,7 @@ private:
 
     TimeSyncService* _timeSyncService;
 
-    OperationMode _operationMode = OperationMode::Coordinated;
+    OperationMode _operationMode = OperationMode::Invalid;
 
     bool _isRunning{false};
     ParticipantStatus _status;

@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <memory>
 #include <cstdint>
+#include <mutex>
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
@@ -93,6 +94,12 @@ public:
 
 private:
     void AddParticipant(const std::string& participantName);
+
+    std::mutex _mutex;
+    auto Lock() -> std::unique_lock<decltype(_mutex)>
+    {
+        return std::unique_lock<decltype(_mutex)>{_mutex};
+    }
 
     std::vector<std::string> _syncParticipantNames;
     std::string _registryUri;

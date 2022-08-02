@@ -299,16 +299,16 @@ protected:
         switch (newState)
         {
         case SystemState::Error:
-            std::cout << "State = " << newState << std::endl;
+            std::cout << "SystemState = " << newState << std::endl;
             AbortAndFailTest("Reached SystemState::Error");
             break;
         case SystemState::Running:
-            std::cout << "State = " << newState << std::endl;
+            std::cout << "SystemState = " << newState << std::endl;
             systemMaster.lifecycleService->Stop("End of test");
             systemMaster.waitForStopPromise.set_value();
             break;
         default: 
-            std::cout << "State = " << newState << std::endl;
+            std::cout << "SystemState = " << newState << std::endl;
             break;
         }
     }

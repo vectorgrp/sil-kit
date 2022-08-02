@@ -129,7 +129,7 @@ auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration)
     switch (_operationMode)
     {
     case OperationMode::Invalid: 
-        throw std::runtime_error("OperationMode was not set. This is mandatory.");
+        throw ConfigurationError("OperationMode was not set. This is mandatory.");
     case OperationMode::Coordinated: 
         break;
     case OperationMode::Autonomous:
@@ -307,7 +307,7 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     }
     else
     {
-        throw std::runtime_error("You may not create the time synchronization service more than once.");
+        throw ConfigurationError("You may not create the time synchronization service more than once.");
     }
 }
 
@@ -393,12 +393,18 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::Stopping: 
         _lifecycleManagement.SystemwideStopping(ss.str()); 
         break;
-    case SystemState::Stopped: break; // To Sync or not to Sync - that is the question -- for now don't
+    case SystemState::Stopped:
+        _lifecycleManagement.SystemwideStopping(ss.str());
+        break; // To Sync or not to Sync - that is the question -- for now don't
+    case SystemState::ShuttingDown: 
+        _lifecycleManagement.SystemwideStopping(ss.str()); 
+        break; // ignore
+    case SystemState::Shutdown: 
+        _lifecycleManagement.SystemwideStopping(ss.str()); 
+        break; // ignore
     case SystemState::Error: 
         _lifecycleManagement.Error(ss.str());
         break; // ignore
-    case SystemState::ShuttingDown: break; // ignore
-    case SystemState::Shutdown: break; // ignore
     }
 }
 

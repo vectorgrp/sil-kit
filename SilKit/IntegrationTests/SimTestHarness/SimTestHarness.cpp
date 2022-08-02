@@ -138,6 +138,7 @@ SimTestHarness::~SimTestHarness() = default;
 
 bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
 {
+    auto lock = Lock();
     // start all participants
     for (auto& kv : _simParticipants)
     {
@@ -188,6 +189,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
 
 SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName)
 {
+    auto lock = Lock();
     if (_simParticipants.count(participantName) == 0)
     {
         //deferred participant creation
@@ -214,10 +216,10 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     // by default, we do no operation during simulation task, the user should override this
     auto* lifecycleService = participant->GetOrCreateLifecycleService();
     auto* timeSyncService = participant->GetOrCreateTimeSyncService();
-    timeSyncService->SetSimulationStepHandler([name = participant->Name()](auto, auto) {
+    timeSyncService->SetSimulationStepHandler([](auto, auto) {
     }, 1ms);
 
-    lifecycleService->SetCommunicationReadyHandler([name = participantName]() {
+    lifecycleService->SetCommunicationReadyHandler([]() {
     });
 
     _simParticipants[participantName] = std::move(participant);

@@ -88,7 +88,7 @@ typedef struct
     SilKit_NanosecondsWallclockTime refreshTime; //!< The refresh time.
 } SilKit_ParticipantStatus;
 
-//!< Details about a status change of a participant.
+//!< Configuration of the simulation workflow
 typedef struct
 {
     SilKit_StructHeader structHeader;

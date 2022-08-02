@@ -85,6 +85,9 @@ private:
         _systemMaster.systemMonitor = _systemMaster.participant->CreateSystemMonitor();
         _systemMaster.lifecycleService = _systemMaster.participant->CreateLifecycleService();
 
+        ITimeSyncService * timeSyncService = _systemMaster.lifecycleService->CreateTimeSyncService();
+        timeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds /*now*/) {}, std::chrono::seconds{1});
+
         requiredParticipantNames.push_back(systemMasterName);
         _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
 

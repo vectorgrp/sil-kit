@@ -1167,12 +1167,12 @@ TEST_F(LifecycleServiceTest, error_on_create_time_sync_service_twice)
             {
                 lifecycleService.CreateTimeSyncService(); // ignore returned controller
             }
-            catch (const std::exception&)
+            catch (const ConfigurationError&)
             {
                 throw;
             }
         },
-        std::runtime_error);
+        ConfigurationError);
 }
 
 } // namespace

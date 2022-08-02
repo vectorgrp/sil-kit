@@ -37,7 +37,8 @@ using ParticipantId = uint64_t;
 namespace Services {
 namespace Orchestration {
 
-// note: always increase number (never reuse old ones!)
+// note: never reuse old numbers!
+//! \brief Available participant states
 enum class ParticipantState : SilKit_ParticipantState
 {
     Invalid                     =   0, //!< An invalid participant state
@@ -54,6 +55,7 @@ enum class ParticipantState : SilKit_ParticipantState
     Shutdown                    = 110, //!< The shutdown state
 };
 
+//! \brief Details about a participant state change.
 struct ParticipantStatus
 {
     std::string participantName; //!< Name of the participant.
@@ -63,7 +65,8 @@ struct ParticipantStatus
     std::chrono::system_clock::time_point refreshTime; //!< The refresh time.
 };
 
-// note: always increase number (never reuse old ones!)
+// note: never reuse old numbers!
+//! \brief Available system states
 enum class SystemState : SilKit_SystemState
 {
     Invalid                     =   0, //!< An invalid participant state
@@ -86,6 +89,7 @@ struct WorkflowConfiguration
     std::vector<std::string> requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
 };
 
+//! \brief Available operation modes of the lifecycle service
 enum class OperationMode : SilKit_OperationMode
 {
     Invalid = 0,

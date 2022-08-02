@@ -112,8 +112,7 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
     //_traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, participant);
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
-    auto* lifecycleService = GetLifecycleService();
-    (void)(dynamic_cast<Services::Orchestration::LifecycleService*>(lifecycleService)->GetTimeSyncService());
+    (void)GetLifecycleService();
 
 
     //// Enable replaying mechanism.
@@ -538,10 +537,6 @@ auto Participant<SilKitConnectionT>::CreateLifecycleService() -> Services::Orche
         throw std::runtime_error("You may not create the lifecycle service more than once.");
     }
     _isLifecycleServiceCreated = true;
-
-    // TODO set SetTimeSyncActive in CreateTimeSyncService!
-    //auto* lcs = GetLifecycleService();
-    //lcs->SetTimeSyncActive(false);
 
     return GetLifecycleService();
 }

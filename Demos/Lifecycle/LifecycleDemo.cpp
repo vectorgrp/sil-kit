@@ -93,7 +93,7 @@ int main(int argc, char** argv)
 
         for (const auto& arg : args)
         {
-            if (arg == "--uncoordinated")
+            if (arg == "--autonomous")
             {
                 coordinateStartAndStop = SilKit::Services::Orchestration::OperationMode::Autonomous;
             }

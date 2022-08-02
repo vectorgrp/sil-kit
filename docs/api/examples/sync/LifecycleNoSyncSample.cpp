@@ -49,5 +49,5 @@ lifecycleService->SetShutdownHandler([]() {
 	std::cout << "Shutting down..." << std::endl;
 });
 
-auto finalStateFuture = lifecycleService->StartLifecycle(true, true);
+auto finalStateFuture = lifecycleService->StartLifecycle({OperationMode::Coordinated});
 auto finalState = finalStateFuture.get();

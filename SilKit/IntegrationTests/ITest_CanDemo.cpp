@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <chrono>
 #include <iostream>
+#include <atomic>
 
 #include <unordered_map> //remove this after rebase on cmake-cleanup-branch
 
@@ -52,7 +53,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
     bool receivedErrorActive = false;
     bool readerReceivedErrorActive = false;
     bool monitorReceivedErrorActive = false;
-    size_t monitorReceiveCount = 0;
+    std::atomic<uint32_t> monitorReceiveCount{0};
 
     //Test data
     const std::string payload = "Hallo Welt";
@@ -77,11 +78,11 @@ TEST_F(ITest_SimTestHarness, can_demo)
       auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
-      canController->AddFrameTransmitHandler([&, participant](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
+      canController->AddFrameTransmitHandler([&](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
         if (frameTransmitEvent.status == Can::CanTransmitStatus::Transmitted)
         {
           receivedTransmitted = true;
-          if(reinterpret_cast<void*>(participant) == frameTransmitEvent.userContext)
+          if((void*)(intptr_t)0xDEADBEEF == frameTransmitEvent.userContext)
           {
             writerHasValidUserContext = true;
           }
@@ -128,7 +129,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
         {
           auto* canController1 = participant->CreateCanController("CanController1", "CAN1");
           Log() << "---   CanWriter sending CanFrame";
-          canController1->SendFrame(msg, reinterpret_cast<void*>(participant));
+          canController1->SendFrame(msg, (void*)(intptr_t)(0xDEADBEEF));
           std::this_thread::sleep_for(10ms);//don't starve other threads on the CI build server
         }
       }, 1ms);
@@ -188,8 +189,8 @@ TEST_F(ITest_SimTestHarness, can_demo)
           EXPECT_EQ(frameEvent.direction, SilKit::Services::TransmitDirection::RX);
 
           EXPECT_EQ(frameEvent.frame.canId, 123u);
-          EXPECT_EQ(frameEvent.userContext, _simTestHarness->GetParticipant("CanWriter")->Participant())
-            << "frameEvent.frame.userContext is mangled!";
+          const auto expectedUsercontext = (void*) (intptr_t) 0xDEADBEEF;
+          EXPECT_EQ(frameEvent.userContext, expectedUsercontext) << "frameEvent.frame.userContext is mangled!";
           if (messageCount++ == 10)
           {
             lifecycleService->Stop("Test done");

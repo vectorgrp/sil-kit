@@ -60,6 +60,7 @@ public:
 
     VAsioTcpPeer& operator=(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer& operator=(VAsioTcpPeer&& other) = delete; //implicitly deleted because of mutex
+    ~VAsioTcpPeer();
 
 public:
     // ----------------------------------------

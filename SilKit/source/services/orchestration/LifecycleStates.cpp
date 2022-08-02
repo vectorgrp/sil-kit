@@ -66,7 +66,7 @@ void State::ContinueSimulation(std::string reason)
 
 void State::StopSimulation(std::string reason)
 {
-    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+    InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
 
 void State::RestartParticipant(std::string reason)

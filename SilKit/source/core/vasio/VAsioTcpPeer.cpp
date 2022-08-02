@@ -348,6 +348,10 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
 }
 
+VAsioTcpPeer::~VAsioTcpPeer()
+{
+}
+
 void VAsioTcpPeer::SendSilKitMsg(SerializedMessage buffer)
 {
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };

@@ -356,24 +356,104 @@ void SystemMonitor::UpdateSystemState(const Orchestration::ParticipantStatus& ne
         {
             SetSystemState(Orchestration::SystemState::Running);
         }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::Stopping);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping,
+                     Orchestration::ParticipantState::Stopped
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::Stopped);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping,
+                     Orchestration::ParticipantState::Stopped,
+                     Orchestration::ParticipantState::ShuttingDown
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::ShuttingDown);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping,
+                     Orchestration::ParticipantState::Stopped,
+                     Orchestration::ParticipantState::ShuttingDown,
+                     Orchestration::ParticipantState::Shutdown
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::Shutdown);
+        }
         return;
 
     case Orchestration::ParticipantState::Paused:
-        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Paused, 
-                                            Orchestration::ParticipantState::Running}))
+        if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Paused, 
+                     Orchestration::ParticipantState::Running
+            }))
+        {
             SetSystemState(Orchestration::SystemState::Paused);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Paused, 
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::Stopping);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Paused, 
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping,
+                     Orchestration::ParticipantState::Stopped
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::Stopped);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Paused, 
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping,
+                     Orchestration::ParticipantState::Stopped,
+                     Orchestration::ParticipantState::ShuttingDown
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::ShuttingDown);
+        }
+        else if (AllRequiredParticipantsInState({
+                     Orchestration::ParticipantState::Paused, 
+                     Orchestration::ParticipantState::Running,
+                     Orchestration::ParticipantState::Stopping,
+                     Orchestration::ParticipantState::Stopped,
+                     Orchestration::ParticipantState::ShuttingDown,
+                     Orchestration::ParticipantState::Shutdown
+                 }))
+        {
+            SetSystemState(Orchestration::SystemState::Shutdown);
+        }
         return;
 
     case Orchestration::ParticipantState::Stopping:
         if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Stopping, 
                                             Orchestration::ParticipantState::Stopped,
+                                            Orchestration::ParticipantState::ShuttingDown,
+                                            Orchestration::ParticipantState::Shutdown,
                                             Orchestration::ParticipantState::Paused, 
                                             Orchestration::ParticipantState::Running}))
             SetSystemState(Orchestration::SystemState::Stopping);
         return;
 
     case Orchestration::ParticipantState::Stopped:
-        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Stopped}))
+        if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Stopped,
+                                            Orchestration::ParticipantState::ShuttingDown,
+                                            Orchestration::ParticipantState::Shutdown}))
             SetSystemState(Orchestration::SystemState::Stopped);
         return;
 
