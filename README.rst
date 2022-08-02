@@ -11,7 +11,8 @@ which can be generated when building the Vector SIL Kit (cf. Customizing the
 Build) and is provided in pre-built form with the SIL Kit packages.
 
 The SIL Kit source and documentation is licensed under a permissable open 
-source license, see LICENSE file.
+source license, see LICENSE file. For licenses of third party dependencies,
+see `ThirdParty/LICENSES.rst`.
 
 Getting Started - GIT Clone
 ----------------------------------------
