@@ -418,7 +418,7 @@ def doBuild(Map config) {
                     timeout(time: 10, unit: 'MINUTES') {
                         ctest(
                             installation: 'InSearchPath',
-                            arguments: "--verbose --build-config Release -R '^Test.*'"
+                            arguments: "--output-on-failure --build-config Release -R '^Test.*'"
                         )
                     }
                     junit("**/*gtestresults.xml")
@@ -431,7 +431,7 @@ def doBuild(Map config) {
                     timeout(time: 10, unit: 'MINUTES') {
                         ctest(
                             installation: 'InSearchPath',
-                            arguments: "--verbose --build-config Release -R '^ITest.*'"
+                            arguments: "--output-on-failure --build-config Release -R '^ITest.*'"
                         )
                     }
                     junit("**/*gtestresults.xml")
