@@ -39,12 +39,8 @@ using namespace SilKit::Config;
 using namespace SilKit::Services;
 using namespace SilKit::Services::Can;
 
-TEST_F(ITest_SimTestHarness, can_demo)
+struct TestState
 {
-    //Create a simulation setup with 2 participants and the netsim
-    SetupFromParticipantList({"CanReader", "CanWriter", "CanMonitor"});
-
-    //Test Results
     bool writerHasReceivedTx = false;
     bool writerHasReceivedRx = false;
     bool writerHasValidUserContext = false;
@@ -55,16 +51,33 @@ TEST_F(ITest_SimTestHarness, can_demo)
     bool monitorReceivedErrorActive = false;
     std::atomic<uint32_t> monitorReceiveCount{0};
 
+    std::vector<uint8_t> payloadBytes;
+
+    CanFrame msg;
+
+    //Reader variables
+    bool result = false;
+    std::chrono::milliseconds receiveTime = 0ms;
+    size_t messageCount{0};
+};
+
+TEST_F(ITest_SimTestHarness, can_demo)
+{
+    //Create a simulation setup with 2 participants and the netsim
+    SetupFromParticipantList({"CanReader", "CanWriter", "CanMonitor"});
+
+    //Test Results
+    auto state = std::make_shared<TestState>();
+
     //Test data
     const std::string payload = "Hallo Welt";
 
-    std::vector<uint8_t> payloadBytes;
-    payloadBytes.resize(payload.size());
-    std::copy(payload.begin(), payload.end(), payloadBytes.begin());
+    state->payloadBytes.resize(payload.size());
+    std::copy(payload.begin(), payload.end(), state->payloadBytes.begin());
 
-    CanFrame msg;
-    msg.canId = 123;
-    msg.dataField = payloadBytes;
+    state->msg = CanFrame{};
+    state->msg.canId = 123;
+    state->msg.dataField = state->payloadBytes;
 
     //Set up the Sending and receiving participants
     {
@@ -78,25 +91,25 @@ TEST_F(ITest_SimTestHarness, can_demo)
       auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
       auto&& canController = participant->CreateCanController("CanController1", "CAN1");
 
-      canController->AddFrameTransmitHandler([&](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
+      canController->AddFrameTransmitHandler([state](auto, const Can::CanFrameTransmitEvent& frameTransmitEvent) {
         if (frameTransmitEvent.status == Can::CanTransmitStatus::Transmitted)
         {
-          receivedTransmitted = true;
+          state->receivedTransmitted = true;
           if((void*)(intptr_t)0xDEADBEEF == frameTransmitEvent.userContext)
           {
-            writerHasValidUserContext = true;
+            state->writerHasValidUserContext = true;
           }
         }
         if (frameTransmitEvent.status == Can::CanTransmitStatus::TransmitQueueFull)
         {
-          receivedTransmitQueueFull = true;
+          state->receivedTransmitQueueFull = true;
         }
       });
 
-      canController->AddErrorStateChangeHandler([&](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
+      canController->AddErrorStateChangeHandler([state](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
         if (errorStateChangeEvent.errorState == Can::CanErrorState::ErrorActive)
         {
-          receivedErrorActive = true;
+          state->receivedErrorActive = true;
         }
       });
 
@@ -107,13 +120,13 @@ TEST_F(ITest_SimTestHarness, can_demo)
       });
 
       timeSyncService->SetSimulationStepHandler(
-      [participant, &msg, canController] (auto now) {
+      [participant, canController, state] (auto now) {
         //Cause transmit queue overrun
         if (now == 0ms)
         {
           for (auto i = 0; i < 21; i++) //keep in sync with VCanController::cNumberOfTxObjects 
           {
-            canController->SendFrame(msg);
+            canController->SendFrame(state->msg);
           }
           return;
         }
@@ -121,7 +134,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
         //Cause a collision
         if (now == 10ms)
         {
-          canController->SendFrame(msg);
+          canController->SendFrame(state->msg);
         }
 
         //Normal transmission
@@ -129,28 +142,25 @@ TEST_F(ITest_SimTestHarness, can_demo)
         {
           auto* canController1 = participant->CreateCanController("CanController1", "CAN1");
           Log() << "---   CanWriter sending CanFrame";
-          canController1->SendFrame(msg, (void*)(intptr_t)(0xDEADBEEF));
+          canController1->SendFrame(state->msg, (void*)(intptr_t)(0xDEADBEEF));
           std::this_thread::sleep_for(10ms);//don't starve other threads on the CI build server
         }
       }, 1ms);
 
-      canController->AddFrameHandler([&writerHasReceivedTx, &writerHasReceivedRx](auto, const Can::CanFrameEvent& frameEvent) {
+      canController->AddFrameHandler([state](auto, const Can::CanFrameEvent& frameEvent) {
         //ignore early test messages
         if(frameEvent.direction ==  SilKit::Services::TransmitDirection::TX)
         {
-          writerHasReceivedTx = true;
+          state->writerHasReceivedTx = true;
         }
 
         if(frameEvent.direction ==  SilKit::Services::TransmitDirection::RX)
         {
-          writerHasReceivedRx = true;
+          state->writerHasReceivedRx = true;
         }
       }, ((DirectionMask)TransmitDirection::RX | (DirectionMask)TransmitDirection::TX) );
     }
-    //Reader variables
-    bool result = false;
-    auto receiveTime = 0ms;
-    auto messageCount{0};
+
     {
       /////////////////////////////////////////////////////////////////////////
       // CanReader
@@ -168,18 +178,18 @@ TEST_F(ITest_SimTestHarness, can_demo)
         canController->Start();
       });
 
-      timeSyncService->SetSimulationStepHandler([canController, &msg, &receiveTime](auto now) {
-        receiveTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+      timeSyncService->SetSimulationStepHandler([canController, state](auto now) {
+        state->receiveTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         //Cause a collision
         if (now == 10ms)
         {
-          canController->SendFrame(msg);
+          canController->SendFrame(state->msg);
         }
 
         }, 1ms);
 
       canController->AddFrameHandler(
-        [&, lifecycleService](auto, const Can::CanFrameEvent& frameEvent)
+        [state, lifecycleService](auto, const Can::CanFrameEvent& frameEvent)
         {
           if (frameEvent.userContext == nullptr)
           {
@@ -191,18 +201,18 @@ TEST_F(ITest_SimTestHarness, can_demo)
           EXPECT_EQ(frameEvent.frame.canId, 123u);
           const auto expectedUsercontext = (void*) (intptr_t) 0xDEADBEEF;
           EXPECT_EQ(frameEvent.userContext, expectedUsercontext) << "frameEvent.frame.userContext is mangled!";
-          if (messageCount++ == 10)
+          if (state->messageCount++ == 10)
           {
             lifecycleService->Stop("Test done");
             Log() << "---    CanReader: Sending Stop from";
           }
-          result = true;
+          state->result = true;
       });
 
-      canController->AddErrorStateChangeHandler([&](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
+      canController->AddErrorStateChangeHandler([state](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
         if (errorStateChangeEvent.errorState == Can::CanErrorState::ErrorActive)
         {
-          readerReceivedErrorActive = true;
+          state->readerReceivedErrorActive = true;
         }
       });
     }
@@ -223,29 +233,30 @@ TEST_F(ITest_SimTestHarness, can_demo)
         canController->Start();
       });
 
-      canController->AddErrorStateChangeHandler([&](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
+      canController->AddErrorStateChangeHandler([state](auto, const Can::CanErrorStateChangeEvent& errorStateChangeEvent) {
         if (errorStateChangeEvent.errorState == Can::CanErrorState::ErrorActive)
         {
-          monitorReceivedErrorActive = true;
+          state->monitorReceivedErrorActive = true;
         }
       });
 
-      canController->AddFrameHandler([&](auto, const Can::CanFrameEvent& ) {
-        monitorReceiveCount++;
+      canController->AddFrameHandler([state](auto, const Can::CanFrameEvent& ) {
+        state->monitorReceiveCount++;
       });
     }
+
     auto ok =  _simTestHarness->Run(5s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    EXPECT_TRUE(result) << " Expecting a message";
-    EXPECT_TRUE(writerHasReceivedTx) << " Expecting a receive Message with Direction == TX on CanWriter";
-    EXPECT_TRUE(writerHasValidUserContext) << " Expecting a CanFrameTransmitEvent with a valid"
+    EXPECT_TRUE(state->result) << " Expecting a message";
+    EXPECT_TRUE(state->writerHasReceivedTx) << " Expecting a receive Message with Direction == TX on CanWriter";
+    EXPECT_TRUE(state->writerHasValidUserContext) << " Expecting a CanFrameTransmitEvent with a valid"
       << " userContext during normal transmission";
-    EXPECT_FALSE(receivedTransmitQueueFull) << " Sending too fast should NOT result in TransmitQueue full in trivial simulation";
-    EXPECT_TRUE(receivedTransmitted) << " Sending should result in acknowledgment";
-    EXPECT_FALSE(receivedErrorActive) << " Collisions are not computed in trivial simulation";
-    EXPECT_FALSE(readerReceivedErrorActive) << " Collisions are not computed in trivial simulation";
-    EXPECT_FALSE(monitorReceivedErrorActive) << " Collisions are not computed in trivial simulation"; 
-    EXPECT_GT(monitorReceiveCount, 10) << "All participants connected to bus must receive frames";
+    EXPECT_FALSE(state->receivedTransmitQueueFull) << " Sending too fast should NOT result in TransmitQueue full in trivial simulation";
+    EXPECT_TRUE(state->receivedTransmitted) << " Sending should result in acknowledgment";
+    EXPECT_FALSE(state->receivedErrorActive) << " Collisions are not computed in trivial simulation";
+    EXPECT_FALSE(state->readerReceivedErrorActive) << " Collisions are not computed in trivial simulation";
+    EXPECT_FALSE(state->monitorReceivedErrorActive) << " Collisions are not computed in trivial simulation";
+    EXPECT_GT(state->monitorReceiveCount, 10) << "All participants connected to bus must receive frames";
 }
 
 } //end namespace
