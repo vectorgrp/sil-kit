@@ -62,4 +62,31 @@ SilKitAPI const char* SilKit_GetLastErrorString();
 
 typedef const char*(*SilKit_GetLastErrorString_t)();
 
+/*! \brief Create an opaque participant configuration from the configuration text.
+ *
+ * To destroy the participant configuration, call \ref SilKit_ParticipantConfiguration_Destroy.
+ *
+ * \param outParticipantConfiguration The pointer through which the participant configuration will be returned (out parameter).
+ * \param configuration The configuration as a string (e.g., read from a configuration file or a string constant).
+ */
+SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_FromString(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration,
+    const char* participantConfigurationString);
+
+typedef SilKit_ReturnCode (*SilKit_ParticipantConfiguration_FromString_t)(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration,
+    const char* participantConfigurationString);
+
+
+/*! \brief Destroy a participant configuration.
+*
+* \param participantConfiguration The participant configuration to be destroyed.
+*/
+SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_Destroy(
+    SilKit_ParticipantConfiguration* participantConfiguration);
+
+typedef SilKit_ReturnCode (*SilKit_ParticipantConfiguration_Destroy_t)(
+    SilKit_ParticipantConfiguration* participantConfiguration);
+
+
 SILKIT_END_DECLS

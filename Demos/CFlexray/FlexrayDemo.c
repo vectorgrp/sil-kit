@@ -496,10 +496,24 @@ int main(int argc, char** argv)
     }
 
     SilKit_ReturnCode returnCode;
-    returnCode = SilKit_Participant_Create(&participant, jsonString, participantName, registryUri, SilKit_True);
+
+    SilKit_ParticipantConfiguration* participantConfiguration = NULL;
+    returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, jsonString);
+    if (returnCode) {
+        printf("%s\n", SilKit_GetLastErrorString());
+        return 2;
+    }
+
+    returnCode = SilKit_Participant_Create(&participant, participantConfiguration, participantName, registryUri);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
         printf("SilKit_Participant_Create => %s\n", SilKit_GetLastErrorString());
+        return 2;
+    }
+
+    returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
+    if (returnCode) {
+        printf("%s\n", SilKit_GetLastErrorString());
         return 2;
     }
 

@@ -83,8 +83,13 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
     {
         SilKit_ReturnCode returnCode;
 
+        SilKit_ParticipantConfiguration* participantConfiguration = nullptr;
+        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_CONFIG_STRING);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+        EXPECT_NE(participantConfiguration, nullptr);
+
         SilKit_Participant* participant = nullptr;
-        returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "Participant1", "42", SilKit_False);
+        returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", "42");
         // since there is no SIL Kit Registry, the call should fail
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
         EXPECT_TRUE(participant == nullptr);
@@ -99,23 +104,37 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
     {
         SilKit_ReturnCode returnCode;
 
+        SilKit_ParticipantConfiguration* participantConfiguration = nullptr;
+
+        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_CONFIG_STRING);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+        EXPECT_NE(participantConfiguration, nullptr);
+
         SilKit_Participant* participant = nullptr;
-        returnCode = SilKit_Participant_Create(nullptr, SILKIT_CONFIG_STRING, "Participant1", "42", SilKit_False);
+        returnCode = SilKit_Participant_Create(nullptr, participantConfiguration, "Participant1", "42");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "42", SilKit_False);
+        returnCode = SilKit_Participant_Create(&participant, nullptr, "Participant1", "42");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, nullptr, "42", SilKit_False);
+        returnCode = SilKit_Participant_Create(&participant, participantConfiguration, nullptr, "42");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-        returnCode = SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "Participant1", nullptr, SilKit_False);
+        returnCode = SilKit_Participant_Create(&participant, participantConfiguration, "Participant1", nullptr);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
         returnCode =
-            SilKit_Participant_Create(&participant, SILKIT_MALFORMED_CONFIG_STRING, "Participant1", "42", SilKit_False);
+            SilKit_Participant_Create(&participant, participantConfiguration, "ParticipantNotExisting", "42");
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
 
-        returnCode =
-            SilKit_Participant_Create(&participant, SILKIT_CONFIG_STRING, "ParticipantNotExisting", "42", SilKit_False);
+        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+        returnCode = SilKit_ParticipantConfiguration_Destroy(nullptr);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+        participantConfiguration = nullptr;
+
+        returnCode = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, SILKIT_MALFORMED_CONFIG_STRING);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_UNSPECIFIEDERROR);
+        EXPECT_EQ(participantConfiguration, nullptr);
 
         // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
         returnCode = SilKit_Participant_Destroy(nullptr);

@@ -23,6 +23,10 @@ Changed
     - ``IRpcClient::Call`` now takes an additional ``userContext`` parameter and does not return a ``IRpcCallHandle *`` anymore.
       The ``userContext`` is presented in the ``RpcCallReturnHandler`` in the ``RpcCallReturnEvent`` structure instead of the ``callHandle``.
 
+- Remove the unused and outdated `synchronized` parameter from `SilKit_Participant_Create`.
+
+- Add and use opaque `SilKit_ParticipantConfiguration` type for use in `SilKit_Participant_Create`.
+
 [3.99.29] - 28-07-2022
 ----------------------
 

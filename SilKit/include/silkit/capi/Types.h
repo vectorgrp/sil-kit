@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 SILKIT_BEGIN_DECLS
 
+typedef struct SilKit_ParticipantConfiguration SilKit_ParticipantConfiguration;
+
 typedef struct SilKit_Participant SilKit_Participant;
 
 typedef int32_t SilKit_ReturnCode;

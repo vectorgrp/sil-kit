@@ -41,19 +41,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 extern "C"
 {
-SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant, const char* cParticipantConfigurationString,
-                                    const char* cParticipantName, const char* cRegistryUri,
-                                    SilKit_Bool /*unused isSynchronized*/)
+SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
+                                            SilKit_ParticipantConfiguration *participantConfiguration,
+                                            const char* cParticipantName, const char* cRegistryUri)
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipant);
-    ASSERT_VALID_POINTER_PARAMETER(cParticipantConfigurationString);
+    ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);
     ASSERT_VALID_POINTER_PARAMETER(cParticipantName);
     ASSERT_VALID_POINTER_PARAMETER(cRegistryUri);
     CAPI_ENTER
     {
-        auto config = SilKit::Config::ParticipantConfigurationFromString(cParticipantConfigurationString);
+        auto* cppParticipantConfiguration =
+            reinterpret_cast<SilKit::Config::ParticipantConfiguration*>(participantConfiguration);
 
-        auto participant = SilKit::CreateParticipant(config, cParticipantName, cRegistryUri).release();
+        // since we do _not_ want to consume the pointer itself, we must make a copy and store it in a shared_ptr
+        auto cppSharedParticipantConfiguration =
+            std::make_shared<SilKit::Config::ParticipantConfiguration>(*cppParticipantConfiguration);
+
+        auto participant =
+            SilKit::CreateParticipant(std::move(cppSharedParticipantConfiguration), cParticipantName, cRegistryUri)
+                .release();
 
         if (participant == nullptr)
         {
@@ -99,5 +106,56 @@ SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit
     }
     CAPI_LEAVE
 }
+
+
+SilKit_ReturnCode SilKit_ParticipantConfiguration_FromString(
+    SilKit_ParticipantConfiguration** outParticipantConfiguration,
+    const char* participantConfigurationString)
+{
+    ASSERT_VALID_OUT_PARAMETER(outParticipantConfiguration);
+    ASSERT_VALID_POINTER_PARAMETER(participantConfigurationString);
+    CAPI_ENTER
+    {
+        // create the configuration using the C++ API function
+        auto cppSharedParticipantConfiguration = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(
+            SilKit::Config::ParticipantConfigurationFromString(participantConfigurationString));
+        if (cppSharedParticipantConfiguration == nullptr)
+        {
+            SilKit_error_string = "Participant configuration could not be created.";
+            return SilKit_ReturnCode_UNSPECIFIEDERROR;
+        }
+
+        // since it is not possible to release the "raw" pointer from a shared_ptr, we copy it into our own raw pointer
+        auto* cppParticipantConfiguration =
+            new SilKit::Config::ParticipantConfiguration(*cppSharedParticipantConfiguration);
+
+        *outParticipantConfiguration = reinterpret_cast<SilKit_ParticipantConfiguration*>(cppParticipantConfiguration);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
+
+SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_Destroy(
+    SilKit_ParticipantConfiguration* participantConfiguration)
+{
+    ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);
+    CAPI_ENTER
+    {
+        if (participantConfiguration == nullptr)
+        {
+            SilKit_error_string = "A null pointer argument was passed to the function.";
+            return SilKit_ReturnCode_BADPARAMETER;
+        }
+
+        auto* cppParticipantConfiguration =
+            reinterpret_cast<SilKit::Config::ParticipantConfiguration*>(participantConfiguration);
+        delete cppParticipantConfiguration;
+
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 
 } //extern "C"

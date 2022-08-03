@@ -16,12 +16,17 @@ SIL Kit Entry Point and API Organization
 
 The main entry point of the C API is the function to obtain a SilKit_Participant::
 
+    SilKit_ParticipantConfiguration* participantConfiguration = NULL;
     SilKit_Participant* participant = NULL;
     const char* configString = "{ ... }";
     const char* participantName = "CanWriter";
     const char* registryUri = "silkit://localhost:8500";
-    SilKit_ReturnCode result = SilKit_Participant_Create(&participant, configString,
-                                                            participantName, registryUri, SilKit_False);
+    SilKit_ReturnCode result;
+    result = SilKit_ParticipantConfiguration_FromString(&participantConfiguration, configString);
+    if (result != SilKit_ReturnCode_SUCCESS) { ... }
+    result = SilKit_Participant_Create(&participant, configString,
+                                                            participantName, registryUri);
+    if (result != SilKit_ReturnCode_SUCCESS) { ... }
 
 All further services of the C API of the SIL Kit are requested through this Participant.
 
