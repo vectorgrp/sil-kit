@@ -71,7 +71,7 @@ public:
     void SetSimulationStepHandler(
         std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task,
         std::chrono::nanoseconds initialStepSize) override;
-    void SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize) override;
+    void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) override;
     void CompleteSimulationStep() override;
 
     void SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
@@ -129,7 +129,7 @@ private:
     bool _isSynchronized{false};
     bool _timeSyncConfigured{false};
 
-    SimulationStepT _simTask;
+    SimulationStepHandler _simTask;
     std::future<void> _asyncResult;
 
     Util::PerformanceMonitor _execTimeMonitor;

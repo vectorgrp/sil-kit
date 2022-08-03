@@ -47,7 +47,7 @@ class SilKitRemoteSink
 {
 public:
     SilKitRemoteSink() = delete;
-    SilKitRemoteSink(const Logger::LogMsgHandlerT& handler)
+    SilKitRemoteSink(const Logger::LogMsgHandler& handler)
         : _logMsgHandler{handler}
     {
     }
@@ -71,7 +71,7 @@ protected:
     void flush_() override {}
 
 private:
-    Logger::LogMsgHandlerT _logMsgHandler;
+    Logger::LogMsgHandler _logMsgHandler;
     bool _is_disabled{false};
 };
 } // anonymous namespace
@@ -173,7 +173,7 @@ void Logger::Critical(const std::string& msg)
     Log(Level::Critical, msg);
 }
 
-void Logger::RegisterRemoteLogging(const LogMsgHandlerT& handler)
+void Logger::RegisterRemoteLogging(const LogMsgHandler& handler)
 {
     auto remoteSinkRef = std::find_if(_config.sinks.begin(), _config.sinks.end(),
         [](const Config::Sink& sink) 

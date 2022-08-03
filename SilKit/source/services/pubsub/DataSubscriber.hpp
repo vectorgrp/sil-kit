@@ -46,12 +46,12 @@ class DataSubscriber
 public:
     DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                    const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
-                   DataMessageHandlerT defaultDataHandler);
+                   DataMessageHandler defaultDataHandler);
 
 public:
     void RegisterServiceDiscovery();
 
-    void SetDataMessageHandler(DataMessageHandlerT callback) override;
+    void SetDataMessageHandler(DataMessageHandler callback) override;
 
     // SilKit::Services::Orchestration::ITimeConsumer
     inline void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
@@ -70,8 +70,8 @@ private:
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
-    DataMessageHandlerT _defaultDataHandler;
-    NewDataPublisherHandlerT _newDataSourceHandler;
+    DataMessageHandler _defaultDataHandler;
+    NewDataPublisherHandler _newDataSourceHandler;
 
     Core::ServiceDescriptor _serviceDescriptor{};
 

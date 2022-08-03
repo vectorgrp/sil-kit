@@ -45,7 +45,7 @@ public:
     //ITimeProvider
     inline auto Now() const -> std::chrono::nanoseconds override;
     inline auto TimeProviderName() const -> const std::string& override;
-    inline HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override;
+    inline HandlerId AddNextSimStepHandler(NextSimStepHandler handler) override;
     inline void RemoveNextSimStepHandler(HandlerId handlerId) override;
     inline void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override;
     inline void SetSynchronized(bool isSynchronized) override;
@@ -75,7 +75,7 @@ auto TimeProvider::TimeProviderName() const -> const std::string&
     return _currentProvider->TimeProviderName();
 }
 
-HandlerId TimeProvider::AddNextSimStepHandler(NextSimStepHandlerT handler)
+HandlerId TimeProvider::AddNextSimStepHandler(NextSimStepHandler handler)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
     return _currentProvider->AddNextSimStepHandler(std::move(handler));

@@ -131,7 +131,7 @@ public:
      *
      * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
      */
-    virtual void SendFrameHeader(LinIdT linId) = 0;
+    virtual void SendFrameHeader(LinId linId) = 0;
 
     /*! Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
      * 

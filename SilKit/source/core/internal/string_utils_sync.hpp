@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

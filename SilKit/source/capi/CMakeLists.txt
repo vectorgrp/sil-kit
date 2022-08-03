@@ -26,6 +26,7 @@ add_silkit_test(Test_CapiFlexray SOURCES Test_CapiFlexray.cpp LIBS SilKitSimFlex
 add_silkit_test(Test_CapiData SOURCES Test_CapiData.cpp LIBS SilKitMwMockParticipant SilKit)
 add_silkit_test(Test_CapiRpc SOURCES Test_CapiRpc.cpp LIBS SilKitSimRpc SilKitMwMockParticipant SilKit)
 add_silkit_test(Test_CapiLogger SOURCES Test_CapiLogger.cpp LIBS SilKitMwLogging SilKit)
+add_silkit_test(Test_CapiVersion SOURCES Test_CapiVersion.cpp LIBS SilKit)
 
 add_silkit_test(Test_CapiSilKit SOURCES Test_CapiSilKit.cpp LIBS SilKitMwMockParticipant SilKit)
 add_silkit_test(Test_CapiParticipantStateHandling SOURCES Test_CapiParticipantStateHandling.cpp LIBS SilKitMwMockParticipant SilKit)

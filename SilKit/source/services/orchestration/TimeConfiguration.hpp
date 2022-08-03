@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 
 
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

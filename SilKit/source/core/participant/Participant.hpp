@@ -119,13 +119,13 @@ public:
         -> Services::PubSub::IDataPublisher* override;
 
     auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
-                              Services::PubSub::DataMessageHandlerT defaultDataHandler)
+                              Services::PubSub::DataMessageHandler defaultDataHandler)
         -> Services::PubSub::IDataSubscriber* override;
 
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
                                       const std::string& mediaType,
                                       const std::vector<SilKit::Services::Label>& publisherLabels,
-                                      Services::PubSub::DataMessageHandlerT callback, Services::PubSub::IDataSubscriber* parent)
+                                      Services::PubSub::DataMessageHandler callback, Services::PubSub::IDataSubscriber* parent)
         -> Services::PubSub::DataSubscriberInternal* override;
 
     auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcClientSpec& dataSpec, Services::Rpc::RpcCallResultHandler handler)

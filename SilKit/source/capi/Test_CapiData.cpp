@@ -60,7 +60,7 @@ public:
 class MockDataSubscriber : public SilKit::Services::PubSub::IDataSubscriber
 {
 public:
-    MOCK_METHOD1(SetDataMessageHandler, void(DataMessageHandlerT callback));
+    MOCK_METHOD1(SetDataMessageHandler, void(DataMessageHandler callback));
 };
 
 class MockParticipant : public SilKit::Core::Tests::DummyParticipant
@@ -72,7 +72,7 @@ public:
 
     MOCK_METHOD(SilKit::Services::PubSub::IDataSubscriber*, CreateDataSubscriber,
                 (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::DataSubscriberSpec& /*dataSpec*/),
-                 (SilKit::Services::PubSub::DataMessageHandlerT /*dataMessageHandler*/)),
+                 (SilKit::Services::PubSub::DataMessageHandler /*dataMessageHandler*/)),
                 (override));
 };
 

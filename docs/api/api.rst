@@ -39,7 +39,7 @@ controller interfaces.
   ethernet
 
 Data Publish/Subscribe and RPC
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 These services do not model a real-world bus and can be used for
 generic programming and interoperability tasks.

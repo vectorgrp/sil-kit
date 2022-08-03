@@ -41,7 +41,7 @@ public:
     void ServiceChange(ServiceDiscoveryEvent::Type changeType, const ServiceDescriptor& serviceDescriptor);
 
     //!< React on single service changes
-    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler,
+    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
                                                  const std::string& controllerTypeName,
                                                  const std::string& supplDataValue);
 
@@ -55,7 +55,7 @@ private:
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
 
     // Storage of specific handlers on this participant by [controllerTypeName/supplDataKey/supplDataValue]
-    std::unordered_map<std::string /* unique_key */, std::vector<ServiceDiscoveryHandlerT>> _specificHandlers;
+    std::unordered_map<std::string /* unique_key */, std::vector<ServiceDiscoveryHandler>> _specificHandlers;
 
     // Storage of incoming serviceDescriptors by [participantName][controllerTypeName/supplDataKey/supplDataValue]
     using ServiceMapByUniqueKey = std::unordered_map<std::string /* unique_key */, ServiceMap>;

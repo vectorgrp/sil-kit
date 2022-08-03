@@ -76,7 +76,7 @@ public:
 
     //! \brief Create a data subscriber at this SIL Kit participant.
     virtual auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
-                                      Services::PubSub::DataMessageHandlerT dataMessageHandler)
+                                      Services::PubSub::DataMessageHandler dataMessageHandler)
         -> Services::PubSub::IDataSubscriber* = 0;
 
     //! \brief Create a Rpc client at this SIL Kit participant.

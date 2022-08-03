@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 #include <cstdint>
 
-#include "silkit/services/orchestration/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Core {

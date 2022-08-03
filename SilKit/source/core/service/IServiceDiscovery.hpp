@@ -30,7 +30,7 @@ namespace SilKit {
 namespace Core {
 namespace Discovery {
 
-using ServiceDiscoveryHandlerT =
+using ServiceDiscoveryHandler =
     std::function<void(ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor&)>;
 
 class IServiceDiscovery
@@ -43,10 +43,10 @@ public:
     //!< Publish a participant-local service removal to all other participants
     virtual void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) = 0;
     //!< Register a handler for asynchronous service creation notifications
-    virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) = 0;
+    virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler) = 0;
     //!< Register a handler for service creation notifications for a specific controllerTypeName, 
     //!< associated supplDataKey and given supplDataValue 
-    virtual void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler,
+    virtual void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
                                                          const std::string& controllerTypeName,
                                                          const std::string& supplDataValue) = 0;
     //!< Get the currently known created services on other participants

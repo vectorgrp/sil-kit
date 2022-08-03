@@ -43,7 +43,7 @@ set_target_properties(sil-kit-registry PROPERTIES
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-# we're linking statically with SIL Kit components and not with the dll.
+# We're linking statically with SIL Kit components and not with the dll.
 add_definitions(-DEXPORT_SilKitAPI)
 
 target_link_libraries(sil-kit-registry
@@ -52,6 +52,17 @@ target_link_libraries(sil-kit-registry
     SilKitConfiguration
     SilKitVersion
 )
+
+
+# Set versioning infos on exe
+if(MSVC)
+    # Include the generated version_macros.hpp in SilKit/source
+    target_include_directories(sil-kit-registry
+        PRIVATE ${CMAKE_BINARY_DIR}/SilKit/source
+    )
+    target_sources(sil-kit-registry PRIVATE SilKitRegistry.rc)
+endif()
+
 install(TARGETS sil-kit-registry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

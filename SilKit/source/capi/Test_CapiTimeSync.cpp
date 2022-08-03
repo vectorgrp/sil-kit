@@ -61,7 +61,7 @@ TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
 
     EXPECT_CALL(mockParticipant.mockTimeSyncService,
                 SetSimulationStepHandler(
-            testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimulationStepT>(testing::_), testing ::_)
+            testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimulationStepHandler>(testing::_), testing ::_)
     ).Times(testing::Exactly(1));
     returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(
         (SilKit_TimeSyncService*)(mockParticipant.CreateLifecycleService()->CreateTimeSyncService()), nullptr,

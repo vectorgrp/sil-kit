@@ -43,7 +43,7 @@ namespace Logging {
 class ILogger
 {
 public:
-    using LogMsgHandlerT = std::function<void(LogMsg)>;
+    using LogMsgHandler = std::function<void(LogMsg)>;
 
 public:
     virtual ~ILogger() = default;

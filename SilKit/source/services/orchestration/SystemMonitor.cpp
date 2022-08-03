@@ -81,7 +81,7 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
         }
     }
 }
-auto SystemMonitor::AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId
+auto SystemMonitor::AddSystemStateHandler(SystemStateHandler handler) -> HandlerId
 {
     if (_systemState != Orchestration::SystemState::Invalid)
     {
@@ -100,7 +100,7 @@ void SystemMonitor::RemoveSystemStateHandler(HandlerId handlerId)
 
 }
 
-auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId
+auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler) -> HandlerId
 {
     for (auto&& kv : _participantStatus)
     {

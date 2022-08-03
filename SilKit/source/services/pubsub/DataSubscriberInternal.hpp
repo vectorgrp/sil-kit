@@ -41,10 +41,10 @@ public:
     DataSubscriberInternal(Core::IParticipantInternal* participant,
                            Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
                            const std::string& mediaType, const std::vector<SilKit::Services::Label>& labels,
-                           DataMessageHandlerT defaultHandler,
+                           DataMessageHandler defaultHandler,
                            IDataSubscriber* parent);
 
-    void SetDataMessageHandler(DataMessageHandlerT handler);
+    void SetDataMessageHandler(DataMessageHandler handler);
     
     //! \brief Accepts messages originating from SilKit communications.
     void ReceiveMsg(const IServiceEndpoint* from, const WireDataMessageEvent& dataMessageEvent) override;
@@ -63,7 +63,7 @@ private:
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::Label> _labels;
-    DataMessageHandlerT _defaultHandler;
+    DataMessageHandler _defaultHandler;
 
     IDataSubscriber* _parent{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};

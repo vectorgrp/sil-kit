@@ -310,7 +310,7 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
                                                              const std::string& mediaType,
                                                              const std::vector<SilKit::Services::Label>& publisherLabels,
-                                                             Services::PubSub::DataMessageHandlerT defaultHandler,
+                                                             Services::PubSub::DataMessageHandler defaultHandler,
                                                              Services::PubSub::IDataSubscriber* parent)
     -> Services::PubSub::DataSubscriberInternal*
 {
@@ -365,7 +365,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
-    SilKit::Services::PubSub::DataMessageHandlerT defaultDataHandler) -> Services::PubSub::IDataSubscriber*
+    SilKit::Services::PubSub::DataMessageHandler defaultDataHandler) -> Services::PubSub::IDataSubscriber*
 {
     SilKit::Config::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());

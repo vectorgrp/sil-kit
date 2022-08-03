@@ -39,7 +39,7 @@ public:
      * The handler is executed when data is received from a matching publisher.
      * The default handler will not be invoked if a specific is available.
      */
-    virtual void SetDataMessageHandler(DataMessageHandlerT callback) = 0;
+    virtual void SetDataMessageHandler(DataMessageHandler callback) = 0;
 };
 
 } // namespace PubSub

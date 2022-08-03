@@ -25,15 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-auto GetSourceMac(const SilKit::Services::Ethernet::EthernetFrame& frame) -> SilKit::Services::Ethernet::EthernetMac
-{
-    SilKit::Services::Ethernet::EthernetMac source{};
-    std::copy(frame.raw.begin() + sizeof(SilKit::Services::Ethernet::EthernetMac),
-              frame.raw.begin() + 2 * sizeof(SilKit::Services::Ethernet::EthernetMac), source.begin());
-
-    return source;
-}
-
 using SilKit::Services::Ethernet::EthernetState;
 using SilKit::Services::Ethernet::EthernetTransmitStatus;
 
@@ -99,7 +90,6 @@ void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
 
     EthernetFrameTransmitEvent ack;
     ack.timestamp = ethFrameEvent.timestamp;
-    ack.sourceMac = GetSourceMac(ToEthernetFrame(ethFrameEvent.frame));
     ack.status = ControllerStateToTransmitStatus(controllerState);
     ack.userContext = ethFrameEvent.userContext;
     ReceiveMsg(ack);

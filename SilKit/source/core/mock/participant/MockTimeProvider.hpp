@@ -50,7 +50,7 @@ public:
     MOCK_METHOD(void, SetSynchronized,(bool isSynchronized), (override));
     MOCK_METHOD(bool, IsSynchronized,(),(const, override));
 
-    Services::HandlerId AddNextSimStepHandler(NextSimStepHandlerT handler) override
+    Services::HandlerId AddNextSimStepHandler(NextSimStepHandler handler) override
     {
         return _handlers.Add(std::move(handler));
     }
@@ -60,7 +60,7 @@ public:
         _handlers.Remove(handlerId);
     }
 
-    Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
+    Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
     const std::string _name = "MockTimeProvider";
     std::chrono::nanoseconds now{};
 };

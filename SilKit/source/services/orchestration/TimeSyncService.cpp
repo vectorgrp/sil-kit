@@ -267,7 +267,7 @@ void TimeSyncService::SetSimulationStepHandler(
     _timeConfiguration.SetStepDuration(initialStepSize);
 }
 
-void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize)
+void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)
 {
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(false);

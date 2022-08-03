@@ -58,7 +58,7 @@ struct LinSendFrameRequest
 struct LinSendFrameHeaderRequest
 {
     std::chrono::nanoseconds timestamp; //!< Time of the header request.
-    LinIdT id; //!< The LinIdT of the header to be transmitted
+    LinId id; //!< The LinId of the header to be transmitted
 };
 
 //! \brief Data type representing a LIN WakeUp pulse.

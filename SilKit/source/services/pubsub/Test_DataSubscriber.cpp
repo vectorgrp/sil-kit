@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(Services::PubSub::DataSubscriberInternal*, CreateDataSubscriberInternal,
                 (const std::string& /*topic*/, const std::string& /*linkName*/, const std::string& /*mediaType*/,
                  (const std::vector<SilKit::Services::Label>& ) /*publisherLabels*/,
-                 Services::PubSub::DataMessageHandlerT /*callback*/, Services::PubSub::IDataSubscriber* /*parent*/),
+                 Services::PubSub::DataMessageHandler /*callback*/, Services::PubSub::IDataSubscriber* /*parent*/),
                 (override));
 };
 
@@ -132,7 +132,7 @@ struct CreateSubscriberInternalMock
     std::unique_ptr<DataSubscriberInternal> dataSubscriberInternal;
 
     auto operator()(const std::string& topic, const std::string& /*linkName*/, const std::string& mediaType,
-                    const std::vector<SilKit::Services::Label>& labels, Services::PubSub::DataMessageHandlerT defaultHandler,
+                    const std::vector<SilKit::Services::Label>& labels, Services::PubSub::DataMessageHandler defaultHandler,
                     Services::PubSub::IDataSubscriber* parent) -> DataSubscriberInternal*
     {
         dataSubscriberInternal = std::make_unique<DataSubscriberInternal>(

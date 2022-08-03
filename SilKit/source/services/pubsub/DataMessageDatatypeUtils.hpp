@@ -49,7 +49,7 @@ struct ExplicitDataMessageHandlerInfo
     HandlerId id;
     std::string mediaType;
     std::map<std::string, std::string> labels;
-    DataMessageHandlerT explicitDataMessageHandler;
+    DataMessageHandler explicitDataMessageHandler;
     std::unordered_map<DataSubscriberInternal*, HandlerId> registeredInternalSubscribers;
 };
 

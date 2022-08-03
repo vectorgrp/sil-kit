@@ -183,7 +183,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
  */
 TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
 {
-    EthernetFrameTransmitEvent expectedAck{ EthernetMac{}, 42ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(17) };
+    EthernetFrameTransmitEvent expectedAck{ 42ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(17) };
 
     EXPECT_CALL(callbacks, FrameTransmitHandler(&controller, expectedAck))
         .Times(1);

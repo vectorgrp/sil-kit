@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <string>
 
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 #include "silkit/util/HandlerId.hpp"
 
 namespace SilKit {
@@ -36,14 +36,14 @@ class ISystemMonitor
 {
 public:
     /*! Callback type to indicate that a ::SystemState has been received.
-    *  Cf., \ref AddSystemStateHandler(SystemStateHandlerT);
+    *  Cf., \ref AddSystemStateHandler(SystemStateHandler);
     */
-    using SystemStateHandlerT = std::function<void(SystemState)>;
+    using SystemStateHandler = std::function<void(SystemState)>;
 
     /*! Callback type to indicate that a ParticipantStatus has been received.
-    *  Cf., \ref AddParticipantStatusHandler(ParticipantStatusHandlerT);
+    *  Cf., \ref AddParticipantStatusHandler(ParticipantStatusHandler);
     */
-    using ParticipantStatusHandlerT = std::function<void(const ParticipantStatus&)>;
+    using ParticipantStatusHandler = std::function<void(const ParticipantStatus&)>;
 
     /*! Callback type to indicate that a participant has been connected.
      * Cf., \ref SetParticipantConnectedHandler(ParticipantConnectedHandler);
@@ -65,9 +65,9 @@ public:
      *
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual auto AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId = 0;
+    virtual auto AddSystemStateHandler(SystemStateHandler handler) -> HandlerId = 0;
 
-    /*! \brief Remove a SystemStateHandlerT by HandlerId on this monitor
+    /*! \brief Remove a SystemStateHandler by HandlerId on this monitor
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -80,9 +80,9 @@ public:
      *
      * \return Returns a \ref HandlerId that can be used to remove the callback.
      */
-    virtual auto AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId = 0;
+    virtual auto AddParticipantStatusHandler(ParticipantStatusHandler handler) -> HandlerId = 0;
 
-    /*! \brief Remove a ParticipantStatusHandlerT by HandlerId on this monitor
+    /*! \brief Remove a ParticipantStatusHandler by HandlerId on this monitor
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */

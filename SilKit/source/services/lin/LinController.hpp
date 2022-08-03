@@ -73,7 +73,7 @@ public:
     auto Status() const noexcept->LinControllerStatus override;
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
-    void SendFrameHeader(LinIdT linId) override;
+    void SendFrameHeader(LinId linId) override;
     void UpdateTxBuffer(LinFrame frame) override;
 
     void GoToSleep() override;
@@ -124,10 +124,10 @@ public:
         std::array<LinFrameResponse, 64> responses;
 
         void UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger);
-        void UpdateTxBuffer(LinIdT linId, std::array<uint8_t, 8> data, Services::Logging::ILogger* logger);
+        void UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data, Services::Logging::ILogger* logger);
 
     };
-    auto GetResponse(LinIdT id) -> std::pair<int, LinFrame>;
+    auto GetResponse(LinId id) -> std::pair<int, LinFrame>;
     auto GetThisLinNode() -> LinNode&;
     auto GetLinNode(Core::EndpointAddress addr) -> LinNode&;
 
@@ -167,11 +167,11 @@ private:
     void ThrowOnDuplicateInitialization() const;
     void ThrowIfUninitialized(const std::string& callingMethodName) const;
     void ThrowIfNotMaster(const std::string& callingMethodName) const;
-    void ThrowIfNotConfiguredTxUnconditional(LinIdT linId);
+    void ThrowIfNotConfiguredTxUnconditional(LinId linId);
     void WarnOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const;
-    void WarnOnReceptionWithInvalidDataLength(LinDataLengthT invalidDataLength, const std::string& fromParticipantName,
+    void WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength, const std::string& fromParticipantName,
                                               const std::string& fromServiceName) const;
-    void WarnOnReceptionWithInvalidLinId(LinIdT invalidLinId, const std::string& fromParticipantName,
+    void WarnOnReceptionWithInvalidLinId(LinId invalidLinId, const std::string& fromParticipantName,
                                          const std::string& fromServiceName) const;
     void WarnOnReceptionWhileInactive() const;
     void WarnOnUnneededStatusChange(LinControllerStatus status) const;
@@ -179,7 +179,7 @@ private:
     // Bookkeeping of global view on responding LinIds on any node
     void UpdateLinIdsRespondedBySlaves(const std::vector<LinFrameResponse>& responsesUpdate);
 
-    bool HasRespondingSlave(LinIdT id);
+    bool HasRespondingSlave(LinId id);
 
 private:
     // ----------------------------------------
@@ -207,12 +207,12 @@ private:
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
 
     std::vector<LinNode> _linNodes;
-    std::vector<LinIdT> _linIdsRespondedBySlaves{}; // Global view of LinIds with TxUnconditional configured on any node.
+    std::vector<LinId> _linIdsRespondedBySlaves{}; // Global view of LinIds with TxUnconditional configured on any node.
     bool _triggerLinSlaveConfigurationHandlers{false};
     std::chrono::nanoseconds _receptionTimeLinSlaveConfiguration{};
 
-    const LinIdT _maxDataLength = 8;
-    const LinIdT _maxLinId = 64;
+    const LinId _maxDataLength = 8;
+    const LinId _maxLinId = 64;
 };
 
 // ==================================================================

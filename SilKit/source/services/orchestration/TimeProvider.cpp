@@ -52,7 +52,7 @@ struct ProviderBase : ITimeProvider
     {
         return _name;
     }
-    virtual HandlerId AddNextSimStepHandler(NextSimStepHandlerT ) override
+    virtual HandlerId AddNextSimStepHandler(NextSimStepHandler ) override
     {
         // No Op
         return {};
@@ -91,7 +91,7 @@ public:
     {
     }
     // Wall clock provider
-    HandlerId AddNextSimStepHandler(NextSimStepHandlerT simStepHandler)
+    HandlerId AddNextSimStepHandler(NextSimStepHandler simStepHandler)
     {
         const auto handlerId = _handlers.Add(std::move(simStepHandler));
 
@@ -114,7 +114,7 @@ public:
     }
 
 private:
-    Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
+    Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
     std::chrono::nanoseconds _tickPeriod{0};
     Util::Timer _timer;
 };
@@ -147,7 +147,7 @@ public:
     {
     }
 
-    HandlerId AddNextSimStepHandler(NextSimStepHandlerT simStepHandler) override
+    HandlerId AddNextSimStepHandler(NextSimStepHandler simStepHandler) override
     {
         return _handlers.Add(std::move(simStepHandler));
     }
@@ -165,7 +165,7 @@ public:
     }
 
 private:
-    Util::SynchronizedHandlers<NextSimStepHandlerT> _handlers;
+    Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
 };
 
 } // namespace detail

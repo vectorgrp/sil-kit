@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "silkit/services/orchestration/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/ILifecycleService.hpp"
@@ -64,7 +64,7 @@ public:
     void Warn(const std::string& /*msg*/) override {}
     void Error(const std::string& /*msg*/) override {}
     void Critical(const std::string& /*msg*/) override {}
-    void RegisterRemoteLogging(const LogMsgHandlerT& /*handler*/) {}
+    void RegisterRemoteLogging(const LogMsgHandler& /*handler*/) {}
     void LogReceivedMsg(const Services::Logging::LogMsg& /*msg*/) {}
     Services::Logging::Level GetLogLevel() const override { return Services::Logging::Level::Debug; }
 };
@@ -94,8 +94,8 @@ public:
 class MockTimeSyncService : public Services::Orchestration::ITimeSyncService
 {
 public:
-    MOCK_METHOD(void, SetSimulationStepHandler, (SimulationStepT task, std::chrono::nanoseconds initialStepSize), (override));
-    MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimulationStepT task, std::chrono::nanoseconds initialStepSize),
+    MOCK_METHOD(void, SetSimulationStepHandler, (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize), (override));
+    MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize),
                 (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
     MOCK_METHOD(void, SetSimulationStepHandler,
@@ -106,10 +106,10 @@ public:
 
 class MockSystemMonitor : public Services::Orchestration::ISystemMonitor {
 public:
-    MOCK_METHOD(HandlerId, AddSystemStateHandler, (SystemStateHandlerT));
+    MOCK_METHOD(HandlerId, AddSystemStateHandler, (SystemStateHandler));
     MOCK_METHOD(void, RemoveSystemStateHandler, (HandlerId));
 
-    MOCK_METHOD(HandlerId, AddParticipantStatusHandler, (ParticipantStatusHandlerT));
+    MOCK_METHOD(HandlerId, AddParticipantStatusHandler, (ParticipantStatusHandler));
     MOCK_METHOD(void, RemoveParticipantStatusHandler, (HandlerId));
 
     MOCK_CONST_METHOD0(SystemState,  Services::Orchestration::SystemState());
@@ -133,9 +133,9 @@ class MockServiceDiscovery : public Discovery::IServiceDiscovery
 public:
     MOCK_METHOD(void, NotifyServiceCreated, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(void, NotifyServiceRemoved, (const ServiceDescriptor& serviceDescriptor), (override));
-    MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (SilKit::Core::Discovery::ServiceDiscoveryHandlerT handler), (override));
+    MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (SilKit::Core::Discovery::ServiceDiscoveryHandler handler), (override));
     MOCK_METHOD(void, RegisterSpecificServiceDiscoveryHandler,
-                (SilKit::Core::Discovery::ServiceDiscoveryHandlerT handler, const std::string& controllerTypeName,
+                (SilKit::Core::Discovery::ServiceDiscoveryHandler handler, const std::string& controllerTypeName,
                  const std::string& supplDataValue),
                 (override));
     MOCK_METHOD(std::vector<ServiceDescriptor>, GetServices, (), (const, override));
@@ -179,7 +179,7 @@ public:
         return nullptr;
     }
     auto CreateDataSubscriber(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::DataSubscriberSpec& /*dataSpec*/,
-                              Services::PubSub::DataMessageHandlerT /*dataMessageHandler*/)
+                              Services::PubSub::DataMessageHandler /*dataMessageHandler*/)
         -> SilKit::Services::PubSub::IDataSubscriber* override
     {
         return nullptr;
@@ -187,7 +187,7 @@ public:
     auto CreateDataSubscriberInternal(const std::string& /*topic*/, const std::string& /*linkName*/,
                                       const std::string& /*mediaType*/,
                                       const std::vector<SilKit::Services::Label>& /*publisherLabels*/,
-                                      Services::PubSub::DataMessageHandlerT /*callback*/,
+                                      Services::PubSub::DataMessageHandler /*callback*/,
                                       Services::PubSub::IDataSubscriber* /*parent*/)
         -> Services::PubSub::DataSubscriberInternal* override
     {

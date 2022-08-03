@@ -46,7 +46,7 @@ BOOL WINAPI systemHandler(DWORD ctrlType);
 class SignalMonitor
 {
 public:
-    SignalMonitor(SignalHandlerT handler)
+    SignalMonitor(SignalHandler handler)
     {
         _handler = std::move(handler);
 
@@ -92,7 +92,7 @@ private:
         }
     }
     HANDLE _readEnd{INVALID_HANDLE_VALUE}, _writeEnd{INVALID_HANDLE_VALUE};
-    SignalHandlerT _handler;
+    SignalHandler _handler;
     std::thread _worker;
     int _signalNumber{-1};
 };
@@ -132,7 +132,7 @@ auto ErrorMessage()
 class SignalMonitor
 {
 public:
-    SignalMonitor(SignalHandlerT handler)
+    SignalMonitor(SignalHandler handler)
     {
         _handler = std::move(handler);
 
@@ -183,7 +183,7 @@ private:
     }
 
     int _pipe[2];
-    SignalHandlerT _handler;
+    SignalHandler _handler;
     std::thread _worker;
     int _signalNumber{-1};
 };
@@ -202,7 +202,7 @@ void systemHandler(int sigNum)
 namespace SilKit {
 namespace registry {
 
-void RegisterSignalHandler(SignalHandlerT handler)
+void RegisterSignalHandler(SignalHandler handler)
 {
     gSignalMonitor.reset(new SignalMonitor(std::move(handler)));
 }

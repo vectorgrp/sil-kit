@@ -1,0 +1,52 @@
+#include <WINVER.H>
+#include "version_macros.hpp"
+#pragma code_page(65001)  // UTF-8 for © symbol
+
+#define STRING_HELPER(x)          #x
+#define VERSIONSTRING(a, b, c, d) STRING_HELPER(a) "." STRING_HELPER(b) "." STRING_HELPER(c) "." STRING_HELPER(d)
+
+#define ASSEMBLYINFO_COMPANY         "Vector Informatik GmbH"
+#define ASSEMBLYINFO_PRODUCT         "SIL Kit Registry"
+#define ASSEMBLYINFO_COPYRIGHT       "Copyright © 2022 Vector Informatik GmbH."
+#define ASSEMBLYINFO_FILEDESCRIPTION "SIL Kit Registry by Vector Informatik GmbH"
+#define ASSEMBLYINFO_VERSIONSTRING   VERSIONSTRING(SILKIT_VERSION_MAJOR,SILKIT_VERSION_MINOR,SILKIT_VERSION_PATCH,SILKIT_BUILD_NUMBER)
+#define ASSEMBLYINFO_VERSIONTOKEN    SILKIT_VERSION_MAJOR, SILKIT_VERSION_MINOR, SILKIT_VERSION_PATCH, SILKIT_BUILD_NUMBER
+
+//======================================================================================================================
+//
+// File Version Info
+//
+//======================================================================================================================
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION ASSEMBLYINFO_VERSIONTOKEN
+    PRODUCTVERSION ASSEMBLYINFO_VERSIONTOKEN
+    FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+    FILEFLAGS (VS_FF_PRERELEASE | VS_FF_DEBUG)
+#else
+    FILEFLAGS(VS_FF_PRERELEASE)
+#endif
+    FILEOS VOS__WINDOWS32
+    FILETYPE VFT_APP
+    FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "CompanyName", ASSEMBLYINFO_COMPANY
+            VALUE "FileDescription", ASSEMBLYINFO_FILEDESCRIPTION
+            VALUE "FileVersion", ASSEMBLYINFO_VERSIONSTRING
+            VALUE "InternalName", "sil-kit-registry"
+            VALUE "LegalCopyright", ASSEMBLYINFO_COPYRIGHT
+            VALUE "OriginalFilename", "sil-kit-registry.exe"
+            VALUE "ProductName", ASSEMBLYINFO_PRODUCT
+            VALUE "ProductVersion", ASSEMBLYINFO_VERSIONSTRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END

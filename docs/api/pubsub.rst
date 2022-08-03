@@ -61,7 +61,7 @@ The following table shows how DataPublishers and DataSubscribers with matching t
      - Sub {"KeyA", "Val1", Mandatory}
    * - Pub {}
      - Match
-     - Match
+     - No Match
    * - Pub {"KeyA", "Val1"}
      - Match
      - Match

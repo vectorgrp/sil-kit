@@ -40,6 +40,16 @@ target_link_libraries(sil-kit-system-controller
     SilKit
     SilKitUtil
 )
+
+# Set versioning infos on exe
+if(MSVC)
+    # Include the generated version_macros.hpp in SilKit/source
+    target_include_directories(sil-kit-system-controller
+        PRIVATE ${CMAKE_BINARY_DIR}/SilKit/source
+    )
+    target_sources(sil-kit-system-controller PRIVATE SilKitSystemController.rc)
+endif()
+
 install(TARGETS sil-kit-system-controller
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

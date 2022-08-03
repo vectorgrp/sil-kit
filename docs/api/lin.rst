@@ -260,14 +260,14 @@ Data Structures
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: SilKit::Services::Lin::LinIdT
+.. doxygentypedef:: SilKit::Services::Lin::LinId
 .. doxygenenum:: SilKit::Services::Lin::LinChecksumModel
-.. doxygentypedef:: SilKit::Services::Lin::LinDataLengthT
+.. doxygentypedef:: SilKit::Services::Lin::LinDataLength
 .. doxygenenum:: SilKit::Services::Lin::LinFrameResponseType
 .. doxygenenum:: SilKit::Services::Lin::LinFrameResponseMode
 .. doxygenenum:: SilKit::Services::Lin::LinFrameStatus
 .. doxygenenum:: SilKit::Services::Lin::LinControllerMode
-.. doxygentypedef:: SilKit::Services::Lin::LinBaudRateT
+.. doxygentypedef:: SilKit::Services::Lin::LinBaudRate
 .. doxygenenum:: SilKit::Services::Lin::LinControllerStatus
 
 Usage Examples
@@ -372,7 +372,7 @@ I.e., the situation corresponds to the end of the previous example.
    :language: cpp
 
 LinSlaveConfigurationHandler
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example shows how the |LinSlaveConfigurationHandler| provides direct access to the |LinFrameResponse| configuration of 
 all slaves. It is primarily intended for diagnostic purposes and not required for regular operation of a LIN controller.

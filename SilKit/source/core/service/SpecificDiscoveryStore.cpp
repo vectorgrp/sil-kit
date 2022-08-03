@@ -85,7 +85,7 @@ void SpecificDiscoveryStore::CallHandlers(ServiceDiscoveryEvent::Type eventType,
 }
 
 
-void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler,
+void SpecificDiscoveryStore::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
                                                                      const std::string& controllerTypeName,
                                                                      const std::string& supplDataValue)
 {

@@ -20,6 +20,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ISystemController.hpp"
 #include "ISystemMonitor.hpp"
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 #include "ILifecycleService.hpp"
 #include "ITimeSyncService.hpp"

@@ -57,9 +57,9 @@ public: //IServiceDiscovery
     //!< Called on removing a service locally; Publish service removal to ourselves to all other participants
     void NotifyServiceRemoved(const ServiceDescriptor& serviceDescriptor) override;
     //!< Register a handler for asynchronous service creation notifications
-    void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler) override;
+    void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler) override;
     //!< Register a specific handler for asynchronous service creation notifications
-    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler,
+    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
                                                  const std::string& controllerTypeName,
                                                  const std::string& supplDataValue) override;
 
@@ -98,7 +98,7 @@ private:
     IParticipantInternal* _participant{nullptr};
     std::string _participantName;
     ServiceDescriptor _serviceDescriptor; //!< for the ServiceDiscovery controller itself
-    std::vector<ServiceDiscoveryHandlerT> _handlers;
+    std::vector<ServiceDiscoveryHandler> _handlers;
     //!< a cache for computing additions/removals per participant
     using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
     std::unordered_map<std::string /* participant name */, ServiceMap> _servicesByParticipant; 

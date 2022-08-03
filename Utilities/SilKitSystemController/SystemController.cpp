@@ -116,9 +116,8 @@ int main(int argc, char** argv)
     commandlineParser.Add<CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
-    std::cout 
-        << "Vector SIL Kit -- System Controller\n"
-        << std::endl;
+    std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
+              << std::endl;
 
     try
     {

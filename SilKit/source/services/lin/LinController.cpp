@@ -128,7 +128,7 @@ void LinController::ThrowIfNotMaster(const std::string& callingMethodName) const
     }
 }
 
-void LinController::ThrowIfNotConfiguredTxUnconditional(LinIdT linId)
+void LinController::ThrowIfNotConfiguredTxUnconditional(LinId linId)
 {
     if (GetThisLinNode().responses[linId].responseMode != LinFrameResponseMode::TxUnconditional)
     {
@@ -143,7 +143,7 @@ void LinController::ThrowIfNotConfiguredTxUnconditional(LinIdT linId)
 void LinController::WarnOnWrongDataLength(const LinFrame& receivedFrame, const LinFrame& configuredFrame) const
 {
     std::string errorMsg =
-        fmt::format("Mismatch between configured ({}) and received ({}) LinDataLengthT in LinFrame with ID {}",
+        fmt::format("Mismatch between configured ({}) and received ({}) LinDataLength in LinFrame with ID {}",
                     configuredFrame.dataLength, receivedFrame.dataLength, static_cast<uint16_t>(receivedFrame.id));
     _logger->Warn(errorMsg);
 }
@@ -167,12 +167,12 @@ void LinController::WarnOnSendAttemptWithUndefinedChecksum(const LinFrame& frame
 void LinController::WarnOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const
 {
     std::string errorMsg = fmt::format("LinController received transmission but has configured "
-                                       "LinChecksumModel::Undefined. Overwriting with {} for LinIdT {}.",
+                                       "LinChecksumModel::Undefined. Overwriting with {} for LinId {}.",
                                        frame.checksumModel, static_cast<uint16_t>(frame.id));
     _logger->Warn(errorMsg);
 }
 
-void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLengthT invalidDataLength,
+void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength,
                                                          const std::string& fromParticipantName,
                                                          const std::string& fromServiceName) const
 {
@@ -183,7 +183,7 @@ void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLengthT invalidD
     _logger->Warn(errorMsg);
 }
 
-void LinController::WarnOnReceptionWithInvalidLinId(LinIdT invalidLinId, const std::string& fromParticipantName,
+void LinController::WarnOnReceptionWithInvalidLinId(LinId invalidLinId, const std::string& fromParticipantName,
                                                     const std::string& fromServiceName) const
 {
     std::string errorMsg = fmt::format(
@@ -297,7 +297,7 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
     SendMsg(LinSendFrameRequest{frame, responseType});
 }
 
-void LinController::SendFrameHeader(LinIdT linId)
+void LinController::SendFrameHeader(LinId linId)
 {
     ThrowIfUninitialized(__FUNCTION__);
     ThrowIfNotMaster(__FUNCTION__);
@@ -368,7 +368,7 @@ LinSlaveConfiguration LinController::GetSlaveConfiguration()
 // Helpers
 //------------------------
 
-bool LinController::HasRespondingSlave(LinIdT id)
+bool LinController::HasRespondingSlave(LinId id)
 {
     auto it = std::find(_linIdsRespondedBySlaves.begin(), _linIdsRespondedBySlaves.end(), id);
     return it != _linIdsRespondedBySlaves.end();
@@ -421,7 +421,7 @@ void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> respo
    }
 }
 
-void LinController::LinNode::UpdateTxBuffer(LinIdT linId, std::array<uint8_t, 8> data,
+void LinController::LinNode::UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> data,
                                             Services::Logging::ILogger* logger)
 {
     if (linId >= responses.size())
@@ -458,7 +458,7 @@ void LinController::CallLinFrameStatusEventHandler(const LinFrameStatusEvent& ms
     CallHandlers(msg);
 }
 
-auto LinController::GetResponse(LinIdT id) -> std::pair<int, LinFrame>
+auto LinController::GetResponse(LinId id) -> std::pair<int, LinFrame>
 {
     LinFrame responseFrame;
     responseFrame.id = id;

@@ -86,6 +86,7 @@ add_library(SilKit ${silkitLibType}
     capi/CapiDataPubSub.cpp
     capi/CapiRpc.cpp
     capi/CapiUtils.cpp
+    capi/CapiVersion.cpp
     capi/CapiImpl.hpp
 
     SilKitForceIncludes.cpp

@@ -162,8 +162,7 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrameTransmitEvent& ms
 {
     auto timestamp = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(msg.timestamp);
     out
-        << "EthernetFrameTransmitEvent{src=" << Util::AsHexString(msg.sourceMac).WithSeparator(":")
-        << ", status=" << msg.status
+        << "EthernetFrameTransmitEvent{status=" << msg.status
         << ", userContext=" << msg.userContext
         << " @" << timestamp.count() << "ms"
         << "}";

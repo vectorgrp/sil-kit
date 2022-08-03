@@ -240,7 +240,7 @@ std::vector<ServiceDescriptor> ServiceDiscovery::GetServices() const
     return createdServices;
 }
 
-void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler)
+void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler)
 {
     if (_shuttingDown)
     {
@@ -260,7 +260,7 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandlerT 
     _handlers.emplace_back(std::move(handler));
 }
 
-void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandlerT handler,
+void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
                                                                const std::string& controllerTypeName,
                                                                const std::string& supplDataValue)
 {

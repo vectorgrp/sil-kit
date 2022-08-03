@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <string>
 
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -34,7 +34,7 @@ namespace Orchestration {
 class ITimeSyncService
 {
 public:
-    using SimulationStepT = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
+    using SimulationStepHandler = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
 public:
     virtual ~ITimeSyncService() = default;
 public:
@@ -45,7 +45,7 @@ public:
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationStepHandler(SimulationStepT task, std::chrono::nanoseconds initialStepSize) = 0;
+    virtual void SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Set the task to be executed with each grant / tick
      *
      * Can be changed at runtime. Execution context depends on the run type.
@@ -55,7 +55,7 @@ public:
      * Throwing an error inside the handler will cause a call to
      * ReportError().
      */
-    virtual void SetSimulationStepHandlerAsync(SimulationStepT task, std::chrono::nanoseconds initialStepSize) = 0;
+    virtual void SetSimulationStepHandlerAsync(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize) = 0;
     /*! \brief Signal that the current simulation task is finished and the next simulation step can be processed.
      *
      * This method should only be used after calling SetSimulationStepHandlerAsync.

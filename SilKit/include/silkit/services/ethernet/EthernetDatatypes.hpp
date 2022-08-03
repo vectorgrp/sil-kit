@@ -94,7 +94,6 @@ enum class EthernetTransmitStatus : EthernetTransmitStatusMask
 //! \brief Publishes status of the simulated Ethernet controller
 struct EthernetFrameTransmitEvent
 {
-    EthernetMac sourceMac; //!< The source MAC address encoded as integral data type
     std::chrono::nanoseconds timestamp; //!< Timestamp of the Ethernet acknowledge.
     EthernetTransmitStatus status; //!< Status of the EthernetTransmitRequest.
     void* userContext; //!< Optional pointer provided by user when sending the frame

@@ -34,8 +34,8 @@ public:
     MOCK_METHOD(LinControllerStatus, Status, (), (const, noexcept));
     MOCK_METHOD2(SendFrame, void(LinFrame frame, LinFrameResponseType responseType));
     MOCK_METHOD3(SendFrame, void(LinFrame frame, LinFrameResponseType responseType, std::chrono::nanoseconds timestamp));
-    MOCK_METHOD1(SendFrameHeader, void(LinIdT linId));
-    MOCK_METHOD2(SendFrameHeader, void(LinIdT linId, std::chrono::nanoseconds timestamp));
+    MOCK_METHOD1(SendFrameHeader, void(LinId linId));
+    MOCK_METHOD2(SendFrameHeader, void(LinId linId, std::chrono::nanoseconds timestamp));
     MOCK_METHOD(void, UpdateTxBuffer, (LinFrame frame));
     MOCK_METHOD0(GoToSleep, void());
     MOCK_METHOD0(GoToSleepInternal, void());

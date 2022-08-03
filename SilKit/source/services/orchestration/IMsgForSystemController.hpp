@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/orchestration/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
 #include "IReceiver.hpp"
 #include "ISender.hpp"

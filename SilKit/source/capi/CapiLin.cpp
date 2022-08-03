@@ -28,9 +28,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 static void assign(SilKit::Services::Lin::LinFrame& cppFrame, const SilKit_LinFrame* cFrame) 
 {
-    cppFrame.id = static_cast<SilKit::Services::Lin::LinIdT>(cFrame->id);
+    cppFrame.id = static_cast<SilKit::Services::Lin::LinId>(cFrame->id);
     cppFrame.checksumModel = static_cast<SilKit::Services::Lin::LinChecksumModel>(cFrame->checksumModel);
-    cppFrame.dataLength = static_cast<SilKit::Services::Lin::LinDataLengthT>(cFrame->dataLength);
+    cppFrame.dataLength = static_cast<SilKit::Services::Lin::LinDataLength>(cFrame->dataLength);
     memcpy(cppFrame.data.data(), cFrame->data, 8);
 }
 
@@ -53,7 +53,7 @@ static void assign(std::vector<SilKit::Services::Lin::LinFrameResponse>& cppFram
 
 static void assign(SilKit::Services::Lin::LinControllerConfig& cppConfig, const SilKit_LinControllerConfig* cConfig)
 {
-    cppConfig.baudRate = static_cast<SilKit::Services::Lin::LinBaudRateT>(cConfig->baudRate);
+    cppConfig.baudRate = static_cast<SilKit::Services::Lin::LinBaudRate>(cConfig->baudRate);
     cppConfig.controllerMode = static_cast<SilKit::Services::Lin::LinControllerMode>(cConfig->controllerMode);
     assign(cppConfig.frameResponses, cConfig->frameResponses, cConfig->numFrameResponses);
 }
@@ -155,7 +155,7 @@ SilKit_ReturnCode SilKit_LinController_SendFrameHeader(SilKit_LinController* con
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-        linController->SendFrameHeader(static_cast<SilKit::Services::Lin::LinIdT>(linId));
+        linController->SendFrameHeader(static_cast<SilKit::Services::Lin::LinId>(linId));
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

@@ -66,7 +66,6 @@ inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buff
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const EthernetFrameTransmitEvent& ack)
 {
     buffer
-        << ack.sourceMac
         << ack.timestamp
         << ack.status
         << ack.userContext
@@ -77,7 +76,6 @@ inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buff
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, EthernetFrameTransmitEvent& ack)
 {
     buffer
-        >> ack.sourceMac
         >> ack.timestamp
         >> ack.status
         >> ack.userContext

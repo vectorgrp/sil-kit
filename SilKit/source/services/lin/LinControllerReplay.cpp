@@ -82,7 +82,7 @@ void LinControllerReplay::SendFrame(LinFrame, LinFrameResponseType)
     return;
 }
 
-void LinControllerReplay::SendFrameHeader(LinIdT)
+void LinControllerReplay::SendFrameHeader(LinId)
 {
     // We don't allow mixing user API calls while replaying.
     _participant->GetLogger()->Debug("Replaying: ignoring call to {}.", __FUNCTION__);

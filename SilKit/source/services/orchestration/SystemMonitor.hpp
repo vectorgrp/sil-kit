@@ -61,10 +61,10 @@ public:
     // Public Interface Methods
 
     // ISystemMonitor
-    auto AddSystemStateHandler(SystemStateHandlerT handler) -> HandlerId override;
+    auto AddSystemStateHandler(SystemStateHandler handler) -> HandlerId override;
     void RemoveSystemStateHandler(HandlerId handlerId) override;
 
-    auto AddParticipantStatusHandler(ParticipantStatusHandlerT handler) -> HandlerId override;
+    auto AddParticipantStatusHandler(ParticipantStatusHandler handler) -> HandlerId override;
     void RemoveParticipantStatusHandler(HandlerId handlerId) override;
 
     auto SystemState() const -> Orchestration::SystemState override;
@@ -127,8 +127,8 @@ private:
 
     unsigned int _invalidTransitionCount{0u};
 
-    Util::SynchronizedHandlers<ParticipantStatusHandlerT> _participantStatusHandlers;
-    Util::SynchronizedHandlers<SystemStateHandlerT> _systemStateHandlers;
+    Util::SynchronizedHandlers<ParticipantStatusHandler> _participantStatusHandlers;
+    Util::SynchronizedHandlers<SystemStateHandler> _systemStateHandlers;
 
     ParticipantConnectedHandler _participantConnectedHandler;
     ParticipantDisconnectedHandler _participantDisconnectedHandler;

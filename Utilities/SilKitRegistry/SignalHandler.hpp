@@ -27,8 +27,8 @@ namespace registry {
 // It only relies on async-signal-safe C functions internally, but
 // it uses a dedicated thread which safely runs the user-provided handler.
 
-using SignalHandlerT = std::function<void(int)>;
-void RegisterSignalHandler(SignalHandlerT handler);
+using SignalHandler = std::function<void(int)>;
+void RegisterSignalHandler(SignalHandler handler);
 
 } // namespace registry
 } // namespace SilKit

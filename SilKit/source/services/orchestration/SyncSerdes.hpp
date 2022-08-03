@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 #include "MessageBuffer.hpp"
 
 namespace SilKit {

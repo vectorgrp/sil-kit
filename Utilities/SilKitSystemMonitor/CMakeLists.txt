@@ -40,6 +40,16 @@ target_link_libraries(sil-kit-monitor
     SilKit
     SilKitUtil
 )
+
+# Set versioning infos on exe
+if(MSVC)
+    # Include the generated version_macros.hpp in SilKit/source
+    target_include_directories(sil-kit-monitor
+        PRIVATE ${CMAKE_BINARY_DIR}/SilKit/source
+    )
+    target_sources(sil-kit-monitor PRIVATE SilKitSystemMonitor.rc)
+endif()
+
 install(TARGETS sil-kit-monitor
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
 )

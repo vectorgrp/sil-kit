@@ -38,7 +38,7 @@ namespace Lin {
  *
  * *Range:* 0...0x3F
  */
-using LinIdT = uint8_t;
+using LinId = uint8_t;
 
 /*! \brief The checksum model of a LIN \ref LinFrame
  *
@@ -61,7 +61,7 @@ enum class LinChecksumModel : uint8_t
  *
  * *Range:* 1...8
  */
-using LinDataLengthT = uint8_t;
+using LinDataLength = uint8_t;
 
 /*! \brief A LIN LinFrame
 *
@@ -71,9 +71,9 @@ using LinDataLengthT = uint8_t;
 */
 struct LinFrame
 {
-    LinIdT id{0}; //!< Lin Identifier
+    LinId id{0}; //!< Lin Identifier
     LinChecksumModel checksumModel{LinChecksumModel::Undefined}; //!< Checksum Model
-    LinDataLengthT dataLength{0}; //!< Data length
+    LinDataLength dataLength{0}; //!< Data length
     std::array<uint8_t, 8> data{}; //!< The actual payload
 };
 
@@ -122,7 +122,7 @@ enum class LinFrameResponseMode : uint8_t
  */
 struct LinFrameResponse
 {
-    /*! frame must provide the LIN \ref LinIdT for which the response is configured.
+    /*! frame must provide the LIN \ref LinId for which the response is configured.
      *
      * If responseMode is LinFrameResponseMode::TxUnconditional, the frame data is used for the transaction.
      */
@@ -237,8 +237,7 @@ enum class LinControllerMode : uint8_t
  *
  * *Range:* 200...20'000 Bd
  */
-using LinBaudRateT = uint32_t;
-
+using LinBaudRate = uint32_t;
 
 /*! Configuration data to initialize the LIN Controller
  *  Cf.: \ref ILinController::Init(LinControllerConfig config);
@@ -249,7 +248,7 @@ struct LinControllerConfig
     LinControllerMode controllerMode{LinControllerMode::Inactive};
     /*! The operational baud rate of the controller. Used in a detailed simulation.
      */
-    LinBaudRateT baudRate{0};
+    LinBaudRate baudRate{0};
     /*! Optional LinFrameResponse configuration.
      *
      * FrameResponses can also be configured at a later point using
@@ -317,7 +316,7 @@ struct LinSlaveConfigurationEvent
 //! \brief The aggregated configuration of all LIN slaves in the network.
 struct LinSlaveConfiguration
 {
-    std::vector<LinIdT> respondingLinIds; //!< A vector of LinIds on which any LIN Slave has configured LinFrameResponseMode::TxUnconditional
+    std::vector<LinId> respondingLinIds; //!< A vector of LinIds on which any LIN Slave has configured LinFrameResponseMode::TxUnconditional
 };
 
 // ================================================================================

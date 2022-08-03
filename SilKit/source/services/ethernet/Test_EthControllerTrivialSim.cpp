@@ -59,7 +59,8 @@ MATCHER_P(EthernetTransmitAckWithouthTransmitIdMatcher, truthAck, "")
     *result_listener << "matches EthernetTransmitAcks without checking the transmit id";
     auto frame1 = truthAck;
     auto frame2 = arg;
-    return frame1.sourceMac == frame2.sourceMac && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
+    return frame1.userContext == frame2.userContext && frame1.status == frame2.status
+           && frame1.timestamp == frame2.timestamp;
 }
 
 auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<const WireEthernetFrameEvent&>
@@ -137,7 +138,6 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now))).Times(1);
 
     EthernetFrameTransmitEvent ack{};
-    ack.sourceMac = EthernetMac{0, 0, 0, 0, 0, 0};
     ack.status = EthernetTransmitStatus::Transmitted;
     ack.timestamp = 42ns;
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack))).Times(1);
@@ -163,14 +163,12 @@ TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(now))).Times(0);
 
     EthernetFrameTransmitEvent nack{};
-    nack.sourceMac = EthernetMac{0, 0, 0, 0, 0, 0};
     nack.status = EthernetTransmitStatus::ControllerInactive;
     nack.timestamp = 42ns;
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(nack))).Times(1);
 
     // once for the nack
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
-
 
     std::vector<uint8_t> rawFrame;
     SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
@@ -220,7 +218,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
     msg.frame.raw = rawFrame;
 
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
-    EthernetFrameTransmitEvent ack{ EthernetMac{ 1, 2, 3, 4, 5, 6 }, 0ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(0) };
+    EthernetFrameTransmitEvent ack{ 0ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(0) };
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
         .Times(1);
 

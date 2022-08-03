@@ -32,7 +32,7 @@ namespace PubSub {
 
 DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                                const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
-                               DataMessageHandlerT defaultDataHandler)
+                               DataMessageHandler defaultDataHandler)
     : _topic{dataSpec.Topic()}
     , _mediaType{dataSpec.MediaType()}
     , _labels{dataSpec.Labels()}
@@ -85,7 +85,7 @@ void DataSubscriber::RegisterServiceDiscovery()
         }, Core::Discovery::controllerTypeDataPublisher, _topic);
 }
 
-void DataSubscriber::SetDataMessageHandler(DataMessageHandlerT callback)
+void DataSubscriber::SetDataMessageHandler(DataMessageHandler callback)
 {
     std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 

@@ -179,7 +179,7 @@ public:
         const std::string& topic, const std::string& linkName,
         const std::string& mediaType,
         const std::vector<SilKit::Services::Label>& publisherLabels,
-        Services::PubSub::DataMessageHandlerT callback,
+        Services::PubSub::DataMessageHandler callback,
         Services::PubSub::IDataSubscriber* parent) -> Services::PubSub::DataSubscriberInternal*  = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection

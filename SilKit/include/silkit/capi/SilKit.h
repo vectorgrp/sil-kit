@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/capi/InterfaceIdentifiers.h"
 #include "silkit/capi/Participant.h"
 #include "silkit/capi/Orchestration.h"
-
+#include "silkit/capi/Version.h"
 
 SILKIT_BEGIN_DECLS
 
@@ -60,24 +60,6 @@ typedef  SilKit_ReturnCode (*SilKit_ReturnCodeToString_t)(const char** outString
 */
 SilKitAPI const char* SilKit_GetLastErrorString();
 
-typedef  const char*(*SilKit_GetLastErrorString_t)();
-
-typedef SilKit_ReturnCode(*SilKit_Participant_GetLogger_t)(
-    SilKit_Logger** outLogger,
-    SilKit_Participant* participant);
-
-/*! \brief Obtain the logger of a particular simulation participant.
- *
- * \param outLogger Pointer to the resulting logger instance (out parameter).
- * \param participant The simulation participant whose logger should be returned.
- *
- * The lifetime of the returned logger is directly bound to the lifetime of the simulation participant.
- * There is no futher cleanup necessary, except for destroying the simulation participant at the end of the
- * simulation.
- */
-SilKitAPI SilKit_ReturnCode SilKit_Participant_GetLogger(
-    SilKit_Logger** outLogger,
-    SilKit_Participant* participant);
-
+typedef const char*(*SilKit_GetLastErrorString_t)();
 
 SILKIT_END_DECLS

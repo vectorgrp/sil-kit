@@ -72,7 +72,6 @@ protected:
             frameEvent.userContext = reinterpret_cast<void *>(index + 1);
 
             auto& ethack = _testFrames[index].expectedAck;
-            ethack.sourceMac = sourceMac;
             ethack.userContext = reinterpret_cast<void *>(index + 1);
             ethack.status = SilKit::Services::Ethernet::EthernetTransmitStatus::Transmitted;
         }

@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <string>
 
-#include "silkit/services/orchestration/SyncDatatypes.hpp"
+#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
 #include "IServiceEndpoint.hpp"
 

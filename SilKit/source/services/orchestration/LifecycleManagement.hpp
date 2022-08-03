@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "SyncDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
 #include "ILifecycleStates.hpp"
 
 namespace SilKit {

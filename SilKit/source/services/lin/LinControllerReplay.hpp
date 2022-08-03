@@ -53,7 +53,7 @@ public:
     auto Status() const noexcept -> LinControllerStatus override;
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
-    void SendFrameHeader(LinIdT linId) override;
+    void SendFrameHeader(LinId linId) override;
     void UpdateTxBuffer(LinFrame frame, LinFrameResponseMode mode) override;
     void SetFrameResponses(std::vector<LinFrameResponse> responses) override;
 

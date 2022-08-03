@@ -48,7 +48,7 @@ struct DataMessageEvent
 };
 
 //! \brief Callback type for new data reception callbacks
-using DataMessageHandlerT =
+using DataMessageHandler =
     std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
 
 //! \brief Information about a newly discovered DataPublisher
@@ -65,7 +65,7 @@ struct NewDataPublisherEvent
 };
 
 //! \brief Callback type for new data publishers
-using NewDataPublisherHandlerT =
+using NewDataPublisherHandler =
     std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
 
 } // namespace PubSub
