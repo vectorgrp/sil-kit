@@ -192,13 +192,18 @@ int main(int argc, char** argv)
                         std::this_thread::sleep_for(sleepTimePerTick);
                     }, 5ms);
             }
-            else
+            else if (participantName == "CanReader")
             {
                 timeSyncService->SetSimulationStepHandler(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
                         std::cout << "now=" << now << ", duration=" << duration << std::endl;
                         std::this_thread::sleep_for(sleepTimePerTick);
                     }, 5ms);
+            }
+            else
+            {
+                std::cout << "Wrong participant name provided. Use either \"CanWriter\" or \"CanReader\"." << std::endl;
+                return 1;
             }
 
             auto finalStateFuture =

@@ -285,6 +285,11 @@ int main(int argc, char* argv[])
         Labels_Destroy(pubLabelList1);
         Labels_Destroy(pubLabelList2);
     }
+    else
+    {
+        printf("Wrong participant name provided. Use either \"Subscriber1\" or \"Publisher1\".\n");
+        return 1;
+    }
 
     if (jsonString)
     {

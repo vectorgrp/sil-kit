@@ -613,7 +613,7 @@ int main(int argc, char* argv[])
 
         SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Master_SimulationStepHandler, 1000000);
     }
-    else
+    else if (strcmp(participantName, "LinSlave") == 0)
     {
         SilKit_LifecycleService_SetCommunicationReadyHandler(lifecycleService, NULL, &Slave_InitCallback);
         SilKit_HandlerId frameStatusHandlerId;
@@ -623,6 +623,11 @@ int main(int argc, char* argv[])
         SilKit_HandlerId wakeupHandlerId;
         SilKit_LinController_AddWakeupHandler(linController, NULL, &Slave_WakeupHandler, &wakeupHandlerId);
         SilKit_TimeSyncService_SetSimulationStepHandler(timeSyncService, NULL, &Slave_SimulationStepHandler, 1000000);
+    }
+    else
+    {
+        printf("Wrong participant name provided. Use either \"LinMaster\" or \"LinSlave\".\n");
+        return 1;
     }
 
     SilKit_ParticipantState outFinalParticipantState;

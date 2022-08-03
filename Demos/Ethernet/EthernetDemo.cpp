@@ -234,7 +234,7 @@ int main(int argc, char** argv)
                         std::this_thread::sleep_for(100ms);
                     }, 1ms);
             }
-            else
+            else if (participantName == "EthernetReader")
             {
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -242,6 +242,12 @@ int main(int argc, char** argv)
                                   << "ms" << std::endl;
                         std::this_thread::sleep_for(100ms);
                     }, 1ms);
+            }
+            else
+            {
+                std::cout << "Wrong participant name provided. Use either \"EthernetWriter\" or \"EthernetReader\"."
+                          << std::endl;
+                return 1;
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});

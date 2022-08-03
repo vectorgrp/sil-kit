@@ -163,7 +163,7 @@ int main(int argc, char** argv)
                     Call(clientB);
                 }, 1s);
         }
-        else // "Server"
+        else if (participantName == "Server")
         {
             SilKit::Services::Rpc::RpcServerSpec dataSpecAdd100{"Add100", "application/octet-stream"};
             dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred);
@@ -183,6 +183,12 @@ int main(int argc, char** argv)
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     std::this_thread::sleep_for(3s);
             }, 1s);
+        }
+        else
+        {
+            std::cout << "Wrong participant name provided. Use either \"Client\" or \"Server\"."
+                      << std::endl;
+            return 1;
         }
 
         auto lifecycleFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});

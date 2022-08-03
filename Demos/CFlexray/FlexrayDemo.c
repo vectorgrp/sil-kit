@@ -569,6 +569,11 @@ int main(int argc, char** argv)
         cfg.slotId = 31;
         AppendTxBufferConfig(&config, &cfg);
     }
+    else
+    {
+        printf("Wrong participant name provided. Use either \"Node0\" or \"Node1\".\n");
+        return 1;
+    }
 
     SilKit_FlexrayController* controller;
     returnCode = SilKit_FlexrayController_Create(&controller, participant, flexrayControllerName, flexrayNetworkName);

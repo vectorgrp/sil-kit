@@ -372,10 +372,16 @@ int main(int argc, char** argv)
         {
             frNode.busState = FlexrayNode::MasterState::PerformWakeup;
         }
-        if (participantName == "Node1")
+        else if (participantName == "Node1")
         {
             frNode.busState = FlexrayNode::MasterState::PerformWakeup;
             frNode.SetStartupDelay(0ms);
+        }
+        else
+        {
+            std::cout << "Wrong participant name provided. Use either \"Node0\" or \"Node1\"."
+                      << std::endl;
+            return 1;
         }
 
         controller->AddPocStatusHandler([&frNode](Flexray::IFlexrayController* linController,

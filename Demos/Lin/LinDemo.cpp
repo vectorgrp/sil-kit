@@ -392,7 +392,7 @@ int main(int argc, char** argv) try
                 master.DoAction(now);
             }, 1ms);
     }
-    else
+    else if (participantName == "LinSlave")
     {
         lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
             std::cout << "Initializing " << participantName << std::endl;
@@ -469,6 +469,12 @@ int main(int argc, char** argv) try
 
                 std::this_thread::sleep_for(500ms);
             }, 1ms);
+    }
+    else
+    {
+        std::cout << "Wrong participant name provided. Use either \"LinMaster\" or \"LinSlave\"."
+                  << std::endl;
+        return 1;
     }
 
     auto lifecycleFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});

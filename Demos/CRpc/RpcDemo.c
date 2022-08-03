@@ -271,6 +271,11 @@ int main(int argc, char* argv[])
             SleepMs(100);
         }
     }
+    else
+    {
+        printf("Wrong participant name provided. Use either \"Client\" or \"Server\".\n");
+        return 1;
+    }
 
     SilKit_Participant_Destroy(participant);
     if (jsonString)

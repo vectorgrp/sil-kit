@@ -199,6 +199,11 @@ int main(int argc, char** argv)
                     std::this_thread::sleep_for(1s);
                 }, 1s);
         }
+        else
+        {
+            std::cout << "Wrong participant name provided. Use either \"PubSub1\", \"PubSub2\", \"Subscriber1\" or \"Subscriber2\"." << std::endl;
+            return 1;
+        }
 
         auto lifecycleFuture =
             lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
