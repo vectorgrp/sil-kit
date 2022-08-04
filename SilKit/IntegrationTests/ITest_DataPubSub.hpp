@@ -88,12 +88,6 @@ protected:
         }
     };
 
-    struct SpecificDataHandlerInfo
-    {
-        std::string mediaType;
-        std::map<std::string, std::string> labels;
-    };
-
     struct DataSubscriberInfo
     {
         DataSubscriberInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
@@ -189,8 +183,9 @@ protected:
     {
         PubSubParticipant(const std::string& newName) { name = newName; }
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
-            const std::vector<DataSubscriberInfo>& newDataSubscribers,
-            std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig = SilKit::Config::MakeEmptyParticipantConfiguration())
+                          const std::vector<DataSubscriberInfo>& newDataSubscribers,
+                          std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig =
+                              SilKit::Config::MakeEmptyParticipantConfiguration())
         {
             config = newConfig;
             name = newName;
@@ -198,7 +193,7 @@ protected:
             dataPublishers = newDataPublishers;
         }
 
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config = SilKit::Config::MakeEmptyParticipantConfiguration();
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config = MakeEmptyParticipantConfiguration();
         bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;

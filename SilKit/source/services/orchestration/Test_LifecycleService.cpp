@@ -241,43 +241,30 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
     
-    EXPECT_CALL(callbacks, CommunicationReadyHandler())
-        .Times(1);
-    EXPECT_CALL(callbacks, StartingHandler())
-        .Times(1);
-    EXPECT_CALL(callbacks, StopHandler())
-        .Times(1);
-    EXPECT_CALL(callbacks, ShutdownHandler())
-        .Times(1);
+    EXPECT_CALL(callbacks, CommunicationReadyHandler()).Times(1);
+    EXPECT_CALL(callbacks, StartingHandler()).Times(1);
+    EXPECT_CALL(callbacks, StopHandler()).Times(1);
+    EXPECT_CALL(callbacks, ShutdownHandler()).Times(1);
 
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
+        .Times(1);
     EXPECT_CALL(participant,
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService,
-                              AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+    EXPECT_CALL(participant,
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService,
-                              AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopping)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopping)))
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopped)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopped)))
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))
         .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))
-        .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
 
     lifecycleService.StartLifecycle();

@@ -318,6 +318,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriberInternal;
 
     SilKit::Config::DataSubscriber controllerConfig;
+    
     // Use a unique name to avoid collisions of several subscribers on same topic on one participant
     controllerConfig.name = to_string(Util::Uuid::GenerateRandom());
     std::string network = linkName;
@@ -355,7 +356,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
         controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         dataSpec, network);
 
-    _connection.SetHistoryLengthForLink(network, history, controller);
+    _connection.SetHistoryLengthForLink(history, controller);
 
     return controller;
     
@@ -1231,7 +1232,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
 
     controller->SetServiceDescriptor(std::move(descriptor));
 
-    _connection.RegisterSilKitService(network, localEndpoint, controllerPtr);
+    _connection.RegisterSilKitService(controllerPtr);
     const auto qualifiedName = network + "/" + config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
@@ -1290,8 +1291,7 @@ void Participant<SilKitConnectionT>::RegisterSimulator(IMsgForSimulatorT* busSim
 {
     auto& serviceEndpoint = dynamic_cast<Core::IServiceEndpoint&>(*busSim);
     auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
-    //XXX we temporarily overwrite the simulator's serviceEndpoint (not used internally)
-    //    only for RegisterSilKitService: we should refactor RegisterSilKitService to accept the ServiceDescriptor directly
+    // We temporarily overwrite the simulator's serviceEndpoint (not used internally) only for RegisterSilKitService
     for (const auto& network: simulatedNetworkNames)
     {
         auto id = ServiceDescriptor{};
@@ -1301,9 +1301,8 @@ void Participant<SilKitConnectionT>::RegisterSimulator(IMsgForSimulatorT* busSim
         id.SetParticipantName(GetParticipantName());
 
         serviceEndpoint.SetServiceDescriptor(id);
-        // Tell the middle-ware we are interested in this named network of the given type
-        EndpointId unused{}; //not used in VAsioConnection.hpp
-        _connection.RegisterSilKitService(network, unused, busSim);
+        // Tell the middleware we are interested in this named network of the given type
+        _connection.RegisterSilKitService(busSim);
     }
     serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore 
 }
@@ -1324,6 +1323,12 @@ template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::ExecuteDeferred(std::function<void()> callback)
 {
     _connection.ExecuteDeferred(std::move(callback));
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+{
+    _connection.SetAsyncSubscriptionsCompletionHandler(std::move(handler));
 }
 
 template <class SilKitConnectionT>

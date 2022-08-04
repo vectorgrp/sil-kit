@@ -89,6 +89,8 @@ public:
     MOCK_METHOD(Services::Orchestration::ParticipantStatus&, Status, (), (override, const));
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, GetTimeSyncService, (), ());
     MOCK_METHOD(Services::Orchestration::ITimeSyncService*, CreateTimeSyncService, (), (override));
+    MOCK_METHOD(void, SetAsyncSubscriptionsCompletionHandler, (std::function<void()> /*handler*/));
+    MOCK_METHOD(Services::Orchestration::OperationMode, GetOperationMode, (), (const));
 };
 
 class MockTimeSyncService : public Services::Orchestration::ITimeSyncService
@@ -350,6 +352,8 @@ public:
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override { return &mockServiceDiscovery; }
 
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override { handler(); };
+    
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
     DummyLogger logger;

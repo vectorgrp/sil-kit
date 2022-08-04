@@ -18,48 +18,59 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #pragma once
 #include <memory>
 #include <future>
-// for thread safe logging:
-#include <mutex>
 #include <iostream>
 #include <sstream>
 #include <string>
 
-#include "GetTestPid.hpp"
-#include "SimTestHarness.hpp"
-
-#include "gtest/gtest.h"
-
 namespace SilKit {
 namespace Tests {
 
-class ITest_SimTestHarness : public testing::Test
+using namespace SilKit::Config;
+
+using namespace std::chrono_literals;
+
+inline std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
-protected: //CTor and operators
-    ITest_SimTestHarness()
-    : _registryUri{MakeTestRegistryUri()}
+    auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
+    out << seconds.count() << "s";
+    return out;
+}
+
+struct ThreadSafeLogger
+{
+    // No copy
+    ThreadSafeLogger(const ThreadSafeLogger&) = delete;
+    ThreadSafeLogger& operator=(const ThreadSafeLogger&) = delete;
+    // Only movable
+    ThreadSafeLogger() = default;
+    ThreadSafeLogger(ThreadSafeLogger&&) = default;
+    ThreadSafeLogger& operator=(ThreadSafeLogger&&) = default;
+
+    template<typename T>
+    auto operator<<(T&& arg) -> ThreadSafeLogger&
     {
+        buf << std::forward<T>(arg);
+        return *this;
     }
 
-    auto TestHarness() -> SimTestHarness&
+    ~ThreadSafeLogger()
     {
-        return *_simTestHarness;
+        buf << std::endl;
+        std::cout << buf.str();
+        std::cout << std::flush;
     }
-
-    void SetupFromParticipantList(std::vector<std::string> participantNames)
-    {
-        // create test harness with deferred participant creation.
-        // Will only create the SIL Kit Registry and tell the SystemController the participantNames
-        _simTestHarness = std::make_unique<SimTestHarness>(participantNames, _registryUri, true);
-
-    }
-
-protected:// members
-    std::string _registryUri;
-    std::unique_ptr<SimTestHarness> _simTestHarness;
+    std::stringstream buf;
 };
+
+//!< thread safe stream logger for testing
+inline auto Log() -> ThreadSafeLogger
+{
+    return ThreadSafeLogger();
+}
 
 } //namespace Tests
 } //namespace SilKit

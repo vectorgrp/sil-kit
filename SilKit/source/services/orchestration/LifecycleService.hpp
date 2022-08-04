@@ -119,6 +119,9 @@ public:
 
     void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
 
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+    OperationMode GetOperationMode() const;
+
 private:
     // ----------------------------------------
     // private methods

@@ -287,6 +287,11 @@ void LifecycleManagement::StartRunning()
     (dynamic_cast<TimeSyncService*>(_parentService->GetTimeSyncService()))->StartTime();
 }
 
+void LifecycleManagement::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+{
+    _parentService->SetAsyncSubscriptionsCompletionHandler(std::move(handler));
+}
+
 void LifecycleManagement::SetState(ILifecycleState* state, std::string message)
 {
     _currentState = state;
@@ -389,6 +394,11 @@ Services::Logging::ILogger* LifecycleManagement::GetLogger()
 LifecycleService* LifecycleManagement::GetService()
 {
     return _parentService;
+}
+
+OperationMode LifecycleManagement::GetOperationMode() const
+{
+    return _parentService->GetOperationMode();
 }
 
 } // namespace Orchestration

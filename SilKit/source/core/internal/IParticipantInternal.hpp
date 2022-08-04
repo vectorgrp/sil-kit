@@ -204,6 +204,10 @@ public:
     //! \brief Create the ITimeSyncService for the given lifecycle service (one time per lifecycle service).
     virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
         -> Services::Orchestration::TimeSyncService* = 0;
+
+    // Register handlers for completion of async service creation
+    virtual void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) = 0;
+    
 };
 
 } // namespace Core

@@ -260,6 +260,8 @@ public:
     void FlushSendBuffers() override;
     void ExecuteDeferred(std::function<void()> callback) override;
 
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override;
+
 public:
     // ----------------------------------------
     // Public methods

@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <unordered_map> //remove this after rebase on cmake-cleanup-branch
 
 #include "ITestFixture.hpp"
+#include "ITestThreadSafeLogger.hpp"
 
 #include "silkit/services/can/all.hpp"
 
@@ -255,7 +256,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
     EXPECT_FALSE(state->receivedErrorActive) << " Collisions are not computed in trivial simulation";
     EXPECT_FALSE(state->readerReceivedErrorActive) << " Collisions are not computed in trivial simulation";
     EXPECT_FALSE(state->monitorReceivedErrorActive) << " Collisions are not computed in trivial simulation";
-    EXPECT_GT(state->monitorReceiveCount, 10) << "All participants connected to bus must receive frames";
+    EXPECT_GT(state->monitorReceiveCount, 10u) << "All participants connected to bus must receive frames";
 }
 
 } //end namespace

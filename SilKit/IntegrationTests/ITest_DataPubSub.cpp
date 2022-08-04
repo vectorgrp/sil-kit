@@ -157,7 +157,7 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_sametopic_sync)
     const uint32_t numMsgToReceive = numMsgToPublish * 2;
     // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
     // so only one call of the newSourceDiscoveryHandler is expected
-    const uint32_t numNewSouceDiscoveries = 1; 
+    const uint32_t numNewSourceDiscoveries = 1; 
     
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"Pub1",
@@ -174,8 +174,22 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_sametopic_sync)
 
     pubsubs.push_back({"Sub1",
                        {},
-                       {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, numNewSouceDiscoveries, expectedDataUnordered},
-                        {"SubCtrl2", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, numNewSouceDiscoveries, expectedDataUnordered}}});
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSourceDiscoveries,
+                         expectedDataUnordered},
+                        {"SubCtrl2",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSourceDiscoveries,
+                         expectedDataUnordered}}});
 
     RunSyncTest(pubsubs);
 }
@@ -515,22 +529,6 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_async_history)
     RunAsyncTest(publishers, subscribers);
 }
 
-// Async with history and specific data handler
-TEST_F(ITest_DataPubSub, test_1pub_1sub_async_history_specifichandler)
-{
-    const uint32_t numMsgToPublish = 1;
-    const uint32_t numMsgToReceive = numMsgToPublish;
-
-    std::vector<PubSubParticipant> publishers;
-    publishers.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 1, defaultMsgSize, numMsgToPublish}}, {}});
-
-    std::vector<PubSubParticipant> subscribers;
-    std::vector<SpecificDataHandlerInfo> specificDataHandlers;
-    specificDataHandlers.push_back({{"A"}, {}});
-    subscribers.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}});
-
-    RunAsyncTest(publishers, subscribers);
-}
 
 // Async rejoin
 TEST_F(ITest_DataPubSub, test_1pub_1sub_async_rejoin)

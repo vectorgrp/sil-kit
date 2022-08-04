@@ -87,6 +87,8 @@ public:
     void ShutdownAfterStop(std::string reason);
     void ShutdownAfterAbort(std::string reason);
 
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+
     // Internal state handling
     void SetState(ILifecycleState* state, std::string message);
     void SetStateError(std::string reason);
@@ -113,6 +115,8 @@ public:
     Services::Logging::ILogger* GetLogger();
 
     LifecycleService* GetService();
+
+    OperationMode GetOperationMode() const;
 
 private:
     std::shared_ptr<ILifecycleState> _invalidState;

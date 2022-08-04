@@ -968,16 +968,32 @@ void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, Serialize
             , ack.subscriber.msgTypeName
             , from->GetInfo().participantName);
     }
-    // we remove the pending subscription in any case. As there will not follow a new, successful acknowledge
-    auto iter = std::find(_pendingSubscriptionAcknowledges.begin(),
-                          _pendingSubscriptionAcknowledges.end(),
-                          std::make_pair(from, ack.subscriber));
-    if (iter != _pendingSubscriptionAcknowledges.end())
+
+    // We remove the pending subscription in any case as there will not follow a new, successful acknowledge from that peer
+    RemovePendingSubscription({from, ack.subscriber});
+}
+
+void VAsioConnection::RemovePendingSubscription(const PendingAcksIdentifier& ackId)
+{
+    auto iterPendingSync =
+        std::find(_pendingSubscriptionAcknowledges.begin(), _pendingSubscriptionAcknowledges.end(), ackId);
+    if (iterPendingSync != _pendingSubscriptionAcknowledges.end())
     {
-        _pendingSubscriptionAcknowledges.erase(iter);
+        _pendingSubscriptionAcknowledges.erase(iterPendingSync);
         if (_pendingSubscriptionAcknowledges.empty())
         {
-            _receivedAllSubscriptionAcknowledges.set_value();
+            SyncSubscriptionsCompleted();
+        }
+    }
+
+    auto iterPendingASync =
+        std::find(_pendingAsyncSubscriptionAcknowledges.begin(), _pendingAsyncSubscriptionAcknowledges.end(), ackId);
+    if (iterPendingASync != _pendingAsyncSubscriptionAcknowledges.end())
+    {
+        _pendingAsyncSubscriptionAcknowledges.erase(iterPendingASync);
+        if (_pendingAsyncSubscriptionAcknowledges.empty())
+        {
+            AsyncSubscriptionsCompleted();
         }
     }
 }
@@ -1050,6 +1066,33 @@ void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage
     case RegistryMessageKind::KnownParticipants:
         return ReceiveKnownParticpants(from, std::move(buffer));
     }
+}
+
+void VAsioConnection::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+{
+    if (_hasPendingAsyncSubscriptions)
+    {
+        _asyncSubscriptionsCompletionHandler = std::move(handler);
+    }
+    else
+    {
+        handler(); 
+    }
+}
+
+void VAsioConnection::SyncSubscriptionsCompleted()
+{
+    _receivedAllSubscriptionAcknowledges.set_value();
+}
+
+void VAsioConnection::AsyncSubscriptionsCompleted()
+{
+    if (_asyncSubscriptionsCompletionHandler)
+    {
+        _asyncSubscriptionsCompletionHandler();
+        _asyncSubscriptionsCompletionHandler = nullptr;
+    }
+    _hasPendingAsyncSubscriptions = false;
 }
 
 } // namespace Core

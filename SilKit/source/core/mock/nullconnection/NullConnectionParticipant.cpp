@@ -42,11 +42,13 @@ struct NullConnection
     void SetTimeSyncService(Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinSimulation(std::string /*registryUri*/) {}
 
-    template<class SilKitServiceT>
-    inline void RegisterSilKitService(const std::string& /*topicName*/, Core::EndpointId /*endpointId*/, SilKitServiceT* /*receiver*/) {}
+    template <class SilKitServiceT>
+    inline void RegisterSilKitService(SilKitServiceT* /*service*/)
+    {
+    }
 
     template <class SilKitServiceT>
-    inline void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, SilKitServiceT* /*service*/) {}
+    inline void SetHistoryLengthForLink(size_t /*history*/, SilKitServiceT* /*service*/) {}
 
     template<typename SilKitMessageT>
     void SendMsg(const Core::IServiceEndpoint* /*from*/, SilKitMessageT&& /*msg*/) {}
@@ -61,6 +63,8 @@ struct NullConnection
 
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* /*peer*/, ParticipantAnnouncement)> /*callback*/) {}
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}
+
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/) {};
 };
 } // anonymous namespace
     

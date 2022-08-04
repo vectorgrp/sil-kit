@@ -212,9 +212,9 @@ protected:
     //we are a friend class
     // - allow selected access to private member
     template<typename MessageT, typename ServiceT>
-    void RegisterSilKitMsgReceiver(const std::string& networkName, SilKit::Core::IMessageReceiver<MessageT>* receiver)
+    void RegisterSilKitMsgReceiver(SilKit::Core::IMessageReceiver<MessageT>* receiver)
     {
-        _connection.RegisterSilKitMsgReceiver<MessageT, ServiceT>(networkName, receiver);
+        _connection.RegisterSilKitMsgReceiver<MessageT, ServiceT>(receiver);
     }
 };
 
@@ -316,7 +316,7 @@ TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
 
     // Create a receiver with index 0 and a different TestMessage _version_
     MockSilKitMessageReceiver mockReceiver;
-    RegisterSilKitMsgReceiver<Tests::Version2::TestMessage,MockSilKitMessageReceiver>(subscriber.networkName, &mockReceiver);
+    RegisterSilKitMsgReceiver<Tests::Version2::TestMessage,MockSilKitMessageReceiver>(&mockReceiver);
 
     // the actual message
     auto buffer = SerializedMessage(message, _from.GetServiceDescriptor().to_endpointAddress(),

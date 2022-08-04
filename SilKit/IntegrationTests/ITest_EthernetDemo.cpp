@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 #include "ITestFixture.hpp"
+#include "ITestThreadSafeLogger.hpp"
 #include "EthDatatypeUtils.hpp"
 
 namespace {

@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 
 #include "ITestFixture.hpp"
+#include "ITestThreadSafeLogger.hpp"
 
 #include "silkit/services/lin/all.hpp"
 #include "silkit/services/lin/string_utils.hpp"

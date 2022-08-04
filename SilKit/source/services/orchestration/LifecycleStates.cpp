@@ -174,10 +174,23 @@ auto ServicesCreatedState::GetParticipantState() -> ParticipantState
 // CommunicationInitializingState
 void CommunicationInitializingState::CommunicationInitializing(std::string reason)
 {
-    // TODO Resolve waitforme
-    // 1. TODO set shared_future
-    // 2. TODO await all queued futures
-    _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), std::move(reason));
+        auto advanceToInitializedState =
+            [this, reason]() {
+				_lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), std::move(reason));
+            };
+        
+        if (_lifecycleManager->GetOperationMode() == OperationMode::Coordinated)
+        {
+            // Delay the next state until pending subscriptions of controllers are completed. 
+            // Applies to all controllers that are included in the trait UseAsyncRegistration().
+            _lifecycleManager->SetAsyncSubscriptionsCompletionHandler(std::move(advanceToInitializedState));
+        }
+        else
+        {
+            // No CommunicationReady guarantees for uncoordinated participants
+            advanceToInitializedState();
+        }
+
 }
 
 void CommunicationInitializingState::AbortSimulation()

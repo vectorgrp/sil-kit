@@ -53,29 +53,27 @@ struct MockConnection
     void JoinSimulation(std::string /*registryUri*/) {}
 
     template <class SilKitServiceT>
-    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/,
-                           SilKitServiceT* /*receiver*/)
+    void RegisterSilKitService(SilKitServiceT* /*service*/)
     {
     }
 
-    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/, RpcClient* receiver)
+    void RegisterSilKitService(RpcClient* receiver)
     {
         services.rpcClient.push_back(receiver);
     }
 
-    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/, RpcServer* receiver)
+    void RegisterSilKitService(RpcServer* receiver)
     {
         services.rpcServer.push_back(receiver);
     }
 
-    void RegisterSilKitService(const std::string& /*topicName*/, SilKit::Core::EndpointId /*endpointId*/,
-                           RpcServerInternal* receiver)
+    void RegisterSilKitService(RpcServerInternal* receiver)
     {
         services.rpcServerInternal.push_back(receiver);
     }
 
     template <class SilKitServiceT>
-    void SetHistoryLengthForLink(const std::string& /*linkName*/, size_t /*history*/, SilKitServiceT* /*service*/)
+    void SetHistoryLengthForLink(size_t /*history*/, SilKitServiceT* /*service*/)
     {
     }
 
@@ -121,6 +119,8 @@ struct MockConnection
     }
 
     void RegisterPeerShutdownCallback(std::function<void(SilKit::Core::IVAsioPeer* peer)> /*callback*/) {}
+
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/){};
 
     void Test_SetTimeProvider(SilKit::Services::Orchestration::ITimeProvider* timeProvider)
     {

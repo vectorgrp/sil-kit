@@ -39,7 +39,7 @@ namespace Orchestration {
 LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
     : _participant{participant}
     , _logger{participant->GetLogger()}
-    ,_lifecycleManagement{participant->GetLogger(), this}
+    , _lifecycleManagement{participant->GetLogger(), this}
 {
     _timeSyncService = _participant->CreateTimeSyncService(this);
 
@@ -239,6 +239,11 @@ void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startCon
     _operationMode = startConfiguration.operationMode;
 }
 
+OperationMode LifecycleService::GetOperationMode() const
+{
+    return _operationMode;
+}
+
 bool LifecycleService::TriggerCommunicationReadyHandler()
 {
     if(_commReadyHandler)
@@ -307,6 +312,11 @@ auto LifecycleService::State() const -> ParticipantState
 auto LifecycleService::Status() const -> const ParticipantStatus&
 {
     return _status;
+}
+
+void LifecycleService::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+{
+    _participant->SetAsyncSubscriptionsCompletionHandler(std::move(handler));
 }
 
 auto LifecycleService::GetTimeSyncService() -> ITimeSyncService*

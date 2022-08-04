@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/string_utils.hpp"
 
 #include "ConfigurationTestUtils.hpp"
+#include "ITestThreadSafeLogger.hpp"
 
 namespace {
 
@@ -45,6 +46,7 @@ using namespace SilKit;
 using namespace SilKit::Config;
 using namespace SilKit::Services::PubSub;
 using namespace SilKit::Services::Orchestration;
+using namespace SilKit::Tests;
 
 const std::string systemMasterName{"SystemMaster"};
 uint64_t numMsgToPublishPerController;
@@ -70,7 +72,7 @@ public:
         if (pubTopics.size() > 0)
         {
             pubControllers.reserve(pubTopics.size());
-            hasPubControllers = true; 
+            hasPubControllers = true;
         }
 
         if (subTopics.size() > 0)
@@ -85,7 +87,7 @@ public:
     }
     ~TestParticipant()
     {
-        if(preSimulationWorker.joinable())
+        if (preSimulationWorker.joinable())
         {
             preSimulationWorker.join();
         }
@@ -104,17 +106,19 @@ public:
         allReceivedPromise.set_value();
     }
 
-    void AwaitCommunication() 
+    void AwaitCommunication()
     {
         auto futureStatus = allReceivedPromise.get_future().wait_for(communicationTimeout);
-        EXPECT_EQ(futureStatus, std::future_status::ready)
-            << "Test Failure: Awaiting test communication timed out";
+        EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting test communication timed out";
     }
 
     void AffirmAllDone()
     {
-        allDone = true;
-        allDonePromise.set_value();
+        if (!allDone)
+        {
+            allDone = true;
+            allDonePromise.set_value();
+        }
     }
 
     void AwaitAllDone()
@@ -125,19 +129,16 @@ public:
 
     void Publish()
     {
-        std::stringstream ss1;
-        ss1 << "[" << name << "] Start publishing..." << std::endl;
-        std::cout << ss1.str();
-        for (auto publisher : pubControllers)
+        Log() << "[" << name << "] Start publishing...";
+        // Publish in reversed order that lastly created publishers come first
+        for (auto publisher = pubControllers.rbegin(); publisher != pubControllers.rend(); ++publisher)
         {
             for (uint64_t i = 0; i < numMsgToPublishPerController; i++)
             {
-                publisher->Publish(std::vector<uint8_t>{0});
+                (*publisher)->Publish(std::vector<uint8_t>{0});
             }
         }
-        std::stringstream ss2;
-        ss2 << "[" << name << "] ...all published" << std::endl;
-        std::cout << ss2.str();
+        Log() << "[" << name << "] ...all published";
     }
 
     //Participant's entry point
@@ -154,12 +155,8 @@ public:
         // We need to create a dedicated thread, so we do not block the 
         // CommunicationReadyHandlerAsync when we communication becomes ready.
         preSimulationStart = preSimulationPromise.get_future();
-        preSimulationWorker = std::thread{[this]{
+        preSimulationWorker = std::thread{[this] {
             preSimulationStart.wait_for(communicationTimeout);
-
-            std::stringstream buf;
-            buf << "[" << name << "] preSimulationWorker";
-            std::cout  << buf.str() << std::endl;
 
             if (hasPubControllers)
             {
@@ -172,40 +169,38 @@ public:
             }
 
             lifecycleService->CompleteCommunicationReadyHandlerAsync();
-            AffirmAllDone();
         }};
 
         lifecycleService->SetCommunicationReadyHandlerAsync([this]() {
-            std::cout << "[" << name << "] CommunicationReadyHandlerAsync: invoking preSimulationWorker" << std::endl;
+            Log() << "[" << name << "] CommunicationReadyHandlerAsync: invoking preSimulationWorker";
             preSimulationPromise.set_value();
         });
 
         lifecycleService->SetStopHandler([this]() {
-            std::cout << "[" << name << "] StopHandler" << std::endl;
+            Log() << "[" << name << "] StopHandler";
         });
 
         lifecycleService->SetShutdownHandler([this]() {
-            std::cout << "[" << name << "] ShutdownHandler" << std::endl;
+            Log() << "[" << name << "] ShutdownHandler";
         });
 
         if (hasPubControllers)
         {
-            std::cout << "[" << name << "] Creating publishers..." << std::endl;
+            Log() << "[" << name << "] Creating publishers...";
             uint32_t controllerIndex = 0;
             for (auto& topic : pubTopics)
             {
                 const DataPublisherSpec spec{topic, ""};
                 const auto controllerName = "Pub-" + std::to_string(controllerIndex);
                 controllerIndex++;
-                pubControllers.push_back(
-                    participant->CreateDataPublisher(controllerName, spec));
+                pubControllers.push_back(participant->CreateDataPublisher(controllerName, spec));
             }
-            std::cout << "[" << name << "] ...created publishers" << std::endl;
+            Log() << "[" << name << "] ...created publishers";
         }
 
         if (hasSubControllers)
         {
-            std::cout << "[" << name << "] Creating subscribers..." << std::endl;
+            Log() << "[" << name << "] Creating subscribers...";
             uint32_t controllerIndex = 0;
             for (auto& topic : subTopics)
             {
@@ -217,38 +212,32 @@ public:
                     [this](IDataSubscriber* /*subscriber*/, const DataMessageEvent& /*dataMessageEvent*/) {
                         if (!allReceived)
                         {
-                            //std::cout << "[" << participant.name << "] Receive #" << participant.receiveMsgCount << std::endl;
-
                             receiveMsgCount++;
                             if (receiveMsgCount >= numMsgToReceiveTotal)
                             {
-                                std::cout << "[" << name << "] All received" << std::endl;
+                                Log() << "[" << name << "] All received";
                                 AffirmCommunication();
                             }
                         }
-                    } ));
+                    }));
             }
-            std::cout << "[" << name << "] ...created subscribers" << std::endl;
+            Log() << "[" << name << "] ...created subscribers";
         }
 
         timeSyncService->SetSimulationStepHandler(
-            [this](std::chrono::nanoseconds now) {
-                std::stringstream ss; 
-                ss << "[" << name << "] SimTask now=" << now.count() << std::endl;
-                std::cout << ss.str();
+            [this](std::chrono::nanoseconds /*now*/) {
+                AffirmAllDone();
             }, 1s);
 
         auto finalStateFuture = lifecycleService->StartLifecycle();
-        std::cout << "[" << name << "] Started Lifecycle" << std::endl;
+        Log() << "[" << name << "] Started Lifecycle";
 
         finalStateFuture.get();
     }
 
-    auto Name() const -> std::string
-    {
-        return name;
-    }
-private://Members
+    auto Name() const -> std::string { return name; }
+
+private: //Members
     std::string name;
     std::unique_ptr<IParticipant> participant;
     Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
@@ -276,12 +265,8 @@ private://Members
 
 class ITest_CommunicationReady : public testing::Test
 {
-
 protected:
-    ITest_CommunicationReady()
-    {
-    }
-
+    ITest_CommunicationReady() {}
 
     struct SystemMaster
     {
@@ -289,9 +274,6 @@ protected:
         std::unique_ptr<IParticipant> participant;
         ISystemController* systemController;
         ISystemMonitor* systemMonitor;
-
-        std::promise<void> waitForStopPromise;
-        std::future<void> waitForStopFuture;
     };
 
     void SystemStateHandler(SystemState newState)
@@ -299,16 +281,14 @@ protected:
         switch (newState)
         {
         case SystemState::Error:
-            std::cout << "SystemState = " << newState << std::endl;
+            Log() << "SystemState = " << newState;
             AbortAndFailTest("Reached SystemState::Error");
             break;
         case SystemState::Running:
-            std::cout << "SystemState = " << newState << std::endl;
-            systemMaster.lifecycleService->Stop("End of test");
-            systemMaster.waitForStopPromise.set_value();
+            Log() << "SystemState = " << newState;
             break;
         default: 
-            std::cout << "SystemState = " << newState << std::endl;
+            Log() << "SystemState = " << newState;
             break;
         }
     }
@@ -319,7 +299,6 @@ protected:
         FAIL() << reason;
     }
 
-
     void RunRegistry(const std::string& registryUri)
     {
         registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
@@ -328,16 +307,14 @@ protected:
 
     void RunSystemMaster(const std::string& registryUri)
     {
-        systemMaster.participant =
-            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
+        systemMaster.participant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                                             systemMasterName, registryUri);
 
         LifecycleConfiguration lc{};
         lc.operationMode = OperationMode::Coordinated;
         systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(lc);
         systemMaster.systemController = systemMaster.participant->CreateSystemController();
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
-
-        systemMaster.waitForStopFuture = systemMaster.waitForStopPromise.get_future();
 
         systemMaster.systemController->SetWorkflowConfiguration({participantNames});
 
@@ -355,7 +332,6 @@ protected:
             participantThreads.emplace_back(
                 [&p, registryUri] { p.ThreadMain(registryUri); });
         }
-
     }
 
     void JoinParticipantThreads()
@@ -377,7 +353,6 @@ protected:
 
         RunRegistry(registryUri);
         RunSystemMaster(registryUri);
-        
     }
 
     void ShutdownSystem()
@@ -386,30 +361,45 @@ protected:
         registry.reset();
     }
 
+    void ExecuteTest(std::vector<TestParticipant>& participants)
+    {
+        try
+        {
+            auto registryUri = MakeTestRegistryUri();
+            SetupSystem(registryUri, participants);
+            RunParticipantThreads(participants, registryUri);
+            Log() << ">> Await all done";
+            for (auto& p : participants)
+                p.AwaitAllDone();
+            systemMaster.lifecycleService->Stop("End of test");
+            JoinParticipantThreads();
+            ShutdownSystem();
+        }
+        catch (const std::exception& error)
+        {
+            std::stringstream ss;
+            ss << "Something went wrong: " << error.what();
+            AbortAndFailTest(ss.str());
+        }
+    }
+
 protected:
     std::vector<std::string> participantNames;
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     SystemMaster systemMaster;
     std::vector<std::thread> participantThreads;
-
-    std::chrono::seconds simtimeToPass{ 3s };
 };
 
+// Tests that basic pubsub communication in the CommunicationReadyHandler works
+TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler)
+{
 
-TEST_F(ITest_CommunicationReady, test_receive_comm_ready)
-try {
-    auto registryUri = MakeTestRegistryUri();
-
-    // Setup 1 publisher and lots of subscribers that the subParticipant is busy 
-    // doing the Subscription handshake and the pubParticipant not.
-    // So we have 1->N communication on one topic.
-
-    const uint32_t numPub = 1;
-    const uint32_t numSub = 100u;
+    const uint32_t numPub = 1u;
+    const uint32_t numSub = 1u;
     const std::string commonTopic = "Topic";
 
     numMsgToPublishPerController = 100u;
-    numMsgToReceiveTotal = numMsgToPublishPerController * numSub;
+    numMsgToReceiveTotal = numMsgToPublishPerController * numPub * numSub;
 
     std::vector<std::string> pubTopics;
     for (uint32_t i = 0; i < numPub; i++)
@@ -427,25 +417,42 @@ try {
     participants.push_back({"Pub", pubTopics, {}});
     participants.push_back({"Sub", {}, subTopics});
 
-    SetupSystem(registryUri, participants);
-
-    RunParticipantThreads(participants, registryUri);
-
-    std::cout << ">> Await all done" << std::endl;
-    for (auto& p : participants)
-        p.AwaitAllDone();
-
-    systemMaster.waitForStopFuture.wait_for(10s);
-
-    JoinParticipantThreads();
-
-    ShutdownSystem();
+    ExecuteTest(participants);
 }
-catch (const std::exception& error)
+
+// Setup lots of publishers and 1 subscriber on each side that both sides are busy doing the subscription handshakes.
+// The CommunicationReadyHandler should be delayed between CommunicationInitializing and CommunicationInitialized
+// until all handshakes are done. E.g., with numPub = 10000:
+//[2022-07-27 14:34:44.680] [PubSub1] [info] New ParticipantState: CommunicationInitializing; reason: Received SystemState::ServicesCreated
+//[2022-07-27 14:35:16.269] [PubSub1] [info] New ParticipantState: CommunicationInitialized; reason: Received SystemState::CommunicationInitializing
+TEST_F(ITest_CommunicationReady, test_delay_comm_ready_handler)
 {
-    std::stringstream ss;
-    ss << "Something went wrong: " << error.what() << std::endl;
-    AbortAndFailTest(ss.str());
+
+    const uint32_t numPub = 100u;
+    const uint32_t numSub = 1u;
+    const std::string topic1 = "Topic1";
+    const std::string topic2 = "Topic2";
+
+    numMsgToPublishPerController = 2u;
+    numMsgToReceiveTotal = numMsgToPublishPerController * numPub * numSub;
+
+    std::vector<std::string> pubTopics1;
+    for (uint32_t i = 0; i < numPub; i++)
+    {
+        pubTopics1.push_back(topic1);
+    }
+
+    std::vector<std::string> pubTopics2;
+    for (uint32_t i = 0; i < numPub; i++)
+    {
+        pubTopics2.push_back(topic2);
+    }
+
+    std::vector<TestParticipant> participants;
+    participants.push_back({"PubSub1", pubTopics1, {topic2}});
+    participants.push_back({"PubSub2", pubTopics2, {topic1}});
+
+    ExecuteTest(participants);
 }
 
 } // anonymous namespace

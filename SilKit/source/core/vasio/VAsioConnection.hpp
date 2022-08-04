@@ -88,8 +88,9 @@ public:
     void SetLogger(Services::Logging::ILogger* logger);
     void JoinSimulation(std::string registryUri);
 
+
     template <class SilKitServiceT>
-    void RegisterSilKitService(const std::string& link, EndpointId endpointId, SilKitServiceT* service)
+    void RegisterSilKitService(SilKitServiceT* service)
     {
         std::future<void> allAcked;
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
@@ -98,9 +99,13 @@ public:
             _receivedAllSubscriptionAcknowledges = std::promise<void>{};
             allAcked = _receivedAllSubscriptionAcknowledges.get_future();
         }
+        else
+        {
+            _hasPendingAsyncSubscriptions = true;
+        }
 
-        _ioContext.dispatch([this, link, endpointId, service]() {
-            this->RegisterSilKitServiceImpl<SilKitServiceT>(link, endpointId, service);
+        _ioContext.dispatch([this, service]() {
+            this->RegisterSilKitServiceImpl<SilKitServiceT>(service);
         });
 
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
@@ -112,13 +117,13 @@ public:
     }
 
     template <class SilKitServiceT>
-    void SetHistoryLengthForLink(const std::string& networkName, size_t historyLength, SilKitServiceT* /*service*/)
+    void SetHistoryLengthForLink(size_t historyLength, SilKitServiceT* service)
     {
-        // NB: Dummy SilKitServiceT* is fed in here to deduce SilKitServiceT, as it is only used in 'typename SilKitServiceT',
-        // which is not sufficient to get the type for some compilers (e.g. Clang)
         typename SilKitServiceT::SilKitSendMessagesTypes sendMessageTypes{};
 
-        Util::tuple_tools::for_each(sendMessageTypes, [this, &networkName, historyLength](auto&& message) {
+        auto&& networkName = GetServiceDescriptor(service).GetNetworkName();
+
+        Util::tuple_tools::for_each(sendMessageTypes, [this, networkName, historyLength](auto&& message) {
             using SilKitMessageT = std::decay_t<decltype(message)>;
             auto link = this->GetLinkByName<SilKitMessageT>(networkName);
             link->SetHistoryLength(historyLength);
@@ -167,6 +172,9 @@ public:
     void OnPeerShutdown(IVAsioPeer* peer);
 
     void NotifyShutdown();
+
+    // Register handlers for completion of async service creation
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
 public: //members
     static constexpr const ParticipantId RegistryParticipantId { 0 };
@@ -257,6 +265,18 @@ private:
     void AddParticipantToLookup(const std::string& participantName);
     const std::string& GetParticipantFromLookup(std::uint64_t participantId) const;
 
+    // TCP Related
+    void AddPeer(std::shared_ptr<IVAsioPeer> peer);
+    template <typename AcceptorT>
+    void AcceptNextConnection(AcceptorT& acceptor);
+
+    // Subscriptions completed Helper
+    void SyncSubscriptionsCompleted();
+    void AsyncSubscriptionsCompleted();
+    // Unique identifier of SubscriptionAcknowledges on the subscriber
+    using PendingAcksIdentifier = std::pair<IVAsioPeer*, VAsioMsgSubscriber>;
+    void RemovePendingSubscription(const PendingAcksIdentifier& ackId);
+
     template<class SilKitMessageT>
     auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<SilKitLink<SilKitMessageT>>
     {
@@ -269,9 +289,11 @@ private:
     }
 
     template<class SilKitMessageT, class SilKitServiceT>
-    void RegisterSilKitMsgReceiver(const std::string& networkName, SilKit::Core::IMessageReceiver<SilKitMessageT>* receiver)
+    void RegisterSilKitMsgReceiver(IMessageReceiver<SilKitMessageT>* receiver)
     {
         SILKIT_ASSERT(_logger);
+        auto&& serviceDescriptor = GetServiceDescriptor(receiver);
+        auto&& networkName = serviceDescriptor.GetNetworkName();
 
         auto link = GetLinkByName<SilKitMessageT>(networkName);
         link->AddLocalReceiver(receiver);
@@ -290,7 +312,7 @@ private:
 
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<SilKitMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IServiceEndpoint*>(rawReceiver.get());
-            ServiceDescriptor tmpServiceDescriptor(dynamic_cast<Core::IServiceEndpoint&>(*receiver).GetServiceDescriptor());
+            ServiceDescriptor tmpServiceDescriptor(GetServiceDescriptor(receiver));
             tmpServiceDescriptor.SetParticipantName(_participantName);
             // copy the Service Endpoint Id
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
@@ -298,51 +320,65 @@ private:
 
             for (auto&& peer : _peers)
             {
+                // Add pending subscriptions
+                PendingAcksIdentifier ackPair{peer.get(), subscriptionInfo};
                 if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
                 {
-                    _pendingSubscriptionAcknowledges.emplace_back(peer.get(), subscriptionInfo);
+                    _pendingSubscriptionAcknowledges.emplace_back(ackPair);
                 }
+                else
+                {
+                    _pendingAsyncSubscriptionAcknowledges.emplace_back(ackPair);
+                }
+
                 peer->Subscribe(subscriptionInfo);
             }
         }
     }
 
     template<class SilKitMessageT>
-    void RegisterSilKitMsgSender(const std::string& networkName, const IServiceEndpoint* serviceId)
+    void RegisterSilKitMsgSender(const std::string& networkName)
     {
         auto link = GetLinkByName<SilKitMessageT>(networkName);
         auto&& serviceLinkMap = std::get<SilKitServiceToLinkMap<SilKitMessageT>>(_serviceToLinkMap);
-        serviceLinkMap[serviceId->GetServiceDescriptor().GetNetworkName()] = link;
+        serviceLinkMap[networkName] = link;
     }
 
     template<class SilKitServiceT>
-    inline void RegisterSilKitServiceImpl(const std::string& link, EndpointId /*endpointId*/, SilKitServiceT* service)
+    inline void RegisterSilKitServiceImpl(SilKitServiceT* service)
     {
         typename SilKitServiceT::SilKitReceiveMessagesTypes receiveMessageTypes{};
         typename SilKitServiceT::SilKitSendMessagesTypes sendMessageTypes{};
 
-        Util::tuple_tools::for_each(receiveMessageTypes,
-            [this, &link, service](auto&& message)
+        Util::tuple_tools::for_each(receiveMessageTypes, [this, service](auto&& message)
         {
             using SilKitMessageT = std::decay_t<decltype(message)>;
-            this->RegisterSilKitMsgReceiver<SilKitMessageT, SilKitServiceT>(link, service);
+            this->RegisterSilKitMsgReceiver<SilKitMessageT, SilKitServiceT>(service);
         }
         );
 
         Util::tuple_tools::for_each(sendMessageTypes,
-            [this, &link,  &service](auto&& message)
+            [this, service](auto&& message)
         {
             using SilKitMessageT = std::decay_t<decltype(message)>;
-            auto& serviceId = dynamic_cast<IServiceEndpoint&>(*service);
-            this->RegisterSilKitMsgSender<SilKitMessageT>(link, &serviceId);
+            this->RegisterSilKitMsgSender<SilKitMessageT>(GetServiceDescriptor(service).GetNetworkName());
         }
         );
 
+        // We could have registered a receiver that only uses already acknowledged senders, thus no new handshake is 
+        // triggered. In that case, the pending acks might be already empty and the subscription is completed.
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
             if (_pendingSubscriptionAcknowledges.empty())
             {
-                _receivedAllSubscriptionAcknowledges.set_value();
+                SyncSubscriptionsCompleted();
+            }
+        }
+        else
+        {
+            if (_pendingAsyncSubscriptionAcknowledges.empty())
+            {
+                AsyncSubscriptionsCompleted();
             }
         }
     }
@@ -400,10 +436,11 @@ private:
         }
     }
 
-    // TCP Related
-    void AddPeer(std::shared_ptr<IVAsioPeer> peer);
-    template<typename AcceptorT>
-    void AcceptNextConnection(AcceptorT& acceptor);
+    template <class SilKitServiceT>
+    const ServiceDescriptor& GetServiceDescriptor(SilKitServiceT* service)
+    {
+        return dynamic_cast<IServiceEndpoint&>(*service).GetServiceDescriptor();
+    }
 
 private:
     // ----------------------------------------
@@ -446,8 +483,13 @@ private:
     std::promise<void> _receivedAllParticipantReplies;
 
     // Keep track of the sent Subscriptions when Registering an SIL Kit Service
-    std::vector<std::pair<IVAsioPeer*, VAsioMsgSubscriber>> _pendingSubscriptionAcknowledges;
+    std::vector<PendingAcksIdentifier> _pendingSubscriptionAcknowledges;
     std::promise<void> _receivedAllSubscriptionAcknowledges;
+
+    // Subscriptions for internal services that use async registration
+    std::vector<PendingAcksIdentifier> _pendingAsyncSubscriptionAcknowledges;
+    std::function<void()> _asyncSubscriptionsCompletionHandler;
+    std::atomic<bool> _hasPendingAsyncSubscriptions{false};
 
     // The worker thread should be the last members in this class. This ensures
     // that no callback is destroyed before the thread finishes.
