@@ -92,7 +92,7 @@ const int numPublications = 30;
 
 char* participantName;
 
-void DefaultDataHandler(void* context, SilKit_DataSubscriber* subscriber, const SilKit_DataMessageEvent* dataMessageEvent)
+void SilKitCALL DefaultDataHandler(void* context, SilKit_DataSubscriber* subscriber, const SilKit_DataMessageEvent* dataMessageEvent)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(subscriber);

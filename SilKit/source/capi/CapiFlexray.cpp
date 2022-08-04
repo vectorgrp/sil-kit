@@ -111,7 +111,7 @@ void assign(SilKit::Services::Flexray::FlexrayControllerConfig& cppConfig, const
 
 extern "C"
 {
-    SilKit_ReturnCode SilKit_FlexrayController_Create(SilKit_FlexrayController** outController, SilKit_Participant* participant,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Create(SilKit_FlexrayController** outController, SilKit_Participant* participant,
                                                const char* name, const char* network)
     {
         ASSERT_VALID_OUT_PARAMETER(outController);
@@ -132,7 +132,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller,
                                                   const SilKit_FlexrayControllerConfig* config)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -157,7 +157,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx,
                                                             const SilKit_FlexrayTxBufferConfig* config)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -176,7 +176,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller,
                                                        const SilKit_FlexrayTxBufferUpdate* update)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -199,7 +199,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd)
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
         CAPI_ENTER
@@ -234,7 +234,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
                                                         SilKit_FlexrayFrameHandler_t handler, SilKit_HandlerId* outHandlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -275,7 +275,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
         CAPI_ENTER
@@ -287,7 +287,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller, void* context,
                                                                 SilKit_FlexrayFrameTransmitHandler_t handler,
                                                                 SilKit_HandlerId* outHandlerId)
     {
@@ -330,7 +330,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
                                                                    SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -343,7 +343,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
                                                          SilKit_FlexrayWakeupHandler_t handler, SilKit_HandlerId* outHandlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -368,7 +368,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
         CAPI_ENTER
@@ -380,7 +380,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller, void* context,
                                                             SilKit_FlexrayPocStatusHandler_t handler,
                                                             SilKit_HandlerId* outHandlerId)
     {
@@ -413,7 +413,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
                                                                SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -426,7 +426,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
                                                          SilKit_FlexraySymbolHandler_t handler, SilKit_HandlerId* outHandlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -450,7 +450,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
         CAPI_ENTER
@@ -462,7 +462,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
                                                                  SilKit_FlexraySymbolTransmitHandler_t handler,
                                                                  SilKit_HandlerId* outHandlerId)
     {
@@ -488,7 +488,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
                                                                     SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -501,7 +501,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller, void* context,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller, void* context,
                                                              SilKit_FlexrayCycleStartHandler_t handler,
                                                              SilKit_HandlerId* outHandlerId)
     {
@@ -526,7 +526,7 @@ extern "C"
         CAPI_LEAVE
     }
 
-    SilKit_ReturnCode SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
+    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
                                                                 SilKit_HandlerId handlerId)
     {
         ASSERT_VALID_POINTER_PARAMETER(controller);

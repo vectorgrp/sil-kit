@@ -60,7 +60,7 @@ typedef struct SilKit_DataSubscriber SilKit_DataSubscriber;
 * \param subscriber The affected subscriber.
 * \param dataMessageEvent Contains the raw data and send timestamp.
 */
-typedef void (*SilKit_DataMessageHandler_t)(void* context, SilKit_DataSubscriber* subscriber, 
+typedef void (SilKitFPTR *SilKit_DataMessageHandler_t)(void* context, SilKit_DataSubscriber* subscriber,
     const SilKit_DataMessageEvent* dataMessageEvent);
 
 /*! \brief Create a DataPublisher on the provided simulation participant with the provided properties.
@@ -74,11 +74,11 @@ typedef void (*SilKit_DataMessageHandler_t)(void* context, SilKit_DataSubscriber
 * \param history A number indicating the number of historic values that should be replayed for a new DataSubscriber.
 * Restricted to {0|1}.
 */
-SilKitAPI SilKit_ReturnCode SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher,
                                                         SilKit_Participant* participant, const char* controllerName,
                                                         SilKit_DataSpec* dataSpec, uint8_t history);
 
-typedef SilKit_ReturnCode (*SilKit_DataPublisher_Create_t)(SilKit_DataPublisher** outPublisher,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataPublisher_Create_t)(SilKit_DataPublisher** outPublisher,
                                                            SilKit_Participant* participant, const char* controllerName,
                                                            SilKit_DataSpec* dataSpec, uint8_t history);
 
@@ -95,13 +95,13 @@ typedef SilKit_ReturnCode (*SilKit_DataPublisher_Create_t)(SilKit_DataPublisher*
 * \param newDataSourceContext A user provided context that is reobtained on invocation of the newDataSourceHandler.
 * \param newDataSourceHandler A handler that is called if a new matching publisher is discovered.
 */
-SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber,
                                                          SilKit_Participant* participant, const char* controllerName,
                                                          SilKit_DataSpec* dataSpec,
                                                          void* defaultDataHandlerContext,
                                                          SilKit_DataMessageHandler_t defaultDataHandler);
 
-typedef SilKit_ReturnCode (*SilKit_DataSubscriber_Create_t)(SilKit_DataSubscriber** outSubscriber,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataSubscriber_Create_t)(SilKit_DataSubscriber** outSubscriber,
                                                             SilKit_Participant* participant, const char* controllerName,
                                                             SilKit_DataSpec* dataSpec,
                                                             void* defaultDataHandlerContext,
@@ -111,19 +111,19 @@ typedef SilKit_ReturnCode (*SilKit_DataSubscriber_Create_t)(SilKit_DataSubscribe
 * \param self The DataPublisher that should publish the data.
 * \param data The data that should be published.
 */
-SilKitAPI SilKit_ReturnCode SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
 
-typedef SilKit_ReturnCode (*SilKit_DataPublisher_Publish_t)(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataPublisher_Publish_t)(SilKit_DataPublisher* self, const SilKit_ByteVector* data);
 
 /*! \brief Sets / overwrites the default handler to be called on data reception.
 * \param self The DataSubscriber for which the handler should be set.
 * \param context A user provided context, that is reobtained on data reception in the dataHandler.
 * \param dataHandler A handler that is called on data reception.
 */
-SilKitAPI SilKit_ReturnCode SilKit_DataSubscriber_SetDataMessageHandler(
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_SetDataMessageHandler(
     SilKit_DataSubscriber* self, void* context, SilKit_DataMessageHandler_t dataHandler);
 
-typedef SilKit_ReturnCode (*SilKit_DataSubscriber_SetDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_DataSubscriber_SetDataMessageHandler_t)(SilKit_DataSubscriber* self, void* context,
                                                                            SilKit_DataMessageHandler_t dataHandler);
 
 SILKIT_END_DECLS

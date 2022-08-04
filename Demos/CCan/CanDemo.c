@@ -81,7 +81,7 @@ typedef struct {
 
 TransmitContext transmitContext;
 
-void FrameTransmitHandler(void* context, SilKit_CanController* controller, struct SilKit_CanFrameTransmitEvent* cAck)
+void SilKitCALL FrameTransmitHandler(void* context, SilKit_CanController* controller, struct SilKit_CanFrameTransmitEvent* cAck)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -93,7 +93,7 @@ void FrameTransmitHandler(void* context, SilKit_CanController* controller, struc
     SilKit_Logger_Log(logger, SilKit_LoggingLevel_Info, buffer);
 }
 
-void FrameHandler(void* context, SilKit_CanController* controller, SilKit_CanFrameEvent* frameEvent)
+void SilKitCALL FrameHandler(void* context, SilKit_CanController* controller, SilKit_CanFrameEvent* frameEvent)
 {
     UNUSED_ARG(controller);
 

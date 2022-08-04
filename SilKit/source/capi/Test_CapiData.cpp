@@ -132,7 +132,7 @@ public:
     SilKit_LabelList* labelList;
 };
 
-void DefaultDataHandler(void* /*context*/, SilKit_DataSubscriber* /*subscriber*/, const SilKit_DataMessageEvent* /*dataMessageEvent*/)
+void SilKitCALL DefaultDataHandler(void* /*context*/, SilKit_DataSubscriber* /*subscriber*/, const SilKit_DataMessageEvent* /*dataMessageEvent*/)
 {
 }
 

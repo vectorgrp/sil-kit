@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 extern "C" {
 
-SilKit_ReturnCode SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message)
+SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(message);
@@ -45,7 +45,7 @@ SilKit_ReturnCode SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel lev
 }
 
 
-SilKit_ReturnCode SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel) {
+SilKit_ReturnCode SilKitCALL SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel) {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(outLevel);
     CAPI_ENTER

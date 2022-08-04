@@ -92,7 +92,7 @@ typedef struct {
 } SimTaskContext;
 SimTaskContext simTaskContext;
 
-void CommunicationReadyCallback(void* context, SilKit_LifecycleService* cbParticipant)
+void SilKitCALL CommunicationReadyCallback(void* context, SilKit_LifecycleService* cbParticipant)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbParticipant);
@@ -106,21 +106,21 @@ void CommunicationReadyCallback(void* context, SilKit_LifecycleService* cbPartic
     (void)SilKit_CanController_Start(canController2);
 }
 
-void StopCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
+void SilKitCALL StopCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
     UNUSED_ARG(cbLifecycleService);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> StopCallback with context=%i\n", tc->someInt);
 }
 
-void ShutdownCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
+void SilKitCALL ShutdownCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
     UNUSED_ARG(cbLifecycleService);
     ParticipantHandlerContext* tc = (ParticipantHandlerContext*)context;
     printf(">> ShutdownCallback with context=%i\n", tc->someInt);
 }
 
-void FrameTransmitHandler(void* context, SilKit_CanController* controller, struct SilKit_CanFrameTransmitEvent* cAck)
+void SilKitCALL FrameTransmitHandler(void* context, SilKit_CanController* controller, struct SilKit_CanFrameTransmitEvent* cAck)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -128,7 +128,7 @@ void FrameTransmitHandler(void* context, SilKit_CanController* controller, struc
     printf(">> %i for CAN Message with timestamp=%"PRIu64"\n", cAck->status, cAck->timestamp);
 }
 
-void FrameHandler(void* context, SilKit_CanController* controller, SilKit_CanFrameEvent* frameEvent)
+void SilKitCALL FrameHandler(void* context, SilKit_CanController* controller, SilKit_CanFrameEvent* frameEvent)
 {
     UNUSED_ARG(controller);
     TransmitContext* txContext = (TransmitContext*)(context);
@@ -177,7 +177,7 @@ void SendFrame()
     printf("CAN Message sent with transmitId=%i\n", transmitContext.someInt);
 }
 
-void SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
+void SilKitCALL SimTask(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
              SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(cbTimeSyncService);

@@ -68,7 +68,7 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
 
 extern "C" {
 
-SilKit_ReturnCode SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
+SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
     SilKit_RpcSpec* rpcSpec, void* context, SilKit_RpcCallHandler_t callHandler)
 {
     ASSERT_VALID_OUT_PARAMETER(out);
@@ -90,7 +90,7 @@ SilKit_ReturnCode SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Partici
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
+SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
                                          const SilKit_ByteVector* returnData)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
@@ -106,7 +106,7 @@ SilKit_ReturnCode SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_R
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_RpcCallHandler_t handler)
+SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_RpcCallHandler_t handler)
         {
             ASSERT_VALID_POINTER_PARAMETER(self);
             ASSERT_VALID_POINTER_PARAMETER(handler);
@@ -119,7 +119,7 @@ SilKit_ReturnCode SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* 
             CAPI_LEAVE
         }
 
-SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
                                    SilKit_RpcSpec* rpcSpec,
                                    void* context, SilKit_RpcCallResultHandler_t resultHandler)
 {
@@ -142,7 +142,7 @@ SilKit_ReturnCode SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Partici
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData, void* userContext)
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData, void* userContext)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(argumentData);
@@ -155,7 +155,7 @@ SilKit_ReturnCode SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_Byt
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(handler);

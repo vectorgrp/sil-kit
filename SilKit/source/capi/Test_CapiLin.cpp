@@ -53,16 +53,16 @@ public:
     MOCK_METHOD(void, RemoveLinSlaveConfigurationHandler, (SilKit::Services::HandlerId));
 };
 
-void CFrameStatusHandler(void* /*context*/, SilKit_LinController* /*controller*/,
+void SilKitCALL CFrameStatusHandler(void* /*context*/, SilKit_LinController* /*controller*/,
                          const SilKit_LinFrameStatusEvent* /*frameStatusEvent*/) { }
 
-void CGoToSleepHandler(void* /*context*/, SilKit_LinController* /*controller*/,
+void SilKitCALL CGoToSleepHandler(void* /*context*/, SilKit_LinController* /*controller*/,
                        const SilKit_LinGoToSleepEvent* /*goToSleepEvent*/) { }
 
-void CWakeupHandler(void* /*context*/, SilKit_LinController* /*controller*/,
+void SilKitCALL CWakeupHandler(void* /*context*/, SilKit_LinController* /*controller*/,
                     const SilKit_LinWakeupEvent* /*wakeupEvent*/) { }
 
-void CLinSlaveConfigurationHandler(void* /*context*/, SilKit_LinController* /*controller*/,
+void SilKitCALL CLinSlaveConfigurationHandler(void* /*context*/, SilKit_LinController* /*controller*/,
                                    const SilKit_LinSlaveConfigurationEvent* /*slaveConfigurationEvent*/) { }
 
 class CapiLinTest : public testing::Test

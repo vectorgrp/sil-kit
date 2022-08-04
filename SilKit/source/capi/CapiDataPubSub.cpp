@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 extern "C" {
 
-SilKit_ReturnCode SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
+SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
                                            const char* controllerName,
                                            SilKit_DataSpec* dataSpec,
                                            uint8_t history)
@@ -59,7 +59,7 @@ SilKit_ReturnCode SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublishe
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data)
+SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(data);
@@ -72,7 +72,7 @@ SilKit_ReturnCode SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant,
+SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant,
                                                const char* controllerName, SilKit_DataSpec* dataSpec,
                                                void* defaultDataHandlerContext,
                                                SilKit_DataMessageHandler_t defaultDataHandler)
@@ -114,7 +114,7 @@ SilKit_ReturnCode SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscr
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_DataSubscriber_SetDataMessageHandler(SilKit_DataSubscriber* self, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_SetDataMessageHandler(SilKit_DataSubscriber* self, void* context,
                                                       SilKit_DataMessageHandler_t dataHandler)
 {
     ASSERT_VALID_POINTER_PARAMETER(self);

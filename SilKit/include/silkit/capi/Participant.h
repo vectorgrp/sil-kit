@@ -46,14 +46,13 @@ typedef uint64_t SilKit_NanosecondsWallclockTime; //!< Wall clock time since epo
 * \param cRegistryUri The `silkit://` URI of the registry
 *
 */
-SilKitAPI SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                                       SilKit_ParticipantConfiguration* participantConfiguration,
                                                       const char* cParticipantName, const char* cRegistryUri);
 
-typedef SilKit_ReturnCode (*SilKit_Participant_Create_t)(SilKit_Participant** outParticipant,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Participant_Create_t)(SilKit_Participant** outParticipant,
                                                          SilKit_ParticipantConfiguration* participantConfiguration,
                                                          const char* cParticipantName, const char* cRegistryUri);
-
 /*! \brief Destroy a simulation participant and its associated simulation elements.
 *
 * Destroys the simulation participant and its created simulation elements such as e.g. Can controllers.
@@ -61,9 +60,9 @@ typedef SilKit_ReturnCode (*SilKit_Participant_Create_t)(SilKit_Participant** ou
 * \param participant The simulation participant to be destroyed.
 *
 */
-SilKitAPI SilKit_ReturnCode SilKit_Participant_Destroy(SilKit_Participant* participant);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_Destroy(SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode (*SilKit_Participant_Destroy_t)(SilKit_Participant* participant);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Participant_Destroy_t)(SilKit_Participant* participant);
 
 /*! \brief Obtain the logger of a particular simulation participant.
  *
@@ -74,9 +73,9 @@ typedef SilKit_ReturnCode (*SilKit_Participant_Destroy_t)(SilKit_Participant* pa
  * There is no futher cleanup necessary, except for destroying the simulation participant at the end of the
  * simulation.
  */
-SilKitAPI SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode (*SilKit_Participant_GetLogger_t)(SilKit_Logger** outLogger, SilKit_Participant* participant);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Participant_GetLogger_t)(SilKit_Logger** outLogger, SilKit_Participant* participant);
 
 SILKIT_END_DECLS
 

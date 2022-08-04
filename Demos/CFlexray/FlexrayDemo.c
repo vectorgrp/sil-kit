@@ -72,9 +72,10 @@ void FlexrayNode_DoAction(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now);
 void FlexrayNode_PocReady(struct FlexrayNode* flexrayNode, SilKit_NanosecondsTime now);
 void FlexrayNode_TxBufferUpdate(FlexrayNode* flexrayNode, SilKit_NanosecondsTime now);
 void FlexrayNode_ReconfigureTxBuffers(struct FlexrayNode* flexrayNode);
-void FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* controller,
+
+void SilKitCALL FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* controller,
                                   const SilKit_FlexrayPocStatusEvent* pocStatus);
-void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol);
+void SilKitCALL FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol);
 
 void print_header(FILE* out, SilKit_FlexrayHeader* header)
 {
@@ -142,7 +143,7 @@ void print_flexrayframetransmitevent(FILE* out, const SilKit_FlexrayFrameTransmi
     fflush(out);
 }
 
-void ReceiveFrame(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameEvent* message)
+void SilKitCALL ReceiveFrame(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -151,7 +152,7 @@ void ReceiveFrame(void* context, SilKit_FlexrayController* controller, const Sil
     print_flexrayframeevent(stdout, message);
 }
 
-void ReceiveFrameTransmit(void* context, SilKit_FlexrayController* controller,
+void SilKitCALL ReceiveFrameTransmit(void* context, SilKit_FlexrayController* controller,
                           const SilKit_FlexrayFrameTransmitEvent* message)
 {
     UNUSED_ARG(context);
@@ -161,7 +162,7 @@ void ReceiveFrameTransmit(void* context, SilKit_FlexrayController* controller,
     print_flexrayframetransmitevent(stdout, message);
 }
 
-void ReceiveWakeup(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayWakeupEvent* message)
+void SilKitCALL ReceiveWakeup(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayWakeupEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -170,7 +171,7 @@ void ReceiveWakeup(void* context, SilKit_FlexrayController* controller, const Si
     fprintf(stdout, "FlexrayWakeupEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
-void ReceiveSymbol(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* message)
+void SilKitCALL ReceiveSymbol(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -179,7 +180,7 @@ void ReceiveSymbol(void* context, SilKit_FlexrayController* controller, const Si
     fprintf(stdout, "FlexraySymbolEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
-void ReceiveSymbolTransmit(void* context, SilKit_FlexrayController* controller,
+void SilKitCALL ReceiveSymbolTransmit(void* context, SilKit_FlexrayController* controller,
                            const SilKit_FlexraySymbolTransmitEvent* message)
 {
     UNUSED_ARG(context);
@@ -189,7 +190,7 @@ void ReceiveSymbolTransmit(void* context, SilKit_FlexrayController* controller,
     fprintf(stdout, "FlexraySymbolTransmitEvent channel=%d symbol=%d\n", message->channel, message->pattern);
 }
 
-void ReceiveCycleStart(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayCycleStartEvent* message)
+void SilKitCALL ReceiveCycleStart(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayCycleStartEvent* message)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -349,7 +350,7 @@ void FlexrayNode_ReconfigureTxBuffers(struct FlexrayNode* flexrayNode)
     }
 }
 
-void FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* controller,
+void SilKitCALL FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* controller,
                                   const SilKit_FlexrayPocStatusEvent* pocStatus)
 {
     UNUSED_ARG(controller);
@@ -367,7 +368,7 @@ void FlexrayNode_PocStatusHandler(void* context, SilKit_FlexrayController* contr
     flexrayNode->_oldPocStatus = *pocStatus;
 }
 
-void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol)
+void SilKitCALL FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol)
 {
     UNUSED_ARG(context);
 
@@ -376,7 +377,7 @@ void FlexrayNode_WakeupHandler(void* context, SilKit_FlexrayController* controll
     SilKit_FlexrayController_ExecuteCmd(controller, SilKit_FlexrayChiCommand_RUN);
 }
 
-void FlexrayNode_SimulationStep(void* context, SilKit_TimeSyncService* timeSyncService, SilKit_NanosecondsTime time,
+void SilKitCALL FlexrayNode_SimulationStep(void* context, SilKit_TimeSyncService* timeSyncService, SilKit_NanosecondsTime time,
                                 SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(timeSyncService);

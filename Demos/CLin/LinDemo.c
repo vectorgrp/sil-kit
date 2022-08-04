@@ -185,20 +185,21 @@ Schedule* masterSchedule;
 Timer slaveTimer;
 SilKit_NanosecondsTime slaveNow;
 
-void StopCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
+void SilKitCALL StopCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbLifecycleService);
     printf("Stopping...\n");
 }
-void ShutdownCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
+
+void SilKitCALL ShutdownCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbLifecycleService);
     printf("Shutting down...\n");
 }
 
-void Master_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
+void SilKitCALL Master_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbLifecycleService);
@@ -228,7 +229,7 @@ void Master_doAction(SilKit_NanosecondsTime now)
     Schedule_ExecuteTask(masterSchedule, now);
 }
 
-void Master_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
+void SilKitCALL Master_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
                     SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(context);
@@ -237,7 +238,7 @@ void Master_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeS
     Master_doAction(now);
 }
 
-void Master_ReceiveFrameStatus(void* context, SilKit_LinController* controller, const SilKit_LinFrameStatusEvent* frameStatusEvent)
+void SilKitCALL Master_ReceiveFrameStatus(void* context, SilKit_LinController* controller, const SilKit_LinFrameStatusEvent* frameStatusEvent)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -261,7 +262,7 @@ void Master_ReceiveFrameStatus(void* context, SilKit_LinController* controller, 
     Schedule_ScheduleNextTask(masterSchedule);
 }
 
-void Master_WakeupHandler(void* context, SilKit_LinController* controller, const SilKit_LinWakeupEvent* wakeUpEvent)
+void SilKitCALL Master_WakeupHandler(void* context, SilKit_LinController* controller, const SilKit_LinWakeupEvent* wakeUpEvent)
 {
     UNUSED_ARG(context);
 
@@ -279,7 +280,7 @@ void Master_WakeupHandler(void* context, SilKit_LinController* controller, const
     Schedule_ScheduleNextTask(masterSchedule);
 }
 
-void Master_LinSlaveConfigurationHandler(void* context, SilKit_LinController* controller,
+void SilKitCALL Master_LinSlaveConfigurationHandler(void* context, SilKit_LinController* controller,
                                          const SilKit_LinSlaveConfigurationEvent* linSlaveConfiguratioEvent)
 {
     UNUSED_ARG(context);
@@ -380,7 +381,7 @@ void Master_GoToSleep(SilKit_NanosecondsTime now)
     SilKit_LinController_GoToSleep(linController);
 }
 
-void Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
+void SilKitCALL Slave_InitCallback(void* context, SilKit_LifecycleService* cbLifecycleService)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbLifecycleService);
@@ -485,7 +486,7 @@ void Slave_DoAction(SilKit_NanosecondsTime now)
     Timer_ExecuteAction(&slaveTimer, now);
 }
 
-void Slave_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
+void SilKitCALL Slave_SimulationStepHandler(void* context, SilKit_TimeSyncService* cbTimeSyncService, SilKit_NanosecondsTime now,
                    SilKit_NanosecondsTime duration)
 {
     UNUSED_ARG(context);
@@ -509,7 +510,7 @@ void Slave_UpdateTxBuffer_LinId34()
     SilKit_LinController_UpdateTxBuffer(linController, &frame34);
 }
 
-void Slave_FrameStatusHandler(void* context, SilKit_LinController* controller, const SilKit_LinFrameStatusEvent* frameStatusEvent)
+void SilKitCALL Slave_FrameStatusHandler(void* context, SilKit_LinController* controller, const SilKit_LinFrameStatusEvent* frameStatusEvent)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(controller);
@@ -532,7 +533,7 @@ void Slave_WakeupPulse(SilKit_NanosecondsTime now)
     SilKit_LinController_Wakeup(linController);
 }
 
-void Slave_GoToSleepHandler(void* context, SilKit_LinController* controller, const SilKit_LinGoToSleepEvent* goToSleepEvent)
+void SilKitCALL Slave_GoToSleepHandler(void* context, SilKit_LinController* controller, const SilKit_LinGoToSleepEvent* goToSleepEvent)
 {
     UNUSED_ARG(context);
     printf("LIN Slave received go-to-sleep command @%" PRIu64 "ms; entering sleep mode.\n",
@@ -542,7 +543,7 @@ void Slave_GoToSleepHandler(void* context, SilKit_LinController* controller, con
     SilKit_LinController_GoToSleepInternal(controller);
 }
 
-void Slave_WakeupHandler(void* context, SilKit_LinController* controller, const SilKit_LinWakeupEvent* wakeUpEvent)
+void SilKitCALL Slave_WakeupHandler(void* context, SilKit_LinController* controller, const SilKit_LinWakeupEvent* wakeUpEvent)
 {
     UNUSED_ARG(context);
     printf(">> LIN Slave received wakeup pulse @%" PRIu64 "ms; direction=%d; entering normal operation mode.\n",

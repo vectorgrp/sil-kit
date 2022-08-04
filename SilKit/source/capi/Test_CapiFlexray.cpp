@@ -76,37 +76,37 @@ public:
 
     struct Callbacks
     {
-        static void FrameHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL FrameHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                  const SilKit_FlexrayFrameEvent* /*message*/)
         {
         }
 
-        static void FrameTransmitHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL FrameTransmitHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                          const SilKit_FlexrayFrameTransmitEvent* /*acknowledge*/)
         {
         }
 
-        static void WakeupHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL WakeupHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                   const SilKit_FlexrayWakeupEvent* /*wakeup*/)
         {
         }
 
-        static void PocStatusHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL PocStatusHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                      const SilKit_FlexrayPocStatusEvent* /*status*/)
         {
         }
 
-        static void SymbolHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL SymbolHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                   const SilKit_FlexraySymbolEvent* /*symbol*/)
         {
         }
 
-        static void SymbolTransmitHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL SymbolTransmitHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                           const SilKit_FlexraySymbolTransmitEvent* /*acknowledge*/)
         {
         }
 
-        static void CycleStartHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
+        static void SilKitCALL CycleStartHandler(void* /*context*/, SilKit_FlexrayController* /*controller*/,
                                       const SilKit_FlexrayCycleStartEvent* /*cycleStart*/)
         {
         }

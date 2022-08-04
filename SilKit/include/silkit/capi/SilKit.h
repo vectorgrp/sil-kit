@@ -46,9 +46,9 @@ SILKIT_BEGIN_DECLS
 * \ref SilKit_GetLastErrorString()
 *
 */
-SilKitAPI SilKit_ReturnCode SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode);
 
-typedef  SilKit_ReturnCode (*SilKit_ReturnCodeToString_t)(const char** outString, SilKit_ReturnCode returnCode);
+typedef  SilKit_ReturnCode (SilKitFPTR *SilKit_ReturnCodeToString_t)(const char** outString, SilKit_ReturnCode returnCode);
 
 /*! \brief Get a human readable error description of the last error on the current thread.
 *
@@ -58,9 +58,9 @@ typedef  SilKit_ReturnCode (*SilKit_ReturnCodeToString_t)(const char** outString
 * \return A specific string containing the last error message of the current thread.
 *
 */
-SilKitAPI const char* SilKit_GetLastErrorString();
+SilKitAPI const char* SilKitCALL SilKit_GetLastErrorString();
 
-typedef const char*(*SilKit_GetLastErrorString_t)();
+typedef const char*(SilKitFPTR *SilKit_GetLastErrorString_t)();
 
 /*! \brief Create an opaque participant configuration from the configuration text.
  *
@@ -69,11 +69,11 @@ typedef const char*(*SilKit_GetLastErrorString_t)();
  * \param outParticipantConfiguration The pointer through which the participant configuration will be returned (out parameter).
  * \param configuration The configuration as a string (e.g., read from a configuration file or a string constant).
  */
-SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_FromString(
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
     const char* participantConfigurationString);
 
-typedef SilKit_ReturnCode (*SilKit_ParticipantConfiguration_FromString_t)(
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromString_t)(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
     const char* participantConfigurationString);
 
@@ -82,10 +82,10 @@ typedef SilKit_ReturnCode (*SilKit_ParticipantConfiguration_FromString_t)(
 *
 * \param participantConfiguration The participant configuration to be destroyed.
 */
-SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_Destroy(
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_Destroy(
     SilKit_ParticipantConfiguration* participantConfiguration);
 
-typedef SilKit_ReturnCode (*SilKit_ParticipantConfiguration_Destroy_t)(
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_Destroy_t)(
     SilKit_ParticipantConfiguration* participantConfiguration);
 
 

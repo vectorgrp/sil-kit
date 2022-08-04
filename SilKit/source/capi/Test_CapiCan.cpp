@@ -97,19 +97,19 @@ namespace {
         MOCK_METHOD(void, RemoveFrameTransmitHandler, (SilKit::Services::HandlerId), (override));
     };
 
-    void FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* /*ack*/)
+    void SilKitCALL FrameTransmitHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameTransmitEvent* /*ack*/)
     {
     }
 
-    void FrameHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameEvent* /*metaData*/)
+    void SilKitCALL FrameHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanFrameEvent* /*metaData*/)
     {
     }
 
-    void StateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanStateChangeEvent* /*state*/)
+    void SilKitCALL StateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanStateChangeEvent* /*state*/)
     {
     }
 
-    void ErrorStateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanErrorStateChangeEvent* /*state*/)
+    void SilKitCALL ErrorStateChangeHandler(void* /*context*/, SilKit_CanController* /*controller*/, SilKit_CanErrorStateChangeEvent* /*state*/)
     {
     }
 

@@ -48,18 +48,18 @@ typedef struct SilKit_Logger SilKit_Logger;
  * \param level The log level for the message
  * \param message The message which shall be logged.
  */
-SilKitAPI SilKit_ReturnCode SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
 
-typedef SilKit_ReturnCode (*SilKit_Logger_Log_t)(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Logger_Log_t)(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message);
 
 /*! \brief Get the lowest configured log level of the log sinks
  *
  * \param logger The logger for which the log level should be obtained
  * \param outLevel a pointer to a logging level where the result will be stored
  */
-SilKitAPI SilKit_ReturnCode SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel);
 
-typedef SilKit_ReturnCode (*SilKit_Logger_GetLogLevel_t)(SilKit_Logger* self, SilKit_LoggingLevel* outLevel);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Logger_GetLogLevel_t)(SilKit_Logger* self, SilKit_LoggingLevel* outLevel);
 
 SILKIT_END_DECLS
 

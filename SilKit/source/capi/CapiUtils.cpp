@@ -34,8 +34,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CapiImpl.hpp"
 
 thread_local std::string SilKit_error_string = "";
-extern "C" {
 
+extern "C" {
 
 #define SilKit_ReturnCode_SUCCESS_str "Operation succeeded."
 #define SilKit_ReturnCode_UNSPECIFIEDERROR_str "An unspecified error occured."
@@ -46,7 +46,7 @@ extern "C" {
 #define SilKit_ReturnCode_TIMEOUT_str "Operation timed out."
 #define SilKit_ReturnCode_UNSUPPORTEDSERVICE_str "The requested service is not supported."
 
-SilKit_ReturnCode SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode)
+SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode)
 {
     if (outString == nullptr)
     {
@@ -87,10 +87,9 @@ SilKit_ReturnCode SilKit_ReturnCodeToString(const char** outString, SilKit_Retur
 }
 
 
-const char* SilKit_GetLastErrorString() {
+const char* SilKitCALL SilKit_GetLastErrorString() {
     const char* error_string = SilKit_error_string.c_str();
     return error_string;
 }
-
 
 }//extern "C"

@@ -541,57 +541,58 @@ typedef void SilKit_FlexrayController;
 /*! Callback type to indicate that a FlexRay message has been received.
   *  Cf. \ref AddFrameHandler();
   */
-typedef void (*SilKit_FlexrayFrameHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameEvent* message);
+typedef void (SilKitFPTR *SilKit_FlexrayFrameHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameEvent* message);
+
 /*! Callback type to indicate that a FlexrayFrameTransmitEvent has been received.
   *  Cf. \ref AddFrameTransmitHandler();
   */
-typedef void (*SilKit_FlexrayFrameTransmitHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameTransmitEvent* acknowledge);
+typedef void (SilKitFPTR *SilKit_FlexrayFrameTransmitHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayFrameTransmitEvent* acknowledge);
 
 /*! Callback type to indicate that a wakeup has been received.
   *   Should be answered by a call to Run(). Cf. \ref AddWakeupHandler();
   */
-typedef void (*SilKit_FlexrayWakeupHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayWakeupEvent* symbol);
+typedef void (SilKitFPTR *SilKit_FlexrayWakeupHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayWakeupEvent* symbol);
 
 /*! Callback type to indicate that the POC status (including state variables, modes and error codes) has changed.
   *
   */
-typedef void (*SilKit_FlexrayPocStatusHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayPocStatusEvent* status);
+typedef void (SilKitFPTR *SilKit_FlexrayPocStatusHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayPocStatusEvent* status);
 
 /*! Callback type to indicate that the controller has received a symbol.
   *  Cf. \ref AddSymbolHandler();
   */
-typedef void (*SilKit_FlexraySymbolHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol);
+typedef void (SilKitFPTR *SilKit_FlexraySymbolHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolEvent* symbol);
 
 /*! Callback type to indicate that the controller has sent a symbol.
   *  Cf. \ref AddSymbolTransmitHandler();
   */
-typedef void (*SilKit_FlexraySymbolTransmitHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolTransmitEvent* acknowledge);
+typedef void (SilKitFPTR *SilKit_FlexraySymbolTransmitHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexraySymbolTransmitEvent* acknowledge);
 
 /*! Callback type to indicate that a new FlexRay cycle did start.
   *  Cf. \ref AddCycleStartHandler();
   */
-typedef void (*SilKit_FlexrayCycleStartHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayCycleStartEvent* cycleStart);
+typedef void (SilKitFPTR *SilKit_FlexrayCycleStartHandler_t)(void* context, SilKit_FlexrayController* controller, const SilKit_FlexrayCycleStartEvent* cycleStart);
 
 /* ! \brief Create a FlexRay controller with the given name.
  * ! \note The object returned must not be deallocated using free()!
  */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_Create(SilKit_FlexrayController** outController,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Create(SilKit_FlexrayController** outController,
                                                              SilKit_Participant* participant, const char* name,
                                                              const char* network);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_Create_t)(SilKit_FlexrayController** outController,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_Create_t)(SilKit_FlexrayController** outController,
                                                         SilKit_Participant* participant, const char* name,
                                                         const char* network);
 
 /*! \brief Apply the given controller configuration to the controller.*/
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller, const SilKit_FlexrayControllerConfig* config);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller, const SilKit_FlexrayControllerConfig* config);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_Configure_t)(SilKit_FlexrayController* controller, const SilKit_FlexrayControllerConfig* config);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_Configure_t)(SilKit_FlexrayController* controller, const SilKit_FlexrayControllerConfig* config);
 
 /*! \brief Reconfigure a TX Buffer that was previously setup with SilKit_FlexrayController_Configure()*/
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx, const SilKit_FlexrayTxBufferConfig* config);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx, const SilKit_FlexrayTxBufferConfig* config);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_ReconfigureTxBuffer_t)(SilKit_FlexrayController* controller, uint16_t txBufferIdx, const SilKit_FlexrayTxBufferConfig* config);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_ReconfigureTxBuffer_t)(SilKit_FlexrayController* controller, uint16_t txBufferIdx, const SilKit_FlexrayTxBufferConfig* config);
 
 /*! \brief Update the content of a previously configured TX buffer.
   *
@@ -602,14 +603,14 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_ReconfigureTxBuffer_t)(SilK
   *
   *  \see SilKit_FlexrayController_Configure(const FlexrayControllerConfig&)
   */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller, const SilKit_FlexrayTxBufferUpdate* update);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller, const SilKit_FlexrayTxBufferUpdate* update);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_UpdateTxBuffer_t)(SilKit_FlexrayController* controller, const SilKit_FlexrayTxBufferUpdate* update);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_UpdateTxBuffer_t)(SilKit_FlexrayController* controller, const SilKit_FlexrayTxBufferUpdate* update);
 
 //! \brief Send the given FlexrayChiCommand.
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_ExecuteCmd_t)(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_ExecuteCmd_t)(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd);
 
 /*! \brief Receive a FlexRay message from the given controller.
  *
@@ -618,11 +619,11 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_ExecuteCmd_t)(SilKit_Flexra
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
                                                                       SilKit_FlexrayFrameHandler_t handler,
                                                                       SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddFrameHandler_t)(SilKit_FlexrayController* controller, void* context,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddFrameHandler_t)(SilKit_FlexrayController* controller, void* context,
                                                                  SilKit_FlexrayFrameHandler_t handler,
                                                                  SilKit_HandlerId* outHandlerId);
 
@@ -630,10 +631,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddFrameHandler_t)(SilKit_F
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller,
                                                                          SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveFrameHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemoveFrameHandler_t)(SilKit_FlexrayController* controller,
                                                                     SilKit_HandlerId handlerId);
 
 /*! \brief Notification that a FlexRay message has been successfully sent.
@@ -643,12 +644,12 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveFrameHandler_t)(SilKi
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller,
                                                                               void* context,
                                                                               SilKit_FlexrayFrameTransmitHandler_t handler,
                                                                               SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddFrameTransmitHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddFrameTransmitHandler_t)(SilKit_FlexrayController* controller,
                                                                          void* context,
                                                                          SilKit_FlexrayFrameTransmitHandler_t handler,
                                                                          SilKit_HandlerId* outHandlerId);
@@ -657,10 +658,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddFrameTransmitHandler_t)(
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
                                                                                  SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveFrameTransmitHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemoveFrameTransmitHandler_t)(SilKit_FlexrayController* controller,
                                                                             SilKit_HandlerId handlerId);
 
 /*! \brief Notification that a wakeup has been received.
@@ -670,11 +671,11 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveFrameTransmitHandler_
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
                                                                        SilKit_FlexrayWakeupHandler_t handler,
                                                                        SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddWakeupHandler_t)(SilKit_FlexrayController* controller, void* context,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddWakeupHandler_t)(SilKit_FlexrayController* controller, void* context,
                                                                   SilKit_FlexrayWakeupHandler_t handler,
                                                                   SilKit_HandlerId* outHandlerId);
 
@@ -682,10 +683,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddWakeupHandler_t)(SilKit_
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller,
                                                                           SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveWakeupHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemoveWakeupHandler_t)(SilKit_FlexrayController* controller,
                                                                      SilKit_HandlerId handlerId);
 
 /*! \brief Notification that the POC status has changed.
@@ -695,12 +696,12 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveWakeupHandler_t)(SilK
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller,
                                                                           void* context,
                                                                           SilKit_FlexrayPocStatusHandler_t handler,
                                                                           SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddPocStatusHandler_t)(SilKit_FlexrayController* controller, void* context,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddPocStatusHandler_t)(SilKit_FlexrayController* controller, void* context,
                                                                      SilKit_FlexrayPocStatusHandler_t handler,
                                                                      SilKit_HandlerId* outHandlerId);
 
@@ -708,10 +709,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddPocStatusHandler_t)(SilK
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
                                                                              SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemovePocStatusHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemovePocStatusHandler_t)(SilKit_FlexrayController* controller,
                                                                         SilKit_HandlerId handlerId);
 
 /*! \brief Notification that the controller has received a symbol.
@@ -724,11 +725,11 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemovePocStatusHandler_t)(S
   * \param handler The handler to be called.
   * \param outHandlerId The handler identifier that can be used to remove the callback.
   */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
                                                                        SilKit_FlexraySymbolHandler_t handler,
                                                                        SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddSymbolHandler_t)(SilKit_FlexrayController* controller, void* context,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddSymbolHandler_t)(SilKit_FlexrayController* controller, void* context,
                                                                   SilKit_FlexraySymbolHandler_t handler,
                                                                   SilKit_HandlerId* outHandlerId);
 
@@ -736,10 +737,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddSymbolHandler_t)(SilKit_
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller,
                                                                           SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemoveSymbolHandler_t)(SilKit_FlexrayController* controller,
                                                                      SilKit_HandlerId handlerId);
 
 /*! \brief Notification that the controller has sent a symbol.
@@ -754,10 +755,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolHandler_t)(SilK
   * \param outHandlerId The handler identifier that can be used to remove the callback.
   */
 SilKitAPI SilKit_ReturnCode
-SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
+SilKitCALL SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
                                                SilKit_FlexraySymbolTransmitHandler_t handler, SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddSymbolTransmitHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddSymbolTransmitHandler_t)(SilKit_FlexrayController* controller,
                                                                           void* context,
                                                                           SilKit_FlexraySymbolTransmitHandler_t handler,
                                                                           SilKit_HandlerId* outHandlerId);
@@ -766,10 +767,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddSymbolTransmitHandler_t)
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
                                                                                   SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolTransmitHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemoveSymbolTransmitHandler_t)(SilKit_FlexrayController* controller,
                                                                              SilKit_HandlerId handlerId);
 
 /*! \brief Notification that a new FlexRay cycle did start.
@@ -779,12 +780,12 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveSymbolTransmitHandler
  * \param handler The handler to be called.
  * \param outHandlerId The handler identifier that can be used to remove the callback.
  */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller,
                                                                            void* context,
                                                                            SilKit_FlexrayCycleStartHandler_t handler,
                                                                            SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddCycleStartHandler_t)(SilKit_FlexrayController* controller, void* context,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_AddCycleStartHandler_t)(SilKit_FlexrayController* controller, void* context,
                                                                       SilKit_FlexrayCycleStartHandler_t handler,
                                                                       SilKit_HandlerId* outHandlerId);
 
@@ -793,10 +794,10 @@ typedef SilKit_ReturnCode (*SilKit_FlexrayController_AddCycleStartHandler_t)(Sil
 *
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
-SilKitAPI SilKit_ReturnCode SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
                                                                               SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (*SilKit_FlexrayController_RemoveCycleStartHandler_t)(SilKit_FlexrayController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_FlexrayController_RemoveCycleStartHandler_t)(SilKit_FlexrayController* controller,
                                                                          SilKit_HandlerId handlerId);
 
 SILKIT_END_DECLS

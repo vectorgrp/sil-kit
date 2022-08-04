@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 extern "C"
 {
     
-SilKit_ReturnCode SilKit_Version_Major(uint32_t* outVersionMajor)
+SilKit_ReturnCode SilKitCALL SilKit_Version_Major(uint32_t* outVersionMajor)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMajor);
     CAPI_ENTER 
@@ -37,7 +37,7 @@ SilKit_ReturnCode SilKit_Version_Major(uint32_t* outVersionMajor)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Version_Minor(uint32_t* outVersionMinor)
+SilKit_ReturnCode SilKitCALL SilKit_Version_Minor(uint32_t* outVersionMinor)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMinor);
     CAPI_ENTER 
@@ -48,7 +48,7 @@ SilKit_ReturnCode SilKit_Version_Minor(uint32_t* outVersionMinor)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Version_Patch(uint32_t* outVersionPatch)
+SilKit_ReturnCode SilKitCALL SilKit_Version_Patch(uint32_t* outVersionPatch)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionPatch);
     CAPI_ENTER 
@@ -59,7 +59,7 @@ SilKit_ReturnCode SilKit_Version_Patch(uint32_t* outVersionPatch)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Version_BuildNumber(uint32_t* outVersionBuildNumber)
+SilKit_ReturnCode SilKitCALL SilKit_Version_BuildNumber(uint32_t* outVersionBuildNumber)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionBuildNumber);
     CAPI_ENTER 
@@ -70,7 +70,7 @@ SilKit_ReturnCode SilKit_Version_BuildNumber(uint32_t* outVersionBuildNumber)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Version_String(const char** outVersionString)
+SilKit_ReturnCode SilKitCALL SilKit_Version_String(const char** outVersionString)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionString);
     CAPI_ENTER
@@ -81,7 +81,7 @@ SilKit_ReturnCode SilKit_Version_String(const char** outVersionString)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Version_VersionSuffix(const char** outVersionSuffix)
+SilKit_ReturnCode SilKitCALL SilKit_Version_VersionSuffix(const char** outVersionSuffix)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionSuffix);
     CAPI_ENTER
@@ -92,7 +92,7 @@ SilKit_ReturnCode SilKit_Version_VersionSuffix(const char** outVersionSuffix)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Version_GitHash(const char** outVersionGitHash)
+SilKit_ReturnCode SilKitCALL SilKit_Version_GitHash(const char** outVersionGitHash)
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionGitHash);
     CAPI_ENTER

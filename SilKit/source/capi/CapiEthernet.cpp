@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #define ETHERNET_MIN_FRAME_SIZE 60
 
-SilKit_ReturnCode SilKit_EthernetController_Create(SilKit_EthernetController** outController, SilKit_Participant* participant,
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController, SilKit_Participant* participant,
                                             const char* name, const char* network)
 {
     ASSERT_VALID_OUT_PARAMETER(outController);
@@ -49,7 +49,7 @@ SilKit_ReturnCode SilKit_EthernetController_Create(SilKit_EthernetController** o
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_Activate(SilKit_EthernetController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Activate(SilKit_EthernetController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -61,7 +61,7 @@ SilKit_ReturnCode SilKit_EthernetController_Activate(SilKit_EthernetController* 
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_Deactivate(SilKit_EthernetController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Deactivate(SilKit_EthernetController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -73,7 +73,7 @@ SilKit_ReturnCode SilKit_EthernetController_Deactivate(SilKit_EthernetController
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller, void* context,
                                                             SilKit_EthernetFrameHandler_t handler,
                                                             SilKit_Direction directionMask,
                                                             SilKit_HandlerId* outHandlerId)
@@ -107,7 +107,7 @@ SilKit_ReturnCode SilKit_EthernetController_AddFrameHandler(SilKit_EthernetContr
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -119,7 +119,7 @@ SilKit_ReturnCode SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetCo
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller,
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller,
                                                                     void* context,
                                                                     SilKit_EthernetFrameTransmitHandler_t handler,
                                                                     SilKit_EthernetTransmitStatus transmitStatusMask,
@@ -149,7 +149,8 @@ SilKit_ReturnCode SilKit_EthernetController_AddFrameTransmitHandler(SilKit_Ether
     }
     CAPI_LEAVE
 }
-SilKit_ReturnCode SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller,
+
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller,
                                                                 SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -162,7 +163,7 @@ SilKit_ReturnCode SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_Et
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_AddStateChangeHandler(SilKit_EthernetController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddStateChangeHandler(SilKit_EthernetController* controller, void* context,
                                                            SilKit_EthernetStateChangeHandler_t handler,
                                                            SilKit_HandlerId* outHandlerId)
 {
@@ -186,7 +187,8 @@ SilKit_ReturnCode SilKit_EthernetController_AddStateChangeHandler(SilKit_Etherne
     }
     CAPI_LEAVE
 }
-SilKit_ReturnCode SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller,
+
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller,
                                                               SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -199,7 +201,7 @@ SilKit_ReturnCode SilKit_EthernetController_RemoveStateChangeHandler(SilKit_Ethe
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_AddBitrateChangeHandler(SilKit_EthernetController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddBitrateChangeHandler(SilKit_EthernetController* controller, void* context,
                                                              SilKit_EthernetBitrateChangeHandler_t handler,
                                                              SilKit_HandlerId* outHandlerId)
 {
@@ -224,7 +226,8 @@ SilKit_ReturnCode SilKit_EthernetController_AddBitrateChangeHandler(SilKit_Ether
     }
     CAPI_LEAVE
 }
-SilKit_ReturnCode SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller,
+
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller,
                                                                 SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -237,7 +240,7 @@ SilKit_ReturnCode SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_Et
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_EthernetController_SendFrame(SilKit_EthernetController* controller, SilKit_EthernetFrame* frame,
+SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(SilKit_EthernetController* controller, SilKit_EthernetFrame* frame,
                                                void* userContext)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);

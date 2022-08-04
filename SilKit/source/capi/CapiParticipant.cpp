@@ -41,7 +41,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 extern "C"
 {
-SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
+SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                             SilKit_ParticipantConfiguration *participantConfiguration,
                                             const char* cParticipantName, const char* cRegistryUri)
 {
@@ -75,7 +75,7 @@ SilKit_ReturnCode SilKit_Participant_Create(SilKit_Participant** outParticipant,
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Participant_Destroy(SilKit_Participant* participant)
+SilKit_ReturnCode SilKitCALL SilKit_Participant_Destroy(SilKit_Participant* participant)
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
     CAPI_ENTER
@@ -93,7 +93,7 @@ SilKit_ReturnCode SilKit_Participant_Destroy(SilKit_Participant* participant)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
+SilKit_ReturnCode SilKitCALL SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
 {
     ASSERT_VALID_OUT_PARAMETER(outLogger);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -108,7 +108,7 @@ SilKit_ReturnCode SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit
 }
 
 
-SilKit_ReturnCode SilKit_ParticipantConfiguration_FromString(
+SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
     const char* participantConfigurationString)
 {
@@ -136,7 +136,7 @@ SilKit_ReturnCode SilKit_ParticipantConfiguration_FromString(
 }
 
 
-SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_Destroy(
+SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_Destroy(
     SilKit_ParticipantConfiguration* participantConfiguration)
 {
     ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);
@@ -156,6 +156,5 @@ SilKitAPI SilKit_ReturnCode SilKit_ParticipantConfiguration_Destroy(
     }
     CAPI_LEAVE
 }
-
 
 } //extern "C"

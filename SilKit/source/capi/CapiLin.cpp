@@ -83,7 +83,7 @@ void assign(SilKit_LinSlaveConfiguration** cLinSlaveConfiguration,
 
 extern "C" {
 
-SilKit_ReturnCode SilKit_LinController_Create(SilKit_LinController** outLinController, SilKit_Participant* participant, const char* name, const char* network)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_Create(SilKit_LinController** outLinController, SilKit_Participant* participant, const char* name, const char* network)
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_OUT_PARAMETER(outLinController);
@@ -103,7 +103,7 @@ SilKit_ReturnCode SilKit_LinController_Create(SilKit_LinController** outLinContr
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_Init(SilKit_LinController* controller, const SilKit_LinControllerConfig* config) 
+SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* controller, const SilKit_LinControllerConfig* config)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(config);
@@ -119,7 +119,7 @@ SilKit_ReturnCode SilKit_LinController_Init(SilKit_LinController* controller, co
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_Status(SilKit_LinController* controller, SilKit_LinControllerStatus* outStatus)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_Status(SilKit_LinController* controller, SilKit_LinControllerStatus* outStatus)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_OUT_PARAMETER(outStatus);
@@ -132,7 +132,7 @@ SilKit_ReturnCode SilKit_LinController_Status(SilKit_LinController* controller, 
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_SendFrame(SilKit_LinController* controller, const SilKit_LinFrame* frame,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrame(SilKit_LinController* controller, const SilKit_LinFrame* frame,
                                          SilKit_LinFrameResponseType responseType)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -149,7 +149,7 @@ SilKit_ReturnCode SilKit_LinController_SendFrame(SilKit_LinController* controlle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_SendFrameHeader(SilKit_LinController* controller, SilKit_LinId linId)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrameHeader(SilKit_LinController* controller, SilKit_LinId linId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -161,7 +161,7 @@ SilKit_ReturnCode SilKit_LinController_SendFrameHeader(SilKit_LinController* con
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_UpdateTxBuffer(SilKit_LinController* controller,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_UpdateTxBuffer(SilKit_LinController* controller,
                                                  const SilKit_LinFrame* frame)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -178,7 +178,7 @@ SilKit_ReturnCode SilKit_LinController_UpdateTxBuffer(SilKit_LinController* cont
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_GoToSleep(SilKit_LinController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_GoToSleep(SilKit_LinController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -190,7 +190,7 @@ SilKit_ReturnCode SilKit_LinController_GoToSleep(SilKit_LinController* controlle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_GoToSleepInternal(SilKit_LinController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_GoToSleepInternal(SilKit_LinController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -202,7 +202,7 @@ SilKit_ReturnCode SilKit_LinController_GoToSleepInternal(SilKit_LinController* c
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_Wakeup(SilKit_LinController* controller) 
+SilKit_ReturnCode SilKitCALL SilKit_LinController_Wakeup(SilKit_LinController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -214,7 +214,7 @@ SilKit_ReturnCode SilKit_LinController_Wakeup(SilKit_LinController* controller)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_WakeupInternal(SilKit_LinController* controller) 
+SilKit_ReturnCode SilKitCALL SilKit_LinController_WakeupInternal(SilKit_LinController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -226,7 +226,7 @@ SilKit_ReturnCode SilKit_LinController_WakeupInternal(SilKit_LinController* cont
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_GetSlaveConfiguration(SilKit_LinController* controller,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_GetSlaveConfiguration(SilKit_LinController* controller,
                                                              SilKit_LinSlaveConfiguration** outLinSlaveConfiguration)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -241,7 +241,7 @@ SilKit_ReturnCode SilKit_LinController_GetSlaveConfiguration(SilKit_LinControlle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_AddFrameStatusHandler(SilKit_LinController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_AddFrameStatusHandler(SilKit_LinController* controller, void* context,
                                                       SilKit_LinFrameStatusHandler_t handler, SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -273,7 +273,7 @@ SilKit_ReturnCode SilKit_LinController_AddFrameStatusHandler(SilKit_LinControlle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_RemoveFrameStatusHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveFrameStatusHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -285,7 +285,7 @@ SilKit_ReturnCode SilKit_LinController_RemoveFrameStatusHandler(SilKit_LinContro
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_AddGoToSleepHandler(SilKit_LinController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_AddGoToSleepHandler(SilKit_LinController* controller, void* context,
                                                     SilKit_LinGoToSleepHandler_t handler, SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -307,7 +307,7 @@ SilKit_ReturnCode SilKit_LinController_AddGoToSleepHandler(SilKit_LinController*
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_RemoveGoToSleepHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveGoToSleepHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -319,7 +319,7 @@ SilKit_ReturnCode SilKit_LinController_RemoveGoToSleepHandler(SilKit_LinControll
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_AddWakeupHandler(SilKit_LinController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_AddWakeupHandler(SilKit_LinController* controller, void* context,
                                                  SilKit_LinWakeupHandler_t handler, SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -342,7 +342,7 @@ SilKit_ReturnCode SilKit_LinController_AddWakeupHandler(SilKit_LinController* co
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_RemoveWakeupHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveWakeupHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -354,7 +354,7 @@ SilKit_ReturnCode SilKit_LinController_RemoveWakeupHandler(SilKit_LinController*
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_AddLinSlaveConfigurationHandler(SilKit_LinController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_LinController_AddLinSlaveConfigurationHandler(SilKit_LinController* controller, void* context,
                                                         SilKit_LinSlaveConfigurationHandler_t handler,
                                                         SilKit_HandlerId* outHandlerId)
 {
@@ -378,7 +378,7 @@ SilKit_ReturnCode SilKit_LinController_AddLinSlaveConfigurationHandler(SilKit_Li
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER

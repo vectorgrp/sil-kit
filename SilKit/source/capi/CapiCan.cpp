@@ -40,7 +40,7 @@ struct PendingTransmits
 };
 PendingTransmits pendingTransmits;
 
-SilKit_ReturnCode SilKit_CanController_Create(SilKit_CanController** outController, SilKit_Participant* participant,
+SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outController, SilKit_Participant* participant,
         const char* cName, const char* cNetwork)
 {
     ASSERT_VALID_OUT_PARAMETER(outController);
@@ -57,7 +57,7 @@ SilKit_ReturnCode SilKit_CanController_Create(SilKit_CanController** outControll
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_AddFrameHandler(SilKit_CanController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanController* controller, void* context,
         SilKit_CanFrameHandler_t callback, SilKit_Direction directionMask,
         SilKit_HandlerId* outHandlerId)
 {
@@ -92,7 +92,7 @@ SilKit_ReturnCode SilKit_CanController_AddFrameHandler(SilKit_CanController* con
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -104,7 +104,7 @@ SilKit_ReturnCode SilKit_CanController_RemoveFrameHandler(SilKit_CanController* 
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller, void* context,
         SilKit_CanFrameTransmitHandler_t callback,
         SilKit_CanTransmitStatus statusMask, SilKit_HandlerId* outHandlerId)
 {
@@ -130,7 +130,7 @@ SilKit_ReturnCode SilKit_CanController_AddFrameTransmitHandler(SilKit_CanControl
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -142,7 +142,7 @@ SilKit_ReturnCode SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanCont
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_AddStateChangeHandler(SilKit_CanController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_CanController_AddStateChangeHandler(SilKit_CanController* controller, void* context,
         SilKit_CanStateChangeHandler_t callback, SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
@@ -165,7 +165,7 @@ SilKit_ReturnCode SilKit_CanController_AddStateChangeHandler(SilKit_CanControlle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -177,7 +177,7 @@ SilKit_ReturnCode SilKit_CanController_RemoveStateChangeHandler(SilKit_CanContro
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanController* controller, void* context,
+SilKit_ReturnCode SilKitCALL SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanController* controller, void* context,
         SilKit_CanErrorStateChangeHandler_t callback,
         SilKit_HandlerId* outHandlerId)
 {
@@ -202,7 +202,7 @@ SilKit_ReturnCode SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanCont
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -214,7 +214,7 @@ SilKit_ReturnCode SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanC
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate, uint32_t xlRate)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate, uint32_t xlRate)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -226,7 +226,7 @@ SilKit_ReturnCode SilKit_CanController_SetBaudRate(SilKit_CanController* control
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_SendFrame(SilKit_CanController* controller, SilKit_CanFrame* message, void* transmitContext)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController* controller, SilKit_CanFrame* message, void* transmitContext)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(message);
@@ -252,7 +252,7 @@ SilKit_ReturnCode SilKit_CanController_SendFrame(SilKit_CanController* controlle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_Start(SilKit_CanController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_Start(SilKit_CanController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -264,7 +264,7 @@ SilKit_ReturnCode SilKit_CanController_Start(SilKit_CanController* controller)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_Stop(SilKit_CanController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_Stop(SilKit_CanController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -276,7 +276,7 @@ SilKit_ReturnCode SilKit_CanController_Stop(SilKit_CanController* controller)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_Reset(SilKit_CanController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_Reset(SilKit_CanController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
@@ -288,7 +288,7 @@ SilKit_ReturnCode SilKit_CanController_Reset(SilKit_CanController* controller)
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKit_CanController_Sleep(SilKit_CanController* controller)
+SilKit_ReturnCode SilKitCALL SilKit_CanController_Sleep(SilKit_CanController* controller)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER

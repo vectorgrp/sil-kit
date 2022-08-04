@@ -22,22 +22,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #ifdef __cplusplus
-#include <cstdint>
+#    include <cstdint>
 #else
-#include <stdint.h>
+#    include <stdint.h>
 #endif
 
 #ifdef __cplusplus
-#define SILKIT_BEGIN_DECLS extern "C" {
-#define SILKIT_END_DECLS }
+#    define SILKIT_BEGIN_DECLS \
+        extern "C" \
+        {
+#    define SILKIT_END_DECLS }
 #else
-#define SILKIT_BEGIN_DECLS 
-#define SILKIT_END_DECLS 
+#    define SILKIT_BEGIN_DECLS
+#    define SILKIT_END_DECLS
 #endif
 
 #ifdef SILKIT_BUILD_STATIC
 #    define SilKitAPI
-# elif defined(EXPORT_SilKitAPI)
+#elif defined(EXPORT_SilKitAPI)
 // define compiler specific export / import attributes
 // define SilKitAPI as EXPORT
 #    if defined(_WIN32)
@@ -58,10 +60,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #        define SilKitAPI
 #        pragma warning Unknown dynamic link import semantics.
 #    endif
-#endif  
+#endif
+
+#ifdef _WIN32
+#define SilKitCALL __stdcall
+#define SilKitFPTR __stdcall
+#else
+#define SilKitCALL
+#define SilKitFPTR
+#endif
 
 // Utilities for more readable definitions
 #ifndef BIT
 #    define BIT(X) (UINTMAX_C(1) << (X))
 #endif
-

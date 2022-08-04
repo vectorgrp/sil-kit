@@ -38,7 +38,7 @@ protected:
 
 };
 
-void SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncService*/, SilKit_NanosecondsTime /*now*/,
+void SilKitCALL SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncService*/, SilKit_NanosecondsTime /*now*/,
              SilKit_NanosecondsTime /*duration*/)
 {
 }

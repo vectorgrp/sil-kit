@@ -72,19 +72,19 @@ public:
     }
 };
 
-void FrameTransmitHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetFrameTransmitEvent* /*cAck*/)
+void SilKitCALL FrameTransmitHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetFrameTransmitEvent* /*cAck*/)
 {
 }
 
-void FrameHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetFrameEvent* /*metaData*/)
+void SilKitCALL FrameHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetFrameEvent* /*metaData*/)
 {
 }
 
-void StateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetStateChangeEvent* /*stateChangeEvent*/)
+void SilKitCALL StateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetStateChangeEvent* /*stateChangeEvent*/)
 {
 }
 
-void BitrateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetBitrateChangeEvent* /*bitrateChangeEvent*/)
+void SilKitCALL BitrateChangeHandler(void* /*context*/, SilKit_EthernetController* /*controller*/, SilKit_EthernetBitrateChangeEvent* /*bitrateChangeEvent*/)
 {
 }
 

@@ -83,14 +83,14 @@ protected:
 
 };
 
-void CommunicationReadyCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
-void StartingCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
-void StopCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
-void ShutdownCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
-void AbortCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/,
+void SilKitCALL CommunicationReadyCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
+void SilKitCALL StartingCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
+void SilKitCALL StopCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
+void SilKitCALL ShutdownCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
+void SilKitCALL AbortCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/,
                    SilKit_ParticipantState /*lastParticipantState*/) {}
-void SystemStateHandler(void* /*context*/, SilKit_SystemMonitor* /*systemMonitor*/, SilKit_SystemState /*state*/) {}
-void ParticipantStatusHandler(void* /*context*/, SilKit_SystemMonitor* /*systemMonitor*/,
+void SilKitCALL SystemStateHandler(void* /*context*/, SilKit_SystemMonitor* /*systemMonitor*/, SilKit_SystemState /*state*/) {}
+void SilKitCALL ParticipantStatusHandler(void* /*context*/, SilKit_SystemMonitor* /*systemMonitor*/,
                               const char* /*participantName*/, SilKit_ParticipantStatus* /*status*/) {}
 
 /*
@@ -349,7 +349,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     ).Times(testing::Exactly(1))
         .WillOnce(Return(ByMove(state.get_future())));
 
-    
+
     returnCode = SilKit_LifecycleService_StartLifecycle((SilKit_LifecycleService*)(lifecycleService));
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     returnCode = SilKit_LifecycleService_WaitForLifecycleToComplete(

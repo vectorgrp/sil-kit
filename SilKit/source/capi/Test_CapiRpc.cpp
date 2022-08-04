@@ -108,11 +108,11 @@ public:
 
 };
 
-void CallHandler(void* /*context*/, SilKit_RpcServer* /*server*/, const SilKit_RpcCallEvent* /*event*/)
+void SilKitCALL CallHandler(void* /*context*/, SilKit_RpcServer* /*server*/, const SilKit_RpcCallEvent* /*event*/)
 {
 }
 
-void CallReturnHandler(void* /*context*/, SilKit_RpcClient* /*client*/, const SilKit_RpcCallResultEvent* /*event*/)
+void SilKitCALL CallReturnHandler(void* /*context*/, SilKit_RpcClient* /*client*/, const SilKit_RpcCallResultEvent* /*event*/)
 {
 }
 
@@ -287,7 +287,7 @@ TEST_F(CapiRpcTest, rpc_server_submit)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-void CallHandlerWithStringContext(void* context, SilKit_RpcServer* /*server*/, const SilKit_RpcCallEvent* /*event*/)
+void SilKitCALL CallHandlerWithStringContext(void* context, SilKit_RpcServer* /*server*/, const SilKit_RpcCallEvent* /*event*/)
 {
     if (context == nullptr)
     {
@@ -312,7 +312,7 @@ TEST_F(CapiRpcTest, rpc_server_set_call_handler_wraps_c_handler_and_passes_conte
     SilKit_RpcServer_SetCallHandler(cRpcServer, &context, CallHandlerWithStringContext);
 }
 
-void CallResultHandlerWithStringContext(void* context, SilKit_RpcClient* /*client*/,
+void SilKitCALL CallResultHandlerWithStringContext(void* context, SilKit_RpcClient* /*client*/,
                                         const SilKit_RpcCallResultEvent* /*event*/)
 {
     if (context == nullptr)

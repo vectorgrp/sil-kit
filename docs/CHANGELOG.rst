@@ -27,6 +27,8 @@ Changed
 
 - Add and use opaque `SilKit_ParticipantConfiguration` type for use in `SilKit_Participant_Create`.
 
+- C: Added ``SilKitCALL`` and ``SilKitFPTR`` macros for specification of the calling convention when building for windows.
+
 [3.99.29] - 28-07-2022
 ----------------------
 

@@ -99,7 +99,7 @@ void PrintByteVector(const SilKit_ByteVector* data)
     printf("\n");
 }
 
-void CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_RpcCallEvent* event)
+void SilKitCALL CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_RpcCallEvent* event)
 {
     UNUSED_ARG(context);
 
@@ -122,7 +122,7 @@ void CallHandler(void* context, SilKit_RpcServer* cbServer, const SilKit_RpcCall
     free(tmp);
 }
 
-void CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_RpcCallResultEvent* event)
+void SilKitCALL CallReturnHandler(void* context, SilKit_RpcClient* cbClient, const SilKit_RpcCallResultEvent* event)
 {
     UNUSED_ARG(context);
     UNUSED_ARG(cbClient);

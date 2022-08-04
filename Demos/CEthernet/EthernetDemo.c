@@ -104,7 +104,7 @@ typedef struct  {
 
 TransmitContext transmitContext;
 
-void FrameTransmitHandler(void* context, SilKit_EthernetController* controller,
+void SilKitCALL FrameTransmitHandler(void* context, SilKit_EthernetController* controller,
                           struct SilKit_EthernetFrameTransmitEvent* frameTransmitEvent)
 {
     UNUSED_ARG(context);
@@ -115,7 +115,7 @@ void FrameTransmitHandler(void* context, SilKit_EthernetController* controller,
            tc->someInt, frameTransmitEvent->timestamp);
 }
 
-void FrameHandler(void* context, SilKit_EthernetController* controller, SilKit_EthernetFrameEvent* frameEvent)
+void SilKitCALL FrameHandler(void* context, SilKit_EthernetController* controller, SilKit_EthernetFrameEvent* frameEvent)
 {
     UNUSED_ARG(controller);
 
