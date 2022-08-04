@@ -20,27 +20,43 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-function(get_linux_distro outVers)
+function(get_uname outName outMachine)
+    execute_process(COMMAND /bin/uname -s
+        TIMEOUT 1
+        OUTPUT_VARIABLE unameName
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    execute_process(COMMAND /bin/uname -m
+        TIMEOUT 1
+        OUTPUT_VARIABLE unameMachine
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    set(${outName} "${unameName}" PARENT_SCOPE)
+    set(${outMachine} "${unameMachine}" PARENT_SCOPE)
+endfunction()
+
+function(get_linux_distro outDistroName outDistroVersion)
     execute_process(COMMAND /usr/bin/lsb_release -s -i
         TIMEOUT 1
-        OUTPUT_VARIABLE linux_id
+        OUTPUT_VARIABLE _linux_id
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     execute_process(COMMAND /usr/bin/lsb_release -s -r
         TIMEOUT 1
-        OUTPUT_VARIABLE linux_release
+        OUTPUT_VARIABLE _linux_release
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    set(${outVers} "${linux_id}-${linux_release}" PARENT_SCOPE)
+    #sanitize output, strip spaces and return lower case
+    if(_linux_id AND _linux_release)
+        string(TOLOWER "${_linux_id}" _linux_id)
+        string(REGEX REPLACE [^a-zA-Z0-9_-] "" _linux_id "${_linux_id}")
+        string(REGEX REPLACE [^a-zA-Z0-9._-] "" _linux_release "${_linux_release}")
+        set(${outDistroName} "${_linux_id}" PARENT_SCOPE)
+        set(${outDistroVersion} "${_linux_release}" PARENT_SCOPE)
+    endif()
 endfunction()
 
-function(get_ubuntu_version outVers)
-    file(READ /etc/issue issue)
-    string(REGEX REPLACE "^Ubuntu.*([0-9][0-9]+\.[0-9][0-9]).*" "\\1" issue "${issue}")
-    set(${outVers} "${issue}" PARENT_SCOPE)
-endfunction()
-
-function(get_compiler_arch outComp outArch outPlatform  )
+function(get_compiler_arch outCompiler outArch outPlatform  )
     #get arch
     if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
         set(SYSTEM_BITNESS "64")
@@ -53,25 +69,31 @@ function(get_compiler_arch outComp outArch outPlatform  )
 
     #get OS
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-        set(SYSTEM_TAG "Win${SYSTEM_BITNESS}")
-        set(${outPlatform} "Win${SYSTEM_BITNESS}" PARENT_SCOPE)
-        if("${SYSTEM_BITNESS}" STREQUAL "64")
-            set(SYSTEM_TAG "x64")
-        endif()
-    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-        set(${outPlatform} "Linux" PARENT_SCOPE)
-        set(SYSTEM_TAG "x86")
-        if(SYSTEM_BITNESS STREQUAL "64")
-            set(SYSTEM_TAG "x64") #XXX should be amd64 or x86_64
-        endif()
-    else()
-        set(SYSTEM_TAG "${CMAKE_SYSTEM_NAME}}")
-    endif()
-    set(${outArch} "${SYSTEM_TAG}" PARENT_SCOPE)
+        set(_platform "Win")
 
-    # get toolset id + version
-    set(_tool_tag "UNKNOWN")
+        set(_system_arch "x86")
+        if("${SYSTEM_BITNESS}" STREQUAL "64")
+            set(_system_arch "x86_64")
+        endif()
+    elseif(UNIX)
+        # generic unix has uname
+        get_uname(_un_name _un_machine)
+        set(_platform "${_un_name}")
+        set(_system_arch "${_un_machine}")
+    else()
+        set(_system_arch "${CMAKE_SYSTEM_NAME}")
+    endif()
+
     if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+        get_linux_distro(_distro_name _distro_version)
+        if( DEFINED _distro_name AND DEFINED _distro_version)
+            set(_platform "${_distro_name}-${_distro_version}")
+        endif()
+    endif()
+
+    # get toolset/compiler id + version
+    set(_tool_tag "UNKNOWN")
+    if(UNIX)
         set(_id "${CMAKE_CXX_COMPILER_ID}")
         if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             set(_id "gcc")
@@ -100,7 +122,8 @@ function(get_compiler_arch outComp outArch outPlatform  )
             set(_tool_tag "VS${vers}")
         endif()
     endif()
-    message(STATUS "Build target is: ${SYSTEM_TAG}-${_tool_tag}")
-    set(${outComp} "${_tool_tag}" PARENT_SCOPE)
-    set(${outArch} "${SYSTEM_TAG}" PARENT_SCOPE)
+    #return  triple
+    set(${outPlatform} "${_platform}" PARENT_SCOPE)
+    set(${outCompiler} "${_tool_tag}" PARENT_SCOPE)
+    set(${outArch} "${_system_arch}" PARENT_SCOPE)
 endfunction()

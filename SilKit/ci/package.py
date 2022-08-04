@@ -53,7 +53,8 @@ def die(status, fmt, *args):
     sys.exit(status)
 
 #expected cpack filename: Project-major.minor.build-TOOL-ARCH-BUILD_TYPE.zip
-expfn = r'(?P<name>.*)-(?P<version>\d+\.\d+\.\d+)-(?P<tool>\w+)-(?P<arch>[\w._]+)-(?P<buildtype>\w+)'
+#Example: SilKit-3.99.29-ubuntu-20.04-x86_64-clang-Debug.zip
+expfn = r'^(?P<name>\w+)-(?P<version>\d+\.\d+\.\d+)-(?P<platform>\w+(?:-[\w.]+)?)-(?P<arch>[\w_]+)-(?P<tool>\w+)-(?P<buildtype>\w+)\.zip$'
 rc = re.compile(expfn)
 def extractDistInfos(filename):
     """ split the filename into its component like version, tool, arch, build type etc.
@@ -244,8 +245,13 @@ def setupWorkdir(workdir):
 
 
 def packDistribution(workdir, distinfos):
-    out = "{}-{}-{}-{}".format(distinfos["name"],distinfos["version"],
-            distinfos["tool"],distinfos["arch"])
+    out = "{}-{}-{}-{}-{}".format(
+        distinfos["name"],
+        distinfos["version"],
+        distinfos["platform"],
+        distinfos["arch"],
+        distinfos["tool"]
+        )
     log("Packing distribution in file {}.zip".format(out))
     count = 0
     with zipfile.ZipFile("{}.zip".format(out), mode="w", compression=zipfile.ZIP_DEFLATED) as zf:

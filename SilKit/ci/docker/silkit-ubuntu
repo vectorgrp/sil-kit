@@ -37,7 +37,9 @@ RUN apt-get update && \
     clang \
     python3-pip \
     mingw-w64 \
-    python3-jinja2
+    python3-jinja2 \
+    lsb-base \
+    lsb-release
 
 # ensure we have newer compilers than the defaults
 RUN if [ "${UBUNTU_VERSION}" = "20.04" ]; then \

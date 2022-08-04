@@ -59,15 +59,9 @@ target_link_libraries(SilKitExtensions
 
 #Reproducible build: do not include CMAKE_SYSTEM_VERSION, it contains kernel version
 # and build ID.
-set(extension_os "${CMAKE_SYSTEM_NAME}")
+set(extension_os "${CMAKE_SYSTEM_NAME}/${SILKIT_HOST_PLATFORM}")
 
 if(UNIX)
-    include(get_compiler_arch)
-    get_linux_distro(ubuntu_vers)
-    if(DEFINED ubuntu_vers)
-        set(extension_os "${extension_os}/${ubuntu_vers}")
-    endif()
-
     target_link_libraries(SilKitExtensions
         PRIVATE ${CMAKE_DL_LIBS}
     )
