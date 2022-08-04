@@ -118,6 +118,7 @@ public:
     void Restart(std::string reason);
 
     void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
+    void SetWorkflowConfiguration(const WorkflowConfiguration& msg);
 
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
     OperationMode GetOperationMode() const;
@@ -126,6 +127,7 @@ private:
     // ----------------------------------------
     // private methods
     void AbortSimulation(std::string reason);
+    void CheckForValidConfiguration();
 
 private:
     // ----------------------------------------
@@ -160,6 +162,9 @@ private:
     // When pausing our participant, message processing is deferred
     // until Continue()  is called;
     std::promise<void> _pauseDonePromise;
+
+    // used to check for valid participant configuration
+    std::vector<std::string> _requiredParticipantNames;
 };
 
 // ================================================================================

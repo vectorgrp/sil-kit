@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
+#include "LifecycleService.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -35,6 +36,7 @@ namespace Orchestration {
 
 SystemMonitor::SystemMonitor(Core::IParticipantInternal* participant)
     : _logger{participant->GetLogger()}
+    , _participant{participant}
 {
 }
 
@@ -42,6 +44,9 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/,
                                      const Orchestration::WorkflowConfiguration& workflowConfiguration)
 {
     UpdateRequiredParticipantNames(workflowConfiguration.requiredParticipantNames);
+    dynamic_cast<LifecycleService*>(_participant->GetLifecycleService())
+        ->SetWorkflowConfiguration(workflowConfiguration);
+    
 }
 
 void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames)

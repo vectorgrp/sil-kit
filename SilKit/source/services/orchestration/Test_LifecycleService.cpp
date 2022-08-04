@@ -1295,4 +1295,49 @@ TEST_F(LifecycleServiceTest, error_on_create_time_sync_service_twice)
         ConfigurationError);
 }
 
+TEST_F(LifecycleServiceTest, error_on_coordinated_not_required)
+{
+    // Goal: make sure that the lifecycleService throws an exception if it is first 
+    // set to be coordinated and then receives a required participant list without its own name
+    LifecycleService lifecycleService(&participant);
+    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+
+    WorkflowConfiguration workflowConfiguration;
+    workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};
+    EXPECT_THROW(
+        {
+            try
+            {
+                lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
+            }
+            catch (const ConfigurationError&)
+            {
+                throw;
+            }
+        },
+        ConfigurationError);
+}
+
+TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)
+{
+    // Goal: make sure that the lifecycleService throws an exception if it first 
+    // receives a required participant list without its own name and is then set to be coordinated
+    LifecycleService lifecycleService(&participant);
+
+    WorkflowConfiguration workflowConfiguration;
+    workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};
+    lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
+    EXPECT_THROW(
+        {
+            try
+            {
+                lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+            }
+            catch (const ConfigurationError&)
+            {
+                throw;
+            }
+        },
+        ConfigurationError);
+}
 } // namespace

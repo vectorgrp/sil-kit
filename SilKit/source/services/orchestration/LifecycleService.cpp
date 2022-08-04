@@ -237,6 +237,10 @@ void LifecycleService::Restart(std::string /*reason*/)
 void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startConfiguration)
 {
     _operationMode = startConfiguration.operationMode;
+    if (!_requiredParticipantNames.empty())
+    {
+        CheckForValidConfiguration();
+    }
 }
 
 OperationMode LifecycleService::GetOperationMode() const
@@ -304,6 +308,20 @@ void LifecycleService::AbortSimulation(std::string reason)
     _lifecycleManagement.AbortSimulation(reason);
 }
 
+void LifecycleService::CheckForValidConfiguration()
+{
+    if (_operationMode == OperationMode::Coordinated && !_requiredParticipantNames.empty())
+    {
+        auto result = std::find(_requiredParticipantNames.begin(), _requiredParticipantNames.end(),
+                                _participant->GetParticipantName());
+        if (result == _requiredParticipantNames.end())
+        {
+            // participants that are coordinated but not required are currently not supported
+            throw ConfigurationError("Coordinated participants must also be required!");
+        }
+    }
+}
+
 auto LifecycleService::State() const -> ParticipantState
 {
     return _status.state;
@@ -363,6 +381,15 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
     // We should not reach this point in normal operation.
     ReportError("Received SystemCommand::" + to_string(command.kind)
                 + " while in ParticipantState::" + to_string(State()));
+}
+
+void LifecycleService::SetWorkflowConfiguration(const WorkflowConfiguration& configuration)
+{
+    _requiredParticipantNames = configuration.requiredParticipantNames;
+    if (_operationMode != OperationMode::Invalid)
+    {
+        CheckForValidConfiguration();
+    }
 }
 
 void LifecycleService::ChangeState(ParticipantState newState, std::string reason)

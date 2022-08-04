@@ -120,6 +120,7 @@ private:
     // private members
     Core::ServiceDescriptor _serviceDescriptor{};
     Services::Logging::ILogger* _logger{nullptr};
+    Core::IParticipantInternal* _participant{nullptr};
 
     std::vector<std::string> _requiredParticipantNames{};
     std::map<std::string, Orchestration::ParticipantStatus> _participantStatus;

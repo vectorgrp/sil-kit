@@ -29,6 +29,8 @@ Changed
 
 - C: Added ``SilKitCALL`` and ``SilKitFPTR`` macros for specification of the calling convention when building for windows.
 
+- Participants cannot be configured to be coordinated if they are not required as well. In case of this combination, an exception is thrown.
+
 [3.99.29] - 28-07-2022
 ----------------------
 
