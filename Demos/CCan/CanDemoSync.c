@@ -231,8 +231,12 @@ int main(int argc, char* argv[])
         return 2;
     }
 
+    SilKit_LifecycleConfiguration startConfig;
+    SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
+    startConfig.operationMode = SilKit_OperationMode_Coordinated;
+
     SilKit_LifecycleService* lifecycleService;
-    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant, &startConfig);
 
     SilKit_TimeSyncService* timesyncService;
     returnCode = SilKit_TimeSyncService_Create(&timesyncService, lifecycleService);
@@ -263,10 +267,7 @@ int main(int argc, char* argv[])
     SilKit_TimeSyncService_SetSimulationStepHandler(timesyncService, (void*)&simTaskContext, &SimTask, 1000000);
 
     SilKit_ReturnCode result;
-    SilKit_LifecycleConfiguration startConfig;
-    SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
-    startConfig.operationMode = SilKit_OperationMode_Coordinated;
-    result = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
+    result = SilKit_LifecycleService_StartLifecycle(lifecycleService);
     if(result != SilKit_ReturnCode_SUCCESS)
     {
         printf("Error: SilKit_LifecycleService_StartLifecycle failed: %s\n", SilKit_GetLastErrorString());

@@ -18,8 +18,9 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 auto participant = SilKit::CreateParticipant(config, participantName, registryUri);
-auto* lifecycleService = participant->GetLifecycleService();
+auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Autonomous});
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
 canController->AddFrameTransmitHandler(
@@ -49,5 +50,5 @@ lifecycleService->SetShutdownHandler([]() {
 	std::cout << "Shutting down..." << std::endl;
 });
 
-auto finalStateFuture = lifecycleService->StartLifecycle({OperationMode::Coordinated});
+auto finalStateFuture = lifecycleService->StartLifecycle();
 auto finalState = finalStateFuture.get();

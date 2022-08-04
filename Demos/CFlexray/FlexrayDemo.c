@@ -517,8 +517,12 @@ int main(int argc, char** argv)
         return 2;
     }
 
+    SilKit_LifecycleConfiguration startConfig;
+    SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
+    startConfig.operationMode = SilKit_OperationMode_Coordinated;
+
     SilKit_LifecycleService* lifecycleService;
-    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant);
+    returnCode = SilKit_LifecycleService_Create(&lifecycleService, participant, &startConfig);
 
     SilKit_TimeSyncService* timeSyncService;
     returnCode = SilKit_TimeSyncService_Create(&timeSyncService, lifecycleService);
@@ -670,11 +674,8 @@ int main(int argc, char** argv)
     }
 
     SilKit_ParticipantState finalState;
-    SilKit_LifecycleConfiguration startConfig;
-    SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
-    startConfig.operationMode = SilKit_OperationMode_Coordinated;
 
-    returnCode = SilKit_LifecycleService_StartLifecycle(lifecycleService, &startConfig);
+    returnCode = SilKit_LifecycleService_StartLifecycle(lifecycleService);
     if (returnCode != SilKit_ReturnCode_SUCCESS)
     {
         printf("SilKit_LifecycleService_StartLifecycle => %s\n", SilKit_GetLastErrorString());

@@ -168,7 +168,7 @@ int main(int argc, char** argv)
         if (runSync)
         {
             // always use life cycle
-            auto* lifecycleService = participant->CreateLifecycleService();
+            auto* lifecycleService = participant->CreateLifecycleService({runCoordinated});
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
@@ -208,7 +208,7 @@ int main(int argc, char** argv)
                     }, 5ms);
             }
 
-            auto finalStateFuture = lifecycleService->StartLifecycle({runCoordinated});
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
         else
         {
             // always use life cycle
-            auto* lifecycleService = participant->CreateLifecycleService();
+            auto* lifecycleService = participant->CreateLifecycleService({runCoordinated});
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
@@ -276,7 +276,7 @@ int main(int argc, char** argv)
             }
 
             auto finalStateFuture =
-                lifecycleService->StartLifecycle({runCoordinated});
+                lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
             isStopped = true;

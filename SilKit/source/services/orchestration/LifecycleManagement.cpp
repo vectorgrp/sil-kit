@@ -46,6 +46,7 @@ LifecycleManagement::LifecycleManagement(Services::Logging::ILogger* logger, Lif
     _shuttingDownState = std::make_shared<ShuttingDownState>(this);
     _shutDownState = std::make_shared<ShutdownState>(this);
     _errorState = std::make_shared<ErrorState>(this);
+    _abortingState = std::make_shared<AbortingState>(this);
 
     _currentState = _invalidState.get();
 }
@@ -127,7 +128,8 @@ void LifecycleManagement::ContinueAfterStop()
 
 void LifecycleManagement::ResolveAbortSimulation(std::string reason)
 {
-    _currentState->ResolveAbortSimulation(std::move(reason));
+    _currentState->ResolveAbortSimulation(reason);
+    ShutdownAfterAbort(std::move(reason));
 }
 
 void LifecycleManagement::RestartAfterStop(std::string reason)
@@ -142,6 +144,11 @@ void LifecycleManagement::ShutdownAfterStop(std::string reason)
     _parentService->Shutdown(std::move(reason));
 }
 
+void LifecycleManagement::ShutdownAfterAbort(std::string reason)
+{
+    // for now, the participant will always shut down after stopping
+    _parentService->Shutdown(std::move(reason));
+}
 
 
 void LifecycleManagement::StartUncoordinated(std::string reason)
@@ -160,7 +167,7 @@ void LifecycleManagement::Error(std::string reason)
 void LifecycleManagement::AbortSimulation(std::string /*reason*/)
 {
     _currentState->AbortSimulation();
-    if (_currentState != GetErrorState())
+    if (_currentState == GetErrorState())
     {
         GetLogger()->Warn("AbortSimulation caused a transition to an error state");
     }
@@ -252,6 +259,27 @@ bool LifecycleManagement::HandleShutdown()
     }
 }
 
+bool LifecycleManagement::HandleAbort()
+{
+    if (!_lastBeforeAbortingState)
+    {
+        throw SilKit::StateError("Abort handler was about to be triggered without a knowing which state was active "
+                                 "before abort was called.");
+    }
+
+    try
+    {
+        _parentService->TriggerAbortHandler(_lastBeforeAbortingState->GetParticipantState());
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        std::stringstream ss;
+        ss << "Detected exception in callback:\n" << e.what();
+        _logger->Warn(ss.str());
+        return false;
+    }
+}
 
 
 void LifecycleManagement::StartRunning()
@@ -269,6 +297,13 @@ void LifecycleManagement::SetStateError(std::string reason)
 {
     SetState(GetErrorState(), reason);
     _currentState->Error(std::move(reason));
+}
+
+void LifecycleManagement::SetAbortingState(std::string reason)
+{
+    _lastBeforeAbortingState = _currentState;
+    SetState(GetAbortingState(), reason);
+    _currentState->ResolveAbortSimulation(std::move(reason));
 }
 
 ILifecycleState* LifecycleManagement::GetCurrentState()
@@ -289,6 +324,11 @@ ILifecycleState* LifecycleManagement::GetOperationalState()
 ILifecycleState* LifecycleManagement::GetErrorState()
 {
     return _errorState.get();
+}
+
+ILifecycleState* LifecycleManagement::GetAbortingState()
+{
+    return _abortingState.get();
 }
 
 ILifecycleState* LifecycleManagement::GetServicesCreatedState()

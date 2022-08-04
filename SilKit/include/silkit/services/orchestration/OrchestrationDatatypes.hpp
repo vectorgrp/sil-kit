@@ -53,6 +53,7 @@ enum class ParticipantState : SilKit_ParticipantState
     Error                       =  90, //!< The error state
     ShuttingDown                = 100, //!< The shutting down state
     Shutdown                    = 110, //!< The shutdown state
+    Aborting                    = 120, //!< The aborting state
 };
 
 //! \brief Details about a participant state change.
@@ -81,6 +82,7 @@ enum class SystemState : SilKit_SystemState
     Error                       =  90, //!< The error state
     ShuttingDown                = 100, //!< The shutting down state
     Shutdown                    = 110, //!< The shutdown state
+    Aborting                    = 120, //!< The aborting state
 };
 
 //! \brief Details of the simulation workflow regarding lifecycle and participant coordination.

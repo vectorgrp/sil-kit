@@ -276,6 +276,22 @@ public:
     auto GetParticipantState() -> ParticipantState override;
 };
 
+class AbortingState : public State
+{
+public:
+    AbortingState(LifecycleManagement* lifecycleManager)
+        : State(lifecycleManager)
+    {
+    }
+    bool ShutdownParticipant(std::string reason) override;
+
+    void AbortSimulation() override;
+    void ResolveAbortSimulation(std::string reason) override;
+
+    auto toString() -> std::string override;
+    auto GetParticipantState() -> ParticipantState override;
+};
+
 class ErrorState : public State
 {
 public:

@@ -67,11 +67,12 @@ public:
     void SetStartingHandler(StartingHandler handler) override;
     void SetStopHandler(StopHandler handler) override;
     void SetShutdownHandler(ShutdownHandler handler) override;
+    void SetAbortHandler(AbortHandler handler) override;
 
     auto CreateTimeSyncService() -> ITimeSyncService* override;
     auto GetTimeSyncService() -> ITimeSyncService*;
 
-    auto StartLifecycle(LifecycleConfiguration startConfiguration)
+    auto StartLifecycle()
         -> std::future<ParticipantState> override;
 
     void ReportError(std::string errorMsg) override;
@@ -103,6 +104,7 @@ public:
     void TriggerStartingHandler();
     void TriggerStopHandler();
     void TriggerShutdownHandler();
+    void TriggerAbortHandler(ParticipantState lastState);
 
     void ChangeState(ParticipantState newState, std::string reason);
 
@@ -114,6 +116,8 @@ public:
 
     void Shutdown(std::string reason);
     void Restart(std::string reason);
+
+    void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
 
 private:
     // ----------------------------------------
@@ -147,6 +151,7 @@ private:
     StartingHandler _startingHandler;
     StopHandler _stopHandler;
     ShutdownHandler _shutdownHandler;
+    AbortHandler _abortHandler;
     std::future<void> _asyncResult;
 
     // When pausing our participant, message processing is deferred

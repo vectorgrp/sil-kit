@@ -286,7 +286,7 @@ void ParticipantsThread(
     size_t& messageCounter)
 {
     auto participant = SilKit::CreateParticipant(config, participantName, benchmark.registryUri);
-    auto* lifecycleService = participant->CreateLifecycleService();
+    auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
    
    SilKit::Services::PubSub::DataPublisherSpec dataSpec{"Topic", {}};
@@ -321,7 +321,7 @@ void ParticipantsThread(
         PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
     }, 1ms);
 
-    lifecycleService->StartLifecycle({OperationMode::Coordinated});
+    lifecycleService->StartLifecycle();
 }
 const auto config = "{}";
 
@@ -368,7 +368,8 @@ int main(int argc, char** argv)
             auto participant = SilKit::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
             auto controller = participant->CreateSystemController();
             auto monitor = participant->CreateSystemMonitor();
-            auto lifecycle = participant->CreateLifecycleService();
+            auto lifecycle = participant->CreateLifecycleService({OperationMode::Coordinated});
+            lifecycle->StartLifecycle();
 
             controller->SetWorkflowConfiguration({participantNames});
 

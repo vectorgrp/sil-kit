@@ -59,8 +59,9 @@ public:
         _controller = participant->CreateSystemController();
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
 
-        _lifecycleService = participant->CreateLifecycleService();
-        _finalStatePromise = _lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        _lifecycleService =
+            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        _finalStatePromise = _lifecycleService->StartLifecycle();
     }
 
     void Shutdown()

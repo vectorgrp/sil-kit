@@ -133,7 +133,8 @@ protected:
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
 
-            auto* lifecycleService = participant.participant->CreateLifecycleService();
+            auto* lifecycleService = participant.participant->CreateLifecycleService(
+                {SilKit::Services::Orchestration::OperationMode::Coordinated});
             auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
@@ -163,7 +164,7 @@ protected:
                         participant.simtimePassedPromise.set_value();
                     }
                 }, 1s);
-            auto finalStateFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             finalStateFuture.get();
         }
         catch (const SilKit::ConfigurationError& error)
@@ -259,7 +260,8 @@ protected:
 
             systemMaster.systemController = systemMaster.participant->CreateSystemController();
             systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
-            systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService();
+            systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(
+                {SilKit::Services::Orchestration::OperationMode::Coordinated});
 
             systemMaster.systemController->SetWorkflowConfiguration({syncParticipantNames});
 
@@ -267,7 +269,7 @@ protected:
                 SystemStateHandler(newState);
             });
 
-            systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+            systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle();
         }
         catch (const SilKit::ConfigurationError& error)
         {

@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <functional>
 
 #include "silkit/services/fwd_decl.hpp"
+#include "silkit/services/orchestration/fwd_decl.hpp"
 
 #include "silkit/services/pubsub/DataMessageDatatypes.hpp"
 #include "silkit/services/pubsub/DataSpec.hpp"
@@ -88,7 +89,8 @@ public:
                                  Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer* = 0;
 
     //! \brief Return the ILifecycleService at this SIL Kit participant.
-    virtual auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
+    virtual auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
+        -> Services::Orchestration::ILifecycleService* = 0;
 
     //! \brief Return the ISystemMonitor at this SIL Kit participant.
     virtual auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;

@@ -162,7 +162,8 @@ int main(int argc, char** argv)
 
         if (runSync)
         {
-            auto* lifecycleService = participant->CreateLifecycleService();
+            auto* lifecycleService =
+                participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
             auto* timeSyncService = lifecycleService->CreateTimeSyncService();
             
             // Set a CommunicationReady Handler
@@ -207,7 +208,7 @@ int main(int argc, char** argv)
             }
 
             auto finalStateFuture =
-                lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+                lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

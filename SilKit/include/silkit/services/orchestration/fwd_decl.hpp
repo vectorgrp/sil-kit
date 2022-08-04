@@ -30,6 +30,7 @@ struct NextSimTask;
 struct SystemCommand;
 struct ParticipantStatus;
 struct WorkflowConfiguration;
+struct LifecycleConfiguration;
 
 class ILifecycleService;
 class ITimeSyncService;

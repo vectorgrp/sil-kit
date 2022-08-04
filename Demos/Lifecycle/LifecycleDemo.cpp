@@ -120,7 +120,8 @@ int main(int argc, char** argv)
         if (runSync)
         {
             // In this demo, the life cycle service will always be used
-            auto* lifecycleService = participant->CreateLifecycleService();
+            auto* lifecycleService =
+                participant->CreateLifecycleService(Orchestration::LifecycleConfiguration{coordinateStartAndStop});
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([]() {
@@ -162,8 +163,7 @@ int main(int argc, char** argv)
                         }
                     }
                 }, 5ms);
-            auto finalStateFuture = lifecycleService->StartLifecycle(
-                Orchestration::LifecycleConfiguration{coordinateStartAndStop});
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;
@@ -172,7 +172,8 @@ int main(int argc, char** argv)
         else
         {
             // In this demo, the life cycle service will always be used
-            auto* lifecycleService = participant->CreateLifecycleService();
+            auto* lifecycleService =
+                participant->CreateLifecycleService(Orchestration::LifecycleConfiguration{coordinateStartAndStop});
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([]() {
@@ -199,8 +200,7 @@ int main(int argc, char** argv)
                 std::cout << "Shutdown..." << std::endl;
             });
 
-            auto finalStateFuture = lifecycleService->StartLifecycle(
-                Orchestration::LifecycleConfiguration{coordinateStartAndStop});
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
             std::cout << "Press enter to stop the process..." << std::endl;

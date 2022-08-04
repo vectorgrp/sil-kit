@@ -119,7 +119,8 @@ int main(int argc, char** argv)
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
         // Set an Init Handler
-        auto* lifecycleService = participant->CreateLifecycleService();
+        auto* lifecycleService =
+            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
         auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         lifecycleService->SetCommunicationReadyHandler([&participantName]() {
@@ -180,7 +181,7 @@ int main(int argc, char** argv)
                 }, 1s);
         }
 
-        auto lifecycleFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        auto lifecycleFuture = lifecycleService->StartLifecycle();
         auto finalState = lifecycleFuture.get();
 
         std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

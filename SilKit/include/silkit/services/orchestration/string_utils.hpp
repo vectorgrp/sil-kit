@@ -78,6 +78,8 @@ std::string to_string(ParticipantState state)
         return "ShuttingDown";
     case ParticipantState::Shutdown:
         return "Shutdown";
+    case ParticipantState::Aborting:
+        return "Aborting";
     }
     throw SilKit::TypeConversionError{};
 }
@@ -110,6 +112,8 @@ std::string to_string(SystemState state)
         return "ShuttingDown";
     case SystemState::Shutdown:
         return "Shutdown";
+    case SystemState::Aborting:
+        return "Aborting";
     }
     throw SilKit::TypeConversionError{};
 }

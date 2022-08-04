@@ -90,14 +90,15 @@ protected: // CTor
         });
 
         // this CTor calls CreateTimeSyncService implicitly
-        lifecycleService = std::make_unique<LifecycleService>(&participant);
+        lifecycleService =
+            std::make_unique<LifecycleService>(&participant);
+        lifecycleService->SetLifecycleConfiguration(LifecycleConfiguration{OperationMode::Coordinated});
     }
 protected: // Methods
     void PrepareLifecycle()
     {
         lifecycleService->SetTimeSyncActive(true);
-        (void)lifecycleService->StartLifecycle(
-            LifecycleConfiguration{OperationMode::Coordinated});
+        (void)lifecycleService->StartLifecycle();
         // skip uninteresting states
         lifecycleService->NewSystemState(SystemState::ServicesCreated);
         lifecycleService->NewSystemState(SystemState::CommunicationInitializing);

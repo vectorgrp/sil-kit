@@ -347,7 +347,8 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-    auto* lifecycleService = participant->CreateLifecycleService();
+    auto* lifecycleService =
+        participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
@@ -477,7 +478,7 @@ int main(int argc, char** argv) try
         return 1;
     }
 
-    auto lifecycleFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+    auto lifecycleFuture = lifecycleService->StartLifecycle();
     auto finalState = lifecycleFuture.get();
 
     std::cout << "Simulation stopped. Final State: " << finalState << std::endl;

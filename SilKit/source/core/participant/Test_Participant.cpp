@@ -149,7 +149,8 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
     EXPECT_NO_THROW({
         try
         {
-            participant->CreateLifecycleService(); // ignore returned controller
+            participant->CreateLifecycleService(
+                {SilKit::Services::Orchestration::OperationMode::Coordinated}); // ignore returned controller
         }
         catch (const std::exception&)
         {
@@ -161,7 +162,8 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
         {
             try
             {
-                participant->CreateLifecycleService(); // ignore returned controller
+                participant->CreateLifecycleService(
+                    {SilKit::Services::Orchestration::OperationMode::Coordinated}); // ignore returned controller
             }
             catch (const std::exception&)
             {

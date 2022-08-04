@@ -87,6 +87,8 @@ void CommunicationReadyCallback(void* /*context*/, SilKit_LifecycleService* /*li
 void StartingCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
 void StopCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
 void ShutdownCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}
+void AbortCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/,
+                   SilKit_ParticipantState /*lastParticipantState*/) {}
 void SystemStateHandler(void* /*context*/, SilKit_SystemMonitor* /*systemMonitor*/, SilKit_SystemState /*state*/) {}
 void ParticipantStatusHandler(void* /*context*/, SilKit_SystemMonitor* /*systemMonitor*/,
                               const char* /*participantName*/, SilKit_ParticipantStatus* /*status*/) {}
@@ -123,13 +125,14 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_
         (SilKit_LifecycleService*)(lifecycleService), NULL, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    // StartLifecycle
-    SilKit_LifecycleConfiguration startConfig;
-    returnCode = SilKit_LifecycleService_StartLifecycle(nullptr, &startConfig);
+    returnCode = SilKit_LifecycleService_SetAbortHandler(nullptr, NULL, &AbortCallback);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+    returnCode = SilKit_LifecycleService_SetAbortHandler(
+        (SilKit_LifecycleService*)(lifecycleService), NULL, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_LifecycleService_StartLifecycle(
-        (SilKit_LifecycleService*)(lifecycleService), nullptr);
+    // StartLifecycle
+    returnCode = SilKit_LifecycleService_StartLifecycle(nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     // WaitForLifecycleToComplete
@@ -236,7 +239,9 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_no_time_sync
 {
     SilKit_ReturnCode returnCode;
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
-    auto* lifecycleService = (SilKit_LifecycleService*)(static_cast<SilKit::Services::Orchestration::ILifecycleService*>(mockParticipant.CreateLifecycleService()));
+    auto* lifecycleService =
+        (SilKit_LifecycleService*)(static_cast<SilKit::Services::Orchestration::ILifecycleService*>(
+            mockParticipant.CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Invalid})));
 
     EXPECT_CALL(mockParticipant.mockLifecycleService, SetStartingHandler(testing::_)).Times(testing::Exactly(1));
 
@@ -257,12 +262,12 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_no_time_sync
     SilKit_LifecycleConfiguration startConfig;
     SilKit_Struct_Init(SilKit_LifecycleConfiguration, startConfig);
 
-    EXPECT_CALL(mockParticipant.mockLifecycleService, StartLifecycle(_))
+    EXPECT_CALL(mockParticipant.mockLifecycleService, StartLifecycle())
         .Times(testing::Exactly(1))
         .WillOnce(Return(ByMove(state.get_future())));
 
     returnCode =
-        SilKit_LifecycleService_StartLifecycle((SilKit_LifecycleService*)(lifecycleService), &startConfig);
+        SilKit_LifecycleService_StartLifecycle((SilKit_LifecycleService*)(lifecycleService));
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     returnCode = SilKit_LifecycleService_WaitForLifecycleToComplete((SilKit_LifecycleService*)(lifecycleService),
                                                                     &outParticipantState);
@@ -288,7 +293,8 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
 {
     SilKit_ReturnCode returnCode;
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
-    auto* lifecycleService = (SilKit_LifecycleService*)(mockParticipant.CreateLifecycleService());
+    auto* lifecycleService = (SilKit_LifecycleService*)(mockParticipant.CreateLifecycleService(
+        {SilKit::Services::Orchestration::OperationMode::Coordinated}));
 
     // required for MockSystemMonitor::ParticipantStatus
     SilKit::Services::Orchestration::ParticipantStatus mockParticipantStatus{};
@@ -339,13 +345,12 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     SilKit_Struct_Init(SilKit_LifecycleConfiguration,startConfig);
 
     EXPECT_CALL(mockParticipant.mockLifecycleService,
-        StartLifecycle(_)
+        StartLifecycle()
     ).Times(testing::Exactly(1))
         .WillOnce(Return(ByMove(state.get_future())));
 
-
-    returnCode = SilKit_LifecycleService_StartLifecycle(
-        (SilKit_LifecycleService*)(lifecycleService), &startConfig);
+    
+    returnCode = SilKit_LifecycleService_StartLifecycle((SilKit_LifecycleService*)(lifecycleService));
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     returnCode = SilKit_LifecycleService_WaitForLifecycleToComplete(
         (SilKit_LifecycleService*)(lifecycleService), &outParticipantState);
@@ -354,13 +359,12 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     state = std::promise<SilKit::Services::Orchestration::ParticipantState>{}; // reset state
     state.set_value(SilKit::Services::Orchestration::ParticipantState::Shutdown);
 
-    EXPECT_CALL(mockParticipant.mockLifecycleService,
-        StartLifecycle(_)
-    ).Times(testing::Exactly(1))
+    EXPECT_CALL(mockParticipant.mockLifecycleService, StartLifecycle())
+        .Times(testing::Exactly(1))
         .WillOnce(Return(ByMove(state.get_future())));
 
 
-    returnCode = SilKit_LifecycleService_StartLifecycle((SilKit_LifecycleService*)(lifecycleService), &startConfig);
+    returnCode = SilKit_LifecycleService_StartLifecycle((SilKit_LifecycleService*)(lifecycleService));
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     returnCode = SilKit_LifecycleService_WaitForLifecycleToComplete(
         (SilKit_LifecycleService*)(lifecycleService), &outParticipantState);

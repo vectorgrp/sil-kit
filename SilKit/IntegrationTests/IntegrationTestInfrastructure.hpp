@@ -83,7 +83,8 @@ private:
 
         _systemMaster.systemController = _systemMaster.participant->CreateSystemController();
         _systemMaster.systemMonitor = _systemMaster.participant->CreateSystemMonitor();
-        _systemMaster.lifecycleService = _systemMaster.participant->CreateLifecycleService();
+        _systemMaster.lifecycleService =
+            _systemMaster.participant->CreateLifecycleService({OperationMode::Coordinated});
 
         ITimeSyncService * timeSyncService = _systemMaster.lifecycleService->CreateTimeSyncService();
         timeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds /*now*/) {}, std::chrono::seconds{1});
@@ -109,7 +110,7 @@ private:
             }
         });
 
-        _systemMaster.lifecycleService->StartLifecycle({OperationMode::Coordinated});
+        _systemMaster.lifecycleService->StartLifecycle();
     }
 
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;

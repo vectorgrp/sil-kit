@@ -146,7 +146,9 @@ public:
         participant =
             SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(Services::Logging::Level::Warn), name, registryUri);
 
-        lifecycleService = participant->CreateLifecycleService();
+        LifecycleConfiguration lc{};
+        lc.operationMode = OperationMode::Coordinated;
+        lifecycleService = participant->CreateLifecycleService(lc);
         auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
         // We need to create a dedicated thread, so we do not block the 
@@ -236,9 +238,7 @@ public:
                 std::cout << ss.str();
             }, 1s);
 
-        LifecycleConfiguration lc{};
-        lc.operationMode = OperationMode::Coordinated;
-        auto finalStateFuture = lifecycleService->StartLifecycle(lc);
+        auto finalStateFuture = lifecycleService->StartLifecycle();
         std::cout << "[" << name << "] Started Lifecycle" << std::endl;
 
         finalStateFuture.get();
@@ -331,7 +331,9 @@ protected:
         systemMaster.participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
-        systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService();
+        LifecycleConfiguration lc{};
+        lc.operationMode = OperationMode::Coordinated;
+        systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(lc);
         systemMaster.systemController = systemMaster.participant->CreateSystemController();
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
 
@@ -343,9 +345,7 @@ protected:
             SystemStateHandler(newState);
         });
 
-        LifecycleConfiguration lc;
-        lc.operationMode = OperationMode::Coordinated;
-        systemMaster.lifecycleService->StartLifecycle(lc);
+        systemMaster.lifecycleService->StartLifecycle();
     }
 
     void RunParticipantThreads(std::vector<TestParticipant>& participants, const std::string& registryUri)

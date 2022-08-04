@@ -23,8 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 auto participant1 = SilKit::CreateParticipant(config, participantName1, registryUri);
 auto participant2 = SilKit::CreateParticipant(config, participantName2, registryUri);
 
-auto* systemController = participant1->GetSystemController();
-auto* systemMonitor = participant1->GetSystemMonitor();
+auto* systemController = participant1->CreateSystemController();
+auto* systemMonitor = participant1->CreateSystemMonitor();
 
 // Tell the SystemController to expect the two synchronized participants
 systemController->SetWorkflowConfiguration({participantName1, participantName2});
@@ -55,10 +55,10 @@ systemMonitor->RegisterSystemStateHandler(systemStateHandler);
 
 // LifecycleService needs to call StartLifecycle for a transition to ParticipantState::ServicesCreated.
 // For more information about the use of the life cycle service and time synchronization service refer to the corresponding section.
-auto* lifecycleService1 = participant1 -> GetLifecycleService();
-auto* timeSyncService1 = lifecycleService1 -> GetTimeSynchrService();
-auto* lifecycleService2 = participant2 -> GetLifecycleService();
-auto* timeSyncService2 = lifecycleService2 -> GetTimeSynchrService();
+auto* lifecycleService1 = participant1 -> CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+auto* timeSyncService1 = lifecycleService1 -> CreateTimeSynchrService();
+auto* lifecycleService2 = participant2 -> CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+auto* timeSyncService2 = lifecycleService2 -> CreateTimeSynchrService();
 
 timeSyncService1->SetSimulationStepHandler(
     [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}, 1ms
@@ -67,15 +67,15 @@ timeSyncService2->SetSimulationStepHandler(
   [](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {}, 1ms
 );
 
-auto status1 = lifecycleService1 -> StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
-auto status2 = lifecycleService2 -> StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+auto status1 = lifecycleService1 -> StartLifecycle();
+auto status2 = lifecycleService2 -> StartLifecycle();
 
 // As soon as all participants are in ParticipantState::ServicesCreated, the system transitions to SystemState::ServicesCreated
 // and the SystemController calls Run() to start the simulation.
 std::this_thread::sleep_for(5s); //give the system some time to run
 // ------------------------------------------------------------
-// Stopping the simulation (Transition from SystemState::Running to SystemState::Stopped).
-systemController->Stop();
+// Stopping the simulation (Transition from SystemState::Running to SystemState::Stopping).
+lifecycleService1->Stop("Stop");
 
-// As soon as all participants stopped the simulation and the system is in SystemState::Stopped,
-// the SystemController calls the final Shutdown() command.
+// All participants will traverse the ParticipantState::Stopped, ParticipantState::ShuttingDown and ParticipantState::Shutdown states. 
+// Afterwards, status1/status2 will return.

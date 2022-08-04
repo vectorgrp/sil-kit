@@ -313,6 +313,8 @@ void SystemMonitor::UpdateSystemState(const Orchestration::ParticipantStatus& ne
 
     switch (newStatus.state)
     {
+    case Orchestration::ParticipantState::Invalid: 
+        return; // ignore invalid participants until they do something
     case Orchestration::ParticipantState::ServicesCreated:
         if (AllRequiredParticipantsInState({Orchestration::ParticipantState::ServicesCreated,
                                             Orchestration::ParticipantState::CommunicationInitializing,
@@ -471,12 +473,11 @@ void SystemMonitor::UpdateSystemState(const Orchestration::ParticipantStatus& ne
         if (AllRequiredParticipantsInState({Orchestration::ParticipantState::Shutdown}))
             SetSystemState(Orchestration::SystemState::Shutdown);
         return;
-
+    case Orchestration::ParticipantState::Aborting:
+        SetSystemState(Orchestration::SystemState::Aborting);
+        return;
     case Orchestration::ParticipantState::Error:
         SetSystemState(Orchestration::SystemState::Error);
-        return;
-
-    default:
         return;
     }
 }

@@ -524,13 +524,14 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
 
         lifecycleService = CreateInternalController<Orchestration::LifecycleService>(
             SilKit::Core::Discovery::controllerTypeLifecycleService, Core::ServiceType::InternalController,
-            std::move(lifecycleSupplementalData), false );
+            std::move(lifecycleSupplementalData), false);
     }
     return lifecycleService;
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateLifecycleService() -> Services::Orchestration::ILifecycleService*
+auto Participant<SilKitConnectionT>::CreateLifecycleService(
+    Services::Orchestration::LifecycleConfiguration startConfiguration) -> Services::Orchestration::ILifecycleService*
 {
     if (_isLifecycleServiceCreated)
     {
@@ -538,7 +539,11 @@ auto Participant<SilKitConnectionT>::CreateLifecycleService() -> Services::Orche
     }
     _isLifecycleServiceCreated = true;
 
-    return GetLifecycleService();
+    auto* lifecycleService = GetLifecycleService();
+    dynamic_cast<SilKit::Services::Orchestration::LifecycleService*>(lifecycleService)
+        ->SetLifecycleConfiguration(std::move(startConfiguration));
+
+    return lifecycleService;
 }
 
 template <class SilKitConnectionT>

@@ -39,6 +39,7 @@ using CommunicationReadyHandler = std::function<void()>;
 using StartingHandler = std::function<void()>;
 using StopHandler = std::function<void()>;
 using ShutdownHandler = std::function<void()>;
+using AbortHandler = std::function<void(ParticipantState /*lastState*/)>;
 
 class ILifecycleService
 {
@@ -111,17 +112,27 @@ public:
      */
     virtual void SetShutdownHandler(ShutdownHandler handler) = 0;
 
+    /*! \brief Register a callback that is executed on simulation shutdown.
+     *
+     * The handler is called when the \ref SystemCommand::Kind::Shutdown
+     * has been received. It is executed in the context of an internal
+     * thread that received the command. After the handler has been
+     * processed, the participant switches to the
+     * \ref ParticipantState::Shutdown state and is allowed to terminate.
+     *
+     * Throwing an error inside the handler will cause a call to
+     * ReportError().
+     */
+    virtual void SetAbortHandler(AbortHandler handler) = 0;
+
     /*! \brief Start non blocking operation; returns immediately.
      *
-     * Starts simulation with virtual time synchronization until shutdown is received. The simulation
-     * task is executed in the context of an internal thread that
-     * receives the grant or tick.
+     * Starts simulation until the simulation is stopped or aborted.
      *
-     * \param startConfiguration the simulation start configuration.
      * \return Future that will hold the final state of the participant
      * once the LifecycleService finishes operation.
      */
-    virtual auto StartLifecycle(LifecycleConfiguration startConfiguration) -> std::future<ParticipantState> = 0;
+    virtual auto StartLifecycle() -> std::future<ParticipantState> = 0;
 
     /*! \brief Abort current simulation run due to an error.
      *

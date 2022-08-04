@@ -73,15 +73,25 @@ SilKit_ReturnCode SilKit_SystemController_Create(SilKit_SystemController** outSy
     CAPI_LEAVE
 }
 
+static auto from_c(const SilKit_LifecycleConfiguration* csc)
+{
+    SilKit::Services::Orchestration::LifecycleConfiguration cpp;
+    cpp.operationMode = static_cast<decltype(cpp.operationMode)>(csc->operationMode);
+    return cpp;
+}
+
 SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
-                                                 SilKit_Participant* participant)
+                                                 SilKit_Participant* participant,
+                                                 const SilKit_LifecycleConfiguration* startConfiguration)
 {
     ASSERT_VALID_OUT_PARAMETER(outLifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
+    ASSERT_VALID_STRUCT_HEADER(startConfiguration);
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto cppLifecycleService = cppParticipant->CreateLifecycleService();
+        auto cppLifecycleService = cppParticipant->CreateLifecycleService(from_c(startConfiguration));
         *outLifecycleService = reinterpret_cast<SilKit_LifecycleService*>(
             static_cast<SilKit::Services::Orchestration::ILifecycleService*>(cppLifecycleService));
         return SilKit_ReturnCode_SUCCESS;
@@ -211,21 +221,32 @@ SilKit_ReturnCode SilKit_LifecycleService_SetShutdownHandler(SilKit_LifecycleSer
     CAPI_LEAVE
 }
 
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_SetAbortHandler(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler)
+{
+    ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    CAPI_ENTER
+    {
+        auto* cppLifecycleService =
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
+
+        cppLifecycleService->SetAbortHandler(
+            [handler, context,
+             lifecycleService](SilKit::Services::Orchestration::ParticipantState cppParticipantState) {
+                handler(context, lifecycleService, static_cast<SilKit_ParticipantState>(cppParticipantState));
+            });
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 // Lifecycle async execution
 static std::map<SilKit_LifecycleService*, std::future<SilKit::Services::Orchestration::ParticipantState>> sRunAsyncFuturePerParticipant;
 
-static auto from_c(SilKit_LifecycleConfiguration* csc)
-{
-    SilKit::Services::Orchestration::LifecycleConfiguration cpp;
-    cpp.operationMode = static_cast<decltype(cpp.operationMode)>(csc->operationMode);
-    return cpp;
-}
-SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService,
-                                                      SilKit_LifecycleConfiguration* startConfiguration)
+SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService)
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
-    ASSERT_VALID_POINTER_PARAMETER(startConfiguration);
-    ASSERT_VALID_STRUCT_HEADER(startConfiguration);
     CAPI_ENTER
     {
         auto* cppLifecycleService =
@@ -233,7 +254,7 @@ SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService
                 clifecycleService);
 
         sRunAsyncFuturePerParticipant[clifecycleService] =
-            cppLifecycleService->StartLifecycle(from_c(startConfiguration));
+            cppLifecycleService->StartLifecycle();
 
         return SilKit_ReturnCode_SUCCESS;
     }

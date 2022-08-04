@@ -96,7 +96,12 @@ void LifecycleService::SetShutdownHandler(ShutdownHandler handler)
     _shutdownHandler = std::move(handler);
 }
 
-auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration)
+void LifecycleService::SetAbortHandler(AbortHandler handler)
+{
+    _abortHandler = std::move(handler);
+}
+
+auto LifecycleService::StartLifecycle()
     -> std::future<ParticipantState>
 {
     if (_timeSyncActive)
@@ -108,8 +113,6 @@ auto LifecycleService::StartLifecycle(LifecycleConfiguration startConfiguration)
         _timeSyncService->ConfigureTimeProvider(TimeProviderKind::NoSync);
     }
     _timeSyncService->InitializeTimeSyncPolicy(_timeSyncActive);
-
-    _operationMode = startConfiguration.operationMode;
 
     // Update ServiceDescriptor
     _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleIsCoordinated,
@@ -231,6 +234,11 @@ void LifecycleService::Restart(std::string /*reason*/)
     //}
 }
 
+void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startConfiguration)
+{
+    _operationMode = startConfiguration.operationMode;
+}
+
 bool LifecycleService::TriggerCommunicationReadyHandler()
 {
     if(_commReadyHandler)
@@ -275,6 +283,14 @@ void LifecycleService::TriggerShutdownHandler()
     if (_shutdownHandler)
     {
         _shutdownHandler();
+    }
+}
+
+void LifecycleService::TriggerAbortHandler(ParticipantState lastState)
+{
+    if (_abortHandler)
+    {
+        _abortHandler(lastState);
     }
 }
 
@@ -402,6 +418,8 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::Shutdown: 
         _lifecycleManagement.SystemwideStopping(ss.str()); 
         break; // ignore
+    case SystemState::Aborting: 
+        break; // ignore - we will receive an abort command separately
     case SystemState::Error: 
         _lifecycleManagement.Error(ss.str());
         break; // ignore

@@ -50,7 +50,10 @@ TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
     returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(nullptr, nullptr, &SimTask, 1000000);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(
-        (SilKit_TimeSyncService*)(mockParticipant.CreateLifecycleService()->CreateTimeSyncService()), nullptr,
+        (SilKit_TimeSyncService*)(mockParticipant
+                                      .CreateLifecycleService(LifecycleConfiguration{OperationMode::Coordinated})
+                                      ->CreateTimeSyncService()),
+        nullptr,
         nullptr, 0);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
@@ -64,7 +67,10 @@ TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
             testing::Matcher<SilKit::Services::Orchestration::ITimeSyncService::SimulationStepHandler>(testing::_), testing ::_)
     ).Times(testing::Exactly(1));
     returnCode = SilKit_TimeSyncService_SetSimulationStepHandler(
-        (SilKit_TimeSyncService*)(mockParticipant.CreateLifecycleService()->CreateTimeSyncService()), nullptr,
+        (SilKit_TimeSyncService*)(mockParticipant
+                                      .CreateLifecycleService(LifecycleConfiguration{OperationMode::Coordinated})
+                                      ->CreateTimeSyncService()),
+        nullptr,
         &SimTask, 1000000);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }

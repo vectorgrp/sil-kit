@@ -77,8 +77,9 @@ public:
         _participant->JoinSilKitSimulation();
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
-        auto* lifecycleService = _participant->GetLifecycleService();
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+        _lifecycleService =
+            _participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        auto* timeSyncService = _lifecycleService->CreateTimeSyncService();
         SilKit::Services::PubSub::DataPublisherSpec dataSpec{topicName, {}};
         auto* publisher = _participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
         timeSyncService->SetSimulationStepHandler(
@@ -94,8 +95,7 @@ public:
 
     void RunAsync()
     {
-        auto* lifecycleService = _participant->GetLifecycleService();
-        _simulationFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        _simulationFuture = _lifecycleService->StartLifecycle();
     }
 
     auto WaitForShutdown() -> ParticipantState
@@ -122,6 +122,7 @@ private:
 
 private:
     std::unique_ptr<IParticipantInternal> _participant{nullptr};
+    SilKit::Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
 
     uint32_t _messageIndex{0u};
     uint32_t _testSize{0u};
@@ -145,12 +146,12 @@ public:
         _systemController = _participant->GetSystemController();
         _systemController->SetWorkflowConfiguration({syncParticipantNames});
 
-        _lifecycleService = _participant->GetLifecycleService();
+        _lifecycleService =
+            _participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
         _monitor = _participant->GetSystemMonitor();
 
-        auto* lifecycleService = _participant->GetLifecycleService();
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+        auto* timeSyncService = _lifecycleService->CreateTimeSyncService();
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
@@ -173,8 +174,7 @@ public:
 
     std::future<ParticipantState> RunAsync() const
     {
-        auto* lifecycleService = _participant->GetLifecycleService();
-        return lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        return _lifecycleService->StartLifecycle();
     }
 
     uint32_t NumMessagesReceived(const uint32_t publisherIndex)

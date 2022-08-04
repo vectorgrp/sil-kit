@@ -74,6 +74,7 @@ public:
     bool HandleStarting();
     bool HandleStop();
     bool HandleShutdown();
+    bool HandleAbort();
 
     void StartRunning();
 
@@ -84,16 +85,19 @@ public:
     // (Internal) Action after Stop
     void RestartAfterStop(std::string reason);
     void ShutdownAfterStop(std::string reason);
+    void ShutdownAfterAbort(std::string reason);
 
     // Internal state handling
     void SetState(ILifecycleState* state, std::string message);
     void SetStateError(std::string reason);
+    void SetAbortingState(std::string message);
 
     ILifecycleState* GetCurrentState();
 
     ILifecycleState* GetInvalidState();
     ILifecycleState* GetOperationalState();
     ILifecycleState* GetErrorState();
+    ILifecycleState* GetAbortingState();
     
     ILifecycleState* GetServicesCreatedState();
     ILifecycleState* GetCommunicationInitializingState();
@@ -114,6 +118,7 @@ private:
     std::shared_ptr<ILifecycleState> _invalidState;
     std::shared_ptr<ILifecycleState> _operationalState;
     std::shared_ptr<ILifecycleState> _errorState;
+    std::shared_ptr<ILifecycleState> _abortingState;
 
     std::shared_ptr<ILifecycleState> _servicesCreatedState;
     std::shared_ptr<ILifecycleState> _communicationInitializingState;
@@ -127,6 +132,7 @@ private:
     std::shared_ptr<ILifecycleState> _shutDownState;
 
     ILifecycleState* _currentState;
+    ILifecycleState* _lastBeforeAbortingState{nullptr};
     LifecycleService* _parentService;
 
     Services::Logging::ILogger* _logger;

@@ -47,7 +47,7 @@ typedef int16_t SilKit_ParticipantState;
 #define SilKit_ParticipantState_Error ((SilKit_ParticipantState)90) //!< The error state
 #define SilKit_ParticipantState_ShuttingDown ((SilKit_ParticipantState)100) //!< The shutting down state
 #define SilKit_ParticipantState_Shutdown ((SilKit_ParticipantState)110) //!< The shutdown state
-#define SilKit_ParticipantState_Reinitializing ((SilKit_ParticipantState)120) //!< The reinitializing state
+#define SilKit_ParticipantState_Aborting ((SilKit_ParticipantState)120) //!< The aborting state
 
 //!< The state of a system, deduced by states of the required participants.
 typedef int16_t SilKit_SystemState;
@@ -63,7 +63,7 @@ typedef int16_t SilKit_SystemState;
 #define SilKit_SystemState_Error ((SilKit_SystemState)90) //!< The error state
 #define SilKit_SystemState_ShuttingDown ((SilKit_SystemState)100) //!< The shutting down state
 #define SilKit_SystemState_Shutdown ((SilKit_SystemState)110) //!< The shutdown state
-#define SilKit_SystemState_Reinitializing ((SilKit_SystemState)120) //!< The reinitializing state
+#define SilKit_SystemState_Aborting ((SilKit_SystemState)120) //!< The aborting state
 
 
 //!< The OperationMode for lifecycle service.
@@ -126,17 +126,28 @@ SilKitAPI SilKit_ReturnCode SilKit_SystemController_Create(SilKit_SystemControll
 typedef SilKit_ReturnCode (*SilKit_SystemController_Create_t)(SilKit_SystemController** outCanController,
                                                               SilKit_Participant* participant);
 
+//!< The LifecycleLifecycle options
+typedef struct SilKit_LifecycleConfiguration
+{
+    SilKit_StructHeader structHeader;
+    SilKit_OperationMode operationMode;
+} SilKit_LifecycleConfiguration;
+
+
 /*! \brief Create a lifecycle service at this SIL Kit simulation participant.
  * \param outLifecycleService Pointer that refers to the resulting lifecycle service (out parameter).
  * \param participant The simulation participant at which the lifecycle service should be created.
+ * \param startConfiguration The desired start configuration of the lifecycle.
  *
  * The object returned must not be deallocated using free()!
  */
 SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
-                                                           SilKit_Participant* participant);
+                                                           SilKit_Participant* participant,
+                                                           const SilKit_LifecycleConfiguration* startConfiguration);
 
 typedef SilKit_ReturnCode (*SilKit_LifecycleService_Create_t)(SilKit_LifecycleService** outLifecycleService,
-                                                              SilKit_Participant* participant);
+                                                              SilKit_Participant* participant,
+                                                              const SilKit_LifecycleConfiguration* startConfiguration);
 
 /*! \brief Create a time sync service at this SIL Kit simulation participant.
  * \param outTimeSyncService Pointer that refers to the resulting time sync service (out parameter).
@@ -290,6 +301,25 @@ SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_SetShutdownHandler(
 
 typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetShutdownHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_ShutdownHandler_t handler);
+
+/*! \brief The handler to be called on a simulation abort.
+ *
+ * \param context The user provided context passed in \ref SilKit_LifecycleService_SetAbortHandler
+ * \param participant The simulation participant receiving the abort command
+ */
+typedef void (*SilKit_LifecycleService_AbortHandler_t)(void* context, SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState lastParticipantState);
+
+/*! \brief Register a callback that is executed on simulation abort.
+ *
+ * \param lifecycleService The lifecycle service receiving the abort command
+ * \param context A user provided context accessible in the handler
+ * \param handler The handler to be called
+ */
+SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_SetAbortHandler(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler);
+
+typedef SilKit_ReturnCode (*SilKit_LifecycleService_SetAbortHandler_t)(
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler);
 
 /*! \brief The handler to be called if the simulation task is due
  *
@@ -482,24 +512,16 @@ SilKitAPI SilKit_ReturnCode SilKit_SystemController_SetWorkflowConfiguration(
 typedef SilKit_ReturnCode (*SilKit_SystemController_SetWorkflowConfiguration_t)(
     SilKit_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfigration);
 
-//!< The LifecycleLifecycle options
-typedef struct SilKit_LifecycleConfiguration
-{
-    SilKit_StructHeader structHeader;
-    SilKit_OperationMode operationMode;
-} SilKit_LifecycleConfiguration;
-
-/*! \brief Start the lifecycle with the given parameters with simulation time synchronization.
+/*! \brief Start the lifecycle.
 * 
 * \param lifecycleService the instance of the lifecycleService.
-* \param startConfiguration contains the desired start configuration of the lifecycle.
 */
 
 SilKitAPI SilKit_ReturnCode SilKit_LifecycleService_StartLifecycle(
-    SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startConfiguration);
+    SilKit_LifecycleService* lifecycleService);
 
 typedef SilKit_ReturnCode (*SilKit_LifecycleService_StartLifecycle_t)(
-    SilKit_LifecycleService* lifecycleService, SilKit_LifecycleConfiguration* startConfiguration);
+    SilKit_LifecycleService* lifecycleService);
 
 /*! \brief Wait for to asynchronous run operation to complete and return the final participant state
  *

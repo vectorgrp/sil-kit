@@ -19,8 +19,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 auto participant = SilKit::CreateParticipant(config, participantName, registryUri);
-auto* lifecycleService = participant->GetLifecycleService();
-auto* timeSyncService = lifecycleService->GetTimeSyncService();
+auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
+auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 auto* canController = participant->CreateCanController("CAN1", "CAN1");
 
 canController->AddFrameTransmitHandler(
@@ -50,7 +50,6 @@ lifecycleService->SetShutdownHandler([]() {
 	std::cout << "Shutting down..." << std::endl;
 });
 
-timeSyncService->SetPeriod(200us);
 if (participantName == "CanWriter")
 {
 	timeSyncService->SetSimulationStepHandler(
@@ -63,5 +62,5 @@ if (participantName == "CanWriter")
 	}, 1ms);
 }
 
-auto finalStateFuture = lifecycleService->StartLifecycle(true, true);
+auto finalStateFuture = lifecycleService->StartLifecycle();
 auto finalState = finalStateFuture.get();

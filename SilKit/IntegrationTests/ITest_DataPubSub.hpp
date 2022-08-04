@@ -369,7 +369,8 @@ protected:
 
             if (sync)
             {
-                auto* lifecycleService = participant.participant->CreateLifecycleService();
+                auto* lifecycleService = participant.participant->CreateLifecycleService(
+                    {SilKit::Services::Orchestration::OperationMode::Coordinated});
                 auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
                 timeSyncService->SetSimulationStepHandler([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
@@ -379,7 +380,7 @@ protected:
                         participant.CheckAllSentPromise();
                     }
                 }, 1s);
-                auto finalStateFuture = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+                auto finalStateFuture = lifecycleService->StartLifecycle();
                 finalStateFuture.get();
             }
             else

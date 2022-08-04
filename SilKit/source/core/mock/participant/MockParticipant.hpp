@@ -79,8 +79,8 @@ public:
     MOCK_METHOD(void, SetStartingHandler, (SilKit::Services::Orchestration::StartingHandler), (override));
     MOCK_METHOD(void, SetStopHandler, (SilKit::Services::Orchestration::StopHandler), (override));
     MOCK_METHOD(void, SetShutdownHandler, (SilKit::Services::Orchestration::ShutdownHandler), (override));
-    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycle,
-                (Services::Orchestration::LifecycleConfiguration), (override));
+    MOCK_METHOD(void, SetAbortHandler, (SilKit::Services::Orchestration::AbortHandler), (override));
+    MOCK_METHOD(std::future<Services::Orchestration::ParticipantState>, StartLifecycle, (), (override));
     MOCK_METHOD(void, ReportError, (std::string /*errorMsg*/), (override));
     MOCK_METHOD(void, Pause, (std::string /*reason*/), (override));
     MOCK_METHOD(void, Continue, (), (override));
@@ -217,7 +217,11 @@ public:
     {
         return &mockLifecycleService;
     }
-    auto CreateLifecycleService() -> Services::Orchestration::ILifecycleService* override { return &mockLifecycleService; }
+    auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration)
+        -> Services::Orchestration::ILifecycleService* override
+    {
+        return &mockLifecycleService;
+    }
 
     MOCK_METHOD(Services::Orchestration::TimeSyncService*, CreateTimeSyncService, (Services::Orchestration::LifecycleService*), (override));
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }

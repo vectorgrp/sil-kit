@@ -122,7 +122,8 @@ TEST_F(ITest_VAsioNetwork, vasio_state_machine)
     auto participantTestUnit =
         CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit", registryUri);
     participantTestUnit->JoinSilKitSimulation();
-    auto* lifecycleService = participantTestUnit->CreateLifecycleService();
+    auto* lifecycleService =
+        participantTestUnit->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
     lifecycleService->SetCommunicationReadyHandler([&callbacks = callbacks]() {
@@ -158,7 +159,7 @@ TEST_F(ITest_VAsioNetwork, vasio_state_machine)
 
     // Perform the actual test
     auto stateReached = SetTargetState(ParticipantState::ServicesCreated);
-    auto finalState = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+    auto finalState = lifecycleService->StartLifecycle();
     EXPECT_EQ(stateReached.wait_for(5s), std::future_status::ready);
 
     stateReached = SetTargetState(ParticipantState::Running);

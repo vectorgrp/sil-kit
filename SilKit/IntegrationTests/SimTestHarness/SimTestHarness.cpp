@@ -86,7 +86,8 @@ auto SimParticipant::GetOrCreateLifecycleService() -> Services::Orchestration::I
 {
     if (!_lifecycleService)
     {
-        _lifecycleService = _participant->CreateLifecycleService();
+        _lifecycleService =
+            _participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
     }
     return _lifecycleService;
 }
@@ -144,7 +145,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     {
         auto& participant = kv.second;
         auto* lifecycleService = participant->GetOrCreateLifecycleService();
-        participant->_result = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        participant->_result = lifecycleService->StartLifecycle();
     }
 
     // wait until simulation is finished or timeout is reached
