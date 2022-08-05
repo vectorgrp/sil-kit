@@ -1211,8 +1211,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
     auto* controllerPtr = GetController<ControllerT>(network, config.name);
     if (controllerPtr != nullptr)
     {
-        // We cache the controller and return it here.
-        return controllerPtr;
+        throw SilKit::ConfigurationError(fmt::format("Service {} in network {} already exists.", config.name, network));
     }
 
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);

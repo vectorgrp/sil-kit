@@ -173,7 +173,7 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
         std::runtime_error);
 }
 
-TEST_F(ParticipantTest, no_error_on_create_logger_twice)
+TEST_F(ParticipantTest, no_error_on_get_logger_twice)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
@@ -183,4 +183,29 @@ TEST_F(ParticipantTest, no_error_on_create_logger_twice)
         participant->GetLogger();
     });
 }
+
+TEST_F(ParticipantTest, error_on_create_basic_controller_twice)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    participant->CreateCanController("CAN1", "CAN1");
+    EXPECT_THROW(participant->CreateCanController("CAN1", "CAN1"), SilKit::ConfigurationError);
+}
+
+
+TEST_F(ParticipantTest, no_error_on_create_basic_controller_twice_different_network)
+{
+    auto participant =
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+
+    auto* canController_can1 = participant->CreateCanController("CAN1", "CAN1");
+    SilKit::Services::Can::ICanController* canController_can2;
+    EXPECT_NO_THROW(canController_can2 = participant->CreateCanController("CAN1", "CAN2"));
+    EXPECT_NE(canController_can1, nullptr);
+    EXPECT_NE(canController_can2, nullptr);
+    EXPECT_NE(canController_can1, canController_can2);
+    
+}
+
 } // anonymous namespace

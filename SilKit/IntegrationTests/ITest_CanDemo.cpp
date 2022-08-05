@@ -121,7 +121,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
       });
 
       timeSyncService->SetSimulationStepHandler(
-      [participant, canController, state] (auto now) {
+      [canController, state] (auto now) {
         //Cause transmit queue overrun
         if (now == 0ms)
         {
@@ -141,9 +141,8 @@ TEST_F(ITest_SimTestHarness, can_demo)
         //Normal transmission
         if (now > 20ms)
         {
-          auto* canController1 = participant->CreateCanController("CanController1", "CAN1");
           Log() << "---   CanWriter sending CanFrame";
-          canController1->SendFrame(state->msg, (void*)(intptr_t)(0xDEADBEEF));
+          canController->SendFrame(state->msg, (void*)(intptr_t)(0xDEADBEEF));
         }
       }, 1ms);
 
