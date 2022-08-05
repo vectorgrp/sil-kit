@@ -67,14 +67,12 @@ VAsioRegistry::VAsioRegistry(std::shared_ptr<SilKit::Config::IParticipantConfigu
 auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
 {
     auto uri = Uri::Parse(listenUri);
+    const auto enableDomainSockets = _vasioConfig->middleware.enableDomainSockets;
 
-    bool isAcceptingTcp{false};
     try
     {
         // Resolve the configured hostname and accept on the given port:
         auto tcpHostPort = _connection.AcceptTcpConnectionsOn(uri.Host(), uri.Port());
-        isAcceptingTcp = true;
-
         // Update the URI to the actually used address and port:
         uri = Uri{tcpHostPort.first, tcpHostPort.second};
     }
@@ -85,26 +83,34 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
                        uri.Port(),
                        uri.EncodedString(),
                        e.what());
+
+
+        if (enableDomainSockets)
+        {
+            // For scenarios where multiple instances run on the same host, binding on TCP/IP will result in an error.
+            // However, if we can accept local ipc connections we warn and continue.
+            _logger->Warn("This registry instance will only accept connections on local domain sockets. This might be "
+                          "caused by a second registry running on this host.");
+        }
+        else
+        {
+            // If local ipc connections are disabled and TPC/IP had an error, we abort.
+            throw SilKit::StateError{"Unable to accept TCP connections."};
+        }
     }
 
-    bool isAcceptingLocalDomain{false};
-    try
+    if (enableDomainSockets)
     {
-        // Local domain sockets, failure is non fatal for operation.
-        _connection.AcceptLocalConnections(uri.EncodedString());
-        isAcceptingLocalDomain = true;
-    }
-    catch (const std::exception& e)
-    {
-        _logger->Warn("VAsioRegistry failed to create local listening socket: {}", e.what());
-    }
-
-    // For scenarios where multiple instances run on the same host, binding on TCP/IP
-    // will result in an error. However, if we can accept local ipc connections we can
-    // continue.
-    if (!isAcceptingTcp && !isAcceptingLocalDomain)
-    {
-        throw SilKit::StateError{"Unable to accept neither TCP, nor Local Domain connections."};
+        try
+        {
+            // Local domain sockets, failure is fatal for operation.
+            _connection.AcceptLocalConnections(uri.EncodedString());
+        }
+        catch (const std::exception& e)
+        {
+            _logger->Warn("VAsioRegistry failed to create local listening socket: {}", e.what());
+            throw SilKit::StateError{"Unable to accept Local Domain connections."};
+        }
     }
 
     _connection.StartIoWorker();

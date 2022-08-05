@@ -78,7 +78,7 @@ public:
     template<typename... Args>
     void Log(Level level, const char* fmt, const Args&... args)
     {
-        if (GetLogLevel() >= level)
+        if (GetLogLevel() <= level)
         {
             std::string msg = fmt::format(fmt, args...);
             Log(level, msg);
