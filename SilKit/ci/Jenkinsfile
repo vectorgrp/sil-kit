@@ -459,7 +459,8 @@ def doBuild(Map config) {
                 // safe the PDB files on windows
                 if(!isUnix()) {
                     // package PDB files without rebuilding
-                    archiveToArtifactory(config, scmVars, "./_build_Debug/${artifactName}-*-PDB.zip")
+                    archiveToArtifactory(config, scmVars, "_build_Debug/${artifactName}-*-PDB.zip")
+                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-PDB.zip")
                 }
             }
         }

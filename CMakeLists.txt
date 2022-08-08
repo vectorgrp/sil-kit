@@ -79,10 +79,20 @@ message(STATUS "SIL Kit - SILKIT_HOST_PLATFORM ${SILKIT_HOST_PLATFORM}")
 message(STATUS "SIL Kit - SILKIT_HOST_ARCHITECTURE ${SILKIT_HOST_ARCHITECTURE}")
 message(STATUS "SIL Kit - SILKIT_HOST_COMPILER ${SILKIT_HOST_COMPILER}")
 
-
 ## Internally used in CI builds to archive VS debugging .PDB files:
-set(SILKIT_PDB_DIR 
-    "${CMAKE_BINARY_DIR}/SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}-PDB")
+
+### in multiconfig builds (vstudio) we cannot rely on CMAKE_BUILD_TYPE to get the build type
+### so we expect ci/build_all.sh to set this variable
+if(NOT CMAKE_BUILD_TYPE)
+    message(WARNING "CMAKE_BUILD_TYPE is not set! cpack files will have no config name.")
+    set(my_build_type) #ignore in output file
+else()
+    set(my_build_type "-${CMAKE_BUILD_TYPE}")
+endif()
+set(SILKIT_PDB_DIR_BASE "${CMAKE_BINARY_DIR}")
+set(SILKIT_PDB_DIR_NAME "SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}${my_build_type}-PDB")
+set(SILKIT_PDB_DIR "${SILKIT_PDB_DIR_BASE}/${SILKIT_PDB_DIR_NAME}")
+
 ###############################################################################
 # Include the SIL Kit projects to be built
 ###############################################################################
@@ -195,15 +205,6 @@ endif(SILKIT_INSTALL_SOURCE)
 ###############################################################################
 # Packaging
 ###############################################################################
-
-### in multiconfig builds (vstudio) we cannot rely on CMAKE_BUILD_TYPE to get the build type
-### so we expect ci/build_all.sh to set this variable
-if(NOT CMAKE_BUILD_TYPE)
-    message(WARNING "CMAKE_BUILD_TYPE is not set! cpack files will have no config name.")
-    set(my_build_type) #ignore in output file
-else()
-    set(my_build_type "-${CMAKE_BUILD_TYPE}")
-endif()
 
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_DESCRIPTION "binary release of SIL Kit library and tools")

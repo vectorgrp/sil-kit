@@ -196,10 +196,10 @@ export(EXPORT SilKitTargets
 
 if(MSVC)
     add_custom_command(
-TARGET SilKit
+        TARGET SilKit
         POST_BUILD
-        COMMAND "${CMAKE_COMMAND}"
-             -E tar cf "${CMAKE_BINARY_DIR}/SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}-PDB.zip"  --format=zip -- ${SILKIT_PDB_DIR}/
+        WORKING_DIRECTORY "${SILKIT_PDB_DIR_BASE}"
+        COMMAND "${CMAKE_COMMAND}" -E tar cf "${SILKIT_PDB_DIR_NAME}.zip" --format=zip -- "${SILKIT_PDB_DIR_NAME}"
         COMMENT "SIL Kit: packaging PDBs"
     )
 endif()
