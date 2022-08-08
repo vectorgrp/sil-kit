@@ -126,7 +126,9 @@ void InvalidState::InitializeLifecycle(std::string reason)
 
 void InvalidState::AbortSimulation()
 {
-    // NOP -- we are not even initialized yet...
+    std::string msg = "Received Abort message before lifecycle was started.";
+    _lifecycleManager->GetLogger()->Warn(msg);
+    _lifecycleManager->SetStateError(std::move(msg));
 }
 
 void InvalidState::ResolveAbortSimulation(std::string)

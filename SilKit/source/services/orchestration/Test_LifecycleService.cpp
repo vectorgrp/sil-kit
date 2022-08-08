@@ -1169,12 +1169,14 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
         .Times(0);
     EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
+        .Times(1);
 
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
     lifecycleService.ReceiveMsg(&masterId, abortCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
 TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
@@ -1301,21 +1303,12 @@ TEST_F(LifecycleServiceTest, error_on_coordinated_not_required)
     // set to be coordinated and then receives a required participant list without its own name
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 
     WorkflowConfiguration workflowConfiguration;
     workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};
-    EXPECT_THROW(
-        {
-            try
-            {
-                lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
-            }
-            catch (const ConfigurationError&)
-            {
-                throw;
-            }
-        },
-        ConfigurationError);
+    lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
 TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)
@@ -1327,17 +1320,8 @@ TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)
     WorkflowConfiguration workflowConfiguration;
     workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};
     lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
-    EXPECT_THROW(
-        {
-            try
-            {
-                lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-            }
-            catch (const ConfigurationError&)
-            {
-                throw;
-            }
-        },
-        ConfigurationError);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
+    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 } // namespace

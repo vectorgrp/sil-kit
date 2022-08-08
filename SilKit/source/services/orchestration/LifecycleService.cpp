@@ -148,12 +148,6 @@ void LifecycleService::ReportError(std::string errorMsg)
 {
     _logger->Error(errorMsg);
 
-    // If the lifecycle is not executing, log message and skip further error handling
-    if (State() == ParticipantState::Invalid)
-    {
-        return;
-    }
-
     if (State() == ParticipantState::Shutdown)
     {
         _logger->Warn("LifecycleService::ReportError() was called in terminal state ParticipantState::Shutdown; "
@@ -319,7 +313,7 @@ void LifecycleService::CheckForValidConfiguration()
             // participants that are coordinated but not required are currently not supported
             std::stringstream ss; 
             ss << _participant->GetParticipantName() << ": Coordinated participants must also be required!";
-            throw ConfigurationError(ss.str());
+            ReportError(ss.str());
         }
     }
 }
