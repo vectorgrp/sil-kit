@@ -274,6 +274,9 @@ protected:
         std::unique_ptr<IParticipant> participant;
         ISystemController* systemController;
         ISystemMonitor* systemMonitor;
+
+        std::promise<void> systemStateRunningPromise;
+        std::future<void> systemStateRunning;
     };
 
     void SystemStateHandler(SystemState newState)
@@ -286,8 +289,9 @@ protected:
             break;
         case SystemState::Running:
             Log() << "SystemState = " << newState;
+            systemMaster.systemStateRunningPromise.set_value();
             break;
-        default: 
+        default:
             Log() << "SystemState = " << newState;
             break;
         }
@@ -321,6 +325,8 @@ protected:
         systemMaster.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
             SystemStateHandler(newState);
         });
+
+        systemMaster.systemStateRunning = systemMaster.systemStateRunningPromise.get_future();
 
         systemMaster.lifecycleService->StartLifecycle();
     }
@@ -371,7 +377,11 @@ protected:
             Log() << ">> Await all done";
             for (auto& p : participants)
                 p.AwaitAllDone();
+            Log() << ">> SystemMaster: Waiting for SystemState::Running";
+            ASSERT_EQ(systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
+            Log() << ">> SystemMaster: Stopping due to END-OF-TEST";
             systemMaster.lifecycleService->Stop("End of test");
+            Log() << ">> Joining participant threads";
             JoinParticipantThreads();
             ShutdownSystem();
         }

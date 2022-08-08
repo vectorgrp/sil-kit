@@ -105,6 +105,9 @@ protected:
         ISystemMonitor*               systemMonitor;
         ILifecycleService* lifecycleService;
         std::future<ParticipantState> finalState;
+
+        std::promise<void> systemStateRunningPromise;
+        std::future<void> systemStateRunning;
     };
 
     void SystemStateHandler(SystemState newState)
@@ -114,6 +117,10 @@ protected:
         case SystemState::Error:
             std::cout << "SystemState::Error -> Aborting simulation" << std ::endl; 
             systemMaster.systemController->AbortSimulation();
+            break;
+
+        case SystemState::Running:
+            systemMaster.systemStateRunningPromise.set_value();
             break;
 
         default: break;
@@ -268,6 +275,8 @@ protected:
             systemMaster.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
                 SystemStateHandler(newState);
             });
+
+            systemMaster.systemStateRunning = systemMaster.systemStateRunningPromise.get_future();
 
             systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle();
         }
@@ -451,6 +460,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
     }
 
     std::cout << ">> Cycles done" << std::endl;
+    ASSERT_EQ(systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
     systemMaster.lifecycleService->Stop("Stop Test.");
 
     StopSyncParticipants();

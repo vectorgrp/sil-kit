@@ -106,6 +106,7 @@ private:
     std::unique_ptr<SimSystemController> _simSystemController;
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> _registry;
+    const std::string internalSystemMonitorName = "InternalSystemMonitor";
 };
 
 

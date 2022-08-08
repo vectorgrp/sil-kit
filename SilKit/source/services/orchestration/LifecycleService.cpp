@@ -317,7 +317,9 @@ void LifecycleService::CheckForValidConfiguration()
         if (result == _requiredParticipantNames.end())
         {
             // participants that are coordinated but not required are currently not supported
-            throw ConfigurationError("Coordinated participants must also be required!");
+            std::stringstream ss; 
+            ss << _participant->GetParticipantName() << ": Coordinated participants must also be required!";
+            throw ConfigurationError(ss.str());
         }
     }
 }

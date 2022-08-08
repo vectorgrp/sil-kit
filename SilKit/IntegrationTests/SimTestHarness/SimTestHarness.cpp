@@ -132,6 +132,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
         }
     }
 
+    _syncParticipantNames.push_back(internalSystemMonitorName);
     _simSystemController = std::make_unique<SimSystemController>(_syncParticipantNames, _registryUri);
 }
 
@@ -140,6 +141,19 @@ SimTestHarness::~SimTestHarness() = default;
 bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
 {
     auto lock = Lock();
+    std::promise<void> simulationFinishedPromise;
+    auto simulationFinishedFuture = simulationFinishedPromise.get_future();
+
+    // Create a monitor, add it to the list of simParticipants, then start all participants
+    AddParticipant(internalSystemMonitorName);
+    auto monitor = _simParticipants[internalSystemMonitorName]->GetOrCreateSystemMonitor();
+    monitor->AddSystemStateHandler([&](auto systemState) {
+        if (systemState == SilKit::Services::Orchestration::SystemState::Shutdown)
+        {
+            simulationFinishedPromise.set_value();
+        }
+    });
+
     // start all participants
     for (auto& kv : _simParticipants)
     {
@@ -183,6 +197,11 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
             timeRemaining = testRunTimeout - timeSlept;
         }
 
+    }
+
+    if (simulationFinishedFuture.wait_for(1s) != std::future_status::ready)
+    {
+        runStatus = false;
     }
 
     return runStatus;

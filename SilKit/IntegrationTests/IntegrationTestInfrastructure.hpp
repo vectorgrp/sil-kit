@@ -60,7 +60,12 @@ public:
         }
     }
 
-    void SystemMasterStop() { _systemMaster.lifecycleService->Stop("SystemMaster Stop"); }
+    void SystemMasterStop()
+    {
+        using namespace std::chrono_literals;
+        ASSERT_EQ(_systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
+        _systemMaster.lifecycleService->Stop("SystemMaster Stop");
+    }
 
     void ShutdownInfrastructure()
     {
@@ -92,11 +97,16 @@ private:
         requiredParticipantNames.push_back(systemMasterName);
         _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
 
+        _systemMaster.systemStateRunning = _systemMaster.systemStateRunningPromise.get_future();
+
         _systemMaster.systemMonitor->AddSystemStateHandler([this, requiredParticipantNames](SystemState newState) {
             switch (newState)
             {
             case SystemState::Error:
                 _systemMaster.systemController->AbortSimulation();
+                break;
+            case SystemState::Running:
+                _systemMaster.systemStateRunningPromise.set_value();
                 break;
             default: break;
             }
@@ -122,6 +132,9 @@ private:
         ISystemController* systemController;
         ISystemMonitor* systemMonitor;
         ILifecycleService* lifecycleService;
+
+        std::promise<void> systemStateRunningPromise;
+        std::future<void> systemStateRunning;
     };
 
     SystemMaster _systemMaster;
