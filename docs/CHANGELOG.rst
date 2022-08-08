@@ -31,6 +31,38 @@ Changed
 
 - Participants cannot be configured to be coordinated if they are not required as well. In case of this combination, an exception is thrown.
 
+- ``IParticipant.hpp``
+  Functionality to aquire a controller by calling Create* twice is removed.   All methods for controller creation 
+  (Bus systems, PubSub, Rpc) now no longer return the cached controller pointer if called with same name and network, 
+  but throw a ConfiguraionError.
+
+- The suffix 'T' has been removed in all handler identifiers (mainly 'using'-statements, e.g. 'DataMessageHandler' -> 'DataMessageHandlerT'). 
+
+- Renamed file ``SilKit/include/silkit/services/orchestration/SyncDatatypes.hpp`` to ``OrchestrationDatatypes.hpp``.
+  
+
+Added
+~~~~~
+
+- The C API now has methods to aquire SIL Kit version information in ``SilKit/include/silkit/capi/Version.h``:    
+  
+  .. code-block:: c++
+  
+    SilKitAPI SilKit_ReturnCode SilKit_Version_Major(uint32_t* outVersionMajor);
+    SilKitAPI SilKit_ReturnCode SilKit_Version_Minor(uint32_t* outVersionMinor);
+    SilKitAPI SilKit_ReturnCode SilKit_Version_Patch(uint32_t* outVersionPatch);
+    SilKitAPI SilKit_ReturnCode SilKit_Version_BuildNumber(uint32_t* outVersionBuildNumber);
+    SilKitAPI SilKit_ReturnCode SilKit_Version_String(const char** outVersionString);
+    SilKitAPI SilKit_ReturnCode SilKit_Version_VersionSuffix(const char** outVersionVersionSuffix);
+    SilKitAPI SilKit_ReturnCode SilKit_Version_GitHash(const char** outVersionGitHash);
+
+Removed
+~~~~~~~
+
+- ``SilKit/include/silkit/services/ethernet/EthernetDatatypes.hpp``:
+  Removed field ``MacAdress`` from ``EthernetFrameTransmitEvent``.
+    
+
 [3.99.29] - 28-07-2022
 ----------------------
 
