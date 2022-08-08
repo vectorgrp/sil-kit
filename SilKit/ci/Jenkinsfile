@@ -459,9 +459,7 @@ def doBuild(Map config) {
                 // safe the PDB files on windows
                 if(!isUnix()) {
                     // package PDB files without rebuilding
-                    def pdbArchive = "_build_Debug/SilKit-${buildName}-PDB.zip"
-                    run "python -mzipfile -c ${pdbArchive} _build_Debug/package-pdb/ _build_Release/package-pdb/"
-                    archiveToArtifactory(config, scmVars, pdbArchive)
+                    archiveToArtifactory(config, scmVars, "./_build_Debug/${artifactName}-*-PDB.zip")
                 }
             }
         }

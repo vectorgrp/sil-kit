@@ -59,6 +59,3 @@ set(INSTALL_INCLUDE_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_INCLUDEDIR})
 set(INSTALL_SOURCE_DIR SilKit-Source)
 set(INSTALL_DEMO_DIR SilKit-Demos)
 set(INSTALL_DOC_DIR SilKit-Documentation)
-
-## Internally used in CI builds to archive VS debugging .PDB files:
-set(PKG_PDB_DIR ${CMAKE_BINARY_DIR}/package-pdb)

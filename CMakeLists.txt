@@ -68,6 +68,21 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Globally add -fPIC compiler option
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Set compile variables (packaging etc.)
+include(get_compiler_arch) 
+get_compiler_arch(comp arch plat)
+set(SILKIT_HOST_PLATFORM "${plat}")
+set(SILKIT_HOST_ARCHITECTURE "${arch}")
+set(SILKIT_HOST_COMPILER "${comp}")
+message(STATUS "SIL Kit - CMAKE_VERSION ${CMAKE_VERSION}")
+message(STATUS "SIL Kit - SILKIT_HOST_PLATFORM ${SILKIT_HOST_PLATFORM}")
+message(STATUS "SIL Kit - SILKIT_HOST_ARCHITECTURE ${SILKIT_HOST_ARCHITECTURE}")
+message(STATUS "SIL Kit - SILKIT_HOST_COMPILER ${SILKIT_HOST_COMPILER}")
+
+
+## Internally used in CI builds to archive VS debugging .PDB files:
+set(SILKIT_PDB_DIR 
+    "${CMAKE_BINARY_DIR}/SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}-PDB")
 ###############################################################################
 # Include the SIL Kit projects to be built
 ###############################################################################
@@ -180,15 +195,6 @@ endif(SILKIT_INSTALL_SOURCE)
 ###############################################################################
 # Packaging
 ###############################################################################
-include(get_compiler_arch) 
-get_compiler_arch(comp arch plat)
-set(SILKIT_HOST_PLATFORM "${plat}")
-set(SILKIT_HOST_ARCHITECTURE "${arch}")
-set(SILKIT_HOST_COMPILER "${comp}")
-message(STATUS "SIL Kit - CMAKE_VERSION ${CMAKE_VERSION}")
-message(STATUS "SIL Kit - SILKIT_HOST_PLATFORM ${SILKIT_HOST_PLATFORM}")
-message(STATUS "SIL Kit - SILKIT_HOST_ARCHITECTURE ${SILKIT_HOST_ARCHITECTURE}")
-message(STATUS "SIL Kit - SILKIT_HOST_COMPILER ${SILKIT_HOST_COMPILER}")
 
 ### in multiconfig builds (vstudio) we cannot rely on CMAKE_BUILD_TYPE to get the build type
 ### so we expect ci/build_all.sh to set this variable

@@ -110,8 +110,8 @@ if (MSVC)
     set_target_properties(SilKit
         PROPERTIES
             PDB_NAME SilKit
-            PDB_OUTPUT_DIRECTORY_RELEASE ${PKG_PDB_DIR}/Release
-            PDB_OUTPUT_DIRECTORY_DEBUG ${PKG_PDB_DIR}/Debug
+            PDB_OUTPUT_DIRECTORY_RELEASE ${SILKIT_PDB_DIR}/Release
+            PDB_OUTPUT_DIRECTORY_DEBUG ${SILKIT_PDB_DIR}/Debug
             LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
     )
 elseif(UNIX)
@@ -192,3 +192,14 @@ export(EXPORT SilKitTargets
     NAMESPACE "SilKit::"
     FILE SilKitTargets.cmake
     )
+
+
+if(MSVC)
+    add_custom_command(
+TARGET SilKit
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+             -E tar cf "${CMAKE_BINARY_DIR}/SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}-PDB.zip"  --format=zip -- ${SILKIT_PDB_DIR}/
+        COMMENT "SIL Kit: packaging PDBs"
+    )
+endif()
