@@ -19,9 +19,10 @@ Changed
 ~~~~~~~
 
 - RPC
-    - Added new ``RpcCallStatus::InternalServerError`` and ``SilKit_CallStatus_INTERNAL_SERVER_ERROR``.
-    - ``IRpcClient::Call`` now takes an additional ``userContext`` parameter and does not return a ``IRpcCallHandle *`` anymore.
-      The ``userContext`` is presented in the ``RpcCallReturnHandler`` in the ``RpcCallReturnEvent`` structure instead of the ``callHandle``.
+
+  - Added new ``RpcCallStatus::InternalServerError`` and ``SilKit_CallStatus_INTERNAL_SERVER_ERROR``.
+  - ``IRpcClient::Call`` now takes an additional ``userContext`` parameter and does not return a ``IRpcCallHandle *`` anymore.
+    The ``userContext`` is presented in the ``RpcCallReturnHandler`` in the ``RpcCallReturnEvent`` structure instead of the ``callHandle``.
 
 - Remove the unused and outdated `synchronized` parameter from `SilKit_Participant_Create`.
 
@@ -40,6 +41,19 @@ Changed
 
 - Renamed file ``SilKit/include/silkit/services/orchestration/SyncDatatypes.hpp`` to ``OrchestrationDatatypes.hpp``.
   
+- Participants may not be coordinated and not part of the required participants list
+
+  - Currently, this will lead to an exception
+  
+- Lifecycle service changes
+  
+  - Instead of booleans, the ``Service::Orchestration::LifecycleConfiguration`` now comprises a single enumerator ``OperationMode`` that defines if a participant coordinates its state transition with others or if it runs autonomously.
+  - Most SystemCommands and all ParticipantCommands were removed. 
+  - Participants will not wait for a commands to Initialize, Run, Stop, or Shutdown anymore. Instead, coordinated participants will react to system state changes.
+  - Instead of calling `ISystemController::Stop()`, any required participant can stop all coordinated participants by calling `ILifecycleService::Stop()`.
+  - Autonomous participants must call `ILifeCycleService::Stop()` by themselves.
+  - All participants that arrive at the ``Stopped`` state now continue to ``Shutdown`` (via ``ShuttingDown``) 
+  - The ``Service::Orchestration::LifecycleConfiguration`` must now be provided in `IParticipant::CreateLifecycleService()` instead of `ILifecycleService::StartLifecycle()`
 
 Added
 ~~~~~
