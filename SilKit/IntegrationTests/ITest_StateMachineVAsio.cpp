@@ -98,7 +98,7 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(ITest_VAsioNetwork, vasio_state_machine)
+TEST_F(ITest_VAsioNetwork, DISABLED_vasio_state_machine)
 {
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};

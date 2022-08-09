@@ -350,7 +350,7 @@ TEST_F(ITest_Rpc, test_1_participant_selfdelivery_same_functionname)
 //-----------------------------------------------------
 
 // Async: Start servers first, call with delay to ensure reception
-TEST_F(ITest_Rpc, test_1client_1server_async_vasio)
+TEST_F(ITest_Rpc, DISABLED_test_1client_1server_async_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;

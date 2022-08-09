@@ -476,8 +476,16 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     auto&& masterRecvTimes = linNodes.at(0)->_result.receiveTimes;
     EXPECT_GT(masterSendTimes.size(), 0);
     EXPECT_GT(masterRecvTimes.size(), 0);
-    EXPECT_EQ(masterSendTimes, masterRecvTimes)
-      << "The master send times and receive times should be equal.";
+    ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size())
+        << "The master send times and receive times should have equal size.";
+    for(auto i = 0u; i< masterRecvTimes.size(); i++)
+    {
+        const auto& sendT = masterSendTimes.at(i);
+        const auto& recvT = masterRecvTimes.at(i);
+        const auto deltaT = std::abs(sendT.count() - recvT.count());
+        const auto deltaNs = std::chrono::nanoseconds{deltaT};
+        EXPECT_TRUE(deltaNs == 1ms || deltaNs == 0ms) << "DeltaT is " << deltaT;
+    }
 
     // The test runs for one schedule cycle with different messages/responses for master/slave
 

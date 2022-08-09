@@ -42,15 +42,17 @@ using namespace SilKit::Tests;
 
 const std::chrono::nanoseconds expectedTime{10ms};
 
-std::atomic<bool> wakeup{false};
 std::mutex mx;
+int cvCounter{};
 std::condition_variable cv;
 
-TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
+TEST(ITest_AsyncSimTask, DISABLED_test_async_simtask_lockstep)
 {
-    // The async participant uses the CompleteSimTask calls to request next simulation step.
-    // The sync participant will run as often as possible.
-    // Async may not start a new SimTask before calling CompleteSimtask to complete the current one
+    // Goal: have a foreign/user thread run in lockstep with the SimulationStepHandler.
+    // The completer thread invokes CompleteSimulationStep after being signaled from the SimulationStepHandler.
+    // The sync participant's SimulationStepHandler will run as often as possible.
+    // Async may not start a new SimTask before calling CompleteSimulationtask to complete the current one.
+
 
     SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
 
@@ -68,45 +70,50 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         numSyncSimtasks++;
     }, 1ms);
 
-
     async->SetSimulationStepHandlerAsync([&](auto now, auto) {
         std::cout << "Async SimTask now=" << now.count()
             << " numActiveSimtasks=" << numActiveSimtasks
             << " numSyncSimtasks=" << numSyncSimtasks
             << std::endl;
 
+
         syncTimeNs = now;
         numActiveSimtasks++;
+
+        if(done)
+        {
+            return;
+        }
+
+        //wait until counter is evne
+        std::unique_lock<decltype(mx)> lock(mx);
+        cv.wait(lock, [] {
+            return cvCounter % 2 == 0;
+            });
+
+        // increment so that completer thread will be notified
+        cvCounter++;
 
         if (now == expectedTime)
         {
             //Only allow time progress up to expectedTime
             std::cout << "Stopping simulation at expected time" << std::endl;
             asyncParticipant->GetOrCreateLifecycleService()->Stop("Stop Test");
-            {
-                std::unique_lock<decltype(mx)> lock(mx);
-                done = true;
-                wakeup = true;
-            }
-            cv.notify_one();
+            done = true;
         }
-        if (now < expectedTime)
-        {
-            //tell our completer thread that this simTask needs a call to CompleteSimTask
-            {
-                std::unique_lock<decltype(mx)> lock(mx);
-                wakeup = true;
-            }
-            cv.notify_one();
-        }
+
+        cv.notify_one();
+
     },1ms);
 
     auto completer = std::thread{[&](){
         while (!done && (syncTimeNs.load() < expectedTime))
         {
             std::unique_lock<decltype(mx)> lock(mx);
-            cv.wait(lock, [] { return wakeup.load();});
-            wakeup = false;
+            //wait for odd counter
+            cv.wait(lock, [] {
+                return cvCounter % 2 == 1;
+                });
             if(done)
             {
                 return;
@@ -114,11 +121,15 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
             std::cout <<"Completer numActiveSimtasks=" << numActiveSimtasks << std::endl;
             if(numActiveSimtasks != 1)
             {
-                ASSERT_EQ(numActiveSimtasks,0 ) << "Only one SimTask should be active until CompleteSimTask is called";
+                ASSERT_EQ(numActiveSimtasks,0 ) << "Only one SimTask should be active until CompleteSimulationStep is called";
                 done = true;
             }
             numActiveSimtasks--;
             async->CompleteSimulationStep();
+
+            // let simstep handler continue
+            cvCounter++;
+            cv.notify_one();
         }
     }};
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout"
@@ -126,7 +137,6 @@ TEST(ITest_AsyncSimTask, test_async_simtask_lockstep)
         << " numSyncSimtasks=" << numSyncSimtasks
         ;
     done=true;
-    wakeup=true;
     cv.notify_all();
     if(completer.joinable())
     {
@@ -156,111 +166,23 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
         std::cout << "Async SimTask now=" << now.count() 
             << " expectedTime=" << expectedTime.count()
             << std::endl;
+        async->CompleteSimulationStep();
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
             asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
         }
-        if (now < expectedTime)
-        {
-            //Only allow time progress up to expectedTime
-            async->CompleteSimulationStep();
-        }
-    },1ms);
+    }, 1ms);
 
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout";
 
     auto isSame = expectedTime == syncTimeNs;
-    auto isOffByOne = syncTimeNs == (expectedTime + 1ms);
+    auto isOffByOne = (syncTimeNs == (expectedTime + 1ms)) || (syncTimeNs == (expectedTime - 1ms));
     ASSERT_TRUE(isSame || isOffByOne)
         << "Simulation time should be at most off by one expectedTime "
         << " (due to NextSimTask handling in distributed participants): "
         << " expectedTime=" << expectedTime.count()
         << " syncTime=" << syncTimeNs.count();
-}
-
-std::promise<bool> startupPromise;
-std::promise<void> nextIterPromise;
-
-auto BackgroundThread(SilKit::Services::Orchestration::ITimeSyncService* parti)
-{
-    while (true)
-    {
-        auto start = startupPromise.get_future();
-        start.wait();
-        if (!start.valid())
-        {
-            std::cout << "Background thread terminating" << std::endl;
-            return;
-        }
-        if (start.get())
-        {
-            std::cout << "Background thread terminating" << std::endl;
-            return;
-        }
-        else
-        {
-            std::cout << "Calling CompleteSimulationTask from background thread" << std::endl;
-            parti->CompleteSimulationStep();
-            startupPromise = decltype(startupPromise){}; // reset for next iteration
-            nextIterPromise.set_value();
-        }
-    }
-}
-
-TEST(ITest_AsyncSimTask, test_async_simtask_completion_from_foreign_thread)
-{
-    // The async participant uses the ExecuteSimtaskNonBlocking and CompleteSimTask calls
-    // The sync participant will be used to check the time progress
-
-    SimTestHarness testHarness({"Sync", "Async"}, MakeTestRegistryUri());
-
-    std::atomic<std::chrono::nanoseconds> syncTime{0ns};
-
-    auto* sync = testHarness.GetParticipant("Sync")->GetOrCreateTimeSyncService();
-    auto* asyncParticipant = testHarness.GetParticipant("Async");
-    auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
-
-    sync->SetSimulationStepHandler([&syncTime](auto now) {
-        syncTime = now;
-    }, 1ms);
-
-    async->SetSimulationStepHandlerAsync([&](auto now, auto) {
-        if (now == expectedTime)
-        {
-            std::cout << "Stopping simulation at expected time" << std::endl;
-            asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
-            startupPromise.set_value(true);
-            return;
-        }
-
-        if (now < expectedTime)
-        {
-            //Signal other thread to call CompleteSimTask
-            startupPromise.set_value(syncTime.load() == expectedTime);
-            //Wait until other thread has signaled
-            auto nextIter = nextIterPromise.get_future();
-            nextIter.wait();
-            nextIter.get();
-            nextIterPromise = decltype(nextIterPromise){};
-        }
-    }, 1ms);
-
-    auto thread = std::thread{[&]() {
-        BackgroundThread(async);
-    }};
-
-    ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach time out";
-
-    thread.join();
-    const auto currentSyncTime = syncTime.load();
-    auto isSame = expectedTime == currentSyncTime;
-    auto isOffByOne = (currentSyncTime == (expectedTime + 1ms)) || (currentSyncTime == (expectedTime - 1ms));
-    ASSERT_TRUE(isSame || isOffByOne)
-        << "Simulation time should be at most off by one expectedTime "
-        << " (due to NextSimTask handling in distributed participants): "
-        << " expectedTime=" << expectedTime.count()
-        << " syncTime=" << currentSyncTime.count();
 }
 
 TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
