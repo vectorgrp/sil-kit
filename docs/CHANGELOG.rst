@@ -5,7 +5,7 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.30] - UNRELEASED
+[3.99.30] - 2022-08-09
 ----------------------
 
 Compatibility with 3.99.29
@@ -33,35 +33,35 @@ Changed
 - Participants cannot be configured to be coordinated if they are not required as well. In case of this combination, an exception is thrown.
 
 - ``IParticipant.hpp``
-  Functionality to aquire a controller by calling Create* twice is removed.   All methods for controller creation 
-  (Bus systems, PubSub, Rpc) now no longer return the cached controller pointer if called with same name and network, 
+  Functionality to aquire a controller by calling Create* twice is removed.   All methods for controller creation
+  (Bus systems, PubSub, Rpc) now no longer return the cached controller pointer if called with same name and network,
   but throw a ConfiguraionError.
 
-- The suffix 'T' has been removed in all handler identifiers (mainly 'using'-statements, e.g. 'DataMessageHandler' -> 'DataMessageHandlerT'). 
+- The suffix 'T' has been removed in all handler identifiers (mainly 'using'-statements, e.g. 'DataMessageHandler' -> 'DataMessageHandlerT').
 
 - Renamed file ``SilKit/include/silkit/services/orchestration/SyncDatatypes.hpp`` to ``OrchestrationDatatypes.hpp``.
-  
+
 - Participants may not be coordinated and not part of the required participants list
 
   - Currently, this will lead to an exception
-  
+
 - Lifecycle service changes
-  
+
   - Instead of booleans, the ``Service::Orchestration::LifecycleConfiguration`` now comprises a single enumerator ``OperationMode`` that defines if a participant coordinates its state transition with others or if it runs autonomously.
-  - Most SystemCommands and all ParticipantCommands were removed. 
+  - Most SystemCommands and all ParticipantCommands were removed.
   - Participants will not wait for a commands to Initialize, Run, Stop, or Shutdown anymore. Instead, coordinated participants will react to system state changes.
   - Instead of calling `ISystemController::Stop()`, any required participant can stop all coordinated participants by calling `ILifecycleService::Stop()`.
   - Autonomous participants must call `ILifeCycleService::Stop()` by themselves.
-  - All participants that arrive at the ``Stopped`` state now continue to ``Shutdown`` (via ``ShuttingDown``) 
+  - All participants that arrive at the ``Stopped`` state now continue to ``Shutdown`` (via ``ShuttingDown``)
   - The ``Service::Orchestration::LifecycleConfiguration`` must now be provided in `IParticipant::CreateLifecycleService()` instead of `ILifecycleService::StartLifecycle()`
 
 Added
 ~~~~~
 
-- The C API now has methods to aquire SIL Kit version information in ``SilKit/include/silkit/capi/Version.h``:    
-  
+- The C API now has methods to aquire SIL Kit version information in ``SilKit/include/silkit/capi/Version.h``:
+
   .. code-block:: c++
-  
+
     SilKitAPI SilKit_ReturnCode SilKit_Version_Major(uint32_t* outVersionMajor);
     SilKitAPI SilKit_ReturnCode SilKit_Version_Minor(uint32_t* outVersionMinor);
     SilKitAPI SilKit_ReturnCode SilKit_Version_Patch(uint32_t* outVersionPatch);
@@ -75,7 +75,7 @@ Removed
 
 - ``SilKit/include/silkit/services/ethernet/EthernetDatatypes.hpp``:
   Removed field ``MacAdress`` from ``EthernetFrameTransmitEvent``.
-    
+
 
 [3.99.29] - 28-07-2022
 ----------------------
