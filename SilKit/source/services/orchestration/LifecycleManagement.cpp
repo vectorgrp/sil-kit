@@ -301,7 +301,6 @@ void LifecycleManagement::SetState(ILifecycleState* state, std::string message)
 void LifecycleManagement::SetStateError(std::string reason)
 {
     SetState(GetErrorState(), reason);
-    _currentState->Error(std::move(reason));
 }
 
 void LifecycleManagement::SetAbortingState(std::string reason)
