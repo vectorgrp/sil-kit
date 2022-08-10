@@ -56,7 +56,8 @@ void FrameTransmitHandler(const CanFrameTransmitEvent& ack, Logging::ILogger* lo
 {
     std::stringstream buffer;
     buffer << ">> " << ack.status
-           << " for CAN Message with timestamp=" << ack.timestamp;
+           << " for CAN frame with timestamp=" << ack.timestamp
+           << " and userContext=" << ack.userContext;
     logger->Info(buffer.str());
 }
 
@@ -64,7 +65,7 @@ void FrameHandler(const CanFrameEvent& frameEvent, Logging::ILogger* logger)
 {
     std::string payload(frameEvent.frame.dataField.begin(), frameEvent.frame.dataField.end());
     std::stringstream buffer;
-    buffer << ">> CAN Message: canId=" << frameEvent.frame.canId
+    buffer << ">> CAN frame: canId=" << frameEvent.frame.canId
            << " timestamp=" << frameEvent.timestamp
            << " \"" << payload << "\"";
     logger->Info(buffer.str());
@@ -78,8 +79,10 @@ void SendFrame(ICanController* controller, Logging::ILogger* logger)
                       | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs); // Bit Rate Switch (for FD Format only)
 
     static int msgId = 0;
+    const auto currentMessageId = msgId++;
+
     std::stringstream payloadBuilder;
-    payloadBuilder << "CAN " << (msgId++)%100;
+    payloadBuilder << "CAN " << (currentMessageId % 100);
     auto payloadStr = payloadBuilder.str();
 
     std::vector<uint8_t> payloadBytes;
@@ -89,9 +92,11 @@ void SendFrame(ICanController* controller, Logging::ILogger* logger)
     canFrame.dataField = payloadBytes;
     canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
 
-    controller->SendFrame(std::move(canFrame));
+    void* const userContext = reinterpret_cast<void *>(static_cast<intptr_t>(currentMessageId));
+
+    controller->SendFrame(std::move(canFrame), userContext);
     std::stringstream buffer;
-    buffer << "<< CAN Message sent";
+    buffer << "<< CAN frame sent with userContext=" << userContext;
     logger->Info(buffer.str());
 }
 
