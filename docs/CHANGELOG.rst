@@ -112,6 +112,16 @@ Compatibility with 3.99.28
 - Application software interface (API): No
 - Middleware network protocol: Yes
 
+Added
+~~~~~
+
+- Added a :cpp:func:`SetCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::SetCommunicationReadyHandlerAsync>`
+  method to the lifecycle interfaces.
+  It will invoke the :cpp:type:`CommunicationReadyHandler<SilKit::Services::Orchestration::CommunicationReadyHandler>` callback in a separate thread.
+  This allows the user to do early communication in a simulation run, for example, to
+  exchange configuration values before the actual simulation starts.
+  The user is required to call :cpp:func:`CompleteCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::CompleteCommunicationReadyHandlerAsync>` when the handler is finished.
+
 Changed
 ~~~~~~~
 
@@ -130,19 +140,6 @@ Changed
       .. code-block:: c++
 
         virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
-
-Added
-~~~~~
-
-- Added a :cpp:func:`SetCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::SetCommunicationReadyHandlerAsync>`
-  method to the lifecycle interfaces.
-  It will invoke the :cpp:type:`CommunicationReadyHandler<SilKit::Services::Orchestration::CommunicationReadyHandler>` callback in a separate thread.
-  This allows the user to do early communication in a simulation run, for example, to
-  exchange configuration values before the actual simulation starts.
-  The user is required to call :cpp:func:`CompleteCommunicationReadyHandlerAsync<SilKit::Services::Orchestration::ILifecycleServiceNoTime::CompleteCommunicationReadyHandlerAsync>` when the handler is finished.
-
-Changed
-~~~~~~~
 
 - ``sil-kit-registry`` now has an addition argument ``--generate-configuration`` which can be used in CI environments
   together with a OS generated port in the URI (i.e. ``silkit://localhost:0``) to create a basic configuration file
