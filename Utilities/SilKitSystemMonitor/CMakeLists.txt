@@ -44,9 +44,11 @@ target_link_libraries(sil-kit-monitor
 # Set versioning infos on exe
 if(MSVC)
     get_target_property(SILKIT_BINARY_DIR SilKit BINARY_DIR)
+    get_target_property(SILKIT_SOURCE_DIR SilKit SOURCE_DIR)
     # Include the generated version_macros.hpp in SilKit/source
     target_include_directories(sil-kit-monitor
         PRIVATE ${SILKIT_BINARY_DIR}
+        PRIVATE ${SILKIT_SOURCE_DIR}
     )
     target_sources(sil-kit-monitor PRIVATE SilKitSystemMonitor.rc)
 endif()
