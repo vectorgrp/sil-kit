@@ -454,8 +454,7 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::Aborting: 
         break; // ignore - we will receive an abort command separately
     case SystemState::Error: 
-        _lifecycleManagement.Error(ss.str());
-        break; // ignore
+        break; // ignore - not relevant for lifecycle (only for simulation)
     }
 }
 
