@@ -18,6 +18,12 @@ Compatibility with 3.99.29
 Changed
 ~~~~~~~
 
+- PubSub/Rpc: Both sides (clients and servers, publishers and subscribers) now can specify the matching behavior of 
+  individual labels. This is done via the `kind` field of a `MatchingLabel` which has to be specified when using 
+  `AddLabel`. The `Label` struct has been is removed. Additionally, the 
+  `SilKit::Services::MatchingLabel::Kind::Preferred` has been renamed to 
+  `SilKit::Services::MatchingLabel::Kind::Optional`.
+
 - RPC
 
   - Added new ``RpcCallStatus::InternalServerError`` and ``SilKit_CallStatus_INTERNAL_SERVER_ERROR``.

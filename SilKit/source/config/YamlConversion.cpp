@@ -1112,20 +1112,4 @@ bool Converter::decode(const Node& node, SilKit::Services::MatchingLabel& obj)
     return true;
 }
 
-template <>
-Node Converter::encode(const SilKit::Services::Label &obj)
-{
-    Node node;
-    node["key"] = obj.key;
-    node["value"] = obj.value;
-    return node;
-}
-template <>
-bool Converter::decode(const Node& node, SilKit::Services::Label& obj)
-{
-    optional_decode(obj.key, node, "key");
-    optional_decode(obj.value, node, "value");
-    return true;
-}
-
 } // namespace YAML

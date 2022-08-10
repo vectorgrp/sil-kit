@@ -51,23 +51,6 @@ struct DataMessageEvent
 using DataMessageHandler =
     std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent)>;
 
-//! \brief Information about a newly discovered DataPublisher
-struct NewDataPublisherEvent
-{
-    //! Reception timestamp of the event
-    std::chrono::nanoseconds timestamp;
-    //! The topic string of the discovered DataPublisher.
-    std::string topic;
-    //! The mediaType of the discovered DataPublisher.
-    std::string mediaType;
-    //! The labels of the discovered DataPublisher.
-    std::map<std::string, std::string> labels;
-};
-
-//! \brief Callback type for new data publishers
-using NewDataPublisherHandler =
-    std::function<void(SilKit::Services::PubSub::IDataSubscriber* subscriber, const NewDataPublisherEvent& newDataPublisherEvent)>;
-
 } // namespace PubSub
 } // namespace Services
 } // namespace SilKit

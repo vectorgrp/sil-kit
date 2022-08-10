@@ -18,6 +18,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #include <thread>
 #include <string>
 #include <chrono>
@@ -28,14 +29,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp" // string conversions for enums
 
+using namespace std::chrono_literals;
+
 const auto registryUri = "silkit://localhost:8500";
 
 void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
 {
     auto participant = SilKit::CreateParticipant(config, "PublisherParticipant", registryUri);
-    auto* publisher = participant->CreateDataPublisher("DataService");
-    auto* lifecycleService = participant->GetLifecycleService();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    SilKit::Services::PubSub::PubSubSpec pubSubSpec{"DataService", "text/plain"};
+    auto* publisher = participant->CreateDataPublisher("PublisherController", pubSubSpec);
+    auto* lifecycleService =
+        participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
     timeSyncService->SetSimulationStepHandler([publisher](std::chrono::nanoseconds now) {
         static auto msgIdx = 0;
@@ -50,7 +55,7 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
     //run the simulation main loop forever
     try
     {
-        auto result = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        auto result = lifecycleService->StartLifecycle();
         std::cout << "Publisher: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)
@@ -62,17 +67,16 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
 void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
 {
     auto participant = SilKit::CreateParticipant(config, "SubscriberParticipant", registryUri);
-    auto* subscriber = participant->CreateDataSubscriber(
-        "DataService", "TestTopic", "text/plain", {},
-        [](auto* subscriber, const auto& dataMessageEvent) {
-            std::string message{ dataMessageEvent.data.begin(), dataMessageEvent.data.end() };
-            std::cout << " <- Received data=\"" << message << "\"" << std::endl;
-        });
-    auto* lifecycleService = participant->GetLifecycleService();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    SilKit::Services::PubSub::PubSubSpec pubSubSpec{"DataService", "text/plain"};
+    auto receptionHandler = [](auto* subscriber, const auto& dataMessageEvent) {
+        std::string message{dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
+        std::cout << " <- Received data=\"" << message << "\"" << std::endl;
+    };
+    auto* subscriber = participant->CreateDataSubscriber("SubscriberController", pubSubSpec, receptionHandler);
 
-    auto* lifecycleService = participant->GetLifecycleService();
-    auto* timeSyncService = lifecycleService->GetTimeSyncService();
+    auto* lifecycleService =
+        participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
     timeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds) {
         //simulation task must be defined, even an empty one
@@ -80,7 +84,7 @@ void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
 
     try
     {
-        auto result = lifecycleService->StartLifecycle({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        auto result = lifecycleService->StartLifecycle();
         std::cout << "Subscriber: result: " << result.get() << std::endl;
     }
     catch (const std::exception& e)

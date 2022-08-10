@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "functional.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/pubsub/PubSubSpec.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -76,8 +76,8 @@ TEST_F(ITest_ServiceDiscovery, discover_services)
         const auto topic = "TopicName-" + std::to_string(i);
         const auto pubControllerName = "PubCtrl" + std::to_string(i);
         const auto subControllerName = "SubCtrl" + std::to_string(i);
-        SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, {}};
-        SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, {}};
+        SilKit::Services::PubSub::PubSubSpec dataSpec{topic, {}};
+        SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, {}};
         publisher->CreateDataPublisher(pubControllerName, dataSpec, 0);
         subscriber->CreateDataSubscriber(subControllerName, matchingDataSpec, nullptr);
     }
@@ -166,7 +166,7 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
     for (auto i = 0u; i < numberOfServices; i++)
     {
         const auto pubControllerName = "PubCtrl" + std::to_string(i);
-        SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, {}};
+        SilKit::Services::PubSub::PubSubSpec dataSpec{topic, {}};
         publisher->CreateDataPublisher(pubControllerName, dataSpec, 0);
     }
 

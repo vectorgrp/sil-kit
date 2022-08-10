@@ -25,35 +25,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-inline void assign(SilKit::Services::PubSub::DataPublisherSpec& cppDataSpec, SilKit_DataSpec* dataSpec)
+inline void assign(SilKit::Services::PubSub::PubSubSpec& cppPubSubSpec, SilKit_DataSpec* pubSubSpec)
 {
-    cppDataSpec = {dataSpec->topic, dataSpec->mediaType};
-    for (size_t i = 0; i < dataSpec->labelList.numLabels; i++)
+    cppPubSubSpec = {pubSubSpec->topic, pubSubSpec->mediaType};
+    for (size_t i = 0; i < pubSubSpec->labelList.numLabels; i++)
     {
-        cppDataSpec.AddLabel(dataSpec->labelList.labels[i].key, dataSpec->labelList.labels[i].value);
+        cppPubSubSpec.AddLabel(pubSubSpec->labelList.labels[i].key, pubSubSpec->labelList.labels[i].value,
+                               (SilKit::Services::MatchingLabel::Kind)pubSubSpec->labelList.labels[i].kind);
     }
 }
 
-inline void assign(SilKit::Services::PubSub::DataSubscriberSpec& cppDataNodeSpec, SilKit_DataSpec* dataSpec)
-{
-    cppDataNodeSpec = {dataSpec->topic, dataSpec->mediaType};
-    for (size_t i = 0; i < dataSpec->labelList.numLabels; i++)
-    {
-        cppDataNodeSpec.AddLabel(dataSpec->labelList.labels[i].key, dataSpec->labelList.labels[i].value,
-                                 (SilKit::Services::MatchingLabel::Kind)dataSpec->labelList.labels[i].kind);
-    }
-}
-
-inline void assign(SilKit::Services::Rpc::RpcClientSpec& cppRpcSpec, SilKit_RpcSpec* rpcSpec)
-{
-    cppRpcSpec = {rpcSpec->functionName, rpcSpec->mediaType};
-    for (size_t i = 0; i < rpcSpec->labelList.numLabels; i++)
-    {
-        cppRpcSpec.AddLabel(rpcSpec->labelList.labels[i].key, rpcSpec->labelList.labels[i].value);
-    }
-}
-
-inline void assign(SilKit::Services::Rpc::RpcServerSpec& cppRpcSpec, SilKit_RpcSpec* rpcSpec)
+inline void assign(SilKit::Services::Rpc::RpcSpec& cppRpcSpec, SilKit_RpcSpec* rpcSpec)
 {
     cppRpcSpec = {rpcSpec->functionName, rpcSpec->mediaType};
     for (size_t i = 0; i < rpcSpec->labelList.numLabels; i++)

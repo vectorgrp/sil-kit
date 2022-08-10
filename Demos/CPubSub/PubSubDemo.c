@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
         // The label's value for a given key must match, empty value is wildcard.
         SilKit_LabelList* subLabelList;
         size_t numSubLabels = 1;
-        SilKit_Label subLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Preferred}};
+        SilKit_Label subLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Optional}};
         Create_Labels(&subLabelList, subLabels, numSubLabels);
 
         SilKit_DataSpec dataSpec;

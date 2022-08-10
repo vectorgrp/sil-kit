@@ -190,7 +190,7 @@ public:
             uint32_t controllerIndex = 0;
             for (auto& topic : pubTopics)
             {
-                const DataPublisherSpec spec{topic, ""};
+                const PubSubSpec spec{topic, ""};
                 const auto controllerName = "Pub-" + std::to_string(controllerIndex);
                 controllerIndex++;
                 pubControllers.push_back(participant->CreateDataPublisher(controllerName, spec));
@@ -204,7 +204,7 @@ public:
             uint32_t controllerIndex = 0;
             for (auto& topic : subTopics)
             {
-                const DataSubscriberSpec spec{topic, ""};
+                const PubSubSpec spec{topic, ""};
                 const auto controllerName = "Sub-" + std::to_string(controllerIndex);
                 controllerIndex++;
                 subControllers.push_back(participant->CreateDataSubscriber(

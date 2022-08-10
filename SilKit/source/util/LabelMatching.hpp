@@ -21,45 +21,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <cstdint>
-#include <string>
+#include <vector>
+
+#include "silkit/services/datatypes.hpp"
 
 namespace SilKit {
-namespace Services {
+namespace Util {
 
-/*! \brief Flag indicating the direction of a message
- */
-enum class TransmitDirection : uint8_t
-{
-    // Undefined
-    Undefined = 0,
-    // Transmit
-    TX = 1,
-    // Receive
-    RX = 2,
-    // Send/Receive
-    TXRX = 3,
-};
-using DirectionMask = uint8_t;
+bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& labels1,
+                 const std::vector<SilKit::Services::MatchingLabel>& labels2);
 
-/*! \brief A label to control the matching behavior of DataPublishers, DataSubscribers, RpcServers, and RpcClients
-* 
-* Used in SilKit::Services::PubSub::PubSubSpec and SilKit::Services::Rpc::RpcSpec
-*/
-struct MatchingLabel
-{
-    /*! \brief The different kinds of matching rules for labels.
-    */
-    enum class Kind : uint32_t
-    {
-        Optional = 1, //!< If this label is available, its value must match.
-        Mandatory = 2 //!< This label must be available and its value must match.
-    };
-
-    std::string key; //!< The label's key.
-    std::string value; //!< The label's key.
-    Kind kind; //!< The matching kind to apply for this label.
-};
-
-} // namespace Services
+} // namespace Util
 } // namespace SilKit

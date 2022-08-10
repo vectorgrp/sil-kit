@@ -50,7 +50,7 @@ protected:
     struct DataPublisherInfo
     {
         DataPublisherInfo(const std::string& newControllerName, const std::string& newTopic, const std::string& newMediaType,
-                          const std::map<std::string, std::string>& newLabels, uint8_t newHistory,
+                          const std::vector<SilKit::Services::MatchingLabel>& newLabels, uint8_t newHistory,
                           size_t newMessageSizeInBytes, uint32_t newNumMsgToPublish)
         {
             controllerName = newControllerName;
@@ -65,7 +65,7 @@ protected:
         std::string controllerName;
         std::string topic;
         std::string mediaType;
-        std::map<std::string, std::string> labels;
+        std::vector<SilKit::Services::MatchingLabel> labels;
         uint8_t history;
         size_t messageSizeInBytes;
         uint32_t numMsgToPublish;
@@ -325,7 +325,7 @@ protected:
                         }
                 });
 
-                SilKit::Services::PubSub::DataSubscriberSpec dataSpec{ds.topic, ds.mediaType};
+                SilKit::Services::PubSub::PubSubSpec dataSpec{ds.topic, ds.mediaType};
                 for (auto label : ds.labels)
                 {
                     dataSpec.AddLabel(label);
@@ -348,10 +348,10 @@ protected:
             // Setup/Create Publishers
             for (auto& dp : participant.dataPublishers)
             {
-                SilKit::Services::PubSub::DataPublisherSpec dataSpec{dp.topic, dp.mediaType};
+                SilKit::Services::PubSub::PubSubSpec dataSpec{dp.topic, dp.mediaType};
                 for (auto label : dp.labels)
                 {
-                    dataSpec.AddLabel(label.first, label.second);
+                    dataSpec.AddLabel(label);
                 }
                 dp.dataPublisher = participant.participant->CreateDataPublisher(dp.controllerName, dataSpec, dp.history);
             }

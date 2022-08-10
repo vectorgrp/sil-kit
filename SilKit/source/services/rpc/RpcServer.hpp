@@ -45,7 +45,7 @@ class RpcServer
 {
 public:
     RpcServer(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-              const SilKit::Services::Rpc::RpcServerSpec& dataSpec, RpcCallHandler handler);
+              const SilKit::Services::Rpc::RpcSpec& dataSpec, RpcCallHandler handler);
 
     void RegisterServiceDiscovery();
 
@@ -62,9 +62,9 @@ public:
 
 private:
     void AddInternalRpcServer(const std::string& clientUUID, std::string joinedMediaType,
-                              const std::vector<SilKit::Services::Label>& clientLabels);
+                              const std::vector<SilKit::Services::MatchingLabel>& clientLabels);
 
-    SilKit::Services::Rpc::RpcServerSpec _dataSpec;
+    SilKit::Services::Rpc::RpcSpec _dataSpec;
     RpcCallHandler _handler;
 
     Core::ServiceDescriptor _serviceDescriptor{};

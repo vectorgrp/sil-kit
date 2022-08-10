@@ -79,7 +79,7 @@ SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, Sil
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        SilKit::Services::Rpc::RpcServerSpec cppDataSpec;
+        SilKit::Services::Rpc::RpcSpec cppDataSpec;
         assign(cppDataSpec, rpcSpec);
         auto rcpServer = cppParticipant->CreateRpcServer(controllerName, cppDataSpec,
                                                          MakeRpcCallHandler(context, callHandler));
@@ -131,7 +131,7 @@ SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, Sil
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        SilKit::Services::Rpc::RpcClientSpec cppRpcSpec;
+        SilKit::Services::Rpc::RpcSpec cppRpcSpec;
         assign(cppRpcSpec, rpcSpec);
         auto rcpClient = cppParticipant->CreateRpcClient(controllerName, cppRpcSpec,
                                                          MakeRpcCallResultHandler(context, resultHandler));

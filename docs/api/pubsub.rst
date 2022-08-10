@@ -9,6 +9,11 @@ Data Publish/Subscribe API
 .. |Publish| replace:: :cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>`
 .. |SetDataMessageHandler| replace:: :cpp:func:`SetDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDataMessageHandler()>`
 .. |AddExplicitDataMessageHandler| replace:: :cpp:func:`AddExplicitDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::AddExplicitDataMessageHandler()>`
+
+.. |PubSubSpec| replace:: :cpp:class:`PubSubSpec<SilKit::Services::PubSub::PubSubSpec>`
+.. |AddLabel| replace:: :cpp:func:`AddLabel()<SilKit::Services::PubSub::PubSubSpec::AddLabel>`
+.. |MatchingLabel| replace:: :cpp:class:`MatchingLabel<SilKit::Services::MatchingLabel>`
+
 .. |IDataPublisher| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataPublisher>`
 .. |IDataSubscriber| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataSubscriber>`
 .. contents::
@@ -18,66 +23,73 @@ Data Publish/Subscribe API
 Using the Data Publish/Subscribe API
 ------------------------------------
 
-The Data Publish/Subscribe API provides a topic-based publish/subscribe mechanism to exchange plain byte vectors containing
-arbitrary user data. Published messages are transmitted immediately to all matching subscribers, that is, without 
-any modelled latency.
+The Data Publish/Subscribe API provides a topic-based publish/subscribe mechanism to exchange plain byte vectors 
+containing arbitrary user data. The DataPublisher and DataSubscriber interfaces are instantiated from an |IParticipant| 
+interface by calling |CreateDataPublisher| and |CreateDataSubscriber|, respectively. 
 
 Data can be transmitted using the |Publish| method of a DataPublisher, either providing a standard vector of data or a
-data pointer and size. DataSubscribers can provide a handler that is called upon incoming data on their topic.
+data pointer and size. Published messages are transmitted immediately to all matching subscribers, that is, without 
+any modelled latency. DataSubscribers provide a handler that is called upon incoming data on their topic.
 
 Topics
 ~~~~~~
 
-DataPublishers and DataSubscribers provide a topic name, communications only takes place among controllers with the 
-same topic. The topic has no wildcard functionality.
+DataPublishers and DataSubscribers provide a topic name which is part of their |PubSubSpec|.
+Communications only takes place among controllers with the same topic. The topic has no wildcard functionality. 
 
 Media Type
 ~~~~~~~~~~
 
-Both DataPublishers and DataSubscribers define a media type in accordance to 
-`RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_, a meta description of the transmitted data. It can be used
+Both DataPublishers and DataSubscribers define a media type as part of their |PubSubSpec|. It is a meta description
+of the transmitted data in accordance to `RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_ and should be used
 to provide infomation about the de-/serialization of the underlying user data. Just like the topic, the media type has
 to match between DataPublishers/DataSubscribers for communicaiton to take place. An empty string on a DataSubscriber
-is a wildcard and will match any other media type of a DataPublisher.
+is a wildcard and will match any other media type of a DataPublisher. DataPublishers should provide information
+about the data they are going to publish and have no wildcard functionality for the media type.
 
 Labels
 ~~~~~~
 
-DataPublishers and DataSubscribers can be annotated with string-based key-value pairs (labels). In addition to the
-matching requirements regarding topic and media type, DataSubscribers will only receive messages by DataPublishers if
-their labels apply the following matching rules:
+Both DataPublishers and DataSubscribers can be annotated with string-based key-value pairs (labels) which can be either
+mandatory or optional. In addition to the matching requirements given by topic and mediaType, DataPublishers and
+DataSubscribers will only communicate if their labels conform to the following matching rules:
 
-* A DataSubscriber without labels matches any DataPublisher.
-* A mandatory label matches, if a label of the same key and value ist found on the corresponding DataPublisher.
-* A preferred label matches, if the label key does not exist on the DataPublisher or both its key and value are equal.
+* A mandatory label matches, if a label of the same key and value is found on the corresponding counterpart.
+* An optional label matches, if the label key does not exist on the counterpart or both its key and value are equal.
 
-The following table shows how DataPublishers and DataSubscribers with matching topics and matching media type would match corresponding to their labels.
+The following table shows how DataPublishers and DataSubscribers with matching topics and matching media type would 
+match corresponding to their labels. Note that the label matching is symmetric, so publishers and subscribers
+are interchangeable here.
 
 .. list-table:: Label combinations
    :header-rows: 1
 
    * - 
-     - Sub {"KeyA", "Val1", Preferred}
-     - Sub {"KeyA", "Val1", Mandatory}
-   * - Pub {}
+     - Subscriber {"KeyA", "Val1", Optional}
+     - Subscriber{"KeyA", "Val1", Mandatory}
+   * - Publisher {}
      - Match
      - No Match
-   * - Pub {"KeyA", "Val1"}
+   * - Publisher {"KeyA", "Val1", Optional}
      - Match
      - Match
-   * - Pub {"KeyA", "Val2"}
+   * - Publisher {"KeyA", "Val2", Optional}
      - No Match
      - No Match
-   * - Pub {"KeyB", "Val1"}
+   * - Publisher {"KeyB", "Val1", Optional}
      - Match
+     - No Match
+   * - Publisher {"KeyB", "Val1", Mandatory}
+     - No Match
      - No Match
 
-The following code snippet shows how the labels of a DataSubscriber can be set.
+The labels are stored in the |PubSubSpec|. A |MatchingLabel| can be added via |AddLabel|,
+see the following code snippet:
 
 .. code-block:: cpp
 
-    SilKit::Services::PubSub::DataSubscriberSpec subDataSpec{"Topic1", "application/json"};
-    subDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::Label::Kind::Preferred);
+    SilKit::Services::PubSub::PubSubSpec subDataSpec{"Topic1", "application/json"};
+    subDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
     auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", subDataSpec, defaultDataHandler);
 
 
@@ -106,16 +118,6 @@ be preferred over a programmatically set topic.
     - Name: DataSubscriberController1
       Topic: TopicB
 
-Usage
-~~~~~
-
-The Publisher and Subscriber interfaces are instantiated from an |IParticipant| interface by calling 
-|CreateDataPublisher| and |CreateDataSubscriber|, respectively. 
-
-The simplified overloads only need a controller name as a single argument, which will be used as topic. Media type, 
-labels and handlers are left emtpy in this variant. Note that in this case, the DataSubscriber still has to provide a 
-handler for incoming messages via |SetDataMessageHandler|.
-
 Usage Examples
 ~~~~~~~~~~~~~~
 
@@ -125,7 +127,7 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
 
     // Participant1 (Publisher)
     // ------------------------
-    SilKit::Services::PubSub::DataPublisherSpec pubDataSpec{"Topic1", "application/json"};
+    SilKit::Services::PubSub::PubSubSpec pubDataSpec{"Topic1", "application/json"};
     pubDataSpec.AddLabel("KeyA", "ValA");
     auto* publisher = participant->CreateDataPublisher("PubCtrl1", pubDataSpec, 1);
     publisher->Publish(user_data);
@@ -138,8 +140,8 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an I
         // publication timestamp in dataMessageEvent.timestamp
         // raw data in dataMessageEvent.data
     });
-    SilKit::Services::PubSub::DataSubscriberSpec subDataSpec{"Topic1", "application/json"};
-    subDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::Label::Kind::Preferred);
+    SilKit::Services::PubSub::PubSubSpec subDataSpec{"Topic1", "application/json"};
+    subDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
     auto* subscriber = participant->CreateDataSubscriber("SubCtrl1", subDataSpec, defaultDataHandler);
 
 
@@ -170,12 +172,11 @@ Data Structures
 .. doxygenstruct:: SilKit::Services::PubSub::DataMessageEvent
    :members:
 
-.. doxygenstruct:: SilKit::Services::Label
+.. doxygenclass:: SilKit::Services::PubSub::PubSubSpec
    :members:
 
-.. doxygenclass:: SilKit::Services::PubSub::DataPublisherSpec
+.. doxygenstruct:: SilKit::Services::MatchingLabel
    :members:
 
-.. doxygenclass:: SilKit::Services::PubSub::DataSubscriberSpec
-   :members:
+
        

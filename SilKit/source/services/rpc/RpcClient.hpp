@@ -48,7 +48,7 @@ class RpcClient
 {
 public:
     RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-              const SilKit::Services::Rpc::RpcClientSpec& dataSpec, const std::string& clientUUID,
+              const SilKit::Services::Rpc::RpcSpec& dataSpec, const std::string& clientUUID,
               RpcCallResultHandler handler);
 
     void RegisterServiceDiscovery();
@@ -87,7 +87,7 @@ private:
         void* _userContext = nullptr;
     };
 
-    SilKit::Services::Rpc::RpcClientSpec _dataSpec;
+    SilKit::Services::Rpc::RpcSpec _dataSpec;
     std::string _clientUUID;
 
     RpcCallResultHandler _handler;

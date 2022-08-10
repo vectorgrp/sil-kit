@@ -115,29 +115,29 @@ public:
     auto CreateLinController(const std::string& canonicalName, const std::string& networkName)
         -> Services::Lin::ILinController* override;
 
-    auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::DataPublisherSpec& dataSpec, size_t history = 0)
+    auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec, size_t history = 0)
         -> Services::PubSub::IDataPublisher* override;
 
-    auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+    auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                               Services::PubSub::DataMessageHandler defaultDataHandler)
         -> Services::PubSub::IDataSubscriber* override;
 
     auto CreateDataSubscriberInternal(const std::string& canonicalName, const std::string& linkName,
                                       const std::string& mediaType,
-                                      const std::vector<SilKit::Services::Label>& publisherLabels,
+                                      const std::vector<SilKit::Services::MatchingLabel>& publisherLabels,
                                       Services::PubSub::DataMessageHandler callback, Services::PubSub::IDataSubscriber* parent)
         -> Services::PubSub::DataSubscriberInternal* override;
 
-    auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcClientSpec& dataSpec, Services::Rpc::RpcCallResultHandler handler)
+    auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcSpec& dataSpec, Services::Rpc::RpcCallResultHandler handler)
         -> Services::Rpc::IRpcClient* override;
 
-    auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcServerSpec& dataSpec,
+    auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcSpec& dataSpec,
                          Services::Rpc::RpcCallHandler handler)
         -> Services::Rpc::IRpcServer* override;
 
     auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                  const std::string& mediaType,
-                                 const std::vector<SilKit::Services::Label>& clientLabels,
+                                 const std::vector<SilKit::Services::MatchingLabel>& clientLabels,
                                  Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
         -> Services::Rpc::RpcServerInternal* override;
 

@@ -50,7 +50,7 @@ class MockParticipant : public DummyParticipant
 public:
     MOCK_METHOD(Services::PubSub::DataSubscriberInternal*, CreateDataSubscriberInternal,
                 (const std::string& /*topic*/, const std::string& /*linkName*/, const std::string& /*mediaType*/,
-                 (const std::vector<SilKit::Services::Label>& ) /*publisherLabels*/,
+                 (const std::vector<SilKit::Services::MatchingLabel>&)/*publisherLabels*/,
                  Services::PubSub::DataMessageHandler /*callback*/, Services::PubSub::IDataSubscriber* /*parent*/),
                 (override));
 };
@@ -63,8 +63,6 @@ protected:
         MOCK_METHOD(void, ReceiveDataDefault, (IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
         MOCK_METHOD(void, ReceiveDataExplicitA, (IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
         MOCK_METHOD(void, ReceiveDataExplicitB, (IDataSubscriber*, const DataMessageEvent& dataMessageEvent));
-
-        MOCK_METHOD(void, NewDataPublisher, (IDataSubscriber*, const NewDataPublisherEvent& newDataPublisherEvent));
     };
 
 protected:
@@ -116,10 +114,10 @@ protected:
 
     const std::string topic{"Topic"};
     const std::string mediaType{};
-    const std::vector<SilKit::Services::Label> labels;
-    SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, mediaType};
-    SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
-    const std::string labelsSerialized{SilKit::Config::Serialize<std::vector<SilKit::Services::Label>>(labels)};
+    const std::vector<SilKit::Services::MatchingLabel> labels;
+    SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
+    SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
+    const std::string labelsSerialized{SilKit::Config::Serialize<std::vector<SilKit::Services::MatchingLabel>>(labels)};
     Callbacks callbacks;
     MockParticipant participant;
     DataSubscriber subscriber;
@@ -132,7 +130,8 @@ struct CreateSubscriberInternalMock
     std::unique_ptr<DataSubscriberInternal> dataSubscriberInternal;
 
     auto operator()(const std::string& topic, const std::string& /*linkName*/, const std::string& mediaType,
-                    const std::vector<SilKit::Services::Label>& labels, Services::PubSub::DataMessageHandler defaultHandler,
+                    const std::vector<SilKit::Services::MatchingLabel>& labels,
+                    Services::PubSub::DataMessageHandler defaultHandler,
                     Services::PubSub::IDataSubscriber* parent) -> DataSubscriberInternal*
     {
         dataSubscriberInternal = std::make_unique<DataSubscriberInternal>(

@@ -27,6 +27,8 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
+using namespace SilKit::Services;
+
 bool operator==(const DataMessageEvent& lhs, const DataMessageEvent& rhs)
 {
     return Util::ItemsAreEqual(lhs.data, rhs.data);
@@ -40,47 +42,6 @@ bool operator==(const WireDataMessageEvent& lhs, const WireDataMessageEvent& rhs
 bool MatchMediaType(const std::string& subMediaType, const std::string& pubMediaType)
 {
     return subMediaType == "" || subMediaType == pubMediaType;
-}
-
-SilKit::Util::Optional<SilKit::Services::Label> findLabel(
-    std::vector<SilKit::Services::Label> dataLabels, const std::string& key)
-{
-    for (auto it : dataLabels)
-    {
-        if (it.key == key)
-        {
-            return {it};
-        }
-    }
-    return SilKit::Util::Optional<SilKit::Services::Label>();
-}
-
-bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& subscriberLabels,
-                 const std::vector<SilKit::Services::Label>& publisherLabels)
-{
-    for (auto&& kv : subscriberLabels)
-    {
-        auto optionalLabel = findLabel(publisherLabels, kv.key);
-        if (!optionalLabel.has_value())
-        {
-            if (kv.kind == SilKit::Services::MatchingLabel::Kind::Mandatory)
-            {
-                // mandatory labels must exist
-                return false;
-            }
-            else if (kv.kind == SilKit::Services::MatchingLabel::Kind::Preferred)
-            {
-                // prefered labels that do not exist are ignored
-                continue;
-            }
-            
-        }
-        else if (kv.value != optionalLabel.value().value) // Value does not match -> no match
-        {
-            return false;
-        }
-    }
-    return true; // All of subscriberLabels match according to their rules -> match
 }
 
 } // namespace PubSub

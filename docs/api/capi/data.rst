@@ -21,17 +21,13 @@ DataSubscribers
 
 Handlers
 ~~~~~~~~
-The DataSubscriber is created with a handler for data reception and a handler
-for notification about new sources:
+The DataSubscriber is created with a handler for data reception:
 
 .. doxygentypedef:: SilKit_DataMessageHandler_t
-.. doxygentypedef:: SilKit_NewDataPublisherHandler_t
 
 Data Structures
 ~~~~~~~~~~~~~~~
 .. doxygenstruct:: SilKit_DataMessageEvent
-   :members:
-.. doxygenstruct:: SilKit_NewDataPublisherEvent
    :members:
 
 

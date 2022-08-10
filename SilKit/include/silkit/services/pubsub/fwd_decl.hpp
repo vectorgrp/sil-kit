@@ -30,8 +30,6 @@ struct DataMessageEvent;
 class IDataPublisher;
 class IDataSubscriber;
 
-struct NewDataPublisherEvent;
-
 } // namespace PubSub
 } // namespace Services
 } // namespace SilKit

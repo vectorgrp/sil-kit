@@ -32,49 +32,6 @@ bool MatchMediaType(const std::string& clientMediaType, const std::string& serve
     return clientMediaType == "" || clientMediaType == serverMediaType;
 }
 
-SilKit::Util::Optional<SilKit::Services::Label> findLabel(
-    std::vector<SilKit::Services::Label> dataLabels, std::string key)
-{
-    for (auto it : dataLabels)
-    {
-        if (it.key == key)
-        {
-            return {it};
-        }
-    }
-    return SilKit::Util::Optional<SilKit::Services::Label>();
-}
-
-bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& serverLabels,
-                 const std::vector<SilKit::Services::Label>& clientLabels)
-{
-    if (serverLabels.size() == 0)
-        return true; // clientLabels empty -> match
-
-    for (auto&& kv : serverLabels)
-    {
-        auto optionalLabel = findLabel(clientLabels, kv.key);
-        if (!optionalLabel.has_value())
-        {
-            if (kv.kind == SilKit::Services::MatchingLabel::Kind::Mandatory)
-            {
-                // mandatory labels must exist
-                return false;
-            }
-            else if (kv.kind == SilKit::Services::MatchingLabel::Kind::Preferred)
-            {
-                // prefered labels that do not exist are ignored
-                continue;
-            }
-        }
-        else if (kv.value != optionalLabel.value().value) // Value does not match -> no match
-        {
-            return false;
-        }
-    }
-    return true; // All of clientLabels match according to their rules -> match
-}
-
 } // namespace Rpc
 } // namespace Services
 } // namespace SilKit

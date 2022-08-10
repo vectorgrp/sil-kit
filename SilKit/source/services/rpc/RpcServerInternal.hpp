@@ -44,7 +44,7 @@ class RpcServerInternal
 public:
     RpcServerInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                       const std::string& functionName, const std::string& mediaType,
-                      const std::vector<SilKit::Services::Label>& labels, const std::string& clientUUID,
+                      const std::vector<SilKit::Services::MatchingLabel>& labels, const std::string& clientUUID,
                       SilKit::Services::Rpc::RpcCallHandler handler, IRpcServer* parent);
 
     void SetRpcHandler(RpcCallHandler handler);
@@ -69,7 +69,7 @@ public:
 private:
     std::string _functionName;
     std::string _mediaType;
-    std::vector<SilKit::Services::Label> _labels;
+    std::vector<SilKit::Services::MatchingLabel> _labels;
     std::string _clientUUID;
     RpcCallHandler _handler;
     IRpcServer* _parent;

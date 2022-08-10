@@ -32,7 +32,7 @@ namespace Rpc {
 
 RpcServerInternal::RpcServerInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                                      const std::string& functionName, const std::string& mediaType,
-                                     const std::vector<SilKit::Services::Label>& labels,
+                                     const std::vector<SilKit::Services::MatchingLabel>& labels,
                                      const std::string& clientUUID,
                                      RpcCallHandler handler, IRpcServer* parent)
     : _functionName{functionName}

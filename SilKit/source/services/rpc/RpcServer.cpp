@@ -27,13 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uuid.hpp"
 #include "YamlParser.hpp"
 #include "Assert.hpp"
+#include "LabelMatching.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Rpc {
 
 RpcServer::RpcServer(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                     const SilKit::Services::Rpc::RpcServerSpec& dataSpec, RpcCallHandler handler)
+                     const SilKit::Services::Rpc::RpcSpec& dataSpec, RpcCallHandler handler)
     : _dataSpec{dataSpec}
     , _handler{std::move(handler)}
     , _logger{participant->GetLogger()}
@@ -65,10 +66,10 @@ void RpcServer::RegisterServiceDiscovery()
                 auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
                 std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
                 auto clientLabels =
-                    SilKit::Config::Deserialize<std::vector<SilKit::Services::Label>>(labelsStr);
+                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
                 if (functionName == _dataSpec.Topic() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
-                    && MatchLabels(_dataSpec.Labels(), clientLabels))
+                    && Util::MatchLabels(_dataSpec.Labels(), clientLabels))
                 {
                     AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
                 }
@@ -106,7 +107,7 @@ void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_
 }
 
 void RpcServer::AddInternalRpcServer(const std::string& clientUUID, std::string joinedMediaType,
-                                     const std::vector<SilKit::Services::Label>& clientLabels)
+                                     const std::vector<SilKit::Services::MatchingLabel>& clientLabels)
 {
     auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
         _dataSpec.Topic(), clientUUID, joinedMediaType, clientLabels, _handler, this));

@@ -10,6 +10,11 @@ RPC (Remote Procedure Call) API
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<SilKit::Services::Rpc::IRpcServer::SubmitResult()>`
 .. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<SilKit::Services::Rpc::IRpcServer::SetCallHandler()>`
 .. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<SilKit::Services::Rpc::IRpcClient::SetCallResultHandler()>`
+
+.. |RpcSpec| replace:: :cpp:class:`RpcSpec<SilKit::Services::Rpc::RpcSpec>`
+.. |AddLabel| replace:: :cpp:func:`AddLabel()<SilKit::Services::Rpc::RpcSpec::AddLabel>`
+.. |MatchingLabel| replace:: :cpp:class:`MatchingLabel<SilKit::Services::MatchingLabel>`
+
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcServer>`
 .. contents::
@@ -19,42 +24,7 @@ RPC (Remote Procedure Call) API
 Using the RPC API
 -----------------
 
-This API provides a client-server model for remote calls with arbitrary argument- and return data. 
-The RpcClient dispatches the call (1) with given argument data. The call arrives remotely and is processed by 
-the handler (2) of the RpcServer, submitting (3) the result back to the RpcClient who gets informed 
-about the incoming return data in his call return handler (4). These steps constitute the core RPC API, where the 
-handlers (2,4) are provided on instantiation and call / submit (1,3) are commands of the RpcClient / RpcServer 
-instances. 
-
-Topic
-~~~~~~~~~~~~~
-
-RpcClients and RpcServers are linked by a string-based topic. For a server to receive a rpc call, the 
-topic must match the function name of the client triggering the call.
-
-Media Type
-~~~~~~~~~~
-
-Both RpcClients and RpcServers define a media type in accordance with
-`RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_, a meta description of the transmitted data.
-It should be used to provide information about the de- / serialization of the underlying user data.
-Just like the function name, the media type has to match between RpcClients / RpcServers for communication to take place.
-An empty string on a RpcClient will match any other media type on a server.
-
-Labels
-~~~~~~
-
-RpcClients and RpcServers can be annotated with string-based key-value pairs (labels).
-Additional to the matching  requirements regarding topic and mediaType, RpcServers will only receive calls by
-RpcClients if their labels conform to the following matching rules:
-
-* A RpcServer without labels matches any other RpcClient.
-* A mandatory label matches, if a label of the same key and value ist found on the corresponding RpcClient.
-* A preferred label matches, if the label key does not exist on the RpcClient or both its key and value are equal.
-
-Usage
-~~~~~
-
+This API provides a client-server model for remote calls with arbitrary argument- and return data.
 The RpcClient and RpcServer interfaces are instantiated from an |IParticipant| interface by calling 
 |CreateRpcClient| and |CreateRpcServer|, respectively. 
 
@@ -71,6 +41,66 @@ The RpcClient receives the call return in a callback which is also specified on 
 be overwritten with |SetCallResultHandler|.
 The callback provides the user context pointer passed to |Call|, the return data and a call status indicating
 success or an error during the procedure.
+
+Topic
+~~~~~~~~~~~~~
+
+RpcClients and RpcServers provide a topic name which is part of their |RpcSpec|. 
+Communications only takes place among RpcClients and RpcServers with the same topic.
+
+Media Type
+~~~~~~~~~~
+
+Both RpcClients and RpcServers define a media type as part of their |RpcSpec|. It is a meta description
+of the transmitted data in accordance to `RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_ and should be used
+to provide infomation about the de- / serialization of the underlying user data. Just like the topic, the media type 
+has to match between RpcClients / RpcServers for communication to take place. An empty string on a RpcClient will 
+match any other media type on a server.
+
+Labels
+~~~~~~
+
+Both RpcClients and RpcServers can be annotated with string-based key-value pairs (labels) which can be either
+mandatory or optional. In addition to the matching requirements given by topic and mediaType, RpcClients and 
+RpcServers will only communicate if their labels conform to the following matching rules:
+
+* A mandatory label matches, if a label of the same key and value is found on the corresponding counterpart.
+* An optional label matches, if the label key does not exist on the counterpart or both its key and value are equal.
+
+The following table shows how RpcClients and RpcServers with matching topics and matching media type would 
+match corresponding to their labels. Note that the label matching is symmetric, so clients and servers
+are interchangeable here.
+
+.. list-table:: Label combinations
+   :header-rows: 1
+
+   * - 
+     - Server {"KeyA", "Val1", Optional}
+     - Server {"KeyA", "Val1", Mandatory}
+   * - Client {}
+     - Match
+     - No Match
+   * - Client {"KeyA", "Val1", Optional}
+     - Match
+     - Match
+   * - Client {"KeyA", "Val2", Optional}
+     - No Match
+     - No Match
+   * - Client {"KeyB", "Val1", Optional}
+     - Match
+     - No Match
+   * - Client {"KeyB", "Val1", Mandatory}
+     - No Match
+     - No Match
+
+The labels are stored in the |RpcSpec|. A |MatchingLabel| can be added via |AddLabel|,
+see the following code snippet:
+
+.. code-block:: cpp
+
+    SilKit::Services::Rpc::RpcSpec clientSpec{"Topic1", "application/json"};
+    clientSpec.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
+    auto* client = participant->CreateRpcClient("ClientCtrl1", clientSpec, callResultHandler);
 
 Error handling
 ~~~~~~~~~~~~~~
@@ -95,7 +125,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
 
     auto participant = SilKit::CreateParticipant(std::move(config), participant_name, registryUri);
 
-    SilKit::Services::Rpc::RpcClientSpec dataSpecClient{"TestFunc", "application/octet-stream"};
+    SilKit::Services::Rpc::RpcSpec dataSpecClient{"TestFunc", "application/octet-stream"};
     auto client = participant->CreateRpcClient("ClientCtrl1", dataSpecClient, 
         [](IRpcClient* client, RpcCallResultEvent event) {
             // handle event.callStatus and/or event.resultData
@@ -113,7 +143,7 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
     // ------------------
 
     auto participant = SilKit::CreateParticipant(std::move(config), participant_name, registryUri);
-    SilKit::Services::Rpc::RpcServerSpec dataSpecServer{"TestFunc", "application/octet-stream"};
+    SilKit::Services::Rpc::RpcSpec dataSpecServer{"TestFunc", "application/octet-stream"};
             
     auto* server = participant->CreateRpcServer("ServerCtrl1", dataSpecServer, 
         [](IRpcServer* server, RpcCallEvent event) {
@@ -144,11 +174,10 @@ Data Structures
 .. doxygenstruct:: SilKit::Services::Rpc::RpcCallResultEvent
    :members:
 
-.. doxygenstruct:: SilKit::Services::Label
+.. doxygenclass:: SilKit::Services::Rpc::RpcSpec
    :members:
 
-.. doxygenclass:: SilKit::Services::Rpc::RpcClientSpec
+.. doxygenstruct:: SilKit::Services::MatchingLabel
    :members:
 
-.. doxygenclass:: SilKit::Services::Rpc::RpcServerSpec
-   :members:
+

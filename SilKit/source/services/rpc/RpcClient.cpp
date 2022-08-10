@@ -47,7 +47,7 @@ auto ToRpcCallStatus(const FunctionCallResponse::Status status) -> RpcCallStatus
 } // namespace
 
 RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                     const SilKit::Services::Rpc::RpcClientSpec& dataSpec, const std::string& clientUUID,
+                     const SilKit::Services::Rpc::RpcSpec& dataSpec, const std::string& clientUUID,
                      RpcCallResultHandler handler)
     : _dataSpec{dataSpec}
     , _clientUUID{clientUUID}

@@ -145,15 +145,13 @@ int main(int argc, char** argv)
 
         if (participantName == "Client")
         {
-            SilKit::Services::Rpc::RpcClientSpec dataSpecAdd100{"Add100", "application/octet-stream"};
-            dataSpecAdd100.AddLabel("KeyA", "ValA");
+            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", "application/octet-stream"};
+            dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Mandatory);
             auto clientA = participant->CreateRpcClient("ClientCtrl1", dataSpecAdd100, &CallReturn);
 
-            SilKit::Services::Rpc::RpcClientSpec dataSpecSort{"Sort", "application/octet-stream"};
-            dataSpecAdd100.AddLabel("KeyC", "ValC");
-            auto clientB =
-                participant->CreateRpcClient("ClientCtrl2", dataSpecSort, &CallReturn);
-
+            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", "application/octet-stream"};
+            dataSpecAdd100.AddLabel("KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Mandatory);
+            auto clientB = participant->CreateRpcClient("ClientCtrl2", dataSpecSort, &CallReturn);
 
             timeSyncService->SetSimulationStepHandler(
                 [clientA, clientB](std::chrono::nanoseconds now,
@@ -166,15 +164,15 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Server")
         {
-            SilKit::Services::Rpc::RpcServerSpec dataSpecAdd100{"Add100", "application/octet-stream"};
-            dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred);
-            dataSpecAdd100.AddLabel("KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Preferred);
+            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", "application/octet-stream"};
+            dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
+            dataSpecAdd100.AddLabel("KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional);
 
             participant->CreateRpcServer("ServerCtrl1", dataSpecAdd100, &RemoteFunc_Add100);
 
-            SilKit::Services::Rpc::RpcServerSpec dataSpecSort{"Sort", "application/octet-stream"};
-            dataSpecSort.AddLabel("KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Preferred);
-            dataSpecSort.AddLabel("KeyD", "ValD", SilKit::Services::MatchingLabel::Kind::Preferred);
+            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", "application/octet-stream"};
+            dataSpecSort.AddLabel("KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Optional);
+            dataSpecSort.AddLabel("KeyD", "ValD", SilKit::Services::MatchingLabel::Kind::Optional);
             participant->CreateRpcServer("ServerCtrl2", dataSpecSort, &RemoteFunc_Sort);
 
             timeSyncService->SetSimulationStepHandler(

@@ -35,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/services/all.hpp"
-#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/pubsub/PubSubSpec.hpp"
 
 #include "ConfigurationTestUtils.hpp"
 
@@ -144,8 +144,8 @@ protected:
                 {SilKit::Services::Orchestration::OperationMode::Coordinated});
             auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
-            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, mediaType};
+            SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
+            SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", matchingDataSpec,
@@ -195,8 +195,8 @@ protected:
         {
             participant.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, mediaType};
-            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{topic, mediaType};
+            SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
+            SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
             participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", matchingDataSpec,

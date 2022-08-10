@@ -67,11 +67,11 @@ class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
     MOCK_METHOD(SilKit::Services::PubSub::IDataPublisher*, CreateDataPublisher,
-                (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::DataPublisherSpec& /*dataSpec*/), size_t /*history*/),
+                (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::PubSubSpec& /*dataSpec*/), size_t /*history*/),
                 (override));
 
     MOCK_METHOD(SilKit::Services::PubSub::IDataSubscriber*, CreateDataSubscriber,
-                (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::DataSubscriberSpec& /*dataSpec*/),
+                (const std::string& /*canonicalName*/, (const SilKit::Services::PubSub::PubSubSpec& /*dataSpec*/),
                  (SilKit::Services::PubSub::DataMessageHandler /*dataMessageHandler*/)),
                 (override));
 };
@@ -110,7 +110,7 @@ public:
     CapiDataTest()
     {
         uint32_t numLabels = 1;
-        SilKit_Label labels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Preferred}};
+        SilKit_Label labels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Optional}};
         Create_Labels(&labelList, labels, numLabels);
 
         mediaType = "A";

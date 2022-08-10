@@ -178,14 +178,14 @@ public:
     virtual auto CreateDataSubscriberInternal(
         const std::string& topic, const std::string& linkName,
         const std::string& mediaType,
-        const std::vector<SilKit::Services::Label>& publisherLabels,
+        const std::vector<SilKit::Services::MatchingLabel>& publisherLabels,
         Services::PubSub::DataMessageHandler callback,
         Services::PubSub::IDataSubscriber* parent) -> Services::PubSub::DataSubscriberInternal*  = 0;
 
     // Internal Rpc server that is only created on a matching rpc connection
     virtual auto CreateRpcServerInternal(const std::string& functionName, const std::string& linkName,
                                          const std::string& mediaType,
-                                         const std::vector<SilKit::Services::Label>& labels,
+                                         const std::vector<SilKit::Services::MatchingLabel>& labels,
                                          Services::Rpc::RpcCallHandler handler, Services::Rpc::IRpcServer* parent)
         -> SilKit::Services::Rpc::RpcServerInternal* = 0;
 

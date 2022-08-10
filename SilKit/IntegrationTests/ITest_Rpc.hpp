@@ -51,7 +51,7 @@ protected:
     struct RpcClientInfo
     {
         RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName,
-                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      const std::string& newMediaType, const std::vector<SilKit::Services::MatchingLabel>& newLabels,
                       size_t newMessageSizeInBytes, uint32_t newNumCalls, uint32_t newNumCallsToReturn)
         {
             expectIncreasingData = true;
@@ -65,7 +65,7 @@ protected:
         }
 
         RpcClientInfo(const std::string& newControllerName, const std::string& newFunctionName,
-                      const std::string& newMediaType, const std::map<std::string, std::string>& newLabels,
+                      const std::string& newMediaType, const std::vector<SilKit::Services::MatchingLabel>& newLabels,
                       size_t newMessageSizeInBytes, uint32_t newNumCalls, uint32_t newNumCallsToReturn,
                       const std::vector<std::vector<uint8_t>>& newExpectedReturnDataUnordered)
         {
@@ -84,7 +84,7 @@ protected:
         std::string controllerName;
         std::string functionName;
         std::string mediaType;
-        std::map<std::string, std::string> labels;
+        std::vector<SilKit::Services::MatchingLabel> labels;
         size_t messageSizeInBytes;
         uint32_t numCalls;
         uint32_t numCallsToReturn;
@@ -354,19 +354,22 @@ protected:
 
         void OnNewServiceDiscovery(const SilKit::Core::ServiceDescriptor sd)
         {
-            std::string functionName = sd.GetSupplementalData()["Rpc::server::functionName"];
-            auto foundFunctionNameIter =
-                std::find(expectedFunctionNames.begin(), expectedFunctionNames.end(), functionName);
-            if (foundFunctionNameIter != expectedFunctionNames.end())
+            if (!allDiscovered)
             {
-                expectedFunctionNames.erase(foundFunctionNameIter);
-            }
+                std::string functionName =
+                    sd.GetSupplementalData()[SilKit::Core::Discovery::supplKeyRpcServerFunctionName];
+                auto foundFunctionNameIter =
+                    std::find(expectedFunctionNames.begin(), expectedFunctionNames.end(), functionName);
+                if (foundFunctionNameIter != expectedFunctionNames.end())
+                {
+                    expectedFunctionNames.erase(foundFunctionNameIter);
+                }
 
-            if (expectedFunctionNames.empty())
-            {
-                expectedFunctionNames.push_back("AlreadyTriggered");
-                allDiscovered = true;
-                allDiscoveredPromise.set_value();
+                if (expectedFunctionNames.empty())
+                {
+                    allDiscovered = true;
+                    allDiscoveredPromise.set_value();
+                }
             }
         }
     };
@@ -376,7 +379,7 @@ protected:
             try
             {
                 participant.participant = SilKit::CreateParticipant(
-                    SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Services::Logging::Level::Info),
+                    SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Services::Logging::Level::Warn),
                     participant.name, registryUri);
                 participant.participantImpl =
                     dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.participant.get());
@@ -407,10 +410,10 @@ protected:
                         participant.CheckAllCallsReturnedPromise();
                     };
 
-                    SilKit::Services::Rpc::RpcClientSpec dataSpec{c->info.functionName, c->info.mediaType};
+                    SilKit::Services::Rpc::RpcSpec dataSpec{c->info.functionName, c->info.mediaType};
                     for (const auto& label : c->info.labels)
                     {
-                        dataSpec.AddLabel(label.first, label.second);
+                        dataSpec.AddLabel(label);
                     }
 
                     c->rpcClient =
@@ -436,7 +439,7 @@ protected:
                         participant.CheckAllCallsReceivedPromise();
                     };
 
-                    SilKit::Services::Rpc::RpcServerSpec dataSpec{s->info.functionName, s->info.mediaType};
+                    SilKit::Services::Rpc::RpcSpec dataSpec{s->info.functionName, s->info.mediaType};
                     for (const auto& label : s->info.labels)
                     {
                         dataSpec.AddLabel(label);

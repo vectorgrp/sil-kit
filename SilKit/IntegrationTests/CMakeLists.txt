@@ -59,7 +59,7 @@ add_silkit_test(ITest_ThreeCanController
 
 add_silkit_test(FTest_CanControllerThreadSafety
     SOURCES
-      ITest_CanControllerThreadSafety.cpp
+      FTest_CanControllerThreadSafety.cpp
     LIBS
         SilKit
         SilKitConfigurationTestUtils

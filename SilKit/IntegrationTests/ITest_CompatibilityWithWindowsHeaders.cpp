@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/string_utils.hpp"
 
 #include "silkit/services/all.hpp"
-#include "silkit/services/exceptions.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/services/can/string_utils.hpp"
 #include "silkit/services/ethernet/string_utils.hpp"
 #include "silkit/services/flexray/string_utils.hpp"

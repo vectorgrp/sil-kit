@@ -45,7 +45,7 @@ class DataSubscriber
 {
 public:
     DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                   const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+                   const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                    DataMessageHandler defaultDataHandler);
 
 public:
@@ -62,7 +62,7 @@ public:
 
 private:
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
-        const std::vector<SilKit::Services::Label>& publisherLabels);
+        const std::vector<SilKit::Services::MatchingLabel>& publisherLabels);
 
     void RemoveInternalSubscriber(const std::string& pubUUID);
 
@@ -71,7 +71,6 @@ private:
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
     DataMessageHandler _defaultDataHandler;
-    NewDataPublisherHandler _newDataSourceHandler;
 
     Core::ServiceDescriptor _serviceDescriptor{};
 
@@ -79,8 +78,6 @@ private:
 
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
-
-    std::unordered_set<SourceInfo, SourceInfo::HashFunction> _announcedDataSources;
 
     mutable std::recursive_mutex _internalSubscribersMx;
 };

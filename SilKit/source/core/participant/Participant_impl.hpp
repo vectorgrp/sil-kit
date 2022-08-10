@@ -309,7 +309,7 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::string& topic, const std::string& linkName,
                                                              const std::string& mediaType,
-                                                             const std::vector<SilKit::Services::Label>& publisherLabels,
+                                                             const std::vector<SilKit::Services::MatchingLabel>& publisherLabels,
                                                              Services::PubSub::DataMessageHandler defaultHandler,
                                                              Services::PubSub::IDataSubscriber* parent)
     -> Services::PubSub::DataSubscriberInternal*
@@ -330,7 +330,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& canonicalName,
-                                                         const SilKit::Services::PubSub::DataPublisherSpec& dataSpec,
+                                                         const SilKit::Services::PubSub::PubSubSpec& dataSpec,
     size_t history) -> Services::PubSub::IDataPublisher*
 {
     if (history > 1)
@@ -365,20 +365,21 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateDataSubscriber(
-    const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+    const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
     SilKit::Services::PubSub::DataMessageHandler defaultDataHandler) -> Services::PubSub::IDataSubscriber*
 {
+    // DataSubscriber has no registered messages (discovers DataPublishers and creates DataSubscriberInternal),
+    // so the network name is irrelevant.
+    auto network = "default";
+
     SilKit::Config::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
     
-    SilKit::Services::PubSub::DataSubscriberSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
+    SilKit::Services::PubSub::PubSubSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
     for (auto label : dataSpec.Labels())
     {
         configuredDataNodeSpec.AddLabel(label);
     }
-
-    // Use unique network name that same topic for multiple DataSubscribers on one participant works
-    std::string network = to_string(Util::Uuid::GenerateRandom());
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriber;
@@ -395,7 +396,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& functionName, const std::string& clientUUID,
                                                          const std::string& mediaType,
-                                                         const std::vector<SilKit::Services::Label>& clientLabels,
+                                                         const std::vector<SilKit::Services::MatchingLabel>& clientLabels,
                                                          Services::Rpc::RpcCallHandler handler,
                                                          Services::Rpc::IRpcServer* parent) -> Services::Rpc::RpcServerInternal*
 {
@@ -418,9 +419,10 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonicalName,
-                                                     const SilKit::Services::Rpc::RpcClientSpec& dataSpec,
+                                                     const SilKit::Services::Rpc::RpcSpec& dataSpec,
                                                  Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient*
 {
+    // RpcClient communicates on a unique network
     auto network = to_string(Util::Uuid::GenerateRandom());
 
     SilKit::Config::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
@@ -436,7 +438,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientLabels] = labelStr;
     supplementalData[SilKit::Core::Discovery::supplKeyRpcClientUUID] = network;
 
-    SilKit::Services::Rpc::RpcClientSpec configuredDataSpec{controllerConfig.functionName.value(), dataSpec.MediaType()};
+    SilKit::Services::Rpc::RpcSpec configuredDataSpec{controllerConfig.functionName.value(), dataSpec.MediaType()};
     for (auto label : dataSpec.Labels())
     {
         configuredDataSpec.AddLabel(label);
@@ -454,25 +456,22 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
 
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonicalName,
-                                                     const SilKit::Services::Rpc::RpcServerSpec& dataSpec,
+                                                     const SilKit::Services::Rpc::RpcSpec& dataSpec,
                                                  Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer*
 {
-    // Use unique network name that same functionName for multiple RpcServers on one participant works
-    std::string network = to_string(Util::Uuid::GenerateRandom());
+    // RpcServer has no registered messages (discovers RpcClients and creates RpcServerInternal),
+    // so the network name is irrelevant.
+    auto network = "default";
 
     SilKit::Config::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.Topic());
 	
-    // RpcServer announces himself to be found by DiscoverRpcServers()
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;
+    // Needed for RpcServer discovery in tests
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = dataSpec.MediaType();
-    auto labels = dataSpec.Labels();
-    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
-    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] = labelStr;
 
-    SilKit::Services::Rpc::RpcServerSpec configuredDataSpec{controllerConfig.functionName.value(),
+    SilKit::Services::Rpc::RpcSpec configuredDataSpec{controllerConfig.functionName.value(),
                                                                   dataSpec.MediaType()};
     for (auto label : dataSpec.Labels())
     {

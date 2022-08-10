@@ -34,7 +34,7 @@ namespace Rpc {
 bool MatchMediaType(const std::string& clientMediaType, const std::string& serverMediaType);
 
 bool MatchLabels(const std::vector<SilKit::Services::MatchingLabel>& subscriberLabels,
-                 const std::vector<SilKit::Services::Label>& publisherLabels);
+                 const std::vector<SilKit::Services::MatchingLabel>& publisherLabels);
 
 
 } // namespace Rpc

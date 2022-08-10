@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/util/serdes/sil/Serialization.hpp"
-#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/pubsub/PubSubSpec.hpp"
 
 
 using namespace SilKit::Services::PubSub;
@@ -62,23 +62,25 @@ void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dat
 
 /*
 PubSub1
-Pub: "Topic1", "A" -> Subscriber1
-Pub: "Topic2", "A" -> Subscriber1, Subscriber2
-Sub: "Topic3", "A" <- PubSub2
+Pub: "Topic1", "A"                                  -> Subscriber1
+Pub: "Topic2", "A"                                  -> Subscriber1, Subscriber2
+Sub: "Topic3", "A"                                  <- PubSub2
+Sub: "Topic4", "A", {"KeyA", "ValA", Mandatory}     <- PubSub2
 
 PubSub2
-Pub: "Topic1", "A" -> Subscriber1
-Pub: "Topic3", "A" -> PubSub1, PubSub2
-Sub: "Topic3", "A" <- PubSub2                           (self)
+Pub: "Topic1", "A"                                  -> Subscriber1
+Pub: "Topic3", "A"                                  -> PubSub1, PubSub2
+Sub: "Topic3", "A"                                  <- PubSub2                        
+Pub: "Topic4", "A", {"KeyA", "ValA", Optional}      -> PubSub1
 
 Subscriber1
-Sub: "Topic1", ""  <- PubSub1, PubSub2                  (two pub)
-Sub: "Topic2", "A" <- PubSub1                           (single pub)
+Sub: "Topic1", ""                                   <- PubSub1, PubSub2               
+Sub: "Topic2", "A"                                  <- PubSub1                        
+Sub: "Topic4", "A"                                  <- PubSub2
 
 Subscriber2
-Sub: "Topic2", "A" <- PubSub1                           (single pub)
-Sub: "Topic3", "B" <- None                              (no match)
-
+Sub: "Topic2", "A"                                  <- PubSub1                        
+Sub: "Topic3", "B"                                  <- None                           
 
 */
 
@@ -92,9 +94,9 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    std::string mediaTypeAll{""};
-    std::string mediaTypeA{"A"};
-    std::string mediaTypeB{"B"};
+    std::string mediaTypeWildcard{""};
+    std::string mediaTypeJson{"application/json"};
+    std::string mediaTypeText{"text/plain"};
 
     std::map<std::string, std::string> labelsEmpty;
 
@@ -131,14 +133,18 @@ int main(int argc, char** argv)
 
         if (participantName == "PubSub1")
         {
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec1{"Topic1", mediaTypeA};
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec2{"Topic2", mediaTypeA};
-            SilKit::Services::PubSub::DataSubscriberSpec dataSpec3{"Topic3", mediaTypeA};
+            SilKit::Services::PubSub::PubSubSpec dataSpecPub1{"Topic1", mediaTypeJson};
+            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpecPub1, 0);
 
-            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpec1, 0);
-            auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", dataSpec2, 0);
+            SilKit::Services::PubSub::PubSubSpec dataSpecPub2{"Topic2", mediaTypeJson};
+            auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", dataSpecPub2, 0);
 
-            participant->CreateDataSubscriber("SubCtrl1", dataSpec3, ReceiveMessage);
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic3", mediaTypeJson};
+            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
+
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub2{"Topic4", mediaTypeJson};
+            dataSpecSub2.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Mandatory);
+            participant->CreateDataSubscriber("SubCtrl2", dataSpecSub2, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -152,31 +158,40 @@ int main(int argc, char** argv)
         }
         else if (participantName == "PubSub2")
         {
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec1{"Topic1", mediaTypeA};
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec2{"Topic3", mediaTypeA};
-            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec2{"Topic3", mediaTypeA};
 
-            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpec1, 0);
-            auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", dataSpec2, 0);
+            SilKit::Services::PubSub::PubSubSpec dataSpecPub1{"Topic1", mediaTypeJson};
+            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpecPub1, 0);
 
-            participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec2, ReceiveMessage);
+            SilKit::Services::PubSub::PubSubSpec dataSpecPub2{"Topic3", mediaTypeJson};
+            auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", dataSpecPub2, 0);
+
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic3", mediaTypeJson};
+            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
+
+            SilKit::Services::PubSub::PubSubSpec dataSpecPub3{"Topic4", mediaTypeJson};
+            dataSpecPub3.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
+            auto* PubTopic4 = participant->CreateDataPublisher("PubCtrl3", dataSpecPub3, 0);
 
             timeSyncService->SetSimulationStepHandler(
-                [PubTopic1, PubTopic3](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                [PubTopic1, PubTopic3, PubTopic4](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                     PublishMessage(PubTopic1, "Topic1_from_Pub2");
                     PublishMessage(PubTopic3, "Topic3_from_Pub2");
+                    PublishMessage(PubTopic4, "Topic4_from_Pub2");
                     std::this_thread::sleep_for(1s);
                 }, 1s);
         }
         else if (participantName == "Subscriber1")
         {
-            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec1{"Topic1", mediaTypeAll};
-            SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec2{"Topic2", mediaTypeA};
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic1", mediaTypeWildcard};
+            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
 
-            participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec1, ReceiveMessage);
-            participant->CreateDataSubscriber("SubCtrl2", matchingDataSpec2, ReceiveMessage);
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub2{"Topic2", mediaTypeJson};
+            participant->CreateDataSubscriber("SubCtrl2", dataSpecSub2, ReceiveMessage);
+
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub3{"Topic4", mediaTypeJson};
+            participant->CreateDataSubscriber("SubCtrl3", dataSpecSub3, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -187,11 +202,11 @@ int main(int argc, char** argv)
         }
         else if (participantName == "Subscriber2")
         {
-            SilKit::Services::PubSub::DataSubscriberSpec dataSpec1{"Topic2", mediaTypeA};
-            SilKit::Services::PubSub::DataSubscriberSpec dataSpec2{"Topic3", mediaTypeB};
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic2", mediaTypeJson};
+            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
 
-            participant->CreateDataSubscriber("SubCtrl1", dataSpec1, ReceiveMessage);
-            participant->CreateDataSubscriber("SubCtrl2", dataSpec2, ReceiveMessage);
+            SilKit::Services::PubSub::PubSubSpec dataSpecSub2{"Topic3", mediaTypeText};
+            participant->CreateDataSubscriber("SubCtrl2", dataSpecSub2, ReceiveMessage);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {

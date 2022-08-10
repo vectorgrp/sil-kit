@@ -26,25 +26,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
+using namespace SilKit::Services;
+
 //--------------------------------------
 // Sync tests: Publish in SimulationTask
-//--------------------------------------
-
-// One publisher participant, one subscriber participant
-TEST_F(ITest_DataPubSub, test_1pub_1sub_delayed_default_handler)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = numMsgToPublish;
-
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    PubSubParticipant subscriber{
-        "Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}};
-    subscriber.delayedDefaultDataHandler = true;
-    pubsubs.push_back(std::move(subscriber));
-
-    RunSyncTest(pubsubs);
-}
 
 // One publisher participant, one subscriber participant
 TEST_F(ITest_DataPubSub, test_1pub_1sub_sync)
@@ -59,8 +44,23 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_sync)
     RunSyncTest(pubsubs);
 }
 
+// Using SetDefaultHandler()
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_delayed_default_handler)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    PubSubParticipant subscriber{"Sub1", {}, {{"SubCtrl1", "TopicA", {"A"}, {}, defaultMsgSize, numMsgToReceive, 1}}};
+    subscriber.delayedDefaultDataHandler = true;
+    pubsubs.push_back(std::move(subscriber));
+
+    RunSyncTest(pubsubs);
+}
+
 // Two mixed pub/sub participants
-TEST_F(ITest_DataPubSub, test_2_mixed_participants)
+TEST_F(ITest_DataPubSub, test_2_mixed_participants_sync)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -81,8 +81,8 @@ TEST_F(ITest_DataPubSub, test_2_mixed_participants)
     RunSyncTest(pubsubs);
 }
 
-// Two mixed pub/sub participants with configuration
-TEST_F(ITest_DataPubSub, test_2_mixed_participants_configured)
+// Two mixed pub/sub participants with YAML configuration
+TEST_F(ITest_DataPubSub, test_2_mixed_participants_sync_configured)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -137,7 +137,7 @@ DataSubscribers:
 }
 
 // Large messages
-TEST_F(ITest_DataPubSub, test_1pub_1sub_largemsg_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_largemsg)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -150,53 +150,8 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_largemsg_sync)
     RunSyncTest(pubsubs);
 }
 
-// Two publishers/subscribers with same topic on one participant
-TEST_F(ITest_DataPubSub, test_1pub_1sub_sametopic_sync)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = numMsgToPublish * 2;
-    // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
-    // so only one call of the newSourceDiscoveryHandler is expected
-    const uint32_t numNewSourceDiscoveries = 1; 
-    
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1",
-                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
-                        {"PubCtrl2", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
-                       {}});
-
-    std::vector<std::vector<uint8_t>> expectedDataUnordered;
-    for (uint8_t d = 0; d < numMsgToPublish; d++)
-    {
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
-    }
-
-    pubsubs.push_back({"Sub1",
-                       {},
-                       {{"SubCtrl1",
-                         "TopicA",
-                         {"A"},
-                         {},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         numNewSourceDiscoveries,
-                         expectedDataUnordered},
-                        {"SubCtrl2",
-                         "TopicA",
-                         {"A"},
-                         {},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         numNewSourceDiscoveries,
-                         expectedDataUnordered}}});
-
-    RunSyncTest(pubsubs);
-}
-
-
 // 100 topics on one publisher/subscriber participant
-TEST_F(ITest_DataPubSub, test_1pub_1sub_100topics_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_100topics)
 {
     const uint32_t numMsgToPublish = 1;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -219,7 +174,6 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_100topics_sync)
 
     RunSyncTest(pubsubs);
 }
-
 
 // One publisher participant, two subscribers participants on same topic
 TEST_F(ITest_DataPubSub, test_1pub_2sub_sync)
@@ -267,8 +221,52 @@ TEST_F(ITest_DataPubSub, test_2pub_1sub_sync)
     RunSyncTest(pubsubs);
 }
 
+// Two publishers/subscribers with same topic on one participant
+TEST_F(ITest_DataPubSub, test_2pub_2sub_sync_sametopic)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish * 2;
+    // PubCtrl1 and PubCtrl2 have the same Topic, mediatype and labels,
+    // so only one call of the newSourceDiscoveryHandler is expected
+    const uint32_t numNewSourceDiscoveries = 1;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish},
+                        {"PubCtrl2", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},
+                       {}});
+
+    std::vector<std::vector<uint8_t>> expectedDataUnordered;
+    for (uint8_t d = 0; d < numMsgToPublish; d++)
+    {
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+        expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
+    }
+
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSourceDiscoveries,
+                         expectedDataUnordered},
+                        {"SubCtrl2",
+                         "TopicA",
+                         {"A"},
+                         {},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         numNewSourceDiscoveries,
+                         expectedDataUnordered}}});
+
+    RunSyncTest(pubsubs);
+}
+
 // Seven participants, multiple topics
-TEST_F(ITest_DataPubSub, test_3pub_4sub_4topics_sync)
+TEST_F(ITest_DataPubSub, test_3pub_4sub_sync_4topics)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = numMsgToPublish;
@@ -306,8 +304,11 @@ TEST_F(ITest_DataPubSub, test_3pub_4sub_4topics_sync)
     RunSyncTest(pubsubs);
 }
 
+//--------------------------------------
+// Topics
+
 // Wrong topic -> Expect no reception
-TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_topic_sync)
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_wrong_topic)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
@@ -319,121 +320,17 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_topic_sync)
     RunSyncTest(pubsubs);
 }
 
-// Matching labels
-TEST_F(ITest_DataPubSub, test_1pub_1sub_label_sync_mandatory)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = numMsgToPublish;
+//--------------------------------------
+// Mediatype
 
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"kA", "vA"}, {"kB", "vB"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Sub1",
-                       {},
-                       {{"SubCtrl1",
-                         "TopicA",
-                         {"A"},
-                         {{"kA", "vA", SilKit::Services::MatchingLabel::Kind::Mandatory},
-                          {"kB", "vB", SilKit::Services::MatchingLabel::Kind::Mandatory}},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         1}}});
-
-    RunSyncTest(pubsubs);
-}
-
-TEST_F(ITest_DataPubSub, test_1pub_1sub_label_sync_preferred_missing_label)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = numMsgToPublish;
-
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back(
-        {"Pub1",
-         {{"PubCtrl1", "TopicA", {"A"}, {{"kA", "vA"}}, 0, defaultMsgSize, numMsgToPublish}},
-         {}});
-    pubsubs.push_back({"Sub1",
-                       {},
-                       {{"SubCtrl1",
-                         "TopicA",
-                         {"A"},
-                         {{"kA", "vA", SilKit::Services::MatchingLabel::Kind::Preferred},
-                          {"kB", "vB", SilKit::Services::MatchingLabel::Kind::Preferred}},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         1}}});
-
-    RunSyncTest(pubsubs);
-}
-
-// Wrong label value -> Expect no reception
-TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_labels_sync_mandatory)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = 0;
-
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"k", "v"}}, 0, defaultMsgSize, numMsgToPublish}},{}});
-    pubsubs.push_back({"Sub1",
-                       {},
-                       {{"SubCtrl1",
-                         "TopicA",
-                         {"B"},
-                         {{"k", "wrong", SilKit::Services::MatchingLabel::Kind::Mandatory}},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         0}}});
-
-    RunSyncTest(pubsubs);
-}
-
-TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_labels_sync_mandatory_missing)
+// Different mediatypes -> Expect no reception
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_wrong_mediatype)
 {
     const uint32_t numMsgToPublish = defaultNumMsgToPublish;
     const uint32_t numMsgToReceive = 0;
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({"Sub1",
-                       {},
-                       {{"SubCtrl1",
-                         "TopicA",
-                         {"B"},
-                         {{"k", "wrong", SilKit::Services::MatchingLabel::Kind::Mandatory}},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         0}}});
-
-    RunSyncTest(pubsubs);
-}
-
-TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_labels_sync_preferred)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = 0;
-
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {{"k", "v"}}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({"Sub1",
-                       {},
-                       {{"SubCtrl1",
-                         "TopicA",
-                         {"B"},
-                         {{"k", "wrong", SilKit::Services::MatchingLabel::Kind::Preferred}},
-                         defaultMsgSize,
-                         numMsgToReceive,
-                         0}}});
-
-    RunSyncTest(pubsubs);
-}
-
-// Wrong mediatype -> Expect no reception
-TEST_F(ITest_DataPubSub, test_1pub_1sub_wrong_mediatype_sync)
-{
-    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
-    const uint32_t numMsgToReceive = 0;
-
-    std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}},{}});
     pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"B"}, {}, defaultMsgSize, numMsgToReceive, 0}}});
 
     RunSyncTest(pubsubs);
@@ -446,15 +343,175 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_wildcard_mediatype_sync)
     const uint32_t numMsgToReceive = numMsgToPublish;
 
     std::vector<PubSubParticipant> pubsubs;
-    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA",  {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
-    pubsubs.push_back({ "Sub1", {}, {{"SubCtrl1", "TopicA", {""}, {}, defaultMsgSize, numMsgToReceive, 1}} });
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {""}, {}, defaultMsgSize, numMsgToReceive, 1}}});
+
+    RunSyncTest(pubsubs);
+}
+
+//--------------------------------------
+// Labels
+
+// Matching mandatory labels
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_mandatory_label)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Mandatory}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Mandatory}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         1}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Wrong mandatory label value -> Expect no reception
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_wrong_mandatory_label_value)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = 0;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"k", "v", MatchingLabel::Kind::Mandatory}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"B"},
+                         {{"k", "wrong", MatchingLabel::Kind::Mandatory}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         0}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Wrong optional label value -> Expect no reception
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_wrong_optional_label_value)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = 0;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"k", "v", MatchingLabel::Kind::Optional}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"B"},
+                         {{"k", "wrong", MatchingLabel::Kind::Optional}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         0}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Missing optional label -> Ok
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_missing_optional_label)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Optional}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Optional}, {"kB", "vB", MatchingLabel::Kind::Optional}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         1}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Missing mandatory label on pub -> Expect no reception
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_missing_mandatory_label_pub)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = 0;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1", {{"PubCtrl1", "TopicA", {"A"}, {}, 0, defaultMsgSize, numMsgToPublish}}, {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"B"},
+                         {{"k", "v", MatchingLabel::Kind::Mandatory}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         0}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Missing mandatory label on sub -> Expect no reception
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_missing_mandatory_label_sub)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = 0;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"k", "v", MatchingLabel::Kind::Mandatory}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1", {}, {{"SubCtrl1", "TopicA", {"B"}, {}, defaultMsgSize, numMsgToReceive, 0}}});
 
     RunSyncTest(pubsubs);
 }
 
 //--------------------
-// Self-delivery tests
-//--------------------
+// Self-delivery 
 
 // 1 pub, 1 sub on a single participant
 TEST_F(ITest_DataPubSub, test_1_participant_selfdelivery)

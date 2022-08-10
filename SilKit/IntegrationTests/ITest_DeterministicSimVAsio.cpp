@@ -80,7 +80,7 @@ public:
         _lifecycleService =
             _participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
         auto* timeSyncService = _lifecycleService->CreateTimeSyncService();
-        SilKit::Services::PubSub::DataPublisherSpec dataSpec{topicName, {}};
+        SilKit::Services::PubSub::PubSubSpec dataSpec{topicName, {}};
         auto* publisher = _participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
         timeSyncService->SetSimulationStepHandler(
             [this, publisher](const nanoseconds now, nanoseconds /*duration*/) {
@@ -155,9 +155,9 @@ public:
 
         for (auto publisherIndex = 0u; publisherIndex < _publisherCount; publisherIndex++)
         {
-            SilKit::Services::PubSub::DataSubscriberSpec dataSpec{"Topic" + std::to_string(publisherIndex), {}};
+            SilKit::Services::PubSub::PubSubSpec dataSpec{"Topic" + std::to_string(publisherIndex), {}};
             _participant->CreateDataSubscriber(
-                "SubCtrl1", dataSpec,
+                "SubCtrl" + std::to_string(publisherIndex), dataSpec,
                 [this, publisherIndex](IDataSubscriber* subscriber, const DataMessageEvent& dataMessageEvent) {
                     ReceiveMessage(subscriber, dataMessageEvent, publisherIndex);
                 });

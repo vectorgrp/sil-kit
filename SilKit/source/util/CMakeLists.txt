@@ -55,3 +55,18 @@ add_library(SilKitUuid STATIC
 target_include_directories(SilKitUuid
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
+
+add_library(SilKitLabelMatching STATIC
+    LabelMatching.hpp
+    LabelMatching.cpp
+)
+target_include_directories(SilKitLabelMatching
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)
+target_link_libraries(SilKitLabelMatching
+    PRIVATE SilKitInterface)
+
+add_silkit_test(Test_LabelMatching
+    SOURCES Test_LabelMatching.cpp 
+    LIBS SilKitLabelMatching
+)

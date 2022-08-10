@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
-#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
 #include "Configuration.hpp"

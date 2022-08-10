@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
         const char* mediaType = "application/octet-stream";
         SilKit_LabelList* serverLabelList;
         size_t numServerLabels = 1;
-        SilKit_Label serverLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Preferred}};
+        SilKit_Label serverLabels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Optional}};
         Create_Labels(&serverLabelList, serverLabels, numServerLabels);
 
         SilKit_RpcSpec rpcSpec;

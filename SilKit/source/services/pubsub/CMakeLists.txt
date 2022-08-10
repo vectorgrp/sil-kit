@@ -44,6 +44,7 @@ target_link_libraries(SilKitSimDataMessage
             SilKitInternal
             SilKitConfiguration
             SilKitUtil
+            SilKitLabelMatching
 )
 
 add_silkit_test(Test_SimDataPublisher 

@@ -31,7 +31,7 @@ namespace {
 //--------------------------------------
 
 // One client participant, one server participant
-TEST_F(ITest_Rpc, test_1client_1server_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -63,7 +63,7 @@ TEST_F(ITest_Rpc, test_2_mixed_participants)
 }
 
 // Large messages
-TEST_F(ITest_Rpc, test_1client_1server_largemsg_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync_largemsg)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -77,7 +77,7 @@ TEST_F(ITest_Rpc, test_1client_1server_largemsg_sync_vasio)
 }
 
 // 100 functions and one client/server participant
-TEST_F(ITest_Rpc, test_1client_1server_100functions_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync_100functions)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -104,7 +104,7 @@ TEST_F(ITest_Rpc, test_1client_1server_100functions_sync_vasio)
 }
 
 // Two clients/servers with same functionName on one participant
-TEST_F(ITest_Rpc, test_1client_1server_samefunctionname_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync_samefunctionname)
 {
     const uint32_t numCallsToReceive = defaultNumCalls * 2;
     const uint32_t numCallsToReturn = defaultNumCalls * 2;
@@ -119,7 +119,7 @@ TEST_F(ITest_Rpc, test_1client_1server_samefunctionname_sync_vasio)
 
     rpcs.push_back({ "Client1", {},
                        {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered},
-                        {"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}},
+                        {"ClientCtrl2", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}},
                        {"TestFuncA"}});
 
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
@@ -138,7 +138,7 @@ TEST_F(ITest_Rpc, test_1client_1server_samefunctionname_sync_vasio)
 
 
 // One client participant, two server participants
-TEST_F(ITest_Rpc, test_1client_2server_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_2server_sync)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls*2;
@@ -159,7 +159,7 @@ TEST_F(ITest_Rpc, test_1client_2server_sync_vasio)
 }
 
 // Two client participants, one server participant
-TEST_F(ITest_Rpc, test_Nclient_1server_sync_vasio)
+TEST_F(ITest_Rpc, test_Nclient_1server_sync)
 {
     const uint32_t numClients = 2;
     const uint32_t numCallsToReceive = defaultNumCalls * numClients;
@@ -169,7 +169,10 @@ TEST_F(ITest_Rpc, test_Nclient_1server_sync_vasio)
     for (uint32_t i = 0; i < numClients; i++)
     {
         std::string participantName = "Client" + std::to_string(i+1);
-        rpcs.push_back({ participantName, {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA"} });
+        rpcs.push_back({participantName,
+                        {},
+                        {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                        {"TestFuncA"}});
     }
     
     std::vector<std::vector<uint8_t>> expectedDataUnordered;
@@ -180,73 +183,50 @@ TEST_F(ITest_Rpc, test_Nclient_1server_sync_vasio)
             expectedDataUnordered.emplace_back(std::vector<uint8_t>(defaultMsgSize, d));
         }
     }
-    rpcs.push_back({ "Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}}, {}, {} });
+    rpcs.push_back({"Server1",
+                    {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}},
+                    {},
+                    {}});
 
     RunSyncTest(rpcs);
 }
 
 // Wrong functionName on server2
-TEST_F(ITest_Rpc, test_1client_2server_wrongFunctionName_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_2server_sync_wrongFunctionName)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncB"} });
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA", "TestFuncB"}});
     rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
-    rpcs.push_back({"Server2", {{"ServerCtrl1", "TestFuncB", "A", {}, defaultMsgSize, 0}}, {}, {} });
+    rpcs.push_back({"Server2", {{"ServerCtrl1", "TestFuncB", "A", {}, defaultMsgSize, 0}}, {}, {}});
 
     RunSyncTest(rpcs);
 }
 
 // Wrong mediaType on server2
-TEST_F(ITest_Rpc, test_1client_1server_wrongDataMediaType_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync_wrongDataMediaType)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls; 
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({"Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncA"} });
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA", "TestFuncA"}});
     rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
     rpcs.push_back({"Server2", {{"ServerCtrl1", "TestFuncA", "B", {}, defaultMsgSize, 0}}, {}, {}});
 
     RunSyncTest(rpcs);
 }
 
-// Wrong labels on server2
-TEST_F(ITest_Rpc, test_1client_1server_wrongLabels_sync_vasio)
-{
-    const uint32_t numCallsToReceive = defaultNumCalls;
-    const uint32_t numCallsToReturn = defaultNumCalls;
-
-    std::vector<RpcParticipant> rpcs;
-    rpcs.push_back(
-        { "Client1", {}, {{"ClientCtrl1", "TestFuncA", "A", {{"KeyA", "ValA"},{"KeyB", "ValB"}}, defaultMsgSize, defaultNumCalls, numCallsToReturn}}, {"TestFuncA", "TestFuncA"} });
-    rpcs.push_back({"Server1",
-                    {{"ServerCtrl1",
-                      "TestFuncA",
-                      "A",
-                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred},
-                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Preferred}},
-                      defaultMsgSize,
-                      numCallsToReceive}},
-                    {},
-                    {}});
-    rpcs.push_back({"Server2",
-                    {{"ServerCtrl2",
-                      "TestFuncA",
-                      "A",
-                      {{"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Mandatory}},
-                      defaultMsgSize,
-                      0}},
-                    {},
-                    {}});
-
-    RunSyncTest(rpcs);
-}
-
-// Wrong labels on server2
-TEST_F(ITest_Rpc, test_1client_1server_wrongPreferredLabels_sync_vasio)
+// Matching mandatory and optional labels on both sides 
+TEST_F(ITest_Rpc, test_1client_1server_sync_labels)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -257,7 +237,42 @@ TEST_F(ITest_Rpc, test_1client_1server_wrongPreferredLabels_sync_vasio)
                     {{"ClientCtrl1",
                       "TestFuncA",
                       "A",
-                      {{"KeyA", "ValWrong"}, {"KeyB", "ValB"}},
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Mandatory},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional},
+                       {"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Optional}},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn}},
+                    {"TestFuncA"}});
+    rpcs.push_back({"Server1",
+                    {{"ServerCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Mandatory},
+                       {"KeyD", "ValD", SilKit::Services::MatchingLabel::Kind::Optional}},
+                      defaultMsgSize,
+                      numCallsToReceive}},
+                    {},
+                    {}});
+
+    RunSyncTest(rpcs);
+}
+
+// No communication with server2 (missing mandatory label on client)
+TEST_F(ITest_Rpc, test_1client_2server_sync_wrong_mandatory_label)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional}},
                       defaultMsgSize,
                       defaultNumCalls,
                       numCallsToReturn}},
@@ -266,17 +281,58 @@ TEST_F(ITest_Rpc, test_1client_1server_wrongPreferredLabels_sync_vasio)
                     {{"ServerCtrl1",
                       "TestFuncA",
                       "A",
-                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Preferred},
-                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Preferred}},
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional}},
                       defaultMsgSize,
-                      0}},
+                      numCallsToReceive}},
                     {},
                     {}});
     rpcs.push_back({"Server2",
                     {{"ServerCtrl2",
                       "TestFuncA",
                       "A",
-                      {{"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Preferred}},
+                      {{"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Mandatory}},
+                      defaultMsgSize,
+                      0}}, // Receives no calls
+                    {},
+                    {}});
+
+    RunSyncTest(rpcs);
+}
+
+// No communication with server1 (wrong optional label value)
+TEST_F(ITest_Rpc, test_1client_2server_sync_wrong_optional_label_value)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValWrong", SilKit::Services::MatchingLabel::Kind::Optional}, // Won't match Server1, but Server2
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional}},
+                      defaultMsgSize,
+                      defaultNumCalls,
+                      numCallsToReturn}},
+                    {"TestFuncA", "TestFuncA"}});
+    rpcs.push_back({"Server1",
+                    {{"ServerCtrl1",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional},
+                       {"KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional}},
+                      defaultMsgSize,
+                      0}}, // Receives no calls
+                    {},
+                    {}});
+    rpcs.push_back({"Server2",
+                    {{"ServerCtrl2",
+                      "TestFuncA",
+                      "A",
+                      {{"KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Optional}},
                       defaultMsgSize,
                       numCallsToReceive}},
                     {},
@@ -286,7 +342,7 @@ TEST_F(ITest_Rpc, test_1client_1server_wrongPreferredLabels_sync_vasio)
 }
 
 // Wildcard mediaType on server
-TEST_F(ITest_Rpc, test_1client_1server_wildcardDxf_sync_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_sync_wildcardDxf)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -337,9 +393,9 @@ TEST_F(ITest_Rpc, test_1_participant_selfdelivery_same_functionname)
     }
     rpcs.push_back({"Mixed1",
                     {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered},
-                     {"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}},
+                     {"ServerCtrl2", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive, expectedDataUnordered}},
                     {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered},
-                     {"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}},
+                     {"ClientCtrl2", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn, expectedReturnDataUnordered}},
                     {"TestFuncA", "TestFuncA"}});
 
     RunSyncTest(rpcs);
@@ -350,7 +406,7 @@ TEST_F(ITest_Rpc, test_1_participant_selfdelivery_same_functionname)
 //-----------------------------------------------------
 
 // Async: Start servers first, call with delay to ensure reception
-TEST_F(ITest_Rpc, DISABLED_test_1client_1server_async_vasio)
+TEST_F(ITest_Rpc, test_1client_1server_async_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;

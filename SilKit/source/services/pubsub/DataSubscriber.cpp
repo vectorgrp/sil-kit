@@ -20,9 +20,9 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "DataSubscriber.hpp"
-
 #include "IServiceDiscovery.hpp"
 #include "YamlParser.hpp"
+#include "LabelMatching.hpp"
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -31,7 +31,7 @@ namespace Services {
 namespace PubSub {
 
 DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
-                               const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+                               const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                                DataMessageHandler defaultDataHandler)
     : _topic{dataSpec.Topic()}
     , _mediaType{dataSpec.MediaType()}
@@ -61,20 +61,17 @@ void DataSubscriber::RegisterServiceDiscovery()
                 std::string pubMediaType{ getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
                 auto pubUUID = getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
                 std::string labelsStr = getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
-                std::vector<SilKit::Services::Label> publisherLabels = SilKit::Config::Deserialize<std::vector<SilKit::Services::Label> > (labelsStr);
+                std::vector<SilKit::Services::MatchingLabel> publisherLabels =
+                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
                 if (topic == _topic && MatchMediaType(_mediaType, pubMediaType) &&
-                    MatchLabels(_labels, publisherLabels))
+                    Util::MatchLabels(_labels, publisherLabels))
                 {
                     std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
                     if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                     {
-                        // NB: The internal subscriber carries its publisher's information
-                        // that AddExplicitDataHandlersToInternalSubscribers() needs to check matching between
-                        // user given mediaType/labels and the publisher's mediaType/labels.
                         AddInternalSubscriber(pubUUID, pubMediaType, publisherLabels);
-                        
                     }
                     else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
                     {
@@ -97,7 +94,7 @@ void DataSubscriber::SetDataMessageHandler(DataMessageHandler callback)
 }
 
 void DataSubscriber::AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
-                                           const std::vector<SilKit::Services::Label>& publisherLabels)
+                                           const std::vector<SilKit::Services::MatchingLabel>& publisherLabels)
 {
     auto internalSubscriber = dynamic_cast<DataSubscriberInternal*>(_participant->CreateDataSubscriberInternal(
         _topic, pubUUID, joinedMediaType, publisherLabels, _defaultDataHandler, this));

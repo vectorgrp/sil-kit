@@ -86,8 +86,8 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
                                                                   participantNameReceiver, registryUri);
     subParticipant->JoinSilKitSimulation();
 
-    SilKit::Services::PubSub::DataPublisherSpec dataSpec{"CrashTopic", {}};
-    SilKit::Services::PubSub::DataSubscriberSpec matchingDataSpec{"CrashTopic", {}};
+    SilKit::Services::PubSub::PubSubSpec dataSpec{"CrashTopic", {}};
+    SilKit::Services::PubSub::PubSubSpec matchingDataSpec{"CrashTopic", {}};
     publisher = pubParticipant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
     subscriber = subParticipant->CreateDataSubscriber(
         "SubCtrl1", matchingDataSpec,

@@ -28,7 +28,7 @@ Terminology
      Allows creation of vehicle network controllers and other services. 
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services, e.g.,
-     a :doc:`CAN Controller<../api/can>` or a :doc:`DataPublisher<../api/datamessage>`. A special service is the
+     a :doc:`CAN Controller<../api/can>` or a :doc:`DataPublisher<../api/pubsub>`. A special service is the
      :doc:`Life Cycle Service<../api/lifecycleService>`, which
      provides state handling and access to the time synchronization service.
  * - :doc:`Configuration<../configuration/configuration>`
@@ -76,11 +76,10 @@ If you use another method to build your software you can directly use the ``SilK
 
 .. _sec:quickstart-simple:
 
-A simple Data Message application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We'll create a simple, self-contained SIL Kit application that uses :doc:`Data Messages<../api/datamessage>`
+A simple Publish / Subscribe application
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We'll create a simple, self-contained SIL Kit application that uses :doc:`Publish/Subscribe<../api/pubsub>`
 to exchange user-defined data among its participants.
-The messages are exchanged using a publish / subscribe pattern.
 
 To use the SIL Kit, you first have to create a valid configuration.  This can 
 be done by loading an existing :ref:`YAML file<sec:ibconfig-json>`.
@@ -113,13 +112,12 @@ Creating the Participant properly initializes the SIL Kit library and allows to 
 :doc:`Life Cycle Service<../api/lifecycleService>`.
 
 Next, we create a :cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic.
-This allows sending data through its :cpp:func:`Publish()<SilKit::Services::generic::IGenericPublisher::Publish()>`
-method, when we are in an active simulation.
+This allows sending data through its :cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>`
+method.
 
 The actual simulation is performed in the simulation task. The simulation task
 is a callback that is executed by the SIL Kit runtime whenever the the simulation
-time of the SIL Kit is advanced. This callback has to be registered with the
-time synchronization service's
+time advances. This callback has to be registered with the time synchronization service's
 :cpp:func:`SetSimulationStepHandler()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`.
 
 The subscriber runs in its own thread, too:

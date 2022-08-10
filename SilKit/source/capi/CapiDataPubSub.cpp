@@ -49,7 +49,7 @@ SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** 
     CAPI_ENTER
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        SilKit::Services::PubSub::DataPublisherSpec cppDataSpec;
+        SilKit::Services::PubSub::PubSubSpec cppDataSpec;
         assign(cppDataSpec, dataSpec);
         
         auto dataPublisher = cppParticipant->CreateDataPublisher(controllerName, cppDataSpec, history);
@@ -85,7 +85,7 @@ SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_Create(SilKit_DataSubscriber*
     {
         auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
 
-        SilKit::Services::PubSub::DataSubscriberSpec cppDataNodeSpec;
+        SilKit::Services::PubSub::PubSubSpec cppDataNodeSpec;
         assign(cppDataNodeSpec, dataSpec);
 
         auto cppDefaultDataHandler = [defaultDataHandler, defaultDataHandlerContext](

@@ -65,8 +65,8 @@ typedef struct SilKit_ByteVector SilKit_ByteVector;
 */
 typedef uint32_t SilKit_LabelKind;
 #define SilKit_LabelKind_Undefined ((uint32_t) 0) //!< Undefined
-#define SilKit_LabelKind_Preferred ((uint32_t) 0) //!< If this label is available, its value must match
-#define SilKit_LabelKind_Mandatory ((uint32_t) 1) //!< This label must be available and its value must match
+#define SilKit_LabelKind_Optional ((uint32_t) 1) //!< If this label is available, its value must match
+#define SilKit_LabelKind_Mandatory ((uint32_t) 2) //!< This label must be available and its value must match
 
 /*! \brief Struct that contains a label as used in PubSub and RPC for matching publisher, subscribers, servers, and clients */
 typedef struct SilKit_Label

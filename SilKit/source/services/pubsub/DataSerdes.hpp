@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MessageBuffer.hpp"
 #include "WireDataMessages.hpp"
 
-#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/PubSubDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {

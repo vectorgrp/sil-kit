@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // NB: type erasing in TraceMessage requires us to use concrete types
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
-#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 

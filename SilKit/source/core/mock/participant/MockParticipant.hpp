@@ -39,7 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 #include "silkit/services/flexray/FlexrayDatatypes.hpp"
 #include "silkit/services/lin/LinDatatypes.hpp"
-#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
 #include "IParticipantInternal.hpp"
@@ -175,12 +175,12 @@ public:
     {
         return nullptr;
     }
-    auto CreateDataPublisher(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::DataPublisherSpec& /*dataSpec*/,
+    auto CreateDataPublisher(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::PubSubSpec& /*dataSpec*/,
                              size_t /*history*/ = 0) -> SilKit::Services::PubSub::IDataPublisher* override
     {
         return nullptr;
     }
-    auto CreateDataSubscriber(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::DataSubscriberSpec& /*dataSpec*/,
+    auto CreateDataSubscriber(const std::string& /*canonicalName*/, const SilKit::Services::PubSub::PubSubSpec& /*dataSpec*/,
                               Services::PubSub::DataMessageHandler /*dataMessageHandler*/)
         -> SilKit::Services::PubSub::IDataSubscriber* override
     {
@@ -188,7 +188,7 @@ public:
     }
     auto CreateDataSubscriberInternal(const std::string& /*topic*/, const std::string& /*linkName*/,
                                       const std::string& /*mediaType*/,
-                                      const std::vector<SilKit::Services::Label>& /*publisherLabels*/,
+                                      const std::vector<SilKit::Services::MatchingLabel>& /*publisherLabels*/,
                                       Services::PubSub::DataMessageHandler /*callback*/,
                                       Services::PubSub::IDataSubscriber* /*parent*/)
         -> Services::PubSub::DataSubscriberInternal* override
@@ -196,19 +196,19 @@ public:
         return nullptr;
     }
 
-    auto CreateRpcClient(const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcClientSpec& /*dataSpec*/,
+    auto CreateRpcClient(const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcSpec& /*dataSpec*/,
                          SilKit::Services::Rpc::RpcCallResultHandler /*handler*/) -> SilKit::Services::Rpc::IRpcClient* override
     {
         return nullptr;
     }
-    auto CreateRpcServer(const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcServerSpec& /*dataSpec*/,
+    auto CreateRpcServer(const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcSpec& /*dataSpec*/,
                          SilKit::Services::Rpc::RpcCallHandler /*handler*/) -> SilKit::Services::Rpc::IRpcServer* override
     {
         return nullptr;
     }
     auto CreateRpcServerInternal(const std::string& /*functionName*/, const std::string& /*linkName*/,
                                  const std::string& /*mediaType*/,
-                                 const std::vector<SilKit::Services::Label>& /*labels*/,
+                                 const std::vector<SilKit::Services::MatchingLabel>& /*labels*/,
                                  Services::Rpc::RpcCallHandler /*handler*/, Services::Rpc::IRpcServer* /*parent*/)
         -> SilKit::Services::Rpc::RpcServerInternal* override
     {

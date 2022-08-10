@@ -29,7 +29,7 @@ namespace PubSub {
 
 DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                                                const std::string& topic, const std::string& mediaType,
-                                               const std::vector<SilKit::Services::Label>& labels,
+                                               const std::vector<SilKit::Services::MatchingLabel>& labels,
                                                DataMessageHandler defaultHandler, IDataSubscriber* parent)
     : _topic{topic}
     , _mediaType{mediaType}

@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "functional.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/pubsub/PubSubSpec.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -64,7 +64,7 @@ protected:
         {
             const auto topic = "TopicName-" + std::to_string(i);
             const auto controllerName = "PubCtrl" + std::to_string(i);
-            SilKit::Services::PubSub::DataPublisherSpec dataSpec{topic, {}};
+            SilKit::Services::PubSub::PubSubSpec dataSpec{topic, {}};
             (void)publisher->Participant()->CreateDataPublisher(controllerName, dataSpec, 0);
         }
 
@@ -85,7 +85,7 @@ protected:
             {
                 const auto topic = "TopicName-" + std::to_string(i);
                 const auto controllerName = "SubCtrl" + std::to_string(i);
-                SilKit::Services::PubSub::DataSubscriberSpec dataSpec{topic, {}};
+                SilKit::Services::PubSub::PubSubSpec dataSpec{topic, {}};
 
                 (void)subscriber->CreateDataSubscriber(controllerName, dataSpec,
                     [](SilKit::Services::PubSub::IDataSubscriber* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {

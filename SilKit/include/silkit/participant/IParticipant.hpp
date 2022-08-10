@@ -29,8 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/fwd_decl.hpp"
 #include "silkit/services/orchestration/fwd_decl.hpp"
 
-#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
-#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/pubsub/PubSubDatatypes.hpp"
+#include "silkit/services/pubsub/PubSubSpec.hpp"
 #include "silkit/services/rpc/RpcSpec.hpp"
 #include "silkit/services/rpc/RpcDatatypes.hpp"
 
@@ -72,20 +72,20 @@ public:
         -> Services::Lin::ILinController* = 0;
 
     //! \brief Create a data publisher at this SIL Kit participant.
-    virtual auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::DataPublisherSpec& dataSpec, size_t history = 0)
+    virtual auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec, size_t history = 0)
         -> Services::PubSub::IDataPublisher* = 0;
 
     //! \brief Create a data subscriber at this SIL Kit participant.
-    virtual auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::DataSubscriberSpec& dataSpec,
+    virtual auto CreateDataSubscriber(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                                       Services::PubSub::DataMessageHandler dataMessageHandler)
         -> Services::PubSub::IDataSubscriber* = 0;
 
     //! \brief Create a Rpc client at this SIL Kit participant.
-    virtual auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcClientSpec& dataSpec,
+    virtual auto CreateRpcClient(const std::string& canonicalName, const SilKit::Services::Rpc::RpcSpec& dataSpec,
                                  Services::Rpc::RpcCallResultHandler handler) -> Services::Rpc::IRpcClient* = 0;
 
     //! \brief Create a Rpc server at this SIL Kit participant.
-    virtual auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcServerSpec& dataSpec,
+    virtual auto CreateRpcServer(const std::string& canonicalName, const SilKit::Services::Rpc::RpcSpec& dataSpec,
                                  Services::Rpc::RpcCallHandler handler) -> Services::Rpc::IRpcServer* = 0;
 
     //! \brief Return the ILifecycleService at this SIL Kit participant.

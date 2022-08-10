@@ -19,13 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
-make_silkit_demo(SilKitDemoDataMessage DataMessageDemo.cpp)
-target_sources(SilKitDemoDataMessage
-    PRIVATE SilKitConfig_DemoDataMessage.json
-)
-
-make_silkit_demo(SilKitDemoDataMessageExt DataMessageDemoExt.cpp)
-target_sources(SilKitDemoDataMessageExt
-    PRIVATE SilKitConfig_DemoDataMessage.json
+make_silkit_demo(SilKitDemoCPubSub PubSubDemo.c)
+set_property(TARGET SilKitDemoCPubSub PROPERTY C_STANDARD 11)
+target_sources(SilKitDemoCPubSub
+    PRIVATE SilKitConfig_DemoPubSub.json
 )

@@ -43,6 +43,7 @@ target_link_libraries(SilKitSimRpc
             SilKitInternal
             SilKitUuid
             SilKitConfiguration
+            SilKitLabelMatching
 )
 
 add_silkit_test(Test_SimRpc

@@ -64,12 +64,12 @@ class MockParticipant : public SilKit::Core::Tests::DummyParticipant
 {
 public:
     MOCK_METHOD(SilKit::Services::Rpc::IRpcClient*, CreateRpcClient,
-                (const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcClientSpec& /*rpcSpec*/,
+                (const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcSpec& /*rpcSpec*/,
                  SilKit::Services::Rpc::RpcCallResultHandler /*handler*/),
                 (override));
 
     MOCK_METHOD(SilKit::Services::Rpc::IRpcServer*, CreateRpcServer,
-                (const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcServerSpec& /*rpcSpec*/,
+                (const std::string& /*controllerName*/, const SilKit::Services::Rpc::RpcSpec& /*rpcSpec*/,
                  SilKit::Services::Rpc::RpcCallHandler /*handler*/),
                 (override));
 };

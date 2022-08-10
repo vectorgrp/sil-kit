@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp"
 
 #include "DataMessageDatatypeUtils.hpp"
-#include "silkit/services/pubsub/DataSpec.hpp"
+#include "silkit/services/pubsub/PubSubSpec.hpp"
 
 namespace {
 
@@ -47,7 +47,7 @@ public:
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const WireDataMessageEvent&), (override));
 };
 
-SilKit::Services::PubSub::DataPublisherSpec testDataNodeSpec{"Topic", {}};
+SilKit::Services::PubSub::PubSubSpec testDataNodeSpec{"Topic", {}};
 
 class DataPublisherTest : public ::testing::Test
 {

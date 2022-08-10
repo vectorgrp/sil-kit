@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/pubsub/DataMessageDatatypes.hpp"
+#include "silkit/services/pubsub/PubSubDatatypes.hpp"
 #include "silkit/services/pubsub/string_utils.hpp"
 
 #include "SharedVector.hpp"

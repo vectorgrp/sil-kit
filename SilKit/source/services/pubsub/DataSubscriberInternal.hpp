@@ -40,7 +40,7 @@ class DataSubscriberInternal
 public:
     DataSubscriberInternal(Core::IParticipantInternal* participant,
                            Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
-                           const std::string& mediaType, const std::vector<SilKit::Services::Label>& labels,
+                           const std::string& mediaType, const std::vector<SilKit::Services::MatchingLabel>& labels,
                            DataMessageHandler defaultHandler,
                            IDataSubscriber* parent);
 
@@ -53,7 +53,7 @@ public:
     void SetTimeProvider(Services::Orchestration::ITimeProvider* provider) override;
 
     std::string GetMediaType() { return _mediaType; };
-    auto GetLabels() -> const std::vector<SilKit::Services::Label>& { return _labels; };
+    auto GetLabels() -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; };
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -62,7 +62,7 @@ public:
 private:
     std::string _topic;
     std::string _mediaType;
-    std::vector<SilKit::Services::Label> _labels;
+    std::vector<SilKit::Services::MatchingLabel> _labels;
     DataMessageHandler _defaultHandler;
 
     IDataSubscriber* _parent{nullptr};
