@@ -5,6 +5,21 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[3.99.31] - UNRELEASED
+----------------------
+
+Compatibility with 3.99.30
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: No
+
+Added
+~~~~~
+
+- Added the ``SILKIT_ENABLE_COVERAGE`` CMake option for adding code-coverage compiler flags when building with GCC or Clang.
+
 [3.99.30] - 2022-08-09
 ----------------------
 

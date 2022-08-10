@@ -64,6 +64,20 @@ function(silkit_enable_threadsan isOn)
     endif()
 endfunction()
 
+function(silkit_enable_coverage isOn)
+    if(NOT isOn)
+        return()
+    endif()
+    if(MSVC)
+        message(STATUS "SIL Kit -- Coverage not supported on MSVC")
+    else()
+        message(STATUS "SIL Kit -- Enabling Coverage")
+        #clang, gcc
+        add_compile_options(-fprofile-arcs -ftest-coverage)
+        add_link_options(-fprofile-arcs -ftest-coverage)
+    endif()
+endfunction()
+
 # Clean warning defaults set in CMAKE_*_FLAGS by CMake < 3.15
 function(silkit_clean_default_compileflags)
     if(MSVC)
