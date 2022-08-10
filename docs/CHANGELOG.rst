@@ -20,6 +20,11 @@ Added
 
 - Added the ``SILKIT_ENABLE_COVERAGE`` CMake option for adding code-coverage compiler flags when building with GCC or Clang.
 
+Changed
+~~~~~~~
+
+- Added an CLI argument to sil-kit-system-controller to run it without user interaction (--non-interactive or -ni)
+
 [3.99.30] - 2022-08-09
 ----------------------
 

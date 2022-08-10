@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKitVersion.hpp"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
 
 #include "CommandlineParser.hpp"
 
@@ -89,6 +90,15 @@ public:
         }
     }
 
+    void WaitForExternalShutdown()
+    {
+        ParticipantState state = _finalStatePromise.get();
+        if (state != ParticipantState::Shutdown)
+        {
+            std::cerr << "Warning: Exited with an unexpected participant state: " << state << std::endl;
+        }
+    }
+
 private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
@@ -107,6 +117,9 @@ int main(int argc, char** argv)
         "-v, --version: Get version info.");
     commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]",
         "-h, --help: Get this help.");
+    commandlineParser.Add<CommandlineParser::Flag>(
+        "non-interactive", "ni", "[--non-interactive]",
+        "--non-interactive: Run without awaiting any user interactions at any time.");
     commandlineParser.Add<CommandlineParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
@@ -195,10 +208,20 @@ int main(int argc, char** argv)
         expectedParticipantNames.push_back(participantName);
         SilKitController controller(participant.get(), configuration, expectedParticipantNames);
 
-        std::cout << "Press enter to shutdown the SilKit..." << std::endl;
-        std::cin.ignore();
+        bool nonInteractiveMode =
+            (commandlineParser.Get<CommandlineParser::Flag>("non-interactive").Value()) ? true : false;
 
-        controller.Shutdown();
+        if (nonInteractiveMode)
+        {
+            controller.WaitForExternalShutdown();
+        }
+        else
+        {
+            std::cout << "Press enter to shutdown the SilKit..." << std::endl;
+            std::cin.ignore();
+
+            controller.Shutdown();
+        }
     }
     catch (const std::exception& error)
     {
