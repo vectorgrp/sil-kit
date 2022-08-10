@@ -3,9 +3,9 @@
 This directory contains sample projects that demonstrate how the SIL Kit
 API can be used:
 
-* **CAN, LIN, FlexRay, Ethernet, DataMessage, RPC**:
+* **CAN, LIN, FlexRay, Ethernet, Pub/Sub, RPC**:
   Write or read participants that are able to connect to SIL Kit and use buses of
-  all supported protocols including CAN, LIN, FlexRay, Ethernet, DataMessage and the RPC service.
+  all supported protocols including CAN, LIN, FlexRay, Ethernet, Pub/Sub and the RPC service.
 
 
 * **Benchmark**:
@@ -57,24 +57,3 @@ compilation.
 
   > cmake --build . --config Debug
 
-
-Copyright (c) 2022 Vector Informatik GmbH
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

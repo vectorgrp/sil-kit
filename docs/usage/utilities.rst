@@ -89,44 +89,6 @@ sil-kit-system-controller
            ``SilKit/bin/`` directory.
 
 
-
-.. _sec:util-system-controller-interactive:
-
-sil-kit-system-controller-interactive
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. list-table::
-   :widths: 17 205
-   :stub-columns: 1
-
-   *  -  Abstract
-      -  This variant of the sil-kit-system-controller allows sending system commands
-         manually via a command line interface. A user can enter commands on
-         standard input: "Run", "Stop", "Abort", "Shutdown <ParticipantName>, Restart <ParticipantName>"
-   *  -  Source location
-      -  ``Utilities/SilKitSystemControllerInteractive``
-   *  -  Requirements
-      -  The sil-kit-system-controller needs a running sil-kit-registry to connect to. 
-         Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
-   *  -  Parameters
-      -  -v, --version                                Get version info.
-         -h, --help                                   Show the help of sil-kit-system-controller-interactive.
-         -u, --connect-uri <silkitUri>                The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
-         -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
-         -c, --configuration  <configuration>         Path and filename of the participant configuration YAML or JSON file.
-
-         <participantName1>, <participantName2>, ...  Names of participants that are required for the simulation (e.g., synchronized paricipants).
-
-   *  -  Usage Example
-      -  .. code-block:: powershell
-
-            # Start sil-kit-system-controller-interactive process for two participants:
-            sil-kit-system-controller-interactive Participant1 Participant2
-   *  -  Notes
-      -  * The distribution package contains the sil-kit-system-controller-interactive
-           in the ``SilKit/bin/`` directory.
-
-
 .. _sec:util-system-monitor:
 
 sil-kit-system-monitor

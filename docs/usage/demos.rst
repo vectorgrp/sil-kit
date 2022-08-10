@@ -284,14 +284,14 @@ Data Message Demo
    *  -  Abstract
       -  Data Message Publish Subscribe Demo for a set of Publishers/Subscribers
    *  -  Source location
-      -  Demos/DataMessage
+      -  Demos/PubSub
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
          * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``SilKitConfig_DemoDataMessage.json`` for an example configuration.
+           use ``SilKitConfig_DemoPubSub.json`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``PubSub1``, ``PubSub2``, ``Subscriber1`` or 
            ``Subscriber2``.
@@ -301,8 +301,8 @@ Data Message Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a FlexRay Process for Node 0 with the default registry URI:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json PubSub1
+            # Creates a combined publisher and subscriber with the default registry URI:
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json PubSub1
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -310,16 +310,16 @@ Data Message Demo
             |SystemMonitor|
 
             # Publisher 1:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json PubSub1
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json PubSub1
 
             # Publisher 2:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json PubSub2
-            
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json PubSub2
+
             # Subscriber 1:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Subscriber1
-            
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Subscriber1
+
             # Subscriber 2:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Subscriber2
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Subscriber2
 
             # System Controller:
             |SystemController| PubSub1 PubSub2 Subscriber1 Subscriber2
@@ -337,7 +337,7 @@ RPC Demo
    *  -  Abstract
       -  Remote Procedure Call Demo. The client triggers remote procedure calls on the server.
    *  -  Source location
-      -  Demos/DataMessage
+      -  Demos/Rpc
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
          * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
@@ -354,7 +354,7 @@ RPC Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a FlexRay Process for Node 0 with the default registry URI:
+            # Creates a Rpc-Server Process with the default registry URI:
             |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.json Server
    *  -  System Example
       -  .. parsed-literal:: 
@@ -363,11 +363,11 @@ RPC Demo
             |SystemMonitor|
 
             # Server:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Publisher1
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.json Server
 
             # Client:
-            |DemoDir|/SilKitDemoDataMessage Demos/DataMessage/SilKitConfig_DemoDataMessage.json Publisher2
-            
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.json Client
+
             # System Controller:
             |SystemController| Server Client
    *  -  Notes

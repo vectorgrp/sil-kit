@@ -1,11 +1,11 @@
-DataMessage C API
------------------
+Data Publish/Subscribe C API
+----------------------------
 
 .. contents::
    :local:
    :depth: 3
 
-The Data Message API provides a topic-based publish / subscribe mechanism to exchange arbitrary user data. 
+The Publish/Subscribe API provides a topic-based publish / subscribe mechanism to exchange arbitrary user data. 
 It consists of DataPublishers and DataSubscribers.
 
 DataPublishers

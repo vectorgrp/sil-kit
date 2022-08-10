@@ -306,7 +306,6 @@ def main():
         #"SilKit" : "Source",
         #"ThirdParty/json11" : "ThirdParty/json11",
         #"ThirdParty/googletest-1.8.0" : "ThirdParty/googletest-1.8.0",
-        #"ThirdParty/Fast-RTPS/thirdparty/asio/" : "ThirdParty/Fast-RTPS/thirdparty/asio/",
         #"ThirdParty/fmt-5.3.0" : "ThirdParty/fmt-5.3.0",
     }
     makeDistribution(workdir, projectroot, deploy_dirs, excludes)
