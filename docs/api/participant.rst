@@ -31,8 +31,9 @@ configuration, a participant name and optionally the URI of the registry:
 The IParticipant API
 ~~~~~~~~~~~~~~~~~~~~
 
-The instantiated |IParticipant| can then be used to access the other services
-of the SIL Kit.
+The instantiated |IParticipant| can then be used to create and access services of the SIL Kit.
+A controller name (the ``canonicalName`` given in Create*-Calls) must be unqiue within a controller type, using the same name twice resuts in
+a ``ConfigurationError``.
 
 .. admonition:: Warning.
 

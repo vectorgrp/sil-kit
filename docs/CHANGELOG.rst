@@ -18,6 +18,10 @@ Compatibility with 3.99.29
 Changed
 ~~~~~~~
 
+- Using the same name controller name (`canonicalName` parameter in Create*Controller) in different networks 
+  (`network` parameter in Create*Controller) is no longer allowed. Controller creation now requires 
+  unique controller names within the same controller type. Any violation of this rule causes a `ConfigurationError`.
+
 - PubSub/Rpc: Both sides (clients and servers, publishers and subscribers) now can specify the matching behavior of 
   individual labels. This is done via the `kind` field of a `MatchingLabel` which has to be specified when using 
   `AddLabel`. The `Label` struct has been is removed. Additionally, the 

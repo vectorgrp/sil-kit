@@ -38,9 +38,7 @@ namespace SilKit {
 * \param participantName Name of the participant
 * \return Instance of the communication adapter
 *
-* \throw SilKit::configuration_error if the config has errors
-* \throw std::runtime_error Parameter participantName does not name
-* a valid participant in the config file.
+* \throw SilKit::ConfigurationError if the config has errors
 * \throw std::exception The participant could not be created.
 */
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
@@ -56,9 +54,7 @@ SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantCon
 * \param registryUri the URI of the registry
 * \return Instance of the communication adapter
 *
-* \throw SilKit::configuration_error if the config has errors
-* \throw std::runtime_error Parameter participantName does not name
-* a valid participant in the config file.
+* \throw SilKit::ConfigurationError if the config has errors
 * \throw std::exception The participant could not be created.
 */
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,

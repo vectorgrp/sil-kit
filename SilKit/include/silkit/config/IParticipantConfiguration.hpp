@@ -44,7 +44,7 @@ public:
 * \param text A string that adheres to our JSON schema.
 * \return The configuration data
 *
-* \throw SilKit::configuration_error The input string violates the
+* \throw SilKit::ConfigurationError The input string violates the
 * JSON format, schema or an integrity rule.
 */
 SilKitAPI auto ParticipantConfigurationFromString(const std::string& text)
@@ -58,7 +58,7 @@ SilKitAPI auto ParticipantConfigurationFromString(const std::string& text)
 * \param filename Path to the YAML or JSON file.
 * \return The configuration data
 *
-* \throw SilKit::configuration_error The file could not be read, or
+* \throw SilKit::ConfigurationError The file could not be read, or
 * the input string violates the YAML/JSON format, schema or an
 * integrity rule.
 */

@@ -65,7 +65,7 @@ const std::string supplKeyRpcClientUUID = "Rpc::client::UUID";
 const std::string controllerTypeRpcServerInternal = "RpcServerInternal";
 const std::string supplKeyRpcServerInternalClientUUID = "Rpc::serverinternal::clientUUID";
 
-// Internal types
+// Internal types. These variables are also used for the (internal) controller names.
 const std::string controllerTypeLoggerSender = "LoggerSender";
 const std::string controllerTypeLoggerReceiver = "LoggerReceiver";
 const std::string controllerTypeServiceDiscovery = "ServiceDiscovery";

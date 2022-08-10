@@ -492,7 +492,7 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService*
 {
     auto* timeSyncService =
-        GetController<Orchestration::TimeSyncService>("default", SilKit::Core::Discovery::controllerTypeTimeSyncService);
+        GetController<Orchestration::TimeSyncService>(SilKit::Core::Discovery::controllerTypeTimeSyncService);
 
     if (timeSyncService)
     {
@@ -515,7 +515,7 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestration::ILifecycleService*
 {
     auto* lifecycleService =
-        GetController<Orchestration::LifecycleService>("default", SilKit::Core::Discovery::controllerTypeLifecycleService);
+        GetController<Orchestration::LifecycleService>(SilKit::Core::Discovery::controllerTypeLifecycleService);
 
     if (!lifecycleService)
     {
@@ -549,13 +549,14 @@ auto Participant<SilKitConnectionT>::CreateLifecycleService(
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestration::ISystemMonitor*
 {
-    auto* controller = GetController<Orchestration::SystemMonitor>("default", "SystemMonitor");
+    auto* controller = GetController<Orchestration::SystemMonitor>(SilKit::Core::Discovery::controllerTypeSystemMonitor);
     if (!controller)
     {
         Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeSystemMonitor;
 
-        controller = CreateInternalController<Orchestration::SystemMonitor>("SystemMonitor", Core::ServiceType::InternalController,
+        controller = CreateInternalController<Orchestration::SystemMonitor>(
+            SilKit::Core::Discovery::controllerTypeSystemMonitor, Core::ServiceType::InternalController,
                                                                    std::move(supplementalData), true);
 
         _connection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
@@ -585,7 +586,8 @@ auto Participant<SilKitConnectionT>::CreateSystemMonitor() -> Services::Orchestr
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServiceDiscovery*
 {
-    auto* controller = GetController<Discovery::ServiceDiscovery>("default", "ServiceDiscovery");
+    auto* controller =
+        GetController<Discovery::ServiceDiscovery>(SilKit::Core::Discovery::controllerTypeServiceDiscovery);
     if (!controller)
     {
         Core::SupplementalData supplementalData;
@@ -604,14 +606,15 @@ auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServic
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetSystemController() -> Services::Orchestration::ISystemController*
 {
-    auto* controller = GetController<Orchestration::SystemController>("default", "SystemController");
+    auto* controller = GetController<Orchestration::SystemController>(SilKit::Core::Discovery::controllerTypeSystemController);
     if (!controller)
     {
         Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeSystemController;
 
-        return CreateInternalController<Orchestration::SystemController>("SystemController", Core::ServiceType::InternalController,
-                                                                std::move(supplementalData), true);
+        return CreateInternalController<Orchestration::SystemController>(
+            SilKit::Core::Discovery::controllerTypeSystemController, Core::ServiceType::InternalController,
+            std::move(supplementalData), true);
     }
     return controller;
 }
@@ -1152,10 +1155,10 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, c
 
 template <class SilKitConnectionT>
 template <class ControllerT>
-auto Participant<SilKitConnectionT>::GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*
+auto Participant<SilKitConnectionT>::GetController(const std::string& serviceName) -> ControllerT*
 {
     auto&& controllerMap = tt::predicative_get<tt::rbind<IsControllerMap, ControllerT>::template type>(_controllers);
-    const auto&& qualifiedName = networkName + "/" + serviceName;
+    const auto qualifiedName = serviceName;
     if (controllerMap.count(qualifiedName))
     {
         return static_cast<ControllerT*>(controllerMap.at(qualifiedName).get());
@@ -1207,7 +1210,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
     }
 
     // If possible, load controller from cache
-    auto* controllerPtr = GetController<ControllerT>(network, config.name);
+    auto* controllerPtr = GetController<ControllerT>(config.name);
     if (controllerPtr != nullptr)
     {
         throw SilKit::ConfigurationError(fmt::format("Service {} in network {} already exists.", config.name, network));
@@ -1231,7 +1234,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
     controller->SetServiceDescriptor(std::move(descriptor));
 
     _connection.RegisterSilKitService(controllerPtr);
-    const auto qualifiedName = network + "/" + config.name;
+    const auto qualifiedName = config.name;
     controllerMap[qualifiedName] = std::move(controller);
 
     #ifdef SILKIT_HAVE_TRACING

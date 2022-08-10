@@ -312,7 +312,7 @@ private:
     void SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg);
 
     template<class ControllerT>
-    auto GetController(const std::string& networkName, const std::string& serviceName) -> ControllerT*;
+    auto GetController(const std::string& serviceName) -> ControllerT*;
 
     //!< internal services don't have a link config
     template<class ControllerT, typename... Arg>
