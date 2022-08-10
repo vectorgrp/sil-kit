@@ -60,6 +60,8 @@ public:
         _controller = participant->CreateSystemController();
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
 
+        _monitor = participant->CreateSystemMonitor();
+
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
         _finalStatePromise = _lifecycleService->StartLifecycle();

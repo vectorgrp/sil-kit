@@ -24,6 +24,12 @@ Changed
 ~~~~~~~
 
 - Added an CLI argument to sil-kit-system-controller to run it without user interaction (--non-interactive or -ni)
+- Participants to not go to `ParticipantState::Error` anymore when the system state changes to `SystemState::Error`
+
+Fixed
+~~~~~
+
+- The sil-kit-system-controller crashed when any button was pressed. This is fixed.
 
 [3.99.30] - 2022-08-09
 ----------------------
