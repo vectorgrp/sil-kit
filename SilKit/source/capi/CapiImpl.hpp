@@ -39,7 +39,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     } \
-    catch (const std::exception&) { \
+    catch (const std::exception& e) { \
+        SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     } \
     catch (...) { \
