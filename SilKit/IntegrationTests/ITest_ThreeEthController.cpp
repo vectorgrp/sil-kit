@@ -109,7 +109,7 @@ protected:
                     EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
                     auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
-                    controller->SendFrame(ToEthernetFrame(ethernetFrame), reinterpret_cast<void *>(numSent + 1));
+                    controller->SendFrame(ToEthernetFrame(ethernetFrame), reinterpret_cast<void *>(static_cast<uintptr_t>(numSent + 1)));
                     numSent++;
                 }
         }, 1ms);
@@ -174,7 +174,7 @@ protected:
         // run the simulation and check invariants
         for (auto index = 1u; index <= testMessages.size(); index++)
         {
-            EXPECT_CALL(callbacks, AckHandler(MatchUserContext(reinterpret_cast<void *>(index))));
+            EXPECT_CALL(callbacks, AckHandler(MatchUserContext(reinterpret_cast<void *>(static_cast<uintptr_t>(index)))));
         }
         EXPECT_CALL(callbacks, AckHandler(MatchUserContext(nullptr))).Times(0);
 
