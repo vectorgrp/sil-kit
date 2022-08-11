@@ -143,8 +143,7 @@ public:
 
     auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
-    auto CreateSystemController() -> Services::Orchestration::ISystemController* override;
-    auto GetSystemController() -> Services::Orchestration::ISystemController* override;
+    auto GetSystemController() -> Experimental::Services::Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
     auto GetLogger() -> Services::Logging::ILogger* override;
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
@@ -261,6 +260,9 @@ public:
     void ExecuteDeferred(std::function<void()> callback) override;
 
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override;
+
+    void SetIsSystemControllerCreated(bool isCreated) override;
+    bool GetIsSystemControllerCreated() override;
 
 public:
     // ----------------------------------------

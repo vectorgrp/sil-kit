@@ -35,6 +35,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/ISilKitRegistry.hpp"
 
+#include "silkit/experimental/services/orchestration/ISystemController.hpp"
+
 namespace SilKit { namespace Tests {
 //forward
 class SimSystemController;
@@ -58,7 +60,7 @@ public:
 
     // Helpers to circumvent one-time-only orchestration service creation
     auto GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*;
-    auto GetOrCreateSystemController() -> Services::Orchestration::ISystemController*;
+    auto GetOrCreateSystemController() -> Experimental::Services::Orchestration::ISystemController*;
     auto GetOrCreateLifecycleService() -> Services::Orchestration::ILifecycleService*;
     auto GetOrCreateTimeSyncService() -> Services::Orchestration::ITimeSyncService*;
     auto GetOrGetLogger() -> Services::Logging::ILogger*;
@@ -69,7 +71,7 @@ private:
     std::unique_ptr<SilKit::IParticipant> _participant;
 
     Services::Orchestration::ISystemMonitor* _systemMonitor{nullptr};
-    Services::Orchestration::ISystemController* _systemController{nullptr};
+    Experimental::Services::Orchestration::ISystemController* _systemController{nullptr};
     Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
     Services::Orchestration::ITimeSyncService* _timeSyncService{nullptr};
     Services::Logging::ILogger* _logger{nullptr};

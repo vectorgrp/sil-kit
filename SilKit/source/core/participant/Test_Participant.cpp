@@ -111,36 +111,6 @@ TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
         std::runtime_error);
 }
 
-TEST_F(ParticipantTest, error_on_create_system_controller_twice)
-{
-    auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
-
-    EXPECT_NO_THROW({
-        try
-        {
-            participant->CreateSystemController(); // ignore returned controller
-        }
-        catch (const std::exception&)
-        {
-            throw;
-        }
-    });
-
-    EXPECT_THROW(
-        {
-            try
-            {
-                participant->CreateSystemController(); // ignore returned controller
-            }
-            catch (const std::exception&)
-            {
-                throw;
-            }
-        },
-        std::runtime_error);
-}
-
 TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
 {
     auto participant =

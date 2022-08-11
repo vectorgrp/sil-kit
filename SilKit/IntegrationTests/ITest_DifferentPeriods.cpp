@@ -234,7 +234,7 @@ private:
     uint32_t _numMessages{0u};
     std::vector<std::string> _syncParticipantNames;
     std::unique_ptr<IParticipantInternal> _participant{nullptr};
-    ISystemController* _systemController{nullptr};
+    SilKit::Experimental::Services::Orchestration::ISystemController* _systemController{nullptr};
     SilKit::Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
     ISystemMonitor* _monitor{nullptr};
 

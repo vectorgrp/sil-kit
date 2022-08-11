@@ -42,7 +42,7 @@ Terminology
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
- * - :ref:`Simulation Time <sec:sim-synchronization:>`
+ * - :ref:`Simulation Time <sec:sim-synchronization>`
    - The simulated time within a simulation as it is perceived by a participant. Participants might be synchronized or
      unsynchronized.
 

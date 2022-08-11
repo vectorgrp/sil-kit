@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/experimental/participant/ParticipantExtentions.hpp"
 
 #include "CommandlineParser.hpp"
 
@@ -57,10 +58,9 @@ public:
         : _config{std::move(config)}
         , _expectedParticipantNames{expectedParticipantNames}
     {
-        _controller = participant->CreateSystemController();
+        _controller = SilKit::Experimental::Participant::CreateSystemController(participant);
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
-
-        _monitor = participant->CreateSystemMonitor();
+		_monitor = participant->CreateSystemMonitor();	
 
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
@@ -105,7 +105,7 @@ private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
 
-    ISystemController* _controller;
+    SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     ISystemMonitor* _monitor;
     ILifecycleService* _lifecycleService;
     std::future<ParticipantState> _finalStatePromise;

@@ -28,6 +28,7 @@ add_subdirectory(core)
 add_subdirectory(services)
 add_subdirectory(extensions)
 add_subdirectory(capi)
+add_subdirectory(experimental)
 
 # Encode the current GIT and version infos into version_macros.hpp
 # If this file is present in the current source directory we assume
@@ -138,6 +139,7 @@ target_link_libraries(SilKit
     SilKitMwParticipant
     SilKitExtensions
     SilKitUtil
+    SilKitExperimental
 )
 
 add_library(SilKitVersion STATIC

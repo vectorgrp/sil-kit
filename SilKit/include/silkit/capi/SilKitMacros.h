@@ -74,3 +74,5 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #ifndef BIT
 #    define BIT(X) (UINTMAX_C(1) << (X))
 #endif
+
+#define SILKIT_UNUSED_ARG(X) (void)(X)

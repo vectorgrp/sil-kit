@@ -37,12 +37,8 @@ a ``ConfigurationError``.
 
 .. admonition:: Warning.
 
-    Services must NOT be created in callbacks. E.g., it is an error to call
-    CreateCanController() in the registered callbacks for
-    :cpp:func:`CommunicationReadyHandler<SilKit::Services::Orchestration::ILifecycleService::CommunicationReadyHandler()>`
-    or even
-    :cpp:func:`SimTask<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`.
-
+    Services must NOT be created in callbacks. E.g., it is an error to call ``CreateCanController()`` in a 
+    ``CommunicationReadyHandler`` or even ``SimulationStepHandler``.
 
 .. doxygenclass:: SilKit::IParticipant
    :members:

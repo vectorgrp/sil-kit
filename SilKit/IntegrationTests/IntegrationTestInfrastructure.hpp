@@ -24,7 +24,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
+
 #include "ConfigurationTestUtils.hpp"
+#include "IParticipantInternal.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Services::Orchestration;
@@ -86,7 +88,9 @@ private:
         _systemMaster.participant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
                                                               systemMasterName, registryUri);
 
-        _systemMaster.systemController = _systemMaster.participant->CreateSystemController();
+        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(_systemMaster.participant.get());
+        _systemMaster.systemController = participantInternal->GetSystemController();
+
         _systemMaster.systemMonitor = _systemMaster.participant->CreateSystemMonitor();
         _systemMaster.lifecycleService =
             _systemMaster.participant->CreateLifecycleService({OperationMode::Coordinated});
@@ -129,7 +133,7 @@ private:
     struct SystemMaster
     {
         std::unique_ptr<IParticipant> participant;
-        ISystemController* systemController;
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController;
         ISystemMonitor* systemMonitor;
         ILifecycleService* lifecycleService;
 

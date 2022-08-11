@@ -30,8 +30,10 @@ add_library(SilKitMwSync
     
     SyncDatatypeUtils.hpp
     SyncDatatypeUtils.cpp
+    
     SystemController.hpp
     SystemController.cpp
+
     SystemMonitor.hpp
     SystemMonitor.cpp
     WatchDog.hpp
@@ -64,6 +66,7 @@ target_link_libraries(SilKitMwSync
         SilKitInternal
         SilKitMwLogging
         SilKitConfiguration
+        SilKitExperimental
     INTERFACE
         SilKitInternal
         SilKitConfiguration

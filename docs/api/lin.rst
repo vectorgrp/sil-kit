@@ -54,10 +54,12 @@ LIN Service API
 .. |LinFrameResponseMode_Tx| replace:: :cpp:enumerator:`LinFrameResponseMode::TxUnconditional<SilKit::Services::Lin::LinFrameResponseMode::TxUnconditional>`
 
 .. |LinFrameStatus| replace:: :cpp:enum:`LinFrameStatus<SilKit::Services::Lin::LinFrameStatus>`
+.. |LinFrameStatus_LIN_RX_OK| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_OK<SilKit::Services::Lin::LIN_RX_OK>`
 .. |LinFrameStatus_LIN_TX_OK| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<SilKit::Services::Lin::LIN_TX_OK>`
 .. |LinFrameStatus_LIN_TX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_TX_ERROR<SilKit::Services::Lin::LIN_TX_ERROR>`
 .. |LinFrameStatus_LIN_RX_ERROR| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_ERROR<SilKit::Services::Lin::LIN_RX_ERROR>`
 .. |LinFrameStatus_LIN_RX_NO_RESPONSE| replace:: :cpp:enumerator:`LinFrameStatus::LIN_RX_NO_RESPONSE<SilKit::Services::Lin::LIN_RX_NO_RESPONSE>`
+
 
 .. |HandlerId| replace:: :cpp:class:`HandlerId<SilKit::Services::HandlerId>`
 

@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 
 #include "ConfigurationTestUtils.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace SilKit {
 namespace Tests {
@@ -40,7 +41,9 @@ public:
         _participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
 
-        _controller = _participant->CreateSystemController();
+        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(_participant.get());
+        _controller = participantInternal->GetSystemController();
+
         _controller->SetWorkflowConfiguration({_syncParticipantNames});
         _monitor = _participant->CreateSystemMonitor();
     }
@@ -52,7 +55,7 @@ public:
     }
 
 private:
-    SilKit::Services::Orchestration::ISystemController* _controller;
+    SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     SilKit::Services::Orchestration::ISystemMonitor* _monitor;
     std::vector<std::string> _syncParticipantNames;
     std::map<std::string, SilKit::Services::Orchestration::ParticipantState> _participantStates; //for printing status updates

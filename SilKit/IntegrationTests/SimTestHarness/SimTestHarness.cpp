@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "ConfigurationTestUtils.hpp"
+#include "IParticipantInternal.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -73,11 +74,12 @@ auto SimParticipant::GetOrCreateSystemMonitor() -> Services::Orchestration::ISys
     return _systemMonitor;
 }
 
-auto SimParticipant::GetOrCreateSystemController() -> Services::Orchestration::ISystemController*
+auto SimParticipant::GetOrCreateSystemController() -> Experimental::Services::Orchestration::ISystemController*
 {
     if (!_systemController)
     {
-        _systemController = _participant->CreateSystemController();
+        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(_participant.get());
+        _systemController = participantInternal->GetSystemController();
     }
     return _systemController;
 }

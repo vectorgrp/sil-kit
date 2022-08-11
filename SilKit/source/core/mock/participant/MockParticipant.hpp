@@ -31,8 +31,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
-#include "silkit/services/orchestration/ISystemController.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
+#include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
 #include "silkit/services/fwd_decl.hpp"
 #include "silkit/services/can/CanDatatypes.hpp"
@@ -122,7 +122,7 @@ public:
     MOCK_METHOD(bool, IsParticipantConnected, (const std::string& participantName), (const, override));
 };
 
-class MockSystemController : public Services::Orchestration::ISystemController {
+class MockSystemController : public Experimental::Services::Orchestration::ISystemController {
 public:
     MOCK_CONST_METHOD0(Run, void());
     MOCK_CONST_METHOD0(Stop, void());
@@ -228,8 +228,7 @@ public:
     MOCK_METHOD(Services::Orchestration::TimeSyncService*, CreateTimeSyncService, (Services::Orchestration::LifecycleService*), (override));
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
     auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* override { return &mockSystemMonitor; }
-    auto GetSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
-    auto CreateSystemController() -> Services::Orchestration::ISystemController* override { return &mockSystemController; }
+    auto GetSystemController() -> Experimental::Services::Orchestration::ISystemController* override { return &mockSystemController; }
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
 
@@ -354,6 +353,9 @@ public:
 
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override { handler(); };
     
+    void SetIsSystemControllerCreated(bool /*isCreated*/) override{};
+    bool GetIsSystemControllerCreated() override { return false; };
+
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
     DummyLogger logger;

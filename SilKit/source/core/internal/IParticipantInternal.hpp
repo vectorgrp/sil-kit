@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <atomic>
 
 #include "silkit/participant/IParticipant.hpp"
+#include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
@@ -193,7 +194,7 @@ public:
     virtual auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
 
     //! \brief Return the ISystemController at this SIL Kit participant.
-    virtual auto GetSystemController() -> Services::Orchestration::ISystemController* = 0;
+    virtual auto GetSystemController() -> Experimental::Services::Orchestration::ISystemController* = 0;
 
     //! \brief Return the ILogger at this SIL Kit participant.
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
@@ -208,6 +209,8 @@ public:
     // Register handlers for completion of async service creation
     virtual void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) = 0;
     
+    virtual bool GetIsSystemControllerCreated() = 0;
+    virtual void SetIsSystemControllerCreated(bool isCreated) = 0;
 };
 
 } // namespace Core

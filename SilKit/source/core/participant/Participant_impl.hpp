@@ -604,7 +604,19 @@ auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServic
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::GetSystemController() -> Services::Orchestration::ISystemController*
+bool Participant<SilKitConnectionT>::GetIsSystemControllerCreated()
+{
+    return _isSystemControllerCreated;
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SetIsSystemControllerCreated(bool isCreated)
+{
+    _isSystemControllerCreated = isCreated;
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetSystemController() -> Experimental::Services::Orchestration::ISystemController*
 {
     auto* controller = GetController<Orchestration::SystemController>(SilKit::Core::Discovery::controllerTypeSystemController);
     if (!controller)
@@ -617,17 +629,6 @@ auto Participant<SilKitConnectionT>::GetSystemController() -> Services::Orchestr
             std::move(supplementalData), true);
     }
     return controller;
-}
-
-template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateSystemController() -> Services::Orchestration::ISystemController*
-{
-    if (_isSystemControllerCreated)
-    {
-        throw std::runtime_error("You may not create the system controller more than once.");
-    }
-    _isSystemControllerCreated = true;
-    return GetSystemController();
 }
 
 template <class SilKitConnectionT>

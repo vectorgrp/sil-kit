@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 
 #include "ConfigurationTestUtils.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace {
 
@@ -101,7 +102,7 @@ protected:
     struct SystemMaster
     {
         std::unique_ptr<IParticipant> participant;
-        ISystemController*            systemController;
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController;
         ISystemMonitor*               systemMonitor;
         ILifecycleService* lifecycleService;
         std::future<ParticipantState> finalState;
@@ -265,7 +266,10 @@ protected:
             systemMaster.participant =
                 SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
 
-            systemMaster.systemController = systemMaster.participant->CreateSystemController();
+            auto participantInternal =
+                dynamic_cast<SilKit::Core::IParticipantInternal*>(systemMaster.participant.get());
+            systemMaster.systemController = participantInternal->GetSystemController();
+
             systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
             systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(
                 {SilKit::Services::Orchestration::OperationMode::Coordinated});

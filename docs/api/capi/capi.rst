@@ -85,7 +85,6 @@ State Handling and Synchronization
   :maxdepth: 1
 
   participantcontroller
-  systemcontroller
   systemmonitor
 
 

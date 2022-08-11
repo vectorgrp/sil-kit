@@ -58,21 +58,6 @@ SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** 
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKitCALL SilKit_SystemController_Create(SilKit_SystemController** outSystemController,
-                                                 SilKit_Participant* participant)
-{
-    ASSERT_VALID_OUT_PARAMETER(outSystemController);
-    ASSERT_VALID_POINTER_PARAMETER(participant);
-    CAPI_ENTER
-    {
-        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        auto cppLifecycleService = cppParticipant->CreateSystemController();
-        *outSystemController = reinterpret_cast<SilKit_SystemController*>(cppLifecycleService);
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
 static auto from_c(const SilKit_LifecycleConfiguration* csc)
 {
     SilKit::Services::Orchestration::LifecycleConfiguration cpp;
@@ -360,36 +345,6 @@ SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Continue(SilKit_LifecycleSe
         auto* lifeCycleService =
             reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(clifecycleService);
         lifeCycleService->Continue();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKitCALL SilKit_SystemController_AbortSimulation(SilKit_SystemController* csystemController)
-{
-    ASSERT_VALID_POINTER_PARAMETER(csystemController);
-    CAPI_ENTER
-    {
-        auto* systemController =
-            reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
-        systemController->AbortSimulation();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
-
-SilKit_ReturnCode SilKitCALL SilKit_SystemController_SetWorkflowConfiguration(
-    SilKit_SystemController* csystemController, const SilKit_WorkflowConfiguration* workflowConfigration)
-{
-    ASSERT_VALID_POINTER_PARAMETER(csystemController);
-    ASSERT_VALID_POINTER_PARAMETER(workflowConfigration);
-    ASSERT_VALID_STRUCT_HEADER(workflowConfigration);
-    CAPI_ENTER
-    {
-        auto* systemController = reinterpret_cast<SilKit::Services::Orchestration::ISystemController*>(csystemController);
-        std::vector<std::string> cppNames;
-        assign(cppNames, workflowConfigration->requiredParticipantNames);
-        systemController->SetWorkflowConfiguration({cppNames});
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

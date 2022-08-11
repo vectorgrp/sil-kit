@@ -1,101 +1,60 @@
-=======================
+=================
 System Controller
-=======================
+=================
+
+.. Macros for docs use
+.. |CreateSystemController| replace:: :cpp:func:`CreateSystemController()<SilKit::Experimental::Participant::CreateSystemController(SilKit::IParticipant* participant) -> SilKit::Experimental::Services::Orchestration::ISystemController*>`
+.. |SetWorkflowConfiguration| replace:: :cpp:func:`SetWorkflowConfiguration()<SilKit::Experimental::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>`
+.. |WorkflowConfiguration| replace:: :cpp:class:`WorkflowConfiguration<SilKit::Services::Orchestration::WorkflowConfiguration>`
+.. |AbortSimulation| replace::  :cpp:func:`AbortSimulation()<SilKit::Experimental::Services::Orchestration::ISystemController::AbortSimulation()>`
 
 .. contents::
    :local:
    :depth: 3
 
-
 .. highlight:: cpp
 
-Using the System Controller
--------------------------------
-
-The system controller API can be used to control the simulation flow such as starting and stoping a simulation.
-Each participant has access to the system controller API and is able to initiate a new system state.
-But the simpler alternative is rather that one participant is solely responsible for using
-the System Controller, so that no erroneous state changes occur and the transitions remain clear.
+.. warning::
+  The System Controller is experimental and might be changed or removed in future versions of the SIL Kit.
 
 .. admonition:: Note
 
-  The SIL Kit provides a utility called :ref:`sil-kit-system-controller<sec:util-system-controller>`, that provides a basic
-  implementation that can be used to start a simulation. In most cases this utility can be used and no own 
-  implementation is needed.
+  The SIL Kit provides a utility called :ref:`sil-kit-system-controller<sec:util-system-controller>`, that provides a 
+  command line linterface to define the required participant names of a simulation. In most cases this utility can be 
+  used and no own implementation is needed.
 
-Before the system controller can be used to initiate state transisitions, 
-:cpp:func:`SetWorkflowConfiguration()<SilKit::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>` must be called
-with a :cpp:class:`WorkflowConfiguration<SilKit::Services::Orchestration::WorkflowConfiguration>` containing the set of 
-required participants within the simulation. This set of required participants must contain all participants that take part in the simulation.
+Create a System Controller
+--------------------------
 
-Initiate state transitions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The System Controller needs a valid participant instance to be created via |CreateSystemController|.
 
-After the required participants are set and the participants called 
-:cpp:func:`StartLifecycleNoTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleNoTimeSync()>` or 
-:cpp:func:`StartLifecycleWithTimeSync<SilKit::Services::Orchestration::ILifecycleService::StartLifecycleWithTimeSync()>`, 
-the participant states will progress automatically either to :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>` 
-(for coordinated participants) or :cpp:enumerator:`ParticipantState::Running<SilKit::Services::Orchestration::Running>`  (for non-coordinated participants).
+.. code-block:: cpp
 
-Once all required participants reached at least :cpp:enumerator:`ParticipantState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>` 
-(and therefore the system is in :cpp:enumerator:`SystemState::ReadyToRun<SilKit::Services::Orchestration::ReadyToRun>`), the next transition can be initiated
-by calling the :cpp:func:`Run()<SilKit::Services::Orchestration::ISystemController::Run()>` command::
+  auto participant = SilKit::CreateParticipant(configuration, participantName, connectUri);
+  systemController = SilKit::Experimental::Participant::CreateSystemController(participant);
 
-  // Initiate state transition from ReadyToRun to Running for all coordinated participants.
-  auto* systemController = participant->GetSystemController();
-  systemController->Run();
+Set the required participants
+-----------------------------
 
-After all participants are successfully running and the system is in
-:cpp:enumerator:`SystemState::Running<SilKit::Services::Orchestration::Running>`, the simulation can be stopped by calling
-the :cpp:func:`Stop()<SilKit::Services::Orchestration::ISystemController::Stop()>` command::
+In the SIL Kit, required participants are a set of user defined participants that are needed for the current 
+simulation setup to function correctly. These participants are used to calculate the system state 
+(see :ref:`System States<subsec:sim-lifecycle>`), which is used by coordinated participants 
+(see :ref:`Configuring Lifecycle<subsec:sim-configuring-lifecycle>`) for their state transitions.
 
-  // Initiate state transition from Running to Stopped for all coordinated participants.
-  auto* systemController = participant->GetSystemController();
-  systemController->Stop();
+To define the required participants, |SetWorkflowConfiguration| must be called with a |WorkflowConfiguration| 
+containing the set of required participants names within the simulation.
 
-If the system is in :cpp:enumerator:`SystemState::Stopped<SilKit::Services::Orchestration::Stopped>`, participants can either
-be restart or the system can be shut down::
+Abort the simulation
+--------------------
 
-  // Restart a participant by providing its name.
-  auto* systemController = participant->GetSystemController();
-  systemController->Restart(participant.name);
-
-  // Shut down all participants.
-  auto* systemController = participant->GetSystemController();
-  systemController->Shutdown();
-
-After a participant is in :cpp:enumerator:`ParticipantState::Shutdown<SilKit::Services::Orchestration::Shutdown>`,
-the simulation is considered to be completed and no more state transitions are possible.
-
+With |AbortSimulation|, all participants with a lifecycle will be aborted. This means that their lifecycle will 
+terminate and call the ``abort handler`` (see :ref:`Using Lifecycle<subsec:sim-using-lifecycle>`).
 
 API and Data Type Reference
 --------------------------------------------------
 
 System Controller API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygenclass:: SilKit::Services::Orchestration::ISystemController
+.. doxygenclass:: SilKit::Experimental::Services::Orchestration::ISystemController
     :members:
 
-
-Data Structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. doxygenstruct:: SilKit::Services::Orchestration::ParticipantCommand
-    :members:
-
-.. doxygenstruct:: SilKit::Services::Orchestration::SystemCommand
-    :members:
-
-
-Usage Example
-----------------------------------------------------
-
-This section contains a basic example about the most common use of the System Controller.
-It demonstrates a simple simulation from start to end with two participants, where one participant
-uses the System Controller to control the system.
-Although the participants would typically reside in different processes,
-their interaction is shown sequentially to demonstrate cause and effect:
-
-.. literalinclude::
-   examples/sync/SystemControllerTwoParticipants.cpp
-   :language: cpp

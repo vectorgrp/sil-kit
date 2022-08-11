@@ -39,6 +39,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ConfigurationTestUtils.hpp"
 #include "ITestThreadSafeLogger.hpp"
 
+#include "IParticipantInternal.hpp"
+
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -272,7 +275,7 @@ protected:
     {
         ILifecycleService* lifecycleService;
         std::unique_ptr<IParticipant> participant;
-        ISystemController* systemController;
+        SilKit::Experimental::Services::Orchestration::ISystemController* systemController;
         ISystemMonitor* systemMonitor;
 
         std::promise<void> systemStateRunningPromise;
@@ -317,7 +320,10 @@ protected:
         LifecycleConfiguration lc{};
         lc.operationMode = OperationMode::Coordinated;
         systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(lc);
-        systemMaster.systemController = systemMaster.participant->CreateSystemController();
+
+        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(systemMaster.participant.get());
+        systemMaster.systemController = participantInternal->GetSystemController();
+
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
 
         systemMaster.systemController->SetWorkflowConfiguration({participantNames});

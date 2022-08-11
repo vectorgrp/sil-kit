@@ -230,7 +230,7 @@ private:
 
 private:
     std::unique_ptr<IParticipantInternal> _participant{nullptr};
-    ISystemController* _systemController{nullptr};
+    SilKit::Experimental::Services::Orchestration::ISystemController* _systemController{nullptr};
     ILifecycleService* _lifecycleService{nullptr};
     ISystemMonitor* _monitor{nullptr};
 

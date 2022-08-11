@@ -20,6 +20,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/config/IParticipantConfiguration.hpp"
+#include "silkit/experimental/participant/ParticipantExtentions.hpp"
+#include "silkit/SilKitMacros.hpp"
 
 /*! \brief Dummy compilation unit to pull in exports from other silkit libs
  *
@@ -31,4 +33,10 @@ void __silkit_force_include_participant_configuration()
 {
     auto foo1 = SilKit::Config::ParticipantConfigurationFromString("");
     auto foo2 = SilKit::Config::ParticipantConfigurationFromFile("");
+}
+
+void __silkit_force_include_experimental()
+{
+    auto unused = SilKit::Experimental::Participant::CreateSystemController(nullptr);
+    SILKIT_UNUSED_ARG(unused);
 }

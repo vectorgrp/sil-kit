@@ -90,6 +90,7 @@ add_silkit_test(ITest_HopOnHopOff
     LIBS
         SilKit
         SilKitConfigurationTestUtils
+        SilKitInternal
 )
 
 add_silkit_test(ITest_CommunicationReady
@@ -98,6 +99,7 @@ add_silkit_test(ITest_CommunicationReady
     LIBS
         SilKit
         SilKitConfigurationTestUtils
+        SilKitInternal
 )
 
 add_silkit_test(ITest_DataPubSub

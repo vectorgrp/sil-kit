@@ -98,7 +98,6 @@ typedef struct
 } SilKit_WorkflowConfiguration;
 
 typedef struct SilKit_SystemMonitor SilKit_SystemMonitor;
-typedef struct SilKit_SystemController SilKit_SystemController;
 typedef struct SilKit_LifecycleService SilKit_LifecycleService;
 typedef struct SilKit_TimeSyncService SilKit_TimeSyncService;
 
@@ -113,18 +112,6 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_System
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outCanController,
                                                            SilKit_Participant* participant);
-
-/*! \brief Create a system controller at this SIL Kit simulation participant.
- * \param outSystemController Pointer that refers to the resulting system controller (out parameter).
- * \param participant The simulation participant at which the system controller should be created.
- *
- * The object returned must not be deallocated using free()!
- */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemController_Create(SilKit_SystemController** outSystemController,
-                                                           SilKit_Participant* participant);
-
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemController_Create_t)(SilKit_SystemController** outCanController,
-                                                              SilKit_Participant* participant);
 
 //!< The LifecycleLifecycle options
 typedef struct SilKit_LifecycleConfiguration
@@ -378,17 +365,6 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_CompleteSimulation
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_CompleteSimulationStep_t)(SilKit_TimeSyncService* timeSyncService);
 
-/*! \brief Send \ref SystemCommand::Kind::AbortSimulation to all participants
- *
- *  The abort simulation command signals all participants to terminate their
- *  lifecycle, regardless of their current state.
- *
- *  The command is allowed at any time.
- */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemController_AbortSimulation(SilKit_SystemController* systemController);
-
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemController_AbortSimulation_t)(SilKit_SystemController* systemController);
-
 /*! \brief Pause execution of the participant
   *
   * Switch to \ref SilKit_ParticipantState_Paused due to the provided \p reason.
@@ -496,21 +472,6 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveParticipantSta
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_RemoveParticipantStatusHandler_t)(SilKit_SystemMonitor* systemMonitor,
                                                                                    SilKit_HandlerId handlerId);
-
-/*! \brief Configures details of the simulation workflow regarding lifecycle and participant coordination.
-  *
-  * Only these participants are taken into account to define the system state.
-  * Further, the simulation time propagation also relies on the required participants.
-  * This information is distributed to other participants, so it must only be set once by a single 
-  * single member of the simulation.
-  *
-  * \param workflowConfigration The desired configuration, currently containing a list of required participants
-  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemController_SetWorkflowConfiguration(
-    SilKit_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfigration);
-
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemController_SetWorkflowConfiguration_t)(
-    SilKit_SystemController* systemController, const SilKit_WorkflowConfiguration* workflowConfigration);
 
 /*! \brief Start the lifecycle.
 * 

@@ -95,9 +95,6 @@ public:
     //! \brief Return the ISystemMonitor at this SIL Kit participant.
     virtual auto CreateSystemMonitor() -> Services::Orchestration::ISystemMonitor* = 0;
 
-    //! \brief Return the ISystemController at this SIL Kit participant.
-    virtual auto CreateSystemController() -> Services::Orchestration::ISystemController* = 0;
-
     //! \brief Return the ILogger at this SIL Kit participant.
     virtual auto GetLogger() -> Services::Logging::ILogger* = 0;
 };

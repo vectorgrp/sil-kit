@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 
-#include "silkit/services/orchestration/ISystemController.hpp"
+#include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
 #include "IMsgForSystemController.hpp"
 #include "IParticipantInternal.hpp"
@@ -33,7 +33,7 @@ namespace Services {
 namespace Orchestration {
 
 class SystemController
-    : public ISystemController
+    : public Experimental::Services::Orchestration::ISystemController
     , public IMsgForSystemController
     , public Core::IServiceEndpoint
 {

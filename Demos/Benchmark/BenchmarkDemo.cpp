@@ -362,16 +362,14 @@ int main(int argc, char** argv)
                 participantNames.push_back(participantName);
                 auto& counter = counters.at(idx);
                 idx++;
-                threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark,  participantName, participantIndex, std::ref(counter));
+                threads.emplace_back(&ParticipantsThread, participantConfiguration, benchmark, participantName, participantIndex, std::ref(counter));
             }
 
             auto participant = SilKit::CreateParticipant(participantConfiguration, "SystemController", benchmark.registryUri);
-            auto controller = participant->CreateSystemController();
+  
             auto monitor = participant->CreateSystemMonitor();
             auto lifecycle = participant->CreateLifecycleService({OperationMode::Coordinated});
             lifecycle->StartLifecycle();
-
-            controller->SetWorkflowConfiguration({participantNames});
 
             monitor->AddParticipantStatusHandler([lifecycle](const ParticipantStatus& newStatus) {
                 ParticipantStatusHandler(lifecycle, newStatus);

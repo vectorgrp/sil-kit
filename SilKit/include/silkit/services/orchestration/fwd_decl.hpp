@@ -37,8 +37,6 @@ class ITimeSyncService;
 
 class ISystemMonitor;
 
-class ISystemController;
-
 class ITimeProvider;
 } // namespace Orchestration
 } // namespace Services

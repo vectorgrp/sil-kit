@@ -18,6 +18,8 @@ It provides access to the :cpp:class:`time synchronization service <SilKit::Serv
 For an overview of a participant's state and its relation to the simulation
 refer to the :ref:`participant lifecycle section<sec:sim-lifecycle-syncParticipants>`.
 
+.. _subsec:sim-configuring-lifecycle:
+
 Configuring the Lifecycle Service
 ---------------------------------
 
@@ -28,10 +30,10 @@ There are two possible operation modi:
 * Coordinated: 
   
   * The lifecycle service will coordinate its state with other participants. It will do so by reacting to changes of the system state, which is based on the list of required participants.
-  * A coordinated participant will only work, if any participant set a list of required participants as part of :cpp:func:`ISystemController::SetWorkflowConfiguration()<SilKit::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>`.
+  * A coordinated participant will only work, if any participant set a list of required participants as part of :cpp:func:`ISystemController::SetWorkflowConfiguration()<SilKit::Experimental::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>`.
   * Coordinated participants will stop, as soon as the system state changes to the stopping state.
   * The `CommunicationReady` callback guarantees that communication via RPC and Publish/Subscribe services is possible.
-  * Coordinated participants can also be terminated externally using the :cpp:func:`ISystemController::AbortSimulation()<SilKit::Services::Orchestration::ISystemController::AbortSimulation()>` call, which aborts the simulation of any participant.
+  * Coordinated participants can also be terminated externally using the :cpp:func:`ISystemController::AbortSimulation()<SilKit::Experimental::Services::Orchestration::ISystemController::AbortSimulation()>` call.
   
 * Autonomous: 
   
@@ -39,11 +41,12 @@ There are two possible operation modi:
   * The lifecycle service will run through all participant states until it is running and it will trigger all callbacks.
   * The `CommunicationReady` callback will trigger, but the communication guarantee is not given.
   * Autonomous participants must stop themselves by explicitly calling :cpp:func:`Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`.
-  * The only way to stop an autonomous participant externally is the :cpp:func:`ISystemController::AbortSimulation()<SilKit::Services::Orchestration::ISystemController::AbortSimulation()>` call, which aborts the simulation of any participant.
+  * The only way to stop an autonomous participant externally is the :cpp:func:`ISystemController::AbortSimulation()<SilKit::Experimental::Services::Orchestration::ISystemController::AbortSimulation()>` call.
+
+.. _subsec:sim-using-lifecycle:
 
 Using the Lifecycle Service
 ----------------------------
-
 
 An |ILifecycleService| instance can be retrieved from a |Participant|. To do so, a lifecycle configuration must be provided::
    

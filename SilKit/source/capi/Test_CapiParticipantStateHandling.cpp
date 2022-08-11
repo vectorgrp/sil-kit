@@ -144,9 +144,6 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_
         (SilKit_LifecycleService*)(lifecycleService), nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
-    returnCode = SilKit_SystemController_AbortSimulation(nullptr);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
     returnCode = SilKit_LifecycleService_Pause(nullptr, nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
@@ -225,12 +222,6 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_SystemMonitor_RemoveParticipantStatusHandler(nullptr, (SilKit_HandlerId)0);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-    returnCode = SilKit_SystemController_SetWorkflowConfiguration(nullptr, workflowConfiguration);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
-
-    returnCode = SilKit_SystemController_SetWorkflowConfiguration((SilKit_SystemController*)(mockParticipant.GetSystemController()), nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
 }
@@ -394,10 +385,6 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     returnCode = SilKit_LifecycleService_Continue((SilKit_LifecycleService*)(lifecycleService));
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    EXPECT_CALL(mockParticipant.mockSystemController, AbortSimulation()).Times(testing::Exactly(1));
-    returnCode = SilKit_SystemController_AbortSimulation((SilKit_SystemController*)(mockParticipant.GetSystemController()));
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
-
     SilKit_HandlerId handlerId;
 
     EXPECT_CALL(mockParticipant.mockSystemMonitor, AddSystemStateHandler(testing::_)).Times(testing::Exactly(1));
@@ -417,10 +404,6 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     returnCode = SilKit_SystemMonitor_RemoveParticipantStatusHandler(systemMonitor, handlerId);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
-    EXPECT_CALL(mockParticipant.mockSystemController, SetWorkflowConfiguration(testing::_)).Times(testing::Exactly(1));
-    returnCode = SilKit_SystemController_SetWorkflowConfiguration(
-        (SilKit_SystemController*)(mockParticipant.GetSystemController()), workflowConfiguration);
-    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 } // namespace

@@ -1,5 +1,7 @@
+
+==========
 Simulation
-**********
+==========
 .. 
   macros for internal use
 ..
@@ -9,7 +11,7 @@ Simulation
   API references
 .. |LifecycleServiceAPI| replace:: :cpp:class:`ILifecycleService<SilKit::Services::Orchestration::ILifecycleService>`
 .. |TimeSyncServiceAPI| replace:: :cpp:class:`ITimeSyncService<SilKit::Services::Orchestration::ITimeSyncService>`
-.. |SystemControllerAPI| replace:: :cpp:class:`ISystemController<SilKit::Services::Orchestration::ISystemController>`
+.. |SystemControllerAPI| replace:: :cpp:class:`ISystemController<SilKit::Experimental::Services::Orchestration::ISystemController>`
 .. |SystemMonitorAPI| replace:: :cpp:class:`ISystemMonitor<SilKit::Services::Orchestration::ISystemMonitor>`
 .. |CompleteSimulationStep| replace:: :cpp:func:`CompleteSimulationStep()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationStep()>`
 .. |StartLifecycle| replace:: :cpp:func:`StartLifecycle()<SilKit::Services::Orchestration::ILifecycleService::StartLifecycle()>`
@@ -25,8 +27,11 @@ Simulation
   Reference implementations, etc.
 .. |SilKitSystemController| replace:: :ref:`SIL Kit System Controller Utility<sec:util-system-controller>`
 
+.. contents::
+   :local:
+   :depth: 3
 
-The following chapter explains, how a simulation using the |ProductName| works.
+The following chapter explains how a simulation using the |ProductName| works.
 It first introduces the properties that affect the participants' behavior towards other participants.
 Then, the lifecycle of individual simulation participants and the overall simulation are detailed.
 Afterwards, details about a simulation run with synchronized participants are presented.
@@ -61,7 +66,8 @@ The following introduces the three components that can affect and observe the in
 
 .. _subsubsec:sim-lifecycle-lifecycleService:
 
-**Lifecycle service:**
+Lifecycle service
+~~~~~~~~~~~~~~~~~
 The |LifecycleServiceAPI| interface allows each participant to access various functions related to its lifecycle.
 Users can register callbacks that trigger once a participant reaches certain states.
 Available callbacks are :cpp:func:`SetCommunicationReadyHandler()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandler()>`, :cpp:func:`SetStopHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStopHandler()>`, and :cpp:func:`SetShutdownHandler()<SilKit::Services::Orchestration::ILifecycleService::SetShutdownHandler()>`.
@@ -71,15 +77,16 @@ Once all needed controllers are registered and, if needed, the time synchronizat
 
 .. _subsubsec:sim-lifecycle-timeSyncService:
 
-**Time synchronization service:**
-
+Time synchronization service
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The |TimeSyncServiceAPI| interface allows users to set a simulation step, which is important for participants with virtual time synchronization.
 A simulation step defines the operations that are repeatedly performed in the interval of the simulation step size.
 The simulation step as well as the initial step size are configured via :cpp:func:`ITimeSyncService::SetSimulationStepHandler()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`
 
 .. _subsubsec:sim-lifecycle-systemMonitor:
 
-**System monitor:**
+System monitor
+~~~~~~~~~~~~~~
 To observe the state transitions of other participants, users first need to retrieve the |SystemMonitorAPI| interface via :cpp:func:`CreateSystemMonitor()<SilKit::IParticipant::CreateSystemMonitor()>`.
 Afterwards, they can register a participant status callback via :cpp:func:`AddParticipantStatusHandler()<SilKit::Services::Orchestration::ISystemMonitor::AddParticipantStatusHandler()>`.
 In addition, users can register a callback for changes of the overall system state via :cpp:func:`AddSystemStateHandler()<SilKit::Services::Orchestration::ISystemMonitor::AddSystemStateHandler()>`.
@@ -88,13 +95,14 @@ For example, two Participants A and B are required. A is in state :cpp:enumerato
 
 .. _subsubsec:sim-lifecycle-systemController:
 
-**System controller:**
-The |SystemControllerAPI| interface allows users to set system-wide simulation parameters, such as which participants are required for a simulation, as well as signal commands that are processed by all receiving participants with a lifecycle.
-The remainder of this documentation refers to these signals as *system commands*.
-There is currently only one system command: :cpp:func:`AbortSimulation()<SilKit::Services::Orchestration::ISystemController::AbortSimulation()>` causes all participants to stop their current lifecycle in an orderly manner.
-Although any participant has a system controller and could therefore steer the simulation, we recommend to either dedicate one participant to take care of the simulation's configuration or to define a dedicated participant that will do this.
-We provide a reference implementation that provides all necessary state transitions for a properly working simulation (see |SilKitSystemController| for details). 
+System controller
+~~~~~~~~~~~~~~~~~
+.. warning::
+  The System Controller is experimental and might be changed or removed in future versions of the SIL Kit.
 
+The |SystemControllerAPI| interface allows users to set system-wide simulation parameters, such as which participants 
+are required for a simulation, as well as signal commands that are processed by all participants with a 
+lifecycle (see :doc:`System Controller<../api/systemcontroller>` for details).
 
 .. _sec:sim-lifecycle-syncParticipants:
 
@@ -157,7 +165,7 @@ Simulation-wide Lifecycle (System State)
 The lifecycle of the overall simulation is derived from the states of a defined set of participants.
 Changes to the system state can be observed via the SystemMonitor.
 
-The set of participants that define the system state must be defined via :cpp:func:`SetWorkflowConfiguration()<SilKit::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>` before the simulation is started (see :ref:`above<subsubsec:sim-lifecycle-systemController>` for details).
+The set of participants that define the system state must be defined via :cpp:func:`SetWorkflowConfiguration()<SilKit::Experimental::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>` before the simulation is started (see :ref:`above<subsubsec:sim-lifecycle-systemController>` for details).
 The system state is defined as follows:
 
 #. If any required participant is not available, the system state is :cpp:enumerator:`Invalid<SilKit::Services::Orchestration::ParticipantState::Invalid>`.
@@ -175,7 +183,6 @@ For example, the system state remains :cpp:enumerator:`ServicesCreated<SilKit::S
 
 In all cases that do not match any of the above, the system state will be regarded as :cpp:enumerator:`Invalid<SilKit::Services::Orchestration::SystemState::Invalid>`.
 This should typically not occur.
-
 
 .. _sec:sim-synchronization:
 
