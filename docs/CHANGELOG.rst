@@ -5,8 +5,8 @@ All notable changes to the IntegrationBus project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[3.99.31] - UNRELEASED
-----------------------
+[4.0.0] - 2022-08-11
+--------------------
 
 Compatibility with 3.99.30
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,7 +30,7 @@ Removed
 ~~~~~~~
 
 - Removed various demos (CCan, CEthernet, CFlexray, CLin, Lifecycle, and TimeAnnotation) as they were meant for testing
-- Removed benchmark demo 
+- Removed benchmark demo
 
 Fixed
 ~~~~~
