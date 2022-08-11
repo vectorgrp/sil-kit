@@ -69,10 +69,10 @@ protected:
             SilKit::Services::Ethernet::EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
             frameEvent.frame = SilKit::Services::Ethernet::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
-            frameEvent.userContext = reinterpret_cast<void *>(index + 1);
+            frameEvent.userContext = reinterpret_cast<void *>(static_cast<uintptr_t>(index + 1));
 
             auto& ethack = _testFrames[index].expectedAck;
-            ethack.userContext = reinterpret_cast<void *>(index + 1);
+            ethack.userContext = reinterpret_cast<void *>(static_cast<uintptr_t>(index + 1));
             ethack.status = SilKit::Services::Ethernet::EthernetTransmitStatus::Transmitted;
         }
     }

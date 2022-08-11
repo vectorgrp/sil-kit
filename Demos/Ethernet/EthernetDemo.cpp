@@ -136,7 +136,7 @@ void SendFrame(Ethernet::IEthernetController* controller, const Ethernet::Ethern
     std::vector<uint8_t> payload(payloadString.size() + 1);
     memcpy(payload.data(), payloadString.c_str(), payloadString.size() + 1);
 
-    const auto userContext = reinterpret_cast<void *>(frameId);
+    const auto userContext = reinterpret_cast<void *>(static_cast<intptr_t>(frameId));
 
     auto frame = CreateFrame(to, from, payload);
     controller->SendFrame(Ethernet::EthernetFrame{frame}, userContext);
