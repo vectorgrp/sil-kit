@@ -26,6 +26,12 @@ Changed
 - Added an CLI argument to sil-kit-system-controller to run it without user interaction (--non-interactive or -ni)
 - Participants to not go to `ParticipantState::Error` anymore when the system state changes to `SystemState::Error`
 
+Removed
+~~~~~~~
+
+- Removed various demos (CCan, CEthernet, CFlexray, CLin, Lifecycle, and TimeAnnotation) as they were meant for testing
+- Removed benchmark demo 
+
 Fixed
 ~~~~~
 

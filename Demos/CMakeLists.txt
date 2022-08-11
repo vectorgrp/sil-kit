@@ -124,17 +124,6 @@ add_subdirectory(Flexray)
 add_subdirectory(Lin)
 add_subdirectory(PubSub)
 add_subdirectory(Rpc)
-add_subdirectory(Benchmark)
-add_subdirectory(Lifecycle)
-add_subdirectory(TimeAnnotation)
-
-# C-API Demos
-add_subdirectory(CCan)
-add_subdirectory(CFlexray)
-add_subdirectory(CEthernet)
-add_subdirectory(CLin)
-add_subdirectory(CPubSub)
-add_subdirectory(CRpc)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################

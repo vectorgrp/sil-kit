@@ -274,7 +274,7 @@ FlexRay Demo
          It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.
 
 
-Data Message Demo
+Publish & Subscribe Demo
 ~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -372,95 +372,3 @@ RPC Demo
             |SystemController| Server Client
    *  -  Notes
       -  Any combination of publishers or subscribers is usable for this demo.
-
-.. _sec:util-benchmark-demo:
-
-Benchmark Demo
-~~~~~~~~~~~~~~
-
-.. list-table::
-   :widths: 17 220
-   :stub-columns: 1
-
-   *  -  Abstract
-      -  Parametrizable demo to benchmark the SilKit performance. Runs the simulation with the specified parameters a number of times and summarizes the real execution time as result.
-   *  -  Source location
-      -  Demos/Benchmark
-   *  -  Parameters
-      -  There are up to 7 positional arguments. All of them are optional and the defaults are used for the unspecified ones.
-         For convenience long command options are supported with the syntax ``--option value``
-         
-         #. Number of simulations (optional); must be at least ``1``; defaults to ``5``.
-             - ``--number-simulations NUM``
-         #. Duration of the simulation in seconds (optional); must be at least ``1``; defaults to ``1``.
-             - ``--simulation-duration SECONDS``
-         #. Number of participants (optional); must be at least ``2``; defaults to ``4``.
-             - ``--number-participants NUM``
-         #. Number of messages sent per tick between each participant (optional); defaults to ``1``.
-             - ``--message-count NUM``
-         #. Size of the messages in bytes (optional); must be at least ``1``; defaults to ``100``.
-             - ``--message-size BYTES``
-         #. Registry URI (optional); defaults to ``silkit://localhost:8500``.
-             - ``--registry-uri URI``
-   *  -  Parameter Example
-      -  .. parsed-literal:: 
-
-            # Creates a benchmark process, which runs the same simulation (5s duration,
-            # 10 participants, 1 message of 200 bytes per participant pair per tick) a hundred times.
-            |DemoDir|/SilKitDemoBenchmark 100 5 10 1 200 50
-   *  -  Notes
-      -  | \- DataPublisher / DataSubscribers are used in the participants.
-         | \- The tick period is 1ms and each tick, each particpant sends the specified number of messages to every other particpant.
-         | \- All participants and the registry run in the same process.
-
-
-Life Cycle Demo
-~~~~~~~~~~~~~~~
-
-.. list-table::
-   :widths: 17 220
-   :stub-columns: 1
-
-   *  -  Abstract
-      -  Participant with or without life cycle and / or time synchronization
-   *  -  Source location
-      -  Demos/Lifecycle
-   *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
-   *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml>
-           File name of the ParticipantConfiguration to be used;
-           use ``SilKitConfig_DemoLifecycle.json`` for an example configuration.
-         <ParticipantName>
-           The name of the participant within the simulation; pauses and continues the simulation three times for five seconds if ``PauseTest``; can be anything otherwise.
-         [RegistryUri] 
-           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
-         [\-\-async]
-           If timeSync flag is set, the participant will run without virtual time synchronization.
-         [\-\-uncoordinated]
-           If the uncoordinated flag is set, the participant will not coordinate its state transitions with other participants. 
-           The state transition Running->Stopping must be triggered via a call to :cpp:func:`ILifecycleService::Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`.
-   *  -  Parameter Example
-      -  .. parsed-literal::
-
-            # Start the Life Cycle Demo with the default registryUri 'silkit://localhost:8500':
-            |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
-
-   *  -  System Example
-      -  .. parsed-literal::
-
-            # System Monitor (optional):
-            |SystemMonitor|
-
-            # Life cycle with coordinated start and stop, synchronized time and running the pause testing:
-            |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json PauseTest --coordinateStartAndStop --syncTime
-
-            # Life cycle with synchronized time, but without coordinated start and stop (i.e., switches directly to the Running state):
-            |DemoDir|/SilKitDemoLifecycle Demos/Lifecycle/SilKitConfig_DemoLifecycle.json AnotherParticipant --syncTime
-
-            # System Controller (add NetworkSimulator as third parameter if using the Network Simulator):
-            |SystemController| EthernetReader Ethernet Writer
-
-   *  -  Notes
-      -  | \- The ``PauseTest`` pauses in three consecutive time-steps for five (wall-clock) seconds, starting at simulation timestamp 0.02s.
