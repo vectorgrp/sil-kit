@@ -63,8 +63,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #endif
 
 #ifdef _WIN32
-#define SilKitCALL __stdcall
-#define SilKitFPTR __stdcall
+#define SilKitCALL __cdecl
+#define SilKitFPTR __cdecl
 #else
 #define SilKitCALL
 #define SilKitFPTR
