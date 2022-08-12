@@ -41,6 +41,7 @@ option(SILKIT_ENABLE_UBSAN "Enable -f sanitize=undefined for builds (requires gc
 option(SILKIT_ENABLE_THREADSAN "Enable -f sanitize=thread for builds (requires gcc, clang)" OFF)
 option(SILKIT_ENABLE_COVERAGE "Enable coverage for builds (requires gcc, clang)" OFF)
 option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/SilKit/cmake)
 include(SilKitInstall)
@@ -91,9 +92,9 @@ if(NOT CMAKE_BUILD_TYPE)
 else()
     set(my_build_type "-${CMAKE_BUILD_TYPE}")
 endif()
-set(SILKIT_PDB_DIR_BASE "${CMAKE_BINARY_DIR}")
-set(SILKIT_PDB_DIR_NAME "SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}${my_build_type}-PDB")
-set(SILKIT_PDB_DIR "${SILKIT_PDB_DIR_BASE}/${SILKIT_PDB_DIR_NAME}")
+set(SILKIT_SYMBOLS_DIR_BASE "${CMAKE_BINARY_DIR}")
+set(SILKIT_SYMBOLS_DIR_NAME "SilKit-${PROJECT_VERSION}-${SILKIT_HOST_PLATFORM}-${SILKIT_HOST_ARCHITECTURE}-${SILKIT_HOST_COMPILER}${my_build_type}-SYMBOLS")
+set(SILKIT_SYMBOLS_DIR "${SILKIT_SYMBOLS_DIR_BASE}/${SILKIT_SYMBOLS_DIR_NAME}")
 
 ###############################################################################
 # Include the SIL Kit projects to be built

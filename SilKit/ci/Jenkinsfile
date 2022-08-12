@@ -456,11 +456,10 @@ def doBuild(Map config) {
                 run "python ./SilKit/ci/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                 archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
 
-                // safe the PDB files on windows
+                // safe the debug symbols files on windows/Linux
+                archiveToArtifactory(config, scmVars, "_build_Debug/${artifactName}-*-SYMBOLS.zip")
                 if(!isUnix()) {
-                    // package PDB files without rebuilding
-                    archiveToArtifactory(config, scmVars, "_build_Debug/${artifactName}-*-PDB.zip")
-                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-PDB.zip")
+                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-SYMBOLS.zip")
                 }
             }
         }

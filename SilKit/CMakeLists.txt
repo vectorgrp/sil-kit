@@ -34,7 +34,6 @@ configure_silkit_version(${PROJECT_NAME})
 
 set(SILKIT_PROJECT_DIR ${PROJECT_SOURCE_DIR})
 
-option(SILKIT_INSTALL_PDB_FILES "Install Visual Studio debug symbol files along with the SIL Kit dll" OFF)
 
 if(MSVC)
     add_compile_options("/MP;/w44062")
