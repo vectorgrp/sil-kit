@@ -67,23 +67,11 @@ void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
 
-    auto it = std::find_if(config->logging.sinks.begin(), config->logging.sinks.end(), [](auto const& el) {
-        return el.type == SilKit::Config::Sink::Type::Stdout;
-    });
-
-    auto level = SilKit::Services::Logging::from_string(logLevel);
-
-    if (it != config->logging.sinks.end())
-    {
-        it->level = level;
-    }
-    else
-    {
-        SilKit::Config::Sink newSink{};
-        newSink.type = SilKit::Config::Sink::Type::Stdout;
-        newSink.level = level;
-        config->logging.sinks.emplace_back(std::move(newSink));
-    }
+    SilKit::Config::Sink newSink{};
+    newSink.type = SilKit::Config::Sink::Type::Stdout;
+    newSink.level = SilKit::Services::Logging::from_string(logLevel);
+    config->logging.sinks.emplace_back(std::move(newSink));
+    
 }
 
 void SanitizeConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
@@ -131,10 +119,6 @@ int main(int argc, char** argv)
         "listen-uri", "u", "silkit://localhost:8500", "[--listen-uri <uri>]",
         "-u, --listen-uri <silkit-uri>: The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CliParser::Option>(
-        "configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the "
-        "format was changed in v3.6.11.");
-    commandlineParser.Add<CliParser::Option>(
         "generate-configuration", "g", "", "[--generate-configuration <configuration>]",
         "-g, --generate-configuration <configuration>: Generate a configuration file which includes the URI the "
         "registry listens on. ");
@@ -174,7 +158,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    auto&& configurationFilename{ commandlineParser.Get<CliParser::Option>("configuration").Value() };
     auto useSignalHandler{ commandlineParser.Get<CliParser::Flag>("use-signal-handler").Value() };
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
     auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
@@ -189,9 +172,7 @@ int main(int argc, char** argv)
 
     try
     {
-        auto configuration = (!configurationFilename.empty()) ?
-            SilKit::Config::ParticipantConfigurationFromFile(configurationFilename) :
-            SilKit::Config::ParticipantConfigurationFromString("");
+        auto configuration = SilKit::Config::ParticipantConfigurationFromString("");
 
         ConfigureLogging(configuration, logLevel);
         SanitizeConfiguration(configuration, listenUri);
@@ -286,7 +267,7 @@ int main(int argc, char** argv)
     }
     catch (const SilKit::ConfigurationError& error)
     {
-        std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
+        std::cerr << "Error in configuration: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
 
