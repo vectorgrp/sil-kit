@@ -5,20 +5,25 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.1] - UNRELEASED
+[4.0.1] - 2022-08-15
 --------------------
 
 Compatibility with 4.0.0
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): XXX
-- Application software interface (API): XXX
-- Middleware network protocol: XXX
+- Application binary interface (ABI): No
+- Application software interface (API): Yes
+- Middleware network protocol: Yes
 
 Changed
 ~~~~~~~
 
 - The calling convention used in the C-API was changed to ``cdecl`` on 32-bit Windows.
+
+Removed
+~~~~~~~
+
+- The ``sil-kit-registry`` command line argument ``--configuration`` was removed.
 
 
 [4.0.0] - 2022-08-11
