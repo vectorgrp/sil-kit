@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 std::vector<uint8_t> CreateFrame(const Ethernet::EthernetMac& destinationAddress, const Ethernet::EthernetMac& sourceAddress,
                                  const std::vector<uint8_t>& payload)
 {
-    const uint16_t etherType = 0x0000;  // IPv6 protocol
+    const uint16_t etherType = 0x0000;  // no protocol
 
     std::vector<uint8_t> raw;
 
