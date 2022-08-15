@@ -69,6 +69,7 @@ For example, the following CMakeLists.txt is able to import the SIL Kit library 
 .. literalinclude::
    sample_silkit/CMakeLists.txt
    :language: cmake
+   :lines: 22-32
 
 Properties, like include directories and compile flags, are automatically handled by the imported target.
 If you use another method to build your software you can directly use the ``SilKit/include`` and
@@ -103,7 +104,7 @@ One thread will act as a publisher by sending a test string to its subscribers:
 .. literalinclude::
    sample_silkit/simple.cpp
    :language: cpp
-   :lines: 14-40
+   :lines: 36-65
 
 
 First, the simulation is joined by creating a participant ``PublisherParticipant``.
@@ -125,7 +126,7 @@ The subscriber runs in its own thread, too:
 .. literalinclude::
    sample_silkit/simple.cpp
    :language: cpp
-   :lines: 42-69
+   :lines: 67-97
 
 The setup is similar to the publisher, except that we instantiate a 
 :cpp:class:`subscriber<SilKit::Services::PubSub::IDataSubscriber>` interface.
@@ -153,7 +154,7 @@ The final simulation setup can be run through the following commands:
       ./sil-kit-system-controller.exe PublisherParticipant SubscriberParticipant
 
       # Start the application running the two participants
-      # Make sure that the SilKit.dll and simple.json are available 
+      # Make sure that the SilKit.dll and simple.yaml are available 
       ./SampleSilKit.exe
 
 The complete source code of this sample can be found here: :download:`CMakeLists.txt<sample_silkit/CMakeLists.txt>`

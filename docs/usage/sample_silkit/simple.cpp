@@ -67,7 +67,9 @@ void publisher_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> c
 void subscriber_main(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
 {
     auto participant = SilKit::CreateParticipant(config, "SubscriberParticipant", registryUri);
+    
     SilKit::Services::PubSub::PubSubSpec pubSubSpec{"DataService", "text/plain"};
+
     auto receptionHandler = [](auto* subscriber, const auto& dataMessageEvent) {
         std::string message{dataMessageEvent.data.begin(), dataMessageEvent.data.end()};
         std::cout << " <- Received data=\"" << message << "\"" << std::endl;

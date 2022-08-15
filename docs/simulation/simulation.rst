@@ -104,6 +104,10 @@ The |SystemControllerAPI| interface allows users to set system-wide simulation p
 are required for a simulation, as well as signal commands that are processed by all participants with a 
 lifecycle (see :doc:`System Controller<../api/systemcontroller>` for details).
 
+.. admonition:: Note
+
+    A coordinated participant must be required, or otherwise the simulation will enter an error state.
+
 .. _sec:sim-lifecycle-syncParticipants:
 
 Lifecycle Coordination Between Participants
@@ -193,6 +197,11 @@ The following first gives a general overview of a simulation run using the |Prod
 Afterwards, possibilities to configure the simulation step length of a simulation step and to define the simulation step that is being executed are introduced.
 The last part details what time information |ProductName| clients provide, depending on their synchronization mode.
 
+.. admonition:: Note
+
+    A mixed operation mode in which some participants operate synchronized and some participants operate unsynchronized
+    is not supported. Therefore, alle participants of a simulation must either be synchronized or unsynchronized.
+
 Simulation Overview
 -------------------
 A |ProductName| simulation is designed as a discrete-event simulation. 
@@ -236,9 +245,6 @@ Also, this allows two participants to communicate without increasing the simulat
 
 Timestamps in Messages
 ----------------------
-.. admonition:: Note
-  
-   The following describes the current behavior and will change in the foreseeable future.
 
 Each sent bus event is annotated with a timestamp, at which it was sent. 
 The timestamp is set automatically by the |ProductName| client.

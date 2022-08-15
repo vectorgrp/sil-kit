@@ -11,7 +11,7 @@ automotive applications. For this, the Vector SIL Kit provides:
   * High level data messages for arbitrary application specific communication in a publish / subscribe pattern
   * Remote Procedure Calls for calling arbitrary procedures on remote participants
 
-* Synchronization of virtual simulation time ??implementing different protocols??
+* Synchronization of virtual simulation time
 
   * Event based synchronization according to lower bound event time
 
@@ -43,9 +43,14 @@ Vehicle Networks
 ~~~~~~~~~~~~~~~~
 
 The SIL Kit provides means to simulate CAN / CAN FD, Ethernet, FlexRay, and LIN networks.
-All networks can be simulated with two different levels of detail: a simple, functional simulation
+All networks except for FlexRay can be simulated with two different levels of detail: a simple, functional simulation
 or a detailed simulation with accurate timings. Simulating accurate timings requires the detailed simulation, which  
-needs an additional network simulator.
+needs an additional network simulator. Because of its intrinsic complexity, FlexRay is only provided in a detailed 
+simulation.
+
+.. admonition:: Note
+  
+   The network simulator for the Vector SIL Kit is part of CANoe4SW Server Edition (starting with version 16 SP3).
 
 Vehicle Network Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
