@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 std::vector<uint8_t> CreateFrame(const Ethernet::EthernetMac& destinationAddress, const Ethernet::EthernetMac& sourceAddress,
                                  const std::vector<uint8_t>& payload)
 {
-    const uint16_t etherType = 0x86dd;  // IPv6 protocol
+    const uint16_t etherType = 0x0000;  // IPv6 protocol
 
     std::vector<uint8_t> raw;
 
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
                         SendFrame(ethernetController, WriterMacAddr, destinationAddress);
-                        std::this_thread::sleep_for(100ms);
+                        std::this_thread::sleep_for(300ms);
                     }, 1ms);
             }
             else if (participantName == "EthernetReader")
@@ -241,7 +241,7 @@ int main(int argc, char** argv)
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
                                   << "ms" << std::endl;
-                        std::this_thread::sleep_for(100ms);
+                        std::this_thread::sleep_for(300ms);
                     }, 1ms);
             }
             else
