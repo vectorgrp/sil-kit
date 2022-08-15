@@ -104,7 +104,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         try
         {
             // Local domain sockets, failure is fatal for operation.
-            _connection.AcceptLocalConnections(uri.EncodedString());
+            _connection.AcceptLocalConnections(listenUri);
         }
         catch (const std::exception& e)
         {

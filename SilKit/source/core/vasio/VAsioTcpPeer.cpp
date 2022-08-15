@@ -175,17 +175,26 @@ static auto GetSocketAddress(const asio::generic::stream_protocol::socket& socke
     }
     else if (epFamily == asio::local::stream_protocol{}.family())
     {
-        // NB: remote and local endpoints are the same for local domain sockets.
+        const auto ep = [&socket, remoteEndpoint] {
+            if (remoteEndpoint)
+            {
+                return socket.remote_endpoint();
+            }
+            else
+            {
+                return socket.local_endpoint();
+            }
+        }();
         // The underlying sockaddr_un contains the path, zero terminated.
-        const auto& ep = socket.local_endpoint();
         const auto* data = static_cast<const char*>(ep.data()->sa_data);
-        out << "local://"  << data;
+        out << "local://" << data;
     }
     else
     {
         throw std::runtime_error("VAsioTcpPeer::GetSocketAddress(): Unknown endpoint.");
     }
-    return out.str();
+    auto result = out.str();
+    return result;
 }
 
 

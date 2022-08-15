@@ -413,7 +413,13 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
         throw std::runtime_error{"ERROR: Failed to connect to SIL Kit Registry"};
     }
 
-    _logger->Info("Connected to registry '{}'", printUris(registry->GetInfo().acceptorUris));
+    {
+        std::ostringstream ss;
+        ss << "Connected to registry at '" << registry->GetRemoteAddress() << "' via '" << registry->GetLocalAddress()
+           << "' (" << printUris(registry->GetInfo().acceptorUris) << ')';
+        _logger->Info(ss.str());
+    }
+
     registry->StartAsyncRead();
 
     SendParticipantAnnouncement(registry.get());
