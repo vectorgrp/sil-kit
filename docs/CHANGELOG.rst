@@ -5,6 +5,21 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.2] - 2022-08-15
+--------------------
+
+Compatibility with 4.0.1
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol: Yes
+
+Changed
+~~~~~~~
+
+- SilKit will now build on NetBSD (currently not tested automatically)
+
 [4.0.1] - 2022-08-15
 --------------------
 
