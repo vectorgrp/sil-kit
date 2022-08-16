@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace asio::ip;
 
-#ifdef __linux__
+#ifdef __unix__
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -46,6 +46,7 @@ static void SetConnectOptions(SilKit::Services::Logging::ILogger* ,
 
 static void EnableQuickAck(SilKit::Services::Logging::ILogger* log, asio::generic::stream_protocol::socket& socket)
 {
+#   if __linux__
     int val{1};
     //Disable Delayed Acknowledgments on the receiving side
     int e = setsockopt(socket.native_handle(), IPPROTO_TCP, TCP_QUICKACK,
@@ -54,6 +55,10 @@ static void EnableQuickAck(SilKit::Services::Logging::ILogger* log, asio::generi
     {
         log->Warn("VasioTcpPeer: cannot set linux-specific socket option TCP_QUICKACK.");
     }
+#   else
+    SILKIT_UNUSED_ARG(log);
+    SILKIT_UNUSED_ARG(socket);
+#   endif //__linux__
 }
 
 #else  // windows
@@ -101,7 +106,7 @@ static void EnableQuickAck(SilKit::Services::Logging::ILogger* ,
     //not supported
 }
 
-#endif // __linux__
+#endif // __unix__
 
 static auto strip(std::string value, const std::string& chars) -> std::string
 {

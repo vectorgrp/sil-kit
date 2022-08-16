@@ -82,6 +82,8 @@ message(STATUS "SIL Kit - SILKIT_HOST_PLATFORM ${SILKIT_HOST_PLATFORM}")
 message(STATUS "SIL Kit - SILKIT_HOST_ARCHITECTURE ${SILKIT_HOST_ARCHITECTURE}")
 message(STATUS "SIL Kit - SILKIT_HOST_COMPILER ${SILKIT_HOST_COMPILER}")
 
+include("SilKit_Platform_${SILKIT_HOST_PLATFORM}" OPTIONAL)
+
 ## Internally used in CI builds to archive VS debugging .PDB files:
 
 ### in multiconfig builds (vstudio) we cannot rely on CMAKE_BUILD_TYPE to get the build type

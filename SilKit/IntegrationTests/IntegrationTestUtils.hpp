@@ -30,15 +30,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <random>
 #include <algorithm>
 
-#if __linux__
+#if __unix__
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
-#endif
+#endif //__unix__
 
 #if _WIN32
 #include <Windows.h> //for 'HANDLE'
-#endif
+#endif//__WIN32
 
 
 namespace IntegrationTestUtils {

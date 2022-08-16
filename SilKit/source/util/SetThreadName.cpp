@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #if _WIN32
 #include <windows.h> // HANDLE, PCWSTR
-#else
+#else // posix
 #include <pthread.h>
 #endif
 
@@ -86,7 +86,11 @@ void SetThreadName(const std::string& threadName)
 
     pthread_t thisThread = pthread_self();
 
+#   if __linux__
     int rc = pthread_setname_np(thisThread, threadName.c_str());
+#   elif defined(__NetBSD__)
+    int rc = pthread_setname_np(thisThread, threadName.c_str(), nullptr);
+#   endif
     // The function pthread_setname_np fails if the length of the specified name exceeds the allowed
     // limit. (16 characters including the terminating null byte)
     SILKIT_ASSERT(rc == 0); 

@@ -21,12 +21,15 @@
 
 
 function(get_uname outName outMachine)
-    execute_process(COMMAND /bin/uname -s
+    find_program(unameBin uname
+        PATHS /bin /usr/bin /usr/local/bin
+    )
+    execute_process(COMMAND ${unameBin} -s
         TIMEOUT 1
         OUTPUT_VARIABLE unameName
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    execute_process(COMMAND /bin/uname -m
+    execute_process(COMMAND ${unameBin} -m
         TIMEOUT 1
         OUTPUT_VARIABLE unameMachine
         OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -36,12 +39,15 @@ function(get_uname outName outMachine)
 endfunction()
 
 function(get_linux_distro outDistroName outDistroVersion)
-    execute_process(COMMAND /usr/bin/lsb_release -s -i
+    find_program(lsb_release lsb_release
+        PATHS /bin /usr/bin /usr/local/bin
+    )
+    execute_process(COMMAND ${lsb_release} -s -i
         TIMEOUT 1
         OUTPUT_VARIABLE _linux_id
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    execute_process(COMMAND /usr/bin/lsb_release -s -r
+    execute_process(COMMAND ${lsb_release} -s -r
         TIMEOUT 1
         OUTPUT_VARIABLE _linux_release
         OUTPUT_STRIP_TRAILING_WHITESPACE
