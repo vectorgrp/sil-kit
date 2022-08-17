@@ -84,12 +84,13 @@ typedef struct
 #define SilKit_Struct_GetHeader(VALUE) ((VALUE).structHeader)
 //!< Helper to access the Interface ID member
 #define SilKit_Struct_GetId(VALUE) (SilKit_Struct_GetHeader(VALUE).version)
-//!< Initialize the struct VALUE with a valid type specific struct header for the given type DATATYPE 
-#define SilKit_Struct_Init(DATATYPE, VALUE)\
-    do {\
-       memset(&(SilKit_Struct_GetHeader(VALUE)), 0x0, sizeof(SilKit_StructHeader));\
-       SilKit_Struct_GetId(VALUE) = DATATYPE ## _STRUCT_VERSION; \
-    } while(0)
+//!< Initialize the struct VALUE with a valid type specific struct header for the given type DATATYPE
+#define SilKit_Struct_Init(DATATYPE, VALUE) \
+    do \
+    { \
+        memset(&(VALUE), 0x0, sizeof(VALUE)); \
+        SilKit_Struct_GetId(VALUE) = DATATYPE##_STRUCT_VERSION; \
+    } while (0)
 
 // CAN
 // CAN data type IDs
