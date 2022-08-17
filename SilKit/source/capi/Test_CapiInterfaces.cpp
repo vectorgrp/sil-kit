@@ -88,4 +88,19 @@ TEST(TestCapi_Interfaces, interface_identifiers_are_unique)
     ASSERT_EQ(allSilkidIdsSize, all.size()) << "The IDs must not be duplicate";
 }
 
+TEST(TestCapi_Interfaces, silkit_struct_init_zeros_whole_structure)
+{
+    SilKit_CanFrameEvent value;
+    // first member
+    value.timestamp = 0x1234;
+    // last member
+    value.userContext = reinterpret_cast<void*>(static_cast<uintptr_t>(0x5678));
+
+    ASSERT_NE(value.timestamp, 0);
+    ASSERT_NE(value.userContext, nullptr);
+    SilKit_Struct_Init(SilKit_CanFrameEvent, value);
+    EXPECT_EQ(value.timestamp, 0);
+    EXPECT_EQ(value.userContext, nullptr);
+}
+
 }//namespace
