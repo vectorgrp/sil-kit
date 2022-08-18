@@ -190,7 +190,7 @@ template <typename T>
 auto Span<T>::at(size_t pos) -> T&
 {
     if (pos >= _size)
-        throw std::out_of_range("invalid Span<T> subscript");
+        throw OutOfRangeError("invalid Span<T> subscript");
 
     return _data[pos];
 }
@@ -199,7 +199,7 @@ template <typename T>
 auto Span<T>::at(size_t pos) const -> const T&
 {
     if (pos >= _size)
-        throw std::out_of_range("invalid Span<T> subscript");
+        throw OutOfRangeError("invalid Span<T> subscript");
 
     return _data[pos];
 }

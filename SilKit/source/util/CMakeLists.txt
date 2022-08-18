@@ -37,6 +37,9 @@ add_library(SilKitFilesystem STATIC
 target_include_directories(SilKitFilesystem
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
+target_link_libraries(SilKitFilesystem
+    PRIVATE SilKitInterface
+)
 
 add_library(SilKitSetThreadName STATIC
     SetThreadName.hpp

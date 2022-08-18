@@ -165,7 +165,7 @@ void LifecycleService::Pause(std::string reason)
         const std::string errorMessage{"TimeSyncService::Pause() was called in state ParticipantState::"
                                        + to_string(State())};
         ReportError(errorMessage);
-        throw std::runtime_error(errorMessage);
+        throw SilKitError(errorMessage);
     }
     _pauseDonePromise = decltype(_pauseDonePromise){};
     _timeSyncService->SetPaused(_pauseDonePromise.get_future());
@@ -179,7 +179,7 @@ void LifecycleService::Continue()
         const std::string errorMessage{"TimeSyncService::Continue() was called in state ParticipantState::"
                                        + to_string(State())};
         ReportError(errorMessage);
-        throw std::runtime_error(errorMessage);
+        throw SilKitError(errorMessage);
     }
 
     _lifecycleManagement.Continue("Pause finished");
@@ -218,7 +218,7 @@ void LifecycleService::Shutdown(std::string reason)
 void LifecycleService::Restart(std::string /*reason*/)
 {
     // Currently inoperable
-    throw std::runtime_error("Restarting is currently deactivated.");
+    throw SilKitError("Restarting is currently deactivated.");
 
     //_lifecycleManagement.Restart(reason);
     //

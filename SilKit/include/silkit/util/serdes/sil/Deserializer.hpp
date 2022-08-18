@@ -138,8 +138,8 @@ public:
     /*! \brief Deserializes the end of an optional value. */
     void EndOptional() {}
 
-    auto BeginUnion() -> int { throw std::runtime_error("Unions are currently not supported."); }
-    void EndUnion() { throw std::runtime_error("Unions are currently not supported."); }
+    auto BeginUnion() -> int { throw SilKitError("Unions are currently not supported."); }
+    void EndUnion() { throw SilKitError("Unions are currently not supported."); }
 
     /*! \brief Resets the buffer and replaces it with another one.
      *  \param buffer the new data buffer.
@@ -160,9 +160,9 @@ private:
     auto DeserializeUnaligned(std::size_t bitSize) -> T
     {
         if (mUnalignedBits >= 8)
-            throw std::runtime_error{"DeserializedUnaligned(): current mUnalignedBits >= 8"};
+            throw SilKitError{"DeserializedUnaligned(): current mUnalignedBits >= 8"};
         if (bitSize > sizeof(T) * 8)
-            throw std::runtime_error{"DeserializedUnaligned(): current bitSize > 8 * sizeof(T)"};
+            throw SilKitError{"DeserializedUnaligned(): current bitSize > 8 * sizeof(T)"};
 
         uint64_t readData = 0;
         std::size_t readBits = 0;

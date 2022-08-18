@@ -158,7 +158,7 @@ TraceMessageType to_channelType(Config::Link::Type linkType)
     case Config::NetworkType::FlexRay:
         return TraceMessageType::FrMessage;
     default:
-        throw std::runtime_error("Unknown channel Type");
+        throw SilKitError("Unknown channel Type");
     }
 }
 
@@ -356,7 +356,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const Config::Config& config, c
     if (replayFiles.empty())
     {
         _log->Error("ReplayScheduler: cannot open replay files.");
-        throw std::runtime_error("ReplayScheduler: cannot open replay files.");
+        throw SilKitError("ReplayScheduler: cannot open replay files.");
     }
 
     // assign replay files to the bus simulator implementing the replay data controller interface
@@ -416,7 +416,7 @@ void ReplayScheduler::ConfigureNetworkSimulators(const Config::Config& config, c
                     if (!replayChannel)
                     {
                         _log->Warn("{}: could not find a replay channel!", simulator.name);
-                        continue; // throw std::runtime_error("Could not find a replay channel");
+                        continue; // throw SilKitError("Could not find a replay channel");
                     }
                     if (replayChannel->NumberOfMessages() < 1)
                     {
@@ -453,7 +453,7 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
     if (replayFiles.empty())
     {
         _log->Error("ReplayScheduler: cannot open replay files.");
-        throw std::runtime_error("ReplayScheduler: cannot open replay files.");
+        throw SilKitError("ReplayScheduler: cannot open replay files.");
     }
     auto getLinkById = [&config](auto id)
     {
@@ -464,7 +464,7 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
                 return link;
             }
         }
-        throw std::runtime_error("Replay: cannot find replay with id=" + std::to_string(id));
+        throw SilKitError("Replay: cannot find replay with id=" + std::to_string(id));
     };
     // create controllers listed in config
     auto makeTasks = [=](auto& controllers, auto createMethod) {
@@ -486,7 +486,7 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
                 auto* controller = createController(controllerConfig.name);
 
                 if (controller == nullptr)
-                    throw std::runtime_error("Create controller returned nullptr for "
+                    throw SilKitError("Create controller returned nullptr for "
                         + controllerConfig.name);
 
                 auto& replayController = dynamic_cast<IReplayDataController&>(*controller);
@@ -494,8 +494,7 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
 
                 auto replayFile = replayFiles.at(controllerConfig.replay.useTraceSource);
                 if (!replayFile)
-                    throw std::runtime_error("No replay file found for" + 
-                    controllerConfig.name);
+                    throw SilKitError("No replay file found for" + controllerConfig.name);
 
                 auto replayChannel = FindReplayChannel(
                     _log,
@@ -510,7 +509,7 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
                 if (!replayChannel)
                 {
                     _log->Warn("{}: could not find a replay channel!", controllerConfig.name);
-                    continue; // throw std::runtime_error("Could not find a replay channel");
+                    continue; // throw SilKitError("Could not find a replay channel");
                 }
 
                 task.replayReader = std::move(replayChannel->GetReader());
@@ -526,7 +525,7 @@ void ReplayScheduler::ConfigureControllers(const Config::Config& config, const C
                     + ": " + ex.what());
                 throw;
             }
-            catch (const std::runtime_error& ex)
+            catch (const SilKitError& ex)
             {
                 _log->Warn("ReplayScheduler: Could not configure controller " + controllerConfig.name
                     + ": " + ex.what());

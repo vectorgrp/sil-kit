@@ -19,6 +19,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include "silkit/participant/exception.hpp"
+
 #include "NamedPipeLinux.hpp"
 
 #include <sys/types.h>
@@ -48,7 +50,7 @@ NamedPipeLinux::NamedPipeLinux(const std::string& name)
             << ": " << strerror(errno)
             ;
 
-        throw std::runtime_error(ss.str());
+        throw SilKitError(ss.str());
     }
     _isOwner = true;
 }
@@ -66,7 +68,7 @@ void NamedPipeLinux::Close()
                 << strerror(errno)
                 << " (errno " << err << ")"
                 ;
-            throw std::runtime_error{msg.str()};
+            throw SilKitError{msg.str()};
 
         }
     }
@@ -94,7 +96,7 @@ bool NamedPipeLinux::Write(const char* buffer, size_t bufferSize)
             ss << "fstream open \"" << _name << "\" failed!";
             Close();
 
-            throw std::runtime_error(ss.str());
+            throw SilKitError(ss.str());
         }
         _isOpen = true;
     }

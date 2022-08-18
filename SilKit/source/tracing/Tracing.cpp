@@ -118,7 +118,7 @@ auto CreateTraceMessageSinks(
             break;
         }
         default:
-            throw std::runtime_error("Unknown Sink Type");
+            throw SilKitError("Unknown Sink Type");
         }
     }
 
@@ -151,7 +151,7 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, /*const Config::Confi
         }
         case Config::TraceSource::Type::Undefined: //[[fallthrough]]
         default:
-            throw std::runtime_error("CreateReplayFiles: unknown TraceSource::Type!");
+            throw SilKitError("CreateReplayFiles: unknown TraceSource::Type!");
         }
     }
 

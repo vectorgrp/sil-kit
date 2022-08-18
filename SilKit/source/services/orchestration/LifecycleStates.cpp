@@ -514,7 +514,7 @@ void StoppedState::StopSimulation(std::string /*reason*/)
 
 void StoppedState::RestartParticipant(std::string /*reason*/)
 {
-    throw std::runtime_error("Restart is currently not supported.");
+    throw SilKitError("Restart is currently not supported.");
 
     //_lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
     //_lifecycleManager->Restart(std::move(reason));
@@ -643,7 +643,7 @@ auto AbortingState::GetParticipantState() -> ParticipantState
 // ErrorState
 void ErrorState::RestartParticipant(std::string /*reason*/)
 {
-    throw std::runtime_error("Restart feature is currently not supported.");
+    throw SilKitError("Restart feature is currently not supported.");
 
     //_lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
 }

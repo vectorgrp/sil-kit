@@ -496,7 +496,7 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
 
     if (timeSyncService)
     {
-        throw std::runtime_error("Tried to instantiate TimeSyncService multiple times!");
+        throw SilKitError("Tried to instantiate TimeSyncService multiple times!");
     }
 
     Core::SupplementalData timeSyncSupplementalData;
@@ -535,7 +535,7 @@ auto Participant<SilKitConnectionT>::CreateLifecycleService(
 {
     if (_isLifecycleServiceCreated)
     {
-        throw std::runtime_error("You may not create the lifecycle service more than once.");
+        throw SilKitError("You may not create the lifecycle service more than once.");
     }
     _isLifecycleServiceCreated = true;
 
@@ -577,7 +577,7 @@ auto Participant<SilKitConnectionT>::CreateSystemMonitor() -> Services::Orchestr
 {
     if (_isSystemMonitorCreated)
     {
-        throw std::runtime_error("You may not create the system monitor more than once.");
+        throw SilKitError("You may not create the system monitor more than once.");
     }
     _isSystemMonitorCreated = true;
     return GetSystemMonitor();

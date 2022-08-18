@@ -131,7 +131,7 @@ TEST(SilKitCommandlineParserTest, test_bad_argument)
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "", "", "");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Positional>("configuration", "", "");
 
-    EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), std::runtime_error);
+    EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), SilKitError);
 }
 
 TEST(SilKitCommandlineParserTest, test_no_arguments)
@@ -170,7 +170,7 @@ TEST(SilKitCommandlineParserTest, test_missing_option_value)
     SilKit::Util::CommandlineParser commandlineParser;
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("registryUri", "u", "", "", "");
 
-    EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), std::runtime_error);
+    EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), SilKitError);
 }
 
 

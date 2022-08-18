@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
+#include "silkit/participant/exception.hpp"
+
 #include <cassert>
 #include <cstdint>
 #include <cstring>
@@ -121,7 +123,7 @@ public:
     {
 #ifndef NDEBUG
         if (size > (std::numeric_limits<uint32_t>::max)()) // Additional bracers to prevent max-Macro collision
-            throw std::length_error{"Array is too big"};
+            throw LengthError{"Array is too big"};
 #endif // NDEBUG
         SerializeAligned(static_cast<uint32_t>(size), sizeof(uint32_t));
     }
@@ -140,8 +142,8 @@ public:
     /*! \brief Serializes the end of an optional value. */
     void EndOptional() {}
 
-    void BeginUnion(int) { throw std::runtime_error("Unions are currently not supported."); }
-    void EndUnion() { throw std::runtime_error("Unions are currently not supported."); }
+    void BeginUnion(int) { throw SilKitError("Unions are currently not supported."); }
+    void EndUnion() { throw SilKitError("Unions are currently not supported."); }
 
     /*! \brief Resets the buffer. */
     void Reset()
@@ -172,9 +174,9 @@ private:
     void SerializeUnaligned(T data, std::size_t bitSize)
     {
         if (mUnalignedBits >= 8)
-            throw std::runtime_error{"SerializedUnaligned(): current mUnalignedBits >= 8"};
+            throw SilKitError{"SerializedUnaligned(): current mUnalignedBits >= 8"};
         if (bitSize > sizeof(T) * 8)
-            throw std::runtime_error{"SerializedUnaligned(): current bitSize > 8 * sizeof(T)"};
+            throw SilKitError{"SerializedUnaligned(): current bitSize > 8 * sizeof(T)"};
 
         mUnalignedData |= (static_cast<uint64_t>(data) << mUnalignedBits);
 

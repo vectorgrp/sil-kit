@@ -64,7 +64,7 @@ void TimeConfiguration::SynchronizedParticipantRemoved(const std::string& otherP
     if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
     {
         const std::string errorMessage{"Participant " + otherParticipantName + " unknown."};
-        throw std::runtime_error{errorMessage};
+        throw SilKitError{errorMessage};
     }
     auto it = _otherNextTasks.find(otherParticipantName);
     if (it != _otherNextTasks.end())

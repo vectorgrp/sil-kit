@@ -54,7 +54,7 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
     // Prevent calling this method more than once
     if (!_requiredParticipantNames.empty())
     {
-        throw std::runtime_error{"Expected participant names are already set."};
+        throw SilKitError{"Expected participant names are already set."};
     }
 
     _requiredParticipantNames = requiredParticipantNames;
@@ -137,7 +137,7 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantName) const 
     auto&& statusIter = _participantStatus.find(participantName);
     if (statusIter == _participantStatus.end())
     {
-        throw std::runtime_error{"Unknown participantName"};
+        throw SilKitError{"Unknown participantName"};
     }
 
     return statusIter->second;

@@ -196,7 +196,7 @@ static auto GetSocketAddress(const asio::generic::stream_protocol::socket& socke
     }
     else
     {
-        throw std::runtime_error("VAsioTcpPeer::GetSocketAddress(): Unknown endpoint.");
+        throw SilKitError("VAsioTcpPeer::GetSocketAddress(): Unknown endpoint.");
     }
     auto result = out.str();
     return result;
@@ -358,7 +358,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         _logger->Debug(errorMsg);
         _logger->Debug("Tried the following URIs: {}", attemptedUris.str());
 
-        throw std::runtime_error{errorMsg};
+        throw SilKitError{errorMsg};
     }
 }
 
@@ -507,7 +507,7 @@ void VAsioTcpPeer::DispatchBuffer()
         uint32_t msgSize{0u};
         if (_msgBuffer.size() < sizeof msgSize)
         {
-            throw std::runtime_error{ "VAsioTcpPeer: Received message is too small to contain message size header" };
+            throw SilKitError{ "VAsioTcpPeer: Received message is too small to contain message size header" };
         }
         memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
         //ensure buffer does not contain data from contiguous messages

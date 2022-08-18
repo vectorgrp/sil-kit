@@ -88,7 +88,7 @@ public:
         const auto tag = getTypeId<std::decay_t<MsgT>>();
         if (tag != _type)
         {
-            throw std::runtime_error("TraceMessage::Get() Requested type does not match stored type.");
+            throw SilKitError("TraceMessage::Get() Requested type does not match stored type.");
         }
 
         return *(reinterpret_cast<const MsgT*>(_value));

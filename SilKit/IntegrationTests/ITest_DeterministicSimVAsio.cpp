@@ -197,7 +197,7 @@ private:
         {
             stream >> receivedMessage >> sentTick >> receivedIndex;
         }
-        catch (std::runtime_error& /*error*/)
+        catch (SilKit::SilKitError& /*error*/)
         {
             std::cout << "ERROR: Received message does not match the expected format" << std::endl;
             _systemController->AbortSimulation();

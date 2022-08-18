@@ -121,7 +121,7 @@ public:
             ss << "Error: Attempt to send targeted message to participant '"
                 << targetParticipantName
                 << "', which is not a valid remote receiver.";
-            throw std::runtime_error{ss.str()};
+            throw SilKitError{ss.str()};
         }
         auto buffer = SerializedMessage(msg, to_endpointAddress(from->GetServiceDescriptor()), receiverIter->remoteIdx);
         receiverIter->peer->SendSilKitMsg(std::move(buffer));

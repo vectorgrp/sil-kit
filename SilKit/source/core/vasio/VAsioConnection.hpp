@@ -391,7 +391,7 @@ private:
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw std::runtime_error{ "VAsioConnection::SendMsgImpl: sending on empty link for " + key };
+            throw SilKitError{ "VAsioConnection::SendMsgImpl: sending on empty link for " + key };
         }
         auto&& link = linkMap[key];
         link->DistributeLocalSilKitMessage(from, std::forward<SilKitMessageT>(msg));
@@ -406,7 +406,7 @@ private:
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw std::runtime_error{"VAsioConnection::SendMsgImpl: sending on empty link for " + key};
+            throw SilKitError{"VAsioConnection::SendMsgImpl: sending on empty link for " + key};
         }
         auto&& link = linkMap[key];
         link->DispatchSilKitMessageToTarget(from, targetParticipantName, std::forward<SilKitMessageT>(msg));

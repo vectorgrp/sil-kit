@@ -69,12 +69,12 @@ protected:
 
 TEST_F(WatchDogTest, throw_if_warn_timeout_is_zero)
 {
-    EXPECT_THROW(WatchDog(Config::HealthCheck{ 0ms,10ms }), std::runtime_error);
+    EXPECT_THROW(WatchDog(Config::HealthCheck{ 0ms,10ms }), SilKitError);
 }
 
 TEST_F(WatchDogTest, throw_if_error_timeout_is_zero)
 {
-    EXPECT_THROW(WatchDog(Config::HealthCheck{ 10ms,0ms }), std::runtime_error);
+    EXPECT_THROW(WatchDog(Config::HealthCheck{ 10ms,0ms }), SilKitError);
 }
 
 TEST_F(WatchDogTest, warn_after_timeout)

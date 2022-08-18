@@ -33,7 +33,7 @@ namespace Participant {
 *
 * \param participant The participant instance for which the system controller is created
 *
-* \throw std::runtime_error The participant is invalid.
+* \throw SilKit::SilKitError The participant is invalid.
 */
 SilKitAPI auto CreateSystemController(IParticipant* participant)
     -> SilKit::Experimental::Services::Orchestration::ISystemController*;

@@ -114,7 +114,7 @@ void PcapReader::Reset()
     if (_filePath.empty() && _stream == nullptr)
     {
         _log->Error("PcapReader::Reset(): no input file or stream pointer given!");
-        throw std::runtime_error("PcapReader::Reset(): no input file or stream pointer given!");
+        throw SilKitError("PcapReader::Reset(): no input file or stream pointer given!");
     }
 
     if (!_filePath.empty())
@@ -127,7 +127,7 @@ void PcapReader::Reset()
         if (!_file.good())
         {
             _log->Error("Cannot open file " + _filePath);
-            throw std::runtime_error("Cannot open file " + _filePath);
+            throw SilKitError("Cannot open file " + _filePath);
         }
     }
 
@@ -145,18 +145,18 @@ void PcapReader::ReadGlobalHeader()
     _stream->read(buf.data(), buf.size());
     if (!_stream->good())
     {
-        throw std::runtime_error("PCAP file cannot be opened: global header short read");
+        throw SilKitError("PCAP file cannot be opened: global header short read");
     }
     auto* hdr = reinterpret_cast<Pcap::GlobalHeader*>(buf.data());
     if (hdr->magic_number != Pcap::NativeMagic)
     {
-        throw std::runtime_error("PCAP file cannot be opened: invalid PCAP valid magic number");
+        throw SilKitError("PCAP file cannot be opened: invalid PCAP valid magic number");
     }
     if ((hdr->version_major != Pcap::MajorVersion)
         && (hdr->version_minor != Pcap::MinorVersion)
         )
     {
-        throw std::runtime_error("PCAP file cannot be opened: invalid PCAP version "
+        throw SilKitError("PCAP file cannot be opened: invalid PCAP version "
             + std::to_string(hdr->version_major) + "." + std::to_string(hdr->version_minor)
         );
     }
@@ -173,7 +173,7 @@ auto PcapReader::StartTime() const -> std::chrono::nanoseconds
 }
 auto PcapReader::EndTime() const -> std::chrono::nanoseconds
 {
-    throw std::runtime_error("PcapReader::EndTime(): Not Implemented");
+    throw SilKitError("PcapReader::EndTime(): Not Implemented");
 }
 
 auto PcapReader::NumberOfMessages() const -> uint64_t 

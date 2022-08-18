@@ -217,8 +217,7 @@ auto YamlValidator::ParentName(const std::string& elementName) const -> std::str
     auto sep = elementName.rfind(_elementSeparator);
     if (sep == elementName.npos)
     {
-        throw std::runtime_error("Yaml Validation: elementName" 
-            + elementName + " has no parent");
+        throw SilKitError("Yaml Validation: elementName" + elementName + " has no parent");
     }
     else if (sep == 0)
     {

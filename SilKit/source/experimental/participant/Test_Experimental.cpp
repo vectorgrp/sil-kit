@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "silkit/participant/exception.hpp"
+
 #include "NullConnectionParticipant.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "ParticipantExtentions.hpp"
@@ -55,7 +57,7 @@ TEST_F(Test_Experimental, error_on_create_system_controller_twice)
 
     auto systemController = SilKit::Experimental::Participant::CreateSystemController(participant.get());
     SILKIT_UNUSED_ARG(systemController);
-    EXPECT_THROW(SilKit::Experimental::Participant::CreateSystemController(participant.get()), std::runtime_error);
+    EXPECT_THROW(SilKit::Experimental::Participant::CreateSystemController(participant.get()), SilKit::SilKitError);
 }
 
 } // anonymous namespace

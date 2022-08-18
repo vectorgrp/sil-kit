@@ -54,7 +54,7 @@ public:
             Trace(dir, address, timestamp, message.Get<SilKit::Services::Flexray::FlexrayFrameEvent>());
             break;
         default:
-            throw std::runtime_error("Invalid replay data");
+            throw SilKitError("Invalid replay data");
         }
     }
 

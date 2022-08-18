@@ -64,7 +64,7 @@ void LinControllerReplay::Init(LinControllerConfig config)
     {
         _participant->GetLogger()->Warn("Replaying on a slave controller is not supported! "
             "Please use tracing and replay on a master controller!");
-        throw std::runtime_error("Replaying is not supported on Slave controllers!");
+        throw SilKitError("Replaying is not supported on Slave controllers!");
     }
 }
 
@@ -198,7 +198,7 @@ void LinControllerReplay::ReplayMessage(const IReplayMessage* replayMessage)
     case SilKit::Services::TransmitDirection::RX:
         break;
     default:
-        throw std::runtime_error("LinControllerReplay: replay message has undefined Direction");
+        throw SilKitError("LinControllerReplay: replay message has undefined Direction");
         break;
     }
 

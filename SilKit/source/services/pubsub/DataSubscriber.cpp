@@ -52,7 +52,7 @@ void DataSubscriber::RegisterServiceDiscovery()
                     std::string tmp;
                     if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
                     { 
-                        throw std::runtime_error{"Unknown key in supplementalData"}; 
+                        throw SilKitError{"Unknown key in supplementalData"};
                     }
                     return tmp;
                 };

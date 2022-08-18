@@ -65,7 +65,7 @@ std::string to_string(TraceMessageType type)
     case TraceMessageType::GenericMessage: return "GenericMessage";
     case TraceMessageType::FrMessage: return "FrMessage";
     default:
-        throw std::runtime_error("Unknown TraceMessage::Type in operator<<!");
+        throw SilKitError("Unknown TraceMessage::Type in operator<<!");
     }
 }
 

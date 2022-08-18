@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/participant/exception.hpp"
 
 #include "IParticipantInternal.hpp"
 #include "LifecycleService.hpp"

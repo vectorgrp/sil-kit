@@ -158,7 +158,7 @@ std::string ServiceDescriptor::to_string() const
         std::string controllerTypeName;
         if (!GetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName))
         {
-            throw std::logic_error("supplementalData.size() > 0");
+            throw LogicError("supplementalData.size() > 0");
         }
 
         ss 

@@ -343,7 +343,7 @@ TEST_F(FlexrayControllerTest, throw_on_unconfigured_tx_buffer_configupdate)
     // Attempt to reconfigure TxBuffer 6, which should be out of range
     FlexrayTxBufferConfig bufferCfg{};
     EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), A<const FlexrayTxBufferConfigUpdate &>())).Times(0);
-    EXPECT_THROW(controller.ReconfigureTxBuffer(6, bufferCfg), std::out_of_range);
+    EXPECT_THROW(controller.ReconfigureTxBuffer(6, bufferCfg), SilKit::OutOfRangeError);
 }
 
 
@@ -384,7 +384,7 @@ TEST_F(FlexrayControllerTest, throw_on_unconfigured_tx_buffer_update)
     FlexrayTxBufferUpdate update;
     update.txBufferIndex = 7; // only txBufferIdx = 0 is configured
     EXPECT_CALL(participant, SendMsg(An<const IServiceEndpoint*>(), A<const FlexrayTxBufferConfigUpdate &>())).Times(0);
-    EXPECT_THROW(controller.UpdateTxBuffer(update), std::out_of_range);
+    EXPECT_THROW(controller.UpdateTxBuffer(update), SilKit::OutOfRangeError);
 }
 
 TEST_F(FlexrayControllerTest, send_run_command)

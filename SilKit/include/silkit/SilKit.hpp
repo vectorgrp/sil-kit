@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 
 #include "silkit/SilKitMacros.hpp"
+#include "silkit/participant/exception.hpp"
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 
@@ -39,7 +40,7 @@ namespace SilKit {
 * \return Instance of the communication adapter
 *
 * \throw SilKit::ConfigurationError if the config has errors
-* \throw std::exception The participant could not be created.
+* \throw SilKit::SilKitError The participant could not be created.
 */
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName)
@@ -55,7 +56,7 @@ SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantCon
 * \return Instance of the communication adapter
 *
 * \throw SilKit::ConfigurationError if the config has errors
-* \throw std::exception The participant could not be created.
+* \throw SilKit::SilKitError The participant could not be created.
 */
 SilKitAPI auto CreateParticipant(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                          const std::string& participantName, const std::string& registryUri)

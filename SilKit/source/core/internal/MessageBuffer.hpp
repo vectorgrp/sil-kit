@@ -522,7 +522,7 @@ inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string,std::string
     }
     if (numElements != tmp.size())
     {
-        throw std::runtime_error("MessageBuffer unable to deserialize std::map<std::string, std::string>");
+        throw SilKitError("MessageBuffer unable to deserialize std::map<std::string, std::string>");
     }
     updatedMsg = std::move(tmp);
     return *this;

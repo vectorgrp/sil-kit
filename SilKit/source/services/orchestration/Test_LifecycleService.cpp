@@ -451,7 +451,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     lifecycleService.Pause("Test");
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Paused);
-    EXPECT_THROW({ lifecycleService.Pause("Pause again"); }, std::runtime_error);
+    EXPECT_THROW({ lifecycleService.Pause("Pause again"); }, SilKitError);
 }
 
 
@@ -519,10 +519,10 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
 
     EXPECT_CALL(callbacks, StopHandler())
         .Times(1)
-        .WillRepeatedly(Throw(std::runtime_error("StopCallbackException")));
+        .WillRepeatedly(Throw(SilKitError("StopCallbackException")));
     EXPECT_CALL(callbacks, ShutdownHandler())
         .Times(1)
-        .WillRepeatedly(Throw(std::runtime_error("ShutdownCallbackException")));
+        .WillRepeatedly(Throw(SilKitError("ShutdownCallbackException")));
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -1190,7 +1190,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
     lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
     EXPECT_CALL(callbacks, StartingHandler())
         .Times(1)
-        .WillRepeatedly(Throw(std::runtime_error("StartingException")));
+        .WillRepeatedly(Throw(SilKitError("StartingException")));
 
     auto descriptor = from_endpointAddress(addr);
     lifecycleService.SetServiceDescriptor(descriptor);

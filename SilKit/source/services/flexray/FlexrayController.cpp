@@ -141,7 +141,7 @@ void FlexrayController::ReconfigureTxBuffer(uint16_t txBufferIdx, const FlexrayT
     if (txBufferIdx >= _bufferConfigs.size())
     {
         _participant->GetLogger()->Error("FlexrayController::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
-        throw std::out_of_range{"Unconfigured txBufferIdx!"};
+        throw OutOfRangeError{"Unconfigured txBufferIdx!"};
     }
 
     if (!IsTxBufferConfigsConfigurable())
@@ -162,7 +162,7 @@ void FlexrayController::UpdateTxBuffer(const FlexrayTxBufferUpdate& update)
     if (update.txBufferIndex >= _bufferConfigs.size())
     {
         _participant->GetLogger()->Error("FlexrayController::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
-        throw std::out_of_range{"Unconfigured txBufferIndex!"};
+        throw OutOfRangeError{"Unconfigured txBufferIndex!"};
     }
 
     SendMsg(MakeWireFlexrayTxBufferUpdate(update));

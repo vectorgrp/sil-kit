@@ -124,7 +124,7 @@ void LinController::ThrowIfNotMaster(const std::string& callingMethodName) const
         std::string errorMsg = callingMethodName
                                + " must only be called in master mode!";
         _logger->Error(errorMsg);
-        throw std::runtime_error{errorMsg};
+        throw SilKitError{errorMsg};
     }
 }
 

@@ -50,7 +50,7 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
 {
     if (outputPath.empty())
     {
-        throw std::runtime_error("PcapSink::Open: outputPath must not be empty!");
+        throw SilKitError("PcapSink::Open: outputPath must not be empty!");
     }
 
     switch (outputType)
@@ -71,7 +71,7 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
         _outputPath = outputPath;
         break;
     default:
-        throw std::runtime_error("PcapSink::Open: specified SinkType not implemented");
+        throw SilKitError("PcapSink::Open: specified SinkType not implemented");
     }
 }
 
@@ -98,7 +98,7 @@ void PcapSink::Close()
         try {
             _pipe->Close();
         }
-        catch (const std::runtime_error& err)
+        catch (const SilKitError& err)
         {
             _logger->Warn("Failed to close PCAP sink: {}", err.what());
         }
@@ -115,7 +115,7 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     {
         std::stringstream ss;
         ss << "Error: unsupported message type: " << traceMessage;
-        throw std::runtime_error(ss.str());
+        throw SilKitError(ss.str());
     }
     const auto& message = traceMessage.Get<Services::Ethernet::EthernetFrame>();
 

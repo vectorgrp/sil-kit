@@ -19,6 +19,8 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include "silkit/participant/exception.hpp"
+
 #include "YamlParser.hpp"
 #include "yaml-cpp/yaml.h"
 
@@ -107,7 +109,7 @@ void EmitScalar(YAML::ostream_wrapper& out, YAML::Node val)
 {
     if (!val.IsScalar())
     {
-        throw std::runtime_error{ "YamlParser: EmitScalar on non-scalar type called" };
+        throw SilKit::SilKitError{ "YamlParser: EmitScalar on non-scalar type called" };
     }
     //XXX we should be able to query the scalar's type, instead of
     //    exception bombing our way to the final value.

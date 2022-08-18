@@ -38,14 +38,14 @@ WatchDog::WatchDog(const Config::HealthCheck& healthCheckConfig)
     {
         _warnTimeout = healthCheckConfig.softResponseTimeout.value();
         if (_warnTimeout <= 0ms)
-            throw std::runtime_error{"WatchDog requires warnTimeout > 0ms"};
+            throw SilKitError{"WatchDog requires warnTimeout > 0ms"};
     }
 
     if (healthCheckConfig.hardResponseTimeout.has_value())
     {
         _errorTimeout = healthCheckConfig.hardResponseTimeout.value();
         if (_errorTimeout <= 0ms)
-            throw std::runtime_error{"WatchDog requires errorTimeout > 0ms"};
+            throw SilKitError{"WatchDog requires errorTimeout > 0ms"};
     }
     _watchThread = std::thread{&WatchDog::Run, this};
 }

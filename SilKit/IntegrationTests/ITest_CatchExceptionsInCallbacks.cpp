@@ -24,9 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <future>
 
+#include "silkit/services/all.hpp"
+#include "silkit/participant/exception.hpp"
+
 #include "CreateParticipantInternal.hpp"
 
-#include "silkit/services/all.hpp"
 #include "functional.hpp"
 
 #include "gmock/gmock.h"
@@ -93,7 +95,7 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
         "SubCtrl1", matchingDataSpec,
         [this](auto* /*subscriber*/, const SilKit::Services::PubSub::DataMessageEvent& /*data*/) {
             this->testOk.set_value(true);
-            throw std::runtime_error{"CrashTest"};
+            throw SilKit::SilKitError{"CrashTest"};
         });
 
     std::this_thread::sleep_for(500ms);

@@ -32,7 +32,7 @@ auto CreateSystemController(IParticipant* participant)
     auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(participant);
     if (participantInternal->GetIsSystemControllerCreated())
     {
-        throw std::runtime_error("You may not create the system controller more than once.");
+        throw SilKitError("You may not create the system controller more than once.");
     }
     participantInternal->SetIsSystemControllerCreated(true);
     return participantInternal->GetSystemController();

@@ -270,7 +270,7 @@ public:
 
     /*! \brief Connect to the registry and join the simulation.
     *
-    * \throw std::exception A participant was created previously, or a
+    * \throw SilKit::SilKitError A participant was created previously, or a
     * participant could not be created.
     */
     void JoinSilKitSimulation() override;

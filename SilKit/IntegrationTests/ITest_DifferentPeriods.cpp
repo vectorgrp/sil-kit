@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 #include "silkit/services/all.hpp"
+#include "silkit/participant/exception.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -200,7 +201,7 @@ private:
         {
             stream >> receivedMessage >> sentTime >> receivedIndex;
         }
-        catch (std::runtime_error& /*error*/)
+        catch (SilKit::SilKitError& /*error*/)
         {
             std::cout << "ERROR: Received message does not match the expected format" << std::endl;
             _lifecycleService->Stop("Test");

@@ -85,30 +85,11 @@ TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
 
-    EXPECT_NO_THROW(
-        {
-            try
-            {
-                participant->CreateSystemMonitor(); // ignore returned controller
-            }
-            catch (const std::exception&)
-            {
-                throw;
-            }
-        });
+    // ignore returned controller
+    EXPECT_NO_THROW(participant->CreateSystemMonitor());
 
-    EXPECT_THROW(
-        {
-            try
-            {
-                participant->CreateSystemMonitor(); // ignore returned controller
-            }
-            catch (const std::exception&)
-            {
-                throw;
-            }
-        },
-        std::runtime_error);
+    // ignore returned controller
+    EXPECT_THROW(participant->CreateSystemMonitor(), SilKit::SilKitError);
 }
 
 TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
@@ -116,31 +97,12 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
 
-    EXPECT_NO_THROW({
-        try
-        {
-            participant->CreateLifecycleService(
-                {SilKit::Services::Orchestration::OperationMode::Coordinated}); // ignore returned controller
-        }
-        catch (const std::exception&)
-        {
-            throw;
-        }
-    });
+    // ignore returned controller
+    EXPECT_NO_THROW(participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated}));
 
-    EXPECT_THROW(
-        {
-            try
-            {
-                participant->CreateLifecycleService(
-                    {SilKit::Services::Orchestration::OperationMode::Coordinated}); // ignore returned controller
-            }
-            catch (const std::exception&)
-            {
-                throw;
-            }
-        },
-        std::runtime_error);
+    // ignore returned controller
+    EXPECT_THROW(participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated}),
+                 SilKit::SilKitError);
 }
 
 TEST_F(ParticipantTest, no_error_on_get_logger_twice)

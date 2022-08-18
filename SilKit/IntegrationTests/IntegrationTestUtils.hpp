@@ -40,6 +40,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <Windows.h> //for 'HANDLE'
 #endif//__WIN32
 
+#include "silkit/participant/exception.hpp"
 
 namespace IntegrationTestUtils {
 
@@ -92,7 +93,7 @@ struct Barrier
                     << have << " expected=" << expected;
                 std::cout << ss.str() << std::endl;
 
-                throw std::runtime_error(ss.str()); //abort test!
+                throw SilKitError(ss.str()); //abort test!
             }
         }
     }
@@ -118,7 +119,7 @@ struct Pipe
             nullptr);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            throw std::runtime_error("Cannot open WIN32 pipe " + path);
+            throw SilKitError("Cannot open WIN32 pipe " + path);
         }
     }
 
@@ -159,7 +160,7 @@ struct Pipe
         file = fopen(pipeName.c_str(), "r");
         if (file == nullptr)
         {
-            throw std::runtime_error("Cannot open linux pipe " + pipeName);
+            throw SilKit::SilKitError("Cannot open linux pipe " + pipeName);
         }
     }
 
@@ -190,7 +191,7 @@ struct Pipe
             }
             else
             {
-                throw std::runtime_error("Read on linux pipe failed: " + ferror(file));
+                throw SilKit::SilKitError("Read on linux pipe failed: " + std::to_string(ferror(file)));
             }
         }
         if (actual < size)

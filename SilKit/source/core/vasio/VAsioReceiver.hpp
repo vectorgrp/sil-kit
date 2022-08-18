@@ -36,7 +36,7 @@ struct RemoteServiceEndpoint : IServiceEndpoint
 {
     void SetServiceDescriptor(const SilKit::Core::ServiceDescriptor&) override 
     {
-        throw std::logic_error("This method is not supposed to be used in this struct."); 
+        throw LogicError("This method is not supposed to be used in this struct.");
     }
 
     auto GetServiceDescriptor() const -> const ServiceDescriptor & override

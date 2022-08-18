@@ -35,6 +35,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_WRONGSTATE; \
     } \
+    catch (const SilKit::SilKitError& e) { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_UNSPECIFIEDERROR; \
+    } \
     catch (const std::runtime_error& e) { \
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \

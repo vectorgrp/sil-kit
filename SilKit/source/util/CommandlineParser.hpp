@@ -47,7 +47,7 @@ public:
     }
 
     /*! \brief Retrieve a commandline argument by its name
-     * \throw std::runtime_error when argument does not exist or is of a different kind
+     * \throw SilKit::SilKitError when argument does not exist or is of a different kind
      */
     template<class TArgument>
     auto Get(std::string name) -> TArgument&
@@ -55,7 +55,7 @@ public:
         auto* argument = GetByName<TArgument>(name);
         if (!argument)
         {
-            throw std::runtime_error("Unknown argument '" + name + "'");
+            throw SilKitError("Unknown argument '" + name + "'");
         }
         return *argument;
     }
@@ -78,7 +78,7 @@ public:
     }
 
     /*! \brief Parse arguments based on argc/argv parameters from a main function
-     * \throw std::runtime_error when a parsing error occurs
+     * \throw SilKit::SilKitError when a parsing error occurs
      */
     void ParseArguments(int argc, char** argv)
     {
@@ -119,7 +119,7 @@ public:
             }
             else
             {
-                throw std::runtime_error("Bad argument '" + argument + "'");
+                throw SilKitError("Bad argument '" + argument + "'");
             }
 
             auto splitPos = std::find(arg.begin(), arg.end(), '=');
@@ -131,7 +131,7 @@ public:
                 auto* option = isShortForm ? GetByShortName<Option>(name) : GetByName<Option>(name);
                 if (!option)
                 {
-                    throw std::runtime_error("Unknown argument '" + argument + "'");
+                    throw SilKitError("Unknown argument '" + argument + "'");
                 }
                 option->_value = std::move(value);
 
@@ -144,7 +144,7 @@ public:
             {
                 if (i + 1 >= argc)
                 {
-                    throw std::runtime_error("Argument '" + argument + "' without a value");
+                    throw SilKitError("Argument '" + argument + "' without a value");
                 }
                 std::string value{ argv[++i] };
                 option->_value = std::move(value);
@@ -161,7 +161,7 @@ public:
                 continue;
             }
 
-            throw std::runtime_error("Unknown argument '" + argument + "'");
+            throw SilKitError("Unknown argument '" + argument + "'");
         }
     }
 

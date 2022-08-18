@@ -410,7 +410,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
         _logger->Info("   You can configure the SIL Kit Registry hostname and port via the SilKitConfig.");
         _logger->Info("   The SIL Kit Registry executable can be found in your SIL Kit installation folder:");
         _logger->Info("     INSTALL_DIR/bin/sil-kit-registry[.exe]");
-        throw std::runtime_error{"ERROR: Failed to connect to SIL Kit Registry"};
+        throw SilKitError{"ERROR: Failed to connect to SIL Kit Registry"};
     }
 
     {
@@ -518,7 +518,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 
     if (!_tcp4Acceptor.is_open() && !_tcp6Acceptor.is_open())
     {
-        throw std::runtime_error{ "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing" };
+        throw SilKitError{ "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing" };
     }
 
     auto epUri = fromAsioEndpoint(_tcp4Acceptor.local_endpoint());
@@ -623,7 +623,7 @@ const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t
     const auto participantIter = _hashToParticipantName.find(participantId);
     if (participantIter == _hashToParticipantName.end())
     {
-        throw std::runtime_error{"VAsioConnection: could not find participant in participant cache"};
+        throw SilKitError{"VAsioConnection: could not find participant in participant cache"};
     }
     return participantIter->second;
 }
@@ -782,7 +782,7 @@ auto VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoin
         // we already have an acceptor for the given endpoint type
         std::stringstream endpointName;
         endpointName << endpoint;
-        throw std::logic_error{ "VAsioConnection: acceptor already open for endpoint type: " 
+        throw LogicError{ "VAsioConnection: acceptor already open for endpoint type: "
             + endpointName.str()};
     }
     try

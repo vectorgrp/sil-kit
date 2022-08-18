@@ -19,11 +19,14 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include "silkit/participant/exception.hpp"
+
 #include "NamedPipeWin.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <windows.h>
+
 namespace SilKit {
 namespace tracing {
 namespace detail {
@@ -64,7 +67,7 @@ NamedPipeWin::NamedPipeWin(const std::string& name)
         NULL);
     if (!isValid())
     {
-        throw std::runtime_error(GetPipeError());
+        throw SilKitError(GetPipeError());
     }
 }
 
@@ -88,7 +91,7 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
         if (ok == 0 && (GetLastError() != ERROR_PIPE_CONNECTED))
         {
             auto msg = "NamedPipeWin: ConnecteNamedPipe failed: " + GetPipeError();
-            throw std::runtime_error(msg); 
+            throw SilKitError(msg);
         }
         _isConnected = true;
     }
@@ -106,7 +109,7 @@ bool NamedPipeWin::Write(const char* buffer, size_t size)
         {
             std::stringstream msg;
             msg << "Failed to connect pipe '" << _name << "': " << GetPipeError();
-            throw std::runtime_error(msg.str());
+            throw SilKitError(msg.str());
         }
     }
     return cbWritten == size;
@@ -124,7 +127,7 @@ void NamedPipeWin::Close()
         {
             std::stringstream msg;
             msg << "Failed to close pipe '" << _name << "': " << GetPipeError();
-            throw std::runtime_error{msg.str()};
+            throw SilKitError{msg.str()};
         }
 
         _pipeHandle = INVALID_HANDLE_VALUE;

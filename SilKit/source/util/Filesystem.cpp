@@ -18,10 +18,12 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
+#include "silkit/participant/exception.hpp"
+
 #include "Filesystem.hpp"
 
 #include <array>
-#include <stdexcept>
 #include <sstream>
 
 #if defined(_WIN32)
@@ -83,7 +85,7 @@ path current_path()
     std::array<char, 4096> buffer;
     if (::getcwd(buffer.data(), static_cast<int>(buffer.size())) == nullptr)
     {
-        throw std::runtime_error("Couldn't get current working directory.");
+        throw SilKitError("Couldn't get current working directory.");
     }
 
     return std::string(buffer.data());
@@ -98,7 +100,7 @@ void current_path(const path& newPath)
         << newPath.string()
         << "\""
         ;
-        throw std::runtime_error(msg.str());
+        throw SilKitError(msg.str());
     }
 }
 path temp_directory_path()
@@ -125,7 +127,7 @@ void rename(const path& old_p, const path& new_p)
     if (::rename(old_p.c_str(), new_p.c_str()) != 0)
     {
         std::perror("rename");
-        throw std::runtime_error("filesystem::rename: Couldn't rename the old filename to the new filename");
+        throw SilKitError("filesystem::rename: Couldn't rename the old filename to the new filename");
     }
 }
 

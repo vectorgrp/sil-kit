@@ -90,10 +90,23 @@ class ExtensionError : public SilKitError
     using SilKitError::SilKitError;
 };
 
-//! \brief LogicError is thrown when an extension could not be loaded
+//! \brief LogicError reports errors as a consequence of faulty logic within the program such as violating logical
+//! preconditions or class invariants and may be preventable.
 class LogicError : public SilKitError
 {
     using SilKitError::SilKitError;
+};
+
+//! \brief LengthError is thrown on attempts to exceed implementation defined length limits for some object.
+class LengthError : public LogicError
+{
+    using LogicError::LogicError;
+};
+
+//! \brief OutOfRangeError is thrown on attempts to access elements out of defined range.
+class OutOfRangeError : public LogicError
+{
+    using LogicError::LogicError;
 };
 
 } // namespace SilKit

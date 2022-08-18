@@ -35,7 +35,7 @@ auto SerializedMessage::ReleaseStorage() -> std::vector<uint8_t>
 {
     auto buffer = _buffer.ReleaseStorage();
     if (buffer.size() > std::numeric_limits<uint32_t>::max())
-        throw std::runtime_error{"SerializedMessage::Serialize: message buffer is too large"};
+        throw SilKitError{"SerializedMessage::Serialize: message buffer is too large"};
 
     // emplace the buffer size as the first element in the byte stream
     const auto bufferSize = static_cast<uint32_t>(buffer.size());
@@ -57,7 +57,7 @@ auto SerializedMessage::GetRemoteIndex() const -> EndpointId
 {
     if (!IsMwOrSim(_messageKind))
     {
-        throw std::runtime_error("SerializedMessage::GetEndpointAddress called on wrong message kind: "
+        throw SilKitError("SerializedMessage::GetEndpointAddress called on wrong message kind: "
                                  + std::to_string((int)_messageKind));
     }
     return _remoteIndex;
@@ -67,7 +67,7 @@ auto SerializedMessage::GetEndpointAddress() const -> EndpointAddress
 {
     if (!IsMwOrSim(_messageKind))
     {
-        throw std::runtime_error("SerializedMessage::GetEndpointAddress called on wrong message kind: "
+        throw SilKitError("SerializedMessage::GetEndpointAddress called on wrong message kind: "
                                  + std::to_string((int)_messageKind));
     }
     return _endpointAddress;

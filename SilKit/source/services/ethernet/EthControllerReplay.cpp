@@ -127,7 +127,7 @@ void EthControllerReplay::ReplayMessage(const IReplayMessage* replayMessage)
         //}
         break;
     default:
-        throw std::runtime_error("EthReplayController: replay message has undefined Direction");
+        throw SilKitError("EthReplayController: replay message has undefined Direction");
         break;
     }
 

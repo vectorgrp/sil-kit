@@ -219,7 +219,7 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
                 
         if (it == _syncParticipantNames.end())
         {
-            throw std::runtime_error{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
+            throw SilKitError{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
         }
         AddParticipant(*it);
     }
