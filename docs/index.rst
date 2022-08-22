@@ -48,10 +48,6 @@ or a detailed simulation with accurate timings. Simulating accurate timings requ
 needs an additional network simulator. Because of its intrinsic complexity, FlexRay is only provided in a detailed 
 simulation.
 
-.. admonition:: Note
-  
-   The network simulator for the Vector SIL Kit is part of CANoe4SW Server Edition (starting with version 16 SP3).
-
 Vehicle Network Controllers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

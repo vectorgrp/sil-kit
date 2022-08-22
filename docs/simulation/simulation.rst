@@ -134,6 +134,11 @@ This information is propagated to the user if they registered the callback via :
 Once the callback is finished, the participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`.
 The participant will wait for the system state to change to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::SystemState::ReadyToRun>` as well and then proceeds to the :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` state.
 
+During the execution of a CommunicationReadyHandler, the network communication of the participant is blocked. Therefore, it is impossible to exchange information with other participants during the execution of a CommunicationReadyHandler.
+If it is necessary to exchange information during the CommunicationInitialized state, :cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` and :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` can be used.
+:cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` signals that the CommunicationInitialized state has been reached. After its execution, a participant is still in the CommunicationInitialized state and can exchange information.
+After :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` is called, the participants state will switch to participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`. 
+
 Participants that coordinate their state but do not use the virtual time synchronization can register a :cpp:func:`SetStartingHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStartingHandler()>`, which indicates that the synchronized participants will start the virtual time synchronization and thus the simulation.
 This callback does not block the other participants and should only be used to start timers etc and will trigger when the state transition to :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` is immenent.
 
@@ -200,7 +205,7 @@ The last part details what time information |ProductName| clients provide, depen
 .. admonition:: Note
 
     A mixed operation mode in which some participants operate synchronized and some participants operate unsynchronized
-    is not supported. Therefore, alle participants of a simulation must either be synchronized or unsynchronized.
+    is not supported. Therefore, all participants of a simulation must either be synchronized or unsynchronized.
 
 Simulation Overview
 -------------------
