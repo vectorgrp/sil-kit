@@ -64,8 +64,6 @@ std::string to_string(EthernetTransmitStatus value)
         return "LinkDown";
     case  EthernetTransmitStatus::Dropped:
         return "Dropped";
-    case  EthernetTransmitStatus::DuplicatedTransmitId:
-        return "DuplicatedTransmitId";
     case  EthernetTransmitStatus::InvalidFrameFormat:
         return "InvalidFrameFormat";
     };
@@ -126,6 +124,8 @@ std::ostream& operator<<(std::ostream& out, const EthernetFrame& msg)
     }
     else
     {
+        using EthernetMac = std::array<uint8_t, 6>;
+
         out << "EthernetFrame{size=" << msg.raw.size();
         if (msg.raw.size() >= 2 * sizeof(EthernetMac))
         {

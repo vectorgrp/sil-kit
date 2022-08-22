@@ -284,12 +284,14 @@ std::ostream& operator<<(std::ostream& out, FlexrayPocState state)
 }
 std::ostream& operator<<(std::ostream& out, const FlexrayHeader& header)
 {
+    using FlagMask = FlexrayHeader::FlagMask;
+    using Flag = FlexrayHeader::Flag;
     return out
         << "Flexray::FlexrayHeader{f=["
-        << (header.IsSet(FlexrayHeader::HeaderFlag::SuFIndicator) ? "U" : "-")
-        << (header.IsSet(FlexrayHeader::HeaderFlag::SyFIndicator) ? "Y" : "-")
-        << (header.IsSet(FlexrayHeader::HeaderFlag::NFIndicator) ? "-" : "N")
-        << (header.IsSet(FlexrayHeader::HeaderFlag::PPIndicator) ? "P" : "-")
+        << ((header.flags & static_cast<FlagMask>(Flag::SuFIndicator)) ? "U" : "-")
+        << ((header.flags & static_cast<FlagMask>(Flag::SyFIndicator)) ? "Y" : "-")
+        << ((header.flags & static_cast<FlagMask>(Flag::NFIndicator)) ? "-" : "N")
+        << ((header.flags & static_cast<FlagMask>(Flag::PPIndicator)) ? "P" : "-")
         << "],s=" << header.frameId
         << ",l=" << (uint32_t)header.payloadLength
         << ",crc=" << std::hex << header.headerCrc << std::dec
@@ -330,7 +332,7 @@ std::ostream& operator<<(std::ostream& out, const FlexrayFrameEvent& msg)
         << "ch=" << msg.channel
         << ", " << msg.frame.header
         << " @" << timestamp.count() << "ms";
-    if (msg.frame.header.IsSet(FlexrayHeader::HeaderFlag::NFIndicator))
+    if (msg.frame.header.flags & static_cast<FlexrayHeader::FlagMask>(FlexrayHeader::Flag::NFIndicator))
     {
         // if payload is valid, provide it as hex dump
         out << ", payload="

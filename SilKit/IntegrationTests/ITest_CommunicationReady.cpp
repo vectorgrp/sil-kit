@@ -228,7 +228,7 @@ public:
         }
 
         timeSyncService->SetSimulationStepHandler(
-            [this](std::chrono::nanoseconds /*now*/) {
+            [this](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
                 AffirmAllDone();
             }, 1s);
 

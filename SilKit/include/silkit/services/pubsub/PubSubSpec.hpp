@@ -21,11 +21,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/datatypes.hpp"
-#include "silkit/participant/exception.hpp"
-
 #include <vector>
 #include <algorithm>
+
+#include "silkit/services/datatypes.hpp"
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -41,25 +41,27 @@ private:
     std::vector<SilKit::Services::MatchingLabel> _labels{};
 
 public:
-    PubSubSpec(){};
-    
+    PubSubSpec() = default;
+
     //! Construct a PubSubSpec via topic and mediaType.
     PubSubSpec(std::string topic, std::string mediaType)
-        : _topic{topic}
-        , _mediaType{mediaType} {};
+        : _topic{std::move(topic)}
+        , _mediaType{std::move(mediaType)}
+    {
+    }
 
     //! Add a given MatchingLabel.
     inline void AddLabel(const SilKit::Services::MatchingLabel& label);
 
     //! Add a MatchingLabel via key, value and matching kind.
-    inline void AddLabel(const std::string& key,const std::string& value, SilKit::Services::MatchingLabel::Kind kind);
+    inline void AddLabel(const std::string& key, const std::string& value, SilKit::Services::MatchingLabel::Kind kind);
 
     //! Get the topic of the PubSubSpec.
-    auto Topic() const -> const std::string& { return _topic; };
+    auto Topic() const -> const std::string& { return _topic; }
     //! Get the media type of the PubSubSpec.
-    auto MediaType() const -> const std::string& { return _mediaType; };
+    auto MediaType() const -> const std::string& { return _mediaType; }
     //! Get the labels of the PubSubSpec.
-    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; };
+    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; }
 };
 
 void PubSubSpec::AddLabel(const SilKit::Services::MatchingLabel& label)

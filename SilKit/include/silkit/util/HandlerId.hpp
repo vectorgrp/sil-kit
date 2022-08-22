@@ -32,12 +32,3 @@ enum struct HandlerId : std::uint64_t
 
 } // namespace Util
 } // namespace SilKit
-
-namespace SilKit {
-namespace Services {
-
-using SilKit::Util::HandlerId;
-
-} // namespace Services
-} // namespace SilKit
-

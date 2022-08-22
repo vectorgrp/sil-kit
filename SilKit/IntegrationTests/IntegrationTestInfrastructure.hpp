@@ -96,7 +96,10 @@ private:
             _systemMaster.participant->CreateLifecycleService({OperationMode::Coordinated});
 
         ITimeSyncService * timeSyncService = _systemMaster.lifecycleService->CreateTimeSyncService();
-        timeSyncService->SetSimulationStepHandler([](std::chrono::nanoseconds /*now*/) {}, std::chrono::seconds{1});
+        timeSyncService->SetSimulationStepHandler(
+            [](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
+            },
+            std::chrono::seconds{1});
 
         requiredParticipantNames.push_back(systemMasterName);
         _systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});

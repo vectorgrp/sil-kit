@@ -94,10 +94,7 @@ public:
 
     HandlerId AddFrameTransmitHandler(
         FrameTransmitHandler handler,
-        CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted
-                                           | (CanTransmitStatusMask)CanTransmitStatus::Canceled
-                                           | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
-                                           | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) override;
+        CanTransmitStatusMask statusMask = SilKit_CanTransmitStatus_DefaultMask) override;
     void RemoveFrameTransmitHandler(HandlerId handlerId) override;
 
     // IMsgForCanController

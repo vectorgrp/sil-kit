@@ -24,14 +24,13 @@ add_library(SilKitExperimental
    participant/ParticipantExtensions.hpp
    services/lin/LinControllerExtensions.cpp
    services/lin/LinControllerExtensions.hpp
-   )
+)
 
 target_link_libraries(SilKitExperimental
-    INTERFACE SilKitInterface
-    PRIVATE 
-        SilKitInternal
-        SilKitSimLin
-        SilKitUtil
+    PUBLIC SilKitInterface
+    PRIVATE SilKitInternal
+    PRIVATE SilKitSimLin
+    PRIVATE SilKitUtil
 )
 
 add_silkit_test(Test_Experimental

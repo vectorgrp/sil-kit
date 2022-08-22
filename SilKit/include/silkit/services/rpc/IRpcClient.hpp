@@ -21,8 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <future>
-
 #include "RpcDatatypes.hpp"
 
 #include "silkit/util/Span.hpp"

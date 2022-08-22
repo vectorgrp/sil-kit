@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IParticipantInternal.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ITraceMessageSource.hpp"
+#include "ITimeProvider.hpp"
 
 #include "ParticipantConfiguration.hpp"
 

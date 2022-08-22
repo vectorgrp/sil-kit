@@ -19,9 +19,10 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-
 #pragma once
+
 #include <stdint.h>
+
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
@@ -31,19 +32,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 SILKIT_BEGIN_DECLS
 
-//! The operational state of the controller, i.e., operational or sleeping.
+/*! The operational state of the controller, i.e., operational or sleeping. */
 typedef uint32_t SilKit_LinControllerStatus;
-//! The controller state is not yet known.
+/*! The controller state is not yet known. */
 #define SilKit_LinControllerStatus_Unknown ((SilKit_LinControllerStatus)0)
-//! Normal operation
+/*! Normal operation */
 #define SilKit_LinControllerStatus_Operational ((SilKit_LinControllerStatus)1)
-//! Sleep state operation; in this state wake-up detection from slave nodes
-//  is enabled.
+/*! Sleep state operation; in this state wake-up detection from slave nodes is enabled. */
 #define SilKit_LinControllerStatus_Sleep ((SilKit_LinControllerStatus)2)
-//! Sleep Pending state is reached when a GoToSleep is issued.
-//  This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
-//  before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
-//  This is only used when using detailed simulations.
+/*! \brief Sleep Pending state is reached when a GoToSleep is issued.
+ *
+ * This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
+ * before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
+ * This is only used when using detailed simulations.
+ */
 #define SilKit_LinControllerStatus_SleepPending ((SilKit_LinControllerStatus)3)
 
 /*! Used to configure a LIN controller as a master or slave.
@@ -55,9 +57,9 @@ typedef uint8_t SilKit_LinControllerMode;
  *  inactive. This does not indicate sleep mode.
  */
 #define SilKit_LinControllerMode_Inactive ((SilKit_LinControllerMode)0)
-//! A LIN controller with active master task and slave task
+/*! A LIN controller with active master task and slave task */
 #define SilKit_LinControllerMode_Master ((SilKit_LinControllerMode)1)
-//! A LIN controller with only a slave task
+/*! A LIN controller with only a slave task */
 #define SilKit_LinControllerMode_Slave ((SilKit_LinControllerMode)2)
 
 /*! The operational baud rate of the controller.
@@ -67,15 +69,13 @@ typedef uint8_t SilKit_LinControllerMode;
  */
 typedef uint32_t SilKit_LinBaudRate;
 
-//! \brief Controls the behavior of a LIN Slave task for a particular LIN ID
+/*! \brief Controls the behavior of a LIN Slave task for a particular LIN ID */
 typedef uint8_t SilKit_LinFrameResponseMode;
-//! The LinFrameResponse corresponding to the ID is neither received nor
-//! transmitted by the LIN slave.
+/*! The LinFrameResponse corresponding to the ID is neither received nor transmitted by the LIN slave. */
 #define SilKit_LinFrameResponseMode_Unused ((SilKit_LinFrameResponseMode)0)
-//! The LinFrameResponse corresponding to the ID is received by the LIN slave.
+/*! The LinFrameResponse corresponding to the ID is received by the LIN slave. */
 #define SilKit_LinFrameResponseMode_Rx ((SilKit_LinFrameResponseMode)1)
-//! The LinFrameResponse corresponding to the ID is transmitted unconditionally
-//! by the LIN slave.
+/*! The LinFrameResponse corresponding to the ID is transmitted unconditionally by the LIN slave. */
 #define SilKit_LinFrameResponseMode_TxUnconditional ((SilKit_LinFrameResponseMode)2)
 
 /*! \brief The identifier of a LIN \ref SilKit_LinFrame
@@ -102,9 +102,9 @@ typedef uint8_t SilKit_LinChecksumModel;
  * response is expected to be provided from a slave.
  */
 typedef uint8_t SilKit_LinFrameResponseType;
-//! Response is generated from this (master) node
+/*! Response is generated from this (master) node */
 #define SilKit_LinFrameResponseType_MasterResponse ((SilKit_LinFrameResponseType)0)
-//! Response is generated from a remote slave node
+/*! Response is generated from a remote slave node */
 #define SilKit_LinFrameResponseType_SlaveResponse ((SilKit_LinFrameResponseType)1)
 /*! Response is generated from one slave to and received by
  *  another slave, for the master the response will be anonymous,
@@ -126,26 +126,19 @@ typedef uint8_t SilKit_LinFrameResponseType;
  */
 typedef uint8_t SilKit_LinFrameStatus;
 
-/*! (currently not in use)
- */
+/*! (currently not in use) */
 #define SilKit_LinFrameStatus_NOT_OK              ((SilKit_LinFrameStatus)0)
-/*! The controller successfully transmitted a frame response.
- */
+/*! The controller successfully transmitted a frame response. */
 #define SilKit_LinFrameStatus_LIN_TX_OK           ((SilKit_LinFrameStatus)1)
-/*! (currently not in use)
- */
+/*! (currently not in use) */
 #define SilKit_LinFrameStatus_LIN_TX_BUSY         ((SilKit_LinFrameStatus)2)
-/*! (currently not in use)
- */
+/*! (currently not in use) */
 #define SilKit_LinFrameStatus_LIN_TX_HEADER_ERROR ((SilKit_LinFrameStatus)3)
-/*! (currently not in use)
- */
+/*! (currently not in use) */
 #define SilKit_LinFrameStatus_LIN_TX_ERROR        ((SilKit_LinFrameStatus)4)
-/*! The controller received a correct frame response.
- */
+/*! The controller received a correct frame response. */
 #define SilKit_LinFrameStatus_LIN_RX_OK           ((SilKit_LinFrameStatus)5)
-/*! (currently not in use)
- */
+/*! (currently not in use) */
 #define SilKit_LinFrameStatus_LIN_RX_BUSY         ((SilKit_LinFrameStatus)6)
 /*! The reception of a response failed.
  *
@@ -155,8 +148,7 @@ typedef uint8_t SilKit_LinFrameStatus;
  * checksum models.
  */
 #define SilKit_LinFrameStatus_LIN_RX_ERROR        ((SilKit_LinFrameStatus)7)
-/*! No LIN controller did provide a response to the frame header.
- */
+/*! No LIN controller did provide a response to the frame header. */
 #define SilKit_LinFrameStatus_LIN_RX_NO_RESPONSE  ((SilKit_LinFrameStatus)8)
 
 /*! \brief The data length of a LIN \ref SilKit_LinFrame in bytes
@@ -186,8 +178,7 @@ struct SilKit_LinFrame
 };
 typedef struct SilKit_LinFrame SilKit_LinFrame;
 
-//! \brief A LIN frame status event delivered in the \ref SilKit_LinFrameStatusHandler_t.
-//! 
+/*! \brief A LIN frame status event delivered in the \ref SilKit_LinFrameStatusHandler_t. */
 struct SilKit_LinFrameStatusEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
@@ -197,7 +188,7 @@ struct SilKit_LinFrameStatusEvent
 };
 typedef struct SilKit_LinFrameStatusEvent SilKit_LinFrameStatusEvent;
 
-//! \brief A LIN wakeup event delivered in the \ref SilKit_LinWakeupHandler_t.
+/*! \brief A LIN wakeup event delivered in the \ref SilKit_LinWakeupHandler_t. */
 struct SilKit_LinWakeupEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
@@ -206,7 +197,7 @@ struct SilKit_LinWakeupEvent
 };
 typedef struct SilKit_LinWakeupEvent SilKit_LinWakeupEvent;
 
-//! \brief A LIN goToSleep event delivered in the \ref SilKit_LinGoToSleepHandler_t
+/*! \brief A LIN goToSleep event delivered in the \ref SilKit_LinGoToSleepHandler_t */
 struct SilKit_LinGoToSleepEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
@@ -214,7 +205,7 @@ struct SilKit_LinGoToSleepEvent
 };
 typedef struct SilKit_LinGoToSleepEvent SilKit_LinGoToSleepEvent;
 
-//! \brief A LIN wakeup event delivered in the \ref SilKit_LinWakeupHandler_t.
+/*! \brief A LIN wakeup event delivered in the \ref SilKit_LinWakeupHandler_t. */
 struct SilKit_Experimental_LinSlaveConfigurationEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
@@ -222,8 +213,7 @@ struct SilKit_Experimental_LinSlaveConfigurationEvent
 };
 typedef struct SilKit_Experimental_LinSlaveConfigurationEvent SilKit_Experimental_LinSlaveConfigurationEvent;
 
-/*! \brief Configuration data for a LIN Slave task for a particular LIN ID.
- */
+/*! \brief Configuration data for a LIN Slave task for a particular LIN ID. */
 struct SilKit_LinFrameResponse
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
@@ -245,14 +235,15 @@ typedef struct SilKit_LinFrameResponse SilKit_LinFrameResponse;
  */
 struct SilKit_LinControllerConfig
 {
-    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
-    //! Configure as LIN master or LIN slave
+    /*! The interface id specifying which version of this struct was obtained */
+    SilKit_StructHeader structHeader;
+    /*! Configure as LIN master or LIN slave */
     SilKit_LinControllerMode controllerMode;
-    //! The operational baud rate of the controller.
+    /*! The operational baud rate of the controller. */
     SilKit_LinBaudRate baudRate;
 
     size_t numFrameResponses;
-     //! LinFrameResponse configuration.
+    /*! LinFrameResponse configuration. */
     SilKit_LinFrameResponse*  frameResponses;
 };
 typedef struct SilKit_LinControllerConfig SilKit_LinControllerConfig;
@@ -263,7 +254,8 @@ typedef struct SilKit_LinControllerConfig SilKit_LinControllerConfig;
  */
 struct SilKit_Experimental_LinSlaveConfiguration
 {
-    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
+    /*!< The interface id specifying which version of this struct was obtained */
+    SilKit_StructHeader structHeader;
     SilKit_Bool isLinIdResponding[64];
 };
 typedef struct SilKit_Experimental_LinSlaveConfiguration SilKit_Experimental_LinSlaveConfiguration;
@@ -363,10 +355,10 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinContr
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Init_t)(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
 
 /*! \brief Set a RX/TX configuration during operation.
- * 
+ *
  * \param controller The LIN controller to set the configuration.
  * \param response The frame and response mode to be configured.
- * 
+ *
  * \throws SilKit::StateError if the LIN Controller is not initialized.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SetFrameResponse(SilKit_LinController* controller,
@@ -621,7 +613,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_AddLinS
                                                                      SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
                                                                      SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref SilKit_Experimental_LinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_Experimental_LinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller
  *
  * \param controller The LIN controller for which the callback should be removed.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.

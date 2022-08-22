@@ -84,7 +84,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, VAsioMsgSubscriber& subs
 struct VAsioPeerInfo
 {
     std::string participantName;
-    SilKit::ParticipantId participantId;
+    SilKit::Core::ParticipantId participantId;
     std::string acceptorHost;
     uint16_t acceptorPort;
 };
@@ -92,7 +92,7 @@ struct VAsioPeerInfo
 struct VAsioPeerUri
 {
     std::string participantName;
-    SilKit::ParticipantId participantId;
+    SilKit::Core::ParticipantId participantId;
     std::vector<std::string> acceptorUris;
 };
 

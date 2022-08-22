@@ -368,13 +368,16 @@ protected:
                     {SilKit::Services::Orchestration::OperationMode::Coordinated});
                 auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-                timeSyncService->SetSimulationStepHandler([&participant, publishTask](std::chrono::nanoseconds /*now*/) {
-                    if (!participant.dataPublishers.empty())
-                    {
-                        publishTask();
-                        participant.CheckAllSentPromise();
-                    }
-                }, 1s);
+                timeSyncService->SetSimulationStepHandler(
+                    [&participant, publishTask](std::chrono::nanoseconds /*now*/,
+                                                std::chrono::nanoseconds /*duration*/) {
+                        if (!participant.dataPublishers.empty())
+                        {
+                            publishTask();
+                            participant.CheckAllSentPromise();
+                        }
+                    },
+                    1s);
                 auto finalStateFuture = lifecycleService->StartLifecycle();
                 finalStateFuture.get();
             }

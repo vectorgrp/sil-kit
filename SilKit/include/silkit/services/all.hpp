@@ -18,13 +18,14 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #include "datatypes.hpp"
 
 #include "can/all.hpp"
 #include "ethernet/all.hpp"
 #include "flexray/all.hpp"
-#include "pubsub/all.hpp"
 #include "lin/all.hpp"
-#include "rpc/all.hpp"
 #include "logging/all.hpp"
 #include "orchestration/all.hpp"
+#include "pubsub/all.hpp"
+#include "rpc/all.hpp"

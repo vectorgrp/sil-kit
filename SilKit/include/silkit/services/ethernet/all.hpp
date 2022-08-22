@@ -21,4 +21,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "EthernetDatatypes.hpp"
 #include "IEthernetController.hpp"
-#include "string_utils.hpp"

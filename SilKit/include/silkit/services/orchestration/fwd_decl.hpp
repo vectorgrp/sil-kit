@@ -25,19 +25,14 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-struct NextSimTask;
-
-struct SystemCommand;
 struct ParticipantStatus;
 struct WorkflowConfiguration;
 struct LifecycleConfiguration;
 
 class ILifecycleService;
+class ISystemMonitor;
 class ITimeSyncService;
 
-class ISystemMonitor;
-
-class ITimeProvider;
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit

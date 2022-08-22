@@ -52,10 +52,10 @@ typedef struct SilKit_RpcClient SilKit_RpcClient;
 /*! The available result codes for calls issued by a client.
 */
 typedef uint32_t SilKit_RpcCallStatus;
-#define SilKit_CallStatus_SUCCESS               ((uint32_t) 0)
-#define SilKit_CallStatus_SERVER_NOT_REACHABLE  ((uint32_t) 1)
-#define SilKit_CallStatus_UNDEFINED_ERROR       ((uint32_t) 2)
-#define SilKit_CallStatus_INTERNAL_SERVER_ERROR ((uint32_t) 3)
+#define SilKit_RpcCallStatus_Success             ((uint32_t) 0)
+#define SilKit_RpcCallStatus_ServerNotReachable  ((uint32_t) 1)
+#define SilKit_RpcCallStatus_UndefinedError      ((uint32_t) 2)
+#define SilKit_RpcCallStatus_InternalServerError ((uint32_t) 3)
 
 typedef struct {
     SilKit_StructHeader structHeader;

@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <functional>
 
 #include "CanDatatypes.hpp"
-#include "silkit/util/HandlerId.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -131,8 +130,8 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameHandler(FrameHandler handler,
-                                      DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) = 0;
+    virtual auto AddFrameHandler(FrameHandler handler,
+                                      DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) -> HandlerId = 0;
 
     /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -149,7 +148,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddStateChangeHandler(StateChangeHandler handler) = 0;
+    virtual auto AddStateChangeHandler(StateChangeHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a StateChangeHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -169,7 +168,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddErrorStateChangeHandler(ErrorStateChangeHandler handler) = 0;
+    virtual auto AddErrorStateChangeHandler(ErrorStateChangeHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove an ErrorStateChangeHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -185,18 +184,15 @@ public:
      * NB: Full support in a detailed simulation. In a simple simulation, all
      * messages are automatically positively acknowledged.
      */
-    virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler, 
-        CanTransmitStatusMask statusMask = (CanTransmitStatusMask)CanTransmitStatus::Transmitted 
-            | (CanTransmitStatusMask)CanTransmitStatus::Canceled
-            | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
-            | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) = 0;
+    virtual auto AddFrameTransmitHandler(FrameTransmitHandler handler,
+                                         CanTransmitStatusMask statusMask = SilKit_CanTransmitStatus_DefaultMask)
+        -> HandlerId = 0;
 
     /*! \brief Remove a FrameTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
     virtual void RemoveFrameTransmitHandler(HandlerId handlerId) = 0;
-
 };
 
 } // namespace Can

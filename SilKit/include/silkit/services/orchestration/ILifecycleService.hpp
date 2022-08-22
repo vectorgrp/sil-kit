@@ -25,11 +25,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <string>
 
+#include "OrchestrationDatatypes.hpp"
+
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
-#include "silkit/capi/Participant.h"
 #include "silkit/participant/exception.hpp"
 
-#include "OrchestrationDatatypes.hpp"
+#include "silkit/capi/Participant.h"
 
 namespace SilKit {
 namespace Services {

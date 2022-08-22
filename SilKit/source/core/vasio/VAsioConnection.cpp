@@ -152,7 +152,7 @@ auto printUris(const std::vector<std::string>& uris)
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in 
 // a runtime exception. We create a unique temporary file path, with a fixed length.
-auto makeLocalEndpoint(const std::string& participantName, const SilKit::ParticipantId& id,
+auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::ParticipantId& id,
                        const std::string& uniqueValue) -> asio::local::stream_protocol::endpoint
 {
     asio::local::stream_protocol::endpoint result;
@@ -203,7 +203,7 @@ auto fromAsioEndpoint(const asio::ip::tcp::endpoint& ep)
     return SilKit::Core::Uri::Parse(uri.str());
 }
 
-auto makeLocalPeerInfo(const std::string& name, SilKit::ParticipantId id, const std::string& uniqueDetail)
+auto makeLocalPeerInfo(const std::string& name, SilKit::Core::ParticipantId id, const std::string& uniqueDetail)
 {
     SilKit::Core::VAsioPeerInfo pi;
     pi.participantName = name;

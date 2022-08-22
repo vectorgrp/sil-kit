@@ -68,13 +68,13 @@ void RpcServer::RegisterServiceDiscovery()
                 auto clientLabels =
                     SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
 
-                if (functionName == _dataSpec.Topic() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
+                if (functionName == _dataSpec.FunctionName() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
                     && Util::MatchLabels(_dataSpec.Labels(), clientLabels))
                 {
                     AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
                 }
             }
-        }, Core::Discovery::controllerTypeRpcClient, _dataSpec.Topic());
+        }, Core::Discovery::controllerTypeRpcClient, _dataSpec.FunctionName());
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData)
@@ -110,7 +110,7 @@ void RpcServer::AddInternalRpcServer(const std::string& clientUUID, std::string 
                                      const std::vector<SilKit::Services::MatchingLabel>& clientLabels)
 {
     auto internalRpcServer = dynamic_cast<RpcServerInternal*>(_participant->CreateRpcServerInternal(
-        _dataSpec.Topic(), clientUUID, joinedMediaType, clientLabels, _handler, this));
+        _dataSpec.FunctionName(), clientUUID, joinedMediaType, clientLabels, _handler, this));
 
     std::unique_lock<decltype(_internalRpcServersMx)> lock{_internalRpcServersMx};
     _internalRpcServers.push_back(internalRpcServer);

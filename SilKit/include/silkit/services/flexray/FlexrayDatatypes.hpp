@@ -27,28 +27,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/datatypes.hpp"
 #include "silkit/util/Span.hpp"
 
+#include "silkit/capi/Flexray.h"
+
 namespace SilKit {
 namespace Services {
 namespace Flexray {
 
-using FlexrayMicroTick = int32_t; //!< FlexRay micro tick
-using FlexrayMacroTick = int32_t; //!< FlexRay macro tick
+using FlexrayMicroTick = SilKit_FlexrayMicroTick; //!< FlexRay micro tick
+
+// Not used in the Parameter structures.
+// using FlexrayMacroTick = SilKit_FlexrayMacroTick; //!< FlexRay macro tick
 
 //! \brief Type and constants for the FlexRay channel parameter A, B, or AB
-enum class FlexrayChannel : uint8_t
+enum class FlexrayChannel : SilKit_FlexrayChannel
 {
-    None = 0, //!< Invalid Channel
-    A    = 1, //!< Channel A
-    B    = 2, //!< Channel B
-    AB   = 3, //!< Channel AB
+    None = SilKit_FlexrayChannel_None, //!< Invalid Channel
+    A    = SilKit_FlexrayChannel_A,    //!< Channel A
+    B    = SilKit_FlexrayChannel_B,    //!< Channel B
+    AB   = SilKit_FlexrayChannel_AB,   //!< Channel AB
 };
 
 //! \brief Period of the clock (used for micro tick period and sample clock period).
-enum class FlexrayClockPeriod : uint8_t
+enum class FlexrayClockPeriod : SilKit_FlexrayClockPeriod
 {
-    T12_5NS = 1, //!< 12.5ns / 80MHz
-    T25NS   = 2, //!< 25ns   / 40MHz
-    T50NS   = 3, //!< 50ns   / 20MHz
+    T12_5NS = SilKit_FlexrayClockPeriod_T12_5NS, //!< 12.5ns / 80MHz
+    T25NS   = SilKit_FlexrayClockPeriod_T25NS,   //!< 25ns   / 40MHz
+    T50NS   = SilKit_FlexrayClockPeriod_T50NS,   //!< 50ns   / 20MHz
 };
 
 /*!
@@ -254,10 +258,10 @@ struct FlexrayNodeParameters
 };
 
 //! Transmission mode for FlexRay Tx-Buffer
-enum class FlexrayTransmissionMode : uint8_t
+enum class FlexrayTransmissionMode : SilKit_FlexrayTransmissionMode
 {
-    SingleShot = 0, //!< Send TX Buffer only once
-    Continuous = 1 //!< Send TX Buffer repeatedly
+    SingleShot = SilKit_FlexrayTransmissionMode_SingleShot, //!< Send TX Buffer only once
+    Continuous = SilKit_FlexrayTransmissionMode_Continuous, //!< Send TX Buffer repeatedly
 };
 
 //! Configuration of Tx-Buffer, used in struct FlexrayControllerConfig
@@ -312,6 +316,17 @@ struct FlexrayTxBufferUpdate
 
 struct FlexrayHeader
 {
+    using FlagMask = SilKit_FlexrayHeader_Flag;
+
+    //! Flag BitMask definition for helper methods
+    enum class Flag : FlagMask
+    {
+        SuFIndicator = SilKit_FlexrayHeader_SuFIndicator,
+        SyFIndicator = SilKit_FlexrayHeader_SyFIndicator,
+        NFIndicator = SilKit_FlexrayHeader_NFIndicator,
+        PPIndicator = SilKit_FlexrayHeader_PPIndicator,
+    };
+
     /*!
      * \brief Flags bit map according to FlagMask. Description:
      *  - [7-5]: unused
@@ -321,37 +336,11 @@ struct FlexrayHeader
      *  - [1]: SyFIndicator: 0, frame not used for synchronization; 1, frame shall be used for sync
      *  - [0]: SuFIndicator: 0, not a startup frame; 1, a startup frame
      */
-    uint8_t flags = 0;
+    FlagMask flags = 0;
     uint16_t frameId = 0; //!< Slot ID in which the frame was sent: 1 - 2047
     uint8_t payloadLength = 0; //!< Payload length, 7 bits
     uint16_t headerCrc = 0; //!< Header CRC, 11 bits
     uint8_t cycleCount = 0; //!< Cycle in which the frame was sent: 0 - 63
-
-
-    // --------------------------------------------------------------------------------
-    //  Convenience Accessors to Header Flags
-    // --------------------------------------------------------------------------------
-
-    //! Flag BitMask definition for helper methods
-    enum class HeaderFlag : uint8_t
-    {
-        SuFIndicator = 1 << 0,
-        SyFIndicator = 1 << 1,
-        NFIndicator = 1 << 2,
-        PPIndicator = 1 << 3
-    };
-
-    //! Convenience helper to check if a HeaderFlag is set
-    inline bool IsSet(HeaderFlag flag) const;
-
-    //! Convenience helper to set a HeaderFlag
-    inline void Set(HeaderFlag flag);
-
-    //! Convenience helper to clear a HeaderFlag
-    inline void Clear(HeaderFlag flag);
-
-    //! Convenience helper to set or clear a HeaderFlag according to a condition
-    inline void Set(HeaderFlag flag, bool condition);
 };
 
 struct FlexrayFrame
@@ -382,11 +371,11 @@ struct FlexrayFrameTransmitEvent
 /*!
  * \brief FlexRay symbols patterns.
  */
-enum class FlexraySymbolPattern : uint8_t
+enum class FlexraySymbolPattern : SilKit_FlexraySymbolPattern
 {
-    CasMts, //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
-    Wus,    //!< Wakeup symbol (WUS).
-    Wudop   //!< Wakeup During Operation Pattern (WUDOP).
+    CasMts = SilKit_FlexraySymbolPattern_CasMts, //!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
+    Wus = SilKit_FlexraySymbolPattern_Wus,       //!< Wakeup symbol (WUS).
+    Wudop = SilKit_FlexraySymbolPattern_Wudop,   //!< Wakeup During Operation Pattern (WUDOP).
 };
 
 /*!
@@ -430,38 +419,38 @@ struct FlexrayCycleStartEvent
  * \brief Protocol Operation Control (POC) state of the FlexRay communication controller
  * *AUTOSAR Name:* Fr_POCStateType
  */
-enum class FlexrayPocState : uint8_t
+enum class FlexrayPocState : SilKit_FlexrayPocState
 {
-    DefaultConfig = 0, //!< CC expects configuration. Initial state after reset. 
-    Config        = 1, //!< CC is in configuration mode for setting communication parameters
-    Ready         = 2, //!< intermediate state for initialization process (after Config).
-    Startup       = 3, //!< FlexRay startup phase
-    Wakeup        = 4, //!< FlexRay wakeup phase
-    NormalActive  = 5, //!< Normal operating mode
-    NormalPassive = 6, //!< Operating mode with transient or tolerable errors
-    Halt          = 7  //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
+    DefaultConfig = SilKit_FlexrayPocState_DefaultConfig, //!< CC expects configuration. Initial state after reset.
+    Config        = SilKit_FlexrayPocState_Config,        //!< CC is in configuration mode for setting communication parameters
+    Ready         = SilKit_FlexrayPocState_Ready,         //!< intermediate state for initialization process (after Config).
+    Startup       = SilKit_FlexrayPocState_Startup,       //!< FlexRay startup phase
+    Wakeup        = SilKit_FlexrayPocState_Wakeup,        //!< FlexRay wakeup phase
+    NormalActive  = SilKit_FlexrayPocState_NormalActive,  //!< Normal operating mode
+    NormalPassive = SilKit_FlexrayPocState_NormalPassive, //!< Operating mode with transient or tolerable errors
+    Halt          = SilKit_FlexrayPocState_Halt,          //!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
 };
 
 /*!
 * \brief Indicates what slot mode the POC is in.
 * *AUTOSAR Name:* Fr_SlotModeType
 */
-enum class FlexraySlotModeType : uint8_t
+enum class FlexraySlotModeType : SilKit_FlexraySlotModeType
 {
-    KeySlot = 0x00,
-    AllPending,
-    All,
+    KeySlot = SilKit_FlexraySlotModeType_KeySlot,
+    AllPending = SilKit_FlexraySlotModeType_AllPending,
+    All = SilKit_FlexraySlotModeType_All,
 };
 
 /*!
 * \brief Indicates what error mode the POC is in.
 * *AUTOSAR Name:* Fr_ErrorModeType
 */
-enum class FlexrayErrorModeType : uint8_t
+enum class FlexrayErrorModeType : SilKit_FlexrayErrorModeType
 {
-    Active = 0x00,
-    Passive,
-    CommHalt,
+    Active = SilKit_FlexrayErrorModeType_Active,
+    Passive = SilKit_FlexrayErrorModeType_Passive,
+    CommHalt = SilKit_FlexrayErrorModeType_CommHalt,
 };
 
 /*!
@@ -469,34 +458,34 @@ enum class FlexrayErrorModeType : uint8_t
 * *AUTOSAR Name:* Fr_StartupStateType
 */
 
-enum class FlexrayStartupStateType : uint8_t
+enum class FlexrayStartupStateType : SilKit_FlexrayStartupStateType
 {
-    Undefined = 0x00,
-    ColdStartListen,
-    IntegrationColdstartCheck,
-    ColdStartJoin,
-    ColdStartCollisionResolution,
-    ColdStartConsistencyCheck,
-    IntegrationListen,
-    InitializeSchedule,
-    IntegrationConsistencyCheck,
-    ColdStartGap,
-    ExternalStartup,
+    Undefined = SilKit_FlexrayStartupStateType_Undefined,
+    ColdStartListen = SilKit_FlexrayStartupStateType_ColdStartListen,
+    IntegrationColdstartCheck = SilKit_FlexrayStartupStateType_IntegrationColdstartCheck,
+    ColdStartJoin = SilKit_FlexrayStartupStateType_ColdStartJoin,
+    ColdStartCollisionResolution = SilKit_FlexrayStartupStateType_ColdStartCollisionResolution,
+    ColdStartConsistencyCheck = SilKit_FlexrayStartupStateType_ColdStartConsistencyCheck,
+    IntegrationListen = SilKit_FlexrayStartupStateType_IntegrationListen,
+    InitializeSchedule = SilKit_FlexrayStartupStateType_InitializeSchedule,
+    IntegrationConsistencyCheck = SilKit_FlexrayStartupStateType_IntegrationConsistencyCheck,
+    ColdStartGap = SilKit_FlexrayStartupStateType_ColdStartGap,
+    ExternalStartup = SilKit_FlexrayStartupStateType_ExternalStartup,
 };
 
 /*!
 * \brief Indicates the outcome of the wake-up mechanism.
 * *AUTOSAR Name:* Fr_WakeupStateType
 */
-enum class FlexrayWakeupStatusType : uint8_t
+enum class FlexrayWakeupStatusType : SilKit_FlexrayWakeupStatusType
 {
-    Undefined = 0x00,
-    ReceivedHeader,
-    ReceivedWup,
-    CollisionHeader,
-    CollisionWup,
-    CollisionUnknown,
-    Transmitted,
+    Undefined = SilKit_FlexrayWakeupStatusType_Undefined,
+    ReceivedHeader = SilKit_FlexrayWakeupStatusType_ReceivedHeader,
+    ReceivedWup = SilKit_FlexrayWakeupStatusType_ReceivedWup,
+    CollisionHeader = SilKit_FlexrayWakeupStatusType_CollisionHeader,
+    CollisionWup = SilKit_FlexrayWakeupStatusType_CollisionWup,
+    CollisionUnknown = SilKit_FlexrayWakeupStatusType_CollisionUnknown,
+    Transmitted = SilKit_FlexrayWakeupStatusType_Transmitted,
 };
 
 /*!
@@ -526,29 +515,6 @@ struct FlexrayPocStatusEvent
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-
-bool FlexrayHeader::IsSet(HeaderFlag flag) const
-{
-    return (flags & static_cast<uint8_t>(flag)) > 0;
-}
-
-void FlexrayHeader::Set(HeaderFlag flag)
-{
-    flags |= static_cast<uint8_t>(flag);
-}
-
-void FlexrayHeader::Clear(HeaderFlag flag)
-{
-    flags &= ~static_cast<uint8_t>(flag);
-}
-
-void FlexrayHeader::Set(HeaderFlag flag, bool condition)
-{
-    if (condition)
-        Set(flag);
-    else
-        Clear(flag);
-}
 
 inline bool operator==(const FlexrayClusterParameters& lhs, const FlexrayClusterParameters& rhs)
 {

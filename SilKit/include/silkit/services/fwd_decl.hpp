@@ -18,19 +18,20 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #include "can/fwd_decl.hpp"
 #include "ethernet/fwd_decl.hpp"
 #include "flexray/fwd_decl.hpp"
 #include "lin/fwd_decl.hpp"
-#include "pubsub/fwd_decl.hpp"
-#include "rpc/fwd_decl.hpp"
 #include "logging/fwd_decl.hpp"
 #include "orchestration/fwd_decl.hpp"
+#include "pubsub/fwd_decl.hpp"
+#include "rpc/fwd_decl.hpp"
 
 namespace SilKit {
 namespace Services {
 
-class ProtocolError;
+struct MatchingLabel;
 
 } // namespace Services
 } // namespace SilKit

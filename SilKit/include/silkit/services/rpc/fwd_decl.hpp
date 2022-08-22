@@ -27,7 +27,6 @@ namespace Rpc {
 
 struct RpcCallEvent;
 struct RpcCallResultEvent;
-struct RpcDiscoveryResult;
 
 class IRpcClient;
 class IRpcServer;

@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/util/serdes/sil/Serialization.hpp"
+#include "silkit/util/serdes/Serialization.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 
 
@@ -97,8 +97,6 @@ int main(int argc, char** argv)
     std::string mediaTypeWildcard{""};
     std::string mediaTypeJson{"application/json"};
     std::string mediaTypeText{"text/plain"};
-
-    std::map<std::string, std::string> labelsEmpty;
 
     try
     {

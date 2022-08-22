@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 #include "silkit/util/Span.hpp"
 

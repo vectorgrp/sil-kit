@@ -283,7 +283,6 @@ Data Structures
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-.. doxygentypedef:: SilKit::Services::Flexray::FlexrayMacroTick
 .. doxygentypedef:: SilKit::Services::Flexray::FlexrayMicroTick
 .. doxygenenum:: SilKit::Services::Flexray::FlexrayClockPeriod
 .. doxygenenum:: SilKit::Services::Flexray::FlexrayChannel

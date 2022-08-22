@@ -258,9 +258,7 @@ auto TimeSyncService::State() const -> ParticipantState
     return _lifecycleService->Status().state;
 }
 
-void TimeSyncService::SetSimulationStepHandler(
-    std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> task,
-    std::chrono::nanoseconds initialStepSize)
+void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)
 {
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(true);
@@ -271,16 +269,6 @@ void TimeSyncService::SetSimulationStepHandlerAsync(SimulationStepHandler task, 
 {
     _simTask = std::move(task);
     _timeConfiguration.SetBlockingMode(false);
-    _timeConfiguration.SetStepDuration(initialStepSize);
-}
-
-void TimeSyncService::SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
-                                               std::chrono::nanoseconds initialStepSize)
-{
-    _simTask = [task = std::move(task)](auto now, auto /*duration*/) {
-        task(now);
-    };
-    _timeConfiguration.SetBlockingMode(true);
     _timeConfiguration.SetStepDuration(initialStepSize);
 }
 

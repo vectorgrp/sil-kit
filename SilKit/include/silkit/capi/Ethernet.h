@@ -44,11 +44,18 @@ typedef uint32_t SilKit_EthernetTransmitStatus;
 /*! The transmit request was dropped, because the transmit queue is full. */
 #define SilKit_EthernetTransmitStatus_Dropped ((SilKit_EthernetTransmitStatus) BIT(3))
 
-/*! (UNUSED) The transmit request was rejected, because there is already another request with the same transmitId. */
-#define SilKit_EthernetTransmitStatus_DuplicatedTransmitId ((SilKit_EthernetTransmitStatus) BIT(4))
+/* (SilKit_EthernetTransmitStatus) BIT(4) is RESERVED (used to be SilKit_EthernetTransmitStatus_DuplicatedTransmitId) */
 
 /*! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, etc.). */
 #define SilKit_EthernetTransmitStatus_InvalidFrameFormat ((SilKit_EthernetTransmitStatus) BIT(5))
+
+/*! Combines all available transmit statuses.
+ */
+#define SilKit_EthernetTransmitStatus_DefaultMask \
+    (SilKit_EthernetTransmitStatus_Transmitted | SilKit_EthernetTransmitStatus_ControllerInactive \
+     | SilKit_EthernetTransmitStatus_LinkDown | SilKit_EthernetTransmitStatus_Dropped \
+     | SilKit_EthernetTransmitStatus_InvalidFrameFormat)
+
 
 typedef uint32_t SilKit_EthernetState;
 
@@ -61,7 +68,8 @@ typedef uint32_t SilKit_EthernetState;
 //!< The Ethernet controller is active and the link to another Ethernet controller is established.
 #define SilKit_EthernetState_LinkUp ((SilKit_EthernetState) 2)
 
-typedef struct 
+
+typedef struct
 {
     SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Timestamp of the state change event

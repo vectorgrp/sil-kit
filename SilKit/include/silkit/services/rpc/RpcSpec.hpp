@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "silkit/services/datatypes.hpp"
-#include "silkit/participant/exception.hpp"
-
 #include <vector>
 #include <algorithm>
+
+#include "silkit/services/datatypes.hpp"
+#include "silkit/participant/exception.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -17,17 +17,19 @@ namespace Rpc {
 class RpcSpec
 {
 private:
-    std::string _topic{};
+    std::string _functionName{};
     std::string _mediaType{};
     std::vector<SilKit::Services::MatchingLabel> _labels{};
 
 public:
-    RpcSpec(){};
+    RpcSpec() = default;
 
     //! Construct a RpcSpec via topic and mediaType.
-    RpcSpec(std::string topic, std::string mediaType)
-        : _topic{topic}
-        , _mediaType{mediaType} {};
+    RpcSpec(std::string functionName, std::string mediaType)
+        : _functionName{std::move(functionName)}
+        , _mediaType{std::move(mediaType)}
+    {
+    }
 
     //! Add a given MatchingLabel.
     inline void AddLabel(const SilKit::Services::MatchingLabel& label);
@@ -36,11 +38,11 @@ public:
     inline void AddLabel(const std::string& key, const std::string& value, SilKit::Services::MatchingLabel::Kind kind);
 
     //! Get the topic of the RpcSpec.
-    auto Topic() const -> const std::string& { return _topic; };
+    auto FunctionName() const -> const std::string& { return _functionName; }
     //! Get the media type of the RpcSpec.
-    auto MediaType() const -> const std::string& { return _mediaType; };
+    auto MediaType() const -> const std::string& { return _mediaType; }
     //! Get the labels of the RpcSpec.
-    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; };
+    auto Labels() const -> const std::vector<SilKit::Services::MatchingLabel>& { return _labels; }
 };
 
 void RpcSpec::AddLabel(const SilKit::Services::MatchingLabel& label)

@@ -48,8 +48,8 @@ public:
      * different endpoints. I.e., a network simulator is aware of the endpointIds.
      */
     //! \brief Setter and getter for the ParticipantID associated with this CAN network simulator
-    virtual void SetParticipantId(SilKit::ParticipantId participantId) = 0;
-    virtual auto GetParticipantId() const -> SilKit::ParticipantId = 0;
+    virtual void SetParticipantId(SilKit::Core::ParticipantId participantId) = 0;
+    virtual auto GetParticipantId() const -> SilKit::Core::ParticipantId = 0;
 
 };
 

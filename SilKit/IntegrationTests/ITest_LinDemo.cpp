@@ -439,7 +439,7 @@ TEST_F(ITest_SimTestHarness, lin_demo)
         linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
         timeSyncService->SetSimulationStepHandler(
-            [master = master.get(), participantName](auto now) {
+            [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
 
                 auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                 Log() << participantName << " now=" << nowMs.count() << "ms";
@@ -477,7 +477,7 @@ TEST_F(ITest_SimTestHarness, lin_demo)
         slave->_controllerConfig = config;
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now) {
+            [slave = slave.get()](auto now, std::chrono::nanoseconds /*duration*/) {
 
                 Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
                 slave->DoAction(now);

@@ -25,9 +25,6 @@ namespace SilKit {
 namespace Services {
 namespace Logging {
 
-struct SourceLoc;
-struct LogMsg;
-
 class ILogger;
 
 } // namespace Logging

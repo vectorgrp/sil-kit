@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <iostream>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <algorithm>
@@ -33,27 +33,24 @@ namespace SilKit {
 namespace Services {
 namespace Logging {
 
-inline std::string to_string(const Level& address);
+inline std::string to_string(const Level& level);
 inline Level from_string(const std::string& levelStr);
-inline std::ostream& operator<<(std::ostream& out, const Level& address);
-inline std::string to_string(const SourceLoc& sourceLoc);
-inline std::ostream& operator<<(std::ostream& out, const SourceLoc& sourceLoc);
-inline std::string to_string(const LogMsg& msg);
-inline std::ostream& operator<<(std::ostream& out, const LogMsg& msg);
+inline std::ostream& operator<<(std::ostream& out, const Level& level);
 
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
-std::string to_string(const Level& lvl)
+
+std::string to_string(const Level& level)
 {
     std::stringstream outStream;
-    outStream << lvl;
+    outStream << level;
     return outStream.str();
 }
 
-std::ostream& operator<<(std::ostream& outStream, const Level& lvl)
+std::ostream& operator<<(std::ostream& outStream, const Level& level)
 {
-    switch (lvl)
+    switch (level)
     {
     case Level::Trace: outStream << "Trace"; break;
     case Level::Debug: outStream << "Debug"; break;
@@ -96,34 +93,6 @@ inline Level from_string(const std::string& levelStr)
     return Level::Off;
 }
 
-std::string to_string(const SourceLoc& sl)
-{
-    std::stringstream outStream;
-    outStream << sl;
-    return outStream.str();
-}
-std::ostream& operator<<(std::ostream& out, const SourceLoc& sl)
-{
-    return out << "SourceLoc{filename=\"" << sl.filename << "\","
-        << "line=" << sl.line << ", funcname={\"" << sl.funcname << "\"}";
-}
-
-std::string to_string(const LogMsg& msg)
-{
-    std::stringstream outStream;
-    outStream << msg;
-    return outStream.str();
-}
-std::ostream& operator<<(std::ostream& out, const LogMsg& msg)
-{
-    out << "LogMsg{logger=" << msg.logger_name
-        << ", level=" << msg.level
-        << ", time=" << msg.time.time_since_epoch().count()
-        << ", source=" << msg.source
-        << ", payload=\"" << msg.payload << "\""
-        << "}";
-    return out;
-}
 } // namespace Logging
 } // namespace Services
 } // namespace SilKit

@@ -30,21 +30,7 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-// RpcDatatypes
-inline std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels);
-
-// ================================================================================
-//  Inline Implementations
-// ================================================================================
-
-std::ostream& operator<<(std::ostream& out, const std::map<std::string, std::string>& labels)
-{
-    out << "{";
-    for (auto&& kvp : labels)
-        out << "{\"" << kvp.first << "\", \"" << kvp.second << "\"}";
-    out << "}";
-    return out;
-}
+// Nothing here yet ...
 
 } // namespace Rpc
 } // namespace Services

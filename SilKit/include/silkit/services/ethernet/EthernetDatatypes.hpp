@@ -24,11 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <array>
 #include <chrono>
 
-#include "silkit/capi/Ethernet.h"
-
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/services/datatypes.hpp"
 #include "silkit/util/Span.hpp"
+
+#include "silkit/capi/Ethernet.h"
 
 // ================================================================================
 //  Ethernet specific data types
@@ -37,9 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Services {
 namespace Ethernet {
-
-//! \brief An Ethernet MAC address, i.e. FF:FF:FF:FF:FF:FF
-using EthernetMac = std::array<uint8_t, 6>;
 
 //! \brief Bitrate in kBit/sec
 using EthernetBitrate = uint32_t;
@@ -59,35 +56,24 @@ struct EthernetFrameEvent
     void* userContext; //!< Optional pointer provided by user when sending the frame
 };
 
-using EthernetTransmitStatusMask = uint32_t;
+using EthernetTransmitStatusMask = SilKit_EthernetTransmitStatus;
 
 //! \brief Acknowledgment status for an EthernetTransmitRequest
 enum class EthernetTransmitStatus : EthernetTransmitStatusMask
 {
-    /*! The message was successfully transmitted on the Ethernet link.
-    */
+    //! The message was successfully transmitted on the Ethernet link.
     Transmitted = SilKit_EthernetTransmitStatus_Transmitted,
 
-    /*! The transmit request was rejected, because the Ethernet controller is not active.
-    */
+    //! The transmit request was rejected, because the Ethernet controller is not active.
     ControllerInactive = SilKit_EthernetTransmitStatus_ControllerInactive,
 
-    /*! The transmit request was rejected, because the Ethernet link is down.
-    */
+    //! The transmit request was rejected, because the Ethernet link is down.
     LinkDown = SilKit_EthernetTransmitStatus_LinkDown,
 
-    /*! The transmit request was dropped, because the transmit queue is full.
-    */
+    //! The transmit request was dropped, because the transmit queue is full.
     Dropped = SilKit_EthernetTransmitStatus_Dropped,
 
-    /*! (currently not in use)
-     *
-     * The transmit request was rejected, because there is already another request with the same transmitId.
-    */
-    DuplicatedTransmitId = SilKit_EthernetTransmitStatus_DuplicatedTransmitId,
-
-    /*! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, wrong order of VLAN tags).
-    */
+    //! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, wrong order of VLAN tags).
     InvalidFrameFormat = SilKit_EthernetTransmitStatus_InvalidFrameFormat,
 };
 
@@ -100,11 +86,14 @@ struct EthernetFrameTransmitEvent
 };
 
 //! \brief State of the Ethernet controller
-enum class EthernetState : uint8_t
+enum class EthernetState : SilKit_EthernetState
 {
-    Inactive = 0, //!< The Ethernet controller is switched off (default after reset).
-    LinkDown = 1, //!< The Ethernet controller is active, but a link to another Ethernet controller in not yet established.
-    LinkUp = 2, //!< The Ethernet controller is active and the link to another Ethernet controller is established.
+    //! The Ethernet controller is switched off (default after reset).
+    Inactive = SilKit_EthernetState_Inactive,
+    //! The Ethernet controller is active, but a link to another Ethernet controller in not yet established.
+    LinkDown = SilKit_EthernetState_LinkDown,
+    //! The Ethernet controller is active and the link to another Ethernet controller is established.
+    LinkUp = SilKit_EthernetState_LinkUp,
 };
 
 //! \brief A state change event of the Ethernet controller

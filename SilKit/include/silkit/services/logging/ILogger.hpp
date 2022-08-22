@@ -21,9 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <memory>
 #include <string>
-#include <functional>
 
 #include "LoggingDatatypes.hpp"
 
@@ -43,10 +41,8 @@ namespace Logging {
 class ILogger
 {
 public:
-    using LogMsgHandler = std::function<void(LogMsg)>;
-
-public:
     virtual ~ILogger() = default;
+
     /*! \brief Log a message with a specified level
     *
     * \param level The log level for the message
@@ -74,6 +70,7 @@ public:
 
     //! \brief Get the lowest configured log level of all sinks
     virtual Level GetLogLevel() const = 0;
+
 #ifdef HAVE_FMTLIB
     template<typename... Args>
     void Log(Level level, const char* fmt, const Args&... args)
@@ -118,6 +115,6 @@ public:
 #endif //HAVE_FMTLIB
 };
 
-} // logging
+} // namespace Logging
 } // namespace Services
 } // namespace SilKit

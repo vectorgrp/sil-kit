@@ -58,9 +58,6 @@ public:
     MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize),
                 (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
-    MOCK_METHOD(void, SetSimulationStepHandler,
-                (std::function<void(std::chrono::nanoseconds now)> task, std::chrono::nanoseconds initialStepSize),
-                (override));
     MOCK_METHOD(void, SetPeriod, (std::chrono::nanoseconds));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };

@@ -39,6 +39,7 @@ using namespace std::chrono_literals;
 
 // Field in a frame that can indicate the protocol, payload size, or the start of a VLAN tag
 using EtherType = uint16_t;
+using EthernetMac = std::array<uint8_t, 6>;
 
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
@@ -47,7 +48,7 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
     return out;
 }
 
-std::vector<uint8_t> CreateFrame(const Ethernet::EthernetMac& destinationAddress, const Ethernet::EthernetMac& sourceAddress,
+std::vector<uint8_t> CreateFrame(const EthernetMac& destinationAddress, const EthernetMac& sourceAddress,
                                  const std::vector<uint8_t>& payload)
 {
     const uint16_t etherType = 0x0000;  // no protocol
@@ -74,7 +75,7 @@ std::vector<uint8_t> CreateFrame(const Ethernet::EthernetMac& destinationAddress
 
 std::string GetPayloadStringFromFrame(const Ethernet::EthernetFrame& frame)
 {
-    const size_t FrameHeaderSize = 2 * sizeof(Ethernet::EthernetMac) + sizeof(EtherType);
+    const size_t FrameHeaderSize = 2 * sizeof(EthernetMac) + sizeof(EtherType);
 
     std::vector<uint8_t> payload;
     payload.insert(payload.end(), frame.raw.begin() + FrameHeaderSize, frame.raw.end());
@@ -107,9 +108,6 @@ void FrameTransmitHandler(Ethernet::IEthernetController* /*controller*/, const E
         case Ethernet::EthernetTransmitStatus::Dropped:
             std::cout << ": Dropped";
             break;
-        case Ethernet::EthernetTransmitStatus::DuplicatedTransmitId:
-            std::cout << ": DuplicatedTransmitId";
-            break;
         }
 
         std::cout << std::endl;
@@ -125,7 +123,7 @@ void FrameHandler(Ethernet::IEthernetController* /*controller*/, const Ethernet:
               << "\"" << std::endl;
 }
 
-void SendFrame(Ethernet::IEthernetController* controller, const Ethernet::EthernetMac& from, const Ethernet::EthernetMac& to)
+void SendFrame(Ethernet::IEthernetController* controller, const EthernetMac& from, const EthernetMac& to)
 {
     static int frameId = 0;
     std::stringstream stream;
@@ -149,8 +147,8 @@ void SendFrame(Ethernet::IEthernetController* controller, const Ethernet::Ethern
 
 int main(int argc, char** argv)
 {
-    SilKit::Services::Ethernet::EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
-    SilKit::Services::Ethernet::EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+    EthernetMac WriterMacAddr = {0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1};
+    EthernetMac BroadcastMacAddr = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
     if (argc < 3)
     {

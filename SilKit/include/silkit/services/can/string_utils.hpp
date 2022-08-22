@@ -105,8 +105,6 @@ std::string to_string(CanTransmitStatus status)
         return "Canceled";
     case CanTransmitStatus::TransmitQueueFull:
         return "TransmitQueueFull";
-    case CanTransmitStatus::DuplicatedTransmitId:
-        return "DuplicatedTransmitId";
     }
     throw SilKit::TypeConversionError{};
 }

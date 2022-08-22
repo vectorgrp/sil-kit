@@ -22,12 +22,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <memory>
-#include <functional>
 
 #include "silkit/SilKitMacros.hpp"
 #include "silkit/vendor/ISilKitRegistry.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
-
 
 namespace SilKit {
 namespace Vendor {
@@ -40,7 +38,6 @@ namespace Vector {
  *
  * \throws SilKit::SilKitError on error.
  */
-
 SilKitAPI auto CreateSilKitRegistry(std::shared_ptr<Config::IParticipantConfiguration> config)
     -> std::unique_ptr<ISilKitRegistry>;
 

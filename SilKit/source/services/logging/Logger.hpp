@@ -39,8 +39,13 @@ namespace SilKit {
 namespace Services {
 namespace Logging {
 
+struct LogMsg;
+
 class Logger : public ILogger
 {
+public:
+    using LogMsgHandler = std::function<void(LogMsg)>;
+
 public:
     // ----------------------------------------
     // Constructors and Destructor
@@ -69,6 +74,7 @@ public:
     void LogReceivedMsg(const LogMsg& msg);
 
     Level GetLogLevel() const override;
+
 private:
     // ----------------------------------------
     // Private members

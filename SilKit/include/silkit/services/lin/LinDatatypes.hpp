@@ -28,6 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/datatypes.hpp"
 #include "silkit/util/Span.hpp"
 
+#include "silkit/capi/Lin.h"
+
 namespace SilKit {
 namespace Services {
 namespace Lin {
@@ -38,7 +40,7 @@ namespace Lin {
  *
  * *Range:* 0...0x3F
  */
-using LinId = uint8_t;
+using LinId = SilKit_LinId;
 
 /*! \brief The checksum model of a LIN \ref SilKit::Services::Lin::LinFrame
  *
@@ -46,11 +48,14 @@ using LinId = uint8_t;
  *
  * *AUTOSAR Name:* Lin_FrameCsModelType 
  */
-enum class LinChecksumModel : uint8_t
+enum class LinChecksumModel : SilKit_LinChecksumModel
 {
-    Unknown = 0,  //!< Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
-    Enhanced = 1, //!< Enhanced checksum model
-    Classic = 2   //!< Classic checksum model 
+    //! Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
+    Unknown = SilKit_LinChecksumModel_Undefined,
+    //! Enhanced checksum model
+    Enhanced = SilKit_LinChecksumModel_Enhanced,
+    //! Classic checksum model
+    Classic = SilKit_LinChecksumModel_Classic,
 };
 
 /*! \brief The data length of a LIN \ref LinFrame in bytes
@@ -61,10 +66,10 @@ enum class LinChecksumModel : uint8_t
  *
  * *Range:* 0...8
  */
-using LinDataLength = uint8_t;
+using LinDataLength = SilKit_LinDataLength;
 
 //! \brief If configured with this value, the data length of the first reception will be used.
-const LinDataLength LinDataLengthUnknown = 255u;
+const LinDataLength LinDataLengthUnknown = SilKit_LinDataLengthUnknown;
 
 /*! \brief A LIN LinFrame
  *
@@ -91,34 +96,34 @@ inline auto GoToSleepFrame() -> LinFrame;
  *
  * *AUTOSAR Name:* Lin_FrameResponseType
  */ 
-enum class LinFrameResponseType : uint8_t
+enum class LinFrameResponseType : SilKit_LinFrameResponseType
 {
     //! Response is generated from this master node 
-    MasterResponse = 0,
+    MasterResponse = SilKit_LinFrameResponseType_MasterResponse,
     
     //! Response is generated from a remote slave node
-    SlaveResponse = 1,
+    SlaveResponse = SilKit_LinFrameResponseType_SlaveResponse,
     
     /*! Response is generated from one slave to and received by
      *  another slave, for the master the response will be anonymous,
      *  it does not have to receive the response.
      */
-    SlaveToSlave = 2
+    SlaveToSlave = SilKit_LinFrameResponseType_SlaveToSlave
 };
 
 //! \brief Controls the behavior of a LIN Slave task for a particular LIN ID
-enum class LinFrameResponseMode : uint8_t
+enum class LinFrameResponseMode : SilKit_LinFrameResponseMode
 {
     //! The LinFrameResponse corresponding to the ID is neither received nor
     //! transmitted by the LIN slave.
-    Unused = 0,
+    Unused = SilKit_LinFrameResponseMode_Unused,
 
     //! The LinFrameResponse corresponding to the ID is received by the LIN slave.
-    Rx = 1,
+    Rx = SilKit_LinFrameResponseMode_Rx,
 
     //! The LinFrameResponse corresponding to the ID is transmitted unconditionally
     //! by the LIN slave.
-    TxUnconditional = 2
+    TxUnconditional = SilKit_LinFrameResponseMode_TxUnconditional,
 };
 
 /*! \brief Configuration data for a LIN Slave task for a particular LIN ID.
@@ -145,25 +150,25 @@ struct LinFrameResponse
  * *AUTOSAR Doc:* LIN operation states for a LIN channel or frame, as returned by the API service Lin_GetStatus().
  *
  */
-enum class LinFrameStatus : uint8_t
+enum class LinFrameStatus : SilKit_LinFrameStatus
 {
     /*! (currently not in use)
      *
      * *AUROSAR Doc:* Development or production error occurred
      */
-    NOT_OK = 0,
+    NOT_OK = SilKit_LinFrameStatus_NOT_OK,
 
     /*! The controller successfully transmitted a frame response.
      *
      * *AUTOSAR Doc:* Successful transmission.
      */
-    LIN_TX_OK = 1,
+    LIN_TX_OK = SilKit_LinFrameStatus_LIN_TX_OK,
 
     /*! (currently not in use)
      *
      * *AUTOSAR Doc:* Ongoing transmission (Header or Response). 
      */
-    LIN_TX_BUSY = 2,
+    LIN_TX_BUSY = SilKit_LinFrameStatus_LIN_TX_BUSY,
 
     /*! (currently not in use)
      *
@@ -173,7 +178,7 @@ enum class LinFrameStatus : uint8_t
      *  Identifier parity error, or 
      *  Physical bus error 
      */
-    LIN_TX_HEADER_ERROR = 3,
+    LIN_TX_HEADER_ERROR = SilKit_LinFrameStatus_LIN_TX_HEADER_ERROR,
 
     /*! (currently not in use)
      *
@@ -182,20 +187,20 @@ enum class LinFrameStatus : uint8_t
      *  Mismatch between sent and read back data,
      *  Physical bus error 
      */
-    LIN_TX_ERROR = 4,
+    LIN_TX_ERROR = SilKit_LinFrameStatus_LIN_TX_ERROR,
 
     /*! The controller received a correct frame response.
      *
      * *AUTOSAR Doc:* Reception of correct response.
      */
-    LIN_RX_OK = 5,
+    LIN_RX_OK = SilKit_LinFrameStatus_LIN_RX_OK,
 
     /*! (currently not in use)
      * 
      * *AUTOSAR Doc:* Ongoing reception: at least one response byte has been
      *  received, but the checksum byte has not been received.
      */
-    LIN_RX_BUSY = 6,
+    LIN_RX_BUSY = SilKit_LinFrameStatus_LIN_RX_BUSY,
 
     /*! The reception of a response failed.
      *
@@ -211,36 +216,36 @@ enum class LinFrameStatus : uint8_t
      *  Checksum error, or
      *  Short response 
      */
-    LIN_RX_ERROR = 7,
+    LIN_RX_ERROR = SilKit_LinFrameStatus_LIN_RX_ERROR,
 
     /*! No LIN controller did provide a response to the frame header.
      *
      * *AUTOSAR Doc:* No response byte has been received so far. 
      */
-    LIN_RX_NO_RESPONSE = 8
+    LIN_RX_NO_RESPONSE = SilKit_LinFrameStatus_LIN_RX_NO_RESPONSE,
 };
 
 /*! Used to configure a LIN controller as a master or slave.
  *
  *  Cf. \ref LinControllerConfig, \ref ILinController::Init()
  */
-enum class LinControllerMode : uint8_t
+enum class LinControllerMode : SilKit_LinControllerMode
 {
     /*! The LIN controller has not been configured yet and is
      *  inactive. This does not indicate sleep mode.
      */
-    Inactive = 0,
+    Inactive = SilKit_LinControllerMode_Inactive,
     //! A LIN controller with active master task and slave task
-    Master = 1,
+    Master = SilKit_LinControllerMode_Master,
     //! A LIN controller with only a slave task
-    Slave = 2
+    Slave = SilKit_LinControllerMode_Slave,
 };
 
 /*! The operational baud rate of the controller.
  *
  * *Range:* 200...20'000 Bd
  */
-using LinBaudRate = uint32_t;
+using LinBaudRate = SilKit_LinBaudRate;
 
 /*! Configuration data to initialize the LIN Controller
  *  Cf.: \ref ILinController::Init(LinControllerConfig config);
@@ -264,23 +269,23 @@ struct LinControllerConfig
 /*! The operational state of the controller, i.e., operational or
  *  sleeping.
  */
-enum class LinControllerStatus
+enum class LinControllerStatus : SilKit_LinControllerStatus
 {
     //! The controller state is not yet known.
-    Unknown = 0,
+    Unknown = SilKit_LinControllerStatus_Unknown,
 
     //! Normal operation
-    Operational = 1,
+    Operational = SilKit_LinControllerStatus_Operational,
 
     //! Sleep state operation; in this state wake-up detection from slave nodes
     //  is enabled.
-    Sleep = 2,
+    Sleep = SilKit_LinControllerStatus_Sleep,
 
     //! Sleep pending state is reached when a GoToSleep is issued.
     //  This allows the network simulator to finish pending transmissions (e.g., sleep frames to slaves)
     //  before entering state Sleep, cf. AUTOSAR SWS LINDriver [SWS_LIN_00266] and section 7.3.3.
     //  This is only used when using detailed simulations with a network simulator.
-    SleepPending = 3,
+    SleepPending = SilKit_LinControllerStatus_SleepPending,
 };
 
 //! \brief A LIN frame status event delivered in the \ref ILinController::FrameStatusHandler.

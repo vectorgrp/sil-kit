@@ -23,4 +23,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "PubSubSpec.hpp"
 #include "IDataPublisher.hpp"
 #include "IDataSubscriber.hpp"
-#include "string_utils.hpp"

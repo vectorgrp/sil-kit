@@ -64,8 +64,6 @@ public:
     void Warn(const std::string& /*msg*/) override {}
     void Error(const std::string& /*msg*/) override {}
     void Critical(const std::string& /*msg*/) override {}
-    void RegisterRemoteLogging(const LogMsgHandler& /*handler*/) {}
-    void LogReceivedMsg(const Services::Logging::LogMsg& /*msg*/) {}
     Services::Logging::Level GetLogLevel() const override { return Services::Logging::Level::Debug; }
 };
 
@@ -100,9 +98,6 @@ public:
     MOCK_METHOD(void, SetSimulationStepHandlerAsync, (SimulationStepHandler task, std::chrono::nanoseconds initialStepSize),
                 (override));
     MOCK_METHOD(void, CompleteSimulationStep, (), (override));
-    MOCK_METHOD(void, SetSimulationStepHandler,
-                (std::function<void(std::chrono::nanoseconds now)>, std::chrono::nanoseconds initialStepSize),
-                (override));
     MOCK_METHOD(std::chrono::nanoseconds, Now, (), (override, const));
 };
 

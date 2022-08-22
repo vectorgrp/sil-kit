@@ -70,11 +70,10 @@ target_include_directories(SilKitMwLogging
 target_link_libraries(SilKitMwLogging
     PUBLIC SilKitInterface
     PUBLIC SilKitInternal
-    PRIVATE spdlog
-    PRIVATE SilKitMwSync
+    PUBLIC SilKitConfiguration
     PUBLIC SilKitMwService
-    INTERFACE SilKitConfiguration
-    PRIVATE SilKitConfiguration
+
+    PRIVATE spdlog
 )
 
 if(UNIX)

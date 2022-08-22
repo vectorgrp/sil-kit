@@ -65,7 +65,7 @@ TEST(ITest_AsyncSimTask, DISABLED_test_async_simtask_lockstep)
     auto* asyncParticipant = testHarness.GetParticipant("Async");
     auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
 
-    sync->SetSimulationStepHandler([&numSyncSimtasks](auto) {
+    sync->SetSimulationStepHandler([&numSyncSimtasks](auto, std::chrono::nanoseconds /*duration*/) {
         // run as fast as possible
         numSyncSimtasks++;
     }, 1ms);
@@ -157,7 +157,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
     auto* asyncParticipant = testHarness.GetParticipant("Async");
     auto* async = testHarness.GetParticipant("Async")->GetOrCreateTimeSyncService();
 
-    sync->SetSimulationStepHandler([&syncTimeNs](auto now) {
+    sync->SetSimulationStepHandler([&syncTimeNs](auto now, std::chrono::nanoseconds /*duration*/) {
         std::cout << "Sync SimTask now=" << now.count() << std::endl;
         syncTimeNs = now;
     }, 1ms);
@@ -202,7 +202,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_different_periods)
     int countSync = 0;
     int countAsync = 0;
 
-    sync->SetSimulationStepHandler([&syncTime, &countSync](auto now) {
+    sync->SetSimulationStepHandler([&syncTime, &countSync](auto now, std::chrono::nanoseconds /*duration*/) {
         syncTime = now;
         countSync++;
     }, 1ms);
@@ -238,7 +238,7 @@ TEST(ITest_AsyncSimTask, test_async_simtask_multiple_completion_calls)
     int countSync = 0;
     int countAsync = 0;
 
-    sync->SetSimulationStepHandler([&syncTime, &countSync](auto now) {
+    sync->SetSimulationStepHandler([&syncTime, &countSync](auto now, std::chrono::nanoseconds /*duration*/) {
         ASSERT_TRUE(now - syncTime == 1ms);
         syncTime = now;
         countSync++;

@@ -193,7 +193,6 @@ Data Structures
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. doxygentypedef:: SilKit::Services::Ethernet::EthernetMac
 .. doxygentypedef:: SilKit::Services::Ethernet::EthernetBitrate
 .. doxygenenum:: SilKit::Services::Ethernet::EthernetTransmitStatus
 .. doxygenenum:: SilKit::Services::Ethernet::EthernetState

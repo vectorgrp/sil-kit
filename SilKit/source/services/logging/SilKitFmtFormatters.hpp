@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "string_utils_sync.hpp"
 #include "ServiceDatatypes.hpp"
+#include "LoggingDatatypesInternal.hpp"
 
 #include "WireCanMessages.hpp"
 #include "WireEthernetMessages.hpp"
@@ -67,6 +68,7 @@ static constexpr bool is_printable_silkit_type_v = is_printable_silkit_type<T>::
 template<class T>
 struct is_printable_silkit_type<T, std::enable_if_t<is_one_of_v<T, 
         SilKit::Services::Logging::LogMsg,
+        SilKit::Services::Logging::SourceLoc,
         SilKit::Services::Orchestration::NextSimTask,
         SilKit::Services::Orchestration::SystemCommand,
         SilKit::Services::Orchestration::ParticipantStatus,

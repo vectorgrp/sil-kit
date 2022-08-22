@@ -22,29 +22,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <functional>
-#include <map>
 #include <chrono>
-#include <string>
-#include <vector>
 
 #include <cstdint>
 
+#include "fwd_decl.hpp"
+
 #include "silkit/util/Span.hpp"
+
+#include "silkit/capi/Rpc.h"
 
 namespace SilKit {
 namespace Services {
 namespace Rpc {
 
-class IRpcClient;
-class IRpcServer;
-class IRpcCallHandle;
-
-enum class RpcCallStatus : uint8_t
+enum class RpcCallStatus : SilKit_RpcCallStatus
 {
-    Success,
-    ServerNotReachable,
-    UndefinedError,
-    InternalServerError,
+    Success = SilKit_RpcCallStatus_Success,
+    ServerNotReachable = SilKit_RpcCallStatus_ServerNotReachable,
+    UndefinedError = SilKit_RpcCallStatus_UndefinedError,
+    InternalServerError = SilKit_RpcCallStatus_InternalServerError,
 };
 
 //! \brief An incoming rpc call from a RpcClient with call data and timestamp

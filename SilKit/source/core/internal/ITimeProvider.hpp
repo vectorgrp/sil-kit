@@ -25,7 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <functional>
 
-#include "silkit/util/HandlerId.hpp"
+#include "silkit/services/datatypes.hpp"
 
 namespace SilKit {
 namespace Services {

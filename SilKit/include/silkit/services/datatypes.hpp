@@ -24,6 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cstdint>
 #include <string>
 
+#include "silkit/util/HandlerId.hpp"
+
 namespace SilKit {
 namespace Services {
 
@@ -60,6 +62,8 @@ struct MatchingLabel
     std::string value; //!< The label's key.
     Kind kind; //!< The matching kind to apply for this label.
 };
+
+using SilKit::Util::HandlerId;
 
 } // namespace Services
 } // namespace SilKit

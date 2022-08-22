@@ -70,22 +70,28 @@ typedef struct SilKit_CanFrameEvent SilKit_CanFrameEvent;
 
 
 typedef int32_t SilKit_CanTransmitStatus;
+
 /*! The message was successfully transmitted on the CAN bus.
 */
-#define SilKit_CanTransmitStatus_Transmitted          ((SilKit_CanTransmitStatus) 1)
+#define SilKit_CanTransmitStatus_Transmitted          ((SilKit_CanTransmitStatus) BIT(0))
+
 /*! (currently not in use)
 *
 * The transmit queue was reset.
 */
-#define SilKit_CanTransmitStatus_Canceled             ((SilKit_CanTransmitStatus) 2)
+#define SilKit_CanTransmitStatus_Canceled             ((SilKit_CanTransmitStatus) BIT(1))
+
 /*! The transmit request was rejected, because the transmit queue is full.
 */
-#define SilKit_CanTransmitStatus_TransmitQueueFull    ((SilKit_CanTransmitStatus) 4)
-/*! (currently not in use)
-*
-* The transmit request was rejected, because there is already another request with the same transmitId.
-*/
-#define SilKit_CanTransmitStatus_DuplicatedTransmitId ((SilKit_CanTransmitStatus) 8)
+#define SilKit_CanTransmitStatus_TransmitQueueFull    ((SilKit_CanTransmitStatus) BIT(2))
+
+/* (SilKit_CanTransmitStatus) BIT(3) is RESERVED (used to be SilKit_CanTransmitStatus_DuplicatedTransmitId) */
+
+/*! Combines all available transmit statuses.
+ */
+#define SilKit_CanTransmitStatus_DefaultMask \
+    (SilKit_CanTransmitStatus_Transmitted | SilKit_CanTransmitStatus_Canceled \
+     | SilKit_CanTransmitStatus_TransmitQueueFull)
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller
 */

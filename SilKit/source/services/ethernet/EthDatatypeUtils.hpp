@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
+#include <array>
+
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
 #include "WireEthernetMessages.hpp"
@@ -28,6 +30,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Services {
 namespace Ethernet {
+
+using EthernetMac = std::array<uint8_t, 6>;
 
 inline bool operator==(const EthernetFrame& lhs, const EthernetFrame& rhs)
 {

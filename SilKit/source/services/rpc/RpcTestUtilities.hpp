@@ -43,7 +43,7 @@ namespace Tests {
 struct MockConnection
 {
     MockConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
-                   SilKit::ParticipantId /*participantId*/,
+                   SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Services::Orchestration::ITimeProvider* /*timeProvider*/, SilKit::Core::ProtocolVersion)
     {
     }

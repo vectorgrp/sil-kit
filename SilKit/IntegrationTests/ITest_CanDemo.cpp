@@ -121,7 +121,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
       });
 
       timeSyncService->SetSimulationStepHandler(
-      [canController, state] (auto now) {
+      [canController, state] (auto now, std::chrono::nanoseconds /*duration*/) {
         //Cause transmit queue overrun
         if (now == 0ms)
         {
@@ -177,7 +177,7 @@ TEST_F(ITest_SimTestHarness, can_demo)
         canController->Start();
       });
 
-      timeSyncService->SetSimulationStepHandler([canController, state](auto now) {
+      timeSyncService->SetSimulationStepHandler([canController, state](auto now, std::chrono::nanoseconds /*duration*/) {
         state->receiveTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         //Cause a collision
         if (now == 10ms)

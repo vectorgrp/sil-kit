@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 
 #include "LinDatatypes.hpp"
-#include "silkit/util/HandlerId.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -126,7 +125,7 @@ public:
      */
     virtual void SendFrameHeader(LinId linId) = 0;
 
-    /*! \brief Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
+    /*! \brief Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID.
      * 
      * \param frame provides the LIN ID and data used for the update.
      * 
@@ -136,9 +135,9 @@ public:
     virtual void UpdateTxBuffer(LinFrame frame) = 0;
 
     /*! \brief Set a RX/TX configuration during operation.
-     * 
+     *
      * \param response The frame and response mode to be configured.
-     * 
+     *
      * \throws SilKit::StateError if the LIN Controller is not initialized.
      */
     virtual void SetFrameResponse(LinFrameResponse response) = 0;
@@ -182,7 +181,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameStatusHandler(FrameStatusHandler handler) = 0;
+    virtual auto AddFrameStatusHandler(FrameStatusHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a FrameStatusHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -206,7 +205,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddGoToSleepHandler(GoToSleepHandler handler) = 0;
+    virtual auto AddGoToSleepHandler(GoToSleepHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a GoToSleepHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -222,7 +221,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddWakeupHandler(WakeupHandler handler) = 0;
+    virtual auto AddWakeupHandler(WakeupHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a WakeupHandler by \ref SilKit::Util::HandlerId on this controller
      *

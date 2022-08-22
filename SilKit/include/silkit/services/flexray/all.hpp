@@ -21,4 +21,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "FlexrayDatatypes.hpp"
 #include "IFlexrayController.hpp"
-#include "string_utils.hpp"

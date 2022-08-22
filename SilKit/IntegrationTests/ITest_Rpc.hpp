@@ -454,13 +454,15 @@ protected:
                     {SilKit::Services::Orchestration::OperationMode::Coordinated});
                 auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-                timeSyncService->SetSimulationStepHandler([&participant](std::chrono::nanoseconds /*now*/) {
-                    for (const auto& client : participant.rpcClients)
-                    {
-                        client->Call();
-                    }
-                    participant.CheckAllCalledPromise();
-                }, 1s);
+                timeSyncService->SetSimulationStepHandler(
+                    [&participant](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
+                        for (const auto& client : participant.rpcClients)
+                        {
+                            client->Call();
+                        }
+                        participant.CheckAllCalledPromise();
+                    },
+                    1s);
                 auto finalStateFuture = lifecycleService->StartLifecycle();
                 finalStateFuture.get();
             }

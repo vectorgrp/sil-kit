@@ -122,7 +122,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameHandler(FrameHandler handler) = 0;
+    virtual auto AddFrameHandler(FrameHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -134,7 +134,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
+    virtual auto AddFrameTransmitHandler(FrameTransmitHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a FrameTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -146,7 +146,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddWakeupHandler(WakeupHandler handler) = 0;
+    virtual auto AddWakeupHandler(WakeupHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a WakeupHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -158,7 +158,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddPocStatusHandler(PocStatusHandler handler) = 0;
+    virtual auto AddPocStatusHandler(PocStatusHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a PocStatusHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -174,7 +174,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddSymbolHandler(SymbolHandler handler) = 0;
+    virtual auto AddSymbolHandler(SymbolHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a SymbolHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -191,7 +191,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddSymbolTransmitHandler(SymbolTransmitHandler handler) = 0;
+    virtual auto AddSymbolTransmitHandler(SymbolTransmitHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a SymbolTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -203,7 +203,7 @@ public:
      *
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddCycleStartHandler(CycleStartHandler handler) = 0;
+    virtual auto AddCycleStartHandler(CycleStartHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a CycleStartHandler by \ref SilKit::Util::HandlerId on this controller
      *

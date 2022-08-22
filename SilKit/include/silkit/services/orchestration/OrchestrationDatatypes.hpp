@@ -25,15 +25,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <vector>
 
+#include "silkit/services/datatypes.hpp"
+
 #include "silkit/capi/Orchestration.h"
 
 namespace SilKit {
-    
-/*! \brief Deprecated identifier for SIL Kit participants
- * Will be fully replaced by participant name in future versions. 
-*/
-using ParticipantId = uint64_t;
-
 namespace Services {
 namespace Orchestration {
 

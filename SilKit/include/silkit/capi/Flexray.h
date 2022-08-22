@@ -339,14 +339,6 @@ typedef uint8_t SilKit_FlexrayChiCommand;
 #define SilKit_FlexrayChiCommand_ALL_SLOTS       ((SilKit_FlexrayChiCommand)0x04)
 #define SilKit_FlexrayChiCommand_WAKEUP          ((SilKit_FlexrayChiCommand)0x05)
 
-struct SilKit_FlexrayHostCommand
-{
-    //! The interface id specifying which version of this struct was obtained
-    SilKit_StructHeader structHeader;
-
-    SilKit_FlexrayChiCommand command;
-};
-
 typedef uint8_t SilKit_FlexrayHeader_Flag;
 #define SilKit_FlexrayHeader_SuFIndicator ((SilKit_FlexrayHeader_Flag)0x01)
 #define SilKit_FlexrayHeader_SyFIndicator ((SilKit_FlexrayHeader_Flag)0x02)

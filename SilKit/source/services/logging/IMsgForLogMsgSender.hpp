@@ -21,8 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/logging/LoggingDatatypes.hpp"
-
+#include "LoggingDatatypesInternal.hpp"
 #include "IReceiver.hpp"
 #include "ISender.hpp"
 

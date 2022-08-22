@@ -426,7 +426,7 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
     auto network = to_string(Util::Uuid::GenerateRandom());
 
     SilKit::Config::RpcClient controllerConfig = GetConfigByControllerName(_participantConfig.rpcClients, canonicalName);
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.Topic());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
 
     // RpcClient gets discovered by RpcServer which creates RpcServerInternal on a matching connection
     Core::SupplementalData supplementalData;
@@ -464,7 +464,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
     auto network = "default";
 
     SilKit::Config::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
-    UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.Topic());
+    UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
 	
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;

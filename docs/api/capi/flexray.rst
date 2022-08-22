@@ -60,8 +60,6 @@ Data Structures
    :members:
 .. doxygenstruct:: SilKit_FlexrayTxBufferUpdate
    :members:
-.. doxygenstruct:: SilKit_FlexrayHostCommand
-   :members:
 .. doxygenstruct:: SilKit_FlexrayHeader
    :members:
 .. doxygenstruct:: SilKit_FlexrayFrame

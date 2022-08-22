@@ -164,7 +164,7 @@ protected:
                 });
 
             timeSyncService->SetSimulationStepHandler(
-                [&participant, this](std::chrono::nanoseconds now) {
+                [&participant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     participant.publisher->Publish(std::vector<uint8_t>{participant.id});
                     if (!participant.simtimePassed && now > simtimeToPass)
                     {

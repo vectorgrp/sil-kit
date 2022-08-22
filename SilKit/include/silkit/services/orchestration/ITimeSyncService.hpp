@@ -22,8 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <functional>
-#include <future>
-#include <string>
 
 #include "OrchestrationDatatypes.hpp"
 
@@ -35,8 +33,10 @@ class ITimeSyncService
 {
 public:
     using SimulationStepHandler = std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)>;
+
 public:
     virtual ~ITimeSyncService() = default;
+
 public:
     /*! \brief Set the task to be executed with each grant / tick
      *
@@ -62,11 +62,6 @@ public:
      * Otherwise, undefined runtime behavior will result.
      */
     virtual void CompleteSimulationStep() = 0;
-
-    //[[deprecated]]
-    virtual void SetSimulationStepHandler(std::function<void(std::chrono::nanoseconds now)> task,
-                                          std::chrono::nanoseconds initialStepSize) = 0;
-
 
     /*! \brief Get the current simulation time
      */

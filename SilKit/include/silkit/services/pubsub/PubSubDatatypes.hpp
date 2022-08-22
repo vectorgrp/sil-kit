@@ -22,10 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <cstdint>
-#include <functional>
-#include <map>
-#include <string>
 #include <chrono>
+#include <functional>
 
 #include "fwd_decl.hpp"
 
@@ -34,9 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Services {
 namespace PubSub {
-
-class IDataSubscriber;
-class IDataPublisher; 
 
 //! \brief An incoming DataMessage of a DataPublisher containing raw data and timestamp
 struct DataMessageEvent

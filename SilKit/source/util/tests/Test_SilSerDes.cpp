@@ -21,8 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "gtest/gtest.h"
 
-#include "silkit/util/serdes/sil/Serializer.hpp"
-#include "silkit/util/serdes/sil/Deserializer.hpp"
+#include "silkit/util/serdes/Serializer.hpp"
+#include "silkit/util/serdes/Deserializer.hpp"
 using namespace SilKit::Util::SerDes;
 
 namespace {

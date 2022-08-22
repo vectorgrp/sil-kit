@@ -57,19 +57,15 @@ target_include_directories(SilKitMwSync
 )
 
 target_link_libraries(SilKitMwSync
-    PUBLIC 
+    PUBLIC
         SilKitInterface
         SilKitUtil
         SilKitSetThreadName
         SilKitInternal
-    PRIVATE 
-        SilKitInternal
+        SilKitConfiguration
+    PRIVATE
         SilKitMwLogging
-        SilKitConfiguration
         SilKitExperimental
-    INTERFACE
-        SilKitInternal
-        SilKitConfiguration
 )
 
 add_silkit_test(Test_MwLifecycleService

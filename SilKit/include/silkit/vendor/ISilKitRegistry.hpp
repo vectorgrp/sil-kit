@@ -18,9 +18,9 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #pragma once
 
-#include <cstdint>
 #include <functional>
 
 #include "silkit/services/logging/fwd_decl.hpp"
@@ -30,7 +30,6 @@ namespace Vendor {
 namespace Vector {
 
 //! \brief Dedicated SIL Kit registry for the Vector SIL Kit middleware.
-//         This is a loadable runtime extension that is non-redistributable.
 class ISilKitRegistry
 {
 public:

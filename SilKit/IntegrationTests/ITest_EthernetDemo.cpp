@@ -108,7 +108,7 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
 
 
         timeSyncService->SetSimulationStepHandler(
-          [ethernetController, &sendCount, &frame](auto now) {
+          [ethernetController, &sendCount, &frame](auto now, std::chrono::nanoseconds /*duration*/) {
             // Send while link is down
             if (now == 10ms)
             {
@@ -145,7 +145,7 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
         auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController2", "ETH1");
 
-        timeSyncService->SetSimulationStepHandler([&](auto now) {
+        timeSyncService->SetSimulationStepHandler([&](auto now, std::chrono::nanoseconds /*duration*/) {
           readerTime = std::chrono::duration_cast<std::chrono::milliseconds>(now);
         }, 1ms);
 

@@ -415,7 +415,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
         linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
 
         timeSyncService->SetSimulationStepHandler(
-            [master = master.get(), participantName](auto now) {
+            [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
                 master->doAction(now);
             }, 1ms);
         linNodes.emplace_back(std::move(master));
@@ -440,7 +440,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
         linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
 
         timeSyncService->SetSimulationStepHandler(
-            [slave = slave.get()](auto now) {
+            [slave = slave.get()](auto now, std::chrono::nanoseconds /*duration*/) {
                 slave->DoAction(now);
             }, 1ms);
         linNodes.emplace_back(std::move(slave));

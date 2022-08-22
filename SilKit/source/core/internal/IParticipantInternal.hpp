@@ -29,6 +29,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDatatypes.hpp"
+#include "OrchestrationDatatypes.hpp"
+#include "LoggingDatatypesInternal.hpp"
 #include "WireCanMessages.hpp"
 #include "WireDataMessages.hpp"
 #include "WireEthernetMessages.hpp"

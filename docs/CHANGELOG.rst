@@ -22,6 +22,14 @@ Added
       nodes  configured with `LinFrameResponseMode::RX` on that id. The first transmission will set the checksum model
       and / or data length.
 
+- Can
+
+  - Added ``SilKit_CanTransmitStatus_DefaultMask``.
+
+- Ethernet
+
+  - Added ``SilKit_EthernetTransmitStatus_DefaultMask``.
+
 Changed
 ~~~~~~~
 
@@ -34,7 +42,39 @@ Changed
       have been moved to the experimental namespace and now reside in  
       ``SilKit/include/silkit/experimental/services/lin/LinControllerExtensions.hpp``.
     - `LinChecksumModel::Undefined` is renamed to `LinChecksumModel::Unknown`.
-  
+
+- Utility
+
+  - Moved the headers from ``silkit/util/serdes/sil/*.hpp`` to ``silkit/util/serdes/*.hpp``.
+
+- Can
+
+  - Removed unused ``SilKit_CanTransmitStatus_DuplicatedTransmitId`` and ``SilKit::Services::Can::CanTransmitStatus::DuplicatedTransmitId`` enumerators.
+
+- Ethernet
+
+  - Removed unused ``SilKit_EthernetTransmitStatus_DuplicatedTransmitId`` and ``SilKit::Services::Ethernet::EthernetTransmitStatus::DuplicatedTransmitId`` enumerators.
+
+- FlexRay
+
+  - Renamed ``FlexrayHeader::HeaderFlag`` to ``FlexrayHeader::Flag`` and introduced ``FlexrayHeader::FlagMask``.
+
+- RPC
+
+  - Renamed ``RpcSpec::Topic`` to ``RpcSpec::FunctionName``.
+  - Renamed enumerators ``SilKit_CallStatus_UPPER_SNAKE_CASE`` to ``SilKit_RpcCallStatus_PascalCase``.
+
+Removed
+~~~~~~~
+
+- Orchestration
+
+  - Removed the deprecated ``ITimeSyncService::SetSimulationStepHandler`` handler which took a handler function without the ``duration`` argument.
+
+- FlexRay
+
+  - Removed the convenience functions ``FlexrayHeader::IsSet``, ``FlexrayHeader::Clear``, and ``FlexrayHeader::Set``.
+
 Fixed
 ~~~~~
 

@@ -27,6 +27,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
+/*! \brief Deprecated identifier for SIL Kit participants
+ * Will be fully replaced by participant name in future versions.
+*/
+using ParticipantId = uint64_t;
+
 /*! \brief Participant specific identifier for its communication endpoints.
  *
  *   One SIL Kit participant can have multiple communication objects,

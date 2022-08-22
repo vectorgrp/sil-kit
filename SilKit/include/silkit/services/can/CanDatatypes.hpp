@@ -23,18 +23,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <chrono>
 
-#include "silkit/capi/Can.h"
 #include "silkit/services/datatypes.hpp"
 #include "silkit/util/Span.hpp"
+
+#include "silkit/capi/Can.h"
 
 // ================================================================================
 //  CAN specific data types
 // ================================================================================
+
 namespace SilKit {
 namespace Services {
 namespace Can {
 
-using CanFrameFlagMask = uint32_t;
+using CanFrameFlagMask = SilKit_CanFrameFlag;
 
 enum class CanFrameFlag : CanFrameFlagMask
 {
@@ -76,76 +78,61 @@ struct CanFrameEvent
 
 /*! \brief CAN Controller state according to AUTOSAR specification AUTOSAR_SWS_CANDriver 4.3.1
  */
-enum class CanControllerState : uint8_t
+enum class CanControllerState : SilKit_CanControllerState
 {
-  /*! CAN controller is not initialized (initial state after reset).
-  */
-  Uninit = 0,
+  //! CAN controller is not initialized (initial state after reset).
+  Uninit = SilKit_CanControllerState_Uninit,
 
-  /*! CAN controller is initialized but does not participate on the CAN bus.
-  */
-  Stopped = 1,
+  //! CAN controller is initialized but does not participate on the CAN bus.
+  Stopped = SilKit_CanControllerState_Stopped,
 
-  /*! CAN controller is in normal operation mode.
-  */
-  Started = 2,
+  //! CAN controller is in normal operation mode.
+  Started = SilKit_CanControllerState_Started,
 
-  /*! CAN controller is in sleep mode which is similar to the Stopped state.
-  */
-  Sleep = 3,
+  //! CAN controller is in sleep mode which is similar to the Stopped state.
+  Sleep = SilKit_CanControllerState_Sleep,
 };
 
 
 /*! \brief Error state of a CAN node according to CAN specification.
  */
-enum class CanErrorState : uint8_t
+enum class CanErrorState : SilKit_CanErrorState
 {
   /*! Error State is Not Available, because CAN controller is in state Uninit.
   *
   * *AUTOSAR Doc:* Successful transmission.
   */
-  NotAvailable = 0,
+  NotAvailable = SilKit_CanErrorState_NotAvailable,
 
   /*! Error Active Mode, the CAN controller is allowed to send messages and active error flags.
   */
-  ErrorActive = 1,
+  ErrorActive = SilKit_CanErrorState_ErrorActive,
 
   /*! Error Passive Mode, the CAN controller is still allowed to send messages, but must not send active error flags.
   */
-  ErrorPassive = 2,
+  ErrorPassive = SilKit_CanErrorState_ErrorPassive,
 
   /*! (currently not in use)
    *
    * *AUTOSAR Doc:* Bus Off Mode, the CAN controller does not take part in communication.
   */
-  BusOff = 3,
+  BusOff = SilKit_CanErrorState_BusOff,
 };
 
-using  CanTransmitStatusMask = uint16_t;
+using CanTransmitStatusMask = SilKit_CanTransmitStatus;
 
 /*! \brief Transfer status of a CAN node according to CAN specification
  */
 enum class CanTransmitStatus : CanTransmitStatusMask
 {
-    /*! The message was successfully transmitted on the CAN bus.
-    */
-    Transmitted = (CanTransmitStatusMask)(1 << 0),
+    //! The message was successfully transmitted on the CAN bus.
+    Transmitted = SilKit_CanTransmitStatus_Transmitted,
 
-    /*! (currently not in use)
-     *
-     * The transmit queue was reset.
-    */
-    Canceled = (CanTransmitStatusMask)(1 << 1),
+    //! The transmit queue was reset. (currently not in use)
+    Canceled = SilKit_CanTransmitStatus_Canceled,
 
-    /*! The transmit request was rejected, because the transmit queue is full.
-    */
-    TransmitQueueFull = (CanTransmitStatusMask)(1 << 2),
-
-    /*! (currently not in use)
-     *
-     * The transmit request was rejected, because there is already another request with the same transmitId.
-    */
-    DuplicatedTransmitId = (CanTransmitStatusMask)(1 << 3)
+    //! The transmit request was rejected, because the transmit queue is full.
+    TransmitQueueFull = SilKit_CanTransmitStatus_TransmitQueueFull,
 };
 
 /*! \brief The acknowledgment of a CAN message, sent to the controller

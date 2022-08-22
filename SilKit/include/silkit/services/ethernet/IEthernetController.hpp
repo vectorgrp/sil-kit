@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <functional>
 
 #include "EthernetDatatypes.hpp"
-#include "silkit/util/HandlerId.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -87,8 +86,8 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameHandler(
-        FrameHandler handler, DirectionMask directionMask = static_cast<DirectionMask>(TransmitDirection::RX)) = 0;
+    virtual auto AddFrameHandler(
+        FrameHandler handler, DirectionMask directionMask = static_cast<DirectionMask>(TransmitDirection::RX)) -> HandlerId = 0;
 
     /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -108,14 +107,9 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddFrameTransmitHandler(
-        FrameTransmitHandler handler,
-        EthernetTransmitStatusMask transmitStatusMask =
-            static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::Transmitted)
-            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::ControllerInactive)
-            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::LinkDown)
-            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::Dropped)
-            | static_cast<EthernetTransmitStatusMask>(EthernetTransmitStatus::InvalidFrameFormat)) = 0;
+    virtual auto AddFrameTransmitHandler(FrameTransmitHandler handler, EthernetTransmitStatusMask transmitStatusMask =
+                                                                           SilKit_EthernetTransmitStatus_DefaultMask)
+        -> HandlerId = 0;
 
     /*! \brief Remove a FrameTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -134,7 +128,7 @@ public:
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddStateChangeHandler(StateChangeHandler handler) = 0;
+    virtual auto AddStateChangeHandler(StateChangeHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a StateChangeHandler by \ref SilKit::Util::HandlerId on this controller
      *
@@ -150,7 +144,7 @@ public:
      *
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
-    virtual HandlerId AddBitrateChangeHandler(BitrateChangeHandler handler) = 0;
+    virtual auto AddBitrateChangeHandler(BitrateChangeHandler handler) -> HandlerId = 0;
 
     /*! \brief Remove a BitrateChangeHandler by \ref SilKit::Util::HandlerId on this controller
      *

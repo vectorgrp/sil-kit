@@ -49,8 +49,8 @@ public:
      * the individual endpointIds.
      */
     //! \brief Setter and getter for the ParticipantID associated with this ethernetsimulator
-    virtual void SetParticipantId(SilKit::ParticipantId participantId) = 0;
-    virtual auto GetParticipantId() const -> SilKit::ParticipantId = 0;
+    virtual void SetParticipantId(SilKit::Core::ParticipantId participantId) = 0;
+    virtual auto GetParticipantId() const -> SilKit::Core::ParticipantId = 0;
 };
 
 } // namespace Ethernet
