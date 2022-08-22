@@ -196,7 +196,7 @@ void CommunicationInitializingState::CommunicationInitializing(std::string reaso
 }
 
 void CommunicationInitializingState::AbortSimulation()
-
+{
     ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
 }
 
