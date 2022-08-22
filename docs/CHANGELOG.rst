@@ -5,6 +5,39 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.3] - 2022-08-22
+--------------------
+
+Added
+~~~~~
+
+- Lin
+  - ``SilKit/include/silkit/services/lin/ILinController.hpp``:
+    - The new method `SetFrameResponse` allows LIN nodes to adjust their LIN response configuration during operation
+     (i.e., after Init()). Calls to `SetFrameResponse` trigger the `LinSlaveConfigurationHandler` on the LIN master.
+    - The LIN types `LinChecksumModel::Unknown` and / or `LinDataLengthUnknown` now have wildcard functionality for
+      nodes  confgiured with `LinFrameResponseMode::RX` on that id. The first transmission will set the checksum model
+      and / or data length.
+
+Changed
+~~~~~~~
+
+- Lin
+  - ``SilKit/include/silkit/services/lin/ILinController.hpp``:
+    - The methods `AddLinSlaveConfigurationHandler`, `RemoveLinSlaveConfigurationHandler`, `GetSlaveConfiguration` and 
+      related data structures `LinSlaveConfigurationEvent`, `LinSlaveConfigurationHandler` and `LinSlaveConfiguration`
+      have been moved to the experimental namespace and now reside in  
+      ``SilKit/include/silkit/experimental/services/lin/LinControllerExtensions.hpp``.
+    - `LinChecksumModel::Undefined` is renamed to `LinChecksumModel::Unknown`.
+  
+
+Compatibility with 4.0.2
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: Yes
+
 [4.0.2] - 2022-08-15
 --------------------
 
