@@ -110,7 +110,7 @@ typedef struct SilKit_TimeSyncService SilKit_TimeSyncService;
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
                                                         SilKit_Participant* participant);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outCanController,
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outSystemMonitor,
                                                            SilKit_Participant* participant);
 
 //!< The LifecycleLifecycle options

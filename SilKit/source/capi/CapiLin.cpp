@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/lin/all.hpp"
 #include "silkit/services/lin/string_utils.hpp"
+#include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
 #include "CapiImpl.hpp"
 #include <cstring>
 
@@ -59,26 +60,14 @@ static void assign(SilKit::Services::Lin::LinControllerConfig& cppConfig, const 
 }
 
 // Assign the cppLinSlaveConfiguration to cLinSlaveConfiguration
-void assign(SilKit_LinSlaveConfiguration** cLinSlaveConfiguration,
-            const SilKit::Services::Lin::LinSlaveConfiguration& cppLinSlaveConfiguration)
+void assign(SilKit_Experimental_LinSlaveConfiguration** cLinSlaveConfiguration,
+            const SilKit::Experimental::Services::Lin::LinSlaveConfiguration& cppLinSlaveConfiguration)
 {
-    size_t numRespondingLinIds = cppLinSlaveConfiguration.respondingLinIds.size();
-    *cLinSlaveConfiguration = (SilKit_LinSlaveConfiguration*)malloc(sizeof(SilKit_LinSlaveConfiguration));
-    if (*cLinSlaveConfiguration != NULL)
+    memset((*cLinSlaveConfiguration)->isLinIdResponding, SilKit_False, 64);
+    for (auto&& linId : cppLinSlaveConfiguration.respondingLinIds)
     {
-        (*cLinSlaveConfiguration)->numRespondingLinIds = numRespondingLinIds;
-        (*cLinSlaveConfiguration)->respondingLinIds = (SilKit_LinId*)malloc(numRespondingLinIds * sizeof(SilKit_LinId));
-        if ((*cLinSlaveConfiguration)->respondingLinIds != NULL)
-        {
-            uint32_t i = 0;
-            for (auto&& linId : cppLinSlaveConfiguration.respondingLinIds)
-            {
-                //SilKit_Struct_Init(SilKit_LinSlaveConfiguration, (*cLinSlaveConfiguration)->respondingLinIds[i]);
-                (*cLinSlaveConfiguration)->respondingLinIds[i] = linId;
-                i++;
-            };
-        }
-    }
+        (*cLinSlaveConfiguration)->isLinIdResponding[linId] = SilKit_True;
+    };
 }
 
 extern "C" {
@@ -118,6 +107,25 @@ SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* con
     }
     CAPI_LEAVE
 }
+
+SilKit_ReturnCode SilKitCALL SilKit_LinController_SetFrameResponse(SilKit_LinController* controller,
+                                                                   const SilKit_LinFrameResponse* response)
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(response);
+    ASSERT_VALID_STRUCT_HEADER(response);
+    CAPI_ENTER
+    {
+        auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
+        auto cppFrameResponse = SilKit::Services::Lin::LinFrameResponse{};
+        assign(cppFrameResponse.frame, response->frame);
+        cppFrameResponse.responseMode = static_cast<SilKit::Services::Lin::LinFrameResponseMode>(response->responseMode);
+        linController->SetFrameResponse(cppFrameResponse);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_Status(SilKit_LinController* controller, SilKit_LinControllerStatus* outStatus)
 {
@@ -226,16 +234,17 @@ SilKit_ReturnCode SilKitCALL SilKit_LinController_WakeupInternal(SilKit_LinContr
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKitCALL SilKit_LinController_GetSlaveConfiguration(SilKit_LinController* controller,
-                                                             SilKit_LinSlaveConfiguration** outLinSlaveConfiguration)
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_GetSlaveConfiguration(SilKit_LinController* controller,
+                                                             SilKit_Experimental_LinSlaveConfiguration* outLinSlaveConfiguration)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_OUT_PARAMETER(outLinSlaveConfiguration);
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-        auto cppSlaveConfiguration = linController->GetSlaveConfiguration();
-        assign(outLinSlaveConfiguration, cppSlaveConfiguration);
+        auto cppSlaveConfiguration = SilKit::Experimental::Services::Lin::GetSlaveConfiguration(linController);
+        SilKit_Struct_Init(SilKit_Experimental_LinSlaveConfiguration, *outLinSlaveConfiguration);
+        assign(&outLinSlaveConfiguration, cppSlaveConfiguration);
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
@@ -354,9 +363,9 @@ SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveWakeupHandler(SilKit_Lin
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKitCALL SilKit_LinController_AddLinSlaveConfigurationHandler(SilKit_LinController* controller, void* context,
-                                                        SilKit_LinSlaveConfigurationHandler_t handler,
-                                                        SilKit_HandlerId* outHandlerId)
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(
+    SilKit_LinController* controller, void* context, SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
+    SilKit_HandlerId* outHandlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -364,11 +373,13 @@ SilKit_ReturnCode SilKitCALL SilKit_LinController_AddLinSlaveConfigurationHandle
     CAPI_ENTER
     {
         auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-        *outHandlerId = (SilKit_HandlerId)linController->AddLinSlaveConfigurationHandler(
-            [handler, context, controller](SilKit::Services::Lin::ILinController* /*ctrl*/,
-                                           const SilKit::Services::Lin::LinSlaveConfigurationEvent& cppLinSlaveConfigurationEvent) {
-                SilKit_LinSlaveConfigurationEvent slaveConfigurationEvent{};
-                SilKit_Struct_Init(SilKit_LinSlaveConfigurationEvent, slaveConfigurationEvent);
+        *outHandlerId = (SilKit_HandlerId)SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(
+            linController,
+            [handler, context, controller](
+                SilKit::Services::Lin::ILinController* /*ctrl*/,
+                const SilKit::Experimental::Services::Lin::LinSlaveConfigurationEvent& cppLinSlaveConfigurationEvent) {
+                SilKit_Experimental_LinSlaveConfigurationEvent slaveConfigurationEvent{};
+                SilKit_Struct_Init(SilKit_Experimental_LinSlaveConfigurationEvent, slaveConfigurationEvent);
                 slaveConfigurationEvent.timestamp =
                     (SilKit_NanosecondsTime)cppLinSlaveConfigurationEvent.timestamp.count();
                 handler(context, controller, &slaveConfigurationEvent);
@@ -378,13 +389,14 @@ SilKit_ReturnCode SilKitCALL SilKit_LinController_AddLinSlaveConfigurationHandle
     CAPI_LEAVE
 }
 
-SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     CAPI_ENTER
     {
         auto cppController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-        cppController->RemoveLinSlaveConfigurationHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+        SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(
+            cppController, static_cast<SilKit::Util::HandlerId>(handlerId));
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE

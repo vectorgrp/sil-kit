@@ -19,4 +19,23 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_subdirectory(participant)
+add_library(SilKitExperimental
+   participant/ParticipantExtensions.cpp
+   participant/ParticipantExtensions.hpp
+   services/lin/LinControllerExtensions.cpp
+   services/lin/LinControllerExtensions.hpp
+   )
+
+target_link_libraries(SilKitExperimental
+    INTERFACE SilKitInterface
+    PRIVATE 
+        SilKitInternal
+        SilKitSimLin
+        SilKitUtil
+)
+
+add_silkit_test(Test_Experimental
+    SOURCES participant/Test_Experimental.cpp 
+    LIBS SilKitMwMockNullConnection SilKitExperimental
+)
+

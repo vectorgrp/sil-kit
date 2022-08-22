@@ -18,6 +18,7 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 // ------------------------------------------------------------
 // Slave Setup (Sender)
 LinControllerConfig slaveConfig;
@@ -83,6 +84,6 @@ else
 }
 
 // In both cases (AUTOSAR and non-AUTOSAR), the following callbacks will be triggered:
-//  - LIN_TX_ERROR for the master and the slave as both provided a response for the same LIN ID.
+//  - LIN_TX_ERROR for the master and slave as both provided a response for the same LIN ID.
 master_FrameStatusHandler(master, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, LinFrameStatus::LIN_TX_ERROR });
 slave_FrameStatusHandler(slave, LinFrameStatusEvent{ timeEndOfFrame, masterFrame, LinFrameStatus::LIN_TX_ERROR });

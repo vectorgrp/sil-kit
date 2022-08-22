@@ -167,6 +167,9 @@ typedef uint8_t SilKit_LinFrameStatus;
  */
 typedef uint8_t SilKit_LinDataLength;
 
+//! \brief If configured with this value, the data length of the first reception will be used.
+const SilKit_LinDataLength SilKit_LinDataLengthUnknown = 255u;
+
 /*! \brief A LIN SilKit_LinFrame
  *
  * This Type is used to provide LIN ID, checksum model, data length and data.
@@ -212,12 +215,12 @@ struct SilKit_LinGoToSleepEvent
 typedef struct SilKit_LinGoToSleepEvent SilKit_LinGoToSleepEvent;
 
 //! \brief A LIN wakeup event delivered in the \ref SilKit_LinWakeupHandler_t.
-struct SilKit_LinSlaveConfigurationEvent
+struct SilKit_Experimental_LinSlaveConfigurationEvent
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
     SilKit_NanosecondsTime timestamp; //!< Time of the event.
 };
-typedef struct SilKit_LinSlaveConfigurationEvent SilKit_LinSlaveConfigurationEvent;
+typedef struct SilKit_Experimental_LinSlaveConfigurationEvent SilKit_Experimental_LinSlaveConfigurationEvent;
 
 /*! \brief Configuration data for a LIN Slave task for a particular LIN ID.
  */
@@ -258,13 +261,12 @@ typedef struct SilKit_LinControllerConfig SilKit_LinControllerConfig;
  * \param numRespondingLinIds The number of entries in respondingLinIds.
  * \param respondingLinIds An array of SilKit_LinId on which any LIN Slave has configured SilKit_LinFrameResponseMode_TxUnconditional
  */
-struct SilKit_LinSlaveConfiguration
+struct SilKit_Experimental_LinSlaveConfiguration
 {
     SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
-    size_t numRespondingLinIds; 
-    SilKit_LinId* respondingLinIds;
+    SilKit_Bool isLinIdResponding[64];
 };
-typedef struct SilKit_LinSlaveConfiguration SilKit_LinSlaveConfiguration;
+typedef struct SilKit_Experimental_LinSlaveConfiguration SilKit_Experimental_LinSlaveConfiguration;
 
 /*!
  * The LIN controller can assume the role of a LIN master or a LIN
@@ -309,10 +311,10 @@ typedef void (SilKitFPTR *SilKit_LinWakeupHandler_t)(void* context, SilKit_LinCo
                                        const SilKit_LinWakeupEvent* wakeUpEvent);
 
 /*! Callback type to indicate that a LIN Slave configuration has been received.
- *  Cf., \ref SilKit_LinController_AddLinSlaveConfigurationHandler;
+ *  Cf., \ref SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler;
  */
-typedef void (SilKitFPTR *SilKit_LinSlaveConfigurationHandler_t)(void* context, SilKit_LinController* controller,
-                                          const SilKit_LinSlaveConfigurationEvent* slaveConfigurationEvent);
+typedef void (SilKitFPTR *SilKit_Experimental_LinSlaveConfigurationHandler_t)(void* context, SilKit_LinController* controller,
+                                          const SilKit_Experimental_LinSlaveConfigurationEvent* slaveConfigurationEvent);
 
 
 /*! \brief Create a LIN controller at this SIL Kit simulation participant.
@@ -359,6 +361,19 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Create_t)(
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Init_t)(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
+
+/*! \brief Set a RX/TX configuration during operation.
+ * 
+ * \param controller The LIN controller to set the configuration.
+ * \param response The frame and response mode to be configured.
+ * 
+ * \throws SilKit::StateError if the LIN Controller is not initialized.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SetFrameResponse(SilKit_LinController* controller,
+                                                                             const SilKit_LinFrameResponse* response);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_SetFrameResponse_t)(SilKit_LinController* controller,
+                                                                               const SilKit_LinFrameResponse* response);
+
 
 /*! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
  *
@@ -470,10 +485,10 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_WakeupInternal_t)(Sil
  * 
  * \return SilKit_ReturnCode_SUCCESS or SilKit_ReturnCode_WRONGSTATE if issued with wrong \ref SilKit_LinControllerMode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_GetSlaveConfiguration(
-    SilKit_LinController* controller, SilKit_LinSlaveConfiguration** outLinSlaveConfiguration);
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_GetSlaveConfiguration_t)(
-    SilKit_LinController* controller, SilKit_LinSlaveConfiguration** outLinSlaveConfiguration);
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_GetSlaveConfiguration(
+    SilKit_LinController* controller, SilKit_Experimental_LinSlaveConfiguration* outLinSlaveConfiguration);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_GetSlaveConfiguration_t)(
+    SilKit_LinController* controller, SilKit_Experimental_LinSlaveConfiguration* outLinSlaveConfiguration);
 
 /*! \brief Reports the SilKit_LinFrameStatus of a SilKit_LinFrame and provides the transmitted frame.
  *
@@ -586,7 +601,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveWakeupHandler_
 /*! \brief The LinSlaveConfigurationHandler is called whenever a remote LIN Slave is configured via SilKit_LinController_Init
  *
  * Note: This callback is mainly for diagnostic purposes and is NOT needed for regular LIN controller operation. 
- * It can be used to call \ref SilKit_LinController_GetSlaveConfiguration to keep track of LIN Ids, where
+ * It can be used to call \ref SilKit_Experimental_LinController_GetSlaveConfiguration to keep track of LIN Ids, where
  * a response of a LIN Slave is to be expected.
  * 
  * Requires \ref SilKit_LinControllerMode_Master
@@ -598,25 +613,25 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveWakeupHandler_
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_AddLinSlaveConfigurationHandler(SilKit_LinController* controller, void* context,
-                                                                  SilKit_LinSlaveConfigurationHandler_t handler,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(SilKit_LinController* controller, void* context,
+                                                                  SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
                                                                   SilKit_HandlerId* outHandlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddLinSlaveConfigurationHandler_t)(SilKit_LinController* controller, void* context,
-                                                                     SilKit_LinSlaveConfigurationHandler_t handler,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler_t)(SilKit_LinController* controller, void* context,
+                                                                     SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
                                                                      SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref SilKit_LinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_Experimental_LinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller 
  *
  * \param controller The LIN controller for which the callback should be removed.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  *
  * \return \ref SilKit_ReturnCode
  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller,
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller,
                                                                      SilKit_HandlerId handlerId);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_RemoveLinSlaveConfigurationHandler_t)(SilKit_LinController* controller,
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler_t)(SilKit_LinController* controller,
                                                                         SilKit_HandlerId handlerId);
 
 

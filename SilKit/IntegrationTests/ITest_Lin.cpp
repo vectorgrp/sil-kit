@@ -457,7 +457,7 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     {
         if (node->_name == "LinSlave")
         {
-            EXPECT_EQ(node->_result.numberReceivedInSleep, 0);
+            EXPECT_EQ(node->_result.numberReceivedInSleep, 0u);
             EXPECT_TRUE(node->_result.gotoSleepReceived)
                 << "Assuming node " << node->_name << " has received a GoToSleep";
             // The LinSlave doesn't receive the wakeup pulse sent by himself in a trivial simulation (without netsim),
@@ -474,8 +474,8 @@ TEST_F(ITest_Lin, sync_lin_simulation)
     std::set<std::chrono::nanoseconds> merged;
     auto&& masterSendTimes = linNodes.at(0)->_result.sendTimes;
     auto&& masterRecvTimes = linNodes.at(0)->_result.receiveTimes;
-    EXPECT_GT(masterSendTimes.size(), 0);
-    EXPECT_GT(masterRecvTimes.size(), 0);
+    EXPECT_GT(masterSendTimes.size(), 0u);
+    EXPECT_GT(masterRecvTimes.size(), 0u);
     ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size())
         << "The master send times and receive times should have equal size.";
     for(auto i = 0u; i< masterRecvTimes.size(); i++)

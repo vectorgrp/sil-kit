@@ -156,20 +156,21 @@ void LinController::WarnOnWrongChecksum(const LinFrame& receivedFrame, const Lin
     _logger->Warn(errorMsg);
 }
 
-void LinController::WarnOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const
+void LinController::DebugMsgOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const
 {
-    std::string errorMsg =
-        fmt::format("LinFrame with ID {} has an undefined checksum model, the transmission is rejected.",
-                    static_cast<uint16_t>(frame.id));
-    _logger->Warn(errorMsg);
+    std::string msg = fmt::format("LinController received transmission but has configured "
+                                       "LinChecksumModel::Unknown. Overwriting with {} for LinId {}.",
+                                       frame.checksumModel, static_cast<uint16_t>(frame.id));
+    _logger->Debug(msg);
 }
 
-void LinController::WarnOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const
+
+void LinController::DebugMsgOnOverwriteOfUnconfiguredDataLength(const LinFrame& frame) const
 {
-    std::string errorMsg = fmt::format("LinController received transmission but has configured "
-                                       "LinChecksumModel::Undefined. Overwriting with {} for LinId {}.",
-                                       frame.checksumModel, static_cast<uint16_t>(frame.id));
-    _logger->Warn(errorMsg);
+    std::string msg = fmt::format("LinController received transmission but has not configured "
+                                      "a LinDataLength. Overwriting with {} for LinId {}.",
+                                      frame.dataLength, static_cast<uint16_t>(frame.id));
+    _logger->Debug(msg);
 }
 
 void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength,
@@ -203,6 +204,60 @@ void LinController::WarnOnUnneededStatusChange(LinControllerStatus status) const
     std::string errorMsg =
         fmt::format("Invalid LinController status change: controller is already in {} mode.", to_string(status));
     _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnInvalidLinId(LinId invalidLinId, const std::string& callingMethodName) const
+{
+    std::string errorMsg =
+        fmt::format("Invalid ID={} in call to '{}'", static_cast<uint16_t>(invalidLinId), callingMethodName);
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnUnusedResponseMode(const std::string& callingMethodName) const
+{
+    std::string errorMsg =
+        fmt::format("LinFrameResponseMode::Unused is not allowed in call to '{}'.", callingMethodName);
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnResponseModeReconfiguration(LinId id, LinFrameResponseMode currentResponseMode) const
+{
+    std::string errorMsg =
+        fmt::format("Can't set response mode for ID={}. Mode is already configured to {}.", id, currentResponseMode);
+    _logger->Warn(errorMsg);
+}
+
+
+void LinController::WarnOnUnconfiguredSlaveResponse(LinId id) const
+{
+    std::string errorMsg =
+        fmt::format("No slave has configured a response for ID={}. Use Init() or SetFrameResponse() on the slave node to configure responses.", id);
+    _logger->Warn(errorMsg);
+}
+
+void LinController::WarnOnSendFrameSlaveResponseWithMasterTx(LinId id) const
+{
+    std::string errorMsg =
+        fmt::format("Master has already configured a response on ID={}. Ignoring this call to SendFrame()", id);
+    _logger->Warn(errorMsg);
+}
+
+void LinController::ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const
+{
+    std::string errorMsg =
+        fmt::format("LinFrame with ID {} has an undefined checksum model.",
+                    static_cast<uint16_t>(frame.id));
+    _logger->Error(errorMsg);
+    throw SilKit::StateError{errorMsg};
+}
+
+void LinController::ThrowOnSendAttemptWithUndefinedDataLength(const LinFrame& frame) const
+{
+    std::string errorMsg =
+        fmt::format("LinFrame with ID {} has an undefined data length.",
+                    static_cast<uint16_t>(frame.id));
+    _logger->Error(errorMsg);
+    throw SilKit::StateError{errorMsg};
 }
 
 void LinController::ThrowOnErroneousInitialization() const
@@ -245,6 +300,11 @@ void LinController::Init(LinControllerConfig config)
     SendMsg(config);
 }
 
+auto LinController::Mode() const noexcept -> LinControllerMode
+{
+    return _controllerMode;
+}
+
 auto LinController::Status() const noexcept -> LinControllerStatus
 {
     return _controllerStatus;
@@ -260,13 +320,10 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
         // Update local response reconfiguration
         if (GetThisLinNode().responses[frame.id].responseMode != LinFrameResponseMode::TxUnconditional)
         {
-            std::vector<LinFrameResponse> responseUpdate;
             LinFrameResponse response{};
             response.frame = frame;
             response.responseMode = LinFrameResponseMode::TxUnconditional;
-            responseUpdate.push_back(response);
-            GetThisLinNode().UpdateResponses(responseUpdate, _logger);
-            _simulationBehavior.UpdateTxBuffer(frame);
+            UpdateFrameResponse(response);
         }
     }
     else
@@ -275,6 +332,7 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
         // that LinSlaveConfigurationHandler and GetSlaveConfiguration stays valid.
         if (!HasRespondingSlave(frame.id))
         {
+            WarnOnUnconfiguredSlaveResponse(frame.id);
             CallLinFrameStatusEventHandler(
                 LinFrameStatusEvent{_timeProvider->Now(), frame, LinFrameStatus::LIN_RX_NO_RESPONSE});
             return;
@@ -282,13 +340,26 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
         
         if (responseType == LinFrameResponseType::SlaveResponse)
         {
-            // As the master, we configure for RX in case of SlaveResponse
-            std::vector<LinFrameResponse> responseUpdate;
-            LinFrameResponse response{};
-            response.frame = frame;
-            response.responseMode = LinFrameResponseMode::Rx;
-            responseUpdate.push_back(response);
-            GetThisLinNode().UpdateResponses(responseUpdate, _logger);
+            // As the master, we configure for RX in case of unconfigured SlaveResponse
+            auto currentResponseMode = GetThisLinNode().responses[frame.id].responseMode;
+            if (currentResponseMode == LinFrameResponseMode::Unused)
+            {
+                std::vector<LinFrameResponse> responseUpdate;
+                LinFrameResponse response{};
+                response.frame = frame;
+                response.responseMode = LinFrameResponseMode::Rx;
+                UpdateFrameResponse(response);
+            }
+            else if (currentResponseMode == LinFrameResponseMode::TxUnconditional)
+            {
+                WarnOnSendFrameSlaveResponseWithMasterTx(frame.id);
+                return;
+            }
+        }
+        else if (responseType == LinFrameResponseType::SlaveToSlave)
+        {
+            CallLinFrameStatusEventHandler(
+                LinFrameStatusEvent{_timeProvider->Now(), frame, LinFrameStatus::LIN_TX_OK});
         }
     }
 
@@ -320,6 +391,42 @@ void LinController::UpdateTxBuffer(LinFrame frame)
     // Detailed: Send LinFrameResponseUpdate with updated payload to BusSim
     // Trivial: Nop
     _simulationBehavior.UpdateTxBuffer(frame);
+}
+
+void LinController::SetFrameResponse(LinFrameResponse response)
+{
+    ThrowIfUninitialized(__FUNCTION__);
+
+    if (response.frame.id >= _maxLinId)
+    {
+        WarnOnInvalidLinId(response.frame.id, __FUNCTION__);
+        return;
+    }
+    if (response.responseMode == LinFrameResponseMode::Unused)
+    {
+        WarnOnUnusedResponseMode(__FUNCTION__);
+        return;
+    }
+    // Don't allow reconfiguration
+    auto currentResponseMode = GetThisLinNode().responses[response.frame.id].responseMode;
+    if (currentResponseMode != LinFrameResponseMode::Unused)
+    {
+        WarnOnResponseModeReconfiguration(response.frame.id, currentResponseMode);
+        return;
+    }
+
+    UpdateFrameResponse(response);
+}
+
+void LinController::UpdateFrameResponse(LinFrameResponse response)
+{
+    // Local update
+    GetThisLinNode().UpdateResponses({response}, _logger);
+
+    // Distribute update
+    LinFrameResponseUpdate responseUpdate{};
+    responseUpdate.frameResponses.push_back(response);
+    SendMsg(responseUpdate);
 }
 
 void LinController::GoToSleep()
@@ -357,11 +464,11 @@ void LinController::WakeupInternal()
     SetControllerStatusInternal(LinControllerStatus::Operational);
 }
 
-LinSlaveConfiguration LinController::GetSlaveConfiguration()
+Experimental::Services::Lin::LinSlaveConfiguration LinController::GetSlaveConfiguration()
 {
     ThrowIfNotMaster(__FUNCTION__);
 
-    return LinSlaveConfiguration{_linIdsRespondedBySlaves};
+    return Experimental::Services::Lin::LinSlaveConfiguration{_linIdsRespondedBySlaves};
 }
 
 //------------------------
@@ -401,6 +508,30 @@ void LinController::SetControllerStatusInternal(LinControllerStatus status)
     msg.status = status;
 
     SendMsg(msg);
+}
+
+void LinController::HandleResponsesUpdate(const IServiceEndpoint* from,
+                                          const std::vector<LinFrameResponse>& responsesToUpdate)
+{
+    auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
+    linNode.UpdateResponses(responsesToUpdate, _logger);
+
+    if (linNode.controllerMode == LinControllerMode::Slave)
+    {
+        UpdateLinIdsRespondedBySlaves(responsesToUpdate);
+    }
+    auto& callbacks = std::get<CallbacksT<Experimental::Services::Lin::LinSlaveConfigurationEvent>>(_callbacks);
+    auto receptionTime = _timeProvider->Now();
+    if (callbacks.Size() == 0)
+    {
+        // No handlers yet, but received a LinSlaveConfiguration -> trigger upon handler addition
+        _triggerLinSlaveConfigurationHandlers = true;
+        _receptionTimeLinSlaveConfiguration = receptionTime;
+    }
+    else
+    {
+        CallHandlers(Experimental::Services::Lin::LinSlaveConfigurationEvent{receptionTime});
+    }
 }
 
 //------------------------
@@ -515,7 +646,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     
     auto& frame = msg.frame;
 
-    if (frame.dataLength > _maxDataLength)
+    if (frame.dataLength != LinDataLengthUnknown && frame.dataLength > _maxDataLength)
     {
         WarnOnReceptionWithInvalidDataLength(frame.dataLength, from->GetServiceDescriptor().GetParticipantName(),
                                              from->GetServiceDescriptor().GetServiceName());
@@ -533,14 +664,21 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
 
     bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
 
-    // If configured for RX, update undefined checksum
+    // If configured for RX, update undefined checksum/payload length
     auto& response = GetThisLinNode().responses[frame.id];
     if (!isGoToSleepFrame
-        && response.responseMode == LinFrameResponseMode::Rx
-        && response.frame.checksumModel == LinChecksumModel::Undefined)
+        && response.responseMode == LinFrameResponseMode::Rx)
     {
-        WarnOnOverwriteOfUnconfiguredChecksum(frame);
-        response.frame.checksumModel = msg.frame.checksumModel;
+        if (response.frame.checksumModel == LinChecksumModel::Unknown)
+        {
+            DebugMsgOnOverwriteOfUnconfiguredChecksum(frame);
+            response.frame.checksumModel = msg.frame.checksumModel;
+        }
+        if (response.frame.dataLength == LinDataLengthUnknown)
+        {
+            DebugMsgOnOverwriteOfUnconfiguredDataLength(frame);
+            response.frame.dataLength = msg.frame.dataLength;
+        }
     }
 
     // Detailed: Just use msg.status
@@ -576,34 +714,26 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPuls
     CallHandlers(LinWakeupEvent{msg.timestamp, msg.direction});
 }
 
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg)
+{
+    // Self-delivered messages are rejected
+    if (from->GetServiceDescriptor() == _serviceDescriptor)
+        return;
+
+    HandleResponsesUpdate(from, msg.frameResponses);
+}
+
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg)
 {
-    // NOTE: Self-delivered messages are rejected
+    // Self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor)
         return;
 
     auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
     linNode.controllerMode = msg.controllerMode;
     linNode.controllerStatus = LinControllerStatus::Operational;
-    linNode.UpdateResponses(msg.frameResponses, _logger);
 
-    if (msg.controllerMode == LinControllerMode::Slave)
-    {
-        UpdateLinIdsRespondedBySlaves(msg.frameResponses);
-    }
-    if (_controllerMode == LinControllerMode::Master)
-    {
-        auto& callbacks = std::get<CallbacksT<LinSlaveConfigurationEvent>>(_callbacks);
-
-        auto receptionTime = _timeProvider->Now();
-        if (callbacks.Size() == 0)
-        {
-            // No handlers yet, but received a LinSlaveConfiguration -> trigger upon handler addition
-            _triggerLinSlaveConfigurationHandlers = true;
-            _receptionTimeLinSlaveConfiguration = receptionTime;
-        }
-        CallHandlers(LinSlaveConfigurationEvent{receptionTime});
-    }
+    HandleResponsesUpdate(from, msg.frameResponses);
 }
 
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg)
@@ -655,7 +785,8 @@ void LinController::RemoveWakeupHandler(HandlerId handlerId)
     }
 }
 
-HandlerId LinController::AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler)
+HandlerId LinController::AddLinSlaveConfigurationHandler(
+    Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
 {
     auto handlerId = AddHandler(std::move(handler));
 
@@ -665,14 +796,14 @@ HandlerId LinController::AddLinSlaveConfigurationHandler(LinSlaveConfigurationHa
     if (_triggerLinSlaveConfigurationHandlers)
     {
         _triggerLinSlaveConfigurationHandlers = false;
-        CallHandlers(LinSlaveConfigurationEvent{_receptionTimeLinSlaveConfiguration});
+        CallHandlers(Experimental::Services::Lin::LinSlaveConfigurationEvent{_receptionTimeLinSlaveConfiguration});
     }
     return handlerId;
 }
 
 void LinController::RemoveLinSlaveConfigurationHandler(HandlerId handlerId)
 {
-    if (!RemoveHandler<LinSlaveConfigurationEvent>(handlerId))
+    if (!RemoveHandler<Experimental::Services::Lin::LinSlaveConfigurationEvent>(handlerId))
     {
         _participant->GetLogger()->Warn("RemoveLinSlaveConfigurationHandler failed: Unknown HandlerId.");
     }

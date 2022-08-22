@@ -100,7 +100,20 @@ void SimBehaviorTrivial::SendMsg(LinTransmission&& msg)
 
 void SimBehaviorTrivial::SendMsg(LinControllerConfig&& msg)
 {
-    SendMsgImpl(msg);
+    // Only slaves need to distribute updates
+    if (_parentController->Mode() == LinControllerMode::Slave)
+    {
+        SendMsgImpl(msg);
+    }
+}
+
+void SimBehaviorTrivial::SendMsg(LinFrameResponseUpdate&& msg)
+{
+    // Only slaves need to distribute updates
+    if (_parentController->Mode() == LinControllerMode::Slave)
+    {
+        SendMsgImpl(msg);
+    }
 }
 
 void SimBehaviorTrivial::SendMsg(LinSendFrameHeaderRequest&& msg)
@@ -154,12 +167,6 @@ void SimBehaviorTrivial::SendErrorTransmissionOnHeaderRequest(int numResponses, 
         LinFrameStatusEvent{transmission.timestamp, transmission.frame, masterFrameStatus});
 }
 
-
-void SimBehaviorTrivial::SendMsg(LinFrameResponseUpdate&& msg)
-{
-    SendMsgImpl(msg);
-}
-
 void SimBehaviorTrivial::SendMsg(LinControllerStatusUpdate&& msg)
 {
     SendMsgImpl(msg);
@@ -173,16 +180,17 @@ void SimBehaviorTrivial::ReceiveFrameHeaderRequest(const LinSendFrameHeaderReque
         // Ignore headers if not configured to answer
         return;
     }
-    if (response.frame.checksumModel == LinChecksumModel::Undefined)
+    if (response.frame.checksumModel == LinChecksumModel::Unknown)
     {
-        // Reject undefined chaecksum models
-        _parentController->WarnOnSendAttemptWithUndefinedChecksum(response.frame);
-        return;
+        _parentController->ThrowOnSendAttemptWithUndefinedChecksum(response.frame);
+    }
+    if (response.frame.dataLength == LinDataLengthUnknown)
+    {
+        _parentController->ThrowOnSendAttemptWithUndefinedDataLength(response.frame);
     }
 
-    LinTransmission transmission{_timeProvider->Now(), response.frame, LinFrameStatus::LIN_RX_OK};
-
     // Dispatch the LIN transmission to all connected nodes
+    LinTransmission transmission{_timeProvider->Now(), response.frame, LinFrameStatus::LIN_RX_OK};
     SendMsgImpl(transmission);
 
     _tracer.Trace(ToTracingDir(LinFrameStatus::LIN_RX_OK), transmission.timestamp, transmission.frame);

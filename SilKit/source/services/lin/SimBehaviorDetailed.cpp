@@ -73,12 +73,12 @@ void SimBehaviorDetailed::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequ
 
 void SimBehaviorDetailed::UpdateTxBuffer(const LinFrame& frame)
 {
-    LinFrameResponseUpdate reponseUpdate{};
+    LinFrameResponseUpdate responseUpdate{};
     LinFrameResponse response{};
     response.frame = frame;
     response.responseMode = LinFrameResponseMode::TxUnconditional;
-    reponseUpdate.frameResponses.push_back(response);
-    SendMsgImpl(reponseUpdate);
+    responseUpdate.frameResponses.push_back(response);
+    SendMsgImpl(responseUpdate);
 }
 
 void SimBehaviorDetailed::GoToSleep()

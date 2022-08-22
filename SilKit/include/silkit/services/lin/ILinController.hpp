@@ -74,13 +74,6 @@ public:
      */
     using WakeupHandler = CallbackT<LinWakeupEvent>;
 
-    /*! Callback type to indicate that a LIN Slave configuration has been received.
-     *  
-     * Triggered when a remote LIN Slave calls \ref ILinController::Init(LinControllerConfig)
-     *  Cf., \ref AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler);
-     */
-    using LinSlaveConfigurationHandler = CallbackT<LinSlaveConfigurationEvent>;
-
 public:
     virtual ~ILinController() = default;
 
@@ -133,7 +126,7 @@ public:
      */
     virtual void SendFrameHeader(LinId linId) = 0;
 
-    /*! Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
+    /*! \brief Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
      * 
      * \param frame provides the LIN ID and data used for the update.
      * 
@@ -141,6 +134,14 @@ public:
      * \throws SilKit::ConfigurationError if the LIN Controller is not configured with TxUnconditional on this ID.
      */
     virtual void UpdateTxBuffer(LinFrame frame) = 0;
+
+    /*! \brief Set a RX/TX configuration during operation.
+     * 
+     * \param response The frame and response mode to be configured.
+     * 
+     * \throws SilKit::StateError if the LIN Controller is not initialized.
+     */
+    virtual void SetFrameResponse(LinFrameResponse response) = 0;
 
     /*! \brief Transmit a go-to-sleep-command and set ControllerState::Sleep and enable wake-up
      *
@@ -174,16 +175,7 @@ public:
      */
     virtual void WakeupInternal() = 0;
 
-    /*! \brief Get the aggregated configuration of all LIN slaves in the network.
-     *
-     * Requires \ref LinControllerMode::Master.
-     * 
-     * \return A struct containing all LinIds on which LIN Slaves have configured 
-     * LinFrameResponseMode::TxUnconditional.
-     */
-    virtual LinSlaveConfiguration GetSlaveConfiguration() = 0;
-
-    /*! \brief Reports the LinFrameStatus of a LinFrame and provides the transmitted frame.
+    /*! \brief Reports the \ref LinFrameStatus of a LIN \ref LinFrame transmission and provides the transmitted frame.
      *
      * The FrameStatusHandler is used for reception and acknowledgement of LIN frames. The direction (prefixed with 
      * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the \ref LinFrameStatus. 
@@ -238,26 +230,6 @@ public:
      */
     virtual void RemoveWakeupHandler(HandlerId handlerId) = 0;
 
-    /*! \brief The LinSlaveConfigurationHandler triggers when a remote LIN Slave is configured via 
-     * LinController::Init(LinControllerConfig) 
-     *
-     * This callback is mainly for diagnostic purposes and is NOT needed for regular LIN controller operation. 
-     * It can be used to call \ref ILinController::GetSlaveConfiguration to keep track of LIN Ids, where
-     * a response of a LIN Slave is to be expected.
-     * 
-     * Requires \ref LinControllerMode::Master.
-     * 
-     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
-     */
-    virtual HandlerId AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler) = 0;
-
-    /*! \brief Remove a LinSlaveConfigurationHandler by \ref SilKit::Util::HandlerId on this controller
-     *
-     * Requires \ref LinControllerMode::Master.
-     * 
-     * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
-     */
-    virtual void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) = 0;
 };
 
 } // namespace Lin

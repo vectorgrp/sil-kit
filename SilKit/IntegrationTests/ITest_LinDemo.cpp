@@ -511,8 +511,8 @@ TEST_F(ITest_SimTestHarness, lin_demo)
     auto&& masterSendTimes = linNodes.at(0)->_result.sendTimes;
     auto&& masterRecvTimes = linNodes.at(0)->_result.receiveTimes;
 
-    EXPECT_GT(masterSendTimes.size(), 0);
-    EXPECT_GT(masterRecvTimes.size(), 0);
+    EXPECT_GT(masterSendTimes.size(), 0u);
+    EXPECT_GT(masterRecvTimes.size(), 0u);
 
     for (auto ts : masterSendTimes)
     {

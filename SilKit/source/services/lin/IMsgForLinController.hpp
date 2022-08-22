@@ -36,7 +36,7 @@ namespace Lin {
  */
 class IMsgForLinController
     : public Core::IReceiver<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate,
-                             LinSendFrameHeaderRequest>
+                             LinSendFrameHeaderRequest, LinFrameResponseUpdate>
     , public Core::ISender<LinTransmission, LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse,
                            LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
 {

@@ -265,7 +265,7 @@ protected:
 };
 
 
-TEST_F(ITest_CanControllerThreadSafety, add_remove_handler_during_reception)
+TEST_F(ITest_CanControllerThreadSafety, DISABLED_add_remove_handler_during_reception)
 {
     numParticipants = 0;
     auto registryUri = MakeTestRegistryUri();

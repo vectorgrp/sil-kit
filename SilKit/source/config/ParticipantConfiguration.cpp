@@ -187,7 +187,7 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
 #if __cplusplus ==  201402L
 // When compiling as C++14, the 'static constexpr variable definitions' are not
 // properly exported in the dll (and not properly odr-used from users of the DLL).
-// For example, when compiling an extention with GCC and loading the shared
+// For example, when compiling an extension with GCC and loading the shared
 // library, this will result in missing symbols for those networkType definitions.
 // Note: In C++17 the static constexpr variable definitions is implicitly inline,
 // and the separate definitions in this file are obsolete.

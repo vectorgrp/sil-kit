@@ -19,7 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#include "ParticipantExtentions.hpp"
+#include "ParticipantExtensions.hpp"
 #include "IParticipantInternal.hpp"
 
 namespace SilKit {
@@ -30,6 +30,10 @@ auto CreateSystemController(IParticipant* participant)
     -> SilKit::Experimental::Services::Orchestration::ISystemController*
 {
     auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(participant);
+    if (participantInternal == nullptr)
+    {
+        throw SilKitError("participant is not a valid SilKit::IParticipant*");
+    }
     if (participantInternal->GetIsSystemControllerCreated())
     {
         throw SilKitError("You may not create the system controller more than once.");

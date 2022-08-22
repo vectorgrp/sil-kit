@@ -24,6 +24,7 @@ add_library(SilKitSimLin STATIC
     LinController.hpp
     
     ISimBehavior.hpp
+    ILinControllerExtensions.hpp
     SimBehavior.cpp
     SimBehavior.hpp
     SimBehaviorDetailed.cpp
@@ -41,10 +42,9 @@ target_include_directories(SilKitSimLin
 target_link_libraries(SilKitSimLin
     PUBLIC  SilKitInterface
             SilKitWireLin
-    PRIVATE SilKitInterface
-            SilKitInternal
-            SilKitMwLogging
             SilKitTracing
+    PRIVATE SilKitInternal
+            SilKitMwLogging
 )
 
 add_silkit_test(Test_SimLin

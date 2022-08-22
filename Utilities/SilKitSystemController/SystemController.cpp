@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/experimental/participant/ParticipantExtentions.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "CommandlineParser.hpp"
 

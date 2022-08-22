@@ -54,7 +54,7 @@ inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig
     return config;
 }
 
-inline auto MakeFrame(LinId linId, LinChecksumModel checksumModel = LinChecksumModel::Undefined,
+inline auto MakeFrame(LinId linId, LinChecksumModel checksumModel = LinChecksumModel::Unknown,
                       uint8_t dataLength = 0, std::array<uint8_t, 8> data = std::array<uint8_t, 8>{}) -> LinFrame
 {
     LinFrame frame;

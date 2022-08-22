@@ -20,7 +20,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/config/IParticipantConfiguration.hpp"
-#include "silkit/experimental/participant/ParticipantExtentions.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
+#include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
 #include "silkit/SilKitMacros.hpp"
 
 /*! \brief Dummy compilation unit to pull in exports from other silkit libs
@@ -37,6 +38,16 @@ void __silkit_force_include_participant_configuration()
 
 void __silkit_force_include_experimental()
 {
-    auto unused = SilKit::Experimental::Participant::CreateSystemController(nullptr);
-    SILKIT_UNUSED_ARG(unused);
+    // Participant extensions
+    auto systemController = SilKit::Experimental::Participant::CreateSystemController(nullptr);
+    SILKIT_UNUSED_ARG(systemController);
+
+    // LinController extensions
+    auto handlerId =
+        SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(nullptr, nullptr);
+    SILKIT_UNUSED_ARG(handlerId);
+    SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(nullptr, SilKit::Util::HandlerId{});
+    auto slaveConfig = SilKit::Experimental::Services::Lin::GetSlaveConfiguration(nullptr);
+    SILKIT_UNUSED_ARG(slaveConfig);
+
 }

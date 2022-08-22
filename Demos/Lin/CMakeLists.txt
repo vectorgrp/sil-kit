@@ -20,7 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 make_silkit_demo(SilKitDemoLin LinDemo.cpp)
-
 target_sources(SilKitDemoLin 
 	PRIVATE SilKitConfig_DemoLin.json
     PRIVATE NetworkSimulatorConfig.json

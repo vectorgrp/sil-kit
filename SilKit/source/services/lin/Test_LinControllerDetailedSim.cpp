@@ -63,7 +63,7 @@ protected:
             callbacks.WakeupHandler(ctrl);
         };
         slaveConfigurationHandler = [this](ILinController* ctrl,
-                                           const LinSlaveConfigurationEvent& /*slaveConfigurationEvent*/) {
+                   const SilKit::Experimental::Services::Lin::LinSlaveConfigurationEvent& /*slaveConfigurationEvent*/) {
             callbacks.LinSlaveConfigurationHandler(ctrl);
         };
 
@@ -88,7 +88,7 @@ protected:
     LinController::FrameStatusHandler frameStatusHandler;
     LinController::GoToSleepHandler goToSleepHandler;
     LinController::WakeupHandler wakeupHandler;
-    LinController::LinSlaveConfigurationHandler slaveConfigurationHandler;
+    SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler slaveConfigurationHandler;
 };
 
 TEST_F(LinControllerDetailedSimTest, send_frame_unitialized)
@@ -116,6 +116,7 @@ TEST_F(LinControllerDetailedSimTest, send_frame)
     EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
     master.ReceiveMsg(&slave1, slaveConfig);
 
+    EXPECT_CALL(participant, SendMsg(&master, A<const LinFrameResponseUpdate&>())).Times(1);
     EXPECT_CALL(participant, SendMsg(&master, expectedMsg)).Times(1);
     master.SendFrame(expectedMsg.frame, expectedMsg.responseType);
 }

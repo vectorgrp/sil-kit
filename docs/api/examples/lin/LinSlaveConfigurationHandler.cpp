@@ -19,21 +19,26 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // ------------------------------------------------------------
+// 
 // Master Setup
+using namespace SilKit::Services::Lin;
+using namespace SilKit::Experimental::Services::Lin;
+
 LinControllerConfig masterConfig;
 masterConfig.controllerMode = LinControllerMode::Master;
 masterConfig.baudRate = 20000;
 master->Init(masterConfig);
 
 // Define the LinSlaveConfigurationHandler
-auto master_LinSlaveConfigurationHandler =
+auto LinSlaveConfigurationHandler =
     [](ILinController* master, LinSlaveConfigurationEvent frameResponseUpdateEvent) 
 {
     // aggregatedSlaveConfig will contain
     // LinSlaveConfiguration::respondingLinIds{ 0x11 }
-    auto aggregatedSlaveConfig = master->GetSlaveConfiguration();
+    auto aggregatedSlaveConfig = GetSlaveConfiguration(master);
 };
-master->AddLinSlaveConfigurationHandler(master_LinSlaveConfigurationHandler);
+
+AddLinSlaveConfigurationHandler(master, &LinSlaveConfigurationHandler);
 
 // ------------------------------------------------------------
 // Slave Setup
@@ -50,5 +55,5 @@ slaveFrame.data = {'S', 'L', 'A', 'V', 'E', 0, 0, 0};
 
 slaveConfig.frameResponses.push_back(LinFrameResponse{slaveFrame, LinFrameResponseMode::TxUnconditional});
 
-// master_LinSlaveConfigurationHandler handler is invoked
+// LinSlaveConfigurationHandler handler is invoked
 slave->Init(slaveConfig);

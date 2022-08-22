@@ -242,12 +242,6 @@ public:
         schedule.ScheduleNextTask();
     }
 
-    void LinSlaveConfigurationHandler(ILinController* linController, const LinSlaveConfigurationEvent& /*slaveConfigurationEvent*/)
-    {
-        auto linSlaveConfiguration = linController->GetSlaveConfiguration();
-        std::cout << ">> Received a new LinSlaveConfiguration=" << linSlaveConfiguration << std::endl;
-    }
-
 private:
     ILinController* controller{nullptr};
     Schedule schedule;
@@ -379,10 +373,6 @@ int main(int argc, char** argv) try
             });
         linController->AddWakeupHandler([&master](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
                 master.WakeupHandler(linController, wakeupEvent);
-            });
-        linController->AddLinSlaveConfigurationHandler(
-            [&master](ILinController* linController, const LinSlaveConfigurationEvent& slaveConfigurationEvent) {
-                master.LinSlaveConfigurationHandler(linController, slaveConfigurationEvent);
             });
 
         timeSyncService->SetSimulationStepHandler(

@@ -48,7 +48,7 @@ using LinId = uint8_t;
  */
 enum class LinChecksumModel : uint8_t
 {
-    Undefined = 0,//!< Undefined / unconfigured checksum model
+    Unknown = 0,  //!< Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
     Enhanced = 1, //!< Enhanced checksum model
     Classic = 2   //!< Classic checksum model 
 };
@@ -59,9 +59,12 @@ enum class LinChecksumModel : uint8_t
  *
  * *AUTOSAR Name:* Lin_FrameDlType
  *
- * *Range:* 1...8
+ * *Range:* 0...8
  */
 using LinDataLength = uint8_t;
+
+//! \brief If configured with this value, the data length of the first reception will be used.
+const LinDataLength LinDataLengthUnknown = 255u;
 
 /*! \brief A LIN LinFrame
  *
@@ -72,7 +75,7 @@ using LinDataLength = uint8_t;
 struct LinFrame
 {
     LinId id{0}; //!< Lin Identifier
-    LinChecksumModel checksumModel{LinChecksumModel::Undefined}; //!< Checksum Model
+    LinChecksumModel checksumModel{LinChecksumModel::Unknown}; //!< Checksum Model
     LinDataLength dataLength{0}; //!< Data length
     std::array<uint8_t, 8> data{}; //!< The actual payload
 };
@@ -299,24 +302,6 @@ struct LinWakeupEvent
 struct LinGoToSleepEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time of the event.
-};
-
-/*! \brief A LIN frame response update event delivered in the \ref ILinController::LinSlaveConfigurationHandler
- *
- * The event is received on a LIN Master when a LIN Slave is configured via LinController::Init().
- * This event is mainly for diagnostic purposes and can be used to keep track of LIN Ids, where
- * a response of a LIN Slave is to be expected by using \ref ILinController::GetSlaveConfiguration() in the handler.
- *
- */
-struct LinSlaveConfigurationEvent
-{
-    std::chrono::nanoseconds timestamp; //!< Time of the event.
-};
-
-//! \brief The aggregated configuration of all LIN slaves in the network.
-struct LinSlaveConfiguration
-{
-    std::vector<LinId> respondingLinIds; //!< A vector of LinIds on which any LIN Slave has configured LinFrameResponseMode::TxUnconditional
 };
 
 // ================================================================================

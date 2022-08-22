@@ -21,11 +21,9 @@ LIN Controller
 
 **The following set of functions can be used to add and remove event handlers on the controller:**
 
-.. doxygenfunction:: SilKit_LinController_AddLinSlaveConfigurationHandler
 .. doxygenfunction:: SilKit_LinController_AddFrameStatusHandler
 .. doxygenfunction:: SilKit_LinController_AddGoToSleepHandler
 .. doxygenfunction:: SilKit_LinController_AddWakeupHandler
-.. doxygenfunction:: SilKit_LinController_RemoveLinSlaveConfigurationHandler
 .. doxygenfunction:: SilKit_LinController_RemoveFrameStatusHandler
 .. doxygenfunction:: SilKit_LinController_RemoveGoToSleepHandler
 .. doxygenfunction:: SilKit_LinController_RemoveWakeupHandler
@@ -33,13 +31,19 @@ LIN Controller
 **The following functions operate on a configured controller:**
 
 .. doxygenfunction:: SilKit_LinController_Status
+.. doxygenfunction:: SilKit_LinController_SetFrameResponse
 .. doxygenfunction:: SilKit_LinController_SendFrame
 .. doxygenfunction:: SilKit_LinController_SendFrameHeader
 .. doxygenfunction:: SilKit_LinController_GoToSleep
 .. doxygenfunction:: SilKit_LinController_GoToSleepInternal
 .. doxygenfunction:: SilKit_LinController_Wakeup
 .. doxygenfunction:: SilKit_LinController_WakeupInternal
-.. doxygenfunction:: SilKit_LinController_GetSlaveConfiguration
+
+**The following functions are experimental and might be changed or removed in future versions:**
+
+.. doxygenfunction:: SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler
+.. doxygenfunction:: SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler
+.. doxygenfunction:: SilKit_Experimental_LinController_GetSlaveConfiguration
 
 Data Structures
 ~~~~~~~~~~~~~~~
@@ -49,7 +53,7 @@ Data Structures
    :members:
 .. doxygenstruct:: SilKit_LinFrameResponse
    :members:
-.. doxygenstruct:: SilKit_LinSlaveConfiguration
+.. doxygenstruct:: SilKit_Experimental_LinSlaveConfiguration
    :members:
 .. doxygenstruct:: SilKit_LinFrameStatusEvent
    :members:
@@ -57,8 +61,13 @@ Data Structures
    :members:
 .. doxygenstruct:: SilKit_LinGoToSleepEvent
    :members:
-.. doxygenstruct:: SilKit_LinSlaveConfigurationEvent
+
+**The following data structures are experimental and might be changed or removed in future versions:**
+
+.. doxygenstruct:: SilKit_Experimental_LinSlaveConfigurationEvent
    :members:
+
+.. doxygentypedef:: SilKit_Experimental_LinSlaveConfigurationHandler_t
 
 Enumerations and Typedefs
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,4 +85,3 @@ Enumerations and Typedefs
 .. doxygentypedef:: SilKit_LinFrameStatusHandler_t
 .. doxygentypedef:: SilKit_LinGoToSleepHandler_t
 .. doxygentypedef:: SilKit_LinWakeupHandler_t
-.. doxygentypedef:: SilKit_LinSlaveConfigurationHandler_t

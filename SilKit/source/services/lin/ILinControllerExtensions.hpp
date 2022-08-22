@@ -21,4 +21,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/experimental/participant/ParticipantExtentions.hpp"
+#include "silkit/services/lin/ILinController.hpp"
+#include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
+
+namespace SilKit {
+namespace Services {
+namespace Lin {
+
+class ILinControllerExtensions
+{
+public:
+    virtual ~ILinControllerExtensions() = default;
+    virtual auto AddLinSlaveConfigurationHandler(Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
+        -> SilKit::Util::HandlerId = 0;
+    virtual void RemoveLinSlaveConfigurationHandler(SilKit::Util::HandlerId handlerId) = 0;
+    virtual auto GetSlaveConfiguration() -> Experimental::Services::Lin::LinSlaveConfiguration = 0;
+};
+
+} // namespace Lin
+} // namespace Services
+} // namespace SilKit

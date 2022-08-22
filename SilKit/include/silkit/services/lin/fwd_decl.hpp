@@ -33,7 +33,6 @@ struct LinControllerConfig;
 struct LinFrameStatusEvent;
 struct LinWakeupEvent;
 struct LinGoToSleepEvent;
-struct LinFrameResponseUpdateEvent;
 
 class ILinController;
 

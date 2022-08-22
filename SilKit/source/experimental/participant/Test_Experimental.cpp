@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "NullConnectionParticipant.hpp"
 #include "ConfigurationTestUtils.hpp"
-#include "ParticipantExtentions.hpp"
+#include "ParticipantExtensions.hpp"
 
 namespace {
 
