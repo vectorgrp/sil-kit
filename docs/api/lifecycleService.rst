@@ -95,8 +95,6 @@ They are always executed in the middleware's worker thread::
         }
     );
 
-.. TODO add documentation about async CommReady callback here.
-
 
 If a participant does not use the virtual time synchronization, a separate callback informs about the transition to the Running state.
 This can be used to start local timers::
@@ -108,9 +106,6 @@ This can be used to start local timers::
     );
 
 The ``CommunicationReady`` handler should be used to intialize and configure :doc:`services and controllers<api>`. 
-
-.. 
-    TODO Further, it allows to exchange data via DataPublisher and DataSubscriber with other participants.
 
 
 Controlling the Participant

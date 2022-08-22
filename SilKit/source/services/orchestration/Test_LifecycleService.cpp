@@ -668,7 +668,6 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-// TODO
 TEST_F(LifecycleServiceTest, Abort_Starting)
 {
     LifecycleService lifecycleService(&participant);

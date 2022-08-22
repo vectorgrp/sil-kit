@@ -196,8 +196,7 @@ void CommunicationInitializingState::CommunicationInitializing(std::string reaso
 }
 
 void CommunicationInitializingState::AbortSimulation()
-{
-    // TODO check if this makes sense while initializing...
+
     ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
 }
 
@@ -276,7 +275,6 @@ auto CommunicationInitializedState::GetParticipantState() -> ParticipantState
 // ReadyToRunState
 void ReadyToRunState::ReadyToRun(std::string reason) 
 {
-    // TODO check which cases need actual abort handling
     if (!_lifecycleManager->GetService()->IsTimeSyncActive())
     {
         std::stringstream ss;
