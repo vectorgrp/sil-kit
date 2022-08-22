@@ -104,6 +104,13 @@ void LifecycleService::SetAbortHandler(AbortHandler handler)
 auto LifecycleService::StartLifecycle()
     -> std::future<ParticipantState>
 {
+    if (!_requiredParticipantNames.empty())
+    {
+        if (!CheckForValidConfiguration())
+        {
+            return _finalStatePromise.get_future();
+        }
+    }
     if (_timeSyncActive)
     {
         _timeSyncService->ConfigureTimeProvider(TimeProviderKind::SyncTime);
@@ -302,7 +309,7 @@ void LifecycleService::AbortSimulation(std::string reason)
     _lifecycleManagement.AbortSimulation(reason);
 }
 
-void LifecycleService::CheckForValidConfiguration()
+bool LifecycleService::CheckForValidConfiguration()
 {
     if (_operationMode == OperationMode::Coordinated && !_requiredParticipantNames.empty())
     {
@@ -314,8 +321,10 @@ void LifecycleService::CheckForValidConfiguration()
             std::stringstream ss; 
             ss << _participant->GetParticipantName() << ": Coordinated participants must also be required!";
             ReportError(ss.str());
+            return false;
         }
     }
+    return true;
 }
 
 auto LifecycleService::State() const -> ParticipantState

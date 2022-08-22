@@ -127,7 +127,7 @@ private:
     // ----------------------------------------
     // private methods
     void AbortSimulation(std::string reason);
-    void CheckForValidConfiguration();
+    bool CheckForValidConfiguration();
 
 private:
     // ----------------------------------------
