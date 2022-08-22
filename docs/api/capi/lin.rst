@@ -35,8 +35,6 @@ LIN Controller
 .. doxygenfunction:: SilKit_LinController_Status
 .. doxygenfunction:: SilKit_LinController_SendFrame
 .. doxygenfunction:: SilKit_LinController_SendFrameHeader
-.. doxygenfunction:: SilKit_LinController_SetFrameResponse
-.. doxygenfunction:: SilKit_LinController_SetFrameResponses
 .. doxygenfunction:: SilKit_LinController_GoToSleep
 .. doxygenfunction:: SilKit_LinController_GoToSleepInternal
 .. doxygenfunction:: SilKit_LinController_Wakeup

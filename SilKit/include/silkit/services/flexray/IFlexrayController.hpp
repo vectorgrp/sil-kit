@@ -77,7 +77,7 @@ public:
 public:
     virtual ~IFlexrayController() = default;
 
-    //! \brief Configure the controller and switch to ::Ready state
+    //! \brief Configure the controller and switch to Ready state
     virtual void Configure(const FlexrayControllerConfig& config) = 0;
 
     //! \brief Reconfigure a TX Buffer that was previously setup with IFlexrayController::Configure(const FlexrayControllerConfig&)
@@ -120,11 +120,11 @@ public:
 
     /*! \brief Receive a FlexRay message from a different controller.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddFrameHandler(FrameHandler handler) = 0;
 
-    /*! \brief Remove a FrameHandler by HandlerId on this controller 
+    /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -132,11 +132,11 @@ public:
 
     /*! \brief Notification that a FlexRay message has been successfully sent.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddFrameTransmitHandler(FrameTransmitHandler handler) = 0;
 
-    /*! \brief Remove a FrameTransmitHandler by HandlerId on this controller 
+    /*! \brief Remove a FrameTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -144,11 +144,11 @@ public:
 
     /*! \brief Notification that a wakeup has been received.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddWakeupHandler(WakeupHandler handler) = 0;
 
-    /*! \brief Remove a WakeupHandler by HandlerId on this controller 
+    /*! \brief Remove a WakeupHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -156,11 +156,11 @@ public:
 
     /*! \brief Notification that the POC status has changed.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddPocStatusHandler(PocStatusHandler handler) = 0;
 
-    /*! \brief Remove a PocStatusHandler by HandlerId on this controller 
+    /*! \brief Remove a PocStatusHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -172,11 +172,11 @@ public:
      * The symbols relevant for interaction trigger also an additional callback,
      * e.g., \ref WakeupHandler.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddSymbolHandler(SymbolHandler handler) = 0;
 
-    /*! \brief Remove a SymbolHandler by HandlerId on this controller 
+    /*! \brief Remove a SymbolHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -189,11 +189,11 @@ public:
      *  - Wakeup() will cause sending the FlexraySymbolPattern::Wus, if the bus is idle.
      *  - Run() will cause the transmission of FlexraySymbolPattern::CasMts if configured to coldstart the bus.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddSymbolTransmitHandler(SymbolTransmitHandler handler) = 0;
 
-    /*! \brief Remove a SymbolTransmitHandler by HandlerId on this controller 
+    /*! \brief Remove a SymbolTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -201,11 +201,11 @@ public:
 
     /*! \brief Notification that a new FlexRay cycle did start.
      *
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddCycleStartHandler(CycleStartHandler handler) = 0;
 
-    /*! \brief Remove a CycleStartHandler by HandlerId on this controller 
+    /*! \brief Remove a CycleStartHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -213,5 +213,5 @@ public:
 };
 
 } // namespace Flexray
-} // SimModels
+} // namespace Services
 } // namespace SilKit

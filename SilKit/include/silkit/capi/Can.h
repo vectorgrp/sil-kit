@@ -159,7 +159,6 @@ typedef struct SilKit_CanController SilKit_CanController;
 /*! Callback type to indicate that a CanTransmitAcknowledge has been received.
 * \param context The by the user provided context on registration.
 * \param controller The CAN controller that received the acknowledge.
-* \param acknowledge The acknowledge and its data.
 * \param frameTransmitEvent The incoming CAN frame transmit event.
 */
 typedef void (SilKitFPTR *SilKit_CanFrameTransmitHandler_t)(void* context, SilKit_CanController* controller,
@@ -193,6 +192,7 @@ typedef void (SilKitFPTR *SilKit_CanErrorStateChangeHandler_t)(void* context, Si
  * \param outCanController Pointer that refers to the resulting CAN controller (out parameter).
  * \param participant The simulation participant at which the CAN controller should be created.
  * \param name The name of the new CAN controller.
+ * \param network The network of the CAN controller to operate in.
  *
  * The lifetime of the resulting CAN controller is directly bound to the lifetime of the simulation participant.
  * There is no further cleanup necessary except for destroying the simulation participant at the end of the 
@@ -296,6 +296,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_SetBaudRate_t)(SilKi
 * \param controller The CAN controller for which the callback should be registered.
 * \param context The user provided context pointer, that is reobtained in the callback.
 * \param handler The handler to be called on transmit acknowledge.
+* \param statusMask A mask to select for which transmit statuses the handler should be called.
 * \param outHandlerId The handler identifier that can be used to remove the callback.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller, void* context,
@@ -310,6 +311,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddFrameTransmitHand
 
 /*! \brief  Remove a \ref SilKit_CanFrameTransmitHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The CAN controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller,
@@ -339,6 +341,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddFrameHandler_t)(S
 
 /*! \brief  Remove a \ref SilKit_CanFrameHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The CAN controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller,
@@ -368,6 +371,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddStateChangeHandle
 
 /*! \brief  Remove a \ref SilKit_CanStateChangeHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The CAN controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller,
@@ -399,6 +403,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_CanController_AddErrorStateChangeH
 
 /*! \brief  Remove a \ref SilKit_CanErrorStateChangeHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The CAN controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller,

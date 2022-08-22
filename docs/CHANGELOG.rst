@@ -2987,8 +2987,9 @@ Changed
       
       typedef void (*ib_Data_NewDataSourceHandler_t)(void* context, ib_Data_Subscriber* subscriber, const char* topic,
                                                       const char* mediaType, const ib_KeyValueList* labels);
+
     + new:
-    
+
     The new DataMessageEvent now contains a timestamp with the send time set by the DataPublisher. 
     Formerly, the reception callback only contained the raw data. The information about a new DataPublisher in the 
     NewDataPublisherHandlerT now is bundeled in a stuct called 'NewDataPublisherEvent' also containing a reception
@@ -3960,7 +3961,7 @@ Removed
     - removed FastRtps specific integration tests.
     - API: removed deprecated `ib::CreateFastRtpsComAdapter` and `ib::CreateVAsioComAdapter`.
       Users should use the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`,
-      refer to :ref:`sec:mwcfg-vasio`.
+      refer to :ref:`changelog-outdated-reference` (``sec:mwcfg-vasio``).
     - ConfigBuilder: removed FastRtps configuration mechanism: `ib::cfg::ConfigBuilder::ConfigureFastRtps`.
 
   
@@ -4500,7 +4501,7 @@ Added
 ~~~~~
 - Added MdfChannel identification to replaying config.
   This allows replaying MDF4 trace files that do not originate from VIB
-  simulation runs, cf. :ref:`sec:replay-foreign`.
+  simulation runs, cf. :ref:`changelog-outdated-reference` (``sec:replay-foreign``).
 
 Fixed
 ~~~~~
@@ -4556,16 +4557,16 @@ The addition of a new internal state makes the current VIB release incompatible 
 
 Added
 ~~~~~
-- Add documentation for :doc:`Replaying and Tracing<usage/replay>` (AFTMAGT-308).
+- Add documentation for :ref:`changelog-outdated-reference` (``Replaying and Tracing<usage/replay>``) (AFTMAGT-308).
 - Added support for replaying FlexRay messages (AFTMAGT-289).
   Replaying FlexRay requires the use of the VIBE-NetworkSimulator.
-  The NetworkSimulator is attached as a replay controller to the replay scheduler, cf. :ref:`sec:replay-architecture` for an overview.
+  The NetworkSimulator is attached as a replay controller to the replay scheduler, cf. :ref:`changelog-outdated-reference` (``sec:replay-architecture``) for an overview.
 - Added support for replaying FlexRay messages in the VIBE-NetworkSimulator (AFTMAGT-290).
   Please note, that the startup/synchronization sequence is not part of a trace file  and time stamps of the
   replay might deviate from the original traced messages.
   The logical order of messages is kept after the synchronization has been established.
-  Refer to section :ref:`sec:replay` for a summary of supported features and limitations.
-- Add a :ref:`Replay<sec:cfg-participant-replay>` configuration block to the NetworkSimulator
+  Refer to section :ref:`changelog-outdated-reference` (``sec:replay``) for a summary of supported features and limitations.
+- Add a :ref:`changelog-outdated-reference` (``Replay<sec:cfg-participant-replay>``) configuration block to the NetworkSimulator
   configuration.
 
 Fixed
@@ -4594,7 +4595,7 @@ Added
   Replaying on LIN slaves is not supported, even though tracing is possible
   on these controllers.
   Invoking transmission API calls during replay is also not supported on a master (AFTMAGT-288).
-- Setting VAsio TCP flags is now supported from a JSON config file, cf. :ref:`sec:mwcfg-vasio` (AFTMAGT-305).
+- Setting VAsio TCP flags is now supported from a JSON config file, cf. :ref:`changelog-outdated-reference` (``sec:mwcfg-vasio``) (AFTMAGT-305).
 
 
 Fixed
@@ -4676,7 +4677,7 @@ Compatibility with 3.3.5
 Added
 ~~~~~~
 - The number of connection attempts can now be configured in the VAsio registry
-  configuration, see the "ConnectAttempts" field in :ref:`sec:mwcfg-vasio`.
+  configuration, see the "ConnectAttempts" field in :ref:`changelog-outdated-reference` (``sec:mwcfg-vasio``).
 - Added preliminary TCP/IP tuning settings to ``struct ib::cfg::VAsio::Config``. 
   The following settings are available:
 
@@ -4737,7 +4738,7 @@ Compatibility with 3.3.3
 Added
 ~~~~~~
 - Added a new configuration format for replaying traces,
-  refer to :ref:`sec:cfg-participant-replaying` for details.
+  refer to :ref:`changelog-outdated-reference` (``sec:cfg-participant-replaying``) for details.
   Please note that the replaying mechanism is still under development.
 
 Changed
@@ -4879,9 +4880,9 @@ Added
 ~~~~~
 
 - The startup delay of a FlexRay node in the FlexRay demo can now be set programmatically.
-- Added a message tracing section to :ref:`Participant Configuration<sec:cfg-participant-tracing>`.
+- Added a message tracing section to :ref:`changelog-outdated-reference` (``Participant Configuration<sec:cfg-participant-tracing>``).
   It briefly discusses how to configure the trace sink mechanism and how the 
-  :ref:`mdf4tracing` extension is used.
+  :ref:`changelog-outdated-reference` (``mdf4tracing``) extension is used.
   The controllers now also reflect the recently updated tracing support.
 
 Changed
@@ -4914,10 +4915,10 @@ Added
 ~~~~~
 
 - Logger of the VAsio Registry can now be configured via the middleware configuration,
-  cf. :ref:`sec:mwcfg-vasio`. The corresponding :cpp:class:`RegistryBuilder<ib::cfg::VAsio::RegistryBuilder>`
+  cf. :ref:`changelog-outdated-reference` (``sec:mwcfg-vasio``). The corresponding :cpp:class:`RegistryBuilder<ib::cfg::VAsio::RegistryBuilder>`
   also gained the :cpp:func:`ConfigureLogger()<ib::cfg::VAsio::RegistryBuilder::ConfigureLogger>` method to configure
   the logger of the VAsio Registry.
-- Added benchmark demo, cf. :ref:`sec:util-benchmark-demo`.
+- Added benchmark demo, cf. :ref:`changelog-outdated-reference` (``sec:util-benchmark-demo``).
 
 .. _sec:vib320-changed:
 
@@ -5299,7 +5300,7 @@ This is a Quality Assured Release.
 Added
 ~~~~~
 - Documentation for the CAN controller API: :doc:`CAN Vehicle Network Controllers <api/can>`.
-- Documentation for the Participant Controller API: :doc:`api/participantcontroller` (AFTMAGT-206).
+- Documentation for the Participant Controller API: :ref:`changelog-outdated-reference` (``api/participantcontroller``) (AFTMAGT-206).
 - Documentation for the IO Port services (AFTMAGT-201).
 - Documented Generic Messages API: (AFTMAGT-204).
 - Documented the simulation state machine and synchronization types: :doc:`simulation/simulation`
@@ -6097,3 +6098,17 @@ Changed
   /include/ib/Config.hpp moved to /include/ib/cfg/Config.hpp.
 - IoPorts are now type specific with direction. IComAdapter::CreateIoPort() has been replaced with: IComAdapter::CreateAnalog{In,Out}(), IComAdapter::CreateDigital{In,Out}(), IComAdapter::CreatePattern{In,Out}(), IComAdapter::CreatePwm{In,Out}()
 - IComAdapter::CreateGenericMessageController() has been replaced by IComAdapter::CreateGenericPublisher() and IComAdapter::CreateGenericSubscriber(), cf. updated demo Demo/GenericMessage/
+
+
+.. _changelog-outdated-reference:
+
+Outdated References
+-------------------
+
+Some references in the changelog may have been outdated by changes made to
+the documentation due to the development process.
+
+These references were replaced with a link to this notice.
+
+Please take a look at the documentation of the version of SilKit /
+IntegrationBus to which the changelog entry belongs.

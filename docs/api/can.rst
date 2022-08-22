@@ -177,7 +177,6 @@ Enumerations and Typedefs
 .. doxygenenum:: SilKit::Services::Can::CanControllerState
 .. doxygenenum:: SilKit::Services::Can::CanErrorState
 .. doxygenenum:: SilKit::Services::Can::CanTransmitStatus
-.. doxygentypedef:: SilKit::Services::Can::CanTxId
 
 Usage Examples
 --------------

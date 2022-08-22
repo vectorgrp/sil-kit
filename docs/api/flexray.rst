@@ -288,7 +288,6 @@ Enumerations and Typedefs
 .. doxygenenum:: SilKit::Services::Flexray::FlexrayClockPeriod
 .. doxygenenum:: SilKit::Services::Flexray::FlexrayChannel
 .. doxygenenum:: SilKit::Services::Flexray::FlexraySymbolPattern
-.. doxygenenum:: SilKit::Services::Flexray::FlexrayChiCommand
 .. doxygenenum:: SilKit::Services::Flexray::FlexrayTransmissionMode
 .. doxygenenum:: SilKit::Services::Flexray::FlexrayPocState
 .. doxygenenum:: SilKit::Services::Flexray::FlexraySlotModeType

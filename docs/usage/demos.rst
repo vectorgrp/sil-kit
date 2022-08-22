@@ -275,7 +275,7 @@ FlexRay Demo
 
 
 Publish & Subscribe Demo
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :widths: 17 220

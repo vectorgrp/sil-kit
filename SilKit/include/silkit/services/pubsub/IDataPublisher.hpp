@@ -39,7 +39,7 @@ public:
      *
      * Convenience method to publish data. Creates a new std::vector
      * with content copied from \p data. For highest efficiency,
-     * use \ref Publish(std::vector<uint8_t>) in combination with
+     * use \ref Publish(Util::Span<const uint8_t>) in combination with
      * std::move.
      *
      * \param data A non-owning reference to an opaque block of raw data

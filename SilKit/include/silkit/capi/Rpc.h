@@ -80,53 +80,58 @@ typedef struct {
 } SilKit_RpcCallResultEvent;
 
 /*! \brief A callback function that is called on a RPC server triggered by client.
-* \param context The user provided context pointer that was provided when this handler was registered.
-* \param server The RPC server that received the call.
-* \param event The event contains information about the call by the client.
-*/
+ * \param context The user provided context pointer that was provided when this handler was registered.
+ * \param server The RPC server that received the call.
+ * \param event The event contains information about the call by the client.
+ */
 typedef void (SilKitFPTR *SilKit_RpcCallHandler_t)(void* context, SilKit_RpcServer* server, const SilKit_RpcCallEvent* event);
 
 /*! \brief A handler that is called on a RPC client when a RPC server submitted a result to an earlier call
-*          of this client.
-* \param context The user's context pointer that was provided when this handler was registered.
-* \param client The RPC client that received the result/triggered the invocation.
-* \param event The event contains information about the results of an earlier call of this client.
-*/
+ *          of this client.
+ * \param context The user's context pointer that was provided when this handler was registered.
+ * \param client The RPC client that received the result/triggered the invocation.
+ * \param event The event contains information about the results of an earlier call of this client.
+ */
 typedef void (SilKitFPTR *SilKit_RpcCallResultHandler_t)(void* context, SilKit_RpcClient* client, const SilKit_RpcCallResultEvent* event);
 
 /*! \brief Create a RPC server on a simulation participant with the provided properties.
-* \param out Pointer to which the resulting RPC server reference will be written.
-* \param participant The simulation participant for which the RPC server should be created.
-* \param controllerName The name of this controller.
-* \param rpcSpec A struct containing all matching related information
-* \param context A user provided context pointer that is passed to the callHandler on call.
-* \param callHandler A callback function that is triggered on invocation of the server functionality.
-*/
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant,
-                                                    const char* controllerName, SilKit_RpcSpec* rpcSpec,
-                                                     void* context, SilKit_RpcCallHandler_t callHandler);
+ * \param outServer Pointer to which the resulting RPC server reference will be written.
+ * \param participant The simulation participant for which the RPC server should be created.
+ * \param controllerName The name of this controller.
+ * \param rpcSpec A struct containing all matching related information
+ * \param callHandlerContext A user provided context pointer that is passed to the callHandler on call.
+ * \param callHandler A callback function that is triggered on invocation of the server functionality.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** outServer,
+                                                               SilKit_Participant* participant,
+                                                               const char* controllerName, SilKit_RpcSpec* rpcSpec,
+                                                               void* callHandlerContext,
+                                                               SilKit_RpcCallHandler_t callHandler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_RpcServer_Create_t)(SilKit_RpcServer** out, SilKit_Participant* participant,
-                                                       const char* controllerName, SilKit_RpcSpec* rpcSpec,
-                                                       void* context,
-                                                SilKit_RpcCallHandler_t callHandler);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_RpcServer_Create_t)(SilKit_RpcServer** out,
+                                                                 SilKit_Participant* participant,
+                                                                 const char* controllerName, SilKit_RpcSpec* rpcSpec,
+                                                                 void* callHandlerContext,
+                                                                 SilKit_RpcCallHandler_t callHandler);
 
 /*! \brief Submit a result for an earlier obtained call handle to an RPC client.
-* \param self The RPC server that should submit the result of the remote procedure call.
-* \param callHandle The call handle that was obtained earlier through an SilKit_RpcCallResultHandler_t.
-* \param returnData The data that should be returned to the calling client.
-*/
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
-                                                           const SilKit_ByteVector* returnData);
+ * \param self The RPC server that should submit the result of the remote procedure call.
+ * \param callHandle The call handle that was obtained earlier through an SilKit_RpcCallResultHandler_t.
+ * \param returnData The data that should be returned to the calling client.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self,
+                                                                     SilKit_RpcCallHandle* callHandle,
+                                                                     const SilKit_ByteVector* returnData);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_RpcServer_SubmitResult_t)(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
-                                                      const SilKit_ByteVector* returnData);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_RpcServer_SubmitResult_t)(SilKit_RpcServer* self,
+                                                                       SilKit_RpcCallHandle* callHandle,
+                                                                       const SilKit_ByteVector* returnData);
 
 /*! \brief Overwrite the call handler of a RPC server.
-* \param self The RPC server of which the callback should be overwritten.
-* \param context A user provided context pointer that is passed to the handler on call.
-* \param handler A callback function that is triggered on invocation of the server functionality.
-*/
+ * \param self The RPC server of which the callback should be overwritten.
+ * \param context A user provided context pointer that is passed to the handler on call.
+ * \param handler A callback function that is triggered on invocation of the server functionality.
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context,
                                                              SilKit_RpcCallHandler_t handler);
 
@@ -134,29 +139,30 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_RpcServer_SetCallHandler_t)(SilKit
                                                         SilKit_RpcCallHandler_t handler);
 
 /*! \brief Create a RPC client on a simulation participant with the provided properties.
-* \param out Pointer to which the resulting RPC client reference will be written.
-* \param participant The simulation participant for which the RPC client should be created.
-* \param controllerName The name of this controller.
-* \param functionName The functionName by which the RPC server is identified.
-* \param mediaType A meta description of the data that will be provided by this client.
-* \param labels A list of key-value pairs of this RPC client. The labels are relevant for matching RPC clients and
-*               RPC servers.
-* \param context A user provided context that is reobtained on call result in the resultHandler.
-* \param resultHandler A callback that is called when a call result is received.
-*/
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant,
-                                                    const char* controllerName, SilKit_RpcSpec* rpcSpec,
-                                                     void* context, SilKit_RpcCallResultHandler_t resultHandler);
+ * \param outClient Pointer to which the resulting RPC client reference will be written.
+ * \param participant The simulation participant for which the RPC client should be created.
+ * \param controllerName The name of this controller.
+ * \param rpcSpec The specification of function name, media type and labels.
+ * \param resultHandlerContext A user provided context that is reobtained on call result in the resultHandler.
+ * \param resultHandler A callback that is called when a call result is received.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** outClient,
+                                                               SilKit_Participant* participant,
+                                                               const char* controllerName, SilKit_RpcSpec* rpcSpec,
+                                                               void* resultHandlerContext,
+                                                               SilKit_RpcCallResultHandler_t resultHandler);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_RpcClient_Create_t)(SilKit_RpcClient** out, SilKit_Participant* participant,
-                                                       const char* controllerName, SilKit_RpcSpec* rpcSpec,
-                                                       void* context, SilKit_RpcCallResultHandler_t resultHandler);
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_RpcClient_Create_t)(SilKit_RpcClient** out,
+                                                                 SilKit_Participant* participant,
+                                                                 const char* controllerName, SilKit_RpcSpec* rpcSpec,
+                                                                 void* resultHandlerContext,
+                                                                 SilKit_RpcCallResultHandler_t resultHandler);
 
 /*! \brief Dispatch a call to one or multiple corresponding RPC servers
-* \param self The RPC client that should trigger the remote procedure call.
-* \param outHandle The handle by which future results of this call can be identified.
-* \param argumentData The data that should be transmitted to the RPC server for this call
-*/
+ * \param self The RPC client that should trigger the remote procedure call.
+ * \param argumentData The data that should be transmitted to the RPC server for this call.
+ * \param userContext A user provided context pointer that is passed to the result handler when a result is received.
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* self,
     const SilKit_ByteVector* argumentData, void* userContext);
 
@@ -164,10 +170,10 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_RpcClient_Call_t)(SilKit_RpcClient*
     const SilKit_ByteVector* argumentData, void* userContext);
 
 /*! \brief Overwrite the call result handler of this client
-* \param self The RPC client that should trigger the remote procedure call.
-* \param context A user provided context pointer that is passed to the handler on call.
-* \param handler A callback that is called when a call result is received.
-*/
+ * \param self The RPC client that should trigger the remote procedure call.
+ * \param context A user provided context pointer that is passed to the handler on call.
+ * \param handler A callback that is called when a call result is received.
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context,
                                                                    SilKit_RpcCallResultHandler_t handler);
 

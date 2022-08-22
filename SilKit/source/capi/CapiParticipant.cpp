@@ -43,12 +43,12 @@ extern "C"
 {
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                             SilKit_ParticipantConfiguration *participantConfiguration,
-                                            const char* cParticipantName, const char* cRegistryUri)
+                                            const char* participantName, const char* registryUri)
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipant);
     ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);
-    ASSERT_VALID_POINTER_PARAMETER(cParticipantName);
-    ASSERT_VALID_POINTER_PARAMETER(cRegistryUri);
+    ASSERT_VALID_POINTER_PARAMETER(participantName);
+    ASSERT_VALID_POINTER_PARAMETER(registryUri);
     CAPI_ENTER
     {
         auto* cppParticipantConfiguration =
@@ -59,7 +59,7 @@ SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outP
             std::make_shared<SilKit::Config::ParticipantConfiguration>(*cppParticipantConfiguration);
 
         auto participant =
-            SilKit::CreateParticipant(std::move(cppSharedParticipantConfiguration), cParticipantName, cRegistryUri)
+            SilKit::CreateParticipant(std::move(cppSharedParticipantConfiguration), participantName, registryUri)
                 .release();
 
         if (participant == nullptr)

@@ -42,11 +42,11 @@ be overwritten with |SetCallResultHandler|.
 The callback provides the user context pointer passed to |Call|, the return data and a call status indicating
 success or an error during the procedure.
 
-Topic
+Function Name
 ~~~~~~~~~~~~~
 
-RpcClients and RpcServers provide a topic name which is part of their |RpcSpec|. 
-Communications only takes place among RpcClients and RpcServers with the same topic.
+RpcClients and RpcServers provide a function name which is part of their |RpcSpec|.
+Communications only takes place among RpcClients and RpcServers with the same function name.
 
 Media Type
 ~~~~~~~~~~
@@ -153,13 +153,13 @@ The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
         });
 
 RpcClient API
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 .. doxygenclass:: SilKit::Services::Rpc::IRpcClient
    :members:
 
 RpcServers API
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. doxygenclass:: SilKit::Services::Rpc::IRpcServer
    :members:
@@ -176,8 +176,3 @@ Data Structures
 
 .. doxygenclass:: SilKit::Services::Rpc::RpcSpec
    :members:
-
-.. doxygenstruct:: SilKit::Services::MatchingLabel
-   :members:
-
-

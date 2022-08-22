@@ -7,16 +7,10 @@ API can be used:
   Write or read participants that are able to connect to SIL Kit and use buses of
   all supported protocols including CAN, LIN, FlexRay, Ethernet, Pub/Sub and the RPC service.
 
-
-* **Benchmark**:
-  A simple command line tool that allows to measure SIL Kit simulation performance
-  with configurable parameters.
-
 The build system is based on cmake.
 Supported target platforms and build tools:
 * Ubuntu 18.04 (GCC 7 or later)
 * Visual Studio 2015 / 2017
-
 
 ## Build Instructions
 

@@ -38,9 +38,10 @@ struct NextSimTask
     std::chrono::nanoseconds duration{0};
 };
 
+//!< System-wide command for the simulation flow.
 struct SystemCommand
 {
-    //! The different kinds of a SystemCommand
+    //!< The different kinds of a SystemCommand
     enum class Kind : uint8_t
     {
         Invalid = 0, //!< An invalid command

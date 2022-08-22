@@ -25,6 +25,9 @@ The Participant constitutes the main entry point into the SIL Kit API.
 
 Services
 --------
+
+The services API includes common datatypes, supports various vehicular networks, and provides generic Pub/Sub and RPC facilities.
+
 Vehicle Network Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Several different vehicular networks are supported by corresponding
@@ -63,6 +66,14 @@ management.
   timeSyncService
   systemcontroller
   systemmonitor
+
+Common Data Types
+~~~~~~~~~~~~~~~~~
+
+.. toctree::
+  :maxdepth: 1
+
+  common
 
 C API
 -----

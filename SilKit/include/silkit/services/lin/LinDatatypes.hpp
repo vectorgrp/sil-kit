@@ -40,7 +40,7 @@ namespace Lin {
  */
 using LinId = uint8_t;
 
-/*! \brief The checksum model of a LIN \ref LinFrame
+/*! \brief The checksum model of a LIN \ref SilKit::Services::Lin::LinFrame
  *
  * This type is used to specify the Checksum model to be used for the LIN \ref LinFrame.
  *
@@ -64,11 +64,11 @@ enum class LinChecksumModel : uint8_t
 using LinDataLength = uint8_t;
 
 /*! \brief A LIN LinFrame
-*
-* This Type is used to provide LIN ID, checksum model, data length and data.
-*
-* *AUTOSAR Name:* Lin_PduType
-*/
+ *
+ * This Type is used to provide LIN ID, checksum model, data length and data.
+ *
+ * *AUTOSAR Name:* Lin_PduType
+ */
 struct LinFrame
 {
     LinId id{0}; //!< Lin Identifier
@@ -302,12 +302,12 @@ struct LinGoToSleepEvent
 };
 
 /*! \brief A LIN frame response update event delivered in the \ref ILinController::LinSlaveConfigurationHandler
-*
-* The event is received on a LIN Master when a LIN Slave is configured via LinController::Init().
-* This event is mainly for diagnostic purposes and can be used to keep track of LIN Ids, where
-* a response of a LIN Slave is to be expected by using \ref GetSlaveConfiguration() in the handler.
-* 
-*/
+ *
+ * The event is received on a LIN Master when a LIN Slave is configured via LinController::Init().
+ * This event is mainly for diagnostic purposes and can be used to keep track of LIN Ids, where
+ * a response of a LIN Slave is to be expected by using \ref ILinController::GetSlaveConfiguration() in the handler.
+ *
+ */
 struct LinSlaveConfigurationEvent
 {
     std::chrono::nanoseconds timestamp; //!< Time of the event.

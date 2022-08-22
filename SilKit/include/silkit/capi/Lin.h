@@ -303,13 +303,13 @@ typedef void (SilKitFPTR *SilKit_LinGoToSleepHandler_t)(void* context, SilKit_Li
                                           const SilKit_LinGoToSleepEvent* goToSleepEvent);
 
 /*! Callback type to indicate that a wakeup pulse has been received.
- *  Cf., \ref SilKit_LinController_AddWakeupHandler(WakeupHandler);
+ *  Cf., \ref SilKit_LinController_AddWakeupHandler;
  */
 typedef void (SilKitFPTR *SilKit_LinWakeupHandler_t)(void* context, SilKit_LinController* controller,
                                        const SilKit_LinWakeupEvent* wakeUpEvent);
 
 /*! Callback type to indicate that a LIN Slave configuration has been received.
- *  Cf., \ref SilKit_LinController_AddWakeupHandler(WakeupHandler);
+ *  Cf., \ref SilKit_LinController_AddLinSlaveConfigurationHandler;
  */
 typedef void (SilKitFPTR *SilKit_LinSlaveConfigurationHandler_t)(void* context, SilKit_LinController* controller,
                                           const SilKit_LinSlaveConfigurationEvent* slaveConfigurationEvent);
@@ -324,6 +324,7 @@ typedef void (SilKitFPTR *SilKit_LinSlaveConfigurationHandler_t)(void* context, 
  * \param outLinController Pointer into which the resulting LIN controller will be written (out parameter).
  * \param participant The simulation participant at which the LIN controller should be created.
  * \param name The name of the new LIN controller.
+ * \param network The network of the LIN controller to operate in.
  *
  * \return \ref SilKit_ReturnCode
  */
@@ -348,8 +349,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Create_t)(
  *  - controllerMode, either sets LIN master or LIN slave mode.
  *  - baudRate, determine transmission speeds (only used for detailed simulation).
  *  - frameResponses, a vector of LinFrameResponse. This must contain the final configuration
- * on which LIN Ids the controller will receive (LinFrameResponseMode::Rx) or respond to
- * (LinFrameResponseMode::TxUnconditional) frames. An exception is the use of \ref SendFrame() for 
+ * on which LIN Ids the controller will receive (\ref SilKit_LinFrameResponseMode_Rx) or respond to
+ * (\ref SilKit_LinFrameResponseMode_TxUnconditional) frames. An exception is the use of \ref SilKit_LinController_SendFrame for 
  * LinFrameResponseType::MasterResponse, which allows to extend the configuration during operation. 
  *
  * *AUTOSAR Name:* Lin_Init
@@ -373,8 +374,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Status_t)(SilKit_Lin
  *
  * The responseType determines if frame.data is used for the frame response or if a different node has to provide 
  * it:
- * - MasterResponse: \ref LinFrame is sent from this controller to all connected slaves using frame.data. The LIN
- * Master doesn't have to be configured with LinFrameResponseMode::TxUnconditional on this LIN ID.
+ * - MasterResponse: LinFrame is sent from this controller to all connected slaves using frame.data. The LIN
+ * Master doesn't have to be configured with SilKit_LinFrameResponseMode_TxUnconditional on this LIN ID.
  * - SlaveResponse: the frame response must be provided by a connected slave and is received by this controller.
  * - SlaveToSlave: the frame response must be provided by a connected slave and is ignored by this controller.
  *
@@ -474,10 +475,10 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_GetSlaveConfiguratio
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_GetSlaveConfiguration_t)(
     SilKit_LinController* controller, SilKit_LinSlaveConfiguration** outLinSlaveConfiguration);
 
-/*! \brief Reports the \ref LinFrameStatus of a LIN \ref LinFrame transmission and provides the transmitted frame.
+/*! \brief Reports the SilKit_LinFrameStatus of a SilKit_LinFrame and provides the transmitted frame.
  *
  * The handler is used for reception and acknowledgement of LIN frames. The direction (prefixed with 
- * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the \ref LinFrameStatus. 
+ * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the \ref SilKit_LinFrameStatus. 
  * 
  *
  * \param controller The LIN controller for which the callback should be registered.
@@ -497,6 +498,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddFrameStatusHandle
 
 /*! \brief  Remove a \ref SilKit_LinFrameStatusHandler_t by SilKit_HandlerId on this controller 
  *
+ * \param controller The LIN controller for which the callback should be removed.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  *
  * \return \ref SilKit_ReturnCode
@@ -538,6 +540,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddGoToSleepHandler_
 
 /*! \brief  Remove a \ref SilKit_LinGoToSleepHandler_t by SilKit_HandlerId on this controller 
  *
+ * \param controller The LIN controller for which the callback should be removed.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  *
  * \return \ref SilKit_ReturnCode
@@ -571,6 +574,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_AddWakeupHandler_t)(S
 
 /*! \brief  Remove a \ref SilKit_LinWakeupHandler_t by SilKit_HandlerId on this controller 
 *
+ * \param controller The LIN controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveWakeupHandler(SilKit_LinController* controller,
@@ -602,8 +606,9 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_AddLinSlaveConfigura
                                                                      SilKit_LinSlaveConfigurationHandler_t handler,
                                                                      SilKit_HandlerId* outHandlerId);
 
-/*! \brief  Remove a \ref SilKit_LinLinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller 
+/*! \brief  Remove a \ref SilKit_LinSlaveConfigurationHandler_t by SilKit_HandlerId on this controller 
  *
+ * \param controller The LIN controller for which the callback should be removed.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  *
  * \return \ref SilKit_ReturnCode

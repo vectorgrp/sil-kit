@@ -43,16 +43,17 @@ typedef uint64_t SilKit_NanosecondsWallclockTime; //!< Wall clock time since epo
 * \param outParticipant The pointer through which the simulation participant will be returned (out parameter).
 * \param participantConfiguration Configuration of the participant (see \ref SilKit_ParticipantConfiguration_FromString)
 * \param participantName Name of the participant
-* \param cRegistryUri The `silkit://` URI of the registry
+* \param registryUri The `silkit://` URI of the registry
 *
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                                       SilKit_ParticipantConfiguration* participantConfiguration,
-                                                      const char* cParticipantName, const char* cRegistryUri);
+                                                      const char* participantName, const char* registryUri);
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Participant_Create_t)(SilKit_Participant** outParticipant,
                                                          SilKit_ParticipantConfiguration* participantConfiguration,
-                                                         const char* cParticipantName, const char* cRegistryUri);
+                                                         const char* participantName, const char* registryUri);
+
 /*! \brief Destroy a simulation participant and its associated simulation elements.
 *
 * Destroys the simulation participant and its created simulation elements such as e.g. Can controllers.

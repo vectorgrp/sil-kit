@@ -174,9 +174,3 @@ Data Structures
 
 .. doxygenclass:: SilKit::Services::PubSub::PubSubSpec
    :members:
-
-.. doxygenstruct:: SilKit::Services::MatchingLabel
-   :members:
-
-
-       

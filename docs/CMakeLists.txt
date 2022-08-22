@@ -35,6 +35,12 @@ set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/xml/index.xml)
 set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
 set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
+if (${SILKIT_WARNINGS_AS_ERRORS})
+  set(SILKIT_DOXYGEN_WARN_AS_ERROR YES)
+else()
+  set(SILKIT_DOXYGEN_WARN_AS_ERROR NO)
+endif()
+
 #Replace variables inside @@ with the current values
 configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
 
@@ -50,6 +56,14 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 # - Our doc files have been updated
 # - The Sphinx config has been updated
 file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
+
+if (UNIX)
+  if (${SILKIT_WARNINGS_AS_ERRORS})
+    set(SILKIT_SPHINX_WARNINGS_AS_ERRORS_ARGUMENTS "-W;--keep-going")
+  else()
+    set(SILKIT_SPHINX_WARNINGS_AS_ERRORS_ARGUMENTS "")
+  endif()
+endif()
 
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    COMMENT "Generating docs"
@@ -68,7 +82,8 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        -d${CMAKE_CURRENT_BINARY_DIR}/sphinx-doctree
                        -T
                        -w ${CMAKE_CURRENT_BINARY_DIR}/sphinx-build-error.log
-                       -E 
+                       -E
+                       ${SILKIT_SPHINX_WARNINGS_AS_ERRORS_ARGUMENTS}
                        ${SPHINX_SOURCE} ${SPHINX_BUILD}
                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                    VERBATIM

@@ -39,25 +39,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 SILKIT_BEGIN_DECLS
 
 /*! \brief Get the corresponding static error string for a given return code.
-*
-* \param outString The pointer through which the resulting human readable error string will be returned.
-* \param returnCode The return code for which the string should be obtained.
-*
-* \ref SilKit_GetLastErrorString()
-*
-*/
+ *
+ * \param outString The pointer through which the resulting human readable error string will be returned.
+ * \param returnCode The return code for which the string should be obtained.
+ *
+ * \ref SilKit_GetLastErrorString()
+ *
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode);
 
 typedef  SilKit_ReturnCode (SilKitFPTR *SilKit_ReturnCodeToString_t)(const char** outString, SilKit_ReturnCode returnCode);
 
 /*! \brief Get a human readable error description of the last error on the current thread.
-*
-* This method is intended to get specific error messages in case of a non success return code.
-* In comparison to SilKit_ReturnCodeToString this function returns dynamic and more specific error messages.
-*
-* \return A specific string containing the last error message of the current thread.
-*
-*/
+ *
+ * This method is intended to get specific error messages in case of a non success return code.
+ * In comparison to SilKit_ReturnCodeToString this function returns dynamic and more specific error messages.
+ *
+ * \return A specific string containing the last error message of the current thread.
+ *
+ */
 SilKitAPI const char* SilKitCALL SilKit_GetLastErrorString();
 
 typedef const char*(SilKitFPTR *SilKit_GetLastErrorString_t)();
@@ -67,7 +67,7 @@ typedef const char*(SilKitFPTR *SilKit_GetLastErrorString_t)();
  * To destroy the participant configuration, call \ref SilKit_ParticipantConfiguration_Destroy.
  *
  * \param outParticipantConfiguration The pointer through which the participant configuration will be returned (out parameter).
- * \param configuration The configuration as a string (e.g., read from a configuration file or a string constant).
+ * \param participantConfigurationString The configuration as a string (e.g., read from a configuration file or a string constant).
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
@@ -79,9 +79,9 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_ParticipantConfiguration_FromStrin
 
 
 /*! \brief Destroy a participant configuration.
-*
-* \param participantConfiguration The participant configuration to be destroyed.
-*/
+ *
+ * \param participantConfiguration The participant configuration to be destroyed.
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_Destroy(
     SilKit_ParticipantConfiguration* participantConfiguration);
 

@@ -22,24 +22,9 @@ RpcServers
 .. doxygenfunction:: SilKit_RpcServer_SubmitResult
 
 A RpcServers is created with a handler to process incoming calls by RpcClients:
-.. doxygentypedef:: SilKit_CallHandler_t
-
-RpcServer Discovery
-~~~~~~~~~~~~~~~~~~~
-
-A participant can poll for already known RpcServers:
-
-.. doxygenfunction:: SilKit_DiscoverServers
-
-The method takes a handler with the discovery results:
-
-.. doxygentypedef:: SilKit_DiscoveryResultHandler_t
+.. doxygentypedef:: SilKit_RpcCallHandler_t
 
 Data Structures
 ~~~~~~~~~~~~~~~
-.. doxygenstruct:: SilKit_DiscoveryResult
-   :members:
-.. doxygenstruct:: SilKit_DiscoveryResultList
-   :members:
-.. doxygentypedef:: SilKit_CallHandle
-.. doxygentypedef:: SilKit_CallStatus
+.. doxygentypedef:: SilKit_RpcCallHandle
+.. doxygentypedef:: SilKit_RpcCallStatus

@@ -1,3 +1,5 @@
+:orphan:
+
 ==========================================
 !!! Getting Started as a SIL Kit Developer
 ==========================================
@@ -111,7 +113,8 @@ in the ``SilKit-Demos/CMakeLists.txt`` directory.
 !!! Architecture
 ~~~~~~~~~~~~~~~~
 
-Have a look at our :ref:`architecture overview <base-architecture>`.
+..
+   Have a look at our :ref:`architecture overview <base-architecture>`.
 
 
 .. _CMake: https://cmake.org

@@ -28,12 +28,13 @@ namespace Experimental {
 namespace Services {
 namespace Orchestration {
 
+//! SystemController interface for configuration of the simulation flow and system-wide commands.
 class ISystemController
 {
 public:
     virtual ~ISystemController() = default;
 
-    /*! \brief Send \ref SilKit::Services::Orchestration::SystemCommand::Kind::AbortSimulation to all participants
+    /*! \brief Sends a SilKit::Services::Orchestration::SystemCommand::Kind::AbortSimulation to all participants
     *
     *  The abort simulation command signals all participants to terminate their
     *  lifecycle, regardless of their current state.

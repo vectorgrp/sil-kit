@@ -69,7 +69,7 @@ For example, the following CMakeLists.txt is able to import the SIL Kit library 
 .. literalinclude::
    sample_silkit/CMakeLists.txt
    :language: cmake
-   :lines: 22-32
+   :lines: 22-31
 
 Properties, like include directories and compile flags, are automatically handled by the imported target.
 If you use another method to build your software you can directly use the ``SilKit/include`` and

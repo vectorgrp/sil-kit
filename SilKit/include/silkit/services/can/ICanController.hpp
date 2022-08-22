@@ -41,22 +41,22 @@ public:
     using CallbackT = std::function<void(ICanController* controller, const MsgT& msg)>;
 
     /*! Callback type to indicate that a CanFrameEvent has been received.
-    *  Cf., \ref AddFrameHandler(FrameHandler);
+    *  Cf., \ref ICanController::AddFrameHandler(FrameHandler,DirectionMask);
     */
     using FrameHandler = CallbackT<CanFrameEvent>;
 
     /*! Callback type to indicate that the ::CanControllerState has changed.
-    *  Cf., \ref AddStateChangeHandler(StateChangeHandler);
+    *  Cf., \ref ICanController::AddStateChangeHandler(StateChangeHandler);
     */
     using StateChangeHandler = CallbackT<CanStateChangeEvent>;
 
     /*! Callback type to indicate that the controller ::CanErrorState has changed.
-    *  Cf., \ref AddErrorStateChangeHandler(ErrorStateChangeHandler);
+    *  Cf., \ref ICanController::AddErrorStateChangeHandler(ErrorStateChangeHandler);
     */
     using ErrorStateChangeHandler = CallbackT<CanErrorStateChangeEvent>;
 
     /*! Callback type to indicate that a CanFrameTransmitEvent has been received.
-    *  Cf., \ref AddFrameTransmitHandler(FrameTransmitHandler);
+    *  Cf., \ref ICanController::AddFrameTransmitHandler(FrameTransmitHandler,CanTransmitStatusMask);
     */
     using FrameTransmitHandler = CallbackT<CanFrameTransmitEvent>;
 
@@ -117,12 +117,10 @@ public:
      * NB: The CanFrame must provide a valid CAN
      * ID and valid flags. The controller
      * must be in the Started state to transmit and receive messages.
-     * 
-     * \param userContext An optional user provided pointer that is
-     * reobtained when receiving the message.
      *
-     * \return Unique TX identifier to relate the request to following
-     * CanFrameTransmitEvent messages.
+     * \param msg The frame to transmit.
+     * \param userContext An optional user provided pointer that is
+     * reobtained in the \ref FrameTransmitHandler.
      */
     virtual void SendFrame(const CanFrame& msg, void* userContext = nullptr) = 0;
 
@@ -131,12 +129,12 @@ public:
      * The registered handler is called when the controller receives a
      * new CanFrame.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddFrameHandler(FrameHandler handler,
                                       DirectionMask directionMask = (DirectionMask)TransmitDirection::RX) = 0;
 
-    /*! \brief Remove a FrameHandler by HandlerId on this controller 
+    /*! \brief Remove a FrameHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -149,11 +147,11 @@ public:
      * state changes from CanControllerState::Uninit to
      * CanControllerState::Started.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddStateChangeHandler(StateChangeHandler handler) = 0;
 
-    /*! \brief Remove a StateChangeHandler by HandlerId on this controller 
+    /*! \brief Remove a StateChangeHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -169,11 +167,11 @@ public:
      * NB: Only supported in a detailed simulation. In simple simulation,
      * the handler is never called.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddErrorStateChangeHandler(ErrorStateChangeHandler handler) = 0;
 
-    /*! \brief Remove an ErrorStateChangeHandler by HandlerId on this controller 
+    /*! \brief Remove an ErrorStateChangeHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -193,7 +191,7 @@ public:
             | (CanTransmitStatusMask)CanTransmitStatus::DuplicatedTransmitId
             | (CanTransmitStatusMask)CanTransmitStatus::TransmitQueueFull) = 0;
 
-    /*! \brief Remove a FrameTransmitHandler by HandlerId on this controller 
+    /*! \brief Remove a FrameTransmitHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */

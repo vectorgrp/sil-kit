@@ -17,7 +17,6 @@ DataSubscribers
 ~~~~~~~~~~~~~~~
 .. doxygenfunction:: SilKit_DataSubscriber_Create
 .. doxygenfunction:: SilKit_DataSubscriber_SetDataMessageHandler
-.. doxygenfunction:: SilKit_DataSubscriber_AddExplicitDataMessageHandler
 
 Handlers
 ~~~~~~~~

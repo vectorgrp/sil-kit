@@ -142,6 +142,7 @@ typedef void (SilKitFPTR *SilKit_EthernetBitrateChangeHandler_t)(void* context, 
 * \param outController A pointer to a pointer in which the Ethernet controller will be stored (out parameter).
 * \param participant The simulation participant for which the Ethernet controller should be created.
 * \param name The utf8 encoded name of the new Ethernet controller.
+* \param network The network of the Ethernet controller to operate in.
 * \result A return code identifying the success/failure of the call.
 * ! \note The object returned must not be deallocated using free()!
 * 
@@ -211,6 +212,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddFrameHandler
 
 /*! \brief  Remove a \ref SilKit_EthernetFrameHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller,
@@ -250,6 +252,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddFrameTransmi
 
 /*! \brief  Remove a \ref SilKit_EthernetFrameTransmitHandler_t by SilKit_HandlerId on this controller
 *
+* \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller,
@@ -286,6 +289,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddStateChangeH
 
 /*! \brief  Remove a \ref SilKit_EthernetStateChangeHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller,
@@ -318,6 +322,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_AddBitrateChang
                                                                           SilKit_HandlerId* outHandlerId);
 /*! \brief  Remove a \ref SilKit_EthernetBitrateChangeHandler_t by SilKit_HandlerId on this controller 
 *
+* \param controller The Ethernet controller for which the callback should be removed.
 * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
 */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller,

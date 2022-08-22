@@ -50,10 +50,9 @@ public:
     /*! \brief Register a callback that is executed once communication with 
      * controllers is possible.
      *
-     * The handler is called after \ref SystemState::CommunicationReady
-     * is reached.
+     * The handler is called after \ref SystemState::CommunicationInitialized is reached.
      * This handler is invoked on the SilKit I/O worker thread, and receiving messages during the handler invocation is not possible.
-     * For an asynchronous invocation, see \ref SetCommunicationReadyHandlerAsync and \ref CompleteCommunicationReadyHandler.
+     * For an asynchronous invocation, see \ref SetCommunicationReadyHandlerAsync and \ref CompleteCommunicationReadyHandlerAsync.
      * After the handler has been processed, the participant switches to the \ref ParticipantState::ReadyToRun state.
      */
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
@@ -61,7 +60,7 @@ public:
     /*! \brief Register a callback that is executed once all communication channels between participants
     *          with a lifecycle have been set up and are ready for communication.
     *
-    * The handler is called after \ref SystemState::CommunicationReady is reached.
+    * The handler when the participant enters the \ref ParticipantState::CommunicationInitialized.
     * The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
     * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
     * The CommunicationReadyHandler is executed in an internal thread and must not be blocked by the user.
@@ -70,9 +69,10 @@ public:
     */ 
     virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
 
-    //!< Notify that the async CommunicationReadyHandler is completed.
-    //! 
-    //! This method must not be invoked from within a CommunicationReadyHandler.
+    /*! \brief Notify that the async CommunicationReadyHandler is completed.
+     *
+     * This method must not be invoked from within a CommunicationReadyHandler.
+     */
     virtual void CompleteCommunicationReadyHandlerAsync() = 0;
 
     /*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters ParticipantState::Run.
@@ -88,8 +88,8 @@ public:
 
     /*! \brief Register a callback that is executed on simulation stop.
      *
-     * The handler is called when a \ref SystemCommand::Kind::Stop has been
-     * received. It is executed in the context of an internal
+     * The handler is called when the participant enters the \ref ParticipantState::Stopping state.
+     * It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Stopped state.
@@ -101,8 +101,8 @@ public:
 
     /*! \brief Register a callback that is executed on simulation shutdown.
      *
-     * The handler is called when the \ref SystemCommand::Kind::Shutdown
-     * has been received. It is executed in the context of an internal
+     * The handler is called when the participant enters the \ref ParticipantState::ShuttingDown state.
+     * It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Shutdown state and is allowed to terminate.
@@ -114,8 +114,8 @@ public:
 
     /*! \brief Register a callback that is executed on simulation shutdown.
      *
-     * The handler is called when the \ref SystemCommand::Kind::Shutdown
-     * has been received. It is executed in the context of an internal
+     * The handler is called when the participant enters the \ref ParticipantState::Aborting.
+     * It is executed in the context of an internal
      * thread that received the command. After the handler has been
      * processed, the participant switches to the
      * \ref ParticipantState::Shutdown state and is allowed to terminate.

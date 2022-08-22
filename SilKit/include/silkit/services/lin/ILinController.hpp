@@ -33,7 +33,7 @@ namespace Lin {
 
 /*! 
  * The LIN controller can assume the role of a LIN master or a LIN slave. All LIN nodes must be configured with their
- * respective role using \ref LinController::Init() to perform data transmission and reception.  
+ * respective role using \ref ILinController::Init(LinControllerConfig) to perform data transmission and reception.
  *
  * AUTOSAR-like LIN interface:
  *
@@ -76,7 +76,7 @@ public:
 
     /*! Callback type to indicate that a LIN Slave configuration has been received.
      *  
-     * Triggered when a remote LIN Slave calls LinController::Init(LinControllerConfig)
+     * Triggered when a remote LIN Slave calls \ref ILinController::Init(LinControllerConfig)
      *  Cf., \ref AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler);
      */
     using LinSlaveConfigurationHandler = CallbackT<LinSlaveConfigurationEvent>;
@@ -183,16 +183,16 @@ public:
      */
     virtual LinSlaveConfiguration GetSlaveConfiguration() = 0;
 
-    /*! \brief Reports the \ref LinFrameStatus of a LIN \ref LinFrame transmission and provides the transmitted frame.
+    /*! \brief Reports the LinFrameStatus of a LinFrame and provides the transmitted frame.
      *
      * The FrameStatusHandler is used for reception and acknowledgement of LIN frames. The direction (prefixed with 
      * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the \ref LinFrameStatus. 
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddFrameStatusHandler(FrameStatusHandler handler) = 0;
 
-    /*! \brief Remove a FrameStatusHandler by HandlerId on this controller 
+    /*! \brief Remove a FrameStatusHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -212,11 +212,11 @@ public:
      * only called for LIN ID 0x3C if configured as
      * LinFrameResponseMode::Rx.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddGoToSleepHandler(GoToSleepHandler handler) = 0;
 
-    /*! \brief Remove a GoToSleepHandler by HandlerId on this controller 
+    /*! \brief Remove a GoToSleepHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -228,11 +228,11 @@ public:
      * operational mode on wake up pulse detection. I.e.,
      * WakeInternal() must be called manually.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddWakeupHandler(WakeupHandler handler) = 0;
 
-    /*! \brief Remove a WakeupHandler by HandlerId on this controller 
+    /*! \brief Remove a WakeupHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -242,16 +242,16 @@ public:
      * LinController::Init(LinControllerConfig) 
      *
      * This callback is mainly for diagnostic purposes and is NOT needed for regular LIN controller operation. 
-     * It can be used to call \ref LinController::GetSlaveConfiguration to keep track of LIN Ids, where
+     * It can be used to call \ref ILinController::GetSlaveConfiguration to keep track of LIN Ids, where
      * a response of a LIN Slave is to be expected.
      * 
      * Requires \ref LinControllerMode::Master.
      * 
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual HandlerId AddLinSlaveConfigurationHandler(LinSlaveConfigurationHandler handler) = 0;
 
-    /*! \brief Remove a LinSlaveConfigurationHandler by HandlerId on this controller 
+    /*! \brief Remove a LinSlaveConfigurationHandler by \ref SilKit::Util::HandlerId on this controller
      *
      * Requires \ref LinControllerMode::Master.
      * 

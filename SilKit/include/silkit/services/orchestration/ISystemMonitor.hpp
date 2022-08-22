@@ -63,11 +63,11 @@ public:
      * If the current SystemState is not \ref SystemState::Invalid,
      * the handler will be called immediately.
      *
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual auto AddSystemStateHandler(SystemStateHandler handler) -> HandlerId = 0;
 
-    /*! \brief Remove a SystemStateHandler by HandlerId on this monitor
+    /*! \brief Remove a SystemStateHandler by \ref SilKit::Util::HandlerId on this monitor
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -78,11 +78,11 @@ public:
      * The handler will be called immediately for any participant that is
      * not in \ref ParticipantState::Invalid.
      *
-     * \return Returns a \ref HandlerId that can be used to remove the callback.
+     * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
     virtual auto AddParticipantStatusHandler(ParticipantStatusHandler handler) -> HandlerId = 0;
 
-    /*! \brief Remove a ParticipantStatusHandler by HandlerId on this monitor
+    /*! \brief Remove a ParticipantStatusHandler by \ref SilKit::Util::HandlerId on this monitor
      *
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
@@ -112,7 +112,7 @@ public:
      */
     virtual void SetParticipantDisconnectedHandler(ParticipantDisconnectedHandler handler) = 0;
 
-    /*! \brief Check if a participant identified by \ref participantName is present.
+    /*! \brief Check if a participant identified by the participantName is present.
      *
      * @param participantName The name of the participant for which presence is queried.
      * @return true if the participant is present
