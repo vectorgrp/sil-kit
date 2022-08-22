@@ -8,10 +8,17 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.3] - 2022-08-22
 --------------------
 
+Compatibility with 4.0.2
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: Yes
+
 Added
 ~~~~~
 
-- Lin
+- LIN
 
   - ``SilKit/include/silkit/services/lin/ILinController.hpp``:
 
@@ -22,7 +29,7 @@ Added
       nodes  configured with `LinFrameResponseMode::RX` on that id. The first transmission will set the checksum model
       and / or data length.
 
-- Can
+- CAN
 
   - Added ``SilKit_CanTransmitStatus_DefaultMask``.
 
@@ -33,7 +40,7 @@ Added
 Changed
 ~~~~~~~
 
-- Lin
+- LIN
 
   - ``SilKit/include/silkit/services/lin/ILinController.hpp``:
 
@@ -47,7 +54,7 @@ Changed
 
   - Moved the headers from ``silkit/util/serdes/sil/*.hpp`` to ``silkit/util/serdes/*.hpp``.
 
-- Can
+- CAN
 
   - Removed unused ``SilKit_CanTransmitStatus_DuplicatedTransmitId`` and ``SilKit::Services::Can::CanTransmitStatus::DuplicatedTransmitId`` enumerators.
 
@@ -81,13 +88,6 @@ Fixed
 - Coordinated, but non-required participants that received the required participant list before calling 
   `ILifecycleService::StartLifecycle()` did not go to the error state.
 
-
-Compatibility with 4.0.2
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Application binary interface (ABI): No
-- Application software interface (API): No
-- Middleware network protocol: Yes
 
 [4.0.2] - 2022-08-15
 --------------------
