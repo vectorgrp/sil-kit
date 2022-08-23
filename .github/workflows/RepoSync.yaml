@@ -9,6 +9,9 @@ jobs:
     environment: SyncRemoteRepoEnv
     
     steps:
+      - run: git tag -d $(git tag -l)
+        shell: bash
+
       - uses: actions/checkout@v1
 
       - uses: vikabgm/repo-sync-action@main
