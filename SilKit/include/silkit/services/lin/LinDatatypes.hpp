@@ -51,7 +51,7 @@ using LinId = SilKit_LinId;
 enum class LinChecksumModel : SilKit_LinChecksumModel
 {
     //! Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
-    Unknown = SilKit_LinChecksumModel_Undefined,
+    Unknown = SilKit_LinChecksumModel_Unknown,
     //! Enhanced checksum model
     Enhanced = SilKit_LinChecksumModel_Enhanced,
     //! Classic checksum model

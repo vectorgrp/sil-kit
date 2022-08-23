@@ -92,7 +92,7 @@ typedef uint8_t SilKit_LinId;
  * This type is used to specify the Checksum model to be used for the LIN \ref SilKit_LinFrame.
  */
 typedef uint8_t SilKit_LinChecksumModel;
-#define SilKit_LinChecksumModel_Undefined ((SilKit_LinChecksumModel)0) //!< Undefined / unconfigured checksum model
+#define SilKit_LinChecksumModel_Unknown ((SilKit_LinChecksumModel)0) //!< Unknown checksum model. If configured with this value, the checksum model of the first reception will be used.
 #define SilKit_LinChecksumModel_Enhanced ((SilKit_LinChecksumModel)1) //!< Enhanced checksum model
 #define SilKit_LinChecksumModel_Classic ((SilKit_LinChecksumModel)2) //!< Classic checksum model
 
