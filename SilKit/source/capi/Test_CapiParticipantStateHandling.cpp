@@ -70,13 +70,14 @@ protected:
     {
         uint32_t numNames = 2;
         const char* names[2] = {"Participant1", "Participant2"};
+
         workflowConfiguration = (SilKit_WorkflowConfiguration*)malloc(sizeof(SilKit_WorkflowConfiguration));
-        if (workflowConfiguration != NULL)
-        {
-            Create_StringList(&workflowConfiguration->requiredParticipantNames, names, numNames);
-        }
+        [this] {
+            ASSERT_NE(workflowConfiguration, nullptr);
+        }();
 
         SilKit_Struct_Init(SilKit_WorkflowConfiguration, *workflowConfiguration);
+        Create_StringList(&workflowConfiguration->requiredParticipantNames, names, numNames);
     }
 
     SilKit_WorkflowConfiguration* workflowConfiguration;
