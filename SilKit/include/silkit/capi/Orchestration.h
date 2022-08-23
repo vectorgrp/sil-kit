@@ -31,94 +31,125 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 SILKIT_BEGIN_DECLS
 
-//!< The state of a participant.
+/*! Simulation time */
+typedef uint64_t SilKit_NanosecondsTime;
+
+/*! Wall clock time since epoch */
+typedef uint64_t SilKit_NanosecondsWallclockTime;
+
+
+/*! The state of a participant. */
 typedef int16_t SilKit_ParticipantState;
-#define SilKit_ParticipantState_Invalid ((SilKit_ParticipantState)0) //!< An invalid participant state
-#define SilKit_ParticipantState_ServicesCreated ((SilKit_ParticipantState)10) //!< The controllers created state
-#define SilKit_ParticipantState_CommunicationInitializing \
-    ((SilKit_ParticipantState)20) //!< The communication initializing state
-#define SilKit_ParticipantState_CommunicationInitialized \
-    ((SilKit_ParticipantState)30) //!< The communication initialized state
-#define SilKit_ParticipantState_ReadyToRun ((SilKit_ParticipantState)40) //!< The initialized state
-#define SilKit_ParticipantState_Running ((SilKit_ParticipantState)50) //!< The running state
-#define SilKit_ParticipantState_Paused ((SilKit_ParticipantState)60) //!< The paused state
-#define SilKit_ParticipantState_Stopping ((SilKit_ParticipantState)70) //!< The stopping state
-#define SilKit_ParticipantState_Stopped ((SilKit_ParticipantState)80) //!< The stopped state
-#define SilKit_ParticipantState_Error ((SilKit_ParticipantState)90) //!< The error state
-#define SilKit_ParticipantState_ShuttingDown ((SilKit_ParticipantState)100) //!< The shutting down state
-#define SilKit_ParticipantState_Shutdown ((SilKit_ParticipantState)110) //!< The shutdown state
-#define SilKit_ParticipantState_Aborting ((SilKit_ParticipantState)120) //!< The aborting state
 
-//!< The state of a system, deduced by states of the required participants.
+/*! An invalid participant state */
+#define SilKit_ParticipantState_Invalid                     ((SilKit_ParticipantState)   0)
+/*! The controllers created state */
+#define SilKit_ParticipantState_ServicesCreated             ((SilKit_ParticipantState)  10)
+/*! The communication initializing state */
+#define SilKit_ParticipantState_CommunicationInitializing   ((SilKit_ParticipantState)  20)
+/*! The communication initialized state */
+#define SilKit_ParticipantState_CommunicationInitialized    ((SilKit_ParticipantState)  30)
+/*! The initialized state */
+#define SilKit_ParticipantState_ReadyToRun                  ((SilKit_ParticipantState)  40)
+/*! The running state */
+#define SilKit_ParticipantState_Running                     ((SilKit_ParticipantState)  50)
+/*! The paused state */
+#define SilKit_ParticipantState_Paused                      ((SilKit_ParticipantState)  60)
+/*! The stopping state */
+#define SilKit_ParticipantState_Stopping                    ((SilKit_ParticipantState)  70)
+/*! The stopped state */
+#define SilKit_ParticipantState_Stopped                     ((SilKit_ParticipantState)  80)
+/*! The error state */
+#define SilKit_ParticipantState_Error                       ((SilKit_ParticipantState)  90)
+/*! The shutting down state */
+#define SilKit_ParticipantState_ShuttingDown                ((SilKit_ParticipantState) 100)
+/*! The shutdown state */
+#define SilKit_ParticipantState_Shutdown                    ((SilKit_ParticipantState) 110)
+/*! The aborting state */
+#define SilKit_ParticipantState_Aborting                    ((SilKit_ParticipantState) 120)
+
+
+/*! The state of a system, deduced by states of the required participants. */
 typedef int16_t SilKit_SystemState;
-#define SilKit_SystemState_Invalid ((SilKit_SystemState)0) //!< An invalid participant state
-#define SilKit_SystemState_ServicesCreated ((SilKit_SystemState)10) //!< The controllers created state
-#define SilKit_SystemState_CommunicationInitializing ((SilKit_SystemState)20) //!< The communication initializing state
-#define SilKit_SystemState_CommunicationInitialized ((SilKit_SystemState)30) //!< The communication initialized state
-#define SilKit_SystemState_ReadyToRun ((SilKit_SystemState)40) //!< The initialized state
-#define SilKit_SystemState_Running ((SilKit_SystemState)50) //!< The running state
-#define SilKit_SystemState_Paused ((SilKit_SystemState)60) //!< The paused state
-#define SilKit_SystemState_Stopping ((SilKit_SystemState)70) //!< The stopping state
-#define SilKit_SystemState_Stopped ((SilKit_SystemState)80) //!< The stopped state
-#define SilKit_SystemState_Error ((SilKit_SystemState)90) //!< The error state
-#define SilKit_SystemState_ShuttingDown ((SilKit_SystemState)100) //!< The shutting down state
-#define SilKit_SystemState_Shutdown ((SilKit_SystemState)110) //!< The shutdown state
-#define SilKit_SystemState_Aborting ((SilKit_SystemState)120) //!< The aborting state
+
+/*! An invalid participant state */
+#define SilKit_SystemState_Invalid                      ((SilKit_SystemState)   0)
+/*! The controllers created state */
+#define SilKit_SystemState_ServicesCreated              ((SilKit_SystemState)  10)
+/*! The communication initializing state */
+#define SilKit_SystemState_CommunicationInitializing    ((SilKit_SystemState)  20)
+/*! The communication initialized state */
+#define SilKit_SystemState_CommunicationInitialized     ((SilKit_SystemState)  30)
+/*! The initialized state */
+#define SilKit_SystemState_ReadyToRun                   ((SilKit_SystemState)  40)
+/*! The running state */
+#define SilKit_SystemState_Running                      ((SilKit_SystemState)  50)
+/*! The paused state */
+#define SilKit_SystemState_Paused                       ((SilKit_SystemState)  60)
+/*! The stopping state */
+#define SilKit_SystemState_Stopping                     ((SilKit_SystemState)  70)
+/*! The stopped state */
+#define SilKit_SystemState_Stopped                      ((SilKit_SystemState)  80)
+/*! The error state */
+#define SilKit_SystemState_Error                        ((SilKit_SystemState)  90)
+/*! The shutting down state */
+#define SilKit_SystemState_ShuttingDown                 ((SilKit_SystemState) 100)
+/*! The shutdown state */
+#define SilKit_SystemState_Shutdown                     ((SilKit_SystemState) 110)
+/*! The aborting state */
+#define SilKit_SystemState_Aborting                     ((SilKit_SystemState) 120)
 
 
-//!< The OperationMode for lifecycle service.
+/*! The OperationMode for lifecycle service. */
 typedef int8_t SilKit_OperationMode;
-#define SilKit_OperationMode_Invalid ((SilKit_OperationMode)0) //!< An invalid operation mode
-#define SilKit_OperationMode_Coordinated ((SilKit_OperationMode)10) //!< The coordinated operation mode
-#define SilKit_OperationMode_Autonomous ((SilKit_OperationMode)20) //!< The autonomous operation mode
+
+/*! An invalid operation mode */
+#define SilKit_OperationMode_Invalid        ((SilKit_OperationMode)  0)
+/*! The coordinated operation mode */
+#define SilKit_OperationMode_Coordinated    ((SilKit_OperationMode) 10)
+/*! The autonomous operation mode */
+#define SilKit_OperationMode_Autonomous     ((SilKit_OperationMode) 20)
 
 
-typedef uint64_t SilKit_NanosecondsTime; //!< Simulation time
-
-typedef uint64_t SilKit_NanosecondsWallclockTime; //!< Wall clock time since epoch
-
-//!< Details about a status change of a participant.
+/*! Details about a status change of a participant. */
 typedef struct
 {
     SilKit_StructHeader structHeader;
-    const char* participantName; //!< Name of the participant.
-    SilKit_ParticipantState participantState; //!< The new state of the participant.
-    const char* enterReason; //!< The reason for the participant to enter the new state.
-    SilKit_NanosecondsWallclockTime enterTime; //!< The enter time of the participant.
-    SilKit_NanosecondsWallclockTime refreshTime; //!< The refresh time.
+    const char* participantName; /*!< Name of the participant. */
+    SilKit_ParticipantState participantState; /*!< The new state of the participant. */
+    const char* enterReason; /*!< The reason for the participant to enter the new state. */
+    SilKit_NanosecondsWallclockTime enterTime; /*!< The enter time of the participant. */
+    SilKit_NanosecondsWallclockTime refreshTime; /*!< The refresh time. */
 } SilKit_ParticipantStatus;
 
-//!< Configuration of the simulation workflow
+
+/*! Configuration of the simulation workflow */
 typedef struct
 {
     SilKit_StructHeader structHeader;
-    SilKit_StringList*
-        requiredParticipantNames; //!< Participants that are waited for when coordinating the simulation start/stop.
-
+    /*! Participants that are waited for when coordinating the simulation start/stop. */
+    SilKit_StringList* requiredParticipantNames;
 } SilKit_WorkflowConfiguration;
 
-typedef struct SilKit_SystemMonitor SilKit_SystemMonitor;
-typedef struct SilKit_LifecycleService SilKit_LifecycleService;
-typedef struct SilKit_TimeSyncService SilKit_TimeSyncService;
 
-/*! \brief Create a system monitor at this SIL Kit simulation participant.
- * \param outSystemMonitor Pointer that refers to the resulting sytem monitor (out parameter).
- * \param participant The simulation participant at which the system monitor should be created.
- *
- * The object returned must not be deallocated using free()!
- */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
-                                                        SilKit_Participant* participant);
-
-typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outSystemMonitor,
-                                                           SilKit_Participant* participant);
-
-//!< The LifecycleLifecycle options
+/*! The LifecycleLifecycle options */
 typedef struct SilKit_LifecycleConfiguration
 {
     SilKit_StructHeader structHeader;
     SilKit_OperationMode operationMode;
 } SilKit_LifecycleConfiguration;
+
+
+typedef struct SilKit_SystemMonitor SilKit_SystemMonitor;
+typedef struct SilKit_LifecycleService SilKit_LifecycleService;
+typedef struct SilKit_TimeSyncService SilKit_TimeSyncService;
+
+
+/*
+ *
+ * Lifecycle Service
+ *
+ */
 
 
 /*! \brief Create a lifecycle service at this SIL Kit simulation participant.
@@ -136,22 +167,10 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Create_t)(SilKit_
                                                               SilKit_Participant* participant,
                                                               const SilKit_LifecycleConfiguration* startConfiguration);
 
-/*! \brief Create a time sync service at this SIL Kit simulation participant.
- * \param outTimeSyncService Pointer that refers to the resulting time sync service (out parameter).
- * \param lifecycleService The lifecyle service at which the time sync service should be created.
- *
- * The object returned must not be deallocated using free()!
- */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTimeSyncService,
-                                                          SilKit_LifecycleService* lifecycleService);
-
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
-                                                             SilKit_Participant* lifecycleService);
-
 /*! \brief  The handler to be called on initialization
  *
  * \param context The user provided context passed in \ref SilKit_LifecycleService_SetCommunicationReadyHandler
-  * \param lifecycleService The lifecycle service receiving the update.
+ * \param lifecycleService The lifecycle service receiving the update.
  */
 typedef void(SilKitFPTR* SilKit_LifecycleService_CommunicationReadyHandler_t)(
     void* context, SilKit_LifecycleService* lifecycleService);
@@ -177,19 +196,19 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_SetCommunicationRe
     SilKit_LifecycleService_CommunicationReadyHandler_t handler);
 
 /*! \brief Register a callback that is executed once all communication channels between participants
-*          with a lifecycle have been set up and are ready for communication.
-*
-* The handler is called after \ref SilKit_ParticipantState_CommunicationInitialized is reached.
-* The API user has to signal the completion of the handler by invoking 
-* \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync.
-* Note that \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync may not be called from within any SilKit_LifecycleService_CommunicationReadyHandler_t.
-* The participant remains in its state until \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync is 
-* invoked and then switches to the \ref SilKit_ParticipantState_ReadyToRun.
-* 
-* \param lifecycleService The lifecycle service receiving the (re-)initialization command
-* \param context A user provided context accessible in the handler
-* \param handler The handler to be called on initialization
-*/ 
+ *          with a lifecycle have been set up and are ready for communication.
+ *
+ * The handler is called after \ref SilKit_ParticipantState_CommunicationInitialized is reached.
+ * The API user has to signal the completion of the handler by invoking
+ * \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync.
+ * Note that \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync may not be called from within any SilKit_LifecycleService_CommunicationReadyHandler_t.
+ * The participant remains in its state until \ref SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync is
+ * invoked and then switches to the \ref SilKit_ParticipantState_ReadyToRun.
+ *
+ * \param lifecycleService The lifecycle service receiving the (re-)initialization command
+ * \param context A user provided context accessible in the handler
+ * \param handler The handler to be called on initialization
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
 
@@ -208,16 +227,16 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_CompleteCommunica
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync_t)(
     SilKit_LifecycleService* lifecycleService);
 
-/*! \brief  This handler is triggered just before the lifecylce service changes to ParticipantState::Running.
+/*! \brief  This handler is triggered just before the lifecylce service changes to SilKit_ParticipantState_Running.
  * It is only triggered if the participant does NOT use virtual time synchronization.
- * It does not block other participants from changing to ParticipantState::Running and should only be used for lightweight operations such as starting timers.
+ * It does not block other participants from changing to SilKit_ParticipantState_Running and should only be used for lightweight operations such as starting timers.
  *
  * \param context The user provided context passed in \ref SilKit_LifecycleService_SetCommunicationReadyHandler.
  * \param lifecycleService The lifecycle service receiving the update.
  */
 typedef void (SilKitFPTR *SilKit_LifecycleService_StartingHandler_t)(void* context, SilKit_LifecycleService* lifecycleService);
 
-/*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters ParticipantState::Run.
+/*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters SilKit_ParticipantState_Running.
  *
  * This handler is triggered just before the participant changes to
  * \ref SilKit::Services::Orchestration::ParticipantState::Running.
@@ -316,6 +335,94 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetAbortHandler(
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetAbortHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler);
 
+/*! \brief Start the lifecycle.
+ *
+ * \param lifecycleService The instance of the lifecycleService.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(
+    SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_StartLifecycle_t)(
+    SilKit_LifecycleService* lifecycleService);
+
+/*! \brief Wait for to asynchronous run operation to complete and return the final participant state
+ *
+ * Blocks until the simulation is shutdown. Prior to this method,
+ * \ref SilKit_LifecycleService_StartLifecycle has to be called.
+ *
+ * \param lifecycleService The lifecycle service to wait for completing the asynchronous run operation.
+ * \param outParticipantState Pointer for storing the final participant state (out parameter).
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_WaitForLifecycleToComplete(
+    SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_WaitForLifecycleToComplete_t)(
+    SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
+
+/*! \brief Pause execution of the participant
+ *
+ * Switch to \ref SilKit_ParticipantState_Paused due to the provided \p reason.
+ *
+ * When a client is in state \ref SilKit_ParticipantState_Paused,
+ * it must not be considered as unresponsive even if a
+ * health monitoring related timeout occurs.
+ *
+ * Precondition: State() == \ref SilKit_ParticipantState_Running
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Pause(SilKit_LifecycleService* lifecycleService,
+    const char* reason);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Pause_t)(SilKit_LifecycleService* lifecycleService,
+    const char* reason);
+
+/*! \brief Switch back to \ref SilKit_ParticipantState_Running
+ * after having paused.
+ *
+ * Precondition: State() == \ref SilKit_ParticipantState_Paused
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Continue(SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Continue_t)(SilKit_LifecycleService* lifecycleService);
+
+/*! \brief Stop execution of the participant.
+ *
+ * Allows the participant to exit the RunAsync loop, e.g., if it
+ * is unable to further progress its simulation.
+ *
+ * Calls the StopHandler and then switches to the
+ * \ref SilKit_ParticipantState_Stopped state.
+ *
+ * NB: In general, Stop should not be called by the participants
+ * as the end of simulation is governed by the central execution
+ * controller. This method should only be used if the client
+ * cannot participate in the system simulation anymore.
+ *
+ * Precondition: State() == \ref SilKit_ParticipantState_Running
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_LifecycleService* lifecycleService, const char* reason);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Stop_t)(SilKit_LifecycleService* lifecycleService, const char* reason);
+
+
+/*
+ *
+ * Time-Sync Service
+ *
+ */
+
+
+/*! \brief Create a time sync service at this SIL Kit simulation participant.
+ * \param outTimeSyncService Pointer that refers to the resulting time sync service (out parameter).
+ * \param lifecycleService The lifecyle service at which the time sync service should be created.
+ *
+ * The object returned must not be deallocated using free()!
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTimeSyncService,
+    SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Create_t)(SilKit_TimeSyncService** outTimeSyncService,
+    SilKit_Participant* lifecycleService);
+
 /*! \brief The handler to be called if the simulation task is due
  *
  * \param context The user provided context passed in \ref SilKit_TimeSyncService_SetSimulationStepHandler
@@ -375,33 +482,28 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_CompleteSimulation
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_CompleteSimulationStep_t)(SilKit_TimeSyncService* timeSyncService);
 
-/*! \brief Pause execution of the participant
-  *
-  * Switch to \ref SilKit_ParticipantState_Paused due to the provided \p reason.
-  *
-  * When a client is in state \ref SilKit_ParticipantState_Paused,
-  * it must not be considered as unresponsive even if a
-  * health monitoring related timeout occurs.
-  *
-  * Precondition: State() == \ref SilKit_ParticipantState_Running
-  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Pause(SilKit_LifecycleService* lifecycleService,
-                                                          const char* reason);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Pause_t)(SilKit_LifecycleService* lifecycleService,
-                                                             const char* reason);
+/*
+ *
+ * System Monitor
+ *
+ */
 
-/*! \brief Switch back to \ref SilKit_ParticipantState_Running
-  * after having paused.
-  *
-  * Precondition: State() == \ref SilKit_ParticipantState_Paused
-  */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Continue(SilKit_LifecycleService* lifecycleService);
 
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Continue_t)(SilKit_LifecycleService* lifecycleService);
+/*! \brief Create a system monitor at this SIL Kit simulation participant.
+ * \param outSystemMonitor Pointer that refers to the resulting sytem monitor (out parameter).
+ * \param participant The simulation participant at which the system monitor should be created.
+ *
+ * The object returned must not be deallocated using free()!
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
+    SilKit_Participant* participant);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_SystemMonitor_Create_t)(SilKit_SystemMonitor** outSystemMonitor,
+    SilKit_Participant* participant);
 
 /*! \brief Get the current participant state of the participant given by participantName
-  */
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantStatus* outParticipantState,
                                                                       SilKit_SystemMonitor* systemMonitor,
                                                                       const char* participantName);
@@ -410,7 +512,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_GetParticipantStatus
                                                                          SilKit_SystemMonitor* systemMonitor,
                                                                          const char* participantName);
 
-//! \brief Get the current \ref SilKit_SystemState
+/*! \brief Get the current \ref SilKit_SystemState */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetSystemState(SilKit_SystemState* outSystemState,
                                                                 SilKit_SystemMonitor* systemMonitor);
 
@@ -483,29 +585,6 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveParticipantSta
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_RemoveParticipantStatusHandler_t)(SilKit_SystemMonitor* systemMonitor,
                                                                                    SilKit_HandlerId handlerId);
 
-/*! \brief Start the lifecycle.
-* 
-* \param lifecycleService The instance of the lifecycleService.
-*/
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(
-    SilKit_LifecycleService* lifecycleService);
-
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_StartLifecycle_t)(
-    SilKit_LifecycleService* lifecycleService);
-
-/*! \brief Wait for to asynchronous run operation to complete and return the final participant state
- *
- * Blocks until the simulation is shutdown. Prior to this method,
- * \ref SilKit_LifecycleService_StartLifecycle has to be called.
- *
- * \param lifecycleService The lifecycle service to wait for completing the asynchronous run operation.
- * \param outParticipantState Pointer for storing the final participant state (out parameter).
- */
-SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_WaitForLifecycleToComplete(
-    SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
-
-typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_WaitForLifecycleToComplete_t)(
-    SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
 SILKIT_END_DECLS
 
 #pragma pack(pop)

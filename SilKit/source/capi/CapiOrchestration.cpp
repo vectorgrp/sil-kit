@@ -351,6 +351,20 @@ SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Continue(SilKit_LifecycleSe
     CAPI_LEAVE
 }
 
+SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_LifecycleService* lifecycleService, const char* reason)
+{
+    ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
+    ASSERT_VALID_POINTER_PARAMETER(reason);
+    CAPI_ENTER
+    {
+        auto* cppLifecycleService =
+            reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
+        cppLifecycleService->Stop(reason);
+        return SilKit_ReturnCode_SUCCESS;
+    }
+    CAPI_LEAVE
+}
+
 // SystemMonitor related functions
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantStatus* outParticipantState,
                                                             SilKit_SystemMonitor* csystemMonitor,
