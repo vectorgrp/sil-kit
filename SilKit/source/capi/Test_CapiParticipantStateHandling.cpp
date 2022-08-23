@@ -154,6 +154,16 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_
     returnCode = SilKit_LifecycleService_Pause(nullptr, "test");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
+    returnCode = SilKit_LifecycleService_Stop(nullptr, nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode =
+        SilKit_LifecycleService_Stop((SilKit_LifecycleService*)(lifecycleService), nullptr);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_LifecycleService_Stop(nullptr, "test");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
     returnCode = SilKit_LifecycleService_Continue(nullptr);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
@@ -377,6 +387,13 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_map
     ).Times(testing::Exactly(1));
     returnCode =
         SilKit_LifecycleService_Pause((SilKit_LifecycleService*)(lifecycleService), "dummy");
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+    EXPECT_CALL(mockParticipant.mockLifecycleService,
+                Stop(testing::_)
+    ).Times(testing::Exactly(1));
+    returnCode =
+        SilKit_LifecycleService_Stop((SilKit_LifecycleService*)(lifecycleService), "dummy");
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     EXPECT_CALL(mockParticipant.mockLifecycleService,

@@ -119,6 +119,7 @@ SilKit_HandlerId id;
 (void) SilKit_TimeSyncService_CompleteSimulationStep(nullptr);
 (void) SilKit_LifecycleService_Pause(nullptr, "");
 (void) SilKit_LifecycleService_Continue(nullptr);
+(void) SilKit_LifecycleService_Stop(nullptr, "");
 (void) SilKit_SystemMonitor_GetParticipantStatus(nullptr, nullptr, "");
 (void) SilKit_SystemMonitor_GetSystemState(nullptr, nullptr);
 (void) SilKit_SystemMonitor_AddSystemStateHandler(nullptr, nullptr, nullptr, &id);
