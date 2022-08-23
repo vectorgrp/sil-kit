@@ -34,14 +34,14 @@ inline namespace v1 {
  *  \returns the data media / mime type the serializer / deserializer can be used for. */
 constexpr auto MediaTypeData() -> const char*
 {
-    return "application/vnd.vector.sil.data; protocolVersion=1";
+    return "application/vnd.vector.silkit.data; protocolVersion=1";
 }
 
 /*! \brief The RPC media / mime type the serializer / deserializer can be used for.
  *  \returns the RPC media / mime type the serializer / deserializer can be used for. */
 constexpr auto MediaTypeRpc() -> const char*
 {
-    return "application/vnd.vector.sil.rpc; protocolVersion=1";
+    return "application/vnd.vector.silkit.rpc; protocolVersion=1";
 }
 
 } // namespace v1

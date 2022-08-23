@@ -5,6 +5,28 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.4] - 2022-08-22
+--------------------
+
+Compatibility with 4.0.3
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): No
+- Application software interface (API): No
+- Middleware network protocol: Yes
+
+Changed
+~~~~~~~
+
+- SilKit::Util::Serdes
+
+  - ``SilKit/include/silkit/util/serdes/Serialization.hpp``:
+
+    - The media type for PubSub was changed from ``application/vnd.vector.sil.data; protocolVersion=1`` to ``application/vnd.vector.silkit.data; protocolVersion=1``
+
+    - The media type for RPC was changed from ``application/vnd.vector.sil.rpc; protocolVersion=1`` to ``application/vnd.vector.silkit.rpc; protocolVersion=1``
+
+
 [4.0.3] - 2022-08-22
 --------------------
 
