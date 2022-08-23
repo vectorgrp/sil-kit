@@ -90,12 +90,14 @@ SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameHandler(SilKit_Et
                 auto& cppFrame = cppFrameEvent.frame;
                 auto* dataPointer = !cppFrame.raw.empty() ? cppFrame.raw.data() : nullptr;
 
-                SilKit_EthernetFrameEvent frameEvent{};
-                SilKit_EthernetFrame frame{};
+                SilKit_EthernetFrame frame;
+                SilKit_Struct_Init(SilKit_EthernetFrame, frame);
+
                 frame.raw = {dataPointer, cppFrame.raw.size()};
 
+                SilKit_EthernetFrameEvent frameEvent;
                 SilKit_Struct_Init(SilKit_EthernetFrameEvent, frameEvent);
-                SilKit_Struct_Init(SilKit_EthernetFrame, frame);
+
                 frameEvent.ethernetFrame = &frame;
                 frameEvent.timestamp = cppFrameEvent.timestamp.count();
 
