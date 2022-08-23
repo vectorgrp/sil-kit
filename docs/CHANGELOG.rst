@@ -11,20 +11,35 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Compatibility with 4.0.3
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Application binary interface (ABI): No
+- Application binary interface (ABI): Yes
 - Application software interface (API): No
-- Middleware network protocol: Yes
+- Middleware network protocol: No
 
 Changed
 ~~~~~~~
 
-- SilKit::Util::Serdes
+- Utility (SerDes)
 
   - ``SilKit/include/silkit/util/serdes/Serialization.hpp``:
 
     - The media type for PubSub was changed from ``application/vnd.vector.sil.data; protocolVersion=1`` to ``application/vnd.vector.silkit.data; protocolVersion=1``
 
     - The media type for RPC was changed from ``application/vnd.vector.sil.rpc; protocolVersion=1`` to ``application/vnd.vector.silkit.rpc; protocolVersion=1``
+
+- LIN
+
+  - ``SilKit_LinChecksumModel_Undefined`` was renamed to ``SilKit_LinChecksumModel_Unknown``.
+
+- C: Orchestration
+
+  - ``SilKit_LifecycleService_Stop`` was added to the C-API.
+    This corresponds to ``SilKit::Services::Orchestration::ILifecycleService::Stop``.
+
+- C: Ethernet
+
+  - Frames delivered in user-provided ``SilKit_EthernetFrameHandler`` functions had an invalid payload delivered.
+    This was fixed, the frame is now correctly delivered.
+    The error only occured in the C API, the C++ API correctly delivered the entire frame.
 
 
 [4.0.3] - 2022-08-22
