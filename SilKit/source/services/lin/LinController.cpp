@@ -669,7 +669,8 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     if (!isGoToSleepFrame
         && response.responseMode == LinFrameResponseMode::Rx)
     {
-        if (response.frame.checksumModel == LinChecksumModel::Unknown)
+        if (frame.checksumModel != LinChecksumModel::Unknown // Skip check if sending with unknown CSM
+            && response.frame.checksumModel == LinChecksumModel::Unknown)
         {
             DebugMsgOnOverwriteOfUnconfiguredChecksum(frame);
             response.frame.checksumModel = msg.frame.checksumModel;

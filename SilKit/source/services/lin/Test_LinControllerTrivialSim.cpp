@@ -724,17 +724,25 @@ TEST_F(LinControllerTrivialSimTest, call_wakeup_handler)
     master.ReceiveMsg(&slave1, wakeupPulse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_master_response_throw_on_unitialized_checksum)
+TEST_F(LinControllerTrivialSimTest, receive_frame_unknown_checksum)
 {
-    master.Init(MakeControllerConfig(LinControllerMode::Master));
+    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    LinFrame configuredFrame =
+        MakeFrame(17, LinChecksumModel::Enhanced, 4); // Configure with Enhanced
+    LinFrameResponse response;
+    response.frame = configuredFrame;
+    response.responseMode = LinFrameResponseMode::Rx;
+    config.frameResponses.push_back(response);
 
-    // SendFrame configures TX on Master
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinSendFrameHeaderRequest&>())).Times(1);
-    LinFrame frame = MakeFrame(17, LinChecksumModel::Unknown, 4);
-    master.SendFrame(frame, LinFrameResponseType::MasterResponse);
+    slave1.Init(config);
+    slave1.AddFrameStatusHandler(frameStatusHandler);
 
-    EXPECT_THROW(master.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, frame.id}), SilKit::StateError);
+    LinFrame receivedFrame = MakeFrame(configuredFrame.id, LinChecksumModel::Unknown); // Receive with Unknown
+    receivedFrame.dataLength = 4;
+
+    EXPECT_CALL(callbacks, FrameStatusHandler(&slave1, receivedFrame, LinFrameStatus::LIN_RX_OK))
+        .Times(1); // Receive ok
+    slave1.ReceiveMsg(&master, LinTransmission{35s, receivedFrame, LinFrameStatus::LIN_RX_OK});
 }
 
 TEST_F(LinControllerTrivialSimTest, send_frame_master_response_throw_on_unitialized_datalength)

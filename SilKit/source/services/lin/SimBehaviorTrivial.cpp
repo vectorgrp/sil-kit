@@ -180,10 +180,6 @@ void SimBehaviorTrivial::ReceiveFrameHeaderRequest(const LinSendFrameHeaderReque
         // Ignore headers if not configured to answer
         return;
     }
-    if (response.frame.checksumModel == LinChecksumModel::Unknown)
-    {
-        _parentController->ThrowOnSendAttemptWithUndefinedChecksum(response.frame);
-    }
     if (response.frame.dataLength == LinDataLengthUnknown)
     {
         _parentController->ThrowOnSendAttemptWithUndefinedDataLength(response.frame);
@@ -225,7 +221,10 @@ auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
                 _parentController->WarnOnWrongDataLength(linTransmission.frame, response.frame);
                 return LinFrameStatus::LIN_RX_ERROR;
             }
-            if (response.frame.checksumModel != linTransmission.frame.checksumModel)
+
+            // Skip check if sending with unknown CSM
+            const bool checkChecksumModel = (linTransmission.frame.checksumModel != LinChecksumModel::Unknown);
+            if (checkChecksumModel && (response.frame.checksumModel != linTransmission.frame.checksumModel))
             {
                 _parentController->WarnOnWrongChecksum(linTransmission.frame, response.frame);
                 return LinFrameStatus::LIN_RX_ERROR;
