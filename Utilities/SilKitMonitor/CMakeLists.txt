@@ -50,7 +50,7 @@ if(MSVC)
         PRIVATE ${SILKIT_BINARY_DIR}
         PRIVATE ${SILKIT_SOURCE_DIR}
     )
-    target_sources(sil-kit-monitor PRIVATE SilKitSystemMonitor.rc)
+    target_sources(sil-kit-monitor PRIVATE sil-kit-monitor.rc)
 endif()
 
 install(TARGETS sil-kit-monitor

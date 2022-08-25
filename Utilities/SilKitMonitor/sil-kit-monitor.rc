@@ -38,9 +38,9 @@ BEGIN
             VALUE "CompanyName", ASSEMBLYINFO_COMPANY
             VALUE "FileDescription", ASSEMBLYINFO_FILEDESCRIPTION
             VALUE "FileVersion", ASSEMBLYINFO_VERSIONSTRING
-            VALUE "InternalName", "sil-kit-system-monitor"
+            VALUE "InternalName", "sil-kit-monitor"
             VALUE "LegalCopyright", ASSEMBLYINFO_COPYRIGHT
-            VALUE "OriginalFilename", "sil-kit-system-monitor.exe"
+            VALUE "OriginalFilename", "sil-kit-monitor.exe"
             VALUE "ProductName", ASSEMBLYINFO_PRODUCT
             VALUE "ProductVersion", ASSEMBLYINFO_VERSIONSTRING
         END
