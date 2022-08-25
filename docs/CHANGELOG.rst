@@ -5,6 +5,14 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.5] - 2022-08-25 Initial public release (quality assured release)
+---------------------------------------------------------------------
+
+This is the first public open source release of the Vector SIL Kit.
+
+Starting with this version, Vector SIL Kit will provide longterm API, ABI, and network compatibility. Note that prior versions do not provide this compatibility.
+
+
 [4.0.4] - 2022-08-22
 --------------------
 
