@@ -162,6 +162,7 @@ if(SILKIT_INSTALL_SOURCE)
             PATTERN *.md
             PATTERN *.xml
         REGEX "/ci/.*" EXCLUDE
+        REGEX "/ci$" EXCLUDE
     )
     install(
         DIRECTORY
