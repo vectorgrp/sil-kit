@@ -81,15 +81,19 @@ void SetThreadName(const std::string& threadName)
 
 void SetThreadName(const std::string& threadName)
 {
+    int rc{0};
     // NB: On Linux the length of a thread name is restricted to 16 characters including the terminating null byte.
     SILKIT_ASSERT(threadName.size() < 16);
 
     pthread_t thisThread = pthread_self();
 
-#   if __linux__
-    int rc = pthread_setname_np(thisThread, threadName.c_str());
+#   if defined(__linux__)
+    rc = pthread_setname_np(thisThread, threadName.c_str());
 #   elif defined(__NetBSD__)
-    int rc = pthread_setname_np(thisThread, threadName.c_str(), nullptr);
+    rc = pthread_setname_np(thisThread, threadName.c_str(), nullptr);
+#   elif defined(__APPLE__)
+    (void)(thisThread);
+    rc = pthread_setname_np(threadName.c_str());
 #   endif
     // The function pthread_setname_np fails if the length of the specified name exceeds the allowed
     // limit. (16 characters including the terminating null byte)

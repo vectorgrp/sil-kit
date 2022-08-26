@@ -119,7 +119,7 @@ if (MSVC)
             PDB_OUTPUT_DIRECTORY_DEBUG ${SILKIT_SYMBOLS_DIR}/Debug
             LINK_FLAGS "/DEBUG" #make sure the resulting .dll has a .pdb file
     )
-elseif(UNIX)
+elseif(UNIX AND NOT APPLE)
     #for reproducible builds
     target_link_options(SilKit
         PRIVATE -Wl,--build-id=none)

@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace asio::ip;
 
-#ifdef __unix__
+#if defined(__unix__) || defined(__APPLE__)
 
 #include <sys/types.h>
 #include <sys/socket.h>
