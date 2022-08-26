@@ -2,9 +2,8 @@
 The Vector SIL Kit
 ================================
 
-The Vector SIL Kit is a runtime component that enables distributed
-simulation for automative applications. This README is intended to provide you
-with quick start on how to build the Vector SIL Kit.
+The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments. 
+This README is intended to provide you with quick start on how to build the Vector SIL Kit.
 
 For documentation on using the Vector SIL Kit, see the html documentation,
 which can be generated when building the Vector SIL Kit (cf. Customizing the
