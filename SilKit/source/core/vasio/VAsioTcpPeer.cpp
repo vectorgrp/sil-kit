@@ -122,12 +122,18 @@ static auto strip(std::string value, const std::string& chars) -> std::string
 namespace SilKit {
 namespace Core {
 
+// Private constructor
 VAsioTcpPeer::VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Services::Logging::ILogger* logger)
     : _socket{executor}
     , _connection{connection}
     , _logger{logger}
 {
 }
+
+VAsioTcpPeer::~VAsioTcpPeer()
+{
+}
+
 
 bool VAsioTcpPeer::IsErrorToTryAgain(const asio::error_code& ec)
 {
@@ -143,8 +149,8 @@ void VAsioTcpPeer::Shutdown()
     if (_socket.is_open())
     {
         _logger->Info("Shutting down connection to {}", _info.participantName);
-        _connection->OnPeerShutdown(this);
         _socket.close();
+        _connection->OnPeerShutdown(this);
     }
 }
 
@@ -362,10 +368,6 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     }
 }
 
-VAsioTcpPeer::~VAsioTcpPeer()
-{
-}
-
 void VAsioTcpPeer::SendSilKitMsg(SerializedMessage buffer)
 {
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
@@ -399,23 +401,23 @@ void VAsioTcpPeer::StartAsyncWrite()
 void VAsioTcpPeer::WriteSomeAsync()
 {
     _socket.async_write_some(_currentSendingBuffer,
-        [this](const asio::error_code& error, std::size_t bytesWritten) {
+        [self=this->shared_from_this()](const asio::error_code& error, std::size_t bytesWritten) {
             if (error && !IsErrorToTryAgain(error))
             {
-                Shutdown();
-                _sending = false;
+                self->Shutdown();
+                self->_sending = false;
                 return;
             }
 
-            if (bytesWritten < _currentSendingBuffer.size())
+            if (bytesWritten < self->_currentSendingBuffer.size())
             {
-                _currentSendingBuffer += bytesWritten;
-                WriteSomeAsync();
+                self->_currentSendingBuffer += bytesWritten;
+                self->WriteSomeAsync();
                 return;
             }
 
-            _sending = false;
-            StartAsyncWrite();
+            self->_sending = false;
+            self->StartAsyncWrite();
         }
     );
 }
@@ -444,21 +446,21 @@ void VAsioTcpPeer::ReadSomeAsync()
     auto  size = _msgBuffer.size() - _wPos;
 
     _socket.async_read_some(asio::buffer(wPtr, size),
-        [this](const asio::error_code& error, std::size_t bytesRead)
+        [self=this->shared_from_this()](const asio::error_code& error, std::size_t bytesRead)
         {
             if (error && !IsErrorToTryAgain(error))
             {
-                Shutdown();
+                self->Shutdown();
                 return;
             }
 
-            if (_enableQuickAck)
+            if (self->_enableQuickAck)
             {
                 // On Linux, the TCP_QUICKACK might be reset after a read/recvmsg syscall.
-                EnableQuickAck(_logger, _socket);
+                EnableQuickAck(self->_logger, self->_socket);
             }
-            _wPos += bytesRead;
-            DispatchBuffer();
+            self->_wPos += bytesRead;
+            self->DispatchBuffer();
         }
     );
 }

@@ -82,6 +82,8 @@ protected:
         bool simtimePassed{false};
         std::promise<void>           simtimePassedPromise;
 
+        bool runAsync{true};
+
         SilKit::Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
 
         void ResetReception()
@@ -204,17 +206,21 @@ protected:
                 [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
                     if (!participant.allReceived)
                     {
-                        participant.receivedIds.insert(dataMessageEvent.data[0]);
-                        // No self delivery: Expect numParticipants-1 receptions
-                        if (participant.receivedIds.size() == numParticipants - 1)
+                        auto participantId = dataMessageEvent.data[0];
+                        if (participantId != participant.id)
                         {
-                            participant.allReceived = true;
-                            participant.allReceivedPromise.set_value();
+                            participant.receivedIds.insert(dataMessageEvent.data[0]);
+                            // No self delivery: Expect numParticipants-1 receptions
+                            if (participant.receivedIds.size() == numParticipants - 1)
+                            {
+                                participant.allReceived = true;
+                                participant.allReceivedPromise.set_value();
+                            }
                         }
                     }
                 });
 
-            while (runAsync)
+            while (participant.runAsync)
             {
                 participant.publisher->Publish(std::vector<uint8_t>{participant.id});
                 std::this_thread::sleep_for(asyncDelayBetweenPublication);
@@ -325,12 +331,11 @@ protected:
 
     void RunAsyncParticipants(std::vector<TestParticipant>& participants, const std::string& registryUri)
     {
-        runAsync = true;
-
         try
         {
             for (auto& p : participants)
             {
+                p.runAsync = true;
                 asyncParticipantThreads.emplace_back([this, &p, registryUri] { AsyncParticipantThread(p, registryUri); });
             }
         }
@@ -348,7 +353,7 @@ protected:
         }
     }
 
-    void StopSyncParticipants()
+    void JoinSyncParticipantsThreads()
     {
         for (auto&& thread : syncParticipantThreads)
         {
@@ -357,9 +362,8 @@ protected:
         syncParticipantThreads.clear();
     }
 
-    void StopAsyncParticipants()
+    void JoinAsyncParticipantsThreads()
     {
-        runAsync = false;
         for (auto&& thread : asyncParticipantThreads)
         {
             thread.join();
@@ -444,7 +448,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 
         std::cout << ">> Hop off async participants" << std::endl;
         // Hop off: Stop while-loop of async participants
-        StopAsyncParticipants();
+        for (auto& p : asyncParticipants)
+            p.runAsync = false;
+        JoinAsyncParticipantsThreads();
 
         // Reset communication and wait for reception once more for remaining sync participants
         numParticipants = syncParticipants.size();
@@ -467,7 +473,139 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
     ASSERT_EQ(systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
     systemMaster.lifecycleService->Stop("Stop Test.");
 
-    StopSyncParticipants();
+    JoinSyncParticipantsThreads();
+
+    ShutdownSystem();
+}
+
+
+TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
+{
+    numParticipants = 0;
+    auto registryUri = MakeTestRegistryUri();
+
+    std::vector<TestParticipant> asyncParticipants1;
+    asyncParticipants1.push_back({"AsyncParticipant1"});
+    std::vector<TestParticipant> asyncParticipants2;
+    asyncParticipants2.push_back({"AsyncParticipant2"});
+
+    // No lifecylce, only registry needed (no systemController)
+    RunRegistry(registryUri);
+
+    for (int i = 0; i < 3; i++)
+    {
+        // Start with asyncParticipant1
+        RunAsyncParticipants(asyncParticipants1, registryUri);
+        // Async2 is second
+        RunAsyncParticipants(asyncParticipants2, registryUri);
+
+        // Await successful communication of async participants
+        for (auto& p : asyncParticipants1)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants2)
+            p.AwaitCommunication();
+
+        // Reset communication
+        numParticipants = 2;
+        for (auto& p : asyncParticipants1)
+            p.ResetReception();
+        for (auto& p : asyncParticipants2)
+            p.ResetReception();
+
+        // Hop off with asyncParticipants1
+        asyncParticipants1[0].runAsync = false;
+        asyncParticipantThreads[0].join();
+        asyncParticipantThreads.erase(asyncParticipantThreads.begin());
+
+        // Reconnect with asyncParticipant1
+        RunAsyncParticipants(asyncParticipants1, registryUri);
+
+        // Await successful communication of async participants
+        for (auto& p : asyncParticipants1)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants2)
+            p.AwaitCommunication();
+
+        // Reset communication
+        numParticipants = 2;
+        for (auto& p : asyncParticipants1)
+            p.ResetReception();
+        for (auto& p : asyncParticipants2)
+            p.ResetReception();
+
+        // Disconnect with both
+        for (auto& p : asyncParticipants1)
+            p.runAsync = false;
+        for (auto& p : asyncParticipants2)
+            p.runAsync = false;
+        JoinAsyncParticipantsThreads();
+    }
+
+    ShutdownSystem();
+}
+
+
+TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
+{
+    numParticipants = 0;
+    auto registryUri = MakeTestRegistryUri();
+
+    std::vector<TestParticipant> asyncParticipants1;
+    asyncParticipants1.push_back({"AsyncParticipant1"});
+    std::vector<TestParticipant> asyncParticipants2;
+    asyncParticipants2.push_back({"AsyncParticipant2"});
+
+    // No lifecylce, only registry needed (no systemController)
+    RunRegistry(registryUri);
+
+    for (int i = 0; i < 3; i++)
+    {
+        // Start with asyncParticipant1
+        RunAsyncParticipants(asyncParticipants1, registryUri);
+        // Async2 is second
+        RunAsyncParticipants(asyncParticipants2, registryUri);
+
+        // Await successful communication of async participants
+        for (auto& p : asyncParticipants1)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants2)
+            p.AwaitCommunication();
+
+        // Reset communication
+        numParticipants = 2;
+        for (auto& p : asyncParticipants1)
+            p.ResetReception();
+        for (auto& p : asyncParticipants2)
+            p.ResetReception();
+
+        // Hop off with asyncParticipants2
+        asyncParticipants2[0].runAsync = false;
+        asyncParticipantThreads[1].join();
+        asyncParticipantThreads.erase(asyncParticipantThreads.begin()+1);
+
+        // Reconnect with asyncParticipant2
+        RunAsyncParticipants(asyncParticipants2, registryUri);
+
+        // Await successful communication of async participants
+        for (auto& p : asyncParticipants1)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants2)
+            p.AwaitCommunication();
+
+        // Reset communication
+        numParticipants = 2;
+        for (auto& p : asyncParticipants1)
+            p.ResetReception();
+        for (auto& p : asyncParticipants2)
+            p.ResetReception();
+
+        // Disconnect with both
+        for (auto& p : asyncParticipants1)
+            p.runAsync = false;
+        for (auto& p : asyncParticipants2)
+            p.runAsync = false;
+        JoinAsyncParticipantsThreads();
+    }
 
     ShutdownSystem();
 }
@@ -495,7 +633,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
             p.AwaitCommunication();
 
         // Hop off async participants
-        StopAsyncParticipants();
+        for (auto& p : asyncParticipants)
+            p.runAsync = false;
+        JoinAsyncParticipantsThreads();
 
         // Reset communication to repeat the cycle
         for (auto& p : asyncParticipants)

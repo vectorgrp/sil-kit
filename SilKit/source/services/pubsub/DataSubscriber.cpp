@@ -107,6 +107,7 @@ void DataSubscriber::RemoveInternalSubscriber(const std::string& pubUUID)
     auto internalSubscriber = _internalSubscribers.find(pubUUID);
     if (internalSubscriber != _internalSubscribers.end())
     {
+        _participant->GetServiceDiscovery()->NotifyServiceRemoved(internalSubscriber->second->GetServiceDescriptor());
         _internalSubscribers.erase(pubUUID);
     }
 }

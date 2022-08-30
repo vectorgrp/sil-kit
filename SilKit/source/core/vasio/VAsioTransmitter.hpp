@@ -108,6 +108,19 @@ public:
         _hist.NotifyPeer(peer, remoteIdx);
     }
 
+    void RemoveRemoteReceiver(IVAsioPeer* peer)
+    {
+        auto it = std::find_if(_remoteReceivers.begin(), _remoteReceivers.end(), [peer](auto&& remoteReceiver) {
+            auto localPeerInfo = remoteReceiver.peer->GetInfo();
+            auto peerToRemove = peer->GetInfo();
+            return localPeerInfo.participantId == peerToRemove.participantId;
+        });
+        if (it != _remoteReceivers.end())
+        {
+            _remoteReceivers.erase(it);
+        }
+    }
+
     void SendMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
     {
         _hist.Save(from, msg);

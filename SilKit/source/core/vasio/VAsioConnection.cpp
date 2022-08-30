@@ -364,7 +364,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     AcceptConnectionsOn(_tcp4Acceptor, tcp::endpoint{asio::ip::tcp::v4(), 0});
     AcceptConnectionsOn(_tcp6Acceptor, tcp::endpoint{asio::ip::tcp::v6(), 0});
 
-    auto registry = std::make_unique<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
+    auto registry = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
     bool ok = false;
 
     // NB: We attempt to connect multiple times. The registry might be a separate process
@@ -659,7 +659,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
             peerUri.participantId,
             printUris(peerUri));
 
-        auto peer = std::make_unique<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
+        auto peer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
         try
         {
             peer->Connect(std::move(peerUri));
@@ -814,7 +814,7 @@ void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
     std::shared_ptr<VAsioTcpPeer> newConnection;
     try
     {
-        newConnection = std::make_shared<VAsioTcpPeer>(_ioContext.get_executor(), this, _logger);
+        newConnection = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
     }
     catch (const std::exception& e)
     {
@@ -854,6 +854,32 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
     for (auto&& callback : _peerShutdownCallbacks)
     {
         callback(peer);
+    }
+
+    RemovePeerFromLinks(peer);
+    RemovePeerFromConnection(peer);
+}
+
+void VAsioConnection::RemovePeerFromLinks(IVAsioPeer* peer)
+{
+    tt::for_each(_links, [peer](auto&& linkMap) {
+        for (auto&& link : linkMap)
+        {
+            link.second->RemoveRemoteReceiver(peer);
+        }
+    });
+}
+
+void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
+{
+    auto it = std::find_if(_peers.begin(), _peers.end(), [peer](auto&& p) {
+        auto localPeerInfo = p->GetInfo();
+        auto peerToRemove = peer->GetInfo();
+        return localPeerInfo.participantId == peerToRemove.participantId;
+    });
+    if (it != _peers.end())
+    {
+        _peers.erase(it);
     }
 }
 

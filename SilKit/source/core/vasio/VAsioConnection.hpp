@@ -249,7 +249,6 @@ private:
 
     bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
-
     void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
 
     // Registry related send / receive methods
@@ -276,6 +275,9 @@ private:
     // Unique identifier of SubscriptionAcknowledges on the subscriber
     using PendingAcksIdentifier = std::pair<IVAsioPeer*, VAsioMsgSubscriber>;
     void RemovePendingSubscription(const PendingAcksIdentifier& ackId);
+
+    void RemovePeerFromLinks(IVAsioPeer* peer);
+    void RemovePeerFromConnection(IVAsioPeer* peer);
 
     template<class SilKitMessageT>
     auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<SilKitLink<SilKitMessageT>>
@@ -468,7 +470,7 @@ private:
 
     // NB: peers and acceptors must be listed AFTER the io_context. Otherwise,
     // their destructor will crash!
-    std::unique_ptr<IVAsioPeer> _registry{nullptr};
+    std::shared_ptr<IVAsioPeer> _registry{nullptr};
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
 
     // We support IPv6, IPv4 and Local Domain sockets for incoming connections:

@@ -52,6 +52,7 @@ public:
 
     void AddLocalReceiver(ReceiverT* receiver);
     void AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx);
+    void RemoveRemoteReceiver(IVAsioPeer* peer);
 
     void DistributeRemoteSilKitMessage(const IServiceEndpoint* from, MsgT&& msg);
     void DistributeLocalSilKitMessage(const IServiceEndpoint* from, const MsgT& msg);
@@ -99,7 +100,11 @@ void SilKitLink<MsgT>::AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx)
 {
     _vasioTransmitter.AddRemoteReceiver(peer, remoteIdx);
 }
-
+template <class MsgT>
+void SilKitLink<MsgT>::RemoveRemoteReceiver(IVAsioPeer* peer)
+{
+    _vasioTransmitter.RemoveRemoteReceiver(peer);
+}
 
 // ==================================================================
 //  Function template using the trait to select the implementation

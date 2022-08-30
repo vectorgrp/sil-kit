@@ -45,6 +45,7 @@ class VAsioConnection;
 class VAsioTcpPeer
     : public IVAsioPeer
     , public IServiceEndpoint
+    , public std::enable_shared_from_this<VAsioTcpPeer>
 {
 public:
     // ----------------------------------------
@@ -54,13 +55,29 @@ public:
     // ----------------------------------------
     // Constructors and Destructor
     VAsioTcpPeer() = delete;
-    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Services::Logging::ILogger* logger);
     VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer(VAsioTcpPeer&& other) = delete; //clang warning: implicitly deleted because of mutex
 
     VAsioTcpPeer& operator=(const VAsioTcpPeer& other) = delete;
     VAsioTcpPeer& operator=(VAsioTcpPeer&& other) = delete; //implicitly deleted because of mutex
     ~VAsioTcpPeer();
+
+private:
+    // ----------------------------------------
+    // Private Constructors
+    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Services::Logging::ILogger* logger);
+
+public:
+    // ----------------------------------------
+    // Public Construction Function
+
+    // VAsioTcpPeer must only be created as shared_prt to keep it alive in active Read/WriteSomeAsync callbacks during shutdown procedure
+    template<typename ExecutorT>
+    static auto Create(ExecutorT&& executor, VAsioConnection* connection,
+                              Services::Logging::ILogger* logger) -> std::shared_ptr<VAsioTcpPeer>
+    {
+        return std::shared_ptr<VAsioTcpPeer>{new VAsioTcpPeer{std::forward<ExecutorT>(executor), connection, logger}};
+    }
 
 public:
     // ----------------------------------------
