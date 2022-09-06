@@ -5,6 +5,31 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.6] - 2022-09-06
+--------------------
+
+Compatibility with 4.0.5
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Application binary interface (ABI): Yes
+- Application software interface (API): Yes
+- Middleware network protocol: Yes
+
+Changed
+~~~~~~~
+
+- Removed an empty directory from the packages
+
+- Updated the description of SIL Kit in the top-level README.rst
+
+Fixed
+~~~~~
+
+- Clean up peers after a remote participant disconnects
+
+- Windows: Fixed the internal name and original filename attributes of the ``sil-kit-monitor.exe``
+
+
 [4.0.5] - 2022-08-25 Initial public release (quality assured release)
 ---------------------------------------------------------------------
 
