@@ -7,9 +7,9 @@ jobs:
     name: Sync branch to remote public GitHub
     runs-on: Linux
     environment: repo-sync-action/public-github
-    
+
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - uses: vikabgm/repo-sync-action@main
         with:

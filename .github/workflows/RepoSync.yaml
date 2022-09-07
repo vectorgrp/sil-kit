@@ -7,9 +7,9 @@ jobs:
     name: Sync branch to remote Git project
     runs-on: Linux
     environment: SyncRemoteRepoEnv
-    
+
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
       - uses: vikabgm/repo-sync-action@main
         with:
