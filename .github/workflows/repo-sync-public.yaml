@@ -10,6 +10,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          clean: true
+          fetch-depth: 0
 
       - uses: vikabgm/repo-sync-action@733d66afe80c643d3f3a11fa60064943843e43d7
         with:
