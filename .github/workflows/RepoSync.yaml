@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: vikabgm/repo-sync-action@main
+      - uses: vikabgm/repo-sync-action@733d66afe80c643d3f3a11fa60064943843e43d7
         with:
           app-key:          ${{ secrets.VECTOR_APP_KEY }}
           app-id:           ${{ secrets.VECTOR_APP_ID }}
