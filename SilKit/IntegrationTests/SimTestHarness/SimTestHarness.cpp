@@ -18,8 +18,8 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #include "SimTestHarness.hpp"
-#include "SimSystemController.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -27,9 +27,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "ConfigurationTestUtils.hpp"
-#include "IParticipantInternal.hpp"
+#include "SimSystemController.hpp"
 
 using namespace std::literals::chrono_literals;
 
@@ -78,8 +79,7 @@ auto SimParticipant::GetOrCreateSystemController() -> Experimental::Services::Or
 {
     if (!_systemController)
     {
-        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(_participant.get());
-        _systemController = participantInternal->GetSystemController();
+        _systemController = Experimental::Participant::CreateSystemController(_participant.get());
     }
     return _systemController;
 }

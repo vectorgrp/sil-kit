@@ -21,9 +21,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "silkit/SilKit.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "ConfigurationTestUtils.hpp"
-#include "IParticipantInternal.hpp"
 
 namespace SilKit {
 namespace Tests {
@@ -41,8 +41,7 @@ public:
         _participant =
             SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
 
-        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(_participant.get());
-        _controller = participantInternal->GetSystemController();
+        _controller = SilKit::Experimental::Participant::CreateSystemController(_participant.get());
 
         _controller->SetWorkflowConfiguration({_syncParticipantNames});
         _monitor = _participant->CreateSystemMonitor();
