@@ -174,8 +174,6 @@ private:
     void ThrowIfUninitialized(const std::string& callingMethodName) const;
     void ThrowIfNotMaster(const std::string& callingMethodName) const;
     void ThrowIfNotConfiguredTxUnconditional(LinId linId);
-    void DebugMsgOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const;
-    void DebugMsgOnOverwriteOfUnconfiguredDataLength(const LinFrame& frame) const;
     void WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength, const std::string& fromParticipantName,
                                               const std::string& fromServiceName) const;
     void WarnOnReceptionWithInvalidLinId(LinId invalidLinId, const std::string& fromParticipantName,

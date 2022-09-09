@@ -455,10 +455,11 @@ TEST_F(LinControllerTrivialSimTest, receive_frame_overwrite_checksum_and_datalen
     EXPECT_CALL(callbacks, FrameStatusHandler(&master, receivedFrame, LinFrameStatus::LIN_RX_OK)).Times(1); // Receive ok
     master.ReceiveMsg(&slave1, LinTransmission{35s, receivedFrame, LinFrameStatus::LIN_RX_OK});
 
+    // No overwrite of configured response
     EXPECT_EQ(master.GetThisLinNode().responses[receivedFrame.id].frame.checksumModel,
-              receivedFrame.checksumModel); // Overwrite to classic
+              configuredFrame.checksumModel); 
     EXPECT_EQ(master.GetThisLinNode().responses[receivedFrame.id].frame.dataLength,
-              receivedFrame.dataLength); // Overwrite to datalength
+              configuredFrame.dataLength);
 }
 
 

@@ -156,23 +156,6 @@ void LinController::WarnOnWrongChecksum(const LinFrame& receivedFrame, const Lin
     _logger->Warn(errorMsg);
 }
 
-void LinController::DebugMsgOnOverwriteOfUnconfiguredChecksum(const LinFrame& frame) const
-{
-    std::string msg = fmt::format("LinController received transmission but has configured "
-                                       "LinChecksumModel::Unknown. Overwriting with {} for LinId {}.",
-                                       frame.checksumModel, static_cast<uint16_t>(frame.id));
-    _logger->Debug(msg);
-}
-
-
-void LinController::DebugMsgOnOverwriteOfUnconfiguredDataLength(const LinFrame& frame) const
-{
-    std::string msg = fmt::format("LinController received transmission but has not configured "
-                                      "a LinDataLength. Overwriting with {} for LinId {}.",
-                                      frame.dataLength, static_cast<uint16_t>(frame.id));
-    _logger->Debug(msg);
-}
-
 void LinController::WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength,
                                                          const std::string& fromParticipantName,
                                                          const std::string& fromServiceName) const
@@ -663,24 +646,6 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, frame);
 
     bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
-
-    // If configured for RX, update undefined checksum/payload length
-    auto& response = GetThisLinNode().responses[frame.id];
-    if (!isGoToSleepFrame
-        && response.responseMode == LinFrameResponseMode::Rx)
-    {
-        if (frame.checksumModel != LinChecksumModel::Unknown // Skip check if sending with unknown CSM
-            && response.frame.checksumModel == LinChecksumModel::Unknown)
-        {
-            DebugMsgOnOverwriteOfUnconfiguredChecksum(frame);
-            response.frame.checksumModel = msg.frame.checksumModel;
-        }
-        if (response.frame.dataLength == LinDataLengthUnknown)
-        {
-            DebugMsgOnOverwriteOfUnconfiguredDataLength(frame);
-            response.frame.dataLength = msg.frame.dataLength;
-        }
-    }
 
     // Detailed: Just use msg.status
     // Trivial: Evaluate status using cached response

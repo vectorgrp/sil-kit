@@ -215,15 +215,17 @@ auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
         }
         case LinFrameResponseMode::Rx:
         {
-            // Verify Checksum and DataLength
-            if (response.frame.dataLength != linTransmission.frame.dataLength)
+            // Skip check if receiving with unknown DataLength
+            const bool checkDataLength = (response.frame.dataLength != LinDataLengthUnknown);
+            if (checkDataLength && (response.frame.dataLength != linTransmission.frame.dataLength))
             {
                 _parentController->WarnOnWrongDataLength(linTransmission.frame, response.frame);
                 return LinFrameStatus::LIN_RX_ERROR;
             }
 
-            // Skip check if sending with unknown CSM
-            const bool checkChecksumModel = (linTransmission.frame.checksumModel != LinChecksumModel::Unknown);
+            // Skip check if sending or receiving with unknown CSM
+            const bool checkChecksumModel = (linTransmission.frame.checksumModel != LinChecksumModel::Unknown)
+                                         && (response.frame.checksumModel != LinChecksumModel::Unknown);
             if (checkChecksumModel && (response.frame.checksumModel != linTransmission.frame.checksumModel))
             {
                 _parentController->WarnOnWrongChecksum(linTransmission.frame, response.frame);

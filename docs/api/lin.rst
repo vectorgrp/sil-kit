@@ -254,10 +254,9 @@ Data length and checksum model
 A |LinDataLength| and |LinChecksumModel| can be provided for a given ID when configuring a reception or initiating a 
 transmission. A frame will arrive with |LinFrameStatus_LIN_RX_ERROR| if there is a mismatch between configured and 
 received data length or checksum model. However, a LIN node configured for reception might not know beforehand about the
-data length or checksum model provided in the response. In this case, a reception can be configured with the wildcards
-|LinDataLengthUnknown| or |LinChecksumModel_Undefined| in the respective paramters of the |LinFrame|. When the first 
-respose arrives, the data length or checksum model provided there will be used. Note that from that point on, a 
-mismatch will again result in a |LinFrameStatus_LIN_RX_ERROR|.
+data length or checksum model provided in the response. In this case, the reception can be configured with the 
+wildcards |LinDataLengthUnknown| or |LinChecksumModel_Undefined| in the respective paramters of the |LinFrame| and the 
+data length or checksum model provided by the sender is used in the |FrameStatusHandler|.
 
 Managing the event handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
