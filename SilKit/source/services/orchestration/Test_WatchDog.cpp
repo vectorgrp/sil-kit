@@ -153,8 +153,8 @@ TEST_F(WatchDogTest, create_health_check_unconfigured)
     healthCheck.hardResponseTimeout = 5ms;
     WatchDog watchDogWithHardTimeout{healthCheck};
     EXPECT_EQ(watchDogWithHardTimeout.GetErrorTimeout(), 5ms);
-
 }
+
 TEST_F(WatchDogTest, create_health_check_configured)
 {
     WatchDog watchDog{Config::HealthCheck{2000ms, 3000ms}};
@@ -170,6 +170,67 @@ TEST_F(WatchDogTest, create_health_check_configured)
     EXPECT_CALL(callbacks, ErrorHandler(_)).Times(0);
     std::this_thread::sleep_for(1s);
     watchDog.Reset();
+}
+
+TEST_F(WatchDogTest, nothing_without_soft_and_hard)
+{
+    WatchDog watchDog{Config::HealthCheck{{}, {}}};
+    watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
+    watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
+
+    watchDog.Start();
+
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(0);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(0);
+
+    std::this_thread::sleep_for(500ms);
+}
+
+TEST_F(WatchDogTest, warn_with_soft_without_hard)
+{
+    WatchDog watchDog{Config::HealthCheck{100ms, {}}};
+    watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
+    watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
+
+    watchDog.Start();
+
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(1);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(0);
+
+    std::this_thread::sleep_for(500ms);
+}
+
+TEST_F(WatchDogTest, error_with_hard_without_soft)
+{
+    WatchDog watchDog{Config::HealthCheck{{}, 100ms}};
+    watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
+    watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
+
+    watchDog.Start();
+
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(0);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(1);
+
+    std::this_thread::sleep_for(500ms);
+}
+
+TEST_F(WatchDogTest, warn_and_error_with_soft_and_hard)
+{
+    WatchDog watchDog{Config::HealthCheck{100ms, 300ms}};
+    watchDog.SetWarnHandler([this](auto timeout) { callbacks.WarnHandler(timeout); });
+    watchDog.SetErrorHandler([this](auto timeout) { callbacks.ErrorHandler(timeout); });
+
+    watchDog.Start();
+
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(1);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(0);
+
+    std::this_thread::sleep_for(200ms);
+
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(0);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(1);
+
+    std::this_thread::sleep_for(200ms);
 }
 
 } // anonymous namespace
