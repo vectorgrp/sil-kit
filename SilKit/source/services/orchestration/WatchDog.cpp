@@ -116,12 +116,6 @@ void WatchDog::Run()
         const auto now = std::chrono::steady_clock::now().time_since_epoch();
         const auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
 
-
-        if (currentRunDuration <= _warnTimeout)
-        {
-            state = WatchDogState::Healthy;
-            continue;
-        }
         if (currentRunDuration > _warnTimeout && currentRunDuration <= _errorTimeout)
         {
             if (state == WatchDogState::Healthy)
@@ -141,6 +135,9 @@ void WatchDog::Run()
             }
             continue;
         }
+
+        // If neither warning, nor error timeouts were hit, the state is healthy.
+        state = WatchDogState::Healthy;
     }
 }
 
