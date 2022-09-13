@@ -79,6 +79,7 @@ def buildConfigs = [
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
         PublishArtifacts: true,
         CmakeArgs: "-D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++",
+        BuildDocsAndSourcePackages: true,
     ]
     ,[
         Name: "Ubuntu-20.04-gcc-10",
@@ -93,8 +94,8 @@ def buildConfigs = [
         NodeLabel: "docker && linux",
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
-        PublishArtifacts: false,
         CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12",
+        PublishArtifacts: false,
     ]
     // Sanitizer builds:
     ,[
@@ -223,6 +224,7 @@ def buildDocker(config) {
             configFile(fileId: 'VECTOR_DOCKER_REGISTRY', variable: 'VECTOR_DOCKER_REGISTRY'),
             configFile(fileId: 'SILKIT_ARTIFACTORY_REPO', variable: 'SILKIT_ARTIFACTORY_REPO'),
             configFile(fileId: 'PROXY_DOMAIN', variable: 'PROXY_DOMAIN'),
+            configFile(fileId: 'PYPI_MIRROR', variable: 'PYPI_MIRROR'),
             ]) {
             def registry = readFile(file: VECTOR_DOCKER_REGISTRY).trim()
             buildArgs += " --build-arg REGISTRY=${registry} "
@@ -232,6 +234,9 @@ def buildDocker(config) {
 
             def proxyDomain = readFile(file: PROXY_DOMAIN).trim()
             buildArgs += " --build-arg PROXY_DOMAIN=${proxyDomain} "
+
+            def pypiMirror = readFile(file: PYPI_MIRROR).trim()
+            buildArgs += " --build-arg PYPI_MIRROR=${pypiMirror} "
 
             print("Building docker image ${dockerImage}")
             if(config.containsKey("DockerBuildArgs")) {
@@ -297,11 +302,16 @@ def runCmake(config, buildType) {
     def cmakeArgs = config["CmakeArgs"]
     cmakeArgs += " -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON "
 
-    if(buildType == "Release") {
-        //only distribute source and docs in release mode
-        cmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON "
+    // Enable Source and Docs packages
+    if (config.containsKey("BuildDocsAndSourcePackages")
+        && (buildType == "Release")
+        && config["BuildDocsAndSourcePackages"].toBoolean() )
+    {
+        print("Building Docs and Source packages!")
+        cmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON  -D SILKIT_BUILD_DOCS=ON"
     }
 
+    // Set warnings as errors
     if (config.containsKey("WarningsAsErrors")) {
         def isEnabled = config["WarningsAsErrors"].toBoolean()
         if(isEnabled) {
@@ -453,13 +463,20 @@ def doBuild(Map config) {
 
         if(publishToArtifactory ) {
             stage(" Bundle and Archive Packages (${buildName})") {
-                run "python ./SilKit/ci/package.py \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
+                run "python ./SilKit/ci/package.py  --keep-top-directory \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                 archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
 
                 // safe the debug symbols files on windows/Linux
                 archiveToArtifactory(config, scmVars, "_build_Debug/${artifactName}-*-SYMBOLS.zip")
                 if(!isUnix()) {
                     archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-SYMBOLS.zip")
+                }
+
+                if (config.containsKey("BuildDocsAndSourcePackages")
+                     && config["BuildDocsAndSourcePackages"].toBoolean())
+                {
+                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-Docs.zip")
+                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-Source.zip")
                 }
             }
         }

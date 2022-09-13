@@ -11,6 +11,8 @@ ENV DEBIAN_FRONTEND "noninteractive"
 ENV UBUNTU_VERSION ${UBUNTU_VERSION}
 ENV SILKIT_ARTIFACTORY_REPO ${SILKIT_ARTIFACTORY_REPO}
 ENV PROXY_DOMAIN ${PROXY_DOMAIN}
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
 
 RUN apt-get update && \
     apt-get install -y \
@@ -30,7 +32,7 @@ RUN apt-get update && \
     wget \
     curl  \
     build-essential \
-    python3 \
+    python3.8 \
     openssl \
     libssl-dev \
     g++ \
@@ -52,10 +54,8 @@ RUN if [ "${UBUNTU_VERSION}" = "20.04" ]; then \
     
 RUN rm -rf /var/lib/apt/lists/*
 
-# Sphinx documentation system
-RUN pip3 install docutils==0.12
-RUN pip3 install sphinx==3.1.2
-RUN pip3 install six
+# for building reproducible docs, we now use pipenv
+RUN pip3 install pipenv
 
 ################################################################################
 # prepare our shell overlay
@@ -80,5 +80,17 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 ################################################################################
 # 3. Step: Setup our build user: jenkins
 ################################################################################
-RUN useradd -r -g users -u 500 jenkins
+RUN useradd -r -g users -u 500  -m jenkins
+
+# Adding sphinx/breathe environment for documentation builds
+COPY docs_requirements.txt /home/jenkins
+RUN chown -R jenkins /home/jenkins
+
 USER jenkins
+
+ARG PYPI_MIRROR
+ENV PYPI_MIRROR ${PYPI_MIRROR}
+
+WORKDIR /home/jenkins
+ENV PATH="${PATH}:/home/jenkins/.local/bin"
+RUN pip3 install --index-url ${PYPI_MIRROR}  -r docs_requirements.txt

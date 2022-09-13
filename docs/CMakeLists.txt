@@ -20,11 +20,10 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-Project(IBDocs NONE)
+Project(sil-kit-docs  NONE)
 include(SilKitVersion)
 configure_silkit_version(${PROJECT_NAME})
 find_package(Doxygen REQUIRED)
-find_package(Sphinx REQUIRED)
 
 # Find all the public headers
 get_target_property(SILKIT_API_HEADERS SilKitApi SOURCES)
@@ -75,7 +74,8 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        ${SILKIT_API_HEADERS}
                        ${SPHINX_SOURCE_FILES}
                    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
-                   COMMAND ${SPHINX_EXECUTABLE} -b html
+                   # generate docs
+                   COMMAND sphinx-build -b html
                        # Tell Breathe where to find the Doxygen output
                        -Dbreathe_projects.SilKit=${DOXYGEN_OUTPUT_DIR}/xml
                        -Drelease=${PROJECT_VERSION}
@@ -85,20 +85,23 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        -E
                        ${SILKIT_SPHINX_WARNINGS_AS_ERRORS_ARGUMENTS}
                        ${SPHINX_SOURCE} ${SPHINX_BUILD}
-                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                    VERBATIM
                    )
 
 add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
 install(DIRECTORY ${SPHINX_BUILD}/
-        DESTINATION ${INSTALL_DOC_DIR})
+        DESTINATION ${INSTALL_DOC_DIR}
+        COMPONENT docs
+        REGEX "\.venv$" EXCLUDE
+        REGEX "\.buildinfo$" EXCLUDE
+        )
 install(
     FILES
         CHANGELOG.rst
     DESTINATION .
-    COMPONENT SilKit-Developer
-)
-
+    COMPONENT docs
+    )
 #add sample code so it shows in the IDE, but don't build or install it
 add_executable(sample_silkit_new_config EXCLUDE_FROM_ALL usage/sample_silkit/simple.cpp)
 target_link_libraries(sample_silkit_new_config PRIVATE SilKit)

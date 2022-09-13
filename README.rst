@@ -56,7 +56,8 @@ There are also specific options to toggle details of the build:
 
     1. SILKIT_BUILD_DOCS=ON (default: OFF) generates html documentation using
        Doxygen and Sphinx. Both must be installed beforehand. Sphinx is a Python
-       program that can be installed via pip.
+       program that can be installed via pip, e.g. with
+       `pip3 install -r SilKit/ci/docker/docs_requirements.txt`
 
     2. SILKIT_BUILD_TESTS=OFF (default: ON) disables the generation of unit and
        integration tests. The tests are based on the google test framework,
@@ -71,7 +72,8 @@ There are also specific options to toggle details of the build:
 E.g., if you want to build the SIL Kit with documentation enabled,
 call cmake in your build directory as follows::
        
-    cmake -SILKIT_BUILD_DOCS=ON ..
+    cmake -DSILKIT_BUILD_DOCS=ON ..
+    cmake --build . --target Doxygen
 
 4. Build the Vector SIL Kit
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

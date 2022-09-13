@@ -46,10 +46,14 @@ elseif(EXISTS "${GIT_HEAD_FILE}")
         ${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake
         @ONLY)
     include(${CMAKE_CURRENT_BINARY_DIR}/MakeVersionMacros.cmake)
-    install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
-        DESTINATION
-        ${INSTALL_SOURCE_DIR}/SilKit/source)
+    if(SILKIT_INSTALL_SOURCE)
+        install(FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/version_macros.hpp
+            DESTINATION
+            ${INSTALL_SOURCE_DIR}/SilKit/source
+            COMPONENT source
+        )
+    endif()
 else()
     message(WARNING "Cannot determine hash of current git head!")
     set(GIT_HEAD_HASH "UNKNOWN")
@@ -64,7 +68,7 @@ install(FILES
     ${VERSION_MACROS_HPP}
     DESTINATION ${INSTALL_INCLUDE_DIR}/silkit/capi
     RENAME SilKitVersionMacros.h
-    COMPONENT SilKit
+    COMPONENT bin
 )
 
 set(silkitLibType SHARED)
@@ -160,21 +164,24 @@ add_library(SilKit::SilKit ALIAS SilKit)
 # we adhere to standard find_package layout
 # refer to https://cmake.org/cmake/help/v3.15/manual/cmake-packages.7.html#package-configuration-file
 if(NOT SILKIT_BUILD_STATIC)
-install(
-    TARGETS SilKit
-    EXPORT SilKitTargets
-    DESTINATION ${INSTALL_LIB_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIB_DIR} # for Linux shared object libraries (.so)
-    ARCHIVE DESTINATION ${INSTALL_LIB_DIR} # for static libraries (.lib/.a)
-    RUNTIME DESTINATION ${INSTALL_BIN_DIR} # for executables and dynamic libraries (.dll)
-    PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
-)
+    install(
+        TARGETS SilKit
+        EXPORT SilKitTargets
+        CONFIGURATIONS Release Debug RelWithDebInfo
+        COMPONENT bin
+        DESTINATION ${INSTALL_LIB_DIR}
+        LIBRARY DESTINATION ${INSTALL_LIB_DIR} # for Linux shared object libraries (.so)
+        ARCHIVE DESTINATION ${INSTALL_LIB_DIR} # for static libraries (.lib/.a)
+        RUNTIME DESTINATION ${INSTALL_BIN_DIR} # for executables and dynamic libraries (.dll)
+        PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
+    )
 # portable installation  definitions
-install(EXPORT SilKitTargets
-    DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
-    NAMESPACE "SilKit::"
-    FILE SilKitTargets.cmake
-)
+    install(EXPORT SilKitTargets
+        DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
+        NAMESPACE "SilKit::"
+        FILE SilKitTargets.cmake
+        COMPONENT bin
+    )
 endif()
 # Also install CmakeTargets for MinSizeRel and RelWithDebInfo
 #
@@ -186,7 +193,8 @@ install(
         cmake/SilKitTargets-minsizerel.cmake
         cmake/SilKitTargets-relwithdebinfo.cmake
     DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
-    CONFIGURATIONS Release
+    CONFIGURATIONS Release Debug RelWithDebInfo
+    COMPONENT bin
 )
 
 #make our local build dir usable for other projects

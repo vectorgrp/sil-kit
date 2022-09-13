@@ -144,6 +144,7 @@ if(SILKIT_INSTALL_SOURCE)
             ${CMAKE_CURRENT_SOURCE_DIR}/SilKit
             ${CMAKE_CURRENT_SOURCE_DIR}/Utilities
         DESTINATION ${INSTALL_SOURCE_DIR}
+        COMPONENT source
         FILES_MATCHING
             PATTERN *.cpp
             PATTERN *.cxx
@@ -163,31 +164,39 @@ if(SILKIT_INSTALL_SOURCE)
             PATTERN *.xml
         REGEX "/ci/.*" EXCLUDE
         REGEX "/ci$" EXCLUDE
+        REGEX "\.git$" EXCLUDE
+        REGEX "\.github$" EXCLUDE
     )
+
     install(
         DIRECTORY
             ${CMAKE_CURRENT_SOURCE_DIR}/Demos/
         DESTINATION ${INSTALL_DEMO_DIR}
+        COMPONENT source
     )
+
     install(
         DIRECTORY
-            ${CMAKE_CURRENT_SOURCE_DIR}/docs
-        DESTINATION ${INSTALL_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/docs/
+        DESTINATION ${INSTALL_SOURCE_DIR}/docs
+        COMPONENT source
     )
+
     install(
         DIRECTORY
             ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/
         DESTINATION ${INSTALL_SOURCE_DIR}/ThirdParty
-        REGEX "breathe" EXCLUDE
+        COMPONENT source
         REGEX "\.git$" EXCLUDE
         REGEX "\.github$" EXCLUDE
     )
+
     install(
         FILES
             CMakeLists.txt
             CMakeSettings.json
         DESTINATION ${INSTALL_SOURCE_DIR}
-        COMPONENT SilKit-Developer
+        COMPONENT source
     )
 
     # create a top-level README.txt with some pointers to the contained packages
@@ -198,21 +207,33 @@ if(SILKIT_INSTALL_SOURCE)
         )
     install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/TOP_LEVEL_README.txt
+        COMPONENT source
         DESTINATION .
-        RENAME README.txt)
+        RENAME README.txt
+        )
 
     # make sure we have our license and copyright infos packaged
     install(FILES
         LICENSE
-        DESTINATION .)
+        COMPONENT source
+        DESTINATION .
+        )
+    install(FILES
+        LICENSE
+        COMPONENT bin
+        DESTINATION usr/share/doc/sil-kit/
+        RENAME copyright
+        )
 endif(SILKIT_INSTALL_SOURCE)
 
 
 ###############################################################################
 # Packaging
 ###############################################################################
-
+#set(CPACK_GENERATOR "ZIP;DEB")
 set(CPACK_GENERATOR "ZIP")
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+#set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_PACKAGE_DESCRIPTION "binary release of SIL Kit library and tools")
 set(CPACK_PACKAGE_NAME "SilKit")
 set(CPACK_PACKAGE_VENDOR "Vector Informatik")
@@ -222,4 +243,25 @@ set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
 set(CPACK_PACKAGE_FILE_NAME 
     "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${plat}-${arch}-${comp}${my_build_type}")
+set(CPACK_PACKAGE_CONTACT "support@vector.com")
+
+set(CPACK_ARCHIVE_BIN_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}") 
+set(CPACK_ARCHIVE_SOURCE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-Source") 
+set(CPACK_ARCHIVE_DOCS_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-Docs") 
+set(CPACK_COMPONENT_UNSPECIFIED_DISABLED ON)
+set(CPACK_COMPONENTS_ALL "bin")
+
+
+
+if(SILKIT_BUILD_DOCS)
+    list(APPEND CPACK_COMPONENTS_ALL "docs")
+endif()
+if(SILKIT_INSTALL_SOURCE)
+    list(APPEND CPACK_COMPONENTS_ALL "source")
+endif()
+
 include(CPack)
+
+cpack_add_component(docs DISPLAY_NAME "SIL Kit Documentation")
+cpack_add_component(source DISPLAY_NAME "SIL Kit Sources")
+cpack_add_component(bin DISPLAY_NAME "SIL Kit Binaries")

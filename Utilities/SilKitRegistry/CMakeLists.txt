@@ -67,4 +67,5 @@ endif()
 
 install(TARGETS sil-kit-registry
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
+    COMPONENT bin
 )

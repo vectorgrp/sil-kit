@@ -73,13 +73,13 @@ endif()
 
 set(make_silkit_demo_caller_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
-set(demo_list)
+set(demo_list "")
 
 add_custom_target(Demos COMMENT "Build all available Demos")
 set_property(TARGET Demos PROPERTY FOLDER "Demos")
 
 # Generate SIL Kit Demo Project
-function(make_silkit_demo executableName demoSourceFile)
+macro(make_silkit_demo executableName demoSourceFile)
     add_executable(${executableName}
         ${demoSourceFile}
     )
@@ -111,8 +111,8 @@ function(make_silkit_demo executableName demoSourceFile)
             Threads::Threads
     )
     add_dependencies(Demos ${executableName})
-    set(demo_list "${demo_list} ${executableName}" CACHE INTERNAL "demo_list")
-endfunction(make_silkit_demo)
+    set(demo_list "${demo_list} ${executableName}" PARENT_SCOPE)
+endmacro()
 
 #######################################################################################################################
 # Add the actual demo projects

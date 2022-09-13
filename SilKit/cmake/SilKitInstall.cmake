@@ -46,7 +46,7 @@
 ### package.py is used to merge zip files together, see package.py --help for more infos
 
 include(GNUInstallDirs)
-set(INSTALL_TOP_DIR SilKit)
+set(INSTALL_TOP_DIR .)
 
 set(INSTALL_BIN_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_BINDIR})
 set(INSTALL_LIB_DIR ${INSTALL_TOP_DIR}/${CMAKE_INSTALL_LIBDIR})

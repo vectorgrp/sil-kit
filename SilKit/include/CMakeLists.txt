@@ -44,20 +44,20 @@ endif()
 install(
     TARGETS SilKitInterface
     EXPORT SilKitTargets
-    COMPONENT SilKit
     INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
+    COMPONENT bin
 )
 # Copy all headers from the source directory to the proper destination
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
     DESTINATION ${INSTALL_INCLUDE_DIR}
-    COMPONENT SilKit
+    COMPONENT bin
     FILES_MATCHING PATTERN *.hpp
 )
 # for C API
 install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
     DESTINATION ${INSTALL_INCLUDE_DIR}
-    COMPONENT SilKit
+    COMPONENT bin
     FILES_MATCHING PATTERN *.h
 )

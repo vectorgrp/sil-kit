@@ -215,10 +215,10 @@ def unpack(workdir, cpackfiles):
             for mem in zf.infolist():
                 # strip toplevel folder from member filepaths
                 el = mem.filename.split("/") #zip contains unix paths
-                assert top == el[0] #sanity check
                 if KEEP_TOP_DIRS:
                     fn = mem.filename
                 else:
+                    assert top == el[0] #sanity check
                     fn = "/".join(el[1:])
                 out = os.path.join(workdir, os.path.normpath(fn))
                 if is_dir(mem) and not os.path.exists(out):
