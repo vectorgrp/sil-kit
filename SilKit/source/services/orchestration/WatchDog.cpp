@@ -26,12 +26,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
+namespace {
+
+auto GetDefaultClock() -> SilKit::Services::Orchestration::WatchDog::IClock*;
+
+} // namespace
+
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-WatchDog::WatchDog(const Config::HealthCheck& healthCheckConfig)
-    : _warnHandler{[](std::chrono::milliseconds) {}}
+WatchDog::WatchDog(const Config::HealthCheck& healthCheckConfig, IClock* clock)
+    : _clock{clock ? clock : GetDefaultClock()}
+    , _warnHandler{[](std::chrono::milliseconds) {}}
     , _errorHandler{[](std::chrono::milliseconds) {}}
 {
     if (healthCheckConfig.softResponseTimeout.has_value())
@@ -58,12 +65,12 @@ WatchDog::~WatchDog()
 
 void WatchDog::Start()
 {
-    _startTime.store(std::chrono::steady_clock::now().time_since_epoch());
+    _startTime.store(_clock->Now());
 }
 
 void WatchDog::Reset()
 {
-    _startTime.store(std::chrono::steady_clock::duration::min());
+    _startTime.store(std::chrono::nanoseconds::min());
 }
 
 void WatchDog::SetWarnHandler(std::function<void(std::chrono::milliseconds)> handler)
@@ -78,17 +85,17 @@ void WatchDog::SetErrorHandler(std::function<void(std::chrono::milliseconds)> ha
 
 void WatchDog::Run()
 {
-
     enum class WatchDogState
     {
         Healthy,
         Warn,
         Error
     };
+
     SilKit::Util::SetThreadName("SilKit-Watchdog");
     WatchDogState state = WatchDogState::Healthy;
     auto stopFuture = _stopPromise.get_future();
-    
+
     while (true)
     {
         auto futureStatus = stopFuture.wait_for(_resolution);
@@ -98,13 +105,13 @@ void WatchDog::Run()
             // stop was signaled; stopping thread;
             return;
         }
-        
+
         const auto startTime = _startTime.load();
 
         // We only communicate with the "main thread" via the atomic _startTime.
         // If _startTime is duration::min(), Start() has not yet been called.
         // Otherwise, _startTime is the duration since epoch when the Start() was called.
-        if (startTime == std::chrono::steady_clock::duration::min())
+        if (startTime == std::chrono::nanoseconds::min())
         {
             // no job is currently running. Reset state and continue.
             state = WatchDogState::Healthy;
@@ -113,7 +120,7 @@ void WatchDog::Run()
 
         // These declarations are after the startTime check to prevent integer overflow
         // by deferring arithmetic on duration::min() until Start() was called.
-        const auto now = std::chrono::steady_clock::now().time_since_epoch();
+        const auto now = _clock->Now();
         const auto currentRunDuration = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime);
 
         if (currentRunDuration > _warnTimeout && currentRunDuration <= _errorTimeout)
@@ -151,7 +158,25 @@ std::chrono::milliseconds WatchDog::GetErrorTimeout()
 {
     return _errorTimeout;
 }
-    
+
 } // namespace Orchestration
 } // namespace Services
 } // namespace SilKit
+
+namespace {
+
+struct SteadyClock : public SilKit::Services::Orchestration::WatchDog::IClock
+{
+    auto Now() const -> std::chrono::nanoseconds override
+    {
+        return std::chrono::steady_clock::now().time_since_epoch();
+    }
+};
+
+auto GetDefaultClock() -> SilKit::Services::Orchestration::WatchDog::IClock*
+{
+    static SteadyClock steadyClock{};
+    return &steadyClock;
+}
+
+} // namespace
