@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -140,13 +140,13 @@ void FlexrayController::ReconfigureTxBuffer(uint16_t txBufferIdx, const FlexrayT
 {
     if (txBufferIdx >= _bufferConfigs.size())
     {
-        _participant->GetLogger()->Error("FlexrayController::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
+        Logging::Error(_participant->GetLogger(), "FlexrayController::ReconfigureTxBuffer() was called with unconfigured txBufferIdx={}", txBufferIdx);
         throw OutOfRangeError{"Unconfigured txBufferIdx!"};
     }
 
     if (!IsTxBufferConfigsConfigurable())
     {
-        _participant->GetLogger()->Error("ReconfigureTxBuffer() was called on a preconfigured txBuffer. This is not "
+        Logging::Error(_participant->GetLogger(), "ReconfigureTxBuffer() was called on a preconfigured txBuffer. This is not "
                                         "allowed and the reconfiguration will be discarded.");
         return;
     }
@@ -161,7 +161,7 @@ void FlexrayController::UpdateTxBuffer(const FlexrayTxBufferUpdate& update)
 {
     if (update.txBufferIndex >= _bufferConfigs.size())
     {
-        _participant->GetLogger()->Error("FlexrayController::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
+        Logging::Error(_participant->GetLogger(), "FlexrayController::UpdateTxBuffer() was called with unconfigured txBufferIndex={}", update.txBufferIndex);
         throw OutOfRangeError{"Unconfigured txBufferIndex!"};
     }
 
@@ -313,7 +313,7 @@ void FlexrayController::RemoveFrameHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexrayFrameEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(), "RemoveFrameHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -326,7 +326,7 @@ void FlexrayController::RemoveFrameTransmitHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexrayFrameTransmitEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveFrameTransmitHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(),"RemoveFrameTransmitHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -339,7 +339,7 @@ void FlexrayController::RemoveWakeupHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexrayWakeupEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveWakeupHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(), "RemoveWakeupHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -352,7 +352,7 @@ void FlexrayController::RemovePocStatusHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexrayPocStatusEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemovePocStatusHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(), "RemovePocStatusHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -365,7 +365,7 @@ void FlexrayController::RemoveSymbolHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexraySymbolEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveSymbolHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(), "RemoveSymbolHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -378,7 +378,7 @@ void FlexrayController::RemoveSymbolTransmitHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexraySymbolTransmitEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveSymbolTransmitHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(), "RemoveSymbolTransmitHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -391,7 +391,7 @@ void FlexrayController::RemoveCycleStartHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<FlexrayCycleStartEvent>(handlerId))
     {
-        _participant->GetLogger()->Warn("RemoveCycleStartHandler failed: Unknown HandlerId.");
+        Logging::Warn(_participant->GetLogger(), "RemoveCycleStartHandler failed: Unknown HandlerId.");
     }
 }
 

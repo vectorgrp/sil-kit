@@ -53,6 +53,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SerializedMessage.hpp"
 #include "TimeProvider.hpp"
 
+#include "ILogger.hpp"
+
 #include <chrono>
 
 #include "gtest/gtest.h"
@@ -64,37 +66,6 @@ using namespace SilKit::Core;
 using testing::Return;
 using testing::ReturnRef;
 using testing::_;
-
-//Printing helpers, required for implicit template usage in VAsioConnection
-namespace SilKit {
-namespace Core {
-namespace Tests {
-
-namespace  version1 {
-std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
-{
-    out <<"version1:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
-    return out;
-}
-} // namespace Version1
-
-inline namespace Version2 {
-std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
-{
-    out <<"version2:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
-    return out;
-}
-} // namespace Version2
-
-std::ostream& operator<<(std::ostream& out , const TestFrameEvent& msg)
-{
-    out <<"TestFrameEvent{" << msg.integer <<",\"" << msg.str << "\"}";
-    return out;
-}
-
-} // namespace Tests
-} // namespace Core
-} // namespace SilKit
 
 namespace {
 struct MockSilKitMessageReceiver

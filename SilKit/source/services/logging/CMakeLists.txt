@@ -31,6 +31,7 @@ add_library(SilKitMwLogging STATIC
     LogMsgReceiver.hpp
     LogMsgReceiver.cpp
 
+    ILogger.hpp
     Logger.hpp
     Logger.cpp
     #string formatting for SIL Kit types

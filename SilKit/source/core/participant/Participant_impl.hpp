@@ -58,6 +58,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uuid.hpp"
 #include "Assert.hpp"
 
+#include "ILogger.hpp"
+
 namespace SilKit {
 namespace Core {
 
@@ -87,7 +89,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _logger = std::make_unique<Services::Logging::Logger>(GetParticipantName(), _participantConfig.logging);
     _connection.SetLogger(_logger.get());
 
-    _logger->Info("Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
+    Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
                   _participantConfig.middleware.registryUri, Version::String());
 
 }
@@ -141,7 +143,7 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SetupRemoteLogging()
 {
-    auto* logger = dynamic_cast<Services::Logging::Logger*>(_logger.get());
+    auto* logger = dynamic_cast<Services::Logging::Logger*>(GetLogger());
     if (logger)
     {
         if (_participantConfig.logging.logFromRemotes)
@@ -173,7 +175,7 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
     }
     else
     {
-        _logger->Warn("Failed to setup remote logging. Participant {} will not send and receive remote logs.", GetParticipantName());
+        Logging::Warn(GetLogger(), "Failed to setup remote logging. Participant {} will not send and receive remote logs.", GetParticipantName());
     }
 }
 
@@ -400,7 +402,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
                                                          Services::Rpc::RpcCallHandler handler,
                                                          Services::Rpc::IRpcServer* parent) -> Services::Rpc::RpcServerInternal*
 {
-    _logger->Trace("Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
+    Logging::Trace(GetLogger(), "Creating internal server for functionName={}, clientUUID={}", functionName, clientUUID);
 
     SilKit::Config::RpcServer controllerConfig;
     // Use a unique name to avoid collisions of several RpcSevers on same functionName on one participant
@@ -900,7 +902,7 @@ template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
 {
-    TraceTx(_logger.get(), from, msg);
+    TraceTx(GetLogger(), from, msg);
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
 }
 
@@ -1149,7 +1151,7 @@ template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg)
 {
-    TraceTx(_logger.get(), from, msg);
+    TraceTx(GetLogger(), from, msg);
     _connection.SendMsg(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
 }
 
@@ -1259,7 +1261,7 @@ void Participant<SilKitConnectionT>::AddTraceSinksToSource(ITraceMessageSource* 
 {
     if (config.useTraceSinks.empty())
     {
-        GetLogger()->Debug("Tracer on {}/{} not enabled, skipping", GetParticipantName(), config.name);
+        Logging::Debug(GetLogger(), "Tracer on {}/{} not enabled, skipping", GetParticipantName(), config.name);
         return;
     }
     auto findSinkByName = [this](const auto& name)

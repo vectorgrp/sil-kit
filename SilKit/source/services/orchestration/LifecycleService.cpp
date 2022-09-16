@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <future>
 
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/ISystemMonitor.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/participant/exception.hpp"
@@ -29,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LifecycleService.hpp"
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
+#include "ILogger.hpp"
 #include "LifecycleManagement.hpp"
 
 using namespace std::chrono_literals;
@@ -217,7 +217,7 @@ void LifecycleService::Shutdown(std::string reason)
     }
     else
     {
-        _logger->Warn("lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
+        Logging::Warn(_logger, "lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
                       std::move(reason));
     }
 }

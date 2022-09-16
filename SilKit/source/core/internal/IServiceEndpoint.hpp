@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Core {
-inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& id);
+inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& descriptor);
 
 inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor);
 // Creates a ServiceDescriptor based on an endpoint address - for testing purposes only!

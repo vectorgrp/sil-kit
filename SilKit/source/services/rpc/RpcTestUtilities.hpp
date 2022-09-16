@@ -22,8 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <vector>
-#include <iostream>
 #include <typeinfo>
+
 
 #include "ITimeProvider.hpp"
 #include "CreateParticipantT.hpp"
@@ -33,6 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#include "ILogger.hpp"
 
 
 namespace SilKit {

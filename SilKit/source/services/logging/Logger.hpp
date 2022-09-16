@@ -22,10 +22,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <memory>
+#include <functional>
 
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/logging/LoggingDatatypes.hpp"
 
+#include "ILogger.hpp"
 #include "Configuration.hpp"
 
 namespace spdlog {

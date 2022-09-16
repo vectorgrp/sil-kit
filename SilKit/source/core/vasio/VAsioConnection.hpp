@@ -30,8 +30,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <mutex>
 
+#include "asio.hpp"
+
 #include "ParticipantConfiguration.hpp"
-#include "silkit/services/logging/ILogger.hpp"
 
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/wrapped_tuple.hpp"
@@ -46,16 +47,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "traits/SilKitServiceTraits.hpp"
 
 // private data types for unit testing support:
-#include "TestDataTypes.hpp"
+#include "TestDataTraits.hpp"
 
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
-#include "asio.hpp"
 
 #include "ProtocolVersion.hpp"
 #include "SerializedMessage.hpp"
 #include "Assert.hpp"
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -110,9 +111,9 @@ public:
 
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
-            _logger->Trace("VAsio waiting for subscription acknowledges for SilKitService {}.", typeid(*service).name());
+            Trace(_logger, "VAsio waiting for subscription acknowledges for SilKitService {}.", typeid(*service).name());
             allAcked.wait();
-            _logger->Trace("VAsio received all subscription acknowledges for SilKitService {}.", typeid(*service).name());
+            Trace(_logger, "VAsio received all subscription acknowledges for SilKitService {}.", typeid(*service).name());
         }
     }
 

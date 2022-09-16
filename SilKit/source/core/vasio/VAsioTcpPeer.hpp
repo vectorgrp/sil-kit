@@ -21,21 +21,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "IVAsioPeer.hpp"
 
 #include <vector>
 #include <queue>
 #include <mutex>
 
+#include "asio.hpp"
+
 #include "silkit/services/logging/ILogger.hpp"
 
+#include "IVAsioPeer.hpp"
 #include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ProtocolVersion.hpp"
 
-#include "asio.hpp"
 
 namespace SilKit {
 namespace Core {

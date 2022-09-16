@@ -23,11 +23,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <functional>
 #include <atomic>
 
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
+#include "ILogger.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "Assert.hpp"
 
@@ -199,7 +199,7 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _watchDog{healthCheckConfig}
 {
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
-        logger->Warn("SimTask did not finish within soft time limit. Timeout detected after {} ms",
+        Warn(logger, "SimTask did not finish within soft time limit. Timeout detected after {} ms",
                      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count());
     });
     _watchDog.SetErrorHandler([this](std::chrono::milliseconds timeout) {
@@ -241,7 +241,7 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
 
     if (State() == ParticipantState::Shutdown)
     {
-        _logger->Warn("TimeSyncService::ReportError() was called in terminal state ParticipantState::Shutdown; "
+        Warn(_logger, "TimeSyncService::ReportError() was called in terminal state ParticipantState::Shutdown; "
                       "transition to ParticipantState::Error is ignored.");
         return;
     }
@@ -317,7 +317,7 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     using DoubleMSecs = std::chrono::duration<double, std::milli>;
 
     _waitTimeMonitor.StopMeasurement();
-    _logger->Trace("Starting next Simulation Task. Waiting time was: {}ms",
+    Trace(_logger, "Starting next Simulation Task. Waiting time was: {}ms",
                    std::chrono::duration_cast<DoubleMSecs>(_waitTimeMonitor.CurrentDuration()).count());
 
     _timeProvider->SetTime(timePoint, duration);
@@ -328,7 +328,7 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     _watchDog.Reset();
     _execTimeMonitor.StopMeasurement();
 
-    _logger->Trace("Finished Simulation Task. Execution time was: {}ms",
+    Trace(_logger, "Finished Simulation Task. Execution time was: {}ms",
                    std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
 }
@@ -378,7 +378,7 @@ void TimeSyncService::StartTime()
 {
     if (_timeSyncConfigured)
     {
-        assert(_timeSyncPolicy);
+        SILKIT_ASSERT(_timeSyncPolicy);
         _timeSyncPolicy->RequestInitialStep();
     }
 }

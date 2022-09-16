@@ -32,8 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <cctype>
 #include <map>
 
-#include "silkit/services/logging/ILogger.hpp"
-
+#include "ILogger.hpp"
 #include "VAsioTcpPeer.hpp"
 #include "Filesystem.hpp"
 #include "SetThreadName.hpp"
@@ -93,7 +92,7 @@ void SetListenOptions(SilKit::Services::Logging::ILogger* logger,
     if (result == SOCKET_ERROR)
     {
         auto lastError = ::GetLastError();
-        logger->Warn("VAsioConnection: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+        SilKit::Services::Logging::Warn(logger, "VAsioConnection: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
     }
 }
 #   endif //__MINGW32__
@@ -294,6 +293,7 @@ inline std::ostream& operator<< (std::ostream& out,
 }
 } //end namespace std
 
+
 namespace SilKit {
 namespace Core {
 
@@ -354,7 +354,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
         }
         catch (const std::exception& ex)
         {
-            _logger->Warn("VasioConnection::JoinSimulation: Cannot accept local IPC connections: {}, pwd={}",
+            Services::Logging::Warn(_logger, "VasioConnection::JoinSimulation: Cannot accept local IPC connections: {}, pwd={}",
                 ex.what(), fs::current_path().string());
         }
     }
@@ -399,9 +399,9 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     // Neither local nor tcp is working.
     if (!ok)
     {
-        _logger->Error("Failed to connect to VAsio registry (number of attempts: {})",
+        Services::Logging::Error(_logger, "Failed to connect to VAsio registry (number of attempts: {})",
                        _config.middleware.connectAttempts);
-        _logger->Info("   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",
+        Services::Logging::Info(_logger, "   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",
             printUris(attemptedUris));
         _logger->Info("   If a registry is unable to open a listening socket it will only be reachable"
                       " via local domain sockets, which depend on the working directory"
@@ -482,7 +482,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
     buffer.SetProtocolVersion(from->GetProtocolVersion());
     auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
 
-    _logger->Debug("Received participant announcement from {}, protocol version {}.{}", announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
+    Services::Logging::Debug(_logger, "Received participant announcement from {}, protocol version {}.{}", announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
         announcement.messageHeader.versionLow);
 
     from->SetInfo(announcement.peerInfo);
@@ -535,7 +535,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     announcement.messageHeader = to_header(_version);
     announcement.peerInfo = std::move(info);
 
-    _logger->Debug("Sending participant announcement to {}", peer->GetInfo().participantName);
+    Services::Logging::Debug(_logger, "Sending participant announcement to {}", peer->GetInfo().participantName);
     peer->SendSilKitMsg(SerializedMessage{announcement});
 
 }
@@ -547,7 +547,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
 
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
-        _logger->Warn("Received failed participant announcement reply from {}",
+        Services::Logging::Warn(_logger, "Received failed participant announcement reply from {}",
             from->GetInfo().participantName);
         const auto handshakeHeader = to_header(from->GetProtocolVersion());
         // check what went wrong during the handshake
@@ -575,7 +575,7 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
         TryAddRemoteSubscriber(from, subscriber);
     }
 
-    _logger->Debug("Received participant announcement reply from {} protocol version {}",
+    Services::Logging::Debug(_logger, "Received participant announcement reply from {} protocol version {}",
         from->GetInfo().participantName, remoteVersion);
 
     auto iter = std::find(
@@ -602,7 +602,7 @@ void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
     // tell the remote peer what *our* protocol version is that we
     // can accept for this peer
     reply.remoteHeader = to_header(peer->GetProtocolVersion());
-    _logger->Debug("Sending participant announcement reply to {} with protocol version {}.{}",
+    Services::Logging::Debug(_logger, "Sending participant announcement reply to {} with protocol version {}.{}",
         peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
         reply.remoteHeader.versionLow);
     peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
@@ -613,7 +613,7 @@ void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
     const auto result = _hashToParticipantName.insert({SilKit::Util::Hash::Hash(participantName), participantName});
     if (result.second == false)
     {
-        _logger->Warn("Warning: Received announcement of participant '{}', which was already announced before.",
+        Services::Logging::Warn(_logger, "Warning: Received announcement of participant '{}', which was already announced before.",
                       participantName);
     }
 }
@@ -650,11 +650,11 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         return;
     }
 
-    _logger->Debug("Received known participants list from SilKitRegistry protocol {}.{}",
+    Services::Logging::Debug(_logger, "Received known participants list from SilKitRegistry protocol {}.{}",
         participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
 
     auto connectPeer = [this](const auto peerUri) {
-        _logger->Debug("Connecting to {} with Id {} on {}",
+        Services::Logging::Debug(_logger, "Connecting to {} with Id {} on {}",
             peerUri.participantName,
             peerUri.participantId,
             printUris(peerUri));
@@ -698,7 +698,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
     {
         _receivedAllParticipantReplies.set_value();
     }
-    _logger->Trace("VAsio is waiting for {} ParticipantAnnouncementReplies", _pendingParticipantReplies.size());
+    Services::Logging::Trace(_logger, "VAsio is waiting for {} ParticipantAnnouncementReplies", _pendingParticipantReplies.size());
 }
 
 void VAsioConnection::StartIoWorker()
@@ -712,7 +712,7 @@ void VAsioConnection::StartIoWorker()
         }
         catch (const std::exception& error)
         {
-            _logger->Error("Something went wrong: {}", error.what());
+            Services::Logging::Error(_logger, "SilKit-IOWorker: Something went wrong: {}", error.what());
             return -1;
         }
     }};
@@ -749,14 +749,14 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
         }
         catch (const asio::system_error& err)
         {
-            _logger->Error("VAsioConnection::AcceptTcpConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName,
+            Services::Logging::Error(_logger, "VAsioConnection::AcceptTcpConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName,
                            port, err.what());
             throw SilKit::StateError{"Unable to resolve hostname and service."};
         }
 
         endpoint = selectBestEndpointFromResolverResults(resolverResults);
 
-        _logger->Debug("Accepting connections at {}:{} @{}",
+        Services::Logging::Debug(_logger, "Accepting connections at {}:{} @{}",
                        resolverResults->host_name(),
                        resolverResults->service_name(),
                        (isIpv4(endpoint) ? "TCPv4" : "TCPv6"));
@@ -796,12 +796,12 @@ auto VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoin
     }
     catch (const std::exception& e)
     {
-        _logger->Error("VAsioConnection failed to listening on {}: {}", endpoint, e.what());
+        Services::Logging::Error(_logger, "VAsioConnection failed to listening on {}: {}", endpoint, e.what());
         acceptor = AcceptorT{_ioContext}; // Reset socket
         throw;
     }
 
-    _logger->Debug("VAsioConnection is listening on {}", acceptor.local_endpoint());
+    Services::Logging::Debug(_logger, "VAsioConnection is listening on {}", acceptor.local_endpoint());
 
     AcceptNextConnection(acceptor);
 
@@ -818,7 +818,7 @@ void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
     }
     catch (const std::exception& e)
     {
-        _logger->Error("VAsioConnection cannot create listener socket: {}", e.what());
+        Services::Logging::Error(_logger, "VAsioConnection cannot create listener socket: {}", e.what());
         throw;
     }
 
@@ -827,7 +827,7 @@ void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
         {
             if (!error)
             {
-                _logger->Debug("New connection from {}", newConnection->Socket());
+                Services::Logging::Debug(_logger, "New connection from {}", newConnection->Socket());
                 AddPeer(std::move(newConnection));
             }
             AcceptNextConnection(acceptor);
@@ -916,7 +916,7 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     peerService.SetServiceDescriptor(peerId);
     link->DistributeRemoteSilKitMessage(&peerService, std::move(msg));
 
-    _logger->Error("Lost connection to participant {}", peerId);
+    Services::Logging::Error(_logger, "Lost connection to participant {}", peerId);
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
@@ -969,7 +969,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     auto myMessageVersion = getVersionForSerdes(subscriber.msgTypeName, subscriber.version);
     if (myMessageVersion == 0)
     {
-        _logger->Warn(
+        Services::Logging::Warn(_logger, 
             "Received SubscriptionAnnouncement from {} for message type {}"
             "for an unknown subscriber version {}",
             from->GetInfo().participantName, subscriber.msgTypeName, subscriber.version);
@@ -995,7 +995,7 @@ void VAsioConnection::ReceiveSubscriptionAcknowledge(IVAsioPeer* from, Serialize
 
     if (ack.status != SubscriptionAcknowledge::Status::Success)
     {
-        _logger->Error("Failed to subscribe [{}] {} from {}"
+        Services::Logging::Error(_logger, "Failed to subscribe [{}] {} from {}"
             , ack.subscriber.networkName
             , ack.subscriber.msgTypeName
             , from->GetInfo().participantName);
@@ -1052,9 +1052,9 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     });
 
     if (wasAdded)
-        _logger->Debug("Registered subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
+        Services::Logging::Debug(_logger, "Registered subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
     else
-        _logger->Warn("Cannot register subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
+        Services::Logging::Warn(_logger, "Cannot register subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
 
     return wasAdded;
 }
@@ -1064,7 +1064,7 @@ void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessag
     auto receiverIdx =  buffer.GetRemoteIndex();//ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
     {
-        _logger->Warn("Ignoring RawSilKitMessage for unknown receiverIdx={}", receiverIdx);
+        Services::Logging::Warn(_logger, "Ignoring RawSilKitMessage for unknown receiverIdx={}", receiverIdx);
         return;
     }
 

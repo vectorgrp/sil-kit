@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace {
 
 using namespace std::chrono_literals;
-using namespace SilKit::Core;
 using namespace SilKit::Services::Can;
 
 using testing::_;

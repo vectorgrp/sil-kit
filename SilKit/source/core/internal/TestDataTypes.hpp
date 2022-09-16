@@ -20,11 +20,11 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 #include <string>
+#include <ostream>
 
 #include "MessageBuffer.hpp"
 #include "InternalSerdes.hpp"
 
-#include "traits/SilKitMsgTraits.hpp"
 
 // Datatypes for testing versioning and renaming of SIL Kit messages.
 namespace SilKit {
@@ -56,25 +56,34 @@ struct TestFrameEvent
     std::string str{"renamed"};
 };
 
+
+//////////////////////////////////////////////////////////////////////
+// String Utils
+//////////////////////////////////////////////////////////////////////
+
+namespace  Version1 {
+inline std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
+{
+    out <<"version1:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
+    return out;
+}
+} // namespace Version1
+
+inline namespace Version2 {
+inline std::ostream& operator<<(std::ostream& out , const TestMessage& msg)
+{
+    out <<"version2:TestMessage{" << msg.integer <<",\"" << msg.str << "\"}";
+    return out;
+}
+} // namespace Version2
+
+inline std::ostream& operator<<(std::ostream& out , const TestFrameEvent& msg)
+{
+    out <<"TestFrameEvent{" << msg.integer <<",\"" << msg.str << "\"}";
+    return out;
+}
+
 } // namespace Tests
-
-//////////////////////////////////////////////////////////////////////
-// Traits for internal testing data types for wire protocol versioning and evolution
-//////////////////////////////////////////////////////////////////////
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Tests::Version1, TestMessage)
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Tests::Version1::TestMessage, "TESTMESSAGE");
-DefineSilKitMsgTrait_Version(SilKit::Core::Tests::Version1::TestMessage, 1);
-
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Tests::Version2, TestMessage)
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Tests::Version2::TestMessage, "TESTMESSAGE");
-DefineSilKitMsgTrait_Version(SilKit::Core::Tests::Version2::TestMessage, 2);
-
-DefineSilKitMsgTrait_TypeName(SilKit::Core::Tests, TestFrameEvent)
-//The renamed TestMessage must have the same SerdesName as the previous struct
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Tests::TestFrameEvent, "TESTMESSAGE");
-DefineSilKitMsgTrait_Version(SilKit::Core::Tests::TestFrameEvent, 3);
-
-
 //////////////////////////////////////////////////////////////////////
 // Serdes operators
 //////////////////////////////////////////////////////////////////////

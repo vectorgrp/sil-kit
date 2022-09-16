@@ -23,11 +23,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <ctime>
 #include <iomanip> //std:put_time
 
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
 #include "SystemMonitor.hpp"
 #include "IServiceDiscovery.hpp"
+#include "ILogger.hpp"
 #include "LifecycleService.hpp"
 
 namespace SilKit {
@@ -152,7 +152,7 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestra
     ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
     if (oldParticipantState == Orchestration::ParticipantState::Shutdown)
     {
-        _logger->Debug("Ignoring ParticipantState update from participant {} to ParticipantState::{} because "
+        Logging::Debug(_logger, "Ignoring ParticipantState update from participant {} to ParticipantState::{} because "
                        "participant is already in terminal state ParticipantState::Shutdown.",
                        newParticipantStatus.participantName, newParticipantStatus.state);
         return;
@@ -285,7 +285,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const Orchestration::Partici
         return;
 
     default:
-        _logger->Error("SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::{}", newStatus.state);
+        Logging::Error(_logger, "SystemMonitor::ValidateParticipantStatusUpdate() Unhandled ParticipantState::{}", newStatus.state);
     }
 
     std::time_t enterTime = std::chrono::system_clock::to_time_t(newStatus.enterTime);
@@ -298,7 +298,7 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const Orchestration::Partici
     std::stringstream timeBuf;
     timeBuf <<  std::put_time(&tmBuffer, "%FT%T");
 
-    _logger->Error(
+    Logging::Error(_logger,
         "SystemMonitor detected invalid ParticipantState transition from {} to {} EnterTime={}, EnterReason=\"{}\"",
         oldState,
         newStatus.state,

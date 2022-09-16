@@ -23,8 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iomanip>
 #include <sstream>
 
-#include "silkit/services/logging/ILogger.hpp"
-
+#include "ILogger.hpp"
 #include "VAsioMsgKind.hpp"
 #include "VAsioConnection.hpp"
 #include "Uri.hpp"
@@ -53,7 +52,7 @@ static void EnableQuickAck(SilKit::Services::Logging::ILogger* log, asio::generi
         (void*)&val, sizeof(val));
     if (e != 0)
     {
-        log->Warn("VasioTcpPeer: cannot set linux-specific socket option TCP_QUICKACK.");
+        SilKit::Services::Logging::Warn(log, "VasioTcpPeer: cannot set linux-specific socket option TCP_QUICKACK.");
     }
 #   else
     SILKIT_UNUSED_ARG(log);
@@ -93,7 +92,7 @@ static void SetConnectOptions(SilKit::Services::Logging::ILogger* logger,
     if (result == SOCKET_ERROR)
     {
         auto lastError = ::GetLastError();
-        logger->Warn("VAsioTcpPeer: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+        SilKit::Services::Logging::Warn(logger, "VAsioTcpPeer: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
     }
 }
 
@@ -148,7 +147,7 @@ void VAsioTcpPeer::Shutdown()
 {
     if (_socket.is_open())
     {
-        _logger->Info("Shutting down connection to {}", _info.participantName);
+        SilKit::Services::Logging::Info(_logger, "Shutting down connection to {}", _info.participantName);
         _socket.close();
         _connection->OnPeerShutdown(this);
     }
@@ -228,7 +227,7 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 
     try
     {
-        _logger->Debug("VAsioTcpPeer: Connecting to {}", socketPath);
+        SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer: Connecting to {}", socketPath);
         asio::local::stream_protocol::endpoint ep{socketPath};
         _socket.connect(ep);
         return true;
@@ -253,7 +252,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     }
     catch (asio::system_error& err)
     {
-        _logger->Warn("Unable to resolve hostname \"{}:{}\": {}", strippedHost, port, err.what());
+        SilKit::Services::Logging::Warn(_logger, "Unable to resolve hostname \"{}:{}\": {}", strippedHost, port, err.what());
         return false;
     }
     auto config = _connection->Config();
@@ -261,7 +260,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     {
         try
         {
-            _logger->Debug( "VAsioTcpPeer: Connecting to [{}]:{} ({})",
+            SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer: Connecting to [{}]:{} ({})",
                 resolverEntry.host_name(),
                 resolverEntry.service_name(),
                 (resolverEntry.endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6")
@@ -299,7 +298,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
         catch (asio::system_error& err)
         {
             // reset the socket
-            _logger->Debug("VAsioTcpPeer: connect failed: {}", err.what());
+            SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer: connect failed: {}", err.what());
             _socket = decltype(_socket){_socket.get_executor()};
         }
     }
@@ -362,7 +361,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
         auto errorMsg = fmt::format("Failed to connect to host URIs: \"{}\"",
             attemptedUris.str());
         _logger->Debug(errorMsg);
-        _logger->Debug("Tried the following URIs: {}", attemptedUris.str());
+        SilKit::Services::Logging::Debug(_logger, "Tried the following URIs: {}", attemptedUris.str());
 
         throw SilKitError{errorMsg};
     }
@@ -424,8 +423,7 @@ void VAsioTcpPeer::WriteSomeAsync()
 
 void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    _logger->Debug("Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName);
-
+    SilKit::Services::Logging::Debug(_logger, "Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName); 
     SendSilKitMsg(SerializedMessage{subscriber});
 }
 
@@ -488,7 +486,7 @@ void VAsioTcpPeer::DispatchBuffer()
     // validate the received size
     if (_currentMsgSize == 0 || _currentMsgSize > 1024 * 1024 * 1024)
     {
-        _logger->Error("Received invalid Message Size: {}", _currentMsgSize);
+        SilKit::Services::Logging::Error(_logger, "Received invalid Message Size: {}", _currentMsgSize);
         Shutdown();
     }
 

@@ -24,10 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 #include <chrono>
 
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
+
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -528,7 +529,7 @@ void LinController::LinNode::UpdateResponses(std::vector<LinFrameResponse> respo
         auto linId = response.frame.id;
         if (linId >= responses.size())
         {
-            logger->Warn("Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
+            Logging::Warn(logger, "Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
             continue;
         }
         responses[linId] = std::move(response);
@@ -540,7 +541,7 @@ void LinController::LinNode::UpdateTxBuffer(LinId linId, std::array<uint8_t, 8> 
 {
     if (linId >= responses.size())
     {
-        logger->Warn("Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
+        Logging::Warn(logger, "Ignoring LinFrameResponse update for invalid ID={}", static_cast<uint16_t>(linId));
         return;
     }
     responses[linId].frame.data = data;

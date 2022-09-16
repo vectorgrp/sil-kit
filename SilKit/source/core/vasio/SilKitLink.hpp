@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/logging/ILogger.hpp"
+#include "ILogger.hpp"
 
 #include "VAsioTransmitter.hpp"
 #include "traits/SilKitMsgTraits.hpp"
@@ -169,11 +169,11 @@ void SilKitLink<MsgT>::DispatchSilKitMessage(ReceiverT* to, const IServiceEndpoi
     }
     catch (const std::exception& e)
     {
-        _logger->Warn("Callback for {}[\"{}\"] threw an exception: {}", MsgTypeName(), Name(), e.what());
+        Services::Logging::Warn(_logger, "Callback for {}[\"{}\"] threw an exception: {}", MsgTypeName(), Name(), e.what());
     }
     catch (...)
     {
-        _logger->Warn("Callback for {}[\"{}\"] threw an unknown exception", MsgTypeName(), Name());
+        Services::Logging::Warn(_logger, "Callback for {}[\"{}\"] threw an unknown exception", MsgTypeName(), Name());
     }
 }
 

@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Logger.hpp"
 #include "Uri.hpp"
+#include "ILogger.hpp"
 
 using asio::ip::tcp;
 
@@ -78,7 +79,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     }
     catch (const std::exception& e)
     {
-        _logger->Error("VAsioRegistry failed to create listening socket {}:{} (uri: {}). Reason: {}",
+        Services::Logging::Error(GetLogger(), "VAsioRegistry failed to create listening socket {}:{} (uri: {}). Reason: {}",
                        uri.Host(),
                        uri.Port(),
                        uri.EncodedString(),
@@ -108,7 +109,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         }
         catch (const std::exception& e)
         {
-            _logger->Warn("VAsioRegistry failed to create local listening socket: {}", e.what());
+            Services::Logging::Warn(GetLogger(), "VAsioRegistry failed to create local listening socket: {}", e.what());
             throw SilKit::StateError{"Unable to accept Local Domain connections."};
         }
     }
@@ -171,7 +172,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     if (FindConnectedPeer(peerInfo.participantName) != _connectedParticipants.end())
     {
-        _logger->Warn(
+        Services::Logging::Warn(GetLogger(),
             "Ignoring announcement from participant name={}, which is already connected",
             peerInfo.participantName);
         return;
@@ -194,7 +195,7 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
-    _logger->Info("Sending known participant message to {}", peer->GetInfo().participantName);
+    Services::Logging::Info(GetLogger(), "Sending known participant message to {}", peer->GetInfo().participantName);
 
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = to_header(peer->GetProtocolVersion());

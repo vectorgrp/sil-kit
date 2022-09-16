@@ -25,15 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "LoggingDatatypes.hpp"
 
-#ifdef HAVE_FMTLIB
-#    ifndef FMT_USE_WINDOWS_H
-#        define FMT_USE_WINDOWS_H 0
-#    endif
-#    include "fmt/format.h"
-#    include "fmt/ostream.h"
-#    include "SilKitFmtFormatters.hpp"
-#endif //HAVE_FMTLIB
-
 namespace SilKit {
 namespace Services {
 namespace Logging {
@@ -70,49 +61,6 @@ public:
 
     //! \brief Get the lowest configured log level of all sinks
     virtual Level GetLogLevel() const = 0;
-
-#ifdef HAVE_FMTLIB
-    template<typename... Args>
-    void Log(Level level, const char* fmt, const Args&... args)
-    {
-        if (GetLogLevel() <= level)
-        {
-            std::string msg = fmt::format(fmt, args...);
-            Log(level, msg);
-        }
-
-    }
-    template<typename... Args>
-    void Trace(const char* fmt, const Args&... args)
-    {
-        Log(Level::Trace, fmt, args...);
-    }
-    template<typename... Args>
-    void Debug(const char* fmt, const Args&... args)
-    {
-        Log(Level::Debug, fmt, args...);
-    }
-    template<typename... Args>
-    void Info(const char* fmt, const Args&... args)
-    {
-        Log(Level::Info, fmt, args...);
-    }
-    template<typename... Args>
-    void Warn(const char* fmt, const Args&... args)
-    {
-        Log(Level::Warn, fmt, args...);
-    }
-    template<typename... Args>
-    void Error(const char* fmt, const Args&... args)
-    {
-        Log(Level::Error, fmt, args...);
-    }
-    template<typename... Args>
-    void Critical(const char* fmt, const Args&... args)
-    {
-        Log(Level::Critical, fmt, args...);
-    }
-#endif //HAVE_FMTLIB
 };
 
 } // namespace Logging
