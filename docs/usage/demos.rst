@@ -293,8 +293,8 @@ Publish & Subscribe Demo
            File name of the ParticipantConfiguraiton to be used; 
            use ``SilKitConfig_DemoPubSub.json`` for an example configuration.
          <ParticipantName> 
-           The name of the participant within the simulation; must either be ``PubSub1``, ``PubSub2``, ``Subscriber1`` or 
-           ``Subscriber2``.
+           The name of the participant within the simulation; must either be ``Publisher`` or 
+           ``Subscriber``.
          [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
 
@@ -302,29 +302,24 @@ Publish & Subscribe Demo
       -  .. parsed-literal:: 
 
             # Creates a combined publisher and subscriber with the default registry URI:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json PubSub1
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Publisher
    *  -  System Example
       -  .. parsed-literal:: 
 
             # System Monitor (optional):
             |SystemMonitor|
 
-            # Publisher 1:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json PubSub1
+            # Publisher:
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Publisher
 
-            # Publisher 2:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json PubSub2
-
-            # Subscriber 1:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Subscriber1
-
-            # Subscriber 2:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Subscriber2
+            # Subscriber:
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Subscriber
 
             # System Controller:
-            |SystemController| PubSub1 PubSub2 Subscriber1 Subscriber2
+            |SystemController| Publisher Subscriber
+
    *  -  Notes
-      -  Any combination of publishers or subscribers is applicable for this demo.
+      -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built in serializer/deserializer.
 
 RPC Demo
 ~~~~~~~~~~~~~~~~~~~~
@@ -371,4 +366,4 @@ RPC Demo
             # System Controller:
             |SystemController| Server Client
    *  -  Notes
-      -  Any combination of publishers or subscribers is usable for this demo.
+      -  ``Client`` participant has two RpcClients that call the ``Add100`` and ``Sort`` functions on the two RpcServers of the ``Server`` participant.

@@ -27,61 +27,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "silkit/util/serdes/Serialization.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
+#include "silkit/util/serdes/Serialization.hpp"
 
 
 using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
-
-void PublishMessage(IDataPublisher* publisher, std::string topicname)
-{
-    static auto msgIdx = 0;
-
-    std::stringstream messageBuilder;
-    messageBuilder << topicname << " LocalMsgId=" << msgIdx++;
-    auto message = messageBuilder.str();
-
-    std::cout << "<< Send DataMessageEvent with data=" << message << std::endl;
-
-    SilKit::Util::SerDes::Serializer serializer;
-    serializer.Serialize(message);
-    publisher->Publish(serializer.ReleaseBuffer());
-}
-
-void ReceiveMessage(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
-{
-    SilKit::Util::SerDes::Deserializer deserializer(SilKit::Util::ToStdVector(dataMessageEvent.data));
-    const auto message = deserializer.Deserialize<std::string>();
-    std::cout << ">> Received new Message: with data=\"" << message << "\"" << std::endl;
-}
 
 /**************************************************************************************************
  * Main Function
  **************************************************************************************************/
 
 /*
-PubSub1
-Pub: "Topic1", "A"                                  -> Subscriber1
-Pub: "Topic2", "A"                                  -> Subscriber1, Subscriber2
-Sub: "Topic3", "A"                                  <- PubSub2
-Sub: "Topic4", "A", {"KeyA", "ValA", Mandatory}     <- PubSub2
+Publisher
+Pub: "Gps"
+Pub: "Temperature"
 
-PubSub2
-Pub: "Topic1", "A"                                  -> Subscriber1
-Pub: "Topic3", "A"                                  -> PubSub1, PubSub2
-Sub: "Topic3", "A"                                  <- PubSub2                        
-Pub: "Topic4", "A", {"KeyA", "ValA", Optional}      -> PubSub1
-
-Subscriber1
-Sub: "Topic1", ""                                   <- PubSub1, PubSub2               
-Sub: "Topic2", "A"                                  <- PubSub1                        
-Sub: "Topic4", "A"                                  <- PubSub2
-
-Subscriber2
-Sub: "Topic2", "A"                                  <- PubSub1                        
-Sub: "Topic3", "B"                                  <- None                           
-
+Subscriber
+Sub: "Gps"
+Sub: "Temperature"
 */
 
 int main(int argc, char** argv)
@@ -94,9 +58,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    std::string mediaTypeWildcard{""};
-    std::string mediaTypeJson{"application/json"};
-    std::string mediaTypeText{"text/plain"};
+    std::string mediaType{SilKit::Util::SerDes::MediaTypeData()};
 
     try
     {
@@ -129,82 +91,86 @@ int main(int argc, char** argv)
             std::cout << "Shutting down..." << std::endl;
         });
 
-        if (participantName == "PubSub1")
+        if (participantName == "Publisher")
         {
-            SilKit::Services::PubSub::PubSubSpec dataSpecPub1{"Topic1", mediaTypeJson};
-            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpecPub1, 0);
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecPub2{"Topic2", mediaTypeJson};
-            auto* PubTopic2 = participant->CreateDataPublisher("PubCtrl2", dataSpecPub2, 0);
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic3", mediaTypeJson};
-            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub2{"Topic4", mediaTypeJson};
-            dataSpecSub2.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Mandatory);
-            participant->CreateDataSubscriber("SubCtrl2", dataSpecSub2, ReceiveMessage);
+            // Create a data publisher for GPS data
+            SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
+            auto* gpsPublisher = participant->CreateDataPublisher("Gps", dataSpecPubGps, 0);
+            
+            // Create a data publisher for temperature data
+            SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
+            auto* temperaturePublisher = participant->CreateDataPublisher("Temperature", dataSpecPubTemperature, 0);
 
             timeSyncService->SetSimulationStepHandler(
-                [PubTopic1, PubTopic2](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                [gpsPublisher, temperaturePublisher](std::chrono::nanoseconds now,
+                                                     std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    PublishMessage(PubTopic1, "Topic1_from_Pub1");
-                    PublishMessage(PubTopic2, "Topic2_from_Pub1");
+
+                    // GPS
+                    double lat = 48.8235 + static_cast<double>((rand() % 150)) / 100000;
+                    double lon = 9.0965 + static_cast<double>((rand() % 150)) / 100000;
+                    std::string signalQuality = "Strong";
+
+                    // Serialize data
+                    SilKit::Util::SerDes::Serializer serializer;
+                    serializer.BeginStruct();
+                    serializer.Serialize(lat);
+                    serializer.Serialize(lon);
+                    serializer.Serialize(signalQuality);
+                    serializer.EndStruct();
+
+                    // Publish serialized data
+                    gpsPublisher->Publish(serializer.ReleaseBuffer());
+                    std::cout << ">> Published Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality << std::endl;
+
+                    // Temperature
+                    double temperature = 25.0 + static_cast<double>(rand() % 10) / 10.0;
+
+                    // Serialize data
+                    serializer.Serialize(temperature);
+
+                    // Publish serialized data
+                    temperaturePublisher->Publish(serializer.ReleaseBuffer());
+                    std::cout << ">> Published temperature data temperature=" << temperature << std::endl;
+
                     std::this_thread::sleep_for(1s);
 
             }, 1s);
         }
-        else if (participantName == "PubSub2")
+        else if (participantName == "Subscriber")
         {
+            SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
+            participant->CreateDataSubscriber(
+                "Gps", dataSpecPubGps,
+                [](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
+                    auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
 
-            SilKit::Services::PubSub::PubSubSpec dataSpecPub1{"Topic1", mediaTypeJson};
-            auto* PubTopic1 = participant->CreateDataPublisher("PubCtrl1", dataSpecPub1, 0);
+                    // Deserialize event data
+                    SilKit::Util::SerDes::Deserializer deserializer(eventData);
+                    deserializer.BeginStruct();
+                    double lat = deserializer.Deserialize<double>();
+                    double lon = deserializer.Deserialize<double>();
+                    std::string signalQuality = deserializer.Deserialize<std::string>();
+                    deserializer.EndStruct();
 
-            SilKit::Services::PubSub::PubSubSpec dataSpecPub2{"Topic3", mediaTypeJson};
-            auto* PubTopic3 = participant->CreateDataPublisher("PubCtrl2", dataSpecPub2, 0);
+                    // Print results
+                    std::cout << "<< Received Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality << std::endl;
+                });
 
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic3", mediaTypeJson};
-            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
+            SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
+            participant->CreateDataSubscriber(
+                "Temperature", dataSpecPubTemperature,
+                [](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
+                    auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
 
-            SilKit::Services::PubSub::PubSubSpec dataSpecPub3{"Topic4", mediaTypeJson};
-            dataSpecPub3.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
-            auto* PubTopic4 = participant->CreateDataPublisher("PubCtrl3", dataSpecPub3, 0);
+                    // Deserialize event data
+                    SilKit::Util::SerDes::Deserializer deserializer(eventData);
+                    double temperature = deserializer.Deserialize<double>();
 
-            timeSyncService->SetSimulationStepHandler(
-                [PubTopic1, PubTopic3, PubTopic4](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    PublishMessage(PubTopic1, "Topic1_from_Pub2");
-                    PublishMessage(PubTopic3, "Topic3_from_Pub2");
-                    PublishMessage(PubTopic4, "Topic4_from_Pub2");
-                    std::this_thread::sleep_for(1s);
-                }, 1s);
-        }
-        else if (participantName == "Subscriber1")
-        {
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic1", mediaTypeWildcard};
-            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub2{"Topic2", mediaTypeJson};
-            participant->CreateDataSubscriber("SubCtrl2", dataSpecSub2, ReceiveMessage);
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub3{"Topic4", mediaTypeJson};
-            participant->CreateDataSubscriber("SubCtrl3", dataSpecSub3, ReceiveMessage);
-
-            timeSyncService->SetSimulationStepHandler(
-                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    std::this_thread::sleep_for(1s);
-            }, 1s);
-        }
-        else if (participantName == "Subscriber2")
-        {
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub1{"Topic2", mediaTypeJson};
-            participant->CreateDataSubscriber("SubCtrl1", dataSpecSub1, ReceiveMessage);
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecSub2{"Topic3", mediaTypeText};
-            participant->CreateDataSubscriber("SubCtrl2", dataSpecSub2, ReceiveMessage);
+                    // Print results
+                    std::cout << "<< Received temperature data temperature=" << temperature << std::endl;
+                });
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -215,7 +181,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            std::cout << "Wrong participant name provided. Use either \"PubSub1\", \"PubSub2\", \"Subscriber1\" or \"Subscriber2\"." << std::endl;
+            std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"." << std::endl;
             return 1;
         }
 

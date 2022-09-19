@@ -23,17 +23,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 #include <thread>
 #include <algorithm>
+#include <vector>
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/util/serdes/Serialization.hpp"
 
 
 using namespace SilKit::Services::Rpc;
 using namespace std::chrono_literals;
 
-std::chrono::milliseconds callReturnTimeout{ 5000ms };
+// An incrementing call counter, that is used to identify the calls of the different clients
+uint16_t callCounter = 0;
 
 static std::ostream& operator<<(std::ostream& os, const SilKit::Util::Span<const uint8_t>& v)
 {
@@ -56,19 +59,29 @@ void Call(IRpcClient* client)
         static_cast<uint8_t>(rand() % 10),
         static_cast<uint8_t>(rand() % 10) };
 
-    const auto userContext = reinterpret_cast<void*>(uintptr_t(rand()));
+    // Add an incrementing callCounter as userContext, to reidentify the corresponding call on reception of a 
+    // call result.
+    const auto userContext = reinterpret_cast<void*>(uintptr_t(callCounter++));
 
-    client->Call(argumentData, userContext);
+    // Serialize call argument data
+    SilKit::Util::SerDes::Serializer serializer;
+    serializer.Serialize(argumentData);
 
-    std::cout << "<< Calling with argumentData=" << argumentData << " and userContext=" << userContext << std::endl;
+    client->Call(serializer.ReleaseBuffer(), userContext);
+    std::cout << ">> Calling with argumentData=" << argumentData << " and userContext=" << userContext << std::endl;
 }
 
-void CallReturn(IRpcClient* /*cbClient*/, RpcCallResultEvent event)
+void CallReturn(IRpcClient* /*client*/, RpcCallResultEvent event)
 {
+    // Deserialize call result data
+    auto resultDataVector = SilKit::Util::ToStdVector(event.resultData);
+    SilKit::Util::SerDes::Deserializer deserializer(resultDataVector);
+    std::vector<uint8_t> resultData = deserializer.Deserialize<std::vector<uint8_t>>();
+    
     switch (event.callStatus)
     {
     case RpcCallStatus::Success:
-        std::cout << ">> Call " << event.userContext << " returned with resultData=" << event.resultData << std::endl;
+        std::cout << ">> Call " << event.userContext << " returned with resultData=" << resultData << std::endl;
         break;
     case RpcCallStatus::ServerNotReachable:
         std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::ServerNotReachable" << std::endl;
@@ -82,28 +95,56 @@ void CallReturn(IRpcClient* /*cbClient*/, RpcCallResultEvent event)
     }
 }
 
+// A function offered by a RpcServer to add 100 to each enty of an array of numbers
 void RemoteFunc_Add100(IRpcServer* server, RpcCallEvent event)
 {
-    auto returnData = SilKit::Util::ToStdVector(event.argumentData);
-    for (auto& v : returnData)
+    // Deserialize call argument data
+    auto argumentDataVector = SilKit::Util::ToStdVector(event.argumentData);
+    SilKit::Util::SerDes::Deserializer deserializer(argumentDataVector);
+    std::vector<uint8_t> argumentData = deserializer.Deserialize<std::vector<uint8_t>>();
+
+    // Copy argument data for calculation
+    std::vector<uint8_t> resultData(argumentData);
+
+    // Perform calculation (increment each argument value by 100)
+    for (auto& v : resultData)
     {
         v += 100;
     }
 
-    std::cout << ">> Received call with argumentData=" << event.argumentData
-              << ", returning resultData=" << returnData << std::endl;
+    std::cout << ">> Received call with argumentData=" << argumentData << ", returning resultData=" << resultData
+              << std::endl;
 
-    server->SubmitResult(event.callHandle, returnData);
+    // Serialize result data
+    SilKit::Util::SerDes::Serializer serializer;
+    serializer.Serialize(resultData);
+
+    // Submit call result to client
+    server->SubmitResult(event.callHandle, serializer.ReleaseBuffer());
 }
 
+// A function offered by a RpcServer to sort an array of numbers
 void RemoteFunc_Sort(IRpcServer* server, RpcCallEvent event)
 {
-    auto returnData = SilKit::Util::ToStdVector(event.argumentData);
-    std::sort(returnData.begin(), returnData.end());
-    std::cout << ">> Received call with argumentData=" << event.argumentData
-              << ", returning resultData=" << returnData << std::endl;
+    // Deserialize call argument data
+    auto argumentDataVector = SilKit::Util::ToStdVector(event.argumentData);
+    SilKit::Util::SerDes::Deserializer deserializer(argumentDataVector);
+    std::vector<uint8_t> argumentData = deserializer.Deserialize<std::vector<uint8_t>>();
 
-    server->SubmitResult(event.callHandle, returnData);
+    // Copy argument data for calculation
+    std::vector<uint8_t> resultData(argumentData);
+
+    // Perform calculation (sort argument values)
+    std::sort(resultData.begin(), resultData.end());
+    std::cout << ">> Received call with argumentData=" << argumentData
+              << ", returning resultData=" << resultData << std::endl;
+
+    // Serialize result data
+    SilKit::Util::SerDes::Serializer serializer;
+    serializer.Serialize(resultData);
+
+    // Submit call result to client
+    server->SubmitResult(event.callHandle, serializer.ReleaseBuffer());
 }
 
 int main(int argc, char** argv)
@@ -115,6 +156,8 @@ int main(int argc, char** argv)
                   << "Use \"Server\" or \"Client\" as <ParticipantName>." << std::endl;
         return -1;
     }
+
+    std::string mediaType{SilKit::Util::SerDes::MediaTypeRpc()};
 
     try
     {
@@ -145,35 +188,34 @@ int main(int argc, char** argv)
 
         if (participantName == "Client")
         {
-            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", "application/octet-stream"};
-            dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Mandatory);
-            auto clientA = participant->CreateRpcClient("ClientCtrl1", dataSpecAdd100, &CallReturn);
+            // Create RpcClient to call "Add100"
+            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", mediaType};
+            auto clientAdd100 = participant->CreateRpcClient("ClientAdd100", dataSpecAdd100, &CallReturn);
 
-            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", "application/octet-stream"};
-            dataSpecAdd100.AddLabel("KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Mandatory);
-            auto clientB = participant->CreateRpcClient("ClientCtrl2", dataSpecSort, &CallReturn);
+            // Create RpcClient to call "Sort"
+            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", mediaType};
+            auto clientSort = participant->CreateRpcClient("ClientSort", dataSpecSort, &CallReturn);
 
             timeSyncService->SetSimulationStepHandler(
-                [clientA, clientB](std::chrono::nanoseconds now,
+                [clientAdd100, clientSort](std::chrono::nanoseconds now,
                                                                            std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    Call(clientA);
-                    Call(clientB);
+                    
+                    // Call both remote procedures in each simulation step
+                    Call(clientAdd100);
+                    Call(clientSort);
                 }, 1s);
         }
         else if (participantName == "Server")
         {
-            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", "application/octet-stream"};
-            dataSpecAdd100.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
-            dataSpecAdd100.AddLabel("KeyB", "ValB", SilKit::Services::MatchingLabel::Kind::Optional);
+            // Create RpcServer to respond to calls for "Add100"
+            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", mediaType};
+            participant->CreateRpcServer("ServerAdd100", dataSpecAdd100, &RemoteFunc_Add100);
 
-            participant->CreateRpcServer("ServerCtrl1", dataSpecAdd100, &RemoteFunc_Add100);
-
-            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", "application/octet-stream"};
-            dataSpecSort.AddLabel("KeyC", "ValC", SilKit::Services::MatchingLabel::Kind::Optional);
-            dataSpecSort.AddLabel("KeyD", "ValD", SilKit::Services::MatchingLabel::Kind::Optional);
-            participant->CreateRpcServer("ServerCtrl2", dataSpecSort, &RemoteFunc_Sort);
+            // Create RpcServer to respond to calls for "Sort"
+            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", mediaType};
+            participant->CreateRpcServer("ServerSort", dataSpecSort, &RemoteFunc_Sort);
 
             timeSyncService->SetSimulationStepHandler(
                 [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
