@@ -1,0 +1,172 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base-env",
+      "description": "Basic preset that defines global variables",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/_build/$env{SILKIT_CMAKE_PRESET_NAME}",
+      "installDir": "${sourceDir}/_install/$env{SILKIT_CMAKE_PRESET_NAME}",
+      "environment": {
+        "SILKIT_CMAKE_PRESET_NAME": "$env{SILKIT_CMAKE_PRESET_BUILD_PLATFORM}-$env{SILKIT_CMAKE_PRESET_ARCHITECTURE}-$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}"
+      },
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "$env{SILKIT_CMAKE_PRESET_BUILD_TYPE}" }
+    },
+    {
+      "name": "linux-base",
+      "displayName": "Linux Base Configuration",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "inherits": "base-env",
+      "hidden": true,
+      "environment": {
+        "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x86_64",
+        "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "linux"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" } }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux Debug",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "inherits": "linux-base",
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux Release",
+      "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
+      "inherits": "linux-base",
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "windows-base",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "inherits": "base-env",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "win"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
+        "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x64"
+      }
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+      "inherits": "x64-debug",
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x86-debug",
+      "displayName": "x86 Debug",
+      "description": "Target Windows (32-bit) with the Visual Studio development environment. (Debug)",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      },
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Debug",
+        "SILKIT_CMAKE_PRESET_ARCHITECTURE": "x86"
+      }
+    },
+    {
+      "name": "x86-release",
+      "displayName": "x86 Release",
+      "description": "Target Windows (32-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+      "inherits": "x86-debug",
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "hidden": false,
+      "inherits": "linux-base",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "hidden": false,
+      "inherits": "linux-base",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x64-debug",
+      "hidden": false,
+      "inherits": "windows-base",
+      "configurePreset": "x64-debug"
+    },
+    {
+      "name": "x64-release",
+      "hidden": false,
+      "inherits": "windows-base",
+      "configurePreset": "x64-release"
+    },
+    {
+      "name": "x86-debug",
+      "hidden": false,
+      "inherits": "windows-base",
+      "configurePreset": "x86-debug"
+    },
+    {
+      "name": "x86-release",
+      "hidden": false,
+      "inherits": "windows-base",
+      "configurePreset": "x86-release"
+    }
+  ]
+}

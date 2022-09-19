@@ -22,5 +22,8 @@ Products/*
 # ignore auto generated pycache
 *__pycache__*
 
-#ci/build_all generates a lot of build directories
+# ci/build_all generates a lot of build directories
 _build_*/
+
+# ignore cmake CMakeUserPresets
+CMakeUserPresets.json
