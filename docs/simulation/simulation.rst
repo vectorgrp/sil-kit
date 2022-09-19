@@ -120,7 +120,7 @@ Each participant has an independent lifecycle that other participants can observ
 .. figure:: ../_static/ParticipantLifecycle_3.png
    :alt: : Participant state machine
    :align: center
-   :width: 100%
+   :width: 800
 
    : |ProductName| participant state machine.
 
@@ -290,7 +290,7 @@ This enables the usage of a distributed synchronization algorithm.
 .. figure:: ../_static/sim-inorder-strict.png
    :alt: Vector SIL Kit message delivery
    :align: center
-   :width: 90%
+   :width: 800
 
    : |ProductName| delivery of messages.
 

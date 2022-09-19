@@ -1,8 +1,8 @@
 .. _sec:capi:
 
-=====
-C API
-=====
+================================
+Entry Point and API Organization
+================================
 
 .. contents::
    :local:
@@ -55,46 +55,14 @@ Participant API
 Most creator functions for other objects (such as bus controllers) require an SilKit_Participant, 
 which is the factory object, as input parameter.
 
-Services
---------
+Logger API 
+----------
 
-Vehicle Network Controller
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. toctree::
-  :maxdepth: 1
-
-  can
-  ethernet
-  lin
-  flexray
-
-Data Messages and RPC
-~~~~~~~~~~~~~~~~~~~~~
-
-.. toctree::
-  :maxdepth: 1
-
-  data
-  rpc
-
-State Handling and Synchronization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. toctree::
-  :maxdepth: 1
-
-  participantcontroller
-  systemmonitor
-
-
-The Logger API 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Logger API can be used to write log messages.
 
 .. doxygenfunction:: SilKit_Participant_GetLogger
 .. doxygenfunction:: SilKit_Logger_Log
 
 Enumerations and Typedefs
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 .. doxygentypedef:: SilKit_LoggingLevel

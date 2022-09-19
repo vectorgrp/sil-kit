@@ -28,7 +28,10 @@ Architecture
 The Vector SIL Kit implements a layered architecture comprising three layers:
 
 .. figure:: _static/SilKitArchitecture.svg
-    :align: center
+    :width: 800
+    
+|
+|
 
 Supported Services
 ------------------

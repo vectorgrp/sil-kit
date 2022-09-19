@@ -12,16 +12,16 @@
 
 import os
 import sys
-#import sphinx_rtd_theme
+import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
 project = 'Vector SIL Kit'
 copyright = 'Copyright (c) 2022 Vector Informatik GmbH'
 author = 'Vector Informatik GmbH'
-version = '4.0.0'
+version = '1.0.0'
 # The full version, including alpha/beta/rc tags
-release = '4.0.0'
+release = version
 
 ###  The master toctree document. ###
 # This is used mainly for the html_sidebars: globaltoc.html to show a
@@ -37,7 +37,7 @@ master_doc = 'contents'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [ 
-    #'sphinx_rtd_theme',
+    'sphinx_rtd_theme',
     #'sphinx.ext.autosectionlabel',
     "breathe" ]
 
@@ -72,8 +72,8 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'sphinx_rtd_theme'
-html_theme = 'bizstyle'
+html_theme = 'sphinx_rtd_theme'
+#html_theme = 'bizstyle'
 
 html_sidebars = {
    '**': ['globaltoc.html', 'sourcelink.html', 'searchbox.html'],
@@ -86,5 +86,5 @@ html_sidebars = {
 html_static_path = ['_static']
 
 html_css_files = [
-    #'custom.css'
+    'custom.css'
 ]

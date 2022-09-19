@@ -13,8 +13,8 @@ The full and unmodified license of each component is printed below.
 
 
 
-1. Google Test:
-===============
+1. Google Test
+==============
 
 Copyright 2008, Google Inc.
 All rights reserved.
@@ -160,3 +160,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+

@@ -17,13 +17,10 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
     * - silkit/
       - ``silkit``
       - Main header, version and macros.
-    * - silkit/mw
-      - ``SilKit::Core``
-      - :doc:`Middleware<../configuration/middleware-configuration>` specific interfaces, data types and exceptions.
-    * - silkit/mw/sync
+    * - silkit/services/orchestration
       - ``SilKit::Services::Orchestration``
       - Synchronization mechanisms.
-    * - silkit/sim
+    * - silkit/services
       - ``SilKit::Services``
       - :ref:`Simulation and Service<sec:api-services>` specific definitions.
     * - silkit/util

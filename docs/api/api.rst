@@ -20,13 +20,18 @@ The Participant constitutes the main entry point into the SIL Kit API.
    
    participant
    header
-
+   
 .. _sec:api-services:
 
 Services
 --------
 
 The services API includes common datatypes, supports various vehicular networks, and provides generic Pub/Sub and RPC facilities.
+
+.. toctree::
+   :maxdepth: 1
+   
+   logging
 
 Vehicle Network Controller
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +72,7 @@ management.
   systemcontroller
   systemmonitor
 
+
 Common Data Types
 ~~~~~~~~~~~~~~~~~
 
@@ -82,6 +88,38 @@ The SIL Kit provides an additional API that allows to use the SIL Kit directly
 with the C programming language:
 
 .. toctree::
-   :maxdepth: 1
-   
-   capi/capi
+  :maxdepth: 1
+
+  capi-main
+
+Services
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Vehicle Network Controller
+++++++++++++++++++++++++++
+
+.. toctree::
+  :maxdepth: 1
+
+  capi-can
+  capi-ethernet
+  capi-lin
+  capi-flexray
+
+Data Messages and RPC
++++++++++++++++++++++
+
+.. toctree::
+  :maxdepth: 1
+
+  capi-data
+  capi-rpc
+
+State Handling and Synchronization
+++++++++++++++++++++++++++++++++++
+
+.. toctree::
+  :maxdepth: 1
+
+  capi-orchestration
+  capi-systemmonitor

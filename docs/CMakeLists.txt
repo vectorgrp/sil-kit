@@ -79,6 +79,7 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        # Tell Breathe where to find the Doxygen output
                        -Dbreathe_projects.SilKit=${DOXYGEN_OUTPUT_DIR}/xml
                        -Drelease=${PROJECT_VERSION}
+                       -Dversion=${PROJECT_VERSION}
                        -d${CMAKE_CURRENT_BINARY_DIR}/sphinx-doctree
                        -T
                        -w ${CMAKE_CURRENT_BINARY_DIR}/sphinx-build-error.log

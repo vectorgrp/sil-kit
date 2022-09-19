@@ -1,12 +1,9 @@
-Participant Controller C API
+Orchestration C API
 ----------------------------
 
 .. contents::
    :local:
    :depth: 3
-
-The features of the ParticipantController in the Cpp API are not provided through a ParticipantController abstraction 
-in the C API but directly provided through the SilKit_Participant.
 
 .. doxygenfunction:: SilKit_LifecycleService_SetCommunicationReadyHandler
 .. doxygenfunction:: SilKit_LifecycleService_SetStartingHandler
