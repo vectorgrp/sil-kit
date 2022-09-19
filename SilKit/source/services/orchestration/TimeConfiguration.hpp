@@ -45,7 +45,7 @@ public: //Methods
     void AdvanceTimeStep();
     auto CurrentSimStep() const -> NextSimTask;
     auto NextSimStep() const -> NextSimTask;
-    bool OtherParticipantHasHigherTimepoint() const;
+    bool OtherParticipantHasLowerTimepoint() const;
     void Initialize();
     bool IsBlocking() const;
 

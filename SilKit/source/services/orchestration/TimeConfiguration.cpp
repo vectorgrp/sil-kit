@@ -97,7 +97,7 @@ auto TimeConfiguration::NextSimStep() const -> NextSimTask
     return _myNextTask;
 }
 
-bool TimeConfiguration::OtherParticipantHasHigherTimepoint() const
+bool TimeConfiguration::OtherParticipantHasLowerTimepoint() const
 {
     Lock lock{_mx};
 

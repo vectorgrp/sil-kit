@@ -147,14 +147,14 @@ private:
             return;
         }
 
-        if(_configuration->OtherParticipantHasHigherTimepoint())
+        if (_configuration->OtherParticipantHasLowerTimepoint())
         {
             return;
         }
 
         // when running in Async mode, set the _isExecutingSimStep guard
         // which will be cleared in CompleteSimulationStep()
-        if(IsAsync())
+        if (IsAsync())
         {
             auto test = false;
             auto newval = true;
