@@ -44,8 +44,8 @@ endif()
 install(
     TARGETS SilKitInterface
     EXPORT SilKitTargets
-    INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
     COMPONENT bin
+    INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
 )
 # Copy all headers from the source directory to the proper destination
 install(
