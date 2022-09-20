@@ -5,15 +5,37 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.6] - 2022-09-06
+[4.0.7] - 2022-09-20
 --------------------
 
-Compatibility with 4.0.5
-~~~~~~~~~~~~~~~~~~~~~~~~
+Changed
+~~~~~~~
+- The documentation is now packaged separately in a `SilKit-4.0.7-Docs.zip` file.
+  This simplifies the CI set up and reproducibility of the generated HTML.
+  To build the documentation you should set up the build environment using pip:
 
-- Application binary interface (ABI): Yes
-- Application software interface (API): Yes
-- Middleware network protocol: Yes
+  .. code-block:: sh
+
+     pip3 install -r SilKit/ci/docker/docs_requirements.txt
+
+- The source tree is now packaged separately in a `SilKit-4.0.7-Source.zip` file.
+  The SIL Kit Demos are part of this package.
+
+- We no longer have a `#if defined(HAVE_FMT)` in the `silkit/services/logging/ILogger.hpp`
+  and variadic logging functions.
+  This define was disabled by default for users and only used internally.
+
+- LIN allows sending with an unknown checksum model in master responses, now.
+
+- The Pub/Sub Demo was updated to use the internal serialization/deserialization routines.
+
+Fixed
+~~~~~
+- Fix building and linking on macOs. This platform is not part of the continuous test suite.
+- Fix to allow setting the hard and soft watchdog timeouts in the HealthCheck separately.
+
+[4.0.6] - 2022-09-06
+--------------------
 
 Changed
 ~~~~~~~
