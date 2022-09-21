@@ -23,8 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "fmt/format.h"
 #include "SilKitFmtFormatters.hpp"
+#include "fmt/format.h"
 
 namespace SilKit {
 namespace Services {

@@ -22,8 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include <fmt/ostream.h>
-#include <type_traits>
-#include <tuple>
 
 // Include all operator<<(std::ostream&...) for libfmt here
 #include "silkit/services/logging/ILogger.hpp"
@@ -49,4 +47,3 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "TestDataTypes.hpp" // for operator<<
 #include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
-

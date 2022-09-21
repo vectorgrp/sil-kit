@@ -73,13 +73,10 @@ add_subdirectory(yaml-cpp
 # libfmt
 function(include_fmt)
     # function() adds an additional scope
-    # XXX fmt is in our public ILogger.hpp, and also in the interface link list of SilKitInterface
-    # therefore it *must* be install-exported, otherwise the install-export of SIL Kit fails
-    set(FMT_VERSION "6.1.0")
-    set(FMT_INSTALL ON CACHE BOOL "Make sure the fmt-header-only interface target is exported" FORCE)
-    message(STATUS "Add subdirectory ${CMAKE_CURRENT_LIST_DIR}/fmt-${FMT_VERSION}")
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fmt-${FMT_VERSION}
-        ${CMAKE_BINARY_DIR}/ThirdParty/fmt-${FMT_VERSION}
+    #set(FMT_INSTALL ON CACHE BOOL "Make sure the fmt-header-only interface target is exported" FORCE)
+    message(STATUS "Add subdirectory ${CMAKE_CURRENT_LIST_DIR}/fmt")
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fmt
+        ${CMAKE_BINARY_DIR}/ThirdParty/fmt
         EXCLUDE_FROM_ALL
     )
 endfunction()
@@ -94,6 +91,7 @@ function(include_spdlog)
     set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     message(STATUS "Add subdirectory ThirdParty/spdlog")
+    set(SPDLOG_FMT_EXTERNAL_HO ON)
     add_subdirectory(
         spdlog
         ${CMAKE_BINARY_DIR}/ThirdParty/spdlog

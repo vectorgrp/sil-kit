@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Logger.hpp"
 
+#include "fmt/chrono.h"
+#include "fmt/format.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/null_sink.h"
 // NB: we do not use the windows color sink, as that will open "CONOUT$" and
@@ -35,7 +37,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SpdlogTypeConversion.hpp"
 
-#include "fmt/chrono.h"
 
 namespace SilKit {
 namespace Services {

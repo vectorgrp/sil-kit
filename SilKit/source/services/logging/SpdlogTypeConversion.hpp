@@ -70,6 +70,8 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
         return Level::Critical;
     case spdlog::level::off:
         return Level::Off;
+    case spdlog::level::n_levels:
+        throw SilKitError("SpdlogTypeConversion: Don't convert the guard. Squelch warning by covering this in the switch");
     }
     throw SilKit::TypeConversionError{};
 }
@@ -77,9 +79,15 @@ inline auto from_spdlog(spdlog::level::level_enum level) -> Level
 inline auto from_spdlog(const spdlog::source_loc& spdLoc) -> SourceLoc
 {
     SourceLoc loc;
-    loc.filename = spdLoc.filename;
+    if(spdLoc.filename != nullptr)
+    {
+        loc.filename = spdLoc.filename;
+    }
     loc.line = spdLoc.line;
-    loc.funcname = spdLoc.funcname;
+    if(spdLoc.funcname != nullptr)
+    {
+        loc.funcname = spdLoc.funcname;
+    }
 
     return loc;
 }
@@ -87,8 +95,8 @@ inline auto from_spdlog(const spdlog::source_loc& spdLoc) -> SourceLoc
 inline auto from_spdlog(const spdlog::details::log_msg& spdMsg) -> LogMsg
 {
     LogMsg msg;
-    if (spdMsg.logger_name)
-        msg.logger_name = *spdMsg.logger_name;
+    if (spdMsg.logger_name.size() > 0)
+        msg.logger_name = std::string{spdMsg.logger_name.data(), spdMsg.logger_name.size()};
     msg.level = from_spdlog(spdMsg.level);
     msg.time = spdMsg.time;
     msg.source = from_spdlog(spdMsg.source);
@@ -106,7 +114,7 @@ inline auto to_spdlog(const LogMsg& msg) -> spdlog::details::log_msg
 {
     return spdlog::details::log_msg{
         to_spdlog(msg.source),
-        &msg.logger_name,
+        msg.logger_name,
         to_spdlog(msg.level),
         msg.payload
     };
