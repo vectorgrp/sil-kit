@@ -14,18 +14,28 @@ Supported target platforms and build tools:
 
 ## Build Instructions
 
-For the binary release, the cmake build from the 'SilKit-Demos'
+For the binary distribution, the cmake build from the 'SilKit-Demos'
 directory should work on all supported platforms in a similar way:
 
-> mkdir build
+> cmake -B build
 
-> cd build
+> cmake --build build
 
-> cmake ../
+You might want to add the appropriate '-T toolset' and '-A architecture' options on MSVC builds.
+The demos will be placed alongside the binaries, if the binary distribution is unpacked next
+to the SilKit-Source package.
+For example, if the directory layout looks as follows, the demo executables will
+be placed in `SilKit-X.Y.Z-$Platform/bin`:
 
-> cmake --build .
+> SilKit-X.Y.Z-Source/Demos
 
-The demos will be placed alongside the binaries.
+> SilKit-X.Y.Z-$Platform/
+
+
+You can also specify the location of the unpacked binary package using the `SILKIT_DIR` variable:
+
+> cmake -B build -D SILKIT_DIR=path/to/SilKit-X.Y.Z-PlatformEtc
+
 
 To build the demos as developer from within the SIL Kit source tree and place them alongside
 the binaries, build the 'Demos' CMake target from the SIL Kit 'build' directory:

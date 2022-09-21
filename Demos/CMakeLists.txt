@@ -32,17 +32,26 @@ if(NOT TARGET SilKit)
     # Assuming we are standalone but still within the original distribution directory layout
     # so the source release should be located in ../${INSTALL_SOURCE_DIR}
     message(STATUS "<-> no SilKit-Library target found. working in distribution mode")
-    message(STATUS "<-> using deployed SIL Kit")
-    # NB: As of SIL Kit 3.0.2, FMT is optional
-    include(
-        ${CMAKE_CURRENT_LIST_DIR}/../SilKit-Source/ThirdParty/fmt.cmake
-        OPTIONAL)
+    message(STATUS "<-> Using a prebuilt SIL Kit package. If find_package fails,"
+            " please specify SILKIT_DIR to provide a look up hint.")
+
+    file(GLOB _glob_silkit_dir LIST_DIRECTORIES true
+        "${CMAKE_CURRENT_LIST_DIR}/../../SilKit-*.*.*-*-*-*/include/"
+    )
+    set(silkitDirs)
+    foreach(path  IN LISTS _glob_silkit_dir)
+        list(APPEND silkitDirs "${path}/..")
+    endforeach()
+
     find_package(SilKit
         REQUIRED
         CONFIG
         NO_CMAKE_PACKAGE_REGISTRY
         NO_DEFAULT_PATH
-        PATHS "${CMAKE_CURRENT_LIST_DIR}/../SilKit"
+        PATHS
+            "${CMAKE_CURRENT_LIST_DIR}/../SilKit"
+            "${SILKIT_DIR}"
+            ${silkitDirs}
     )
     set(_is_standalone TRUE)
 else()
@@ -79,15 +88,19 @@ add_custom_target(Demos COMMENT "Build all available Demos")
 set_property(TARGET Demos PROPERTY FOLDER "Demos")
 
 # Generate SIL Kit Demo Project
+
+if(_is_standalone)
+    get_target_property(silkitImportLocation SilKit::SilKit IMPORTED_LOCATION_RELEASE)
+    get_filename_component(silkitLibDir "${silkitImportLocation}" DIRECTORY)
+    set(_DEMO_OUTPUT_DIR "${silkitLibDir}/../bin")
+else()
+    set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
+endif()
+
 macro(make_silkit_demo executableName demoSourceFile)
     add_executable(${executableName}
         ${demoSourceFile}
     )
-    if(_is_standalone)
-        set(_DEMO_OUTPUT_DIR "${CMAKE_CURRENT_LIST_DIR}/../../SilKit/bin")
-    else()
-        set(_DEMO_OUTPUT_DIR "${CMAKE_BINARY_DIR}/$<CONFIG>")
-    endif()
     remove_definitions(-DEXPORT_SilKitAPI)
     
     # Group this demo project into a folder
