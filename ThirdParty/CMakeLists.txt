@@ -21,10 +21,10 @@ function(addTestProject)
         )
     endif()
 
-    set(_gtest_version 1.11.0)
-    message(STATUS "Add subdirectory ThirdParty/googletest-${_gtest_version}")
-    add_subdirectory(googletest-${_gtest_version}
-        googletest-${_gtest_version}
+    #check the submodule tag for the current version.
+    message(STATUS "Add subdirectory ThirdParty/googletest")
+    add_subdirectory(googletest
+        googletest
         EXCLUDE_FROM_ALL
     )
 
