@@ -165,6 +165,29 @@ void FlexrayController::UpdateTxBuffer(const FlexrayTxBufferUpdate& update)
         throw OutOfRangeError{"Unconfigured txBufferIndex!"};
     }
 
+    if (_config.clusterParameters)
+    {
+        const auto isStaticSegment =
+            _bufferConfigs.at(update.txBufferIndex).slotId <= _config.clusterParameters->gNumberOfStaticSlots;
+        if (isStaticSegment)
+        {
+            const auto maxLength = _config.clusterParameters->gPayloadLengthStatic * 2u; //FR words to bytes
+            if (update.payload.size() > maxLength)
+            {
+                Logging::Warn(_participant->GetLogger(),
+                    "FlexrayController::UpdateTxBuffer() was called with FlexRayTxBufferUpdate.payload size"
+                    " exceeding 2*gPayloadLengthStatic ({}). The payload will be truncated.",
+                    maxLength);
+            }
+            if (update.payload.size() < maxLength)
+            {
+                Logging::Warn(_participant->GetLogger(),
+                    "FlexrayController::UpdateTxBuffer() was called with FlexRayTxBufferUpdate.payload size"
+                    " lower than 2*gPayloadLengthStatic ({}). The payload will be zero padded.",
+                    maxLength);
+            }
+        }
+    }
     SendMsg(MakeWireFlexrayTxBufferUpdate(update));
 }
 

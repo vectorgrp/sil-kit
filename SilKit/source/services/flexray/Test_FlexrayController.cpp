@@ -53,6 +53,95 @@ using namespace SilKit::Services::Flexray;
 
 using ::SilKit::Core::Tests::DummyParticipant;
 
+auto GetDummyConfig() -> SilKit::Config::FlexrayController
+{
+    SilKit::Config::FlexrayController dummyConfig;
+    dummyConfig.network = "testNetwork";
+    dummyConfig.name = "testController";
+    return dummyConfig;
+}
+
+auto MakeValidClusterParams() -> FlexrayClusterParameters
+{
+    FlexrayClusterParameters clusterParams;
+    clusterParams.gColdstartAttempts = 2;
+    clusterParams.gCycleCountMax = 7;
+    clusterParams.gdActionPointOffset = 1;
+    clusterParams.gdDynamicSlotIdlePhase = 0;
+    clusterParams.gdMiniSlot = 2;
+    clusterParams.gdMiniSlotActionPointOffset = 1;
+    clusterParams.gdStaticSlot = 3;
+    clusterParams.gdSymbolWindow = 1;
+    clusterParams.gdSymbolWindowActionPointOffset = 1;
+    clusterParams.gdTSSTransmitter = 1;
+    clusterParams.gdWakeupTxActive = 15;
+    clusterParams.gdWakeupTxIdle = 45;
+    clusterParams.gListenNoise = 2;
+    clusterParams.gMacroPerCycle = 8;
+    clusterParams.gMaxWithoutClockCorrectionFatal = 1;
+    clusterParams.gMaxWithoutClockCorrectionPassive = 1;
+    clusterParams.gNumberOfMiniSlots = 0;
+    clusterParams.gNumberOfStaticSlots = 2;
+    clusterParams.gPayloadLengthStatic = 8;
+    clusterParams.gSyncFrameIDCountMax = 2;
+
+    return clusterParams;
+}
+
+auto MakeValidNodeParams() -> FlexrayNodeParameters
+{
+    FlexrayNodeParameters nodeParams;
+    nodeParams.pAllowHaltDueToClock = 0;
+    nodeParams.pAllowPassiveToActive = 0;
+    nodeParams.pChannels = FlexrayChannel::A;
+    nodeParams.pClusterDriftDamping = 0;
+    nodeParams.pdAcceptedStartupRange = 29;
+    nodeParams.pdListenTimeout = 1926;
+    nodeParams.pdMicrotick = FlexrayClockPeriod::T12_5NS;
+    nodeParams.pKeySlotId = 0;
+    nodeParams.pKeySlotOnlyEnabled = 0;
+    nodeParams.pKeySlotUsedForStartup = 0;
+    nodeParams.pKeySlotUsedForSync = 0;
+    nodeParams.pLatestTx = 0;
+    nodeParams.pMacroInitialOffsetA = 2;
+    nodeParams.pMacroInitialOffsetB = 2;
+    nodeParams.pMicroInitialOffsetA = 0;
+    nodeParams.pMicroInitialOffsetB = 0;
+    nodeParams.pMicroPerCycle = 960;
+    nodeParams.pOffsetCorrectionOut = 15;
+    nodeParams.pOffsetCorrectionStart = 7;
+    nodeParams.pRateCorrectionOut = 3;
+    nodeParams.pSamplesPerMicrotick = 1;
+    nodeParams.pWakeupChannel = FlexrayChannel::A;
+    nodeParams.pWakeupPattern = 0;
+
+    return nodeParams;
+}
+
+auto MakeValidTxBufferConfig() -> FlexrayTxBufferConfig
+{
+    FlexrayTxBufferConfig bufferCfg{};
+    bufferCfg.channels = FlexrayChannel::AB;
+    bufferCfg.hasPayloadPreambleIndicator = false;
+    bufferCfg.offset = 0;
+    bufferCfg.repetition = 0;
+    bufferCfg.slotId = 17;
+    bufferCfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
+    
+    return bufferCfg;
+}
+
+auto GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
+{
+    SilKit::Config::FlexrayController dummyConfig;
+    dummyConfig.network = "testNetwork";
+    dummyConfig.name = "testController";
+    dummyConfig.clusterParameters = MakeValidClusterParams();
+    dummyConfig.nodeParameters = MakeValidNodeParams();
+    dummyConfig.txBufferConfigurations.push_back(MakeValidTxBufferConfig());
+    return dummyConfig;
+}
+
 class MockParticipant : public DummyParticipant
 {
 public:
@@ -78,9 +167,9 @@ protected:
 
 protected:
     FlexrayControllerTest()
-        : controller(&participant, FlexrayControllerTest::GetDummyConfig(), participant.GetTimeProvider())
-        , controllerBusSim(&participant, FlexrayControllerTest::GetDummyConfig(), participant.GetTimeProvider())
-        , controllerConfigured(&participant, FlexrayControllerTest::GetDummyConfigWithValues(),
+        : controller(&participant, GetDummyConfig(), participant.GetTimeProvider())
+        , controllerBusSim(&participant, GetDummyConfig(), participant.GetTimeProvider())
+        , controllerConfigured(&participant, GetDummyConfigWithValues(),
                           participant.GetTimeProvider())
     {
         
@@ -106,93 +195,6 @@ protected:
 
     SilKit::Config::FlexrayController dummyConfig;
 
-    auto static GetDummyConfig() -> SilKit::Config::FlexrayController
-    {
-        SilKit::Config::FlexrayController dummyConfig;
-        dummyConfig.network = "testNetwork";
-        dummyConfig.name = "testController";
-        return dummyConfig;
-    }
-    auto static GetDummyConfigWithValues() -> SilKit::Config::FlexrayController
-    {
-        SilKit::Config::FlexrayController dummyConfig;
-        dummyConfig.network = "testNetwork";
-        dummyConfig.name = "testController";
-        dummyConfig.clusterParameters = MakeValidClusterParams();
-        dummyConfig.nodeParameters = MakeValidNodeParams();
-        dummyConfig.txBufferConfigurations.push_back(MakeValidTxBufferConfig());
-        return dummyConfig;
-    }
-
-    auto static MakeValidClusterParams() -> FlexrayClusterParameters
-    {
-        FlexrayClusterParameters clusterParams;
-        clusterParams.gColdstartAttempts = 2;
-        clusterParams.gCycleCountMax = 7;
-        clusterParams.gdActionPointOffset = 1;
-        clusterParams.gdDynamicSlotIdlePhase = 0;
-        clusterParams.gdMiniSlot = 2;
-        clusterParams.gdMiniSlotActionPointOffset = 1;
-        clusterParams.gdStaticSlot = 3;
-        clusterParams.gdSymbolWindow = 1;
-        clusterParams.gdSymbolWindowActionPointOffset = 1;
-        clusterParams.gdTSSTransmitter = 1;
-        clusterParams.gdWakeupTxActive = 15;
-        clusterParams.gdWakeupTxIdle = 45;
-        clusterParams.gListenNoise = 2;
-        clusterParams.gMacroPerCycle = 8;
-        clusterParams.gMaxWithoutClockCorrectionFatal = 1;
-        clusterParams.gMaxWithoutClockCorrectionPassive = 1;
-        clusterParams.gNumberOfMiniSlots = 0;
-        clusterParams.gNumberOfStaticSlots = 2;
-        clusterParams.gPayloadLengthStatic = 0;
-        clusterParams.gSyncFrameIDCountMax = 2;
-
-        return clusterParams;
-    }
-
-    auto static MakeValidNodeParams() -> FlexrayNodeParameters
-    {
-        FlexrayNodeParameters nodeParams;
-        nodeParams.pAllowHaltDueToClock = 0;
-        nodeParams.pAllowPassiveToActive = 0;
-        nodeParams.pChannels = FlexrayChannel::A;
-        nodeParams.pClusterDriftDamping = 0;
-        nodeParams.pdAcceptedStartupRange = 29;
-        nodeParams.pdListenTimeout = 1926;
-        nodeParams.pdMicrotick = FlexrayClockPeriod::T12_5NS;
-        nodeParams.pKeySlotId = 0;
-        nodeParams.pKeySlotOnlyEnabled = 0;
-        nodeParams.pKeySlotUsedForStartup = 0;
-        nodeParams.pKeySlotUsedForSync = 0;
-        nodeParams.pLatestTx = 0;
-        nodeParams.pMacroInitialOffsetA = 2;
-        nodeParams.pMacroInitialOffsetB = 2;
-        nodeParams.pMicroInitialOffsetA = 0;
-        nodeParams.pMicroInitialOffsetB = 0;
-        nodeParams.pMicroPerCycle = 960;
-        nodeParams.pOffsetCorrectionOut = 15;
-        nodeParams.pOffsetCorrectionStart = 7;
-        nodeParams.pRateCorrectionOut = 3;
-        nodeParams.pSamplesPerMicrotick = 1;
-        nodeParams.pWakeupChannel = FlexrayChannel::A;
-        nodeParams.pWakeupPattern = 0;
-
-        return nodeParams;
-    }
-
-    auto static MakeValidTxBufferConfig() -> FlexrayTxBufferConfig
-    {
-        FlexrayTxBufferConfig bufferCfg{};
-        bufferCfg.channels = FlexrayChannel::AB;
-        bufferCfg.hasPayloadPreambleIndicator = false;
-        bufferCfg.offset = 0;
-        bufferCfg.repetition = 0;
-        bufferCfg.slotId = 17;
-        bufferCfg.transmissionMode = FlexrayTransmissionMode::SingleShot;
-        
-        return bufferCfg;
-    }
 };
 
 TEST_F(FlexrayControllerTest, send_controller_config)
@@ -594,6 +596,48 @@ TEST_F(FlexrayControllerTest, add_remove_handler)
 
     EXPECT_CALL(callbacks, MessageHandler(&controller, ToFlexrayFrameEvent(message))).Times(0);
     controller.ReceiveMsg(&controllerBusSim, message);
+}
+
+TEST_F(FlexrayControllerTest, txbuffer_update_in_static_segment_produces_warning)
+{
+    // Configure Controller
+    auto config = GetDummyConfigWithValues();
+    config.txBufferConfigurations.at(0).slotId = 2;//must be in static segment
+    FlexrayControllerConfig controllerConfig{};
+
+
+    FlexrayController myController(&participant, config, participant.GetTimeProvider());
+    myController.Configure(controllerConfig);
+
+    ASSERT_GT(config.clusterParameters->gPayloadLengthStatic, 0);
+
+    const auto maxSize = config.clusterParameters->gPayloadLengthStatic * 2u;
+    std::vector<uint8_t> payload;
+    FlexrayTxBufferUpdate txBuffer{};
+    txBuffer.payload = payload;
+    txBuffer.payloadDataValid = true;
+    txBuffer.txBufferIndex = 0;
+
+    using LogLevel = SilKit::Services::Logging::Level;
+
+    // now update the static buffer to be smaller than max size ( forcing a warning about padding)
+    payload.resize(maxSize - 2u); // ensure we get a 'zero padding' warning
+    EXPECT_CALL(participant.logger, Log(LogLevel::Warn, testing::HasSubstr("zero padded"))).Times(1);
+    myController.UpdateTxBuffer(txBuffer);
+
+    // now update the static buffer to be bigger than max size ( forcing a warning about truncating)
+    payload.resize(maxSize + 2u); // ensure we get a 'truncated' warning
+    txBuffer.payload = payload;
+    txBuffer.payloadDataValid = true;
+    EXPECT_CALL(participant.logger, Log(LogLevel::Warn, testing::HasSubstr("truncated"))).Times(1);
+    myController.UpdateTxBuffer(txBuffer);
+
+    //now update the static  buffer to have the correct size
+    payload.resize(maxSize);
+    txBuffer.payload = payload;
+    txBuffer.payloadDataValid = true;
+    EXPECT_CALL(participant.logger, Log(LogLevel::Warn, _)).Times(0);
+    myController.UpdateTxBuffer(txBuffer);
 }
 
 } // namespace

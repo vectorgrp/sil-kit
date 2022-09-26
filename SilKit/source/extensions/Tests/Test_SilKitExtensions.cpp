@@ -54,7 +54,7 @@ void SetCurrentWorkingDir(const std::string& cwd)
     SilKit::Filesystem::current_path(cwd);
 }
 
-class StdoutLogger: public SilKit::Core::Tests::DummyLogger 
+class StdoutLogger: public SilKit::Core::Tests::MockLogger 
 {
 public:
     void Info(const std::string& msg) override

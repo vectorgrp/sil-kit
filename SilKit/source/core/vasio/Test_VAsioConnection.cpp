@@ -180,7 +180,7 @@ protected:
     Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
     MockVAsioPeer _from;
-    Tests::DummyLogger _dummyLogger;
+    Tests::MockLogger _dummyLogger;
 
     //we are a friend class
     // - allow selected access to private member
