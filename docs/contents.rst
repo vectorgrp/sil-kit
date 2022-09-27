@@ -12,5 +12,6 @@ Contents
   usage/demos
   configuration/configuration
   usage/utilities
+  usage/troubleshooting
   CHANGELOG
   licenses/license
