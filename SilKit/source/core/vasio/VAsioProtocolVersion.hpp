@@ -33,8 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-inline auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion;
-inline auto to_header(ProtocolVersion version);
+inline auto ExtractProtocolVersion(const RegistryMsgHeader& header) -> ProtocolVersion;
+inline auto MakeRegistryMsgHeader(ProtocolVersion version);
 inline auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeader) -> std::string;
 inline constexpr auto CurrentProtocolVersion() -> ProtocolVersion;
 inline bool ProtocolVersionSupported(const RegistryMsgHeader& header);
@@ -44,23 +44,23 @@ inline auto operator<<(std::ostream& out, const ProtocolVersion& header) -> std:
 //////////////////////////////////////////////////////////////////////
 //  Inline Implementations
 //////////////////////////////////////////////////////////////////////
-auto from_header(const RegistryMsgHeader& header) -> ProtocolVersion
+auto ExtractProtocolVersion(const RegistryMsgHeader& header) -> ProtocolVersion
 {
-	return {header.versionHigh, header.versionLow};
+    return {header.versionHigh, header.versionLow};
 }
 
-auto to_header(ProtocolVersion version)
+auto MakeRegistryMsgHeader(ProtocolVersion version)
 {
-	RegistryMsgHeader header;
-	header.versionHigh = version.major;
-	header.versionLow = version.minor;
-	return header;
+    RegistryMsgHeader header;
+    header.versionHigh = version.major;
+    header.versionLow = version.minor;
+    return header;
 }
 
 //! Map ProtocolVersion ranges to SILKIT distribution releases
 auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeader) -> std::string
 {
-    const auto version = from_header(registryMsgHeader);
+    const auto version = ExtractProtocolVersion(registryMsgHeader);
     if (version.major == 1)
     {
         return {"< v2.0.0"};
@@ -87,7 +87,7 @@ auto MapVersionToRelease(const SilKit::Core::RegistryMsgHeader& registryMsgHeade
 
 bool ProtocolVersionSupported(const RegistryMsgHeader& header)
 {
-    const auto version = from_header(header);
+    const auto version = ExtractProtocolVersion(header);
     if(version == ProtocolVersion{3, 0})
     {
         //3.99.21: bumped version to be explicitly incompatible with prior releases (MVP3, CANoe16)

@@ -32,9 +32,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
+// 'V' = 0x56, 'I' = 0x49, 'B' = 0x42, '-' = 0x2d
+static constexpr uint32_t REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE = 0x2d424956;
+static constexpr std::array<uint8_t, 4> REGISTRY_MESSAGE_HEADER_PREAMBLE_BYTES = {'V', 'I', 'B', '-'};
+
 struct RegistryMsgHeader
 {
-    std::array<uint8_t, 4> preambel{{'V', 'I', 'B', '-'}};
+    uint32_t preamble{REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE};
     // If versionHigh/Low changes here, update SILKIT version range .
     // Also, ensure backwards compatibility in the Ser/Des code path.
     // See VAsioProtcolVersion.hpp
@@ -80,6 +84,9 @@ struct ParticipantAnnouncementReply
     };
     Status status{Status::Failed}; //default for failure to deserialize
     std::vector<VAsioMsgSubscriber> subscribers;
+
+    /// Diagnostic message (for Status::Failed). Added in 4.0.8.
+    std::string diagnostic;
 };
 
 struct KnownParticipants
@@ -108,14 +115,15 @@ enum class RegistryMessageKind : uint8_t
 // ================================================================================
 inline bool operator!=(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rhs)
 {
-    return lhs.preambel != rhs.preambel
+    return lhs.preamble != rhs.preamble
         || lhs.versionHigh != rhs.versionHigh
-        || lhs.versionLow != rhs.versionLow;
+        || lhs.versionLow != rhs.versionLow
+        ;
 }
 
 inline bool operator==(const RegistryMsgHeader& lhs, const RegistryMsgHeader& rhs)
 {
-    return lhs.preambel == rhs.preambel
+    return lhs.preamble == rhs.preamble
         && lhs.versionHigh == rhs.versionHigh
         && lhs.versionLow == rhs.versionLow
         ;
@@ -125,7 +133,8 @@ inline bool operator==(const VAsioMsgSubscriber& lhs, const VAsioMsgSubscriber& 
 {
     return lhs.receiverIdx == rhs.receiverIdx 
         && lhs.networkName == rhs.networkName
-        && lhs.msgTypeName == rhs.msgTypeName;
+        && lhs.msgTypeName == rhs.msgTypeName
+        ;
 }
 
 } // namespace Core

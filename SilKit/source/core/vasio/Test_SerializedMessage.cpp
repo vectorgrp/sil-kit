@@ -63,6 +63,9 @@ TEST(VAsioSerializedMessage, packed_handshake_message)
 	announcement.peerInfo.participantName = "SerdesTest";
 	announcement.peerInfo.acceptorUris ={ "https://example.com:1234"};
 
+    // check that the default-constructed announcement contains the correct preamble
+    ASSERT_EQ(announcement.messageHeader.preamble, REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE);
+
 	SerializedMessage msg{announcement};
 	auto blob = msg.ReleaseStorage();
 	const auto* ptr = reinterpret_cast<const PackedHandshake*>(blob.data());
@@ -73,7 +76,8 @@ TEST(VAsioSerializedMessage, packed_handshake_message)
 	ASSERT_EQ(ptr->messageKind, (uint8_t)VAsioMsgKind::SilKitRegistryMessage);
 	ASSERT_EQ(ptr->registryMessageKind, (uint8_t)RegistryMessageKind::ParticipantAnnouncement);
 
-	ASSERT_EQ(ptr->preambel, announcement.messageHeader.preambel);
+    // check that the serialized preamble contains the exact bytes
+	ASSERT_EQ(ptr->preambel, REGISTRY_MESSAGE_HEADER_PREAMBLE_BYTES);
 	ASSERT_EQ(ptr->versionHigh, announcement.messageHeader.versionHigh);
 	ASSERT_EQ(ptr->versionLow, announcement.messageHeader.versionLow);
 

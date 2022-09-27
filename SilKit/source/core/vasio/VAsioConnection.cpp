@@ -149,7 +149,7 @@ auto printUris(const std::vector<std::string>& uris)
 }
 
 //!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
-// Using the current working directory as part of a domain socket path might result in 
+// Using the current working directory as part of a domain socket path might result in
 // a runtime exception. We create a unique temporary file path, with a fixed length.
 auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::ParticipantId& id,
                        const std::string& uniqueValue) -> asio::local::stream_protocol::endpoint
@@ -433,8 +433,11 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     auto waitOk = receivedAllReplies.wait_for(5s);
     if(waitOk == std::future_status::timeout)
     {
-        _logger->Error("Timeout during connection handshake with SIL Kit Registry.");
-        throw ProtocolError("Timeout during connection handshake with SIL Kit Registry.");
+        auto message = fmt::format("Timeout during connection handshake with SIL Kit Registry. This might indicate "
+                                   "that a participant with the same name ('{}') has already connected to the registry.",
+                                   _participantName);
+        _logger->Error(message);
+        throw ProtocolError(std::move(message));
     }
     // check if an exception was set:
     receivedAllReplies.get();
@@ -447,7 +450,7 @@ void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& othe
 {
     const auto errorMsg = fmt::format("Network incompatibility between this version range ({})"
         " and connecting participant '{}' ({})",
-        MapVersionToRelease(to_header(_version)),
+        MapVersionToRelease(MakeRegistryMsgHeader(_version)),
         otherParticipantName,
         MapVersionToRelease(other)
     );
@@ -455,70 +458,22 @@ void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& othe
     std::cerr << "ERROR: " << errorMsg << std::endl;
 }
 
-void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
-{
-    const auto remoteHeader = buffer.GetRegistryMessageHeader();
-
-    // check if we support the remote peer's protocol version or signal a handshake failure
-    if(ProtocolVersionSupported(remoteHeader))
-    {
-        from->SetProtocolVersion(from_header(remoteHeader));
-    }
-    else
-    {
-        // it is not safe to decode the ParticipantAnnouncement
-        NotifyNetworkIncompatibility(remoteHeader, from->GetRemoteAddress());
-
-        ParticipantAnnouncementReply reply;
-        reply.status = ParticipantAnnouncementReply::Status::Failed;
-        reply.remoteHeader = to_header(_version); // tell remote peer what version we intent to speak
-        from->SendSilKitMsg(SerializedMessage{from->GetProtocolVersion(), reply});
-
-        return;
-    }
-
-    // after negotiating the Version, we can safely deserialize the remaining message
-    // ParticipantAnnouncement announcement;
-    buffer.SetProtocolVersion(from->GetProtocolVersion());
-    auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
-
-    Services::Logging::Debug(_logger, "Received participant announcement from {}, protocol version {}.{}", announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
-        announcement.messageHeader.versionLow);
-
-    from->SetInfo(announcement.peerInfo);
-    auto& service = dynamic_cast<IServiceEndpoint&>(*from);
-    auto serviceDescriptor = service.GetServiceDescriptor();
-    serviceDescriptor.SetParticipantName(announcement.peerInfo.participantName);
-    service.SetServiceDescriptor(serviceDescriptor);
-    {
-        std::unique_lock<decltype(_participantAnnouncementReceiversMutex)> lock{_participantAnnouncementReceiversMutex};
-        for (auto&& receiver : _participantAnnouncementReceivers)
-        {
-            receiver(from, announcement);
-        }
-    }
-    AddParticipantToLookup(announcement.peerInfo.participantName);
-
-    SendParticipantAnnouncementReply(from);
-}
-
 void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 {
     // Legacy Info for interop
     // URI encoded infos
-    VAsioPeerInfo info{ _participantName, _participantId, {}, {/*capabilities*/}};
+    VAsioPeerInfo info{_participantName, _participantId, {}, {/*capabilities*/}};
 
     // Ensure that the local acceptor is the first entry in the acceptorUris
     if (_localAcceptor.is_open())
     {
-        info.acceptorUris.push_back(
-            fromAsioEndpoint(_localAcceptor.local_endpoint()).EncodedString()
-        );
+        info.acceptorUris.push_back(fromAsioEndpoint(_localAcceptor.local_endpoint()).EncodedString());
     }
 
     if (!_tcp4Acceptor.is_open() && !_tcp6Acceptor.is_open())
     {
-        throw SilKitError{ "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing" };
+        throw SilKitError{
+            "VasioConnection: cannot send announcement on TCP: tcp-acceptors for IPv4 and IPv6 are missing"};
     }
 
     auto epUri = fromAsioEndpoint(_tcp4Acceptor.local_endpoint());
@@ -529,43 +484,139 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
         info.acceptorUris.emplace_back(epUri.EncodedString());
     }
 
-
     ParticipantAnnouncement announcement;
     // We override the default protocol version here for integration testing
-    announcement.messageHeader = to_header(_version);
+    announcement.messageHeader = MakeRegistryMsgHeader(_version);
     announcement.peerInfo = std::move(info);
 
     Services::Logging::Debug(_logger, "Sending participant announcement to {}", peer->GetInfo().participantName);
     peer->SendSilKitMsg(SerializedMessage{announcement});
+}
 
+void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer)
+{
+    const auto remoteHeader = buffer.GetRegistryMessageHeader();
+
+    // check if we support the remote peer's protocol version or signal a handshake failure
+    if (ProtocolVersionSupported(remoteHeader))
+    {
+        from->SetProtocolVersion(ExtractProtocolVersion(remoteHeader));
+    }
+    else
+    {
+        // it is not safe to decode the ParticipantAnnouncement
+        NotifyNetworkIncompatibility(remoteHeader, from->GetRemoteAddress());
+
+        SendFailedParticipantAnnouncementReply(
+            from,
+            // tell the remote peer the protocol version we intend to speak
+            _version,
+            // inform the remote peer about the unsupported protocol version
+            fmt::format("protocol version {}.{} is not supported", remoteHeader.versionHigh, remoteHeader.versionLow));
+
+        return;
+    }
+
+    // after negotiating the Version, we can safely deserialize the remaining message
+    buffer.SetProtocolVersion(from->GetProtocolVersion());
+    auto announcement = buffer.Deserialize<ParticipantAnnouncement>();
+
+    Services::Logging::Debug(_logger, "Received participant announcement from {}, protocol version {}.{}",
+                             announcement.peerInfo.participantName, announcement.messageHeader.versionHigh,
+                             announcement.messageHeader.versionLow);
+
+    from->SetInfo(announcement.peerInfo);
+    auto& service = dynamic_cast<IServiceEndpoint&>(*from);
+    auto serviceDescriptor = service.GetServiceDescriptor();
+    serviceDescriptor.SetParticipantName(announcement.peerInfo.participantName);
+    service.SetServiceDescriptor(serviceDescriptor);
+
+    // If one of the handlers for ParticipantAnnouncements throws an exception, report failure to the remote peer
+    try
+    {
+        std::unique_lock<decltype(_participantAnnouncementReceiversMutex)> lock{_participantAnnouncementReceiversMutex};
+        for (auto&& receiver : _participantAnnouncementReceivers)
+        {
+            receiver(from, announcement);
+        }
+    }
+    catch (const SilKitError& error)
+    {
+        SendFailedParticipantAnnouncementReply(
+            from,
+            // tell the remote peer what protocol version we accepted for communication with them
+            from->GetProtocolVersion(),
+            // use the exception message as the diagnostic
+            error.what());
+
+        return;
+    }
+
+    AddParticipantToLookup(announcement.peerInfo.participantName);
+
+    SendParticipantAnnouncementReply(from);
+}
+
+void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
+{
+    ParticipantAnnouncementReply reply;
+    // tell the remote peer what *our* protocol version is that we can accept for this peer
+    reply.remoteHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
+    reply.status = ParticipantAnnouncementReply::Status::Success;
+    // fill in the service descriptors we want to subscribe to
+    std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
+                   [](const auto& subscriber) {
+                       return subscriber->GetDescriptor();
+                   });
+
+    Services::Logging::Debug(_logger, "Sending ParticipantAnnouncementReply to '{}' with protocol version {}",
+                             peer->GetInfo().participantName, ExtractProtocolVersion(reply.remoteHeader));
+
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
+}
+
+void VAsioConnection::SendFailedParticipantAnnouncementReply(IVAsioPeer* peer, ProtocolVersion version,
+                                                             std::string diagnostic)
+{
+    ParticipantAnnouncementReply reply;
+    reply.remoteHeader = MakeRegistryMsgHeader(version);
+    reply.status = ParticipantAnnouncementReply::Status::Failed;
+    reply.diagnostic = std::move(diagnostic);
+
+    Services::Logging::Debug(_logger, "Sending failed ParticipantAnnouncementReply to '{}' with protocol version {}",
+                             peer->GetInfo().participantName, ExtractProtocolVersion(reply.remoteHeader));
+
+    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
 }
 
 void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer)
 {
     auto reply = buffer.Deserialize<ParticipantAnnouncementReply>();
-    const auto& remoteVersion = from_header(reply.remoteHeader);
+    const auto& remoteVersion = ExtractProtocolVersion(reply.remoteHeader);
 
     if (reply.status == ParticipantAnnouncementReply::Status::Failed)
     {
-        Services::Logging::Warn(_logger, "Received failed participant announcement reply from {}",
-            from->GetInfo().participantName);
-        const auto handshakeHeader = to_header(from->GetProtocolVersion());
-        // check what went wrong during the handshake
-        if(reply.remoteHeader.preambel != handshakeHeader.preambel)
-        {
-            auto msg = fmt::format("SILKIT Connection Handshake: ParticipantAnnouncementReply contains invalid preambel in header. check endianess on participant {}.", from->GetInfo().participantName);
-        }
-        const auto msg = fmt::format("SILKIT Connection Handshake: ParticipantAnnouncementReply contains unsupported version."
-                        " participant={} participant-version={}",
-                        from->GetInfo().participantName, remoteVersion);
+        const auto message =
+            fmt::format("SIL Kit Connection Handshake: Received failed ParticipantAnnouncementReply from '{}' with "
+                        "protocol version {} and diagnostic message: {}",
+                        from->GetInfo().participantName,
+                        // extract the version delivered in the reply (
+                        ExtractProtocolVersion(reply.remoteHeader),
+                        // provide a non-empty default string for the diagnostic message
+                        reply.diagnostic.empty() ? "(no diagnostic message was delivered)" : reply.diagnostic.c_str());
 
-        if(from->GetInfo().participantId == RegistryParticipantId)
+        _logger->Warn(message);
+
+        // tear down the participant if we are talking to the registry
+        if (from->GetInfo().participantId == RegistryParticipantId)
         {
             // handshake with SIL Kit Registry failed, we need to abort.
-            auto error = ProtocolError(msg);
+            auto error = ProtocolError(message);
             _receivedAllParticipantReplies.set_exception(std::make_exception_ptr(error)); //propagate to main thread
             throw error; // for I/O thread
         }
+
+        // fail the handshake without tearing down this participant if we are not talking to the registry
         return;
     }
 
@@ -576,12 +627,9 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     }
 
     Services::Logging::Debug(_logger, "Received participant announcement reply from {} protocol version {}",
-        from->GetInfo().participantName, remoteVersion);
+                             from->GetInfo().participantName, remoteVersion);
 
-    auto iter = std::find(
-        _pendingParticipantReplies.begin(),
-        _pendingParticipantReplies.end(),
-        from);
+    auto iter = std::find(_pendingParticipantReplies.begin(), _pendingParticipantReplies.end(), from);
     if (iter != _pendingParticipantReplies.end())
     {
         _pendingParticipantReplies.erase(iter);
@@ -592,51 +640,15 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     }
 }
 
-void VAsioConnection::SendParticipantAnnouncementReply(IVAsioPeer* peer)
-{
-    ParticipantAnnouncementReply reply;
-    reply.status = ParticipantAnnouncementReply::Status::Success;
-    std::transform(_vasioReceivers.begin(), _vasioReceivers.end(), std::back_inserter(reply.subscribers),
-                   [](const auto& subscriber) { return subscriber->GetDescriptor(); });
-
-    // tell the remote peer what *our* protocol version is that we
-    // can accept for this peer
-    reply.remoteHeader = to_header(peer->GetProtocolVersion());
-    Services::Logging::Debug(_logger, "Sending participant announcement reply to {} with protocol version {}.{}",
-        peer->GetInfo().participantName, reply.remoteHeader.versionHigh,
-        reply.remoteHeader.versionLow);
-    peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
-}
-
-void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
-{
-    const auto result = _hashToParticipantName.insert({SilKit::Util::Hash::Hash(participantName), participantName});
-    if (result.second == false)
-    {
-        Services::Logging::Warn(_logger, "Warning: Received announcement of participant '{}', which was already announced before.",
-                      participantName);
-    }
-}
-
-const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
-{
-    const auto participantIter = _hashToParticipantName.find(participantId);
-    if (participantIter == _hashToParticipantName.end())
-    {
-        throw SilKitError{"VAsioConnection: could not find participant in participant cache"};
-    }
-    return participantIter->second;
-}
-
 void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer)
 {
     auto participantsMsg = buffer.Deserialize<KnownParticipants>();
 
     // After receiving a ParticipantAnnouncement the Registry will send a KnownParticipants message
     // check if we support its version here
-    if(ProtocolVersionSupported(participantsMsg.messageHeader))
+    if (ProtocolVersionSupported(participantsMsg.messageHeader))
     {
-        peer->SetProtocolVersion(from_header(participantsMsg.messageHeader));
+        peer->SetProtocolVersion(ExtractProtocolVersion(participantsMsg.messageHeader));
     }
     else
     {
@@ -645,19 +657,17 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
 
         ParticipantAnnouncementReply reply;
         reply.status = ParticipantAnnouncementReply::Status::Failed;
-        reply.remoteHeader = to_header(_version);
+        reply.remoteHeader = MakeRegistryMsgHeader(_version);
         peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
         return;
     }
 
     Services::Logging::Debug(_logger, "Received known participants list from SilKitRegistry protocol {}.{}",
-        participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
+                             participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
 
     auto connectPeer = [this](const auto peerUri) {
-        Services::Logging::Debug(_logger, "Connecting to {} with Id {} on {}",
-            peerUri.participantName,
-            peerUri.participantId,
-            printUris(peerUri));
+        Services::Logging::Debug(_logger, "Connecting to {} with Id {} on {}", peerUri.participantName,
+                                 peerUri.participantId, printUris(peerUri));
 
         auto peer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
         try
@@ -685,7 +695,6 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
             SILKIT_ASSERT(false);
         }
 
-
         AddPeer(std::move(peer));
     };
     // check URI first
@@ -698,7 +707,29 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
     {
         _receivedAllParticipantReplies.set_value();
     }
-    Services::Logging::Trace(_logger, "VAsio is waiting for {} ParticipantAnnouncementReplies", _pendingParticipantReplies.size());
+    Services::Logging::Trace(_logger, "VAsio is waiting for {} ParticipantAnnouncementReplies",
+                             _pendingParticipantReplies.size());
+}
+
+void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
+{
+    const auto result = _hashToParticipantName.insert({SilKit::Util::Hash::Hash(participantName), participantName});
+    if (result.second == false)
+    {
+        Services::Logging::Warn(
+            _logger, "Warning: Received announcement of participant '{}', which was already announced before.",
+            participantName);
+    }
+}
+
+const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
+{
+    const auto participantIter = _hashToParticipantName.find(participantId);
+    if (participantIter == _hashToParticipantName.end())
+    {
+        throw SilKitError{"VAsioConnection: could not find participant in participant cache"};
+    }
+    return participantIter->second;
 }
 
 void VAsioConnection::StartIoWorker()
@@ -716,7 +747,6 @@ void VAsioConnection::StartIoWorker()
             return -1;
         }
     }};
-
 }
 
 void VAsioConnection::AcceptLocalConnections(const std::string& uniqueId)
@@ -839,7 +869,7 @@ void VAsioConnection::AddPeer(std::shared_ptr<IVAsioPeer> newPeer)
 {
     newPeer->StartAsyncRead();
 
-    _peers.emplace_back(std::move(newPeer));   
+    _peers.emplace_back(std::move(newPeer));
 }
 
 void VAsioConnection::RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback)
@@ -969,7 +999,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     auto myMessageVersion = getVersionForSerdes(subscriber.msgTypeName, subscriber.version);
     if (myMessageVersion == 0)
     {
-        Services::Logging::Warn(_logger, 
+        Services::Logging::Warn(_logger,
             "Received SubscriptionAnnouncement from {} for message type {}"
             "for an unknown subscriber version {}",
             from->GetInfo().participantName, subscriber.msgTypeName, subscriber.version);
@@ -1108,7 +1138,7 @@ void VAsioConnection::SetAsyncSubscriptionsCompletionHandler(std::function<void(
     }
     else
     {
-        handler(); 
+        handler();
     }
 }
 

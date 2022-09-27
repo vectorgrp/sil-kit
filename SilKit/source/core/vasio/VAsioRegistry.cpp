@@ -172,10 +172,12 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
     if (FindConnectedPeer(peerInfo.participantName) != _connectedParticipants.end())
     {
-        Services::Logging::Warn(GetLogger(),
-            "Ignoring announcement from participant name={}, which is already connected",
+        Services::Logging::Warn(
+            GetLogger(),
+            "Ignoring ParticipantAnnouncement from '{}', because a participant with the same name is already connected",
             peerInfo.participantName);
-        return;
+
+        throw SilKitError{fmt::format("participant with name '{}' is already connected", peerInfo.participantName)};
     }
 
     SendKnownParticipants(from);
@@ -198,7 +200,7 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
     Services::Logging::Info(GetLogger(), "Sending known participant message to {}", peer->GetInfo().participantName);
 
     KnownParticipants knownParticipantsMsg;
-    knownParticipantsMsg.messageHeader = to_header(peer->GetProtocolVersion());
+    knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
     // In case the peer is remote we need to replace all local addresses with 
     // the endpoint address known to the registry.
     auto replaceLocalhostUri = [&peer](auto& peerUriToPatch) {

@@ -35,14 +35,14 @@ namespace Core {
 
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RegistryMsgHeader& header)
 {
-    buffer << header.preambel
+    buffer << header.preamble
            << header.versionHigh
            << header.versionLow;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, RegistryMsgHeader& header)
 {
-    buffer >> header.preambel
+    buffer >> header.preamble
            >> header.versionHigh
            >> header.versionLow;
     return buffer;
@@ -107,7 +107,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
 {
     // ParticipantAnnouncement is the first message sent during a handshake.
     // so we need to extract its version information for ser/des here.
-    buffer.SetProtocolVersion(from_header(announcement.messageHeader));
+    buffer.SetProtocolVersion(ExtractProtocolVersion(announcement.messageHeader));
     if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
         SerializeV30(buffer, announcement);
@@ -153,7 +153,9 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const ParticipantAnnounc
         buffer  
             << reply.remoteHeader
             << reply.status
-            << reply.subscribers;
+            << reply.subscribers
+            // Added in 4.0.8.
+            << reply.diagnostic;
     }
     return buffer;
 }
@@ -171,6 +173,12 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
             >> reply.remoteHeader
             >> reply.status
             >> reply.subscribers;
+
+        // Added in 4.0.8.
+        if (buffer.RemainingBytesLeft() > 0)
+        {
+            buffer >> reply.diagnostic;
+        }
     }
     return buffer;
 }
