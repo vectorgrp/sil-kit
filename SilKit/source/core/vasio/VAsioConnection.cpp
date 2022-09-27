@@ -1115,7 +1115,15 @@ void VAsioConnection::RegisterMessageReceiver(std::function<void(IVAsioPeer* pee
 
 void VAsioConnection::ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    auto kind = buffer.GetRegistryKind();
+    const auto header = buffer.GetRegistryMessageHeader();
+    if (header.preamble != REGISTRY_MESSAGE_HEADER_PREAMBLE_VALUE)
+    {
+        Services::Logging::Warn(_logger, "Ignoring registry message from '{}' with invalid preamble {}",
+                                from->GetInfo().participantName, header.preamble);
+        return;
+    }
+
+    const auto kind = buffer.GetRegistryKind();
     switch (kind)
     {
     case RegistryMessageKind::Invalid:
