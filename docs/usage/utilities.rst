@@ -90,9 +90,9 @@ sil-kit-system-controller
            ``SilKit/bin/`` directory.
 
 
-.. _sec:util-system-monitor:
+.. _sec:util-monitor:
 
-sil-kit-system-monitor
+sil-kit-monitor
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -100,15 +100,15 @@ sil-kit-system-monitor
    :stub-columns: 1
 
    *  -  Abstract
-      -  The sil-kit-system-monitor visualizes the states of the participants of a
+      -  The sil-kit-monitor visualizes the states of the participants of a
          SIL Kit simulation.
    *  -  Source location
-      -  ``Utilities/SilKitSystemMonitor``
+      -  ``Utilities/SilKitMonitor``
    *  -  Requirements
       -  Requires a running sil-kit-registry to connect to.
    *  -  Parameters
       -  -v, --version                           Get version info.
-         -h, --help                              Show the help of the sil-kit-system-monitor.
+         -h, --help                              Show the help of the sil-kit-monitor.
          -u, --connect-uri <silkitUri>           The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
          -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.
          -c, --configuration  <configuration>    Path and filename of the participant configuration YAML or JSON file.
@@ -117,7 +117,7 @@ sil-kit-system-monitor
       -  .. code-block:: powershell
             
             # Start SystemMonitor
-            sil-kit-system-monitor
+            sil-kit-monitor
    *  -  Notes
-      -  * The distribution package contains the sil-kit-system-monitor in the ``SilKit/bin/`` directory.
-         * The sil-kit-system-monitor represents a passive participant in a SIL Kit system. Thus, it can be (re)started at any time.
+      -  * The distribution package contains the sil-kit-monitor in the ``SilKit/bin/`` directory.
+         * The sil-kit-monitor represents a passive participant in a SIL Kit system. Thus, it can be (re)started at any time.

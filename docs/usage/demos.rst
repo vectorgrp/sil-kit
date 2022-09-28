@@ -9,7 +9,7 @@ the Git repository in the folder Demos.
 
 .. |UtilDir| replace:: build/Release
 .. |DemoDir| replace:: build/Release
-.. |SystemMonitor| replace::  |UtilDir|/sil-kit-system-monitor
+.. |Monitor| replace::  |UtilDir|/sil-kit-monitor
 .. |SystemController| replace::  |UtilDir|/sil-kit-system-controller
 
 .. admonition:: Note
@@ -60,7 +60,7 @@ CAN Demo
       -  Demos/Can
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -85,7 +85,7 @@ CAN Demo
         .. parsed-literal:: 
 
             # System Monitor (optional):
-            |SystemMonitor|
+            |Monitor|
 
             # CAN Reader:
             |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.json CanReader
@@ -123,7 +123,7 @@ Ethernet Demo
       -  Demos/Ethernet
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * Network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -148,7 +148,7 @@ Ethernet Demo
         .. parsed-literal:: 
 
             # System Monitor (optional):
-            |SystemMonitor|
+            |Monitor|
 
             # Ethernet Reader:
             |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.json EthernetReader
@@ -187,7 +187,7 @@ LIN Demo
       -  Demos/Lin
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * Network simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -207,7 +207,7 @@ LIN Demo
       -  .. parsed-literal:: 
 
             # System Monitor (optional):
-            |SystemMonitor|
+            |Monitor|
 
             # LIN Master:
             |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.json LinMaster
@@ -236,7 +236,7 @@ FlexRay Demo
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
          * Network simulator (mandatory)
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -259,7 +259,7 @@ FlexRay Demo
             NetworkSimulator Demos/FlexRay/NetworkSimulatorConfig.json
 
             # System Monitor (optional):
-            |SystemMonitor|
+            |Monitor|
 
             # Node 0:
             |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.json Node0
@@ -287,7 +287,7 @@ Publish & Subscribe Demo
       -  Demos/PubSub
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -307,7 +307,7 @@ Publish & Subscribe Demo
       -  .. parsed-literal:: 
 
             # System Monitor (optional):
-            |SystemMonitor|
+            |Monitor|
 
             # Publisher:
             |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.json Publisher
@@ -335,7 +335,7 @@ RPC Demo
       -  Demos/Rpc
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
-         * :ref:`sil-kit-system-monitor<sec:util-system-monitor>` (optional)
+         * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -355,7 +355,7 @@ RPC Demo
       -  .. parsed-literal:: 
 
             # System Monitor (optional):
-            |SystemMonitor|
+            |Monitor|
 
             # Server:
             |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.json Server
