@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <istream>
 #include <fstream>
 
-#include "silkit/extensions/IReplay.hpp"
+#include "IReplay.hpp"
 
 namespace SilKit {
 namespace tracing {

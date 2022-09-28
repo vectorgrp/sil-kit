@@ -54,7 +54,7 @@ private:
     EthController* _parentController{nullptr};
     const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
-    Tracer _tracer;
+    Tracer* _tracer{nullptr};
 };
 
 } // namespace Ethernet

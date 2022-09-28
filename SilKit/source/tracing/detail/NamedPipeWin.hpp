@@ -20,7 +20,11 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 #include "NamedPipe.hpp"
+
+#include <string>
+
 #include <windows.h>
+
 
 namespace SilKit {
 namespace tracing {
@@ -51,6 +55,7 @@ private:
     bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
 
     bool _isConnected{false};
+    std::string _name;
 };
 
 } //end namespace detail

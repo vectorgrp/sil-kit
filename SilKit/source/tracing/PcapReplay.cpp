@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
+#include "IReplay.hpp"
 #include "PcapReader.hpp"
 
 
@@ -37,7 +38,7 @@ using namespace SilKit::tracing;
 //////////////////////////////////////////////////////////////////////
 
 class ReplayPcapChannel
-    : public IReplayChannel
+    : public SilKit::IReplayChannel
 {
 public:
     ReplayPcapChannel(const std::string& filePath, ILogger* logger)
@@ -49,7 +50,7 @@ public:
     auto Type() const -> SilKit::TraceMessageType override
     {
         //our version supports only ethernet
-        return TraceMessageType::EthernetFrame;
+        return SilKit::TraceMessageType::EthernetFrame;
     }
 
     auto StartTime() const -> std::chrono::nanoseconds override
@@ -73,7 +74,7 @@ public:
     {
         return _reader.GetMetaInfos();
     }
-    auto GetReader() -> std::shared_ptr<IReplayChannelReader> override
+    auto GetReader() -> std::shared_ptr<SilKit::IReplayChannelReader> override
     {
         // return a copy, which allows caching the internal data structures
         // for seeking. It is reset to start reading at the beginning.
@@ -85,7 +86,7 @@ private:
 };
 
 class ReplayPcapFile :
-    public IReplayFile
+    public SilKit::IReplayFile
 {
 public:
     ReplayPcapFile(std::string filePath, SilKit::Services::Logging::ILogger* logger)
@@ -108,18 +109,18 @@ public:
         return IReplayFile::FileType::PcapFile;
     }
 
-    std::vector<std::shared_ptr<IReplayChannel>>::iterator begin() override
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator begin() override
     {
         return _channels.begin();
     }
-    std::vector<std::shared_ptr<IReplayChannel>>::iterator end() override
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator end() override
     {
         return _channels.end();
     }
 
 private:
     std::string _filePath;
-    std::vector<std::shared_ptr<IReplayChannel>> _channels;
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>> _channels;
 };
 
 } //end anonymous namespace
@@ -128,7 +129,7 @@ private:
 namespace SilKit {
 namespace tracing {
 
-auto PcapReplay::OpenFile(const SilKit::Config::Config& /*unused*/, const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
+auto PcapReplay::OpenFile(const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
     -> std::shared_ptr<IReplayFile>
 {
     return std::make_shared<ReplayPcapFile>(filePath, logger);

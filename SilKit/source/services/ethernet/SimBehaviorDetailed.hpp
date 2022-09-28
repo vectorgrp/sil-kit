@@ -55,7 +55,7 @@ private:
     const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
     const Core::ServiceDescriptor* _parentServiceDescriptor{nullptr};
     Core::ServiceDescriptor _simulatedLink;
-    Tracer _tracer;
+    Tracer* _tracer{nullptr};
 };
 
 

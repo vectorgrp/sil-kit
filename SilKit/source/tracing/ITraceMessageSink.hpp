@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <chrono>
 #include <tuple>
 
-#include "silkit/services/logging/fwd_decl.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 #include "EndpointAddress.hpp"
 #include "TraceMessage.hpp"

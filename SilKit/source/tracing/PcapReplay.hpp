@@ -21,7 +21,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/extensions/IReplay.hpp"
+#include <string>
+
+#include "silkit/services/logging/ILogger.hpp"
+#include "IReplay.hpp"
 
 namespace SilKit {
 namespace tracing {
@@ -29,8 +32,7 @@ class PcapReplay
     : public IReplayDataProvider
 {
 public:
-    auto OpenFile(/*const Config::Config& config,*/
-        const std::string& filePath,
+    auto OpenFile( const std::string& filePath,
         SilKit::Services::Logging::ILogger* logger)
         -> std::shared_ptr<IReplayFile> override;
 };

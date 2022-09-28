@@ -32,7 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/datatypes.hpp"
 
 #include "TraceMessage.hpp"
-#include "ITraceMessageSink.hpp" //for 'enum class Direction'
 #include "EndpointAddress.hpp"
 
 namespace SilKit {

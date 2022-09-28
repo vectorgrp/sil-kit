@@ -30,21 +30,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <stdexcept>
 
+
 namespace SilKit {
-
-
 
 // helpers  to associate a TraceMessage-Type enum to a C++ type
 enum class TraceMessageType
 {
-    EthernetFrame,
-    CanFrameEvent,
-    LinFrame,
-    FlexrayFrameEvent,
-    InvalidReplayData,
-    #ifdef SILKIT_HAVE_TRACING
-    FlexraySymbolEvent, FlexrayPocStatusEvent, FlexrayTxBufferConfigUpdate, FlexrayTxBufferUpdate
-    #endif
+    EthernetFrame
+    ,CanFrameEvent
+    ,LinFrame
+    ,FlexrayFrameEvent
+    ,InvalidReplayData
+    ,DataMessageEvent
 };
 
 template<TraceMessageType id>

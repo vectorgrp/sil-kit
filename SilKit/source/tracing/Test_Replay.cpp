@@ -22,8 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <memory>
 #include <future>
 
-#include "silkit/config/Config.hpp"
-#include "silkit/core/EndpointAddress.hpp"
 #include "functional.hpp"
 
 #include "gtest/gtest.h"
@@ -32,8 +30,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp"
 #include "Timer.hpp"
 
+#include "Configuration.hpp"
+#include "EndpointAddress.hpp"
+
 #include "EthControllerReplay.hpp"
-#if 0 // Replay is inactive for now
 #include "GenericPublisherReplay.hpp"
 #include "GenericSubscriberReplay.hpp"
 namespace {
@@ -316,7 +316,6 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_send)
 
     MockCanMessage msg;
     msg._address = {1,2};
-    /*
     // Replay Send / Send
     {
         msg._direction = SilKit::Services::TransmitDirection::TX;
@@ -378,7 +377,6 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_send)
         can.SetServiceDescriptor(from_endpointAddress(msg._address));
         can.ReplayMessage(&msg);
     }
-    */
 }
 
 TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
@@ -393,7 +391,6 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
 
     msg._address = {1,2};
 
-    /*
     // Replay Receive / Receive
     {
         msg._direction = SilKit::Services::TransmitDirection::RX;
@@ -428,7 +425,6 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
             .Times(0);
         controller.ReplayMessage(&msg);
     }
-    */
 }
 
 struct MockGenericMessage
@@ -566,4 +562,3 @@ TEST(ReplayTest, genericsubscriber_replay_config_send)
 }
 
 } //end anonymous namespace
-#endif

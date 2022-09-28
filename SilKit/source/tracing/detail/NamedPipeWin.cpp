@@ -69,6 +69,7 @@ NamedPipeWin::NamedPipeWin(const std::string& name)
     {
         throw SilKitError(GetPipeError());
     }
+    _name = ss.str();
 }
 
 NamedPipeWin::~NamedPipeWin()

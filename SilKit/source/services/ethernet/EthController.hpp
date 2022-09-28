@@ -108,6 +108,7 @@ public:
 
     EthernetState GetState();
 
+    inline auto GetTracer() -> Tracer*;
 private:
     // ----------------------------------------
     // private methods
@@ -156,7 +157,7 @@ private:
 
 void EthController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(SilKit::Core::EndpointAddress{}, *sink);
+    _tracer.AddSink(GetServiceDescriptor().to_endpointAddress(), *sink);
 }
 void EthController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
@@ -165,6 +166,11 @@ void EthController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceD
 auto EthController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+auto EthController::GetTracer() -> Tracer*
+{
+    return &_tracer;
 }
 
 } // namespace Ethernet

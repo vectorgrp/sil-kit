@@ -78,18 +78,6 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp, size_t rawFrameSize)
                           testing::Field(&WireEthernetFrameEvent::frame, testing::Truly(frameHasCorrectSize)));
 }
 
-void SetSourceMac(std::vector<uint8_t>& raw, const EthernetMac& source)
-{
-    const size_t MinFrameSize = 60;
-    const size_t SourceMacStart = sizeof(EthernetMac);
-    if (raw.empty())
-    {
-        raw.resize(MinFrameSize);
-    }
-
-    std::copy(source.begin(), source.end(), raw.begin() + SourceMacStart);
-}
-
 class MockParticipant : public DummyParticipant
 {
 public:
@@ -355,44 +343,42 @@ TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
     testController.ReceiveMsg(&controllerOther, msg);
 }
 
-
-TEST_F(EthernetControllerTrivialSimTest, DISABLED_ethcontroller_uses_tracing)
+TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
 {
-#if (0)
-
-
     const auto now = 1337ns;
     ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(now));
 
-    SilKit::Config::EthernetController config{};
-    auto ethController = EthController(&participant, config, participant.GetTimeProvider());
-    ethController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    EthController ethController{&participant, cfg, participant.GetTimeProvider()};
+    auto controllerId = ethController.GetServiceDescriptor().to_endpointAddress();
     ethController.AddSink(&traceSink);
 
 
-    EthernetFrame frame{};
-    SetDestinationMac(frame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
-    SetSourceMac(frame, EthernetMac{ 9, 8, 7, 6, 5, 4 });
+    std::vector<uint8_t> rawFrame;
+    SetDestinationMac(rawFrame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
+    SetSourceMac(rawFrame, EthernetMac{ 9, 8, 7, 6, 5, 4 });
 
+    EthernetFrame ethernetFrame;
+    ethernetFrame.raw = rawFrame;
     //Send direction
     EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, frame))
+        Trace(SilKit::Services::TransmitDirection::TX, controllerId, now,ethernetFrame))
         .Times(1);
+    EthernetFrame frame{rawFrame};
     ethController.SendFrame(frame);
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, frame))
+        Trace(SilKit::Services::TransmitDirection::RX, controllerId, now, ethernetFrame))
         .Times(1);
 
-    EthernetFrameEvent ethMsg{};
-    ethMsg.frame = frame;
-    ethMsg.timestamp = now;
-    ethController.ReceiveMsg(&controllerOther, ethMsg);
-#endif // 0
+    WireEthernetFrameEvent wireEthernetFrame;
+    wireEthernetFrame.frame.raw = rawFrame;
+    wireEthernetFrame.timestamp = now;
+    wireEthernetFrame.direction = TransmitDirection::RX;
+    ethController.ReceiveMsg(&controllerOther, wireEthernetFrame);
 }
 
 } // anonymous namespace

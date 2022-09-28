@@ -21,35 +21,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <sstream>
 
-#include "silkit/config/Config.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-#include "silkit/extensions/string_utils.hpp"
 
 #include "CreateMdf4Tracing.hpp"
 #include "PcapSink.hpp"
 #include "Tracing.hpp"
 #include "PcapReplay.hpp"
 
+#include "ILogger.hpp"
+
+#include "string_utils.hpp"
+
 namespace SilKit {
 
 namespace tracing {
-
-using ITraceMessageSink;
-using SinkType;
-using TraceMessage;
-using TraceMessageType;
-
 
 
 // Tracing
 
 auto CreateTraceMessageSinks(
     Services::Logging::ILogger* logger,
-    const Config::Config& config,
-    const Config::Participant& participantConfig
+    const Config::ParticipantConfiguration& participantConfig
     ) -> std::vector<std::unique_ptr<ITraceMessageSink>>
 {
-    auto controllerUsesSink = [&participantConfig](const auto& name, const auto& controllers)
+    auto controllerUsesSink = [](const auto& name, const auto& controllers)
     {
         for (const auto& ctrl : controllers)
         {
@@ -75,20 +69,19 @@ auto CreateTraceMessageSinks(
         ok |= controllerUsesSink(name, participantConfig.ethernetControllers);
         ok |= controllerUsesSink(name, participantConfig.flexrayControllers);
         ok |= controllerUsesSink(name, participantConfig.linControllers);
-        ok |= controllerUsesSink(name, participantConfig.genericPublishers);
-        ok |= controllerUsesSink(name, participantConfig.genericSubscribers);
-        ok |= controllerUsesSink(name, participantConfig.networkSimulators);
+        ok |= controllerUsesSink(name, participantConfig.dataPublishers);
+        ok |= controllerUsesSink(name, participantConfig.dataSubscribers);
 
         return ok;
     };
 
     std::vector<std::unique_ptr<ITraceMessageSink>> newSinks;
-    for (const auto& sinkCfg : participantConfig.traceSinks)
+    for (const auto& sinkCfg : participantConfig.tracing.traceSinks)
     {
-        if (!sinkCfg.enabled || !sinkInUse(sinkCfg.name))
+        if (/* XXX !sinkCfg.enabled  || */!sinkInUse(sinkCfg.name))
         {
-            logger->Debug("Tracing: skipping disabled sink {} on participant {}",
-                sinkCfg.name, participantConfig.name);
+            Services::Logging::Debug(logger, "Tracing: skipping disabled sink {} on participant {}",
+                sinkCfg.name, participantConfig.participantName);
             continue;
         }
 
@@ -98,22 +91,22 @@ auto CreateTraceMessageSinks(
         {
             //the `config' contains information about the links, which
             // will be useful when naming the MDF4 channels
-            auto sink = CreateMdf4Tracing(config, logger, participantConfig.name, sinkCfg.name);
-            sink->Open(tracing::SinkType::Mdf4File, sinkCfg.outputPath);
+            auto sink = CreateMdf4Tracing(participantConfig, logger, participantConfig.participantName, sinkCfg.name);
+            sink->Open(SinkType::Mdf4File, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
         }
         case Config::TraceSink::Type::PcapFile:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
-            sink->Open(tracing::SinkType::PcapFile, sinkCfg.outputPath);
+            sink->Open(SinkType::PcapFile, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
         }
         case  Config::TraceSink::Type::PcapPipe:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
-            sink->Open(tracing::SinkType::PcapNamedPipe, sinkCfg.outputPath);
+            sink->Open(SinkType::PcapNamedPipe, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
         }
@@ -126,26 +119,26 @@ auto CreateTraceMessageSinks(
 }
 
     
-auto CreateReplayFiles(Services::Logging::ILogger* logger, /*const Config::Config& config,*/
-    const Config::Participant& participantConfig)
+auto CreateReplayFiles(Services::Logging::ILogger* logger, 
+    const Config::ParticipantConfiguration& participantConfig)
     -> std::map<std::string, std::shared_ptr<IReplayFile>>
 {
     std::map<std::string, std::shared_ptr<IReplayFile>> replayFiles;
 
-    for (const auto& source : participantConfig.traceSources)
+    for (const auto& source : participantConfig.tracing.traceSources)
     {
         switch (source.type)
         {
         case Config::TraceSource::Type::Mdf4File:
         {
-            auto file = CreateMdf4Replay(config, logger, source.inputPath);
+            auto file = CreateMdf4Replay(participantConfig, logger, source.inputPath);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }
         case Config::TraceSource::Type::PcapFile:
         {
             auto provider = PcapReplay{};
-            auto file = provider.OpenFile(/*config, */source.inputPath, logger);
+            auto file = provider.OpenFile(source.inputPath, logger);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }
@@ -160,15 +153,15 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, /*const Config::Confi
 
 // Replaying utilities
 
-bool HasReplayConfig(const Config::Participant& cfg)
+bool HasReplayConfig(const Config::ParticipantConfiguration& cfg)
 {
     // if there are no replay trace sources, the Replay blocks are invalid
-    if (cfg.traceSources.empty())
+    if (cfg.tracing.traceSources.empty())
         return false;
 
     //find replay blocks of services
     bool ok = false;
-    auto isActive = [&ok, &cfg](const auto& ctrls)
+    auto isActive = [&ok](const auto& ctrls)
     {
         for (const auto& ctrl : ctrls)
         {
@@ -187,11 +180,9 @@ bool HasReplayConfig(const Config::Participant& cfg)
     isActive(cfg.ethernetControllers);
     isActive(cfg.linControllers);
     isActive(cfg.flexrayControllers);
-    // Generic Messages
-    isActive(cfg.genericPublishers);
-    isActive(cfg.genericSubscribers);
-    // Network Simulator
-    isActive(cfg.networkSimulators);
+    // Data Pub/Sub
+    isActive(cfg.dataPublishers);
+    isActive(cfg.dataSubscribers);
 
     return ok;
 }

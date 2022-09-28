@@ -143,7 +143,6 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
     {
         return;
     }
-
     _tracer.Trace(msg.direction, msg.timestamp, ToEthernetFrame(msg.frame));
     CallHandlers(ToEthernetFrameEvent(msg));
 }

@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/ethernet/EthernetDatatypes.hpp"
 
+#include "WireEthernetMessages.hpp"
 #include "Pcap.hpp"
 #include "Assert.hpp"
 
@@ -35,7 +36,7 @@ using namespace SilKit::Services::Logging;
 
 class PcapMessage
     : public SilKit::IReplayMessage
-    , public SilKit::Services::Ethernet::EthernetFrame
+    , public SilKit::Services::Ethernet::WireEthernetFrame
 {
 public:
 
@@ -209,11 +210,11 @@ bool PcapReader::Seek(size_t messageNumber)
                 + ": Cannot read packet at offset " + std::to_string(_stream->tellg()));
             return false;
         }
-        msg->SetRawFrame(msgBuf);
+        msg->raw = std::move(msgBuf);
         msg->SetTimestamp(timeStamp);
 
         _currentMessage = std::move(msg);
-        //FIXME we can't know the number of messages without seeking through the whole file,
+        //NB we can't know the number of messages without seeking through the whole file,
         //      which we're not going to do for performance reasons.
         _numMessages++; 
     }
@@ -224,7 +225,7 @@ std::shared_ptr<IReplayMessage> PcapReader::Read()
 {
     //return cached value
     return _currentMessage;
-};
+}
 
 auto PcapReader::GetMetaInfos() const -> const std::map<std::string, std::string>&
 {

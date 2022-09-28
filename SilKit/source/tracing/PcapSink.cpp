@@ -25,15 +25,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <ctime>
 #include <sstream>
 
-#include "silkit/services/logging/ILogger.hpp"
-#include "silkit/extensions/TraceMessage.hpp"
-#include "silkit/extensions/string_utils.hpp"
+
+#include "TraceMessage.hpp"
+#include "string_utils.hpp"
 
 #include "Pcap.hpp"
 #include "detail/NamedPipe.hpp"
 
+#include "ILogger.hpp"
+
 namespace SilKit {
 namespace tracing {
+using namespace SilKit::Services::Logging;
 
 namespace {
 Pcap::GlobalHeader g_pcapGlobalHeader{};
@@ -100,7 +103,7 @@ void PcapSink::Close()
         }
         catch (const SilKitError& err)
         {
-            _logger->Warn("Failed to close PCAP sink: {}", err.what());
+            Services::Logging::Warn(_logger, "Failed to close PCAP sink: {}", err.what());
         }
         _pipe.reset();
     }
@@ -126,7 +129,7 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(timestamp);
 
     Pcap::PacketHeader pcapPacketHeader;
-    pcapPacketHeader.orig_len = static_cast<uint32_t>(message.GetFrameSize());
+    pcapPacketHeader.orig_len = static_cast<uint32_t>(message.raw.size());
     pcapPacketHeader.incl_len = pcapPacketHeader.orig_len;
     pcapPacketHeader.ts_sec = static_cast<uint32_t>(usec.count() / tosec);
     pcapPacketHeader.ts_usec = static_cast<uint32_t>(usec.count() % tosec);
@@ -136,8 +139,8 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     {
         _file.write(reinterpret_cast<char*>(&pcapPacketHeader),
                 sizeof(pcapPacketHeader));
-        _file.write(reinterpret_cast<const char*>(&message.RawFrame().at(0)),
-                message.GetFrameSize());
+        _file.write(reinterpret_cast<const char*>(&message.raw.at(0)),
+                message.raw.size());
         ok = _file.good();
     }
 
@@ -145,19 +148,19 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     {
         if (!_headerWritten)
         {
-            _logger->Info("Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ",
+            Services::Logging::Info(_logger, "Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ",
                 _name, _outputPath);
 
             ok &= _pipe->Write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
                 sizeof(g_pcapGlobalHeader));
-            _logger->Debug("Sink {}: PCAP pipe: {} is connected successfully",
+            Services::Logging::Debug(_logger, "Sink {}: PCAP pipe: {} is connected successfully",
                 _name, _outputPath);
 
             _headerWritten = true;
         }
 
         ok &=_pipe->Write(reinterpret_cast<char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
-        ok &=_pipe->Write(reinterpret_cast<const char*>(&message.RawFrame().at(0)), message.GetFrameSize());
+        ok &=_pipe->Write(reinterpret_cast<const char*>(&message.raw.at(0)), message.raw.size());
     }
 }
 
