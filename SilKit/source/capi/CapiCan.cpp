@@ -71,6 +71,7 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanCont
                 [context, controller, callback](SilKit::Services::Can::ICanController* /*ctrl*/,
                     const SilKit::Services::Can::CanFrameEvent& cppCanFrameEvent) {
                 SilKit_CanFrame frame{};
+                SilKit_Struct_Init(SilKit_CanFrame, frame);
                 frame.id = cppCanFrameEvent.frame.canId;
                 frame.flags = cppCanFrameEvent.frame.flags;
                 frame.dlc = cppCanFrameEvent.frame.dlc;
