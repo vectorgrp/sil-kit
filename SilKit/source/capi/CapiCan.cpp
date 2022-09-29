@@ -83,6 +83,7 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanCont
                 SilKit_Struct_Init(SilKit_CanFrameEvent, frameEvent);
                 frameEvent.timestamp = cppCanFrameEvent.timestamp.count();
                 frameEvent.frame = &frame;
+                frameEvent.direction = static_cast<SilKit_Direction>(cppCanFrameEvent.direction);
                 frameEvent.userContext = cppCanFrameEvent.userContext;
 
                 callback(context, controller, &frameEvent);
