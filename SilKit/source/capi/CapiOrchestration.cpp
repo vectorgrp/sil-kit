@@ -226,8 +226,44 @@ SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetAbortHandler(
     CAPI_LEAVE
 }
 
-// Lifecycle async execution
-static std::map<SilKit_LifecycleService*, std::future<SilKit::Services::Orchestration::ParticipantState>> sRunAsyncFuturePerParticipant;
+class LifecycleFutureMap
+{
+public:
+    using ParticipantStateFuture = std::future<SilKit::Services::Orchestration::ParticipantState>;
+
+public:
+    void Add(SilKit_LifecycleService * lifecycleService, ParticipantStateFuture future)
+    {
+        std::unique_lock<decltype(_mutex)> lock{_mutex};
+
+        _map[lifecycleService] = std::move(future);
+    }
+
+    auto Get(SilKit_LifecycleService *lifecycleService) -> ParticipantStateFuture *
+    {
+        std::unique_lock<decltype(_mutex)> lock{_mutex};
+
+        const auto it = _map.find(lifecycleService);
+        if (it == _map.end())
+        {
+            return nullptr;
+        }
+        return &it->second;
+    }
+
+    void Remove(SilKit_LifecycleService *lifecycleService)
+    {
+        std::unique_lock<decltype(_mutex)> lock{_mutex};
+
+        _map.erase(lifecycleService);
+    }
+
+private:
+    std::mutex _mutex;
+    std::map<SilKit_LifecycleService*, ParticipantStateFuture> _map;
+};
+
+static LifecycleFutureMap sLifecycleFutureMap;
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService)
 {
@@ -238,8 +274,7 @@ SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(SilKit_Lifec
             reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(
                 clifecycleService);
 
-        sRunAsyncFuturePerParticipant[clifecycleService] =
-            cppLifecycleService->StartLifecycle();
+        sLifecycleFutureMap.Add(clifecycleService, cppLifecycleService->StartLifecycle());
 
         return SilKit_ReturnCode_SUCCESS;
     }
@@ -253,19 +288,20 @@ SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_WaitForLifecycleToComplete(
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
     CAPI_ENTER
     {
-        if (sRunAsyncFuturePerParticipant.find(clifecycleService) == sRunAsyncFuturePerParticipant.end())
+        const auto future = sLifecycleFutureMap.Get(clifecycleService);
+        if (future == nullptr)
         {
             SilKit_error_string = "Unknown participant to wait for completion of asynchronous run operation";
             return SilKit_ReturnCode_BADPARAMETER;
         }
-        if (!sRunAsyncFuturePerParticipant[clifecycleService].valid())
+        if (!future->valid())
         {
             SilKit_error_string = "Failed to access asynchronous run operation";
             return SilKit_ReturnCode_UNSPECIFIEDERROR;
         }
-        auto finalState = sRunAsyncFuturePerParticipant[clifecycleService].get();
+        const auto finalState = future->get();
         *outParticipantState = static_cast<SilKit_ParticipantState>(finalState);
-        sRunAsyncFuturePerParticipant.erase(clifecycleService);
+        sLifecycleFutureMap.Remove(clifecycleService);
         return SilKit_ReturnCode_SUCCESS;
     }
     CAPI_LEAVE
