@@ -32,9 +32,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ConfigurationTestUtils.hpp"
 #include "SimSystemController.hpp"
 
+#ifdef SILKIT_HOURGLASS
+#include "silkit/hourglass/SilKit.hpp"
+#include "silkit/hourglass/config/IParticipantConfiguration.hpp"
+#endif
+
 using namespace std::literals::chrono_literals;
 
-namespace 
+namespace
 {
 auto Now()
 {
@@ -216,7 +221,7 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
     {
         //deferred participant creation
         auto it = std::find(_syncParticipantNames.begin(), _syncParticipantNames.end(), participantName);
-                
+
         if (it == _syncParticipantNames.end())
         {
             throw SilKitError{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
@@ -231,8 +236,15 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
 
-    participant->_participant =
-        SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participantName, _registryUri);
+#ifdef SILKIT_HOURGLASS
+    using SilKit::Hourglass::CreateParticipant;
+    using SilKit::Hourglass::Config::ParticipantConfigurationFromString;
+#else
+    using SilKit::CreateParticipant;
+    using SilKit::Config::ParticipantConfigurationFromString;
+#endif
+
+    participant->_participant = CreateParticipant(ParticipantConfigurationFromString(""), participantName, _registryUri);
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this

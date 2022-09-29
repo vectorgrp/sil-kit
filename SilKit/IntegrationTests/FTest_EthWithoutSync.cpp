@@ -26,22 +26,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "EthDatatypeUtils.hpp"
-#include "EthController.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
 
-#include "VAsioRegistry.hpp"
-
-#include "ConfigurationTestUtils.hpp"
+#include "HourglassHelpers.hpp"
 
 namespace {
 
 using namespace std::chrono_literals;
+
+constexpr std::size_t MINIMUM_ETHERNET_FRAME_LENGTH = 60;
 
 class FTest_EthWithoutSync : public testing::Test
 {
@@ -61,6 +61,8 @@ protected:
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
+            // pad the message such that the actual frame has exactly the minimum frame length
+            messageString.resize(std::max<size_t>(messageString.size(), MINIMUM_ETHERNET_FRAME_LENGTH - 18), ' ');
             auto& frameEvent = _testFrames[index].expectedFrameEvent;
 
             SilKit::Services::Ethernet::EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
@@ -69,6 +71,7 @@ protected:
             SilKit::Services::Ethernet::EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
             frameEvent.frame = SilKit::Services::Ethernet::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
+            EXPECT_GE(frameEvent.frame.raw.AsSpan().size(), MINIMUM_ETHERNET_FRAME_LENGTH);
             frameEvent.userContext = reinterpret_cast<void *>(static_cast<uintptr_t>(index + 1));
 
             auto& ethack = _testFrames[index].expectedAck;
@@ -81,11 +84,10 @@ protected:
     {
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
-        
-        auto participant =
-            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "EthWriter", _registryUri);
-        auto* controller = dynamic_cast<SilKit::Services::Ethernet::EthController*>(
-            participant->CreateEthernetController("ETH1", "ETH1"));
+
+        const auto participant = SilKit::IntegrationTests::CreateParticipant(
+            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "EthWriter", _registryUri);
+        const auto controller = participant->CreateEthernetController("ETH1", "ETH1");
 
         controller->Activate();
 
@@ -118,9 +120,9 @@ protected:
     {
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
-        auto participant =
-            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "EthReader", _registryUri);
-        auto* controller = participant->CreateEthernetController("ETH1", "ETH1");
+        const auto participant = SilKit::IntegrationTests::CreateParticipant(
+            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "EthReader", _registryUri);
+        const auto controller = participant->CreateEthernetController("ETH1", "ETH1");
 
         controller->Activate();
 
@@ -176,7 +178,8 @@ protected:
 
 TEST_F(FTest_EthWithoutSync, eth_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry =
+        SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(_registryUri);
     ExecuteTest();
 }

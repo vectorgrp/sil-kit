@@ -27,7 +27,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <vector>
 
+#ifdef SILKIT_HOURGLASS
+#include "silkit/hourglass/SilKit.hpp"
+#include "silkit/hourglass/config/IParticipantConfiguration.hpp"
+#else
 #include "silkit/SilKit.hpp"
+#endif
+
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
@@ -191,10 +197,18 @@ int main(int argc, char** argv)
             }
         }
 
-        auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
+#ifdef SILKIT_HOURGLASS
+        using SilKit::Hourglass::CreateParticipant;
+        using SilKit::Hourglass::Config::ParticipantConfigurationFromFile;
+#else
+        using SilKit::CreateParticipant;
+        using SilKit::Config::ParticipantConfigurationFromFile;
+#endif
+
+        auto participantConfiguration = ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
-        auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto participant = CreateParticipant(participantConfiguration, participantName, registryUri);
         auto* ethernetController = participant->CreateEthernetController("Eth1", "Eth1");
 
         ethernetController->AddFrameHandler(&FrameHandler);

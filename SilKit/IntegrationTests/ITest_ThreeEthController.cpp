@@ -47,6 +47,8 @@ using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
 
+constexpr std::size_t MINIMUM_ETHERNET_FRAME_LENGTH = 60;
+
 auto MatchUserContext(void* userContext) -> testing::Matcher<const EthernetFrameTransmitEvent&>
 {
     return testing::Field(&EthernetFrameTransmitEvent::userContext, userContext);
@@ -70,7 +72,13 @@ protected:
         {
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;
-            testMessages[index].expectedData = messageBuilder.str();
+            std::string messageString = messageBuilder.str();
+            // pad the message such that the actual frame has exactly the minimum frame length
+            constexpr size_t PAYLOAD_LENGTH = MINIMUM_ETHERNET_FRAME_LENGTH - 2 * sizeof(EthernetMac)
+                                              - sizeof(EthernetEtherType) - sizeof(EthernetVlanTagControlIdentifier)
+                                              - sizeof(EthernetEtherType);
+            messageString.resize(std::max<size_t>(messageString.size(), PAYLOAD_LENGTH), ' ');
+            testMessages[index].expectedData = std::move(messageString);
         }
 
         syncParticipantNames = { "EthWriter" ,"EthReader1" ,"EthReader2" };
@@ -108,6 +116,7 @@ protected:
                     EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
                     auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
+                    EXPECT_GE(ethernetFrame.raw.AsSpan().size(), MINIMUM_ETHERNET_FRAME_LENGTH);
                     controller->SendFrame(ToEthernetFrame(ethernetFrame), reinterpret_cast<void *>(static_cast<uintptr_t>(numSent + 1)));
                     numSent++;
                 }

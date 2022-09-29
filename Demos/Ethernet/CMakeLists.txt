@@ -25,3 +25,26 @@ target_sources(SilKitDemoEthernet
     PRIVATE SilKitConfig_DemoEthernet.json
     PRIVATE NetworkSimulatorConfig.json
 )
+
+if (NOT _is_standalone)
+    # SIL Kit Ethernet Demo using C++-API implemented using the C-API
+    # The C++-API implementation using the C-API is currently part of the
+    # integration test-suite of SIL Kit. Therefore it cannot be used when
+    # the SIL Kit demos are built from the release package.
+
+    make_silkit_demo(
+        SilKitDemoEthernet_Hourglass
+        EthernetDemo.cpp
+    )
+
+    target_link_libraries(
+        SilKitDemoEthernet_Hourglass
+        PRIVATE SilKit_Hourglass
+    )
+
+    target_sources(
+        SilKitDemoEthernet_Hourglass
+        PRIVATE SilKitConfig_DemoEthernet.json
+        PRIVATE NetworkSimulatorConfig.json
+    )
+endif()

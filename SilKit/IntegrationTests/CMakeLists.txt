@@ -21,6 +21,7 @@
 
 # local headers as interface lib
 add_subdirectory(SimTestHarness)
+add_subdirectory(Hourglass)
 
 add_library(ITest_Utils INTERFACE)
 target_include_directories(ITest_Utils
@@ -28,60 +29,26 @@ target_include_directories(ITest_Utils
 
 set(itest_extra_libs SilKitMwVAsio)
 
-add_silkit_test(FTest_CanWithoutSync
-    SOURCES
-      FTest_CanWithoutSync.cpp
-    LIBS
-      SilKitSimCan
-      ${itest_extra_libs}
-      SilKit
-      SilKitConfigurationTestUtils
-)
-
-add_silkit_test(FTest_EthWithoutSync
-    SOURCES
-      FTest_EthWithoutSync.cpp
-    LIBS
-      SilKitSimEthernet
-      ${itest_extra_libs}
-      SilKit
-      SilKitConfigurationTestUtils
-)
-
-add_silkit_test(ITest_ThreeCanController
-    SOURCES
-      ITest_ThreeCanController.cpp
-    LIBS
-        SilKitMwParticipant
-        SilKitSimTestHarness
-        ${itest_extra_libs}
-)
-
-add_silkit_test(FTest_CanControllerThreadSafety
-    SOURCES
-      FTest_CanControllerThreadSafety.cpp
-    LIBS
-        SilKit
-        SilKitConfigurationTestUtils
-)
-
-add_silkit_test(ITest_ThreeEthController
-    SOURCES
-      ITest_ThreeEthController.cpp
-    LIBS
-      SilKitSimTestHarness
-      SilKitMwParticipant
-      SilKitSimEthernet
-      ${itest_extra_libs}
-)
-
 add_silkit_test(ITest_CatchExceptionsInCallbacks
     SOURCES
       ITest_CatchExceptionsInCallbacks.cpp
     LIBS
+      SilKit
       SilKitMwParticipant
       SilKitConfigurationTestUtils
       ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_CatchExceptionsInCallbacks_Hourglass
+
+    SOURCES
+    ITest_CatchExceptionsInCallbacks.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKitUtil # source/util/functional.hpp
+    SilKitConfigurationTestUtils # source/config/ConfigurationTestUtils.hpp
 )
 
 add_silkit_test(ITest_HopOnHopOff
@@ -102,6 +69,17 @@ add_silkit_test(ITest_CommunicationReady
         SilKitInternal
 )
 
+add_silkit_test(
+    ITest_CommunicationReady_Hourglass
+
+    SOURCES
+    ITest_CommunicationReady.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKitInternal
+)
+
 add_silkit_test(ITest_DataPubSub
     SOURCES
       ITest_DataPubSub.cpp
@@ -119,15 +97,6 @@ add_silkit_test(ITest_TargetedMessaging
       SilKitSimCan
       SilKitSimTestHarness
       SilKitInternal
-)
-
-add_silkit_test(ITest_Rpc
-    SOURCES
-      ITest_Rpc.cpp
-    LIBS
-      SilKit
-      SilKitInternal
-      SilKitConfigurationTestUtils
 )
 
 add_silkit_test(ITest_StateMachineVAsio
@@ -211,13 +180,15 @@ add_silkit_test(ITest_AsyncSimTask
       ${itest_extra_libs}
 )
 
-add_silkit_test(ITest_Lin
-    SOURCES
-      ITest_Lin.cpp
+add_silkit_test(
+    ITest_AsyncSimTask_Hourglass
+
+    SOURCES ITest_AsyncSimTask.cpp
+
     LIBS
-      SilKitMwParticipant
-      SilKitSimTestHarness
-      ${itest_extra_libs}
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+    SilKitUtil # source/util/functional.hpp
 )
 
 # Windows specific tests
@@ -230,9 +201,237 @@ if(MSVC)
         )
 endif()
 
+# ============================================================
+#  Integration Tests for Single Bus System
+# ============================================================
 
-# ITest_s based on demos
+# CAN
 
-add_silkit_test(ITest_LinDemo SOURCES ITest_LinDemo.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
-add_silkit_test(ITest_CanDemo SOURCES ITest_CanDemo.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
-add_silkit_test(ITest_EthernetDemo SOURCES ITest_EthernetDemo.cpp LIBS SilKitSimTestHarness SilKitMwParticipant ${itest_extra_libs})
+add_silkit_test(
+    FTest_CanWithoutSync
+
+    SOURCES FTest_CanWithoutSync.cpp
+
+    LIBS
+    SilKitSimCan
+    ${itest_extra_libs}
+    SilKit
+    SilKitConfigurationTestUtils
+)
+
+add_silkit_test(
+    FTest_CanWithoutSync_Hourglass
+
+    SOURCES FTest_CanWithoutSync.cpp
+
+    LIBS
+    SilKit
+    SilKit_Hourglass
+    SilKitSimCan # source/services/can/CanDatatypesUtils.[hc]pp
+)
+
+add_silkit_test(
+    ITest_ThreeCanController
+
+    SOURCES ITest_ThreeCanController.cpp
+
+    LIBS
+    SilKitMwParticipant
+    SilKitSimTestHarness
+    ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_ThreeCanController_Hourglass
+
+    SOURCES ITest_ThreeCanController.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+    SilKitUtil # source/util/functional.hpp
+)
+
+add_silkit_test(
+    FTest_CanControllerThreadSafety
+
+    SOURCES FTest_CanControllerThreadSafety.cpp
+
+    LIBS
+    SilKit
+    SilKitConfigurationTestUtils
+)
+
+add_silkit_test(
+    FTest_CanControllerThreadSafety_Hourglass
+
+    SOURCES FTest_CanControllerThreadSafety.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+)
+
+# Ethernet
+
+add_silkit_test(
+    ITest_ThreeEthController
+
+    SOURCES ITest_ThreeEthController.cpp
+
+    LIBS
+    SilKitSimTestHarness
+    SilKitMwParticipant
+    SilKitSimEthernet
+    ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_ThreeEthController_Hourglass
+
+    SOURCES ITest_ThreeEthController.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+    SilKitUtil # source/util/functional.hpp
+    SilKitSimEthernet # source/services/ethernet/EthDatatypeUtils.[hc]pp
+)
+
+add_silkit_test(
+    FTest_EthWithoutSync
+
+    SOURCES FTest_EthWithoutSync.cpp
+
+    LIBS
+    SilKitSimEthernet
+    ${itest_extra_libs}
+    SilKit
+    SilKitConfigurationTestUtils
+)
+
+add_silkit_test(
+    FTest_EthWithoutSync_Hourglass
+
+    SOURCES FTest_EthWithoutSync.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKitSimEthernet # source/services/ethernet/EthDatatypeUtils.[hc]pp
+)
+
+# LIN
+
+add_silkit_test(
+    ITest_Lin
+
+    SOURCES ITest_Lin.cpp
+
+    LIBS
+    SilKitMwParticipant
+    SilKitSimTestHarness
+    ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_Lin_Hourglass
+
+    SOURCES ITest_Lin.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+    SilKitUtil # source/util/functional.hpp
+)
+
+# RPC
+
+add_silkit_test(
+    ITest_Rpc
+
+    SOURCES ITest_Rpc.cpp
+
+    LIBS
+    SilKit
+    SilKitInternal
+    SilKitConfigurationTestUtils
+)
+
+# Hourglass:
+# Currently impossible due to explicit use of the ServiceDiscovery, as it is
+# retrieved via through a dynamic_cast to IParticipantInternal.
+
+# ============================================================
+#  Integration Tests based on Demo Applications
+# ============================================================
+
+# CAN
+
+add_silkit_test(
+    ITest_CanDemo
+
+    SOURCES ITest_CanDemo.cpp
+
+    LIBS
+    SilKitSimTestHarness
+    SilKitMwParticipant
+    ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_CanDemo_Hourglass
+
+    SOURCES ITest_CanDemo.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+)
+
+# Ethernet
+
+add_silkit_test(
+    ITest_EthernetDemo
+
+    SOURCES ITest_EthernetDemo.cpp
+
+    LIBS
+    SilKitSimTestHarness
+    SilKitMwParticipant
+    ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_EthernetDemo_Hourglass
+
+    SOURCES ITest_EthernetDemo.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+    SilKitSimEthernet # source/services/ethernet/EthDatatypeUtils.[hc]pp
+)
+
+# LIN
+
+add_silkit_test(
+    ITest_LinDemo
+
+    SOURCES ITest_LinDemo.cpp
+
+    LIBS
+    SilKitSimTestHarness
+    SilKitMwParticipant
+    ${itest_extra_libs}
+)
+
+add_silkit_test(
+    ITest_LinDemo_Hourglass
+
+    SOURCES ITest_LinDemo.cpp
+
+    LIBS
+    SilKit_Hourglass
+    SilKit_Hourglass_SimTestHarness
+    SilKitUtil # source/util/functional.hpp
+)

@@ -36,11 +36,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 
-#include "ConfigurationTestUtils.hpp"
 #include "ITestThreadSafeLogger.hpp"
 
 #include "IParticipantInternal.hpp"
 
+#include "HourglassHelpers.hpp"
 
 namespace {
 
@@ -148,7 +148,9 @@ public:
     void ThreadMain( const std::string& registryUri)
     {
         participant =
-            SilKit::CreateParticipant(SilKit::Config::MakeParticipantConfigurationWithLogging(Services::Logging::Level::Warn), name, registryUri);
+            IntegrationTests::CreateParticipant(IntegrationTests::ParticipantConfigurationFromString(
+                                                    R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Warn"}]}})"),
+                                                name, registryUri);
 
         LifecycleConfiguration lc{};
         lc.operationMode = OperationMode::Coordinated;
@@ -308,13 +310,13 @@ protected:
 
     void RunRegistry(const std::string& registryUri)
     {
-        registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+        registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
         registry->StartListening(registryUri);
     }
 
     void RunSystemMaster(const std::string& registryUri)
     {
-        systemMaster.participant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
+        systemMaster.participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
                                                              systemMasterName, registryUri);
 
         LifecycleConfiguration lc{};

@@ -26,8 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/all.hpp"
 #include "silkit/participant/exception.hpp"
-
-#include "CreateParticipantInternal.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "functional.hpp"
 
@@ -37,12 +36,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"
 
-#include "VAsioRegistry.hpp"
+#include "HourglassHelpers.hpp"
 
 namespace {
 
 using namespace std::chrono_literals;
-using namespace SilKit::Core;
 
 using testing::_;
 using testing::A;
@@ -75,18 +73,14 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
 
-    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->StartListening(registryUri);
 
-    std::string participantNameSender = "Sender";
-    auto pubParticipant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                                                  participantNameSender, registryUri);
-    pubParticipant->JoinSilKitSimulation();
+    auto pubParticipant = SilKit::IntegrationTests::CreateParticipant(
+        SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "Sender", registryUri);
 
-    std::string participantNameReceiver = "Receiver";
-    auto subParticipant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                                                  participantNameReceiver, registryUri);
-    subParticipant->JoinSilKitSimulation();
+    auto subParticipant = SilKit::IntegrationTests::CreateParticipant(
+        SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "Receiver", registryUri);
 
     SilKit::Services::PubSub::PubSubSpec dataSpec{"CrashTopic", {}};
     SilKit::Services::PubSub::PubSubSpec matchingDataSpec{"CrashTopic", {}};

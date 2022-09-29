@@ -42,3 +42,39 @@ set_target_properties(SilKitSimTestHarness PROPERTIES
      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
+# ==============================================================================
+# Hourglass-Variant
+# ==============================================================================
+
+add_library(
+    SilKit_Hourglass_SimTestHarness
+
+    SimSystemController.hpp
+    SimTestHarness.hpp
+    SimTestHarness.cpp
+)
+
+target_link_libraries(
+    SilKit_Hourglass_SimTestHarness
+
+    PRIVATE SilKit
+    PRIVATE SilKitConfigurationTestUtils
+
+    PUBLIC SilKit_Hourglass
+)
+
+target_include_directories(
+    SilKit_Hourglass_SimTestHarness
+
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+set_property(TARGET SilKit_Hourglass_SimTestHarness PROPERTY FOLDER "Tests")
+
+set_target_properties(
+    SilKit_Hourglass_SimTestHarness
+
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+)

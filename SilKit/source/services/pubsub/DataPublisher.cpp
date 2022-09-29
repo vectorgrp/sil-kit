@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
 #include "WireDataMessages.hpp"
+#include "silkit/util/Span.hpp"
 
 namespace SilKit {
 namespace Services {

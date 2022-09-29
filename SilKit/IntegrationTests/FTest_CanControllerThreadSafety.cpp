@@ -35,8 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/config/IParticipantConfiguration.hpp"
 
-#include "ConfigurationTestUtils.hpp"
+#include "HourglassHelpers.hpp"
 
 namespace {
 
@@ -73,7 +74,7 @@ protected:
         bool allReceived{ false };
         std::promise<void> allReceivedPromise;
 
-        void AwaitCommunication() 
+        void AwaitCommunication()
         {
             auto futureStatus = allReceivedPromise.get_future().wait_for(communicationTimeout);
             EXPECT_EQ(futureStatus, std::future_status::ready)
@@ -87,8 +88,8 @@ protected:
 
         try
         {
-            participant.participant =
-                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+            participant.participant = IntegrationTests::CreateParticipant(
+                IntegrationTests::ParticipantConfigurationFromString(""), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 
@@ -121,8 +122,8 @@ protected:
     {
         try
         {
-            participant.participant =
-                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+            participant.participant = IntegrationTests::CreateParticipant(
+                IntegrationTests::ParticipantConfigurationFromString(""), participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 
@@ -170,7 +171,7 @@ protected:
         try
         {
             registry =
-                SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+                SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
             registry->StartListening(registryUri);
         }
         catch (const SilKit::ConfigurationError& error)
@@ -236,10 +237,10 @@ protected:
         }
     }
 
-    void ShutdownAndFailTest(const std::string& reason) 
+    void ShutdownAndFailTest(const std::string& reason)
     {
         StopAsyncParticipants();
-        FAIL() << reason; 
+        FAIL() << reason;
     }
 
     void StopAsyncParticipants()

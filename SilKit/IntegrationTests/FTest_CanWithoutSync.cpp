@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
 
 #include "CanDatatypesUtils.hpp"
 
@@ -35,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"
 
-#include "VAsioRegistry.hpp"
+#include "HourglassHelpers.hpp"
 
 namespace {
 
@@ -103,8 +104,8 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
-        auto participant =
-            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "CanWriter", _registryUri);
+        auto participant = SilKit::IntegrationTests::CreateParticipant(
+            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "CanWriter", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameTransmitHandler(
@@ -138,7 +139,8 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto participant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "CanReader", _registryUri);
+        auto participant = SilKit::IntegrationTests::CreateParticipant(
+            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "CanReader", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(
@@ -192,7 +194,7 @@ protected:
 
 TEST_F(FTest_CanWithoutSync, can_communication_no_simulation_flow_vasio)
 {
-    auto registry = std::make_unique<SilKit::Core::VAsioRegistry>(SilKit::Config::ParticipantConfigurationFromString("ParticipantName: Registry"));
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->StartListening(_registryUri);
     ExecuteTest();
 }
