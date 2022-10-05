@@ -79,7 +79,7 @@ def buildConfigs = [
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
         PublishArtifacts: true,
         CmakeArgs: "-D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++",
-        BuildDocsAndSourcePackages: true,
+        BuildDocsAndSourcePackages: false,
     ]
     ,[
         Name: "Ubuntu-20.04-gcc-10",
@@ -302,14 +302,8 @@ def runCmake(config, buildType) {
     def cmakeArgs = config["CmakeArgs"]
     cmakeArgs += " -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON "
 
-    // Enable Source and Docs packages
-    if (config.containsKey("BuildDocsAndSourcePackages")
-        && (buildType == "Release")
-        && config["BuildDocsAndSourcePackages"].toBoolean() )
-    {
-        print("Building Docs and Source packages!")
-        cmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON  -D SILKIT_BUILD_DOCS=ON"
-    }
+    print("CMake: enabling Docs and Source packages (${buildType})!")
+    cmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON  -D SILKIT_BUILD_DOCS=ON"
 
     // Set warnings as errors
     if (config.containsKey("WarningsAsErrors")) {
@@ -336,7 +330,6 @@ def runCmake(config, buildType) {
 
     cmakeBuild(
         installation: 'InSearchPath',
-        cleanBuild: true,
         buildType: "${buildType}",
         buildDir: "_build_${buildType}",
         generator: "Ninja",
@@ -399,8 +392,8 @@ def doBuild(Map config) {
             print("DEBUG scmVars=${scmVars}, commitTime=${commitTime}, TZ=${env.TZ}, LC_ALL=${env.LC_ALL}")
             buildEnv.add("SOURCE_DATE_EPOCH=${commitTime}")
             buildEnv.add("TZ=UTC")
-            buildEnv.add("LC_ALL=C")
-            buildEnv.add("LANG=C")
+            buildEnv.add("LC_ALL=C.UTF-8")
+            buildEnv.add("LANG=C.UTF-8")
             // save branch name for publishing stage
             gitBranch = scmVars.GIT_BRANCH
         }
@@ -408,12 +401,23 @@ def doBuild(Map config) {
         stage("Cmake Release Build (${buildName})") {
             print("${buildName} --  running cmake Release")
             withEnv(buildEnv) {
+                // Install dependencies for documentation
+                configFileProvider([
+                    configFile(fileId: 'PYPI_MIRROR', variable: 'PYPI_MIRROR'),
+                ]) {
+                    def pypiMirror = readFile(file: PYPI_MIRROR).trim()
+                    print("Using pipenv to install docs dependencies")
+                    if(!isUnix()) {
+                        run("python -m pip install pipenv")
+                    }
+                    run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
+                }
                 print("Debug: TZ=${env.TZ} LC_ALL=${env.LC_ALL}")
                 runCmake(config, "Release" )
             }
         }
 
-        // Skip Tests when cross-building        
+        // Skip Tests when cross-building
         def isCrossBuild  = false
         if(config.containsKey("IsCrossBuild")) {
             isCrossBuild = config["IsCrossBuild"]
@@ -463,7 +467,7 @@ def doBuild(Map config) {
 
         if(publishToArtifactory ) {
             stage(" Bundle and Archive Packages (${buildName})") {
-                run "python ./SilKit/ci/package.py  --keep-top-directory \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
+                run "python ./SilKit/ci/package.py  \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
                 archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
 
                 // safe the debug symbols files on windows/Linux
@@ -472,6 +476,7 @@ def doBuild(Map config) {
                     archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-SYMBOLS.zip")
                 }
 
+                // NB: cpack components are currently disabled, so this is inactive:
                 if (config.containsKey("BuildDocsAndSourcePackages")
                      && config["BuildDocsAndSourcePackages"].toBoolean())
                 {

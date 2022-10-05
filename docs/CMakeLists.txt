@@ -64,6 +64,7 @@ if (UNIX)
   endif()
 endif()
 
+find_package(Python3 REQUIRED)
 add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    COMMENT "Generating docs"
                    MAIN_DEPENDENCY
@@ -75,7 +76,7 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                        ${SPHINX_SOURCE_FILES}
                    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
                    # generate docs
-                   COMMAND sphinx-build -b html
+                   COMMAND ${Python3_EXECUTABLE} -m pipenv run sphinx-build -b html
                        # Tell Breathe where to find the Doxygen output
                        -Dbreathe_projects.SilKit=${DOXYGEN_OUTPUT_DIR}/xml
                        -Drelease=${PROJECT_VERSION}

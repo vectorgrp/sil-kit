@@ -221,7 +221,7 @@ if(SILKIT_INSTALL_SOURCE)
     install(FILES
         LICENSE
         COMPONENT bin
-        DESTINATION usr/share/doc/sil-kit/
+        DESTINATION ${INSTALL_TOP_DIR}usr/share/doc/sil-kit/
         RENAME copyright
         )
 endif(SILKIT_INSTALL_SOURCE)
@@ -232,7 +232,7 @@ endif(SILKIT_INSTALL_SOURCE)
 ###############################################################################
 #set(CPACK_GENERATOR "ZIP;DEB")
 set(CPACK_GENERATOR "ZIP")
-set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL OFF)
 #set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_PACKAGE_DESCRIPTION "binary release of SIL Kit library and tools")
 set(CPACK_PACKAGE_NAME "SilKit")
