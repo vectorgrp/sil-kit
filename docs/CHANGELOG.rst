@@ -5,6 +5,32 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.8] - 2022-10-07
+--------------------
+
+Changed
+~~~~~~~
+
+- The third party dependencies were updated.
+
+  - ``yaml-cpp`` to version 0.7.0.
+
+  - ``asio`` to version 1.24.0.
+
+  - ``fmt`` to version 8.1.1.
+
+  - ``spdlog`` to version 1.10.0.
+
+  - ``googletest`` to version 1.12.1.
+
+- The FlexRay controller now issues a warning if the static buffer payload is truncated
+  or padded with zeros, i.e., if the size is not exactly as specified in the controller
+  configuration.
+
+- The registry now transmits a diagnostic string when a participant announcement cannot
+  be processed, e.g., because a participant with the same name already exists.
+  The second participant will not time out after a few seconds anymore, but fail much faster.
+
 [4.0.7] - 2022-09-20
 --------------------
 
