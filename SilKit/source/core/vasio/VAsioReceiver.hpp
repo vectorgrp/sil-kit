@@ -121,7 +121,7 @@ void VAsioReceiver<MsgT>::ReceiveRawMsg(IVAsioPeer* /*from*/, const ServiceDescr
 {
     MsgT msg = buffer.Deserialize<MsgT>();
 
-    Services::TraceRx(_logger, this, msg);
+    Services::TraceRx(_logger, this, msg, descriptor);
 
     auto remoteId = RemoteServiceEndpoint(descriptor);
     _link->DistributeRemoteSilKitMessage(&remoteId, std::move(msg));

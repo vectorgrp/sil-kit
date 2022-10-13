@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <iomanip>
 #include <sstream>
+#include <thread>
 
 #include "ILogger.hpp"
 #include "VAsioMsgKind.hpp"
@@ -30,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 
 using namespace asio::ip;
+using namespace std::chrono_literals;
 
 #if defined(__unix__) || defined(__APPLE__)
 
@@ -134,6 +136,38 @@ VAsioTcpPeer::~VAsioTcpPeer()
 }
 
 
+void VAsioTcpPeer::DrainAllBuffers()
+{
+    _isShuttingDown = true;
+
+    // Wait for sendingQueue 
+    int waitMs;
+    for (waitMs = 100; waitMs >= 0; waitMs--)
+    {
+        if (_sendingQueue.empty())
+            break;
+        std::this_thread::sleep_for(1ms);
+    }
+    if (waitMs <= 0)
+    {
+        Services::Logging::Warn(_logger, "Could not clear sending queue to {}",
+                                GetInfo().participantName);
+    }
+
+    // Wait for incoming Msg 
+    for (waitMs = 100; waitMs >= 0; waitMs--)
+    {
+        if (_currentMsgSize == 0)
+            break;
+        std::this_thread::sleep_for(1ms);
+    }
+    if (waitMs <= 0)
+    {
+        Services::Logging::Warn(_logger, "Could not wait for read buffer on peer to {}",
+                                GetInfo().participantName);
+    }
+}
+
 bool VAsioTcpPeer::IsErrorToTryAgain(const asio::error_code& ec)
 {
     return ec == asio::error::no_descriptors
@@ -149,6 +183,11 @@ void VAsioTcpPeer::Shutdown()
     {
         SilKit::Services::Logging::Info(_logger, "Shutting down connection to {}", _info.participantName);
         _socket.close();
+
+        std::unique_lock<std::mutex> lock{_sendingQueueLock};
+        _sendingQueue.clear();
+        lock.unlock();
+
         _connection->OnPeerShutdown(this);
     }
 }
@@ -369,13 +408,19 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
 void VAsioTcpPeer::SendSilKitMsg(SerializedMessage buffer)
 {
-    std::unique_lock<std::mutex> lock{ _sendingQueueLock };
+    // Prevent sending when shutting down
+    if (!_isShuttingDown && _socket.is_open())
+    {
+        std::unique_lock<std::mutex> lock{_sendingQueueLock};
 
-    _sendingQueue.push(buffer.ReleaseStorage());
+        _sendingQueue.push_back(buffer.ReleaseStorage());
 
-    lock.unlock();
+        lock.unlock();
 
-    asio::dispatch(_socket.get_executor(), [this]() { StartAsyncWrite(); });
+        asio::dispatch(_socket.get_executor(), [this]() {
+            StartAsyncWrite();
+        });
+    }
 }
 
 void VAsioTcpPeer::StartAsyncWrite()
@@ -385,12 +430,14 @@ void VAsioTcpPeer::StartAsyncWrite()
 
     std::unique_lock<std::mutex> lock{ _sendingQueueLock };
     if (_sendingQueue.empty())
+    {
         return;
+    }
 
     _sending = true;
 
     _currentSendingBufferData = std::move(_sendingQueue.front());
-    _sendingQueue.pop();
+    _sendingQueue.pop_front();
     lock.unlock();
 
     _currentSendingBuffer = asio::buffer(_currentSendingBufferData.data(), _currentSendingBufferData.size());
@@ -459,6 +506,7 @@ void VAsioTcpPeer::ReadSomeAsync()
             }
             self->_wPos += bytesRead;
             self->DispatchBuffer();
+
         }
     );
 }
@@ -467,6 +515,10 @@ void VAsioTcpPeer::DispatchBuffer()
 {
     if (_currentMsgSize == 0)
     {
+        if (_isShuttingDown)
+        {
+            return;
+        }
         if (_wPos >= sizeof(uint32_t))
         {
             _currentMsgSize = *reinterpret_cast<uint32_t*>(_msgBuffer.data());

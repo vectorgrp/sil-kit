@@ -137,6 +137,7 @@ add_subdirectory(Flexray)
 add_subdirectory(Lin)
 add_subdirectory(PubSub)
 add_subdirectory(Rpc)
+add_subdirectory(Benchmark)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################

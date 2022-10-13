@@ -1,0 +1,15 @@
+{
+  "Description": "Configuration for Benchmark Demo without domain sockets",
+  "Logging": {
+    "Sinks": [
+      {
+        "Type": "Stdout",
+        "Level": "Error"
+      }
+    ]
+  },
+  "Middleware" :
+  {
+    "EnableDomainSockets": "False"
+  }
+}

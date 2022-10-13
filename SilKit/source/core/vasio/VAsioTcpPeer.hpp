@@ -104,6 +104,9 @@ public:
 
     inline void SetProtocolVersion(ProtocolVersion v)  override;
     inline auto GetProtocolVersion() const -> ProtocolVersion  override;
+    
+    void DrainAllBuffers() override;
+
 private:
     // ----------------------------------------
     // Private Methods
@@ -132,11 +135,12 @@ private:
     size_t _wPos{0};
 
     // sending
-    std::queue<std::vector<uint8_t>> _sendingQueue;
+    std::atomic_bool _isShuttingDown{false};
+    std::deque<std::vector<uint8_t>> _sendingQueue;
     asio::mutable_buffer _currentSendingBuffer;
     std::vector<uint8_t> _currentSendingBufferData;
-    std::mutex _sendingQueueLock;
-    bool _sending{false};
+    mutable std::mutex _sendingQueueLock;
+    std::atomic_bool _sending{false};
     bool _enableQuickAck{false};
     Core::ServiceDescriptor _serviceDescriptor;
 };

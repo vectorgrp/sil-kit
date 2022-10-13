@@ -133,6 +133,7 @@ struct MockVAsioPeer
     MOCK_METHOD(void, StartAsyncRead, (), (override));
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
+    MOCK_METHOD(void, DrainAllBuffers, (), (override));
 
     // IServiceEndpoint
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));

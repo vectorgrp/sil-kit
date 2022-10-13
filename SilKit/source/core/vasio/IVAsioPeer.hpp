@@ -55,7 +55,8 @@ public:
     virtual auto GetLocalAddress() const -> std::string = 0;
     //! Start the reading in the IO loop context
     virtual void StartAsyncRead() = 0;
-
+    //! Soft shutdown: Waits until sending queue and incoming messages are processed 
+    virtual void DrainAllBuffers()= 0;
     //! Version management for backward compatibility on network ser/des level
     virtual void SetProtocolVersion(ProtocolVersion v) = 0;
     virtual auto GetProtocolVersion() const -> ProtocolVersion = 0;

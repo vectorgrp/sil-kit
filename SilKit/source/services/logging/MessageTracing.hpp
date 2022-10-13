@@ -23,14 +23,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ILogger.hpp"
 #include "IServiceEndpoint.hpp"
+#include "ServiceDescriptor.hpp"
 
 namespace SilKit {
 namespace Services {
 
 template<class SilKitMessageT>
-void TraceRx(Logging::ILogger* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg)
+void TraceRx(Logging::ILogger* logger, const Core::IServiceEndpoint* addr, const SilKitMessageT& msg,
+             const Core::ServiceDescriptor& from)
 {
-    Logging::Trace(logger, "Recv from {}: {}", addr->GetServiceDescriptor(), msg);
+    Logging::Trace(logger, "Recv on {} from {}: {}", addr->GetServiceDescriptor(), from.GetParticipantName(), msg);
 }
 
 template<class SilKitMessageT>

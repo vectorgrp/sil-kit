@@ -501,7 +501,9 @@ private:
     std::thread _ioWorker;
 
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
-    bool _isShuttingDown{false};
+    std::atomic_bool _isShuttingDown{false};
+    // Lock access to _peers in ~VAsioConnection and (async) OnPeerShutdown
+    std::mutex _peersLock;
 
     // Hold mapping from hash to participantName
     std::map<uint64_t, std::string> _hashToParticipantName;

@@ -367,3 +367,64 @@ RPC Demo
             |SystemController| Server Client
    *  -  Notes
       -  ``Client`` participant has two RpcClients that call the ``Add100`` and ``Sort`` functions on the two RpcServers of the ``Server`` participant.
+
+
+Benchmark Demo
+~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Benchmark Demo. Used for evaluating SIL Kit performance of PubSub communication.
+   *  -  Source location
+      -  Demos/Benchmark
+   *  -  Requirements
+      -  None (The demo starts its own instance of the registry and system controller).
+   *  -  Positional parameters
+      -  [numberOfSimulationRuns]
+           Sets the number of simulation runs to perform.
+         [simulationDuration]
+           Sets the virtual simulation duration.
+         [numberOfParticipants]
+           Sets the number of simulation participants.
+         [messageCount]
+           Sets the number of messages to be send in each simulation step.
+         [messageSizeInBytes]
+           Sets the message size.
+         [registryURi] 
+           The URI of the registry to start.
+   *    - Optional parameters
+        - --help
+            Show the help message.
+          --registry-uri
+            The URI of the registry to start.
+          --message-size
+            Sets the message size.
+          --message-count
+            Sets the number of messages to be send in each simulation step.
+          --number-participants
+            Sets the number of simulation participants.
+          --number-simulation-runs
+            Sets the number of simulation runs to perform.
+          --simulation-duration
+            Sets the simulation duration (virtual time).
+          --configuration 
+            Path and filename of the participant configuration YAML or JSON file.
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+            # Launch the BenchmarkDemo with positional arguments and a specified configuration file:
+            |DemoDir|/SilKitDemoBenchmark.exe 4 1 2 1 10 --configuration ./SilKitConfig_DemoBenchmark_DomainSockets_Off.json
+
+            # Launch the BenchmarkDemo with default arguments but 4 participants:
+            |DemoDir|/SilKitDemoBenchmark.exe --number-participants 4
+   *  -  Notes
+      -  This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> 
+         of <B> bytes per simulation step with a fixed period of 1ms and run for <S> seconds (virtual time). 
+         This simulation run is repeated <K> times and averages over all runs are calculated. The demo uses 
+         PubSub controllers with the same topic for the message exchange, so each participant broadcasts the
+         messages to all other participants. The configuration file 
+         ``SilKitConfig_DemoBenchmark_DomainSockets_Off.json`` can be used to disable domain socket usage 
+         for more realistic timings of TCP/IP traffic. With ``SilKitConfig_DemoBenchmark_TCPNagle_Off.json``, 
+         Nagle's algorithm and domain sockets are switched off.

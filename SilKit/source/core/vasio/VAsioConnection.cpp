@@ -322,6 +322,17 @@ VAsioConnection::VAsioConnection(SilKit::Config::ParticipantConfiguration config
 
 VAsioConnection::~VAsioConnection()
 {
+    _isShuttingDown = true;
+
+    std::unique_lock<std::mutex> lock{_peersLock};
+    decltype(_peers) peers;
+    peers.swap(_peers);
+    for (auto peer : peers)
+    {
+        peer->DrainAllBuffers();
+    }
+    lock.unlock();
+
     if (_ioWorker.joinable())
     {
         _ioContext.stop();
@@ -881,13 +892,17 @@ void VAsioConnection::RegisterPeerShutdownCallback(std::function<void(IVAsioPeer
 
 void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
 {
-    for (auto&& callback : _peerShutdownCallbacks)
+    if (!_isShuttingDown)
     {
-        callback(peer);
+        std::unique_lock<std::mutex> lock{_peersLock};
+        for (auto&& callback : _peerShutdownCallbacks)
+        {
+            callback(peer);
+        }
+        RemovePeerFromLinks(peer);
+        RemovePeerFromConnection(peer);
+        lock.unlock();
     }
-
-    RemovePeerFromLinks(peer);
-    RemovePeerFromConnection(peer);
 }
 
 void VAsioConnection::RemovePeerFromLinks(IVAsioPeer* peer)

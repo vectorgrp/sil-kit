@@ -28,7 +28,12 @@
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
       },
-      "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" } }
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
+          "rsyncCommandArgs": [ "--exclude", "_build" ]
+        }
+      }
     },
     {
       "name": "linux-debug",
