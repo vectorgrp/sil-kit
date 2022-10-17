@@ -313,6 +313,72 @@ private:
     std::chrono::nanoseconds now{0ns};
 };
 
+void InitLinMaster(SilKit::Services::Lin::ILinController* linController, std::string participantName)
+{
+    std::cout << "Initializing " << participantName << std::endl;
+
+    LinControllerConfig config;
+    config.controllerMode = LinControllerMode::Master;
+    config.baudRate = 20'000;
+    linController->Init(config);
+}
+
+void InitLinSlave(SilKit::Services::Lin::ILinController* linController, std::string participantName)
+{
+    std::cout << "Initializing " << participantName << std::endl;
+
+    // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
+    LinFrameResponse response_16;
+    response_16.frame.id = 16;
+    response_16.frame.checksumModel = LinChecksumModel::Classic;
+    response_16.frame.dataLength = 6;
+    response_16.responseMode = LinFrameResponseMode::Rx;
+
+    // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
+    //  - This LinFrameResponseMode::Unused causes the controller to ignore
+    //    this message and not trigger a callback. This is also the default.
+    LinFrameResponse response_17;
+    response_17.frame.id = 17;
+    response_17.frame.checksumModel = LinChecksumModel::Classic;
+    response_17.frame.dataLength = 6;
+    response_17.responseMode = LinFrameResponseMode::Unused;
+
+    // Configure LIN Controller to receive LIN ID 18
+    //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
+    LinFrameResponse response_18;
+    response_18.frame.id = 18;
+    response_18.frame.checksumModel = LinChecksumModel::Classic;
+    response_18.frame.dataLength = 8;
+    response_18.responseMode = LinFrameResponseMode::Rx;
+
+    // Configure LIN Controller to receive LIN ID 19
+    //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
+    LinFrameResponse response_19;
+    response_19.frame.id = 19;
+    response_19.frame.checksumModel = LinChecksumModel::Enhanced;
+    response_19.frame.dataLength = 1;
+    response_19.responseMode = LinFrameResponseMode::Rx;
+
+    // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
+    LinFrameResponse response_34;
+    response_34.frame.id = 34;
+    response_34.frame.checksumModel = LinChecksumModel::Enhanced;
+    response_34.frame.dataLength = 6;
+    response_34.frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
+    response_34.responseMode = LinFrameResponseMode::TxUnconditional;
+
+    LinControllerConfig config;
+    config.controllerMode = LinControllerMode::Slave;
+    config.baudRate = 20'000;
+    config.frameResponses.push_back(response_16);
+    config.frameResponses.push_back(response_17);
+    config.frameResponses.push_back(response_18);
+    config.frameResponses.push_back(response_19);
+    config.frameResponses.push_back(response_34);
+
+    linController->Init(config);
+}
+
 
 /**************************************************************************************************
  * Main Function
@@ -331,10 +397,23 @@ int main(int argc, char** argv) try
     std::string participantConfigurationFilename(argv[1]);
     std::string participantName(argv[2]);
 
-    auto registryUri = "silkit://localhost:8500";
-    if (argc >= 4)
+    std::string registryUri = "silkit://localhost:8500";
+
+    bool runSync = true;
+
+    std::vector<std::string> args;
+    std::copy((argv + 3), (argv + argc), std::back_inserter(args));
+
+    for (auto arg : args)
     {
-        registryUri = argv[3];
+        if (arg == "--async")
+        {
+            runSync = false;
+        }
+        else
+        {
+            registryUri = arg;
+        }
     }
 
     auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
@@ -359,13 +438,9 @@ int main(int argc, char** argv) try
 
     if (participantName == "LinMaster")
     {
-        lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-            std::cout << "Initializing " << participantName << std::endl;
 
-            LinControllerConfig config;
-            config.controllerMode = LinControllerMode::Master;
-            config.baudRate = 20'000;
-            linController->Init(config);
+        lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
+            InitLinMaster(linController, participantName);
         });
         linController->AddFrameStatusHandler(
             [&master](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
@@ -375,69 +450,50 @@ int main(int argc, char** argv) try
                 master.WakeupHandler(linController, wakeupEvent);
             });
 
-        timeSyncService->SetSimulationStepHandler(
-            [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+        if (runSync)
+        {
+            timeSyncService->SetSimulationStepHandler(
+                [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                master.DoAction(now);
-            }, 1ms);
+                    master.DoAction(now);
+                },
+                1ms);
+
+            
+            auto lifecycleFuture = lifecycleService->StartLifecycle();
+            auto finalState = lifecycleFuture.get();
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+        }
+        else
+        {
+            InitLinMaster(linController, participantName);
+
+            bool isStopped = false;
+            std::thread workerThread;
+            auto now = 0ms;
+
+            workerThread = std::thread{[&]() {
+                while (!isStopped)
+                {
+                    master.DoAction(now);
+                    now += 1ms;
+                    std::this_thread::sleep_for(1s);
+                }
+            }};
+
+            isStopped = true;
+            if (workerThread.joinable())
+            {
+                workerThread.join();
+            }
+        }
     }
     else if (participantName == "LinSlave")
     {
         lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-            std::cout << "Initializing " << participantName << std::endl;
-
-            // Configure LIN Controller to receive a LinFrameResponse for LIN ID 16
-            LinFrameResponse response_16;
-            response_16.frame.id = 16;
-            response_16.frame.checksumModel = LinChecksumModel::Classic;
-            response_16.frame.dataLength = 6;
-            response_16.responseMode = LinFrameResponseMode::Rx;
-
-            // Configure LIN Controller to receive a LinFrameResponse for LIN ID 17
-            //  - This LinFrameResponseMode::Unused causes the controller to ignore
-            //    this message and not trigger a callback. This is also the default.
-            LinFrameResponse response_17;
-            response_17.frame.id = 17;
-            response_17.frame.checksumModel = LinChecksumModel::Classic;
-            response_17.frame.dataLength = 6;
-            response_17.responseMode = LinFrameResponseMode::Unused;
-
-            // Configure LIN Controller to receive LIN ID 18
-            //  - LinChecksumModel does not match with master --> Receive with LIN_RX_ERROR
-            LinFrameResponse response_18;
-            response_18.frame.id = 18;
-            response_18.frame.checksumModel = LinChecksumModel::Classic;
-            response_18.frame.dataLength = 8;
-            response_18.responseMode = LinFrameResponseMode::Rx;
-
-            // Configure LIN Controller to receive LIN ID 19
-            //  - dataLength does not match with master --> Receive with LIN_RX_ERROR
-            LinFrameResponse response_19;
-            response_19.frame.id = 19;
-            response_19.frame.checksumModel = LinChecksumModel::Enhanced;
-            response_19.frame.dataLength = 1;
-            response_19.responseMode = LinFrameResponseMode::Rx;
-
-            // Configure LIN Controller to send a LinFrameResponse for LIN ID 34
-            LinFrameResponse response_34;
-            response_34.frame.id = 34;
-            response_34.frame.checksumModel = LinChecksumModel::Enhanced;
-            response_34.frame.dataLength = 6;
-            response_34.frame.data = std::array<uint8_t, 8>{3, 4, 3, 4, 3, 4, 3, 4};
-            response_34.responseMode = LinFrameResponseMode::TxUnconditional;
-
-            LinControllerConfig config;
-            config.controllerMode = LinControllerMode::Slave;
-            config.baudRate = 20'000;
-            config.frameResponses.push_back(response_16);
-            config.frameResponses.push_back(response_17);
-            config.frameResponses.push_back(response_18);
-            config.frameResponses.push_back(response_19);
-            config.frameResponses.push_back(response_34);
-
-            linController->Init(config);
+            InitLinSlave(linController, participantName);
         });
 
         linController->AddFrameStatusHandler(
@@ -452,14 +508,45 @@ int main(int argc, char** argv) try
                 slave.WakeupHandler(linController, wakeupEvent);
             });
 
-        timeSyncService->SetSimulationStepHandler(
-            [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+        if (runSync)
+        {
+            timeSyncService->SetSimulationStepHandler(
+                [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                    std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
+                              << std::endl;
+                    slave.DoAction(now);
 
-                std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms" << std::endl;
-                slave.DoAction(now);
+                    std::this_thread::sleep_for(500ms);
+                },
+                1ms);
 
-                std::this_thread::sleep_for(500ms);
-            }, 1ms);
+            auto lifecycleFuture = lifecycleService->StartLifecycle();
+            auto finalState = lifecycleFuture.get();
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+        }
+        else
+        {
+            InitLinSlave(linController, participantName);
+
+            bool isStopped = false;
+            std::thread workerThread;
+            auto now = 0ms;
+
+            workerThread = std::thread{[&]() {
+                while (!isStopped)
+                {
+                    slave.DoAction(now);
+                    now += 1ms;
+                    std::this_thread::sleep_for(1s);
+                }
+            }};
+
+            isStopped = true;
+            if (workerThread.joinable())
+            {
+                workerThread.join();
+            }
+        }
     }
     else
     {
@@ -468,10 +555,7 @@ int main(int argc, char** argv) try
         return 1;
     }
 
-    auto lifecycleFuture = lifecycleService->StartLifecycle();
-    auto finalState = lifecycleFuture.get();
 
-    std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
     std::cout << "Press enter to stop the process..." << std::endl;
     std::cin.ignore();
 

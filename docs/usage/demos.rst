@@ -186,7 +186,7 @@ LIN Demo
    *  -  Source location
       -  Demos/Lin
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * Network simulator (optional)
    *  -  Parameters
@@ -198,6 +198,9 @@ LIN Demo
            ``EthernetReader``.
          [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
+         [\-\-async] 
+           If async flag is set, the participant will join the simulation unsynchronized and it will not need
+           the |SystemController| to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
@@ -286,7 +289,7 @@ Publish & Subscribe Demo
    *  -  Source location
       -  Demos/PubSub
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -297,6 +300,9 @@ Publish & Subscribe Demo
            ``Subscriber``.
          [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
+         [\-\-async] 
+           If async flag is set, the participant will join the simulation unsynchronized and it will not need
+           the |SystemController| to start.
 
    *  -  Parameter Example
       -  .. parsed-literal:: 
@@ -334,7 +340,7 @@ RPC Demo
    *  -  Source location
       -  Demos/Rpc
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -345,6 +351,9 @@ RPC Demo
            ``Client``.
          [RegistryUri] 
            The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
+         [\-\-async] 
+           If async flag is set, the participant will join the simulation unsynchronized and it will not need
+           the |SystemController| to start.
 
    *  -  Parameter Example
       -  .. parsed-literal:: 

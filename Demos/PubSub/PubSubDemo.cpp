@@ -48,150 +48,224 @@ Sub: "Gps"
 Sub: "Temperature"
 */
 
+void PublishData(SilKit::Services::PubSub::IDataPublisher* gpsPublisher,
+                 SilKit::Services::PubSub::IDataPublisher* temperaturePublisher)
+{
+    // GPS
+    double lat = 48.8235 + static_cast<double>((rand() % 150)) / 100000;
+    double lon = 9.0965 + static_cast<double>((rand() % 150)) / 100000;
+    std::string signalQuality = "Strong";
+
+    // Serialize data
+    SilKit::Util::SerDes::Serializer serializer;
+    serializer.BeginStruct();
+    serializer.Serialize(lat);
+    serializer.Serialize(lon);
+    serializer.Serialize(signalQuality);
+    serializer.EndStruct();
+
+    // Publish serialized data
+    gpsPublisher->Publish(serializer.ReleaseBuffer());
+    std::cout << ">> Published Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality
+              << std::endl;
+
+    // Temperature
+    double temperature = 25.0 + static_cast<double>(rand() % 10) / 10.0;
+
+    // Serialize data
+    serializer.Serialize(temperature);
+
+    // Publish serialized data
+    temperaturePublisher->Publish(serializer.ReleaseBuffer());
+    std::cout << ">> Published temperature data temperature=" << temperature << std::endl;
+}
+
+void ReceiveGpsData(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
+{
+    auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
+
+    // Deserialize event data
+    SilKit::Util::SerDes::Deserializer deserializer(eventData);
+    deserializer.BeginStruct();
+    double lat = deserializer.Deserialize<double>();
+    double lon = deserializer.Deserialize<double>();
+    std::string signalQuality = deserializer.Deserialize<std::string>();
+    deserializer.EndStruct();
+
+    // Print results
+    std::cout << "<< Received Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality
+              << std::endl;
+}
+
+void ReceiveTemperatureData(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
+{
+    auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
+
+    // Deserialize event data
+    SilKit::Util::SerDes::Deserializer deserializer(eventData);
+    double temperature = deserializer.Deserialize<double>();
+
+    // Print results
+    std::cout << "<< Received temperature data temperature=" << temperature << std::endl;
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 3)
     {
         std::cerr << "Missing arguments! Start demo with: " << argv[0]
-                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri]" << std::endl
-                  << "Use \"Publisher1\", \"Publisher2\", \"Subscriber1\" or \"Subscriber2\" as <ParticipantName>." << std::endl;
+                  << " <ParticipantConfiguration.yaml|json> <ParticipantName> [RegistryUri] [--async]" << std::endl
+                  << "Use \"Publisher\" or \"Subscriber\" as <ParticipantName>." << std::endl;
         return -1;
     }
 
     std::string mediaType{SilKit::Util::SerDes::MediaTypeData()};
+    SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
+    SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
 
     try
     {
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        auto registryUri = "silkit://localhost:8500";
-        if (argc >= 4)
+        std::string registryUri = "silkit://localhost:8500";
+
+        bool runSync = true;
+
+        std::vector<std::string> args;
+        std::copy((argv + 3), (argv + argc), std::back_inserter(args));
+
+        for (auto arg : args)
         {
-            registryUri = argv[3];
+            if (arg == "--async")
+            {
+                runSync = false;
+            }
+            else
+            {
+                registryUri = arg;
+            }
         }
+
 
         auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* lifecycleService =
-            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
-
-        lifecycleService->SetCommunicationReadyHandler([&participantName]() {
-            std::cout << "Communication ready for " << participantName << std::endl;
-        });
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stopping..." << std::endl;
-        });
-
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutting down..." << std::endl;
-        });
-
-        if (participantName == "Publisher")
+        if (runSync)
         {
-            // Create a data publisher for GPS data
-            SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
-            auto* gpsPublisher = participant->CreateDataPublisher("Gps", dataSpecPubGps, 0);
-            
-            // Create a data publisher for temperature data
-            SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
-            auto* temperaturePublisher = participant->CreateDataPublisher("Temperature", dataSpecPubTemperature, 0);
+            auto* lifecycleService =
+                participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-            timeSyncService->SetSimulationStepHandler(
-                [gpsPublisher, temperaturePublisher](std::chrono::nanoseconds now,
-                                                     std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+            lifecycleService->SetCommunicationReadyHandler([&participantName]() {
+                std::cout << "Communication ready for " << participantName << std::endl;
+            });
+            lifecycleService->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
 
-                    // GPS
-                    double lat = 48.8235 + static_cast<double>((rand() % 150)) / 100000;
-                    double lon = 9.0965 + static_cast<double>((rand() % 150)) / 100000;
-                    std::string signalQuality = "Strong";
+            lifecycleService->SetShutdownHandler([]() {
+                std::cout << "Shutting down..." << std::endl;
+            });
 
-                    // Serialize data
-                    SilKit::Util::SerDes::Serializer serializer;
-                    serializer.BeginStruct();
-                    serializer.Serialize(lat);
-                    serializer.Serialize(lon);
-                    serializer.Serialize(signalQuality);
-                    serializer.EndStruct();
+            if (participantName == "Publisher")
+            {
+                // Create a data publisher for GPS data
+                auto* gpsPublisher = participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0);
 
-                    // Publish serialized data
-                    gpsPublisher->Publish(serializer.ReleaseBuffer());
-                    std::cout << ">> Published Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality << std::endl;
+                // Create a data publisher for temperature data
+                auto* temperaturePublisher = participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0);
 
-                    // Temperature
-                    double temperature = 25.0 + static_cast<double>(rand() % 10) / 10.0;
+                timeSyncService->SetSimulationStepHandler(
+                    [gpsPublisher, temperaturePublisher](std::chrono::nanoseconds now,
+                                                         std::chrono::nanoseconds /*duration*/) {
+                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                    // Serialize data
-                    serializer.Serialize(temperature);
+                        PublishData(gpsPublisher, temperaturePublisher);
 
-                    // Publish serialized data
-                    temperaturePublisher->Publish(serializer.ReleaseBuffer());
-                    std::cout << ">> Published temperature data temperature=" << temperature << std::endl;
+                        std::this_thread::sleep_for(1s);
+                    },
+                    1s);
+            }
+            else if (participantName == "Subscriber")
+            {
+                SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
+                participant->CreateDataSubscriber(
+                    "GpsSubscriber", dataSpecPubGps,
+                    &ReceiveGpsData);
 
-                    std::this_thread::sleep_for(1s);
+                SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
+                participant->CreateDataSubscriber(
+                    "TemperatureSubscriber", dataSpecPubTemperature,
+                    &ReceiveTemperatureData);
 
-            }, 1s);
-        }
-        else if (participantName == "Subscriber")
-        {
-            SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
-            participant->CreateDataSubscriber(
-                "Gps", dataSpecPubGps,
-                [](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                    auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
+                timeSyncService->SetSimulationStepHandler(
+                    [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                        std::this_thread::sleep_for(1s);
+                    },
+                    1s);
+            }
+            else
+            {
+                std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
+                          << std::endl;
+                return 1;
+            }
 
-                    // Deserialize event data
-                    SilKit::Util::SerDes::Deserializer deserializer(eventData);
-                    deserializer.BeginStruct();
-                    double lat = deserializer.Deserialize<double>();
-                    double lon = deserializer.Deserialize<double>();
-                    std::string signalQuality = deserializer.Deserialize<std::string>();
-                    deserializer.EndStruct();
+            auto lifecycleFuture = lifecycleService->StartLifecycle();
+            auto finalState = lifecycleFuture.get();
 
-                    // Print results
-                    std::cout << "<< Received Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality << std::endl;
-                });
-
-            SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
-            participant->CreateDataSubscriber(
-                "Temperature", dataSpecPubTemperature,
-                [](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                    auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
-
-                    // Deserialize event data
-                    SilKit::Util::SerDes::Deserializer deserializer(eventData);
-                    double temperature = deserializer.Deserialize<double>();
-
-                    // Print results
-                    std::cout << "<< Received temperature data temperature=" << temperature << std::endl;
-                });
-
-            timeSyncService->SetSimulationStepHandler(
-                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    std::this_thread::sleep_for(1s);
-                }, 1s);
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
         }
         else
         {
-            std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"." << std::endl;
-            return 1;
+
+            bool isStopped = false;
+            std::thread workerThread;
+
+            if (participantName == "Publisher")
+            {
+                // Create a data publisher for GPS data
+                auto* gpsPublisher = participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0);
+
+                // Create a data publisher for temperature data
+                auto* temperaturePublisher = participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0);
+
+                workerThread = std::thread{[&]() {
+                    while (!isStopped)
+                    {
+                        PublishData(gpsPublisher, temperaturePublisher);
+                        std::this_thread::sleep_for(1s);
+                    }
+                }};
+            }
+            else if (participantName == "Subscriber")
+            {
+                participant->CreateDataSubscriber("GpsSubscriber", dataSpecPubGps, &ReceiveGpsData);
+
+                participant->CreateDataSubscriber("TemperatureSubscriber", dataSpecPubTemperature, &ReceiveTemperatureData);
+            }else{
+                std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
+                          << std::endl;
+                return 1;
+            }
+
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
+            isStopped = true;
+            if (workerThread.joinable())
+            {
+                workerThread.join();
+            }
         }
-
-        auto lifecycleFuture =
-            lifecycleService->StartLifecycle();
-        auto finalState = lifecycleFuture.get();
-
-        std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
+        
     }
     catch (const SilKit::ConfigurationError& error)
     {

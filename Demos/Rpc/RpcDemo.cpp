@@ -158,16 +158,31 @@ int main(int argc, char** argv)
     }
 
     std::string mediaType{SilKit::Util::SerDes::MediaTypeRpc()};
+    SilKit::Services::Rpc::RpcSpec rpcSpecAdd100{"Add100", mediaType};
+    SilKit::Services::Rpc::RpcSpec rpcSpecSort{"Sort", mediaType};
 
     try
     {
         std::string participantConfigurationFilename(argv[1]);
         std::string participantName(argv[2]);
 
-        auto registryUri = "silkit://localhost:8500";
-        if (argc >= 4)
+        std::string registryUri = "silkit://localhost:8500";
+
+        bool runSync = true;
+
+        std::vector<std::string> args;
+        std::copy((argv + 3), (argv + argc), std::back_inserter(args));
+
+        for (auto arg : args)
         {
-            registryUri = argv[3];
+            if (arg == "--async")
+            {
+                runSync = false;
+            }
+            else
+            {
+                registryUri = arg;
+            }
         }
 
         auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
@@ -175,69 +190,116 @@ int main(int argc, char** argv)
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
 
-        auto* lifecycleService =
-            participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
-
-        lifecycleService->SetStopHandler([]() {
-            std::cout << "Stopping..." << std::endl;
-        });
-        lifecycleService->SetShutdownHandler([]() {
-            std::cout << "Shutting down..." << std::endl;
-        });
-
-        if (participantName == "Client")
+        if (runSync)
         {
-            // Create RpcClient to call "Add100"
-            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", mediaType};
-            auto clientAdd100 = participant->CreateRpcClient("ClientAdd100", dataSpecAdd100, &CallReturn);
+            auto* lifecycleService =
+                participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-            // Create RpcClient to call "Sort"
-            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", mediaType};
-            auto clientSort = participant->CreateRpcClient("ClientSort", dataSpecSort, &CallReturn);
+            lifecycleService->SetStopHandler([]() {
+                std::cout << "Stopping..." << std::endl;
+            });
+            lifecycleService->SetShutdownHandler([]() {
+                std::cout << "Shutting down..." << std::endl;
+            });
 
-            timeSyncService->SetSimulationStepHandler(
-                [clientAdd100, clientSort](std::chrono::nanoseconds now,
-                                                                           std::chrono::nanoseconds /*duration*/) {
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    
-                    // Call both remote procedures in each simulation step
-                    Call(clientAdd100);
-                    Call(clientSort);
-                }, 1s);
-        }
-        else if (participantName == "Server")
-        {
-            // Create RpcServer to respond to calls for "Add100"
-            SilKit::Services::Rpc::RpcSpec dataSpecAdd100{"Add100", mediaType};
-            participant->CreateRpcServer("ServerAdd100", dataSpecAdd100, &RemoteFunc_Add100);
+            if (participantName == "Client")
+            {
+                // Create RpcClient to call "Add100"
+                auto clientAdd100 = participant->CreateRpcClient("ClientAdd100", rpcSpecAdd100, &CallReturn);
 
-            // Create RpcServer to respond to calls for "Sort"
-            SilKit::Services::Rpc::RpcSpec dataSpecSort{"Sort", mediaType};
-            participant->CreateRpcServer("ServerSort", dataSpecSort, &RemoteFunc_Sort);
+                // Create RpcClient to call "Sort"
+                auto clientSort = participant->CreateRpcClient("ClientSort", rpcSpecSort, &CallReturn);
 
-            timeSyncService->SetSimulationStepHandler(
-                [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                timeSyncService->SetSimulationStepHandler(
+                    [clientAdd100, clientSort](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                    auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
-                    std::cout << "now=" << nowMs.count() << "ms" << std::endl;
-                    std::this_thread::sleep_for(3s);
-            }, 1s);
+                        // Call both remote procedures in each simulation step
+                        Call(clientAdd100);
+                        Call(clientSort);
+                    },
+                    1s);
+            }
+            else if (participantName == "Server")
+            {
+                // Create RpcServer to respond to calls for "Add100"
+                participant->CreateRpcServer("ServerAdd100", rpcSpecAdd100, &RemoteFunc_Add100);
+
+                // Create RpcServer to respond to calls for "Sort"
+                participant->CreateRpcServer("ServerSort", rpcSpecSort, &RemoteFunc_Sort);
+
+                timeSyncService->SetSimulationStepHandler(
+                    [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                        std::cout << "now=" << nowMs.count() << "ms" << std::endl;
+                        std::this_thread::sleep_for(1s);
+                    },
+                    1s);
+            }
+            else
+            {
+                std::cout << "Wrong participant name provided. Use either \"Client\" or \"Server\"." << std::endl;
+                return 1;
+            }
+
+            auto lifecycleFuture = lifecycleService->StartLifecycle();
+            auto finalState = lifecycleFuture.get();
+
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
         }
         else
         {
-            std::cout << "Wrong participant name provided. Use either \"Client\" or \"Server\"."
-                      << std::endl;
-            return 1;
+            bool isStopped = false;
+            std::thread workerThread;
+
+            if (participantName == "Server")
+            {
+                // Create RpcServer to respond to calls for "Add100"
+                participant->CreateRpcServer("ServerAdd100", rpcSpecAdd100, &RemoteFunc_Add100);
+
+                // Create RpcServer to respond to calls for "Sort"
+                participant->CreateRpcServer("ServerSort", rpcSpecSort, &RemoteFunc_Sort);
+
+                workerThread = std::thread{[&]() {
+                    while (!isStopped)
+                    {
+                        std::this_thread::sleep_for(1s);
+                    }
+                }};
+            }
+            else if (participantName == "Client")
+            {
+                // Create RpcClient to call "Add100"
+                auto clientAdd100 = participant->CreateRpcClient("ClientAdd100", rpcSpecAdd100, &CallReturn);
+
+                // Create RpcClient to call "Sort"
+                auto clientSort = participant->CreateRpcClient("ClientSort", rpcSpecSort, &CallReturn);
+
+                
+                workerThread = std::thread{[&]() {
+                    while (!isStopped)
+                    {
+                        // Call both remote procedures in each simulation step
+                        Call(clientAdd100);
+                        Call(clientSort);
+                        std::this_thread::sleep_for(1s);
+                    }
+                }};
+
+            }
+
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
+            isStopped = true;
+            if (workerThread.joinable())
+            {
+                workerThread.join();
+            }
         }
-
-        auto lifecycleFuture = lifecycleService->StartLifecycle();
-        auto finalState = lifecycleFuture.get();
-
-        std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
-        std::cout << "Press enter to stop the process..." << std::endl;
-        std::cin.ignore();
     }
     catch (const SilKit::ConfigurationError& error)
     {
