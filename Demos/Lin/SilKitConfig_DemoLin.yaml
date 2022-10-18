@@ -1,0 +1,5 @@
+Description: Sample configuration for LIN
+Logging:
+  Sinks:
+    - Level: Info
+      Type: Stdout

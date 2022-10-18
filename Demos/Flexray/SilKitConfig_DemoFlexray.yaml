@@ -1,0 +1,5 @@
+Description: Sample configuration for FlexRay
+Logging:
+  Sinks:
+    - Level: Info
+      Type: Stdout

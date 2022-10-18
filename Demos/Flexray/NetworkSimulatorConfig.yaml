@@ -1,0 +1,5 @@
+Description: Network simulator configuration for a detailed simulation of the FlexRay Demo
+SchemaVersion: '1'
+SimulatedNetworks:
+  - Name: PowerTrain1
+    Type: FlexRay

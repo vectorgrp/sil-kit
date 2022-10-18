@@ -22,5 +22,5 @@
 
 make_silkit_demo(SilKitDemoPubSub PubSubDemo.cpp)
 target_sources(SilKitDemoPubSub
-    PRIVATE SilKitConfig_DemoPubSub.json
+    PRIVATE SilKitConfig_DemoPubSub.yaml
 )

@@ -1,0 +1,5 @@
+Description: Network simulator configuration for a detailed simulation of the LIN Demo
+SchemaVersion: '1'
+SimulatedNetworks:
+  - Name: LIN1
+    Type: LIN

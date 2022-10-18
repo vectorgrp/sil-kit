@@ -1,0 +1,5 @@
+Description: Network simulator configuration for a detailed simulation of the CAN Demo
+SchemaVersion: '1'
+SimulatedNetworks:
+  - Name: CAN1
+    Type: CAN

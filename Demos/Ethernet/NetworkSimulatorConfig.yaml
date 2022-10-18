@@ -1,0 +1,20 @@
+Description: Network simulator configuration for a detailed simulation of the Ethernet Demo
+SchemaVersion: '1'
+SimulatedNetworks:
+  - Name: Eth1
+    Type: Ethernet
+  - Name: FS-Port0
+    Type: Ethernet
+  - Name: FS-Port1
+    Type: Ethernet
+Switches:
+  - Name: FrontSwitch
+    Ports:
+      - Name: Port0
+        Network: FS-Port0
+        VlanIds:
+          - 1
+      - Name: Port1
+        Network: FS-Port1
+        VlanIds:
+          - 1

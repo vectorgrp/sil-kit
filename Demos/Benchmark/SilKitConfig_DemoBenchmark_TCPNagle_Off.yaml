@@ -1,0 +1,8 @@
+Description: Configuration for Benchmark Demo without Nagle's algorithm
+Logging:
+  Sinks:
+    - Level: Error
+      Type: Stdout
+Middleware:
+  EnableDomainSockets: 'False'
+  TcpNoDelay: 'True'
