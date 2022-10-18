@@ -249,7 +249,11 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
-    
+
+    Logging::Trace(GetLogger(), "Created CAN controller '{}' for network '{}' with service name '{}'",
+                   controllerConfig.name, controllerConfig.network.value(),
+                   controller->GetServiceDescriptor().to_string());
+
     return controller;
 }
 
@@ -268,6 +272,11 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
+
+    Logging::Trace(GetLogger(), "Created Ethernet controller '{}' for network '{}' with service name '{}'",
+                   controllerConfig.name, controllerConfig.network.value(),
+                   controller->GetServiceDescriptor().to_string());
+
     return controller;
 }
 
@@ -286,6 +295,11 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& 
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
+
+    Logging::Trace(GetLogger(), "Created FlexRay controller '{}' for network '{}' with service name '{}'",
+                   controllerConfig.name, controllerConfig.network.value(),
+                   controller->GetServiceDescriptor().to_string());
+
     return controller;
 }
 
@@ -304,6 +318,10 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
+
+    Logging::Trace(GetLogger(), "Created LIN controller '{}' for network '{}' with service name '{}'",
+                   controllerConfig.name, controllerConfig.network.value(),
+                   controller->GetServiceDescriptor().to_string());
 
     return controller;
 }
@@ -328,6 +346,43 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     return CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
         controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         topic, mediaType, publisherLabels, defaultHandler, parent);
+}
+
+static inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labels) -> std::string
+{
+    std::ostringstream os;
+
+    if (labels.empty())
+    {
+        os << "(no labels)";
+    }
+
+    bool first = true;
+
+    for (const auto& label : labels)
+    {
+        if (first)
+        {
+            first = false;
+        }
+        else
+        {
+            os << ", ";
+        }
+
+        switch (label.kind)
+        {
+        case MatchingLabel::Kind::Optional: os << "Optional"; break;
+        case MatchingLabel::Kind::Mandatory: os << "Mandatory"; break;
+        default:
+            os << "MatchingLabel::Kind(" << static_cast<std::underlying_type_t<MatchingLabel::Kind>>(label.kind) << ")";
+            break;
+        }
+
+        os << " '" << label.key << "': '" << label.value << "'";
+    }
+
+    return os.str();
 }
 
 template <class SilKitConnectionT>
@@ -360,6 +415,16 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
 
     _connection.SetHistoryLengthForLink(history, controller);
 
+    if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
+    {
+        Logging::Trace(
+            GetLogger(),
+            "Created DataPublisher '{}' with topic '{}' and media type '{}' for network '{}' with service name "
+            "'{}' and labels: {}",
+            controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
+            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+    }
+
     return controller;
     
 }
@@ -391,6 +456,16 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
         configuredDataNodeSpec, defaultDataHandler);
 
     controller->RegisterServiceDiscovery();
+
+    if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
+    {
+        Logging::Trace(
+            GetLogger(),
+            "Created DataSubscriber '{}' with topic '{}' and media type '{}' for network '{}' with service name "
+            "'{}' and labels: {}",
+            controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
+            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+    }
 
     return controller;
 }
@@ -452,7 +527,17 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
     controller->RegisterServiceDiscovery();
- 
+
+    if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
+    {
+        Logging::Trace(
+            GetLogger(),
+            "Created RPC Client '{}' with function name '{}' and media type '{}' for network '{}' with service name "
+            "'{}' and labels: {}",
+            controllerConfig.name, controllerConfig.functionName.value(), dataSpec.MediaType(), network,
+            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+    }
+
     return controller;
 }
 
@@ -486,6 +571,16 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
     controller->RegisterServiceDiscovery();
+
+    if (GetLogger()->GetLogLevel() <= Logging::Level::Trace)
+    {
+        Logging::Trace(
+            GetLogger(),
+            "Created RPC Server '{}' with function name '{}' and media type '{}' for network '{}' with service name "
+            "'{}' and labels: {}",
+            controllerConfig.name, controllerConfig.functionName.value(), dataSpec.MediaType(), network,
+            controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+    }
 
     return controller;
 }
@@ -531,6 +626,29 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
     return lifecycleService;
 }
 
+static inline auto FormatLifecycleConfigurationForLogging(
+    const Services::Orchestration::LifecycleConfiguration& lifecycleConfiguration) -> std::string
+{
+    std::ostringstream os;
+
+    using Services::Orchestration::OperationMode;
+
+    os << "LifecycleConfiguration{operationMode=";
+    switch (lifecycleConfiguration.operationMode)
+    {
+    case OperationMode::Invalid: os << "Invalid"; break;
+    case OperationMode::Coordinated: os << "Coordinated"; break;
+    case OperationMode::Autonomous: os << "Autonomous"; break;
+    default:
+        os << "OperationMode("
+           << static_cast<std::underlying_type_t<OperationMode>>(lifecycleConfiguration.operationMode) << ")";
+    }
+
+    os << "}";
+
+    return os.str();
+}
+
 template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateLifecycleService(
     Services::Orchestration::LifecycleConfiguration startConfiguration) -> Services::Orchestration::ILifecycleService*
@@ -543,7 +661,10 @@ auto Participant<SilKitConnectionT>::CreateLifecycleService(
 
     auto* lifecycleService = GetLifecycleService();
     dynamic_cast<SilKit::Services::Orchestration::LifecycleService*>(lifecycleService)
-        ->SetLifecycleConfiguration(std::move(startConfiguration));
+        ->SetLifecycleConfiguration(startConfiguration);
+
+    Logging::Trace(GetLogger(), "Created Lifecycle with operating mode {}",
+                   FormatLifecycleConfigurationForLogging(startConfiguration));
 
     return lifecycleService;
 }
