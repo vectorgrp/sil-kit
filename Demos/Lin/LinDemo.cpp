@@ -465,6 +465,8 @@ int main(int argc, char** argv) try
             auto lifecycleFuture = lifecycleService->StartLifecycle();
             auto finalState = lifecycleFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
         }
         else
         {
@@ -483,6 +485,8 @@ int main(int argc, char** argv) try
                 }
             }};
 
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
             isStopped = true;
             if (workerThread.joinable())
             {
@@ -523,6 +527,9 @@ int main(int argc, char** argv) try
             auto lifecycleFuture = lifecycleService->StartLifecycle();
             auto finalState = lifecycleFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
+
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
         }
         else
         {
@@ -541,6 +548,8 @@ int main(int argc, char** argv) try
                 }
             }};
 
+            std::cout << "Press enter to stop the process..." << std::endl;
+            std::cin.ignore();
             isStopped = true;
             if (workerThread.joinable())
             {
@@ -555,9 +564,6 @@ int main(int argc, char** argv) try
         return 1;
     }
 
-
-    std::cout << "Press enter to stop the process..." << std::endl;
-    std::cin.ignore();
 
     return 0;
 }
