@@ -160,14 +160,14 @@ int main(int argc, char** argv)
             auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             lifecycleService->SetCommunicationReadyHandler([&participantName]() {
-                std::cout << "Communication ready for " << participantName << std::endl;
+                std::cout << "Communication ready handler called for " << participantName << std::endl;
             });
             lifecycleService->SetStopHandler([]() {
-                std::cout << "Stopping..." << std::endl;
+                std::cout << "Stop handler called" << std::endl;
             });
 
             lifecycleService->SetShutdownHandler([]() {
-                std::cout << "Shutting down..." << std::endl;
+                std::cout << "Shutdown handler called" << std::endl;
             });
 
             if (participantName == "Publisher")

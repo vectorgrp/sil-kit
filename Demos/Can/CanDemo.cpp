@@ -180,12 +180,12 @@ int main(int argc, char** argv)
 
             // Set a Stop Handler
             lifecycleService->SetStopHandler([]() {
-                std::cout << "Stopping..." << std::endl;
+                std::cout << "Stop handler called" << std::endl;
             });
 
             // Set a Shutdown Handler
             lifecycleService->SetShutdownHandler([]() {
-                std::cout << "Shutting down..." << std::endl;
+                std::cout << "Shutdown handler called" << std::endl;
             });
 
             if (participantName == "CanWriter")

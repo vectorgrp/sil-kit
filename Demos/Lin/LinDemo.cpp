@@ -427,10 +427,10 @@ int main(int argc, char** argv) try
 
     // Set a Stop and Shutdown Handler
     lifecycleService->SetStopHandler([]() {
-        std::cout << "Stopping..." << std::endl;
+        std::cout << "Stop handler called" << std::endl;
     });
     lifecycleService->SetShutdownHandler([]() {
-        std::cout << "Shutting down..." << std::endl;
+        std::cout << "Shutdown handler called" << std::endl;
     });
 
     LinMaster master{linController};

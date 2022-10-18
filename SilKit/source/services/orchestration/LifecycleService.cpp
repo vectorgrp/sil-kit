@@ -406,7 +406,7 @@ void LifecycleService::ChangeState(ParticipantState newState, std::string reason
 
     std::stringstream ss;
     ss << "New ParticipantState: " << newState << "; reason: " << _status.enterReason;
-    _logger->Info(ss.str());
+    _logger->Debug(ss.str());
 
     SendMsg(_status);
 }
@@ -446,9 +446,14 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::ReadyToRun: 
         _lifecycleManagement.SystemwideReadyToRun(ss.str()); 
         break;
-    case SystemState::Running: break; // ignore
-    case SystemState::Paused: break; // ignore
+    case SystemState::Running: 
+        _logger->Info("Simulation running");
+        break; // ignore
+    case SystemState::Paused: 
+        _logger->Info("Simulation paused"); 
+        break; // ignore
     case SystemState::Stopping: 
+        _logger->Info("Simulation stopping");
         _lifecycleManagement.SystemwideStopping(ss.str()); 
         break;
     case SystemState::Stopped:
@@ -458,6 +463,7 @@ void LifecycleService::NewSystemState(SystemState systemState)
         _lifecycleManagement.SystemwideStopping(ss.str()); 
         break; // ignore
     case SystemState::Shutdown: 
+        _logger->Info("Simulation has shutdown");
         _lifecycleManagement.SystemwideStopping(ss.str()); 
         break; // ignore
     case SystemState::Aborting: 
