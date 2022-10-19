@@ -25,7 +25,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <ctime>
 #include <sstream>
 
-
 #include "TraceMessage.hpp"
 #include "string_utils.hpp"
 
@@ -35,18 +34,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILogger.hpp"
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
+
 using namespace SilKit::Services::Logging;
 
 namespace {
-Pcap::GlobalHeader g_pcapGlobalHeader{};
-} //anonymous namespace
+constexpr Pcap::GlobalHeader g_pcapGlobalHeader{};
+} // namespace
 
 PcapSink::PcapSink(Services::Logging::ILogger* logger, std::string name)
     : _name{std::move(name)}
     , _logger{logger}
 {
-
 }
 
 void PcapSink::Open(SinkType outputType, const std::string& outputPath)
@@ -64,17 +63,15 @@ void PcapSink::Open(SinkType outputType, const std::string& outputPath)
             _file.close();
         }
         _file.open(outputPath, std::ios::out | std::ios::binary);
-        _file.write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
-                sizeof(g_pcapGlobalHeader));
+        _file.write(reinterpret_cast<const char*>(&g_pcapGlobalHeader), sizeof(g_pcapGlobalHeader));
         break;
 
     case SilKit::SinkType::PcapNamedPipe:
-        _pipe = detail::NamedPipe::Create(outputPath);
+        _pipe = Detail::NamedPipe::Create(outputPath);
         _headerWritten = false;
         _outputPath = outputPath;
         break;
-    default:
-        throw SilKitError("PcapSink::Open: specified SinkType not implemented");
+    default: throw SilKitError("PcapSink::Open: specified SinkType not implemented");
     }
 }
 
@@ -98,7 +95,8 @@ void PcapSink::Close()
 
     if (_pipe)
     {
-        try {
+        try
+        {
             _pipe->Close();
         }
         catch (const SilKitError& err)
@@ -110,9 +108,8 @@ void PcapSink::Close()
 }
 
 void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
-        const Core::EndpointAddress& /* unused endpoint address */,
-        std::chrono::nanoseconds timestamp,
-        const TraceMessage& traceMessage)
+                     const Core::EndpointAddress& /* unused endpoint address */, std::chrono::nanoseconds timestamp,
+                     const TraceMessage& traceMessage)
 {
     if (traceMessage.Type() != TraceMessageType::EthernetFrame)
     {
@@ -123,7 +120,6 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     const auto& message = traceMessage.Get<Services::Ethernet::EthernetFrame>();
 
     std::unique_lock<decltype(_lock)> lock;
-    
 
     const auto tosec = 1000'000ull;
     const auto usec = std::chrono::duration_cast<std::chrono::microseconds>(timestamp);
@@ -137,10 +133,8 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     bool ok = true;
     if (_file.is_open())
     {
-        _file.write(reinterpret_cast<char*>(&pcapPacketHeader),
-                sizeof(pcapPacketHeader));
-        _file.write(reinterpret_cast<const char*>(&message.raw.at(0)),
-                message.raw.size());
+        _file.write(reinterpret_cast<const char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
+        _file.write(reinterpret_cast<const char*>(&message.raw.at(0)), message.raw.size());
         ok = _file.good();
     }
 
@@ -148,22 +142,19 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     {
         if (!_headerWritten)
         {
-            Services::Logging::Info(_logger, "Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ",
-                _name, _outputPath);
+            Services::Logging::Info(_logger, "Sink {}: Waiting for a reader to connect to PCAP pipe {} ... ", _name,
+                                    _outputPath);
 
-            ok &= _pipe->Write(reinterpret_cast<char*>(&g_pcapGlobalHeader),
-                sizeof(g_pcapGlobalHeader));
-            Services::Logging::Debug(_logger, "Sink {}: PCAP pipe: {} is connected successfully",
-                _name, _outputPath);
+            ok &= _pipe->Write(reinterpret_cast<const char*>(&g_pcapGlobalHeader), sizeof(g_pcapGlobalHeader));
+            Services::Logging::Debug(_logger, "Sink {}: PCAP pipe: {} is connected successfully", _name, _outputPath);
 
             _headerWritten = true;
         }
 
-        ok &=_pipe->Write(reinterpret_cast<char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
-        ok &=_pipe->Write(reinterpret_cast<const char*>(&message.raw.at(0)), message.raw.size());
+        ok &= _pipe->Write(reinterpret_cast<const char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
+        ok &= _pipe->Write(reinterpret_cast<const char*>(&message.raw.at(0)), message.raw.size());
     }
 }
 
-
-} // tracing
-} // silkit
+} // namespace Tracing
+} // namespace SilKit

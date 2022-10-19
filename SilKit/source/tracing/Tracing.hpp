@@ -35,26 +35,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfiguration.hpp"
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
 
 // Configure the trace sinks based on the configuration and return a vector of
 // the sinks.
-
-auto CreateTraceMessageSinks(
-    Services::Logging::ILogger* logger,
-    const Config::ParticipantConfiguration& participantConfig
-    ) -> std::vector<std::unique_ptr<ITraceMessageSink>>;
+auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
+                             const Config::ParticipantConfiguration& participantConfig)
+    -> std::vector<std::unique_ptr<ITraceMessageSink>>;
 
 // Configure replay files from the trace source configurations and return a vector of
 // the files.
-auto CreateReplayFiles(
-    Services::Logging::ILogger* logger,
-    const Config::ParticipantConfiguration& participantConfig
-    ) -> std::map<std::string, std::shared_ptr<IReplayFile>>;
+auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::ParticipantConfiguration& participantConfig)
+    -> std::map<std::string, std::shared_ptr<IReplayFile>>;
 
 //! \brief Predicate to check whether any of the participant's controllers
 //         has a Replay config.
-
 bool HasReplayConfig(const Config::ParticipantConfiguration& config);
-} //end namespace tracing
-} //end namespace SilKit
+
+} // namespace Tracing
+} // namespace SilKit

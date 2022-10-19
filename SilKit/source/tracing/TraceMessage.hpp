@@ -30,32 +30,41 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <stdexcept>
 
-
 namespace SilKit {
 
 // helpers  to associate a TraceMessage-Type enum to a C++ type
 enum class TraceMessageType
 {
-    EthernetFrame
-    ,CanFrameEvent
-    ,LinFrame
-    ,FlexrayFrameEvent
-    ,InvalidReplayData
-    ,DataMessageEvent
+    EthernetFrame,
+    CanFrameEvent,
+    LinFrame,
+    FlexrayFrameEvent,
+    InvalidReplayData,
+    DataMessageEvent,
 };
 
-template<TraceMessageType id>
+template <TraceMessageType id>
 struct TypeIdTrait
 {
     static const TraceMessageType typeId = id;
 };
 
-template<class MsgT> struct MessageTrait;
+template <class MsgT>
+struct MessageTrait;
+
+#define SILKIT_TRACING_MESSAGE(TYPENAME, TRACE_MESSAGE_TYPE_ENUMERATOR) \
+    template <> \
+    struct MessageTrait<TYPENAME> : TypeIdTrait<TraceMessageType::TRACE_MESSAGE_TYPE_ENUMERATOR> \
+    { \
+    };
+
 // specializations for supported (C++) Types
-template<> struct MessageTrait<Services::Ethernet::EthernetFrame> : TypeIdTrait<TraceMessageType::EthernetFrame> {};
-template<> struct MessageTrait<Services::Can::CanFrameEvent> : TypeIdTrait<TraceMessageType::CanFrameEvent> {};
-template<> struct MessageTrait<Services::Lin::LinFrame> : TypeIdTrait<TraceMessageType::LinFrame> {};
-template<> struct MessageTrait<Services::Flexray::FlexrayFrameEvent> : TypeIdTrait<TraceMessageType::FlexrayFrameEvent> {};
+SILKIT_TRACING_MESSAGE(Services::Ethernet::EthernetFrame, EthernetFrame)
+SILKIT_TRACING_MESSAGE(Services::Can::CanFrameEvent, CanFrameEvent)
+SILKIT_TRACING_MESSAGE(Services::Lin::LinFrame, LinFrame)
+SILKIT_TRACING_MESSAGE(Services::Flexray::FlexrayFrameEvent, FlexrayFrameEvent)
+
+#undef SILKIT_TRACING_MESSAGE
 
 class TraceMessage
 {
@@ -67,19 +76,16 @@ public:
     TraceMessage operator=(const TraceMessage&) = delete;
     TraceMessage& operator=(const TraceMessage&&) = delete;
 
-    template<typename MsgT>
+    template <typename MsgT>
     TraceMessage(const MsgT& msg)
         : _type{getTypeId<MsgT>()}
         , _value{reinterpret_cast<const void*>(&msg)}
     {
     }
 
-    TraceMessageType Type() const
-    {
-        return _type;
-    }
+    TraceMessageType Type() const { return _type; }
 
-    template<typename MsgT>
+    template <typename MsgT>
     const MsgT& Get() const
     {
         const auto tag = getTypeId<std::decay_t<MsgT>>();
@@ -92,7 +98,7 @@ public:
     }
 
 private:
-    template<typename MsgT>
+    template <typename MsgT>
     constexpr TraceMessageType getTypeId() const
     {
         return MessageTrait<MsgT>::typeId;
@@ -102,7 +108,4 @@ private:
     const void* _value;
 };
 
-
-
-
-} //end namespace SilKit
+} // namespace SilKit

@@ -27,15 +27,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IReplay.hpp"
 
 namespace SilKit {
-namespace tracing {
-class PcapReplay
-    : public IReplayDataProvider
+namespace Tracing {
+
+class PcapReplay : public IReplayDataProvider
 {
 public:
-    auto OpenFile( const std::string& filePath,
-        SilKit::Services::Logging::ILogger* logger)
+    auto OpenFile(const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
         -> std::shared_ptr<IReplayFile> override;
 };
 
-} // namespace tracing
+} // namespace Tracing
 } // namespace SilKit

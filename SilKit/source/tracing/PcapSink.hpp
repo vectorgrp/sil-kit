@@ -31,11 +31,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "detail/NamedPipe.hpp"
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
 
-
-class PcapSink
-    : public ITraceMessageSink
+class PcapSink : public ITraceMessageSink
 {
 public:
     // ----------------------------------------
@@ -48,17 +46,11 @@ public:
     // ----------------------------------------
     // Public methods
 
-    void Open(
-        SinkType outputType,
-        const std::string& outputPath
-    ) override;
+    void Open(SinkType outputType, const std::string& outputPath) override;
     void Close() override;
 
-    void Trace(SilKit::Services::TransmitDirection txRx,
-        const Core::EndpointAddress& id,
-        std::chrono::nanoseconds timestamp,
-        const TraceMessage& msg
-    ) override;
+    void Trace(SilKit::Services::TransmitDirection txRx, const Core::EndpointAddress& id,
+               std::chrono::nanoseconds timestamp, const TraceMessage& msg) override;
 
     auto GetLogger() const -> Services::Logging::ILogger* override;
 
@@ -69,7 +61,7 @@ private:
     // Private members
     bool _headerWritten{false};
     std::ofstream _file;
-    std::unique_ptr<detail::NamedPipe> _pipe;
+    std::unique_ptr<Detail::NamedPipe> _pipe;
     std::mutex _lock;
     std::string _name;
     std::string _busName;
@@ -77,5 +69,5 @@ private:
     Services::Logging::ILogger* _logger{nullptr};
 };
 
-} // namespace tracing
+} // namespace Tracing
 } // namespace SilKit

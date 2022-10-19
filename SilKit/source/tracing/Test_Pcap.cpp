@@ -32,9 +32,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "MockParticipant.hpp"
 #include "EthDatatypeUtils.hpp"
 
-
 namespace {
-using namespace SilKit::tracing;
+
+using namespace SilKit::Tracing;
 using namespace SilKit::Services::Ethernet;
 using namespace SilKit::Core::Tests;
 
@@ -42,24 +42,19 @@ std::vector<uint8_t> MakePcapTestData(WireEthernetFrame& wireFrame, size_t numMe
 {
     std::vector<uint8_t> data;
     std::string payloadData{"Testing Trace message Pcap, padding to a minimal size of > 64 bytes"
-        "... and so on 0123456789ABCDEF"
-    };
+                            "... and so on 0123456789ABCDEF"};
 
     Pcap::GlobalHeader ghdr{};
     Pcap::PacketHeader phdr{};
 
-    EthernetMac destinationMac {1,2,3,4,5,6};
-    EthernetMac sourceMac {7,8,9,0xa,0xb,0xc};
+    EthernetMac destinationMac{1, 2, 3, 4, 5, 6};
+    EthernetMac sourceMac{7, 8, 9, 0xa, 0xb, 0xc};
     EthernetEtherType etherType{0x0800};
-
 
     wireFrame = CreateEthernetFrame(destinationMac, sourceMac, etherType, payloadData);
     auto frame = wireFrame.raw.AsSpan();
 
-    data.resize(
-        Pcap::GlobalHeaderSize
-        + (Pcap::PacketHeaderSize + frame.size()) * numMessages
-    );
+    data.resize(Pcap::GlobalHeaderSize + (Pcap::PacketHeaderSize + frame.size()) * numMessages);
     // encode
     auto* raw = data.data();
     memcpy(raw, &ghdr, Pcap::GlobalHeaderSize);
@@ -104,7 +99,6 @@ TEST(ReplayTest, read_from_pcap)
         auto ethMsg = dynamic_cast<WireEthernetFrame&>(*msg);
         ASSERT_TRUE(ItemsAreEqual(ethMsg.raw.AsSpan(), testInput.raw.AsSpan()));
 
-
         if (!reader.Seek(1))
         {
             break;
@@ -113,4 +107,4 @@ TEST(ReplayTest, read_from_pcap)
     EXPECT_EQ(numMessages, 10);
 }
 
-} //end anonymous namespace
+} // namespace

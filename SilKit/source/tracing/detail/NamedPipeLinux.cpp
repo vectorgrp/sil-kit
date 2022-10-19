@@ -34,21 +34,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 
 namespace SilKit {
-namespace tracing {
-namespace detail {
+namespace Tracing {
+namespace Detail {
 
 NamedPipeLinux::NamedPipeLinux(const std::string& name)
-:_name(name)
+    : _name(name)
 {
     int err = ::mkfifo(_name.c_str(), 0644);
 
-    if(err == -1)
+    if (err == -1)
     {
         std::stringstream ss;
-        ss  << "Error creating pipe \"" << _name << "\""
-            << ": errno: " << err
-            << ": " << strerror(errno)
-            ;
+        ss << "Error creating pipe \"" << _name << "\""
+           << ": errno: " << err << ": " << strerror(errno);
 
         throw SilKitError(ss.str());
     }
@@ -57,25 +55,23 @@ NamedPipeLinux::NamedPipeLinux(const std::string& name)
 
 void NamedPipeLinux::Close()
 {
-    if(_isOwner)
+    if (_isOwner)
     {
-        _isOwner=false;
+        _isOwner = false;
         int err = ::unlink(_name.c_str());
-        if(err == -1)
+        if (err == -1)
         {
             std::stringstream msg;
-            msg  << "Failed to delete pipe '" << _name << "':"
-                << strerror(errno)
-                << " (errno " << err << ")"
-                ;
+            msg << "Failed to delete pipe '" << _name << "':" << strerror(errno) << " (errno " << err << ")";
             throw SilKitError{msg.str()};
-
         }
     }
 }
+
 NamedPipeLinux::~NamedPipeLinux()
 {
-    try {
+    try
+    {
         Close();
     }
     catch (...)
@@ -106,13 +102,12 @@ bool NamedPipeLinux::Write(const char* buffer, size_t bufferSize)
     return _file.good();
 }
 
-// public Factory 
+// public Factory
 std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
 {
     return std::make_unique<NamedPipeLinux>(name);
 }
 
-
-} //end namespace detail
-} //end namespace tracing
-} //end namespace SilKit
+} // namespace Detail
+} // namespace Tracing
+} // namespace SilKit

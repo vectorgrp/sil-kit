@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <limits>
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
 
 //!< Helper to check whether Direction `dir` is active in the config
 inline bool IsReplayEnabledFor(const Config::Replay& cfg, Config::Replay::Direction dir)
@@ -41,17 +41,13 @@ inline bool IsReplayEnabledFor(const Config::Replay& cfg, Config::Replay::Direct
 //!< For replaying in the receive path we use an unlikely EndpointAddress
 inline auto ReplayEndpointAddress() -> SilKit::Core::EndpointAddress
 {
-    return {
-        std::numeric_limits<decltype(SilKit::Core::EndpointAddress::participant)>::max(),
-        std::numeric_limits<decltype(SilKit::Core::EndpointAddress::endpoint)>::max()
-    };
+    return {std::numeric_limits<decltype(SilKit::Core::EndpointAddress::participant)>::max(),
+            std::numeric_limits<decltype(SilKit::Core::EndpointAddress::endpoint)>::max()};
 }
 
 struct ReplayServiceDescriptor : public Core::IServiceEndpoint
 {
-    void SetServiceDescriptor(const Core::ServiceDescriptor& ) override
-    {
-    }
+    void SetServiceDescriptor(const Core::ServiceDescriptor&) override {}
     auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override
     {
         static Core::ServiceDescriptor id;
@@ -72,5 +68,6 @@ public:
     // concrete type, e.g. Services::Ethernet::EthernetFrame.
     virtual void ReplayMessage(const IReplayMessage* message) = 0;
 };
-} //end namespace tracing
-} //end namespace SilKit
+
+} // namespace Tracing
+} // namespace SilKit

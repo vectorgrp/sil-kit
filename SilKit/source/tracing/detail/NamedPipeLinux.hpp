@@ -24,21 +24,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 
 namespace SilKit {
-namespace tracing {
-namespace detail {
+namespace Tracing {
+namespace Detail {
 
-class NamedPipeLinux: public NamedPipe
+class NamedPipeLinux : public NamedPipe
 {
 public:
     // ----------------------------------------
     // Constructors and Destructor
     NamedPipeLinux(const std::string& name);
     ~NamedPipeLinux();
+
 public:
     // ----------------------------------------
     // Public interface methods
     bool Write(const char* buffer, size_t bufferSize) override;
     void Close() override;
+
 private:
     // ----------------------------------------
     // private members
@@ -48,6 +50,6 @@ private:
     bool _isOpen{false};
 };
 
-} //end namespace detail
-} //end namespace tracing
-} //end namespace SilKit
+} // namespace Detail
+} // namespace Tracing
+} // namespace SilKit

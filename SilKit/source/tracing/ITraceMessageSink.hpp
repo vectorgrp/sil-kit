@@ -33,13 +33,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 
-
 //! \brief SinkType specifies the type of the output backend to use for permanent storage.
 enum class SinkType
 {
-	PcapFile,
-	PcapNamedPipe,
-	Mdf4File
+    PcapFile,
+    PcapNamedPipe,
+    Mdf4File
 };
 
 //! \brief Messages traces are written to a message sink.
@@ -50,7 +49,6 @@ class ITraceMessageSink
 public:
     virtual ~ITraceMessageSink() = default;
 
-
     virtual void Open(SinkType type, const std::string& outputPath) = 0;
     virtual void Close() = 0;
     virtual auto GetLogger() const -> Services::Logging::ILogger* = 0;
@@ -59,8 +57,7 @@ public:
     virtual void Trace(
         SilKit::Services::TransmitDirection dir,
         const Core::EndpointAddress& address, //!< the address is used to identify the controller this message is from
-        std::chrono::nanoseconds timestamp,
-        const TraceMessage& message) = 0;
+        std::chrono::nanoseconds timestamp, const TraceMessage& message) = 0;
 };
 
 //! \brief Helper class to instantiate a trace message sink from a shared library module.
@@ -69,12 +66,8 @@ class ITraceMessageSinkFactory
 public:
     virtual ~ITraceMessageSinkFactory() = default;
     virtual auto Create(/*Config::Config config, */
-            SilKit::Services::Logging::ILogger* logger,
-            std::string participantName,
-            std::string sinkName
-        )
-       -> std::unique_ptr<ITraceMessageSink> = 0;
+                        SilKit::Services::Logging::ILogger* logger, std::string participantName, std::string sinkName)
+        -> std::unique_ptr<ITraceMessageSink> = 0;
 };
 
-
-} //end namespace SilKit
+} // namespace SilKit

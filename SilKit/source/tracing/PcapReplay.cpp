@@ -27,18 +27,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IReplay.hpp"
 #include "PcapReader.hpp"
 
-
 namespace {
 
 using namespace SilKit::Services::Logging;
-using namespace SilKit::tracing;
+using namespace SilKit::Tracing;
+
 //////////////////////////////////////////////////////////////////////
 // IReplay: Boilerplate to satisfy interfaces follows.
 //          Actual implementation is in PcapReader.
 //////////////////////////////////////////////////////////////////////
 
-class ReplayPcapChannel
-    : public SilKit::IReplayChannel
+class ReplayPcapChannel : public SilKit::IReplayChannel
 {
 public:
     ReplayPcapChannel(const std::string& filePath, ILogger* logger)
@@ -53,40 +52,28 @@ public:
         return SilKit::TraceMessageType::EthernetFrame;
     }
 
-    auto StartTime() const -> std::chrono::nanoseconds override
-    {
-        return _reader.StartTime();
-    }
-    auto EndTime() const -> std::chrono::nanoseconds override
-    {
-        return _reader.EndTime();
-    }
-    auto NumberOfMessages() const -> uint64_t override
-    {
-        return _reader.NumberOfMessages();
-    }
+    auto StartTime() const -> std::chrono::nanoseconds override { return _reader.StartTime(); }
+    auto EndTime() const -> std::chrono::nanoseconds override { return _reader.EndTime(); }
+    auto NumberOfMessages() const -> uint64_t override { return _reader.NumberOfMessages(); }
     auto Name() const -> const std::string& override
     {
         // Pcap has no concept of channel, return hard coded.
         return _channelName;
     }
-    auto GetMetaInfos() const -> const std::map<std::string, std::string>& override
-    {
-        return _reader.GetMetaInfos();
-    }
+    auto GetMetaInfos() const -> const std::map<std::string, std::string>& override { return _reader.GetMetaInfos(); }
     auto GetReader() -> std::shared_ptr<SilKit::IReplayChannelReader> override
     {
         // return a copy, which allows caching the internal data structures
         // for seeking. It is reset to start reading at the beginning.
         return std::make_shared<PcapReader>(_reader);
     }
+
 private:
     PcapReader _reader;
     const std::string _channelName{"PcapChannel0"};
 };
 
-class ReplayPcapFile :
-    public SilKit::IReplayFile
+class ReplayPcapFile : public SilKit::IReplayFile
 {
 public:
     ReplayPcapFile(std::string filePath, SilKit::Services::Logging::ILogger* logger)
@@ -95,39 +82,24 @@ public:
         auto channel = std::make_shared<ReplayPcapChannel>(_filePath, logger);
         _channels.emplace_back(std::move(channel));
     }
-    auto FilePath() const -> const std::string & override
-    {
-        return _filePath;
-    }
-    auto SilKitConfig() const -> std::string override
-    {
-        return {};
-    }
 
-    FileType Type() const override
-    {
-        return IReplayFile::FileType::PcapFile;
-    }
+    auto FilePath() const -> const std::string& override { return _filePath; }
+    auto SilKitConfig() const -> std::string override { return {}; }
 
-    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator begin() override
-    {
-        return _channels.begin();
-    }
-    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator end() override
-    {
-        return _channels.end();
-    }
+    FileType Type() const override { return IReplayFile::FileType::PcapFile; }
+
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator begin() override { return _channels.begin(); }
+    std::vector<std::shared_ptr<SilKit::IReplayChannel>>::iterator end() override { return _channels.end(); }
 
 private:
     std::string _filePath;
     std::vector<std::shared_ptr<SilKit::IReplayChannel>> _channels;
 };
 
-} //end anonymous namespace
-
+} // namespace
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
 
 auto PcapReplay::OpenFile(const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
     -> std::shared_ptr<IReplayFile>
@@ -135,5 +107,5 @@ auto PcapReplay::OpenFile(const std::string& filePath, SilKit::Services::Logging
     return std::make_shared<ReplayPcapFile>(filePath, logger);
 }
 
-} // namespace tracing
+} // namespace Tracing
 } // namespace SilKit

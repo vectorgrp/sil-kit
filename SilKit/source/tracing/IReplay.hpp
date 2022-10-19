@@ -49,8 +49,8 @@ public:
     //!< Pass the config (containing search path hints), the actual file to open
     //   and a logger to the extension.
     virtual auto OpenFile(/*const SilKit::Config::Config& config,*/
-        const std::string& filePath,
-        SilKit::Services::Logging::ILogger* logger) -> std::shared_ptr<IReplayFile> = 0;
+                          const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
+        -> std::shared_ptr<IReplayFile> = 0;
 };
 
 class IReplayFile
@@ -105,7 +105,6 @@ public:
     virtual std::shared_ptr<IReplayMessage> Read() = 0;
 };
 
-
 class IReplayChannel
 {
 public:
@@ -126,6 +125,4 @@ public:
     virtual auto GetReader() -> std::shared_ptr<IReplayChannelReader> = 0;
 };
 
-
-
-} //end namespace SilKit
+} // namespace SilKit

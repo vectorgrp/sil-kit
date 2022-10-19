@@ -27,7 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 
-
 inline std::string to_string(const TraceMessage&);
 inline std::string to_string(TraceMessageType);
 
@@ -40,7 +39,7 @@ inline std::ostream& operator<<(std::ostream& out, TraceMessageType);
 
 std::ostream& operator<<(std::ostream& out, const TraceMessage& msg)
 {
-    return out << "TraceMessage<"<< msg.Type()  << ">";
+    return out << "TraceMessage<" << msg.Type() << ">";
 }
 
 std::ostream& operator<<(std::ostream& out, TraceMessageType type)
@@ -64,10 +63,8 @@ std::string to_string(TraceMessageType type)
     case TraceMessageType::LinFrame: return "LinFrame";
     case TraceMessageType::DataMessageEvent: return "DataMessageEvent";
     case TraceMessageType::FlexrayFrameEvent: return "FlaxrayFrameEvent";
-    default:
-        throw SilKitError("Unknown TraceMessage::Type in operator<<!");
+    default: throw SilKitError("Unknown TraceMessage::Type in operator<<!");
     }
 }
 
-
-} //end namespace SilKit
+} // namespace SilKit

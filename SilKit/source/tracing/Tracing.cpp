@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <sstream>
 
-
 #include "CreateMdf4Tracing.hpp"
 #include "PcapSink.hpp"
 #include "Tracing.hpp"
@@ -32,22 +31,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "string_utils.hpp"
 
 namespace SilKit {
-
-namespace tracing {
-
+namespace Tracing {
 
 // Tracing
 
-auto CreateTraceMessageSinks(
-    Services::Logging::ILogger* logger,
-    const Config::ParticipantConfiguration& participantConfig
-    ) -> std::vector<std::unique_ptr<ITraceMessageSink>>
+auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
+                             const Config::ParticipantConfiguration& participantConfig)
+    -> std::vector<std::unique_ptr<ITraceMessageSink>>
 {
-    auto controllerUsesSink = [](const auto& name, const auto& controllers)
-    {
+    auto controllerUsesSink = [](const auto& name, const auto& controllers) {
         for (const auto& ctrl : controllers)
         {
-            for (const auto&  sinkName: ctrl.useTraceSinks)
+            for (const auto& sinkName : ctrl.useTraceSinks)
             {
                 if (sinkName == name)
                 {
@@ -62,8 +57,7 @@ auto CreateTraceMessageSinks(
     // This solves a problem where a stale "TraceSinks" declaration in the config and an active Replay
     // configuration both access the same output/input file: the trace sink would truncate
     // the file to 0 bytes.
-    auto sinkInUse = [&participantConfig, &controllerUsesSink](const auto& name)
-    {
+    auto sinkInUse = [&participantConfig, &controllerUsesSink](const auto& name) {
         bool ok = false;
         ok |= controllerUsesSink(name, participantConfig.canControllers);
         ok |= controllerUsesSink(name, participantConfig.ethernetControllers);
@@ -78,10 +72,10 @@ auto CreateTraceMessageSinks(
     std::vector<std::unique_ptr<ITraceMessageSink>> newSinks;
     for (const auto& sinkCfg : participantConfig.tracing.traceSinks)
     {
-        if (/* XXX !sinkCfg.enabled  || */!sinkInUse(sinkCfg.name))
+        if (/* XXX !sinkCfg.enabled  || */ !sinkInUse(sinkCfg.name))
         {
-            Services::Logging::Debug(logger, "Tracing: skipping disabled sink {} on participant {}",
-                sinkCfg.name, participantConfig.participantName);
+            Services::Logging::Debug(logger, "Tracing: skipping disabled sink {} on participant {}", sinkCfg.name,
+                                     participantConfig.participantName);
             continue;
         }
 
@@ -103,24 +97,21 @@ auto CreateTraceMessageSinks(
             newSinks.emplace_back(std::move(sink));
             break;
         }
-        case  Config::TraceSink::Type::PcapPipe:
+        case Config::TraceSink::Type::PcapPipe:
         {
             auto sink = std::make_unique<PcapSink>(logger, sinkCfg.name);
             sink->Open(SinkType::PcapNamedPipe, sinkCfg.outputPath);
             newSinks.emplace_back(std::move(sink));
             break;
         }
-        default:
-            throw SilKitError("Unknown Sink Type");
+        default: throw SilKitError("Unknown Sink Type");
         }
     }
 
     return newSinks;
 }
 
-    
-auto CreateReplayFiles(Services::Logging::ILogger* logger, 
-    const Config::ParticipantConfiguration& participantConfig)
+auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::ParticipantConfiguration& participantConfig)
     -> std::map<std::string, std::shared_ptr<IReplayFile>>
 {
     std::map<std::string, std::shared_ptr<IReplayFile>> replayFiles;
@@ -143,8 +134,7 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger,
             break;
         }
         case Config::TraceSource::Type::Undefined: //[[fallthrough]]
-        default:
-            throw SilKitError("CreateReplayFiles: unknown TraceSource::Type!");
+        default: throw SilKitError("CreateReplayFiles: unknown TraceSource::Type!");
         }
     }
 
@@ -161,13 +151,10 @@ bool HasReplayConfig(const Config::ParticipantConfiguration& cfg)
 
     //find replay blocks of services
     bool ok = false;
-    auto isActive = [&ok](const auto& ctrls)
-    {
+    auto isActive = [&ok](const auto& ctrls) {
         for (const auto& ctrl : ctrls)
         {
-            if ( (ctrl.replay.direction != Config::Replay::Direction::Undefined)
-                && !ctrl.replay.useTraceSource.empty()
-            )
+            if ((ctrl.replay.direction != Config::Replay::Direction::Undefined) && !ctrl.replay.useTraceSource.empty())
             {
                 ok = true;
                 break;
@@ -186,5 +173,6 @@ bool HasReplayConfig(const Config::ParticipantConfiguration& cfg)
 
     return ok;
 }
-} //end namespace tracing
-} //end namespace SilKit
+
+} // namespace Tracing
+} // namespace SilKit

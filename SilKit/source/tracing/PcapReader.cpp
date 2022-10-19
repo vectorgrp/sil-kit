@@ -27,9 +27,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
 
 using namespace SilKit::Services::Logging;
+
 //////////////////////////////////////////////////////////////////////
 // PcapMessage -- internal only
 //////////////////////////////////////////////////////////////////////
@@ -39,11 +40,10 @@ class PcapMessage
     , public SilKit::Services::Ethernet::WireEthernetFrame
 {
 public:
-
     auto Timestamp() const -> std::chrono::nanoseconds override;
     void SetTimestamp(std::chrono::nanoseconds timeStamp);
 
-    auto GetDirection() const ->SilKit::Services::TransmitDirection override;
+    auto GetDirection() const -> SilKit::Services::TransmitDirection override;
 
     auto EndpointAddress() const -> SilKit::Core::EndpointAddress override;
 
@@ -51,8 +51,8 @@ public:
 
 private:
     std::chrono::nanoseconds _timeStamp{0};
-    SilKit::Services::TransmitDirection _direction{ SilKit::Services::TransmitDirection::TX };
-    SilKit::Core::EndpointAddress  _endpointAddress{};
+    SilKit::Services::TransmitDirection _direction{SilKit::Services::TransmitDirection::TX};
+    SilKit::Core::EndpointAddress _endpointAddress{};
 };
 
 void PcapMessage::SetTimestamp(std::chrono::nanoseconds timeStamp)
@@ -137,8 +137,8 @@ void PcapReader::Reset()
     //seek stream to first packet and cache first message
     ReadGlobalHeader();
     Seek(1);
-
 }
+
 void PcapReader::ReadGlobalHeader()
 {
     std::array<char, sizeof(Pcap::GlobalHeader)> buf{};
@@ -153,31 +153,26 @@ void PcapReader::ReadGlobalHeader()
     {
         throw SilKitError("PCAP file cannot be opened: invalid PCAP valid magic number");
     }
-    if ((hdr->version_major != Pcap::MajorVersion)
-        && (hdr->version_minor != Pcap::MinorVersion)
-        )
+    if ((hdr->version_major != Pcap::MajorVersion) && (hdr->version_minor != Pcap::MinorVersion))
     {
-        throw SilKitError("PCAP file cannot be opened: invalid PCAP version "
-            + std::to_string(hdr->version_major) + "." + std::to_string(hdr->version_minor)
-        );
+        throw SilKitError("PCAP file cannot be opened: invalid PCAP version " + std::to_string(hdr->version_major) + "."
+                          + std::to_string(hdr->version_minor));
     }
-    _metaInfos["pcap/version"] = std::to_string(hdr->version_major) 
-        + "." 
-        + std::to_string(hdr->version_minor);
+    _metaInfos["pcap/version"] = std::to_string(hdr->version_major) + "." + std::to_string(hdr->version_minor);
     _metaInfos["pcap/gmt_to_local"] = std::to_string(hdr->thiszone);
 }
-
 
 auto PcapReader::StartTime() const -> std::chrono::nanoseconds
 {
     return _startTime;
 }
+
 auto PcapReader::EndTime() const -> std::chrono::nanoseconds
 {
     throw SilKitError("PcapReader::EndTime(): Not Implemented");
 }
 
-auto PcapReader::NumberOfMessages() const -> uint64_t 
+auto PcapReader::NumberOfMessages() const -> uint64_t
 {
     return _numMessages;
 }
@@ -193,21 +188,20 @@ bool PcapReader::Seek(size_t messageNumber)
         _stream->read(buf.data(), buf.size());
         if (!_stream->good())
         {
-            _log->Warn("PCAP file: " + _filePath +": short read on packet header.");
+            _log->Warn("PCAP file: " + _filePath + ": short read on packet header.");
             return false;
         }
         auto msg = std::make_shared<PcapMessage>();
         auto* hdr = reinterpret_cast<Pcap::PacketHeader*>(buf.data());
-        std::chrono::nanoseconds timeStamp{((uint64_t)hdr->ts_sec * 1000000000u)
-            + ((uint64_t)hdr->ts_usec * 1000u)};
+        std::chrono::nanoseconds timeStamp{((uint64_t)hdr->ts_sec * 1000000000u) + ((uint64_t)hdr->ts_usec * 1000u)};
 
         std::vector<uint8_t> msgBuf{};
         msgBuf.resize(hdr->incl_len);
         _stream->read(reinterpret_cast<char*>(msgBuf.data()), hdr->incl_len);
         if (!_stream->good())
         {
-            _log->Warn("PCAP file: " + _filePath 
-                + ": Cannot read packet at offset " + std::to_string(_stream->tellg()));
+            _log->Warn("PCAP file: " + _filePath + ": Cannot read packet at offset "
+                       + std::to_string(_stream->tellg()));
             return false;
         }
         msg->raw = std::move(msgBuf);
@@ -216,7 +210,7 @@ bool PcapReader::Seek(size_t messageNumber)
         _currentMessage = std::move(msg);
         //NB we can't know the number of messages without seeking through the whole file,
         //      which we're not going to do for performance reasons.
-        _numMessages++; 
+        _numMessages++;
     }
     return true;
 }
@@ -232,6 +226,5 @@ auto PcapReader::GetMetaInfos() const -> const std::map<std::string, std::string
     return _metaInfos;
 }
 
-
-} // namespace tracing
+} // namespace Tracing
 } // namespace SilKit

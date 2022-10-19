@@ -32,7 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 
-
 // A ITraceMessageSource can be connected to number of ITraceMessageSinks.
 // Usually a Tracer object is used in the implementation of a message source.
 class ITraceMessageSource
@@ -55,20 +54,18 @@ public:
     inline void AddSink(Core::EndpointAddress id, ITraceMessageSink& sink);
 
     //convenience wrapper converting concrete types into type-erased TraceMessage references
-    template<typename MsgT>
-    void Trace(SilKit::Services::TransmitDirection direction,
-            std::chrono::nanoseconds timestamp,
-            const MsgT& msg);
+    template <typename MsgT>
+    void Trace(SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp, const MsgT& msg);
 
     // type erased Trace method
-    inline void Trace(SilKit::Services::TransmitDirection direction,
-            std::chrono::nanoseconds timestamp,
-            const TraceMessage& msg);
+    inline void Trace(SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp,
+                      const TraceMessage& msg);
 
 private:
     //Adding a sink will create a function object wrapping the sink and a
     //call to its sink.Trace(msg) method.
-    using ConnectedSink = std::function<void(SilKit::Services::TransmitDirection, std::chrono::nanoseconds, const TraceMessage&)>;
+    using ConnectedSink =
+        std::function<void(SilKit::Services::TransmitDirection, std::chrono::nanoseconds, const TraceMessage&)>;
     std::vector<ConnectedSink> _sinks;
 };
 
@@ -78,31 +75,26 @@ private:
 
 void Tracer::AddSink(Core::EndpointAddress id, ITraceMessageSink& sink)
 {
-    auto sinkCallback = [id, &sink]
-        (SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp, const TraceMessage& msg)
-        {
-            sink.Trace(direction, id, timestamp, msg);
-        };
+    auto sinkCallback = [id, &sink](SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp,
+                                    const TraceMessage& msg) {
+        sink.Trace(direction, id, timestamp, msg);
+    };
     _sinks.emplace_back(std::move(sinkCallback));
 }
 
-template<typename MsgT>
-void Tracer::Trace(SilKit::Services::TransmitDirection direction,
-        std::chrono::nanoseconds timestamp,
-        const MsgT& msg)
+template <typename MsgT>
+void Tracer::Trace(SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp, const MsgT& msg)
 {
     Trace(direction, timestamp, TraceMessage(msg));
 }
 
-void Tracer::Trace(SilKit::Services::TransmitDirection direction,
-        std::chrono::nanoseconds timestamp,
-        const TraceMessage& msg)
+void Tracer::Trace(SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp,
+                   const TraceMessage& msg)
 {
-    for (auto& sink: _sinks)
+    for (auto& sink : _sinks)
     {
         sink(direction, timestamp, msg);
     }
 }
 
-
-} //end namespace SilKit
+} // namespace SilKit

@@ -25,10 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 
 namespace SilKit {
-namespace tracing {
-namespace detail {
-
-
+namespace Tracing {
+namespace Detail {
 
 class NamedPipe
 {
@@ -50,11 +48,8 @@ public:
     // ----------------------------------------
     // Factory method
     static auto Create(const std::string& name) -> Ptr;
-    
-
 };
 
-} //end namespace detail
-} //end namespace tracing
-} //end namespace SilKit
-
+} // namespace Detail
+} // namespace Tracing
+} // namespace SilKit

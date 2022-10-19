@@ -27,11 +27,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IReplay.hpp"
 
 namespace SilKit {
-namespace tracing {
+namespace Tracing {
 
-
-class PcapReader
-    : public SilKit::IReplayChannelReader
+class PcapReader : public SilKit::IReplayChannelReader
 {
 public:
     // Constructors
@@ -44,17 +42,19 @@ public:
     // Methods
     auto StartTime() const -> std::chrono::nanoseconds;
     auto EndTime() const -> std::chrono::nanoseconds;
-    auto NumberOfMessages() const -> uint64_t ;
+    auto NumberOfMessages() const -> uint64_t;
 
     // Interface IReplayChannelReader
     bool Seek(size_t messageNumber) override;
-    auto Read() -> std::shared_ptr<SilKit::IReplayMessage>  override;
+    auto Read() -> std::shared_ptr<SilKit::IReplayMessage> override;
 
     auto GetMetaInfos() const -> const std::map<std::string, std::string>&;
+
 private:
     //Methods
     void Reset();
     void ReadGlobalHeader();
+
 private:
     std::string _filePath;
     std::ifstream _file;
@@ -67,6 +67,5 @@ private:
     std::chrono::nanoseconds _endTime{0};
 };
 
-
-} // namespace tracing
+} // namespace Tracing
 } // namespace SilKit
