@@ -13,6 +13,9 @@ Changed
 
 - Demos: Replaced JSON configuration files with YAML files. The provided configurations did not change.
 
+- Changed the lifecycle service to be less verbose in log level info. See log level debug for more detailed
+  information of the lifecycle.
+
 
 [4.0.9] - 2022-10-19
 --------------------
