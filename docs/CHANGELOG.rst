@@ -5,13 +5,26 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.9] - unreleased
+[4.0.9] - 2022-10-19
 --------------------
 
 Added
-~~~~~~~
+~~~~~
 
 - The LinDemo, PubSubDemo, and RpcDemo now allow using ``--async`` cli flag for unsynchronized execution.
+
+Fixed
+~~~~~
+
+- C-API:
+
+  - Data race on static variable
+
+  - Setting the direction field of the ``CanFrameEvent``
+
+  - Initialize the struct header of the embedded ``CanFrame`` structure in the ``CanFrameEvent``
+
+- Immediate shutdown of the asynchronous mode of the LIN demo
 
 
 [4.0.8] - 2022-10-07
