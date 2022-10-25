@@ -217,4 +217,52 @@ TEST(SynchronizedHandlersTest, add_remove_call_concurrently)
     EXPECT_EQ(handlerIds.size(), 0);
 }
 
+TEST(SynchronizedHandlersTest, swap_transfers_handlers)
+{
+    using TestHandlers = SilKit::Util::SynchronizedHandlers<TestFunction>;
+    using std::swap;
+
+    size_t callCounter = 0;
+
+    TestHandlers a, b;
+
+    std::set<SilKit::Util::HandlerId> ids;
+
+    ids.insert(b.Add([&callCounter] {
+        ++callCounter;
+    }));
+
+    ids.insert(b.Add([&callCounter] {
+        ++callCounter;
+    }));
+
+    ASSERT_EQ(ids.size(), 2);
+
+    ASSERT_EQ(callCounter, 0);
+    a.InvokeAll();
+    ASSERT_EQ(callCounter, 0);
+    b.InvokeAll();
+    ASSERT_EQ(callCounter, 2);
+
+    swap(a, b);
+
+    ASSERT_EQ(callCounter, 2);
+    a.InvokeAll();
+    ASSERT_EQ(callCounter, 4);
+    b.InvokeAll();
+    ASSERT_EQ(callCounter, 4);
+
+    ids.insert(a.Add([&callCounter] {
+        ++callCounter;
+    }));
+
+    ASSERT_EQ(ids.size(), 3);
+
+    ASSERT_EQ(callCounter, 4);
+    a.InvokeAll();
+    ASSERT_EQ(callCounter, 7);
+    b.InvokeAll();
+    ASSERT_EQ(callCounter, 7);
+}
+
 } // namespace

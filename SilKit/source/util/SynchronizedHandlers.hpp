@@ -34,14 +34,31 @@ class SynchronizedHandlers
 {
     using Mutex = std::recursive_mutex;
 
+    struct State
+    {
+        // NB: entries must not invalidate iterators on adding or removing (i.e., node-based containers like map are
+        //     fine, containers like vector are not)
+        std::map<HandlerId, Callable> entries;
+        std::underlying_type_t<HandlerId> nextHandlerId = 0;
+
+        friend void swap(State &a, State &b) noexcept
+        {
+            using std::swap;
+            swap(a.entries, b.entries);
+            swap(a.nextHandlerId, b.nextHandlerId);
+        }
+    };
+
 public:
+    SynchronizedHandlers() = default;
+
     template <typename... T>
     auto Add(T &&...t) -> HandlerId
     {
         const auto lock = MakeUniqueLock();
 
         const auto handlerId = MakeHandlerId();
-        _entries.emplace(handlerId, Callable{std::forward<T>(t)...});
+        _state.entries.emplace(handlerId, Callable{std::forward<T>(t)...});
 
         return handlerId;
     }
@@ -50,7 +67,7 @@ public:
     {
         const auto lock = MakeUniqueLock();
 
-        return _entries.erase(handlerId) != 0;
+        return _state.entries.erase(handlerId) != 0;
     }
 
     template <typename... T>
@@ -58,31 +75,48 @@ public:
     {
         const auto lock = MakeUniqueLock();
 
-        for (const auto &kv : _entries)
+        for (const auto &kv : _state.entries)
         {
             kv.second(t...);
         }
 
-        return !_entries.empty();
+        return !_state.entries.empty();
     }
 
-    auto Size() -> size_t { 
-        return _entries.size();
+    auto Size() -> size_t { return _state.entries.size(); }
+
+public:
+    friend void swap(SynchronizedHandlers &a, SynchronizedHandlers &b) noexcept
+    {
+        if (&a == &b)
+        {
+            return;
+        }
+
+        auto aLock = a.MakeDeferredLock();
+        auto bLock = b.MakeDeferredLock();
+
+        std::lock(aLock, bLock);
+
+        using std::swap;
+        swap(a._state, b._state);
     }
 
 private:
     auto MakeUniqueLock() const -> std::unique_lock<Mutex> { return std::unique_lock<Mutex>{_mutex}; }
 
-    auto MakeHandlerId() -> HandlerId { return static_cast<HandlerId>(_nextHandlerId++); }
+    auto MakeDeferredLock() const -> std::unique_lock<Mutex>
+    {
+        return std::unique_lock<Mutex>{_mutex, std::defer_lock};
+    }
+
+    auto MakeHandlerId() -> HandlerId { return static_cast<HandlerId>(_state.nextHandlerId++); }
 
 private:
     mutable Mutex _mutex;
 
-    // NB: _entries must not invalidate iterators on adding or removing (i.e., node-based containers like map are fine,
-    //     containers like vector are not)
-    // NB: access to _entries and _nextHandlerId must be protected by locking the _mutex
-    std::map<HandlerId, Callable> _entries;
-    std::underlying_type_t<HandlerId> _nextHandlerId = 0;
+    // NB: access to _state must be protected by locking the _mutex
+    State _state;
 };
 
 } // namespace Util
