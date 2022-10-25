@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <functional>
 #include <chrono>
+
 #include "SetThreadName.hpp"
 
 namespace SilKit {

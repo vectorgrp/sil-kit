@@ -351,47 +351,45 @@ TEST(CanControllerTrivialSimTest, add_remove_handler)
     canController.SendFrame(msg);
 }
 
-TEST(CanControllerTrivialSimTest, DISABLED_cancontroller_uses_tracing)
+TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
 {
-
-
     SilKit::Tests::MockTraceSink traceSink;
     Tests::DummyParticipant participant;
     SilKit::Config::CanController cfg;
     const std::chrono::nanoseconds now = 1337ns;
-    const EndpointAddress controllerAddress = {1,2};
-    const EndpointAddress otherAddress = {2,2};
 
     ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(now));
 
-
     CanController controller(&participant, cfg, participant.GetTimeProvider());
-    controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    controller.SetServiceDescriptor(from_endpointAddress(EndpointAddress{1, 2}));
+    const auto controllerAddress = controller.GetServiceDescriptor().to_endpointAddress();
     controller.AddSink(&traceSink);
     controller.Start();
 
-
-    WireCanFrameEvent testFrameEvent{};
+    WireCanFrame canFrame{};
 
     //Send direction
     EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, ToCanFrame(testFrameEvent.frame)))
+        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, ToCanFrame(canFrame)))
         .Times(1);
-    controller.SendFrame(ToCanFrame(testFrameEvent.frame));
+    controller.SendFrame(ToCanFrame(canFrame));
+
+    CanController otherController(&participant, {}, participant.GetTimeProvider());
+    otherController.SetServiceDescriptor(from_endpointAddress(EndpointAddress{2, 2}));
 
     // Receive direction
-    EXPECT_CALL(participant.mockTimeProvider, Now())
-        .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, ToCanFrame(testFrameEvent.frame)))
+        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, ToCanFrame(canFrame)))
         .Times(1);
 
-    CanController canControllerPlaceholder(&participant, {}, participant.GetTimeProvider());
-    canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(otherAddress));
-    controller.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
+    WireCanFrameEvent wireCanFrameEvent;
+    wireCanFrameEvent.frame = canFrame;
+    wireCanFrameEvent.timestamp = now;
+    wireCanFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
+    controller.ReceiveMsg(&otherController, wireCanFrameEvent);
 }
 
 TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)

@@ -59,7 +59,7 @@ std::string to_string(TraceMessageType type)
     switch (type)
     {
     case TraceMessageType::EthernetFrame: return "EthernetFrame";
-    case TraceMessageType::CanFrameEvent: return "CanFrameEvent";
+    case TraceMessageType::CanFrame: return "CanFrame";
     case TraceMessageType::LinFrame: return "LinFrame";
     case TraceMessageType::DataMessageEvent: return "DataMessageEvent";
     case TraceMessageType::FlexrayFrameEvent: return "FlaxrayFrameEvent";

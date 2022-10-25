@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
 #include "CanController.hpp"
+#include "Tracing.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -32,8 +33,9 @@ namespace Can {
 CanController::CanController(Core::IParticipantInternal* participant, SilKit::Config::CanController config,
                              Services::Orchestration::ITimeProvider* timeProvider)
     : _participant(participant)
-    , _config{config}
+    , _config{std::move(config)}
     , _simulationBehavior{participant, this, timeProvider}
+    , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
 {
 }
 
@@ -167,7 +169,7 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
         return;
     }
 
-    _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, ToCanFrameEvent(msg));
+    _tracer.Trace(msg.direction, msg.timestamp, ToCanFrame(msg.frame));
     CallHandlers(ToCanFrameEvent(msg));
 }
 
@@ -198,6 +200,58 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanController
         _errorState = msg.errorState;
         CallHandlers(CanErrorStateChangeEvent{ msg.timestamp, msg.errorState });
     }
+}
+
+//------------------------
+// Replay
+//------------------------
+
+void CanController::ReplayMessage(const SilKit::IReplayMessage* message)
+{
+    if (!_replayActive)
+    {
+        return;
+    }
+
+    using namespace SilKit::Tracing;
+    switch (message->GetDirection())
+    {
+    case SilKit::Services::TransmitDirection::TX:
+        if (IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
+        {
+            ReplaySend(message);
+        }
+        break;
+    case SilKit::Services::TransmitDirection::RX:
+        if (IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
+        {
+            ReplayReceive(message);
+        }
+        break;
+    default:
+        throw SilKitError("CanController: replay message has undefined Direction");
+        break;
+    }
+}
+
+void CanController::ReplaySend(const IReplayMessage* replayMessage)
+{
+    // need to copy the message here.
+    // will throw if invalid message type.
+    Services::Can::WireCanFrame msg = dynamic_cast<const Services::Can::WireCanFrame&>(*replayMessage);
+    SendFrame(ToCanFrame(msg));
+}
+
+void CanController::ReplayReceive(const IReplayMessage* replayMessage)
+{
+    static Tracing::ReplayServiceDescriptor replayService;
+    Services::Can::WireCanFrame frame = dynamic_cast<const Services::Can::WireCanFrame&>(*replayMessage);
+    Services::Can::WireCanFrameEvent msg{};
+    msg.timestamp = replayMessage->Timestamp();
+    msg.frame = std::move(frame);
+    msg.direction = TransmitDirection::RX;
+    msg.userContext = nullptr;
+    ReceiveMsg(&replayService, msg);
 }
 
 //------------------------

@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "ParticipantConfiguration.hpp"
+#include "ReplayScheduler.hpp"
 
 // Interfaces relying on SilKitInternal
 #include "IMsgForLogMsgSender.hpp"
@@ -350,6 +351,7 @@ private:
 
     std::unique_ptr<Services::Logging::ILogger> _logger;
     std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;
+    std::unique_ptr<Tracing::ReplayScheduler> _replayScheduler;
 
     std::tuple<
         ControllerMap<Services::Can::IMsgForCanController>,

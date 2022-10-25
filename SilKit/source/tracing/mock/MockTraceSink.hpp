@@ -41,8 +41,8 @@ public:
     {
         switch (message.Type())
         {
-        case TraceMessageType::CanFrameEvent:
-            Trace(dir, address, timestamp, message.Get<SilKit::Services::Can::CanFrameEvent>());
+        case TraceMessageType::CanFrame:
+            Trace(dir, address, timestamp, message.Get<SilKit::Services::Can::CanFrame>());
             break;
         case TraceMessageType::EthernetFrame:
             Trace(dir, address, timestamp, message.Get<SilKit::Services::Ethernet::EthernetFrame>());

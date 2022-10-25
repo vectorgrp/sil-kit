@@ -54,6 +54,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "Participant.hpp"
 
+#include "Tracing.hpp"
 #include "MessageTracing.hpp"
 #include "Uuid.hpp"
 #include "Assert.hpp"
@@ -111,24 +112,18 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
     (void)GetServiceDiscovery();
 
     // Create the participants trace message sinks as declared in the configuration.
-    //_traceSinks = tracing::CreateTraceMessageSinks(GetLogger(), _config, participant);
+    _traceSinks = Tracing::CreateTraceMessageSinks(GetLogger(), _participantConfig);
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     (void)GetLifecycleService();
 
-
-    //// Enable replaying mechanism.
-    //const auto& participantConfig = get_by_name(_config.simulationSetup.participants, GetParticipantName());
-    //if (tracing::HasReplayConfig(participantConfig))
-    //{
-    //    _replayScheduler = std::make_unique<tracing::ReplayScheduler>(_config,
-    //        participantConfig,
-    //        _config.simulationSetup.timeSync.tickPeriod,
-    //        this,
-    //        _timeProvider.get()
-    //    );
-    //    _logger->Info("Replay Scheduler active.");
-    //}
+    // Enable replaying mechanism.
+    if (Tracing::HasReplayConfig(_participantConfig))
+    {
+        _replayScheduler = std::make_unique<Tracing::ReplayScheduler>(_participantConfig, this);
+        _replayScheduler->ConfigureTimeProvider(&_timeProvider);
+        _logger->Info("Replay Scheduler active.");
+    }
 
     // Ensure shutdowns are cleanly handled.
     auto&& monitor = GetSystemMonitor();
@@ -254,6 +249,18 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
                    controllerConfig.name, controllerConfig.network.value(),
                    controller->GetServiceDescriptor().to_string());
 
+    if (_replayScheduler)
+    {
+        _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
+                                              controllerConfig.network.value(), controllerConfig.networkType);
+    }
+
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, controllerConfig);
+    }
+
     return controller;
 }
 
@@ -261,13 +268,14 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string& canonicalName, const std::string& networkName)
     -> Ethernet::IEthernetController*
 {
-    SilKit::Config::EthernetController controllerConfig = GetConfigByControllerName(_participantConfig.ethernetControllers, canonicalName);
+    SilKit::Config::EthernetController controllerConfig =
+        GetConfigByControllerName(_participantConfig.ethernetControllers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.network, networkName);
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeEthernet;
 
-    auto controller = CreateController<SilKit::Config::EthernetController, Ethernet::EthController>(
+    auto *controller = CreateController<SilKit::Config::EthernetController, Ethernet::EthController>(
         controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
         &_timeProvider);
 
@@ -276,6 +284,18 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
     Logging::Trace(GetLogger(), "Created Ethernet controller '{}' for network '{}' with service name '{}'",
                    controllerConfig.name, controllerConfig.network.value(),
                    controller->GetServiceDescriptor().to_string());
+
+    if (_replayScheduler)
+    {
+        _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
+                                              controllerConfig.network.value(), controllerConfig.networkType);
+    }
+
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, controllerConfig);
+    }
 
     return controller;
 }
@@ -300,6 +320,12 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& 
                    controllerConfig.name, controllerConfig.network.value(),
                    controller->GetServiceDescriptor().to_string());
 
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, controllerConfig);
+    }
+
     return controller;
 }
 
@@ -323,6 +349,12 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
                    controllerConfig.name, controllerConfig.network.value(),
                    controller->GetServiceDescriptor().to_string());
 
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, controllerConfig);
+    }
+
     return controller;
 }
 
@@ -338,7 +370,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriberInternal;
 
     SilKit::Config::DataSubscriber controllerConfig;
-    
+
     // Use a unique name to avoid collisions of several subscribers on same topic on one participant
     controllerConfig.name = to_string(Util::Uuid::GenerateRandom());
     std::string network = linkName;
@@ -425,8 +457,13 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
             controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
     }
 
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, controllerConfig);
+    }
+
     return controller;
-    
 }
 
 
@@ -441,7 +478,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
 
     SilKit::Config::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
-    
+
     SilKit::Services::PubSub::PubSubSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
     for (auto label : dataSpec.Labels())
     {
@@ -465,6 +502,12 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
             "'{}' and labels: {}",
             controllerConfig.name, controllerConfig.topic.value(), dataSpec.MediaType(), network,
             controller->GetServiceDescriptor().to_string(), FormatLabelsForLogging(dataSpec.Labels()));
+    }
+
+    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
+    if (traceSource)
+    {
+        AddTraceSinksToSource(traceSource, controllerConfig);
     }
 
     return controller;
@@ -552,7 +595,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
 
     SilKit::Config::RpcServer controllerConfig = GetConfigByControllerName(_participantConfig.rpcServers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.functionName, dataSpec.FunctionName());
-	
+
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;
     // Needed for RpcServer discovery in tests
@@ -718,7 +761,7 @@ auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServic
 
         controller = CreateInternalController<Discovery::ServiceDiscovery>(
             "ServiceDiscovery", Core::ServiceType::InternalController, std::move(supplementalData), true, GetParticipantName());
-        
+
         _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticpantRemoval(peer->GetInfo().participantName);
         });
@@ -1304,7 +1347,7 @@ auto Participant<SilKitConnectionT>::CreateInternalController(const std::string&
     config.name = serviceName;
     config.network = "default";
 
-    return CreateController<Config::InternalController, ControllerT>(config, serviceType, supplementalData, publishService, 
+    return CreateController<Config::InternalController, ControllerT>(config, serviceType, supplementalData, publishService,
                                                                   std::forward<Arg>(arg)...);
 }
 
@@ -1360,14 +1403,6 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
     _connection.RegisterSilKitService(controllerPtr);
     const auto qualifiedName = config.name;
     controllerMap[qualifiedName] = std::move(controller);
-
-    #ifdef SILKIT_HAVE_TRACING
-    auto* traceSource = dynamic_cast<ITraceMessageSource*>(controllerPtr);
-    if (traceSource)
-    {
-        AddTraceSinksToSource(traceSource, config);
-    }
-    #endif
 
     if (publishService)
     {
@@ -1429,7 +1464,7 @@ void Participant<SilKitConnectionT>::RegisterSimulator(IMsgForSimulatorT* busSim
         // Tell the middleware we are interested in this named network of the given type
         _connection.RegisterSilKitService(busSim);
     }
-    serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore 
+    serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore
 }
 
 template <class SilKitConnectionT>

@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "IServiceDiscovery.hpp"
 #include "ServiceDatatypes.hpp"
+#include "Tracing.hpp"
 
 
 namespace SilKit {
@@ -33,8 +34,9 @@ namespace Ethernet {
 EthController::EthController(Core::IParticipantInternal* participant, Config::EthernetController config,
                                Services::Orchestration::ITimeProvider* timeProvider)
     : _participant(participant)
-    , _config{config}
+    , _config{std::move(config)}
     , _simulationBehavior{participant, this, timeProvider}
+    , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
 {
 }
 
@@ -180,6 +182,36 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetStatu
     }
 }
 
+// IReplayDataProvider
+
+void EthController::ReplayMessage(const IReplayMessage* message)
+{
+    if (!_replayActive)
+    {
+        return;
+    }
+
+    using namespace SilKit::Tracing;
+    switch (message->GetDirection())
+    {
+    case SilKit::Services::TransmitDirection::TX:
+        if (IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
+        {
+            ReplaySend(message);
+        }
+        break;
+    case SilKit::Services::TransmitDirection::RX:
+        if (IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
+        {
+            ReplayReceive(message);
+        }
+        break;
+    default:
+        throw SilKitError("EthController: replay message has undefined Direction");
+        break;
+    }
+}
+
 //------------------------
 // Handlers
 //------------------------
@@ -268,6 +300,28 @@ void EthController::CallHandlers(const MsgT& msg)
 {
     auto& callbacks = std::get<CallbacksT<MsgT>>(_callbacks);
     callbacks.InvokeAll(this, msg);
+}
+
+void EthController::ReplaySend(const IReplayMessage* replayMessage)
+{
+    // need to copy the message here.
+    // will throw if invalid message type.
+    Services::Ethernet::WireEthernetFrame msg =
+        dynamic_cast<const Services::Ethernet::WireEthernetFrame&>(*replayMessage);
+    SendFrame(ToEthernetFrame(msg));
+}
+
+void EthController::ReplayReceive(const IReplayMessage* replayMessage)
+{
+    static Tracing::ReplayServiceDescriptor replayService;
+    Services::Ethernet::WireEthernetFrame frame =
+        dynamic_cast<const Services::Ethernet::WireEthernetFrame&>(*replayMessage);
+    Services::Ethernet::WireEthernetFrameEvent msg{};
+    msg.timestamp = replayMessage->Timestamp();
+    msg.frame = std::move(frame);
+    msg.direction = TransmitDirection::RX;
+    msg.userContext = nullptr;
+    ReceiveMsg(&replayService, msg);
 }
 
 } // namespace Ethernet

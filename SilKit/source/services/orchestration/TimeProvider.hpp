@@ -34,13 +34,20 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
+namespace detail {
+class ITimeProviderInternal : public ITimeProvider
+{
+public:
+    virtual auto MutableNextSimStepHandlers() -> Util::SynchronizedHandlers<NextSimStepHandler> & = 0;
+};
+} // namespace detail
 
 class TimeProvider : public ITimeProvider
 {
 public:
-    //CTor
-    virtual ~TimeProvider() = default;
     TimeProvider();
+    ~TimeProvider() override = default;
+
 public:
     //ITimeProvider
     inline auto Now() const -> std::chrono::nanoseconds override;
@@ -54,8 +61,8 @@ public:
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) override;
 
 private: //Members
-    mutable std::mutex _mutex;
-    std::unique_ptr<ITimeProvider> _currentProvider;
+    mutable std::recursive_mutex _mutex;
+    std::unique_ptr<detail::ITimeProviderInternal> _currentProvider;
 };
 
 //////////////////////////////////////////////////////////////////////

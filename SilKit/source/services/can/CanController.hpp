@@ -27,11 +27,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 
 #include "silkit/services/can/ICanController.hpp"
-#include "ITimeConsumer.hpp"
 
+#include "ITimeConsumer.hpp"
 #include "IMsgForCanController.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
+#include "IReplayDataController.hpp"
 #include "ParticipantConfiguration.hpp"
 
 #include "SimBehavior.hpp"
@@ -47,6 +48,7 @@ class CanController
     , public IMsgForCanController
     , public ITraceMessageSource
     , public Core::IServiceEndpoint
+    , public Tracing::IReplayDataController
 {
 public:
     // ----------------------------------------
@@ -109,6 +111,9 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
+    // IReplayDataController
+    void ReplayMessage(const SilKit::IReplayMessage *message) override;
+
 public:
     // ----------------------------------------
     // Public methods
@@ -120,6 +125,8 @@ public:
     void SetTrivialBehavior();
 
     auto GetState() -> CanControllerState;
+
+    auto GetTracer() -> Tracer *;
 
 private:
     // ----------------------------------------
@@ -163,6 +170,10 @@ private:
     template <typename MsgT>
     inline void SendMsg(MsgT&& msg);
 
+    // IReplayDataProvider Implementation
+    void ReplaySend(const IReplayMessage * replayMessage);
+    void ReplayReceive(const IReplayMessage * replayMessage);
+
 private:
     // ----------------------------------------
     // private members
@@ -171,6 +182,7 @@ private:
     SimBehavior _simulationBehavior;
     Core::ServiceDescriptor _serviceDescriptor;
     Tracer _tracer;
+    bool _replayActive{false};
 
     CanControllerState _controllerState = CanControllerState::Uninit;
     CanErrorState _errorState = CanErrorState::NotAvailable;
@@ -193,16 +205,22 @@ private:
 
 void CanController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(SilKit::Core::EndpointAddress{}, *sink);
+    _tracer.AddSink(GetServiceDescriptor().to_endpointAddress(), *sink);
 }
 
 void CanController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
+
 auto CanController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+inline auto CanController::GetTracer() -> Tracer *
+{
+    return &_tracer;
 }
 
 } // namespace Can

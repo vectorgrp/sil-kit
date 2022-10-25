@@ -31,6 +31,7 @@ SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant
     : _participant{participant}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(canController)}
     , _parentServiceDescriptor{&serviceDescriptor}
+    , _tracer{canController->GetTracer()}
 {
 }
 
@@ -49,6 +50,7 @@ void SimBehaviorDetailed::SendMsg(CanSetControllerMode&& msg)
 }
 void SimBehaviorDetailed::SendMsg(WireCanFrameEvent&& msg)
 {
+    _tracer->Trace(msg.direction, msg.timestamp, ToCanFrame(msg.frame));
     SendMsgImpl(msg);
 }
 

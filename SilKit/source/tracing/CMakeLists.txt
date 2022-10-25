@@ -47,8 +47,8 @@ add_library(SilKitTracing STATIC
     PcapReplay.cpp
     PcapReplay.hpp
 
-    #ReplayScheduler.hpp
-    #ReplayScheduler.cpp
+    ReplayScheduler.hpp
+    ReplayScheduler.cpp
 )
 
 target_include_directories(SilKitTracing
@@ -89,3 +89,5 @@ endif()
 
 #XXX not viable, yet: add_silkit_test(Test_Replay SOURCES Test_Replay.cpp LIBS SilKitMwMockParticipant SilKitTracing )
 add_silkit_test(Test_Pcap SOURCES Test_Pcap.cpp LIBS SilKitTracing SilKitMwMockParticipant )
+
+add_silkit_test(Test_EthernetReplay SOURCES Test_EthernetReplay.cpp LIBS SilKitMwMockParticipant SilKitTracing)

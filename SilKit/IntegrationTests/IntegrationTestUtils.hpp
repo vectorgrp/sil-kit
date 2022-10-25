@@ -93,7 +93,7 @@ struct Barrier
                     << have << " expected=" << expected;
                 std::cout << ss.str() << std::endl;
 
-                throw SilKitError(ss.str()); //abort test!
+                throw SilKit::SilKitError(ss.str()); //abort test!
             }
         }
     }

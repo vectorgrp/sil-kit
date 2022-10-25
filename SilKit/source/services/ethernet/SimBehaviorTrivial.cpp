@@ -53,7 +53,6 @@ SimBehaviorTrivial::SimBehaviorTrivial(Core::IParticipantInternal* participant, 
     , _parentController{ethController}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
     , _timeProvider{timeProvider}
-    , _tracer{ethController->GetTracer()}
 {
     (void)_parentController;
 }
@@ -77,11 +76,9 @@ void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
     // Trivial Sim: Set the timestamp, trace, send out the event and directly generate the ack
     ethFrameEvent.timestamp = _timeProvider->Now();
 
-    _tracer->Trace(TransmitDirection::TX, ethFrameEvent.timestamp, ToEthernetFrame(ethFrameEvent.frame));
-
     if (controllerState == EthernetState::LinkUp)
     {
-        // Trace and self delivery as TX
+        // Self delivery as TX (handles TX tracing)
         ethFrameEvent.direction = TransmitDirection::TX;
         ReceiveMsg(ethFrameEvent);
 

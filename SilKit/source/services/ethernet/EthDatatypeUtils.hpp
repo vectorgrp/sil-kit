@@ -134,6 +134,29 @@ inline auto CreateEthernetFrameWithVlanTag(const SilKit::Services::Ethernet::Eth
     return WireEthernetFrame{raw};
 }
 
+inline void SetDestinationMac(std::vector<uint8_t>& raw, const EthernetMac& source)
+{
+    const size_t MinFrameSize = 60;
+    if (raw.empty())
+    {
+        raw.resize(MinFrameSize);
+    }
+
+    ::memcpy(raw.data(), source.data(), sizeof(EthernetMac));
+}
+
+inline void SetSourceMac(std::vector<uint8_t>& raw, const EthernetMac& source)
+{
+    const size_t MinFrameSize = 60;
+    const size_t SourceMacStart = sizeof(EthernetMac);
+    if (raw.empty())
+    {
+        raw.resize(MinFrameSize);
+    }
+
+    std::copy(source.begin(), source.end(), raw.begin() + SourceMacStart);
+}
+
 } // namespace SilKit
 } // namespace Services
 } // namespace Ethernet

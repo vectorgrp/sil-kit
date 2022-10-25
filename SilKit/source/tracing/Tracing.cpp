@@ -72,7 +72,7 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
     std::vector<std::unique_ptr<ITraceMessageSink>> newSinks;
     for (const auto& sinkCfg : participantConfig.tracing.traceSinks)
     {
-        if (/* XXX !sinkCfg.enabled  || */ !sinkInUse(sinkCfg.name))
+        if (!sinkInUse(sinkCfg.name))
         {
             Services::Logging::Debug(logger, "Tracing: skipping disabled sink {} on participant {}", sinkCfg.name,
                                      participantConfig.participantName);
@@ -154,7 +154,7 @@ bool HasReplayConfig(const Config::ParticipantConfiguration& cfg)
     auto isActive = [&ok](const auto& ctrls) {
         for (const auto& ctrl : ctrls)
         {
-            if ((ctrl.replay.direction != Config::Replay::Direction::Undefined) && !ctrl.replay.useTraceSource.empty())
+            if (IsValidReplayConfig(ctrl.replay))
             {
                 ok = true;
                 break;
@@ -162,16 +162,24 @@ bool HasReplayConfig(const Config::ParticipantConfiguration& cfg)
         }
     };
 
-    //Bus controllers
+    // Bus controllers
+
     isActive(cfg.canControllers);
     isActive(cfg.ethernetControllers);
     isActive(cfg.linControllers);
     isActive(cfg.flexrayControllers);
+
     // Data Pub/Sub
+
     isActive(cfg.dataPublishers);
     isActive(cfg.dataSubscribers);
 
     return ok;
+}
+
+bool IsValidReplayConfig(const Config::Replay& config)
+{
+    return (config.direction != Config::Replay::Direction::Undefined) && !config.useTraceSource.empty();
 }
 
 } // namespace Tracing

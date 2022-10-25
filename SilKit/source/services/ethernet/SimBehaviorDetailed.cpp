@@ -31,7 +31,6 @@ SimBehaviorDetailed::SimBehaviorDetailed(Core::IParticipantInternal* participant
     : _participant{participant}
     , _parentServiceEndpoint{dynamic_cast<Core::IServiceEndpoint*>(ethController)}
     , _parentServiceDescriptor{&serviceDescriptor}
-    , _tracer{ethController->GetTracer()}
 {
 }
 
@@ -43,7 +42,6 @@ void SimBehaviorDetailed::SendMsgImpl(MsgT&& msg)
 
 void SimBehaviorDetailed::SendMsg(WireEthernetFrameEvent&& msg)
 {
-    _tracer->Trace(TransmitDirection::TX, msg.timestamp, ToEthernetFrame(msg.frame));
     SendMsgImpl(msg);
 }
 

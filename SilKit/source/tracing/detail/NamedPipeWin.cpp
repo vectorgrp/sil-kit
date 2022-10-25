@@ -28,8 +28,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <windows.h>
 
 namespace SilKit {
-namespace tracing {
-namespace detail {
+namespace Tracing {
+namespace Detail {
 
 static std::string GetPipeError()
 {
@@ -141,6 +141,6 @@ std::unique_ptr<NamedPipe> NamedPipe::Create(const std::string& name)
     return std::make_unique<NamedPipeWin>(name);
 }
 
-} //end namespace detail
-} //end namespace tracing
+} //end namespace Detail
+} //end namespace Tracing
 } //end namespace SilKit

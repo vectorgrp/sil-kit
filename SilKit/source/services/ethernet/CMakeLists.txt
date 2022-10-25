@@ -22,9 +22,7 @@
 add_library(SilKitSimEthernet STATIC
     EthController.cpp
     EthController.hpp
-    #EthControllerReplay.hpp
-    #EthControllerReplay.cpp
-    
+
     ISimBehavior.hpp
     SimBehavior.cpp
     SimBehavior.hpp
@@ -32,7 +30,7 @@ add_library(SilKitSimEthernet STATIC
     SimBehaviorDetailed.hpp
     SimBehaviorTrivial.cpp
     SimBehaviorTrivial.hpp
-    
+
     EthernetSerdes.hpp
     EthernetSerdes.cpp
 )

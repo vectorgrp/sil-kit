@@ -24,10 +24,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 
 #include "silkit/services/ethernet/IEthernetController.hpp"
-#include "ITimeConsumer.hpp"
 
+#include "ITimeConsumer.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
+#include "IReplayDataController.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "IMsgForEthController.hpp"
 #include "SimBehavior.hpp"
@@ -44,6 +45,7 @@ class EthController
     , public IMsgForEthController
     , public ITraceMessageSource
     , public Core::IServiceEndpoint
+    , public Tracing::IReplayDataController
 {
 public:
     // ----------------------------------------
@@ -96,6 +98,9 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
+    // IReplayDataProvider
+    void ReplayMessage(const IReplayMessage* message) override;
+
 public:
     // ----------------------------------------
     // Public methods
@@ -108,7 +113,8 @@ public:
 
     EthernetState GetState();
 
-    inline auto GetTracer() -> Tracer*;
+    auto GetTracer() -> Tracer*;
+
 private:
     // ----------------------------------------
     // private methods
@@ -128,6 +134,10 @@ private:
     template <typename MsgT>
     inline void SendMsg(MsgT&& msg);
 
+    // IReplayDataProvider Implementation
+    void ReplaySend(const IReplayMessage* replayMessage);
+    void ReplayReceive(const IReplayMessage* replayMessage);
+
 private:
     // ----------------------------------------
     // private members
@@ -138,7 +148,9 @@ private:
 
     EthernetState _ethState = EthernetState::Inactive;
     uint32_t _ethBitRate = 0;
+
     Tracer _tracer;
+    bool _replayActive{false};
 
     template <typename MsgT>
     using CallbacksT = Util::SynchronizedHandlers<CallbackT<MsgT>>;
@@ -159,16 +171,18 @@ void EthController::AddSink(ITraceMessageSink* sink)
 {
     _tracer.AddSink(GetServiceDescriptor().to_endpointAddress(), *sink);
 }
+
 void EthController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
+
 auto EthController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-auto EthController::GetTracer() -> Tracer*
+inline auto EthController::GetTracer() -> Tracer*
 {
     return &_tracer;
 }

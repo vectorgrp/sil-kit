@@ -31,42 +31,40 @@ namespace Orchestration {
 // Actual Provider Implementations
 namespace detail {
 
-struct ProviderBase : ITimeProvider
+class ProviderBase : public ITimeProviderInternal
 {
-    std::chrono::nanoseconds _now{};
-    std::string _name;
-    bool _isSynchronized{false};
-
+public:
     ProviderBase(std::string name)
         : _name{std::move(name)}
     {
     }
 
-    virtual ~ProviderBase() = default;
-
-    virtual auto Now() const -> std::chrono::nanoseconds override
+    auto Now() const -> std::chrono::nanoseconds override
     {
         return _now;
     }
-    virtual auto TimeProviderName() const -> const std::string& override
+
+    auto TimeProviderName() const -> const std::string& override
     {
         return _name;
     }
-    virtual HandlerId AddNextSimStepHandler(NextSimStepHandler ) override
+
+    HandlerId AddNextSimStepHandler(NextSimStepHandler nextSimStepHandler) override
     {
-        // No Op
-        return {};
+        return _handlers.Add(std::move(nextSimStepHandler));
     }
-    virtual void RemoveNextSimStepHandler(HandlerId ) override
+
+    void RemoveNextSimStepHandler(HandlerId handlerId) override
     {
-        // No Op
+        _handlers.Remove(handlerId);
     }
-    virtual void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds ) override
+
+    void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds ) override
     {
         _now = now;
     }
 
-    virtual void ConfigureTimeProvider(Orchestration::TimeProviderKind ) override
+    void ConfigureTimeProvider(Orchestration::TimeProviderKind ) override
     {
         // No Op
     }
@@ -76,10 +74,22 @@ struct ProviderBase : ITimeProvider
         _isSynchronized = isSynchronized;
     }
 
-    virtual bool IsSynchronized() const override
+    bool IsSynchronized() const override
     {
         return _isSynchronized;
     }
+
+public:
+    auto MutableNextSimStepHandlers() -> Util::SynchronizedHandlers<NextSimStepHandler> & override
+    {
+        return _handlers;
+    }
+
+protected:
+    std::chrono::nanoseconds _now{};
+    std::string _name;
+    bool _isSynchronized{false};
+    Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
 };
 
 class WallclockProvider : public ProviderBase
@@ -90,10 +100,11 @@ public:
         , _tickPeriod{tickPeriod}
     {
     }
+
     // Wall clock provider
-    HandlerId AddNextSimStepHandler(NextSimStepHandler simStepHandler)
+    HandlerId AddNextSimStepHandler(NextSimStepHandler simStepHandler) override
     {
-        const auto handlerId = _handlers.Add(std::move(simStepHandler));
+        const auto handlerId = ProviderBase::AddNextSimStepHandler(std::move(simStepHandler));
 
         _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
             _handlers.InvokeAll(now, _tickPeriod);
@@ -102,19 +113,13 @@ public:
         return handlerId;
     }
 
-    void RemoveNextSimStepHandler(HandlerId handlerId)
-    {
-        _handlers.Remove(handlerId);
-    }
-
-    auto Now() const -> std::chrono::nanoseconds
+    auto Now() const -> std::chrono::nanoseconds override
     {
         const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
         return now;
     }
 
 private:
-    Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
     std::chrono::nanoseconds _tickPeriod{0};
     Util::Timer _timer;
 };
@@ -127,6 +132,7 @@ public:
         : ProviderBase("NoSyncProvider")
     {
     }
+
     auto Now() const -> std::chrono::nanoseconds override
     {
         // always return std::chrono::nanoseconds::min
@@ -147,25 +153,12 @@ public:
     {
     }
 
-    HandlerId AddNextSimStepHandler(NextSimStepHandler simStepHandler) override
-    {
-        return _handlers.Add(std::move(simStepHandler));
-    }
-
-    void RemoveNextSimStepHandler(HandlerId handlerId) override
-    {
-        _handlers.Remove(handlerId);
-    }
-
     void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override
     {
         // tell our users about the next simulation step
         _handlers.InvokeAll(now, duration);
         _now = now;
     }
-
-private:
-    Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
 };
 
 } // namespace detail
@@ -182,18 +175,31 @@ void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timePro
 
     std::unique_lock<decltype(_mutex)> lock{_mutex};
 
+    std::unique_ptr<detail::ITimeProviderInternal> providerPtr;
+
     switch (timeProviderKind)
     {
     case Orchestration::TimeProviderKind::NoSync:
-        _currentProvider = std::make_unique<detail::NoSyncProvider>(); 
+        providerPtr = std::make_unique<detail::NoSyncProvider>();
         break;
-    case Orchestration::TimeProviderKind::WallClock: 
-        _currentProvider = std::make_unique<detail::WallclockProvider>(1ms); 
+    case Orchestration::TimeProviderKind::WallClock:
+        providerPtr = std::make_unique<detail::WallclockProvider>(1ms);
         break;
-    case Orchestration::TimeProviderKind::SyncTime: 
-        _currentProvider = std::make_unique<detail::SynchronizedVirtualTimeProvider>(); 
+    case Orchestration::TimeProviderKind::SyncTime:
+        providerPtr = std::make_unique<detail::SynchronizedVirtualTimeProvider>();
         break;
     default: break;
+    }
+
+    if (providerPtr)
+    {
+        using std::swap;
+
+        // swap the newly created provider with the current provider
+        swap(_currentProvider, providerPtr);
+
+        // swap the NextSimStepHandler's of the current provider and the last provider
+        swap(_currentProvider->MutableNextSimStepHandlers(), providerPtr->MutableNextSimStepHandlers());
     }
 
     _currentProvider->SetSynchronized(isSynchronized);

@@ -352,7 +352,7 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
     EthController ethController{&participant, cfg, participant.GetTimeProvider()};
     auto controllerId = ethController.GetServiceDescriptor().to_endpointAddress();
     ethController.AddSink(&traceSink);
-
+    ethController.Activate();
 
     std::vector<uint8_t> rawFrame;
     SetDestinationMac(rawFrame, EthernetMac{ 1, 2, 3, 4, 5, 6 });

@@ -18,46 +18,43 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
-#pragma once
-#include "NamedPipe.hpp"
 
-#include <string>
+#include "Timer.hpp"
 
-#include <windows.h>
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
+namespace {
 
-namespace SilKit {
-namespace Tracing {
-namespace Detail {
+using namespace std::chrono_literals;
 
-class NamedPipeWin : public NamedPipe
+TEST(UtilsTimerTest, ensure_util_timer_works)
 {
-public:
-    // ----------------------------------------
-    // Constructors and Destructor
-    NamedPipeWin(const std::string& name);
+    {
+        //Make sure DTor is able to stop a running timer
+        SilKit::Util::Timer timer;
+        timer.WithPeriod(std::chrono::milliseconds(50), [](const auto) {});
+    }
 
-    ~NamedPipeWin();
+    {
+        std::promise<void> done;
+        auto isDone = done.get_future();
+        SilKit::Util::Timer timer;
+        auto numCalls = 0u;
+        auto cb = [&](const auto) {
+          numCalls++;
+          if (numCalls == 5)
+          {
+              timer.Stop();
+              done.set_value();
+          }
+        };
+        timer.WithPeriod(std::chrono::milliseconds(50), cb);
+        ASSERT_TRUE(timer.IsActive());
+        isDone.wait_for(1s);
+        ASSERT_TRUE(!timer.IsActive());
+        ASSERT_EQ(numCalls, 5);
+    }
+}
 
-public:
-    // ----------------------------------------
-    // Public interface methods
-    bool Write(const char* buffer, size_t size) override;
-    void Close() override;
-private:
-    // ----------------------------------------
-    // private members
-    HANDLE _pipeHandle{INVALID_HANDLE_VALUE};
-
-private:
-    // ----------------------------------------
-    // private methods
-    bool isValid() const { return _pipeHandle != INVALID_HANDLE_VALUE; }
-
-    bool _isConnected{false};
-    std::string _name;
-};
-
-} //end namespace Detail
-} //end namespace Tracing
-} //end namespace SilKit
+}

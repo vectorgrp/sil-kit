@@ -77,9 +77,7 @@ void SimBehaviorTrivial::SendMsg(WireCanFrameEvent&& canFrameEvent)
         canFrameEventCpy.direction = TransmitDirection::TX;
         canFrameEventCpy.timestamp = now;
 
-        _tracer.Trace(SilKit::Services::TransmitDirection::TX, now, ToCanFrameEvent(canFrameEvent));
-
-        // Self delivery as TX
+        // Self delivery as TX (handles TX tracing)
         ReceiveMsg(canFrameEventCpy);
 
         // Send to others as RX
