@@ -80,68 +80,84 @@ If you use another method to build your software you can directly use the ``SilK
 A simple Publish / Subscribe application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We'll create a simple, self-contained SIL Kit application that uses :doc:`Publish/Subscribe<../api/pubsub>`
-to exchange user-defined data among its participants.
+to exchange user-defined data among two participants. First, we include the system and SIL Kit headers and 
+define namespaces and constants in our cpp file ``simple.cpp``:
 
-To use the SIL Kit, you first have to create a valid configuration.  This can 
-be done by loading an existing :ref:`YAML file<sec:ibconfig-json>`.
+.. literalinclude::
+   sample_silkit/simple.cpp
+   :language: cpp
+   :lines: 22-31
 
-We use a configuration file ``simple.yaml`` for creating our simulation.
-The file will be loaded by our application and from helper :doc:`utilities`::
-
-    auto config = SilKit::Config::ParticipantConfigurationFromFile("simple.yaml")
-
-
-The configuration file itself contains an empty JSON object, that later on can be used to configure our simulation participants 
-without recompiling it.
+SIL Kit participants are created with a configuration that is used to change certain aspects of the simulation 
+without recompiling the application. This can be done by loading an existing :ref:`YAML file<sec:ibconfig-json>`.
+Here, we use the configuration file ``simple.yaml`` that logs all error messages to a file:
 
 .. literalinclude::
    sample_silkit/simple.yaml
    :language: yaml
 
-The application will run two participants concurrently, each in their own thread.
+We load it in the main function of our code::
+
+    int main(int argc, char** argv)
+    {
+        auto config = SilKit::Config::ParticipantConfigurationFromFile("simple.yaml")
+        // TODO: Use config to create participants
+    }
+
+The application will run two participants concurrently, each in its own thread.
 One thread will act as a publisher by sending a test string to its subscribers:
 
 .. literalinclude::
    sample_silkit/simple.cpp
    :language: cpp
-   :lines: 36-65
+   :lines: 33-69
 
-
-First, the simulation is joined by creating a participant ``PublisherParticipant``.
-Creating the Participant properly initializes the SIL Kit library and allows to instantiate
-:doc:`Services<../api/api>` and offers access to the
-:doc:`Life Cycle Service<../api/lifecycleService>`.
-
-Next, we create a :cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic.
-This allows sending data through its :cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>`
-method.
-
-The actual simulation is performed in the simulation task. The simulation task
-is a callback that is executed by the SIL Kit runtime whenever the the simulation
-time advances. This callback has to be registered with the time synchronization service's
+First, the simulation is joined by creating the participant called "PublisherParticipant".
+This properly initializes the SIL Kit library and allows to instantiate
+:doc:`Services<../api/api>` and offers access to the :doc:`Life Cycle Service<../api/lifecycleService>`, which 
+controls the orchestration of our simulation. Next, we create a 
+:cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic. Later, we subscibe 
+to the same topic name in our subscriber to enable communication between the participants. The actual simulation 
+is performed in the simulation task. This is a callback that is executed by the SIL Kit runtime whenever the
+simulation time advances. This callback has to be registered with the time synchronization service's
 :cpp:func:`SetSimulationStepHandler()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandler()>`.
+We hand over the publisher object in the capture list of our simulation task and use it to send data through its 
+:cpp:func:`Publish()<SilKit::Services::PubSub::IDataPublisher::Publish()>` method.
 
 The subscriber runs in its own thread, too:
 
 .. literalinclude::
    sample_silkit/simple.cpp
    :language: cpp
-   :lines: 67-97
+   :lines: 71-102
 
 The setup is similar to the publisher, except that we instantiate a 
-:cpp:class:`subscriber<SilKit::Services::PubSub::IDataSubscriber>` interface.
-This allows us to register a
+:cpp:class:`subscriber<SilKit::Services::PubSub::IDataSubscriber>` interface. This allows us to register a
 :cpp:func:`SetDataMessageHandler()<SilKit::Services::PubSub::IDataSubscriber::SetDataMessageHandler()>`
-callback to receive data value updates.
-The simulation task has to be defined, even though no simulation work is performed.
+callback to receive data value updates. The simulation task has to be defined, even though no simulation work is
+performed.
 
-To run this sample, you have to use the :ref:`sec:util-registry` and
-:ref:`sec:util-system-controller` processes.
-The registry is required for participants discovery.
-The :ref:`sec:util-system-controller` initializes the connected participants and starts the
-simulation until the return key is pressed. For convenience and to reduce code
-duplication, these utility programs are implemented in separate executables and
-distributed in binary forms.
+We extend our main function to spawn both threads and join them again once finished.
+Also, we use a try-catch block here to get proper error handling e.g. if the configuration file cannot be loaded.
+
+.. literalinclude::
+   sample_silkit/simple.cpp
+   :language: cpp
+   :lines: 104-127
+
+The appication is built with cmake on the command line (from a build directory) by calling ``cmake ..`` to generate 
+and then build via ``cmake --build .``. A more conveniant way is to open the folder in an IDE with CMake support.
+To run this sample, copy the shared library files  (e.g. on Windows  the ``SilKit.dll``, ``SilKitd.dll`` from ``SilKit/bin`` ) and the ``simple.yaml`` next 
+to the compiled executable.
+
+Running the simulation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Our sample needs the utility processes :ref:`sec:util-registry` and :ref:`sec:util-system-controller` to run. The 
+registry is required for participant discovery. The :ref:`sec:util-system-controller` takes the participant names
+as commandline arguments, initializes the connected participants and starts the simulation until the return key is 
+pressed. For convenience and to reduce code duplication, these utility programs are implemented in separate executables
+and distributed in binary forms.
 
 The final simulation setup can be run through the following commands:
 

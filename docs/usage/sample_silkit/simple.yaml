@@ -1,1 +1,5 @@
---- {}
+Logging:
+  Sinks:
+  - Type: File
+    Level: Warn
+    LogName: SimpleParticipantLog
