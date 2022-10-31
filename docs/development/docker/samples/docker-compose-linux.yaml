@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+
+  registry:
+    image: ubuntu
+    # Defining 'ports' allows connecting from outside on 'localhost'.
+    # Without, the IP of the container (172.26.0.X) is needed.
+    ports:
+    - "8500:8500"
+    tty: true 
+    working_dir: /app
+    volumes:
+        - ./silkitfiles-linux:/app
+    # 'localhost' not working here, needs to be 0.0.0.0
+    command: bash -c "ls && ./sil-kit-registry -u silkit://0.0.0.0:8500" 
+
+  canreader:
+    image: ubuntu
+    tty: true 
+    working_dir: /app
+    volumes:
+        - ./silkitfiles-linux:/app
+    environment:
+        - LD_LIBRARY_PATH=/app
+    # Use conatiner name 'registry' as host name     
+    command: bash -c "ls && ./SilKitDemoCan SilKitConfig_DemoCan.yaml CanReader silkit://registry:8500 --async"
+
+# Needs the folder ./silkitfiles-linux/ with SilKitConfig_DemoCan.yaml, SilKitDemoCan, libSilKit.so, sil-kit-registry
+
+# Launch the CanWriter on the host:
+# ./SilKitDemoCan SilKitConfig_DemoCan.yaml CanWriter silkit://localhost:8500 --async 
