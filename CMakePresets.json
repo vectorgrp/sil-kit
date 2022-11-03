@@ -353,7 +353,7 @@
         },
         {
             "name": "vs140-x86-debug",
-            "inherits": ["mixin-windows", "mixin-dirs", "mixin-ninja" , "mixin-arch-x86", "mixin-toolset-v140", "mixin-debug"]
+            "inherits": ["mixin-windows", "mixin-dirs", "mixin-ninja" , "mixin-arch-x86", "mixin-toolset-v140", "mixin-debug", "mixin-werror"]
         },
         {
             "name": "vs140-x86-release",
@@ -370,7 +370,7 @@
 
         {
             "name": "vs141-x86-debug",
-            "inherits": ["mixin-windows", "mixin-dirs", "mixin-ninja" , "mixin-arch-x86", "mixin-toolset-v141", "mixin-debug"]
+            "inherits": ["mixin-windows", "mixin-dirs", "mixin-ninja" , "mixin-arch-x86", "mixin-toolset-v141", "mixin-debug", "mixin-werror"]
         },
         {
             "name": "vs141-x86-release",

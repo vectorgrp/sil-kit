@@ -181,7 +181,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_short_eth_frame)
     rawFrame.push_back('R');
     rawFrame.push_back('T');
 
-    ASSERT_LT(rawFrame.size(), 60);
+    ASSERT_LT(rawFrame.size(), 60u);
 
     const auto isFramePrefixEqual = [&rawFrame](const WireEthernetFrameEvent& event) -> bool {
         const auto eventRawFrame = event.frame.raw.AsSpan();

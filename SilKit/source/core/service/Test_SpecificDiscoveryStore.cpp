@@ -99,9 +99,9 @@ TEST_F(SpecificDiscoveryStoreTest, no_reaction_on_irrelevant_services)
     
     TestWrapperSpecificDiscoveryStore testStore;
 
-    for (std::string& controllerType : controllerTypes)
+    for (std::string& ctrlType: controllerTypes)
     {
-        testDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerType);
+        testDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, ctrlType);
         testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, testDescriptor);
     }
 

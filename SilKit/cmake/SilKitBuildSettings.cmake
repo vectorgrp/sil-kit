@@ -96,7 +96,7 @@ endfunction()
 # We set the warning flags explicitly.
 macro(silkit_clean_default_compileflags)
     if(MSVC)
-        silkit_replace_compileflags("(/W[3|4]|/w)" "")
+        silkit_replace_compileflags("(/W[1|2|3|4]|/w)" "")
         add_compile_options("/MP")
         if(MSVC_VERSION EQUAL 1900)
             #disable: "decorated name length exceeded", we have long templates.
@@ -110,17 +110,21 @@ function(silkit_target_clean_compileflags target)
         message(FATAL_ERROR "silkit_target_clean_compileflags: the target ${target} does not exist")
     endif()
     get_target_property(_compile_options ${target} COMPILE_OPTIONS)
-    list(TRANSFORM _compile_options REPLACE "/W[3|4]" "")
+    list(TRANSFORM _compile_options REPLACE "/W[1|2|3|4]" "")
     set_target_properties(${target} PROPERTIES COMPILE_OPTIONS "${_compile_options}")
 endfunction()
 function(silkit_enable_warnings isOn)
     # Conditionally treat warnings as errors
     set(_warnAsError "")
     if (${isOn})
-        if(MSVC_VERSION GREATER 1919)
+        # MSVC_VERSION 1900 is VS2015 aka v140
+        # we do not enable warnings as errors on VS2015 and below!
+        if(MSVC_VERSION GREATER 1900)
+            message(STATUS "SIL Kit: enabling warnings as errors!")
             set(_warnAsError "/WX")
         elseif(UNIX OR MINGW)
             #assume compiler is clang or gcc
+            message(STATUS "SIL Kit: enabling warnings as errors!")
             set(_warnAsError "-Werror")
         endif()
     endif()
@@ -133,6 +137,15 @@ function(silkit_enable_warnings isOn)
             /wd4100 # disable unreferenced formal parameter
             ${_warnAsError}
             )
+        # Warning levels for VS2017
+        if(MSVC_VERSION GREATER 1910 AND MSVC_VERSION LESS 1920)
+            set(_flags  ${_flags}
+                # libfmt has a deliberate 'integral constant overflow', c.f. https://github.com/fmtlib/fmt/issues/3163
+                /wd4307 # integral constant overflow
+                /wd4244 # possible loss of data after conversion
+                /wd4389 # too many bogus signed/unsigned warnings in VS2017 Win32
+            )
+        endif()
     elseif(MINGW)
         set(_flags
             -pedantic
@@ -140,7 +153,7 @@ function(silkit_enable_warnings isOn)
             -Wextra
             -Wcast-align
             -Wpacked
-            -Wno-implicit-fallthrough   
+            -Wno-implicit-fallthrough
 
             -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9
             -Wno-format                 # MinGW-gcc does not recognize %zu
@@ -155,7 +168,7 @@ function(silkit_enable_warnings isOn)
             -Wextra
             -Wcast-align
             -Wpacked
-            -Wno-implicit-fallthrough   
+            -Wno-implicit-fallthrough
             -Wformat=2
 
             -Wno-shadow                 # Appears in ThirdParty/spdlog/include/spdlog/common.h:214:9

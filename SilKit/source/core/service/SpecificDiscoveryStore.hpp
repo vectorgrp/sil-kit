@@ -43,7 +43,10 @@ struct FilterTypeHash
 {
     std::size_t operator()(const FilterType& ft) const
     {
-        return SilKit::Util::Hash::HashCombine(std::hash<ControllerType>()(std::get<0>(ft)), (std::hash<TopicOrKey>()(std::get<1>(ft))));
+        return static_cast<size_t>(
+          SilKit::Util::Hash::HashCombine(std::hash<ControllerType>()(std::get<0>(ft)),
+                                                                   (std::hash<TopicOrKey>()(std::get<1>(ft))))
+          );
     }
 };
 
