@@ -79,7 +79,7 @@ public:
     auto CreateDataPublisher(const std::string& canonicalName, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                              size_t history) -> SilKit::Services::PubSub::IDataPublisher* override
     {
-        _dataPublishers.emplace_front(_participant, canonicalName, dataSpec, history);
+        _dataPublishers.emplace_front(_participant, canonicalName, dataSpec, static_cast<uint8_t>(history & 0xff));
         return &_dataPublishers.front();
     }
 

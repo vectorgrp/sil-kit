@@ -18,7 +18,7 @@ class DataPublisher : public SilKit::Services::PubSub::IDataPublisher
 {
 public:
     DataPublisher(SilKit_Participant* participant, const std::string& canonicalName,
-                  const SilKit::Services::PubSub::PubSubSpec& dataSpec, size_t history)
+                  const SilKit::Services::PubSub::PubSubSpec& dataSpec, uint8_t history)
     {
         auto labels = MakePubSubSpecView(dataSpec);
 
