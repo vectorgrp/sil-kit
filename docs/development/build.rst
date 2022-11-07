@@ -13,13 +13,13 @@ To get started developing you'll need the following prerequisites:
  - `Git`_
  - C++ compiler (Visual Studio 2015/2017, GCC, Clang)
  - `CMake <https://cmake.org>`_
- - `Googletest`_ (submodule)
- - `Json11`_  (submodule)
+ - C++ dependencies are managed as submodules, e.g. run `git submodule update --init --recursive`
 
 
 For generating the documentation, you will require:
- - Python3
- - Sphinx  (e.g., install with *pip install sphinx* version >= 3.0)
+ - Python3 dependencies, see: `SilKit/ci/docker/docs_requirements.txt`
+    - install with `pip3 install -r SilKit/ci/docker/docs_requirements.txt`
+    - and pipenv: `pip3 install pipenv`
  - doxygen
 
 
@@ -49,6 +49,11 @@ In general, the options can be combined and set using the cmake-gui, your IDE, o
 !!! Building Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Install the required Python dependencies::
+
+    pip3 install -r SilKit/ci/docker/docs_requirements.txt
+    pip3 install pipenv
+    
 You will need to set the SILKIT_BUILD_DOCS option::
     
     cmake $source_dir -D SILKIT_BUILD_DOCS=ON
