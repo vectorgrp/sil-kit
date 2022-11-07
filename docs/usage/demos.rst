@@ -408,19 +408,21 @@ Benchmark Demo
         - --help
             Show the help message.
           --registry-uri
-            The URI of the registry to start.
+            The URI of the registry to start. Default: silkit://localhost:8500
           --message-size
-            Sets the message size.
+            Sets the message size. Default: 1000
           --message-count
-            Sets the number of messages to be send in each simulation step.
+            Sets the number of messages to be send in each simulation step. Default: 50
           --number-participants
-            Sets the number of simulation participants.
+            Sets the number of simulation participants. Default: 2
           --number-simulation-runs
-            Sets the number of simulation runs to perform.
+            Sets the number of simulation runs to perform. Default: 4
           --simulation-duration
-            Sets the simulation duration (virtual time).
+            Sets the simulation duration (virtual time). Default: 1s
           --configuration 
-            Path and filename of the participant configuration YAML or JSON file.
+            Path and filename of the participant configuration YAML or JSON file. Default: empty
+          --write-csv
+            Path and filename of csv file with benchmark results. Default: empty
    *  -  Parameter Example
       -  .. parsed-literal:: 
             # Launch the BenchmarkDemo with positional arguments and a specified configuration file:
@@ -431,9 +433,14 @@ Benchmark Demo
    *  -  Notes
       -  This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> 
          of <B> bytes per simulation step with a fixed period of 1ms and run for <S> seconds (virtual time). 
-         This simulation run is repeated <K> times and averages over all runs are calculated. The demo uses 
-         PubSub controllers with the same topic for the message exchange, so each participant broadcasts the
-         messages to all other participants. The configuration file 
+         This simulation run is repeated <K> times and averages over all runs are calculated. Results for average 
+         runtime, speedup (virtual time/runtime), throughput (data size/runtime), message rate (count/runtime) 
+         including the standard deviation are printed. 
+         The demo uses PubSub controllers with the same topic for the message exchange, so each participant broadcasts
+         the messages to all other participants. The configuration file 
          ``SilKitConfig_DemoBenchmark_DomainSockets_Off.yaml`` can be used to disable domain socket usage 
          for more realistic timings of TCP/IP traffic. With ``SilKitConfig_DemoBenchmark_TCPNagle_Off.yaml``, 
          Nagle's algorithm and domain sockets are switched off.
+         The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding
+         differen message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and 
+         ``Demos\Benchmark\performance-diff\Readme.md`` for further information.

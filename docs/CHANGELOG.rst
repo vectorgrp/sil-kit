@@ -12,6 +12,11 @@ Changed
 ~~~~~~~
 
 - Demos: Replaced JSON configuration files with YAML files. The provided configurations did not change.
+- Extended SilKitDemoBenchmark: 
+
+    - Calculates standard deviation for throughput, message rate, speedup
+    - Added ``--write-csv`` command line argument to output results to csv file
+    - Helper scripts for msg-size-scaling and performance-diff
 
 - Changed the lifecycle service to be less verbose in log level info. See log level debug for more detailed
   information of the lifecycle.
