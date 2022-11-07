@@ -5,14 +5,24 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.10] - unreleased
+[4.0.10] - 2022-11-07
 ---------------------
 
 Changed
 ~~~~~~~
 
+- Documentation
+
+  - Improved Quickstart Docs and fixed sample code
+  - Updated build instructions for documentation
+
+- Logging
+
+  - Trace-Log was extended with outputs for controller creation.
+  - Default verbosity of lifecycle reduced to debug
+  
 - Demos: Replaced JSON configuration files with YAML files. The provided configurations did not change.
-- Extended SilKitDemoBenchmark: 
+- Extended SilKitDemoBenchmark
 
     - Calculates standard deviation for throughput, message rate, speedup
     - Added ``--write-csv`` command line argument to output results to csv file
