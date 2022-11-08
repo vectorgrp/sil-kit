@@ -70,12 +70,17 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     auto uri = Uri::Parse(listenUri);
     const auto enableDomainSockets = _vasioConfig->middleware.enableDomainSockets;
 
+    bool hasTcpSocket = false;
+    bool hasDomainSocket = false;
+
     try
     {
         // Resolve the configured hostname and accept on the given port:
         auto tcpHostPort = _connection.AcceptTcpConnectionsOn(uri.Host(), uri.Port());
         // Update the URI to the actually used address and port:
         uri = Uri{tcpHostPort.first, tcpHostPort.second};
+
+        hasTcpSocket = true;
     }
     catch (const std::exception& e)
     {
@@ -84,34 +89,53 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
                        uri.Port(),
                        uri.EncodedString(),
                        e.what());
-
-
-        if (enableDomainSockets)
-        {
-            // For scenarios where multiple instances run on the same host, binding on TCP/IP will result in an error.
-            // However, if we can accept local ipc connections we warn and continue.
-            _logger->Warn("This registry instance will only accept connections on local domain sockets. This might be "
-                          "caused by a second registry running on this host.");
-        }
-        else
-        {
-            // If local ipc connections are disabled and TPC/IP had an error, we abort.
-            throw SilKit::StateError{"Unable to accept TCP connections."};
-        }
     }
 
     if (enableDomainSockets)
     {
         try
         {
-            // Local domain sockets, failure is fatal for operation.
             _connection.AcceptLocalConnections(listenUri);
+
+            hasDomainSocket = true;
         }
         catch (const std::exception& e)
         {
             Services::Logging::Warn(GetLogger(), "VAsioRegistry failed to create local listening socket: {}", e.what());
-            throw SilKit::StateError{"Unable to accept Local Domain connections."};
         }
+    }
+
+    if (hasTcpSocket && hasDomainSocket)
+    {
+        Services::Logging::Debug(GetLogger(), "VAsioRegistry: Listening on both, TCP and Domain sockets");
+    }
+    else if (hasTcpSocket && !hasDomainSocket)
+    {
+        if (enableDomainSockets)
+        {
+            // There exist old versions of Windows that do not support domain sockets. Here only TCP/IP will be available.
+            _logger->Warn(
+                "This registry instance will only accept connections on TCP sockets. This might be caused by a second "
+                "registry running on this host, or using an operating system that does not support Domain sockets.");
+        }
+        else
+        {
+            _logger->Warn("This registry instance will only accept connections on TCP sockets. Domain sockets were "
+                          "explicitly disabled through the participant configuration.");
+        }
+    }
+    else if (!hasTcpSocket && hasDomainSocket)
+    {
+        // For scenarios where multiple instances run on the same host, binding on TCP/IP will result in an error.
+        // However, if we can accept local ipc connections we warn and continue.
+        _logger->Warn("This registry instance will only accept connections on local domain sockets. This might be "
+                      "caused by a second registry running on this host, or another process was already bound to the "
+                      "same port as this registry was attempting to use.");
+    }
+    else
+    {
+        Services::Logging::Error(GetLogger(), "VAsioRegistry: Unable to listen on neither TCP, nor Domain sockets");
+        throw SilKit::StateError{"VAsioRegistry: Unable to listen on neither TCP, nor Domain sockets"};
     }
 
     _connection.StartIoWorker();
