@@ -31,6 +31,9 @@ Changed
 - Changed the lifecycle service to be less verbose in log level info. See log level debug for more detailed
   information of the lifecycle.
 
+- Updated participant configuration file schema and added it to the json schema support. Use .silkit.yaml/json suffix 
+  for automated schema support.
+
 
 [4.0.9] - 2022-10-19
 --------------------

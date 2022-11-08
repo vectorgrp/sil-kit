@@ -22,7 +22,7 @@
 make_silkit_demo(SilKitDemoEthernet  EthernetDemo.cpp)
 
 target_sources(SilKitDemoEthernet
-    PRIVATE SilKitConfig_DemoEthernet.yaml
+    PRIVATE DemoEthernet.silkit.yaml
     PRIVATE NetworkSimulatorConfig.yaml
 )
 
@@ -44,7 +44,7 @@ if (NOT _is_standalone)
 
     target_sources(
         SilKitDemoEthernet_Hourglass
-        PRIVATE SilKitConfig_DemoEthernet.yaml
+        PRIVATE DemoEthernet.silkit.yaml
         PRIVATE NetworkSimulatorConfig.yaml
     )
 endif()

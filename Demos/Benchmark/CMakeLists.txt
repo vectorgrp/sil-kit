@@ -22,6 +22,6 @@
 make_silkit_demo(SilKitDemoBenchmark BenchmarkDemo.cpp)
 
 target_sources(SilKitDemoBenchmark
-    PRIVATE SilKitConfig_DemoBenchmark_DomainSockets_Off.yaml
-    PRIVATE SilKitConfig_DemoBenchmark_TCPNagle_Off.yaml
+    PRIVATE DemoBenchmarkDomainSocketsOff.silkit.yaml
+    PRIVATE DemoBenchmarkTCPNagleOff.silkit.yaml
 )

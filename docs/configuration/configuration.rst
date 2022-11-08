@@ -19,7 +19,7 @@ The Participant Configuration File
 =======================================
 
 Simulation participants of the Vector SIL Kit can be configured via a YAML/JSON file, often
-referred to as *participant configuration*, ``SilKitConfig.json``, or ``SilKitConfig.yaml``. A configuration file is optional, 
+referred to as *participant configuration*. A configuration file is optional, 
 it is intended to be used to configure behavior and connections of a simulation participant that was distributed in 
 binary form.
 A participant configuration can be passed to a simulation when a simulation participant is created 
@@ -30,10 +30,14 @@ programmatically defined values. For example, the ``ParticipantName`` field of t
 participant name that is provided through the API of the Vector SIL Kit when participants are created, namely 
 :cpp:func:`CreateParticipant(..., const std::string& participantName, ...)<SilKit::CreateParticipant()>`.
 
-A ``SilKitConfig.yaml`` begins with some general information about the configuration file itself, followed by several 
+A participant configuration file begins with some general information about the configuration file itself, followed by several 
 subsections for the different services of the Vector SIL Kit.
 
-The outline of a ``SilKitConfig.yaml`` file is as follows:
+.. admonition:: Note
+
+    Many IDEs automatically support participant configuration schema support when the participant configuration file ends with the suffix ``.silkit.json/yaml``.
+
+The outline of a participant configuration file is as follows:
 
 .. code-block:: yaml
                 

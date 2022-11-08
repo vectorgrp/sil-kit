@@ -22,6 +22,6 @@
 make_silkit_demo(SilKitDemoCan CanDemo.cpp)
 
 target_sources(SilKitDemoCan
-    PRIVATE SilKitConfig_DemoCan.yaml
+    PRIVATE DemoCan.silkit.yaml
     PRIVATE NetworkSimulatorConfig.yaml
 )

@@ -65,7 +65,7 @@ CAN Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguration to be used; 
-           use ``SilKitConfig_DemoCan.yaml`` for an example configuration.
+           use ``DemoCan.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``CanWriter`` or 
            ``CanReader``.
@@ -78,7 +78,7 @@ CAN Demo
       -  .. parsed-literal:: 
             
             # Creates a CAN Writer Process with the default registry URI
-            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.yaml CanWriter
+            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter
    *  -  System Example
       - For synchronized execution:
 
@@ -88,10 +88,10 @@ CAN Demo
             |Monitor|
 
             # CAN Reader:
-            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.yaml CanReader
+            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanReader
 
             # CAN Writer:
-            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.yaml CanWriter
+            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter
 
             # System Controller:
             |SystemController| CanReader CanWriter 
@@ -101,10 +101,10 @@ CAN Demo
         .. parsed-literal:: 
 
             # CAN Reader:
-            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.yaml CanReader --async
+            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanReader --async
 
             # CAN Writer:
-            |DemoDir|/SilKitDemoCan Demos/Can/SilKitConfig_DemoCan.yaml CanWriter --async
+            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter --async
 
    *  -  Notes
       -  | \- The writer sends CAN frames at a fixed rate of one frame per simulation step (1ms).
@@ -128,7 +128,7 @@ Ethernet Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``SilKitConfig_DemoEthernet.yaml`` for an example configuration.
+           use ``DemoEthernet.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
@@ -141,7 +141,7 @@ Ethernet Demo
       -  .. parsed-literal:: 
 
             # Creates an Ethernet Writer Process with the default registry URI:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.yaml EthernetWriter
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
    *  -  System Example
       - For synchronized execution:
 
@@ -151,10 +151,10 @@ Ethernet Demo
             |Monitor|
 
             # Ethernet Reader:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.yaml EthernetReader
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader
 
             # Ethernet Writer:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.yaml EthernetWriter
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
 
             # System Controller:
             |SystemController| EthernetReader Ethernet Writer
@@ -164,10 +164,10 @@ Ethernet Demo
         .. parsed-literal:: 
 
             # Ethernet Reader:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.yaml EthernetReader --async
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader --async
 
             # Ethernet Writer:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/SilKitConfig_DemoEthernet.yaml EthernetWriter --async
+            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter --async
 
    *  -  Notes
       -  | \- The writer sends Ethernet frames at a fixed rate of one frame per simulation step (1ms).
@@ -192,7 +192,7 @@ LIN Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``SilKitConfig_DemoLin.yaml`` for an example configuration.
+           use ``DemoLin.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
@@ -205,7 +205,7 @@ LIN Demo
       -  .. parsed-literal:: 
 
             # Creates a LIN Master Process with the default registry URI:
-            |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.yaml LinMaster
+            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -213,10 +213,10 @@ LIN Demo
             |Monitor|
 
             # LIN Master:
-            |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.yaml LinMaster
+            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster
 
             # LIN Slave:
-            |DemoDir|/SilKitDemoLin Demos/Lin/SilKitConfig_DemoLin.yaml LinSlave
+            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinSlave
 
             # System Controller:
             |SystemController| LinSlave LinMaster
@@ -243,7 +243,7 @@ FlexRay Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``SilKitConfig_DemoFlexRay.yaml`` for an example configuration.
+           use ``DemoFlexRay.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Node0`` or 
            ``Node1``.
@@ -254,7 +254,7 @@ FlexRay Demo
       -  .. parsed-literal:: 
 
             # Creates a FlexRay Process for Node 0 with the default registry URI:
-            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.yaml Node0
+            |DemoDir|/SilKitDemoFlexray Demos/FlexRayDemoFlexray.silkit.yaml Node0
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -265,10 +265,10 @@ FlexRay Demo
             |Monitor|
 
             # Node 0:
-            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.yaml Node0
+            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/DemoFlexray.silkit.yaml Node0
 
             # Node 1:
-            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/SilKitConfig_DemoFlexray.yaml Node1
+            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/DemoFlexray.silkit.yaml Node1
 
             # System Controller:
             |SystemController| Node0 Node1 NetworkSimulator
@@ -294,7 +294,7 @@ Publish & Subscribe Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``SilKitConfig_DemoPubSub.yaml`` for an example configuration.
+           use ``DemoPubSub.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Publisher`` or 
            ``Subscriber``.
@@ -308,7 +308,7 @@ Publish & Subscribe Demo
       -  .. parsed-literal:: 
 
             # Creates a combined publisher and subscriber with the default registry URI:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.yaml Publisher
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -316,10 +316,10 @@ Publish & Subscribe Demo
             |Monitor|
 
             # Publisher:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.yaml Publisher
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher
 
             # Subscriber:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/SilKitConfig_DemoPubSub.yaml Subscriber
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Subscriber
 
             # System Controller:
             |SystemController| Publisher Subscriber
@@ -345,7 +345,7 @@ RPC Demo
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
-           use ``SilKitConfig_DemoRpc.yaml`` for an example configuration.
+           use ``DemoRpc.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Server`` or 
            ``Client``.
@@ -359,7 +359,7 @@ RPC Demo
       -  .. parsed-literal:: 
 
             # Creates a Rpc-Server Process with the default registry URI:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.yaml Server
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -367,10 +367,10 @@ RPC Demo
             |Monitor|
 
             # Server:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.yaml Server
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server
 
             # Client:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/SilKitConfig_DemoRpc.yaml Client
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Client
 
             # System Controller:
             |SystemController| Server Client
@@ -426,7 +426,7 @@ Benchmark Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
             # Launch the BenchmarkDemo with positional arguments and a specified configuration file:
-            |DemoDir|/SilKitDemoBenchmark.exe 4 1 2 1 10 --configuration ./SilKitConfig_DemoBenchmark_DomainSockets_Off.yaml
+            |DemoDir|/SilKitDemoBenchmark.exe 4 1 2 1 10 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
 
             # Launch the BenchmarkDemo with default arguments but 4 participants:
             |DemoDir|/SilKitDemoBenchmark.exe --number-participants 4
@@ -438,8 +438,8 @@ Benchmark Demo
          including the standard deviation are printed. 
          The demo uses PubSub controllers with the same topic for the message exchange, so each participant broadcasts
          the messages to all other participants. The configuration file 
-         ``SilKitConfig_DemoBenchmark_DomainSockets_Off.yaml`` can be used to disable domain socket usage 
-         for more realistic timings of TCP/IP traffic. With ``SilKitConfig_DemoBenchmark_TCPNagle_Off.yaml``, 
+         ``DemoBenchmarkDomainSocketsOff.silkit.yaml`` can be used to disable domain socket usage 
+         for more realistic timings of TCP/IP traffic. With ``DemoBenchmarkTCPNagleOff.silkit.yaml``, 
          Nagle's algorithm and domain sockets are switched off.
          The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding
          differen message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and 

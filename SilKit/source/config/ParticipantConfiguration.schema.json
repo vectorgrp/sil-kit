@@ -1,79 +1,67 @@
 {
-  "$id": "http://vector.com/#",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "JSON schema for SIL Kit Participant configuration files",
-  "type": "object",
+  "additionalProperties": false,
   "definitions": {
-
     "Description": {
       "type": "string",
-      "title": "Free text commenting on or summarizing this configuration. Optional",
+      "description": "Free text commenting on or summarizing this configuration. Optional",
       "default": ""
     },
-
     "Name": {
       "type": "string",
-      "title": "Name of the endpoint"
+      "description": "Name of the endpoint"
     },
-
     "Network": {
       "type": "string",
-      "title": "Name of the network. Optional; Defaults to the endpoint name"
+      "description": "Name of the network. Optional; Defaults to the endpoint name"
     },
-
     "UseTraceSinks": {
       "type": "array",
-      "title": "Names of trace sinks to use"
+      "description": "Names of trace sinks to use"
     },
-
     "Replay": {
       "type": "object",
       "properties": {
         "UseTraceSource": {
           "type": "string",
-          "title": "Name of a trace source used as a simulation message source for this controller"
+          "description": "Name of a trace source used as a simulation message source for this controller"
         },
         "Direction": {
           "type": "string",
-          "title": "Filter messages to use from the trace source by their direction. May be Send, Receive or Both",
-          "enum": [
-            "Send",
-            "Receive",
-            "Both"
-          ]
+          "description": "Filter messages to use from the trace source by their direction. May be Send, Receive or Both",
+          "enum": [ "Send", "Receive", "Both" ]
         },
         "MdfChannel": {
           "type": "object",
           "properties": {
             "ChannelName": {
               "type": "string",
-              "title": "Name of an MDF channel in the trace source"
+              "description": "Name of an MDF channel in the trace source"
             },
             "ChannelSource": {
               "type": "string",
-              "title": "Name of an MDF channel's source information object"
+              "description": "Name of an MDF channel's source information object"
             },
             "ChannelPath": {
               "type": "string",
-              "title": "Path of an MDF channel's source information object"
+              "description": "Path of an MDF channel's source information object"
             },
             "GroupName": {
               "type": "string",
-              "title": "Name of an MDF channel group"
+              "description": "Name of an MDF channel group"
             },
             "GroupSource": {
               "type": "string",
-              "title": "Name of an MDF channel group's source information object"
+              "description": "Name of an MDF channel group's source information object"
             },
             "GroupPath": {
               "type": "string",
-              "title": "Path of an MDF channel group's source information object"
+              "description": "Path of an MDF channel group's source information object"
             }
           }
         }
       }
     },
-
     "FlexrayClusterParameters": {
       "type": "object",
       "properties": {
@@ -81,125 +69,124 @@
           "type": "integer",
           "minimum": 2,
           "maximum": 31,
-          "title": "Number of attempts for a cold start before giving up (range 2-31)"
+          "description": "Number of attempts for a cold start before giving up (range 2-31)"
         },
         "gCycleCountMax": {
           "type": "integer",
           "minimum": 7,
           "maximum": 63,
-          "title": "Max cycle count value in a given cluster (range 7-63, must be an odd integer)"
+          "description": "Max cycle count value in a given cluster (range 7-63, must be an odd integer)"
         },
         "gdActionPointOffset": {
           "type": "integer",
           "minimum": 1,
           "maximum": 63,
-          "title": "Time offset for a static slot in macroticks (range 1 - 63)"
+          "description": "Time offset for a static slot in macroticks (range 1 - 63)"
         },
         "gdDynamicSlotIdlePhase": {
           "type": "integer",
           "minimum": 0,
           "maximum": 2,
-          "title": "Duration of the idle phase within a dynamic slot in gdMiniSlots (range 0 - 2)"
+          "description": "Duration of the idle phase within a dynamic slot in gdMiniSlots (range 0 - 2)"
         },
         "gdMiniSlot": {
           "type": "integer",
           "minimum": 2,
           "maximum": 63,
-          "title": "Duration of a mini slot in macroticks (2 - 63)"
+          "description": "Duration of a mini slot in macroticks (2 - 63)"
         },
         "gdMiniSlotActionPointOffset": {
           "type": "integer",
           "minimum": 1,
           "maximum": 31,
-          "title": "Time offset for a mini slot in macroticks (range 1- 31)"
+          "description": "Time offset for a mini slot in macroticks (range 1- 31)"
         },
         "gdStaticSlot": {
           "type": "integer",
           "minimum": 3,
           "maximum": 664,
-          "title": "Duration of a static slot in macroticks (range 3 - 664)"
+          "description": "Duration of a static slot in macroticks (range 3 - 664)"
         },
         "gdSymbolWindow": {
           "type": "integer",
           "minimum": 0,
           "maximum": 162,
-          "title": "Duration of the symbol window in macroticks (range 0 - 162)"
+          "description": "Duration of the symbol window in macroticks (range 0 - 162)"
         },
         "gdSymbolWindowActionPointOffset": {
           "type": "integer",
           "minimum": 1,
           "maximum": 63,
-          "title": "Time offset for a static symbol windows in macroticks (range 1 - 63)"
+          "description": "Time offset for a static symbol windows in macroticks (range 1 - 63)"
         },
         "gdTSSTransmitter": {
           "type": "integer",
           "minimum": 1,
           "maximum": 15,
-          "title": "Duration of TSS (Transmission Start Sequence) in gdBits (range 1 - 15)"
+          "description": "Duration of TSS (Transmission Start Sequence) in gdBits (range 1 - 15)"
         },
         "gdWakeupTxActive": {
           "type": "integer",
           "minimum": 15,
           "maximum": 60,
-          "title": "Duration of LOW Phase of a wakeup symbol in gdBit (range 15 - 60)"
+          "description": "Duration of LOW Phase of a wakeup symbol in gdBit (range 15 - 60)"
         },
         "gdWakeupTxIdle": {
           "type": "integer",
           "minimum": 45,
           "maximum": 180,
-          "title": "Duration of the idle of a wakeup symbol in gdBit (45 - 180)"
+          "description": "Duration of the idle of a wakeup symbol in gdBit (45 - 180)"
         },
         "gListenNoise": {
           "type": "integer",
           "minimum": 2,
           "maximum": 16,
-          "title": "Upper limit for the startup listen timeout and wakeup listen timeout in the presence of noise; Used as a multiplier of pdListenTimeout (range 2 - 16)"
+          "description": "Upper limit for the startup listen timeout and wakeup listen timeout in the presence of noise; Used as a multiplier of pdListenTimeout (range 2 - 16)"
         },
         "gMacroPerCycle": {
           "type": "integer",
           "minimum": 8,
           "maximum": 16000,
-          "title": "Number of macroticks per cycle (range 8 - 16000)"
+          "description": "Number of macroticks per cycle (range 8 - 16000)"
         },
         "gMaxWithoutClockCorrectionFatal": {
           "type": "integer",
           "minimum": 1,
           "maximum": 15,
-          "title": "Threshold used for testing the vClockCorrectionFailed counter (range 1 - 15)"
+          "description": "Threshold used for testing the vClockCorrectionFailed counter (range 1 - 15)"
         },
         "gMaxWithoutClockCorrectionPassive": {
           "type": "integer",
           "minimum": 1,
           "maximum": 15,
-          "title": "Threshold used for testing the vClockCorrectionFailed counter (range 1 - 15)"
+          "description": "Threshold used for testing the vClockCorrectionFailed counter (range 1 - 15)"
         },
         "gNumberOfMiniSlots": {
           "type": "integer",
           "minimum": 0,
           "maximum": 7988,
-          "title": "Number of mini slots (range 0 - 7988)"
+          "description": "Number of mini slots (range 0 - 7988)"
         },
         "gNumberOfStaticSlots": {
           "type": "integer",
           "minimum": 2,
           "maximum": 1023,
-          "title": "Number of static slots in a cycle (range 2 - 1023)"
+          "description": "Number of static slots in a cycle (range 2 - 1023)"
         },
         "gPayloadLengthStatic": {
           "type": "integer",
           "minimum": 0,
           "maximum": 127,
-          "title": "Length of the payload of a static frame in 16-Bits words (range 0 - 127)"
+          "description": "Length of the payload of a static frame in 16-Bits words (range 0 - 127)"
         },
         "gSyncFrameIDCountMax": {
           "type": "integer",
           "minimum": 2,
           "maximum": 15,
-          "title": "Maximum number of distinct sync frame identifiers present in a given cluster (range 2 - 15)"
+          "description": "Maximum number of distinct sync frame identifiers present in a given cluster (range 2 - 15)"
         }
       }
     },
-
     "FlexrayNodeParameters": {
       "type": "object",
       "properties": {
@@ -207,140 +194,139 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 1,
-          "title": "Controls the transition to halt state due to clock synchronization errors. (values 0, 1)"
+          "description": "Controls the transition to halt state due to clock synchronization errors. (values 0, 1)"
         },
         "pAllowPassiveToActive": {
           "type": "integer",
           "minimum": 0,
           "maximum": 31,
-          "title": "Required number of consecutive even / odd cycle pairs for normal passive to normal active (range 0 - 31)"
+          "description": "Required number of consecutive even / odd cycle pairs for normal passive to normal active (range 0 - 31)"
         },
         "pChannels": {
           "type": "string",
           "enum": [ "A", "B", "AB", "None" ],
-          "title": "Channel(s) to which the controller is connected"
+          "description": "Channel(s) to which the controller is connected"
         },
         "pClusterDriftDamping": {
           "type": "integer",
           "minimum": 0,
           "maximum": 10,
-          "title": "Cluster drift damping factor for rate correction in microticks (range 0 - 10)"
+          "description": "Cluster drift damping factor for rate correction in microticks (range 0 - 10)"
         },
         "pdAcceptedStartupRange": {
           "type": "integer",
           "minimum": 29,
           "maximum": 2743,
-          "title": "Allowed deviation for startup frames during integration in microticks (range 29 - 2743)"
+          "description": "Allowed deviation for startup frames during integration in microticks (range 29 - 2743)"
         },
         "pdListenTimeout": {
           "type": "integer",
           "minimum": 1926,
           "maximum": 2567692,
-          "title": "Duration of listen phase in microticks (range 1926 - 2567692)"
+          "description": "Duration of listen phase in microticks (range 1926 - 2567692)"
         },
         "pKeySlotId": {
           "type": "integer",
           "minimum": 0,
           "maximum": 1023,
-          "title": "Slot ID of the key slot (range 0 - 1023; value 0 means that there is no key slot)"
+          "description": "Slot ID of the key slot (range 0 - 1023; value 0 means that there is no key slot)"
         },
         "pKeySlotOnlyEnabled": {
           "type": "integer",
           "minimum": 0,
           "maximum": 1,
-          "title": "Shall the node enter key slot only mode after startup. (values 0, 1) (AUTOSAR pSingleSlotEnabled)"
+          "description": "Shall the node enter key slot only mode after startup. (values 0, 1) (AUTOSAR pSingleSlotEnabled)"
         },
         "pKeySlotUsedForStartup": {
           "type": "integer",
           "minimum": 0,
           "maximum": 1,
-          "title": "Key slot is used for startup (values 0, 1)"
+          "description": "Key slot is used for startup (values 0, 1)"
         },
         "pKeySlotUsedForSync": {
           "type": "integer",
           "minimum": 0,
           "maximum": 1,
-          "title": "Key slot is used for sync (values 0, 1)"
+          "description": "Key slot is used for sync (values 0, 1)"
         },
         "pLatestTx": {
           "type": "integer",
           "minimum": 0,
           "maximum": 7988,
-          "title": "Last mini slot which can be transmitted (range 0 - 7988)"
+          "description": "Last mini slot which can be transmitted (range 0 - 7988)"
         },
         "pMacroInitialOffsetA": {
           "type": "integer",
           "minimum": 2,
           "maximum": 68,
-          "title": "Initial startup offset for frame reference point on channel A (range 2 - 68 macroticks)"
+          "description": "Initial startup offset for frame reference point on channel A (range 2 - 68 macroticks)"
         },
         "pMacroInitialOffsetB": {
           "type": "integer",
           "minimum": 2,
           "maximum": 68,
-          "title": "Initial startup offset for frame reference point on channel B (range 2 - 68 macroticks)"
+          "description": "Initial startup offset for frame reference point on channel B (range 2 - 68 macroticks)"
         },
         "pMicroInitialOffsetA": {
           "type": "integer",
           "minimum": 0,
           "maximum": 239,
-          "title": "Offset between secondary time reference and MT boundary (range 0 - 239 microticks)"
+          "description": "Offset between secondary time reference and MT boundary (range 0 - 239 microticks)"
         },
         "pMicroInitialOffsetB": {
           "type": "integer",
           "minimum": 0,
           "maximum": 239,
-          "title": "Offset between secondary time reference and MT boundary (range 0 - 239 microticks)"
+          "description": "Offset between secondary time reference and MT boundary (range 0 - 239 microticks)"
         },
         "pMicroPerCycle": {
           "type": "integer",
           "minimum": 960,
           "maximum": 1280000,
-          "title": "Nominal number of microticks in the communication cycle (range 960 - 1280000)"
+          "description": "Nominal number of microticks in the communication cycle (range 960 - 1280000)"
         },
         "pOffsetCorrectionOut": {
           "type": "integer",
           "minimum": 15,
           "maximum": 16082,
-          "title": "Maximum permissible offset correction value (range 15 - 16082 microticks)"
+          "description": "Maximum permissible offset correction value (range 15 - 16082 microticks)"
         },
         "pOffsetCorrectionStart": {
           "type": "integer",
           "minimum": 7,
           "maximum": 15999,
-          "title": "Start of the offset correction phase within the NIT, (7 - 15999 macroticks)"
+          "description": "Start of the offset correction phase within the NIT, (7 - 15999 macroticks)"
         },
         "pRateCorrectionOut": {
           "type": "integer",
           "minimum": 3,
           "maximum": 3846,
-          "title": "Maximum permissible rate correction value (range 3 - 3846 microticks)"
+          "description": "Maximum permissible rate correction value (range 3 - 3846 microticks)"
         },
         "pWakeupChannel": {
           "type": "string",
           "enum": [ "A", "B" ],
-          "title": "Channel used by the node to send a wakeup pattern"
+          "description": "Channel used by the node to send a wakeup pattern"
         },
         "pWakeupPattern": {
           "type": "integer",
           "minimum": 0,
           "maximum": 63,
-          "title": "Number of repetitions of the wakeup symbol (range 0 - 63, value 0 or 1 prevents sending of WUP)"
+          "description": "Number of repetitions of the wakeup symbol (range 0 - 63, value 0 or 1 prevents sending of WUP)"
         },
         "pdMicrotick": {
           "type": "string",
           "enum": [ "12.5ns", "25ns", "50ns" ],
-          "title": "Duration of a FlexRay microtick"
+          "description": "Duration of a FlexRay microtick"
         },
         "pSamplesPerMicrotick": {
           "type": "integer",
           "minimum": 1,
           "maximum": 2,
-          "title": "Number of samples per microtick (values 1, 2)"
+          "description": "Number of samples per microtick (values 1, 2)"
         }
       }
     },
-
     "FlexrayTxBufferConfigurations": {
       "type": "array",
       "items": {
@@ -349,95 +335,97 @@
           "channels": {
             "type": "string",
             "enum": [ "A", "B", "AB", "None" ],
-            "title": "Channel(s)"
+            "description": "Channel(s)"
           },
           "slotId": {
             "type": "integer",
             "minimum": 0,
             "maximum": 65535,
-            "title": "The slot Id of frame"
+            "description": "The slot Id of frame"
           },
           "offset": {
             "type": "integer",
             "minimum": 0,
             "maximum": 63,
-            "title": "Base offset for cycle multiplexing (values 0 - 63)"
+            "description": "Base offset for cycle multiplexing (values 0 - 63)"
           },
           "repetition": {
             "type": "integer",
             "minimum": 0,
             "maximum": 64,
-            "title": "Repetition for cycle multiplexing (values 1, 2, 4, 8, 16, 32, 64)"
+            "description": "Repetition for cycle multiplexing (values 1, 2, 4, 8, 16, 32, 64)"
           },
           "PPindicator": {
             "type": "boolean",
-            "title": "Set the PPindicator"
+            "description": "Set the PPindicator"
           },
           "headerCrc": {
             "type": "integer",
-            "title": "Header CRC, 11 bits"
+            "description": "Header CRC, 11 bits"
           },
           "transmissionMode": {
             "type": "string",
             "enum": [ "SingleShot", "Continuous" ],
-            "title": "SingleShot or Continuous transmission mode"
+            "description": "SingleShot or Continuous transmission mode"
           }
         }
       }
     },
-
     "FlexrayController": {
       "type": "object",
       "properties": {
-        "Name": { "$ref": "#/definitions/Name" },
-        "Network": { "$ref": "#/definitions/Network" },
-        "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-        "Replay": { "$ref": "#/definitions/Replay" },
-        "ClusterParameters": { "$ref": "#/definitions/FlexrayClusterParameters" },
-        "NodeParameters": { "$ref": "#/definitions/FlexrayNodeParameters" },
-        "TxBufferConfigurations": { "$ref": "#/definitions/FlexrayTxBufferConfigurations" }
+        "Name": {
+          "$ref": "#/definitions/Name"
+        },
+        "Network": {
+          "$ref": "#/definitions/Network"
+        },
+        "UseTraceSinks": {
+          "$ref": "#/definitions/UseTraceSinks"
+        },
+        "Replay": {
+          "$ref": "#/definitions/Replay"
+        },
+        "ClusterParameters": {
+          "$ref": "#/definitions/FlexrayClusterParameters"
+        },
+        "NodeParameters": {
+          "$ref": "#/definitions/FlexrayNodeParameters"
+        },
+        "TxBufferConfigurations": {
+          "$ref": "#/definitions/FlexrayTxBufferConfigurations"
+        }
       },
       "additionalProperties": false,
-      "required": [
-        "Name"
-      ]
+      "required": [ "Name" ]
     },
-
     "FlexrayControllers": {
       "type": "array",
+      "description": "Reconfigures the FlexrayControllers of the participant",
       "items": {
         "$ref": "#/definitions/FlexrayController"
       }
     },
-
     "Topic": {
       "type": "string",
-      "title": "Name of the communication channel between DataPublisher and DataSubscribers."
+      "description": "Name of the communication channel between DataPublisher and DataSubscribers"
     },
-
     "RpcFunctionName": {
       "type": "string",
-      "title": "Name of the RPC function called by RpcClients on RpcServers."
+      "description": "Name of the RPC function called by RpcClients on RpcServers"
     },
-
     "Logging": {
       "type": "object",
+      "description": "Configures the properties of the SIL Kit Logging Service",
       "properties": {
         "LogFromRemotes": {
           "type": "boolean",
-          "title": "Enables receiving of remote log messages from other participants"
+          "description": "Enables receiving of remote log messages from other participants",
+          "default": false
         },
         "FlushLevel": {
           "type": "string",
-          "enum": [
-            "Critical",
-            "Error",
-            "Warn",
-            "Info",
-            "Debug",
-            "Trace",
-            "Off"
-          ]
+          "enum": [ "Critical", "Error", "Warn", "Info", "Debug", "Trace", "Off" ]
         },
         "Sinks": {
           "type": "array",
@@ -446,11 +434,7 @@
             "properties": {
               "Type": {
                 "type": "string",
-                "enum": [
-                  "Remote",
-                  "File",
-                  "Stdout"
-                ]
+                "enum": [ "Remote", "File", "Stdout" ]
               },
               "Level": {
                 "type": "string",
@@ -467,291 +451,267 @@
               },
               "LogName": {
                 "type": "string",
-                "title": "Log name; Results in the following filename: <LogName>_%y-%m-%dT%h-%m-%s.txt"
+                "description": "Log name; Results in the following filename: <LogName>_%y-%m-%dT%h-%m-%s.txt"
               }
             },
             "additionalProperties": false,
-            "required": [
-              "Type"
-            ]
+            "required": [ "Type" ]
           }
         }
       },
       "additionalProperties": false,
-      "required": [
-        "Sinks"
-      ]
+      "required": [ "Sinks" ]
     }
-
   },
+  "description": "JSON schema for SIL Kit Participant configuration files",
   "properties": {
-
     "$schema": {
       "type": "string",
-      "title": "The schema file",
+      "description": "The schema file",
       "default": "",
-      "examples": [
-        "./ParticipantConfiguration.schema.json"
-      ]
+      "examples": [ "./ParticipantConfiguration.schema.json" ]
     },
-
     "schemaVersion": {
-      "type": [
-        "integer",
-        "string"
+      "anyOf": [
+        { "type": "integer" },
+        { "type": "string" }
       ],
-      "title": "Version of the schema used to validate this document"
+      "default": 0,
+      "description": "Version of the schema used to validate this document"
     },
-
     "Description": {
       "$ref": "#/definitions/Description"
     },
-
     "ParticipantName": {
       "type": "string",
-      "title": "Name of the participant"
+      "description": "Name of the participant"
     },
-
     "CanControllers": {
       "type": "array",
+      "description": "Reconfigures the CanControllers of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "Network": { "$ref": "#/definitions/Network" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Name": {
+            "$ref": "#/definitions/Name"
+          },
+          "Network": {
+            "$ref": "#/definitions/Network"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
+          }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "LinControllers": {
       "type": "array",
+      "description": "Reconfigures the LinControllers of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "Network": { "$ref": "#/definitions/Network" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Name": {
+            "$ref": "#/definitions/Name"
+          },
+          "Network": {
+            "$ref": "#/definitions/Network"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
+          }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "FlexrayControllers": {
-      "$ref":  "#/definitions/FlexrayControllers"
+      "$ref": "#/definitions/FlexrayControllers"
     },
-    "FlexRayControllers": {
-      "$ref":  "#/definitions/FlexrayControllers",
-      "$comment": "deprecated and replaced by \"FlexrayControllers\""
-    },
-
     "EthernetControllers": {
       "type": "array",
+      "description": "Reconfigures the EthernetControllers of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "Network": { "$ref": "#/definitions/Network" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Name": {
+            "$ref": "#/definitions/Name"
+          },
+          "Network": {
+            "$ref": "#/definitions/Network"
+          },
+          "UseTraceSinks": {
+            "$ref": "#/definitions/UseTraceSinks"
+          },
+          "Replay": {
+            "$ref": "#/definitions/Replay"
+          }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "DataPublishers": {
       "type": "array",
+      "description": "Reconfigures the DataPublishers of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "Topic": { "$ref": "#/definitions/Topic" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Name": {
+            "$ref": "#/definitions/Name"
+          },
+          "Topic": {
+            "$ref": "#/definitions/Topic"
+          }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "DataSubscribers": {
       "type": "array",
+      "description": "Reconfigures the DataSubscribers of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "Topic": { "$ref": "#/definitions/Topic" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" }
+          "Name": {
+            "$ref": "#/definitions/Name"
+          },
+          "Topic": {
+            "$ref": "#/definitions/Topic"
+          }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "RpcClients": {
       "type": "array",
+      "description": "Reconfigures the RpcClients of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "FunctionName": { "$ref": "#/definitions/RpcFunctionName" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" },
-
-          "Channel": {
-            "$ref": "#/definitions/RpcFunctionName",
-            "$comment": "deprecated and replaced by \"FunctionName\""
+          "Name": {
+            "$ref": "#/definitions/Name"
           },
-          "RpcChannel": {
-            "$ref": "#/definitions/RpcFunctionName",
-            "$comment": "deprecated and replaced by \"FunctionName\""
+          "FunctionName": {
+            "$ref": "#/definitions/RpcFunctionName"
           }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "RpcServers": {
       "type": "array",
+      "description": "Reconfigures the RpcServers of the participant",
       "items": {
         "type": "object",
         "properties": {
-          "Name": { "$ref": "#/definitions/Name" },
-          "FunctionName": { "$ref": "#/definitions/RpcFunctionName" },
-          "UseTraceSinks": { "$ref": "#/definitions/UseTraceSinks" },
-          "Replay": { "$ref": "#/definitions/Replay" },
-
-          "Channel": {
-            "$ref": "#/definitions/RpcFunctionName",
-            "$comment": "deprecated and replaced by \"FunctionName\""
+          "Name": {
+            "$ref": "#/definitions/Name"
           },
-          "RpcChannel": {
-            "$ref": "#/definitions/RpcFunctionName",
-            "$comment": "deprecated and replaced by \"FunctionName\""
+          "FunctionName": {
+            "$ref": "#/definitions/RpcFunctionName"
           }
         },
         "additionalProperties": false,
-        "required": [
-          "Name"
-        ]
+        "required": [ "Name" ]
       }
     },
-
     "Logging": {
       "$ref": "#/definitions/Logging"
     },
-
     "HealthCheck": {
       "type": "object",
+      "description": "Node to configure properties to determine the health status of the simulation",
       "properties": {
         "SoftResponseTimeout": {
           "type": "integer",
-          "title": "If a task is not finished before this limit, a warning is logged. Optional; Unit is in milliseconds."
+          "description": "If a simulation step is not finished before this limit, a warning is logged. Optional; Unit is in milliseconds"
         },
         "HardResponseTimeout": {
           "type": "integer",
-          "title": "If a task is not finished before this limit, the participant enters error state. Optional; Unit is in milliseconds."
+          "description": "If a simulation step is not finished before this limit, the participant enters error state. Optional; Unit is in milliseconds"
         }
       },
       "additionalProperties": false
     },
-
     "Tracing": {
-      "TraceSinks": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "Name": {
-              "type": "string",
-              "title": "Name of the trace sink"
+      "type": "object",
+      "description": "Configures the tracing service of the participant",
+      "properties": {
+        "TraceSinks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Name": {
+                "type": "string",
+                "description": "Name of the trace sink"
+              },
+              "OutputPath": {
+                "type": "string",
+                "description": "File path of output file"
+              },
+              "Type": {
+                "type": "string",
+                "enum": [ "PcapFile", "PcapPipe", "Mdf4File" ],
+                "description": "File format specifier"
+              }
             },
-            "OutputPath": {
-              "type": "string",
-              "title": "File path of output file"
+            "additionalProperties": false
+          }
+        },
+        "TraceSources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Name": {
+                "type": "string",
+                "description": "Name of the trace source",
+                "examples": [ "SomeTraceSource" ]
+              },
+              "InputPath": {
+                "type": "string",
+                "description": "File path of input file"
+              },
+              "Type": {
+                "type": "string",
+                "enum": [ "PcapFile", "PcapPipe", "Mdf4File" ],
+                "description": "File format specifier"
+              }
             },
-            "Type": {
-              "type": "string",
-              "enum": [
-                "PcapFile",
-                "PcapPipe",
-                "Mdf4File"
-              ],
-              "title": "File format specifier"
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "TraceSources": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "Name": {
-              "type": "string",
-              "title": "Name of the trace source",
-              "examples": [
-                "SomeTraceSource"
-              ]
-            },
-            "InputPath": {
-              "type": "string",
-              "title": "File path of input file"
-            },
-            "Type": {
-              "type": "string",
-              "enum": [
-                "PcapFile",
-                "PcapPipe",
-                "Mdf4File"
-              ],
-              "title": "File format specifier"
-            }
-          },
-          "additionalProperties": false
+            "additionalProperties": false
+          }
         }
       }
     },
-
     "Extensions": {
       "type": "object",
-      "title": "Optional configuration for the extension loading mechanism",
+      "description": "Optional configuration for the extension loading mechanism",
       "properties": {
         "SearchPathHints": {
           "type": "array",
           "items": {
             "type": "string",
-            "title": "A filesystem path to additionally search for extensions"
+            "description": "A filesystem path to additionally search for extensions"
           }
         }
       },
       "additionalProperties": false
     },
-
     "Middleware": {
       "type": "object",
-      "title": "Optional configuration of the VAsio middleware",
+      "description": "Optional configuration of the SIL Kit middleware",
       "properties": {
         "RegistryUri": {
           "type": "string",
@@ -763,22 +723,25 @@
         },
         "TcpNoDelay": {
           "type": "boolean",
-          "default": "true"
+          "default": true
         },
         "TcpQuickAck": {
           "type": "boolean",
-          "default": "false"
+          "default": false
         },
         "TcpSendBufferSize": {
           "type": "integer"
         },
         "TcpReceiveBufferSize": {
           "type": "integer"
+        },
+        "EnableDomainSockets": {
+          "type": "boolean",
+          "default": true
         }
       },
       "additionalProperties": false
     }
-
   },
-  "additionalProperties": false
+  "type": "object"
 }

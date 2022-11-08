@@ -22,6 +22,6 @@
 make_silkit_demo(SilKitDemoFlexray FlexrayDemo.cpp)
 
 target_sources(SilKitDemoFlexray
-    PRIVATE SilKitConfig_DemoFlexray.yaml
+    PRIVATE DemoFlexray.silkit.yaml
     PRIVATE NetworkSimulatorConfig.yaml
 )
