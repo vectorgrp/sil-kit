@@ -69,6 +69,10 @@ according to layer 2 of IEEE 802.3, with
 
   The frame check sequence (32-bit CRC, 4 octets) is omitted. Thus, the minimum length of a frame is 60 octets.
 
+.. admonition:: Note
+
+  If the frame is shorter than the minimum length of 60 octets, the frame will be padded with zeros to the minimum length.
+
 A valid frame can be setup and sent as follows::
 
   // Prepare an Ethernet frame
