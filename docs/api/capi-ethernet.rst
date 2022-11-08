@@ -41,8 +41,7 @@ Ethernet Frame
 ~~~~~~~~~~~~~~
 
 The SilKit_EthernetFrame is a raw Ethernet frame consisting of the destination mac, the source mac, the ethertype and a 
-payload. The union type within the SilKit_EthernetFrame helps when manual construction of a frame is necessary 
-(frameHeader, frameHeaderVlanTagged).
+payload.
 
 .. note:: For an example of manual frame construction one can refer to the C Ethernet demo.
 
