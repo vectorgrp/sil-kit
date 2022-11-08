@@ -5,6 +5,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.11] - UNRELEASED
+---------------------
+
+Changed
+~~~~~~~
+
+- Ethernet
+
+  - The Ethernet controller now quietly pads Ethernet frames with zeros to the
+    minimum size of 60 bytes.
+
+
 [4.0.10] - 2022-11-07
 ---------------------
 
