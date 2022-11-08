@@ -340,30 +340,28 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_EthernetController_RemoveBitrateCh
                                                                              SilKit_HandlerId handlerId);
 
 /*! \brief Send an Ethernet frame
-*
-* Requires previous activation of the
-* controller and a successfully established link. Also, the
-* entire EthernetFrame must be valid, e.g., destination and source MAC
-* addresses must be valid, ether type and vlan tags must be
-* correct, payload size must be valid.
-*
-* These requirements are not enforced in
-* simple simulation. In this case, the message is simply passed
-* on to all connected controllers without performing any check. 
-* The user must ensure that a valid frame is provided.
-* 
-* The minimum frame size of 60 bytes must be provided, or 
-* SilKit_ReturnCode_BAD_PARAMETER will be returned.
-*
-* \param controller The Ethernet controller that should send the frame.
-* \param frame The Ethernet frame to be sent.
-* \param userContext The user provided context pointer, that is reobtained in the frame ack handler
-* \result A return code identifying the success/failure of the call.
-* 
-*/
+ *
+ * Requires previous activation of the controller and a successfully
+ * established link. Also, the entire EthernetFrame must be valid, e.g.,
+ * destination and source MAC addresses must be valid, ether type and vlan tags
+ * must be correct.
+ *
+ * These requirements are not enforced in simple simulation. In this case, the
+ * message is simply passed on to all connected controllers without performing
+ * any check. The user must ensure that a valid frame is provided.
+ *
+ * If the frame size is smaller than the minimum of 60 bytes, the frame will be
+ * padded with zeros.
+ *
+ * \param controller The Ethernet controller that should send the frame.
+ * \param frame The Ethernet frame to be sent.
+ * \param userContext The user provided context pointer, that is reobtained in
+ *                    the frame ack handler
+ * \result A return code identifying the success/failure of the call.
+ */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(
   SilKit_EthernetController* controller,
-  SilKit_EthernetFrame* frame, 
+  SilKit_EthernetFrame* frame,
   void* userContext);
 
 typedef SilKit_ReturnCode(SilKitFPTR *SilKit_EthernetController_SendFrame_t)(
