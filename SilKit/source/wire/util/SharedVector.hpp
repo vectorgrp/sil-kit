@@ -43,7 +43,7 @@ public:
 
     SharedVector(const std::vector<T> vector);
 
-    SharedVector(const Span<const T> span);
+    SharedVector(const Span<const T> span, size_t minimumSize = 0, T padValue = T{});
 
     auto AsSpan() const& -> Span<const T>;
 
@@ -71,9 +71,10 @@ SharedVector<T>::SharedVector(const std::vector<T> vector)
 }
 
 template <typename T>
-SharedVector<T>::SharedVector(const Span<const T> span)
+SharedVector<T>::SharedVector(const Span<const T> span, const size_t minimumSize, const T padValue)
     : _data{std::make_shared<std::vector<T>>(span.begin(), span.end())}
 {
+    _data->resize(std::max(_data->size(), minimumSize), padValue);
 }
 
 template <typename T>

@@ -18,12 +18,15 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "silkit/capi/SilKit.h"
 #include "silkit/services/ethernet/all.hpp"
 #include "EthDatatypeUtils.hpp"
 #include "MockParticipant.hpp"
+
+#include "fmt/format.h"
 
 namespace {
 using namespace SilKit::Services::Ethernet;
@@ -352,6 +355,46 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
     returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, testUserContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
+}
+
+TEST_F(CapiEthernetTest, ethernet_controller_send_short_frame)
+{
+    std::vector<uint8_t> buffer;
+
+    // set destination mac
+    const EthernetMac destinationMac{ 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC1 };
+    std::copy(destinationMac.begin(), destinationMac.end(), std::back_inserter(buffer));
+
+    // set source mac
+    const EthernetMac sourceMac{ 0xF6, 0x04, 0x68, 0x71, 0xAA, 0xC2 };
+    std::copy(sourceMac.begin(), sourceMac.end(), std::back_inserter(buffer));
+
+    // set ethertype
+    buffer.push_back(0x00);
+    buffer.push_back(0x08);
+
+    // set payload
+    const auto payload = std::string{"SHORT"};
+    std::copy(payload.begin(), payload.end(), std::back_inserter(buffer));
+
+    // create the Ethernet frame being sent
+    SilKit_EthernetFrame ef{};
+    SilKit_Struct_Init(SilKit_EthernetFrame, ef);
+    ef.raw = {buffer.data(), buffer.size()};
+
+    const auto testUserContext = reinterpret_cast<void *>(0x12345);
+
+    // create the expected Ethernet frame
+    std::vector<uint8_t> expectedFrameRaw(ef.raw.data, ef.raw.data + ef.raw.size);
+    EthernetFrame expectedFrame{};
+    expectedFrame.raw = expectedFrameRaw;
+
+    // NOTE: The C API just hands the raw Ethernet frame to the underlying implementation. Any padding would be handled
+    //       in the implementation.
+    EXPECT_CALL(mockController, SendFrame(EthFrameMatcher(expectedFrame), testUserContext)).Times(testing::Exactly(1));
+
+    const auto returnCode = SilKit_EthernetController_SendFrame((SilKit_EthernetController*)&mockController, &ef, testUserContext);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 }

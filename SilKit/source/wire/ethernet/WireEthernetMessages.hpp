@@ -94,7 +94,8 @@ auto ToEthernetFrame(const WireEthernetFrame& wireEthernetFrame) -> EthernetFram
 
 auto MakeWireEthernetFrame(const EthernetFrame& ethernetFrame) -> WireEthernetFrame
 {
-    return {ethernetFrame.raw};
+    constexpr static const size_t minimumEthernetFrameSizeWithoutFcs = 60;
+    return {Util::SharedVector<uint8_t>{ethernetFrame.raw, minimumEthernetFrameSizeWithoutFcs}};
 }
 
 auto ToEthernetFrameEvent(const WireEthernetFrameEvent& wireEthernetFrameEvent) -> EthernetFrameEvent

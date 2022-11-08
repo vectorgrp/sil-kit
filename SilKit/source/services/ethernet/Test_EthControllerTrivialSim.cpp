@@ -68,9 +68,19 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp) -> testing::Matcher<co
     return testing::Field(&WireEthernetFrameEvent::timestamp, timestamp);
 }
 
+auto AnEthMessageWith(std::chrono::nanoseconds timestamp, size_t rawFrameSize)
+    -> testing::Matcher<const WireEthernetFrameEvent&>
+{
+    const auto frameHasCorrectSize = [rawFrameSize](const WireEthernetFrame& frame) -> bool {
+        return frame.raw.AsSpan().size() == rawFrameSize;
+    };
+    return testing::AllOf(testing::Field(&WireEthernetFrameEvent::timestamp, timestamp),
+                          testing::Field(&WireEthernetFrameEvent::frame, testing::Truly(frameHasCorrectSize)));
+}
+
 void SetSourceMac(std::vector<uint8_t>& raw, const EthernetMac& source)
 {
-    const size_t MinFrameSize = 64;
+    const size_t MinFrameSize = 60;
     const size_t SourceMacStart = sizeof(EthernetMac);
     if (raw.empty())
     {
@@ -147,6 +157,62 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
 
     std::vector<uint8_t> rawFrame;
     SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+
+    EthernetFrame frame{rawFrame};
+    controller.Activate();
+    controller.SendFrame(frame);
+}
+
+//! \brief SendFrame must pad the Ethernet frame to the minimum length of 60 bytes (without the Frame Check Sequence).
+TEST_F(EthernetControllerTrivialSimTest, send_short_eth_frame)
+{
+    ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(42ns));
+
+    const auto now = 42ns;
+
+    EthernetFrameTransmitEvent ack{};
+    ack.status = EthernetTransmitStatus::Transmitted;
+    ack.timestamp = 42ns;
+    EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack))).Times(1);
+
+    // once for activate and once for sending the frame
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
+
+    std::vector<uint8_t> rawFrame;
+    // destination and source MAC
+    std::generate_n(std::back_inserter(rawFrame), 6 + 6, []() -> uint8_t {
+        return 0xFF;
+    });
+    // EtherType
+    rawFrame.push_back(0x00);
+    rawFrame.push_back(0x00);
+    // payload
+    rawFrame.push_back('S');
+    rawFrame.push_back('H');
+    rawFrame.push_back('O');
+    rawFrame.push_back('R');
+    rawFrame.push_back('T');
+
+    ASSERT_LT(rawFrame.size(), 60);
+
+    const auto isFramePrefixEqual = [&rawFrame](const WireEthernetFrameEvent& event) -> bool {
+        const auto eventRawFrame = event.frame.raw.AsSpan();
+        return std::equal(rawFrame.begin(), rawFrame.end(), eventRawFrame.begin(),
+                          std::next(eventRawFrame.begin(), rawFrame.size()));
+    };
+
+    const auto isFramePaddingZero = [&rawFrame](const WireEthernetFrameEvent& event) -> bool {
+        const auto eventRawFrame = event.frame.raw.AsSpan();
+        return std::all_of(std::next(eventRawFrame.begin(), rawFrame.size()), eventRawFrame.end(),
+                           [](const uint8_t byte) {
+                               return byte == 0;
+                           });
+    };
+
+    const testing::Matcher<const WireEthernetFrameEvent&> matcher{testing::AllOf(
+        AnEthMessageWith(now, 60), testing::Truly(isFramePrefixEqual), testing::Truly(isFramePaddingZero))};
+
+    EXPECT_CALL(participant, SendMsg(&controller, matcher)).Times(1);
 
     EthernetFrame frame{rawFrame};
     controller.Activate();

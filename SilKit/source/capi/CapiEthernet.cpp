@@ -249,17 +249,11 @@ SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(SilKit_Ethernet
     ASSERT_VALID_POINTER_PARAMETER(frame);
     CAPI_ENTER
     {
-        if (frame->raw.size < ETHERNET_MIN_FRAME_SIZE)
-        {
-            SilKit_error_string = "An ethernet frame must be at least 60 bytes in size.";
-            return SilKit_ReturnCode_BADPARAMETER;
-        }
         using std::chrono::duration;
         auto cppController = reinterpret_cast<SilKit::Services::Ethernet::IEthernetController*>(controller);
 
         SilKit::Services::Ethernet::EthernetFrame ef;
-        std::vector<uint8_t> rawFrame(frame->raw.data, frame->raw.data + frame->raw.size);
-        ef.raw = rawFrame;
+        ef.raw = SilKit::Util::Span<const uint8_t>{frame->raw.data, frame->raw.size};
         cppController->SendFrame(ef, userContext);
 
         return SilKit_ReturnCode_SUCCESS;
