@@ -35,7 +35,6 @@ sil-kit-registry
         -s, --use-signal-handler              Exit this process when a signal is received. If not set, the process runs infinitely.
         -u, --listen-uri <silkit-uri>         The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
         -l, --log <level>                     Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
-        -c, --configuration <configuration>   Path and filename of the participant configuration YAML or JSON file.
         -g, --generate-configuration <path>   Path and filename of a participant configuration file to generate containing the URI the registry is using.
 
    *  - Usage Example
