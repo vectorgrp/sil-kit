@@ -68,14 +68,6 @@ std::vector<uint8_t> CreateFrame(const EthernetMac& destinationAddress, const Et
     raw.push_back(etherTypeBytes[0]);
     std::copy(payload.begin(), payload.end(), std::back_inserter(raw));
 
-    // make sure that the result is a valid Ethernet frame
-    if (raw.size() < 64)
-    {
-        auto fillSize = static_cast<size_t>(64 - raw.size());
-        std::vector<uint8_t> filler(fillSize, 0);
-        std::copy(filler.begin(), filler.end(), std::back_inserter(raw)); // expand to a valid frame
-    }
-
     return raw;
 }
 
