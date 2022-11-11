@@ -19,6 +19,10 @@ Changed
   - (Re-)added experimental support for PCAP tracing and replay on ethernet controllers.
     The tracing and replay behavior may change in the future.
 
+- Registry
+
+  - Only exit if neither TCP, nor domain sockets are available.
+
 
 [4.0.10] - 2022-11-07
 ---------------------
