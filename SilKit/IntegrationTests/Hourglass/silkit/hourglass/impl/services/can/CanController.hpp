@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "silkit/capi/Can.h"
+#include "silkit/capi/InterfaceIdentifiers.h"
 
 #include "silkit/services/can/ICanController.hpp"
 
@@ -177,10 +178,14 @@ public:
             SILKIT_UNUSED_ARG(controller);
 
             SilKit::Services::Can::CanFrameTransmitEvent event{};
-            // event.canId = XXX ; // SilKit_CanFrameTransmitEvent does not contain the canId field
             event.userContext = frameTransmitEvent->userContext;
             event.timestamp = std::chrono::nanoseconds{frameTransmitEvent->timestamp};
             event.status = static_cast<SilKit::Services::Can::CanTransmitStatus>(frameTransmitEvent->status);
+
+            if (SK_ID_GET_VERSION(SilKit_Struct_GetId((*frameTransmitEvent))) >= 2)
+            {
+                event.canId = frameTransmitEvent->canId;
+            }
 
             const auto data = static_cast<HandlerData<FrameTransmitHandler> *>(context);
             data->handler(data->controller, event);

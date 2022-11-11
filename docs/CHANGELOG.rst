@@ -23,6 +23,13 @@ Changed
 
   - Only exit if neither TCP, nor domain sockets are available.
 
+Fixed
+~~~~~
+
+- C: CAN:
+
+  - Added missing ``canId`` field to the ``SilKit_CanFrameTransmitEvent`` and bumped the structure version.
+
 
 [4.0.10] - 2022-11-07
 ---------------------

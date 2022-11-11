@@ -74,14 +74,9 @@ MATCHER_P(UserContextContainsFrameCounter, frameCounter, "") {
 
 auto AnAckWithCanIdAndFrameCounter(uint32_t canId, uint16_t frameCounter) -> testing::Matcher<const CanFrameTransmitEvent&>
 {
-#ifdef SILKIT_HOURGLASS
-    SILKIT_UNUSED_ARG(canId);
-#endif
     using namespace testing;
     return AllOf(
-#ifndef SILKIT_HOURGLASS
         Field(&CanFrameTransmitEvent::canId, canId),
-#endif
         Field(&CanFrameTransmitEvent::userContext, UserContextContainsFrameCounter(frameCounter))
     );
 }

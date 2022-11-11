@@ -124,6 +124,7 @@ SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit
                 frameTransmitEvent.userContext = cppFrameTransmitEvent.userContext;
                 frameTransmitEvent.timestamp = cppFrameTransmitEvent.timestamp.count();
                 frameTransmitEvent.status = (SilKit_CanTransmitStatus)cppFrameTransmitEvent.status;
+                frameTransmitEvent.canId = cppFrameTransmitEvent.canId;
                 callback(context, controller, &frameTransmitEvent);
                 },
                 static_cast<SilKit::Services::Can::CanTransmitStatusMask>(statusMask));

@@ -102,7 +102,7 @@ typedef struct
 
 // CAN data type versions
 #define SilKit_CanFrame_VERSION 1
-#define SilKit_CanFrameTransmitEvent_VERSION 1
+#define SilKit_CanFrameTransmitEvent_VERSION 2
 #define SilKit_CanFrameEvent_VERSION 1
 #define SilKit_CanStateChangeEvent_VERSION 1
 #define SilKit_CanErrorStateChangeEvent_VERSION 1

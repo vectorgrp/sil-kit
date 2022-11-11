@@ -101,6 +101,14 @@ struct SilKit_CanFrameTransmitEvent
     void* userContext; //!< Value that was provided by user in corresponding parameter on send of CAN frame
     SilKit_NanosecondsTime timestamp; //!< Reception time
     SilKit_CanTransmitStatus status; //!< Status of the CanTransmitRequest
+    /*! Identifies the CAN id to which this CanFrameTransmitEvent refers to.
+     *
+     * \version Check: SK_ID_GET_VERSION(SilKit_Struct_GetId(event)) >= 2
+     *
+     * You must check that the structure version is sufficient before accessing this field.
+     * Added in SIL Kit version 4.0.11.
+     */
+    uint32_t canId;
 };
 typedef struct SilKit_CanFrameTransmitEvent SilKit_CanFrameTransmitEvent;
 
