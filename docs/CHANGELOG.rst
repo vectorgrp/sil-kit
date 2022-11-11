@@ -16,6 +16,9 @@ Changed
   - The Ethernet controller now quietly pads Ethernet frames with zeros to the
     minimum size of 60 bytes.
 
+  - (Re-)added experimental support for PCAP tracing and replay on ethernet controllers.
+    The tracing and replay behavior may change in the future.
+
 
 [4.0.10] - 2022-11-07
 ---------------------
