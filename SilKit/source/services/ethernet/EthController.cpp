@@ -145,8 +145,34 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
     {
         return;
     }
-    _tracer.Trace(msg.direction, msg.timestamp, ToEthernetFrame(msg.frame));
-    CallHandlers(ToEthernetFrameEvent(msg));
+
+    // The event instance that is passed to the handlers
+    auto ethernetFrameEvent = ToEthernetFrameEvent(msg);
+
+    // If padding is required, this vector will hold the storage of the padded data. The vector must be alive until
+    // _after_ CallHandlers has finished.
+    std::vector<uint8_t> newData;
+
+    constexpr static const size_t minimumEthernetFrameSizeWithoutFcs = 60;
+    if (msg.frame.raw.AsSpan().size() < minimumEthernetFrameSizeWithoutFcs)
+    {
+        // This span holds the received raw frame data, it is used as the source
+        auto rawSpan = msg.frame.raw.AsSpan();
+
+        // reserve enough storage, this avoids multiple allocations during the copy and padding
+        newData.reserve(minimumEthernetFrameSizeWithoutFcs);
+
+        // copy the short frame data and pad with zeros
+        std::copy(rawSpan.begin(), rawSpan.end(), std::back_inserter(newData));
+        newData.resize(minimumEthernetFrameSizeWithoutFcs);
+
+        // replace the raw frame data with a span of the bytes in newData
+        ethernetFrameEvent.frame.raw = SilKit::Util::Span<const uint8_t>{newData};
+    }
+
+    // Only use ethernetFrameEvent, not msg, as it may contain the unpadded frame
+    _tracer.Trace(ethernetFrameEvent.direction, ethernetFrameEvent.timestamp, ethernetFrameEvent.frame);
+    CallHandlers(ethernetFrameEvent);
 }
 
 void EthController::ReceiveMsg(const IServiceEndpoint* from, const EthernetFrameTransmitEvent& msg)

@@ -381,4 +381,20 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
     ethController.ReceiveMsg(&controllerOther, wireEthernetFrame);
 }
 
+TEST_F(EthernetControllerTrivialSimTest, receive_pads_with_zeros)
+{
+    WireEthernetFrameEvent msg{};
+    msg.direction = TransmitDirection::RX;
+
+    auto expectedRaw = std::vector<uint8_t>(60);
+
+    auto expectedEvent = ToEthernetFrameEvent(msg);
+    expectedEvent.frame.raw = SilKit::Util::Span<const uint8_t>{expectedRaw};
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, expectedEvent))
+        .Times(1);
+
+    controller.ReceiveMsg(&controllerOther, msg);
+}
+
 } // anonymous namespace
