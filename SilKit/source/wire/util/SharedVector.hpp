@@ -41,7 +41,7 @@ public:
 
     SharedVector(std::initializer_list<T> initializerList);
 
-    SharedVector(const std::vector<T> vector);
+    SharedVector(std::vector<T> vector);
 
     SharedVector(const Span<const T> span, size_t minimumSize = 0, T padValue = T{});
 
@@ -65,7 +65,7 @@ SharedVector<T>::SharedVector(std::initializer_list<T> initializerList)
 }
 
 template <typename T>
-SharedVector<T>::SharedVector(const std::vector<T> vector)
+SharedVector<T>::SharedVector(std::vector<T> vector)
     : _data{std::make_shared<std::vector<T>>(std::move(vector))}
 {
 }
