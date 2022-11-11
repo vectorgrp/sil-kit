@@ -111,3 +111,45 @@ TEST(MwVAsioSerdes, SimEthernet_EthSetMode)
 
     EXPECT_EQ(in.mode, out.mode);
 }
+
+TEST(MwVAsioSerdes, SimEthernet_Deserialize_WireEthernetFrame_expands_to_minimum_size)
+{
+    using namespace SilKit::Services::Ethernet;
+
+    constexpr static const size_t minimumEthernetFrameSizeWithoutFcs = 60;
+    const auto content = std::vector<uint8_t>(std::vector<uint8_t>::size_type(30), UINT8_C(0xAB));
+
+    ASSERT_LT(content.size(), minimumEthernetFrameSizeWithoutFcs);
+
+    SilKit::Core::MessageBuffer buffer;
+
+    {
+        WireEthernetFrameEvent event{};
+        event.frame.raw = content;
+
+        {
+            const auto raw = event.frame.raw.AsSpan();
+
+            ASSERT_EQ(raw.size(), content.size());
+            ASSERT_TRUE(std::equal(raw.begin(), raw.end(), content.begin(), content.end()));
+        }
+
+        Serialize(buffer, event);
+    }
+
+    {
+        WireEthernetFrameEvent event{};
+        Deserialize(buffer, event);
+
+        {
+            const auto raw = event.frame.raw.AsSpan();
+
+            ASSERT_EQ(raw.size(), minimumEthernetFrameSizeWithoutFcs);
+            ASSERT_TRUE(
+                std::equal(raw.begin(), std::next(raw.begin(), content.size()), content.begin(), content.end()));
+            ASSERT_TRUE(std::all_of(std::next(raw.begin(), content.size()), raw.end(), [](const auto value) {
+                return value == 0x0;
+            }));
+        }
+    }
+}

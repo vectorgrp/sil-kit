@@ -34,7 +34,13 @@ inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buff
 
 inline SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireEthernetFrame& msg)
 {
-    buffer >> msg.raw;
+    std::vector<uint8_t> raw;
+    buffer >> raw;
+
+    constexpr static const size_t minimumEthernetFrameSizeWithoutFcs = 60;
+    raw.resize(std::max(minimumEthernetFrameSizeWithoutFcs, raw.size()), UINT8_C(0));
+
+    msg.raw = SilKit::Util::SharedVector<uint8_t>{std::move(raw)};
 
     return buffer;
 }
