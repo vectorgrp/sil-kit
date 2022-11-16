@@ -23,6 +23,13 @@ Changed
 
   - Only exit if neither TCP, nor domain sockets are available.
 
+- SIL Kit Library
+
+  - Changed the default symbol visibility to hidden, which is now also enforced for
+    Linux builds.
+
+  - Symbols for ASIO are not exported as weak symbols anymore.
+
 Fixed
 ~~~~~
 
