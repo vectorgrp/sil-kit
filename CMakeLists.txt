@@ -43,6 +43,16 @@ option(SILKIT_ENABLE_COVERAGE "Enable coverage for builds (requires gcc, clang)"
 option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" ON)
 
+
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+
+add_compile_definitions(
+    ASIO_DISABLE_VISIBILITY=1
+)
+
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake ${CMAKE_CURRENT_LIST_DIR}/SilKit/cmake)
 include(SilKitInstall)
 include(SilKitVersion)
