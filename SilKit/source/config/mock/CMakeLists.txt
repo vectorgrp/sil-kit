@@ -19,14 +19,14 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitConfigurationTestUtils INTERFACE
+add_library(I_SilKit_Config_TestUtils INTERFACE
     ConfigurationTestUtils.hpp
 )
 
-target_include_directories(SilKitConfigurationTestUtils
+target_include_directories(I_SilKit_Config_TestUtils
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(SilKitConfigurationTestUtils
-    INTERFACE SilKitConfiguration
+target_link_libraries(I_SilKit_Config_TestUtils
+    INTERFACE S_SilKit_Config
 )

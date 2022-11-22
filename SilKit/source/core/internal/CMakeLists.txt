@@ -21,23 +21,22 @@
 
 # The Participant's connection interfaces are collected in this folder
 # for easy consumption from external projects
-add_library(SilKitInternal INTERFACE)
-target_include_directories(SilKitInternal 
+add_library(I_SilKit_Core_Internal INTERFACE)
+target_include_directories(I_SilKit_Core_Internal
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
     # for internal type definitions
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../service # ServiceDiscovery is internal only special
 )
-target_link_libraries(
-    SilKitInternal
-    INTERFACE SilKitWireUtil
-    INTERFACE SilKitWireCan
-    INTERFACE SilKitWireData
-    INTERFACE SilKitWireEthernet
-    INTERFACE SilKitWireFlexray
-    INTERFACE SilKitWireLin
-    INTERFACE SilKitWireRpc
-    INTERFACE SilKitConfiguration
+target_link_libraries(I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Wire_Util
+    INTERFACE I_SilKit_Wire_Can
+    INTERFACE I_SilKit_Wire_Data
+    INTERFACE I_SilKit_Wire_Ethernet
+    INTERFACE I_SilKit_Wire_Flexray
+    INTERFACE I_SilKit_Wire_Lin
+    INTERFACE I_SilKit_Wire_Rpc
+    INTERFACE S_SilKit_Config
 )
 
-add_silkit_test(Test_MwVAsio_MessageBuffer SOURCES Test_MessageBuffer.cpp LIBS SilKitInternal)
-add_silkit_test(Test_MwInternal_Serdes  SOURCES Test_InternalSerdes.cpp LIBS SilKitInternal)
+add_silkit_test(Test_MwVAsio_MessageBuffer SOURCES Test_MessageBuffer.cpp LIBS I_SilKit_Core_Internal)
+add_silkit_test(Test_MwInternal_Serdes  SOURCES Test_InternalSerdes.cpp LIBS I_SilKit_Core_Internal)

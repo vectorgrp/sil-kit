@@ -38,7 +38,7 @@ set_target_properties(sil-kit-monitor PROPERTIES
 
 target_link_libraries(sil-kit-monitor
     SilKit
-    SilKitUtil
+    I_SilKit_Util
 )
 
 # Set versioning infos on exe

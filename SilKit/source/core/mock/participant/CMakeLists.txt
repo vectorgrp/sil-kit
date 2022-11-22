@@ -19,13 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitMwMockParticipant INTERFACE
+add_library(I_SilKit_Core_Mock_Participant INTERFACE
 )
 
-target_include_directories(SilKitMwMockParticipant
+target_include_directories(I_SilKit_Core_Mock_Participant
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(SilKitMwMockParticipant
-    INTERFACE SilKitMwLogging SilKitMwSync SilKitInternal
+target_link_libraries(I_SilKit_Core_Mock_Participant
+    INTERFACE S_SilKit_Services_Logging
+    INTERFACE S_SilKit_Services_Orchestration
+    INTERFACE I_SilKit_Core_Internal
 )

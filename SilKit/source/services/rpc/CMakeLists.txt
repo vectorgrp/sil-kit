@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitSimRpc STATIC
+
+add_library(I_SilKit_Services_Rpc INTERFACE)
+
+target_include_directories(I_SilKit_Services_Rpc
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_Rpc STATIC
     RpcCallHandle.hpp
     RpcDatatypeUtils.hpp
     RpcDatatypeUtils.cpp
@@ -34,16 +42,14 @@ add_library(SilKitSimRpc STATIC
     RpcSerdes.cpp
 )
 
-target_include_directories(SilKitSimRpc
-    PUBLIC .
-)
+target_link_libraries(S_SilKit_Services_Rpc
+    PUBLIC I_SilKit_Services_Rpc
 
-target_link_libraries(SilKitSimRpc
     PRIVATE SilKitInterface
-            SilKitInternal
-            SilKitUuid
-            SilKitConfiguration
-            SilKitLabelMatching
+            I_SilKit_Core_Internal
+            S_SilKit_Util_Uuid
+            S_SilKit_Config
+            S_SilKit_Util_LabelMatching
 )
 
 add_silkit_test(Test_SimRpc
@@ -52,9 +58,9 @@ add_silkit_test(Test_SimRpc
         Test_RpcServer.cpp
         Test_RpcMatching.cpp
     LIBS
-        SilKitSimRpc
-        SilKitMwMockParticipant
-        SilKitInternal
-        SilKitMwMockNullConnection
+        S_SilKit_Services_Rpc
+        I_SilKit_Core_Mock_Participant
+        I_SilKit_Core_Internal
+        S_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS SilKitInternal SilKitSimRpc)
+add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Rpc)

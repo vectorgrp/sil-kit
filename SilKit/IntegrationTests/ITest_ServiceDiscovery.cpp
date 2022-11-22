@@ -22,9 +22,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 
 #include "silkit/services/all.hpp"
-#include "functional.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+
+#include "functional.hpp"
 
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
@@ -60,7 +62,7 @@ TEST_F(ITest_ServiceDiscovery, discover_services)
     std::string publisherName = "Publisher";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
@@ -152,7 +154,7 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
     std::string publisherName = "Publisher";
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal

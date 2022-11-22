@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitSimDataMessage STATIC
+
+add_library(I_SilKit_Services_PubSub INTERFACE)
+
+target_include_directories(I_SilKit_Services_PubSub
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_PubSub STATIC
     DataMessageDatatypeUtils.hpp
     DataMessageDatatypeUtils.cpp
     DataPublisher.hpp
@@ -34,33 +42,34 @@ add_library(SilKitSimDataMessage STATIC
     DataSerdes.cpp
 )
 
-target_include_directories(SilKitSimDataMessage
-    PUBLIC .
-)
+target_link_libraries(S_SilKit_Services_PubSub
+    PUBLIC I_SilKit_Services_PubSub
 
-target_link_libraries(SilKitSimDataMessage
-    PUBLIC  SilKitWireData
+    PUBLIC  I_SilKit_Wire_Data
     PRIVATE SilKitInterface
-            SilKitInternal
-            SilKitConfiguration
-            SilKitUtil
-            SilKitLabelMatching
+            I_SilKit_Core_Internal
+            S_SilKit_Config
+            I_SilKit_Util
+            S_SilKit_Util_LabelMatching
 )
 
 add_silkit_test(Test_SimDataPublisher 
     SOURCES Test_DataPublisher.cpp 
-    LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal 
+    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal 
 )
 add_silkit_test(Test_SimDataSubscriber
     SOURCES Test_DataSubscriber.cpp
-    LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal 
+    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal 
 )
 add_silkit_test(Test_SimDataSubscriberInternal
     SOURCES Test_DataSubscriberInternal.cpp
-    LIBS SilKitSimDataMessage SilKitMwMockParticipant SilKitInternal
+    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal
 )
 add_silkit_test(Test_PubSubMatching
     SOURCES Test_PubSubMatching.cpp 
-    LIBS SilKitSimDataMessage SilKitUtil
+    LIBS S_SilKit_Services_PubSub I_SilKit_Util
 )
-add_silkit_test(Test_SimData_Serdes SOURCES Test_DataSerdes.cpp LIBS SilKitSimDataMessage SilKitInternal)
+add_silkit_test(Test_SimData_Serdes
+    SOURCES Test_DataSerdes.cpp
+    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Internal
+)

@@ -23,7 +23,7 @@ add_library(DummyExtension SHARED
     DummyExtension.cpp
     DummyExtension.hpp
 )
-target_link_libraries(DummyExtension PRIVATE SilKitExtensions )
+target_link_libraries(DummyExtension PRIVATE S_SilKit_Extensions)
 set_property(TARGET DummyExtension PROPERTY FOLDER "Tests")
 set_target_properties(DummyExtension PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>/silkit_library_test"
@@ -32,7 +32,7 @@ set_target_properties(DummyExtension PROPERTIES
 )
 
 add_library(WrongVersionExtension SHARED WrongVersionExtension.cpp)
-target_link_libraries(WrongVersionExtension PRIVATE SilKitExtensions )
+target_link_libraries(WrongVersionExtension PRIVATE S_SilKit_Extensions)
 set_property(TARGET WrongVersionExtension PROPERTY FOLDER "Tests")
 set_target_properties(WrongVersionExtension PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
@@ -41,7 +41,7 @@ set_target_properties(WrongVersionExtension PROPERTIES
 )
 
 add_library(WrongBuildSystem  SHARED WrongBuildSystem.cpp) 
-target_link_libraries(WrongBuildSystem PRIVATE SilKitExtensions )
+target_link_libraries(WrongBuildSystem PRIVATE S_SilKit_Extensions)
 set_property(TARGET WrongBuildSystem PROPERTY FOLDER "Tests")
 set_target_properties(WrongBuildSystem PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
@@ -49,7 +49,7 @@ set_target_properties(WrongBuildSystem PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
 
-add_silkit_test(Test_SilKitExtensions SOURCES Test_SilKitExtensions.cpp LIBS SilKitExtensions SilKitFilesystem SilKitMwMockParticipant)
+add_silkit_test(Test_SilKitExtensions SOURCES Test_SilKitExtensions.cpp LIBS S_SilKit_Extensions S_SilKit_Util_Filesystem I_SilKit_Core_Mock_Participant)
 
 if(${SILKIT_BUILD_TESTS})
     add_dependencies(Test_SilKitExtensions

@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitSimEthernet STATIC
+
+add_library(I_SilKit_Services_Ethernet INTERFACE)
+
+target_include_directories(I_SilKit_Services_Ethernet
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_Ethernet STATIC
     EthController.cpp
     EthController.hpp
 
@@ -35,19 +43,16 @@ add_library(SilKitSimEthernet STATIC
     EthernetSerdes.cpp
 )
 
-target_link_libraries(SilKitSimEthernet
-    PUBLIC
-        SilKitTracing
-        SilKitWireEthernet
-    PRIVATE
-        SilKitInternal
-        SilKitInterface
-        SilKitMwLogging
-)
+target_link_libraries(S_SilKit_Services_Ethernet
+    PUBLIC I_SilKit_Services_Ethernet
 
-target_include_directories(SilKitSimEthernet
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+    PUBLIC
+        S_SilKit_Tracing
+        I_SilKit_Wire_Ethernet
+    PRIVATE
+        I_SilKit_Core_Internal
+        SilKitInterface
+        S_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_SimEthController
@@ -56,9 +61,9 @@ add_silkit_test(Test_SimEthController
         Test_EthControllerDetailedSim.cpp
         Test_EthControllerConfig.cpp
     LIBS
-        SilKitSimEthernet
-        SilKitMwMockParticipant
-        SilKitTracing
-        SilKitMwMockNullConnection
+        S_SilKit_Services_Ethernet
+        I_SilKit_Core_Mock_Participant
+        S_SilKit_Tracing
+        S_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimEthernet_Serdes  SOURCES Test_EthernetSerdes.cpp LIBS SilKitSimEthernet)
+add_silkit_test(Test_SimEthernet_Serdes  SOURCES Test_EthernetSerdes.cpp LIBS S_SilKit_Services_Ethernet)

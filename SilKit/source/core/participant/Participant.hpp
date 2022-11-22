@@ -35,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfiguration.hpp"
 #include "ReplayScheduler.hpp"
 
-// Interfaces relying on SilKitInternal
+// Interfaces relying on I_SilKit_Core_Internal
 #include "IMsgForLogMsgSender.hpp"
 #include "IMsgForLogMsgReceiver.hpp"
 
@@ -67,7 +67,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ITraceMessageSink.hpp"
 #include "ITraceMessageSource.hpp"
 
-// SilKitMwService
+// core/service
 #include "ServiceDiscovery.hpp"
 
 #include "ProtocolVersion.hpp"

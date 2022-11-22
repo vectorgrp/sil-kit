@@ -12,6 +12,11 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Fixed
 ~~~~~
 
+- Integration Tests
+
+  - Linking executables with both, the dynamic library, and certain internal, static library components leads to ODR violations.
+    The ASAN / UBSAN instrumentation from recent Clang versions is able to detect these.
+
 - LIN
 
   - Fixed faulty behavior of ``ILinController::SendFrame()`` for ``LinFrameResponseType::MasterResponse``. The method now consistently uses the input frame data.

@@ -38,7 +38,7 @@ set_target_properties(sil-kit-system-controller PROPERTIES
 
 target_link_libraries(sil-kit-system-controller
     SilKit
-    SilKitUtil
+    I_SilKit_Util
 )
 
 # Set versioning infos on exe

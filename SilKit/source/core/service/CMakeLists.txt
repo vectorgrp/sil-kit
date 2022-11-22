@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitMwService STATIC
+
+add_library(I_SilKit_Core_Service INTERFACE)
+
+target_include_directories(I_SilKit_Core_Service
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Core_Service STATIC
     ServiceDatatypes.hpp
     ServiceDiscovery.hpp
     ServiceDiscovery.cpp
@@ -30,25 +38,19 @@ add_library(SilKitMwService STATIC
     ServiceSerdes.cpp
 )
 
-target_include_directories(SilKitMwService
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-)
+target_link_libraries(S_SilKit_Core_Service
+    PUBLIC I_SilKit_Core_Service
 
-target_link_libraries(SilKitMwService
+    PRIVATE S_SilKit_Services_Logging
+
     PUBLIC SilKitInterface
-    PRIVATE 
-        SilKitInternal
-        SilKitConfiguration
-        SilKitMwLogging
-    INTERFACE 
-        SilKitInternal
-        SilKitConfiguration
+    PUBLIC S_SilKit_Config
+    PUBLIC I_SilKit_Core_Internal
 )
 
 
 add_silkit_test(Test_MwServiceDiscovery
     SOURCES Test_ServiceDiscovery.cpp 
-    LIBS SilKitMwService SilKitMwMockParticipant SilKitUuid)
+    LIBS S_SilKit_Core_Service I_SilKit_Core_Mock_Participant S_SilKit_Util_Uuid)
 
-add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS SilKitMwService)
+add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS S_SilKit_Core_Service)

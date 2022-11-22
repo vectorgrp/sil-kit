@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitSimFlexray STATIC
+
+add_library(I_SilKit_Services_Flexray INTERFACE)
+
+target_include_directories(I_SilKit_Services_Flexray
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_Flexray STATIC
     FlexrayController.cpp
     FlexrayController.hpp
     FlexrayDatatypeUtils.cpp
@@ -31,28 +39,26 @@ add_library(SilKitSimFlexray STATIC
     FlexraySerdes.cpp
 )
 
-target_include_directories(SilKitSimFlexray
-    PUBLIC .
-)
+target_link_libraries(S_SilKit_Services_Flexray
+    PUBLIC I_SilKit_Services_Flexray
 
-target_link_libraries(SilKitSimFlexray
     PRIVATE SilKitInterface
-            SilKitInternal
-            SilKitMwLogging
-            SilKitTracing
-            SilKitConfiguration
+            I_SilKit_Core_Internal
+            S_SilKit_Services_Logging
+            S_SilKit_Tracing
+            S_SilKit_Config
 )
 
-add_silkit_test(Test_SimFlexrayValidation SOURCES Test_Validation.cpp LIBS SilKitSimFlexray)
+add_silkit_test(Test_SimFlexrayValidation SOURCES Test_Validation.cpp LIBS S_SilKit_Services_Flexray)
 add_silkit_test(Test_SimFlexrayController
     SOURCES
         Test_FlexrayController.cpp
         Test_FlexrayControllerConfig.cpp
     LIBS 
-        SilKitSimFlexray
-        SilKitMwMockParticipant
-        SilKitTracing
-        SilKitConfiguration
-        SilKitMwMockNullConnection
+        S_SilKit_Services_Flexray
+        I_SilKit_Core_Mock_Participant
+        S_SilKit_Tracing
+        S_SilKit_Config
+        S_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimFlexray_Serdes SOURCES Test_FlexraySerdes.cpp LIBS SilKitInternal SilKitSimFlexray)
+add_silkit_test(Test_SimFlexray_Serdes SOURCES Test_FlexraySerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Flexray)

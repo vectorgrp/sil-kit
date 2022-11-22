@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitSimCan STATIC
+
+add_library(I_SilKit_Services_Can INTERFACE)
+
+target_include_directories(I_SilKit_Services_Can
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_Can STATIC
     CanDatatypesUtils.cpp
     CanDatatypesUtils.hpp
     CanController.cpp
@@ -36,18 +44,15 @@ add_library(SilKitSimCan STATIC
     CanSerdes.cpp
 )
 
-target_include_directories(SilKitSimCan
-    PUBLIC .
-)
+target_link_libraries(S_SilKit_Services_Can
+    PUBLIC I_SilKit_Services_Can
 
-target_link_libraries(SilKitSimCan
-    PUBLIC  SilKitWireCan
+    PUBLIC  I_SilKit_Wire_Can
     PRIVATE SilKitInterface
-            SilKitInternal
-            SilKitTracing
-            SilKitConfiguration
-    INTERFACE SilKitInternal
-            SilKitConfiguration
+            S_SilKit_Tracing
+
+    PUBLIC I_SilKit_Core_Internal
+    PUBLIC S_SilKit_Config
 )
 
 add_silkit_test(Test_SimCanController
@@ -56,12 +61,12 @@ add_silkit_test(Test_SimCanController
         Test_CanControllerDetailedSim.cpp 
         Test_CanControllerTrivialSim.cpp
     LIBS 
-        SilKitSimCan
-        SilKitMwMockParticipant
-        SilKitTracing
-        SilKitMwMockNullConnection
+        S_SilKit_Services_Can
+        I_SilKit_Core_Mock_Participant
+        S_SilKit_Tracing
+        S_SilKit_Core_Mock_NullConnection
 )
 
-add_silkit_test(Test_SimCan_Serdes  SOURCES Test_CanSerdes.cpp LIBS SilKitInternal SilKitSimCan)
+add_silkit_test(Test_SimCan_Serdes  SOURCES Test_CanSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Can)
 
-add_silkit_test(Test_SimCan_StringUtils SOURCES Test_CanStringUtils.cpp LIBS SilKitInternal SilKitSimCan)
+add_silkit_test(Test_SimCan_StringUtils SOURCES Test_CanStringUtils.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Can)

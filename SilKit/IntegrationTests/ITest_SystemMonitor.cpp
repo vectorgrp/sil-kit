@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 
 #include "silkit/services/all.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+
 #include "functional.hpp"
 
 #include "SimTestHarness.hpp"
@@ -69,7 +71,7 @@ TEST_F(ITest_SystemMonitor, discover_services)
     const SilKit::Services::Orchestration::ParticipantConnectionInformation& thirdParticipantConnection{"Third"};
 
     // Registry
-    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
     registry->StartListening(registryUri);
 
     // Create the first participant and register the connect and disconnect callbacks

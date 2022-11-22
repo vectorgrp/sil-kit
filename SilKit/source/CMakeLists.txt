@@ -138,12 +138,12 @@ target_link_libraries(SilKit
     PUBLIC
     SilKitInterface
     PRIVATE
-    SilKitInternal
-    SilKitConfiguration
-    SilKitMwParticipant
-    SilKitExtensions
-    SilKitUtil
-    SilKitExperimental
+    I_SilKit_Core_Internal
+    S_SilKit_Config
+    S_SilKit_Core_Participant
+    S_SilKit_Extensions
+    I_SilKit_Util
+    S_SilKit_Experimental
 )
 
 add_library(SilKitVersion STATIC

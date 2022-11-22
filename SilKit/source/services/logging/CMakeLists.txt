@@ -20,7 +20,30 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-add_library(SilKitMwLogging STATIC
+add_library(I_SilKit_Services_Logging INTERFACE)
+
+target_include_directories(I_SilKit_Services_Logging
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+################################################################################
+# Thirdparty -- Logging
+################################################################################
+# We use fmtlib to offer a convenient logging interface
+
+if (TARGET fmt-header-only)
+    message(STATUS "have fmt-header-only")
+    target_link_libraries(I_SilKit_Services_Logging
+        INTERFACE $<BUILD_INTERFACE:fmt-header-only>
+    )
+    target_compile_definitions(I_SilKit_Services_Logging
+        INTERFACE $<BUILD_INTERFACE:HAVE_FMTLIB>
+        INTERFACE $<BUILD_INTERFACE:FMT_HEADER_ONLY>
+    )
+endif()
+
+
+add_library(S_SilKit_Services_Logging STATIC
     SpdlogTypeConversion.hpp
     IMsgForLogMsgSender.hpp
     IMsgForLogMsgReceiver.hpp
@@ -40,45 +63,20 @@ add_library(SilKitMwLogging STATIC
     LoggingSerdes.hpp
     LoggingSerdes.cpp
 )
-################################################################################
-# Thirdparty -- Logging
-################################################################################
-# We use fmtlib to offer a convenient logging interface
 
-if (TARGET fmt-header-only)
-    message(STATUS "have fmt-header-only")
-    target_link_libraries(SilKitMwLogging
-        INTERFACE
-            $<BUILD_INTERFACE:fmt-header-only>
-        PRIVATE
-            $<BUILD_INTERFACE:fmt-header-only>
-    )
-    target_compile_definitions(SilKitMwLogging
-        INTERFACE
-            $<BUILD_INTERFACE:HAVE_FMTLIB>
-            $<BUILD_INTERFACE:FMT_HEADER_ONLY>
-        PRIVATE
-            $<BUILD_INTERFACE:HAVE_FMTLIB>
-            $<BUILD_INTERFACE:FMT_HEADER_ONLY>
-    )
-endif()
+target_link_libraries(S_SilKit_Services_Logging
+    PUBLIC I_SilKit_Services_Logging
 
-target_include_directories(SilKitMwLogging
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(SilKitMwLogging
     PUBLIC SilKitInterface
-    PUBLIC SilKitInternal
-    PUBLIC SilKitConfiguration
-    PUBLIC SilKitMwService
+    PUBLIC I_SilKit_Core_Internal
+    PUBLIC S_SilKit_Config
+    PUBLIC S_SilKit_Core_Service
 
     PRIVATE spdlog
 )
 
 if(UNIX)
-    set_target_properties(SilKitMwLogging
+    set_target_properties(S_SilKit_Services_Logging
         PROPERTIES
         VISIBILITY_INLINES_HIDDEN 1
         CXX_VISIBILITY_PRESET hidden
@@ -87,6 +85,6 @@ endif()
 
 add_silkit_test(Test_MwLoggingLogger 
     SOURCES Test_Logger.cpp 
-    LIBS SilKitMwLogging SilKitMwMockParticipant
+    LIBS S_SilKit_Services_Logging I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_MwLogging_Serdes SOURCES Test_LoggingSerdes.cpp LIBS SilKitMwLogging )
+add_silkit_test(Test_MwLogging_Serdes SOURCES Test_LoggingSerdes.cpp LIBS S_SilKit_Services_Logging )

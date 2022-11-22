@@ -20,6 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-add_library(SilKitWireFlexray INTERFACE)
-target_include_directories(SilKitWireFlexray INTERFACE .)
-target_link_libraries(SilKitWireFlexray INTERFACE SilKitWireUtil)
+add_library(I_SilKit_Wire_Flexray INTERFACE)
+target_include_directories(I_SilKit_Wire_Flexray INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(I_SilKit_Wire_Flexray INTERFACE I_SilKit_Wire_Util)

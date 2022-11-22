@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitMwParticipant STATIC
+
+add_library(I_SilKit_Core_Participant INTERFACE)
+
+target_include_directories(I_SilKit_Core_Participant
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Core_Participant STATIC
     Participant.hpp
     Participant_impl.hpp
     Participant.cpp
@@ -31,46 +39,45 @@ add_library(SilKitMwParticipant STATIC
     CreateParticipantT.cpp
 )
 
-target_link_libraries(SilKitMwParticipant
+target_link_libraries(S_SilKit_Core_Participant
+    PUBLIC I_SilKit_Core_Participant
+
     INTERFACE  SilKitInterface
     PUBLIC
-        SilKitInternal
-        SilKitMwLogging
-        SilKitConfiguration
-        SilKitUtil
-        SilKitSetThreadName
-        SilKitUuid
-        SilKitMwSync
-        SilKitSimCan
-        SilKitSimEthernet
-        SilKitSimFlexray
-        SilKitSimLin
-        SilKitSimDataMessage
-        SilKitSimRpc
-        SilKitTracing
-        SilKitMwService
-    INTERFACE  SilKitMwService
-    PRIVATE
-        SilKitVersion
+        I_SilKit_Core_Internal
+        S_SilKit_Services_Logging
+        S_SilKit_Config
+        I_SilKit_Util
+        S_SilKit_Util_SetThreadName
+        S_SilKit_Util_Uuid
+        S_SilKit_Services_Orchestration
+        S_SilKit_Services_Can
+        S_SilKit_Services_Ethernet
+        S_SilKit_Services_Flexray
+        S_SilKit_Services_Lin
+        S_SilKit_Services_PubSub
+        S_SilKit_Services_Rpc
+        S_SilKit_Tracing
+
+    PUBLIC S_SilKit_Config
+    PUBLIC S_SilKit_Core_Service
+
+    PRIVATE SilKitVersion
 )
 
-target_link_libraries(SilKitMwParticipant PUBLIC SilKitMwVAsio)
-
-target_include_directories(SilKitMwParticipant
-    PUBLIC .
-)
+target_link_libraries(S_SilKit_Core_Participant PUBLIC S_SilKit_Core_VAsio)
 
 if (MSVC)
-    target_compile_options(SilKitMwParticipant PRIVATE "/bigobj")
+    target_compile_options(S_SilKit_Core_Participant PRIVATE "/bigobj")
 endif (MSVC)
 
 add_silkit_test(Test_MwParticipant 
     SOURCES Test_Participant.cpp 
-    LIBS SilKitMwMockNullConnection SilKitConfigurationTestUtils
+    LIBS S_SilKit_Core_Mock_NullConnection I_SilKit_Config_TestUtils
 )
 
 add_silkit_test(
     Test_ValidateAndSanitizeConfig
     SOURCES Test_ValidateAndSanitizeConfig.cpp
-    LIBS SilKitMwParticipant
+    LIBS S_SilKit_Core_Participant
 )

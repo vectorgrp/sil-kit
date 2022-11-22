@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitSimLin STATIC
+
+add_library(I_SilKit_Services_Lin INTERFACE)
+
+target_include_directories(I_SilKit_Services_Lin
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_Lin STATIC
     LinController.cpp
     LinController.hpp
     
@@ -35,16 +43,14 @@ add_library(SilKitSimLin STATIC
     LinSerdes.cpp
 )
 
-target_include_directories(SilKitSimLin
-    PUBLIC .
-)
+target_link_libraries(S_SilKit_Services_Lin
+    PUBLIC I_SilKit_Services_Lin
 
-target_link_libraries(SilKitSimLin
     PUBLIC  SilKitInterface
-            SilKitWireLin
-            SilKitTracing
-    PRIVATE SilKitInternal
-            SilKitMwLogging
+            I_SilKit_Wire_Lin
+            S_SilKit_Tracing
+    PRIVATE I_SilKit_Core_Internal
+            S_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_SimLin
@@ -54,9 +60,9 @@ add_silkit_test(Test_SimLin
         Test_LinControllerTrivialSim.cpp
         Test_LinControllerConfig.cpp
     LIBS
-        SilKitSimLin
-        SilKitMwMockParticipant
-        SilKitTracing
-        SilKitMwMockNullConnection
+        S_SilKit_Services_Lin
+        I_SilKit_Core_Mock_Participant
+        S_SilKit_Tracing
+        S_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimLin_Serdes  SOURCES Test_LinSerdes.cpp LIBS SilKitInternal SilKitSimLin)
+add_silkit_test(Test_SimLin_Serdes  SOURCES Test_LinSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Lin)

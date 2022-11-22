@@ -20,6 +20,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-add_library(SilKitWireRpc INTERFACE)
-target_include_directories(SilKitWireRpc INTERFACE .)
-target_link_libraries(SilKitWireRpc INTERFACE SilKitUuid SilKitWireUtil)
+add_library(I_SilKit_Wire_Rpc INTERFACE)
+target_include_directories(I_SilKit_Wire_Rpc INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(I_SilKit_Wire_Rpc INTERFACE S_SilKit_Util_Uuid I_SilKit_Wire_Util)

@@ -21,6 +21,6 @@
 
 add_silkit_test(Test_UtilsSpan SOURCES Test_Span.cpp)
 add_silkit_test(Test_UtilsSilSerDes SOURCES Test_SilSerializer.cpp Test_SilSerDes.cpp)
-add_silkit_test(Test_UtilsCommandlineParser SOURCES Test_CommandlineParser.cpp LIBS SilKitUtil)
-add_silkit_test(Test_UtilsSynchronizedHandlers SOURCES Test_SynchronizedHandlers.cpp LIBS SilKitUtil)
-add_silkit_test(Test_UtilsTimer SOURCES Test_Timer.cpp LIBS SilKitUtil SilKitSetThreadName)
+add_silkit_test(Test_UtilsCommandlineParser SOURCES Test_CommandlineParser.cpp LIBS I_SilKit_Util)
+add_silkit_test(Test_UtilsSynchronizedHandlers SOURCES Test_SynchronizedHandlers.cpp LIBS I_SilKit_Util)
+add_silkit_test(Test_UtilsTimer SOURCES Test_Timer.cpp LIBS I_SilKit_Util S_SilKit_Util_SetThreadName)

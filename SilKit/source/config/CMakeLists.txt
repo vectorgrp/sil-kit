@@ -19,7 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitConfiguration STATIC
+
+add_library(S_SilKit_Config STATIC
     Configuration.hpp
     Configuration.cpp
     ParticipantConfiguration.hpp
@@ -36,27 +37,25 @@ add_library(SilKitConfiguration STATIC
     YamlValidator.cpp
 )
 
-target_link_libraries(SilKitConfiguration
+target_link_libraries(S_SilKit_Config
     PRIVATE SilKitInterface
-    PRIVATE SilKitUtil
-    INTERFACE SilKitUtil
-    PRIVATE yaml-cpp
-    INTERFACE yaml-cpp
+
+    PUBLIC I_SilKit_Util
+    PUBLIC yaml-cpp
 )
 
-target_include_directories(SilKitConfiguration
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+target_include_directories(S_SilKit_Config
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_silkit_test(Test_MwCfgValidation 
     SOURCES Test_Validation.cpp 
-    LIBS SilKitConfiguration
+    LIBS S_SilKit_Config
 )
 
 add_silkit_test(Test_ParticipantConfiguration 
     SOURCES Test_ParticipantConfiguration.cpp
-    LIBS SilKitMwMockNullConnection
+    LIBS S_SilKit_Core_Mock_NullConnection
     CONFIGS
         ParticipantConfiguration_Minimal.json
         ParticipantConfiguration_Full.json
@@ -65,22 +64,22 @@ add_silkit_test(Test_ParticipantConfiguration
 
 add_silkit_test(Test_MwCfgYamlParser 
     SOURCES Test_YamlParser.cpp 
-    LIBS SilKitConfiguration yaml-cpp
+    LIBS S_SilKit_Config yaml-cpp
 )
 
 add_silkit_test(Test_MwCfgYamlValidator 
     SOURCES Test_YamlValidator.cpp 
-    LIBS SilKitConfiguration yaml-cpp
+    LIBS S_SilKit_Config yaml-cpp
 )
 
 if(SILKIT_BUILD_TESTS)
-    add_library(SilKitConfigurationTestUtils INTERFACE)
+    add_library(I_SilKit_Config_TestUtils INTERFACE)
 
-    target_include_directories(SilKitConfigurationTestUtils
+    target_include_directories(I_SilKit_Config_TestUtils
         INTERFACE ${CMAKE_CURRENT_LIST_DIR}
     )
 
-    target_link_libraries(SilKitConfigurationTestUtils
-        INTERFACE SilKitConfiguration
+    target_link_libraries(I_SilKit_Config_TestUtils
+        INTERFACE S_SilKit_Config
     )
 endif()

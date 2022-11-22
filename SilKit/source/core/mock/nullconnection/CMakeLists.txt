@@ -19,19 +19,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitMwMockNullConnection STATIC
+add_library(S_SilKit_Core_Mock_NullConnection STATIC
     NullConnectionParticipant.cpp
     NullConnectionParticipant.hpp
 )
 
-target_include_directories(SilKitMwMockNullConnection
+target_include_directories(S_SilKit_Core_Mock_NullConnection
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-target_link_libraries(SilKitMwMockNullConnection
-    PUBLIC SilKitMwParticipant
+target_link_libraries(S_SilKit_Core_Mock_NullConnection
+    PUBLIC S_SilKit_Core_Participant
 )
 
 if (MSVC)
-    target_compile_options(SilKitMwMockNullConnection PRIVATE "/bigobj")
+    target_compile_options(S_SilKit_Core_Mock_NullConnection PRIVATE "/bigobj")
 endif (MSVC)

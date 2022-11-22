@@ -19,7 +19,15 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitMwSync
+
+add_library(I_SilKit_Services_Orchestration INTERFACE)
+
+target_include_directories(I_SilKit_Services_Orchestration
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+
+add_library(S_SilKit_Services_Orchestration
     ILifecycleStates.hpp
     LifecycleManagement.hpp
     LifecycleManagement.cpp
@@ -51,39 +59,36 @@ add_library(SilKitMwSync
     TimeConfiguration.cpp
 )
 
-target_include_directories(SilKitMwSync
-    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
-    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
-)
+target_link_libraries(S_SilKit_Services_Orchestration
+    PUBLIC I_SilKit_Services_Orchestration
 
-target_link_libraries(SilKitMwSync
     PUBLIC
         SilKitInterface
-        SilKitUtil
-        SilKitSetThreadName
-        SilKitInternal
-        SilKitConfiguration
+        I_SilKit_Util
+        S_SilKit_Util_SetThreadName
+        I_SilKit_Core_Internal
+        S_SilKit_Config
     PRIVATE
-        SilKitMwLogging
-        SilKitExperimental
+        S_SilKit_Services_Logging
+        S_SilKit_Experimental
 )
 
 add_silkit_test(Test_MwLifecycleService
     SOURCES Test_LifecycleService.cpp 
-    LIBS SilKitMwSync SilKitMwMockParticipant
+    LIBS S_SilKit_Services_Orchestration I_SilKit_Core_Mock_Participant
 )
 add_silkit_test(Test_MwSystemController 
     SOURCES Test_SystemController.cpp 
-    LIBS SilKitMwSync SilKitMwMockParticipant
+    LIBS S_SilKit_Services_Orchestration I_SilKit_Core_Mock_Participant
 )
 add_silkit_test(Test_MwSystemMonitor 
     SOURCES Test_SystemMonitor.cpp 
-    LIBS SilKitMwSync SilKitMwMockParticipant
+    LIBS S_SilKit_Services_Orchestration I_SilKit_Core_Mock_Participant
 )
 add_silkit_test(Test_MwWatchDog
     SOURCES Test_WatchDog.cpp
-    LIBS SilKitMwSync
+    LIBS S_SilKit_Services_Orchestration
 )
-add_silkit_test(Test_MwSync_Serdes SOURCES Test_SyncSerdes.cpp LIBS SilKitMwSync SilKitInternal)
-add_silkit_test(Test_TimeProvider SOURCES Test_TimeProvider.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
-add_silkit_test(Test_TimeSyncService SOURCES Test_TimeSyncService.cpp LIBS SilKitMwSync SilKitMwMockParticipant)
+add_silkit_test(Test_MwSync_Serdes SOURCES Test_SyncSerdes.cpp LIBS S_SilKit_Services_Orchestration I_SilKit_Core_Internal)
+add_silkit_test(Test_TimeProvider SOURCES Test_TimeProvider.cpp LIBS S_SilKit_Services_Orchestration I_SilKit_Core_Mock_Participant)
+add_silkit_test(Test_TimeSyncService SOURCES Test_TimeSyncService.cpp LIBS S_SilKit_Services_Orchestration I_SilKit_Core_Mock_Participant)

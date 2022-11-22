@@ -19,57 +19,61 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(SilKitUtil INTERFACE)
+add_library(I_SilKit_Util INTERFACE)
 
-target_include_directories(SilKitUtil
+target_include_directories(I_SilKit_Util
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
 add_subdirectory(tests)
 
+
 # Filesystem utilities required for cross platform and language portability.
 # Can be removed when we finaly upgrade to C++17
 
-add_library(SilKitFilesystem STATIC
+add_library(S_SilKit_Util_Filesystem STATIC
     Filesystem.hpp
     Filesystem.cpp
 )
-target_include_directories(SilKitFilesystem
+target_include_directories(S_SilKit_Util_Filesystem
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
-target_link_libraries(SilKitFilesystem
+target_link_libraries(S_SilKit_Util_Filesystem
     PRIVATE SilKitInterface
 )
 
-add_library(SilKitSetThreadName STATIC
+
+add_library(S_SilKit_Util_SetThreadName STATIC
     SetThreadName.hpp
     SetThreadName.cpp
 )
-target_include_directories(SilKitSetThreadName
+target_include_directories(S_SilKit_Util_SetThreadName
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
-target_link_libraries(SilKitSetThreadName
+target_link_libraries(S_SilKit_Util_SetThreadName
     PRIVATE SilKitInterface)
 
-add_library(SilKitUuid STATIC
+
+add_library(S_SilKit_Util_Uuid STATIC
     Uuid.hpp
     Uuid.cpp
 )
-target_include_directories(SilKitUuid
+target_include_directories(S_SilKit_Util_Uuid
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
 
-add_library(SilKitLabelMatching STATIC
+
+add_library(S_SilKit_Util_LabelMatching STATIC
     LabelMatching.hpp
     LabelMatching.cpp
 )
-target_include_directories(SilKitLabelMatching
+target_include_directories(S_SilKit_Util_LabelMatching
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
-target_link_libraries(SilKitLabelMatching
+target_link_libraries(S_SilKit_Util_LabelMatching
     PRIVATE SilKitInterface)
 
 add_silkit_test(Test_LabelMatching
     SOURCES Test_LabelMatching.cpp 
-    LIBS SilKitLabelMatching
+    LIBS S_SilKit_Util_LabelMatching
 )

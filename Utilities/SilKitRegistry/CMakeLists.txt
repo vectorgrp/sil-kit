@@ -47,9 +47,9 @@ set_target_properties(sil-kit-registry PROPERTIES
 add_definitions(-DEXPORT_SilKitAPI)
 
 target_link_libraries(sil-kit-registry
-    SilKitMwVAsio
-    SilKitMwParticipant
-    SilKitConfiguration
+    S_SilKit_Core_VAsio
+    S_SilKit_Core_Participant
+    S_SilKit_Config
     SilKitVersion
 )
 
