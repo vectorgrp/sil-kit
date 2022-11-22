@@ -97,6 +97,10 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
         // since there is no SIL Kit Registry with which one could create a Participant, we check against nullptr
         returnCode = SilKit_Participant_Destroy(nullptr);
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+        // destory the participant configuration to satisfy ASAN
+        returnCode = SilKit_ParticipantConfiguration_Destroy(participantConfiguration);
+        EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
 
 

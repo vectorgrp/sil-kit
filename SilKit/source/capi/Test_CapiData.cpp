@@ -118,7 +118,17 @@ public:
         dummyContext.someInt = 1234;
         dummyContextPtr = (void*)&dummyContext;
     }
-    ~CapiDataTest() { }
+
+    ~CapiDataTest()
+    {
+        for (uint32_t index = 0; index != labelList->numLabels; ++index)
+        {
+            free(const_cast<char *>(labelList->labels[index].key));
+            free(const_cast<char *>(labelList->labels[index].value));
+        }
+        free(labelList->labels);
+        free(labelList);
+    }
 
     typedef struct
     {

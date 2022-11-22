@@ -66,12 +66,14 @@ class CapiParticipantStateHandlingTest : public testing::Test
 protected:
     SilKit::Core::Tests::DummyParticipant mockParticipant;
 
+    std::unique_ptr<SilKit_WorkflowConfiguration> workflowConfiguration;
+
     CapiParticipantStateHandlingTest()
     {
         uint32_t numNames = 2;
         const char* names[2] = {"Participant1", "Participant2"};
 
-        workflowConfiguration = (SilKit_WorkflowConfiguration*)malloc(sizeof(SilKit_WorkflowConfiguration));
+        workflowConfiguration = std::make_unique<SilKit_WorkflowConfiguration>();
         [this] {
             ASSERT_NE(workflowConfiguration, nullptr);
         }();
@@ -80,8 +82,15 @@ protected:
         Create_StringList(&workflowConfiguration->requiredParticipantNames, names, numNames);
     }
 
-    SilKit_WorkflowConfiguration* workflowConfiguration;
-
+    ~CapiParticipantStateHandlingTest()
+    {
+        for (uint32_t index = 0; index != workflowConfiguration->requiredParticipantNames->numStrings; ++index)
+        {
+            free(workflowConfiguration->requiredParticipantNames->strings[index]);
+        }
+        free(workflowConfiguration->requiredParticipantNames->strings);
+        free(workflowConfiguration->requiredParticipantNames);
+    }
 };
 
 void SilKitCALL CommunicationReadyCallback(void* /*context*/, SilKit_LifecycleService* /*lifecycleService*/) {}

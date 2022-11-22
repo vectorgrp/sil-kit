@@ -17,6 +17,10 @@ Fixed
   - Linking executables with both, the dynamic library, and certain internal, static library components leads to ODR violations.
     The ASAN / UBSAN instrumentation from recent Clang versions is able to detect these.
 
+- C-API Tests
+
+  - Fixed some memory leaks in C-API tests.
+
 - LIN
 
   - Fixed faulty behavior of ``ILinController::SendFrame()`` for ``LinFrameResponseType::MasterResponse``. The method now consistently uses the input frame data.
