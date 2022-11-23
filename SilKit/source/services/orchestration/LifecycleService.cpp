@@ -36,10 +36,15 @@ using namespace std::chrono_literals;
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
-LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
+
+LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
+                                   std::chrono::milliseconds systemStateReachedShuttingDownTimeout)
     : _participant{participant}
     , _logger{participant->GetLogger()}
     , _lifecycleManagement{participant->GetLogger(), this}
+    , _finalStatePromise{std::make_unique<std::promise<ParticipantState>>()}
+    , _finalStateFuture{_finalStatePromise->get_future()}
+    , _systemStateReachedShuttingDownTimeout{systemStateReachedShuttingDownTimeout}
 {
     _timeSyncService = _participant->CreateTimeSyncService(this);
 
@@ -48,7 +53,11 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
 
  LifecycleService::~LifecycleService()
 {
-}
+     if (_finalStatePromiseSetterThread.joinable())
+     {
+         _finalStatePromiseSetterThread.join();
+     }
+ }
 
 void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandler handler)
 {
@@ -104,11 +113,16 @@ void LifecycleService::SetAbortHandler(AbortHandler handler)
 auto LifecycleService::StartLifecycle()
     -> std::future<ParticipantState>
 {
+    if (_finalStatePromise == nullptr || _finalStatePromiseSetterThread.joinable())
+    {
+        throw LogicError{"LifecycleService::StartLifecycle must not be called twice"};
+    }
+
     if (!_requiredParticipantNames.empty())
     {
         if (!CheckForValidConfiguration())
         {
-            return _finalStatePromise.get_future();
+            return std::move(_finalStateFuture);
         }
     }
     if (_timeSyncActive)
@@ -148,7 +162,7 @@ auto LifecycleService::StartLifecycle()
             "LifecycleService::StartLifecycle was called without start coordination.");
         break;
     }
-    return _finalStatePromise.get_future();
+    return std::move(_finalStateFuture);
 }
 
 void LifecycleService::ReportError(std::string errorMsg)
@@ -207,8 +221,42 @@ void LifecycleService::Shutdown(std::string reason)
         {
             std::stringstream ss;
             ss << "Confirming shutdown of " << _participant->GetParticipantName();
-            _logger->Debug(ss.str()); 
-            _finalStatePromise.set_value(State());
+            _logger->Debug(ss.str());
+
+            // The following code is a workaround which alleviates the potential loss of the 'stop' signal issued by
+            // the lifecycle service of (e.g.) the system-controller.
+            //
+            // Setting the final-state promise is delayed up to a timeout value.
+
+            // steal the final state promise pointer in a thread-safe way (protected by a mutex)
+            auto finalStatePromise = [this] {
+                const auto lock = std::unique_lock<decltype(_finalStatePromiseMutex)>{_finalStatePromiseMutex};
+                return std::move(_finalStatePromise);
+            }();
+
+            // if we stole the actual promise object, we start the thread which actually sets it
+            if (finalStatePromise)
+            {
+                _finalStatePromiseSetterThread = std::thread{
+                    [logger = _logger, timeout = _systemStateReachedShuttingDownTimeout,
+                     systemStateReachedShuttingDownFuture = _systemStateReachedShuttingDownPromise.get_future(),
+                     finalStatePromise = std::move(finalStatePromise), state = State()] {
+                        try
+                        {
+                            systemStateReachedShuttingDownFuture.wait_for(timeout);
+                        }
+                        catch (const std::exception& exception)
+                        {
+                            Logging::Warn(logger, "LifecycleService: Waiting for the system state failed: {}",
+                                          exception.what());
+                        }
+                        catch (...)
+                        {
+                            Logging::Warn(logger, "LifecycleService: Waiting for the system state failed: unknown");
+                        }
+                        finalStatePromise->set_value(state);
+                    }};
+            }
         }
         catch (const std::future_error&)
         {
@@ -459,12 +507,14 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case SystemState::Stopped:
         _lifecycleManagement.SystemwideStopping(ss.str());
         break; // To Sync or not to Sync - that is the question -- for now don't
-    case SystemState::ShuttingDown: 
-        _lifecycleManagement.SystemwideStopping(ss.str()); 
+    case SystemState::ShuttingDown:
+        HandleSystemStateShuttingDown();
+        _lifecycleManagement.SystemwideStopping(ss.str());
         break; // ignore
     case SystemState::Shutdown: 
         _logger->Info("Simulation has shutdown");
-        _lifecycleManagement.SystemwideStopping(ss.str()); 
+        HandleSystemStateShuttingDown();
+        _lifecycleManagement.SystemwideStopping(ss.str());
         break; // ignore
     case SystemState::Aborting: 
         break; // ignore - we will receive an abort command separately
@@ -481,6 +531,18 @@ void LifecycleService::SetTimeSyncActive(bool isTimeSyncActive)
 bool LifecycleService::IsTimeSyncActive() const
 {
     return _timeSyncActive;
+}
+
+void LifecycleService::HandleSystemStateShuttingDown()
+{
+    try
+    {
+        _systemStateReachedShuttingDownPromise.set_value();
+    }
+    catch (...)
+    {
+        // Ignore any exception. This function will be called multiple times.
+    }
 }
 
 } // namespace Orchestration

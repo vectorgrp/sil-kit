@@ -53,9 +53,11 @@ class LifecycleService
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    LifecycleService(Core::IParticipantInternal* participant);
+    LifecycleService(Core::IParticipantInternal* participant,
+                     std::chrono::milliseconds systemStateReachedShuttingDownTimeout = std::chrono::seconds{2});
 
     ~LifecycleService();
+
 public:
     // ----------------------------------------
     // Public Methods
@@ -129,6 +131,8 @@ private:
     void AbortSimulation(std::string reason);
     bool CheckForValidConfiguration();
 
+    void HandleSystemStateShuttingDown();
+
 private:
     // ----------------------------------------
     // private members
@@ -145,7 +149,15 @@ private:
     LifecycleManagement _lifecycleManagement;
     bool _timeSyncActive = false;
 
-    std::promise<ParticipantState> _finalStatePromise;
+    // Final State Handling and Shutdown-Workaround
+    std::mutex _finalStatePromiseMutex;
+    std::unique_ptr<std::promise<ParticipantState>> _finalStatePromise;
+    std::thread _finalStatePromiseSetterThread;
+
+    std::future<ParticipantState> _finalStateFuture;
+
+    const std::chrono::milliseconds _systemStateReachedShuttingDownTimeout;
+    std::promise<void> _systemStateReachedShuttingDownPromise;
 
     //Async communication handler support
     CommunicationReadyHandler _commReadyHandler;
