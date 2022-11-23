@@ -135,7 +135,7 @@ int main(int argc, char** argv)
         std::vector<std::string> args;
         std::copy((argv + 3), (argv + argc), std::back_inserter(args));
 
-        for (auto arg : args)
+        for (auto&& arg : args)
         {
             if (arg == "--async")
             {
@@ -192,12 +192,10 @@ int main(int argc, char** argv)
             }
             else if (participantName == "Subscriber")
             {
-                SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
                 participant->CreateDataSubscriber(
                     "GpsSubscriber", dataSpecPubGps,
                     &ReceiveGpsData);
 
-                SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
                 participant->CreateDataSubscriber(
                     "TemperatureSubscriber", dataSpecPubTemperature,
                     &ReceiveTemperatureData);
