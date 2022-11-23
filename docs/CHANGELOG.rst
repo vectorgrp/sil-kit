@@ -5,13 +5,17 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.11] - 2022-11-18
+
+[4.0.12] - 2022-11-23
 ---------------------
 
 Fixed
 ~~~~~
 
-- Lin: Fixed faulty behavior of ``ILinController::SendFrame()`` for ``LinFrameResponseType::MasterResponse``. The method now consistently uses the input frame data.
+- LIN
+
+  - Fixed faulty behavior of ``ILinController::SendFrame()`` for ``LinFrameResponseType::MasterResponse``. The method now consistently uses the input frame data.
+
 
 [4.0.11] - 2022-11-18
 ---------------------
