@@ -79,21 +79,40 @@ function(silkit_enable_coverage isOn)
 endfunction()
 
 # Clean warning defaults set in CMAKE_*_FLAGS by CMake < 3.15
-function(silkit_clean_default_compileflags)
-    if(MSVC)
-        foreach (flag_var
-            CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-            CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-            CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-            CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+function(silkit_replace_compileflags regexp value)
+    foreach (flag_var
+        CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
 
-            # Clean /W3 to avoid /W3 /W4 override warnings
-            string(REPLACE "/W3" "" ${flag_var} "${${flag_var}}")
-            set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
-        endforeach()
-    endif()
+        # Clean /W3 to avoid /W3 /W4 override warnings
+        string(REGEX REPLACE "${regexp}" "${value}" ${flag_var} "${${flag_var}}")
+        set(${flag_var} "${${flag_var}}" PARENT_SCOPE)
+    endforeach()
 endfunction()
 
+# Remove warning levels which are injected by old CMake versions.
+# We set the warning flags explicitly.
+macro(silkit_clean_default_compileflags)
+    if(MSVC)
+        silkit_replace_compileflags("(/W[3|4]|/w)" "")
+        add_compile_options("/MP")
+        if(MSVC_VERSION EQUAL 1900)
+            #disable: "decorated name length exceeded", we have long templates.
+            add_compile_options("/wd4503")
+        endif()
+    endif()
+endmacro()
+
+function(silkit_target_clean_compileflags target)
+    if(NOT TARGET ${target})
+        message(FATAL_ERROR "silkit_target_clean_compileflags: the target ${target} does not exist")
+    endif()
+    get_target_property(_compile_options ${target} COMPILE_OPTIONS)
+    list(TRANSFORM _compile_options REPLACE "/W[3|4]" "")
+    set_target_properties(${target} PROPERTIES COMPILE_OPTIONS "${_compile_options}")
+endfunction()
 function(silkit_enable_warnings isOn)
     # Conditionally treat warnings as errors
     set(_warnAsError "")
@@ -108,6 +127,7 @@ function(silkit_enable_warnings isOn)
 
     # actual warning flags per platform/compiler
     if(MSVC)
+        silkit_clean_default_compileflags()
         set(_flags 
             /W4
             /wd4100 # disable unreferenced formal parameter

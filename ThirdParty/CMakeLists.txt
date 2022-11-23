@@ -1,7 +1,8 @@
 # Disable warnings in ThirdParty folder
-add_compile_options(-w)
 
-function(addTestProject)
+function(include_gtest)
+    silkit_clean_default_compileflags()
+
     # Prevent overriding the parent project's compiler/linker settings on Windows
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
@@ -40,40 +41,56 @@ function(addTestProject)
             GTEST_LANG_CXX11=1
             _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1
         )
+        silkit_target_clean_compileflags(gtest)
+        silkit_target_clean_compileflags(gmock_main)
     endif()
     set_property(TARGET gmock_main PROPERTY FOLDER "ThirdParty")
     set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
 endfunction()
 
 if(SILKIT_BUILD_TESTS)
-    addTestProject()
+    include_gtest()
 endif()
 
 # NB: we use a standalone, bundled ASIO now.
 # the binary distribution lacks the Asio sources
 # but it should be included/deployed by our packaging tools
-add_library(asio INTERFACE)
-target_include_directories(asio INTERFACE ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
-set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
+function(include_asio)
+    silkit_clean_default_compileflags()
+    add_compile_options(-w)
+    add_library(asio INTERFACE)
+    target_include_directories(asio INTERFACE ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
+    set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
 
-if(NOT EXISTS ${ASIO_INCLUDE_DIR})
-    message(FATAL_ERROR "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
-else()
-    message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
-endif()
+    if(NOT EXISTS ${ASIO_INCLUDE_DIR})
+        message(FATAL_ERROR "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
+    else()
+        message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
+    endif()
+endfunction()
+include_asio()
 
 # Third party YAML parsing 
-set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
-add_subdirectory(yaml-cpp
-	yaml-cpp
-	EXCLUDE_FROM_ALL
+function(include_yamlcpp)
+    set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
+    silkit_clean_default_compileflags()
+    add_compile_options(-w)
+    add_subdirectory(yaml-cpp
+        yaml-cpp
+        EXCLUDE_FROM_ALL
 	)
-
+    # yaml-cpp explicitly sets /W3
+    silkit_target_clean_compileflags(yaml-cpp)
+endfunction()
+include_yamlcpp()
 
 # libfmt
 function(include_fmt)
     # function() adds an additional scope
     #set(FMT_INSTALL ON CACHE BOOL "Make sure the fmt-header-only interface target is exported" FORCE)
+    silkit_clean_default_compileflags()
+    add_compile_options(-w)
+
     message(STATUS "Add subdirectory ${CMAKE_CURRENT_LIST_DIR}/fmt")
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fmt
         ${CMAKE_BINARY_DIR}/ThirdParty/fmt
@@ -86,6 +103,10 @@ include_fmt()
 function(include_spdlog)
     # function() adds an additional scope
     # Temporarily patch some CMake variables to trick spdlog's install commands into using our install-folder layout
+
+    silkit_clean_default_compileflags()
+    add_compile_options(-w)
+
     set(CMAKE_INSTALL_LIBDIR "${INSTALL_LIB_DIR}")
     set(CMAKE_INSTALL_INCLUDEDIR  "${INSTALL_INCLUDE_DIR}")
     set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)

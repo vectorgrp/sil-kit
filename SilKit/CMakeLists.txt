@@ -34,14 +34,7 @@ configure_silkit_version(${PROJECT_NAME})
 
 set(SILKIT_PROJECT_DIR ${PROJECT_SOURCE_DIR})
 
-
-if(MSVC)
-    add_compile_options("/MP;/w44062")
-    #disable warnings on visual studio 2015 v14
-    if(MSVC_VERSION EQUAL 1900)
-        add_compile_options("/wd4503")
-    endif()
-endif (MSVC)
+silkit_clean_default_compileflags()
 
 if(SILKIT_BUILD_STATIC)
     add_definitions(-D SILKIT_BUILD_STATIC)
