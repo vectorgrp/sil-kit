@@ -24,6 +24,9 @@ macro(silkit_package_debugsymbols targetName)
             COMMENT "SIL Kit: SILKIT_PACKAGE_SYMBOLS: creating PDB zip"
         )
     endif()
+    if(APPLE)
+        return()
+    endif()
     if(UNIX AND CMAKE_BUILD_TYPE MATCHES "Debug")
 
         silkit_split_debugsymbols("${targetName}")
