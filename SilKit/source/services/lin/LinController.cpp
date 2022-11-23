@@ -302,13 +302,10 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
     if (responseType == LinFrameResponseType::MasterResponse)
     {
         // Update local response reconfiguration
-        if (GetThisLinNode().responses[frame.id].responseMode != LinFrameResponseMode::TxUnconditional)
-        {
-            LinFrameResponse response{};
-            response.frame = frame;
-            response.responseMode = LinFrameResponseMode::TxUnconditional;
-            UpdateFrameResponse(response);
-        }
+        LinFrameResponse response{};
+        response.frame = frame;
+        response.responseMode = LinFrameResponseMode::TxUnconditional;
+        UpdateFrameResponse(response);
     }
     else
     {

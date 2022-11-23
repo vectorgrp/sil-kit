@@ -8,6 +8,14 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.11] - 2022-11-18
 ---------------------
 
+Fixed
+~~~~~
+
+- Lin: Fixed faulty behavior of ``ILinController::SendFrame()`` for ``LinFrameResponseType::MasterResponse``. The method now consistently uses the input frame data.
+
+[4.0.11] - 2022-11-18
+---------------------
+
 Changed
 ~~~~~~~
 
