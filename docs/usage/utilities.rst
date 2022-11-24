@@ -73,15 +73,16 @@ sil-kit-system-controller
       -  The sil-kit-system-controller needs a running sil-kit-registry to connect to. 
          Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
-      -  -v,  --version                                Get version info.
-         -h,  --help                                   Show the help of sil-kit-system-controller.
-         -u,  --connect-uri <silkitUri>                The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
-         -n,  --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
-         -c,  --configuration <configuration>          Path and filename of the participant configuration YAML or JSON file.
-         -ni, --non-interactive                        Run without awaiting any user interactions at any time.
-
-         <participantName1>, <participantName2>, ...  Names of participants to wait for before starting simulation.
-
+      -  -v, --version                                Get version info.
+         -h, --help                                   Show the help of sil-kit-system-controller.
+         -u, --connect-uri <silkitUri>                The registry URI to connect to. Defaults to 'silkit://localhost:8500'.
+         -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to 'SystemController'.
+         -c, --configuration <configuration>          Path and filename of the participant configuration YAML or JSON file.
+         -ni, --non-interactive                       Run without awaiting any user interactions at any time.
+         
+         | **<participantName1>, <participantName2> ...**
+         |  Names of participants to wait for before starting simulation.
+   
    *  -  Usage Example
       -  .. code-block:: powershell
 
