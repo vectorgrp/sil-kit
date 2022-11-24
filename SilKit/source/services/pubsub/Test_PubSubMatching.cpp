@@ -51,7 +51,7 @@ TEST_F(PubSubMatchingTest, add_labels)
 
     EXPECT_THROW(spec.AddLabel("key", "val", (MatchingLabel::Kind)0u), SilKit::ConfigurationError);
 
-    MatchingLabel badLabel;
+    MatchingLabel badLabel{};
     badLabel.key = "key";
     badLabel.value = "value";
     EXPECT_THROW(spec.AddLabel(badLabel), SilKit::ConfigurationError);
