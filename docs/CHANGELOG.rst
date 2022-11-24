@@ -27,8 +27,19 @@ Fixed
 
 - Lifecycle Service
 
-    - Alleviate potential loss of the 'stop' signal issued from the lifecycle service of a participant.
+  - Alleviate potential loss of the 'stop' signal issued from the lifecycle service of a participant.
 
+- Various fixes related to warnings
+
+  - Remove duplicate variables in PubSub demo.
+  
+  - Fix 'D9025: overriding...' diagnostics in MSVC.
+  
+  - Fix warnings in hourglass code.
+  
+  - Fix cmake configuration on macos.
+  
+  - Properly initialize variable in unit test.
 
 [4.0.11] - 2022-11-18
 ---------------------
