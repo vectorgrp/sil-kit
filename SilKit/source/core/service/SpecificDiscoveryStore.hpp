@@ -35,40 +35,43 @@ class SpecificDiscoveryStore
 {
 public: 
 
-    SpecificDiscoveryStore(const std::string& fromParticipant );
-
     //!< Service addition/removal
     void ServiceChange(ServiceDiscoveryEvent::Type changeType, const ServiceDescriptor& serviceDescriptor);
 
     //!< React on single service changes
     void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                 const std::string& controllerTypeName,
-                                                 const std::string& supplDataValue);
+                                                 const std::vector<std::string>& lookupKeys);
 
 private:
 
     //!< Inform about service changes
-    void CallHandlers(ServiceDiscoveryEvent::Type eventType, const std::string& controllerTypeName,
-                      const std::string& associatedSupplDataKey, const std::string& supplDataValue,
-                      const ServiceDescriptor& serviceDescriptor);
+    void CallHandlersOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& lookupKey,
+                                     const ServiceDescriptor& serviceDescriptor) const;
+    void UpdateLookupOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& lookupKey,
+                                   const ServiceDescriptor& serviceDescriptor);
 
-    using ServiceMap = std::unordered_map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
+    void CallHandlerOnHandlerRegistration(const ServiceDiscoveryHandler& handler,
+                                          const std::vector<std::string>& lookupKeys) const;
+    void UpdateLookupOnHandlerRegistration(ServiceDiscoveryHandler handler, const std::vector<std::string>& lookupKeys);
+
+    std::vector<std::string> ConstructLookupKeys(const std::string& supplControllerTypeName,
+                                                  const ServiceDescriptor& serviceDescriptor) const;
+    std::vector<std::string> ConstructLookupKeysDataPublisher(const ServiceDescriptor& serviceDescriptor) const;
+    std::vector<std::string> ConstructLookupKeysRpcServerInternal(const ServiceDescriptor& serviceDescriptor) const;
+    std::vector<std::string> ConstructLookupKeysRpcClient(const ServiceDescriptor& serviceDescriptor) const;
+
+    using ServiceMap = std::map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
 
     // Storage of specific handlers on this participant by [controllerTypeName/supplDataKey/supplDataValue]
-    std::unordered_map<std::string /* unique_key */, std::vector<ServiceDiscoveryHandler>> _specificHandlers;
+    std::map<std::string /* unique_key */, std::vector<ServiceDiscoveryHandler>> _specificDiscoveryHandlers;
 
     // Storage of incoming serviceDescriptors by [participantName][controllerTypeName/supplDataKey/supplDataValue]
-    using ServiceMapByUniqueKey = std::unordered_map<std::string /* unique_key */, ServiceMap>;
-    std::unordered_map<std::string /* participant name */, ServiceMapByUniqueKey> _specificAnnouncementsByParticipant;
+    using ServiceMapByUniqueKey = std::map<std::string /* unique_key */, ServiceMap>;
+    std::map<std::string /* participant name */, ServiceMapByUniqueKey> _serviceDescriptorsByParticipant;
 
-    // We only allow specific handlers for fixed controllerTypeName, supplDataKey are associated
-    const std::unordered_map<std::string, std::string> _allowedSpecificDiscovery = {
-        {controllerTypeDataPublisher, supplKeyDataPublisherTopic},
-        {controllerTypeRpcServerInternal, supplKeyRpcServerInternalClientUUID},
-        {controllerTypeRpcClient, supplKeyRpcClientFunctionName}};
-
-    std::string _participantName;
-
+    // We only allow specific handlers for fixed controllerTypeNames
+    const std::unordered_set<std::string> _allowedControllers = {
+        controllerTypeDataPublisher, controllerTypeRpcServerInternal, controllerTypeRpcClient};
 };
 
 } // namespace Discovery

@@ -44,28 +44,36 @@ DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services
 
 void DataSubscriber::RegisterServiceDiscovery()
 {
-    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
-        [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
+    auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
+        auto getVal = [serviceDescriptor](const std::string& key) {
+            std::string tmp;
+            if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
+            {
+                throw SilKitError{"Unknown key in supplementalData"};
+            }
+            return tmp;
+        };
 
-                auto getVal = [serviceDescriptor](std::string key) {
-                    std::string tmp;
-                    if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-                    { 
-                        throw SilKitError{"Unknown key in supplementalData"};
-                    }
-                    return tmp;
-                };
+        const auto pubUUID = getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
 
-                auto topic = getVal(Core::Discovery::supplKeyDataPublisherTopic);
-                std::string pubMediaType{ getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
-                auto pubUUID = getVal(Core::Discovery::supplKeyDataPublisherPubUUID);
-                std::string labelsStr = getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
-                std::vector<SilKit::Services::MatchingLabel> publisherLabels =
+        // Early abort creation if Publisher is already connected
+        if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated
+            && _internalSubscribers.count(pubUUID) > 0)
+        {
+            return;
+        }
+
+        const auto topic = getVal(Core::Discovery::supplKeyDataPublisherTopic);
+        if (topic == _topic)
+        {
+            const std::string pubMediaType{getVal(Core::Discovery::supplKeyDataPublisherMediaType)};
+            if (MatchMediaType(_mediaType, pubMediaType))
+            {
+                const std::string labelsStr = getVal(Core::Discovery::supplKeyDataPublisherPubLabels);
+                const std::vector<SilKit::Services::MatchingLabel> publisherLabels =
                     SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
-
-                if (topic == _topic && MatchMediaType(_mediaType, pubMediaType) &&
-                    Util::MatchLabels(_labels, publisherLabels))
+                if (Util::MatchLabels(_labels, publisherLabels))
                 {
                     std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
 
@@ -78,9 +86,56 @@ void DataSubscriber::RegisterServiceDiscovery()
                         RemoveInternalSubscriber(pubUUID);
                     }
                 }
-            
-        }, Core::Discovery::controllerTypeDataPublisher, _topic);
+            }
+        }
+    };
+    
+    // Evaluate the discovery lookups
+    std::vector<std::string> discoveryLookupEntries{};
+    std::string allLabelsStr = "";
+    std::string mandatoryLabelsStr = "";
+    bool hasOptionalLabels = false;
+    for (auto l : _labels)
+    {
+        allLabelsStr += l.key + "/" + l.value + "/";
+
+        if (l.kind == MatchingLabel::Kind::Mandatory)
+        {
+            mandatoryLabelsStr += l.key + "/" + l.value + "/";
+        }
+        else
+        {
+            hasOptionalLabels = true;
+        }
+    }
+
+    const auto lookupKeyBase = Core::Discovery::controllerTypeDataPublisher + "/"
+                               + Core::Discovery::supplKeyDataPublisherTopic + "/" + _topic + "/"
+                               + Core::Discovery::supplKeyDataPublisherPubLabels + "/";
+
+    // How this controller is discovered by DataPublisher. Two entries needed for all/optional labels
+    const auto discoveryLookupKeyAllLabels = lookupKeyBase + allLabelsStr;
+    const auto discoveryLookupKeyMandatoryLabels = lookupKeyBase + mandatoryLabelsStr;
+
+    if (_labels.empty())
+    {
+        discoveryLookupEntries.push_back(discoveryLookupKeyAllLabels);
+    }
+    else
+    {
+        // Add entry with all labels to quickly find optional/madatory <-> optional/madatory
+        // Only needed if we have optional labels
+        if (hasOptionalLabels)
+        {
+            discoveryLookupEntries.push_back(discoveryLookupKeyAllLabels);
+        }
+        // Add entry only with mandatory labels. Might boil down to no labels and just topic to find optional <-> empty
+        discoveryLookupEntries.push_back(discoveryLookupKeyMandatoryLabels);
+    }
+
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(matchHandler, discoveryLookupEntries);
 }
+
 
 void DataSubscriber::SetDataMessageHandler(DataMessageHandler callback)
 {

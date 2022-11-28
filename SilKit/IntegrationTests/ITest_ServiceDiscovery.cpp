@@ -164,7 +164,7 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
     auto&& subscriber = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
 
     // Services
-    const auto topic = "Topic";
+    const std::string topic = "Topic";
     for (auto i = 0u; i < numberOfServices; i++)
     {
         const auto pubControllerName = "PubCtrl" + std::to_string(i);
@@ -180,6 +180,11 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
 
     auto allCreated = std::promise<void>();
     auto allRemoved = std::promise<void>();
+
+    const auto discoveryLookupKey = SilKit::Core::Discovery::controllerTypeDataPublisher + "/"
+                               + SilKit::Core::Discovery::supplKeyDataPublisherTopic + "/" + topic + "/"
+                               + SilKit::Core::Discovery::supplKeyDataPublisherPubLabels + "/";
+
     // Participants are already there, so the registration will trigger the provided handler immediately
     subscriberServiceDiscovery->RegisterSpecificServiceDiscoveryHandler(
         [numberOfServices, &allRemoved, &allCreated, &createdServiceNames, &removedServiceNames, publisherName](
@@ -209,7 +214,8 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
                 break;
             default: break;
             }
-        }, SilKit::Core::Discovery::controllerTypeDataPublisher, topic);
+        },
+        {discoveryLookupKey});
 
     // Await the creation
     allCreated.get_future().wait_for(10s);

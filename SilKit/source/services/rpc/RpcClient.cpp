@@ -60,34 +60,38 @@ RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestr
 
 void RpcClient::RegisterServiceDiscovery()
 {
-    // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
-    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
-        [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-            auto getVal = [serviceDescriptor](std::string key) {
-                std::string tmp;
-                if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-                {
-                    throw SilKit::StateError{"Unknown key in supplementalData"};
-                }
-                return tmp;
-            };
-
-            auto clientUUID = getVal(Core::Discovery::supplKeyRpcServerInternalClientUUID);
-
-            if (clientUUID == _clientUUID)
+    auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
+        auto getVal = [serviceDescriptor](const std::string& key) {
+            std::string tmp;
+            if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
             {
-                if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
-                {
-                    _numCounterparts++;
-                }
-                else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
-                {
-                    _numCounterparts--;
-                }
+                throw SilKit::StateError{"Unknown key in supplementalData"};
             }
-        },
-        Core::Discovery::controllerTypeRpcServerInternal, _clientUUID);
+            return tmp;
+        };
+
+        auto clientUUID = getVal(Core::Discovery::supplKeyRpcServerInternalClientUUID);
+
+        if (clientUUID == _clientUUID)
+        {
+            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+            {
+                _numCounterparts++;
+            }
+            else if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
+            {
+                _numCounterparts--;
+            }
+        }
+    };
+
+    // How this controller is discovered by RpcServerInternal
+    const std::string discoveryLookupKey = Core::Discovery::controllerTypeRpcServerInternal + "/"
+                                           + Core::Discovery::supplKeyRpcServerInternalClientUUID + "/" + _clientUUID;
+
+    // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(matchHandler, {discoveryLookupKey});
 }
 
 void RpcClient::Call(Util::Span<const uint8_t> data, void* userContext)

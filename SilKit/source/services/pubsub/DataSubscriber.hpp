@@ -50,7 +50,6 @@ public:
 
 public:
     void RegisterServiceDiscovery();
-
     void SetDataMessageHandler(DataMessageHandler callback) override;
 
     // SilKit::Services::Orchestration::ITimeConsumer
@@ -70,6 +69,7 @@ private:
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
+
     DataMessageHandler _defaultDataHandler;
 
     Core::ServiceDescriptor _serviceDescriptor{};

@@ -60,8 +60,7 @@ public: //IServiceDiscovery
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler) override;
     //!< Register a specific handler for asynchronous service creation notifications
     void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                 const std::string& controllerTypeName,
-                                                 const std::string& supplDataValue) override;
+                                                 const std::vector<std::string>& lookupKeys) override;
 
     //!< Get all currently known services, including from ourselves
     std::vector<ServiceDescriptor> GetServices() const override;

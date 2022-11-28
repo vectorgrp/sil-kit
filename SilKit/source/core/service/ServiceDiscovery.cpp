@@ -29,8 +29,6 @@ namespace Discovery {
 ServiceDiscovery::ServiceDiscovery(IParticipantInternal* participant, const std::string& participantName)
     : _participant{participant}
     , _participantName{participantName}
-    , _specificDiscoveryStore{ participantName }
-
 {
 }
 
@@ -261,8 +259,7 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler h
 }
 
 void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                               const std::string& controllerTypeName,
-                                                               const std::string& supplDataValue)
+                                                               const std::vector<std::string>& lookupKeys)
 {
     if (_shuttingDown)
     {
@@ -270,7 +267,7 @@ void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryH
     }
 
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
-    _specificDiscoveryStore.RegisterSpecificServiceDiscoveryHandler(handler, controllerTypeName, supplDataValue);
+    _specificDiscoveryStore.RegisterSpecificServiceDiscoveryHandler(handler, lookupKeys);
 }
 
 } // namespace Discovery

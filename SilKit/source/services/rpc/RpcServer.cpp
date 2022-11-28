@@ -45,36 +45,39 @@ RpcServer::RpcServer(Core::IParticipantInternal* participant, Services::Orchestr
 
 void RpcServer::RegisterServiceDiscovery()
 {
-    // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
-    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
-        [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
-            if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
-            {
-
-                auto getVal = [serviceDescriptor](std::string key) {
-                    std::string tmp;
-                    if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
-                    {
-                        throw SilKit::StateError{"Unknown key in supplementalData"};
-                    }
-                    return tmp;
-                };
-
-                auto functionName = getVal(Core::Discovery::supplKeyRpcClientFunctionName);
-                auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
-                auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
-                std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
-                auto clientLabels =
-                    SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
-
-                if (functionName == _dataSpec.FunctionName() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
-                    && Util::MatchLabels(_dataSpec.Labels(), clientLabels))
+    auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                               const SilKit::Core::ServiceDescriptor& serviceDescriptor) {
+        if (discoveryType == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+        {
+            auto getVal = [serviceDescriptor](const std::string& key) {
+                std::string tmp;
+                if (!serviceDescriptor.GetSupplementalDataItem(key, tmp))
                 {
-                    AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
+                    throw SilKit::StateError{"Unknown key in supplementalData"};
                 }
+                return tmp;
+            };
+
+            auto functionName = getVal(Core::Discovery::supplKeyRpcClientFunctionName);
+            auto clientMediaType = getVal(Core::Discovery::supplKeyRpcClientMediaType);
+            auto clientUUID = getVal(Core::Discovery::supplKeyRpcClientUUID);
+            std::string labelsStr = getVal(Core::Discovery::supplKeyRpcClientLabels);
+            auto clientLabels = SilKit::Config::Deserialize<std::vector<SilKit::Services::MatchingLabel>>(labelsStr);
+
+            if (functionName == _dataSpec.FunctionName() && MatchMediaType(clientMediaType, _dataSpec.MediaType())
+                && Util::MatchLabels(_dataSpec.Labels(), clientLabels))
+            {
+                AddInternalRpcServer(clientUUID, clientMediaType, clientLabels);
             }
-        }, Core::Discovery::controllerTypeRpcClient, _dataSpec.FunctionName());
+        }
+    };
+
+    // How this controller is discovered by RpcClient
+    const std::string discoveryLookupKey = Core::Discovery::controllerTypeRpcClient + "/"
+                          + Core::Discovery::supplKeyRpcClientFunctionName + "/" + _dataSpec.FunctionName();
+
+    // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(matchHandler, {discoveryLookupKey});
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData)

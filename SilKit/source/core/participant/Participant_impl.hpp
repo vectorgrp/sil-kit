@@ -429,21 +429,30 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
 
     std::string network = to_string(Util::Uuid::GenerateRandom());
 
+    // Merge config and parameters, sort labels
     SilKit::Config::DataPublisher controllerConfig = GetConfigByControllerName(_participantConfig.dataPublishers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
+    SilKit::Services::PubSub::PubSubSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
+    auto labels = dataSpec.Labels();
+    std::sort(labels.begin(), labels.end(), [](const MatchingLabel& v1, const MatchingLabel& v2) {
+        return v1.key < v2.key;
+    });
+    for (auto label : labels)
+    {
+        configuredDataNodeSpec.AddLabel(label);
+    }
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataPublisher;
-    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherTopic] = controllerConfig.topic.value();
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherTopic] = configuredDataNodeSpec.Topic();
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubUUID] = network;
-    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherMediaType] = dataSpec.MediaType();
-    auto labels = dataSpec.Labels();
+    supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherMediaType] = configuredDataNodeSpec.MediaType();
     auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<SilKit::Config::DataPublisher, SilKit::Services::PubSub::DataPublisher>(
         controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
-        dataSpec, network);
+        configuredDataNodeSpec, network);
 
     _connection.SetHistoryLengthForLink(history, controller);
 
@@ -474,13 +483,18 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
 {
     // DataSubscriber has no registered messages (discovers DataPublishers and creates DataSubscriberInternal),
     // so the network name is irrelevant.
-    auto network = "default";
+    const auto network = "default";
 
+    // Merge config and parameters, sort labels
     SilKit::Config::DataSubscriber controllerConfig = GetConfigByControllerName(_participantConfig.dataSubscribers, canonicalName);
     UpdateOptionalConfigValue(canonicalName, controllerConfig.topic, dataSpec.Topic());
-
+    
     SilKit::Services::PubSub::PubSubSpec configuredDataNodeSpec{controllerConfig.topic.value(), dataSpec.MediaType()};
-    for (auto label : dataSpec.Labels())
+    auto labels = dataSpec.Labels();
+    std::sort(labels.begin(), labels.end(), [](const MatchingLabel& v1, const MatchingLabel& v2) {
+        return v1.key < v2.key;
+    });
+    for (auto label : labels)
     {
         configuredDataNodeSpec.AddLabel(label);
     }

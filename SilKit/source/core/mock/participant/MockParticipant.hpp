@@ -132,8 +132,7 @@ public:
     MOCK_METHOD(void, NotifyServiceRemoved, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(void, RegisterServiceDiscoveryHandler, (SilKit::Core::Discovery::ServiceDiscoveryHandler handler), (override));
     MOCK_METHOD(void, RegisterSpecificServiceDiscoveryHandler,
-                (SilKit::Core::Discovery::ServiceDiscoveryHandler handler, const std::string& controllerTypeName,
-                 const std::string& supplDataValue),
+                (SilKit::Core::Discovery::ServiceDiscoveryHandler handler, (const std::vector<std::string>& lookupKeys)),
                 (override));
     MOCK_METHOD(std::vector<ServiceDescriptor>, GetServices, (), (const, override));
     MOCK_METHOD(void, OnParticpantRemoval, (const std::string& participantName), (override));

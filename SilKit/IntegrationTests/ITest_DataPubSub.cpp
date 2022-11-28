@@ -373,6 +373,64 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_mandatory_label)
                        {{"SubCtrl1",
                          "TopicA",
                          {"A"},
+                         {{"kB", "vB", MatchingLabel::Kind::Mandatory}, {"kA", "vA", MatchingLabel::Kind::Mandatory}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         1}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Matching mandatory and optional labels
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_pub_mandatory_sub_optional_labels)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Mandatory}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Optional}, {"kB", "vB", MatchingLabel::Kind::Optional}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         1}}});
+
+    RunSyncTest(pubsubs);
+}
+
+// Matching mandatory and optional labels
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_sub_mandatory_pub_optional_labels)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Optional}, {"kB", "vB", MatchingLabel::Kind::Optional}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
                          {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Mandatory}},
                          defaultMsgSize,
                          numMsgToReceive,
@@ -380,6 +438,36 @@ TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_mandatory_label)
 
     RunSyncTest(pubsubs);
 }
+
+// Matching mixed mandatory and optional labels
+TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_mixed_labels)
+{
+    const uint32_t numMsgToPublish = defaultNumMsgToPublish;
+    const uint32_t numMsgToReceive = numMsgToPublish;
+
+    std::vector<PubSubParticipant> pubsubs;
+    pubsubs.push_back({"Pub1",
+                       {{"PubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Optional}},
+                         0,
+                         defaultMsgSize,
+                         numMsgToPublish}},
+                       {}});
+    pubsubs.push_back({"Sub1",
+                       {},
+                       {{"SubCtrl1",
+                         "TopicA",
+                         {"A"},
+                         {{"kA", "vA", MatchingLabel::Kind::Mandatory}, {"kB", "vB", MatchingLabel::Kind::Optional}},
+                         defaultMsgSize,
+                         numMsgToReceive,
+                         1}}});
+
+    RunSyncTest(pubsubs);
+}
+
 
 // Wrong mandatory label value -> Expect no reception
 TEST_F(ITest_DataPubSub, test_1pub_1sub_sync_wrong_mandatory_label_value)

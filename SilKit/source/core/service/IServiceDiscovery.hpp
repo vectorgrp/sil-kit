@@ -47,8 +47,7 @@ public:
     //!< Register a handler for service creation notifications for a specific controllerTypeName, 
     //!< associated supplDataKey and given supplDataValue 
     virtual void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                         const std::string& controllerTypeName,
-                                                         const std::string& supplDataValue) = 0;
+                                                         const std::vector<std::string>& lookupKeys) = 0;
     //!< Get the currently known created services on other participants
     virtual std::vector<ServiceDescriptor> GetServices() const = 0;
     //!< React on a participant shutdown
