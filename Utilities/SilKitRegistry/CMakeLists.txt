@@ -50,10 +50,16 @@ set_target_properties(sil-kit-registry PROPERTIES
 add_definitions(-DEXPORT_SilKitAPI)
 
 target_link_libraries(sil-kit-registry
-    S_SilKit_Core_VAsio
-    S_SilKit_Core_Participant
+    PRIVATE
+    I_SilKit_Core_Participant #ValidateAndSanitize
+    I_SilKit_Util
+
     S_SilKit_Config
-    SilKitVersion
+    S_SilKit_Util_Filesystem
+    S_SilKit_Util_Uri
+    S_SilKit_Dashboard
+
+    SilKit::SilKit
 )
 
 # Set versioning infos on exe

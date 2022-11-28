@@ -417,7 +417,7 @@
 
         {
             "name": "gcc9-debug",
-            "inherits": ["mixin-posix", "mixin-dirs", "mixin-ninja" , "mixin-debug", "mixin-gcc9", "mixin-werror"]
+            "inherits": ["mixin-posix", "mixin-dirs", "mixin-ninja" , "mixin-debug", "mixin-gcc9"]
         },
         {
             "name": "gcc9-release",

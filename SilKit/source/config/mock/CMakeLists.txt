@@ -28,5 +28,5 @@ target_include_directories(I_SilKit_Config_TestUtils
 )
 
 target_link_libraries(I_SilKit_Config_TestUtils
-    INTERFACE S_SilKit_Config
+    INTERFACE I_SilKit_Config
 )

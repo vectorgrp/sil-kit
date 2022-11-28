@@ -1,3 +1,4 @@
+#include "silkit/SilKitMacros.hpp"
 #include "WindowsServiceMain.hpp"
 
 #if defined(HAS_SILKIT_REGISTRY_WINDOWS_SERVICE)
@@ -87,7 +88,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
     SILKIT_UNUSED_ARG(dwArgc);
     SILKIT_UNUSED_ARG(lpszArgv);
 
-    std::unique_ptr<SilKit::Core::VAsioRegistry> registry;
+    SilKitRegistry::RegistryInstance registry;
 
     if (gStartFunction == nullptr)
     {
@@ -105,7 +106,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
         return;
     }
 
-    if (registry == nullptr)
+    if (registry._registry == nullptr)
     {
         SvcReportStatus(SERVICE_ERROR_CRITICAL, ERROR_INTERNAL_ERROR, 0);
         return;
@@ -123,7 +124,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
         return;
     }
 
-    registry.reset();
+    registry = {};
 
     // report that the service has stopped
     SvcReportStatus(SERVICE_STOPPED, NO_ERROR, 0);

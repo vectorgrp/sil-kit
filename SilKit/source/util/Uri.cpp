@@ -169,5 +169,22 @@ auto Uri::MakeTcp(const std::string& host, const uint16_t port) -> Uri
     return Uri::Parse(fmt::format("tcp://{}:{}", host, port));
 }
 
+auto Uri::UrlEncode(const std::string& name) -> std::string
+{
+    std::string safeName;
+    for (const uint8_t ch : name)
+    {
+        if (std::isalnum(static_cast<int>(ch)))
+        {
+            safeName.push_back(ch);
+        }
+        else
+        {
+            safeName += fmt::format("%{:02x}", static_cast<unsigned char>(ch));
+        }
+    }
+    return safeName;
+}
+
 } // namespace Core
 } // namespace SilKit

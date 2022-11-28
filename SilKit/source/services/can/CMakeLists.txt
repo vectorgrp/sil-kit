@@ -52,7 +52,7 @@ target_link_libraries(S_SilKit_Services_Can
             S_SilKit_Tracing
 
     PUBLIC I_SilKit_Core_Internal
-    PUBLIC S_SilKit_Config
+    PUBLIC I_SilKit_Config
 )
 
 add_silkit_test(Test_SimCanController

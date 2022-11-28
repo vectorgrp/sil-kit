@@ -387,3 +387,41 @@ add_silkit_test(ITest_LinDemo_Hourglass
     LIBS
     S_ITests_STH_Hourglass
 )
+if(SILKIT_BUILD_DASHBOARD)
+    add_silkit_test(
+        ITest_Dashboard
+
+        SOURCES ITest_Dashboard.cpp
+
+        LIBS
+        SilKit
+        S_ITests_STH
+        S_SilKit_Dashboard
+        I_SilKit_Core_Internal
+        I_SilKit_Config_TestUtils
+        I_SilKit_Services_Ethernet
+        S_SilKit_Config
+    )
+    add_silkit_test(
+        ITest_DashboardServerUnavailable
+
+        SOURCES ITest_DashboardServerUnavailable.cpp
+
+        LIBS
+        SilKit
+        S_ITests_STH
+        S_SilKit_Dashboard
+        S_SilKit_Config
+    )
+    add_silkit_test(
+        ITest_DashboardServerTimeout
+
+        SOURCES ITest_DashboardServerTimeout.cpp
+
+        LIBS
+        SilKit
+        S_ITests_STH
+        S_SilKit_Dashboard
+        S_SilKit_Config
+    )
+endif()

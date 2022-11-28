@@ -36,6 +36,7 @@ if (TARGET fmt-header-only)
     target_link_libraries(I_SilKit_Services_Logging
         INTERFACE $<BUILD_INTERFACE:fmt-header-only>
     )
+    target_include_directories(I_SilKit_Services_Logging INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
     target_compile_definitions(I_SilKit_Services_Logging
         INTERFACE $<BUILD_INTERFACE:HAVE_FMTLIB>
         INTERFACE $<BUILD_INTERFACE:FMT_HEADER_ONLY>
@@ -69,7 +70,7 @@ target_link_libraries(S_SilKit_Services_Logging
 
     PUBLIC SilKitInterface
     PUBLIC I_SilKit_Core_Internal
-    PUBLIC S_SilKit_Config
+    PUBLIC I_SilKit_Config
     PUBLIC S_SilKit_Core_Service
 
     PRIVATE spdlog

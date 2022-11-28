@@ -63,6 +63,18 @@ target_include_directories(S_SilKit_Util_Uuid
 )
 
 
+add_library(S_SilKit_Util_Uri STATIC
+    Uri.hpp
+    Uri.cpp
+)
+target_link_libraries(S_SilKit_Util_Uri
+    PRIVATE SilKitInterface
+    fmt-header-only)
+target_include_directories(S_SilKit_Util_Uri
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)
+
+
 add_library(S_SilKit_Util_LabelMatching STATIC
     LabelMatching.hpp
     LabelMatching.cpp

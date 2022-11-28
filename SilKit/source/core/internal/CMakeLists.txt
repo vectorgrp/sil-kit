@@ -35,7 +35,7 @@ target_link_libraries(I_SilKit_Core_Internal
     INTERFACE I_SilKit_Wire_Flexray
     INTERFACE I_SilKit_Wire_Lin
     INTERFACE I_SilKit_Wire_Rpc
-    INTERFACE S_SilKit_Config
+    INTERFACE I_SilKit_Config
 )
 
 add_silkit_test(Test_MwVAsio_MessageBuffer SOURCES Test_MessageBuffer.cpp LIBS I_SilKit_Core_Internal)

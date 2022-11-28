@@ -39,3 +39,14 @@ inline auto MakeTestRegistryUri()
     ss << "silkit://localhost:" << port;
     return ss.str();
 }
+
+inline auto MakeTestDashboardUri()
+{
+    std::stringstream ss;
+    int port = 20000;
+    int pid = getpid();
+    port += pid % 1000; // clamp to [8500, 9500)
+    // add a random offset to prevent two tests listening on the same port
+    ss << "http://localhost:" << port;
+    return ss.str();
+}

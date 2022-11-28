@@ -55,9 +55,6 @@ add_library(S_SilKit_Core_VAsio STATIC
     VAsioTcpPeer.cpp
     VAsioTransmitter.hpp
 
-    Uri.hpp
-    Uri.cpp
-
     SerializedMessageTraits.hpp
     SerializedMessage.hpp
     SerializedMessage.cpp
@@ -76,13 +73,14 @@ target_link_libraries(S_SilKit_Core_VAsio
       S_SilKit_Services_PubSub
       S_SilKit_Services_Rpc
       S_SilKit_Services_Can
+      S_SilKit_Util_Uri
       S_SilKit_Services_Ethernet
       S_SilKit_Services_Lin
       S_SilKit_Services_Flexray
       Threads::Threads
       S_SilKit_Util_Filesystem
 
-    INTERFACE S_SilKit_Config
+    INTERFACE I_SilKit_Config
 )
 
 target_compile_definitions(S_SilKit_Core_VAsio PRIVATE ASIO_STANDALONE)

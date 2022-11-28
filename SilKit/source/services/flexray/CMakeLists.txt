@@ -46,7 +46,7 @@ target_link_libraries(S_SilKit_Services_Flexray
             I_SilKit_Core_Internal
             S_SilKit_Services_Logging
             S_SilKit_Tracing
-            S_SilKit_Config
+            I_SilKit_Config
 )
 
 add_silkit_test(Test_SimFlexrayValidation SOURCES Test_Validation.cpp LIBS S_SilKit_Services_Flexray)

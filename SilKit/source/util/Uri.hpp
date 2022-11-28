@@ -56,6 +56,8 @@ public:
 
     static auto MakeTcp(const std::string& host, const uint16_t port) -> Uri;
 
+    static auto UrlEncode(const std::string& name) -> std::string;
+
 public:
     // public methods
     auto EncodedString() const -> const std::string&;

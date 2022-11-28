@@ -42,6 +42,7 @@ option(SILKIT_ENABLE_THREADSAN "Enable -f sanitize=thread for builds (requires g
 option(SILKIT_ENABLE_COVERAGE "Enable coverage for builds (requires gcc, clang)" OFF)
 option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" ON)
+option(SILKIT_BUILD_DASHBOARD "Build the SIL Kit Dashboard client." ON)
 
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)

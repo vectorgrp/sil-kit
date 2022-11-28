@@ -48,7 +48,7 @@ target_link_libraries(S_SilKit_Services_Rpc
     PRIVATE SilKitInterface
             I_SilKit_Core_Internal
             S_SilKit_Util_Uuid
-            S_SilKit_Config
+            I_SilKit_Config
             S_SilKit_Util_LabelMatching
 )
 
@@ -62,5 +62,6 @@ add_silkit_test(Test_SimRpc
         I_SilKit_Core_Mock_Participant
         I_SilKit_Core_Internal
         S_SilKit_Core_Mock_NullConnection
+        S_SilKit_Config
 )
 add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Rpc)

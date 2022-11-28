@@ -40,7 +40,7 @@ struct ValidateAndSanitizeConfigResult
     std::vector<std::pair<Services::Logging::Level, std::string>> logMessages;
 };
 
-auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
+SilKitAPI auto ValidateAndSanitizeConfig(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                const std::string& participantName, const std::string& registryUri)
     -> ValidateAndSanitizeConfigResult;
 

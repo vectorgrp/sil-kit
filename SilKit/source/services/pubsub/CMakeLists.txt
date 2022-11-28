@@ -48,7 +48,7 @@ target_link_libraries(S_SilKit_Services_PubSub
     PUBLIC  I_SilKit_Wire_Data
     PRIVATE SilKitInterface
             I_SilKit_Core_Internal
-            S_SilKit_Config
+            I_SilKit_Config
             I_SilKit_Util
             S_SilKit_Util_LabelMatching
 )

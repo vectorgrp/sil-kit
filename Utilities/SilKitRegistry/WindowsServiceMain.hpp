@@ -1,9 +1,12 @@
 #pragma once
 
-#include "VAsioRegistry.hpp"
+#include "silkit/vendor/ISilKitRegistry.hpp"
+#include "silkit/participant/exception.hpp"
 
 #include <functional>
 #include <memory>
+
+#include "Registry.hpp"
 
 #if defined(_WIN32) && defined(_MSC_VER)
 #    define HAS_SILKIT_REGISTRY_WINDOWS_SERVICE 1
@@ -11,7 +14,7 @@
 
 namespace SilKitRegistry {
 
-using StartFunction = std::function<std::unique_ptr<SilKit::Core::VAsioRegistry>()>;
+using StartFunction = std::function<SilKitRegistry::RegistryInstance()>;
 
 #ifdef HAS_SILKIT_REGISTRY_WINDOWS_SERVICE
 

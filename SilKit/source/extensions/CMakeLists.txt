@@ -52,7 +52,7 @@ target_include_directories(S_SilKit_Extensions
 
 target_link_libraries(S_SilKit_Extensions
     PUBLIC  SilKitInterface
-            S_SilKit_Config
+            I_SilKit_Config
     PRIVATE SilKitVersion
             S_SilKit_Tracing
 )

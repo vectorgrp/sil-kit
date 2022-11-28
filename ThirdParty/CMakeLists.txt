@@ -92,6 +92,11 @@ function(include_yamlcpp)
 	)
     # yaml-cpp explicitly sets /W3
     silkit_target_clean_compileflags(yaml-cpp)
+
+    add_library(YamlInterface INTERFACE)
+    target_include_directories(YamlInterface
+        INTERFACE $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
+
 endfunction()
 include_yamlcpp()
 
@@ -132,3 +137,26 @@ function(include_spdlog)
 endfunction()
 
 include_spdlog()
+
+
+if(SILKIT_BUILD_DASHBOARD)
+    function(include_oatpp)
+        silkit_clean_default_compileflags()
+        add_compile_options(-w)
+
+        set(OATPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+        set(OATPP_INSTALL OFF CACHE BOOL "" FORCE)
+
+        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+        set(CMAKE_C_VISIBILITY_PRESET hidden)
+        # work around old cmake in oatpp:
+        set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+        add_subdirectory(oatpp)
+        silkit_target_clean_compileflags(oatpp)
+        set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
+        set_property(TARGET oatpp PROPERTY VISIBILITY_INLINES_HIDDEN ON)
+    endfunction()
+
+    include_oatpp()
+endif()

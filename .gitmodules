@@ -13,3 +13,6 @@
 [submodule "ThirdParty/googletest"]
 	path = ThirdParty/googletest
 	url = https://github.com/google/googletest
+[submodule "ThirdParty/oatpp"]
+	path = ThirdParty/oatpp
+	url = https://github.com/oatpp/oatpp.git

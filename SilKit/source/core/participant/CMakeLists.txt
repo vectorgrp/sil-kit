@@ -46,7 +46,7 @@ target_link_libraries(S_SilKit_Core_Participant
     PUBLIC
         I_SilKit_Core_Internal
         S_SilKit_Services_Logging
-        S_SilKit_Config
+        I_SilKit_Config
         I_SilKit_Util
         S_SilKit_Util_SetThreadName
         S_SilKit_Util_Uuid
@@ -59,7 +59,6 @@ target_link_libraries(S_SilKit_Core_Participant
         S_SilKit_Services_Rpc
         S_SilKit_Tracing
 
-    PUBLIC S_SilKit_Config
     PUBLIC S_SilKit_Core_Service
 
     PRIVATE SilKitVersion
@@ -71,8 +70,8 @@ if (MSVC)
     target_compile_options(S_SilKit_Core_Participant PRIVATE "/bigobj")
 endif (MSVC)
 
-add_silkit_test(Test_MwParticipant 
-    SOURCES Test_Participant.cpp 
+add_silkit_test(Test_MwParticipant
+    SOURCES Test_Participant.cpp
     LIBS S_SilKit_Core_Mock_NullConnection I_SilKit_Config_TestUtils
 )
 

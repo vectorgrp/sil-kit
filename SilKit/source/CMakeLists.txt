@@ -29,7 +29,9 @@ add_subdirectory(services)
 add_subdirectory(extensions)
 add_subdirectory(capi)
 add_subdirectory(experimental)
+add_subdirectory(dashboard)
 
+find_package(Threads REQUIRED)
 # Encode the current GIT and version infos into version_macros.hpp
 # If this file is present in the current source directory we assume
 # that this source-tree is a non-git/packaged source tree and re-use
@@ -75,6 +77,7 @@ set(silkitLibType SHARED)
 if(SILKIT_BUILD_STATIC)
     set(silkitLibType STATIC)
 endif()
+
 
 add_library(SilKit ${silkitLibType}
     SilKit.hpp
@@ -148,6 +151,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(SilKit
     PUBLIC
     SilKitInterface
+    Threads::Threads
     PRIVATE
     I_SilKit_Core_Internal
     S_SilKit_Config

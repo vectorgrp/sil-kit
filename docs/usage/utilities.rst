@@ -30,12 +30,13 @@ sil-kit-registry
    *  - Requirements
       - None
    *  - Parameters
-      - -v, --version                         Get version info.
-        -h, --help                            Show the help of the SIL Kit Registry.
-        -s, --use-signal-handler              Exit this process when a signal is received. If not set, the process runs infinitely.
-        -u, --listen-uri <silkit-uri>         The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
-        -l, --log <level>                     Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
-        -g, --generate-configuration <path>   Path and filename of a participant configuration file to generate containing the URI the registry is using.
+      - -v, --version                        Get version info.
+        -h, --help                           Show the help of the SIL Kit Registry.
+        -s, --use-signal-handler             Exit this process when a signal is received. If not set, the process runs infinitely.
+        -u, --listen-uri <silkit-uri>        The silkit:// URI the registry should listen on. Defaults to 'silkit://localhost:8500'.
+        -l, --log <level>                    Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.
+        -g, --generate-configuration <path>  Path and filename of a participant configuration file to generate containing the URI the registry is using.
+        -d, --dashboard-uri <dashboard-uri>  The http:// URI the data should be sent to. Defaults to 'http://localhost:8082'.
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -51,6 +52,7 @@ sil-kit-registry
          * The registry will run if either binding to the TCP socket, or the Domain socket, or both succeeds.
            If only TCP or Domain sockets are used, because one of the bindings failed for some reason, a warning will be logged.
            It will exit with an error if neither is available.
+         * The SIL Kit Dashboard is experimental and might be changed or removed in future versions of the SIL Kit.
 
 
 .. _sec:util-system-controller:

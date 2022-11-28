@@ -19,6 +19,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+add_library(I_SilKit_Config INTERFACE)
+
+target_include_directories(I_SilKit_Config
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+)
+target_link_libraries(I_SilKit_Config
+    INTERFACE
+        YamlInterface
+        I_SilKit_Util
+)
 
 add_library(S_SilKit_Config STATIC
     Configuration.hpp
@@ -39,8 +49,8 @@ add_library(S_SilKit_Config STATIC
 
 target_link_libraries(S_SilKit_Config
     PRIVATE SilKitInterface
-
     PUBLIC I_SilKit_Util
+    PUBLIC I_SilKit_Config
     PUBLIC yaml-cpp
 )
 
@@ -48,12 +58,12 @@ target_include_directories(S_SilKit_Config
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_silkit_test(Test_MwCfgValidation 
-    SOURCES Test_Validation.cpp 
+add_silkit_test(Test_MwCfgValidation
+    SOURCES Test_Validation.cpp
     LIBS S_SilKit_Config
 )
 
-add_silkit_test(Test_ParticipantConfiguration 
+add_silkit_test(Test_ParticipantConfiguration
     SOURCES Test_ParticipantConfiguration.cpp
     LIBS S_SilKit_Core_Mock_NullConnection
     CONFIGS
@@ -63,24 +73,23 @@ add_silkit_test(Test_ParticipantConfiguration
         ParticipantConfiguration_Logging_Without_File.json
 )
 
-add_silkit_test(Test_MwCfgYamlParser 
-    SOURCES Test_YamlParser.cpp 
+add_silkit_test(Test_MwCfgYamlParser
+    SOURCES Test_YamlParser.cpp
     LIBS S_SilKit_Config yaml-cpp
 )
 
-add_silkit_test(Test_MwCfgYamlValidator 
-    SOURCES Test_YamlValidator.cpp 
+add_silkit_test(Test_MwCfgYamlValidator
+    SOURCES Test_YamlValidator.cpp
     LIBS S_SilKit_Config yaml-cpp
 )
-
 if(SILKIT_BUILD_TESTS)
     add_library(I_SilKit_Config_TestUtils INTERFACE)
 
     target_include_directories(I_SilKit_Config_TestUtils
         INTERFACE ${CMAKE_CURRENT_LIST_DIR}
     )
-
     target_link_libraries(I_SilKit_Config_TestUtils
-        INTERFACE S_SilKit_Config
+        INTERFACE I_SilKit_Config
     )
+
 endif()
