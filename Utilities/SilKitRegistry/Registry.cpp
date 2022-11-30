@@ -27,6 +27,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/logging/string_utils.hpp"
 
 #include "SignalHandler.hpp"
+#include "WindowsServiceMain.hpp"
+
 #include "VAsioRegistry.hpp"
 #include "CommandlineParser.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -71,7 +73,27 @@ void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
     newSink.type = SilKit::Config::Sink::Type::Stdout;
     newSink.level = SilKit::Services::Logging::from_string(logLevel);
     config->logging.sinks.emplace_back(std::move(newSink));
-    
+
+}
+
+void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
+                                       const std::string& logLevel)
+{
+    namespace fs = SilKit::Filesystem;
+
+    auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    SILKIT_ASSERT(config != nullptr);
+
+    SilKit::Config::Sink newSink{};
+    newSink.type = SilKit::Config::Sink::Type::File;
+    newSink.level = SilKit::Services::Logging::from_string(logLevel);
+    newSink.logName = []() -> std::string {
+        std::ostringstream path;
+        path << fs::temp_directory_path().string() << fs::path::preferred_separator
+             << "sil-kit-registry_windows-service";
+        return path.str();
+    }();
+    config->logging.sinks.emplace_back(std::move(newSink));
 }
 
 void SanitizeConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
@@ -102,8 +124,77 @@ auto ExtractRegistryUriFromConfiguration(std::shared_ptr<SilKit::Config::IPartic
     return cfg->middleware.registryUri;
 }
 
-} //namespace
+auto GenerateRandomCharacters(const std::string& generatedConfigurationPath, size_t count) -> std::string
+{
+    std::mt19937_64 gen{
+        std::hash<std::string>{}(generatedConfigurationPath)
+        ^ std::hash<std::chrono::steady_clock::rep>{}(std::chrono::steady_clock::now().time_since_epoch().count())};
+    std::uniform_int_distribution<int> dis{0, 127};
 
+    std::string result;
+    while (result.size() != count)
+    {
+        const char ch = static_cast<char>(dis(gen));
+        if (std::isalnum(ch, std::locale::classic()))
+        {
+            result.push_back(ch);
+        }
+    }
+    return result;
+}
+
+auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration, std::string listenUri,
+                   CommandlineParser::Option generatedConfigurationPathOpt) -> std::unique_ptr<VAsioRegistry>
+{
+    auto registry = std::make_unique<VAsioRegistry>(configuration);
+    const auto chosenListenUri = registry->StartListening(listenUri);
+
+    std::cout << "SIL Kit Registry listening on " << chosenListenUri << std::endl;
+
+    if (generatedConfigurationPathOpt.HasValue())
+    {
+        const auto generatedConfigurationPath = generatedConfigurationPathOpt.Value();
+
+        SilKit::Config::ParticipantConfiguration generatedConfiguration;
+        generatedConfiguration.middleware.registryUri = chosenListenUri;
+
+        namespace fs = SilKit::Filesystem;
+
+        auto tmpPath = fs::path(generatedConfigurationPath + "."
+                                + GenerateRandomCharacters(generatedConfigurationPath, 8) + ".tmp");
+
+        const auto serializedConfiguration = [&generatedConfiguration,
+                                              path = generatedConfigurationPath]() -> std::string {
+            const auto yamlNode = SilKit::Config::to_yaml(generatedConfiguration);
+
+            const auto jsonSuffix = std::string{".json"};
+            const auto pathHasJsonSuffix =
+                path.size() >= jsonSuffix.size()
+                && (path.compare(path.size() - jsonSuffix.size(), std::string::npos, jsonSuffix) == 0);
+
+            if (pathHasJsonSuffix)
+            {
+                return SilKit::Config::yaml_to_json(yamlNode);
+            }
+            else
+            {
+                return YAML::Dump(yamlNode);
+            }
+        }();
+
+        auto file = std::ofstream{tmpPath.string(), std::ios::out | std::ios::trunc};
+        file << serializedConfiguration << std::endl;
+        file.close();
+
+        const auto newPath = fs::path(generatedConfigurationPathOpt.Value());
+
+        fs::rename(tmpPath, newPath);
+    }
+
+    return registry;
+}
+
+} // namespace
 
 std::promise<int> signalPromise;
 int main(int argc, char** argv)
@@ -124,6 +215,12 @@ int main(int argc, char** argv)
         "registry listens on. ");
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
+
+    if (SilKitRegistry::HasWindowsServiceSupport())
+    {
+        commandlineParser.Add<CliParser::Flag>("windows-service", "W", "[--windows-service]",
+                                               "-W, --windows-service: Run as a Windows service.", CliParser::Hidden);
+    }
 
     std::cout << "Vector SIL Kit -- Registry, SIL Kit version: " << SilKit::Version::String() << std::endl
         << std::endl;
@@ -169,6 +266,9 @@ int main(int argc, char** argv)
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
     auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
 
+    bool windowsService{SilKitRegistry::HasWindowsServiceSupport()
+                        && commandlineParser.Get<CliParser::Flag>("windows-service").Value()};
+
     if (!isValidLogLevel(logLevel))
     {
         std::cerr << "Error: Argument '<level>' must be one of 'trace', 'debug',"
@@ -177,99 +277,60 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    if (useSignalHandler && windowsService)
+    {
+        std::cerr << "Error: Conflicting flags --windows-service / -W and --use-signal-handler / -s." << std::endl;
+        return -1;
+    }
+
     try
     {
         auto configuration = SilKit::Config::ParticipantConfigurationFromString("");
 
-        ConfigureLogging(configuration, logLevel);
+        if (windowsService)
+        {
+            ConfigureLoggingForWindowsService(configuration, logLevel);
+        }
+        else
+        {
+            ConfigureLogging(configuration, logLevel);
+        }
         SanitizeConfiguration(configuration, listenUri);
 
         listenUri = ExtractRegistryUriFromConfiguration(configuration);
 
-        VAsioRegistry registry{configuration};
-        const auto chosenListenUri = registry.StartListening(listenUri);
-
-        std::cout << "SIL Kit Registry listening on " << chosenListenUri << std::endl;
-
         const auto generatedConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("generate-configuration");
-        if (generatedConfigurationPathOpt.HasValue())
+
+        if (windowsService)
         {
-            SilKit::Config::ParticipantConfiguration generatedConfiguration;
-            generatedConfiguration.middleware.registryUri = chosenListenUri;
-
-            const auto generateRandomCharacters = [&generatedConfigurationPathOpt] (std::size_t count) {
-                std::mt19937_64 gen{std::hash<std::string>{}(generatedConfigurationPathOpt.Value())
-                                    ^ std::hash<std::chrono::steady_clock::rep>{}(
-                                        std::chrono::steady_clock::now().time_since_epoch().count())};
-                std::uniform_int_distribution<char> dis;
-
-                std::string result;
-                while (result.size() != count)
-                {
-                    const char ch = dis(gen);
-                    if (std::isalnum(ch, std::locale::classic()))
-                    {
-                        result.push_back(ch);
-                    }
-                }
-                return result;
-            };
-
-            namespace fs = SilKit::Filesystem;
-
-            auto tmpPath = fs::path(generatedConfigurationPathOpt.Value() + "." + generateRandomCharacters(8) + ".tmp");
-
-            const auto serializedConfiguration = [&generatedConfiguration,
-                                                  path = generatedConfigurationPathOpt.Value()]() -> std::string {
-                const auto yamlNode = SilKit::Config::to_yaml(generatedConfiguration);
-
-                const auto jsonSuffix = std::string{".json"};
-                const auto pathHasJsonSuffix =
-                    path.size() >= jsonSuffix.size()
-                    && (path.compare(path.size() - jsonSuffix.size(), std::string::npos, jsonSuffix) == 0);
-
-                if (pathHasJsonSuffix)
-                {
-                    return SilKit::Config::yaml_to_json(yamlNode);
-                }
-                else
-                {
-                    return YAML::Dump(yamlNode);
-                }
-            }();
-
-            auto file = std::ofstream{tmpPath.string(), std::ios::out | std::ios::trunc};
-            file << serializedConfiguration << std::endl;
-            file.close();
-
-            const auto newPath = fs::path(generatedConfigurationPathOpt.Value());
-
-            fs::rename(tmpPath, newPath);
-        }
-
-        if (useSignalHandler)
-        {
-            using namespace SilKit::registry;
-
-
-            auto signalValue = signalPromise.get_future();
-            RegisterSignalHandler(
-                [](auto sigNum)
-                {
-                    signalPromise.set_value(sigNum);
-                }
-            );
-            std::cout << "Registered signal handler" << std::endl;
-
-            signalValue.wait();
-
-            std::cout << "Signal " << signalValue.get() << " received!" << std::endl;
-            std::cout << "Exiting..." << std::endl;
+            SilKitRegistry::RunWindowsService([=] {
+                return StartRegistry(configuration, listenUri, generatedConfigurationPathOpt);
+            });
         }
         else
         {
-            std::cout << "Press enter to shutdown registry..." << std::endl;
-            std::cin.ignore();
+            const auto registry = StartRegistry(configuration, listenUri, generatedConfigurationPathOpt);
+
+            if (useSignalHandler)
+            {
+                using namespace SilKit::registry;
+
+                auto signalValue = signalPromise.get_future();
+                RegisterSignalHandler([](auto sigNum) {
+                    signalPromise.set_value(sigNum);
+                });
+                std::cout << "Registered signal handler" << std::endl;
+
+                signalValue.wait();
+
+                std::cout << "Signal " << signalValue.get() << " received!" << std::endl;
+                std::cout << "Exiting..." << std::endl;
+            }
+            else
+            {
+                std::cout << "Press enter to shutdown registry..." << std::endl;
+                std::cin.ignore();
+            }
         }
     }
     catch (const SilKit::ConfigurationError& error)

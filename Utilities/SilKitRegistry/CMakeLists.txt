@@ -35,6 +35,9 @@ add_executable(sil-kit-registry
     SignalHandler.hpp
     SignalHandler.cpp
     Registry.cpp
+
+    WindowsServiceMain.hpp
+    WindowsServiceMain.cpp
 )
 
 # Group this demo project into a folder

@@ -67,12 +67,14 @@ public:
         out << "Usage: " << executableName;
         for (auto& argument : _arguments)
         {
+            if (argument->IsHidden()) continue;
             out << " " << argument->Usage();
         }
         out << std::endl;
         out << "Arguments:" << std::endl;
         for (auto& argument : _arguments)
         {
+            if (argument->IsHidden()) continue;
             out << argument->Description() << std::endl;
         }
     }
@@ -165,6 +167,8 @@ public:
         }
     }
 
+    enum { Hidden };
+
     enum class ArgumentKind { Positional, PositionalList, Option, Flag };
 
     struct IArgument
@@ -175,24 +179,27 @@ public:
         virtual auto Name() const -> std::string = 0;
         virtual auto Usage() const -> std::string = 0;
         virtual auto Description() const -> std::string = 0;
+        virtual bool IsHidden() const = 0;
     };
 
     template<class Derived, class T>
     struct Argument 
         : public IArgument
     {
-        Argument(std::string name, std::string usage, std::string description)
-            : _name(name), _usage(usage), _description(description) {}
+        Argument(std::string name, std::string usage, std::string description, bool hidden=false)
+            : _name(name), _usage(usage), _description(description), _hidden{hidden} {}
 
         auto Kind() const -> ArgumentKind override { return static_cast<const Derived*>(this)->kind; }
         auto Name() const -> std::string override { return _name; }
         auto Usage() const -> std::string override { return _usage; }
         auto Description() const -> std::string override { return _description; }
+        bool IsHidden() const override { return _hidden; }
 
     private:
         std::string _name;
         std::string _usage;
         std::string _description;
+        bool _hidden{false};
     };
 
     /*! \brief A positional argument, i.e. one without any prefix, processed in the added order
@@ -276,6 +283,9 @@ public:
 
         Flag(std::string name, std::string shortName, std::string usage, std::string description)
             : Argument(name, usage, description), _shortName(shortName), _value(false) {}
+
+        Flag(std::string name, std::string shortName, std::string usage, std::string description, decltype(Hidden))
+            : Argument(name, usage, description, true), _shortName(shortName), _value(false) {}
 
         auto ShortName() const -> std::string { return _shortName; }
         auto DefaultValue() const -> bool { return false; }
