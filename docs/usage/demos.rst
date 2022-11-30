@@ -61,7 +61,7 @@ CAN Demo
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
-         * network simulator (optional)
+         * SIL Kit Network Simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguration to be used; 
@@ -124,7 +124,7 @@ Ethernet Demo
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
-         * Network simulator (optional)
+         * SIL Kit Network Simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -157,7 +157,7 @@ Ethernet Demo
             |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
 
             # System Controller:
-            |SystemController| EthernetReader Ethernet Writer
+            |SystemController| EthernetReader EthernetWriter
 
         For unsynchronized execution:
 
@@ -188,7 +188,7 @@ LIN Demo
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
-         * Network simulator (optional)
+         * SIL Kit Network Simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
            File name of the ParticipantConfiguraiton to be used; 
@@ -238,7 +238,7 @@ FlexRay Demo
       -  Demos/FlexRay
    *  -  Requirements
       -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
-         * Network simulator (mandatory)
+         * SIL Kit Network Simulator (mandatory)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -259,7 +259,7 @@ FlexRay Demo
       -  .. parsed-literal:: 
 
             # Network simulator (assumed to be in PATH, necessary):
-            NetworkSimulator Demos/FlexRay/NetworkSimulatorConfig.yaml
+            sil-kit-network-simulator Demos/FlexRay/NetworkSimulatorConfig.yaml
 
             # System Monitor (optional):
             |Monitor|
