@@ -10,6 +10,7 @@ Configuration
    configuration-services
    logging-configuration
    healthcheck-configuration
+   configuration-tracing
    extension-configuration
    middleware-configuration
 
@@ -66,6 +67,8 @@ The outline of a participant configuration file is as follows:
     - ...
     HealthCheck: 
     - ...
+    Tracing:
+      ...
     Extensions: 
     - ...
     Middleware: 
@@ -109,6 +112,9 @@ Configuration Options
 
    * - :ref:`HealthCheck<sec:cfg-participant-healthcheck>`
      - Configuration concerning soft and hard timeouts for simulation task execution.
+
+   * - :ref:`Tracing<sec:cfg-participant-tracing>`
+     - Configuration of experimental tracing and replay functionality.
 
    * - :doc:`Extensions<extension-configuration>`
      - Configuration of optional extensions to the Vector SIL Kit and where to find them.

@@ -11,6 +11,7 @@ All services of the Vector SIL Kit can be configured within the participant conf
 The following sections describe how each service can be configured.
 The configuration of the single services is fully optional.
        
+
 .. _sec:cfg-participant-can:
 
 CanControllers
@@ -33,6 +34,7 @@ CanControllers
      - The name of the CAN Controller
    * - Network
      - The name of the CAN Network to connect to (optional)
+
 
 .. _sec:cfg-participant-lin:
 
@@ -82,6 +84,10 @@ EthernetControllers
      - The name of the Ethernet Controller
    * - Network
      - The name of the Ethernet Network to connect to (optional)
+   * - UseTraceSinks
+     - **Experimental**: Optional list of names of trace sinks, as defined in the :ref:`Tracing<sec:cfg-participant-tracing>` configuration.
+   * - Replay
+     - **Experimental**: The optional replay configuration, as described in :ref:`Replay<sec:cfg-participant-replay>`.
 
 
 .. _sec:cfg-participant-flexray:
@@ -117,6 +123,7 @@ FlexrayControllers
        "slotId", "offset", "repetition", "PPindicator", "headerCrc" 
        and "transmissionMode" (SingleShot, Continuous). See ParticipantConfiguration.schema.json for a full set of parameters.(optional)
 
+
 .. _sec:cfg-participant-data-publishers:
 
 DataPublishers
@@ -140,6 +147,7 @@ DataPublishers
    * - Topic
      - The topic on which the DataPublisher publishs its information. (optional)
 
+
 .. _sec:cfg-participant-data-subscribers:
 
 DataSubscribers
@@ -162,6 +170,7 @@ DataSubscribers
      - The name of the DataSubscriber.
    * - Topic
      - The topic on which the DataSubscriber publishs its information. (optional)
+
 
 .. _sec:cfg-participant-rpc-servers:
 

@@ -11,7 +11,8 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Changed
 ~~~~~~~
 
-- PubSub/Rpc: Improved performance in startup-phase when using labels. 
+- PubSub/Rpc: Improved performance in startup-phase when using labels.
+- Documentation: Configuration structure for PCAP tracing and replay
 
 
 [4.0.12] - 2022-11-24
