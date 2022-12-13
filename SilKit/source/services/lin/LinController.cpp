@@ -61,6 +61,7 @@ void LinController::RegisterServiceDiscovery()
                     && IsRelevantNetwork(remoteServiceDescriptor))
                 {
                     SetDetailedBehavior(remoteServiceDescriptor);
+
                 }
             }
             else
@@ -649,9 +650,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
     // Trivial: Evaluate status using cached response
     const LinFrameStatus msgStatus = _simulationBehavior.CalcFrameStatus(msg, isGoToSleepFrame);
 
-    // Only use LIN_RX_NO_RESPONSE on locally triggered LinFrameStatusEvent on erroneous SendFrame/SendFrameHeader,
-    // not if received from remote. 
-    if (msgStatus != LinFrameStatus::LIN_RX_NO_RESPONSE)
+    if (msgStatus != LinFrameStatus::NOT_OK)
     {
         // Dispatch frame to handlers
         CallHandlers(LinFrameStatusEvent{msg.timestamp, frame, msgStatus});

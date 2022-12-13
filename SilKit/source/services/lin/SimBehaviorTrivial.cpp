@@ -211,7 +211,8 @@ auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission,
     {
         case LinFrameResponseMode::Unused:
         {
-            return LinFrameStatus::LIN_RX_NO_RESPONSE;
+            // Return NOT_OK to not trigger the reception callback
+            return LinFrameStatus::NOT_OK;
         }
         case LinFrameResponseMode::Rx:
         {

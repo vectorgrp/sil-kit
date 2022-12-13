@@ -14,6 +14,12 @@ Changed
 - PubSub/Rpc: Improved performance in startup-phase when using labels.
 - Documentation: Configuration structure for PCAP tracing and replay
 
+Fixed
+~~~~~
+
+- LIN: Previously, only when using the network simulator, the FrameStatusHandler on the LIN Master was not called in
+  case of an unconfigured response (RX_NO_RESPONSE). This inconsistency has been fixed.
+
 
 [4.0.12] - 2022-11-24
 ---------------------
