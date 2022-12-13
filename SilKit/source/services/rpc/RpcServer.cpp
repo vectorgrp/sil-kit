@@ -77,7 +77,8 @@ void RpcServer::RegisterServiceDiscovery()
                           + Core::Discovery::supplKeyRpcClientFunctionName + "/" + _dataSpec.FunctionName();
 
     // RpcServer discovers RpcClient and adds RpcServerInternal on a matching connection
-    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(matchHandler, {discoveryLookupKey});
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
+        matchHandler, Core::Discovery::controllerTypeRpcClient, _dataSpec.FunctionName(), _dataSpec.Labels());
 }
 
 void RpcServer::SubmitResult(IRpcCallHandle* callHandle, Util::Span<const uint8_t> resultData)

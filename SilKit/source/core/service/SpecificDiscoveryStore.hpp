@@ -23,55 +23,135 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <unordered_map>
 #include <unordered_set>
+#include <memory>
+#include <string>
+#include <functional>
+#include <map>
 
 #include "IServiceDiscovery.hpp"
+#include "Hash.hpp"
 
 namespace SilKit {
 namespace Core {
 namespace Discovery {
 
+// Internal Data Types
+using ControllerType = std::string;
+using TopicOrKey = std::string;
+using FilterType = std::tuple<ControllerType, TopicOrKey>;
+struct FilterTypeHash
+{
+    std::size_t operator()(const FilterType& ft) const
+    {
+        return SilKit::Util::Hash::HashCombine(std::hash<ControllerType>()(std::get<0>(ft)), (std::hash<TopicOrKey>()(std::get<1>(ft))));
+    }
+};
+
+using HandlerValue = std::shared_ptr<ServiceDiscoveryHandler>;
+
+//!< Stores all potential nodes (service descriptors) and handlers to call for a specific data matching branch
+class DiscoveryCluster
+{
+public:
+    std::vector<ServiceDescriptor> nodes;
+    std::vector<HandlerValue> handlers;
+};
+
+//!< Holds all relevant information for a controllerType and key (topic/functionName/clientUUID)
+class DiscoveryKeyNode
+{
+public:
+    //!< Stores all handlers/nodes for a specific label key (first tuple parameter) and value (second tuple parameter)
+    std::unordered_map<FilterType, DiscoveryCluster, FilterTypeHash> labelMap;
+    //!< Stores all handlers/nodes that do not have a specific label
+    std::unordered_map<TopicOrKey, DiscoveryCluster> notLabelMap;
+    //!< Stores all handlers/nodes that do not have any label
+    DiscoveryCluster noLabelCluster;
+    //!< Stores all handlers/nodes for a controllerType and key
+    DiscoveryCluster allCluster;
+};
+
 //!< Store to prevent quadratic lookup of services
 class SpecificDiscoveryStore
 {
 public: 
-
-    //!< Service addition/removal
+   
+    /*! \brief Service addition/removal is called on service discovery events
+    * 
+    *   Note: Implementation is not thread safe, all public API interactions must be secured with a common mutex
+    */
     void ServiceChange(ServiceDiscoveryEvent::Type changeType, const ServiceDescriptor& serviceDescriptor);
 
-    //!< React on single service changes
-    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                 const std::vector<std::string>& lookupKeys);
+    /*! \brief Register a specific service discovery handler, that is optimized to pre-filter relevant service discovery events
+    *   \parameter handler a callback that is called for pre-filtered service discovery events
+    *   \parameter controllerType service discovery controller type to pre-filter
+    *   \parameter key used to pre filter the service discovery events; semantics depend on controllerType 
+    *      (DataPublisher -> topic, RpcServer -> FunctionName, RpcServerInternal -> clientUUID)
+    *   \parameter labels that should match for the filtered service discovery events
+    *
+    *   Note: handler might be called for service discovery events that only if a subset of the parameter constraints
+    *   Implementation is not thread safe, all public API interactions must be secured with a common mutex
+    */ 
+    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler, const std::string& controllerType,
+                                                 const std::string& key,
+                                                 const std::vector<SilKit::Services::MatchingLabel>& labels);
 
-private:
+private: //methods
 
-    //!< Inform about service changes
-    void CallHandlersOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& lookupKey,
-                                     const ServiceDescriptor& serviceDescriptor) const;
-    void UpdateLookupOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& lookupKey,
-                                   const ServiceDescriptor& serviceDescriptor);
+    //!< Trigger relevant handler calls when a service has changed
+    void CallHandlersOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& controllerType,
+                                     const std::string& topic, const std::vector<SilKit::Services::MatchingLabel>& labels,
+                                     const ServiceDescriptor& serviceDescriptor);
 
-    void CallHandlerOnHandlerRegistration(const ServiceDiscoveryHandler& handler,
-                                          const std::vector<std::string>& lookupKeys) const;
-    void UpdateLookupOnHandlerRegistration(ServiceDiscoveryHandler handler, const std::vector<std::string>& lookupKeys);
+    //!< Trigger handler for past events that happened before registration
+    void CallHandlerOnHandlerRegistration(const ServiceDiscoveryHandler& handler, const std::string& controllerType,
+                                          const std::string& topic,
+                                          const std::vector<SilKit::Services::MatchingLabel>& labels);
 
-    std::vector<std::string> ConstructLookupKeys(const std::string& supplControllerTypeName,
-                                                  const ServiceDescriptor& serviceDescriptor) const;
-    std::vector<std::string> ConstructLookupKeysDataPublisher(const ServiceDescriptor& serviceDescriptor) const;
-    std::vector<std::string> ConstructLookupKeysRpcServerInternal(const ServiceDescriptor& serviceDescriptor) const;
-    std::vector<std::string> ConstructLookupKeysRpcClient(const ServiceDescriptor& serviceDescriptor) const;
+    //!< Update the internal lookup structure when a service discovery event happened
+    void UpdateLookupOnServiceChange(ServiceDiscoveryEvent::Type eventType, const std::string& supplControllerTypeName,
+                                     const std::string& topic,
+                                     const std::vector<SilKit::Services::MatchingLabel>& labels,
+                                     const ServiceDescriptor& serviceDescriptor);
 
-    using ServiceMap = std::map<std::string /*serviceDescriptor*/, ServiceDescriptor>;
+    //!< Update all DiscoveryClusters within the internal lookup structure
+    void UpdateDiscoveryClusters(const std::string& controllerType, const std::string& key,
+                                 const std::vector<SilKit::Services::MatchingLabel>& labels,
+                                                         std::function<void(DiscoveryCluster&)>);
 
-    // Storage of specific handlers on this participant by [controllerTypeName/supplDataKey/supplDataValue]
-    std::map<std::string /* unique_key */, std::vector<ServiceDiscoveryHandler>> _specificDiscoveryHandlers;
+    //!< Looks for the label that returns a minimal handler set
+    auto GetLabelWithMinimalHandlerSet(DiscoveryKeyNode& keyNode,
+                                       const std::vector<SilKit::Services::MatchingLabel>& labels)
+        -> const SilKit::Services::MatchingLabel*;
 
-    // Storage of incoming serviceDescriptors by [participantName][controllerTypeName/supplDataKey/supplDataValue]
-    using ServiceMapByUniqueKey = std::map<std::string /* unique_key */, ServiceMap>;
-    std::map<std::string /* participant name */, ServiceMapByUniqueKey> _serviceDescriptorsByParticipant;
+    //!< Looks for the label that returns a minimal ServiceDescriptor set
+    auto GetLabelWithMinimalNodeSet(DiscoveryKeyNode& keyNode,
+                                    const std::vector<SilKit::Services::MatchingLabel>& labels)
+        -> const SilKit::Services::MatchingLabel*;
 
-    // We only allow specific handlers for fixed controllerTypeNames
+    //!< Insert a new lookup node from internal lookup structure
+    void InsertLookupNode(const std::string& controllerType, const std::string& key, 
+                           const std::vector<SilKit::Services::MatchingLabel>& labels,
+                           const ServiceDescriptor& serviceDescriptor);
+    
+    //!< Remove a new lookup node from internal lookup structure
+    void RemoveLookupNode(const std::string& controllerType, const std::string& key,
+                          const ServiceDescriptor& serviceDescriptor);
+
+    //!< Insert a new lookup handler
+    void InsertLookupHandler(const std::string& controllerType, const std::string& key, 
+                          const std::vector<SilKit::Services::MatchingLabel>& labels,
+                             ServiceDiscoveryHandler handler);
+
+private: //member
+
+    //!< SpecificDiscoveryStore is only available to a a sub set of controllers
     const std::unordered_set<std::string> _allowedControllers = {
         controllerTypeDataPublisher, controllerTypeRpcServerInternal, controllerTypeRpcClient};
+
+protected:
+    //! NB: container is not thread safe, all public API interactions must be secured with a common mutex
+    std::unordered_map<FilterType, DiscoveryKeyNode, FilterTypeHash> _lookup;
 };
 
 } // namespace Discovery

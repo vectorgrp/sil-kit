@@ -133,7 +133,8 @@ void DataSubscriber::RegisterServiceDiscovery()
         discoveryLookupEntries.push_back(discoveryLookupKeyMandatoryLabels);
     }
 
-    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(matchHandler, discoveryLookupEntries);
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
+        matchHandler, Core::Discovery::controllerTypeDataPublisher, _topic, _labels);
 }
 
 

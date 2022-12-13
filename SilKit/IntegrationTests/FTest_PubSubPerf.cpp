@@ -243,7 +243,7 @@ TEST_F(FTest_PubSubPerf, test_pubsub_performance)
     topicModeSub = TopicMode::IndividualTopics; labelModeSub = LabelMode::NoLabels;
     startOrder = StartOrderMode::SubFirst;
     ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
-
+    
     std::cout << std::endl;
     std::cout << "# IndividualTopics + IndividualLabels + Pub Mandatory + Sub Mandatory + Pub first" << std::endl;
     std::cout << "# NumberOfTopics Runtime(s)" << std::endl;
@@ -284,7 +284,7 @@ TEST_F(FTest_PubSubPerf, test_pubsub_performance)
     topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsOptional;
     topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsOptional;
     startOrder = StartOrderMode::PubFirst;
-    ExecuteTest(testSetBadScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
+    ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
 
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Optional + Sub Optional + Sub first" << std::endl;
@@ -292,7 +292,7 @@ TEST_F(FTest_PubSubPerf, test_pubsub_performance)
     topicModePub = TopicMode::CommonTopic; labelModePub = LabelMode::IndividualLabelsOptional;
     topicModeSub = TopicMode::CommonTopic; labelModeSub = LabelMode::IndividualLabelsOptional;
     startOrder = StartOrderMode::SubFirst;
-    ExecuteTest(testSetBadScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
+    ExecuteTest(testSetGoodScaling, topicModePub, labelModePub, topicModeSub, labelModeSub, startOrder);
     
     std::cout << std::endl;
     std::cout << "# CommonTopic + IndividualLabels + Pub Mandatory + Sub Mandatory + Pub first" << std::endl;

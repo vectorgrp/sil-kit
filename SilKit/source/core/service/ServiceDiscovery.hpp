@@ -59,8 +59,9 @@ public: //IServiceDiscovery
     //!< Register a handler for asynchronous service creation notifications
     void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler) override;
     //!< Register a specific handler for asynchronous service creation notifications
-    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                 const std::vector<std::string>& lookupKeys) override;
+    void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler, const std::string& controllerType,
+                                                 const std::string& topic,
+                                                 const std::vector<SilKit::Services::MatchingLabel>& labels) override;
 
     //!< Get all currently known services, including from ourselves
     std::vector<ServiceDescriptor> GetServices() const override;

@@ -258,8 +258,9 @@ void ServiceDiscovery::RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler h
     _handlers.emplace_back(std::move(handler));
 }
 
-void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                               const std::vector<std::string>& lookupKeys)
+void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(
+    ServiceDiscoveryHandler handler, const std::string& controllerType_, const std::string& topic,
+    const std::vector<SilKit::Services::MatchingLabel>& labels)
 {
     if (_shuttingDown)
     {
@@ -267,7 +268,7 @@ void ServiceDiscovery::RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryH
     }
 
     std::unique_lock<decltype(_discoveryMx)> lock(_discoveryMx);
-    _specificDiscoveryStore.RegisterSpecificServiceDiscoveryHandler(handler, lookupKeys);
+    _specificDiscoveryStore.RegisterSpecificServiceDiscoveryHandler(handler, controllerType_, topic, labels);
 }
 
 } // namespace Discovery

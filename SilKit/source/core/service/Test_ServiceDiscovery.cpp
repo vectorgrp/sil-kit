@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "string_utils_internal.hpp"
 #include "Uuid.hpp"
 #include "MockParticipant.hpp"
+#include "MockServiceDescriptor.hpp"
 
 namespace {
 
@@ -50,28 +51,6 @@ class MockParticipant : public DummyParticipant
 public:
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const ParticipantDiscoveryEvent&), (override));
     MOCK_METHOD(void, SendMsg, (const IServiceEndpoint*, const ServiceDiscoveryEvent&), (override));
-};
-
-class MockServiceDescriptor : public IServiceEndpoint
-{
-public:
-    ServiceDescriptor serviceDescriptor;
-    MockServiceDescriptor(EndpointAddress ea)
-    {
-        serviceDescriptor.SetNetworkName(to_string(ea));
-        serviceDescriptor.SetParticipantName(std::to_string(ea.participant));
-        serviceDescriptor.SetServiceName(to_string(ea));
-        serviceDescriptor.SetServiceId(ea.endpoint);
-    }
-    void SetServiceDescriptor(const ServiceDescriptor& _serviceDescriptor) override
-    {
-        serviceDescriptor = _serviceDescriptor;
-    }
-    auto GetServiceDescriptor() const -> const ServiceDescriptor & override
-    {
-        return serviceDescriptor;
-    }
-
 };
 
 class Callbacks

@@ -185,6 +185,12 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
                                + SilKit::Core::Discovery::supplKeyDataPublisherTopic + "/" + topic + "/"
                                + SilKit::Core::Discovery::supplKeyDataPublisherPubLabels + "/";
 
+    std::string controllerType = SilKit::Core::Discovery::controllerTypeDataPublisher;
+
+    std::string mediaType = "";
+    std::string topicCopy = topic;
+    std::vector<SilKit::Services::MatchingLabel> labels; 
+
     // Participants are already there, so the registration will trigger the provided handler immediately
     subscriberServiceDiscovery->RegisterSpecificServiceDiscoveryHandler(
         [numberOfServices, &allRemoved, &allCreated, &createdServiceNames, &removedServiceNames, publisherName](
@@ -214,8 +220,8 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
                 break;
             default: break;
             }
-        },
-        {discoveryLookupKey});
+        }, controllerType, 
+        topicCopy, labels);
 
     // Await the creation
     allCreated.get_future().wait_for(10s);

@@ -46,8 +46,9 @@ public:
     virtual void RegisterServiceDiscoveryHandler(ServiceDiscoveryHandler handler) = 0;
     //!< Register a handler for service creation notifications for a specific controllerTypeName, 
     //!< associated supplDataKey and given supplDataValue 
-    virtual void RegisterSpecificServiceDiscoveryHandler(ServiceDiscoveryHandler handler,
-                                                         const std::vector<std::string>& lookupKeys) = 0;
+    virtual void RegisterSpecificServiceDiscoveryHandler(
+        ServiceDiscoveryHandler handler, const std::string& controllerType, const std::string& topic,
+        const std::vector<SilKit::Services::MatchingLabel>& labels) = 0;
     //!< Get the currently known created services on other participants
     virtual std::vector<ServiceDescriptor> GetServices() const = 0;
     //!< React on a participant shutdown

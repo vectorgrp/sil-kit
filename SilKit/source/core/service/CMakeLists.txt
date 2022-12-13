@@ -40,6 +40,7 @@ add_library(S_SilKit_Core_Service STATIC
 
 target_link_libraries(S_SilKit_Core_Service
     PUBLIC I_SilKit_Core_Service
+    PUBLIC I_SilKit_Util
 
     PRIVATE S_SilKit_Services_Logging
 
@@ -54,3 +55,7 @@ add_silkit_test(Test_MwServiceDiscovery
     LIBS S_SilKit_Core_Service I_SilKit_Core_Mock_Participant S_SilKit_Util_Uuid)
 
 add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS S_SilKit_Core_Service)
+
+add_silkit_test(Test_MwSpecificDiscoveryStore
+    SOURCES Test_SpecificDiscoveryStore.cpp 
+    LIBS S_SilKit_Core_Service I_SilKit_Core_Mock_Participant S_SilKit_Util_Uuid)

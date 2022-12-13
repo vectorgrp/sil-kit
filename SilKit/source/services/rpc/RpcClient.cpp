@@ -86,12 +86,9 @@ void RpcClient::RegisterServiceDiscovery()
         }
     };
 
-    // How this controller is discovered by RpcServerInternal
-    const std::string discoveryLookupKey = Core::Discovery::controllerTypeRpcServerInternal + "/"
-                                           + Core::Discovery::supplKeyRpcServerInternalClientUUID + "/" + _clientUUID;
-
     // The RpcClient discovers RpcServersInternal and is ready to detach calls afterwards
-    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(matchHandler, {discoveryLookupKey});
+    _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
+        matchHandler, Core::Discovery::controllerTypeRpcServerInternal, _clientUUID, _dataSpec.Labels());
 }
 
 void RpcClient::Call(Util::Span<const uint8_t> data, void* userContext)
