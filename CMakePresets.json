@@ -36,6 +36,35 @@
       }
     },
     {
+      "name": "qnx-cross-x86_64",
+      "displayName": "QNX cross-build x86_64",
+      "description": "QNX Cross build",
+      "generator": "Unix Makefiles",
+      "environment": {
+        "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
+      },
+      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-cross-x86_64.cmake",
+      "binaryDir": "${sourceDir}/_build/${presetName}",
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
+          "rsyncCommandArgs": [ "--exclude", "_build" ]
+        }
+      }
+    },
+    {
+      "inherits": "qnx-cross-x86_64",
+      "name": "qnx-cross-armv7",
+      "displayName": "QNX cross-build armv7",
+      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-cross-armv7.cmake"
+    },
+    {
+      "inherits": "qnx-cross-x86_64",
+      "name": "qnx-cross-aarch64",
+      "displayName": "QNX cross-build aarch64",
+      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-cross-aarch64.cmake"
+    },
+    {
       "name": "linux-debug",
       "displayName": "Linux Debug",
       "description": "Target the Windows Subsystem for Linux (WSL) or a remote Linux system.",
@@ -172,6 +201,21 @@
       "hidden": false,
       "inherits": "windows-base",
       "configurePreset": "x86-release"
+    },
+    {
+      "name": "qnx-cross-x86_64",
+      "hidden": false,
+      "configurePreset": "qnx-cross-x86_64"
+    },
+    {
+      "name": "qnx-cross-armv7",
+      "hidden": false,
+      "configurePreset": "qnx-cross-armv7"
+    },
+    {
+      "name": "qnx-cross-aarch64",
+      "hidden": false,
+      "configurePreset": "qnx-cross-aarch64"
     }
   ]
 }

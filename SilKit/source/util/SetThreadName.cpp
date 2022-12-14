@@ -22,6 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SetThreadName.hpp"
 #include "Assert.hpp"
 
+#include "silkit/capi/SilKitMacros.h"
+
 #if _WIN32
 #include <windows.h> // HANDLE, PCWSTR
 #else // posix
@@ -87,12 +89,12 @@ void SetThreadName(const std::string& threadName)
 
     pthread_t thisThread = pthread_self();
 
-#   if defined(__linux__)
+#   if defined(__linux__) || defined(__QNX__)
     rc = pthread_setname_np(thisThread, threadName.c_str());
 #   elif defined(__NetBSD__)
     rc = pthread_setname_np(thisThread, threadName.c_str(), nullptr);
 #   elif defined(__APPLE__)
-    (void)(thisThread);
+    SILKIT_UNUSED_ARG(thisThread);
     rc = pthread_setname_np(threadName.c_str());
 #   endif
     // The function pthread_setname_np fails if the length of the specified name exceeds the allowed
