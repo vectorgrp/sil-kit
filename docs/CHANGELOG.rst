@@ -5,7 +5,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.13] - Unreleased
+[4.0.13] - 2022-12-14
 ---------------------
 
 Changed
@@ -24,6 +24,8 @@ Fixed
 
   - The acceptor URIs the known participants list sent by the registry are now rewritten correctly.
     Previously, certain startup scenarios only worked when the participants were started in a certain order.
+
+- SerDes: Added missing limit library include.
 
 
 [4.0.12] - 2022-11-24
