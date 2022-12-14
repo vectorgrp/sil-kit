@@ -49,9 +49,13 @@ public:
     explicit Uri(const std::string& uriStr);
     Uri(const Uri&) = default;
     Uri& operator=(const Uri&) = default;
+
 public:
     // public static methods
     static auto Parse(std::string uriStr) -> Uri;
+
+    static auto MakeTcp(const std::string& host, const uint16_t port) -> Uri;
+
 public:
     // public methods
     auto EncodedString() const -> const std::string&;

@@ -20,6 +20,11 @@ Fixed
 - LIN: Previously, only when using the network simulator, the FrameStatusHandler on the LIN Master was not called in
   case of an unconfigured response (RX_NO_RESPONSE). This inconsistency has been fixed.
 
+- Registry
+
+  - The acceptor URIs the known participants list sent by the registry are now rewritten correctly.
+    Previously, certain startup scenarios only worked when the participants were started in a certain order.
+
 
 [4.0.12] - 2022-11-24
 ---------------------

@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/participant/exception.hpp"
 
+#include "fmt/format.h"
+
 namespace SilKit {
 namespace Core {
 
@@ -160,6 +162,11 @@ auto Uri::Parse(std::string rawUri) -> Uri
         }
     }
     return uri;
+}
+
+auto Uri::MakeTcp(const std::string& host, const uint16_t port) -> Uri
+{
+    return Uri::Parse(fmt::format("tcp://{}:{}", host, port));
 }
 
 } // namespace Core

@@ -164,7 +164,6 @@ auto VAsioRegistry::FindConnectedPeer(const std::string& name) const -> std::vec
 
 void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const ParticipantAnnouncement& announcement)
 {
-
     auto peerInfo = announcement.peerInfo;
 
     // NB When we have a remote client we might need to patch its acceptor name (host or ip address).
@@ -185,11 +184,22 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
                 continue;
             }
 
-            // Update to socket peer address but keep the original acceptor port.
-            // Legacy clients have a hard-coded '127.0.0.1' address.
-            if (isCatchallAddress(uri) || isLocalhostAddress(uri))
+            // handle tcp://... URIs
+            if (origUri.Type() == Uri::UriType::Tcp)
             {
-                uri = Uri{ fromUri.Host(), origUri.Port() }.EncodedString();
+                // Update to socket peer address but keep the original acceptor port.
+                // Legacy clients have a hard-coded '127.0.0.1' address.
+                if (isCatchallAddress(uri) || isLocalhostAddress(uri))
+                {
+                    Services::Logging::Debug(
+                        GetLogger(), "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Updating Acceptor URI: {}",
+                        peerInfo.participantName, uri);
+                    uri = Uri::MakeTcp(fromUri.Host(), origUri.Port()).EncodedString();
+                }
+
+                Services::Logging::Debug(GetLogger(),
+                                         "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Acceptor URI: {}",
+                                         peerInfo.participantName, uri);
             }
         }
     }
@@ -227,13 +237,15 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());
     // In case the peer is remote we need to replace all local addresses with 
     // the endpoint address known to the registry.
-    auto replaceLocalhostUri = [&peer](auto& peerUriToPatch) {
+    auto replaceLocalhostUri = [logger=GetLogger(), &peer](auto& peerUriToPatch) {
         const auto registryUri = Uri{ peer->GetLocalAddress() };
+
         if (registryUri.Type() == Uri::UriType::Local)
         {
             // don't touch local domain socket URIs
             return;
         }
+
         for (auto& uri : peerUriToPatch.acceptorUris)
         {
             auto parsedUri = Uri{ uri };
@@ -241,10 +253,21 @@ void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
             {
                 continue;
             }
-            // Patch loopback or INADDR_ANY with the actual endpoint address of the remote peer's connection.
-            if (isLocalhostAddress(uri) || isCatchallAddress(uri))
+
+            // handle tcp://... URIs
+            if (parsedUri.Type() == Uri::UriType::Tcp)
             {
-                uri = Uri{ registryUri.Host(), parsedUri.Port() }.EncodedString();
+                // Patch loopback or INADDR_ANY with the actual endpoint address of the remote peer's connection.
+                if (isLocalhostAddress(uri) || isCatchallAddress(uri))
+                {
+                    Services::Logging::Debug(logger,
+                                             "VAsioRegistry::SendKnownParticipants: Peer '{}': Updating Acceptor URI: {}",
+                                             peer->GetInfo().participantName, uri);
+                    uri = Uri::MakeTcp(registryUri.Host(), parsedUri.Port()).EncodedString();
+                }
+
+                Services::Logging::Debug(logger, "VAsioRegistry::SendKnownParticipants: Peer '{}': Acceptor URI: {}",
+                                         peer->GetInfo().participantName, uri);
             }
         }
     };
