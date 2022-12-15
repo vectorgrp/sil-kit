@@ -43,7 +43,7 @@
       "environment": {
         "SILKIT_CMAKE_PRESET_BUILD_PLATFORM": "qnx"
       },
-      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-cross-x86_64.cmake",
+      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-x86_64.cmake",
       "binaryDir": "${sourceDir}/_build/${presetName}",
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
@@ -56,13 +56,13 @@
       "inherits": "qnx-cross-x86_64",
       "name": "qnx-cross-armv7",
       "displayName": "QNX cross-build armv7",
-      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-cross-armv7.cmake"
+      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-armv7.cmake"
     },
     {
       "inherits": "qnx-cross-x86_64",
       "name": "qnx-cross-aarch64",
       "displayName": "QNX cross-build aarch64",
-      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-cross-aarch64.cmake"
+      "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-aarch64.cmake"
     },
     {
       "name": "linux-debug",
