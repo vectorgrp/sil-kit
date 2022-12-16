@@ -101,10 +101,10 @@ void RemoteFunc_Add100(IRpcServer* server, RpcCallEvent event)
     // Deserialize call argument data
     auto argumentDataVector = SilKit::Util::ToStdVector(event.argumentData);
     SilKit::Util::SerDes::Deserializer deserializer(argumentDataVector);
-    std::vector<uint8_t> argumentData = deserializer.Deserialize<std::vector<uint8_t>>();
+    const std::vector<uint8_t> argumentData = deserializer.Deserialize<std::vector<uint8_t>>();
 
     // Copy argument data for calculation
-    std::vector<uint8_t> resultData(argumentData);
+    std::vector<uint8_t> resultData{argumentData};
 
     // Perform calculation (increment each argument value by 100)
     for (auto& v : resultData)
