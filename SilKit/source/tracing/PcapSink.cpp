@@ -135,7 +135,7 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
     {
         _file.write(reinterpret_cast<const char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
         _file.write(reinterpret_cast<const char*>(&message.raw.at(0)), message.raw.size());
-        ok = _file.good();
+        ok &= _file.good();
     }
 
     if (_pipe)
@@ -153,6 +153,11 @@ void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
 
         ok &= _pipe->Write(reinterpret_cast<const char*>(&pcapPacketHeader), sizeof(pcapPacketHeader));
         ok &= _pipe->Write(reinterpret_cast<const char*>(&message.raw.at(0)), message.raw.size());
+    }
+
+    if (!ok)
+    {
+        throw SilKitError("Failed to write trace message to PCAP sink");
     }
 }
 
