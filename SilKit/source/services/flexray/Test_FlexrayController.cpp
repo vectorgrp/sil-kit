@@ -462,7 +462,7 @@ TEST_F(FlexrayControllerTest, call_message_ack_handler)
 {
     controller.AddFrameTransmitHandler(bind_method(&callbacks, &Callbacks::MessageAckHandler));
 
-    WireFlexrayFrameTransmitEvent ack;
+    WireFlexrayFrameTransmitEvent ack{};
     ack.timestamp = 17ns;
     ack.channel = FlexrayChannel::A;
     ack.frame.header.frameId = 13;
