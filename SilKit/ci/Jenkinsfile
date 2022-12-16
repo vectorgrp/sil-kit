@@ -97,22 +97,46 @@ def buildConfigs = [
         CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12",
         PublishArtifacts: false,
     ]
-    // Sanitizer builds:
     ,[
-        Name: "Ubuntu-thread-sanitizer",
+        Name: "Ubuntu-22.04-gcc-12",
         NodeLabel: "docker && linux",
         DockerImage: "silkit-ubuntu",
-        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D SILKIT_ENABLE_THREADSAN=ON",
+        CmakeArgs: "-D CMAKE_C_COMPILER=gcc-12 -D CMAKE_CXX_COMPILER=g++-12",
     ]
     ,[
-        Name: "Ubuntu-address-sanitizer",
+        Name: "Ubuntu-22.04-clang-14",
         NodeLabel: "docker && linux",
         DockerImage: "silkit-ubuntu",
-        DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12 -D SILKIT_ENABLE_ASAN=ON",
+    ]
+    // Sanitizer builds:
+    ,[
+        Name: "Ubuntu-22.04-clang-14-thread-sanitizer",
+        NodeLabel: "docker && linux",
+        DockerImage: "silkit-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14 -D SILKIT_ENABLE_THREADSAN=ON",
+    ]
+    ,[
+        Name: "Ubuntu-22.04-clang-14-address-sanitizer",
+        NodeLabel: "docker && linux",
+        DockerImage: "silkit-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14 -D SILKIT_ENABLE_ASAN=ON",
+    ]
+    ,[
+        Name: "Ubuntu-22.04-clang-14-undefined-behavior-sanitizer",
+        NodeLabel: "docker && linux",
+        DockerImage: "silkit-ubuntu",
+        DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
+        PublishArtifacts: false,
+        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14 -D SILKIT_ENABLE_UBSAN=ON",
     ]
 ]
 
@@ -516,13 +540,13 @@ node {
         if(params.UseAddressSanitizer) {
             print("Building on Ubuntu with -f sanitizer=thread")
             configNames = [
-                "Ubuntu-thread-sanitizer"
+                "Ubuntu-22.04-clang-14-thread-sanitizer"
             ]
         }
         else if (params.UseThreadSanitizer) {
             print("Building on Ubuntu with -f sanitizer=address")
             configNames = [
-                "Ubuntu-address-sanitizer"
+                "Ubuntu-22.04-clang-14-address-sanitizer"
             ]
         }
         else if(doFullBuild) {
@@ -533,7 +557,10 @@ node {
                 "VS2017-Win32",
                 "VS2017-Win64",
                 "Ubuntu-18.04-gcc",
-                "Ubuntu-20.04-clang-12", // most modern compiler, no artifacts
+                "Ubuntu-22.04-clang-14", // most modern compiler, no artifacts
+                "Ubuntu-22.04-clang-14-thread-sanitizer", // TSan with most modern compiler, no artifacts
+                "Ubuntu-22.04-clang-14-address-sanitizer", // ASan with most modern compiler, no artifacts
+                "Ubuntu-22.04-clang-14-undefined-behavior-sanitizer", // UBSan with most modern compiler, no artifacts
                 //"MinGW", // XXX disabled until we can improve CI performance
             ]
             publishToArtifactory = true
@@ -542,7 +569,9 @@ node {
             print("Doing a minimal build without publishing artifacts on branch ${env.BRANCH_NAME}")
             configNames = [
                 "VS2015-Win32", // out of date implementation of C++14
-                "Ubuntu-20.04-clang-12", // most modern compiler
+                "Ubuntu-22.04-clang-14-thread-sanitizer", // TSan with most modern compiler
+                "Ubuntu-22.04-clang-14-address-sanitizer", // ASan with most modern compiler
+                "Ubuntu-22.04-clang-14-undefined-behavior-sanitizer", // UBSan with most modern compiler
             ]
         }
         def builds = [:]
