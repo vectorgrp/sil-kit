@@ -105,13 +105,36 @@ void SerializedMessage::ReadNetworkHeaders()
     {
         //optional registry kind tag
         _registryKind = ExtractRegistryMessageKind(_buffer);
+
+        // Protocol Version:
+        //   3.1:
+        //     All handshake messages start with the RegistryMessageHeader
+        //   3.0:
+        //     ParticipantAnnouncement and KnownParticipants start with the RegistryMessageHeader
+        //     ParticipantAnnouncementReply does _NOT_ start with the RegistryMessageHeader
+
         switch(_registryKind)
         {
         case RegistryMessageKind::ParticipantAnnouncement:
-        case RegistryMessageKind::ParticipantAnnouncementReply:
         case RegistryMessageKind::KnownParticipants:
-            // all handshake messages contain a header
             _registryMessageHeader = PeekRegistryMessageHeader(_buffer);
+            break;
+        case RegistryMessageKind::ParticipantAnnouncementReply:
+            if (_buffer.GetProtocolVersion() == ProtocolVersion{3, 1})
+            {
+                _registryMessageHeader = PeekRegistryMessageHeader(_buffer);
+            }
+            else if (_buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
+            {
+                // Since the ParticipantAnnouncementReply
+                _registryMessageHeader = RegistryMsgHeader{};
+                _registryMessageHeader.versionHigh = 3;
+                _registryMessageHeader.versionLow = 0;
+            }
+            else
+            {
+                throw ProtocolError("SerializedMessage: Unsupported protocol version encountered during handshake");
+            }
             break;
         case RegistryMessageKind::Invalid:
             throw ProtocolError("SerializedMessage: ReadNetworkHeaders() encountered RegistryMessageKind::Invalid");
