@@ -189,6 +189,7 @@ private:
     std::promise<void> _pauseDonePromise;
 
     // used to check for valid participant configuration
+    mutable std::mutex _requiredParticipantNamesMx;
     std::vector<std::string> _requiredParticipantNames;
 };
 

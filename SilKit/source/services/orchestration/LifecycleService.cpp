@@ -116,7 +116,7 @@ auto LifecycleService::StartLifecycle()
         throw LogicError{"LifecycleService::StartLifecycle must not be called twice"};
     }
 
-    if (!_requiredParticipantNames.empty())
+    if (HasRequiredParticipantNames())
     {
         if (!CheckForValidConfiguration())
         {
@@ -284,7 +284,7 @@ void LifecycleService::Restart(std::string /*reason*/)
 void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startConfiguration)
 {
     _operationMode = startConfiguration.operationMode;
-    if (!_requiredParticipantNames.empty())
+    if (HasRequiredParticipantNames())
     {
         CheckForValidConfiguration();
     }
@@ -357,14 +357,19 @@ void LifecycleService::AbortSimulation(std::string reason)
 
 bool LifecycleService::CheckForValidConfiguration()
 {
-    if (_operationMode == OperationMode::Coordinated && !_requiredParticipantNames.empty())
+    if (_operationMode == OperationMode::Coordinated)
     {
-        auto result = std::find(_requiredParticipantNames.begin(), _requiredParticipantNames.end(),
+        const auto isNotRequiredParticipant = [this]() -> bool {
+            std::unique_lock<decltype(_requiredParticipantNamesMx)> lock{_requiredParticipantNamesMx};
+            auto it = std::find(_requiredParticipantNames.begin(), _requiredParticipantNames.end(),
                                 _participant->GetParticipantName());
-        if (result == _requiredParticipantNames.end())
+            return it == _requiredParticipantNames.end();
+        }();
+
+        if (isNotRequiredParticipant)
         {
             // participants that are coordinated but not required are currently not supported
-            std::stringstream ss; 
+            std::stringstream ss;
             ss << _participant->GetParticipantName() << ": Coordinated participants must also be required!";
             ReportError(ss.str());
             return false;
@@ -454,7 +459,7 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
 
 void LifecycleService::SetWorkflowConfiguration(const WorkflowConfiguration& configuration)
 {
-    _requiredParticipantNames = configuration.requiredParticipantNames;
+    SetRequiredParticipantNames(configuration.requiredParticipantNames);
     if (_operationMode != OperationMode::Invalid)
     {
         CheckForValidConfiguration();
@@ -567,6 +572,18 @@ void LifecycleService::HandleSystemStateShuttingDown()
     {
         // Ignore any exception. This function will be called multiple times.
     }
+}
+
+void LifecycleService::SetRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames)
+{
+    std::unique_lock<decltype(_requiredParticipantNamesMx)> lock{_requiredParticipantNamesMx};
+    _requiredParticipantNames = requiredParticipantNames;
+}
+
+bool LifecycleService::HasRequiredParticipantNames() const
+{
+    std::unique_lock<decltype(_requiredParticipantNamesMx)> lock{_requiredParticipantNamesMx};
+    return !_requiredParticipantNames.empty();
 }
 
 } // namespace Orchestration
