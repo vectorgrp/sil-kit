@@ -113,6 +113,8 @@ protected:
     {
         MOCK_METHOD1(WarnHandler, void(std::chrono::milliseconds));
         MOCK_METHOD1(ErrorHandler, void(std::chrono::milliseconds));
+
+        MOCK_METHOD(void, SequencePoint, ());
     };
 
 protected:
@@ -328,16 +330,24 @@ TEST_F(WatchDogTest, warn_and_error_with_soft_and_hard)
     watchDog.SetWarnHandler(Util::bind_method(&callbacks, &Callbacks::WarnHandler));
     watchDog.SetErrorHandler(Util::bind_method(&callbacks, &Callbacks::ErrorHandler));
 
-    EXPECT_CALL(callbacks, WarnHandler(_)).Times(1);
-    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(0);
+    // NB: It is undefined behavior to interleave setting expectations and calling mock methods.
+
+    // The expectations on WarnHandler and ErrorHandler are partially ordered. The explicit call to SequencePoint
+    // separates two sets of expectations.
+    testing::Sequence warnSequence, errorSequence;
+
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(1).InSequence(warnSequence);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(0).InSequence(errorSequence);
+    EXPECT_CALL(callbacks, SequencePoint()).Times(1).InSequence(warnSequence, errorSequence);
+    EXPECT_CALL(callbacks, WarnHandler(_)).Times(0).InSequence(warnSequence);
+    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(1).InSequence(errorSequence);
 
     watchDog.Start();
 
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
-    mockClock.AdvanceLimitBy(100ms);
+    callbacks.SequencePoint();
 
-    EXPECT_CALL(callbacks, WarnHandler(_)).Times(0);
-    EXPECT_CALL(callbacks, ErrorHandler(_)).Times(1);
+    mockClock.AdvanceLimitBy(100ms);
 
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
