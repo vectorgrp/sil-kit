@@ -70,19 +70,47 @@ protected:
             name = newName;
             id = static_cast<uint8_t>(numParticipants++);
         }
+
+        TestParticipant(TestParticipant&&) = default;
+        TestParticipant& operator=(TestParticipant&&) = default;
+
+        struct ImmovableMembers
+        {
+            ImmovableMembers() = default;
+
+            ImmovableMembers(ImmovableMembers&& other) noexcept
+                : allReceived{other.allReceived.load()}
+                , runAsync{other.runAsync.load()}
+            {
+            }
+
+            ImmovableMembers& operator=(ImmovableMembers&& other) noexcept
+            {
+                if (this != &other)
+                {
+                    allReceived = other.allReceived.load();
+                    runAsync = other.runAsync.load();
+                }
+
+                return *this;
+            }
+
+            std::atomic<bool> allReceived{false};
+            std::atomic<bool> runAsync{true};
+        };
+
+        ImmovableMembers i{};
+
         std::string                  name;
         uint8_t id;
         std::unique_ptr<IParticipant> participant;
         IDataPublisher* publisher;
         IDataSubscriber* subscriber;
         std::set<uint8_t> receivedIds;
-        bool allReceived{ false };
         std::promise<void>           allReceivedPromise;
 
         bool simtimePassed{false};
         std::promise<void>           simtimePassedPromise;
-
-        bool runAsync{true};
 
         SilKit::Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
 
@@ -90,7 +118,7 @@ protected:
         {
             receivedIds.clear();
             allReceivedPromise = std::promise<void>{};
-            allReceived = false;
+            i.allReceived = false;
         }
 
         void AwaitCommunication() 
@@ -153,13 +181,13 @@ protected:
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", matchingDataSpec,
                 [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                    if (!participant.allReceived)
+                    if (!participant.i.allReceived)
                     {
                         participant.receivedIds.insert(dataMessageEvent.data[0]);
                         // No self delivery: Expect numParticipants-1 receptions
                         if (participant.receivedIds.size() == numParticipants-1)
                         {
-                            participant.allReceived = true;
+                            participant.i.allReceived = true;
                             participant.allReceivedPromise.set_value();
                         }
                     }
@@ -204,7 +232,7 @@ protected:
             participant.subscriber = participant.participant->CreateDataSubscriber(
                 "TestSubscriber", matchingDataSpec,
                 [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                    if (!participant.allReceived)
+                    if (!participant.i.allReceived)
                     {
                         auto participantId = dataMessageEvent.data[0];
                         if (participantId != participant.id)
@@ -213,14 +241,14 @@ protected:
                             // No self delivery: Expect numParticipants-1 receptions
                             if (participant.receivedIds.size() == numParticipants - 1)
                             {
-                                participant.allReceived = true;
+                                participant.i.allReceived = true;
                                 participant.allReceivedPromise.set_value();
                             }
                         }
                     }
                 });
 
-            while (participant.runAsync)
+            while (participant.i.runAsync)
             {
                 participant.publisher->Publish(std::vector<uint8_t>{participant.id});
                 std::this_thread::sleep_for(asyncDelayBetweenPublication);
@@ -335,7 +363,7 @@ protected:
         {
             for (auto& p : participants)
             {
-                p.runAsync = true;
+                p.i.runAsync = true;
                 asyncParticipantThreads.emplace_back([this, &p, registryUri] { AsyncParticipantThread(p, registryUri); });
             }
         }
@@ -449,7 +477,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
         std::cout << ">> Hop off async participants" << std::endl;
         // Hop off: Stop while-loop of async participants
         for (auto& p : asyncParticipants)
-            p.runAsync = false;
+            p.i.runAsync = false;
         JoinAsyncParticipantsThreads();
 
         // Reset communication and wait for reception once more for remaining sync participants
@@ -513,7 +541,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
             p.ResetReception();
 
         // Hop off with asyncParticipants1
-        asyncParticipants1[0].runAsync = false;
+        asyncParticipants1[0].i.runAsync = false;
         asyncParticipantThreads[0].join();
         asyncParticipantThreads.erase(asyncParticipantThreads.begin());
 
@@ -535,9 +563,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
 
         // Disconnect with both
         for (auto& p : asyncParticipants1)
-            p.runAsync = false;
+            p.i.runAsync = false;
         for (auto& p : asyncParticipants2)
-            p.runAsync = false;
+            p.i.runAsync = false;
         JoinAsyncParticipantsThreads();
     }
 
@@ -579,7 +607,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
             p.ResetReception();
 
         // Hop off with asyncParticipants2
-        asyncParticipants2[0].runAsync = false;
+        asyncParticipants2[0].i.runAsync = false;
         asyncParticipantThreads[1].join();
         asyncParticipantThreads.erase(asyncParticipantThreads.begin()+1);
 
@@ -601,9 +629,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
 
         // Disconnect with both
         for (auto& p : asyncParticipants1)
-            p.runAsync = false;
+            p.i.runAsync = false;
         for (auto& p : asyncParticipants2)
-            p.runAsync = false;
+            p.i.runAsync = false;
         JoinAsyncParticipantsThreads();
     }
 
@@ -634,7 +662,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
 
         // Hop off async participants
         for (auto& p : asyncParticipants)
-            p.runAsync = false;
+            p.i.runAsync = false;
         JoinAsyncParticipantsThreads();
 
         // Reset communication to repeat the cycle
