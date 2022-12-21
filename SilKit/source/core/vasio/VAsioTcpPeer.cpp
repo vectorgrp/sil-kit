@@ -144,8 +144,11 @@ void VAsioTcpPeer::DrainAllBuffers()
     int waitMs;
     for (waitMs = 100; waitMs >= 0; waitMs--)
     {
-        if (_sendingQueue.empty())
-            break;
+        {
+            std::unique_lock<decltype(_sendingQueueLock)> sendingQueueLock{_sendingQueueLock};
+            if (_sendingQueue.empty())
+                break;
+        }
         std::this_thread::sleep_for(1ms);
     }
     if (waitMs <= 0)
