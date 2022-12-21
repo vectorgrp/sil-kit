@@ -47,8 +47,6 @@ LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
     , _systemStateReachedShuttingDownTimeout{systemStateReachedShuttingDownTimeout}
 {
     _timeSyncService = _participant->CreateTimeSyncService(this);
-
-    _status.participantName = _participant->GetParticipantName();
 }
 
  LifecycleService::~LifecycleService()
@@ -377,12 +375,30 @@ bool LifecycleService::CheckForValidConfiguration()
 
 auto LifecycleService::State() const -> ParticipantState
 {
+    std::unique_lock<decltype(_statusMx)> lock{_statusMx};
     return _status.state;
 }
 
 auto LifecycleService::Status() const -> const ParticipantStatus&
 {
-    return _status;
+    // NB: This method cannot return a reference to the 'actual' current status, since that object is modified
+    //     concurrently.
+    //
+    //     Using the returned reference from this method is only safe as long as it is not also called concurrently.
+    //     Using the returned reference is also only valid until the next call to this method.
+    //
+    //     Calling this method concurrently on multiple threads, and using any member of the return value will result
+    //     not only in data-races, but can also cause access to already freed memory and may result in a crash.
+    //     The same issues arise when using a reference returned by a previous call to this method.
+
+    // copy the current status under lock
+    {
+        std::unique_lock<decltype(_statusMx)> lock{_statusMx};
+        _returnValueForStatus = _status;
+    }
+
+    // return a reference to the copy
+    return _returnValueForStatus;
 }
 
 void LifecycleService::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
@@ -447,16 +463,24 @@ void LifecycleService::SetWorkflowConfiguration(const WorkflowConfiguration& con
 
 void LifecycleService::ChangeState(ParticipantState newState, std::string reason)
 {
-    _status.state = newState;
-    _status.enterReason = std::move(reason);
-    _status.enterTime = std::chrono::system_clock::now();
-    _status.refreshTime = _status.enterTime;
+    ParticipantStatus status{};
+    status.participantName = _participant->GetParticipantName();
+    status.state = newState;
+    status.enterReason = std::move(reason);
+    status.enterTime = std::chrono::system_clock::now();
+    status.refreshTime = _status.enterTime;
 
     std::stringstream ss;
-    ss << "New ParticipantState: " << newState << "; reason: " << _status.enterReason;
+    ss << "New ParticipantState: " << newState << "; reason: " << status.enterReason;
     _logger->Debug(ss.str());
 
-    SendMsg(_status);
+    // assign the current status under lock (copy)
+    {
+        std::unique_lock<decltype(_statusMx)> lock{_statusMx};
+        _status = status;
+    }
+
+    SendMsg(status);
 }
 
 void LifecycleService::SetTimeSyncService(TimeSyncService* timeSyncService)

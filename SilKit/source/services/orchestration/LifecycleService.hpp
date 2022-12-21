@@ -133,6 +133,14 @@ private:
 
     void HandleSystemStateShuttingDown();
 
+    /// Thread-safe assignment of the required participant names.
+    /// Uses the mutex _requiredParticipantNamesMx.
+    void SetRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames);
+
+    /// Thread-safe check for having any required participant names.
+    /// Uses the mutex _requiredParticipantNamesMx.
+    bool HasRequiredParticipantNames() const;
+
 private:
     // ----------------------------------------
     // private members
@@ -144,8 +152,13 @@ private:
 
     OperationMode _operationMode = OperationMode::Invalid;
 
-    bool _isRunning{false};
+    mutable std::mutex _statusMx;
     ParticipantStatus _status;
+    /// This member must _only_ be used in LifecycleService::Status(). It is required because otherwise calling
+    /// LifecycleService::Status() always causes a data-race because the access cannot be protected.
+    mutable ParticipantStatus _returnValueForStatus;
+
+    bool _isRunning{false};
     LifecycleManagement _lifecycleManagement;
     bool _timeSyncActive = false;
 

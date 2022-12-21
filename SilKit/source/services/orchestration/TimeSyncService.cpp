@@ -255,7 +255,7 @@ bool TimeSyncService::IsSynchronized()
 
 auto TimeSyncService::State() const -> ParticipantState
 {
-    return _lifecycleService->Status().state;
+    return _lifecycleService->State();
 }
 
 void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)
