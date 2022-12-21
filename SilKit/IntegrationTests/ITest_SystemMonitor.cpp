@@ -49,8 +49,17 @@ protected:
         MOCK_METHOD(void, ParticipantConnectedHandler,
                     (const SilKit::Services::Orchestration::ParticipantConnectionInformation&),
                     (const));
+
         MOCK_METHOD(void, ParticipantDisconnectedHandler,
                     (const SilKit::Services::Orchestration::ParticipantConnectionInformation&), (const));
+
+    };
+
+    struct SequencePoints
+    {
+        MOCK_METHOD(void, A_BeforeCreateThirdParticipant, ());
+        MOCK_METHOD(void, B_AfterCreateThirdParticipant, ());
+        MOCK_METHOD(void, C_AfterThirdParticipantDestroyed, ());
     };
 
     ITest_SystemMonitor()
@@ -59,6 +68,7 @@ protected:
 
     Callbacks callbacks;
     Callbacks secondCallbacks;
+    SequencePoints sequencePoints;
 };
 
 // Tests that the service discovery handler fires for created services
@@ -88,15 +98,57 @@ TEST_F(ITest_SystemMonitor, discover_services)
             callbacks.ParticipantDisconnectedHandler(participantInformation);
     });
 
-    EXPECT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
-    {
-        EXPECT_CALL(callbacks, ParticipantConnectedHandler(secondParticipantConnection)).Times(1);
+    SilKit::Services::Orchestration::ISystemMonitor * secondSystemMonitor = nullptr;
 
+    testing::Sequence sequence, secondSequence;
+
+    EXPECT_CALL(callbacks, ParticipantConnectedHandler(secondParticipantConnection))
+        .Times(1);
+
+    EXPECT_CALL(sequencePoints, A_BeforeCreateThirdParticipant()).Times(1).InSequence(sequence, secondSequence);
+    {
+        EXPECT_CALL(callbacks, ParticipantConnectedHandler(thirdParticipantConnection))
+            .Times(1)
+            .InSequence(sequence);
+        EXPECT_CALL(secondCallbacks, ParticipantConnectedHandler(thirdParticipantConnection))
+            .Times(1)
+            .InSequence(secondSequence);
+    }
+    EXPECT_CALL(sequencePoints, B_AfterCreateThirdParticipant()).Times(1).InSequence(sequence, secondSequence);
+    {
+        EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(thirdParticipantConnection))
+            .Times(1)
+            .InSequence(sequence)
+            .WillOnce([&] {
+                ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+            });
+
+        EXPECT_CALL(secondCallbacks, ParticipantDisconnectedHandler(thirdParticipantConnection))
+            .Times(1)
+            .InSequence(secondSequence)
+            .WillOnce([&] {
+                ASSERT_NE(secondSystemMonitor, nullptr);
+                ASSERT_FALSE(
+                    secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+            });
+    }
+    EXPECT_CALL(sequencePoints, C_AfterThirdParticipantDestroyed()).Times(1).InSequence(sequence, secondSequence);
+    {
+        EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(secondParticipantConnection))
+            .Times(1)
+            .InSequence(sequence)
+            .WillOnce([&] {
+                ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
+            });
+    }
+
+    ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
+    {
         // Create the second participant which should trigger the callbacks of the first
         auto&& secondParticipant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
                                                              secondParticipantConnection.participantName, registryUri);
 
-        auto* secondSystemMonitor = secondParticipant->CreateSystemMonitor();
+        secondSystemMonitor = secondParticipant->CreateSystemMonitor();
         secondSystemMonitor->SetParticipantConnectedHandler(
             [this](const SilKit::Services::Orchestration::ParticipantConnectionInformation&
                        participantConnectionInformation) {
@@ -108,47 +160,31 @@ TEST_F(ITest_SystemMonitor, discover_services)
                 secondCallbacks.ParticipantDisconnectedHandler(participantConnectionInformation);
         });
 
-        EXPECT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-        EXPECT_FALSE(secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-        {
-            EXPECT_CALL(callbacks, ParticipantConnectedHandler(thirdParticipantConnection)).Times(1);
-            EXPECT_CALL(secondCallbacks, ParticipantConnectedHandler(thirdParticipantConnection))
-                .Times(1);
+        ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+        ASSERT_FALSE(secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
 
-            // Create the third participant which should trigger the callbacks of the first and second
-            auto&& thirdParticipant =
-                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                          thirdParticipantConnection.participantName, registryUri);
+        sequencePoints.A_BeforeCreateThirdParticipant();
 
-            EXPECT_TRUE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-            EXPECT_TRUE(secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+        // Create the third participant which should trigger the callbacks of the first and second
+        auto&& thirdParticipant =
+            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
+                                      thirdParticipantConnection.participantName, registryUri);
 
-            EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(thirdParticipantConnection)).Times(1).WillOnce([&] {
-                EXPECT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-            });
+        ASSERT_TRUE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+        ASSERT_TRUE(secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
 
-            EXPECT_CALL(secondCallbacks, ParticipantDisconnectedHandler(thirdParticipantConnection))
-                .Times(1)
-                .WillOnce([&] {
-                    EXPECT_FALSE(
-                        secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
-                });
+        sequencePoints.B_AfterCreateThirdParticipant();
 
-            // Destroy the third participant
-            thirdParticipant.reset();
-        }
+        // Destroy the third participant
+        thirdParticipant.reset();
 
-        EXPECT_CALL(callbacks, ParticipantDisconnectedHandler(secondParticipantConnection))
-            .Times(1)
-            .WillOnce([&] {
-            EXPECT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
-        });
+        sequencePoints.C_AfterThirdParticipantDestroyed();
 
         // wait for a little while to give the callbacks time to be triggered
         std::this_thread::sleep_for(std::chrono::milliseconds{10});
 
         // Destroy the second participant
-        EXPECT_TRUE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
+        ASSERT_TRUE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
         secondParticipant.reset();
     }
 
