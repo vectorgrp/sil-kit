@@ -44,7 +44,7 @@ class LimitedMockClock : public WatchDog::IClock
 {
 public:
     explicit LimitedMockClock(std::chrono::nanoseconds limit, std::chrono::nanoseconds tick = 1ms)
-        : _limit{limit}
+        : _limitRep{static_cast<std::chrono::nanoseconds>(limit).count()}
         , _tick{tick}
     {
     }
@@ -54,7 +54,7 @@ public:
         _now += _tick;
 
         // set the flag that the limit has been reached (but only _once_, otherwise an exception is thrown)
-        if (_now >= _limit)
+        if (_now >= GetLimit())
         {
             if (!_limitReachedFlagged.exchange(true))
             {
@@ -82,7 +82,7 @@ public:
     /// \param advance by how much the current limit should be advanced
     void AdvanceLimitBy(std::chrono::nanoseconds advance)
     {
-        _limit += advance;
+        _limitRep += static_cast<std::chrono::nanoseconds>(advance).count();
 
         if (_limitReachedFlagged)
         {
@@ -92,7 +92,10 @@ public:
     }
 
 private:
-    std::chrono::nanoseconds _limit;
+    auto GetLimit() const -> std::chrono::nanoseconds { return std::chrono::nanoseconds{_limitRep}; }
+
+private:
+    std::atomic<std::chrono::nanoseconds::rep> _limitRep;
     std::chrono::nanoseconds _tick;
 
     // stores the current mock-time
