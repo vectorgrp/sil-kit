@@ -189,14 +189,21 @@ void SystemMonitor::SetParticipantDisconnectedHandler(ParticipantDisconnectedHan
 
 auto SystemMonitor::IsParticipantConnected(const std::string& participantName) const -> bool
 {
+    std::unique_lock<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};
+
     const auto it = _connectedParticipants.find(participantName);
     return it != _connectedParticipants.end();
 }
 
 void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
-    // Add the participant name to the map of connected participant names/connections
-    _connectedParticipants.emplace(participantConnectionInformation.participantName, participantConnectionInformation);
+    {
+        std::unique_lock<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};
+
+        // Add the participant name to the map of connected participant names/connections
+        _connectedParticipants.emplace(participantConnectionInformation.participantName, participantConnectionInformation);
+    }
+
     // Call the handler if set
     if (_participantConnectedHandler)
     {
@@ -206,12 +213,17 @@ void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformatio
 
 void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
-    // Remove the participant name from the map of connected participant names/connections
-    auto it = _connectedParticipants.find(participantConnectionInformation.participantName);
-    if (it != _connectedParticipants.end())
     {
-        _connectedParticipants.erase(it);
+        std::unique_lock<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};
+
+        // Remove the participant name from the map of connected participant names/connections
+        auto it = _connectedParticipants.find(participantConnectionInformation.participantName);
+        if (it != _connectedParticipants.end())
+        {
+            _connectedParticipants.erase(it);
+        }
     }
+
     // Call the handler if set
     if (_participantDisconnectedHandler)
     {

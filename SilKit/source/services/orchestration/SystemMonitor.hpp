@@ -133,6 +133,8 @@ private:
 
     ParticipantConnectedHandler _participantConnectedHandler;
     ParticipantDisconnectedHandler _participantDisconnectedHandler;
+
+    mutable std::mutex _connectedParticipantsMx;
     std::unordered_map<std::string, ParticipantConnectionInformation> _connectedParticipants;
 };
 
