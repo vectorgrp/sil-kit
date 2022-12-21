@@ -34,57 +34,74 @@ class Timer
 {
 public:
     Timer() = default;
-    Timer(Timer&&) = default;
-    Timer& operator=(Timer&&) = default;
+
+    Timer(Timer&& other) noexcept
+        : _isRunning{other._isRunning.load()}
+        , _m{std::move(other._m)}
+    {
+    }
+
+    Timer& operator=(Timer&& other) noexcept
+    {
+        if (this != &other)
+        {
+            _isRunning = other._isRunning.load();
+            _m = std::move(other._m);
+        }
+
+        return *this;
+    }
 
     ~Timer()
     {
         Stop();
-        if (_thread.joinable())
+        if (_m.thread.joinable())
         {
-            _thread.join();
+            _m.thread.join();
         }
     }
 
+public:
     void Stop()
     {
         if (_isRunning)
         {
             _isRunning = false;
-            _promise.set_value();
+            _m.promise.set_value();
         }
     }
 
     void WithPeriod(std::chrono::nanoseconds period,
         std::function<void(std::chrono::nanoseconds)> callback)
     {
-        _period = period;
-        if (_period <= std::chrono::nanoseconds{0})
+        _m.period = period;
+        if (_m.period <= std::chrono::nanoseconds{0})
         {
             return;
         }
 
-        _callback = std::move(callback);
-        if (!_callback)
+        _m.callback = std::move(callback);
+        if (!_m.callback)
         {
             return;
         }
 
         Stop();
-        if (_thread.joinable())
+        if (_m.thread.joinable())
         {
-            _thread.join();
+            _m.thread.join();
         }
 
         _isRunning = true;
-        _promise = std::promise<void>{};
-        _thread = std::thread{&Timer::ThreadMain, this, _promise.get_future()};
+        _m.promise = std::promise<void>{};
+        _m.thread = std::thread{&Timer::ThreadMain, this, _m.promise.get_future()};
     }
 
     bool IsActive() const
     {
         return  _isRunning;
     }
+
 private:
     // Methods
     void ThreadMain(std::future<void> future)
@@ -92,22 +109,26 @@ private:
         SilKit::Util::SetThreadName("SilKit-Timer");
         while (_isRunning)
         {
-            if (future.wait_for(_period) == std::future_status::timeout)
+            if (future.wait_for(_m.period) == std::future_status::timeout)
             {
                 const auto now = std::chrono::high_resolution_clock::now().time_since_epoch();
-                _callback(now);
+                _m.callback(now);
             }
         }
     }
 
 private:
-    // Members
-    bool _isRunning{false};
-    std::chrono::nanoseconds _period{0};
-    std::thread _thread;
-    std::function<void(std::chrono::nanoseconds)> _callback;
-    std::promise<void> _promise;
+    // Immovable Members
+    std::atomic<bool> _isRunning{false};
+    // Movable Members
+    struct
+    {
+        std::chrono::nanoseconds period{0};
+        std::thread thread;
+        std::function<void(std::chrono::nanoseconds)> callback;
+        std::promise<void> promise;
+    } _m;
 };
 
-} //end util
-} //end silkit
+} // namespace Util
+} // namespace SilKit
