@@ -36,12 +36,16 @@ namespace SilKit {
 namespace Services {
 namespace Rpc {
 
+//! \brief The status of a RpcCallResultEvent. Informs whether a call was successful.
 enum class RpcCallStatus : SilKit_RpcCallStatus
 {
-    Success = SilKit_RpcCallStatus_Success,
-    ServerNotReachable = SilKit_RpcCallStatus_ServerNotReachable,
-    UndefinedError = SilKit_RpcCallStatus_UndefinedError,
-    InternalServerError = SilKit_RpcCallStatus_InternalServerError,
+    Success = SilKit_RpcCallStatus_Success, //!< Call was successful
+    ServerNotReachable = SilKit_RpcCallStatus_ServerNotReachable, //!< No server matching the RpcSpec was found
+    UndefinedError = SilKit_RpcCallStatus_UndefinedError, //!< An unidentified error occured
+    /*! \brief The Call lead to an internal RpcServer error.
+     * This might happen if no CallHandler was specified for the RpcServer.
+     */
+    InternalServerError = SilKit_RpcCallStatus_InternalServerError, 
 };
 
 //! \brief An incoming rpc call from a RpcClient with call data and timestamp

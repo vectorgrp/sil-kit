@@ -176,3 +176,8 @@ Data Structures
 
 .. doxygenclass:: SilKit::Services::Rpc::RpcSpec
    :members:
+
+Enumerations
+~~~~~~~~~~~~
+
+.. doxygenenum:: SilKit::Services::Rpc::RpcCallStatus

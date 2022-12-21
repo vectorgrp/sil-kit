@@ -49,12 +49,15 @@ typedef struct SilKit_RpcServer SilKit_RpcServer;
 typedef struct SilKit_RpcClient SilKit_RpcClient;
 
 
-/*! The available result codes for calls issued by a client.
+/*! \brief The status of a RpcCallResultEvent. Informs whether a call was successful.
 */
 typedef uint32_t SilKit_RpcCallStatus;
-#define SilKit_RpcCallStatus_Success             ((uint32_t) 0)
-#define SilKit_RpcCallStatus_ServerNotReachable  ((uint32_t) 1)
-#define SilKit_RpcCallStatus_UndefinedError      ((uint32_t) 2)
+#define SilKit_RpcCallStatus_Success             ((uint32_t) 0) //!< Call was successful
+#define SilKit_RpcCallStatus_ServerNotReachable  ((uint32_t) 1) //!< No server matching the RpcSpec was found
+#define SilKit_RpcCallStatus_UndefinedError      ((uint32_t) 2) //!< An unidentified error occured
+/*! \brief The Call lead to an internal RpcServer error.
+ * This might happen if no CallHandler was specified for the RpcServer.
+ */
 #define SilKit_RpcCallStatus_InternalServerError ((uint32_t) 3)
 
 typedef struct {
