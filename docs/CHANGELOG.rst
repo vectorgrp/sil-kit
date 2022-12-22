@@ -5,13 +5,15 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.14] - unreleased
+
+[4.0.14] - UNRELEASED
 ---------------------
 
 Fixed
 ~~~~~
 
 - Catch and print exceptions when parsing utility CLI arguments
+- Various issues found by the Address Sanitizer and Thread Sanitizer of Clang 14 are now resolved.
 
 
 [4.0.13] - 2022-12-14
