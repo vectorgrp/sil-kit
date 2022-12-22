@@ -105,7 +105,7 @@ public:
             _hasPendingAsyncSubscriptions = true;
         }
 
-        _ioContext.dispatch([this, service]() {
+        asio::post(_ioContext, [this, service]() {
             this->RegisterSilKitServiceImpl<SilKitServiceT>(service);
         });
 
@@ -325,20 +325,24 @@ private:
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));
 
-            for (auto&& peer : _peers)
             {
-                // Add pending subscriptions
-                PendingAcksIdentifier ackPair{peer.get(), subscriptionInfo};
-                if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
-                {
-                    _pendingSubscriptionAcknowledges.emplace_back(ackPair);
-                }
-                else
-                {
-                    _pendingAsyncSubscriptionAcknowledges.emplace_back(ackPair);
-                }
+                std::unique_lock<decltype(_peersLock)> lock{_peersLock};
 
-                peer->Subscribe(subscriptionInfo);
+                for (auto&& peer : _peers)
+                {
+                    // Add pending subscriptions
+                    PendingAcksIdentifier ackPair{peer.get(), subscriptionInfo};
+                    if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
+                    {
+                        _pendingSubscriptionAcknowledges.emplace_back(ackPair);
+                    }
+                    else
+                    {
+                        _pendingAsyncSubscriptionAcknowledges.emplace_back(ackPair);
+                    }
+
+                    peer->Subscribe(subscriptionInfo);
+                }
             }
         }
     }
