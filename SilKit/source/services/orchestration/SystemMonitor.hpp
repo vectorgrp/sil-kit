@@ -123,7 +123,10 @@ private:
     Core::IParticipantInternal* _participant{nullptr};
 
     std::vector<std::string> _requiredParticipantNames{};
+
+    mutable std::mutex _participantStatusMx;
     std::map<std::string, Orchestration::ParticipantStatus> _participantStatus;
+
     Orchestration::SystemState _systemState{Orchestration::SystemState::Invalid};
 
     unsigned int _invalidTransitionCount{0u};

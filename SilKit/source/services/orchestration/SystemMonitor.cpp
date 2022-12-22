@@ -63,6 +63,8 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
     // Init new participants in status map
     for (auto&& name : _requiredParticipantNames)
     {
+        std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+
         auto&& statusIter = _participantStatus.find(name);
         if (statusIter == _participantStatus.end())
         {
@@ -78,7 +80,12 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
         auto oldSystemState = _systemState;
         for (auto&& name : _requiredParticipantNames)
         {
-            UpdateSystemState(_participantStatus[name]);
+            Orchestration::ParticipantStatus status{};
+            {
+                std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+                status = _participantStatus[name];
+            }
+            UpdateSystemState(status);
         }
         if (oldSystemState != _systemState)
         {
@@ -107,13 +114,17 @@ void SystemMonitor::RemoveSystemStateHandler(HandlerId handlerId)
 
 auto SystemMonitor::AddParticipantStatusHandler(ParticipantStatusHandler handler) -> HandlerId
 {
-    for (auto&& kv : _participantStatus)
     {
-        auto&& participantStatus = kv.second;
-        if (participantStatus.state == Orchestration::ParticipantState::Invalid)
-            continue;
+        std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
 
-        handler(participantStatus);
+        for (auto&& kv : _participantStatus)
+        {
+            auto&& participantStatus = kv.second;
+            if (participantStatus.state == Orchestration::ParticipantState::Invalid)
+                continue;
+
+            handler(participantStatus);
+        }
     }
 
     return _participantStatusHandlers.Add(std::move(handler));
@@ -134,6 +145,8 @@ auto SystemMonitor::SystemState() const -> Orchestration::SystemState
 
 auto SystemMonitor::ParticipantStatus(const std::string& participantName) const -> const Orchestration::ParticipantStatus&
 {
+    std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+
     auto&& statusIter = _participantStatus.find(participantName);
     if (statusIter == _participantStatus.end())
     {
@@ -148,7 +161,12 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestra
     auto participantName = newParticipantStatus.participantName;
 
     // Validation
-    auto oldParticipantState = _participantStatus[participantName].state;
+    ParticipantState oldParticipantState;
+    {
+        std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+        oldParticipantState = _participantStatus[participantName].state;
+    }
+
     ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
     if (oldParticipantState == Orchestration::ParticipantState::Shutdown)
     {
@@ -159,7 +177,10 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestra
     }
 
     // Update status map
-    _participantStatus[participantName] = newParticipantStatus;
+    {
+        std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+        _participantStatus[participantName] = newParticipantStatus;
+    }
 
     // On new participant state
     if (oldParticipantState != newParticipantStatus.state)
@@ -235,7 +256,12 @@ bool SystemMonitor::AllRequiredParticipantsInState(std::initializer_list<Orchest
 {
     for (auto&& name : _requiredParticipantNames)
     {
-        bool isAcceptedState = std::any_of(begin(acceptedStates), end(acceptedStates), [participantState = _participantStatus.at(name).state](auto acceptedState) {
+        auto participantState = [this, &name] {
+            std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+            return _participantStatus.at(name).state;
+        }();
+
+        bool isAcceptedState = std::any_of(begin(acceptedStates), end(acceptedStates), [participantState](auto acceptedState) {
             return participantState == acceptedState;
         });
         if (!isAcceptedState)
