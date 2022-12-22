@@ -907,10 +907,13 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
 
 void VAsioConnection::RemovePeerFromLinks(IVAsioPeer* peer)
 {
-    tt::for_each(_links, [peer](auto&& linkMap) {
-        for (auto&& link : linkMap)
+    tt::for_each(_links, [this, peer](auto&& linkMap) {
+        std::unique_lock<decltype(_linksMx)> lock{_linksMx};
+
+        // remove the peer from the links without taking the lock
+        for (auto& kv : linkMap)
         {
-            link.second->RemoveRemoteReceiver(peer);
+            kv.second->RemoveRemoteReceiver(peer);
         }
     });
 }
@@ -1079,18 +1082,23 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 {
     bool wasAdded = false;
 
-    tt::for_each(_links, [&](auto&& linkMap) {
-        using LinkType = typename std::decay_t<decltype(linkMap)>::mapped_type::element_type;
+    tt::for_each(_links, [this, &from, &subscriber, &wasAdded](auto&& linkMap) {
+        using LinkPtr = typename std::decay_t<decltype(linkMap)>::mapped_type;
+        using LinkType = typename LinkPtr::element_type;
 
         if (subscriber.msgTypeName != LinkType::MessageSerdesName())
             return;
 
+        // create the link under lock
+        std::unique_lock<decltype(_linksMx)> lock{_linksMx};
         auto& link = linkMap[subscriber.networkName];
         if (!link)
         {
             link = std::make_shared<LinkType>(subscriber.networkName, _logger, _timeProvider);
         }
+        lock.unlock();
 
+        // add the remote receiver without taking the lock
         link->AddRemoteReceiver(from, subscriber.receiverIdx);
 
         wasAdded = true;

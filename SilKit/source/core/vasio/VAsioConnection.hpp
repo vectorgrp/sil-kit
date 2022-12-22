@@ -285,6 +285,8 @@ private:
     template<class SilKitMessageT>
     auto GetLinkByName(const std::string& networkName) -> std::shared_ptr<SilKitLink<SilKitMessageT>>
     {
+        std::unique_lock<decltype(_linksMx)> lock{_linksMx};
+
         auto& link = std::get<SilKitLinkMap<SilKitMessageT>>(_links)[networkName];
         if (!link)
         {
@@ -455,6 +457,8 @@ private:
     ParticipantId _participantId{0};
     Services::Logging::ILogger* _logger{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
+
+    mutable std::mutex _linksMx;
 
     //! \brief Virtual SIL Kit links by networkName according to SilKitConfig.
     Util::tuple_tools::wrapped_tuple<SilKitLinkMap, SilKitMessageTypes> _links;
