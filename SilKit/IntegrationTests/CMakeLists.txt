@@ -96,7 +96,7 @@ add_silkit_test(ITest_TargetedMessaging
       S_SilKit_Tracing      # XXX
       S_SilKit_Services_Can # XXX
       I_SilKit_Core_Internal
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 )
 
 add_silkit_test(ITest_StateMachineVAsio
@@ -132,7 +132,7 @@ add_silkit_test(ITest_SingleParticipant
     LIBS
       I_SilKit_Core_Participant
       I_SilKit_Core_VAsio
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 )
 
 add_silkit_test(ITest_ServiceDiscovery
@@ -151,7 +151,7 @@ add_silkit_test(ITest_ServiceDiscovery
       I_SilKit_Services_Orchestration
       I_SilKit_Services_PubSub
       I_SilKit_Services_Rpc
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 )
 
 add_silkit_test(FTest_ServiceDiscoveryPerf
@@ -160,7 +160,7 @@ add_silkit_test(FTest_ServiceDiscoveryPerf
     LIBS
       I_SilKit_Core_Participant
       I_SilKit_Core_VAsio
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 )
 
 add_silkit_test(ITest_SystemMonitor
@@ -178,7 +178,7 @@ add_silkit_test(ITest_SystemMonitor
       I_SilKit_Services_Orchestration
       I_SilKit_Services_PubSub
       I_SilKit_Services_Rpc
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 
       S_SilKit_Services_Orchestration
 )
@@ -189,7 +189,7 @@ add_silkit_test(FTest_PubSubPerf
     LIBS
       I_SilKit_Core_Participant
       I_SilKit_Core_VAsio
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 )
 
 add_silkit_test(ITest_AsyncSimTask
@@ -198,7 +198,7 @@ add_silkit_test(ITest_AsyncSimTask
     LIBS
       I_SilKit_Core_Participant
       I_SilKit_Core_VAsio
-      S_IntegrationTests_SimTestHarness
+      S_ITests_STH
 )
 
 add_silkit_test(
@@ -209,7 +209,7 @@ add_silkit_test(
     LIBS
     SilKit_Hourglass
     I_SilKit_Util # source/util/functional.hpp
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 # Windows specific tests
@@ -259,7 +259,7 @@ add_silkit_test(
     LIBS
     I_SilKit_Core_Participant
     I_SilKit_Core_VAsio
-    S_IntegrationTests_SimTestHarness
+    S_ITests_STH
 )
 
 add_silkit_test(
@@ -270,7 +270,7 @@ add_silkit_test(
     LIBS
     SilKit_Hourglass
     I_SilKit_Util # source/util/functional.hpp
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 add_silkit_test(
@@ -290,7 +290,7 @@ add_silkit_test(
 
     LIBS
     SilKit_Hourglass
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 # Ethernet
@@ -304,7 +304,7 @@ add_silkit_test(
     I_SilKit_Core_Participant
     I_SilKit_Core_VAsio
     I_SilKit_Services_Ethernet
-    S_IntegrationTests_SimTestHarness
+    S_ITests_STH
 
     I_SilKit_Wire_Ethernet
 )
@@ -318,7 +318,7 @@ add_silkit_test(
     SilKit_Hourglass
     I_SilKit_Util # source/util/functional.hpp
     S_SilKit_Services_Ethernet # source/services/ethernet/EthDatatypeUtils.[hc]pp # XXX
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 add_silkit_test(
@@ -353,7 +353,7 @@ add_silkit_test(
     LIBS
     I_SilKit_Core_Participant
     I_SilKit_Core_VAsio
-    S_IntegrationTests_SimTestHarness
+    S_ITests_STH
 )
 
 add_silkit_test(
@@ -364,7 +364,7 @@ add_silkit_test(
     LIBS
     SilKit_Hourglass
     I_SilKit_Util # source/util/functional.hpp
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 # RPC
@@ -398,7 +398,7 @@ add_silkit_test(
     LIBS
     I_SilKit_Core_Participant
     I_SilKit_Core_VAsio
-    S_IntegrationTests_SimTestHarness
+    S_ITests_STH
 )
 
 add_silkit_test(
@@ -408,7 +408,7 @@ add_silkit_test(
 
     LIBS
     SilKit_Hourglass
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 # Ethernet
@@ -422,7 +422,7 @@ add_silkit_test(
     I_SilKit_Core_Participant
     I_SilKit_Core_VAsio
     I_SilKit_Services_Ethernet
-    S_IntegrationTests_SimTestHarness
+    S_ITests_STH
 
     I_SilKit_Wire_Ethernet
 )
@@ -435,7 +435,7 @@ add_silkit_test(
     LIBS
     SilKit_Hourglass
     S_SilKit_Services_Ethernet # source/services/ethernet/EthDatatypeUtils.[hc]pp
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )
 
 # LIN
@@ -448,7 +448,7 @@ add_silkit_test(
     LIBS
     I_SilKit_Core_Participant
     I_SilKit_Core_VAsio
-    S_IntegrationTests_SimTestHarness
+    S_ITests_STH
 )
 
 add_silkit_test(
@@ -459,5 +459,5 @@ add_silkit_test(
     LIBS
     SilKit_Hourglass
     I_SilKit_Util # source/util/functional.hpp
-    S_IntegrationTests_SimTestHarness_Hourglass
+    S_ITests_STH_Hourglass
 )

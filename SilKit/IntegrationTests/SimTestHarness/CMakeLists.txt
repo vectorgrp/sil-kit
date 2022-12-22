@@ -19,24 +19,24 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(S_IntegrationTests_SimTestHarness STATIC
+add_library(S_ITests_STH STATIC
     SimSystemController.hpp
     SimTestHarness.hpp
     SimTestHarness.cpp
 )
-target_link_libraries(S_IntegrationTests_SimTestHarness
+target_link_libraries(S_ITests_STH
     PRIVATE I_SilKit_Core_Internal
 
     PUBLIC SilKit
     PUBLIC I_SilKit_Config_TestUtils
 )
-target_include_directories(S_IntegrationTests_SimTestHarness
+target_include_directories(S_ITests_STH
     INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
 )
-set_property(TARGET S_IntegrationTests_SimTestHarness PROPERTY FOLDER "Tests")
+set_property(TARGET S_ITests_STH PROPERTY FOLDER "Tests")
 
-set_target_properties(S_IntegrationTests_SimTestHarness PROPERTIES
+set_target_properties(S_ITests_STH PROPERTIES
      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
 )
@@ -45,27 +45,27 @@ set_target_properties(S_IntegrationTests_SimTestHarness PROPERTIES
 # Hourglass-Variant
 # ==============================================================================
 
-add_library(S_IntegrationTests_SimTestHarness_Hourglass STATIC
+add_library(S_ITests_STH_Hourglass STATIC
     SimSystemController.hpp
     SimTestHarness.hpp
     SimTestHarness.cpp
 )
 
-target_link_libraries(S_IntegrationTests_SimTestHarness_Hourglass
+target_link_libraries(S_ITests_STH_Hourglass
     PRIVATE I_SilKit_Config_TestUtils
 
     PUBLIC SilKit
     PUBLIC SilKit_Hourglass
 )
 
-target_include_directories(S_IntegrationTests_SimTestHarness_Hourglass
+target_include_directories(S_ITests_STH_Hourglass
 
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set_property(TARGET S_IntegrationTests_SimTestHarness_Hourglass PROPERTY FOLDER "Tests")
+set_property(TARGET S_ITests_STH_Hourglass PROPERTY FOLDER "Tests")
 
-set_target_properties(S_IntegrationTests_SimTestHarness_Hourglass
+set_target_properties(S_ITests_STH_Hourglass
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
