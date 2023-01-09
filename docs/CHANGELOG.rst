@@ -5,6 +5,15 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.14] - unreleased
+---------------------
+
+Fixed
+~~~~~
+
+- Catch and print exceptions when parsing utility CLI arguments
+
+
 [4.0.13] - 2022-12-14
 ---------------------
 

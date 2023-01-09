@@ -132,6 +132,13 @@ int main(int argc, char** argv)
     {
         commandlineParser.ParseArguments(argc, argv);
     }
+    catch (const SilKit::SilKitError& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
+
+        return -1;
+    }
     catch (const std::runtime_error& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
