@@ -76,4 +76,19 @@ TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file)
     CreateParticipantFromConfiguration(cfg);
 }
 
+/*
+    Test whether json and yaml configurations are parsed equivalently
+*/
+TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file_json_yaml_equal)
+{
+    auto jsonCfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.json");
+    auto yamlCfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.yaml");
+
+    // cast to ParticipantConfiguration to use right equal operator
+    auto participantConfigJson = *std::dynamic_pointer_cast<ParticipantConfiguration>(jsonCfg);
+    auto participantConfigYaml = *std::dynamic_pointer_cast<ParticipantConfiguration>(yamlCfg);
+
+    ASSERT_TRUE(participantConfigJson == participantConfigYaml);
+}
+
 } // anonymous namespace

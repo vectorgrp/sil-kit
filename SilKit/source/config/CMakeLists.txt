@@ -59,6 +59,7 @@ add_silkit_test(Test_ParticipantConfiguration
     CONFIGS
         ParticipantConfiguration_Minimal.json
         ParticipantConfiguration_Full.json
+        ParticipantConfiguration_Full.yaml
         ParticipantConfiguration_Logging_Without_File.json
 )
 

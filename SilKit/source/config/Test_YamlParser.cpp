@@ -39,7 +39,10 @@ using namespace std::chrono_literals;
 
 //!< Yaml config which has almost complete list of config elements.
 const auto completeConfiguration = R"raw(
+---
 Description: Example configuration to test YAML Parser
+schemaVersion: 0
+ParticipantName: Node0
 CanControllers:
 - Name: CAN1
   Replay:
@@ -157,6 +160,21 @@ DataPublishers:
   Topic: Temperature
   UseTraceSinks:
   - Sink1
+DataSubscribers:
+- Name: Subscriber1
+  Topic: Temperature
+  UseTraceSinks:
+  - Sink1
+RpcServers:
+- Name: Server1
+  FunctionName: Function1
+  UseTraceSinks:
+  - Sink1
+RpcClients:
+- Name: Client1
+  FunctionName: Function1
+  UseTraceSinks:
+  - Sink1
 Logging:
   Sinks:
   - Type: File
@@ -164,7 +182,6 @@ Logging:
     LogName: MyLog1
   FlushLevel: Critical
   LogFromRemotes: false
-ParticipantName: Node0
 HealthCheck:
   SoftResponseTimeout: 500
   HardResponseTimeout: 5000
@@ -189,6 +206,7 @@ Middleware:
   EnableDomainSockets: false
   TcpSendBufferSize: 3456
   TcpReceiveBufferSize: 3456
+
 )raw";
 
 TEST_F(YamlParserTest, yaml_complete_configuration)
