@@ -6,8 +6,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.14] - UNRELEASED
+[4.0.14] - 2023-01-10
 ---------------------
+
+Added
+~~~~~
+
+- CMake: Prepared cross-compiling for QNX
+
+Changed
+~~~~~~~
+
+- Tests: Improved tests regarding configuration parsing
 
 Fixed
 ~~~~~
