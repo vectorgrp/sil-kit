@@ -44,6 +44,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "WireFlexrayMessages.hpp"
 #include "WireLinMessages.hpp"
 #include "WireRpcMessages.hpp"
+#include "WireDataMessages.hpp"
 
 #include "TestDataTypes.hpp" // for operator<<
 #include "IServiceEndpoint.hpp" // for operator<<(... ServiceDescriptor)
+
+
+#define MAKE_FORMATTER(TYPE) template<> struct fmt::formatter<TYPE> : ostream_formatter{}
+MAKE_FORMATTER( SilKit::Core::Discovery::ServiceDiscoveryEvent);
+MAKE_FORMATTER( SilKit::Services::Lin::LinChecksumModel);
+MAKE_FORMATTER( SilKit::Services::Lin::LinFrameResponseMode);
+MAKE_FORMATTER( SilKit::Services::Rpc::FunctionCall);
+MAKE_FORMATTER( SilKit::Services::Rpc::FunctionCallResponse);
+MAKE_FORMATTER( SilKit::Services::Orchestration::ParticipantState);
+MAKE_FORMATTER( SilKit::Core::ServiceDescriptor);
+MAKE_FORMATTER( SilKit::Core::ProtocolVersion);
+MAKE_FORMATTER( SilKit::Core::Discovery::ParticipantDiscoveryEvent);
+MAKE_FORMATTER( SilKit::Services::PubSub::WireDataMessageEvent);
+MAKE_FORMATTER( SilKit::Services::Logging::LogMsg);
+MAKE_FORMATTER( SilKit::Services::Orchestration::WorkflowConfiguration);
+MAKE_FORMATTER( SilKit::Services::Orchestration::SystemCommand);
+MAKE_FORMATTER( SilKit::Services::Lin::LinControllerStatus);

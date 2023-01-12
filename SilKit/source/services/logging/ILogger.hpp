@@ -36,7 +36,7 @@ void Log(ILogger* logger, Level level, const char* fmt, const Args&... args)
 {
     if (logger && (logger->GetLogLevel() <= level))
     {
-        const std::string msg = fmt::format(fmt, args...);
+        const std::string msg = fmt::format(fmt, fmt::streamed(args)...);
         logger->Log(level, msg);
     }
 

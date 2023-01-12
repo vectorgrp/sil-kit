@@ -187,7 +187,7 @@ void LinController::WarnOnReceptionWhileInactive() const
 void LinController::WarnOnUnneededStatusChange(LinControllerStatus status) const
 {
     std::string errorMsg =
-        fmt::format("Invalid LinController status change: controller is already in {} mode.", to_string(status));
+        fmt::format("Invalid LinController status change: controller is already in {} mode.", status);
     _logger->Warn(errorMsg);
 }
 

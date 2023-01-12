@@ -293,6 +293,7 @@ inline std::ostream& operator<< (std::ostream& out,
 }
 } //end namespace std
 
+MAKE_FORMATTER(asio::generic::stream_protocol::socket);
 
 namespace SilKit {
 namespace Core {
