@@ -22,6 +22,11 @@ function(include_gtest)
         )
     endif()
 
+    # disable the IPO for GTest due to CMake policy CMP0069 changes
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    endif()
+
     #check the submodule tag for the current version.
     message(STATUS "Add subdirectory ThirdParty/googletest")
     add_subdirectory(googletest
@@ -75,6 +80,12 @@ function(include_yamlcpp)
     set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
     silkit_clean_default_compileflags()
     add_compile_options(-w)
+
+    # disable the IPO for GTest due to CMake policy CMP0069 changes
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    endif()
+
     add_subdirectory(yaml-cpp
         yaml-cpp
         EXCLUDE_FROM_ALL

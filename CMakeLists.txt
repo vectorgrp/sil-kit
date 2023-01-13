@@ -19,7 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 ###############################################################################
 # Project definition
@@ -47,6 +47,10 @@ option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archiv
 set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
 
 add_compile_definitions(
     ASIO_DISABLE_VISIBILITY=1
