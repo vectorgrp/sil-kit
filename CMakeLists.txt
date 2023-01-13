@@ -75,6 +75,7 @@ silkit_enable_threadsan(${SILKIT_ENABLE_THREADSAN})
 silkit_enable_coverage(${SILKIT_ENABLE_COVERAGE})
 silkit_check_reproducible()
 silkit_clean_default_compileflags()
+silkit_add_libs_for_atomic64()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

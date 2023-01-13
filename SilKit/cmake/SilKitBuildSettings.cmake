@@ -187,3 +187,22 @@ macro(silkit_check_reproducible)
     endif()
 
 endmacro()
+
+
+include(CheckCXXSourceCompiles)
+macro(silkit_add_libs_for_atomic64)
+# armv7 gcc might need -latomic for 64bit atomic operations (__atomic_fetch_add_8)
+    check_cxx_source_compiles("
+#include <atomic>
+#include <cstdint>
+int main() {
+    std::atomic<int64_t> a{0};
+    int64_t b{10};
+    a =  a + b;
+    return a;
+ }
+" HAVE_ATOMIC_64BIT)
+    if(NOT HAVE_ATOMIC_64BIT)
+        link_libraries(-latomic)
+    endif()
+endmacro()
