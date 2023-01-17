@@ -19,6 +19,23 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+function(silkit_validate_preset_toolset)
+    # When building using a preset, the variable SILKIT_REQUIRED_MSVC_TOOLSET_VERSION
+    # is set. Validate that the user properly set vcvars corresponding to the preset.
+    if(NOT SILKIT_REQUIRED_MSVC_TOOLSET_VERSION)
+        return()
+    endif()
+
+    #accept any of "v140","v14.0","14.0"
+    string(REGEX REPLACE "v?([0-9]+.?[0-9]*)" "\\1" _toolset "${SILKIT_REQUIRED_MSVC_TOOLSET_VERSION}")
+    if(NOT MSVC_TOOLSET_VERSION MATCHES ${_toolset})
+        message(FATAL_ERROR "SIL Kit: the cmake preset specifies MSVC toolset ${_toolset},"
+                " but the currently selected MSVC_TOOLSET_VERSION is ${MSVC_TOOLSET_VERSION}."
+                " Please source the appropriate vcvarsall.bat version for this build preset."
+                " For example, `vcvarsall.bat -vcvars_ver=14.0 ...`.")
+    endif()
+
+endfunction()
 
 function(get_uname outName outMachine)
     find_program(unameBin uname
@@ -111,6 +128,7 @@ function(get_compiler_arch outCompiler outArch outPlatform  )
     elseif(MINGW)
         set(_tool_tag "MinGW")
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+        silkit_validate_preset_toolset()
         if(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v140")
             set(_tool_tag "VS2015")
         elseif(CMAKE_VS_PLATFORM_TOOLSET MATCHES "v141")

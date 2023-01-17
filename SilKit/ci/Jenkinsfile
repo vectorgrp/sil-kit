@@ -9,7 +9,7 @@ projectName="vib-main"
 artifactName='SilKit'
 keepNumBuilds=10 //number of log files on Jenkins, workspaces are always cleaned
 publishToArtifactory=false
-buildDebugBin=false //debug binaries are only build when doing a release to customers
+globalBuildDebugBin=false //debug binaries are only build when doing a release to customers
 buildWarningsAsErrors=true // compiler warnings are treated as errors
 // artifactory for archiving / packaging
 artifactoryServer = Artifactory.server('IntegrationBusArtifactory')
@@ -26,7 +26,8 @@ def buildConfigs = [
         Arch:"x64",
         MsvcVersion:"14.1",
         PublishArtifacts: true,
-        CmakeArgs: ""
+        CmakePreset: "vs141-x64-release",
+        BuildDocs: true,
     ]
     ,[
         Name:"VS2015-Win64",
@@ -34,7 +35,8 @@ def buildConfigs = [
         Arch:"x64",
         MsvcVersion:"14.0",
         PublishArtifacts: true,
-        CmakeArgs: "",
+        CmakePreset: "vs140-x64-release",
+        BuildDocs: true,
     ]
     ,[
         Name: "VS2017-Win32",
@@ -42,7 +44,8 @@ def buildConfigs = [
         Arch:"x64_x86",
         MsvcVersion:"14.1",
         PublishArtifacts: true,
-        CmakeArgs: "",
+        CmakePreset: "vs141-x86-release",
+        BuildDocs: true,
     ]
     ,[
         Name: "VS2015-Win32",
@@ -50,17 +53,8 @@ def buildConfigs = [
         Arch:"x64_x86",
         MsvcVersion:"14.0",
         PublishArtifacts: true,
-        CmakeArgs: "",
-    ]
-
-    ,[
-        Name: "MinGW", // We cross compile from ubuntu to windows
-        NodeLabel: "docker && windows",
-        DockerImage: "silkit-windows",
-        //DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
-        PublishArtifacts: true,
-        CmakeArgs: " -D CMAKE_C_COMPILER=C:/mingw64/bin/x86_64-w64-mingw32-gcc.exe  -D CMAKE_CXX_COMPILER=C:/mingw64/bin/x86_64-w64-mingw32-g++.exe",
-        WarningsAsErrors: false, // we have some spurious warnings here, will be ignored
+        CmakePreset: "vs140-x86-release",
+        BuildDocs: true,
     ]
 
     // Linux builds:
@@ -70,7 +64,7 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang -D CMAKE_CXX_COMPILER=clang++",
+        CmakePreset: "clang10-release",
     ]
     ,[
         Name: "Ubuntu-18.04-gcc",
@@ -78,8 +72,8 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=18.04",
         PublishArtifacts: true,
-        CmakeArgs: "-D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++",
-        BuildDocsAndSourcePackages: false,
+        BuildDocs: true,
+        CmakePreset: "gcc8-release",
     ]
     ,[
         Name: "Ubuntu-20.04-gcc-10",
@@ -87,15 +81,15 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=gcc-10 -D CMAKE_CXX_COMPILER=g++-10",
+        CmakePreset: "gcc10-release",
     ]
     ,[
         Name: "Ubuntu-20.04-clang-12",
         NodeLabel: "docker && linux",
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=20.04",
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-12 -D CMAKE_CXX_COMPILER=clang++-12",
         PublishArtifacts: false,
+        CmakePreset: "clang12-release",
     ]
     ,[
         Name: "Ubuntu-22.04-gcc-12",
@@ -103,15 +97,15 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=gcc-12 -D CMAKE_CXX_COMPILER=g++-12",
+        CmakePreset: "gcc12-release",
     ]
     ,[
         Name: "Ubuntu-22.04-clang-14",
         NodeLabel: "docker && linux",
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14",
         PublishArtifacts: false,
+        CmakePreset: "clang14-release",
     ]
     // Sanitizer builds:
     ,[
@@ -120,7 +114,9 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14 -D SILKIT_ENABLE_THREADSAN=ON",
+        CmakeArgs: "-D SILKIT_ENABLE_THREADSAN=ON",
+        CmakePreset: "clang14-release",
+        TestDebug: true,
     ]
     ,[
         Name: "Ubuntu-22.04-clang-14-address-sanitizer",
@@ -128,7 +124,9 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14 -D SILKIT_ENABLE_ASAN=ON",
+        CmakeArgs: "-D SILKIT_ENABLE_ASAN=ON",
+        CmakePreset: "clang14-release",
+        TestDebug: true,
     ]
     ,[
         Name: "Ubuntu-22.04-clang-14-undefined-behavior-sanitizer",
@@ -136,7 +134,9 @@ def buildConfigs = [
         DockerImage: "silkit-ubuntu",
         DockerBuildArgs: "--build-arg UBUNTU_VERSION=22.04",
         PublishArtifacts: false,
-        CmakeArgs: "-D CMAKE_C_COMPILER=clang-14 -D CMAKE_CXX_COMPILER=clang++-14 -D SILKIT_ENABLE_UBSAN=ON",
+        CmakeArgs: "-D SILKIT_ENABLE_UBSAN=ON",
+        CmakePreset: "clang14-release",
+        TestDebug: true,
     ]
 ]
 
@@ -199,42 +199,30 @@ def shallowCheckoutGit() {
         ])
 }
 
-def archiveToArtifactory(config, scm, pattern) {
-    //find the file to upload
+def archiveToArtifactory(pattern) {
     if (! publishToArtifactory ) {
-        print("INFO: skipping publishing ${config.Name} to artifactory because of user request")
-        return
-    }
-    if(! config["PublishArtifacts"]) {
-        print("INFO: skipping publishing ${config.Name} to artifactory because of config")
+        print("INFO: skipping publishing to artifactory because of user request")
         return
     }
 
-    def files = findFiles(glob: pattern)
-    if(files.size() != 1) {
-        error("ERROR: single file ${pattern} required: findFiles returned: ${files}")
-    } else {
-
-        print("INFO: found build artifact ${files[0]}")
-        def fileName = files[0].name
-
-        configFileProvider(
-            [configFile(fileId: 'SILKIT_ARTIFACTORY_REPO', variable: 'SILKIT_ARTIFACTORY_REPO')]) {
-            def repo = readFile(file: SILKIT_ARTIFACTORY_REPO).trim()
-            def spec = """{
-                "files": [{
-                    "pattern": "${files[0]}",
-                    "target" : "${repo}/${projectName}/${scm.GIT_BRANCH}/${scm.GIT_COMMIT}/${fileName}",
-                    "props"  : "git_commit=${scm.GIT_COMMIT};git_branch=${scm.GIT_BRANCH};git_url=${scm.GIT_URL}"
-            }]}"""
-            print("artifactory spec=${spec}")
-            def buildInfo = artifactoryServer.upload(
-                spec: spec,
-                failNoOp: true
-            )
-            setBuildRetention(buildInfo)
-            artifactoryBuildInfo.append(buildInfo)
-        }
+    configFileProvider(
+        [configFile(fileId: 'SILKIT_ARTIFACTORY_REPO', variable: 'SILKIT_ARTIFACTORY_REPO')]) {
+        def repo = readFile(file: SILKIT_ARTIFACTORY_REPO).trim()
+        print("Artifactory: archiving with regexp file spec pattern=${pattern}")
+        spec = """{
+            "files": [{
+                "pattern": "${pattern}",
+                "regexp" : "true",
+                "target" : "${repo}/${projectName}/${env.GIT_COMMIT}/",
+                "props"  : "git_commit=${env.GIT_COMMIT};git_branch=${env.GIT_BRANCH};git_url=${env.GIT_URL}"
+        }]}"""
+        print("artifactory spec=${spec}")
+        def buildInfo = artifactoryServer.upload(
+            spec: spec,
+            failNoOp: true
+        )
+        setBuildRetention(buildInfo)
+        artifactoryBuildInfo.append(buildInfo)
     }
 }
 
@@ -321,47 +309,6 @@ def getVsBuildEnv(arch, version){
     return localEnv
 }
 
-//helper to invoke  cmake platform independently with uniform arguments
-def runCmake(config, buildType) {
-    def cmakeArgs = config["CmakeArgs"]
-    cmakeArgs += " -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON "
-
-    print("CMake: enabling Docs and Source packages (${buildType})!")
-    cmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON  -D SILKIT_BUILD_DOCS=ON"
-
-    // Set warnings as errors
-    if (config.containsKey("WarningsAsErrors")) {
-        def isEnabled = config["WarningsAsErrors"].toBoolean()
-        if(isEnabled) {
-            print("Enabling Warnings-as-Errors for the current build config")
-            cmakeArgs +=" -DSILKIT_WARNINGS_AS_ERRORS=ON "
-        } else {
-            print("Disabling Warnings-as-Errors for the current build config")
-        }
-    } else {
-         if (buildWarningsAsErrors ) {
-            print("Setting Build with Warnings as Errors (globally set)")
-            cmakeArgs +=" -DSILKIT_WARNINGS_AS_ERRORS=ON "
-        }
-    }
-
-    // Add CL compiler for VS (MS Visual Studio) builds
-    if(config["Name"] =~ /^VS/) {
-        cmakeArgs += " -D CMAKE_C_COMPILER=cl -D CMAKE_CXX_COMPILER=cl"
-        def msvcVersion = config["MsvcVersion"]
-        cmakeArgs += " -DMSVC_TOOLSET_VERSION=${msvcVersion}" //needed for binary download URL resolution
-    }
-
-    cmakeBuild(
-        installation: 'InSearchPath',
-        buildType: "${buildType}",
-        buildDir: "_build_${buildType}",
-        generator: "Ninja",
-        cmakeArgs: "${cmakeArgs} -DCMAKE_BUILD_TYPE=${buildType} ",
-        steps: [[args: "--target package --config ${buildType}  --parallel", withCmake: true]]
-    )
-}
-
 def run(what) {
     if(isUnix()) {
         sh "${what}"
@@ -398,6 +345,12 @@ def runWithOutput(what) {
 def doBuild(Map config) {
     return runOnNode(config, {
         def buildName = config["Name"]
+        def buildPreset = config["CmakePreset"]
+        def debugPreset = buildPreset.replace("-release", "-debug")
+        def buildCmakeArgs = config.getOrDefault("CmakeArgs", "")
+        def buildDocs = config.getOrDefault("BuildDocs", false)
+        def publishArtifacts = config.getOrDefault("PublishArtifacts", false).toBoolean()
+        def buildTestDebug = config.getOrDefault("TestDebug", false) 
 
         def buildEnv = []
         def scmVars = [:]
@@ -413,99 +366,116 @@ def doBuild(Map config) {
 
             // For reproducible build set SOURCE_DATE_EPOCH to time of last commit
             def commitTime = runWithOutput("git log --max-count=1 --format=%ct -r origin/main")
-            print("DEBUG scmVars=${scmVars}, commitTime=${commitTime}, TZ=${env.TZ}, LC_ALL=${env.LC_ALL}")
             buildEnv.add("SOURCE_DATE_EPOCH=${commitTime}")
             buildEnv.add("TZ=UTC")
             buildEnv.add("LC_ALL=C.UTF-8")
             buildEnv.add("LANG=C.UTF-8")
+
+            print("DEBUG scmVars=${scmVars}, commitTime=${commitTime}, TZ=${env.TZ}, LC_ALL=${env.LC_ALL} buildEnv=${buildEnv}")
+
             // save branch name for publishing stage
             gitBranch = scmVars.GIT_BRANCH
+            buildEnv.add("GIT_BRANCH=${scmVars.GIT_BRANCH}")
+            buildEnv.add("GIT_COMMIT=${scmVars.GIT_COMMIT}")
+            buildEnv.add("GIT_URL=${scmVars.GIT_URL}")
         }
 
-        stage("Cmake Release Build (${buildName})") {
-            print("${buildName} --  running cmake Release")
-            withEnv(buildEnv) {
-                // Install dependencies for documentation
-                configFileProvider([
-                    configFile(fileId: 'PYPI_MIRROR', variable: 'PYPI_MIRROR'),
-                ]) {
-                    def pypiMirror = readFile(file: PYPI_MIRROR).trim()
-                    print("Using pipenv to install docs dependencies")
+        def warningsAsError = config.getOrDefault("WarningAsErrors", false).toBoolean()
+        if(warningsAsError) {
+            print("Enabling Warnings-as-Errors for the current build config")
+            buildCmakeArgs +=" -DSILKIT_WARNINGS_AS_ERRORS=ON "
+        } else {
+            print("Disabling Warnings-as-Errors for the current build config")
+        }
+        if(buildDocs) {
+            buildCmakeArgs +=" -DSILKIT_BUILD_DOCS=ON "
+            buildCmakeArgs +=" -DSILKIT_INSTALL_SOURCE=ON "
+        }
+
+        if(config.containsKey("MsvcVersion")) {
+            def msvcVersion = config["MsvcVersion"]
+            //needed for binary download URL resolution
+            buildCmakeArgs += " -D MSVC_TOOLSET_VERSION=${msvcVersion} "
+        }
+
+        withEnv(buildEnv) {
+            stage("${buildName}: cmake version") {
+                run("cmake --version")
+            }
+            stage("${buildName}: cmake configure for preset ${buildPreset}") {
+                    // Install dependencies for documentation
+                    configFileProvider([
+                        configFile(fileId: 'PYPI_MIRROR', variable: 'PYPI_MIRROR'),
+                    ]) {
+                        def pypiMirror = readFile(file: PYPI_MIRROR).trim()
+                        print("Using pipenv to install docs dependencies")
+                        if(!isUnix()) {
+                            run("python -m pip install pipenv")
+                        }
+                        run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
+                    }
+                    run("cmake --preset ${buildPreset} ${buildCmakeArgs}")
+            }
+
+            stage("${buildName}: cmake build for preset ${buildPreset}") {
+                run("cmake --build --preset ${buildPreset}")
+            }
+
+            stage("${buildName}: ctest for preset ${buildPreset}") {
+                timeout(time: 3, unit: 'MINUTES') {
+                    run("ctest --preset ${buildPreset} -R \"^Test\" --output-on-failure")
+                    junit("_build/${buildPreset}/**/*gtestresults.xml")
+                }
+                timeout(time: 10, unit: 'MINUTES') {
+                    run("ctest --preset ${buildPreset} -R \"^ITest\" --output-on-failure")
+                    junit("_build/${buildPreset}/**/*gtestresults.xml")
+                }
+            }
+
+            if(globalBuildDebugBin || buildTestDebug) {
+                stage("${buildName}: cmake build for preset ${buildPreset} @Debug") {
+                    // in Debug builds we only need the library and symbols
+                    def debugFlags = ""
+                    debugFlags += " -D SILKIT_BUILD_DOCS=OFF "
+                    debugFlags += " -D SILKIT_INSTALL_SOURCE=OFF "
+                    debugFlags += " -D SILKIT_BUILD_UTILITIES=OFF "
+                    debugFlags += " -D SILKIT_BUILD_DEMOS=OFF "
+
+                    run "cmake --preset ${debugPreset} ${debugFlags}"
+                    run "cmake --build --preset ${debugPreset}"
+                    run "cmake --build --preset ${debugPreset} --target package"
+                }
+            }
+            // run tests for sanitizer builds also in debug mode
+            if(buildTestDebug) {
+                stage("${buildName}: ctest for preset ${debugPreset}") {
+                    timeout(time: 3, unit: 'MINUTES') {
+                        run("ctest --preset ${debugPreset} -R \"^Test\" --output-on-failure")
+                        junit("_build/${debugPreset}/**/*gtestresults.xml")
+                    }
+                    timeout(time: 10, unit: 'MINUTES') {
+                        run("ctest --preset ${debugPreset} -R \"^ITest\" --output-on-failure")
+                        junit("_build/${debugPreset}/**/*gtestresults.xml")
+                    }
+                }
+            }
+            stage("${buildName}: packaging artifacts for preset ${buildPreset}") {
+                if(publishArtifacts) {
+                    run "cmake --build --preset ${buildPreset} --target package"
+                    if(globalBuildDebugBin) {
+                        run "python ./SilKit/ci/package.py  \"_build/${buildPreset}/${artifactName}-*-Release.zip\" \"_build/${debugPreset}/${artifactName}-*-Debug.zip\""
+                        archiveToArtifactory("${artifactName}-.*.zip")
+                    } else {
+                        archiveToArtifactory("_build/${buildPreset}/${artifactName}-.*.zip")
+                    }
+
+                    // safe the debug symbols files on windows/Linux
+                    archiveToArtifactory("_build/${debugPreset}/${artifactName}-.*-SYMBOLS.zip")
                     if(!isUnix()) {
-                        run("python -m pip install pipenv")
-                    }
-                    run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
-                }
-                print("Debug: TZ=${env.TZ} LC_ALL=${env.LC_ALL}")
-                runCmake(config, "Release" )
-            }
-        }
-
-        // Skip Tests when cross-building
-        def isCrossBuild  = false
-        if(config.containsKey("IsCrossBuild")) {
-            isCrossBuild = config["IsCrossBuild"]
-        }
-
-        if(isCrossBuild) {
-            print("${buildName} --  skipping tests in crossbuild")
-        } else {
-            stage("Unit Tests Release (${buildName})") {
-                dir("_build_Release") {
-
-                    timeout(time: 10, unit: 'MINUTES') {
-                        ctest(
-                            installation: 'InSearchPath',
-                            arguments: "--output-on-failure --build-config Release -R '^Test.*'"
-                        )
-                    }
-                    junit("**/*gtestresults.xml")
-
-                }
-            }
-
-            stage("Integration Tests Release (${buildName})") {
-                dir("_build_Release") {
-                    timeout(time: 10, unit: 'MINUTES') {
-                        ctest(
-                            installation: 'InSearchPath',
-                            arguments: "--output-on-failure --build-config Release -R '^ITest.*'"
-                        )
-                    }
-                    junit("**/*gtestresults.xml")
-
-                }
-            }
-        }
-
-        if(buildDebugBin) {
-            stage("Cmake Debug Build (${buildName})") {
-                print("${buildName} --  running cmake Debug")
-                withEnv(buildEnv) {
-                    runCmake(config, "Debug")
-                }
-            }
-        } else {
-            print("Skipping Debug Build")
-        }
-
-        if(publishToArtifactory ) {
-            stage(" Bundle and Archive Packages (${buildName})") {
-                run "python ./SilKit/ci/package.py  \"_build_Release/${artifactName}-*-Release.zip\" \"_build_Debug/${artifactName}-*-Debug.zip\""
-                archiveToArtifactory(config, scmVars, "${artifactName}-*.zip")
-
-                // safe the debug symbols files on windows/Linux
-                archiveToArtifactory(config, scmVars, "_build_Debug/${artifactName}-*-SYMBOLS.zip")
-                if(!isUnix()) {
-                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-SYMBOLS.zip")
-                }
-
-                // NB: cpack components are currently disabled, so this is inactive:
-                if (config.containsKey("BuildDocsAndSourcePackages")
-                     && config["BuildDocsAndSourcePackages"].toBoolean())
-                {
-                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-Docs.zip")
-                    archiveToArtifactory(config, scmVars, "_build_Release/${artifactName}-*-Source.zip")
+                         archiveToArtifactory("_build/${buildPreset}/${artifactName}-.*-SYMBOLS.zip")
+                     }
+                } else {
+                    print("Package publishing disabled: config=${config}")
                 }
             }
         }
@@ -561,10 +531,9 @@ node {
                 "Ubuntu-22.04-clang-14-thread-sanitizer", // TSan with most modern compiler, no artifacts
                 "Ubuntu-22.04-clang-14-address-sanitizer", // ASan with most modern compiler, no artifacts
                 "Ubuntu-22.04-clang-14-undefined-behavior-sanitizer", // UBSan with most modern compiler, no artifacts
-                //"MinGW", // XXX disabled until we can improve CI performance
             ]
             publishToArtifactory = true
-            buildDebugBin = true
+            globalBuildDebugBin = true
         } else {
             print("Doing a minimal build without publishing artifacts on branch ${env.BRANCH_NAME}")
             configNames = [
@@ -581,7 +550,7 @@ node {
             if(params.ForceArtifactUpload) {
                 print("ForceArtifactUpload: PublishArtifacts is enabled for ${configName}")
                 buildConfig["PublishArtifacts"] = true
-                buildDebugBin = true
+                globalBuildDebugBin = true
             } else {
                 if(!doFullBuild) {
                     print("PublishArtifacts is disabled for ${configName}")

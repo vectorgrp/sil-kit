@@ -96,7 +96,6 @@ RUN mkdir -p /opt/vector
 ENV PATH="/opt/vector/bin:${PATH}"
 
 ARG ARTIFACTORY
-ENV CMAKE_VERSION="3.15.0"
 ENV BOOST_ROOT=/opt/vector
 
 # install download scripts to bin folder
