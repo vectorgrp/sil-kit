@@ -6,6 +6,22 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.15] - UNRELEASED
+---------------------
+
+Changed
+~~~~~~~
+
+- Registry:
+
+  - Allow running the ``sil-kit-registry`` as a windows service.
+    In this case, the registry grants others the ``PROCESS_QUERY_LIMITED_INFORMATION`` permission.
+
+  - The registry must be run with the ``--windows-service`` command line flag.
+    This argument is _not_ shown in the command line usage information available via ``--help``.
+    This command line flag may be removed in the future.
+
+
 [4.0.14] - 2023-01-10
 ---------------------
 
