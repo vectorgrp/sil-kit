@@ -213,7 +213,7 @@ def archiveToArtifactory(pattern) {
             "files": [{
                 "pattern": "${pattern}",
                 "regexp" : "true",
-                "target" : "${repo}/${projectName}/${env.GIT_COMMIT}/",
+                "target" : "${repo}/${projectName}/${env.GIT_BRANCH}/${env.GIT_COMMIT}/",
                 "props"  : "git_commit=${env.GIT_COMMIT};git_branch=${env.GIT_BRANCH};git_url=${env.GIT_URL}"
         }]}"""
         print("artifactory spec=${spec}")
