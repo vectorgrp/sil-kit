@@ -62,7 +62,7 @@ public:
 
     /*! \brief Output usage info for previously declared parameters to the given stream
      */
-    void PrintUsageInfo(std::ostream& out, std::string executableName)
+    void PrintUsageInfo(std::ostream& out, const std::string& executableName)
     {
         out << "Usage: " << executableName;
         for (auto& argument : _arguments)
@@ -187,7 +187,7 @@ public:
         : public IArgument
     {
         Argument(std::string name, std::string usage, std::string description, bool hidden=false)
-            : _name(name), _usage(usage), _description(description), _hidden{hidden} {}
+            : _name(std::move(name)), _usage(std::move(usage)), _description(std::move(description)), _hidden{hidden} {}
 
         auto Kind() const -> ArgumentKind override { return static_cast<const Derived*>(this)->kind; }
         auto Name() const -> std::string override { return _name; }
@@ -213,7 +213,7 @@ public:
         static constexpr auto kind = ArgumentKind::Positional;
 
         Positional(std::string name, std::string usage, std::string description)
-            : Argument(name, usage, description), _value() {}
+            : Argument(std::move(name), std::move(usage), std::move(description)), _value() {}
 
         auto Value() const -> std::string { return _value; }
         auto HasValue() const -> bool { return !_value.empty(); }
@@ -234,7 +234,7 @@ public:
         static constexpr auto kind = ArgumentKind::PositionalList;
 
         PositionalList(std::string name, std::string usage, std::string description)
-            : Argument(name, usage, description), _values() {}
+            : Argument(std::move(name), std::move(usage), std::move(description)), _values() {}
 
         auto Values() const -> std::vector<std::string> { return _values; }
         auto HasValues() const -> bool { return !_values.empty(); }
@@ -246,7 +246,7 @@ public:
      /*! \brief A named argument with a string value
      * 
      * It supports a long prefix ("--" followed by name), and a short prefix ("-" followed by shortName), if not empty.
-     * The actual value can be postfixed either after a "=" or a " ", i.e. a separate commandline argument.
+     * The actual value can be suffixed either after a "=" or a " ", i.e. a separate commandline argument.
      * Usage ("[--Name <value>]") and description ("-ShortName, --Name <value>: Explanation") are used by PrintVersionInfo.
      */
     struct Option
@@ -256,7 +256,7 @@ public:
         static constexpr auto kind = ArgumentKind::Option;
 
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage, std::string description)
-            : Argument(name, usage, description), _shortName(shortName), _defaultValue(defaultValue), _value() {}
+            : Argument(std::move(name), std::move(usage), std::move(description)), _shortName(std::move(shortName)), _defaultValue(std::move(defaultValue)), _value() {}
 
         auto ShortName() const -> std::string { return _shortName; }
         auto DefaultValue() const -> std::string { return _defaultValue; }
@@ -282,10 +282,10 @@ public:
         static constexpr auto kind = ArgumentKind::Flag;
 
         Flag(std::string name, std::string shortName, std::string usage, std::string description)
-            : Argument(name, usage, description), _shortName(shortName), _value(false) {}
+            : Argument(std::move(name), std::move(usage), std::move(description)), _shortName(std::move(shortName)), _value(false) {}
 
         Flag(std::string name, std::string shortName, std::string usage, std::string description, decltype(Hidden))
-            : Argument(name, usage, description, true), _shortName(shortName), _value(false) {}
+            : Argument(std::move(name), std::move(usage), std::move(description), true), _shortName(std::move(shortName)), _value(false) {}
 
         auto ShortName() const -> std::string { return _shortName; }
         auto DefaultValue() const -> bool { return false; }
