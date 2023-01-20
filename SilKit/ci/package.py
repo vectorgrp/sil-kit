@@ -220,6 +220,10 @@ def unpack(workdir, cpackfiles):
                 else:
                     assert top == el[0] #sanity check
                     fn = "/".join(el[1:])
+
+                if len(el) > 2 and not el[1].startswith("SilKit-"):
+                    fn = "SilKit/" + fn
+
                 out = os.path.join(workdir, os.path.normpath(fn))
                 if is_dir(mem) and not os.path.exists(out):
                     os.makedirs(out)
