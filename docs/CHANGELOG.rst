@@ -6,7 +6,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.15] - UNRELEASED
+[4.0.15] - 2023-01-23
 ---------------------
 
 Changed
@@ -20,6 +20,10 @@ Changed
   - The registry must be run with the ``--windows-service`` command line flag.
     This argument is _not_ shown in the command line usage information available via ``--help``.
     This command line flag may be removed in the future.
+
+- Docs: Add registry requirement to demos documentation.
+
+- CMake: The minimum required CMake version has been bumped to 3.10
 
 
 [4.0.14] - 2023-01-10
