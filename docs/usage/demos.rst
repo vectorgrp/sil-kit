@@ -10,6 +10,7 @@ the Git repository in the folder Demos.
 .. |UtilDir| replace:: build/Release
 .. |DemoDir| replace:: build/Release
 .. |Monitor| replace::  |UtilDir|/sil-kit-monitor
+.. |Registry| replace::  |UtilDir|/sil-kit-registry
 .. |SystemController| replace::  |UtilDir|/sil-kit-system-controller
 
 .. admonition:: Note
@@ -59,7 +60,8 @@ CAN Demo
    *  -  Source location
       -  Demos/Can
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+         * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
@@ -84,6 +86,9 @@ CAN Demo
 
         .. parsed-literal:: 
 
+            # Registry (if not already running):
+            |Registry|
+            
             # System Monitor (optional):
             |Monitor|
 
@@ -99,6 +104,9 @@ CAN Demo
         For unsynchronized execution:
 
         .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
 
             # CAN Reader:
             |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanReader --async
@@ -122,7 +130,8 @@ Ethernet Demo
    *  -  Source location
       -  Demos/Ethernet
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+         * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
@@ -147,6 +156,9 @@ Ethernet Demo
 
         .. parsed-literal:: 
 
+            # Registry (if not already running):
+            |Registry|
+
             # System Monitor (optional):
             |Monitor|
 
@@ -162,6 +174,9 @@ Ethernet Demo
         For unsynchronized execution:
 
         .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
 
             # Ethernet Reader:
             |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader --async
@@ -186,7 +201,8 @@ LIN Demo
    *  -  Source location
       -  Demos/Lin
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+         * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
@@ -207,7 +223,12 @@ LIN Demo
             # Creates a LIN Master Process with the default registry URI:
             |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster
    *  -  System Example
-      -  .. parsed-literal:: 
+      -  For synchronized execution:
+
+         .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
 
             # System Monitor (optional):
             |Monitor|
@@ -220,6 +241,21 @@ LIN Demo
 
             # System Controller:
             |SystemController| LinSlave LinMaster
+
+         For unsynchronized execution:
+
+         .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
+
+            # LIN Master:
+            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster --async
+
+            # LIN Slave:
+            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinSlave --async
+
+            
    *  -  Notes
       -  | \- The LIN demo can only run in a synchronized mode.
          | \- Both Master and Slave sleep for 500 milliseconds per simulation step to slow down execution.
@@ -237,7 +273,8 @@ FlexRay Demo
    *  -  Source location
       -  Demos/FlexRay
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>`
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+         * :ref:`sil-kit-system-controller<sec:util-system-controller>`
          * SIL Kit Network Simulator (mandatory)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
@@ -257,6 +294,9 @@ FlexRay Demo
             |DemoDir|/SilKitDemoFlexray Demos/FlexRayDemoFlexray.silkit.yaml Node0
    *  -  System Example
       -  .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
 
             # Network simulator (assumed to be in PATH, necessary):
             sil-kit-network-simulator Demos/FlexRay/NetworkSimulatorConfig.yaml
@@ -289,7 +329,8 @@ Publish & Subscribe Demo
    *  -  Source location
       -  Demos/PubSub
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+         * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -311,6 +352,9 @@ Publish & Subscribe Demo
             |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher
    *  -  System Example
       -  .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
 
             # System Monitor (optional):
             |Monitor|
@@ -340,7 +384,8 @@ RPC Demo
    *  -  Source location
       -  Demos/Rpc
    *  -  Requirements
-      -  * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+         * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
@@ -362,6 +407,9 @@ RPC Demo
             |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server
    *  -  System Example
       -  .. parsed-literal:: 
+
+            # Registry (if not already running):
+            |Registry|
 
             # System Monitor (optional):
             |Monitor|
