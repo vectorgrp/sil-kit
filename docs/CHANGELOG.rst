@@ -18,7 +18,7 @@ Changed
     In this case, the registry grants others the ``PROCESS_QUERY_LIMITED_INFORMATION`` permission.
 
   - The registry must be run with the ``--windows-service`` command line flag.
-    This argument is _not_ shown in the command line usage information available via ``--help``.
+    This argument is *not* shown in the command line usage information available via ``--help``.
     This command line flag may be removed in the future.
 
 - Docs: Add registry requirement to demos documentation.
