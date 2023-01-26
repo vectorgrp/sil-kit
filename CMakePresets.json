@@ -169,10 +169,11 @@
 
         {
             "name": "mixin-tsan",
-            "description": "Enable Thread sanitizer",
+            "description": "Enable Thread sanitizer, don't split symbols",
             "hidden": true,
             "cacheVariables": {
-                "SILKIT_ENABLE_THREADSAN": "ON"
+                "SILKIT_ENABLE_THREADSAN": "ON",
+                "SILKIT_PACKAGE_SYMBOLS": "OFF"
             }
         },
 
