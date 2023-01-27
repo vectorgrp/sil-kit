@@ -444,12 +444,55 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     auto waitOk = receivedAllReplies.wait_for(5s);
     if(waitOk == std::future_status::timeout)
     {
-        auto message = fmt::format("Timeout during connection handshake with SIL Kit Registry. This might indicate "
-                                   "that a participant with the same name ('{}') has already connected to the registry.",
-                                   _participantName);
-        _logger->Error(message);
-        throw ProtocolError(std::move(message));
+        if (_hasReceivedKnownParticipants)
+        {
+            // known participants was received -> probably connection issues with a participant
+            bool firstPeer = true;
+            std::ostringstream listOfPendingParticipants;
+            listOfPendingParticipants << "Timeout during connection setup. The participant was able to connect to the registry, "
+                                         "but not to all participants. There might be network issues. Check network settings and "
+                                         "firewall configuration. Was not able to connect to the following participant(s): ";
+
+            for (auto& peer : _pendingParticipantReplies)
+            {
+                auto& peerInfo = peer->GetInfo();
+                if (!firstPeer)
+                {
+                    listOfPendingParticipants << ", "; 
+                }
+                listOfPendingParticipants << peerInfo.participantName << "(";
+
+                bool firstUri = true;
+                for (auto& uri : peerInfo.acceptorUris)
+                {
+                    if (!firstUri)
+                    {
+                        listOfPendingParticipants << ", ";
+                    }
+                    listOfPendingParticipants << uri;
+                    firstUri = false;
+                }
+
+                listOfPendingParticipants << ")";
+                firstPeer = false;
+            }
+
+            auto message = listOfPendingParticipants.str();
+            _logger->Error(message);
+            throw ProtocolError(std::move(message));
+        }
+        else
+        {
+            // no known participants were received -> probably connection issue with registry
+            auto message =
+                fmt::format("Timeout during connection handshake with SIL Kit Registry. This might indicate "
+                            "that a participant with the same name ('{}') has already connected to the registry.",
+                            _participantName);
+            _logger->Error(message);
+            throw ProtocolError(std::move(message));
+        }
     }
+
     // check if an exception was set:
     receivedAllReplies.get();
 
@@ -672,6 +715,8 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         peer->SendSilKitMsg(SerializedMessage{peer->GetProtocolVersion(), reply});
         return;
     }
+
+    _hasReceivedKnownParticipants = true;
 
     Services::Logging::Debug(_logger, "Received known participants list from SilKitRegistry protocol {}.{}",
                              participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);

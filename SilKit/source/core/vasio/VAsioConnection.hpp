@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <typeinfo>
 #include <future>
 #include <mutex>
+#include <atomic>
 
 #include "asio.hpp"
 
@@ -494,6 +495,8 @@ private:
     // replies.
     std::vector<IVAsioPeer*> _pendingParticipantReplies;
     std::promise<void> _receivedAllParticipantReplies;
+
+    std::atomic<bool> _hasReceivedKnownParticipants{false};
 
     // Keep track of the sent Subscriptions when Registering an SIL Kit Service
     std::vector<PendingAcksIdentifier> _pendingSubscriptionAcknowledges;
