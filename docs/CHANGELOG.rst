@@ -13,6 +13,8 @@ Changed
 
 - Improved error messages when connections between participants/to the registry have failed.
 
+- CMake: Reduced weak symbols exported in debug builds.
+
 [4.0.15] - 2023-01-23
 ---------------------
 
