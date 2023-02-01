@@ -274,9 +274,11 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
         _socket.connect(ep);
         return true;
     }
-    catch (const std::exception&)
+    catch (const std::exception& err)
     {
         // reset the socket
+        SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer::ConnectLocal: Error while connecting to '{}': {}",
+                                         socketPath, err.what());
         _socket = decltype(_socket){_socket.get_executor()};
         // move on to TCP connections
     }
@@ -340,7 +342,8 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
         catch (asio::system_error& err)
         {
             // reset the socket
-            SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer: connect failed: {}", err.what());
+            SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer::ConnectTcp: Error while connecting to '{}:{}': {}",
+                                             host, port, err.what());
             _socket = decltype(_socket){_socket.get_executor()};
         }
     }
@@ -355,37 +358,25 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     // parse endpoints into Uri objects
     const auto& uriStrings = _info.acceptorUris;
     std::vector<Uri> uris;
-    std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris),
-        [](const auto& uriStr) {
-            return Uri{uriStr};
+    std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris), [](const auto& uriStr) {
+        return Uri::Parse(uriStr);
     });
 
+    // Attempt connecting via local-domain socket first
     if (_connection->Config().middleware.enableDomainSockets)
     {
-        //Attempt local connections first
-        auto localUri = std::find_if(uris.begin(), uris.end(),
-            [](const auto& uri) {
-                return uri.Type() == Uri::UriType::Local;
-        });
-        if (localUri != uris.end())
+        for (const auto& uri : uris)
         {
-            attemptedUris << localUri->EncodedString() << ",";
-            if (ConnectLocal(localUri->Path()))
+            if (uri.Type() != Uri::UriType::Local)
             {
-                return;
+                continue;
             }
-        }
-    }
 
-    //New style tcp:// URIs 
-    for (const auto& uri : uris)
-    {
-        if (uri.Type() == Uri::UriType::Tcp)
-        {
+            attemptedUris << uri.EncodedString() << ",";
+
             try
             {
-                attemptedUris << uri.EncodedString() << ",";
-                if (ConnectTcp(uri.Host(), uri.Port()))
+                if (ConnectLocal(uri.Path()))
                 {
                     return;
                 }
@@ -395,6 +386,29 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
                 // reset the socket
                 _socket = decltype(_socket){_socket.get_executor()};
             }
+        }
+    }
+
+    for (const auto& uri : uris)
+    {
+        if (uri.Type() != Uri::UriType::Tcp)
+        {
+            continue;
+        }
+
+        attemptedUris << uri.EncodedString() << ",";
+
+        try
+        {
+            if (ConnectTcp(uri.Host(), uri.Port()))
+            {
+                return;
+            }
+        }
+        catch (...)
+        {
+            // reset the socket
+            _socket = decltype(_socket){_socket.get_executor()};
         }
     }
 
