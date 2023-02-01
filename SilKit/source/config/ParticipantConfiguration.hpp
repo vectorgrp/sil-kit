@@ -227,6 +227,7 @@ struct Middleware
     bool tcpNoDelay{ false }; //!< Disables Nagle's algorithm.
     bool tcpQuickAck{ false }; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
     bool enableDomainSockets{ true }; //!< By default local domain socket is preferred to TCP/IP sockets.
+    std::vector<std::string> acceptorUris{}; //!< Explicit list of endpoints this participant will accept connections on.
 };
 
 // ================================================================================

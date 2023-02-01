@@ -160,7 +160,8 @@ bool operator==(const Middleware& lhs, const Middleware& rhs)
         && lhs.tcpNoDelay == rhs.tcpNoDelay
         && lhs.tcpQuickAck == rhs.tcpQuickAck
         && lhs.tcpReceiveBufferSize == rhs.tcpReceiveBufferSize
-        && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize;
+        && lhs.tcpSendBufferSize == rhs.tcpSendBufferSize
+        && lhs.acceptorUris == rhs.acceptorUris;
 }
 
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs)

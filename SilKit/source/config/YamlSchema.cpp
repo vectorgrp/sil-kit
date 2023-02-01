@@ -223,7 +223,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 {"TcpQuickAck"},
                 {"TcpReceiveBufferSize"},
                 {"TcpSendBufferSize"},
-                {"EnableDomainSockets"}
+                {"EnableDomainSockets"},
+                {"AcceptorUris"}
             }
         }
     };
