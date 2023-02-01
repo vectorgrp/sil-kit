@@ -173,36 +173,83 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
     // to substitute it here.
 
     const auto fromUri = Uri{from->GetRemoteAddress()};
-    if (fromUri.Type() == Uri::UriType::Tcp)
+
+    std::vector<std::string> acceptorUris;
+    auto addAcceptorUri = [this, &peerInfo, &acceptorUris](const std::string& acceptorUriString) {
+        Services::Logging::Debug(GetLogger(),
+                                 "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Adding Acceptor URI: {}",
+                                 peerInfo.participantName, acceptorUriString);
+
+        acceptorUris.emplace_back(acceptorUriString);
+    };
+
+    for (const auto& acceptorUriString : peerInfo.acceptorUris)
     {
-        for (auto& uri : peerInfo.acceptorUris)
+        const auto originalAcceptorUri = Uri::Parse(acceptorUriString);
+
+        Services::Logging::Debug(GetLogger(),
+                                 "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Deciding on Acceptor URI: {}",
+                                 peerInfo.participantName, originalAcceptorUri.EncodedString());
+
+        if (fromUri.Type() == Uri::UriType::Local)
         {
-            //parse to get listening port of peer
-            const auto origUri = Uri{ uri };
-            if (origUri.Type() == Uri::UriType::Local)
+            if (originalAcceptorUri.Type() == Uri::UriType::Tcp)
             {
-                continue;
+                addAcceptorUri(acceptorUriString);
             }
-
-            // handle tcp://... URIs
-            if (origUri.Type() == Uri::UriType::Tcp)
+            else if (originalAcceptorUri.Type() == Uri::UriType::Local)
             {
-                // Update to socket peer address but keep the original acceptor port.
-                // Legacy clients have a hard-coded '127.0.0.1' address.
-                if (isCatchallAddress(uri) || isLocalhostAddress(uri))
-                {
-                    Services::Logging::Debug(
-                        GetLogger(), "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Updating Acceptor URI: {}",
-                        peerInfo.participantName, uri);
-                    uri = Uri::MakeTcp(fromUri.Host(), origUri.Port()).EncodedString();
-                }
-
+                addAcceptorUri(acceptorUriString);
+            }
+            else
+            {
                 Services::Logging::Debug(GetLogger(),
-                                         "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Acceptor URI: {}",
-                                         peerInfo.participantName, uri);
+                                         "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Dropping Acceptor URI "
+                                         "'{}' with unknown type.",
+                                         peerInfo.participantName, acceptorUriString);
             }
         }
+        else if (fromUri.Type() == Uri::UriType::Tcp)
+        {
+            if (originalAcceptorUri.Type() == Uri::UriType::Tcp)
+            {
+                if (isCatchallAddress(acceptorUriString))
+                {
+                    auto updatedAcceptorUriString =
+                        Uri::MakeTcp(fromUri.Host(), originalAcceptorUri.Port()).EncodedString();
+
+                    Services::Logging::Debug(
+                        GetLogger(),
+                        "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Updating Acceptor URI '{}' to '{}'",
+                        peerInfo.participantName, acceptorUriString, updatedAcceptorUriString);
+
+                    addAcceptorUri(updatedAcceptorUriString);
+                }
+                else
+                {
+                    addAcceptorUri(acceptorUriString);
+                }
+            }
+            else if (originalAcceptorUri.Type() == Uri::UriType::Local)
+            {
+                addAcceptorUri(acceptorUriString);
+            }
+            else
+            {
+                Services::Logging::Debug(GetLogger(),
+                                         "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Dropping Acceptor URI "
+                                         "'{}' with unknown type.",
+                                         peerInfo.participantName, acceptorUriString);
+            }
+        }
+        else
+        {
+            Services::Logging::Warn(
+                GetLogger(), "VAsioRegistry::OnParticipantAnnouncement: Peer '{}': Remote URI '{}' has unknown type.",
+                peerInfo.participantName, acceptorUriString);
+        }
     }
+    peerInfo.acceptorUris = acceptorUris;
 
     if (FindConnectedPeer(peerInfo.participantName) != _connectedParticipants.end())
     {
