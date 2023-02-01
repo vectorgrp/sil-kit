@@ -871,14 +871,14 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
     Services::Logging::Debug(_logger, "Received known participants list from SilKitRegistry protocol {}.{}",
                              participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
 
-    auto connectPeer = [this](const auto peerUri) {
-        Services::Logging::Debug(_logger, "Connecting to {} with Id {} on {}", peerUri.participantName,
-                                 peerUri.participantId, printUris(peerUri));
+    auto connectPeer = [this](const auto peerInfo) {
+        Services::Logging::Debug(_logger, "Connecting to {} with Id {} on {}", peerInfo.participantName,
+                                 peerInfo.participantId, printUris(peerInfo));
 
         auto peer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
         try
         {
-            peer->Connect(std::move(peerUri));
+            peer->Connect(std::move(peerInfo));
         }
         catch (const std::exception&)
         {
@@ -891,11 +891,11 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
 
         // The service ID is incomplete at this stage.
         ServiceDescriptor peerId;
-        peerId.SetParticipantName(peerUri.participantName);
+        peerId.SetParticipantName(peerInfo.participantName);
         peer->SetServiceDescriptor(peerId);
 
         const auto result =
-            _hashToParticipantName.insert({SilKit::Util::Hash::Hash(peerUri.participantName), peerUri.participantName});
+            _hashToParticipantName.insert({SilKit::Util::Hash::Hash(peerInfo.participantName), peerInfo.participantName});
         if (result.second == false)
         {
             SILKIT_ASSERT(false);
@@ -904,9 +904,9 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         AddPeer(std::move(peer));
     };
     // check URI first
-    for (auto&& uri : participantsMsg.peerInfos)
+    for (auto&& peerInfo : participantsMsg.peerInfos)
     {
-        connectPeer(uri);
+        connectPeer(peerInfo);
     }
 
     if (_pendingParticipantReplies.empty())
