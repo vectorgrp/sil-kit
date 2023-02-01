@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <mutex>
 #include <atomic>
+#include <list>
 
 #include "asio.hpp"
 
@@ -164,6 +165,13 @@ public:
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
     void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer);
 
+    // Prepare Acceptor Sockets (Local Domain and TCP)
+    auto PrepareAcceptorEndpointUris(const std::string &connectUri) -> std::vector<std::string>;
+    void OpenTcpAcceptors(const std::vector<std::string> & acceptorEndpointUris);
+    void OpenLocalAcceptors(const std::vector<std::string> & acceptorEndpointUris);
+
+    auto ResolveHostAndPort(const std::string& host, const uint16_t port) -> asio::ip::tcp::resolver::results_type;
+
     // Listening Sockets (acceptors)
     void AcceptLocalConnections(const std::string& uniqueId);
     auto AcceptTcpConnectionsOn(const std::string& hostname, uint16_t port) -> std::pair<std::string, uint16_t>;
@@ -181,7 +189,6 @@ public:
 public: //members
     static constexpr const ParticipantId RegistryParticipantId { 0 };
 private:
-
     template<typename AcceptorT, typename EndpointT>
     auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
 
@@ -485,10 +492,10 @@ private:
     std::shared_ptr<IVAsioPeer> _registry{nullptr};
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
 
-    // We support IPv6, IPv4 and Local Domain sockets for incoming connections:
-    asio::ip::tcp::acceptor _tcp4Acceptor;
-    asio::ip::tcp::acceptor _tcp6Acceptor;
-    asio::local::stream_protocol::acceptor _localAcceptor;
+    // We support IPv6, IPv4 and Local Domain sockets for incoming connections. The address of the acceptor objects
+    // must be stable, so either keep this a std::list, or turn it into a std::vector<std::unique_ptr<...>>.
+    std::list<asio::ip::tcp::acceptor> _tcpAcceptors;
+    std::list<asio::local::stream_protocol::acceptor> _localAcceptors;
 
     // After receiving the list of known participants from the registry, we keep
     // track of the sent ParticipantAnnouncements and wait for the corresponding
