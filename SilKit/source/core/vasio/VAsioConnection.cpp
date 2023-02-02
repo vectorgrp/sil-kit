@@ -1073,6 +1073,7 @@ void VAsioConnection::AddPeer(std::shared_ptr<IVAsioPeer> newPeer)
 {
     newPeer->StartAsyncRead();
 
+    std::unique_lock<std::mutex> lock{_peersLock};
     _peers.emplace_back(std::move(newPeer));
 }
 
