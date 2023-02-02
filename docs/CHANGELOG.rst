@@ -15,6 +15,9 @@ Changed
 
 - CMake: Reduced weak symbols exported in debug builds.
 
+- Allow configuration of acceptor URIs in the participant configuration.
+
+
 [4.0.15] - 2023-01-23
 ---------------------
 
