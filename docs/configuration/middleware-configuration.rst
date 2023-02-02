@@ -64,3 +64,10 @@ running on localhost listening on Port 8500. These values can be changed via the
    * - TcpReceiveBufferSize
      - Sets the TCP receive buffer size. Be careful when changing the OS defaults!
 
+   * - AcceptorUris
+     - Overwrite the default acceptor URIs of the participant. The configuration
+       field exists to support more complicated network setups, where the
+       listening ports of the participant must have a known, fixed port number
+       and address.
+       It is *not* required to set this field under normal circumstances.
+
