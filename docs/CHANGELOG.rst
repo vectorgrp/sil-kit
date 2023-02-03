@@ -5,7 +5,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.16] - UNRELEASED
+[4.0.16] - 2023-02-03
 ---------------------
 
 Changed
@@ -16,6 +16,12 @@ Changed
 - CMake: Reduced weak symbols exported in debug builds.
 
 - Allow configuration of acceptor URIs in the participant configuration.
+
+- The third party dependencies were updated.
+
+  - ``fmt`` to version 9.1.0.
+
+  - ``spdlog`` to version 1.11.0.
 
 
 [4.0.15] - 2023-01-23
