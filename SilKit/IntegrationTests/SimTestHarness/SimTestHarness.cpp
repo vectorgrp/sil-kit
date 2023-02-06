@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
-#include "ConfigurationTestUtils.hpp"
 #include "SimSystemController.hpp"
 
 #ifdef SILKIT_HOURGLASS
@@ -127,7 +126,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
 {
 
     // start registry
-    _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+    _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     _registry->StartListening(_registryUri);
 
     // configure and add participants

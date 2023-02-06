@@ -25,10 +25,7 @@ add_library(S_ITests_STH STATIC
     SimTestHarness.cpp
 )
 target_link_libraries(S_ITests_STH
-    PRIVATE I_SilKit_Core_Internal
-
     PUBLIC SilKit
-    PUBLIC I_SilKit_Config_TestUtils
 )
 target_include_directories(S_ITests_STH
     INTERFACE
@@ -52,8 +49,6 @@ add_library(S_ITests_STH_Hourglass STATIC
 )
 
 target_link_libraries(S_ITests_STH_Hourglass
-    PRIVATE I_SilKit_Config_TestUtils
-
     PUBLIC SilKit
     PUBLIC SilKit_Hourglass
 )

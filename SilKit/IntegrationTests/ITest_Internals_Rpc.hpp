@@ -27,7 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ConfigurationTestUtils.hpp"
 
-#include "functional.hpp"
 #include "GetTestPid.hpp"
 #include "IntegrationTestInfrastructure.hpp"
 #include "IParticipantInternal.hpp"

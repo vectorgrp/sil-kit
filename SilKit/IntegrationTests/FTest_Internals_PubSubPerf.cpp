@@ -22,11 +22,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 
 #include "silkit/services/all.hpp"
-#include "functional.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 
 #include "SimTestHarness.hpp"
+
+#include "BindMethod.hpp"
 #include "GetTestPid.hpp"
 
 #include "gmock/gmock.h"

@@ -21,9 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "silkit/SilKit.hpp"
+#include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
-
-#include "ConfigurationTestUtils.hpp"
 
 namespace SilKit {
 namespace Tests {
@@ -38,8 +37,8 @@ public:
     SimSystemController(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri)
         : _syncParticipantNames{syncParticipantNames}
     {
-        _participant =
-            SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), "SystemController", registryUri);
+        _participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                 "SystemController", registryUri);
 
         _controller = SilKit::Experimental::Participant::CreateSystemController(_participant.get());
 
