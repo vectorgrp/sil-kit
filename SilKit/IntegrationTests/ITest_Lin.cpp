@@ -23,14 +23,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <string>
 #include <chrono>
 
-#include "SimTestHarness.hpp"
-#include "GetTestPid.hpp"
-
 #include "silkit/services/lin/all.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
-#include "functional.hpp"
+
+#include "SimTestHarness.hpp"
+
+#include "GetTestPid.hpp"
 
 #include "gtest/gtest.h"
 
@@ -411,8 +411,14 @@ TEST_F(ITest_Lin, sync_lin_simulation)
 
         auto master = std::make_unique<LinMaster>(participant, linController, lifecycleService);
 
-        linController->AddFrameStatusHandler(Util::bind_method(master.get(), &LinMaster::ReceiveFrameStatus));
-        linController->AddWakeupHandler(Util::bind_method(master.get(), &LinMaster::WakeupHandler));
+        linController->AddFrameStatusHandler(
+            [master = master.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+                master->ReceiveFrameStatus(linController, frameStatusEvent);
+            });
+        linController->AddWakeupHandler(
+            [master = master.get()](ILinController* linController, const LinWakeupEvent& wakeupEvent) {
+                master->WakeupHandler(linController, wakeupEvent);
+            });
 
         timeSyncService->SetSimulationStepHandler(
             [master = master.get(), participantName](auto now, std::chrono::nanoseconds /*duration*/) {
@@ -436,8 +442,15 @@ TEST_F(ITest_Lin, sync_lin_simulation)
           });
 
         auto slave = std::make_unique<LinSlave>(participant, linController, lifecycleService);
-        linController->AddFrameStatusHandler(Util::bind_method(slave.get(), &LinSlave::FrameStatusHandler));
-        linController->AddGoToSleepHandler(Util::bind_method(slave.get(), &LinSlave::GoToSleepHandler));
+
+        linController->AddFrameStatusHandler(
+            [slave = slave.get()](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
+                slave->FrameStatusHandler(linController, frameStatusEvent);
+            });
+        linController->AddGoToSleepHandler(
+            [slave = slave.get()](ILinController* linController, const LinGoToSleepEvent& goToSleepEvent) {
+                slave->GoToSleepHandler(linController, goToSleepEvent);
+            });
 
         timeSyncService->SetSimulationStepHandler(
             [slave = slave.get()](auto now, std::chrono::nanoseconds /*duration*/) {

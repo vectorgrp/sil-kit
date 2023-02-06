@@ -24,22 +24,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <future>
 
-#include "CreateParticipantInternal.hpp"
-#include "VAsioRegistry.hpp"
-
+#include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "functional.hpp"
+#include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "ConfigurationTestUtils.hpp"
 
 namespace {
 
 using namespace std::chrono_literals;
-using namespace SilKit::Core;
+
 using namespace SilKit::Services::Orchestration;
 
 using testing::_;
@@ -103,25 +102,24 @@ TEST_F(ITest_VAsioNetwork, DISABLED_vasio_state_machine)
     auto registryUri = MakeTestRegistryUri();
     std::vector<std::string> syncParticipantNames{"TestUnit"};
 
-    auto registry = std::make_unique<VAsioRegistry>(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     // Setup Participant for TestController
-    auto participant =
-        CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestController", registryUri);
+    auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                 "TestController", registryUri);
 
-    participant->JoinSilKitSimulation();
-    auto systemController = participant->GetSystemController();
+    auto systemController = SilKit::Experimental::Participant::CreateSystemController(participant.get());
     systemController->SetWorkflowConfiguration({syncParticipantNames});
-    auto monitor = participant->GetSystemMonitor();
+
+    auto monitor = participant->CreateSystemMonitor();
     monitor->AddParticipantStatusHandler([this](ParticipantStatus status) {
         this->ParticipantStateHandler(status.state);
     });
 
     // Setup Participant for Test Unit
     auto participantTestUnit =
-        CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestUnit", registryUri);
-    participantTestUnit->JoinSilKitSimulation();
+        SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""), "TestUnit", registryUri);
     auto* lifecycleService =
         participantTestUnit->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();

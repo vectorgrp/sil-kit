@@ -28,18 +28,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "EthDatatypeUtils.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-
+#include "EthernetHelpers.hpp"
 #include "HourglassHelpers.hpp"
 
 namespace {
 
 using namespace std::chrono_literals;
+
+using SilKit::Util::ItemsAreEqual;
+
+using SilKit::IntegrationTests::EthernetMac;
+using SilKit::IntegrationTests::EthernetEtherType;
+using SilKit::IntegrationTests::EthernetVlanTagControlIdentifier;
+using SilKit::IntegrationTests::CreateEthernetFrameWithVlanTagFromString;
 
 constexpr std::size_t MINIMUM_ETHERNET_FRAME_LENGTH = 60;
 
@@ -63,15 +68,20 @@ protected:
             std::string messageString = messageBuilder.str();
             // pad the message such that the actual frame has exactly the minimum frame length
             messageString.resize(std::max<size_t>(messageString.size(), MINIMUM_ETHERNET_FRAME_LENGTH - 18), ' ');
+
             auto& frameEvent = _testFrames[index].expectedFrameEvent;
+            auto& frameData = _testFrames[index].expectedFrameData;
 
-            SilKit::Services::Ethernet::EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
-            SilKit::Services::Ethernet::EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
-            SilKit::Services::Ethernet::EthernetEtherType etherType{ 0x0800 };
-            SilKit::Services::Ethernet::EthernetVlanTagControlIdentifier tci{ 0x0000 };
+            EthernetMac destinationMac{ 0x12, 0x23, 0x45, 0x67, 0x89, 0x9a };
+            EthernetMac sourceMac{ 0x9a, 0x89, 0x67, 0x45, 0x23, 0x12 };
+            EthernetEtherType etherType{ 0x0800 };
+            EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
-            frameEvent.frame = SilKit::Services::Ethernet::CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, messageString, tci);
-            EXPECT_GE(frameEvent.frame.raw.AsSpan().size(), MINIMUM_ETHERNET_FRAME_LENGTH);
+            frameData =
+                CreateEthernetFrameWithVlanTagFromString(destinationMac, sourceMac, etherType, messageString, tci);
+            frameEvent.frame = SilKit::Services::Ethernet::EthernetFrame{frameData};
+
+            EXPECT_GE(frameEvent.frame.raw.size(), MINIMUM_ETHERNET_FRAME_LENGTH);
             frameEvent.userContext = reinterpret_cast<void *>(static_cast<uintptr_t>(index + 1));
 
             auto& ethack = _testFrames[index].expectedAck;
@@ -107,7 +117,7 @@ protected:
         while (numSent < _testFrames.size())
         {
             const auto& frameEvent = _testFrames.at(numSent).expectedFrameEvent;
-            controller->SendFrame(ToEthernetFrame(frameEvent.frame), reinterpret_cast<void*>(frameEvent.userContext));
+            controller->SendFrame(frameEvent.frame, reinterpret_cast<void*>(frameEvent.userContext));
             ++numSent;
         }
         std::cout << "All eth messages sent" << std::endl;
@@ -128,8 +138,15 @@ protected:
 
         controller->AddFrameHandler(
             [this, &ethReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Ethernet::IEthernetController*, const SilKit::Services::Ethernet::EthernetFrameEvent& msg) {
+                unsigned frameIndex = numReceived++;
 
-                _testFrames.at(numReceived++).receivedFrameEvent = MakeWireEthernetFrameEvent(msg);
+                auto& frameData = _testFrames.at(frameIndex).receivedFrameData;
+                auto& frameEvent = _testFrames.at(frameIndex).receivedFrameEvent;
+
+                frameEvent = msg;
+                frameData = ToStdVector(msg.frame.raw);
+                frameEvent.frame = SilKit::Services::Ethernet::EthernetFrame{frameData};
+
                 if (numReceived >= _testFrames.size())
                 {
                     std::cout << "All eth messages received" << std::endl;
@@ -156,15 +173,21 @@ protected:
             // Without sync: Do not test the timestamps
             message.receivedFrameEvent.timestamp = 0ns;
             message.receivedAck.timestamp = 0ns;
-            EXPECT_EQ(ToEthernetFrameEvent(message.expectedFrameEvent), ToEthernetFrameEvent(message.receivedFrameEvent));
-            EXPECT_EQ(message.expectedAck, message.receivedAck);
+
+            EXPECT_TRUE(ItemsAreEqual(message.expectedFrameEvent.frame.raw, message.receivedFrameEvent.frame.raw));
+            EXPECT_EQ(message.expectedFrameEvent.timestamp, message.receivedFrameEvent.timestamp);
+
+            EXPECT_EQ(message.expectedAck.timestamp, message.receivedAck.timestamp);
+            EXPECT_EQ(message.expectedAck.status, message.receivedAck.status);
         }
     }
 
     struct TestFrame
     {
-        SilKit::Services::Ethernet::WireEthernetFrameEvent expectedFrameEvent;
-        SilKit::Services::Ethernet::WireEthernetFrameEvent receivedFrameEvent;
+        std::vector<uint8_t> expectedFrameData;
+        std::vector<uint8_t> receivedFrameData;
+        SilKit::Services::Ethernet::EthernetFrameEvent expectedFrameEvent;
+        SilKit::Services::Ethernet::EthernetFrameEvent receivedFrameEvent;
         SilKit::Services::Ethernet::EthernetFrameTransmitEvent expectedAck;
         SilKit::Services::Ethernet::EthernetFrameTransmitEvent receivedAck;
     };

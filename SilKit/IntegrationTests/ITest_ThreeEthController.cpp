@@ -22,15 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 
 #include "silkit/services/all.hpp"
-#include "functional.hpp"
 
 #include "SimTestHarness.hpp"
+
+#include "EthernetHelpers.hpp"
 #include "GetTestPid.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "EthDatatypeUtils.hpp"
 
 namespace {
 
@@ -46,6 +45,13 @@ using testing::AtLeast;
 using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
+
+using SilKit::IntegrationTests::EthernetFrameHeaderSize;
+using SilKit::IntegrationTests::EthernetFrameVlanTagSize;
+using SilKit::IntegrationTests::EthernetMac;
+using SilKit::IntegrationTests::EthernetEtherType;
+using SilKit::IntegrationTests::EthernetVlanTagControlIdentifier;
+using SilKit::IntegrationTests::CreateEthernetFrameWithVlanTagFromString;
 
 constexpr std::size_t MINIMUM_ETHERNET_FRAME_LENGTH = 60;
 
@@ -115,9 +121,11 @@ protected:
                     EthernetEtherType etherType{ 0x0800 };
                     EthernetVlanTagControlIdentifier tci{ 0x0000 };
 
-                    auto ethernetFrame = CreateEthernetFrameWithVlanTag(destinationMac, sourceMac, etherType, message.expectedData, tci);
-                    EXPECT_GE(ethernetFrame.raw.AsSpan().size(), MINIMUM_ETHERNET_FRAME_LENGTH);
-                    controller->SendFrame(ToEthernetFrame(ethernetFrame), reinterpret_cast<void *>(static_cast<uintptr_t>(numSent + 1)));
+                    auto ethernetFrameData = CreateEthernetFrameWithVlanTagFromString(destinationMac, sourceMac, etherType, message.expectedData, tci);
+                    auto ethernetFrame = SilKit::Services::Ethernet::EthernetFrame{ethernetFrameData};
+
+                    EXPECT_GE(ethernetFrame.raw.size(), MINIMUM_ETHERNET_FRAME_LENGTH);
+                    controller->SendFrame(ethernetFrame, reinterpret_cast<void *>(static_cast<uintptr_t>(numSent + 1)));
                     numSent++;
                 }
         }, 1ms);

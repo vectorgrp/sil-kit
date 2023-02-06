@@ -22,7 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ITest_Rpc.hpp"
+#include "ITest_Internals_Rpc.hpp"
 
 namespace {
 
@@ -31,7 +31,7 @@ namespace {
 //--------------------------------------
 
 // One client participant, one server participant
-TEST_F(ITest_Rpc, test_1client_1server_sync)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -45,7 +45,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync)
 
 
 // Two mixed participants
-TEST_F(ITest_Rpc, test_2_mixed_participants)
+TEST_F(ITest_Internals_Rpc, test_2_mixed_participants)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -63,7 +63,7 @@ TEST_F(ITest_Rpc, test_2_mixed_participants)
 }
 
 // Large messages
-TEST_F(ITest_Rpc, test_1client_1server_sync_largemsg)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_largemsg)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -77,7 +77,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync_largemsg)
 }
 
 // 100 functions and one client/server participant
-TEST_F(ITest_Rpc, test_1client_1server_sync_100functions)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_100functions)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -104,7 +104,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync_100functions)
 }
 
 // Two clients/servers with same functionName on one participant
-TEST_F(ITest_Rpc, test_1client_1server_sync_samefunctionname)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_samefunctionname)
 {
     const uint32_t numCallsToReceive = defaultNumCalls * 2;
     const uint32_t numCallsToReturn = defaultNumCalls * 2;
@@ -138,7 +138,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync_samefunctionname)
 
 
 // One client participant, two server participants
-TEST_F(ITest_Rpc, test_1client_2server_sync)
+TEST_F(ITest_Internals_Rpc, test_1client_2server_sync)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls*2;
@@ -159,7 +159,7 @@ TEST_F(ITest_Rpc, test_1client_2server_sync)
 }
 
 // Two client participants, one server participant
-TEST_F(ITest_Rpc, test_Nclient_1server_sync)
+TEST_F(ITest_Internals_Rpc, test_Nclient_1server_sync)
 {
     const uint32_t numClients = 2;
     const uint32_t numCallsToReceive = defaultNumCalls * numClients;
@@ -192,7 +192,7 @@ TEST_F(ITest_Rpc, test_Nclient_1server_sync)
 }
 
 // Wrong functionName on server2
-TEST_F(ITest_Rpc, test_1client_2server_sync_wrongFunctionName)
+TEST_F(ITest_Internals_Rpc, test_1client_2server_sync_wrongFunctionName)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -209,7 +209,7 @@ TEST_F(ITest_Rpc, test_1client_2server_sync_wrongFunctionName)
 }
 
 // Wrong mediaType on server2
-TEST_F(ITest_Rpc, test_1client_1server_sync_wrongDataMediaType)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_wrongDataMediaType)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls; 
@@ -226,7 +226,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync_wrongDataMediaType)
 }
 
 // Matching mandatory and optional labels on both sides 
-TEST_F(ITest_Rpc, test_1client_1server_sync_labels)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_labels)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -260,7 +260,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync_labels)
 }
 
 // No communication with server2 (missing mandatory label on client)
-TEST_F(ITest_Rpc, test_1client_2server_sync_wrong_mandatory_label)
+TEST_F(ITest_Internals_Rpc, test_1client_2server_sync_wrong_mandatory_label)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -301,7 +301,7 @@ TEST_F(ITest_Rpc, test_1client_2server_sync_wrong_mandatory_label)
 }
 
 // No communication with server1 (wrong optional label value)
-TEST_F(ITest_Rpc, test_1client_2server_sync_wrong_optional_label_value)
+TEST_F(ITest_Internals_Rpc, test_1client_2server_sync_wrong_optional_label_value)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -342,7 +342,7 @@ TEST_F(ITest_Rpc, test_1client_2server_sync_wrong_optional_label_value)
 }
 
 // Wildcard mediaType on server
-TEST_F(ITest_Rpc, test_1client_1server_sync_wildcardDxf)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_wildcardDxf)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -359,7 +359,7 @@ TEST_F(ITest_Rpc, test_1client_1server_sync_wildcardDxf)
 //--------------------
 
 // 1 server, 1 client on a single participant
-TEST_F(ITest_Rpc, test_1_participant_selfdelivery)
+TEST_F(ITest_Internals_Rpc, test_1_participant_selfdelivery)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -373,7 +373,7 @@ TEST_F(ITest_Rpc, test_1_participant_selfdelivery)
 }
 
 // 2 servers, 2 clients on a single participant with same functionName
-TEST_F(ITest_Rpc, test_1_participant_selfdelivery_same_functionname)
+TEST_F(ITest_Internals_Rpc, test_1_participant_selfdelivery_same_functionname)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;
@@ -406,7 +406,7 @@ TEST_F(ITest_Rpc, test_1_participant_selfdelivery_same_functionname)
 //-----------------------------------------------------
 
 // Async: Start servers first, call with delay to ensure reception
-TEST_F(ITest_Rpc, test_1client_1server_async_vasio)
+TEST_F(ITest_Internals_Rpc, test_1client_1server_async_vasio)
 {
     const uint32_t numCallsToReceive = defaultNumCalls;
     const uint32_t numCallsToReturn = defaultNumCalls;

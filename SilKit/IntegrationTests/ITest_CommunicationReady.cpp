@@ -35,10 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/ILifecycleService.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "ITestThreadSafeLogger.hpp"
-
-#include "IParticipantInternal.hpp"
 
 #include "HourglassHelpers.hpp"
 
@@ -323,8 +322,8 @@ protected:
         lc.operationMode = OperationMode::Coordinated;
         systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(lc);
 
-        auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(systemMaster.participant.get());
-        systemMaster.systemController = participantInternal->GetSystemController();
+        systemMaster.systemController =
+            SilKit::Experimental::Participant::CreateSystemController(systemMaster.participant.get());
 
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
 

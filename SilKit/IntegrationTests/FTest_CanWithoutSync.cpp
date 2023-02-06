@@ -28,14 +28,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "CanDatatypesUtils.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "ConfigurationTestUtils.hpp"
-
 #include "HourglassHelpers.hpp"
 
 namespace {
@@ -43,7 +39,7 @@ namespace {
 using namespace std::chrono_literals;
 
 // basically the same as the normal == operator, but it doesn't compare timestamps
-bool Matches(const SilKit::Services::Can::WireCanFrameEvent& lhs, const SilKit::Services::Can::WireCanFrameEvent& rhs)
+bool Matches(const SilKit::Services::Can::CanFrameEvent& lhs, const SilKit::Services::Can::CanFrameEvent& rhs)
 {
     return lhs.frame.canId == rhs.frame.canId
         && lhs.frame.flags == rhs.frame.flags
@@ -69,21 +65,23 @@ protected:
         _testMessages.resize(10);
         for (auto index = 0u; index < _testMessages.size(); index++)
         {
+            auto& canmsgData = _testMessages[index].expectedMsgData;
+
             std::stringstream messageBuilder;
             messageBuilder << "Test Message " << index;
             std::string messageString = messageBuilder.str();
 
-            std::vector<uint8_t> messageBytes;
-            messageBytes.resize(messageString.size());
-            std::copy(messageString.begin(), messageString.end(), messageBytes.begin());
+            canmsgData.resize(messageString.size());
+            std::copy(messageString.begin(), messageString.end(), canmsgData.begin());
 
             using SilKit::Services::Can::CanFrameFlag;
             using SilKit::Services::Can::CanFrameFlagMask;
 
             auto& canmsg = _testMessages[index].expectedMsg;
+
             canmsg.frame.canId = index;
-            canmsg.frame.dataField = messageBytes;
-            canmsg.frame.dlc = static_cast<uint16_t>(canmsg.frame.dataField.AsSpan().size());
+            canmsg.frame.dataField = canmsgData;
+            canmsg.frame.dlc = static_cast<uint16_t>(canmsg.frame.dataField.size());
             canmsg.frame.flags |=
                 static_cast<CanFrameFlagMask>(CanFrameFlag::Ide) | static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
                 | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec);
@@ -125,7 +123,7 @@ protected:
 
         while (numSent < _testMessages.size())
         {
-            controller->SendFrame(ToCanFrame(_testMessages.at(numSent).expectedMsg.frame), (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
+            controller->SendFrame(_testMessages.at(numSent).expectedMsg.frame, (void*)((size_t)numSent+1)); // Don't move the msg to test the altered transmitID
             numSent++;
         }
         std::cout << "All can messages sent" << std::endl;
@@ -145,8 +143,16 @@ protected:
 
         controller->AddFrameHandler(
             [this, &canReaderAllReceivedPromiseLocal, &numReceived](SilKit::Services::Can::ICanController*, const SilKit::Services::Can::CanFrameEvent& msg) {
+                unsigned msgIndex = numReceived++;
 
-                _testMessages.at(numReceived++).receivedMsg = MakeWireCanFrameEvent(msg);
+                auto& msgData = _testMessages.at(msgIndex).receivedMsgData;
+                auto& msgEvent = _testMessages.at(msgIndex).receivedMsg;
+
+                msgEvent = msg;
+
+                msgData = ToStdVector(msg.frame.dataField);
+                msgEvent.frame.dataField = msgData;
+
                 if (numReceived >= _testMessages.size())
                 {
                     std::cout << "All can messages received" << std::endl;
@@ -173,14 +179,18 @@ protected:
         for (auto&& message : _testMessages)
         {
             EXPECT_TRUE(Matches(message.expectedMsg, message.receivedMsg));
-            EXPECT_EQ(message.expectedAck, message.receivedAck);
+
+            EXPECT_EQ(message.expectedAck.status, message.receivedAck.status);
+            EXPECT_EQ(message.expectedAck.userContext, message.receivedAck.userContext);
         }
     }
 
     struct Testmessage
     {
-        SilKit::Services::Can::WireCanFrameEvent expectedMsg;
-        SilKit::Services::Can::WireCanFrameEvent receivedMsg;
+        std::vector<uint8_t> expectedMsgData;
+        std::vector<uint8_t> receivedMsgData;
+        SilKit::Services::Can::CanFrameEvent expectedMsg;
+        SilKit::Services::Can::CanFrameEvent receivedMsg;
         SilKit::Services::Can::CanFrameTransmitEvent expectedAck;
         SilKit::Services::Can::CanFrameTransmitEvent receivedAck;
     };
@@ -194,7 +204,7 @@ protected:
 
 TEST_F(FTest_CanWithoutSync, can_communication_no_simulation_flow_vasio)
 {
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(_registryUri);
     ExecuteTest();
 }

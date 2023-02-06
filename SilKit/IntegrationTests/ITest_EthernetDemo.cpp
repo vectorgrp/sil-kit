@@ -33,27 +33,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ITestFixture.hpp"
 #include "ITestThreadSafeLogger.hpp"
-#include "EthDatatypeUtils.hpp"
+#include "EthernetHelpers.hpp"
 
 namespace {
+
 using namespace SilKit::Tests;
 using namespace SilKit::Config;
 using namespace SilKit::Services;
 
+using SilKit::IntegrationTests::EthernetMac;
+using SilKit::IntegrationTests::EthernetEtherType;
+using SilKit::IntegrationTests::CreateEthernetFrameFromString;
 
 TEST_F(ITest_SimTestHarness, ethernet_demo)
 {
     //Create a simulation setup with 2 participants 
     SetupFromParticipantList({"EthernetReader", "EthernetWriter"});
 
-    const SilKit::Services::Ethernet::EthernetMac writerMac{00, 22, 33, 44, 55, 66};
-    const SilKit::Services::Ethernet::EthernetMac readerMac{00, 88, 99, 00, 11, 22};
-    const SilKit::Services::Ethernet::EthernetEtherType etherType{ 0x0800 };
+    const EthernetMac writerMac{00, 22, 33, 44, 55, 66};
+    const EthernetMac readerMac{00, 88, 99, 00, 11, 22};
+    const EthernetEtherType etherType{ 0x0800 };
 
     //Test Data
-    auto wireFrame = SilKit::Services::Ethernet::CreateEthernetFrame(readerMac, writerMac, etherType,
+    auto frameData = CreateEthernetFrameFromString(readerMac, writerMac, etherType,
       "Hello World! We need a minimum size of 64 bytes for the frame so here is some useless data");
-    auto frame = ToEthernetFrame(wireFrame);
+    auto frame = SilKit::Services::Ethernet::EthernetFrame{frameData};
 
     //Test Results
     auto receivedLinkDown = false;
@@ -162,7 +166,7 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
               return;
             }
 
-            ASSERT_EQ(frame, netsimMessage.frame);
+            ASSERT_TRUE(SilKit::Util::ItemsAreEqual(frame.raw, netsimMessage.frame.raw));
             if (receiveCount++ == 10)
             {
                 receivedMessage = true;

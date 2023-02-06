@@ -26,23 +26,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 #include <numeric>
 
-#include "CreateParticipantInternal.hpp"
-#include "VAsioRegistry.hpp"
-
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
+#include "silkit/config/IParticipantConfiguration.hpp"
+#include "silkit/SilKit.hpp"
+#include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "ConfigurationTestUtils.hpp"
 
 namespace {
 
 using namespace std::chrono;
 using namespace SilKit::Config;
-using namespace SilKit::Core;
 using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Services::PubSub;
 
@@ -71,10 +70,8 @@ public:
         : _testSize{testSize}
     {
         _participantName = "Publisher" + std::to_string(publisherIndex);
-        _participant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                                               _participantName, registryUri);
-
-        _participant->JoinSilKitSimulation();
+        _participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                 _participantName, registryUri);
 
         const auto topicName = "Topic" + std::to_string(publisherIndex);
         _lifecycleService =
@@ -121,7 +118,7 @@ private:
     }
 
 private:
-    std::unique_ptr<IParticipantInternal> _participant{nullptr};
+    std::unique_ptr<SilKit::IParticipant> _participant{nullptr};
     SilKit::Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
 
     uint32_t _messageIndex{0u};
@@ -139,17 +136,16 @@ public:
         , _testSize{testSize}
         , _participantName{participantName}
     {
-        _participant = SilKit::Core::CreateParticipantInternal(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                                               participantName, registryUri);
-        _participant->JoinSilKitSimulation();
+        _participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                 participantName, registryUri);
 
-        _systemController = _participant->GetSystemController();
+        _systemController = SilKit::Experimental::Participant::CreateSystemController(_participant.get());
         _systemController->SetWorkflowConfiguration({syncParticipantNames});
 
         _lifecycleService =
             _participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
 
-        _monitor = _participant->GetSystemMonitor();
+        _monitor = _participant->CreateSystemMonitor();
 
         auto* timeSyncService = _lifecycleService->CreateTimeSyncService();
 
@@ -229,7 +225,7 @@ private:
     }
 
 private:
-    std::unique_ptr<IParticipantInternal> _participant{nullptr};
+    std::unique_ptr<SilKit::IParticipant> _participant{nullptr};
     SilKit::Experimental::Services::Orchestration::ISystemController* _systemController{nullptr};
     ILifecycleService* _lifecycleService{nullptr};
     ISystemMonitor* _monitor{nullptr};
@@ -266,8 +262,8 @@ TEST_F(ITest_DeterministicSimVAsio, deterministic_simulation_vasio)
         syncParticipantNames.push_back("Publisher" + std::to_string(i));
     }
 
-    VAsioRegistry registry{ SilKit::Config::MakeEmptyParticipantConfiguration() };
-    registry.StartListening(registryUri);
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
+    registry->StartListening(registryUri);
 
     // The subscriber assumes the role of the system controller and initiates simulation state changes
     Subscriber subscriber(subscriberName, registryUri, publisherCount, testSize);

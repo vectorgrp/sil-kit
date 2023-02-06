@@ -27,7 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SimTestHarness.hpp"
 
-#include "BindMethod.hpp"
 #include "GetTestPid.hpp"
 
 #include "gmock/gmock.h"

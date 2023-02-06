@@ -28,13 +28,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/participant/exception.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 
-#include "functional.hpp"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "ConfigurationTestUtils.hpp"
 
 #include "HourglassHelpers.hpp"
 
@@ -73,7 +70,7 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
 {
     auto registryUri = MakeTestRegistryUri();
 
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeEmptyParticipantConfiguration());
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
     auto pubParticipant = SilKit::IntegrationTests::CreateParticipant(

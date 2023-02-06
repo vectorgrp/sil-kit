@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"

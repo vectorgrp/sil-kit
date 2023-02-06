@@ -39,7 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/flexray/string_utils.hpp"
 #include "silkit/services/lin/string_utils.hpp"
 
-#include "functional.hpp"
 #include "silkit/util/PrintableHexString.hpp"
 #include "silkit/util/Span.hpp"
 #include "silkit/SilKitVersion.hpp"

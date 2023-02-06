@@ -42,10 +42,10 @@ using namespace SilKit::Services::PubSub;
 const size_t defaultMsgSize = 3;
 const uint32_t defaultNumMsgToPublish = 3;
 
-class ITest_DataPubSub : public testing::Test
+class ITest_Internals_DataPubSub : public testing::Test
 {
 protected:
-    ITest_DataPubSub() {}
+    ITest_Internals_DataPubSub() {}
 
     struct DataPublisherInfo
     {
