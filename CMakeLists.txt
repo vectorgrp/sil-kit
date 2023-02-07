@@ -229,12 +229,6 @@ if(SILKIT_INSTALL_SOURCE)
         COMPONENT source
         DESTINATION .
         )
-    install(FILES
-        LICENSE
-        COMPONENT bin
-        DESTINATION ${INSTALL_TOP_DIR}usr/share/doc/sil-kit/
-        RENAME copyright
-        )
 endif(SILKIT_INSTALL_SOURCE)
 
 
