@@ -74,6 +74,7 @@ def buildConfigs = [
         PublishArtifacts: true,
         BuildDocs: true,
         CmakePreset: "gcc8-release",
+        TriggerAbiCheck: true,
     ]
     ,[
         Name: "Ubuntu-20.04-gcc-10",
@@ -351,6 +352,7 @@ def doBuild(Map config) {
         def buildDocs = config.getOrDefault("BuildDocs", false)
         def publishArtifacts = config.getOrDefault("PublishArtifacts", false).toBoolean()
         def buildTestDebug = config.getOrDefault("TestDebug", false) 
+        def triggerAbiCheck = config.getOrDefault("TriggerAbiCheck", false)
 
         def buildEnv = []
         def scmVars = [:]
@@ -476,6 +478,49 @@ def doBuild(Map config) {
                      }
                 } else {
                     print("Package publishing disabled: config=${config}")
+                }
+            }
+            if (publishArtifacts && triggerAbiCheck) {
+                stage("${buildName}: Triggering ABI Check") {
+                    def versionList = []
+
+                    // look for the archive file created in the previous step
+                    for (zipFile in findFiles(glob: "**.zip"))
+                    {
+                        def m = zipFile =~ /^.*SilKit-([0-9]+[.][0-9]+[.][0-9]+)-[^\/]*.zip$/
+                        if (!m)
+                        {
+                            continue
+                        }
+
+                        versionList += m[0][1]
+                    }
+
+                    def versions = versionList.toSet()
+
+                    if (versions.size() == 0)
+                    {
+                        echo "No version found for which the ABI check could be triggered!"
+                        return
+                    }
+
+                    if (versions.size() > 1)
+                    {
+                        error "Multiple versions found for which the ABI check would be triggered!"
+                    }
+
+                    // take the first artifact we found and extract the version from it
+                    def silKitVersion = versions.first()
+                    echo "Triggering ABI-Check for SIL Kit version ${silKitVersion} (${env.GIT_BRANCH}, ${env.GIT_COMMIT})"
+
+                    build(
+                        job: '/SilKit/sil-kit-dev-abi-check/main',
+                        parameters: [
+                            string(name: 'TEST_BRANCH', value: env.GIT_BRANCH),
+                            string(name: 'TEST_COMMIT', value: env.GIT_COMMIT),
+                            string(name: 'TEST_VERSION', value: silKitVersion)
+                        ]
+                    )
                 }
             }
         }
