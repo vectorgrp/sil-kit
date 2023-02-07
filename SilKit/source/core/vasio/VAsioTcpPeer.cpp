@@ -109,17 +109,6 @@ static void EnableQuickAck(SilKit::Services::Logging::ILogger* ,
 
 #endif // __unix__
 
-static auto strip(std::string value, const std::string& chars) -> std::string
-{
-    size_t it;
-    while((it = value.find_first_of(chars)) != value.npos)
-    {
-        value.erase(it, 1);
-    }
-
-    return value;
-}
-
 namespace SilKit {
 namespace Core {
 
@@ -287,16 +276,10 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 
 bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
 {
-    tcp::resolver resolver(_socket.get_executor());
-    tcp::resolver::results_type resolverResults;
-    auto strippedHost = strip(host, "[]"); //no ipv6 brackets
-    try
+    auto resolverResults = ResolveHostAndPort(_socket.get_executor(),_logger, host, port);
+    if (resolverResults.empty())
     {
-        resolverResults = resolver.resolve(strippedHost, std::to_string(static_cast<int>(port)));
-    }
-    catch (asio::system_error& err)
-    {
-        SilKit::Services::Logging::Warn(_logger, "Unable to resolve hostname \"{}:{}\": {}", strippedHost, port, err.what());
+        SilKit::Services::Logging::Warn(_logger, "Unable to resolve hostname \"{}:{}\"", host, port);
         return false;
     }
     auto config = _connection->Config();

@@ -352,25 +352,6 @@ void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
     _logger = logger;
 }
 
-auto VAsioConnection::ResolveHostAndPort(const std::string& host, const uint16_t port)
-    -> asio::ip::tcp::resolver::results_type
-{
-    tcp::resolver resolver(_ioContext);
-    tcp::resolver::results_type results;
-
-    try
-    {
-        results = resolver.resolve(host, std::to_string(port));
-    }
-    catch (const asio::system_error& err)
-    {
-        Services::Logging::Warn(_logger, "VAsioConnection::PrepareAcceptors: Unable to resolve host \"{}:{}\": {}",
-                                host, port, err.what());
-    }
-
-    return results;
-}
-
 auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string & connectUri) -> std::vector<std::string>
 {
     auto acceptorEndpointUris = _config.middleware.acceptorUris;
@@ -401,7 +382,7 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string> & acceptor
             SilKit::Services::Logging::Debug(_logger, "Found TCP acceptor endpoint URI {} with host {} and port {}",
                                              uriString, uri.Host(), uri.Port());
 
-            for (const auto& result : ResolveHostAndPort(uri.Host(), uri.Port()))
+            for (const auto& result : ResolveHostAndPort(_ioContext.get_executor(), _logger, uri.Host(), uri.Port()))
             {
                 const auto endpoint = result.endpoint();
                 const auto address = endpoint.address();
@@ -980,16 +961,12 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
 
     if (! hostName.empty())
     {
-        tcp::resolver resolver(_ioContext);
         tcp::resolver::results_type resolverResults;
-        try
+        resolverResults = ResolveHostAndPort(_ioContext.get_executor(), _logger, hostName, port);
+        if (resolverResults.empty())
         {
-            resolverResults = resolver.resolve(hostName,std::to_string(static_cast<int>(port)));
-        }
-        catch (const asio::system_error& err)
-        {
-            Services::Logging::Error(_logger, "VAsioConnection::AcceptTcpConnectionsOn: Unable to resolve hostname \"{}:{}\": {}", hostName,
-                           port, err.what());
+            Services::Logging::Error(_logger, "VAsioConnection::AcceptTcpConnectionsOn: Unable to resolve hostname"
+                "\"{}:{}\"", hostName, port);
             throw SilKit::StateError{"Unable to resolve hostname and service."};
         }
 

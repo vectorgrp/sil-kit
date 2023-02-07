@@ -170,8 +170,6 @@ public:
     void OpenTcpAcceptors(const std::vector<std::string> & acceptorEndpointUris);
     void OpenLocalAcceptors(const std::vector<std::string> & acceptorEndpointUris);
 
-    auto ResolveHostAndPort(const std::string& host, const uint16_t port) -> asio::ip::tcp::resolver::results_type;
-
     // Listening Sockets (acceptors)
     void AcceptLocalConnections(const std::string& uniqueId);
     auto AcceptTcpConnectionsOn(const std::string& hostname, uint16_t port) -> std::pair<std::string, uint16_t>;
@@ -530,6 +528,35 @@ private:
     ProtocolVersion _version;
     friend class VAsioConnectionTest;
 };
+
+inline auto ResolveHostAndPort(const asio::any_io_executor& executor, Services::Logging::ILogger* logger, const std::string& host, const uint16_t port)
+    -> asio::ip::tcp::resolver::results_type
+{
+    auto strippedHost = [host]() {
+        std::string value{host};
+        size_t it;
+        while((it = value.find_first_of("[]")) != value.npos)
+        {
+            value.erase(it, 1);
+        }
+
+        return value;
+    }();
+    asio::ip::tcp::resolver resolver(executor);
+    asio::ip::tcp::resolver::results_type results;
+
+    try
+    {
+        results = resolver.resolve(strippedHost, std::to_string(port));
+    }
+    catch (const asio::system_error& err)
+    {
+        Services::Logging::Warn(logger, "VAsioConnection::ResolveHostAndPort: Unable to resolve host \"{}:{}\": {}",
+                                strippedHost, port, err.what());
+    }
+
+    return results;
+}
 
 } // namespace Core
 } // namespace SilKit
