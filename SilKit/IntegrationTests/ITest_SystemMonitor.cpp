@@ -102,6 +102,13 @@ TEST_F(ITest_SystemMonitor, discover_services)
 
     testing::Sequence sequence, secondSequence;
 
+    std::promise<void> thirdParticipantDisconnectedPromiseA, thirdParticipantDisconnectedPromiseB;
+    auto thirdParticipantDisconnectedFutureA = thirdParticipantDisconnectedPromiseA.get_future();
+    auto thirdParticipantDisconnectedFutureB = thirdParticipantDisconnectedPromiseB.get_future();
+
+    std::promise<void> secondParticipantDisconnectedPromise;
+    auto secondParticipantDisconnectedFuture = secondParticipantDisconnectedPromise.get_future();
+
     EXPECT_CALL(callbacks, ParticipantConnectedHandler(secondParticipantConnection))
         .Times(1);
 
@@ -121,6 +128,7 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .InSequence(sequence)
             .WillOnce([&] {
                 ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+              thirdParticipantDisconnectedPromiseA.set_value();
             });
 
         EXPECT_CALL(secondCallbacks, ParticipantDisconnectedHandler(thirdParticipantConnection))
@@ -130,6 +138,7 @@ TEST_F(ITest_SystemMonitor, discover_services)
                 ASSERT_NE(secondSystemMonitor, nullptr);
                 ASSERT_FALSE(
                     secondSystemMonitor->IsParticipantConnected(thirdParticipantConnection.participantName));
+                thirdParticipantDisconnectedPromiseB.set_value();
             });
     }
     EXPECT_CALL(sequencePoints, C_AfterThirdParticipantDestroyed()).Times(1).InSequence(sequence, secondSequence);
@@ -139,6 +148,7 @@ TEST_F(ITest_SystemMonitor, discover_services)
             .InSequence(sequence)
             .WillOnce([&] {
                 ASSERT_FALSE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
+                secondParticipantDisconnectedPromise.set_value();
             });
     }
 
@@ -178,18 +188,17 @@ TEST_F(ITest_SystemMonitor, discover_services)
         // Destroy the third participant
         thirdParticipant.reset();
 
-        sequencePoints.C_AfterThirdParticipantDestroyed();
+        ASSERT_EQ(thirdParticipantDisconnectedFutureA.wait_for(std::chrono::seconds{10}), std::future_status::ready);
+        ASSERT_EQ(thirdParticipantDisconnectedFutureB.wait_for(std::chrono::seconds{10}), std::future_status::ready);
 
-        // wait for a little while to give the callbacks time to be triggered
-        std::this_thread::sleep_for(std::chrono::milliseconds{10});
+        sequencePoints.C_AfterThirdParticipantDestroyed();
 
         // Destroy the second participant
         ASSERT_TRUE(firstSystemMonitor->IsParticipantConnected(secondParticipantConnection.participantName));
         secondParticipant.reset();
-    }
 
-    // wait for a little while to give the callbacks time to be triggered
-    std::this_thread::sleep_for(std::chrono::milliseconds{10});
+        ASSERT_EQ(secondParticipantDisconnectedFuture.wait_for(std::chrono::seconds{10}), std::future_status::ready);
+    }
 }
 
 } // anonymous namespace
