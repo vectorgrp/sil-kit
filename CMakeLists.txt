@@ -205,7 +205,7 @@ if(SILKIT_INSTALL_SOURCE)
     install(
         FILES
             CMakeLists.txt
-            CMakeSettings.json
+            CMakePresets.json
         DESTINATION ${INSTALL_SOURCE_DIR}
         COMPONENT source
     )
