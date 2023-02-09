@@ -5,6 +5,24 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.17] - 2023-02-09
+---------------------
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+- Fix DNS resolver issues on Ubuntu 18.04 and systemd-resolved. We now properly
+  strip square brackets from IPv6 addresses in URIs.
+- Fixed a race-condition in the ITest_SystemMonitor. This caused sporadic failures on CI builds.
+
+Removed
+~~~~~~~
+- Removed the deprecated CMakeSettings.json file from the source tree.
+  If you are a developer, use the CMakePreset.json instead which is more portable and flexible.
+- Removed `usr/share/doc` from the delivery packages. This should only be part of Debian packages.
+
+
+
 [4.0.16] - 2023-02-03
 ---------------------
 
