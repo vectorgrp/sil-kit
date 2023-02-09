@@ -1,0 +1,16 @@
+name: 'Linux + address sanitizer'
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  clang-asan-debug:
+    name: Address Sanitizer Tests
+    environment: public-github-runners
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: clang-asan-debug

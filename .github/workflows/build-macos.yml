@@ -1,0 +1,20 @@
+name: macOS build
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-macos:
+    if: ${{ false }} #disabled for now
+    runs-on: macos-latest
+    environment: public-github-runners
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: clang-release
+

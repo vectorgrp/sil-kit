@@ -1,0 +1,18 @@
+name: 'Linux + thread sanitizer'
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  clang-tsan-debug:
+    name: Thread Sanitizer Tests
+    environment: public-github-runners
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - uses: ./.github/actions/build-cmake-preset
+      with:
+        preset-name: clang-tsan-debug
+
+

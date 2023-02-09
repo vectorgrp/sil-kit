@@ -1,0 +1,67 @@
+name: build CMake preset
+description: Build the given SIL Kit CMake preset
+
+inputs:
+  preset-name:
+    description: "The preset name from CMakePresets.json."
+    required: true
+  upload-testlog:
+    description: "Upload gtest log with same name as preset-name"
+    required: false
+    default: true
+    type: boolean
+  cmake-args:
+    description: "Additional CMake arguments"
+    required: false
+
+runs:
+  using: composite
+  steps:
+
+    - name: Setup host
+      if: runner.os == 'Linux'
+      run: sudo apt install -y ninja-build doxygen clang-12 llvm-12
+      id: setup-host-linux
+      shell: bash
+
+    - name: Setup host
+      if: runner.os == 'Windows'
+      run: choco install -y ninja
+      id: setup-host-windows
+      shell: powershell
+
+    - name: Setup host
+      if: runner.os == 'macOS'
+      run: brew install ninja doxygen
+      id: setup-host-macos
+      shell: bash
+
+    - name: Prepare build env on Windows
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1.12.0
+      with:
+        arch: x64
+        toolset: '14.1'
+      id: setup-env-windows
+
+    - name: Configure ${{ inputs.preset-name }}
+      run: cmake --preset ${{ inputs.preset-name }} ${{ inputs.cmake-args }}
+      id: cmake-configure
+      shell: bash
+
+    - name: Build ${{ inputs.preset-name }}
+      id: cmake-build
+      run: cmake --build --preset ${{ inputs.preset-name }}
+      shell: bash
+
+    - name: test ${{ inputs.preset-name }}
+      id: ctests
+      run: ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)'
+      shell: bash
+
+    - name: stash test reports ${{ inputs.preset-name }}
+      if: ${{ inputs.upload-testlog }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.preset-name }}
+        path: '_build/**/*gtestresults.xml'

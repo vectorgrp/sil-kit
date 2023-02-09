@@ -267,6 +267,15 @@
                 "CMAKE_CXX_COMPILER": "clang++-15"
             }
         },
+        {
+            "name": "mixin-clang",
+            "description": "Target clang",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++"
+            }
+        },
 
         {
             "name": "mixin-windows",
@@ -455,6 +464,15 @@
         {
             "name": "clang15-release",
             "inherits": [ "mixin-release", "clang15-debug"]
+        },
+
+        {
+            "name": "clang-debug",
+            "inherits": [ "mixin-clang","gcc9-debug"]
+        },
+        {
+            "name": "clang-release",
+            "inherits": [ "mixin-release", "clang-debug"]
         },
 
         {
@@ -655,6 +673,14 @@
             "configurePreset": "clang15-release"
         },
         {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release"
+        },
+        {
             "name": "clang-asan-debug",
             "configurePreset": "clang-asan-debug"
         },
@@ -833,6 +859,14 @@
         {
             "name": "clang15-release",
             "configurePreset": "clang15-release"
+        },
+        {
+            "name": "clang-debug",
+            "configurePreset": "clang-debug"
+        },
+        {
+            "name": "clang-release",
+            "configurePreset": "clang-release"
         },
         {
             "name": "clang-asan-debug",

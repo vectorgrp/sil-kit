@@ -1,7 +1,6 @@
 ================================
 The Vector SIL Kit
 ================================
-
 .. image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
    :target: https://github.com/vectorgrp/sil-kit/releases
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
@@ -9,14 +8,24 @@ The Vector SIL Kit
 .. image:: https://img.shields.io/badge/documentation-html-blue.svg
    :target: https://vectorgrp.github.io/sil-kit-docs
 
-The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments. 
+.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-asan.yml
+.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml
+.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml
+
+.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
+
+The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
 
 For documentation on using the Vector SIL Kit, see the html documentation,
 which can be generated when building the Vector SIL Kit (cf. Customizing the
 Build) and is provided in pre-built form with the SIL Kit packages.
 
-The SIL Kit source and documentation is licensed under a permissable open 
+The SIL Kit source and documentation is licensed under a permissable open
 source license, see LICENSE file. For licenses of third party dependencies,
 see `ThirdParty/LICENSES.rst`.
 
@@ -112,3 +121,4 @@ call cmake in your build directory as follows::
     pip3 install pipenv
     cmake -D SILKIT_BUILD_DOCS=ON -B _build
     cmake --build _build --target Doxygen
+
