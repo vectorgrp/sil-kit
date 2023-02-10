@@ -20,7 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // ------------------------------------------------------------
 // Receiver Setup
-canReceiver->SetBaudRate(10000, 1000000);
+canReceiver->SetBaudRate(10000, 1000000, 1000000);
 canReceiver->Start();
 
 // Register CanFrameHandler to receive data
@@ -29,7 +29,7 @@ canReceiver->AddFrameHandler(receiver_frameHandler);
 
 // ------------------------------------------------------------
 // Sender Setup
-canSender->SetBaudRate(10000, 1000000);
+canSender->SetBaudRate(10000, 1000000, 1000000);
 canSender->Start();
 
 // Register FrameTransmitHandler to receive acknowledge of the successful transmission
@@ -38,15 +38,16 @@ canSender->AddFrameTransmitHandler(sender_frameTransmitHandler);
 
 // ------------------------------------------------------------
 // Send message on CAN bus "CAN1".
-CanFrame canFrame;
+const std::vector<uint8_t> canFrameData = {'d', 'a', 't', 'a', 0, 1, 2, 3};
+CanFrame canFrame{};
 canFrame.canId = 17;
-canFrame.flags.ide = 0; // Identifier Extension
-canFrame.flags.rtr = 0; // Remote Transmission Request
-canFrame.flags.fdf = 0; // FD Format Indicator
-canFrame.flags.brs = 1; // Bit Rate Switch  (for FD Format only)
-canFrame.flags.esi = 0; // Error State indicator (for FD Format only)
-canFrame.dataField = {'d', 'a', 't', 'a', 0, 1, 2, 3};
-canFrame.dlc = canMessage.dataField.size();
+canFrame.flags =
+    // FD Format Indicator
+      static_cast<CanFrameFlagMask>(CanFrameFlag::Fdf)
+    // Bit Rate Switch  (for FD Format only)
+    | static_cast<CanFrameFlagMask>(CanFrameFlag::Brs);
+canFrame.dataField = canFrameData;
+canFrame.dlc = canFrame.dataField.size();
 
 // The returned transmitId can be used to check if the canTransmitAcknowledge
 // that should be triggered after a successful reception has the same transmitId
