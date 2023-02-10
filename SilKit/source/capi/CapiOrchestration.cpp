@@ -491,7 +491,8 @@ SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(SilKit_Pa
         SilKit_Struct_Init(SilKit_ParticipantStatus, cstatus);
 
         cstatus.enterReason = participantStatus.enterReason.c_str();
-        cstatus.enterTime = participantStatus.enterTime.time_since_epoch().count();
+        cstatus.enterTime = std::chrono::nanoseconds{participantStatus.enterTime.time_since_epoch()}.count();
+        cstatus.refreshTime = std::chrono::nanoseconds{participantStatus.refreshTime.time_since_epoch()}.count();
         cstatus.participantName = participantStatus.participantName.c_str();
         cstatus.participantState = (SilKit_ParticipantState)participantStatus.state;
 
