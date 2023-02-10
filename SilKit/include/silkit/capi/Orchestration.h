@@ -359,6 +359,20 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_WaitForLifecycleT
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_WaitForLifecycleToComplete_t)(
     SilKit_LifecycleService* lifecycleService, SilKit_ParticipantState* outParticipantState);
 
+/*! \brief Abort current simulation run due to an error.
+ *
+ * Switch to the \ref SilKit_ParticipantState_Error state and
+ * report the error message in the SIL Kit system.
+ *
+ * \param lifecycleService The lifecycle service of the simulation.
+ * \param reason A string describing the error.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_ReportError(SilKit_LifecycleService* lifecycleService,
+                                                                           const char* reason);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_ReportError_t)(SilKit_LifecycleService* lifecycleService,
+                                                                              const char* reason);
+
 /*! \brief Pause execution of the participant
  *
  * Switch to \ref SilKit_ParticipantState_Paused due to the provided \p reason.
@@ -403,6 +417,27 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_Lifec
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Stop_t)(SilKit_LifecycleService* lifecycleService, const char* reason);
 
+/*! \brief Get the current participant state.
+ *
+ * @param outParticipantState The current participant state will be written to the pointee.
+ * @param lifecycleService The lifecycle service obtained by \ref SilKit_LifecycleService_Create.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_State(SilKit_ParticipantState* outParticipantState,
+                                                                     SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LifecycleService_State_t)(SilKit_ParticipantState* outParticipantState,
+                                                                       SilKit_LifecycleService* lifecycleService);
+
+/*! \brief Get the current participant status.
+ *
+ * @param outParticipantStatus The current participant status will be written to the pointee.
+ * @param lifecycleService The lifecycle service obtained by \ref SilKit_LifecycleService_Create.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Status(SilKit_ParticipantStatus* outParticipantStatus,
+                                                                      SilKit_LifecycleService* lifecycleService);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_Status_t)(SilKit_ParticipantStatus* outParticipantStatus,
+                                                                         SilKit_LifecycleService* lifecycleService);
 
 /*
  *
@@ -481,6 +516,17 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_SetSimulationStepH
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_CompleteSimulationStep(SilKit_TimeSyncService* timeSyncService);
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_CompleteSimulationStep_t)(SilKit_TimeSyncService* timeSyncService);
+
+/*! \brief Get the current simulation time
+ *
+ * \param timeSyncService The time sync service obtained via \ref SilKit_TimeSyncService_Create.
+ * \param outNanosecondsTime The simulation time in nanoseconds.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Now(SilKit_TimeSyncService* timeSyncService,
+    SilKit_NanosecondsTime* outNanosecondsTime);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_TimeSyncService_Now_t)(SilKit_TimeSyncService* timeSyncService,
+    SilKit_NanosecondsTime* outNanosecondsTime);
 
 
 /*
@@ -584,6 +630,65 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveParticipantSta
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_RemoveParticipantStatusHandler_t)(SilKit_SystemMonitor* systemMonitor,
                                                                                    SilKit_HandlerId handlerId);
+
+/*! \brief Information about a participant connection in the \ref SilKit_SystemMonitor_ParticipantConnectedHandler_t. */
+typedef struct SilKit_ParticipantConnectionInformation
+{
+    SilKit_StructHeader structHeader;
+    /*! \brief Name of the remote participant. */
+    const char* participantName;
+} SilKit_ParticipantConnectionInformation;
+
+/*! Callback type to indicate that a participant has been connected.
+ * Cf., \ref SilKit_SystemMonitor_SetParticipantConnectedHandler
+ */
+typedef void (SilKitFPTR *SilKit_SystemMonitor_ParticipantConnectedHandler_t)(
+    void* context, SilKit_SystemMonitor* systemMonitor,
+    const SilKit_ParticipantConnectionInformation* participantConnectionInformation);
+
+/*! \brief Set a callback for participants being connected.
+ *
+ * @param systemMonitor The system monitor obtained via \ref SilKit_SystemMonitor_Create.
+ * @param context The user context pointer made available to the handler.
+ * @param handler The handler to be called to be called when a participant has been connected.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_SetParticipantConnectedHandler(
+    SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantConnectedHandler_t handler);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_SetParticipantConnectedHandler_t)(
+    SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantConnectedHandler_t handler);
+
+/*! Callback type to indicate that a participant has been disconnected.
+ * Cf., \ref SilKit_SystemMonitor_SetParticipantDisconnectedHandler
+ */
+typedef void (SilKitFPTR *SilKit_SystemMonitor_ParticipantDisconnectedHandler_t)(
+    void* context, SilKit_SystemMonitor* systemMonitor,
+    const SilKit_ParticipantConnectionInformation* participantConnectionInformation);
+
+/*! \brief Set a callback for participants being disconnected.
+ *
+ * @param systemMonitor The system monitor obtained via \ref SilKit_SystemMonitor_Create.
+ * @param context The user context pointer made available to the handler.
+ * @param handler The handler to be called to be called when a participant has been disconnected.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_SetParticipantDisconnectedHandler(
+    SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantDisconnectedHandler_t handler);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_SetParticipantDisconnectedHandler_t)(
+    SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantDisconnectedHandler_t handler);
+
+/*! \brief Check if a participant identified by the participantName is present.
+ *
+ * @param systemMonitor The system monitor obtained via \ref SilKit_SystemMonitor_Create.
+ * @param participantName The name of the participant for which presence is queried.
+ * @param out \ref SilKit_True is written to the pointee if the participant is present, otherwise \ref SilKit_False.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_IsParticipantConnected(SilKit_SystemMonitor* systemMonitor,
+                                                                                   const char* participantName,
+                                                                                   SilKit_Bool* out);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_IsParticipantConnected_t)(
+    SilKit_SystemMonitor* systemMonitor, const char* participantName, SilKit_Bool* out);
 
 SILKIT_END_DECLS
 
