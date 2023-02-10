@@ -251,7 +251,7 @@ typedef void (SilKitFPTR *SilKit_LifecycleService_StartingHandler_t)(void* conte
  * \param handler The handler to be called when starting.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetStartingHandler(
-    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_CommunicationReadyHandler_t handler);
+    SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_StartingHandler_t handler);
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_SetStartingHandler_t)(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_StartingHandler_t handler);
