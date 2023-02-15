@@ -5,6 +5,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+
+
+[4.0.18] - UNRELEASED
+---------------------
+
+Changed
+~~~~~~~
+
+- Complete the Hourglass implementation of the C++ API used internally for testing.
+
+
+
 [4.0.17] - 2023-02-09
 ---------------------
 This is a Quality Assured Release.
