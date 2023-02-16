@@ -55,6 +55,9 @@ add_library(S_SilKit_Core_VAsio STATIC
     VAsioTcpPeer.cpp
     VAsioTransmitter.hpp
 
+    TransformAcceptorUris.hpp
+    TransformAcceptorUris.cpp
+
     SerializedMessageTraits.hpp
     SerializedMessage.hpp
     SerializedMessage.cpp
@@ -104,6 +107,7 @@ add_silkit_test(Test_MwVAsioConnection SOURCES Test_VAsioConnection.cpp LIBS S_S
 add_silkit_test(Test_MwVAsio_Serdes  SOURCES Test_VAsioSerdes.cpp LIBS S_SilKit_Core_VAsio)
 add_silkit_test(Test_MwVAsio_SerializedMessage  SOURCES Test_SerializedMessage.cpp LIBS S_SilKit_Core_VAsio)
 add_silkit_test(Test_MwVAsio_Uri  SOURCES Test_Uri.cpp LIBS S_SilKit_Core_VAsio)
+add_silkit_test(Test_MwVAsio_TransformAcceptorUris  SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKit_Core_VAsio)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version

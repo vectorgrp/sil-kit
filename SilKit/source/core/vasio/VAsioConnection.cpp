@@ -952,7 +952,7 @@ void VAsioConnection::AcceptLocalConnections(const std::string& uniqueId)
 auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
     -> std::pair<std::string, uint16_t>
 {
-    // Default to TCP IPv4 catchall
+    // Default to TCP IPv4 catchallIp
     tcp::endpoint endpoint(tcp::v4(), port);
 
     auto isIpv4 = [](const auto endpoint) {
