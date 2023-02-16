@@ -54,7 +54,7 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
     // Prevent calling this method more than once
     if (!_requiredParticipantNames.empty())
     {
-        throw SilKitError{"Expected participant names are already set."};
+        throw SilKitError{"Required participant names are already set."};
     }
 
     _requiredParticipantNames = requiredParticipantNames;

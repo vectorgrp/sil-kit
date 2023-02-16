@@ -370,7 +370,10 @@ bool LifecycleService::CheckForValidConfiguration()
         {
             // participants that are coordinated but not required are currently not supported
             std::stringstream ss;
-            ss << _participant->GetParticipantName() << ": Coordinated participants must also be required!";
+            
+            ss << _participant->GetParticipantName()
+               << ": This participant is in OperationMode::Coordinated but it is not part of the"
+                  "set of \"required\" participants declared to the system controller. ";
             ReportError(ss.str());
             return false;
         }

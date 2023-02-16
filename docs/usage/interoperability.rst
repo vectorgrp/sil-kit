@@ -1,4 +1,4 @@
-================
+
 Interoperability
 ================
 
@@ -10,7 +10,7 @@ SIL Kit provides interoperability between participants and utilities from differ
 This section documents known issues and potentially misleading messages reported by SIL Kit participants in certain cases.
 
 Duplicate Participant Names
-===========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Multiple participants with the same name connect to a single registry instance.
 
@@ -26,7 +26,7 @@ Scenario A
 
 The second participant connecting with the same name reports a connection timeout with the following message:
 
-::
+.. code-block:: powershell
 
    Timeout during connection handshake with SIL Kit Registry.
 
@@ -39,7 +39,7 @@ Scenario B (Mixed Versions)
 
 The message reported by the second participant has been modified in SIL Kit 4.0.8 (when connecting to a registry of version 4.0.7 or lower):
 
-::
+.. code-block:: powershell
 
    Timeout during connection handshake with SIL Kit Registry. This might indicate that a participant with the same name ('...') has already connected to the registry.
 
@@ -54,7 +54,7 @@ The registry transmits an error to the second participant in SIL Kit 4.0.8 via t
 
 The second participant does not report a timeout anymore, but immediately reports a misleading error message, referring to an unsupported protocol version:
 
-::
+.. code-block:: powershell
 
     SILKIT Connection Handshake: ParticipantAnnouncementReply contains unsupported version. participant=SilKitRegistry participant-version=3.1
 
@@ -70,6 +70,6 @@ The registry transmits an error to the second participant in SIL Kit 4.0.8 via t
 
 The second participant does not report a timeout anymore, but immediately reports a an error message containing the diagnositc message reported by the registry:
 
-::
+.. code-block:: powershell
 
     SIL Kit Connection Handshake: Received failed ParticipantAnnouncementReply from 'SilKitRegistry' with protocol version 3.1 and diagnostic message: participant with name 'CanReader' is already connected
