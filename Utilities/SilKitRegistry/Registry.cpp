@@ -149,7 +149,7 @@ auto GenerateRandomCharacters(const std::string& generatedConfigurationPath, siz
 }
 
 auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration, std::string listenUri,
-        std::string dashboardUri, bool disableDashboard,
+        std::string dashboardUri, bool enableDashboard,
         CommandlineParser::Option generatedConfigurationPathOpt) -> SilKitRegistry::RegistryInstance
 {
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(configuration);
@@ -199,7 +199,7 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
 
     //Try to start a dashboard
     std::unique_ptr<SilKit::Dashboard::IDashboard> dashboard;
-    if (!disableDashboard)
+    if (enableDashboard)
     {
         try {
             dashboard = SilKit::Dashboard::CreateDashboard(configuration, chosenListenUri, dashboardUri);
@@ -243,8 +243,8 @@ int main(int argc, char** argv)
         "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to. Defaults to 'http://localhost:8082'.");
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
-    commandlineParser.Add<CliParser::Flag>("disable-dashboard", "Q", "[--disable-dashboard]",
-        "-Q, --disable-dashboard: Disable the built-in dashboard REST client.", CliParser::Hidden);
+    commandlineParser.Add<CliParser::Flag>("enable-dashboard", "Q", "[--enable-dashboard]",
+        "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
 
 
     if (SilKitRegistry::HasWindowsServiceSupport())
@@ -297,7 +297,7 @@ int main(int argc, char** argv)
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
     auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
-    const auto disableDashboard{commandlineParser.Get<CliParser::Flag>("disable-dashboard").Value()};
+    const auto enableDashboard{commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value()};
 
     bool windowsService{SilKitRegistry::HasWindowsServiceSupport()
                         && commandlineParser.Get<CliParser::Flag>("windows-service").Value()};
@@ -338,13 +338,13 @@ int main(int argc, char** argv)
         {
             SilKitRegistry::RunWindowsService([=] {
                 return StartRegistry(configuration, listenUri,
-                    dashboardUri, disableDashboard, generatedConfigurationPathOpt);
+                    dashboardUri, enableDashboard, generatedConfigurationPathOpt);
             });
         }
         else
         {
             const auto registry = StartRegistry(configuration, listenUri,
-                dashboardUri,  disableDashboard, generatedConfigurationPathOpt);
+                dashboardUri,  enableDashboard, generatedConfigurationPathOpt);
 
             if (useSignalHandler)
             {
