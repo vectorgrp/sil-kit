@@ -91,6 +91,7 @@ Dashboard::Dashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
         SilKit::Util::SetThreadName("SK-Dashboard");
         auto dashboardStop = _dashboardStopPromise.get_future();
         Run(std::move(dashboardStop));
+        _cachingEventHandler->OnShutdown(GetCurrentTime());
     }};
 }
 
@@ -104,10 +105,9 @@ Dashboard::~Dashboard()
     _systemMonitor->RemoveParticipantStatusHandler(_participantStatusHandlerId);
     _systemMonitor->RemoveSystemStateHandler(_systemStateHandlerId);
     _retryPolicy->AbortAllRetries();
-    _cachingEventHandler->OnShutdown(GetCurrentTime());
     Services::Logging::Info(_participantInternal->GetLogger(), "Dashboard: {} executor task(s) still running",
                             _asyncExecutor->getTasksCount());
-    _asyncExecutor->waitTasksFinished();
+    _asyncExecutor->waitTasksFinished(10s);
     Services::Logging::Info(_participantInternal->GetLogger(), "Dashboard: executor tasks finished");
     _asyncExecutor->stop();
     _asyncExecutor->join();
