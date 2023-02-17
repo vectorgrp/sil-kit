@@ -38,6 +38,9 @@ add_executable(sil-kit-registry
 
     WindowsServiceMain.hpp
     WindowsServiceMain.cpp
+    # we do not link against SilKit::SilKit, but we need the CreateSilKitRegistry symbol
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../SilKit/source/CreateSilKitRegistry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../SilKit/source/SilKit.cpp # CreateParticipant
 )
 
 # Group this demo project into a folder
@@ -58,8 +61,8 @@ target_link_libraries(sil-kit-registry
     S_SilKit_Util_Filesystem
     S_SilKit_Util_Uri
     S_SilKit_Dashboard
+    S_SilKit_Core_Participant
 
-    SilKit::SilKit
 )
 
 # Set versioning infos on exe
