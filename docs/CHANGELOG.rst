@@ -7,11 +7,12 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 
 
 
-[4.0.18] - UNRELEASED
+[4.0.18] - 2023-02-21
 ---------------------
 
 Added
 ~~~~~
+
 - Added descriptions to troubleshooting section for common errors.
 
 Changed
@@ -19,6 +20,10 @@ Changed
 
 - Complete the Hourglass implementation of the C++ API used internally for testing.
 
+Fixed
+~~~~~
+
+- Properly handle IPv6 acceptors in the registry when transmitting to a remote participant
 
 
 [4.0.17] - 2023-02-09
