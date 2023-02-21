@@ -92,8 +92,8 @@ if(SILKIT_BUILD_DASHBOARD)
             I_SilKit_Util
             I_SilKit_Core_Participant
             I_SilKit_Services_Logging
-            Threads::Threads
         PRIVATE
+            Threads::Threads
             S_SilKit_Util_Uri
             S_SilKit_Util_SetThreadName
             oatpp

@@ -151,7 +151,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(SilKit
     PUBLIC
     SilKitInterface
-    Threads::Threads
     PRIVATE
     I_SilKit_Core_Internal
     S_SilKit_Config
