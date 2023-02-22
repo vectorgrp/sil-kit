@@ -16,6 +16,17 @@ Changed
   for better readability.
 
 
+[4.0.19] - UNRELEASED
+---------------------
+
+Fixed
+~~~~~
+
+- Allow installing and starting the sil-kit-registry.exe as a Windows Service on Windows Containers during ``docker build`` steps.
+  The layer creation fails if a domain socket is still active during shutdown of the temporary container.
+  Disables the local-domain sockets of the ``sil-kit-registry.exe`` when running as a Windows Service.
+
+
 [4.0.18] - 2023-02-21
 ---------------------
 

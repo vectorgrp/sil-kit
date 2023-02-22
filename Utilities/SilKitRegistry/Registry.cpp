@@ -99,6 +99,8 @@ void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticip
         return path.str();
     }();
     config->logging.sinks.emplace_back(std::move(newSink));
+
+    config->middleware.enableDomainSockets = false;
 }
 
 void SanitizeConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
