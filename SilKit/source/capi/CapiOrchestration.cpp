@@ -19,31 +19,44 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#include "ParticipantConfiguration.hpp"
-
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/participant/exception.hpp"
 
-#include "IParticipantInternal.hpp"
 #include "LifecycleService.hpp"
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
 #include <memory>
-#include <string>
-#include <iostream>
-#include <algorithm>
 #include <map>
 #include <mutex>
 #include <cstring>
 
+
+namespace {
+
+auto CToCpp(const SilKit_LifecycleConfiguration* csc)
+{
+  SilKit::Services::Orchestration::LifecycleConfiguration cpp{};
+  cpp.operationMode = static_cast<decltype(cpp.operationMode)>(csc->operationMode);
+  return cpp;
+}
+
+void CppToC(
+    const SilKit::Services::Orchestration::ParticipantConnectionInformation& cppParticipantConnectionInformation,
+    SilKit_ParticipantConnectionInformation& cParticipantConnectionInformation)
+{
+  SilKit_Struct_Init(SilKit_ParticipantConnectionInformation, cParticipantConnectionInformation);
+  cParticipantConnectionInformation.participantName = cppParticipantConnectionInformation.participantName.c_str();
+}
+
+} // namespace
+
+
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_Create(SilKit_SystemMonitor** outSystemMonitor,
                                                  SilKit_Participant* participant)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outSystemMonitor);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -53,19 +66,13 @@ CAPI_ENTER
     *outSystemMonitor = reinterpret_cast<SilKit_SystemMonitor*>(systemMonitor);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
 
-static auto from_c(const SilKit_LifecycleConfiguration* csc)
-{
-    SilKit::Services::Orchestration::LifecycleConfiguration cpp;
-    cpp.operationMode = static_cast<decltype(cpp.operationMode)>(csc->operationMode);
-    return cpp;
-}
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Create(SilKit_LifecycleService** outLifecycleService,
                                                  SilKit_Participant* participant,
                                                  const SilKit_LifecycleConfiguration* startConfiguration)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outLifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -73,15 +80,16 @@ CAPI_ENTER
     ASSERT_VALID_STRUCT_HEADER(startConfiguration);
 
     auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-    auto cppLifecycleService = cppParticipant->CreateLifecycleService(from_c(startConfiguration));
+    auto cppLifecycleService = cppParticipant->CreateLifecycleService(CToCpp(startConfiguration));
     *outLifecycleService = reinterpret_cast<SilKit_LifecycleService*>(
         static_cast<SilKit::Services::Orchestration::ILifecycleService*>(cppLifecycleService));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Create(SilKit_TimeSyncService** outTimeSyncService, SilKit_LifecycleService* lifecycleService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outTimeSyncService);
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
@@ -92,11 +100,12 @@ CAPI_ENTER
     *outTimeSyncService = reinterpret_cast<SilKit_TimeSyncService*>(timeSyncService);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetCommunicationReadyHandler(SilKit_LifecycleService* lifecycleService, void* context,
                                                           SilKit_LifecycleService_CommunicationReadyHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -109,11 +118,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetCommunicationReadyHandlerAsync(SilKit_LifecycleService* lifecycleService, void* context,
                                                           SilKit_LifecycleService_CommunicationReadyHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -126,10 +136,11 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync(SilKit_LifecycleService* lifecycleService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
 
@@ -139,12 +150,13 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetStartingHandler(
     SilKit_LifecycleService* lifecycleService, void* context,
     SilKit_LifecycleService_StartingHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -158,11 +170,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetStopHandler(SilKit_LifecycleService* clifecycleService, void* context,
                                             SilKit_LifecycleService_StopHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -175,11 +188,12 @@ CAPI_ENTER
     });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetShutdownHandler(SilKit_LifecycleService* clifecycleService, void* context,
                                                 SilKit_LifecycleService_ShutdownHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -192,11 +206,12 @@ CAPI_ENTER
     });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_SetAbortHandler(
     SilKit_LifecycleService* lifecycleService, void* context, SilKit_LifecycleService_AbortHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -211,7 +226,8 @@ CAPI_ENTER
         });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 class LifecycleFutureMap
 {
@@ -252,8 +268,9 @@ private:
 
 static LifecycleFutureMap sLifecycleFutureMap;
 
+
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
 
@@ -265,11 +282,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_WaitForLifecycleToComplete(SilKit_LifecycleService* clifecycleService,
                                                         SilKit_ParticipantState* outParticipantState)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
@@ -290,11 +308,12 @@ CAPI_ENTER
     sLifecycleFutureMap.Remove(clifecycleService);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_ReportError(SilKit_LifecycleService* cLifecycleService,
                                                                            const char* reason)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(cLifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(reason);
@@ -306,11 +325,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_State(SilKit_ParticipantState* outParticipantState,
                                                            SilKit_LifecycleService* cLifecycleService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
     ASSERT_VALID_POINTER_PARAMETER(cLifecycleService);
@@ -322,11 +342,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Status(SilKit_ParticipantStatus* outParticipantStatus,
                                                             SilKit_LifecycleService* cLifecycleService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipantStatus);
     ASSERT_VALID_STRUCT_HEADER(outParticipantStatus);
@@ -346,12 +367,13 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetSimulationStepHandler(
     SilKit_TimeSyncService* ctimeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(ctimeSyncService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -365,12 +387,13 @@ CAPI_ENTER
         std::chrono::nanoseconds(initialStepSize));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_SetSimulationStepHandlerAsync(
     SilKit_TimeSyncService* ctimeSyncService, void* context, SilKit_TimeSyncService_SimulationStepHandler_t handler,
     SilKit_NanosecondsTime initialStepSize)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(ctimeSyncService);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -385,10 +408,11 @@ CAPI_ENTER
         std::chrono::nanoseconds(initialStepSize));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_CompleteSimulationStep(SilKit_TimeSyncService* ctimeSyncService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(ctimeSyncService);
 
@@ -396,11 +420,12 @@ CAPI_ENTER
     timeSyncService->CompleteSimulationStep();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_TimeSyncService_Now(SilKit_TimeSyncService* cTimeSyncService,
                                                         SilKit_NanosecondsTime* outNanosecondsTime)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(cTimeSyncService);
     ASSERT_VALID_OUT_PARAMETER(outNanosecondsTime);
@@ -409,10 +434,11 @@ CAPI_ENTER
     *outNanosecondsTime = timeSyncService->Now().count();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Pause(SilKit_LifecycleService* clifecycleService, const char* reason)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(reason);
@@ -422,10 +448,11 @@ CAPI_ENTER
     lifeCycleService->Pause(reason);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Continue(SilKit_LifecycleService* clifecycleService)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
 
@@ -434,10 +461,11 @@ CAPI_ENTER
     lifeCycleService->Continue();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_Stop(SilKit_LifecycleService* lifecycleService, const char* reason)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
     ASSERT_VALID_POINTER_PARAMETER(reason);
@@ -447,13 +475,14 @@ CAPI_ENTER
     cppLifecycleService->Stop(reason);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 // SystemMonitor related functions
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetParticipantStatus(SilKit_ParticipantStatus* outParticipantState,
                                                             SilKit_SystemMonitor* csystemMonitor,
                                                             const char* participantName)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
@@ -474,10 +503,11 @@ CAPI_ENTER
     *outParticipantState = cstatus;
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_GetSystemState(SilKit_SystemState* outParticipantState, SilKit_SystemMonitor* csystemMonitor)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
@@ -487,11 +517,12 @@ CAPI_ENTER
     *outParticipantState = (SilKit_SystemState)systemState;
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_AddSystemStateHandler(SilKit_SystemMonitor* csystemMonitor, void* context,
                                                    SilKit_SystemStateHandler_t handler, SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -506,10 +537,11 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveSystemStateHandler(SilKit_SystemMonitor* csystemMonitor, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
 
@@ -519,12 +551,13 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_AddParticipantStatusHandler(SilKit_SystemMonitor* csystemMonitor, void* context,
                                                          SilKit_ParticipantStatusHandler_t handler,
                                                          SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -551,11 +584,12 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_RemoveParticipantStatusHandler(SilKit_SystemMonitor* csystemMonitor,
                                                                       SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(csystemMonitor);
 
@@ -565,19 +599,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
 
-static void CppToC(
-    const SilKit::Services::Orchestration::ParticipantConnectionInformation& cppParticipantConnectionInformation,
-    SilKit_ParticipantConnectionInformation& cParticipantConnectionInformation)
-{
-    SilKit_Struct_Init(SilKit_ParticipantConnectionInformation, cParticipantConnectionInformation);
-    cParticipantConnectionInformation.participantName = cppParticipantConnectionInformation.participantName.c_str();
-}
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_SetParticipantConnectedHandler(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantConnectedHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(systemMonitor);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -595,11 +622,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_SetParticipantDisconnectedHandler(
     SilKit_SystemMonitor* systemMonitor, void* context, SilKit_SystemMonitor_ParticipantDisconnectedHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(systemMonitor);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -617,11 +645,12 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_IsParticipantConnected(SilKit_SystemMonitor* cSystemMonitor,
                                                                          const char* participantName, SilKit_Bool* out)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(cSystemMonitor);
     ASSERT_VALID_POINTER_PARAMETER(participantName);
@@ -633,4 +662,4 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

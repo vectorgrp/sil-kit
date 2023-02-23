@@ -25,24 +25,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/orchestration/string_utils.hpp"
-#include "IParticipantInternal.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
 #include <memory>
-#include <string>
-#include <iostream>
-#include <algorithm>
 #include <map>
 #include <mutex>
-#include <cstring>
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Create(SilKit_Participant** outParticipant,
                                             SilKit_ParticipantConfiguration *participantConfiguration,
                                             const char* participantName, const char* registryUri)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipant);
     ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);
@@ -70,10 +65,11 @@ CAPI_ENTER
     *outParticipant = reinterpret_cast<SilKit_Participant*>(participant);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_Destroy(SilKit_Participant* participant)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
 
@@ -87,10 +83,11 @@ CAPI_ENTER
     delete cppParticipant;
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Participant_GetLogger(SilKit_Logger** outLogger, SilKit_Participant* participant)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outLogger);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -100,12 +97,13 @@ CAPI_ENTER
     *outLogger = reinterpret_cast<SilKit_Logger*>(logger);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_FromString(
     SilKit_ParticipantConfiguration** outParticipantConfiguration,
     const char* participantConfigurationString)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outParticipantConfiguration);
     ASSERT_VALID_POINTER_PARAMETER(participantConfigurationString);
@@ -126,11 +124,12 @@ CAPI_ENTER
     *outParticipantConfiguration = reinterpret_cast<SilKit_ParticipantConfiguration*>(cppParticipantConfiguration);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_ParticipantConfiguration_Destroy(
     SilKit_ParticipantConfiguration* participantConfiguration)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(participantConfiguration);
 
@@ -146,4 +145,4 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

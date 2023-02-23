@@ -19,8 +19,6 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#include <string>
-#include <algorithm>
 #include <map>
 #include <mutex>
 #include <cstring>
@@ -31,17 +29,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CapiImpl.hpp"
 #include "silkit/services/can/all.hpp"
 
-struct PendingTransmits
-{
-    std::map<uint32_t, void*> userContextById;
-    std::map<uint32_t, std::function<void()>> callbacksById;
-    std::mutex mutex;
-};
-PendingTransmits pendingTransmits;
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Create(SilKit_CanController** outController, SilKit_Participant* participant,
         const char* cName, const char* cNetwork)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outController);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -53,12 +44,13 @@ CAPI_ENTER
     *outController = reinterpret_cast<SilKit_CanController*>(canController);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameHandler(SilKit_CanController* controller, void* context,
         SilKit_CanFrameHandler_t callback, SilKit_Direction directionMask,
         SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(callback);
@@ -89,10 +81,11 @@ CAPI_ENTER
     }, directionMask);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -100,12 +93,13 @@ CAPI_ENTER
     canController->RemoveFrameHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_AddFrameTransmitHandler(SilKit_CanController* controller, void* context,
         SilKit_CanFrameTransmitHandler_t callback,
         SilKit_CanTransmitStatus statusMask, SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(callback);
@@ -126,10 +120,11 @@ CAPI_ENTER
             static_cast<SilKit::Services::Can::CanTransmitStatusMask>(statusMask));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveFrameTransmitHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -137,11 +132,12 @@ CAPI_ENTER
     canController->RemoveFrameTransmitHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_AddStateChangeHandler(SilKit_CanController* controller, void* context,
         SilKit_CanStateChangeHandler_t callback, SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(callback);
@@ -159,10 +155,11 @@ CAPI_ENTER
             });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -170,12 +167,13 @@ CAPI_ENTER
     canController->RemoveStateChangeHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_AddErrorStateChangeHandler(SilKit_CanController* controller, void* context,
         SilKit_CanErrorStateChangeHandler_t callback,
         SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(callback);
@@ -194,10 +192,11 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_RemoveErrorStateChangeHandler(SilKit_CanController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -205,10 +204,11 @@ CAPI_ENTER
     canController->RemoveErrorStateChangeHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_SetBaudRate(SilKit_CanController* controller, uint32_t rate, uint32_t fdRate, uint32_t xlRate)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -216,10 +216,11 @@ CAPI_ENTER
     canController->SetBaudRate(rate, fdRate, xlRate);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_SendFrame(SilKit_CanController* controller, SilKit_CanFrame* message, void* transmitContext)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(message);
@@ -240,10 +241,11 @@ CAPI_ENTER
     canController->SendFrame(std::move(frame), transmitContext);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Start(SilKit_CanController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -251,10 +253,11 @@ CAPI_ENTER
     canController->Start();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Stop(SilKit_CanController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -262,10 +265,11 @@ CAPI_ENTER
     canController->Stop();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Reset(SilKit_CanController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -273,10 +277,11 @@ CAPI_ENTER
     canController->Reset();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_CanController_Sleep(SilKit_CanController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -284,5 +289,4 @@ CAPI_ENTER
     canController->Sleep();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
-
+CAPI_CATCH_EXCEPTIONS

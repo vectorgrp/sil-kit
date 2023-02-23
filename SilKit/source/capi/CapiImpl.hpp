@@ -28,9 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CapiExceptions.hpp"
 #include "TypeUtils.hpp"
 
-#define CAPI_ENTER try
-
-#define CAPI_LEAVE \
+#define CAPI_CATCH_EXCEPTIONS \
     catch (const SilKit::CapiBadParameterError& e) \
     { \
         SilKit_error_string = e.what(); \
@@ -62,49 +60,75 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
     }
 
 #define ASSERT_VALID_POINTER_PARAMETER(p) \
-    if (p == nullptr) \
+    do \
     { \
-        throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
-    }
+        if (p == nullptr) \
+        { \
+            throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
+        } \
+    } \
+    while (false)
 
 #define ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(p) \
-    if (p == nullptr) \
+    do \
     { \
-        throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
+        if (p == nullptr) \
+        { \
+            throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
+        } \
+        if (*p == nullptr) \
+        { \
+            throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not point to a null value."}; \
+        } \
     } \
-    if (*p == nullptr) \
-    { \
-        throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not point to a null value."}; \
-    }
+    while (false)
 
 #define ASSERT_VALID_OUT_PARAMETER(p) \
-    if (p == nullptr) \
+    do \
     { \
-        throw SilKit::CapiBadParameterError{"Return parameter '" #p "' must not be null."}; \
-    }
+        if (p == nullptr) \
+        { \
+            throw SilKit::CapiBadParameterError{"Return parameter '" #p "' must not be null."}; \
+        } \
+    } \
+    while (false)
 
 #define kInvalidFunctionPointer "Handler function parameter must not be null."
 
 #define ASSERT_VALID_HANDLER_PARAMETER(handler) \
-    if (handler == nullptr) \
+    do \
     { \
-        throw SilKit::CapiBadParameterError{kInvalidFunctionPointer}; \
-    }
+        if (handler == nullptr) \
+        { \
+            throw SilKit::CapiBadParameterError{kInvalidFunctionPointer}; \
+        } \
+    } \
+    while (false)
 
 #define ASSERT_VALID_BOOL_PARAMETER(b) \
-    if (!(b == SilKit_True || b == SilKit_False)) \
+    do \
     { \
-        throw SilKit::CapiBadParameterError{"The parameter '" #b "' is not a valid SilKit_Bool."}; \
-    }
+        if (!(b == SilKit_True || b == SilKit_False)) \
+        { \
+            throw SilKit::CapiBadParameterError{"The parameter '" #b "' is not a valid SilKit_Bool."}; \
+        } \
+    } \
+    while (false)
 
 #define ASSERT_VALID_STRUCT_HEADER(p) \
-    if (!HasValidStructHeader(p)) \
+    do \
     { \
-        throw SilKit::CapiBadParameterError{"The parameter '" #p \
-                                            "' has no valid SilKit_StructHeader. Check your library version"}; \
-    }
+        if (!HasValidStructHeader(p)) \
+        { \
+            throw SilKit::CapiBadParameterError{"The parameter '" #p \
+                                                "' has no valid SilKit_StructHeader. Check your library version"}; \
+        } \
+    } \
+    while (false)
+
 
 extern thread_local std::string SilKit_error_string;
+
 
 // Utility to verify a CAPI struct header
 

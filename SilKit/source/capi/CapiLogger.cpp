@@ -27,8 +27,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <string>
 
+
 SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(message);
@@ -39,10 +40,11 @@ CAPI_ENTER
     logger->Log(enumLevel, useString);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(outLevel);
@@ -52,4 +54,4 @@ CAPI_ENTER
     *outLevel = enumLevel;
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

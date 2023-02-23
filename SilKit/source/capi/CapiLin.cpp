@@ -22,12 +22,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/lin/all.hpp"
-#include "silkit/services/lin/string_utils.hpp"
 #include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
 #include "CapiImpl.hpp"
 #include <cstring>
 
-static void assign(SilKit::Services::Lin::LinFrame& cppFrame, const SilKit_LinFrame* cFrame) 
+
+namespace {
+
+void assign(SilKit::Services::Lin::LinFrame& cppFrame, const SilKit_LinFrame* cFrame)
 {
     cppFrame.id = static_cast<SilKit::Services::Lin::LinId>(cFrame->id);
     cppFrame.checksumModel = static_cast<SilKit::Services::Lin::LinChecksumModel>(cFrame->checksumModel);
@@ -35,14 +37,15 @@ static void assign(SilKit::Services::Lin::LinFrame& cppFrame, const SilKit_LinFr
     memcpy(cppFrame.data.data(), cFrame->data, 8);
 }
 
-static void assign(SilKit::Services::Lin::LinFrameResponse& cppFrameResponse, const SilKit_LinFrameResponse* cFrameResponse)
+void assign(SilKit::Services::Lin::LinFrameResponse& cppFrameResponse, const SilKit_LinFrameResponse* cFrameResponse)
 {
     assign(cppFrameResponse.frame, cFrameResponse->frame);
-    cppFrameResponse.responseMode = static_cast<SilKit::Services::Lin::LinFrameResponseMode>(cFrameResponse->responseMode);
+    cppFrameResponse.responseMode =
+        static_cast<SilKit::Services::Lin::LinFrameResponseMode>(cFrameResponse->responseMode);
 }
 
-static void assign(std::vector<SilKit::Services::Lin::LinFrameResponse>& cppFrameResponses,
-                   const SilKit_LinFrameResponse* cFrameResponses, size_t numFrameResponses)
+void assign(std::vector<SilKit::Services::Lin::LinFrameResponse>& cppFrameResponses,
+            const SilKit_LinFrameResponse* cFrameResponses, size_t numFrameResponses)
 {
     for (size_t i = 0; i < numFrameResponses; i++)
     {
@@ -52,7 +55,7 @@ static void assign(std::vector<SilKit::Services::Lin::LinFrameResponse>& cppFram
     }
 }
 
-static void assign(SilKit::Services::Lin::LinControllerConfig& cppConfig, const SilKit_LinControllerConfig* cConfig)
+void assign(SilKit::Services::Lin::LinControllerConfig& cppConfig, const SilKit_LinControllerConfig* cConfig)
 {
     cppConfig.baudRate = static_cast<SilKit::Services::Lin::LinBaudRate>(cConfig->baudRate);
     cppConfig.controllerMode = static_cast<SilKit::Services::Lin::LinControllerMode>(cConfig->controllerMode);
@@ -67,11 +70,14 @@ void assign(SilKit_Experimental_LinSlaveConfiguration** cLinSlaveConfiguration,
     for (auto&& linId : cppLinSlaveConfiguration.respondingLinIds)
     {
         (*cLinSlaveConfiguration)->isLinIdResponding[linId] = SilKit_True;
-    };
+    }
 }
 
+} // namespace
+
+
 SilKit_ReturnCode SilKitCALL SilKit_LinController_Create(SilKit_LinController** outLinController, SilKit_Participant* participant, const char* name, const char* network)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_OUT_PARAMETER(outLinController);
@@ -87,10 +93,11 @@ CAPI_ENTER
     *outLinController = reinterpret_cast<SilKit_LinController*>(cppLinController);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* controller, const SilKit_LinControllerConfig* config)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(config);
@@ -102,11 +109,12 @@ CAPI_ENTER
     linController->Init(cppControllerConfig);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_SetFrameResponse(SilKit_LinController* controller,
                                                                    const SilKit_LinFrameResponse* response)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(response);
@@ -119,10 +127,11 @@ CAPI_ENTER
     linController->SetFrameResponse(cppFrameResponse);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_Status(SilKit_LinController* controller, SilKit_LinControllerStatus* outStatus)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_OUT_PARAMETER(outStatus);
@@ -131,11 +140,12 @@ CAPI_ENTER
     *outStatus = static_cast<SilKit_LinControllerStatus>(linController->Status());
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrame(SilKit_LinController* controller, const SilKit_LinFrame* frame,
                                          SilKit_LinFrameResponseType responseType)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frame);
@@ -147,10 +157,11 @@ CAPI_ENTER
     linController->SendFrame(cppFrame, static_cast<SilKit::Services::Lin::LinFrameResponseType>(responseType));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_SendFrameHeader(SilKit_LinController* controller, SilKit_LinId linId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -158,11 +169,12 @@ CAPI_ENTER
     linController->SendFrameHeader(static_cast<SilKit::Services::Lin::LinId>(linId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_UpdateTxBuffer(SilKit_LinController* controller,
                                                  const SilKit_LinFrame* frame)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frame);
@@ -174,10 +186,11 @@ CAPI_ENTER
     linController->UpdateTxBuffer(cppFrame);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_GoToSleep(SilKit_LinController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -185,10 +198,11 @@ CAPI_ENTER
     linController->GoToSleep();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_GoToSleepInternal(SilKit_LinController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -196,10 +210,11 @@ CAPI_ENTER
     linController->GoToSleepInternal();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_Wakeup(SilKit_LinController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -207,10 +222,11 @@ CAPI_ENTER
     linController->Wakeup();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_WakeupInternal(SilKit_LinController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -218,11 +234,12 @@ CAPI_ENTER
     linController->WakeupInternal();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_GetSlaveConfiguration(SilKit_LinController* controller,
                                                              SilKit_Experimental_LinSlaveConfiguration* outLinSlaveConfiguration)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_OUT_PARAMETER(outLinSlaveConfiguration);
@@ -233,11 +250,12 @@ CAPI_ENTER
     assign(&outLinSlaveConfiguration, cppSlaveConfiguration);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_AddFrameStatusHandler(SilKit_LinController* controller, void* context,
                                                       SilKit_LinFrameStatusHandler_t handler, SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -264,10 +282,11 @@ CAPI_ENTER
         });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveFrameStatusHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -275,11 +294,12 @@ CAPI_ENTER
     cppController->RemoveFrameStatusHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_AddGoToSleepHandler(SilKit_LinController* controller, void* context,
                                                     SilKit_LinGoToSleepHandler_t handler, SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -296,21 +316,23 @@ CAPI_ENTER
         });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveGoToSleepHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     auto cppController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
     cppController->RemoveGoToSleepHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_AddWakeupHandler(SilKit_LinController* controller, void* context,
                                                  SilKit_LinWakeupHandler_t handler, SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -328,10 +350,11 @@ CAPI_ENTER
     });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_LinController_RemoveWakeupHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -339,12 +362,13 @@ CAPI_ENTER
     cppController->RemoveWakeupHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler(
     SilKit_LinController* controller, void* context, SilKit_Experimental_LinSlaveConfigurationHandler_t handler,
     SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -364,10 +388,11 @@ CAPI_ENTER
         });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -376,4 +401,4 @@ CAPI_ENTER
         cppController, static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

@@ -23,24 +23,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/pubsub/all.hpp"
 
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
-#include <string>
-#include <iostream>
-#include <algorithm>
 #include <map>
 #include <mutex>
 #include <cstring>
+
 
 SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Create(SilKit_DataPublisher** outPublisher, SilKit_Participant* participant,
                                            const char* controllerName,
                                            SilKit_DataSpec* dataSpec,
                                            uint8_t history)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outPublisher);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -55,10 +52,11 @@ CAPI_ENTER
     *outPublisher = reinterpret_cast<SilKit_DataPublisher*>(dataPublisher);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_DataPublisher_Publish(SilKit_DataPublisher* self, const SilKit_ByteVector* data)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(data);
@@ -67,13 +65,14 @@ CAPI_ENTER
     cppPublisher->Publish(SilKit::Util::ToSpan(*data));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_Create(SilKit_DataSubscriber** outSubscriber, SilKit_Participant* participant,
                                                const char* controllerName, SilKit_DataSpec* dataSpec,
                                                void* defaultDataHandlerContext,
                                                SilKit_DataMessageHandler_t defaultDataHandler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outSubscriber);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -108,11 +107,12 @@ CAPI_ENTER
     *outSubscriber = reinterpret_cast<SilKit_DataSubscriber*>(dataSubscriber);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_DataSubscriber_SetDataMessageHandler(SilKit_DataSubscriber* self, void* context,
                                                       SilKit_DataMessageHandler_t dataHandler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_HANDLER_PARAMETER(dataHandler);
@@ -136,4 +136,4 @@ CAPI_ENTER
         });
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

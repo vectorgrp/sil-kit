@@ -23,72 +23,79 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKitVersion.hpp"
 #include "CapiImpl.hpp"
 
+
 SilKit_ReturnCode SilKitCALL SilKit_Version_Major(uint32_t* outVersionMajor)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMajor);
 
     *outVersionMajor = SilKit::Version::Major();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_Minor(uint32_t* outVersionMinor)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMinor);
 
     *outVersionMinor = SilKit::Version::Minor();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_Patch(uint32_t* outVersionPatch)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionPatch);
 
     *outVersionPatch = SilKit::Version::Patch();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_BuildNumber(uint32_t* outVersionBuildNumber)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionBuildNumber);
 
     *outVersionBuildNumber = SilKit::Version::BuildNumber();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_String(const char** outVersionString)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionString);
 
     *outVersionString = SilKit::Version::String();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_VersionSuffix(const char** outVersionSuffix)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionSuffix);
 
     *outVersionSuffix = SilKit::Version::VersionSuffix();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_GitHash(const char** outVersionGitHash)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionGitHash);
 
     *outVersionGitHash = SilKit::Version::GitHash();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

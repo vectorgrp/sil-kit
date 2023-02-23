@@ -35,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 #include <cstring>
 
+
 namespace {
 
 SilKit::Services::Rpc::RpcCallResultHandler MakeRpcCallResultHandler(void* context, SilKit_RpcCallResultHandler_t handler)
@@ -64,11 +65,12 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
     };
 }
 
-}//namespace
+} // namespace
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
     SilKit_RpcSpec* rpcSpec, void* context, SilKit_RpcCallHandler_t callHandler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -85,11 +87,12 @@ CAPI_ENTER
     *out = reinterpret_cast<SilKit_RpcServer*>(rcpServer);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
                                          const SilKit_ByteVector* returnData)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(callHandle);
@@ -100,10 +103,11 @@ CAPI_ENTER
     cppServer->SubmitResult(cppCallHandle, SilKit::Util::ToSpan(*returnData));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_RpcCallHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(handler);
@@ -112,12 +116,13 @@ CAPI_ENTER
     cppServer->SetCallHandler(MakeRpcCallHandler(context, handler));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
                                    SilKit_RpcSpec* rpcSpec,
                                    void* context, SilKit_RpcCallResultHandler_t resultHandler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -134,10 +139,11 @@ CAPI_ENTER
     *out = reinterpret_cast<SilKit_RpcClient*>(rcpClient);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData, void* userContext)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(argumentData);
@@ -146,10 +152,11 @@ CAPI_ENTER
     cppClient->Call(SilKit::Util::ToSpan(*argumentData), userContext);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(handler);
@@ -158,4 +165,4 @@ CAPI_ENTER
     cppClient->SetCallResultHandler(MakeRpcCallResultHandler(context, handler));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS

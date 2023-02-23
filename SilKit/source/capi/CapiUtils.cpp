@@ -20,18 +20,10 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/capi/SilKit.h"
-#include "silkit/SilKit.hpp"
-#include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/orchestration/string_utils.hpp"
 
 #include <string>
-#include <iostream>
 #include <algorithm>
-#include <map>
-#include <mutex>
-#include <cstring>
-#include "CapiImpl.hpp"
 
 thread_local std::string SilKit_error_string = "";
 
@@ -43,6 +35,7 @@ thread_local std::string SilKit_error_string = "";
 #define SilKit_ReturnCode_BUFFERTOOSMALL_str "Operation failed because a buffer is too small."
 #define SilKit_ReturnCode_TIMEOUT_str "Operation timed out."
 #define SilKit_ReturnCode_UNSUPPORTEDSERVICE_str "The requested service is not supported."
+
 
 SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, SilKit_ReturnCode returnCode)
 {

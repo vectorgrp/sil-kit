@@ -23,18 +23,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKit.hpp"
 #include "silkit/services/logging/ILogger.hpp"
 #include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/ethernet/all.hpp"
-#include "silkit/services/ethernet/string_utils.hpp"
 
 #include <cstring>
 #include "CapiImpl.hpp"
 
-#define ETHERNET_MIN_FRAME_SIZE 60
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Create(SilKit_EthernetController** outController, SilKit_Participant* participant,
                                             const char* name, const char* network)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_OUT_PARAMETER(outController);
     ASSERT_VALID_POINTER_PARAMETER(participant);
@@ -46,10 +43,11 @@ CAPI_ENTER
     *outController = reinterpret_cast<SilKit_EthernetController*>(ethernetController);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Activate(SilKit_EthernetController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -57,10 +55,11 @@ CAPI_ENTER
     cppController->Activate();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_Deactivate(SilKit_EthernetController* controller)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -68,13 +67,14 @@ CAPI_ENTER
     cppController->Deactivate();
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameHandler(SilKit_EthernetController* controller, void* context,
                                                             SilKit_EthernetFrameHandler_t handler,
                                                             SilKit_Direction directionMask,
                                                             SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -103,10 +103,11 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameHandler(SilKit_EthernetController* controller, SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -114,14 +115,15 @@ CAPI_ENTER
     cppController->RemoveFrameHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddFrameTransmitHandler(SilKit_EthernetController* controller,
                                                                     void* context,
                                                                     SilKit_EthernetFrameTransmitHandler_t handler,
                                                                     SilKit_EthernetTransmitStatus transmitStatusMask,
                                                                     SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -144,11 +146,12 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveFrameTransmitHandler(SilKit_EthernetController* controller,
                                                                 SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -156,12 +159,13 @@ CAPI_ENTER
     cppController->RemoveFrameTransmitHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddStateChangeHandler(SilKit_EthernetController* controller, void* context,
                                                            SilKit_EthernetStateChangeHandler_t handler,
                                                            SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -180,11 +184,12 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveStateChangeHandler(SilKit_EthernetController* controller,
                                                               SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -192,12 +197,13 @@ CAPI_ENTER
     cppController->RemoveStateChangeHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_AddBitrateChangeHandler(SilKit_EthernetController* controller, void* context,
                                                              SilKit_EthernetBitrateChangeHandler_t handler,
                                                              SilKit_HandlerId* outHandlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_HANDLER_PARAMETER(handler);
@@ -217,11 +223,12 @@ CAPI_ENTER
     *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_RemoveBitrateChangeHandler(SilKit_EthernetController* controller,
                                                                 SilKit_HandlerId handlerId)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
@@ -229,11 +236,12 @@ CAPI_ENTER
     cppController->RemoveBitrateChangeHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_EthernetController_SendFrame(SilKit_EthernetController* controller, SilKit_EthernetFrame* frame,
                                                void* userContext)
-CAPI_ENTER
+try
 {
     ASSERT_VALID_POINTER_PARAMETER(controller);
     ASSERT_VALID_POINTER_PARAMETER(frame);
@@ -247,4 +255,4 @@ CAPI_ENTER
 
     return SilKit_ReturnCode_SUCCESS;
 }
-CAPI_LEAVE
+CAPI_CATCH_EXCEPTIONS
