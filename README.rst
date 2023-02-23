@@ -2,6 +2,13 @@
 The Vector SIL Kit
 ================================
 
+.. image:: https://img.shields.io/github/v/release/vectorgrp/sil-kit.svg
+   :target: https://github.com/vectorgrp/sil-kit/releases
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://github.com/vectorgrp/sil-kit/blob/main/LICENSE
+.. image:: https://img.shields.io/badge/documentation-html-blue.svg
+   :target: https://vectorgrp.github.io/sil-kit-docs
+
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments. 
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
 
