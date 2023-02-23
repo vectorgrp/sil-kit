@@ -6,6 +6,15 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.19] - UNRELEASED
+---------------------
+
+Changed
+~~~~~~~
+
+- Use function-try-blocks for C-API definitions to reduce indentation and reformat some code
+  for better readability.
+
 
 [4.0.18] - 2023-02-21
 ---------------------
