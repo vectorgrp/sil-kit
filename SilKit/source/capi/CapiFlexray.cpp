@@ -109,433 +109,412 @@ void assign(SilKit::Services::Flexray::FlexrayControllerConfig& cppConfig, const
 }
 }//namespace
 
-extern "C"
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Create(SilKit_FlexrayController** outController, SilKit_Participant* participant,
+                                           const char* name, const char* network)
+CAPI_ENTER
 {
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Create(SilKit_FlexrayController** outController, SilKit_Participant* participant,
-                                               const char* name, const char* network)
+    ASSERT_VALID_OUT_PARAMETER(outController);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+    ASSERT_VALID_POINTER_PARAMETER(name);
+    ASSERT_VALID_POINTER_PARAMETER(network);
+
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    auto controller = cppParticipant->CreateFlexrayController(name, network);
+    if (controller == nullptr)
     {
-        ASSERT_VALID_OUT_PARAMETER(outController);
-        ASSERT_VALID_POINTER_PARAMETER(participant);
-        ASSERT_VALID_POINTER_PARAMETER(name);
-        ASSERT_VALID_POINTER_PARAMETER(network);
-        CAPI_ENTER
-        {
-            auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-            auto controller = cppParticipant->CreateFlexrayController(name, network);
-            if (controller == nullptr)
-            {
-                return SilKit_ReturnCode_UNSPECIFIEDERROR;
-            }
-            *outController = reinterpret_cast<SilKit_FlexrayController*>(controller);
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
+        return SilKit_ReturnCode_UNSPECIFIEDERROR;
     }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller,
-                                                  const SilKit_FlexrayControllerConfig* config)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_POINTER_PARAMETER(config);
-        ASSERT_VALID_POINTER_PARAMETER(config->clusterParams);
-        ASSERT_VALID_POINTER_PARAMETER(config->nodeParams);
-        // Versioning checks
-        ASSERT_VALID_STRUCT_HEADER(config);
-        ASSERT_VALID_STRUCT_HEADER(config->clusterParams);
-        ASSERT_VALID_STRUCT_HEADER(config->nodeParams);
-
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            SilKit::Services::Flexray::FlexrayControllerConfig cppConfig;
-            assign(cppConfig, config);
-
-            cppController->Configure(cppConfig);
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx,
-                                                            const SilKit_FlexrayTxBufferConfig* config)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_POINTER_PARAMETER(config);
-        ASSERT_VALID_STRUCT_HEADER(config);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            SilKit::Services::Flexray::FlexrayTxBufferConfig cppConfig;
-            assign(cppConfig, config);
-
-            cppController->ReconfigureTxBuffer(txBufferIdx, cppConfig);
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller,
-                                                       const SilKit_FlexrayTxBufferUpdate* update)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_POINTER_PARAMETER(update);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            SilKit::Services::Flexray::FlexrayTxBufferUpdate cppUpdate;
-            cppUpdate.txBufferIndex = update->txBufferIndex;
-            cppUpdate.payloadDataValid = update->payloadDataValid == SilKit_True;
-            if (update->payloadDataValid)
-            {
-                ASSERT_VALID_POINTER_PARAMETER(update->payload.data);
-                cppUpdate.payload = SilKit::Util::ToSpan(update->payload);
-            }
-            cppController->UpdateTxBuffer(cppUpdate);
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            switch (cmd)
-            {
-            case SilKit_FlexrayChiCommand_RUN:
-                cppController->Run();
-                break;
-            case SilKit_FlexrayChiCommand_DEFERRED_HALT:
-                cppController->DeferredHalt();
-                break;
-            case SilKit_FlexrayChiCommand_FREEZE:
-                cppController->Freeze();
-                break;
-            case SilKit_FlexrayChiCommand_ALLOW_COLDSTART:
-                cppController->AllowColdstart();
-                break;
-            case SilKit_FlexrayChiCommand_ALL_SLOTS:
-                cppController->AllSlots();
-                break;
-            case SilKit_FlexrayChiCommand_WAKEUP:
-                cppController->Wakeup();
-                break;
-            default:
-                return SilKit_ReturnCode_BADPARAMETER;
-            }
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
-                                                        SilKit_FlexrayFrameHandler_t handler, SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddFrameHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexrayFrameEvent& msg) {
-                    SilKit_FlexrayFrameEvent message;
-                    SilKit_FlexrayFrame frame;
-                    SilKit_FlexrayHeader header;
-
-                    SilKit_Struct_Init(SilKit_FlexrayFrameEvent, message);
-                    SilKit_Struct_Init(SilKit_FlexrayFrame, frame);
-                    SilKit_Struct_Init(SilKit_FlexrayHeader, header);
-
-                    header.cycleCount = msg.frame.header.cycleCount;
-                    header.frameId = msg.frame.header.frameId;
-                    header.flags = msg.frame.header.flags;
-                    header.headerCrc = msg.frame.header.headerCrc;
-                    header.payloadLength = msg.frame.header.payloadLength;
-
-                    frame.header = &header;
-                    frame.payload.data = (uint8_t*)msg.frame.payload.data();
-                    frame.payload.size = (uint32_t)msg.frame.payload.size();
-
-                    message.timestamp = msg.timestamp.count();
-                    message.channel = (SilKit_FlexrayChannel)msg.channel;
-                    message.frame = &frame;
-
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemoveFrameHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller, void* context,
-                                                                SilKit_FlexrayFrameTransmitHandler_t handler,
-                                                                SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddFrameTransmitHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
-                                   const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& msg) {
-                    SilKit_FlexrayFrameTransmitEvent message;
-                    SilKit_FlexrayFrame frame;
-                    SilKit_FlexrayHeader header;
-
-                    SilKit_Struct_Init(SilKit_FlexrayFrameEvent, message);
-                    SilKit_Struct_Init(SilKit_FlexrayFrame, frame);
-                    SilKit_Struct_Init(SilKit_FlexrayHeader, header);
-
-                    header.cycleCount = msg.frame.header.cycleCount;
-                    header.frameId = msg.frame.header.frameId;
-                    header.flags = msg.frame.header.flags;
-                    header.headerCrc = msg.frame.header.headerCrc;
-                    header.payloadLength = msg.frame.header.payloadLength;
-
-                    frame.payload.data = (uint8_t*)msg.frame.payload.data();
-                    frame.payload.size = (uint32_t)msg.frame.payload.size();
-                    frame.header = &header;
-
-                    message.timestamp = msg.timestamp.count();
-                    message.txBufferIndex = msg.txBufferIndex;
-                    message.channel = (SilKit_FlexrayChannel)msg.channel;
-                    message.frame = &frame;
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
-                                                                   SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemoveFrameTransmitHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
-                                                         SilKit_FlexrayWakeupHandler_t handler, SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddWakeupHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexrayWakeupEvent& msg) {
-                    SilKit_FlexrayWakeupEvent message;
-                    SilKit_Struct_Init(SilKit_FlexrayWakeupEvent, message);
-
-                    message.timestamp = msg.timestamp.count();
-                    message.channel = (SilKit_FlexrayChannel)msg.channel;
-                    message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemoveWakeupHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller, void* context,
-                                                            SilKit_FlexrayPocStatusHandler_t handler,
-                                                            SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddPocStatusHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
-                                   const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg) {
-                    SilKit_FlexrayPocStatusEvent message;
-                    SilKit_Struct_Init(SilKit_FlexrayPocStatusEvent, message);
-                    message.timestamp = msg.timestamp.count();
-                    message.state = (SilKit_FlexrayPocState)msg.state;
-                    message.chiHaltRequest = msg.chiHaltRequest;
-                    message.coldstartNoise = msg.coldstartNoise;
-                    message.freeze = msg.freeze;
-                    message.chiReadyRequest = msg.chiReadyRequest;
-                    message.errorMode = (SilKit_FlexrayErrorModeType)msg.errorMode;
-                    message.slotMode = (SilKit_FlexraySlotModeType)msg.slotMode;
-                    message.startupState = (SilKit_FlexrayStartupStateType)msg.startupState;
-                    message.wakeupStatus = (SilKit_FlexrayWakeupStatusType)msg.wakeupStatus;
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
-                                                               SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemovePocStatusHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
-                                                         SilKit_FlexraySymbolHandler_t handler, SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddSymbolHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexraySymbolEvent& msg) {
-                    SilKit_FlexraySymbolEvent message;
-                    SilKit_Struct_Init(SilKit_FlexraySymbolEvent, message);
-                    message.timestamp = msg.timestamp.count();
-                    message.channel = (SilKit_FlexrayChannel)msg.channel;
-                    message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemoveSymbolHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
-                                                                 SilKit_FlexraySymbolTransmitHandler_t handler,
-                                                                 SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddSymbolTransmitHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
-                                   const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg) {
-                    SilKit_FlexraySymbolTransmitEvent message;
-                    SilKit_Struct_Init(SilKit_FlexraySymbolTransmitEvent, message);
-                    message.timestamp = msg.timestamp.count();
-                    message.channel = (SilKit_FlexrayChannel)msg.channel;
-                    message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
-                                                                    SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemoveSymbolTransmitHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller, void* context,
-                                                             SilKit_FlexrayCycleStartHandler_t handler,
-                                                             SilKit_HandlerId* outHandlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        ASSERT_VALID_HANDLER_PARAMETER(handler);
-        ASSERT_VALID_OUT_PARAMETER(outHandlerId);
-        CAPI_ENTER
-        {
-            SilKit::Services::Flexray::IFlexrayController* cppController =
-                reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            *outHandlerId = (SilKit_HandlerId)cppController->AddCycleStartHandler(
-                [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
-                                   const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg) {
-                    SilKit_FlexrayCycleStartEvent message;
-                    SilKit_Struct_Init(SilKit_FlexrayCycleStartEvent, message);
-                    message.timestamp = msg.timestamp.count();
-                    message.cycleCounter = msg.cycleCounter;
-                    handler(context, ctrl, &message);
-                });
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
-
-    SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
-                                                                SilKit_HandlerId handlerId)
-    {
-        ASSERT_VALID_POINTER_PARAMETER(controller);
-        CAPI_ENTER
-        {
-            auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
-            cppController->RemoveCycleStartHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
-            return SilKit_ReturnCode_SUCCESS;
-        }
-        CAPI_LEAVE
-    }
+    *outController = reinterpret_cast<SilKit_FlexrayController*>(controller);
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_Configure(SilKit_FlexrayController* controller,
+                                              const SilKit_FlexrayControllerConfig* config)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(config);
+    ASSERT_VALID_POINTER_PARAMETER(config->clusterParams);
+    ASSERT_VALID_POINTER_PARAMETER(config->nodeParams);
+    // Versioning checks
+    ASSERT_VALID_STRUCT_HEADER(config);
+    ASSERT_VALID_STRUCT_HEADER(config->clusterParams);
+    ASSERT_VALID_STRUCT_HEADER(config->nodeParams);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    SilKit::Services::Flexray::FlexrayControllerConfig cppConfig;
+    assign(cppConfig, config);
+
+    cppController->Configure(cppConfig);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ReconfigureTxBuffer(SilKit_FlexrayController* controller, uint16_t txBufferIdx,
+                                                        const SilKit_FlexrayTxBufferConfig* config)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(config);
+    ASSERT_VALID_STRUCT_HEADER(config);
+    ASSERT_VALID_BOOL_PARAMETER(config->hasPayloadPreambleIndicator);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    SilKit::Services::Flexray::FlexrayTxBufferConfig cppConfig;
+    assign(cppConfig, config);
+
+    cppController->ReconfigureTxBuffer(txBufferIdx, cppConfig);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_UpdateTxBuffer(SilKit_FlexrayController* controller,
+                                                   const SilKit_FlexrayTxBufferUpdate* update)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(update);
+    ASSERT_VALID_BOOL_PARAMETER(update->payloadDataValid);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    SilKit::Services::Flexray::FlexrayTxBufferUpdate cppUpdate;
+    cppUpdate.txBufferIndex = update->txBufferIndex;
+    cppUpdate.payloadDataValid = update->payloadDataValid == SilKit_True;
+    if (update->payloadDataValid)
+    {
+        ASSERT_VALID_POINTER_PARAMETER(update->payload.data);
+        cppUpdate.payload = SilKit::Util::ToSpan(update->payload);
+    }
+    cppController->UpdateTxBuffer(cppUpdate);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_ExecuteCmd(SilKit_FlexrayController* controller, SilKit_FlexrayChiCommand cmd)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    switch (cmd)
+    {
+    case SilKit_FlexrayChiCommand_RUN:
+        cppController->Run();
+        break;
+    case SilKit_FlexrayChiCommand_DEFERRED_HALT:
+        cppController->DeferredHalt();
+        break;
+    case SilKit_FlexrayChiCommand_FREEZE:
+        cppController->Freeze();
+        break;
+    case SilKit_FlexrayChiCommand_ALLOW_COLDSTART:
+        cppController->AllowColdstart();
+        break;
+    case SilKit_FlexrayChiCommand_ALL_SLOTS:
+        cppController->AllSlots();
+        break;
+    case SilKit_FlexrayChiCommand_WAKEUP:
+        cppController->Wakeup();
+        break;
+    default:
+        return SilKit_ReturnCode_BADPARAMETER;
+    }
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameHandler(SilKit_FlexrayController* controller, void* context,
+                                                    SilKit_FlexrayFrameHandler_t handler, SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddFrameHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexrayFrameEvent& msg) {
+            SilKit_FlexrayFrameEvent message;
+            SilKit_FlexrayFrame frame;
+            SilKit_FlexrayHeader header;
+
+            SilKit_Struct_Init(SilKit_FlexrayFrameEvent, message);
+            SilKit_Struct_Init(SilKit_FlexrayFrame, frame);
+            SilKit_Struct_Init(SilKit_FlexrayHeader, header);
+
+            header.cycleCount = msg.frame.header.cycleCount;
+            header.frameId = msg.frame.header.frameId;
+            header.flags = msg.frame.header.flags;
+            header.headerCrc = msg.frame.header.headerCrc;
+            header.payloadLength = msg.frame.header.payloadLength;
+
+            frame.header = &header;
+            frame.payload.data = (uint8_t*)msg.frame.payload.data();
+            frame.payload.size = (uint32_t)msg.frame.payload.size();
+
+            message.timestamp = msg.timestamp.count();
+            message.channel = (SilKit_FlexrayChannel)msg.channel;
+            message.frame = &frame;
+
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemoveFrameHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddFrameTransmitHandler(SilKit_FlexrayController* controller, void* context,
+                                                            SilKit_FlexrayFrameTransmitHandler_t handler,
+                                                            SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddFrameTransmitHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
+                           const SilKit::Services::Flexray::FlexrayFrameTransmitEvent& msg) {
+            SilKit_FlexrayFrameTransmitEvent message;
+            SilKit_FlexrayFrame frame;
+            SilKit_FlexrayHeader header;
+
+            SilKit_Struct_Init(SilKit_FlexrayFrameEvent, message);
+            SilKit_Struct_Init(SilKit_FlexrayFrame, frame);
+            SilKit_Struct_Init(SilKit_FlexrayHeader, header);
+
+            header.cycleCount = msg.frame.header.cycleCount;
+            header.frameId = msg.frame.header.frameId;
+            header.flags = msg.frame.header.flags;
+            header.headerCrc = msg.frame.header.headerCrc;
+            header.payloadLength = msg.frame.header.payloadLength;
+
+            frame.payload.data = (uint8_t*)msg.frame.payload.data();
+            frame.payload.size = (uint32_t)msg.frame.payload.size();
+            frame.header = &header;
+
+            message.timestamp = msg.timestamp.count();
+            message.txBufferIndex = msg.txBufferIndex;
+            message.channel = (SilKit_FlexrayChannel)msg.channel;
+            message.frame = &frame;
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveFrameTransmitHandler(SilKit_FlexrayController* controller,
+                                                               SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemoveFrameTransmitHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddWakeupHandler(SilKit_FlexrayController* controller, void* context,
+                                                     SilKit_FlexrayWakeupHandler_t handler, SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddWakeupHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexrayWakeupEvent& msg) {
+            SilKit_FlexrayWakeupEvent message;
+            SilKit_Struct_Init(SilKit_FlexrayWakeupEvent, message);
+
+            message.timestamp = msg.timestamp.count();
+            message.channel = (SilKit_FlexrayChannel)msg.channel;
+            message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveWakeupHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemoveWakeupHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddPocStatusHandler(SilKit_FlexrayController* controller, void* context,
+                                                        SilKit_FlexrayPocStatusHandler_t handler,
+                                                        SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddPocStatusHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
+                           const SilKit::Services::Flexray::FlexrayPocStatusEvent& msg) {
+            SilKit_FlexrayPocStatusEvent message;
+            SilKit_Struct_Init(SilKit_FlexrayPocStatusEvent, message);
+            message.timestamp = msg.timestamp.count();
+            message.state = (SilKit_FlexrayPocState)msg.state;
+            message.chiHaltRequest = msg.chiHaltRequest;
+            message.coldstartNoise = msg.coldstartNoise;
+            message.freeze = msg.freeze;
+            message.chiReadyRequest = msg.chiReadyRequest;
+            message.errorMode = (SilKit_FlexrayErrorModeType)msg.errorMode;
+            message.slotMode = (SilKit_FlexraySlotModeType)msg.slotMode;
+            message.startupState = (SilKit_FlexrayStartupStateType)msg.startupState;
+            message.wakeupStatus = (SilKit_FlexrayWakeupStatusType)msg.wakeupStatus;
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemovePocStatusHandler(SilKit_FlexrayController* controller,
+                                                           SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemovePocStatusHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolHandler(SilKit_FlexrayController* controller, void* context,
+                                                     SilKit_FlexraySymbolHandler_t handler, SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddSymbolHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl, const SilKit::Services::Flexray::FlexraySymbolEvent& msg) {
+            SilKit_FlexraySymbolEvent message;
+            SilKit_Struct_Init(SilKit_FlexraySymbolEvent, message);
+            message.timestamp = msg.timestamp.count();
+            message.channel = (SilKit_FlexrayChannel)msg.channel;
+            message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolHandler(SilKit_FlexrayController* controller, SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemoveSymbolHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddSymbolTransmitHandler(SilKit_FlexrayController* controller, void* context,
+                                                             SilKit_FlexraySymbolTransmitHandler_t handler,
+                                                             SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddSymbolTransmitHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
+                           const SilKit::Services::Flexray::FlexraySymbolTransmitEvent& msg) {
+            SilKit_FlexraySymbolTransmitEvent message;
+            SilKit_Struct_Init(SilKit_FlexraySymbolTransmitEvent, message);
+            message.timestamp = msg.timestamp.count();
+            message.channel = (SilKit_FlexrayChannel)msg.channel;
+            message.pattern = (SilKit_FlexraySymbolPattern)msg.pattern;
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveSymbolTransmitHandler(SilKit_FlexrayController* controller,
+                                                                SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemoveSymbolTransmitHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_AddCycleStartHandler(SilKit_FlexrayController* controller, void* context,
+                                                         SilKit_FlexrayCycleStartHandler_t handler,
+                                                         SilKit_HandlerId* outHandlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    SilKit::Services::Flexray::IFlexrayController* cppController =
+        reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    *outHandlerId = (SilKit_HandlerId)cppController->AddCycleStartHandler(
+        [context, handler](SilKit::Services::Flexray::IFlexrayController* ctrl,
+                           const SilKit::Services::Flexray::FlexrayCycleStartEvent& msg) {
+            SilKit_FlexrayCycleStartEvent message;
+            SilKit_Struct_Init(SilKit_FlexrayCycleStartEvent, message);
+            message.timestamp = msg.timestamp.count();
+            message.cycleCounter = msg.cycleCounter;
+            handler(context, ctrl, &message);
+        });
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
+
+SilKit_ReturnCode SilKitCALL SilKit_FlexrayController_RemoveCycleStartHandler(SilKit_FlexrayController* controller,
+                                                            SilKit_HandlerId handlerId)
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto cppController = reinterpret_cast<SilKit::Services::Flexray::IFlexrayController*>(controller);
+    cppController->RemoveCycleStartHandler(static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE

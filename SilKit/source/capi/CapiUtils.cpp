@@ -35,8 +35,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 thread_local std::string SilKit_error_string = "";
 
-extern "C" {
-
 #define SilKit_ReturnCode_SUCCESS_str "Operation succeeded."
 #define SilKit_ReturnCode_UNSPECIFIEDERROR_str "An unspecified error occured."
 #define SilKit_ReturnCode_NOTSUPPORTED_str "Operation is not supported."
@@ -87,9 +85,8 @@ SilKit_ReturnCode SilKitCALL SilKit_ReturnCodeToString(const char** outString, S
 }
 
 
-const char* SilKitCALL SilKit_GetLastErrorString() {
+const char* SilKitCALL SilKit_GetLastErrorString()
+{
     const char* error_string = SilKit_error_string.c_str();
     return error_string;
 }
-
-}//extern "C"

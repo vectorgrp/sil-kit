@@ -66,106 +66,96 @@ SilKit::Services::Rpc::RpcCallHandler MakeRpcCallHandler(void* context, SilKit_R
 
 }//namespace
 
-extern "C" {
-
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_Create(SilKit_RpcServer** out, SilKit_Participant* participant, const char* controllerName,
     SilKit_RpcSpec* rpcSpec, void* context, SilKit_RpcCallHandler_t callHandler)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(controllerName);
     ASSERT_VALID_POINTER_PARAMETER(rpcSpec);
     ASSERT_VALID_HANDLER_PARAMETER(callHandler);
-    CAPI_ENTER
-    {
-        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        SilKit::Services::Rpc::RpcSpec cppDataSpec;
-        assign(cppDataSpec, rpcSpec);
-        auto rcpServer = cppParticipant->CreateRpcServer(controllerName, cppDataSpec,
-                                                         MakeRpcCallHandler(context, callHandler));
 
-        *out = reinterpret_cast<SilKit_RpcServer*>(rcpServer);
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    SilKit::Services::Rpc::RpcSpec cppDataSpec;
+    assign(cppDataSpec, rpcSpec);
+    auto rcpServer = cppParticipant->CreateRpcServer(controllerName, cppDataSpec,
+                                                     MakeRpcCallHandler(context, callHandler));
+
+    *out = reinterpret_cast<SilKit_RpcServer*>(rcpServer);
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SubmitResult(SilKit_RpcServer* self, SilKit_RpcCallHandle* callHandle,
                                          const SilKit_ByteVector* returnData)
+CAPI_ENTER
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(callHandle);
     ASSERT_VALID_POINTER_PARAMETER(returnData);
-    CAPI_ENTER
-    {
-        auto cppServer = reinterpret_cast<SilKit::Services::Rpc::IRpcServer*>(self);
-        auto cppCallHandle = reinterpret_cast<SilKit::Services::Rpc::IRpcCallHandle*>(callHandle);
-        cppServer->SubmitResult(cppCallHandle, SilKit::Util::ToSpan(*returnData));
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    auto cppServer = reinterpret_cast<SilKit::Services::Rpc::IRpcServer*>(self);
+    auto cppCallHandle = reinterpret_cast<SilKit::Services::Rpc::IRpcCallHandle*>(callHandle);
+    cppServer->SubmitResult(cppCallHandle, SilKit::Util::ToSpan(*returnData));
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcServer_SetCallHandler(SilKit_RpcServer* self, void* context, SilKit_RpcCallHandler_t handler)
-        {
-            ASSERT_VALID_POINTER_PARAMETER(self);
-            ASSERT_VALID_POINTER_PARAMETER(handler);
-            CAPI_ENTER
-            {
-                auto cppServer = reinterpret_cast<SilKit::Services::Rpc::IRpcServer*>(self);
-                cppServer->SetCallHandler(MakeRpcCallHandler(context, handler));
-                return SilKit_ReturnCode_SUCCESS;
-            }
-            CAPI_LEAVE
-        }
+CAPI_ENTER
+{
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_POINTER_PARAMETER(handler);
+
+    auto cppServer = reinterpret_cast<SilKit::Services::Rpc::IRpcServer*>(self);
+    cppServer->SetCallHandler(MakeRpcCallHandler(context, handler));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Create(SilKit_RpcClient** out, SilKit_Participant* participant, const char* controllerName,
                                    SilKit_RpcSpec* rpcSpec,
                                    void* context, SilKit_RpcCallResultHandler_t resultHandler)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(out);
     ASSERT_VALID_POINTER_PARAMETER(participant);
     ASSERT_VALID_POINTER_PARAMETER(controllerName);
     ASSERT_VALID_POINTER_PARAMETER(rpcSpec);
     ASSERT_VALID_HANDLER_PARAMETER(resultHandler);
-    CAPI_ENTER
-    {
-        auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
-        SilKit::Services::Rpc::RpcSpec cppRpcSpec;
-        assign(cppRpcSpec, rpcSpec);
-        auto rcpClient = cppParticipant->CreateRpcClient(controllerName, cppRpcSpec,
-                                                         MakeRpcCallResultHandler(context, resultHandler));
 
-        *out = reinterpret_cast<SilKit_RpcClient*>(rcpClient);
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+    auto cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    SilKit::Services::Rpc::RpcSpec cppRpcSpec;
+    assign(cppRpcSpec, rpcSpec);
+    auto rcpClient = cppParticipant->CreateRpcClient(controllerName, cppRpcSpec,
+                                                     MakeRpcCallResultHandler(context, resultHandler));
+
+    *out = reinterpret_cast<SilKit_RpcClient*>(rcpClient);
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData, void* userContext)
+CAPI_ENTER
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(argumentData);
-    CAPI_ENTER
-    {
-        auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
-        cppClient->Call(SilKit::Util::ToSpan(*argumentData), userContext);
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
+    cppClient->Call(SilKit::Util::ToSpan(*argumentData), userContext);
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
+CAPI_ENTER
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(handler);
-    CAPI_ENTER
-    {
-        auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
-        cppClient->SetCallResultHandler(MakeRpcCallResultHandler(context, handler));
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
 
-} // extern "C"
+    auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
+    cppClient->SetCallResultHandler(MakeRpcCallResultHandler(context, handler));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE

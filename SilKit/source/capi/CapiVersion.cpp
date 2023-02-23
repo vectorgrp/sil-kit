@@ -23,84 +23,72 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/SilKitVersion.hpp"
 #include "CapiImpl.hpp"
 
-extern "C"
-{
-    
 SilKit_ReturnCode SilKitCALL SilKit_Version_Major(uint32_t* outVersionMajor)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMajor);
-    CAPI_ENTER 
-    { 
-        *outVersionMajor = SilKit::Version::Major();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    *outVersionMajor = SilKit::Version::Major();
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_Minor(uint32_t* outVersionMinor)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMinor);
-    CAPI_ENTER 
-    { 
-        *outVersionMinor = SilKit::Version::Minor();
-        return SilKit_ReturnCode_SUCCESS; 
-    }
-    CAPI_LEAVE
+
+    *outVersionMinor = SilKit::Version::Minor();
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_Patch(uint32_t* outVersionPatch)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionPatch);
-    CAPI_ENTER 
-    { 
-        *outVersionPatch = SilKit::Version::Patch();
-        return SilKit_ReturnCode_SUCCESS; 
-    }
-    CAPI_LEAVE
+
+    *outVersionPatch = SilKit::Version::Patch();
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_BuildNumber(uint32_t* outVersionBuildNumber)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionBuildNumber);
-    CAPI_ENTER 
-    { 
-        *outVersionBuildNumber = SilKit::Version::BuildNumber();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    *outVersionBuildNumber = SilKit::Version::BuildNumber();
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_String(const char** outVersionString)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionString);
-    CAPI_ENTER
-    {
-        *outVersionString = SilKit::Version::String();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    *outVersionString = SilKit::Version::String();
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_VersionSuffix(const char** outVersionSuffix)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionSuffix);
-    CAPI_ENTER
-    {
-        *outVersionSuffix = SilKit::Version::VersionSuffix();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    *outVersionSuffix = SilKit::Version::VersionSuffix();
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
 SilKit_ReturnCode SilKitCALL SilKit_Version_GitHash(const char** outVersionGitHash)
+CAPI_ENTER
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionGitHash);
-    CAPI_ENTER
-    {
-        *outVersionGitHash = SilKit::Version::GitHash();
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
 
-} //extern "C"
+    *outVersionGitHash = SilKit::Version::GitHash();
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_LEAVE

@@ -27,35 +27,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <string>
 
-extern "C" {
-
 SilKit_ReturnCode SilKitCALL SilKit_Logger_Log(SilKit_Logger* self, SilKit_LoggingLevel level, const char* message)
+CAPI_ENTER
 {
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(message);
-    CAPI_ENTER
-    {
-        auto logger = reinterpret_cast<SilKit::Services::Logging::ILogger*>(self);
-        auto enumLevel = static_cast<SilKit::Services::Logging::Level>(level);
-        std::string useString{message}; //ensure we do not trigger the FMT template overload for const char*
-        logger->Log(enumLevel, useString);
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
+
+    auto logger = reinterpret_cast<SilKit::Services::Logging::ILogger*>(self);
+    auto enumLevel = static_cast<SilKit::Services::Logging::Level>(level);
+    std::string useString{message}; //ensure we do not trigger the FMT template overload for const char*
+    logger->Log(enumLevel, useString);
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE
 
-
-SilKit_ReturnCode SilKitCALL SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel) {
+SilKit_ReturnCode SilKitCALL SilKit_Logger_GetLogLevel(SilKit_Logger* self, SilKit_LoggingLevel* outLevel)
+CAPI_ENTER
+{
     ASSERT_VALID_POINTER_PARAMETER(self);
     ASSERT_VALID_POINTER_PARAMETER(outLevel);
-    CAPI_ENTER
-    {
-        auto logger = reinterpret_cast<SilKit::Services::Logging::ILogger*>(self);
-        auto enumLevel = static_cast<SilKit_LoggingLevel>(logger->GetLogLevel());
-        *outLevel = enumLevel;
-        return SilKit_ReturnCode_SUCCESS;
-    }
-    CAPI_LEAVE
-}
 
+    auto logger = reinterpret_cast<SilKit::Services::Logging::ILogger*>(self);
+    auto enumLevel = static_cast<SilKit_LoggingLevel>(logger->GetLogLevel());
+    *outLevel = enumLevel;
+    return SilKit_ReturnCode_SUCCESS;
 }
+CAPI_LEAVE

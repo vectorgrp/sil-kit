@@ -19,84 +19,90 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-
 #pragma once
+
 #include "silkit/capi/Types.h"
 #include "silkit/capi/InterfaceIdentifiers.h"
 #include "silkit/participant/exception.hpp"
 
+#include "CapiExceptions.hpp"
 #include "TypeUtils.hpp"
 
-#define CAPI_ENTER \
-    try
+#define CAPI_ENTER try
 
 #define CAPI_LEAVE \
-    catch (const SilKit::StateError& e) { \
+    catch (const SilKit::CapiBadParameterError& e) \
+    { \
+        SilKit_error_string = e.what(); \
+        return SilKit_ReturnCode_BADPARAMETER; \
+    } \
+    catch (const SilKit::StateError& e) \
+    { \
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_WRONGSTATE; \
     } \
-    catch (const SilKit::SilKitError& e) { \
+    catch (const SilKit::SilKitError& e) \
+    { \
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     } \
-    catch (const std::runtime_error& e) { \
+    catch (const std::runtime_error& e) \
+    { \
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     } \
-    catch (const std::exception& e) { \
+    catch (const std::exception& e) \
+    { \
         SilKit_error_string = e.what(); \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
     } \
-    catch (...) { \
+    catch (...) \
+    { \
         return SilKit_ReturnCode_UNSPECIFIEDERROR; \
-    } \
-
-#define kInvalidFunctionPointer  "Handler function parameter must not be null."
+    }
 
 #define ASSERT_VALID_POINTER_PARAMETER(p) \
     if (p == nullptr) \
     { \
-        SilKit_error_string = "Parameter '" #p "' must not be null."; \
-        return SilKit_ReturnCode_BADPARAMETER; \
+        throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
     }
+
 #define ASSERT_VALID_POINTER_TO_POINTER_PARAMETER(p) \
     if (p == nullptr) \
     { \
-        SilKit_error_string = "Parameter '" #p "' must not be null."; \
-        return SilKit_ReturnCode_BADPARAMETER; \
+        throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not be null."}; \
     } \
     if (*p == nullptr) \
     { \
-        SilKit_error_string = "Parameter '" #p "' must not point to a null value."; \
-        return SilKit_ReturnCode_BADPARAMETER; \
+        throw SilKit::CapiBadParameterError{"Parameter '" #p "' must not point to a null value."}; \
     }
+
 #define ASSERT_VALID_OUT_PARAMETER(p) \
     if (p == nullptr) \
     { \
-        SilKit_error_string = "Return parameter '" #p "' must not be null."; \
-        return SilKit_ReturnCode_BADPARAMETER; \
+        throw SilKit::CapiBadParameterError{"Return parameter '" #p "' must not be null."}; \
     }
+
+#define kInvalidFunctionPointer "Handler function parameter must not be null."
+
 #define ASSERT_VALID_HANDLER_PARAMETER(handler) \
     if (handler == nullptr) \
     { \
-        SilKit_error_string = kInvalidFunctionPointer; \
-        return SilKit_ReturnCode_BADPARAMETER; \
+        throw SilKit::CapiBadParameterError{kInvalidFunctionPointer}; \
     }
 
 #define ASSERT_VALID_BOOL_PARAMETER(b) \
     if (!(b == SilKit_True || b == SilKit_False)) \
     { \
-        SilKit_error_string = "The parameter '" #b "' is not a valid SilKit_Bool."; \
-        return SilKit_ReturnCode_BADPARAMETER; \
+        throw SilKit::CapiBadParameterError{"The parameter '" #b "' is not a valid SilKit_Bool."}; \
     }
 
 #define ASSERT_VALID_STRUCT_HEADER(p) \
-    if (!HasValidStructHeader(p))\
-    {\
-        SilKit_error_string = "The parameter '" #p "' has no valid SilKit_StructHeader. Check your library version";\
-        return SilKit_ReturnCode_BADPARAMETER;\
+    if (!HasValidStructHeader(p)) \
+    { \
+        throw SilKit::CapiBadParameterError{"The parameter '" #p \
+                                            "' has no valid SilKit_StructHeader. Check your library version"}; \
     }
-    
 
 extern thread_local std::string SilKit_error_string;
 
