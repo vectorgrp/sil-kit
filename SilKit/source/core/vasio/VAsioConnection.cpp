@@ -814,7 +814,10 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     Services::Logging::Debug(_logger, "Received participant announcement reply from {} protocol version {}",
                              from->GetInfo().participantName, remoteVersion);
 
-    auto iter = std::find(_pendingParticipantReplies.begin(), _pendingParticipantReplies.end(), from);
+    auto iter =
+        std::find_if(_pendingParticipantReplies.begin(), _pendingParticipantReplies.end(), [&from](const auto& peer) {
+            return peer.get() == from;
+        });
     if (iter != _pendingParticipantReplies.end())
     {
         _pendingParticipantReplies.erase(iter);
@@ -857,9 +860,15 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
                                  peerInfo.participantId, printUris(peerInfo));
 
         auto peer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
+
+        // Remember that we expect a reply from this peer
+        _pendingParticipantReplies.push_back(peer);
+
+        // Try to connect to the peer only _after_ remembering that we need to connect, otherwise suitable error will
+        // be raised.
         try
         {
-            peer->Connect(std::move(peerInfo));
+            peer->Connect(peerInfo);
         }
         catch (const std::exception&)
         {
@@ -867,7 +876,6 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
         }
 
         // We connected to the other peer. tell him who we are.
-        _pendingParticipantReplies.push_back(peer.get());
         SendParticipantAnnouncement(peer.get());
 
         // The service ID is incomplete at this stage.

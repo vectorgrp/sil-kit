@@ -498,7 +498,7 @@ private:
     // After receiving the list of known participants from the registry, we keep
     // track of the sent ParticipantAnnouncements and wait for the corresponding
     // replies.
-    std::vector<IVAsioPeer*> _pendingParticipantReplies;
+    std::vector<std::shared_ptr<IVAsioPeer>> _pendingParticipantReplies;
     std::promise<void> _receivedAllParticipantReplies;
 
     std::atomic<bool> _hasReceivedKnownParticipants{false};

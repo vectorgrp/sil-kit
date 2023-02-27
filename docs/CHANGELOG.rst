@@ -15,16 +15,15 @@ Changed
 - Use function-try-blocks for C-API definitions to reduce indentation and reformat some code
   for better readability.
 
-
-[4.0.19] - UNRELEASED
----------------------
-
 Fixed
 ~~~~~
 
 - Allow installing and starting the sil-kit-registry.exe as a Windows Service on Windows Containers during ``docker build`` steps.
   The layer creation fails if a domain socket is still active during shutdown of the temporary container.
   Disables the local-domain sockets of the ``sil-kit-registry.exe`` when running as a Windows Service.
+
+- When a participant is unable to connect to another participant, the correct
+  error message is logged, and an error is raised.
 
 
 [4.0.18] - 2023-02-21

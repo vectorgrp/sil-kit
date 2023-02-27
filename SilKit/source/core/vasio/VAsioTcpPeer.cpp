@@ -397,9 +397,7 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
     if (!_socket.is_open())
     {
-        auto errorMsg = fmt::format("Failed to connect to host URIs: \"{}\"",
-            attemptedUris.str());
-        _logger->Debug(errorMsg);
+        auto errorMsg = fmt::format("Failed to connect to host URIs: \"{}\"", attemptedUris.str());
         SilKit::Services::Logging::Debug(_logger, "Tried the following URIs: {}", attemptedUris.str());
 
         throw SilKitError{errorMsg};
