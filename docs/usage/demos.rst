@@ -492,3 +492,49 @@ Benchmark Demo
          The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding
          differen message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and 
          ``Demos\Benchmark\performance-diff\Readme.md`` for further information.
+
+
+Latency Demo
+~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 17 220
+   :stub-columns: 1
+
+   *  -  Abstract
+      -  Latency Demo. Used for evaluating SIL Kit performance of PubSub communication.
+   *  -  Source location
+      -  Demos/Latency
+   *  -  Requirements
+      -  * :ref:`sil-kit-registry<sec:util-registry>`
+   *  -  Positional parameters
+      -  [messageCount]
+           Sets the number of messages to be send in each simulation step.
+         [messageSizeInBytes]
+           Sets the message size.
+         [registryURi] 
+           The URI of the registry to start.
+   *    - Optional parameters
+        - --help
+            Show the help message.
+          --isReceiver
+            This process is the receiving counterpart of the latency measurement. Default: false
+          --registry-uri
+            The URI of the registry to start. Default: silkit://localhost:8500
+          --message-size
+            Sets the message size. Default: 1000
+          --message-count
+            Sets the number of messages to be send in each simulation step. Default: 1000
+          --configuration 
+            Path and filename of the participant configuration YAML or JSON file. Default: empty
+          --write-csv
+            Path and filename of csv file with benchmark results. Default: empty
+   *  -  Parameter Example
+      -  .. parsed-literal:: 
+            # Launch the LatencyDemo with positional arguments and a specified configuration file:
+            |DemoDir|/SilKitDemoLatency.exe 100 1000 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
+   *  -  Notes
+      -  This latency demo produces timings of a configurable simulation setup. Two participants exchange <M> messages 
+         of <B> bytes without time synchronization. The demo uses PubSub controllers performing a message roundtrip (ping-pong) 
+         to calculate latency and throughput timings. Note that the two participants must use the same parameters for a 
+         valid measurement and one participant must use the --isReceiver flag.

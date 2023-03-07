@@ -25,3 +25,5 @@ target_sources(SilKitDemoBenchmark
     PRIVATE DemoBenchmarkDomainSocketsOff.silkit.yaml
     PRIVATE DemoBenchmarkTCPNagleOff.silkit.yaml
 )
+
+make_silkit_demo(SilKitDemoLatency LatencyDemo.cpp)

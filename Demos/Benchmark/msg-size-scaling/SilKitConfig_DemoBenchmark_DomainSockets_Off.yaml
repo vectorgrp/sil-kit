@@ -1,7 +1,3 @@
 Description: Configuration for Benchmark Demo without domain sockets
-Logging:
-  Sinks:
-    - Level: Error
-      Type: Stdout
 Middleware:
   EnableDomainSockets: 'False'

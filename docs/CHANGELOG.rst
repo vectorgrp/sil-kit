@@ -6,6 +6,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.19] - Unreleased
+---------------------
+
+Added
+~~~~~
+
+- Modification of BenchmarkDemo: Change the communication topology by modifying the PubSub topics. 
+  A participant should only send to a single other participant.
+
+- Add LatencyDemo: Measure the average latency between two participants in different processes.
+
+
 [4.0.19] - 2023-03-02
 ---------------------
 

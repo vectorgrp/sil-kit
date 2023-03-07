@@ -42,6 +42,8 @@ using namespace SilKit::Config;
 using namespace SilKit::Services::PubSub;
 using namespace std::chrono_literals;
 
+std::chrono::milliseconds stepSize = 1ms;
+
 std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
     const auto seconds = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(timestamp);
@@ -51,34 +53,33 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 
 void PrintUsage(const std::string& executableName)
 {
-    std::cout << "Usage:" << std::endl
-              << executableName << " [numberOfSimulationRuns]"
-              << " [simulationDuration]"
-              << " [numberOfParticipants]"
-              << " [messageCount]"
-              << " [messageSizeInBytes]"
-              << " [registryURi]" << std::endl
-              << "If no arguments are given, default values will be used." << std::endl
-              << "\t--help\tshow this message." << std::endl
-              << "\t--registry-uri\tThe URI of the registry to start. Default: silkit://localhost:8500" << std::endl
-              << "\t--message-size\tSets the message size to BYTES. Default: 1000" << std::endl
-              << "\t--message-count\tSets the number of messages to be send per participant in each simulation step to "
-                 "NUM. Default: 50"
-              << std::endl
-              << "\t--number-participants\tSets the number of simulation participants to NUM. Default: 2" << std::endl
-              << "\t--number-simulation-runs\tSets the number of simulation runs to perform to NUM. Default: 4"
-              << std::endl
-              << "\t--simulation-duration\tSets the simulation duration (virtual time) to SECONDS. Default: 1s"
-              << std::endl
-              << "\t--configuration\tPath and filename of the participant configuration YAML or JSON file. Default: empty"
-              << std::endl
-              << "\t--write-csv\tPath and filename of csv file with benchmark results. Default: empty" << std::endl;
+    std::cout
+        << "Usage:" << std::endl
+        << executableName << " [numberOfSimulationRuns]"
+        << " [simulationDuration]"
+        << " [numberOfParticipants]"
+        << " [messageCount]"
+        << " [messageSizeInBytes]"
+        << " [registryURi]" << std::endl
+        << "If no arguments are given, default values will be used." << std::endl
+        << "\t--help\tshow this message." << std::endl
+        << "\t--registry-uri\tThe URI of the registry to start. Default: silkit://localhost:8500" << std::endl
+        << "\t--message-size\tSets the message size to BYTES. Default: 1000" << std::endl
+        << "\t--message-count\tSets the number of messages to be send per participant in each simulation step to "
+           "NUM. Default: 50"
+        << std::endl
+        << "\t--number-participants\tSets the number of simulation participants to NUM. Default: 2" << std::endl
+        << "\t--number-simulation-runs\tSets the number of simulation runs to perform to NUM. Default: 4" << std::endl
+        << "\t--simulation-duration\tSets the simulation duration (virtual time) to SECONDS. Default: 1s" << std::endl
+        << "\t--configuration\tPath and filename of the participant configuration YAML or JSON file. Default: empty"
+        << std::endl
+        << "\t--write-csv\tPath and filename of csv file with benchmark results. Default: empty" << std::endl;
 }
 
 struct BenchmarkConfig
 {
     uint32_t numberOfSimulationRuns = 4;
-    std::chrono::seconds simulationDuration = 1s;
+    std::chrono::seconds simulationDuration = 1s;    
     uint32_t numberOfParticipants = 2;
     uint32_t messageCount = 50;
     uint32_t messageSizeInBytes = 1000;
@@ -254,6 +255,18 @@ bool Validate(const BenchmarkConfig& config)
     return true;
 }
 
+uint32_t relateParticipant(uint32_t idx, uint32_t numberOfParticipants)
+{
+    if (idx == (numberOfParticipants - 1)) //last participant
+    {
+        return 0;
+    }
+    else
+    {
+        return idx+1;
+    }
+}
+
 void PublishMessages(IDataPublisher* publisher, uint32_t messageCount, uint32_t messageSizeInBytes)
 {
     for (uint32_t i = 0; i < messageCount; i++)
@@ -276,8 +289,11 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
     auto* lifecycleService = participant->CreateLifecycleService({OperationMode::Coordinated});
     auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
-    SilKit::Services::PubSub::PubSubSpec dataSpec{"Topic", {}};
-    SilKit::Services::PubSub::PubSubSpec matchingDataSpec{"Topic", {}};
+    const std::string topicPub = "Topic" + std::to_string(participantIndex);
+    const std::string topicSub =
+        "Topic" + std::to_string(relateParticipant(participantIndex, benchmark.numberOfParticipants));
+    SilKit::Services::PubSub::PubSubSpec dataSpec{topicPub, {}};
+    SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topicSub, {}};    
     auto publisher = participant->CreateDataPublisher("PubCtrl1", dataSpec, 0);
     participant->CreateDataSubscriber("SubCtrl1", matchingDataSpec, [&messageCounter](auto*, auto&) {
         // this is handled in I/O thread, so no data races on counter.
@@ -298,14 +314,14 @@ void ParticipantsThread(std::shared_ptr<SilKit::Config::IParticipantConfiguratio
                     std::chrono::duration_cast<std::chrono::nanoseconds>(benchmark.simulationDuration);
                 const auto durationOfOneSimulationPercentile = simulationDurationInNs / 20;
 
-                if (now % durationOfOneSimulationPercentile < 1ms)
+                if (now % durationOfOneSimulationPercentile < stepSize)
                 {
                     std::cout << ".";
                 }
             }
             PublishMessages(publisher, benchmark.messageCount, benchmark.messageSizeInBytes);
         },
-        1ms);
+        stepSize);
 
     auto lifecycleFuture = lifecycleService->StartLifecycle();
     lifecycleFuture.get();
@@ -338,14 +354,10 @@ void PrintParameters(BenchmarkConfig benchmark)
               << std::endl
               << std::left << std::setw(38) << "- Messages per simulation step (1ms): " << benchmark.messageCount
               << std::endl
-              << std::left << std::setw(38) << "- Message size (bytes): " << benchmark.messageSizeInBytes
-              << std::endl
-              << std::left << std::setw(38) << "- Registry URI: " << benchmark.registryUri
-              << std::endl
-              << std::left << std::setw(38) << "- Configuration: " << benchmark.silKitConfigPath
-              << std::endl
-              << std::left << std::setw(38) << "- CSV output: " << benchmark.writeCsv
-              << std::endl;
+              << std::left << std::setw(38) << "- Message size (bytes): " << benchmark.messageSizeInBytes << std::endl
+              << std::left << std::setw(38) << "- Registry URI: " << benchmark.registryUri << std::endl
+              << std::left << std::setw(38) << "- Configuration: " << benchmark.silKitConfigPath << std::endl
+              << std::left << std::setw(38) << "- CSV output: " << benchmark.writeCsv << std::endl;
 }
 
 template <typename T>
@@ -396,10 +408,12 @@ int main(int argc, char** argv)
         registry->StartListening(benchmark.registryUri);
 
         std::vector<size_t> messageCounts;
-        std::vector<std::chrono::nanoseconds> measuredRealDurations;
+        std::vector<std::chrono::nanoseconds> measuredRealDurations;        
+
         for (uint32_t simulationRun = 1; simulationRun <= benchmark.numberOfSimulationRuns; simulationRun++)
         {
             std::vector<size_t> counters(benchmark.numberOfParticipants, 0);
+
             std::cout << "> Simulation " << simulationRun << ": ";
             auto startTimestamp = std::chrono::high_resolution_clock::now();
 
@@ -437,8 +451,7 @@ int main(int argc, char** argv)
             auto endTimestamp = std::chrono::high_resolution_clock::now();
             measuredRealDurations.emplace_back(endTimestamp - startTimestamp);
             auto totalCount = std::accumulate(counters.begin(), counters.end(), size_t{0});
-            messageCounts.emplace_back(totalCount);
-
+            messageCounts.emplace_back(totalCount);          
             std::cout << " " << measuredRealDurations.back() << std::endl;
         }
 
@@ -518,7 +531,7 @@ int main(int argc, char** argv)
             std::fstream csvFile;
             csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out); // Try to open
             bool csvValid{true};
-            if (!csvFile.is_open()) 
+            if (!csvFile.is_open())
             {
                 // File doesn't exist, create new file and write header
                 csvFile.open(benchmark.writeCsv, std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
@@ -550,9 +563,7 @@ int main(int argc, char** argv)
                         << std::endl;
             }
             csvFile.close();
-
         }
-
     }
     catch (const SilKit::ConfigurationError& error)
     {
