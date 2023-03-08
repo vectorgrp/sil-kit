@@ -35,7 +35,7 @@ namespace SilKit {
 // which keeps the shared library loaded during the lifetime of the calling process.
 
 template<typename FactoryT> 
-auto FactorySingleton(Services::Logging::ILogger* logger,
+auto SilKitExtensionLoader(Services::Logging::ILogger* logger,
     const std::string& extensionName,
     const Config::Extensions& config)
     -> FactoryT&

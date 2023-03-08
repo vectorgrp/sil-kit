@@ -35,7 +35,7 @@ add_library(S_SilKit_Extensions STATIC
 
     # Imlplementation Helpers
     SilKitExtensionImpl/DllCache.hpp
-    SilKitExtensionImpl/FactorySingleton.hpp
+    SilKitExtensionImpl/SilKitExtensionLoader.hpp
     #Extension implementations
     #   MDF4 (private)
     SilKitExtensionImpl/CreateMdf4Tracing.cpp
