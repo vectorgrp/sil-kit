@@ -36,7 +36,7 @@ namespace SilKit {
 enum class TraceMessageType
 {
     EthernetFrame,
-    CanFrame,
+    CanFrameEvent,
     LinFrame,
     FlexrayFrameEvent,
     InvalidReplayData,
@@ -60,7 +60,7 @@ struct MessageTrait;
 
 // specializations for supported (C++) Types
 SILKIT_TRACING_MESSAGE(Services::Ethernet::EthernetFrame, EthernetFrame)
-SILKIT_TRACING_MESSAGE(Services::Can::CanFrame, CanFrame)
+SILKIT_TRACING_MESSAGE(Services::Can::CanFrameEvent, CanFrameEvent)
 SILKIT_TRACING_MESSAGE(Services::Lin::LinFrame, LinFrame)
 SILKIT_TRACING_MESSAGE(Services::Flexray::FlexrayFrameEvent, FlexrayFrameEvent)
 SILKIT_TRACING_MESSAGE(Services::PubSub::DataMessageEvent, DataMessageEvent)

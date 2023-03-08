@@ -119,7 +119,7 @@ struct Pipe
             nullptr);
         if (handle == INVALID_HANDLE_VALUE)
         {
-            throw SilKitError("Cannot open WIN32 pipe " + path);
+            throw SilKit::SilKitError("Cannot open WIN32 pipe " + path);
         }
     }
 

@@ -31,7 +31,6 @@ add_library(S_SilKit_Extensions STATIC
     SilKitExtensionApi/SilKitExtensionMacros.hpp
     SilKitExtensionApi/SilKitExtensionABI.h
     SilKitExtensionApi/SilKitExtensionUtils.hpp
-    SilKitExtensionApi/SilKitExtensionUtils.cpp
 
 
     # Imlplementation Helpers

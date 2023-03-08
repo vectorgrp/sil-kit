@@ -50,7 +50,7 @@ void SimBehaviorDetailed::SendMsg(CanSetControllerMode&& msg)
 }
 void SimBehaviorDetailed::SendMsg(WireCanFrameEvent&& msg)
 {
-    _tracer->Trace(msg.direction, msg.timestamp, ToCanFrame(msg.frame));
+    _tracer->Trace(msg.direction, msg.timestamp, ToCanFrameEvent(msg));
     SendMsgImpl(msg);
 }
 

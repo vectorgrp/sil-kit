@@ -74,7 +74,7 @@ template <typename T>
 SharedVector<T>::SharedVector(const Span<const T> span, const size_t minimumSize, const T padValue)
     : _data{std::make_shared<std::vector<T>>(span.begin(), span.end())}
 {
-    _data->resize(std::max(_data->size(), minimumSize), padValue);
+    _data->resize((std::max)(_data->size(), minimumSize), padValue);
 }
 
 template <typename T>

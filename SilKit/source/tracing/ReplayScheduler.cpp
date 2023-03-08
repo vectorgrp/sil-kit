@@ -48,7 +48,7 @@ TraceMessageType ToTraceMessageType(Config::NetworkType networkType)
     switch (networkType)
     {
     case Config::NetworkType::Ethernet: return TraceMessageType::EthernetFrame;
-    case Config::NetworkType::CAN: return TraceMessageType::CanFrame;
+    case Config::NetworkType::CAN: return TraceMessageType::CanFrameEvent;
     case Config::NetworkType::LIN: return TraceMessageType::LinFrame;
     case Config::NetworkType::FlexRay: return TraceMessageType::FlexrayFrameEvent;
     case Config::NetworkType::Data: return TraceMessageType::DataMessageEvent;

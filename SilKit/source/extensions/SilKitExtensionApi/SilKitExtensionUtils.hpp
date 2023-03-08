@@ -23,6 +23,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <cstdint>
 
+#if !defined(SILKIT_EXTENSION_OS)
+#   error  "SILKIT_EXTENSION_OS must be defined for the compiler via CMake for the target platform"
+#endif
+
 namespace SilKit { 
 //! \brief Fields of the BuildInfo array
 enum class BuildInfoField
@@ -42,7 +46,10 @@ enum class BuildInfoField
 
 //! \brief Return the build system's name
 // This is provided by a compile-time definition in CMake and must be set.
-const char* BuildinfoSystem();
+constexpr const char* BuildinfoSystem()
+{
+    return SILKIT_EXTENSION_OS;
+}
 
 //! \brief Encodes the C++ language standard version.
 // This value is used to make sure that the C++ runtime libraries and STL are 

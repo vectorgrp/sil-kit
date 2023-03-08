@@ -169,7 +169,7 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
         return;
     }
 
-    _tracer.Trace(msg.direction, msg.timestamp, ToCanFrame(msg.frame));
+    _tracer.Trace(msg.direction, msg.timestamp, ToCanFrameEvent(msg));
     CallHandlers(ToCanFrameEvent(msg));
 }
 

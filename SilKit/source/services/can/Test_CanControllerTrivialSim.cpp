@@ -368,12 +368,16 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
     controller.Start();
 
     WireCanFrame canFrame{};
+    WireCanFrameEvent wireCanFrameEvent{};
+    wireCanFrameEvent.frame = canFrame;
+    wireCanFrameEvent.timestamp = now;
+    wireCanFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
 
     //Send direction
     EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, ToCanFrame(canFrame)))
+        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, ToCanFrameEvent(wireCanFrameEvent)))
         .Times(1);
     controller.SendFrame(ToCanFrame(canFrame));
 
@@ -382,13 +386,9 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, ToCanFrame(canFrame)))
+        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, ToCanFrameEvent(wireCanFrameEvent)))
         .Times(1);
 
-    WireCanFrameEvent wireCanFrameEvent;
-    wireCanFrameEvent.frame = canFrame;
-    wireCanFrameEvent.timestamp = now;
-    wireCanFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
     controller.ReceiveMsg(&otherController, wireCanFrameEvent);
 }
 
