@@ -144,8 +144,10 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
             Core::SupplementalData supplementalData;
             supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLoggerReceiver;
 
-            CreateInternalController<Services::Logging::LogMsgReceiver>("LogMsgReceiver", Core::ServiceType::InternalController,
-                                                      std::move(supplementalData), true, logger);
+            Config::InternalController config;
+            config.name = "LogMsgReceiver";
+            config.network = "default";
+            CreateController<Services::Logging::LogMsgReceiver>(config, std::move(supplementalData), true, logger);
         }
 
         auto sinkIter = std::find_if(_participantConfig.logging.sinks.begin(), _participantConfig.logging.sinks.end(),
@@ -156,8 +158,11 @@ void Participant<SilKitConnectionT>::SetupRemoteLogging()
             Core::SupplementalData supplementalData;
             supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLoggerSender;
 
-            auto&& logMsgSender = CreateInternalController<Services::Logging::LogMsgSender>(
-                "LogMsgSender", Core::ServiceType::InternalController, std::move(supplementalData), true);
+            Config::InternalController config;
+            config.name = "LogMsgSender";
+            config.network = "default";
+            auto&& logMsgSender = CreateController<Services::Logging::LogMsgSender>(
+                config, std::move(supplementalData), true);
 
             logger->RegisterRemoteLogging([logMsgSender](Services::Logging::LogMsg logMsg) {
 
@@ -237,8 +242,8 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeCan;
 
-    auto controller = CreateController<SilKit::Config::CanController, Can::CanController>(
-        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<Can::CanController>(
+        controllerConfig, std::move(supplementalData), true, controllerConfig,
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
@@ -273,8 +278,8 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeEthernet;
 
-    auto *controller = CreateController<SilKit::Config::EthernetController, Ethernet::EthController>(
-        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto *controller = CreateController<Ethernet::EthController>(
+        controllerConfig, std::move(supplementalData), true, controllerConfig,
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
@@ -308,8 +313,8 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeFlexray;
 
-    auto controller = CreateController<SilKit::Config::FlexrayController, Flexray::FlexrayController>(
-        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<Flexray::FlexrayController>(
+        controllerConfig, std::move(supplementalData), true, controllerConfig,
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
@@ -337,8 +342,8 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLin;
 
-    auto controller = CreateController<SilKit::Config::LinController, Lin::LinController>(
-        controllerConfig, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+    auto controller = CreateController<Lin::LinController>(
+        controllerConfig, std::move(supplementalData), true, controllerConfig,
         &_timeProvider);
 
     controller->RegisterServiceDiscovery();
@@ -386,8 +391,8 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     controllerConfig.name = to_string(Util::Uuid::GenerateRandom());
     std::string network = linkName;
 
-    auto controller =  CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
+    auto controller = CreateController<PubSub::DataSubscriberInternal>(
+        controllerConfig, network, std::move(supplementalData), true, &_timeProvider,
         topic, mediaType, publisherLabels, defaultHandler, parent);
 
     //Restore original DataSubscriber config for replay
@@ -462,7 +467,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
         configuredDataNodeSpec.AddLabel(label);
     }
 
-    Core::SupplementalData supplementalData;
+    SilKit::Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataPublisher;
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherTopic] = configuredDataNodeSpec.Topic();
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubUUID] = network;
@@ -470,10 +475,9 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] = labelStr;
 
-    auto controller = CreateController<SilKit::Config::DataPublisher, SilKit::Services::PubSub::DataPublisher>(
+    auto controller = CreateController<Services::PubSub::DataPublisher>(
         controllerConfig,
         network,
-        Core::ServiceType::Controller,
         std::move(supplementalData),
         true,
         &_timeProvider,
@@ -539,9 +543,8 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels] = labelStr;
 
-    auto controller = CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriber>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
-        &_timeProvider,
+    auto controller = CreateController<Services::PubSub::DataSubscriber>(
+        controllerConfig, network, std::move(supplementalData), true, controllerConfig, &_timeProvider,
         configuredDataNodeSpec, defaultDataHandler);
 
     controller->RegisterServiceDiscovery();
@@ -580,7 +583,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
     std::string network = clientUUID;
 
     // RpcServerInternal gets discovered by RpcClient which is then ready to detach calls
-    Core::SupplementalData supplementalData;
+    SilKit::Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServerInternal;
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerInternalClientUUID] = clientUUID;
     auto parentRpcServer = dynamic_cast<Services::Rpc::RpcServer*>(parent);
@@ -589,8 +592,8 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
         supplementalData[SilKit::Core::Discovery::supplKeyRpcServerInternalParentServiceID] =
             std::to_string(parentRpcServer->GetServiceDescriptor().GetServiceId());
     }
-    return CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServerInternal>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
+    return CreateController<Services::Rpc::RpcServerInternal>(
+        controllerConfig, network, std::move(supplementalData), true, &_timeProvider,
         functionName, mediaType, clientLabels, clientUUID, handler, parent);
 }
 
@@ -621,8 +624,8 @@ auto Participant<SilKitConnectionT>::CreateRpcClient(const std::string& canonica
         configuredDataSpec.AddLabel(label);
     }
 
-    auto controller = CreateController<SilKit::Config::RpcClient, SilKit::Services::Rpc::RpcClient>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
+    auto controller = CreateController<Services::Rpc::RpcClient>(
+        controllerConfig, network, std::move(supplementalData), true, &_timeProvider,
         configuredDataSpec, network, handler);
 
     // RpcClient discovers RpcServerInternal and is ready to dispatch calls
@@ -669,8 +672,8 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
         configuredDataSpec.AddLabel(label);
     }
 
-    auto controller = CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServer>(
-        controllerConfig, network, Core::ServiceType::Controller, supplementalData, true, &_timeProvider,
+    auto controller = CreateController<Services::Rpc::RpcServer>(
+        controllerConfig, network, supplementalData, true, &_timeProvider,
         configuredDataSpec, handler);
 
     // RpcServer discovers RpcClient and creates RpcServerInternal on a matching connection
@@ -703,9 +706,11 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
     Core::SupplementalData timeSyncSupplementalData;
     timeSyncSupplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeTimeSyncService;
 
-    timeSyncService = CreateInternalController<Orchestration::TimeSyncService>(
-        SilKit::Core::Discovery::controllerTypeTimeSyncService, Core::ServiceType::InternalController,
-        std::move(timeSyncSupplementalData), false, &_timeProvider, _participantConfig.healthCheck);
+        Config::InternalController config;
+        config.name = Discovery::controllerTypeTimeSyncService;
+        config.network = "default";
+        timeSyncService = CreateController<Orchestration::TimeSyncService>(
+            config, std::move(timeSyncSupplementalData), false, &_timeProvider, _participantConfig.healthCheck);
 
     //Ensure that the TimeSyncService is able to affect the life cycle
     timeSyncService->SetLifecycleService(service);
@@ -723,9 +728,11 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
         Core::SupplementalData lifecycleSupplementalData;
         lifecycleSupplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeLifecycleService;
 
-        lifecycleService = CreateInternalController<Orchestration::LifecycleService>(
-            SilKit::Core::Discovery::controllerTypeLifecycleService, Core::ServiceType::InternalController,
-            std::move(lifecycleSupplementalData), false);
+        Config::InternalController config;
+        config.name = Discovery::controllerTypeLifecycleService;
+        config.network = "default";
+        lifecycleService = CreateController<Orchestration::LifecycleService>(
+            config, std::move(lifecycleSupplementalData), false);
     }
     return lifecycleService;
 }
@@ -782,9 +789,11 @@ auto Participant<SilKitConnectionT>::GetSystemMonitor() -> Services::Orchestrati
         Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeSystemMonitor;
 
-        controller = CreateInternalController<Orchestration::SystemMonitor>(
-            SilKit::Core::Discovery::controllerTypeSystemMonitor, Core::ServiceType::InternalController,
-                                                                   std::move(supplementalData), true);
+        Config::InternalController config;
+        config.name = Discovery::controllerTypeSystemMonitor;
+        config.network = "default";
+        controller = CreateController<Orchestration::SystemMonitor>(
+            config, std::move(supplementalData), true);
 
         _connection.RegisterMessageReceiver([controller](IVAsioPeer* peer, const ParticipantAnnouncement&) {
             controller->OnParticipantConnected(
@@ -814,14 +823,17 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServiceDiscovery*
 {
     auto* controller =
-        GetController<Discovery::ServiceDiscovery>(SilKit::Core::Discovery::controllerTypeServiceDiscovery);
+        GetController<SilKit::Core::Discovery::ServiceDiscovery>(SilKit::Core::Discovery::controllerTypeServiceDiscovery);
     if (!controller)
     {
         Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeServiceDiscovery;
 
-        controller = CreateInternalController<Discovery::ServiceDiscovery>(
-            "ServiceDiscovery", Core::ServiceType::InternalController, std::move(supplementalData), true, GetParticipantName());
+        Config::InternalController config;
+        config.name = Discovery::controllerTypeServiceDiscovery;
+        config.network = "default";
+        controller = CreateController<SilKit::Core::Discovery::ServiceDiscovery>(
+            config, std::move(supplementalData), true, GetParticipantName());
 
         _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticpantRemoval(peer->GetInfo().participantName);
@@ -846,9 +858,11 @@ auto Participant<SilKitConnectionT>::GetRequestReplyService() -> RequestReply::I
 
         RequestReply::ProcedureMap procedures{{RequestReply::FunctionType::ParticipantReplies, _participantReplies.get()}};
 
-        controller = CreateInternalController<RequestReply::RequestReplyService>(
-            "RequestReplyService", Core::ServiceType::InternalController, std::move(supplementalData), true,
-            GetParticipantName(), procedures);
+        Config::InternalController config;
+        config.name = "RequestReplyService";
+        config.network = "default";
+        controller = CreateController<RequestReply::RequestReplyService>(
+            config, std::move(supplementalData), true, GetParticipantName(), procedures);
 
         _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
             controller->OnParticpantRemoval(peer->GetInfo().participantName);
@@ -884,9 +898,12 @@ auto Participant<SilKitConnectionT>::GetSystemController() -> Experimental::Serv
         Core::SupplementalData supplementalData;
         supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeSystemController;
 
-        return CreateInternalController<Orchestration::SystemController>(
-            SilKit::Core::Discovery::controllerTypeSystemController, Core::ServiceType::InternalController,
-            std::move(supplementalData), true);
+        Config::InternalController config;
+        config.name = SilKit::Core::Discovery::controllerTypeSystemController;
+        config.network = "default";
+
+        return CreateController<Orchestration::SystemController>(
+            config, std::move(supplementalData), true);
     }
     return controller;
 }
@@ -1456,39 +1473,25 @@ auto Participant<SilKitConnectionT>::GetController(const std::string& serviceNam
 
 template <class SilKitConnectionT>
 template <class ControllerT, typename... Arg>
-auto Participant<SilKitConnectionT>::CreateInternalController(const std::string& serviceName,
-                                                          const Core::ServiceType serviceType,
-                                                          const Core::SupplementalData& supplementalData,
-                                                          const bool publishService, Arg&&... arg) -> ControllerT*
-{
-    Config::InternalController config;
-    config.name = serviceName;
-    config.network = "default";
-
-    return CreateController<Config::InternalController, ControllerT>(config, serviceType, supplementalData, publishService,
-                                                                  std::forward<Arg>(arg)...);
-}
-
-template <class SilKitConnectionT>
-template <class ConfigT, class ControllerT, typename... Arg>
-auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, const Core::ServiceType serviceType,
-                                                  const Core::SupplementalData& supplementalData,
+auto Participant<SilKitConnectionT>::CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config,
+                                                  const SilKit::Core::SupplementalData& supplementalData,
                                                   const bool publishService,
                                                   Arg&&... arg) -> ControllerT*
 {
     SILKIT_ASSERT(config.network.has_value());
-    return CreateController<ConfigT, ControllerT>(config, *config.network, serviceType, supplementalData,
+    return CreateController<ControllerT>(config, *config.network, supplementalData,
                                                   publishService, std::forward<Arg>(arg)...);
 }
 
 template <class SilKitConnectionT>
-template <class ConfigT, class ControllerT, typename... Arg>
-auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, const std::string& network,
-                                                  const Core::ServiceType serviceType,
-                                                  const Core::SupplementalData& supplementalData,
+template <class ControllerT, typename... Arg>
+auto Participant<SilKitConnectionT>::CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config,
+                                                  const std::string& network,
+                                                  const SilKit::Core::SupplementalData& supplementalData,
                                                   const bool publishService,
                                                   Arg&&... arg) -> ControllerT*
 {
+    const auto serviceType = SilKitServiceTraitServiceType<ControllerT>::GetServiceType();
     if (config.name == "")
     {
         throw SilKit::ConfigurationError("Services must have a non-empty name.");

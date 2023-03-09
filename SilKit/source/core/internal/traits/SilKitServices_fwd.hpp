@@ -20,33 +20,65 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
-#include "internal_fwd.hpp"
 
 namespace SilKit {
+//forwards
+namespace Config {
+namespace v1 {
+struct CanController;
+struct EthernetController;
+struct LinController;
+struct FlexrayController;
+struct RpcClient;
+struct RpcServer;
+struct DataPublisher;
+struct DataSubscriber;
+} //v1
+}//Config
+
 namespace Core {
+namespace Discovery {
+class ServiceDiscovery;
+}//Discovery
+namespace RequestReply {
+class RequestReplyService;
+} //RequestReply
+}//Core
 
-// the silkit services type traits
-template <class SilKitServiceT>
-struct SilKitServiceTraitUseAsyncRegistration {
-    static constexpr bool UseAsyncRegistration() {
-        return false;
-    }
-};
+namespace Services {
+namespace Orchestration {
+class TimeSyncService;
+class LifecycleService;
+class SystemMonitor;
+class SystemController;
+}//Orchestration
+namespace Logging {
+class LogMsgReceiver;
+class LogMsgSender;
+} //Logging
+namespace Ethernet {
+class EthController;
+} //Can
+namespace Can {
+class CanController;
+} //Can
+namespace Lin {
+class LinController;
+} //Lin
+namespace Flexray {
+class FlexrayController;
+} //Flexray
 
-// The final service traits
-template <class SilKitServiceT> struct SilKitServiceTraits
-    : SilKitServiceTraitUseAsyncRegistration<SilKitServiceT>
-{
-};
+namespace PubSub {
+class DataPublisher;
+class DataSubscriber  ;
+class DataSubscriberInternal;
+} //PubSub
+namespace Rpc {
+class RpcServer;
+class RpcClient  ;
+class RpcServerInternal;
+} //Rpc
 
-#define DefineSilKitServiceTrait_UseAsyncRegistration(Namespace, ServiceName) template<> struct SilKitServiceTraitUseAsyncRegistration<Namespace::ServiceName>{\
-    static constexpr bool UseAsyncRegistration() { return true;}\
-    }
-
-// Services that are registered asynchronously (= not in main thread but in IO-Worker thread on an incoming SilKitMessage) 
-DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::PubSub, DataSubscriberInternal);
-DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::Rpc, RpcServerInternal);
-
-
-} // namespace Core
+} //Services
 } // namespace SilKit

@@ -80,6 +80,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // Add connection types here and make sure they are instantiated in Participant.cpp
 #include "VAsioConnection.hpp"
 
+// utilities for CreateController
+#include "traits/SilKitServiceConfigTraits.hpp"
 
 using namespace std::chrono_literals;
 
@@ -339,20 +341,15 @@ private:
     template<class ControllerT>
     auto GetController(const std::string& serviceName) -> ControllerT*;
 
-    //!< internal services don't have a link config
-    template<class ControllerT, typename... Arg>
-    auto CreateInternalController(const std::string& serviceName, const Core::ServiceType serviceType,
-                          const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg) -> ControllerT*;
-
     //!< Internal controller creation, explicit network argument for ConfigT without network
-    template <class ConfigT, class ControllerT, typename... Arg>
-    auto CreateController(const ConfigT& config, const std::string& network, const Core::ServiceType serviceType,
-                          const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
+    template <class ControllerT, typename... Arg>
+    auto CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config,
+        const std::string& network, const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
         -> ControllerT*;
 
     //!< Internal controller creation, expects config.network
-    template <class ConfigT, class ControllerT, typename... Arg>
-    auto CreateController(const ConfigT& config, const Core::ServiceType serviceType,
+    template <class ControllerT, typename... Arg>
+    auto CreateController(const SilKitServiceTraitConfigType_t<ControllerT>& config,
                           const Core::SupplementalData& supplementalData, bool publishService, Arg&&... arg)
         -> ControllerT*;
 
