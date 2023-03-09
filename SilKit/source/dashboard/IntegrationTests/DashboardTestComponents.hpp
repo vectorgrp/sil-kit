@@ -47,7 +47,7 @@ public:
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider)
     ([this] {
-        return std::static_pointer_cast<oatpp::network::ServerConnectionProvider>(
+        return std::dynamic_pointer_cast<oatpp::network::ServerConnectionProvider>(
             oatpp::network::tcp::server::ConnectionProvider::createShared({_host, _port}));
     }());
 
@@ -64,7 +64,7 @@ public:
 
     OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ClientConnectionProvider>, clientConnectionProvider)
     ([this] {
-        return std::static_pointer_cast<oatpp::network::ClientConnectionProvider>(
+        return std::dynamic_pointer_cast<oatpp::network::ClientConnectionProvider>(
             oatpp::network::tcp::client::ConnectionProvider::createShared({_host, _port}));
     }());
 

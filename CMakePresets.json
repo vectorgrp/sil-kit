@@ -459,15 +459,15 @@
 
         {
             "name": "clang-asan-debug",
-            "inherits": ["clang12-debug", "mixin-asan" ]
+            "inherits": ["clang12-debug", "mixin-asan", "mixin-nosplitdebug" ]
         },
         {
             "name": "clang-tsan-debug",
-            "inherits": ["clang12-debug", "mixin-tsan" ]
+            "inherits": ["clang12-debug", "mixin-tsan", "mixin-nosplitdebug" ]
         },
         {
             "name": "clang-ubsan-debug",
-            "inherits": ["clang12-debug", "mixin-ubsan" ]
+            "inherits": ["clang12-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
         },
 
         {
