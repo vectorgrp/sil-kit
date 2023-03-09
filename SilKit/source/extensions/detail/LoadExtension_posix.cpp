@@ -37,7 +37,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit { namespace detail {
 
 //used by FindLibrary
+#if defined(__APPLE__)
+const std::string lib_file_extension=".dylib";
+#else
 const std::string lib_file_extension=".so";
+#endif
 const std::string lib_prefix="lib";
 const std::string path_sep = "/";
 

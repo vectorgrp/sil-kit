@@ -184,7 +184,7 @@ endfunction()
 macro(silkit_check_reproducible)
     if(NOT DEFINED ENV{SOURCE_DATE_EPOCH})
         message(STATUS "SIL Kit - Reproducible build: SOURCE_DATE_EPOCH is not set!"
-           " Set it to 'git log -1 --format=%ct -r origin/master'")
+           " Set it to 'git log -1 --format=%ct -r origin/main'")
     else()
         message(STATUS "SIL Kit - Reproducible build: SOURCE_DATE_EPOCH=$ENV{SOURCE_DATE_EPOCH}")
     endif()
@@ -215,7 +215,7 @@ int main() {
     return a;
  }
 " HAVE_ATOMIC_64BIT)
-    if(NOT HAVE_ATOMIC_64BIT)
+    if(NOT APPLE AND NOT HAVE_ATOMIC_64BIT)
         link_libraries(-latomic)
     endif()
 endmacro()
