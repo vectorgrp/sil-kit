@@ -134,7 +134,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
     {
         for (auto&& name : _syncParticipantNames)
         {
-            AddParticipant(name);
+            AddParticipant(name, "");
         }
     }
 
@@ -151,7 +151,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     auto simulationFinishedFuture = simulationFinishedPromise.get_future();
 
     // Create a monitor, add it to the list of simParticipants, then start all participants
-    AddParticipant(internalSystemMonitorName);
+    AddParticipant(internalSystemMonitorName, "");
     auto monitor = _simParticipants[internalSystemMonitorName]->GetOrCreateSystemMonitor();
     monitor->AddSystemStateHandler([&](auto systemState) {
         if (systemState == SilKit::Services::Orchestration::SystemState::Shutdown)
@@ -213,7 +213,7 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
     return runStatus;
 }
 
-SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName)
+SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName, const std::string& participantConfiguration)
 {
     auto lock = Lock();
     if (_simParticipants.count(participantName) == 0)
@@ -225,12 +225,17 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
         {
             throw SilKitError{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
         }
-        AddParticipant(*it);
+        AddParticipant(*it, participantConfiguration);
     }
     return _simParticipants[participantName].get();
 }
 
-void SimTestHarness::AddParticipant(const std::string& participantName)
+SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName)
+{
+    return GetParticipant(participantName, "");
+}
+
+void SimTestHarness::AddParticipant(const std::string& participantName, const std::string& participantConfiguration)
 {
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
@@ -243,7 +248,7 @@ void SimTestHarness::AddParticipant(const std::string& participantName)
     using SilKit::Config::ParticipantConfigurationFromString;
 #endif
 
-    participant->_participant = CreateParticipant(ParticipantConfigurationFromString(""), participantName, _registryUri);
+    participant->_participant = CreateParticipant(ParticipantConfigurationFromString(participantConfiguration), participantName, _registryUri);
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this

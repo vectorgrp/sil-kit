@@ -93,9 +93,11 @@ public:
     bool Run(std::chrono::nanoseconds testRunTimeout = std::chrono::nanoseconds::min());
     //! \brief Get the SimParticipant by name
     SimParticipant* GetParticipant(const std::string& participantName);
+    //! \brief Get the SimParticipant by name. If it does not exist yet, create a SimParticipant with the specified name and provide its ParticipantConfiguration as a string.
+    SimParticipant* GetParticipant(const std::string& participantName, const std::string& participantConfiguration);
 
 private:
-    void AddParticipant(const std::string& participantName);
+    void AddParticipant(const std::string& participantName, const std::string& participantConfiguration);
 
     std::mutex _mutex;
     auto Lock() -> std::unique_lock<decltype(_mutex)>
