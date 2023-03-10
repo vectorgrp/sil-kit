@@ -169,7 +169,7 @@ private:
 
 void EthController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(GetServiceDescriptor().to_endpointAddress(), *sink);
+    _tracer.AddSink(GetServiceDescriptor(), *sink);
 }
 
 void EthController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)

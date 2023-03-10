@@ -133,9 +133,10 @@ inline bool ServiceDescriptor::operator!=(const ServiceDescriptor& rhs) const
 std::string ServiceDescriptor::to_string() const
 {
     const std::string separator{ "/" };
+    std::string controllerTypeName;
     // common
     std::stringstream ss;
-    ss 
+    ss
         << GetParticipantName()
         << separator
         << SilKit::Core::to_string(GetServiceType())
@@ -143,26 +144,22 @@ std::string ServiceDescriptor::to_string() const
     switch (GetServiceType())
     {
     case ServiceType::Link:
-    {
-        ss 
+        ss
             << separator
             << Config::to_string(GetNetworkType())
             << separator
             << GetNetworkName()
             ;
         break;
-    }
     case ServiceType::Controller:
     case ServiceType::SimulatedController:
-    {
-        std::string controllerTypeName;
         if (!GetSupplementalDataItem(SilKit::Core::Discovery::controllerType, controllerTypeName))
         {
             throw LogicError("supplementalData.size() > 0");
         }
 
-        ss 
-            << separator 
+        ss
+            << separator
             << controllerTypeName
             << separator
             << GetNetworkName()
@@ -170,26 +167,20 @@ std::string ServiceDescriptor::to_string() const
             << GetServiceName()
             ;
         break;
-    }
     case ServiceType::InternalController:
-    {
-        ss 
+        ss
             << separator
             << GetServiceName()
             ;
         break;
-    }
-    case ServiceType::Undefined: 
-    {
+    case ServiceType::Undefined:
         ss
-            << separator 
-            << GetNetworkName() 
+            << separator
+            << GetNetworkName()
             << separator
             << GetServiceName()
             ;
-        
       break;
-    }
     }
     return ss.str();
 }

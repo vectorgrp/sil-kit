@@ -363,7 +363,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
 
     CanController controller(&participant, cfg, participant.GetTimeProvider());
     controller.SetServiceDescriptor(from_endpointAddress(EndpointAddress{1, 2}));
-    const auto controllerAddress = controller.GetServiceDescriptor().to_endpointAddress();
+    const auto controllerDescriptor  = controller.GetServiceDescriptor();
     controller.AddSink(&traceSink);
     controller.Start();
 
@@ -377,7 +377,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
     EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, controllerAddress, now, ToCanFrameEvent(wireCanFrameEvent)))
+        Trace(SilKit::Services::TransmitDirection::TX, controllerDescriptor , now, ToCanFrameEvent(wireCanFrameEvent)))
         .Times(1);
     controller.SendFrame(ToCanFrame(canFrame));
 
@@ -386,7 +386,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::RX, controllerAddress, now, ToCanFrameEvent(wireCanFrameEvent)))
+        Trace(SilKit::Services::TransmitDirection::RX, controllerDescriptor , now, ToCanFrameEvent(wireCanFrameEvent)))
         .Times(1);
 
     controller.ReceiveMsg(&otherController, wireCanFrameEvent);

@@ -45,7 +45,7 @@ inline uint64_t Hash(const std::string& s)
     uint64_t hash = 5381;
     for (auto c : s)
     {
-        hash = (hash << 5) + hash + c; // hash * 33 + c
+        hash = (hash << 5) + hash + static_cast<uint64_t>(c); // hash * 33 + c
     }
     return hash;
 }

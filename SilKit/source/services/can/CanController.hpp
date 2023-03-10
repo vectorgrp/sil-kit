@@ -205,7 +205,7 @@ private:
 
 void CanController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(GetServiceDescriptor().to_endpointAddress(), *sink);
+    _tracer.AddSink(GetServiceDescriptor(), *sink);
 }
 
 void CanController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)

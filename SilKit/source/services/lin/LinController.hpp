@@ -232,7 +232,7 @@ private:
 
 void LinController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(Core::EndpointAddress{}, *sink);
+    _tracer.AddSink(GetServiceDescriptor(), *sink);
 }
 void LinController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {

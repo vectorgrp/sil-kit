@@ -239,6 +239,17 @@ void EthController::ReplayMessage(const IReplayMessage* message)
             ReplayReceive(message);
         }
         break;
+    case SilKit::Services::TransmitDirection::TXRX:
+        if (IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
+        {
+            ReplayReceive(message);
+        }
+        if (IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
+        {
+            ReplaySend(message);
+        }
+        break;
+    case SilKit::Services::TransmitDirection::Undefined:
     default:
         throw SilKitError("EthController: replay message has undefined Direction");
         break;

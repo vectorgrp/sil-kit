@@ -350,7 +350,7 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
         .WillByDefault(testing::Return(now));
 
     EthController ethController{&participant, cfg, participant.GetTimeProvider()};
-    auto controllerId = ethController.GetServiceDescriptor().to_endpointAddress();
+    auto controllerDescriptor = ethController.GetServiceDescriptor();
     ethController.AddSink(&traceSink);
     ethController.Activate();
 
@@ -364,14 +364,14 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
     EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, controllerId, now,ethernetFrame))
+        Trace(SilKit::Services::TransmitDirection::TX, controllerDescriptor, now,ethernetFrame))
         .Times(1);
     EthernetFrame frame{rawFrame};
     ethController.SendFrame(frame);
 
     // Receive direction
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::RX, controllerId, now, ethernetFrame))
+        Trace(SilKit::Services::TransmitDirection::RX, controllerDescriptor, now, ethernetFrame))
         .Times(1);
 
     WireEthernetFrameEvent wireEthernetFrame;

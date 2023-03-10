@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "EndpointAddress.hpp"
+#include "ServiceDescriptor.hpp"
 #include "TraceMessage.hpp"
 #include "ParticipantConfiguration.hpp"
 
@@ -57,7 +57,7 @@ public:
 
     virtual void Trace(
         SilKit::Services::TransmitDirection dir,
-        const Core::EndpointAddress& address, //!< the address is used to identify the controller this message is from
+        const Core::ServiceDescriptor& address, //!< the address is used to identify the controller this message is from
         std::chrono::nanoseconds timestamp, const TraceMessage& message) = 0;
 };
 

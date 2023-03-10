@@ -73,7 +73,7 @@ if(UNIX)
             -pedantic -Wall -Wextra
             -Wcast-align -Wformat=2 -Wmissing-declarations
             -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5
-            -Wswitch-default -Wundef -Wno-unused
+            -Wundef -Wno-unused
             -Wpacked
             -Werror -Wfatal-errors
     )

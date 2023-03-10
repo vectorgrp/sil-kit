@@ -49,7 +49,7 @@ public:
     void Open(SinkType outputType, const std::string& outputPath) override;
     void Close() override;
 
-    void Trace(SilKit::Services::TransmitDirection txRx, const Core::EndpointAddress& id,
+    void Trace(SilKit::Services::TransmitDirection txRx, const Core::ServiceDescriptor& id,
                std::chrono::nanoseconds timestamp, const TraceMessage& msg) override;
 
     auto GetLogger() const -> Services::Logging::ILogger* override;

@@ -51,7 +51,7 @@ public:
 
     // Add the given `sink` to the list trace sinks.
     // A function object is created that wraps the actual sink.Trace call.
-    inline void AddSink(Core::EndpointAddress id, ITraceMessageSink& sink);
+    inline void AddSink(const Core::ServiceDescriptor& serviceDescr, ITraceMessageSink& sink);
 
     //convenience wrapper converting concrete types into type-erased TraceMessage references
     template <typename MsgT>
@@ -73,11 +73,11 @@ private:
 // Inline Implementations
 ////////////////////////////////////////
 
-void Tracer::AddSink(Core::EndpointAddress id, ITraceMessageSink& sink)
+void Tracer::AddSink(const Core::ServiceDescriptor& serviceDescr, ITraceMessageSink& sink)
 {
-    auto sinkCallback = [id, &sink](SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp,
+    auto sinkCallback = [serviceDescr, &sink](SilKit::Services::TransmitDirection direction, std::chrono::nanoseconds timestamp,
                                     const TraceMessage& msg) {
-        sink.Trace(direction, id, timestamp, msg);
+        sink.Trace(direction, serviceDescr, timestamp, msg);
     };
     _sinks.emplace_back(std::move(sinkCallback));
 }

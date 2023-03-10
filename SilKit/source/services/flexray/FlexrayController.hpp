@@ -192,7 +192,7 @@ private:
 // ==================================================================
 void FlexrayController::AddSink(ITraceMessageSink* sink)
 {
-    _tracer.AddSink(SilKit::Core::EndpointAddress{}, *sink);
+    _tracer.AddSink(GetServiceDescriptor(), *sink);
 }
 
 void FlexrayController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)

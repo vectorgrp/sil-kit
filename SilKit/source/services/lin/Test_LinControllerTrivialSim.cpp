@@ -857,7 +857,7 @@ TEST_F(LinControllerTrivialSimTest, DISABLED_send_with_tracing)
     EXPECT_CALL(participant.mockTimeProvider, Now())
         .Times(1);
     EXPECT_CALL(traceSink,
-        Trace(SilKit::Services::TransmitDirection::TX, addr1, now, frame))
+        Trace(SilKit::Services::TransmitDirection::TX, master.GetServiceDescriptor(), now, frame))
         .Times(1);
 
     master.SendFrame(frame, LinFrameResponseType::MasterResponse);

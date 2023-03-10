@@ -78,7 +78,7 @@ public:
     TraceMessage& operator=(const TraceMessage&&) = delete;
 
     template <typename MsgT>
-    TraceMessage(const MsgT& msg)
+    explicit TraceMessage(const MsgT& msg)
         : _type{getTypeId<MsgT>()}
         , _value{reinterpret_cast<const void*>(&msg)}
     {

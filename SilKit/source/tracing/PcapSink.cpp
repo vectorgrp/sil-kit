@@ -108,7 +108,7 @@ void PcapSink::Close()
 }
 
 void PcapSink::Trace(SilKit::Services::TransmitDirection /*unused*/,
-                     const Core::EndpointAddress& /* unused endpoint address */, std::chrono::nanoseconds timestamp,
+                     const Core::ServiceDescriptor& /* unused endpoint address */, std::chrono::nanoseconds timestamp,
                      const TraceMessage& traceMessage)
 {
     if (traceMessage.Type() != TraceMessageType::EthernetFrame)
