@@ -129,7 +129,7 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::Partici
         case Config::TraceSource::Type::PcapFile:
         {
             auto provider = PcapReplay{};
-            auto file = provider.OpenFile(source.inputPath, logger);
+            auto file = provider.OpenFile(participantConfig, source.inputPath, logger);
             replayFiles.insert({source.name, std::move(file)});
             break;
         }

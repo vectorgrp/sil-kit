@@ -46,7 +46,7 @@ public:
     {
     }
 
-    const char*GetExtensionName() const
+    const char* GetExtensionName() const
     {
         return _descriptor.extension_name;
     }

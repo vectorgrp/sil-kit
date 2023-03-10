@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "EndpointAddress.hpp"
 #include "TraceMessage.hpp"
+#include "ParticipantConfiguration.hpp"
 
 namespace SilKit {
 
@@ -65,7 +66,7 @@ class ITraceMessageSinkFactory
 {
 public:
     virtual ~ITraceMessageSinkFactory() = default;
-    virtual auto Create(/*Config::Config config, */
+    virtual auto Create(SilKit::Config::ParticipantConfiguration config,
                         SilKit::Services::Logging::ILogger* logger, std::string participantName, std::string sinkName)
         -> std::unique_ptr<ITraceMessageSink> = 0;
 };

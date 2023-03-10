@@ -43,7 +43,7 @@ auto CreateMdf4Tracing(Config::ParticipantConfiguration config,
     -> std::unique_ptr<ITraceMessageSink>
 {
     auto& factory = SilKitExtensionLoader<ITraceMessageSinkFactory>(logger, "vibe-mdf4tracing", config.extensions);
-    return factory.Create(/*std::move(config), */logger, participantName, sinkName);
+    return factory.Create(std::move(config), logger, participantName, sinkName);
 }
 
 auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services::Logging::ILogger* logger,
@@ -51,7 +51,7 @@ auto CreateMdf4Replay(Config::ParticipantConfiguration config, SilKit::Services:
     -> std::shared_ptr<IReplayFile>
 {
     auto& factory = SilKitExtensionLoader<IReplayDataProvider>(logger, "vibe-mdf4tracing", config.extensions);
-    return factory.OpenFile(/*config, */fileName, logger);
+    return factory.OpenFile(config, fileName, logger);
 }
 
 

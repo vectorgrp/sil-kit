@@ -101,7 +101,7 @@ private:
 namespace SilKit {
 namespace Tracing {
 
-auto PcapReplay::OpenFile(const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
+auto PcapReplay::OpenFile(const SilKit::Config::ParticipantConfiguration&, const std::string& filePath, SilKit::Services::Logging::ILogger* logger)
     -> std::shared_ptr<IReplayFile>
 {
     return std::make_shared<ReplayPcapFile>(filePath, logger);
