@@ -150,7 +150,7 @@ private:
 
     TimeSyncService* _timeSyncService;
 
-    OperationMode _operationMode = OperationMode::Invalid;
+    std::atomic<OperationMode> _operationMode{OperationMode::Invalid};
 
     mutable std::mutex _statusMx;
     ParticipantStatus _status;

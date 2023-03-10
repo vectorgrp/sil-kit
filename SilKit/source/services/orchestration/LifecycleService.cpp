@@ -135,7 +135,7 @@ auto LifecycleService::StartLifecycle()
 
     // Update ServiceDescriptor
     _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::lifecycleIsCoordinated,
-                                               std::to_string(static_cast<int>(_operationMode)));
+                                               std::to_string(static_cast<int>(_operationMode.load())));
 
     // Publish services
     auto serviceDiscovery = _participant->GetServiceDiscovery();
