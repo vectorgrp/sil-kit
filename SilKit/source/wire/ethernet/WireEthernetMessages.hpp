@@ -79,6 +79,7 @@ inline std::string to_string(const EthernetStatus& msg);
 inline std::string to_string(const EthernetSetMode& msg);
 
 inline std::ostream& operator<<(std::ostream& out, const WireEthernetFrameEvent& msg);
+inline std::ostream& operator<<(std::ostream& out, const WireEthernetFrame& msg);
 inline std::ostream& operator<<(std::ostream& out, EthernetMode value);
 inline std::ostream& operator<<(std::ostream& out, const EthernetStatus& msg);
 inline std::ostream& operator<<(std::ostream& out, const EthernetSetMode& msg);
@@ -142,6 +143,11 @@ std::string to_string(const EthernetSetMode& msg)
 std::ostream& operator<<(std::ostream& out, const WireEthernetFrameEvent& msg)
 {
     return out << ToEthernetFrameEvent(msg);
+}
+
+std::ostream& operator<<(std::ostream& out, const WireEthernetFrame& msg)
+{
+    return out << to_string(msg);
 }
 
 std::ostream& operator<<(std::ostream& out, EthernetMode value)
