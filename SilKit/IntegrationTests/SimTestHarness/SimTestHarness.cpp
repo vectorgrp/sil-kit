@@ -264,5 +264,14 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
 }
 
 
+void SimTestHarness::Reset()
+{
+    auto lock = Lock();
+    _simParticipants.clear();
+    _simSystemController.reset();
+    _registry.reset();
+    _registryUri.clear();
+    _syncParticipantNames.clear();
+}
 } // namespace Tests
 } // namespace SilKit
