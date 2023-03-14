@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sys/types.h>
 #include <unistd.h>
 #include <limits.h>
+#include <libgen.h>
 
 #include "SilKitExtensions.hpp"
 #include "LoadExtension.hpp"
@@ -95,7 +96,8 @@ std::string GetProcessPath()
     }
     auto unb = static_cast<size_t>(nb);
     buf.at(unb) = '\0';
-    return std::string(buf.data(), unb);
+    auto* processDir = dirname(buf.data());
+    return std::string{processDir};
 }
 
 }//detail
