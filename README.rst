@@ -25,11 +25,14 @@ Related Projects
 
 One of the design goals of SIL Kit is to easily connect different third-party tools,
 such as emulators, virtual machines and simulation tools.
+
 The SIL Kit ecosystem comprises the following turn-key solutions:
-`SIL Kit Adapters for QEMU <https://github.com/vectorgrp/sil-kit-adapters-qemu>`_
-integrates with QEMU to support co-simulation with emulated targets.
-The `SIL Kit Adapters for TAP devices <https://github.com/vectorgrp/sil-kit-adapters-tap>`_
-project provides first-class support for TAP devices of the host operating system.
+
+* The `SIL Kit Adapters for QEMU <https://github.com/vectorgrp/sil-kit-adapters-qemu>`_
+  integrates with QEMU to support co-simulation with emulated targets.
+
+* The `SIL Kit Adapters for TAP devices <https://github.com/vectorgrp/sil-kit-adapters-tap>`_
+  project provides first-class support for TAP devices of the host operating system.
 
 
 Getting Started - GIT Clone
