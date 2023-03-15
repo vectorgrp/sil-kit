@@ -252,7 +252,7 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
     if (_replayScheduler)
     {
         _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
-                                              controllerConfig.network.value(), controllerConfig.networkType);
+                                              controllerConfig.network.value(), controllerConfig.GetNetworkType());
     }
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
@@ -288,7 +288,7 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
     if (_replayScheduler)
     {
         _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
-                                              controllerConfig.network.value(), controllerConfig.networkType);
+                                              controllerConfig.network.value(), controllerConfig.GetNetworkType());
     }
 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
@@ -1426,7 +1426,7 @@ auto Participant<SilKitConnectionT>::CreateController(const ConfigT& config, con
     descriptor.SetNetworkName(network);
     descriptor.SetParticipantName(GetParticipantName());
     descriptor.SetServiceName(config.name);
-    descriptor.SetNetworkType(config.networkType);
+    descriptor.SetNetworkType(config.GetNetworkType());
     descriptor.SetServiceId(localEndpoint);
     descriptor.SetServiceType(serviceType);
     descriptor.SetSupplementalData(std::move(supplementalData));

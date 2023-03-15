@@ -48,7 +48,7 @@ inline namespace v1 {
 //! \brief Generic dummy for all internal controllers - do not make available to public API!
 struct InternalController
 {
-    static constexpr NetworkType networkType = NetworkType::Undefined;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Undefined; }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -61,7 +61,7 @@ struct InternalController
 //! \brief CAN controller service
 struct CanController
 {
-    static constexpr NetworkType networkType = NetworkType::CAN;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::CAN; }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -77,7 +77,7 @@ struct CanController
 //! \brief LIN controller service
 struct LinController
 {
-    static constexpr NetworkType networkType = NetworkType::LIN;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::LIN; }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -93,7 +93,7 @@ struct LinController
 //! \brief Ethernet controller service
 struct EthernetController
 {
-    static constexpr NetworkType networkType = NetworkType::Ethernet;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Ethernet; }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -109,7 +109,7 @@ struct EthernetController
 //! \brief FlexRay controller service
 struct FlexrayController
 {
-    static constexpr NetworkType networkType = NetworkType::FlexRay;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::FlexRay; }
 
     std::string name;
     SilKit::Util::Optional<std::string> network;
@@ -129,7 +129,7 @@ struct FlexrayController
 //! \brief Publisher configuration for the Data communication service
 struct DataPublisher
 {
-    static constexpr NetworkType networkType = NetworkType::Data;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Data; }
 
     std::string name;
     SilKit::Util::Optional<std::string> topic;
@@ -144,7 +144,7 @@ struct DataPublisher
 //! \brief Subscriber configuration for the Data communication service
 struct DataSubscriber
 {
-    static constexpr NetworkType networkType = NetworkType::Data;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::Data; }
 
     std::string name;
     SilKit::Util::Optional<std::string> topic;
@@ -160,7 +160,7 @@ struct DataSubscriber
 //! \brief Server configuration for the RPC communication service
 struct RpcServer
 {
-    static constexpr NetworkType networkType = NetworkType::RPC;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::RPC; }
 
     std::string name;
     SilKit::Util::Optional<std::string> functionName;
@@ -172,7 +172,7 @@ struct RpcServer
 //! \brief Client configuration for the RPC communication service
 struct RpcClient
 {
-    static constexpr NetworkType networkType = NetworkType::RPC;
+    static constexpr auto GetNetworkType() -> NetworkType { return NetworkType::RPC; }
 
     std::string name;
     SilKit::Util::Optional<std::string> functionName;

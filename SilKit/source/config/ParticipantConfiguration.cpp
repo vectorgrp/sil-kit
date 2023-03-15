@@ -180,31 +180,6 @@ bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfigurat
         && lhs.tracing == rhs.tracing
         && lhs.extensions == rhs.extensions;
 }
-
-// ================================================================================
-//  Public API
-// ================================================================================
-
-#if __cplusplus ==  201402L
-// When compiling as C++14, the 'static constexpr variable definitions' are not
-// properly exported in the dll (and not properly odr-used from users of the DLL).
-// For example, when compiling an extension with GCC and loading the shared
-// library, this will result in missing symbols for those networkType definitions.
-// Note: In C++17 the static constexpr variable definitions is implicitly inline,
-// and the separate definitions in this file are obsolete.
-// 
-// As a workaround, the missing symbols are defined in this translation
-// unit.
-constexpr NetworkType CanController::networkType;
-constexpr NetworkType LinController::networkType;
-constexpr NetworkType EthernetController::networkType;
-constexpr NetworkType FlexrayController::networkType;
-constexpr NetworkType DataPublisher::networkType;
-constexpr NetworkType DataSubscriber::networkType;
-constexpr NetworkType RpcServer::networkType;
-constexpr NetworkType RpcClient::networkType;
-#endif
-
 } // inline namespace v1
 
 auto ParticipantConfigurationFromString(const std::string& text)
