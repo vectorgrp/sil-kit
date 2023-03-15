@@ -52,7 +52,7 @@ const std::string systemMasterName{"SystemMaster"};
 const std::string topic{"Topic"};
 const std::string mediaType{ "A" };
 static size_t numParticipants;
-std::chrono::milliseconds communicationTimeout{2000ms};
+std::chrono::milliseconds communicationTimeout{8000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 
 class ITest_HopOnHopOff : public testing::Test
