@@ -97,6 +97,8 @@ try
 
             frameEvent.ethernetFrame = &frame;
             frameEvent.timestamp = cppFrameEvent.timestamp.count();
+            frameEvent.direction = static_cast<SilKit_Direction>(cppFrameEvent.direction);
+            frameEvent.userContext = cppFrameEvent.userContext;
 
             handler(context, controller, &frameEvent);
         }, directionMask);

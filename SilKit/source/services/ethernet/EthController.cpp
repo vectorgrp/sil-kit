@@ -170,6 +170,13 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
         ethernetFrameEvent.frame.raw = SilKit::Util::Span<const uint8_t>{newData};
     }
 
+    const auto frameDirection = static_cast<DirectionMask>(ethernetFrameEvent.direction);
+    constexpr auto txDirection = static_cast<DirectionMask>(TransmitDirection::TX);
+    if ((frameDirection & txDirection) != txDirection)
+    {
+        ethernetFrameEvent.userContext = nullptr;
+    }
+
     // Only use ethernetFrameEvent, not msg, as it may contain the unpadded frame
     _tracer.Trace(ethernetFrameEvent.direction, ethernetFrameEvent.timestamp, ethernetFrameEvent.frame);
     CallHandlers(ethernetFrameEvent);

@@ -13,7 +13,7 @@ Added
 
 - Added frequently asked questions (FAQ) section to documentation.
 
-[4.0.19] - Unreleased
+[4.0.20] - Unreleased
 ---------------------
 
 Added
@@ -23,6 +23,14 @@ Added
   A participant should only send to a single other participant.
 
 - Add LatencyDemo: Measure the average latency between two participants in different processes.
+
+
+Fixed
+~~~~~
+
+- C-API: Fixed a bug where the ``SilKit_EthernetFrameEvent`` delivered in the Ethernet frame handler had
+  the ``userContext`` field always set to ``nullptr``, instead of the value passed in the corresponding ``SilKit_EthernetController_SendFrame`` call.
+- C++-API: Fixed a bug where the ``userContext`` was set in the frame handlers registered on other controllers than the one calling ``SendFrame``. The ``userContext`` is only ever set when a frame event with ``TransmitDirection::TX`` is received, which is only possible on the same controller that sent it.
 
 
 [4.0.19] - 2023-03-02

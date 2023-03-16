@@ -18,14 +18,15 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
+
 #include <memory>
 #include <thread>
 #include <string>
 #include <chrono>
 #include <iostream>
-
 #include <unordered_map> //remove this after rebase on cmake-cleanup-branch
 
+#include <cinttypes>
 
 #include "silkit/services/ethernet/all.hpp"
 
@@ -44,6 +45,8 @@ using namespace SilKit::Services;
 using SilKit::IntegrationTests::EthernetMac;
 using SilKit::IntegrationTests::EthernetEtherType;
 using SilKit::IntegrationTests::CreateEthernetFrameFromString;
+
+constexpr uintptr_t sendFrameUserContext = 0x12345678;
 
 TEST_F(ITest_SimTestHarness, ethernet_demo)
 {
@@ -65,9 +68,13 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
     auto receivedMessage = false;
     auto receivedAckTransmitted = false;
     auto receivedAckDropped = false;
-    auto receiveCount = 0;
     auto sendCount = 0;
     auto linkBitrate = 0;
+    std::atomic<int> readerReceivedRxCount{0};
+    std::atomic<int> readerReceivedTxCount{0};
+    std::atomic<int> writerReceivedRxCount{0};
+    std::atomic<int> writerReceivedTxCount{0};
+
     //Set up the Sending and receiving participants
     {
         /////////////////////////////////////////////////////////////////////////
@@ -78,7 +85,7 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
         auto* lifecycleService = simParticipant->GetOrCreateLifecycleService();
         auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
         auto&& ethernetController = participant->CreateEthernetController("EthernetController1", "ETH1");
-        
+
         lifecycleService->SetCommunicationReadyHandler([ethernetController]() {
             Log() << "---   EthernetWriter: Init called, setting baud rate and starting";
             ethernetController->Activate();
@@ -87,6 +94,22 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
         ethernetController->AddBitrateChangeHandler([&](auto, Ethernet::EthernetBitrateChangeEvent bitrateChangeEvent) {
           linkBitrate = bitrateChangeEvent.bitrate;
         });
+
+        ethernetController->AddFrameHandler(
+            [&writerReceivedRxCount](auto, const SilKit::Services::Ethernet::EthernetFrameEvent& event) {
+                ASSERT_EQ(event.direction, TransmitDirection::RX);
+                ASSERT_EQ(event.userContext, nullptr);
+                writerReceivedRxCount++;
+            },
+            static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::RX));
+
+        ethernetController->AddFrameHandler(
+            [&writerReceivedTxCount](auto, const SilKit::Services::Ethernet::EthernetFrameEvent& event) {
+                ASSERT_EQ(event.direction, TransmitDirection::TX);
+                ASSERT_EQ(event.userContext, reinterpret_cast<void*>(sendFrameUserContext));
+                writerReceivedTxCount++;
+            },
+            static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TX));
 
         ethernetController->AddStateChangeHandler([&](auto, Ethernet::EthernetStateChangeEvent stateChangeEvent) {
           if (stateChangeEvent.state == Ethernet::EthernetState::LinkDown)
@@ -117,7 +140,7 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
             if (now == 10ms)
             {
               Log() << "---   EthernetWriter sending EthernetFrame which should cause LinkDown status";
-              ethernetController->SendFrame(frame);
+              ethernetController->SendFrame(frame, reinterpret_cast<void*>(sendFrameUserContext));
             }
 
             //give the Ethernet link some time to get into the 'UP' state
@@ -127,14 +150,14 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
             {
               for (auto i = 0; i < 33;i++) // keep this in sync with EthernetController mTxQueueLimit
               {
-                ethernetController->SendFrame(frame);
+                ethernetController->SendFrame(frame, reinterpret_cast<void*>(sendFrameUserContext));
               }
             }
             // Send controlled number of messages
             if (now > 55ms && (sendCount++ <= 10)) 
             {
               Log() << "---   EthernetWriter sending EthernetFrame";
-              ethernetController->SendFrame(frame);
+              ethernetController->SendFrame(frame, reinterpret_cast<void*>(sendFrameUserContext));
             }
         }, 1ms);
     }
@@ -159,21 +182,33 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
         });
 
         ethernetController->AddFrameHandler(
-            [&readerTime, &receivedMessage, &frame, &receiveCount, lifecycleService](auto, const auto& netsimMessage) {
-            if (readerTime < 55ms)
-            {
-              // ignore the messages from the Queue-overflow attempt and LinkUp
-              return;
-            }
+            [&readerTime, &receivedMessage, &frame, &readerReceivedRxCount, lifecycleService](
+                auto, const SilKit::Services::Ethernet::EthernetFrameEvent& event) {
+                ASSERT_EQ(event.direction, TransmitDirection::RX);
 
-            ASSERT_TRUE(SilKit::Util::ItemsAreEqual(frame.raw, netsimMessage.frame.raw));
-            if (receiveCount++ == 10)
-            {
-                receivedMessage = true;
-                lifecycleService->Stop("Test done");
-                Log() << "---    EthernetReader: Sending Stop ";
-            }
-        });
+                if (readerTime < 55ms)
+                {
+                    // ignore the messages from the Queue-overflow attempt and LinkUp
+                    return;
+                }
+
+                ASSERT_EQ(event.userContext, nullptr);
+                ASSERT_TRUE(SilKit::Util::ItemsAreEqual(frame.raw, event.frame.raw));
+                if (readerReceivedRxCount++ == 10)
+                {
+                    receivedMessage = true;
+                    lifecycleService->Stop("Test done");
+                    Log() << "---    EthernetReader: Sending Stop ";
+                }
+            },
+            static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::RX));
+
+        ethernetController->AddFrameHandler(
+            [&readerReceivedTxCount](auto, const SilKit::Services::Ethernet::EthernetFrameEvent& event) {
+                ASSERT_EQ(event.direction, TransmitDirection::TX);
+                readerReceivedTxCount++;
+            },
+            static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TX));
     }
 
 
@@ -186,5 +221,11 @@ TEST_F(ITest_SimTestHarness, ethernet_demo)
     EXPECT_TRUE(receivedAckTransmitted) << "Sending  a message must produce an acknowledge";
     EXPECT_FALSE(receivedAckDropped) << "Sending too fast has no effect on trivial simulation ";
     EXPECT_EQ(linkBitrate, 0) << "Bit rate change handler is not called as part of trivial simulation";
+
+    EXPECT_GT(readerReceivedRxCount, 0) << "EthernetReader has not received any frames in the RX direction";
+    EXPECT_EQ(readerReceivedTxCount, 0) << "EthernetReader must not receive any loopback frames";
+
+    EXPECT_EQ(writerReceivedRxCount, 0) << "EthernetWriter must not receive any frames in the RX direction";
+    EXPECT_GT(writerReceivedTxCount, 0) << "EthernetWriter has not received any loopback frames";
 }
 } //end namespace
