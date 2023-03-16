@@ -425,6 +425,7 @@ RPC Demo
    *  -  Notes
       -  ``Client`` participant has two RpcClients that call the ``Add100`` and ``Sort`` functions on the two RpcServers of the ``Server`` participant.
 
+.. _sec:util-benchmark-demo:
 
 Benchmark Demo
 ~~~~~~~~~~~~~~~~~~~~

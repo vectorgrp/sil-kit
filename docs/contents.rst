@@ -13,5 +13,6 @@ Contents
   configuration/configuration
   usage/utilities
   usage/troubleshooting
+  faq/faq
   CHANGELOG
   licenses/license
