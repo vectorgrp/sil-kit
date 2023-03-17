@@ -13,12 +13,6 @@ Added
 
 - Added frequently asked questions (FAQ) section to documentation.
 
-[4.0.20] - Unreleased
----------------------
-
-Added
-~~~~~
-
 - Modification of BenchmarkDemo: Change the communication topology by modifying the PubSub topics. 
   A participant should only send to a single other participant.
 
