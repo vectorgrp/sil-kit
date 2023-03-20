@@ -32,6 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IParticipantInternal.hpp"
 #include "DataSubscriberInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
+#include "ITraceMessageSource.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -42,13 +43,14 @@ class DataSubscriber
     , public IMsgForDataSubscriber
     , public Services::Orchestration::ITimeConsumer
     , public Core::IServiceEndpoint
+    , public ITraceMessageSource
 {
 public:
     DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
                    const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                    DataMessageHandler defaultDataHandler);
 
-public:
+public: //methods
     void RegisterServiceDiscovery();
     void SetDataMessageHandler(DataMessageHandler callback) override;
 
@@ -59,16 +61,22 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
-private:
+
+    //ITraceMessageSource
+    inline void AddSink(ITraceMessageSink* sink) override;
+
+private: //methods
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
         const std::vector<SilKit::Services::MatchingLabel>& publisherLabels);
 
     void RemoveInternalSubscriber(const std::string& pubUUID);
 
-private:
+    DataMessageHandler WrapTracingCallback(DataMessageHandler callback);
+private: //members
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
+    Tracer _tracer;
 
     DataMessageHandler _defaultDataHandler;
 
@@ -99,6 +107,12 @@ void DataSubscriber::SetServiceDescriptor(const SilKit::Core::ServiceDescriptor&
 auto DataSubscriber::GetServiceDescriptor() const -> const SilKit::Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+
+void DataSubscriber::AddSink(ITraceMessageSink* sink)
+{
+    _tracer.AddSink(GetServiceDescriptor(), *sink);
 }
 
 } // namespace PubSub

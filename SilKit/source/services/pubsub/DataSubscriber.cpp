@@ -36,7 +36,7 @@ DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services
     : _topic{dataSpec.Topic()}
     , _mediaType{dataSpec.MediaType()}
     , _labels{dataSpec.Labels()}
-    , _defaultDataHandler{defaultDataHandler}
+    , _defaultDataHandler{WrapTracingCallback(defaultDataHandler)}
     , _timeProvider{timeProvider}
     , _participant{ participant }
 {
@@ -141,11 +141,11 @@ void DataSubscriber::RegisterServiceDiscovery()
 void DataSubscriber::SetDataMessageHandler(DataMessageHandler callback)
 {
     std::unique_lock<decltype(_internalSubscribersMx)> lock(_internalSubscribersMx);
-
-    _defaultDataHandler = callback;
+    auto tracingCallback = WrapTracingCallback(std::move(callback));
+    _defaultDataHandler = tracingCallback;
     for (auto internalSubscriber : _internalSubscribers)
     {
-        internalSubscriber.second->SetDataMessageHandler(callback);
+        internalSubscriber.second->SetDataMessageHandler(tracingCallback);
     }
 }
 
@@ -166,6 +166,19 @@ void DataSubscriber::RemoveInternalSubscriber(const std::string& pubUUID)
         _participant->GetServiceDiscovery()->NotifyServiceRemoved(internalSubscriber->second->GetServiceDescriptor());
         _internalSubscribers.erase(pubUUID);
     }
+}
+
+ auto DataSubscriber::WrapTracingCallback(DataMessageHandler callback) ->
+    SilKit::Services::PubSub::DataMessageHandler
+{
+    auto tracingCallback = [this, callback=std::move(callback)](auto&& service, auto&& message) {
+        _tracer.Trace(TransmitDirection::RX, _timeProvider->Now(), message);
+        if (callback)
+        {
+            callback(service, message);
+        }
+    };
+    return tracingCallback;
 }
 
 } // namespace PubSub
