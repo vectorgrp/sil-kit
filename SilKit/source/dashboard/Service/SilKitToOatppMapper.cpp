@@ -126,6 +126,16 @@ oatpp::Object<MatchingLabelDto> CreateMatchingLabelDto(const Services::MatchingL
     return label;
 }
 
+oatpp::String GetSupplementalDataValue(const Core::ServiceDescriptor& serviceDescriptor, const std::string& key)
+{
+    std::string str;
+    if (!serviceDescriptor.GetSupplementalDataItem(key, str))
+    {
+        throw SilKitError{"Missing key " + key + " in supplementalData"};
+    }
+    return str;
+}
+
 oatpp::Vector<oatpp::Object<MatchingLabelDto>> CreateMatchingLabels(const Core::ServiceDescriptor& serviceDescriptor,
                                                                     const std::string& labelsKey)
 {
@@ -148,37 +158,75 @@ oatpp::Vector<oatpp::Object<MatchingLabelDto>> CreateMatchingLabels(const Core::
 oatpp::Object<ServiceDto> SilKitToOatppMapper::CreateServiceDto(const Core::ServiceDescriptor& serviceDescriptor)
 {
     auto controller = ServiceDto::createShared();
+    controller->name = serviceDescriptor.GetServiceName();
     controller->networkName = serviceDescriptor.GetNetworkName();
     return controller;
+}
+
+oatpp::Object<DataSpecDto> CreateDataSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
+                                             const std::string& topicKey, const std::string& mediaTypeKey,
+                                             const std::string& labelsKey)
+{
+    auto dataSpec = DataSpecDto::createShared();
+    dataSpec->topic = GetSupplementalDataValue(serviceDescriptor, topicKey);
+    dataSpec->mediaType = GetSupplementalDataValue(serviceDescriptor, mediaTypeKey);
+    dataSpec->labels = CreateMatchingLabels(serviceDescriptor, labelsKey);
+    return dataSpec;
 }
 
 oatpp::Object<DataPublisherDto> SilKitToOatppMapper::CreateDataPublisherDto(
     const Core::ServiceDescriptor& serviceDescriptor)
 {
     auto dataPublisher = DataPublisherDto::createShared();
+    dataPublisher->name = serviceDescriptor.GetServiceName();
     dataPublisher->networkName = serviceDescriptor.GetNetworkName();
-    std::string topic;
-    if (!serviceDescriptor.GetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherTopic, topic))
-    {
-        throw SilKitError{"Missing key " + Core::Discovery::supplKeyDataPublisherTopic + " in supplementalData "};
-    }
-    dataPublisher->topic = topic;
-    dataPublisher->labels = CreateMatchingLabels(serviceDescriptor, Core::Discovery::supplKeyDataPublisherPubLabels);
+    dataPublisher->spec = CreateDataSpecDto(serviceDescriptor, Core::Discovery::supplKeyDataPublisherTopic,
+                                            Core::Discovery::supplKeyDataPublisherMediaType,
+                                            Core::Discovery::supplKeyDataPublisherPubLabels);
     return dataPublisher;
+}
+
+oatpp::Object<DataSubscriberDto> SilKitToOatppMapper::CreateDataSubscriberDto(
+    const Core::ServiceDescriptor& serviceDescriptor)
+{
+    auto dataSubscriber = DataSubscriberDto::createShared();
+    dataSubscriber->name = serviceDescriptor.GetServiceName();
+    dataSubscriber->spec = CreateDataSpecDto(serviceDescriptor, Core::Discovery::supplKeyDataSubscriberTopic,
+                                             Core::Discovery::supplKeyDataSubscriberMediaType,
+                                             Core::Discovery::supplKeyDataSubscriberSubLabels);
+    return dataSubscriber;
+}
+
+oatpp::Object<RpcSpecDto> CreateRpcSpecDto(const Core::ServiceDescriptor& serviceDescriptor,
+                                           const std::string& functionNameKey, const std::string& mediaTypeKey,
+                                           const std::string& labelsKey)
+{
+    auto rpcSpec = RpcSpecDto::createShared();
+    rpcSpec->functionName = GetSupplementalDataValue(serviceDescriptor, functionNameKey);
+    rpcSpec->mediaType = GetSupplementalDataValue(serviceDescriptor, mediaTypeKey);
+    rpcSpec->labels = CreateMatchingLabels(serviceDescriptor, labelsKey);
+    return rpcSpec;
 }
 
 oatpp::Object<RpcClientDto> SilKitToOatppMapper::CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor)
 {
     auto rpcClient = RpcClientDto::createShared();
+    rpcClient->name = serviceDescriptor.GetServiceName();
     rpcClient->networkName = serviceDescriptor.GetNetworkName();
-    std::string functionName;
-    if (!serviceDescriptor.GetSupplementalDataItem(Core::Discovery::supplKeyRpcClientFunctionName, functionName))
-    {
-        throw SilKitError{"Missing key " + Core::Discovery::supplKeyRpcClientFunctionName + " in supplementalData"};
-    }
-    rpcClient->functionName = functionName;
-    rpcClient->labels = CreateMatchingLabels(serviceDescriptor, Core::Discovery::supplKeyRpcClientLabels);
+    rpcClient->spec =
+        CreateRpcSpecDto(serviceDescriptor, Core::Discovery::supplKeyRpcClientFunctionName,
+                         Core::Discovery::supplKeyRpcClientMediaType, Core::Discovery::supplKeyRpcClientLabels);
     return rpcClient;
+}
+
+oatpp::Object<RpcServerDto> SilKitToOatppMapper::CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor)
+{
+    auto rpcServer = RpcServerDto::createShared();
+    rpcServer->name = serviceDescriptor.GetServiceName();
+    rpcServer->spec =
+        CreateRpcSpecDto(serviceDescriptor, Core::Discovery::supplKeyRpcServerFunctionName,
+                         Core::Discovery::supplKeyRpcServerMediaType, Core::Discovery::supplKeyRpcServerLabels);
+    return rpcServer;
 }
 
 oatpp::Object<SimulationEndDto> SilKitToOatppMapper::CreateSimulationEndDto(uint64_t stop)

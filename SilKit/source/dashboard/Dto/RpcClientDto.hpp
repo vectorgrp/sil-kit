@@ -21,23 +21,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "ServiceDto.hpp"
-#include "MatchingLabelDto.hpp"
+#include "RpcSpecDto.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
 namespace SilKit {
 namespace Dashboard {
 
-class RpcClientDto : public ServiceDto
+class RpcClientDto : public oatpp::DTO
 {
-    DTO_INIT(RpcClientDto, ServiceDto)
+    DTO_INIT(RpcClientDto, DTO)
 
-    DTO_FIELD_INFO(functionName) { info->description = "Function name"; }
-    DTO_FIELD(String, functionName);
+    DTO_FIELD_INFO(name) { info->description = "Name of the service"; }
+    DTO_FIELD(String, name);
 
-    DTO_FIELD_INFO(labels) { info->description = "Labels"; }
-    DTO_FIELD(Vector<Object<MatchingLabelDto>>, labels);
+    DTO_FIELD_INFO(networkName) { info->description = "Name of the network"; }
+    DTO_FIELD(String, networkName);
+
+    DTO_FIELD_INFO(spec) { info->description = "Rpc spec"; }
+    DTO_FIELD(Object<RpcSpecDto>, spec);
 };
 
 } // namespace Dashboard

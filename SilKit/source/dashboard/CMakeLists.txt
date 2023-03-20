@@ -51,9 +51,13 @@ if(SILKIT_BUILD_DASHBOARD)
         Client/SendCoroutine.hpp
 
         Dto/DataPublisherDto.hpp
+        Dto/DataSpecDto.hpp
+        Dto/DataSubscriberDto.hpp
         Dto/MatchingLabelDto.hpp
         Dto/ParticipantStatusDto.hpp
         Dto/RpcClientDto.hpp
+        Dto/RpcServerDto.hpp
+        Dto/RpcSpecDto.hpp
         Dto/ServiceDto.hpp
         Dto/SimulationConfigurationDto.hpp
         Dto/SimulationCreationRequestDto.hpp

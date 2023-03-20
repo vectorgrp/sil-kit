@@ -73,7 +73,7 @@ protected:
     }
 
     SilKit::Dashboard::TestResult CreateExpectedTestResult(
-        std::map<std::string, std::set<SilKit::Dashboard::Service>> servicesByParticipant)
+        std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> servicesByParticipant)
     {
         std::set<std::string> expectedStates{"servicescreated",
                                              "communicationinitializing",
@@ -125,57 +125,49 @@ void CheckMatchingLabel(MatchingLabel actual, MatchingLabel expected, const std:
 void CheckService(SilKit::Dashboard::Service actual, SilKit::Dashboard::Service expected,
                   const std::string& participantName)
 {
-    if (expected.serviceType == "datapublisher")
+    ASSERT_EQ(actual.parentServiceId, expected.parentServiceId)
+        << "Unexpected parent service id for " << participantName << "!";
+    ASSERT_EQ(actual.serviceType, expected.serviceType) << "Unexpected service type for " << participantName << "!";
+    if (expected.serviceType == "datapublisher" || expected.serviceType == "datasubscriber")
     {
-        ASSERT_EQ(actual.serviceType, expected.serviceType)
-            << "Unexpected controller type for " << participantName << "!";
         ASSERT_EQ(actual.serviceName, expected.serviceName) << "Unexpected service name for " << participantName << "!";
-        ASSERT_EQ(actual.topic, expected.topic) << "Unexpected topic for " << participantName << "!";
-        for (auto i = 0u; i < expected.labels.size(); i++)
+        ASSERT_EQ(actual.spec.topic, expected.spec.topic) << "Unexpected topic for " << participantName << "!";
+        for (auto i = 0u; i < expected.spec.labels.size(); i++)
         {
-            CheckMatchingLabel(actual.labels.at(i), expected.labels.at(i), participantName);
+            CheckMatchingLabel(actual.spec.labels.at(i), expected.spec.labels.at(i), participantName);
         }
         return;
     }
-    if (expected.serviceType == "datasubscriber")
+    if (expected.serviceType == "datasubscriberinternal")
     {
-        ASSERT_EQ(actual.serviceType, expected.serviceType)
-            << "Unexpected controller type for " << participantName << "!";
         return;
     }
-    if (expected.serviceType == "rpcclient")
+    if (expected.serviceType == "rpcclient" || expected.serviceType == "rpcserver")
     {
-        ASSERT_EQ(actual.serviceType, expected.serviceType)
-            << "Unexpected controller type for " << participantName << "!";
         ASSERT_EQ(actual.serviceName, expected.serviceName) << "Unexpected service name for " << participantName << "!";
-        ASSERT_EQ(actual.functionName, expected.functionName)
+        ASSERT_EQ(actual.spec.functionName, expected.spec.functionName)
             << "Unexpected functionName for " << participantName << "!";
-        for (auto i = 0u; i < expected.labels.size(); i++)
+        for (auto i = 0u; i < expected.spec.labels.size(); i++)
         {
-            CheckMatchingLabel(actual.labels.at(i), expected.labels.at(i), participantName);
+            CheckMatchingLabel(actual.spec.labels.at(i), expected.spec.labels.at(i), participantName);
         }
         return;
     }
-    if (expected.serviceType == "rpcserver")
+    if (expected.serviceType == "rpcserverinternal")
     {
-        ASSERT_EQ(actual.serviceType, expected.serviceType)
-            << "Unexpected controller type for " << participantName << "!";
         return;
     }
-    ASSERT_EQ(actual.serviceType, expected.serviceType) << "Unexpected controller type for " << participantName << "!";
     ASSERT_EQ(actual.serviceName, expected.serviceName) << "Unexpected service name for " << participantName << "!";
     ASSERT_EQ(actual.networkName, expected.networkName) << "Unexpected network name for " << participantName << "!";
 }
 
-void CheckServices(std::set<SilKit::Dashboard::Service> actual, std::set<SilKit::Dashboard::Service> expected,
-                   const std::string& participantName)
+void CheckServices(std::map<uint64_t, SilKit::Dashboard::Service> actual,
+                   std::map<uint64_t, SilKit::Dashboard::Service> expected, const std::string& participantName)
 {
     ASSERT_EQ(actual.size(), expected.size()) << "Wrong number of services for " << participantName << "!";
-    for (auto&& service : expected)
+    for (auto i = expected.begin(); i != expected.end(); ++i)
     {
-        ASSERT_TRUE(actual.find(service) != actual.end())
-            << "Service " << service.serviceName << " " << service.serviceType << " not found!";
-        CheckService(*(actual.find(service)), service, participantName);
+        CheckService(actual[i->first], i->second, participantName);
     }
 }
 
@@ -248,8 +240,8 @@ TEST_F(DashboardTestHarness, dashboard_can)
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
-    SilKit::Dashboard::Service expectedService = {"cancontroller", "CanController1", "CAN1", "IGNORED", "IGNORED", {}};
-    CheckTestResult(testResult, CreateExpectedTestResult({{"CanWriter", {expectedService}}}));
+    CheckTestResult(testResult, CreateExpectedTestResult(
+                                    {{"CanWriter", {{4, {"", "cancontroller", "CanController1", "CAN1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_ethernet)
@@ -273,9 +265,9 @@ TEST_F(DashboardTestHarness, dashboard_ethernet)
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
-    SilKit::Dashboard::Service expectedService = {
-        "ethernetcontroller", "EthernetController1", "ETH1", "IGNORED", "IGNORED", {}};
-    CheckTestResult(testResult, CreateExpectedTestResult({{"EthernetWriter", {expectedService}}}));
+    CheckTestResult(testResult,
+                    CreateExpectedTestResult(
+                        {{"EthernetWriter", {{4, {"", "ethernetcontroller", "EthernetController1", "ETH1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_flexray)
@@ -299,9 +291,8 @@ TEST_F(DashboardTestHarness, dashboard_flexray)
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
-    SilKit::Dashboard::Service expectedService = {
-        "flexraycontroller", "FlexrayController1", "FR1", "IGNORED", "IGNORED", {}};
-    CheckTestResult(testResult, CreateExpectedTestResult({{"Node", {expectedService}}}));
+    CheckTestResult(testResult, CreateExpectedTestResult(
+                                    {{"Node", {{4, {"", "flexraycontroller", "FlexrayController1", "FR1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_lin)
@@ -325,16 +316,16 @@ TEST_F(DashboardTestHarness, dashboard_lin)
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
-    SilKit::Dashboard::Service expectedService = {"lincontroller", "LinController1", "LIN1", "IGNORED", "IGNORED", {}};
-    CheckTestResult(testResult, CreateExpectedTestResult({{"LinMaster", {expectedService}}}));
+    CheckTestResult(testResult, CreateExpectedTestResult(
+                                    {{"LinMaster", {{4, {"", "lincontroller", "LinController1", "LIN1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_pubsub)
 {
     SetupFromParticipantList({"Publisher", "Subscriber"});
     auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        PubSub::PubSubSpec dataSpec{"Topic", "A"};
-        dataSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Mandatory});
+        PubSub::PubSubSpec dataPublisherSpec{"Topic", "A"};
+        dataPublisherSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Optional});
         {
             /////////////////////////////////////////////////////////////////////////
             // Publisher
@@ -344,8 +335,10 @@ TEST_F(DashboardTestHarness, dashboard_pubsub)
             auto&& participant = simParticipant->Participant();
             (void)simParticipant->GetOrCreateLifecycleService();
             (void)simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateDataPublisher("PubCtrl", dataSpec, 1);
+            (void)participant->CreateDataPublisher("PubCtrl", dataPublisherSpec, 1);
         }
+        PubSub::PubSubSpec dataSubscriberSpec{"Topic", "A"};
+        dataSubscriberSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Mandatory});
         {
             /////////////////////////////////////////////////////////////////////////
             // Subscriber
@@ -355,7 +348,7 @@ TEST_F(DashboardTestHarness, dashboard_pubsub)
             auto&& participant = simParticipant->Participant();
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
             auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateDataSubscriber("SubCtrl", dataSpec, [](auto, const auto&) {
+            (void)participant->CreateDataSubscriber("SubCtrl", dataSubscriberSpec, [](auto, const auto&) {
             });
 
             timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
@@ -364,24 +357,31 @@ TEST_F(DashboardTestHarness, dashboard_pubsub)
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
-    CheckTestResult(testResult,
-                    CreateExpectedTestResult(
-                        {{"Publisher",
-                          {{"datapublisher",
-                            "PubCtrl",
-                            "IGNORED",
-                            "Topic",
-                            "IGNORED",
-                            {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}},
-                         {"Subscriber", {{"datasubscriber", "IGNORED", "IGNORED", "IGNORED", "IGNORED", {}}}}}));
+    CheckTestResult(
+        testResult,
+        CreateExpectedTestResult({{"Publisher",
+                                   {{4,
+                                     {"",
+                                      "datapublisher",
+                                      "PubCtrl",
+                                      "IGNORED",
+                                      {"Topic", "IGNORED", "A", {{"Key", "Value", MatchingLabel::Kind::Optional}}}}}}},
+                                  {"Subscriber",
+                                   {{4,
+                                     {"",
+                                      "datasubscriber",
+                                      "SubCtrl",
+                                      "IGNORED",
+                                      {"Topic", "IGNORED", "A", {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}},
+                                    {5, {"4", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_rpc)
 {
     SetupFromParticipantList({"Client", "Server"});
     auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        Rpc::RpcSpec dataSpec{"func", "A"};
-        dataSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Mandatory});
+        Rpc::RpcSpec rpcClientSpec{"func", "A"};
+        rpcClientSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Mandatory});
         {
             /////////////////////////////////////////////////////////////////////////
             // Client
@@ -391,9 +391,11 @@ TEST_F(DashboardTestHarness, dashboard_rpc)
             auto&& participant = simParticipant->Participant();
             (void)simParticipant->GetOrCreateLifecycleService();
             (void)simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateRpcClient("ClientCtrl", dataSpec, [](auto, const auto&) {
+            (void)participant->CreateRpcClient("ClientCtrl", rpcClientSpec, [](auto, const auto&) {
             });
         }
+        Rpc::RpcSpec rpcServerSpec{"func", "A"};
+        rpcServerSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Optional});
         {
             /////////////////////////////////////////////////////////////////////////
             // Server
@@ -403,7 +405,7 @@ TEST_F(DashboardTestHarness, dashboard_rpc)
             auto&& participant = simParticipant->Participant();
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
             auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateRpcServer("ServerCtrl", dataSpec, [](auto, const auto&) {
+            (void)participant->CreateRpcServer("ServerCtrl", rpcServerSpec, [](auto, const auto&) {
             });
 
             timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
@@ -412,15 +414,23 @@ TEST_F(DashboardTestHarness, dashboard_rpc)
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
-    CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"Client",
-                                      {{"rpcclient",
-                                        "ClientCtrl",
-                                        "IGNORED",
-                                        "IGNORED",
-                                        "func",
-                                        {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}},
-                                     {"Server", {{"rpcserver", "IGNORED", "IGNORED", "IGNORED", "IGNORED", {}}}}}));
+    CheckTestResult(
+        testResult,
+        CreateExpectedTestResult({{"Client",
+                                   {{4,
+                                     {"",
+                                      "rpcclient",
+                                      "ClientCtrl",
+                                      "IGNORED",
+                                      {"IGNORED", "func", "A", {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}}}},
+                                  {"Server",
+                                   {{4,
+                                     {"",
+                                      "rpcserver",
+                                      "ServerCtrl",
+                                      "IGNORED",
+                                      {"IGNORED", "func", "A", {{"Key", "Value", MatchingLabel::Kind::Optional}}}}},
+                                    {5, {"4", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_netsim)

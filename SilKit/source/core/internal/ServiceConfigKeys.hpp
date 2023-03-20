@@ -48,7 +48,11 @@ const std::string supplKeyDataPublisherMediaType = "PubSub::pubMediaType";
 const std::string supplKeyDataPublisherPubLabels = "PubSub::pubLabels";
 
 const std::string controllerTypeDataSubscriber = "DataSubscriber";
+const std::string supplKeyDataSubscriberTopic = "PubSub::topic";
+const std::string supplKeyDataSubscriberMediaType = "PubSub::subMediaType";
+const std::string supplKeyDataSubscriberSubLabels = "PubSub::subLabels";
 const std::string controllerTypeDataSubscriberInternal = "DataSubscriberInternal";
+const std::string supplKeyDataSubscriberInternalParentServiceID = "PubSub::subIntParentServiceId";
 
 // RPC types
 const std::string controllerTypeRpcServer = "RpcServer";
@@ -64,6 +68,7 @@ const std::string supplKeyRpcClientUUID = "Rpc::client::UUID";
 
 const std::string controllerTypeRpcServerInternal = "RpcServerInternal";
 const std::string supplKeyRpcServerInternalClientUUID = "Rpc::serverinternal::clientUUID";
+const std::string supplKeyRpcServerInternalParentServiceID = "Rpc::serverinternal::parentServiceId";
 
 // Internal types. These variables are also used for the (internal) controller names.
 const std::string controllerTypeLoggerSender = "LoggerSender";

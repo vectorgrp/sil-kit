@@ -28,8 +28,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 
 #include "DataPublisherDto.hpp"
+#include "DataSubscriberDto.hpp"
 #include "ParticipantStatusDto.hpp"
 #include "RpcClientDto.hpp"
+#include "RpcServerDto.hpp"
 #include "ServiceDescriptor.hpp"
 #include "ServiceDto.hpp"
 #include "SimulationCreationRequestDto.hpp"
@@ -49,7 +51,9 @@ public:
         const Services::Orchestration::ParticipantStatus& participantStatus) = 0;
     virtual oatpp::Object<ServiceDto> CreateServiceDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<DataPublisherDto> CreateDataPublisherDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
+    virtual oatpp::Object<DataSubscriberDto> CreateDataSubscriberDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<RpcClientDto> CreateRpcClientDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
+    virtual oatpp::Object<RpcServerDto> CreateRpcServerDto(const Core::ServiceDescriptor& serviceDescriptor) = 0;
     virtual oatpp::Object<SimulationEndDto> CreateSimulationEndDto(uint64_t stop) = 0;
 };
 } // namespace Dashboard

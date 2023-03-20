@@ -72,7 +72,7 @@ void SilKitEventHandler::Run(const std::string& connectUri, uint64_t time)
         auto simulation = simulationCreated.get();
         if (simulation)
         {
-            Services::Logging::Info(_logger , "Dashboard: created simulation with id {}", simulation->id);
+            Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", simulation->id);
             _simulationId = simulation->id;
         }
         _simulationCreatedPromise.set_value(simulation != nullptr);
@@ -100,7 +100,8 @@ void SilKitEventHandler::OnParticipantConnected(
 
 void SilKitEventHandler::OnSystemStateChanged(Services::Orchestration::SystemState systemState)
 {
-    Services::Logging::Debug(_logger, "Dashboard: updating system state for simulation {} {}", _simulationId, systemState);
+    Services::Logging::Debug(_logger, "Dashboard: updating system state for simulation {} {}", _simulationId,
+                             systemState);
     _dashboardSystemServiceClient->UpdateSystemStatusForSimulation(
         _simulationId.load(), _silKitToOatppMapper->CreateSystemStatusDto(systemState));
 }
@@ -125,73 +126,96 @@ void SilKitEventHandler::OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscove
     }
 }
 
-bool IsInternalController(const Core::ServiceDescriptor& serviceDescriptor)
-{
-    return (serviceDescriptor.GetNetworkType() == Config::NetworkType::Data
-            || serviceDescriptor.GetNetworkType() == Config::NetworkType::RPC)
-           && serviceDescriptor.GetNetworkName() == "default";
-}
-
 void SilKitEventHandler::OnControllerCreated(uint32_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
-    if (IsInternalController(serviceDescriptor))
-    {
-        return;
-    }
-    Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId, serviceDescriptor);
+    Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId,
+                             serviceDescriptor);
     std::string controllerType;
     if (!serviceDescriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType))
     {
         throw SilKitError{"Missing key" + Core::Discovery::controllerType + " in supplementalData"};
     }
     auto participantName = SilKit::Core::Uri::UrlEncode(serviceDescriptor.GetParticipantName());
-    auto serviceName = SilKit::Core::Uri::UrlEncode(serviceDescriptor.GetServiceName());
     if (controllerType == Core::Discovery::controllerTypeCan)
     {
         _dashboardSystemServiceClient->AddCanControllerForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
     else if (controllerType == Core::Discovery::controllerTypeEthernet)
     {
         _dashboardSystemServiceClient->AddEthernetControllerForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
     else if (controllerType == Core::Discovery::controllerTypeFlexray)
     {
         _dashboardSystemServiceClient->AddFlexrayControllerForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
     else if (controllerType == Core::Discovery::controllerTypeLin)
     {
         _dashboardSystemServiceClient->AddLinControllerForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
     else if (controllerType == Core::Discovery::controllerTypeDataPublisher)
     {
         _dashboardSystemServiceClient->AddDataPublisherForParticipantOfSimulation(
-            simulationId, participantName, serviceName,
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
             _silKitToOatppMapper->CreateDataPublisherDto(serviceDescriptor));
+    }
+    else if (controllerType == Core::Discovery::controllerTypeDataSubscriber)
+    {
+        _dashboardSystemServiceClient->AddDataSubscriberForParticipantOfSimulation(
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateDataSubscriberDto(serviceDescriptor));
     }
     else if (controllerType == Core::Discovery::controllerTypeDataSubscriberInternal)
     {
-        _dashboardSystemServiceClient->AddDataSubscriberForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
-    }
-    else if (controllerType == Core::Discovery::controllerTypeRpcServerInternal)
-    {
-        _dashboardSystemServiceClient->AddRpcServerForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
+        std::string parentServiceId;
+        if (!serviceDescriptor.GetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberInternalParentServiceID,
+                                                       parentServiceId))
+        {
+            throw SilKitError{"Missing key" + Core::Discovery::supplKeyDataSubscriberInternalParentServiceID
+                              + " in supplementalData"};
+        }
+        _dashboardSystemServiceClient->AddDataSubscriberInternalForParticipantOfSimulation(
+            simulationId, participantName, parentServiceId, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
     else if (controllerType == Core::Discovery::controllerTypeRpcClient)
     {
         _dashboardSystemServiceClient->AddRpcClientForParticipantOfSimulation(
-            simulationId, participantName, serviceName, _silKitToOatppMapper->CreateRpcClientDto(serviceDescriptor));
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateRpcClientDto(serviceDescriptor));
+    }
+    else if (controllerType == Core::Discovery::controllerTypeRpcServer)
+    {
+        _dashboardSystemServiceClient->AddRpcServerForParticipantOfSimulation(
+            simulationId, participantName, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateRpcServerDto(serviceDescriptor));
+    }
+    else if (controllerType == Core::Discovery::controllerTypeRpcServerInternal)
+    {
+        std::string parentServiceId;
+        if (!serviceDescriptor.GetSupplementalDataItem(Core::Discovery::supplKeyRpcServerInternalParentServiceID,
+                                                       parentServiceId))
+        {
+            throw SilKitError{"Missing key" + Core::Discovery::supplKeyRpcServerInternalParentServiceID
+                              + " in supplementalData"};
+        }
+        _dashboardSystemServiceClient->AddRpcServerInternalForParticipantOfSimulation(
+            simulationId, participantName, parentServiceId, serviceDescriptor.GetServiceId(),
+            _silKitToOatppMapper->CreateServiceDto(serviceDescriptor));
     }
 }
 
 void SilKitEventHandler::OnLinkCreated(uint32_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
-    Services::Logging::Debug(_logger, "Dashboard: adding network for simulation {} {}", simulationId, serviceDescriptor);
+    Services::Logging::Debug(_logger, "Dashboard: adding network for simulation {} {}", simulationId,
+                             serviceDescriptor);
     auto networkName = SilKit::Core::Uri::UrlEncode(serviceDescriptor.GetNetworkName());
     switch (serviceDescriptor.GetNetworkType())
     {

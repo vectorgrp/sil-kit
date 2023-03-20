@@ -1,5 +1,5 @@
 /* Copyright (c) 2022 Vector Informatik GmbH
-
+ 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -21,57 +21,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <set>
-#include <vector>
+#include "RpcSpecDto.hpp"
 
-#include "silkit/services/all.hpp"
+#include OATPP_CODEGEN_BEGIN(DTO)
 
 namespace SilKit {
 namespace Dashboard {
 
-struct Spec
+class RpcServerDto : public oatpp::DTO
 {
-    std::string topic;
-    std::string functionName;
-    std::string mediaType;
-    std::vector<SilKit::Services::MatchingLabel> labels;
-};
+    DTO_INIT(RpcServerDto, DTO)
 
-struct Service
-{
-    std::string parentServiceId;
-    std::string serviceType;
-    std::string serviceName;
-    std::string networkName;
-    Spec spec;
-};
+    DTO_FIELD_INFO(name) { info->description = "Name of the service"; }
+    DTO_FIELD(String, name);
 
-struct Link
-{
-    std::string type;
-    std::string name;
-    bool operator<(const Link& rhs) const { return type < rhs.type || (type == rhs.type && name < rhs.name); }
-};
-
-struct SimulationData
-{
-    std::set<std::string> participants;
-    std::map<std::string, std::set<std::string>> statesByParticipant;
-    std::map<std::string, std::map<uint64_t, Service>> servicesByParticipant;
-    std::set<Link> links;
-    std::set<std::string> systemStates;
-    bool stopped{false};
-};
-
-struct TestResult
-{
-    int32_t errorStatus{-1};
-    std::string errorMessage{};
-    int64_t objectCount{-1};
-    std::map<uint32_t, SimulationData> dataBySimulation;
+    DTO_FIELD_INFO(spec) { info->description = "Rpc spec"; }
+    DTO_FIELD(Object<RpcSpecDto>, spec);
 };
 
 } // namespace Dashboard
 } // namespace SilKit
+
+#include OATPP_CODEGEN_END(DTO)

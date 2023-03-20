@@ -185,7 +185,7 @@ TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Success)
 
     // Act
     const auto service = CreateService();
-    const oatpp::UInt32 expectedSimulationId = 123;
+    const oatpp::UInt64 expectedSimulationId = 123;
     auto request = SimulationEndDto::createShared();
     service->SetSimulationEnd(expectedSimulationId, request);
     WaitForExecutor();
@@ -212,7 +212,7 @@ TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Failure)
 
     // Act
     const auto service = CreateService();
-    const oatpp::UInt32 expectedSimulationId = 123;
+    const oatpp::UInt64 expectedSimulationId = 123;
     auto request = SimulationEndDto::createShared();
     service->SetSimulationEnd(expectedSimulationId, request);
     WaitForExecutor();

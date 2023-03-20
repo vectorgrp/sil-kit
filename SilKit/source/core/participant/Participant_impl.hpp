@@ -367,8 +367,14 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     -> Services::PubSub::DataSubscriberInternal*
 {
     Core::SupplementalData supplementalData;
-    supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriberInternal;
-
+    supplementalData[SilKit::Core::Discovery::controllerType] =
+        SilKit::Core::Discovery::controllerTypeDataSubscriberInternal;
+    auto parentDataSubscriber = dynamic_cast<Services::PubSub::DataSubscriber*>(parent);
+    if (parentDataSubscriber)
+    {
+        supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberInternalParentServiceID] =
+            std::to_string(parentDataSubscriber->GetServiceDescriptor().GetServiceId());
+    }
     SilKit::Config::DataSubscriber controllerConfig;
 
     // Use a unique name to avoid collisions of several subscribers on same topic on one participant
@@ -501,6 +507,10 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeDataSubscriber;
+    supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberTopic] = configuredDataNodeSpec.Topic();
+    supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberMediaType] = configuredDataNodeSpec.MediaType();
+    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels] = labelStr;
 
     auto controller = CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriber>(
         controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
@@ -545,7 +555,12 @@ auto Participant<SilKitConnectionT>::CreateRpcServerInternal(const std::string& 
     Core::SupplementalData supplementalData;
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServerInternal;
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerInternalClientUUID] = clientUUID;
-
+    auto parentRpcServer = dynamic_cast<Services::Rpc::RpcServer*>(parent);
+    if (parentRpcServer)
+    {
+        supplementalData[SilKit::Core::Discovery::supplKeyRpcServerInternalParentServiceID] =
+            std::to_string(parentRpcServer->GetServiceDescriptor().GetServiceId());
+    }
     return CreateController<SilKit::Config::RpcServer, Services::Rpc::RpcServerInternal>(
         controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         functionName, mediaType, clientLabels, clientUUID, handler, parent);
@@ -614,6 +629,10 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
     supplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeRpcServer;
     // Needed for RpcServer discovery in tests
     supplementalData[SilKit::Core::Discovery::supplKeyRpcServerFunctionName] = controllerConfig.functionName.value();
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerMediaType] = dataSpec.MediaType();
+    const auto& labels = dataSpec.Labels();
+    auto labelStr = SilKit::Config::Serialize<std::decay_t<decltype(labels)>>(labels);
+    supplementalData[SilKit::Core::Discovery::supplKeyRpcServerLabels] = labelStr;
 
     SilKit::Services::Rpc::RpcSpec configuredDataSpec{controllerConfig.functionName.value(),
                                                                   dataSpec.MediaType()};

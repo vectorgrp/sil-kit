@@ -108,11 +108,13 @@ TEST_F(TestSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAndTimeAndSt
     ASSERT_EQ(dto->state, ParticipantState::ReadyToRun);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateServiceDto_MapNetworkName)
+TEST_F(TestSilKitToOatppMapper, CreateServiceDto_MapNameAndNetworkName)
 {
     // Arrange
+    const std::string expectedName("myService");
     const std::string expectedNetwork("myNetwork");
     Core::ServiceDescriptor descriptor;
+    descriptor.SetServiceName(expectedName);
     descriptor.SetNetworkName(expectedNetwork);
 
     // Act
@@ -120,19 +122,24 @@ TEST_F(TestSilKitToOatppMapper, CreateServiceDto_MapNetworkName)
     const auto dto = dataMapper->CreateServiceDto(descriptor);
 
     // Assert
+    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
     ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateDataPublisherDto_MapNetworkNameAndLabel)
+TEST_F(TestSilKitToOatppMapper, CreateDataPublisherDto_MapNameAndNetworkNameAndTopicAndMediaTypeAndLabel)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
-
+    const std::string expectedName("myService");
     const std::string expectedNetwork("myNetwork");
+    descriptor.SetServiceName(expectedName);
     descriptor.SetNetworkName(expectedNetwork);
 
     const std::string expectedTopic("myTopic");
     descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherTopic, expectedTopic);
+
+    const std::string expectedMediaType("myMediaType");
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherMediaType, expectedMediaType);
 
     Services::MatchingLabel expectedLabel;
     expectedLabel.key = "myKey";
@@ -147,23 +154,62 @@ TEST_F(TestSilKitToOatppMapper, CreateDataPublisherDto_MapNetworkNameAndLabel)
     const auto dto = dataMapper->CreateDataPublisherDto(descriptor);
 
     // Assert
+    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
     ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
-    ASSERT_STREQ(dto->topic->c_str(), expectedTopic.c_str());
-    ASSERT_STREQ(dto->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
-    ASSERT_STREQ(dto->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
-    ASSERT_EQ(dto->labels->at(0)->kind, LabelKind::Mandatory);
+    ASSERT_STREQ(dto->spec->topic->c_str(), expectedTopic.c_str());
+    ASSERT_STREQ(dto->spec->mediaType->c_str(), expectedMediaType.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
+    ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionNameAndLabel)
+TEST_F(TestSilKitToOatppMapper, CreateDataSubscriberDto_MapNetworkNameAndTopicAndMediaTypeAndLabel)
+{
+    // Arrange
+    Core::ServiceDescriptor descriptor;
+    const std::string expectedName("myService");
+    descriptor.SetServiceName(expectedName);
+
+    const std::string expectedTopic("myTopic");
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberTopic, expectedTopic);
+
+    const std::string expectedMediaType("myMediaType");
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberMediaType, expectedMediaType);
+
+    Services::MatchingLabel expectedLabel;
+    expectedLabel.key = "myKey";
+    expectedLabel.value = "myValue";
+    expectedLabel.kind = Services::MatchingLabel::Kind::Mandatory;
+    auto labels = std::vector<Services::MatchingLabel>{expectedLabel};
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberSubLabels, Config::Serialize(labels));
+
+    // Act
+    const auto dataMapper = CreateService();
+    const auto dto = dataMapper->CreateDataSubscriberDto(descriptor);
+
+    // Assert
+    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
+    ASSERT_STREQ(dto->spec->topic->c_str(), expectedTopic.c_str());
+    ASSERT_STREQ(dto->spec->mediaType->c_str(), expectedMediaType.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
+    ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
+}
+
+TEST_F(TestSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
 {
     // Arrange 
     Core::ServiceDescriptor descriptor;
-
+    const std::string expectedName("myService");
     const std::string expectedNetwork("myNetwork");
+    descriptor.SetServiceName(expectedName);
     descriptor.SetNetworkName(expectedNetwork);
 
     const std::string expectedFunctionName("myFunctionName");
     descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcClientFunctionName, expectedFunctionName);
+
+    const std::string expectedMediaType("myMediaType");
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcClientMediaType, expectedMediaType);
 
     Services::MatchingLabel expectedLabel;
     expectedLabel.key = "myKey";
@@ -178,11 +224,45 @@ TEST_F(TestSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionName
     const auto dto = dataMapper->CreateRpcClientDto(descriptor);
 
     // Assert
+    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
     ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
-    ASSERT_STREQ(dto->functionName->c_str(), expectedFunctionName.c_str());
-    ASSERT_STREQ(dto->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
-    ASSERT_STREQ(dto->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
-    ASSERT_EQ(dto->labels->at(0)->kind,LabelKind::Mandatory);
+    ASSERT_STREQ(dto->spec->functionName->c_str(), expectedFunctionName.c_str());
+    ASSERT_STREQ(dto->spec->mediaType->c_str(), expectedMediaType.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
+    ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
+}
+
+TEST_F(TestSilKitToOatppMapper, CreateRpcServerDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
+{
+    // Arrange
+    Core::ServiceDescriptor descriptor;
+    const std::string expectedName("myService");
+    const std::string expectedFunctionName("myFunctionName");
+    descriptor.SetServiceName(expectedName);
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcServerFunctionName, expectedFunctionName);
+
+    const std::string expectedMediaType("myMediaType");
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcServerMediaType, expectedMediaType);
+
+    Services::MatchingLabel expectedLabel;
+    expectedLabel.key = "myKey";
+    expectedLabel.value = "myValue";
+    expectedLabel.kind = Services::MatchingLabel::Kind::Mandatory;
+    auto labels = std::vector<Services::MatchingLabel>{expectedLabel};
+    descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcServerLabels, Config::Serialize(labels));
+
+    // Act
+    const auto dataMapper = CreateService();
+    const auto dto = dataMapper->CreateRpcServerDto(descriptor);
+
+    // Assert
+    ASSERT_STREQ(dto->name->c_str(), expectedName.c_str());
+    ASSERT_STREQ(dto->spec->functionName->c_str(), expectedFunctionName.c_str());
+    ASSERT_STREQ(dto->spec->mediaType->c_str(), expectedMediaType.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->key->c_str(), expectedLabel.key.c_str());
+    ASSERT_STREQ(dto->spec->labels->at(0)->value->c_str(), expectedLabel.value.c_str());
+    ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
 }
 
 TEST_F(TestSilKitToOatppMapper, CreateSimulationEndDto)

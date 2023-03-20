@@ -30,7 +30,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantStatusDto.hpp"
 #include "ServiceDto.hpp"
 #include "DataPublisherDto.hpp"
+#include "DataSubscriberDto.hpp"
 #include "RpcClientDto.hpp"
+#include "RpcServerDto.hpp"
 #include "SimulationEndDto.hpp"
 
 namespace SilKit {
@@ -44,57 +46,64 @@ public:
     virtual std::future<oatpp::Object<SimulationCreationResponseDto>> CreateSimulation(
         oatpp::Object<SimulationCreationRequestDto> simulation) = 0;
 
-    virtual void AddParticipantToSimulation(oatpp::UInt32 simulationId, oatpp::String participantName) = 0;
+    virtual void AddParticipantToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName) = 0;
 
-    virtual void AddParticipantStatusForSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
+    virtual void AddParticipantStatusForSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
                                                    oatpp::Object<ParticipantStatusDto> participantStatus) = 0;
 
-    virtual void AddCanControllerForParticipantOfSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
-                                                            oatpp::String canonicalName,
+    virtual void AddCanControllerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                            oatpp::UInt64 serviceId,
                                                             oatpp::Object<ServiceDto> canController) = 0;
 
-    virtual void AddEthernetControllerForParticipantOfSimulation(oatpp::UInt32 simulationId,
-                                                                 oatpp::String participantName,
-                                                                 oatpp::String canonicalName,
+    virtual void AddEthernetControllerForParticipantOfSimulation(oatpp::UInt64 simulationId,
+                                                                 oatpp::String participantName, oatpp::UInt64 serviceId,
                                                                  oatpp::Object<ServiceDto> ethernetController) = 0;
 
-    virtual void AddFlexrayControllerForParticipantOfSimulation(oatpp::UInt32 simulationId,
-                                                                oatpp::String participantName,
-                                                                oatpp::String canonicalName,
+    virtual void AddFlexrayControllerForParticipantOfSimulation(oatpp::UInt64 simulationId,
+                                                                oatpp::String participantName, oatpp::UInt64 serviceId,
                                                                 oatpp::Object<ServiceDto> flexrayController) = 0;
 
-    virtual void AddLinControllerForParticipantOfSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
-                                                            oatpp::String canonicalName,
+    virtual void AddLinControllerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                            oatpp::UInt64 serviceId,
                                                             oatpp::Object<ServiceDto> linController) = 0;
 
-    virtual void AddDataPublisherForParticipantOfSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
-                                                            oatpp::String canonicalName,
+    virtual void AddDataPublisherForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                            oatpp::UInt64 serviceId,
                                                             oatpp::Object<DataPublisherDto> dataPublisher) = 0;
 
-    virtual void AddDataSubscriberForParticipantOfSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
-                                                             oatpp::String canonicalName,
-                                                             oatpp::Object<ServiceDto> dataSubscriber) = 0;
+    virtual void AddDataSubscriberForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                             oatpp::UInt64 serviceId,
+                                                             oatpp::Object<DataSubscriberDto> dataSubscriber) = 0;
 
-    virtual void AddRpcClientForParticipantOfSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
-                                                        oatpp::String canonicalName,
+    virtual void AddDataSubscriberInternalForParticipantOfSimulation(
+        oatpp::UInt64 simulationId, oatpp::String participantName, oatpp::String parentServiceId,
+        oatpp::UInt64 serviceId, oatpp::Object<ServiceDto> dataSubscriberInternal) = 0;
+
+    virtual void AddRpcClientForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                        oatpp::UInt64 serviceId,
                                                         oatpp::Object<RpcClientDto> rpcClient) = 0;
 
-    virtual void AddRpcServerForParticipantOfSimulation(oatpp::UInt32 simulationId, oatpp::String participantName,
-                                                        oatpp::String canonicalName,
-                                                        oatpp::Object<ServiceDto> rpcServer) = 0;
+    virtual void AddRpcServerForParticipantOfSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                        oatpp::UInt64 serviceId,
+                                                        oatpp::Object<RpcServerDto> rpcServer) = 0;
 
-    virtual void AddCanNetworkToSimulation(oatpp::UInt32 simulationId, oatpp::String networkName) = 0;
+    virtual void AddRpcServerInternalForParticipantOfSimulation(oatpp::UInt64 simulationId,
+                                                                oatpp::String participantName,
+                                                                oatpp::String parentServiceId, oatpp::UInt64 serviceId,
+                                                                oatpp::Object<ServiceDto> rpcServerInternal) = 0;
 
-    virtual void AddEthernetNetworkToSimulation(oatpp::UInt32 simulationId, oatpp::String networkName) = 0;
+    virtual void AddCanNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
 
-    virtual void AddFlexrayNetworkToSimulation(oatpp::UInt32 simulationId, oatpp::String networkName) = 0;
+    virtual void AddEthernetNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
 
-    virtual void AddLinNetworkToSimulation(oatpp::UInt32 simulationId, oatpp::String networkName) = 0;
+    virtual void AddFlexrayNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
 
-    virtual void UpdateSystemStatusForSimulation(oatpp::UInt32 simulationId,
+    virtual void AddLinNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
+
+    virtual void UpdateSystemStatusForSimulation(oatpp::UInt64 simulationId,
                                                  oatpp::Object<SystemStatusDto> systemStatus) = 0;
 
-    virtual void SetSimulationEnd(oatpp::UInt32 simulationId, oatpp::Object<SimulationEndDto> simulation) = 0;
+    virtual void SetSimulationEnd(oatpp::UInt64 simulationId, oatpp::Object<SimulationEndDto> simulation) = 0;
 };
 
 } // namespace Dashboard

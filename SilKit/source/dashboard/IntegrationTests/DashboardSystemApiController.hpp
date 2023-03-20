@@ -37,8 +37,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "oatpp/web/server/api/ApiController.hpp"
 
 #include "DataPublisherDto.hpp"
+#include "DataSubscriberDto.hpp"
 #include "ParticipantStatusDto.hpp"
 #include "RpcClientDto.hpp"
+#include "RpcServerDto.hpp"
 #include "ServiceDto.hpp"
 #include "SimulationCreationRequestDto.hpp"
 #include "SimulationCreationResponseDto.hpp"
@@ -55,8 +57,7 @@ namespace Dashboard {
 class DashboardSystemApiController : public oatpp::web::server::api::ApiController
 {
 public:
-    DashboardSystemApiController(std::chrono::duration<long long> creationTimeout,
-                                 std::chrono::duration<long long> updateTimeout,
+    DashboardSystemApiController(std::chrono::seconds creationTimeout, std::chrono::seconds updateTimeout,
                                  const std::shared_ptr<ObjectMapper>& objectMapper)
         : oatpp::web::server::api::ApiController(objectMapper)
         , _creationTimeout(creationTimeout)
@@ -65,16 +66,15 @@ public:
     }
 
 private:
-    std::chrono::duration<long long> _creationTimeout;
-    std::chrono::duration<long long> _updateTimeout;
+    std::chrono::seconds _creationTimeout;
+    std::chrono::seconds _updateTimeout;
     std::atomic<uint32_t> _simulationId{0};
     std::mutex _mutex;
     std::map<uint32_t, SimulationData> _data;
 
 public:
     static std::shared_ptr<DashboardSystemApiController> createShared(
-        std::chrono::duration<long long> creationTimeout,
-        std::chrono::duration<long long> updateTimeout,
+        std::chrono::seconds creationTimeout, std::chrono::seconds updateTimeout,
         const std::shared_ptr<ObjectMapper>& objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<ObjectMapper>))
     {
         return std::make_shared<DashboardSystemApiController>(creationTimeout, updateTimeout, objectMapper);
@@ -94,7 +94,7 @@ public:
     }
 
     ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}",
-             addParticipantToSimulation, PATH(UInt32, simulationId), PATH(String, participantName))
+             addParticipantToSimulation, PATH(UInt64, simulationId), PATH(String, participantName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
@@ -104,7 +104,7 @@ public:
     }
 
     ENDPOINT("POST", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/statuses",
-             addParticipantStatusForSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
+             addParticipantStatusForSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
              BODY_DTO(Object<SilKit::Dashboard::ParticipantStatusDto>, participantStatus))
     {
         std::this_thread::sleep_for(_updateTimeout);
@@ -116,140 +116,180 @@ public:
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT(
-        "PUT",
-        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/cancontrollers/{canonicalName}",
-        addCanControllerForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-        PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, canController))
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/cancontrollers/{serviceId}",
+             addCanControllerForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, canController))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(canController, Status::CODE_400, "canController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"cancontroller", canonicalName, canController->networkName});
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId, {"", "cancontroller", canController->name, canController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
 
     ENDPOINT("PUT",
              "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/ethernetcontrollers/"
-             "{canonicalName}",
-             addEthernetControllerForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-             PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, ethernetController))
+             "{serviceId}",
+             addEthernetControllerForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, ethernetController))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(ethernetController, Status::CODE_400, "ethernetController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"ethernetcontroller", canonicalName, ethernetController->networkName});
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId, {"", "ethernetcontroller", ethernetController->name, ethernetController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
 
     ENDPOINT("PUT",
              "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/flexraycontrollers/"
-             "{canonicalName}",
-             addFlexrayControllerForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-             PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, flexrayController))
+             "{serviceId}",
+             addFlexrayControllerForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, flexrayController))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(flexrayController, Status::CODE_400, "flexrayController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"flexraycontroller", canonicalName, flexrayController->networkName});
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId, {"", "flexraycontroller", flexrayController->name, flexrayController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT(
-        "PUT",
-        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/lincontrollers/{canonicalName}",
-        addLinControllerForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-        PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, linController))
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/lincontrollers/{serviceId}",
+             addLinControllerForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, linController))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(linController, Status::CODE_400, "linController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"lincontroller", canonicalName, linController->networkName});
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId, {"", "lincontroller", linController->name, linController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT(
-        "PUT",
-        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/datapublishers/{canonicalName}",
-        addDataPublisherForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-        PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::DataPublisherDto>, dataPublisher))
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/datapublishers/{serviceId}",
+             addDataPublisherForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::DataPublisherDto>, dataPublisher))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(dataPublisher, Status::CODE_400, "dataPublisher not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        std::vector<SilKit::Services::MatchingLabel> labels;
-        for (auto& label : *dataPublisher->labels)
-        {
-            labels.push_back({label->key, label->value,
-                              label->kind == LabelKind::Mandatory ? SilKit::Services::MatchingLabel::Kind::Mandatory
-                                                                  : SilKit::Services::MatchingLabel::Kind::Optional});
-        }
         _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"datapublisher", canonicalName, dataPublisher->networkName, dataPublisher->topic, "", labels});
+            std::pair<uint64_t, Service>(serviceId, {"",
+                                                     "datapublisher",
+                                                     dataPublisher->name,
+                                                     dataPublisher->networkName,
+                                                     {dataPublisher->spec->topic, "", dataPublisher->spec->mediaType,
+                                                      GetLabels(dataPublisher->spec->labels)}}));
         return createResponse(Status::CODE_204, "");
     }
 
     ENDPOINT(
         "PUT",
-        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/datasubscribers/{canonicalName}",
-        addDataSubscriberForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-        PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, dataSubscriber))
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/datasubscribers/{serviceId}",
+        addDataSubscriberForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+        PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::DataSubscriberDto>, dataSubscriber))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(dataSubscriber, Status::CODE_400, "dataSubscriber not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
         _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"datasubscriber", canonicalName, dataSubscriber->networkName});
+            std::pair<uint64_t, Service>(serviceId, {"",
+                                                     "datasubscriber",
+                                                     dataSubscriber->name,
+                                                     "",
+                                                     {dataSubscriber->spec->topic, "", dataSubscriber->spec->mediaType,
+                                                      GetLabels(dataSubscriber->spec->labels)}}));
         return createResponse(Status::CODE_204, "");
     }
 
     ENDPOINT("PUT",
-             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/rpcclients/{canonicalName}",
-             addRpcClientForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-             PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::RpcClientDto>, rpcClient))
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/datasubscribers/"
+             "{parentServiceId}/internals/{serviceId}",
+             addDataSubscriberInternalForParticipantOfSimulation, PATH(UInt64, simulationId),
+             PATH(String, participantName), PATH(String, parentServiceId), PATH(UInt64, serviceId),
+             BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, dataSubscriberInternal))
+    {
+        std::this_thread::sleep_for(_updateTimeout);
+        OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
+        OATPP_ASSERT_HTTP(dataSubscriberInternal, Status::CODE_400, "dataSubscriberInternal not set");
+        std::unique_lock<decltype(_mutex)> lock(_mutex);
+        _data[_simulationId].servicesByParticipant[participantName].insert(
+            std::pair<uint64_t, Service>(serviceId, {parentServiceId,
+                                                     "datasubscriberinternal",
+                                                     dataSubscriberInternal->name,
+                                                     dataSubscriberInternal->networkName,
+                                                     {}}));
+        return createResponse(Status::CODE_204, "");
+    }
+
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/rpcclients/{serviceId}",
+             addRpcClientForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::RpcClientDto>, rpcClient))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(rpcClient, Status::CODE_400, "rpcClient not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        std::vector<SilKit::Services::MatchingLabel> labels;
-        for (auto& label : *rpcClient->labels)
-        {
-            labels.push_back({label->key, label->value,
-                              label->kind == LabelKind::Mandatory ? SilKit::Services::MatchingLabel::Kind::Mandatory
-                                                                  : SilKit::Services::MatchingLabel::Kind::Optional});
-        }
-        _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"rpcclient", canonicalName, rpcClient->networkName, "", rpcClient->functionName, labels});
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId,
+            {"",
+             "rpcclient",
+             rpcClient->name,
+             rpcClient->networkName,
+             {"", rpcClient->spec->functionName, rpcClient->spec->mediaType, GetLabels(rpcClient->spec->labels)}}));
         return createResponse(Status::CODE_204, "");
     }
 
     ENDPOINT("PUT",
-             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/rpcservers/{canonicalName}",
-             addRpcServerForParticipantOfSimulation, PATH(UInt32, simulationId), PATH(String, participantName),
-             PATH(String, canonicalName), BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, rpcServer))
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/rpcservers/{serviceId}",
+             addRpcServerForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(UInt64, serviceId), BODY_DTO(Object<SilKit::Dashboard::RpcServerDto>, rpcServer))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(rpcServer, Status::CODE_400, "rpcServer not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
-            {"rpcserver", canonicalName, rpcServer->networkName});
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId,
+            {"",
+             "rpcserver",
+             rpcServer->name,
+             "",
+             {"", rpcServer->spec->functionName, rpcServer->spec->mediaType, GetLabels(rpcServer->spec->labels)}}));
+        return createResponse(Status::CODE_204, "");
+    }
+
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/rpcservers/"
+             "{parentServiceId}/internals/{serviceId}",
+             addRpcServerInternalForParticipantOfSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(String, parentServiceId), PATH(UInt64, serviceId),
+             BODY_DTO(Object<SilKit::Dashboard::ServiceDto>, rpcServerInternal))
+    {
+        std::this_thread::sleep_for(_updateTimeout);
+        OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
+        OATPP_ASSERT_HTTP(rpcServerInternal, Status::CODE_400, "rpcServerInternal not set");
+        std::unique_lock<decltype(_mutex)> lock(_mutex);
+        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+            serviceId,
+            {parentServiceId, "rpcserverinternal", rpcServerInternal->name, rpcServerInternal->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
 
     ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/cannetworks/{networkName}",
-             addCanNetworkToSimulation, PATH(UInt32, simulationId), PATH(String, networkName))
+             addCanNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
@@ -259,7 +299,7 @@ public:
     }
 
     ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/ethernetnetworks/{networkName}",
-             addEthernetNetworkToSimulation, PATH(UInt32, simulationId), PATH(String, networkName))
+             addEthernetNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
@@ -269,7 +309,7 @@ public:
     }
 
     ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/flexraynetworks/{networkName}",
-             addFlexrayNetworkToSimulation, PATH(UInt32, simulationId), PATH(String, networkName))
+             addFlexrayNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
@@ -279,7 +319,7 @@ public:
     }
 
     ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/linnetworks/{networkName}",
-             addLinNetworkToSimulation, PATH(UInt32, simulationId), PATH(String, networkName))
+             addLinNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
@@ -289,7 +329,7 @@ public:
     }
 
     ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/system/status", updateSystemStatusForSimulation,
-             PATH(UInt32, simulationId), BODY_DTO(Object<SilKit::Dashboard::SystemStatusDto>, systemStatus))
+             PATH(UInt64, simulationId), BODY_DTO(Object<SilKit::Dashboard::SystemStatusDto>, systemStatus))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
@@ -300,7 +340,7 @@ public:
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("POST", "system-service/v1.0/simulations/{simulationId}", setSimulationEnd, PATH(UInt32, simulationId),
+    ENDPOINT("POST", "system-service/v1.0/simulations/{simulationId}", setSimulationEnd, PATH(UInt64, simulationId),
              BODY_DTO(Object<SilKit::Dashboard::SimulationEndDto>, simulation))
     {
         std::this_thread::sleep_for(_updateTimeout);
@@ -309,6 +349,19 @@ public:
         std::unique_lock<decltype(_mutex)> lock(_mutex);
         _data[_simulationId].stopped = true;
         return createResponse(Status::CODE_204, "");
+    }
+
+private:
+    std::vector<SilKit::Services::MatchingLabel> GetLabels(oatpp::Vector<Object<MatchingLabelDto>> labels)
+    {
+        std::vector<SilKit::Services::MatchingLabel> res;
+        for (auto& label : *labels)
+        {
+            res.push_back({label->key, label->value,
+                           label->kind == LabelKind::Mandatory ? SilKit::Services::MatchingLabel::Kind::Mandatory
+                                                               : SilKit::Services::MatchingLabel::Kind::Optional});
+        }
+        return res;
     }
 };
 

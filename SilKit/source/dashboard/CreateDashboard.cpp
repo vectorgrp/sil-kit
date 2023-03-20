@@ -42,8 +42,7 @@ auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
 
 auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                       const std::string& registryUri, const std::string& dashboardUri, std::function<void()> testCode,
-                      std::chrono::duration<long long> creationTimeout,
-                      std::chrono::duration<long long> updateTimeout)
+                      std::chrono::seconds creationTimeout, std::chrono::seconds updateTimeout)
     -> TestResult
 {
     TestResult testResult{};

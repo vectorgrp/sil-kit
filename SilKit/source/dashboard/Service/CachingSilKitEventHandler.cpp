@@ -205,13 +205,13 @@ void CachingSilKitEventHandler::NotifyCachedEvents()
     }
     {
         auto&& cacheCopy = _dataCache.GetAndClear<Services::Orchestration::SystemState>();
-        for (auto&& status : cacheCopy)
+        for (auto&& state : cacheCopy)
         {
             if (_state == Disabled)
             {
                 return;
             }
-            _eventHandler->OnSystemStateChanged(status);
+            _eventHandler->OnSystemStateChanged(state);
         }
     }
 }

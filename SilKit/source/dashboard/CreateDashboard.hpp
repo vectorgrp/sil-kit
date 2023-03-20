@@ -40,8 +40,8 @@ SilKitAPI auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfi
 SilKitAPI auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                 const std::string& registryUri, const std::string& dashboardUri,
                                 std::function<void()> testCode,
-                                std::chrono::duration<long long> creationTimeout = std::chrono::seconds{0},
-                                std::chrono::duration<long long> updateTimeout = std::chrono::seconds{0}) -> TestResult;
+                                std::chrono::seconds creationTimeout = std::chrono::seconds{0},
+                                std::chrono::seconds updateTimeout = std::chrono::seconds{0}) -> TestResult;
 
 } // namespace Dashboard
 } // namespace SilKit

@@ -8,6 +8,11 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.20] - UNRELEASED
 ---------------------
 
+Changed
+~~~~~~~
+
+- Make additional data and rpc information available to the dashboard.
+
 Added
 ~~~~~
 
