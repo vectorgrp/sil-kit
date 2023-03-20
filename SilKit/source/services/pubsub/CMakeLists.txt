@@ -46,6 +46,7 @@ target_link_libraries(S_SilKit_Services_PubSub
     PUBLIC I_SilKit_Services_PubSub
 
     PUBLIC  I_SilKit_Wire_Data
+            S_SilKit_Tracing
     PRIVATE SilKitInterface
             I_SilKit_Core_Internal
             I_SilKit_Config
@@ -55,7 +56,7 @@ target_link_libraries(S_SilKit_Services_PubSub
 
 add_silkit_test(Test_SimDataPublisher 
     SOURCES Test_DataPublisher.cpp 
-    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal 
+    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal
 )
 add_silkit_test(Test_SimDataSubscriber
     SOURCES Test_DataSubscriber.cpp

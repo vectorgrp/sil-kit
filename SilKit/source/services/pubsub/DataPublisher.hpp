@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "IMsgForDataPublisher.hpp"
 #include "IParticipantInternal.hpp"
+#include "ITraceMessageSource.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -38,6 +39,7 @@ class DataPublisher
     , public IMsgForDataPublisher
     , public Services::Orchestration::ITimeConsumer
     , public Core::IServiceEndpoint
+    , public ITraceMessageSource
 {
 public:
     DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
@@ -52,12 +54,17 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
+    //ITraceMessageSource
+    inline void AddSink(ITraceMessageSink* sink) override;
+
+    auto GetTracer() -> Tracer*;
 
 private:
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
     std::string _pubUUID;
+    Tracer _tracer;
 
     Core::ServiceDescriptor _serviceDescriptor{};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
@@ -68,6 +75,11 @@ private:
 //  Inline Implementations
 // ================================================================================
 
+void DataPublisher::AddSink(ITraceMessageSink* sink)
+{
+    _tracer.AddSink(GetServiceDescriptor(), *sink);
+}
+
 void DataPublisher::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
@@ -76,6 +88,11 @@ void DataPublisher::SetServiceDescriptor(const Core::ServiceDescriptor& serviceD
 auto DataPublisher::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+inline auto DataPublisher::GetTracer() -> Tracer*
+{
+    return &_tracer;
 }
 
 } // namespace PubSub

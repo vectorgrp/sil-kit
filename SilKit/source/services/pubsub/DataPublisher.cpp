@@ -43,7 +43,9 @@ DataPublisher::DataPublisher(Core::IParticipantInternal* participant, Services::
 void DataPublisher::Publish(Util::Span<const uint8_t> data)
 {
     WireDataMessageEvent msg{_timeProvider->Now(), data};
+    _tracer.Trace(SilKit::Services::TransmitDirection::TX, msg.timestamp, ToDataMessageEvent(msg));
     _participant->SendMsg(this, msg);
+    
 }
 
 void DataPublisher::SetTimeProvider(Services::Orchestration::ITimeProvider* provider)
