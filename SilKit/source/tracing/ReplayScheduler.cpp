@@ -59,7 +59,7 @@ TraceMessageType ToTraceMessageType(Config::NetworkType networkType)
 // NB: The following block is currently inactive, because MDF4 tracing is not ready yet. It is kept for future
 //     reference, to easy reactivation.
 
-#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
+//#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
 
 std::vector<std::string> splitString(std::string input, const std::string& separator)
 {
@@ -137,17 +137,17 @@ private:
 };
 
 // XXX: There is no link type anymore
-TraceMessageType to_channelType(Config::Link::Type linkType)
-{
-    switch (linkType)
-    {
-    case Config::NetworkType::Ethernet: return TraceMessageType::EthernetFrame;
-    case Config::NetworkType::CAN: return TraceMessageType::CanFrameEvent;
-    case Config::NetworkType::LIN: return TraceMessageType::LinFrame;
-    case Config::NetworkType::FlexRay: return TraceMessageType::FrMessage;
-    default: throw SilKitError("Unknown channel Type");
-    }
-}
+// TraceMessageType to_channelType(Config::Link::Type linkType)
+//{
+//    switch (linkType)
+//    {
+//    case Config::NetworkType::Ethernet: return TraceMessageType::EthernetFrame;
+//    case Config::NetworkType::CAN: return TraceMessageType::CanFrameEvent;
+//    case Config::NetworkType::LIN: return TraceMessageType::LinFrame;
+//    case Config::NetworkType::FlexRay: return TraceMessageType::FrMessage;
+//    default: throw SilKitError("Unknown channel Type");
+//    }
+//}
 
 // Helper to match a channel by a Config::MdfChannel identification supplied by the user
 bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const Config::MdfChannel& mdfId)
@@ -220,7 +220,7 @@ std::string to_string(const Config::MdfChannel& mdf)
     return result.str();
 }
 
-#endif
+//#endif
 
 // Find the MDF channels associated with the given participant/controller names and types or an MdfChannel identification.
 auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* replayFile,
@@ -228,10 +228,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
                        const std::string& participantName, const std::string& networkName,
                        const Config::NetworkType networkType) -> std::shared_ptr<IReplayChannel>
 {
-    // XXX: There parameters are required for MDF4 channel matching.
-    SILKIT_UNUSED_ARG(replayConfig);
-    SILKIT_UNUSED_ARG(participantName);
-    SILKIT_UNUSED_ARG(networkName);
 
     std::vector<std::shared_ptr<IReplayChannel>> channelList;
 
@@ -249,7 +245,7 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
         Services::Logging::Warn(log, "Replay: ignoring {} channel '{}' from file '{}'", to_string(channel->Type()),
                                 channel->Name(), replayFile->FilePath());
 
-#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
+//#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
 
         if (HasMdfChannelSelection(replayConfig.mdfChannel))
         {
@@ -274,10 +270,10 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             }
         }
 
-#endif
+//#endif
     }
 
-#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
+//#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
 
     // when an MdfChannel config is given, the channel has to be unique.
     if (HasMdfChannelSelection(replayConfig.mdfChannel) && (channelList.size() != 1))
@@ -289,7 +285,7 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
         throw SilKit::ConfigurationError{msg.str()};
     }
 
-#endif
+//#endif
 
     if (channelList.size() < 1)
     {
