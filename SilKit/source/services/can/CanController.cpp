@@ -238,17 +238,17 @@ void CanController::ReplaySend(const IReplayMessage* replayMessage)
 {
     // need to copy the message here.
     // will throw if invalid message type.
-    Services::Can::WireCanFrame msg = dynamic_cast<const Services::Can::WireCanFrame&>(*replayMessage);
-    SendFrame(ToCanFrame(msg));
+    auto msgEvent = dynamic_cast<const Services::Can::WireCanFrameEvent&>(*replayMessage);
+    SendFrame(ToCanFrame(msgEvent.frame));
 }
 
 void CanController::ReplayReceive(const IReplayMessage* replayMessage)
 {
     static Tracing::ReplayServiceDescriptor replayService;
-    Services::Can::WireCanFrame frame = dynamic_cast<const Services::Can::WireCanFrame&>(*replayMessage);
+    auto frameEvent = dynamic_cast<const Services::Can::WireCanFrameEvent&>(*replayMessage);
     Services::Can::WireCanFrameEvent msg{};
     msg.timestamp = replayMessage->Timestamp();
-    msg.frame = std::move(frame);
+    msg.frame = std::move(frameEvent.frame);
     msg.direction = TransmitDirection::RX;
     msg.userContext = nullptr;
     ReceiveMsg(&replayService, msg);
