@@ -151,6 +151,12 @@ void CanController::ChangeControllerMode(CanControllerState state)
 
 void CanController::SendFrame(const CanFrame& frame, void* userContext)
 {
+    if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
+    {
+        // do not allow user messages from the public API.
+        // ReplaySend will send all frames.
+        return;
+    }
     WireCanFrameEvent wireCanFrameEvent{};
     wireCanFrameEvent.frame = MakeWireCanFrame(frame);
     wireCanFrameEvent.userContext = userContext;
@@ -169,6 +175,10 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
         return;
     }
 
+    if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
+    {
+        return;
+    }
     _tracer.Trace(msg.direction, msg.timestamp, ToCanFrameEvent(msg));
     CallHandlers(ToCanFrameEvent(msg));
 }
@@ -239,7 +249,9 @@ void CanController::ReplaySend(const IReplayMessage* replayMessage)
     // need to copy the message here.
     // will throw if invalid message type.
     auto msgEvent = dynamic_cast<const Services::Can::WireCanFrameEvent&>(*replayMessage);
-    SendFrame(ToCanFrame(msgEvent.frame));
+    msgEvent.userContext = nullptr;
+
+    SendMsg(msgEvent);
 }
 
 void CanController::ReplayReceive(const IReplayMessage* replayMessage)
@@ -251,7 +263,10 @@ void CanController::ReplayReceive(const IReplayMessage* replayMessage)
     msg.frame = std::move(frameEvent.frame);
     msg.direction = TransmitDirection::RX;
     msg.userContext = nullptr;
-    ReceiveMsg(&replayService, msg);
+   
+    const auto msgEvent = ToCanFrameEvent(msg);
+    _tracer.Trace(msg.direction, msg.timestamp, msgEvent);
+    CallHandlers(msgEvent);
 }
 
 //------------------------

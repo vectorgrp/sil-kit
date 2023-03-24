@@ -35,6 +35,10 @@ namespace Tracing {
 //!< Helper to check whether Direction `dir` is active in the config
 inline bool IsReplayEnabledFor(const Config::Replay& cfg, Config::Replay::Direction dir)
 {
+    if (cfg.direction == Config::Replay::Direction::Undefined)
+    {
+        return false;
+    }
     return cfg.direction == dir || cfg.direction == Config::Replay::Direction::Both;
 }
 
