@@ -128,11 +128,14 @@ void EthController::Deactivate()
 
 void EthController::SendFrame(EthernetFrame frame, void* userContext)
 {
-    WireEthernetFrameEvent msg{};
-    msg.frame = MakeWireEthernetFrame(frame);
-    msg.userContext = userContext;
-
-    SendMsg(std::move(msg));
+    if ((_config.replay.direction == Config::Replay::Direction::Undefined)
+        || (_config.replay.direction == Config::Replay::Direction::Receive))
+    {
+      WireEthernetFrameEvent msg{};
+        msg.frame = MakeWireEthernetFrame(frame);
+        msg.userContext = userContext;
+        SendMsg(std::move(msg));
+    }  
 }
 
 //------------------------
@@ -350,9 +353,14 @@ void EthController::ReplaySend(const IReplayMessage* replayMessage)
 {
     // need to copy the message here.
     // will throw if invalid message type.
-    Services::Ethernet::WireEthernetFrame msg =
+    Services::Ethernet::WireEthernetFrame frame =
         dynamic_cast<const Services::Ethernet::WireEthernetFrame&>(*replayMessage);
-    SendFrame(ToEthernetFrame(msg));
+
+    WireEthernetFrameEvent msg{};
+    msg.frame = frame;
+    msg.userContext = nullptr;
+
+    SendMsg(std::move(msg));
 }
 
 void EthController::ReplayReceive(const IReplayMessage* replayMessage)
