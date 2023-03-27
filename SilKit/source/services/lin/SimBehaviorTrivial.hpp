@@ -70,7 +70,6 @@ private:
     LinController* _parentController{nullptr};
     const Core::IServiceEndpoint* _parentServiceEndpoint{nullptr};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
-    Tracer _tracer;
 };
 
 } // namespace Lin

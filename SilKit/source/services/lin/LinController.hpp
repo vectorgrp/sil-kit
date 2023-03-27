@@ -150,6 +150,8 @@ public:
     void ThrowOnSendAttemptWithUndefinedChecksum(const LinFrame& frame) const;
     void ThrowOnSendAttemptWithUndefinedDataLength(const LinFrame& frame) const;
 
+    // for ITraceMessageSource
+    inline auto GetTracer() -> Tracer*;
 private:
     // ----------------------------------------
     // private methods
@@ -241,6 +243,10 @@ void LinController::SetServiceDescriptor(const Core::ServiceDescriptor& serviceD
 auto LinController::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+auto LinController::GetTracer() -> Tracer*
+{
+    return &_tracer;
 }
 } // namespace Lin
 } // namespace Services

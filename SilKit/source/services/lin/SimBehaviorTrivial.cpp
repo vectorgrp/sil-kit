@@ -48,10 +48,12 @@ inline auto ToTracingDir(LinFrameStatus status) -> SilKit::Services::TransmitDir
     case LinFrameStatus::LIN_RX_BUSY: //[[fallthrough]]
     case LinFrameStatus::LIN_RX_NO_RESPONSE: //[[fallthrough]]
     case LinFrameStatus::LIN_RX_OK: return SilKit::Services::TransmitDirection::RX;
+
     case LinFrameStatus::LIN_TX_ERROR: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_BUSY: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_HEADER_ERROR: //[[fallthrough]]
     case LinFrameStatus::LIN_TX_OK: return SilKit::Services::TransmitDirection::TX;
+
     default:
         //if invalid status given, failsafe to send.
         return SilKit::Services::TransmitDirection::TX;
@@ -160,7 +162,7 @@ void SimBehaviorTrivial::SendErrorTransmissionOnHeaderRequest(int numResponses, 
         masterFrameStatus = LinFrameStatus::LIN_TX_ERROR;
     }
 
-    _tracer.Trace(ToTracingDir(masterFrameStatus), transmission.timestamp, transmission.frame);
+    _parentController->GetTracer()->Trace(ToTracingDir(masterFrameStatus), transmission.timestamp, transmission.frame);
 
     // Evoke the callbacks locally
     _parentController->CallLinFrameStatusEventHandler(
@@ -189,7 +191,12 @@ void SimBehaviorTrivial::ReceiveFrameHeaderRequest(const LinSendFrameHeaderReque
     LinTransmission transmission{_timeProvider->Now(), response.frame, LinFrameStatus::LIN_RX_OK};
     SendMsgImpl(transmission);
 
-    _tracer.Trace(ToTracingDir(LinFrameStatus::LIN_RX_OK), transmission.timestamp, transmission.frame);
+    auto direction = ToTracingDir(LinFrameStatus::LIN_RX_OK);
+    if (_parentController->GetThisLinNode().controllerMode == LinControllerMode::Master)
+    {
+        direction = ToTracingDir(LinFrameStatus::LIN_TX_OK);
+    }
+    _parentController->GetTracer()->Trace(direction, transmission.timestamp, transmission.frame);
 
     // Evoke the callbacks with LIN_TX_OK locally
     _parentController->CallLinFrameStatusEventHandler(
