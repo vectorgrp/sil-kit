@@ -70,7 +70,6 @@ EthernetControllers
      EthernetControllers:
      - Name: ETH1
        Network: Ethernet1
-     - Name: ETH2
 
 
 
