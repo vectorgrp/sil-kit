@@ -42,7 +42,11 @@ What is the sil-kit-registry?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The SIL Kit registry is a central utility that is necessary for running a SIL Kit simulation.
-All participants of a SIL Kit simulation connect to the registry process that tells them where they will find the participants of the simulation. All SIL Kit simulation participants must be able to reach the SIL Kit registry.
+At the start, each participant connects to the registry and retrieves the connection information to all other participants.
+In this sense, the registry acts as a phone book that tells the user the contact information to all other participants of a SIL Kit simulation.
+The registry does not partake in the simulation itself.
+It especially does not route messages between participants.
+Please note that it is mandatory that all SIL Kit simulation participants can reach the SIL Kit registry for a proper simulation setup.
 
 Can I use Vector SIL Kit together with real hardware/in a Hardware-in-the-Loop setup?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
