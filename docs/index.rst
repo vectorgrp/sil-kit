@@ -66,12 +66,12 @@ In addition, the use of other services (Data Message, RPC, ...) is presented as 
 
 
 Prerequisites for Usage
----------------------------
+------------------------
 
 * For Windows:
-    * Visual Studio 2015 Toolset v140 and higher (also tested with MSVC++ 14.12)
-* For Ubuntu Bionic Beaver (18.04 LTS):
-    * GCC 7.4.0 **or**
-    * Clang 6.0
+    * Visual Studio 2017 (toolset v141) and higher
+* For Ubuntu 18.04 LTS:
+    * GCC 8 **or**
+    * Clang
 
 These are specific versions the Vector SIL Kit is tested and built against.

@@ -11,7 +11,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~
 To get started developing you'll need the following prerequisites:
  - `Git`_
- - C++ compiler (Visual Studio 2015/2017, GCC, Clang)
+ - C++ compiler (Visual Studio 2017 or newer, GCC, Clang)
  - `CMake <https://cmake.org>`_
  - C++ dependencies are managed as submodules, e.g. run `git submodule update --init --recursive`
 
