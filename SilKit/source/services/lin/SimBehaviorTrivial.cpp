@@ -259,6 +259,7 @@ void SimBehaviorTrivial::GoToSleep()
     gotosleepTx.status = LinFrameStatus::LIN_RX_OK;
     gotosleepTx.timestamp = _timeProvider->Now();
 
+    _parentController->GetTracer()->Trace(ToTracingDir(gotosleepTx.status), gotosleepTx.timestamp, gotosleepTx.frame);
     SendMsgImpl(gotosleepTx);
 
     // Evoke the callbacks with LIN_TX_OK locally
