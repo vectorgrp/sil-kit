@@ -349,6 +349,13 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
                    controllerConfig.name, controllerConfig.network.value(),
                    controller->GetServiceDescriptor().to_string());
 
+    if (_replayScheduler)
+    {
+        _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
+                                              controllerConfig.network.value(), controllerConfig.GetNetworkType());
+    }
+
+
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {

@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ITimeConsumer.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
+#include "IReplayDataController.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "IMsgForLinController.hpp"
 #include "SimBehavior.hpp"
@@ -45,6 +46,7 @@ class LinController
     , public ILinControllerExtensions
     , public IMsgForLinController
     , public ITraceMessageSource
+    , public Tracing::IReplayDataController
     , public Core::IServiceEndpoint
 {
 public:
@@ -111,6 +113,9 @@ public:
 
     //ITraceMessageSource
     inline void AddSink(ITraceMessageSink* sink) override;
+
+    // IReplayDataProvider
+    void ReplayMessage(const IReplayMessage* replayMessage) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -200,6 +205,7 @@ private:
     Core::IParticipantInternal* _participant;
     Config::LinController _config;
     Services::Logging::ILogger* _logger;
+    Tracer _tracer;
     SimBehavior _simulationBehavior;
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
 
@@ -216,8 +222,8 @@ private:
         CallbacksT<Experimental::Services::Lin::LinSlaveConfigurationEvent>
     > _callbacks;
 
-    Tracer _tracer;
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
+    bool _replayActive{false};
 
     std::vector<LinNode> _linNodes;
     std::vector<LinId> _linIdsRespondedBySlaves{}; // Global view of LinIds with TxUnconditional configured on any node.
