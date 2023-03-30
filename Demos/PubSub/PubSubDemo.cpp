@@ -48,53 +48,78 @@ Sub: "Gps"
 Sub: "Temperature"
 */
 
+struct GpsData
+{
+    double latitude;
+    double longitude;
+    std::string signalQuality;
+};
+
+std::vector<uint8_t> Serialize(const GpsData& gpsData)
+{
+    // Serialize data
+    SilKit::Util::SerDes::Serializer serializer;
+    serializer.BeginStruct();
+    serializer.Serialize(gpsData.latitude);
+    serializer.Serialize(gpsData.longitude);
+    serializer.Serialize(gpsData.signalQuality);
+    serializer.EndStruct();
+
+    return serializer.ReleaseBuffer();
+}
+
+GpsData Deserialize(const std::vector<uint8_t>& data)
+{
+    GpsData gpsData;
+
+    // Deserialize event data
+    SilKit::Util::SerDes::Deserializer deserializer(data);
+    deserializer.BeginStruct();
+    gpsData.latitude = deserializer.Deserialize<double>();
+    gpsData.longitude = deserializer.Deserialize<double>();
+    gpsData.signalQuality = deserializer.Deserialize<std::string>();
+    deserializer.EndStruct();
+
+    return gpsData;
+}
+
 void PublishData(SilKit::Services::PubSub::IDataPublisher* gpsPublisher,
                  SilKit::Services::PubSub::IDataPublisher* temperaturePublisher)
 {
     // GPS
-    double lat = 48.8235 + static_cast<double>((rand() % 150)) / 100000;
-    double lon = 9.0965 + static_cast<double>((rand() % 150)) / 100000;
-    std::string signalQuality = "Strong";
+    GpsData gpsData;
+    gpsData.latitude = 48.8235 + static_cast<double>((rand() % 150)) / 100000;
+    gpsData.longitude = 9.0965 + static_cast<double>((rand() % 150)) / 100000;
+    gpsData.signalQuality = "Strong";
 
     // Serialize data
-    SilKit::Util::SerDes::Serializer serializer;
-    serializer.BeginStruct();
-    serializer.Serialize(lat);
-    serializer.Serialize(lon);
-    serializer.Serialize(signalQuality);
-    serializer.EndStruct();
+    auto gpsSerialized = Serialize(gpsData);
 
     // Publish serialized data
-    gpsPublisher->Publish(serializer.ReleaseBuffer());
-    std::cout << ">> Published Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality
-              << std::endl;
+    gpsPublisher->Publish(gpsSerialized);
+    std::cout << ">> Published GPS data: lat=" << gpsData.latitude << ", lon=" << gpsData.longitude
+              << ", signalQuality=" << gpsData.signalQuality << std::endl;
 
     // Temperature
     double temperature = 25.0 + static_cast<double>(rand() % 10) / 10.0;
 
     // Serialize data
-    serializer.Serialize(temperature);
+    SilKit::Util::SerDes::Serializer temperatureSerializer;
+    temperatureSerializer.Serialize(temperature);
 
     // Publish serialized data
-    temperaturePublisher->Publish(serializer.ReleaseBuffer());
-    std::cout << ">> Published temperature data temperature=" << temperature << std::endl;
+    temperaturePublisher->Publish(temperatureSerializer.ReleaseBuffer());
+    std::cout << ">> Published temperature data: temperature=" << temperature << std::endl;
 }
 
 void ReceiveGpsData(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
 {
     auto eventData = SilKit::Util::ToStdVector(dataMessageEvent.data);
-
-    // Deserialize event data
-    SilKit::Util::SerDes::Deserializer deserializer(eventData);
-    deserializer.BeginStruct();
-    double lat = deserializer.Deserialize<double>();
-    double lon = deserializer.Deserialize<double>();
-    std::string signalQuality = deserializer.Deserialize<std::string>();
-    deserializer.EndStruct();
+    auto gpsData = Deserialize(eventData);
 
     // Print results
-    std::cout << "<< Received Gps data lat=" << lat << ", lon=" << lon << ", signalQuality=" << signalQuality
-              << std::endl;
+    std::cout << "<< Received GPS data: lat=" << gpsData.latitude << ", lon=" << gpsData.longitude
+              << ", signalQuality=" << gpsData.signalQuality << std::endl;
 }
 
 void ReceiveTemperatureData(IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent)
@@ -106,7 +131,7 @@ void ReceiveTemperatureData(IDataSubscriber* /*subscriber*/, const DataMessageEv
     double temperature = deserializer.Deserialize<double>();
 
     // Print results
-    std::cout << "<< Received temperature data temperature=" << temperature << std::endl;
+    std::cout << "<< Received temperature data: temperature=" << temperature << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -173,15 +198,18 @@ int main(int argc, char** argv)
             if (participantName == "Publisher")
             {
                 // Create a data publisher for GPS data
-                auto* gpsPublisher = participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0);
+                auto* gpsPublisher = participant->CreateDataPublisher(
+                    "GpsPublisher", dataSpecPubGps, 0);
 
                 // Create a data publisher for temperature data
-                auto* temperaturePublisher = participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0);
+                auto* temperaturePublisher = participant->CreateDataPublisher(
+                    "TemperaturePublisher", dataSpecPubTemperature, 0);
 
                 timeSyncService->SetSimulationStepHandler(
                     [gpsPublisher, temperaturePublisher](std::chrono::nanoseconds now,
                                                          std::chrono::nanoseconds /*duration*/) {
-                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                        auto nowMs = 
+                            std::chrono::duration_cast<std::chrono::milliseconds>(now);
                         std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
                         PublishData(gpsPublisher, temperaturePublisher);
@@ -202,7 +230,8 @@ int main(int argc, char** argv)
 
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                        auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
+                        auto nowMs = 
+                            std::chrono::duration_cast<std::chrono::milliseconds>(now);
                         std::cout << "now=" << nowMs.count() << "ms" << std::endl;
                         std::this_thread::sleep_for(1s);
                     },
@@ -231,10 +260,12 @@ int main(int argc, char** argv)
             if (participantName == "Publisher")
             {
                 // Create a data publisher for GPS data
-                auto* gpsPublisher = participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0);
+                auto* gpsPublisher = participant->CreateDataPublisher(
+                    "GpsPublisher", dataSpecPubGps, 0);
 
                 // Create a data publisher for temperature data
-                auto* temperaturePublisher = participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0);
+                auto* temperaturePublisher = participant->CreateDataPublisher(
+                    "TemperaturePublisher", dataSpecPubTemperature, 0);
 
                 workerThread = std::thread{[&]() {
                     while (!isStopped)
@@ -246,10 +277,14 @@ int main(int argc, char** argv)
             }
             else if (participantName == "Subscriber")
             {
-                participant->CreateDataSubscriber("GpsSubscriber", dataSpecPubGps, &ReceiveGpsData);
+                participant->CreateDataSubscriber(
+                    "GpsSubscriber", dataSpecPubGps, &ReceiveGpsData);
 
-                participant->CreateDataSubscriber("TemperatureSubscriber", dataSpecPubTemperature, &ReceiveTemperatureData);
-            }else{
+                participant->CreateDataSubscriber(
+                    "TemperatureSubscriber", dataSpecPubTemperature, &ReceiveTemperatureData);
+            } 
+            else
+            {
                 std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
                           << std::endl;
                 return 1;
