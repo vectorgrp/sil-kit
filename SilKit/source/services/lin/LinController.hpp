@@ -161,6 +161,9 @@ private:
     // ----------------------------------------
     // private methods
 
+    // allow using the SendFrame API from ReplayMessage
+    void SendFrameInternal(LinFrame frame, LinFrameResponseType responseType);
+
     template <typename MsgT>
     HandlerId AddHandler(CallbackT<MsgT> handler);
 

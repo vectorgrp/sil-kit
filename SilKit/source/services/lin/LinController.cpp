@@ -297,16 +297,8 @@ auto LinController::Status() const noexcept -> LinControllerStatus
     return _controllerStatus;
 }
 
-void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
+void LinController::SendFrameInternal(LinFrame frame, LinFrameResponseType responseType)
 {
-    ThrowIfUninitialized(__FUNCTION__);
-    ThrowIfNotMaster(__FUNCTION__);
-    if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
-    {
-        Logging::Debug(_logger, "Ignoring API call due to Replay config on {}", _config.name);
-        return;
-    }
-
     if (responseType == LinFrameResponseType::MasterResponse)
     {
         // Update local response reconfiguration
@@ -355,6 +347,19 @@ void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
     // Detailed: Send LinSendFrameRequest to BusSim
     // Trivial: SendFrameHeader
     SendMsg(LinSendFrameRequest{frame, responseType});
+
+}
+
+void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
+{
+    ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfNotMaster(__FUNCTION__);
+    if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
+    {
+        Logging::Debug(_logger, "Ignoring API call due to Replay config on {}", _config.name);
+        return;
+    }
+    SendFrameInternal(std::move(frame), responseType);
 }
 
 void LinController::SendFrameHeader(LinId linId)
@@ -840,21 +845,26 @@ void LinController::ReplayMessage(const IReplayMessage* replayMessage)
     tm.frame = std::move(frame);
     tm.status = isReceive ? LinFrameStatus::LIN_RX_OK : LinFrameStatus::LIN_TX_OK;
 
-    // When we are a master, also synthesize the frame header (SIL Kit type LinTransmission) based on the replay data.
-    // NB: the actual transmission is always in RX-direction, only the callback handlers will see the actual
-    //     direction.
-
-    if (isSleepFrame)
-    {
-        ReceiveMsg(this, tm); // invoke callbacks for goto sleep frame
-        _simulationBehavior.GoToSleep();
-        return;
-    }
+    // ensure slave responses are updated locally
     LinFrameResponse response;
     response.frame = tm.frame;
     response.responseMode = isReceive ? LinFrameResponseMode::Rx : LinFrameResponseMode::TxUnconditional;
     UpdateFrameResponse(response);
-    ReceiveMsg(this, tm);
+
+    if (isSleepFrame)
+    {
+        _simulationBehavior.GoToSleep();
+        _controllerStatus = LinControllerStatus::Sleep;
+        ReceiveMsg(this, tm);
+        return;
+    }
+
+    //broadcast to slaves
+    auto responseType = isReceive ? LinFrameResponseType::SlaveResponse : LinFrameResponseType::MasterResponse;
+    SendFrameInternal(tm.frame, responseType);
+
+    // ensure local handlers are called
+    //ReceiveMsg(this, tm);
 }
 
 
