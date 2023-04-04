@@ -78,6 +78,16 @@ auto AnEthMessageWith(std::chrono::nanoseconds timestamp, size_t rawFrameSize)
                           testing::Field(&WireEthernetFrameEvent::frame, testing::Truly(frameHasCorrectSize)));
 }
 
+auto AnEthernetFrameEventWith(TransmitDirection direction) -> testing::Matcher<const EthernetFrameEvent&>
+{
+    return testing::Field(&EthernetFrameEvent::direction, direction);
+}
+
+auto AWireEthernetFrameEventWith(TransmitDirection direction) -> testing::Matcher<const WireEthernetFrameEvent&>
+{
+    return testing::Field(&WireEthernetFrameEvent::direction, direction);
+}
+
 class MockParticipant : public DummyParticipant
 {
 public:
@@ -395,6 +405,35 @@ TEST_F(EthernetControllerTrivialSimTest, receive_pads_with_zeros)
         .Times(1);
 
     controller.ReceiveMsg(&controllerOther, msg);
+}
+
+TEST_F(EthernetControllerTrivialSimTest, sendmsg_distributes_before_txreceive)
+{
+    ON_CALL(participant.mockTimeProvider, Now())
+        .WillByDefault(testing::Return(42ns));
+
+    testing::Sequence sequenceRxTx;
+    testing::Sequence sequenceRxAck;
+
+    EXPECT_CALL(participant, SendMsg(&controller, AWireEthernetFrameEventWith(TransmitDirection::RX)))
+        .InSequence(sequenceRxTx)
+        .InSequence(sequenceRxAck);
+
+    EXPECT_CALL(callbacks, ReceiveMessage(&controller, AnEthernetFrameEventWith(TransmitDirection::TX)))
+        .InSequence(sequenceRxTx);
+
+    EthernetFrameTransmitEvent ack{};
+    ack.status = EthernetTransmitStatus::Transmitted;
+    ack.timestamp = 42ns;
+    EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack)))
+        .InSequence(sequenceRxAck);
+
+    std::vector<uint8_t> rawFrame;
+    SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
+    EthernetFrame frame{rawFrame};
+
+    controller.Activate();
+    controller.SendFrame(frame);
 }
 
 } // anonymous namespace

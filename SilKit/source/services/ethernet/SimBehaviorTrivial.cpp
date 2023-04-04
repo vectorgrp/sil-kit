@@ -78,13 +78,13 @@ void SimBehaviorTrivial::SendMsg(WireEthernetFrameEvent&& ethFrameEvent)
 
     if (controllerState == EthernetState::LinkUp)
     {
-        // Self delivery as TX (handles TX tracing)
-        ethFrameEvent.direction = TransmitDirection::TX;
-        ReceiveMsg(ethFrameEvent);
-
         // Send to others as RX
         ethFrameEvent.direction = TransmitDirection::RX;
         _participant->SendMsg(_parentServiceEndpoint, ethFrameEvent);
+
+        // Self delivery as TX (handles TX tracing)
+        ethFrameEvent.direction = TransmitDirection::TX;
+        ReceiveMsg(ethFrameEvent);
     }
 
     EthernetFrameTransmitEvent ack;
