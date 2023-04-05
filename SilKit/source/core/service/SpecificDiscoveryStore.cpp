@@ -116,6 +116,10 @@ void SpecificDiscoveryStore::CallHandlerOnHandlerRegistration(const ServiceDisco
             {
                 handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
             }
+            for (auto&& serviceDescriptor : entry.noLabelCluster.nodes)
+            {
+                handler(ServiceDiscoveryEvent::Type::ServiceCreated, serviceDescriptor);
+            }
         }
         // trigger label handlers
         for (auto&& serviceDescriptor : entry.labelMap[MakeFilter(greedyLabel->key, greedyLabel->value)].nodes)
@@ -153,6 +157,13 @@ void SpecificDiscoveryStore::CallHandlersOnServiceChange(ServiceDiscoveryEvent::
         {
             // trigger notlabel handlers
             for (auto&& handler : entry.notLabelMap[greedyLabel->key].handlers)
+            {
+                if (handler)
+                {
+                    (*handler)(eventType, serviceDescriptor);
+                }
+            }
+            for (auto&& handler : entry.noLabelCluster.handlers)
             {
                 if (handler)
                 {

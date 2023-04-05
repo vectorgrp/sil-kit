@@ -30,8 +30,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ServiceDiscovery.hpp"
 #include "string_utils_internal.hpp"
 #include "Uuid.hpp"
+#include "LabelMatching.hpp"
 #include "MockParticipant.hpp"
 #include "MockServiceDescriptor.hpp"
+#include "YamlParser.hpp"
 
 namespace {
 
@@ -334,6 +336,76 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_labels)
             callbacks.ServiceDiscoveryHandler(discoveryType, sd);
         },
         controllerTypeDataPublisher, "Topic1", {label});
+}
+
+TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_issues)
+{
+    TestWrapperSpecificDiscoveryStore testStore;
+
+    ServiceDescriptor baseDescriptor{};
+    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetNetworkName("Link1");
+    baseDescriptor.SetServiceName("ServiceDiscovery");
+    baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);
+    baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherTopic, "Topic1");
+    baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherMediaType, "text/json");
+    baseDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels, "[]");
+
+    ServiceDescriptor noLabelTestDescriptor{baseDescriptor};
+    noLabelTestDescriptor.SetServiceId(1);
+
+    ServiceDescriptor labelTestDescriptor{baseDescriptor};
+    labelTestDescriptor.SetSupplementalDataItem(supplKeyDataPublisherPubLabels,
+                                                " - key: kA\n   value: vA\n   kind: 2\n - key: kB\n   value: vB\n   kind: 2\n - key: kC\n   value: vC\n   kind: 2 ");
+    labelTestDescriptor.SetServiceId(2);
+
+    testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, labelTestDescriptor);
+    testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
+
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor))
+        .Times(2);
+
+    EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated, labelTestDescriptor))
+        .Times(1);
+
+    std::vector<SilKit::Services::MatchingLabel> optionalSubscriberLabels{
+        {"kA", "vA", SilKit::Services::MatchingLabel::Kind::Optional},
+        {"kB", "vB2", SilKit::Services::MatchingLabel::Kind::Optional},
+        {"kC", "vC", SilKit::Services::MatchingLabel::Kind::Optional}};
+
+    testStore.RegisterSpecificServiceDiscoveryHandler(
+        [this, optionalSubscriberLabels](ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor& sd) {
+            std::vector<SilKit::Services::MatchingLabel> labels;
+            std::string labelsStr;
+            if (sd.GetSupplementalDataItem(supplKeyDataPublisherPubLabels, labelsStr))
+            {
+                labels = SilKit::Config::Deserialize<decltype(labels)>(labelsStr);
+            }
+            if (MatchLabels(labels, optionalSubscriberLabels))
+            {
+                callbacks.ServiceDiscoveryHandler(discoveryType, sd);
+            }
+        },
+        controllerTypeDataPublisher, "Topic1", optionalSubscriberLabels);
+
+    std::vector<SilKit::Services::MatchingLabel> optionalSubscriberLabels2 {
+    {"kA", "vA", SilKit::Services::MatchingLabel::Kind::Optional},
+    {"kB", "vB", SilKit::Services::MatchingLabel::Kind::Optional},
+    {"kC", "vC", SilKit::Services::MatchingLabel::Kind::Optional}};
+    testStore.RegisterSpecificServiceDiscoveryHandler(
+        [this, optionalSubscriberLabels2](ServiceDiscoveryEvent::Type discoveryType, const ServiceDescriptor& sd) {
+            std::vector<SilKit::Services::MatchingLabel> labels;
+            std::string labelsStr;
+            if (sd.GetSupplementalDataItem(supplKeyDataPublisherPubLabels, labelsStr))
+            {
+                labels = SilKit::Config::Deserialize<decltype(labels)>(labelsStr);
+            }
+            if (MatchLabels(labels, optionalSubscriberLabels2))
+            {
+                callbacks.ServiceDiscoveryHandler(discoveryType, sd);
+            }
+        },
+        controllerTypeDataPublisher, "Topic1", optionalSubscriberLabels2);
 }
 
 } // anonymous namespace for test
