@@ -12,7 +12,7 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 Fixed
 ~~~~~
 
-- Ethernet (Trivial Sim.): The self-delivery with ``TransmitDirection::TX`` is now triggered only after
+- Ethernet and CAN (Trivial Sim.): The self-delivery with ``TransmitDirection::TX`` is now triggered only after
   the frame has been sent with ``TransmitDirection::RX``.
 
 

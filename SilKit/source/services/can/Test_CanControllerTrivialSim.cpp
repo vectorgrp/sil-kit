@@ -59,6 +59,16 @@ MATCHER_P(CanTransmitAckWithouthTransmitIdMatcher, truthAck, "") {
     return frame1.canId == frame2.canId && frame1.status == frame2.status && frame1.timestamp == frame2.timestamp;
 }
 
+auto ACanFrameEventWith(SilKit::Services::TransmitDirection direction) -> testing::Matcher<CanFrameEvent>
+{
+    return testing::Field(&CanFrameEvent::direction, direction);
+}
+
+auto AWireCanFrameEventWith(SilKit::Services::TransmitDirection direction) -> testing::Matcher<const WireCanFrameEvent&>
+{
+    return testing::Field(&WireCanFrameEvent::direction, direction);
+}
+
 class MockParticipant : public DummyParticipant
 {
 public:
@@ -415,5 +425,42 @@ TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)
     canController.SendFrame(ToCanFrame(testFrameEvent.frame));
 }
 
+TEST(CanControllerTrivialSimTest, sendmsg_distributes_before_txreceive)
+{
+    using namespace std::placeholders;
+
+    EndpointAddress controllerAddress = { 3, 8 };
+
+    MockParticipant mockParticipant;
+    CanControllerCallbacks callbackProvider;
+    SilKit::Config::CanController cfg;
+
+    CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
+    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
+    canController.AddFrameTransmitHandler(std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
+    canController.Start();
+
+    CanFrame msg{};
+    CanFrameTransmitEvent expectedAck{ msg.canId, 0ns, CanTransmitStatus::Transmitted, nullptr };
+
+    testing::Sequence sequenceRxTx;
+    testing::Sequence sequenceRxAck;
+
+    EXPECT_CALL(mockParticipant,
+                SendMsg(&canController, AWireCanFrameEventWith(SilKit::Services::TransmitDirection::RX)))
+        .InSequence(sequenceRxTx)
+        .InSequence(sequenceRxAck);
+
+    EXPECT_CALL(callbackProvider,
+                FrameHandler(&canController, ACanFrameEventWith(SilKit::Services::TransmitDirection::TX)))
+        .InSequence(sequenceRxTx);
+
+    EXPECT_CALL(callbackProvider,
+                FrameTransmitHandler(&canController, CanTransmitAckWithouthTransmitIdMatcher(expectedAck)))
+        .InSequence(sequenceRxAck);
+
+    canController.SendFrame(msg);
+}
 
 }  // anonymous namespace

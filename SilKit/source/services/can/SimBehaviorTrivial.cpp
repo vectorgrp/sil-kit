@@ -74,15 +74,15 @@ void SimBehaviorTrivial::SendMsg(WireCanFrameEvent&& canFrameEvent)
     {
         auto now = _timeProvider->Now();
         WireCanFrameEvent canFrameEventCpy = canFrameEvent;
-        canFrameEventCpy.direction = TransmitDirection::TX;
         canFrameEventCpy.timestamp = now;
-
-        // Self delivery as TX (handles TX tracing)
-        ReceiveMsg(canFrameEventCpy);
 
         // Send to others as RX
         canFrameEventCpy.direction = TransmitDirection::RX;
         _participant->SendMsg(_parentServiceEndpoint, canFrameEventCpy);
+
+        // Self delivery as TX (handles TX tracing)
+        canFrameEventCpy.direction = TransmitDirection::TX;
+        ReceiveMsg(canFrameEventCpy);
 
         // Self acknowledge
         CanFrameTransmitEvent ack{};
