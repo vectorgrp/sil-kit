@@ -5,6 +5,14 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.22] - unreleased
+---------------------
+
+Fixed
+~~~~~
+
+- Resolved issue that lead to wrong label matching behavior under certain circumstances.
+
 [4.0.21] - 2023-04-03
 ---------------------
 
