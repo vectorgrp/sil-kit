@@ -155,9 +155,9 @@ public:
 
     void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override
     {
+        _now = now;
         // tell our users about the next simulation step
         _handlers.InvokeAll(now, duration);
-        _now = now;
     }
 };
 

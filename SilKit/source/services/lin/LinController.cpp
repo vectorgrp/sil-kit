@@ -855,7 +855,7 @@ void LinController::ReplayMessage(const IReplayMessage* replayMessage)
     {
         _simulationBehavior.GoToSleep();
         _controllerStatus = LinControllerStatus::Sleep;
-        ReceiveMsg(this, tm);
+        //ReceiveMsg(this, tm);
         return;
     }
 
