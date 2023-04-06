@@ -55,8 +55,8 @@ public:
     inline HandlerId AddNextSimStepHandler(NextSimStepHandler handler) override;
     inline void RemoveNextSimStepHandler(HandlerId handlerId) override;
     inline void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) override;
-    inline void SetSynchronized(bool isSynchronized) override;
-    inline bool IsSynchronized() const override;
+    inline void SetSynchronizeVirtualTime(bool isSynchronizingVirtualTime) override;
+    inline bool IsSynchronizingVirtualTime() const override;
 
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) override;
 
@@ -100,16 +100,16 @@ void TimeProvider::SetTime(std::chrono::nanoseconds now, std::chrono::nanosecond
     _currentProvider->SetTime(now, duration);
 }
 
-void TimeProvider::SetSynchronized(bool isSynchronized)
+void TimeProvider::SetSynchronizeVirtualTime(bool isSynchronizingVirtualTime)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    _currentProvider->SetSynchronized(isSynchronized);
+    _currentProvider->SetSynchronizeVirtualTime(isSynchronizingVirtualTime);
 }
 
-bool TimeProvider::IsSynchronized() const
+bool TimeProvider::IsSynchronizingVirtualTime() const
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    return _currentProvider->IsSynchronized();
+    return _currentProvider->IsSynchronizingVirtualTime();
 }
 
 } // namespace Orchestration

@@ -39,7 +39,7 @@ using namespace SilKit::Services::Orchestration;
 TEST(TestTimeProvider, check_time_provider_impls)
 {
 	TimeProvider timeProvider{};
-	timeProvider.SetSynchronized(true);
+	timeProvider.SetSynchronizeVirtualTime(true);
 	//Check default implementation is NoSync
 	ASSERT_EQ(timeProvider.TimeProviderName(), "NoSyncProvider");
 
@@ -50,7 +50,7 @@ TEST(TestTimeProvider, check_time_provider_impls)
 	ASSERT_EQ(timeProvider.TimeProviderName(), "WallclockProvider");
 
 	// synchronized state must be kept, even after re-configuring
-	ASSERT_TRUE(timeProvider.IsSynchronized());
+	ASSERT_TRUE(timeProvider.IsSynchronizingVirtualTime());
 }
 
 TEST(TestTimeProvider, check_handlers)

@@ -128,7 +128,7 @@ void SetTimestamp(MsgT& /*msg*/, std::chrono::nanoseconds /*value*/, std::enable
 template <class MsgT>
 void SilKitLink<MsgT>::DistributeRemoteSilKitMessage(const IServiceEndpoint* from, MsgT&& msg)
 {
-    if (_timeProvider->IsSynchronized())
+    if (_timeProvider->IsSynchronizingVirtualTime())
     {
         SetTimestamp(msg, _timeProvider->Now());
     }

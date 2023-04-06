@@ -80,7 +80,7 @@ public:
     void ExecuteSimStep(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration);
 
     // Get the instance of the internal ITimeProvider that is updated with our simulation time
-    void InitializeTimeSyncPolicy(bool isSynchronized);
+    void InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime);
     void ResetTime();
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind);
     void StartTime();
@@ -94,14 +94,14 @@ public:
     void AwaitNotPaused();
     void ReportError(const std::string& errorMsg);
 
-    bool IsSynchronized();
+    bool IsSynchronizingVirtualTime();
 
     void SetLifecycleService(LifecycleService* lifecycleService);
 
 private:
     // ----------------------------------------
     // private methods
-    auto MakeTimeSyncPolicy(bool isSynchronized) -> std::shared_ptr<ITimeSyncPolicy>;
+    auto MakeTimeSyncPolicy(bool isSynchronizingVirtualTime) -> std::shared_ptr<ITimeSyncPolicy>;
 
 private:
     // ----------------------------------------
@@ -117,7 +117,7 @@ private:
     std::vector<std::string> _requiredParticipants;
 
     bool _isRunning{false};
-    bool _isSynchronized{false};
+    bool _isSynchronizingVirtualTime{false};
     bool _timeSyncConfigured{false};
 
     SimulationStepHandler _simTask;

@@ -69,14 +69,14 @@ public:
         // No Op
     }
 
-    void SetSynchronized(bool isSynchronized) override
+    void SetSynchronizeVirtualTime(bool isSynchronizingVirtualTime) override
     {
-        _isSynchronized = isSynchronized;
+        _isSynchronizingVirtualTime = isSynchronizingVirtualTime;
     }
 
-    bool IsSynchronized() const override
+    bool IsSynchronizingVirtualTime() const override
     {
-        return _isSynchronized;
+        return _isSynchronizingVirtualTime;
     }
 
 public:
@@ -88,7 +88,7 @@ public:
 protected:
     std::chrono::nanoseconds _now{};
     std::string _name;
-    bool _isSynchronized{false};
+    bool _isSynchronizingVirtualTime{false};
     Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
 };
 
@@ -171,7 +171,7 @@ TimeProvider::TimeProvider()
 
 void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind)
 {
-    const auto isSynchronized = _currentProvider->IsSynchronized();
+    const auto isSynchronizingVirtualTime = _currentProvider->IsSynchronizingVirtualTime();
 
     std::unique_lock<decltype(_mutex)> lock{_mutex};
 
@@ -202,7 +202,7 @@ void TimeProvider::ConfigureTimeProvider(Orchestration::TimeProviderKind timePro
         swap(_currentProvider->MutableNextSimStepHandlers(), providerPtr->MutableNextSimStepHandlers());
     }
 
-    _currentProvider->SetSynchronized(isSynchronized);
+    _currentProvider->SetSynchronizeVirtualTime(isSynchronizingVirtualTime);
 }
 
 } // namespace Orchestration

@@ -81,7 +81,7 @@ public:
         // Bootstrap checked execution, in case there is no other participant.
         // Else, checked execution is initiated when we receive their NextSimTask messages.
         _participant->ExecuteDeferred([this]() {
-            this->CheckDistributedTimeAdvanceGrant();
+            this->ProcessSimulationTimeUpdate();
         });
     }
 
@@ -95,7 +95,7 @@ public:
     {
         _controller.SendMsg(_configuration->NextSimStep());
         _participant->ExecuteDeferred([this]() {
-            this->CheckDistributedTimeAdvanceGrant();
+            this->ProcessSimulationTimeUpdate();
         });
     }
 
@@ -113,7 +113,7 @@ public:
             return;
         case ParticipantState::Paused: // [[fallthrough]]
         case ParticipantState::Running:
-            CheckDistributedTimeAdvanceGrant();
+            ProcessSimulationTimeUpdate();
             return;
         case ParticipantState::Stopping: // [[fallthrough]]
         case ParticipantState::Stopped: // [[fallthrough]]
@@ -129,59 +129,81 @@ public:
     }
 
 private:
-    bool IsAsync() const
-    {
-        return !IsSync();
-    }
-
-    bool IsSync() const
+    bool IsSimStepSync() const
     {
         return _configuration->IsBlocking();
     }
 
-    void CheckDistributedTimeAdvanceGrant()
+    bool IsTimeAdvancePossible()
     {
         // Deferred execution of this callback was initiated, but simulation stopped in the meantime
         if (_controller.State() != ParticipantState::Running)
         {
-            return;
+            return false;
         }
 
         if (_configuration->OtherParticipantHasLowerTimepoint())
         {
-            return;
-        }
-
-        // when running in Async mode, set the _isExecutingSimStep guard
-        // which will be cleared in CompleteSimulationStep()
-        if (IsAsync())
-        {
-            auto test = false;
-            auto newval = true;
-            if(!_isExecutingSimStep.compare_exchange_strong(test, newval))
-            {
-                //_isExecutingSimStep was not modified, it was already true
-                return;
-            }
+            return false;
         }
 
         // No other participant has a lower time point: It is our turn
-        _configuration->AdvanceTimeStep();
-        auto currentStep = _configuration->CurrentSimStep();
-        _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
-        _controller.AwaitNotPaused();
+        return true;
+    }
 
-        if (IsSync())
+    void ProcessSimulationTimeUpdate()
+    {
+        // Check if we meet the conditions to trigger our local time advancement
+        if (IsTimeAdvancePossible())
         {
-            //NB: CompleteSimulationStep does invoke this explicitly on the API caller's request:
-            RequestNextStep();
+            if (IsSimStepSync())
+            {
+                AdvanceTimeSimStepSync();
+            }
+            else
+            {
+                AdvanceTimeSimStepAsync();
+            }
+
         }
-        else
+
+    }
+
+    void AdvanceTimeSimStepSync() 
+    {
+        AdvanceTimeAndExecuteSimStep();
+
+        // The synchronous SimStep API creates the nextSimTask message automatically after the callback
+        RequestNextStep();
+    }
+
+    void AdvanceTimeSimStepAsync() 
+    {
+        // when running in Async mode, set the _isExecutingSimStep guard
+        // which will be cleared in CompleteSimulationStep()
+        auto test = false;
+        auto newval = true;
+        if (!_isExecutingSimStep.compare_exchange_strong(test, newval))
         {
-            // Do nothing until a user calls CompleteSimulationStep()
-            // This ensures that only one async SimTask is executed until completed by the user
+            //_isExecutingSimStep was not modified, it was already true
             return;
         }
+
+        AdvanceTimeAndExecuteSimStep();
+
+        // Do nothing until a user calls CompleteSimulationStep()
+        // This ensures that only one async SimStep is executed until completed by the user
+    }
+
+    void AdvanceTimeAndExecuteSimStep()
+    {
+        // update the current and next sim. step timestamps
+        _configuration->AdvanceTimeStep();
+        // Execute the simulation step callback with the current simulation time
+        auto currentStep = _configuration->CurrentSimStep();
+        _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
+        // if the participant was paused, wait until it is unpaused
+        _controller.AwaitNotPaused();
     }
 
     std::atomic<bool> _isExecutingSimStep{false};
@@ -199,12 +221,12 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
     , _watchDog{healthCheckConfig}
 {
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
-        Warn(logger, "SimTask did not finish within soft time limit. Timeout detected after {} ms",
+        Warn(logger, "SimStep did not finish within soft time limit. Timeout detected after {} ms",
                      std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count());
     });
     _watchDog.SetErrorHandler([this](std::chrono::milliseconds timeout) {
         std::stringstream buffer;
-        buffer << "SimTask did not finish within hard time limit. Timeout detected after "
+        buffer << "SimStep did not finish within hard time limit. Timeout detected after "
                << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms";
         this->ReportError(buffer.str());
     });
@@ -248,9 +270,9 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
     _lifecycleService->ChangeState(ParticipantState::Error, errorMsg);
 }
 
-bool TimeSyncService::IsSynchronized()
+bool TimeSyncService::IsSynchronizingVirtualTime()
 {
-    return _isSynchronized;
+    return _isSynchronizingVirtualTime;
 }
 
 auto TimeSyncService::State() const -> ParticipantState
@@ -277,10 +299,10 @@ void TimeSyncService::SetPeriod(std::chrono::nanoseconds period)
     _timeConfiguration.SetStepDuration(period);
 }
 
-auto TimeSyncService::MakeTimeSyncPolicy(bool isSynchronized) -> std::shared_ptr<ITimeSyncPolicy>
+auto TimeSyncService::MakeTimeSyncPolicy(bool isSynchronizingVirtualTime) -> std::shared_ptr<ITimeSyncPolicy>
 {
     _timeSyncConfigured = true;
-    if (isSynchronized)
+    if (isSynchronizingVirtualTime)
     {
         return std::make_shared<SynchronizedPolicy>(*this, _participant, &_timeConfiguration);
     }
@@ -328,7 +350,7 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
     _watchDog.Reset();
     _execTimeMonitor.StopMeasurement();
 
-    Trace(_logger, "Finished Simulation Task. Execution time was: {}ms",
+    Trace(_logger, "Finished Simulation Step. Execution time was: {}ms",
                    std::chrono::duration_cast<DoubleMSecs>(_execTimeMonitor.CurrentDuration()).count());
     _waitTimeMonitor.StartMeasurement();
 }
@@ -341,10 +363,10 @@ void TimeSyncService::CompleteSimulationStep()
 }
 
 //! \brief Create a time provider that caches the current simulation time.
-void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
+void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
 {
-    _isSynchronized = isSynchronized;
-    _timeProvider->SetSynchronized(isSynchronized);
+    _isSynchronizingVirtualTime = isSynchronizingVirtualTime;
+    _timeProvider->SetSynchronizeVirtualTime(isSynchronizingVirtualTime);
 
     if (_timeSyncPolicy != nullptr)
     {
@@ -353,8 +375,8 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronized)
 
     try
     {
-        _timeSyncPolicy = MakeTimeSyncPolicy(isSynchronized);
-        _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncActive, (isSynchronized) ? "1" : "0");
+        _timeSyncPolicy = MakeTimeSyncPolicy(isSynchronizingVirtualTime);
+        _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncActive, (isSynchronizingVirtualTime) ? "1" : "0");
         ResetTime();
     }
     catch (const std::exception& e)
