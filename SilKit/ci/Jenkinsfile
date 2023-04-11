@@ -30,30 +30,12 @@ def buildConfigs = [
         BuildDocs: true,
     ]
     ,[
-        Name:"VS2015-Win64",
-        NodeLabel: "ninja && buildtools2019",
-        Arch:"x64",
-        MsvcVersion:"14.0",
-        PublishArtifacts: true,
-        CmakePreset: "vs140-x64-release",
-        BuildDocs: true,
-    ]
-    ,[
         Name: "VS2017-Win32",
         NodeLabel: "ninja && buildtools2019",
         Arch:"x64_x86",
         MsvcVersion:"14.1",
         PublishArtifacts: true,
         CmakePreset: "vs141-x86-release",
-        BuildDocs: true,
-    ]
-    ,[
-        Name: "VS2015-Win32",
-        NodeLabel: "ninja && buildtools2019",
-        Arch:"x64_x86",
-        MsvcVersion:"14.0",
-        PublishArtifacts: true,
-        CmakePreset: "vs140-x86-release",
         BuildDocs: true,
     ]
 
@@ -568,8 +550,6 @@ node {
         else if(doFullBuild) {
             print("Doing a full build and publishing artifacts on branch ${env.BRANCH_NAME}")
             configNames = [
-                "VS2015-Win32",
-                "VS2015-Win64",
                 "VS2017-Win32",
                 "VS2017-Win64",
                 "Ubuntu-18.04-gcc",
@@ -583,8 +563,8 @@ node {
         } else {
             print("Doing a minimal build without publishing artifacts on branch ${env.BRANCH_NAME}")
             configNames = [
-                "VS2015-Win32", // out of date implementation of C++14
-                "Ubuntu-22.04-clang-14-thread-sanitizer", // TSan with most modern compiler
+                "VS2017-Win32", 
+		"Ubuntu-22.04-clang-14-thread-sanitizer", // TSan with most modern compiler
                 "Ubuntu-22.04-clang-14-address-sanitizer", // ASan with most modern compiler
                 "Ubuntu-22.04-clang-14-undefined-behavior-sanitizer", // UBSan with most modern compiler
             ]
