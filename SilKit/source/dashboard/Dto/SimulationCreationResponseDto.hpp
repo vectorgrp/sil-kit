@@ -34,7 +34,7 @@ class SimulationCreationResponseDto : public oatpp::DTO
     DTO_INIT(SimulationCreationResponseDto, DTO)
 
     DTO_FIELD_INFO(id) { info->description = "Id"; }
-    DTO_FIELD(UInt32, id);
+    DTO_FIELD(UInt64, id);
 };
 
 } // namespace Dashboard}

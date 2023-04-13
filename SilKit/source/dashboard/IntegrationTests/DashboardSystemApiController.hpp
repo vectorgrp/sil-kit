@@ -288,43 +288,47 @@ public:
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/cannetworks/{networkName}",
-             addCanNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/cannetworks/{networkName}",
+             addCanNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].links.insert({"can", networkName});
+        _data[_simulationId].linksByParticipant[participantName].insert({"can", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/ethernetnetworks/{networkName}",
-             addEthernetNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/ethernetnetworks/{networkName}",
+        addEthernetNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+        PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].links.insert({"ethernet", networkName});
+        _data[_simulationId].linksByParticipant[participantName].insert({"ethernet", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/flexraynetworks/{networkName}",
-             addFlexrayNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/flexraynetworks/{networkName}",
+        addFlexrayNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+        PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].links.insert({"flexray", networkName});
+        _data[_simulationId].linksByParticipant[participantName].insert({"flexray", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/linnetworks/{networkName}",
-             addLinNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/linnetworks/{networkName}",
+             addLinNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+             PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].links.insert({"lin", networkName});
+        _data[_simulationId].linksByParticipant[participantName].insert({"lin", networkName});
         return createResponse(Status::CODE_204, "");
     }
 

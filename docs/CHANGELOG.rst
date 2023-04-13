@@ -9,8 +9,15 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.23] - UNRELEASED
 ---------------------
 
+Changed
+~~~~~~~
+
+- Added network simulator information to the dashboard REST API
+
 Fixed
 ~~~~~
+
+- Fixed data type of simulation id returned by the dashboard REST API
 
 - Ethernet and CAN (Trivial Sim.): The self-delivery with ``TransmitDirection::TX`` is now triggered only after
   the frame has been sent with ``TransmitDirection::RX``.

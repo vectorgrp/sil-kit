@@ -129,20 +129,30 @@ class DashboardSystemApiClient : public oatpp::web::client::ApiClient
                    BODY_DTO(Object<ServiceDto>, rpcServerInternal))
 
     // notify a simulated CAN network has been created for a given simulation
-    API_CALL_ASYNC("PUT", "system-service/v1.0/simulations/{simulationId}/cannetworks/{networkName}",
-                   addCanNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    API_CALL_ASYNC(
+        "PUT",
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/cannetworks/{networkName}",
+        addCanNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName), PATH(String, networkName))
 
     // notify a simulated Ethernet network has been created for a given simulation
-    API_CALL_ASYNC("PUT", "system-service/v1.0/simulations/{simulationId}/ethernetnetworks/{networkName}",
-                   addEthernetNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    API_CALL_ASYNC(
+        "PUT",
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/ethernetnetworks/{networkName}",
+        addEthernetNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+        PATH(String, networkName))
 
     // notify a simulated FlexRay network has been created for a given simulation
-    API_CALL_ASYNC("PUT", "system-service/v1.0/simulations/{simulationId}/flexraynetworks/{networkName}",
-                   addFlexrayNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    API_CALL_ASYNC(
+        "PUT",
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/flexraynetworks/{networkName}",
+        addFlexrayNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
+        PATH(String, networkName))
 
     // notify a simulated LIN network has been created for a given simulation
-    API_CALL_ASYNC("PUT", "system-service/v1.0/simulations/{simulationId}/linnetworks/{networkName}",
-                   addLinNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, networkName))
+    API_CALL_ASYNC(
+        "PUT",
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/linnetworks/{networkName}",
+        addLinNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName), PATH(String, networkName))
 
     // notify the system has entered a new state for a given simulation
     API_CALL_ASYNC("PUT", "system-service/v1.0/simulations/{simulationId}/system/status",

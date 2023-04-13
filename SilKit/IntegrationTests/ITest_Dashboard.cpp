@@ -94,7 +94,7 @@ protected:
             expected.dataBySimulation[1].statesByParticipant[i->first] = expectedStates;
         }
         expected.dataBySimulation[1].servicesByParticipant = servicesByParticipant;
-        expected.dataBySimulation[1].links = {};
+        expected.dataBySimulation[1].linksByParticipant = {};
         expected.dataBySimulation[1].systemStates = expectedStates;
         expected.dataBySimulation[1].stopped = true;
         return expected;
@@ -200,7 +200,11 @@ void CheckSimulationData(SilKit::Dashboard::SimulationData actual, SilKit::Dashb
         CheckServices(actual.servicesByParticipant[participantName], expected.servicesByParticipant[participantName],
                       participantName);
     }
-    CheckLinks(actual.links, expected.links);
+    for (auto j = expected.linksByParticipant.begin(); j != expected.linksByParticipant.end(); ++j)
+    {
+        auto participantName = j->first;
+        CheckLinks(actual.linksByParticipant[participantName], expected.linksByParticipant[participantName]);
+    }
     CheckStates(actual.systemStates, expected.systemStates, "system");
     ASSERT_EQ(actual.stopped, expected.stopped) << "Wrong simulation state!";
 }
@@ -472,7 +476,8 @@ TEST_F(DashboardTestHarness, dashboard_netsim)
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
     auto expected = DashboardTestHarness::CreateExpectedTestResult({{"NetSim", {}}});
-    expected.dataBySimulation[1].links = {{"can", "CAN1"}, {"ethernet", "ETH1"}, {"flexray", "FR1"}, {"lin", "LIN1"}};
+    expected.dataBySimulation[1].linksByParticipant = {
+        {"NetSim", {{"can", "CAN1"}, {"ethernet", "ETH1"}, {"flexray", "FR1"}, {"lin", "LIN1"}}}};
     CheckTestResult(testResult, expected);
 }
 

@@ -192,36 +192,46 @@ void DashboardSystemServiceClient::AddRpcServerInternalForParticipantOfSimulatio
         "adding rpc server internal");
 }
 
-void DashboardSystemServiceClient::AddCanNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName)
+void DashboardSystemServiceClient::AddCanNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                             oatpp::String networkName)
 {
-    _executor->execute<SendCoroutine>(_logger,
-                                      std::bind(&DashboardSystemApiClient::addCanNetworkToSimulation,
-                                                _dashboardSystemApiClient, simulationId, networkName, nullptr),
-                                      "adding can network");
+    _executor->execute<SendCoroutine>(
+        _logger,
+        std::bind(&DashboardSystemApiClient::addCanNetworkToSimulation, _dashboardSystemApiClient, simulationId,
+                  participantName, networkName, nullptr),
+        "adding can network");
 }
 
-void DashboardSystemServiceClient::AddEthernetNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName)
+void DashboardSystemServiceClient::AddEthernetNetworkToSimulation(oatpp::UInt64 simulationId,
+                                                                  oatpp::String participantName,
+                                                                  oatpp::String networkName)
 {
-    _executor->execute<SendCoroutine>(_logger,
-                                      std::bind(&DashboardSystemApiClient::addEthernetNetworkToSimulation,
-                                                _dashboardSystemApiClient, simulationId, networkName, nullptr),
-                                      "adding ethernet network");
+    _executor->execute<SendCoroutine>(
+        _logger,
+        std::bind(&DashboardSystemApiClient::addEthernetNetworkToSimulation, _dashboardSystemApiClient, simulationId,
+                  participantName, networkName, nullptr),
+        "adding ethernet network");
 }
 
-void DashboardSystemServiceClient::AddFlexrayNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName)
+void DashboardSystemServiceClient::AddFlexrayNetworkToSimulation(oatpp::UInt64 simulationId,
+                                                                 oatpp::String participantName,
+                                                                 oatpp::String networkName)
 {
-    _executor->execute<SendCoroutine>(_logger,
-                                      std::bind(&DashboardSystemApiClient::addFlexrayNetworkToSimulation,
-                                                _dashboardSystemApiClient, simulationId, networkName, nullptr),
-                                      "adding flexray network");
+    _executor->execute<SendCoroutine>(
+        _logger,
+        std::bind(&DashboardSystemApiClient::addFlexrayNetworkToSimulation, _dashboardSystemApiClient, simulationId,
+                  participantName, networkName, nullptr),
+        "adding flexray network");
 }
 
-void DashboardSystemServiceClient::AddLinNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName)
+void DashboardSystemServiceClient::AddLinNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                             oatpp::String networkName)
 {
-    _executor->execute<SendCoroutine>(_logger,
-                                      std::bind(&DashboardSystemApiClient::addLinNetworkToSimulation,
-                                                _dashboardSystemApiClient, simulationId, networkName, nullptr),
-                                      "adding lin network");
+    _executor->execute<SendCoroutine>(
+        _logger,
+        std::bind(&DashboardSystemApiClient::addLinNetworkToSimulation, _dashboardSystemApiClient, simulationId,
+                  participantName, networkName, nullptr),
+        "adding lin network");
 }
 
 void DashboardSystemServiceClient::UpdateSystemStatusForSimulation(oatpp::UInt64 simulationId,

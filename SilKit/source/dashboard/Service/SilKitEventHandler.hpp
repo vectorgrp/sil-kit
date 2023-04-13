@@ -63,7 +63,7 @@ private: //member
     std::atomic<bool> _stopping{false};
     std::thread _simulationCreationThread;
     std::promise<bool> _simulationCreatedPromise;
-    std::atomic<uint32_t> _simulationId{0};
+    std::atomic<uint64_t> _simulationId{0};
 
     Services::Logging::ILogger* _logger;
     std::shared_ptr<IDashboardSystemServiceClient> _dashboardSystemServiceClient;

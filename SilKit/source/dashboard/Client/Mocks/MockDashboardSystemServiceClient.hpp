@@ -71,13 +71,13 @@ public:
     MOCK_METHOD(void, AddRpcServerInternalForParticipantOfSimulation,
                 (oatpp::UInt64, oatpp::String, oatpp::String, oatpp::UInt64, oatpp::Object<ServiceDto>), (override));
 
-    MOCK_METHOD(void, AddCanNetworkToSimulation, (oatpp::UInt64, oatpp::String), (override));
+    MOCK_METHOD(void, AddCanNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
 
-    MOCK_METHOD(void, AddEthernetNetworkToSimulation, (oatpp::UInt64, oatpp::String), (override));
+    MOCK_METHOD(void, AddEthernetNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
 
-    MOCK_METHOD(void, AddFlexrayNetworkToSimulation, (oatpp::UInt64, oatpp::String), (override));
+    MOCK_METHOD(void, AddFlexrayNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
 
-    MOCK_METHOD(void, AddLinNetworkToSimulation, (oatpp::UInt64, oatpp::String), (override));
+    MOCK_METHOD(void, AddLinNetworkToSimulation, (oatpp::UInt64, oatpp::String, oatpp::String), (override));
 
     MOCK_METHOD(void, UpdateSystemStatusForSimulation, (oatpp::UInt64, oatpp::Object<SystemStatusDto>), (override));
 

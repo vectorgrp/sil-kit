@@ -216,20 +216,21 @@ void SilKitEventHandler::OnLinkCreated(uint32_t simulationId, const Core::Servic
 {
     Services::Logging::Debug(_logger, "Dashboard: adding network for simulation {} {}", simulationId,
                              serviceDescriptor);
+    auto participantName = SilKit::Core::Uri::UrlEncode(serviceDescriptor.GetParticipantName());
     auto networkName = SilKit::Core::Uri::UrlEncode(serviceDescriptor.GetNetworkName());
     switch (serviceDescriptor.GetNetworkType())
     {
     case Config::NetworkType::CAN:
-        _dashboardSystemServiceClient->AddCanNetworkToSimulation(simulationId, networkName);
+        _dashboardSystemServiceClient->AddCanNetworkToSimulation(simulationId, participantName, networkName);
         break;
     case Config::NetworkType::Ethernet:
-        _dashboardSystemServiceClient->AddEthernetNetworkToSimulation(simulationId, networkName);
+        _dashboardSystemServiceClient->AddEthernetNetworkToSimulation(simulationId, participantName, networkName);
         break;
     case Config::NetworkType::FlexRay:
-        _dashboardSystemServiceClient->AddFlexrayNetworkToSimulation(simulationId, networkName);
+        _dashboardSystemServiceClient->AddFlexrayNetworkToSimulation(simulationId, participantName, networkName);
         break;
     case Config::NetworkType::LIN:
-        _dashboardSystemServiceClient->AddLinNetworkToSimulation(simulationId, networkName);
+        _dashboardSystemServiceClient->AddLinNetworkToSimulation(simulationId, participantName, networkName);
         break;
     default: return;
     }

@@ -60,7 +60,7 @@ struct SimulationData
     std::set<std::string> participants;
     std::map<std::string, std::set<std::string>> statesByParticipant;
     std::map<std::string, std::map<uint64_t, Service>> servicesByParticipant;
-    std::set<Link> links;
+    std::map<std::string, std::set<Link>> linksByParticipant;
     std::set<std::string> systemStates;
     bool stopped{false};
 };

@@ -92,13 +92,17 @@ public:
                                                                 oatpp::String parentServiceId, oatpp::UInt64 serviceId,
                                                                 oatpp::Object<ServiceDto> rpcServerInternal) = 0;
 
-    virtual void AddCanNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
+    virtual void AddCanNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                           oatpp::String networkName) = 0;
 
-    virtual void AddEthernetNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
+    virtual void AddEthernetNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                                oatpp::String networkName) = 0;
 
-    virtual void AddFlexrayNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
+    virtual void AddFlexrayNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                               oatpp::String networkName) = 0;
 
-    virtual void AddLinNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String networkName) = 0;
+    virtual void AddLinNetworkToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName,
+                                           oatpp::String networkName) = 0;
 
     virtual void UpdateSystemStatusForSimulation(oatpp::UInt64 simulationId,
                                                  oatpp::Object<SystemStatusDto> systemStatus) = 0;

@@ -577,14 +577,17 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_A
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
+    descriptor.SetParticipantName("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::CAN);
     descriptor.SetNetworkName("my networkname");
 
     oatpp::UInt64 actualSimulationId;
+    oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddCanNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1>([&](auto simulationId, auto networkName) {
+        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
+            actualParticipantName = participantName;
             actualNetworkName = networkName;
         })));
 
@@ -593,6 +596,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_A
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
+    ASSERT_STREQ(actualParticipantName->c_str(), "Network%20Simulator");
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
@@ -605,14 +609,17 @@ TEST_F(TestDashboardSilKitEventHandler,
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
+    descriptor.SetParticipantName("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::Ethernet);
     descriptor.SetNetworkName("my networkname");
 
     oatpp::UInt64 actualSimulationId;
+    oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddEthernetNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1>([&](auto simulationId, auto networkName) {
+        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
+            actualParticipantName = participantName;
             actualNetworkName = networkName;
         })));
 
@@ -621,6 +628,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
+    ASSERT_STREQ(actualParticipantName->c_str(), "Network%20Simulator");
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
@@ -633,14 +641,17 @@ TEST_F(TestDashboardSilKitEventHandler,
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
+    descriptor.SetParticipantName("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::FlexRay);
     descriptor.SetNetworkName("my networkname");
 
     oatpp::UInt64 actualSimulationId;
+    oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddFlexrayNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1>([&](auto simulationId, auto networkName) {
+        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
+            actualParticipantName = participantName;
             actualNetworkName = networkName;
         })));
 
@@ -649,6 +660,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
+    ASSERT_STREQ(actualParticipantName->c_str(), "Network%20Simulator");
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
@@ -660,14 +672,17 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_A
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
+    descriptor.SetParticipantName("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::LIN);
     descriptor.SetNetworkName("my networkname");
 
     oatpp::UInt64 actualSimulationId;
+    oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddLinNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1>([&](auto simulationId, auto networkName) {
+        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
+            actualParticipantName = participantName;
             actualNetworkName = networkName;
         })));
 
@@ -676,6 +691,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_A
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
+    ASSERT_STREQ(actualParticipantName->c_str(), "Network%20Simulator");
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
