@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IMsgForDataPublisher.hpp"
 #include "IParticipantInternal.hpp"
 #include "ITraceMessageSource.hpp"
+#include "IReplayDataController.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -40,11 +41,18 @@ class DataPublisher
     , public Services::Orchestration::ITimeConsumer
     , public Core::IServiceEndpoint
     , public ITraceMessageSource
+    , public Tracing::IReplayDataController
 {
 public:
-    DataPublisher(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider, const SilKit::Services::PubSub::PubSubSpec& dataSpec,
-                  const std::string& pubUUID);
+    DataPublisher(Core::IParticipantInternal* participant,
+                  Services::Orchestration::ITimeProvider* timeProvider,
+                  const SilKit::Services::PubSub::PubSubSpec& dataSpec,
+                  const std::string& pubUUID,
+                  const Config::DataPublisher& config  
+    );
 
+
+public: // Methods
     void Publish(Util::Span<const uint8_t> data) override;
 
     //SilKit::Services::Orchestration::ITimeConsumer
@@ -59,7 +67,12 @@ public:
 
     auto GetTracer() -> Tracer*;
 
-private:
+    // IReplayDataController
+    void ReplayMessage(const SilKit::IReplayMessage *message) override;
+private: // Methods
+    void PublishInternal(Util::Span<const uint8_t> data);
+
+private: // Member
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
@@ -69,6 +82,8 @@ private:
     Core::ServiceDescriptor _serviceDescriptor{};
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
     Core::IParticipantInternal* _participant{nullptr};
+
+    Config::DataPublisher _config;
 };
 
 // ================================================================================

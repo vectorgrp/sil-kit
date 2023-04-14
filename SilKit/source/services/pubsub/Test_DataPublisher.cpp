@@ -53,7 +53,7 @@ class DataPublisherTest : public ::testing::Test
 {
 protected:
     DataPublisherTest()
-        : publisher{&participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID"}
+        : publisher{ &participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID", {} }
     {
         publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
     }

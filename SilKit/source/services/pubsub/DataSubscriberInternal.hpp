@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IParticipantInternal.hpp"
 #include "DataMessageDatatypeUtils.hpp"
 #include "SynchronizedHandlers.hpp"
+#include "IReplayDataController.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -36,14 +37,16 @@ class DataSubscriberInternal
     : public IMsgForDataSubscriberInternal
     , public Services::Orchestration::ITimeConsumer
     , public Core::IServiceEndpoint
+    , public Tracing::IReplayDataController
 {
-public:
+public: //Ctor
     DataSubscriberInternal(Core::IParticipantInternal* participant,
                            Services::Orchestration::ITimeProvider* timeProvider, const std::string& topic,
                            const std::string& mediaType, const std::vector<SilKit::Services::MatchingLabel>& labels,
                            DataMessageHandler defaultHandler,
                            IDataSubscriber* parent);
 
+public: //Methods
     void SetDataMessageHandler(DataMessageHandler handler);
     
     //! \brief Accepts messages originating from SilKit communications.
@@ -58,11 +61,19 @@ public:
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
-private:
+
+    // IReplayDataProvider
+    void ReplayMessage(const IReplayMessage* replayMessage) override;
+
+private: //Methods
+    void ReceiveInternal(const WireDataMessageEvent& dataMessageEvent);
+private: // Member
     std::string _topic;
     std::string _mediaType;
     std::vector<SilKit::Services::MatchingLabel> _labels;
     DataMessageHandler _defaultHandler;
+    
+    Config::Replay _replayConfig;
 
     IDataSubscriber* _parent{nullptr};
     Core::ServiceDescriptor _serviceDescriptor{};

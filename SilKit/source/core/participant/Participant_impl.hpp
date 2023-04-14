@@ -388,9 +388,18 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriberInternal(const std::str
     controllerConfig.name = to_string(Util::Uuid::GenerateRandom());
     std::string network = linkName;
 
-    return CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
+    auto controller =  CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriberInternal>(
         controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
         topic, mediaType, publisherLabels, defaultHandler, parent);
+
+    //Restore original DataSubscriber config for replay
+    auto&& parentConfig = parentDataSubscriber->GetConfig();
+    if (_replayScheduler)
+    {
+        _replayScheduler->ConfigureController(parentConfig.name, controller, parentConfig.replay,
+                                              parentConfig.topic.value(), parentConfig.GetNetworkType());
+    }
+    return controller;
 }
 
 static inline auto FormatLabelsForLogging(const std::vector<MatchingLabel>& labels) -> std::string
@@ -464,8 +473,15 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     supplementalData[SilKit::Core::Discovery::supplKeyDataPublisherPubLabels] = labelStr;
 
     auto controller = CreateController<SilKit::Config::DataPublisher, SilKit::Services::PubSub::DataPublisher>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
-        configuredDataNodeSpec, network);
+        controllerConfig,
+        network,
+        Core::ServiceType::Controller,
+        std::move(supplementalData),
+        true,
+        &_timeProvider,
+        configuredDataNodeSpec,
+        network,
+        controllerConfig);
 
     _connection.SetHistoryLengthForLink(history, controller);
 
@@ -483,6 +499,12 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     if (traceSource)
     {
         AddTraceSinksToSource(traceSource, controllerConfig);
+    }
+
+    if (_replayScheduler)
+    {
+        _replayScheduler->ConfigureController(controllerConfig.name, controller, controllerConfig.replay,
+                                              controllerConfig.topic.value(), controllerConfig.GetNetworkType());
     }
 
     return controller;
@@ -520,7 +542,8 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     supplementalData[SilKit::Core::Discovery::supplKeyDataSubscriberSubLabels] = labelStr;
 
     auto controller = CreateController<SilKit::Config::DataSubscriber, Services::PubSub::DataSubscriber>(
-        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, &_timeProvider,
+        controllerConfig, network, Core::ServiceType::Controller, std::move(supplementalData), true, controllerConfig,
+        &_timeProvider,
         configuredDataNodeSpec, defaultDataHandler);
 
     controller->RegisterServiceDiscovery();

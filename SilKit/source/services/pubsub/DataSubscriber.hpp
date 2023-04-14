@@ -46,7 +46,7 @@ class DataSubscriber
     , public ITraceMessageSource
 {
 public:
-    DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
+    DataSubscriber(Core::IParticipantInternal* participant, Config::DataSubscriber config, Services::Orchestration::ITimeProvider* timeProvider,
                    const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                    DataMessageHandler defaultDataHandler);
 
@@ -64,6 +64,12 @@ public: //methods
 
     //ITraceMessageSource
     inline void AddSink(ITraceMessageSink* sink) override;
+
+    //For tracing in DataSubscriberInternal
+    inline auto GetConfig() -> const Config::DataSubscriber&
+    {
+        return _config;
+    }
 
 private: //methods
     void AddInternalSubscriber(const std::string& pubUUID, const std::string& joinedMediaType,
@@ -88,6 +94,7 @@ private: //members
     Core::IParticipantInternal* _participant{nullptr};
 
     mutable std::recursive_mutex _internalSubscribersMx;
+    Config::DataSubscriber _config;
 };
 
 // ================================================================================

@@ -20,6 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "DataSubscriberInternal.hpp"
+#include "DataSubscriber.hpp"
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -40,6 +41,11 @@ DataSubscriberInternal::DataSubscriberInternal(Core::IParticipantInternal* parti
     , _participant{participant}
 {
     (void)_participant;
+
+    if (_parent)
+    {
+        _replayConfig = dynamic_cast<DataSubscriber&>(*_parent).GetConfig().replay;
+    }
 }
 
 void DataSubscriberInternal::SetDataMessageHandler(DataMessageHandler handler)
@@ -49,6 +55,17 @@ void DataSubscriberInternal::SetDataMessageHandler(DataMessageHandler handler)
 
 void DataSubscriberInternal::ReceiveMsg(const IServiceEndpoint* /*from*/, const WireDataMessageEvent& dataMessageEvent)
 {
+    if (Tracing::IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Receive))
+    {
+        return;
+    }
+
+    ReceiveInternal(dataMessageEvent);
+}
+
+void DataSubscriberInternal::ReceiveInternal(const WireDataMessageEvent& dataMessageEvent)
+{
+
     if (_defaultHandler)
     {
         _defaultHandler(_parent, ToDataMessageEvent(dataMessageEvent));
@@ -65,6 +82,26 @@ void DataSubscriberInternal::SetTimeProvider(Services::Orchestration::ITimeProvi
     _timeProvider = provider;
 }
 
+void DataSubscriberInternal::ReplayMessage(const IReplayMessage* message)
+{
+    using namespace SilKit::Tracing;
+    switch (message->GetDirection())
+    {
+    case SilKit::Services::TransmitDirection::RX:
+        if (IsReplayEnabledFor(_replayConfig, Config::Replay::Direction::Receive))
+        {
+            auto&& msg = dynamic_cast<const Services::PubSub::WireDataMessageEvent&>(*message);
+            ReceiveInternal(msg);
+        }
+        break;
+    case SilKit::Services::TransmitDirection::TX:
+        //Ignore transmit messages
+        break;
+    default:
+        throw SilKitError("DataSubscriberInternal: replay message has undefined direction");
+        break;
+    }
+}
 
 } // namespace PubSub
 } // namespace Services

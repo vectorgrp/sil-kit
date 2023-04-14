@@ -30,7 +30,8 @@ namespace SilKit {
 namespace Services {
 namespace PubSub {
 
-DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
+DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Config::DataSubscriber config,
+                               Services::Orchestration::ITimeProvider* timeProvider,
                                const SilKit::Services::PubSub::PubSubSpec& dataSpec,
                                DataMessageHandler defaultDataHandler)
     : _topic{dataSpec.Topic()}
@@ -39,6 +40,7 @@ DataSubscriber::DataSubscriber(Core::IParticipantInternal* participant, Services
     , _defaultDataHandler{WrapTracingCallback(defaultDataHandler)}
     , _timeProvider{timeProvider}
     , _participant{ participant }
+    , _config{std::move(config)}
 {
 }
 

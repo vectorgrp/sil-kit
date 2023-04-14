@@ -68,9 +68,10 @@ protected:
 protected:
     DataSubscriberTest()
         : subscriber{&participant,
+                     {},
                      participant.GetTimeProvider(), matchingDataSpec,
                      SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault)}
-        , publisher{&participant, participant.GetTimeProvider(), dataSpec, publisherUuid}
+        , publisher{ &participant, participant.GetTimeProvider(), dataSpec, publisherUuid,{} }
     {
         subscriber.SetServiceDescriptor(from_endpointAddress(subscriberEndpointAddress));
         SetupPublisherServiceDescriptor(publisher, publisherUuid, publisherEndpointAddress);

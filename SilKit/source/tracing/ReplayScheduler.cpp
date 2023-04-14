@@ -225,7 +225,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
         Services::Logging::Warn(log, "Replay: ignoring {} channel '{}' from file '{}'", to_string(channel->Type()),
                                 channel->Name(), replayFile->FilePath());
 
-
         if (HasMdfChannelSelection(replayConfig.mdfChannel))
         {
             // User specifies lookup information for us
@@ -248,7 +247,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
                 channelList.emplace_back(std::move(channel));
             }
         }
-
     }
 
     // when an MdfChannel config is given, the channel has to be unique.
