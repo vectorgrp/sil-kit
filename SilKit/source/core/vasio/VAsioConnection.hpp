@@ -113,9 +113,9 @@ public:
 
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
-            Trace(_logger, "VAsio waiting for subscription acknowledges for SilKitService {}.", typeid(*service).name());
+            Trace(_logger, "SIL Kit waiting for subscription acknowledges for SilKitService {}.", typeid(*service).name());
             allAcked.wait();
-            Trace(_logger, "VAsio received all subscription acknowledges for SilKitService {}.", typeid(*service).name());
+            Trace(_logger, "SIL Kit received all subscription acknowledges for SilKitService {}.", typeid(*service).name());
         }
     }
 
@@ -408,7 +408,7 @@ private:
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw SilKitError{ "VAsioConnection::SendMsgImpl: sending on empty link for " + key };
+            throw SilKitError{ "SendMsgImpl: sending on empty link for " + key };
         }
         auto&& link = linkMap[key];
         link->DistributeLocalSilKitMessage(from, std::forward<SilKitMessageT>(msg));
@@ -423,7 +423,7 @@ private:
         auto& linkMap = std::get<SilKitServiceToLinkMap<std::decay_t<SilKitMessageT>>>(_serviceToLinkMap);
         if (linkMap.count(key) < 1)
         {
-            throw SilKitError{"VAsioConnection::SendMsgImpl: sending on empty link for " + key};
+            throw SilKitError{"SendMsgToTargetImpl: sending on empty link for " + key};
         }
         auto&& link = linkMap[key];
         link->DispatchSilKitMessageToTarget(from, targetParticipantName, std::forward<SilKitMessageT>(msg));
@@ -551,7 +551,7 @@ inline auto ResolveHostAndPort(const asio::any_io_executor& executor, Services::
     }
     catch (const asio::system_error& err)
     {
-        Services::Logging::Warn(logger, "VAsioConnection::ResolveHostAndPort: Unable to resolve host \"{}:{}\": {}",
+        Services::Logging::Warn(logger, "ResolveHostAndPort: Unable to resolve host \"{}:{}\": {}",
                                 strippedHost, port, err.what());
     }
 

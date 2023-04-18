@@ -14,7 +14,7 @@ Connectivity issues with registry
 .. code-block:: console
   :caption: Example error message
 
-  [yyyy-mm-dd hh:mm:ss] [CanWriter] [error] Failed to connect to VAsio registry (number of attempts: 1)
+  [yyyy-mm-dd hh:mm:ss] [CanWriter] [error] Failed to connect to SIL Kit Registry (number of attempts: 1)
   [yyyy-mm-dd hh:mm:ss] [CanWriter] [info]    Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: silkit://localhost:8500, local://<PATH>.silkit.
   [yyyy-mm-dd hh:mm:ss] [CanWriter] [info]    If a registry is unable to open a listening socket it will only be reachable via local domain sockets, which depend on the working directory and the middleware configuration ('enableDomainSockets').
   [yyyy-mm-dd hh:mm:ss] [CanWriter] [info]    Make sure that the hostname can be resolved and is reachable.

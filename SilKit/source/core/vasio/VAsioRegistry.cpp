@@ -66,7 +66,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     }
     catch (const std::exception& e)
     {
-        Services::Logging::Error(GetLogger(), "VAsioRegistry failed to create listening socket {}:{} (uri: {}). Reason: {}",
+        Services::Logging::Error(GetLogger(), "SIL Kit Registry failed to create listening socket {}:{} (uri: {}). Reason: {}",
                        uri.Host(),
                        uri.Port(),
                        uri.EncodedString(),
@@ -83,13 +83,13 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         }
         catch (const std::exception& e)
         {
-            Services::Logging::Warn(GetLogger(), "VAsioRegistry failed to create local listening socket: {}", e.what());
+            Services::Logging::Warn(GetLogger(), "SIL Kit Registry failed to create local listening socket: {}", e.what());
         }
     }
 
     if (hasTcpSocket && hasDomainSocket)
     {
-        Services::Logging::Debug(GetLogger(), "VAsioRegistry: Listening on both, TCP and Domain sockets");
+        Services::Logging::Debug(GetLogger(), "SIL Kit Registry: Listening on both, TCP and Domain sockets");
     }
     else if (hasTcpSocket && !hasDomainSocket)
     {
@@ -116,8 +116,8 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     }
     else
     {
-        Services::Logging::Error(GetLogger(), "VAsioRegistry: Unable to listen on neither TCP, nor Domain sockets");
-        throw SilKit::StateError{"VAsioRegistry: Unable to listen on neither TCP, nor Domain sockets"};
+        Services::Logging::Error(GetLogger(), "SIL Kit Registry: Unable to listen on neither TCP, nor Domain sockets");
+        throw SilKit::StateError{"SIL Kit Registry: Unable to listen on neither TCP, nor Domain sockets"};
     }
 
     _connection.StartIoWorker();
@@ -210,14 +210,6 @@ void VAsioRegistry::OnPeerShutdown(IVAsioPeer* peer)
 bool VAsioRegistry::AllParticipantsAreConnected() const
 {
     return false;
-    /*for (auto&& participant : _connection.Config().simulationSetup.participants)
-    {
-        if (FindConnectedPeer(participant.name) == _connectedParticipants.end())
-        {
-            return false;
-        }
-    }
-    return true;*/
 }
 
 } // namespace Core

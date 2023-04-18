@@ -99,7 +99,7 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
     std::set<Uri, UriLexicographicLess> acceptorUris;
 
     const auto acceptUri = [logger, &acceptorUris, audiencePeer, advertisedPeer](const Uri& uri) {
-        Services::Logging::Debug(logger, "VAsioRegistry::TransformAcceptorUris: '{}' to '{}': Accept: {}",
+        Services::Logging::Debug(logger, "SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Accept: {}",
                                  advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
                                  uri.EncodedString());
         acceptorUris.emplace(uri);
@@ -108,7 +108,7 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
     const auto acceptNewTcpUri = [logger, &acceptorUris, audiencePeer, advertisedPeer](const std::string& host,
                                                                                        uint16_t port) {
         auto uri = Uri::MakeTcp(host, port);
-        Services::Logging::Debug(logger, "VAsioRegistry::TransformAcceptorUris: '{}' to '{}': Accept: {}",
+        Services::Logging::Debug(logger, "SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Accept: {}",
                                  advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
                                  uri.EncodedString());
         acceptorUris.emplace(std::move(uri));
@@ -119,12 +119,12 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
     if (src.Type() != Uri::UriType::Local && src.Type() != Uri::UriType::Tcp)
     {
         throw SilKitError{
-            "VAsioRegistry::TransformAcceptorUris: Remote address of advertised peer has invalid UriType"};
+            "SIL Kit Registry: TransformAcceptorUris: Remote address of advertised peer has invalid UriType"};
     }
 
     if (dst.Type() != Uri::UriType::Local && dst.Type() != Uri::UriType::Tcp)
     {
-        throw SilKitError{"VAsioRegistry::TransformAcceptorUris: Local address of audience peer has invalid UriType"};
+        throw SilKitError{"SIL Kit Registry: TransformAcceptorUris: Local address of audience peer has invalid UriType"};
     }
 
     // URI transformation
@@ -134,7 +134,7 @@ auto TransformAcceptorUris(SilKit::Services::Logging::ILogger* logger, IVAsioPee
         const auto uri = Uri::Parse(uriString);
         const auto uriInfo = GetUriInfo(uri);
 
-        Services::Logging::Debug(logger, "VAsioRegistry::TransformAcceptorUris: '{}' to '{}': Decide: {}",
+        Services::Logging::Debug(logger, "SIL Kit Registry: TransformAcceptorUris: '{}' to '{}': Decide: {}",
                                  advertisedPeer->GetInfo().participantName, audiencePeer->GetInfo().participantName,
                                  uri.EncodedString());
 

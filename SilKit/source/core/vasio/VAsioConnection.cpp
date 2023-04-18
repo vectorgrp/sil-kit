@@ -92,7 +92,7 @@ void SetListenOptions(SilKit::Services::Logging::ILogger* logger,
     if (result == SOCKET_ERROR)
     {
         auto lastError = ::GetLastError();
-        SilKit::Services::Logging::Warn(logger, "VAsioConnection: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
+        SilKit::Services::Logging::Warn(logger, "SetListenOptions: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
     }
 }
 #   endif //__MINGW32__
@@ -420,7 +420,7 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string> & acceptor
         else
         {
             SilKit::Services::Logging::Warn(
-                _logger, "VAsioConnection::PrepareAcceptors: Unused acceptor endpoint URI: {}", uriString);
+                _logger, "OpenTcpAcceptors: Unused acceptor endpoint URI: {}", uriString);
         }
     }
 }
@@ -462,7 +462,7 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string> & accept
         else
         {
             SilKit::Services::Logging::Warn(
-                _logger, "VAsioConnection::PrepareAcceptors: Unused acceptor endpoint URI: {}", uriString);
+                _logger, "OpenLocalAcceptors: Unused acceptor endpoint URI: {}", uriString);
         }
     }
 }
@@ -483,8 +483,8 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
 
     if (_localAcceptors.empty() && _tcpAcceptors.empty())
     {
-        SilKit::Services::Logging::Error(_logger, "VAsioConnection::JoinSimulation: no acceptors available");
-        throw SilKitError{"VAsioConnection::JoinSimulation: no acceptors available"};
+        SilKit::Services::Logging::Error(_logger, "JoinSimulation: no acceptors available");
+        throw SilKitError{"JoinSimulation: no acceptors available"};
     }
 
     auto registry = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
@@ -498,7 +498,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     // Compute a list of Registry URIs and attempt to connect as per config
     std::vector<std::string> attemptedUris{{connectUri}};
 
-    _logger->Debug("Connecting to VAsio registry");
+    _logger->Debug("Connecting to SIL Kit Registry");
 
     // First, attempt local connections if available:
     if (_config.middleware.enableDomainSockets)
@@ -522,7 +522,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     // Neither local nor tcp is working.
     if (!ok)
     {
-        Services::Logging::Error(_logger, "Failed to connect to VAsio registry (number of attempts: {})",
+        Services::Logging::Error(_logger, "Failed to connect to SIL Kit Registry (number of attempts: {})",
                        _config.middleware.connectAttempts);
         Services::Logging::Info(_logger, "   Make sure that the SIL Kit Registry is up and running and is listening on the following URIs: {}.",
             printUris(attemptedUris));
@@ -551,7 +551,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     StartIoWorker();
 
     auto receivedAllReplies = _receivedAllParticipantReplies.get_future();
-    _logger->Debug("VAsio is waiting for known participants list from registry.");
+    _logger->Debug("SIL Kit is waiting for known participants list from registry.");
 
     auto waitOk = receivedAllReplies.wait_for(5s);
     if(waitOk == std::future_status::timeout)
@@ -608,7 +608,7 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     // check if an exception was set:
     receivedAllReplies.get();
 
-    _logger->Trace("VAsio received announcement replies from all participants.");
+    _logger->Trace("SIL Kit received announcement replies from all participants.");
 }
 
 void VAsioConnection::NotifyNetworkIncompatibility(const RegistryMsgHeader& other,
@@ -642,7 +642,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
             const auto epUri = fromAsioEndpoint(acceptor.local_endpoint());
             info.acceptorUris.push_back(epUri.EncodedString());
             Services::Logging::Trace(
-                _logger, "VAsioConnection::SendParticipantAnnouncement: Peer '{}': Local-Domain Acceptor Uri: {}",
+                _logger, "SendParticipantAnnouncement: Peer '{}': Local-Domain Acceptor Uri: {}",
                 peer->GetInfo().participantName, epUri.EncodedString());
         }
     }
@@ -656,14 +656,14 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
             const auto epUri = fromAsioEndpoint(acceptor.local_endpoint());
             info.acceptorUris.emplace_back(epUri.EncodedString());
             Services::Logging::Trace(_logger,
-                                     "VAsioConnection::SendParticipantAnnouncement: Peer '{}': TCP Acceptor Uri: {}",
+                                     "SendParticipantAnnouncement: Peer '{}': TCP Acceptor Uri: {}",
                                      peer->GetInfo().participantName, epUri.EncodedString());
         }
     }
 
     if (openAcceptorCount == 0)
     {
-        const auto message = "VAsioConnection::SendParticipantAnnouncement: Cannot send announcement: All acceptors "
+        const auto message = "SendParticipantAnnouncement: Cannot send announcement: All acceptors "
                              "(both Local-Domain and TCP) are missing";
         SilKit::Services::Logging::Error(_logger, message);
         throw SilKitError{message};
@@ -902,7 +902,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
     {
         _receivedAllParticipantReplies.set_value();
     }
-    Services::Logging::Trace(_logger, "VAsio is waiting for {} ParticipantAnnouncementReplies",
+    Services::Logging::Trace(_logger, "SIL Kit is waiting for {} ParticipantAnnouncementReplies",
                              _pendingParticipantReplies.size());
 }
 
@@ -922,7 +922,7 @@ const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t
     const auto participantIter = _hashToParticipantName.find(participantId);
     if (participantIter == _hashToParticipantName.end())
     {
-        throw SilKitError{"VAsioConnection: could not find participant in participant cache"};
+        throw SilKitError{"GetParticipantFromLookup: could not find participant in participant cache"};
     }
     return participantIter->second;
 }
@@ -973,7 +973,7 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
         resolverResults = ResolveHostAndPort(_ioContext.get_executor(), _logger, hostName, port);
         if (resolverResults.empty())
         {
-            Services::Logging::Error(_logger, "VAsioConnection::AcceptTcpConnectionsOn: Unable to resolve hostname"
+            Services::Logging::Error(_logger, "AcceptTcpConnectionsOn: Unable to resolve hostname"
                 "\"{}:{}\"", hostName, port);
             throw SilKit::StateError{"Unable to resolve hostname and service."};
         }
@@ -1001,7 +1001,7 @@ auto VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoin
         // we already have an acceptor for the given endpoint type
         std::stringstream endpointName;
         endpointName << endpoint;
-        throw LogicError{ "VAsioConnection: acceptor already open for endpoint type: "
+        throw LogicError{ "AcceptConnectionsOn: acceptor already open for endpoint type: "
             + endpointName.str()};
     }
     try
@@ -1015,12 +1015,12 @@ auto VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoin
     }
     catch (const std::exception& e)
     {
-        Services::Logging::Error(_logger, "VAsioConnection failed to listening on {}: {}", endpoint, e.what());
+        Services::Logging::Error(_logger, "SIL Kit failed to listening on {}: {}", endpoint, e.what());
         acceptor = AcceptorT{_ioContext}; // Reset socket
         throw;
     }
 
-    Services::Logging::Debug(_logger, "VAsioConnection is listening on {}", acceptor.local_endpoint());
+    Services::Logging::Debug(_logger, "SIL Kit is listening on {}", acceptor.local_endpoint());
 
     AcceptNextConnection(acceptor);
 
@@ -1037,7 +1037,7 @@ void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
     }
     catch (const std::exception& e)
     {
-        Services::Logging::Error(_logger, "VAsioConnection cannot create listener socket: {}", e.what());
+        Services::Logging::Error(_logger, "SIL Kit cannot create listener socket: {}", e.what());
         throw;
     }
 

@@ -232,7 +232,7 @@ static auto GetSocketAddress(const asio::generic::stream_protocol::socket& socke
     }
     else
     {
-        throw SilKitError("VAsioTcpPeer::GetSocketAddress(): Unknown endpoint.");
+        throw SilKitError("GetSocketAddress: Unknown endpoint.");
     }
     auto result = out.str();
     return result;
@@ -258,7 +258,7 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
 
     try
     {
-        SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer: Connecting to {}", socketPath);
+        SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Connecting to {}", socketPath);
         asio::local::stream_protocol::endpoint ep{socketPath};
         _socket.connect(ep);
         return true;
@@ -266,7 +266,7 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
     catch (const std::exception& err)
     {
         // reset the socket
-        SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer::ConnectLocal: Error while connecting to '{}': {}",
+        SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Error while connecting to '{}': {}",
                                          socketPath, err.what());
         _socket = decltype(_socket){_socket.get_executor()};
         // move on to TCP connections
@@ -287,7 +287,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     {
         try
         {
-            SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer: Connecting to [{}]:{} ({})",
+            SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Connecting to [{}]:{} ({})",
                 resolverEntry.host_name(),
                 resolverEntry.service_name(),
                 (resolverEntry.endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6")
@@ -325,7 +325,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
         catch (asio::system_error& err)
         {
             // reset the socket
-            SilKit::Services::Logging::Debug(_logger, "VAsioTcpPeer::ConnectTcp: Error while connecting to '{}:{}': {}",
+            SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Error while connecting to '{}:{}': {}",
                                              host, port, err.what());
             _socket = decltype(_socket){_socket.get_executor()};
         }
@@ -557,7 +557,7 @@ void VAsioTcpPeer::DispatchBuffer()
         uint32_t msgSize{0u};
         if (_msgBuffer.size() < sizeof msgSize)
         {
-            throw SilKitError{ "VAsioTcpPeer: Received message is too small to contain message size header" };
+            throw SilKitError{ "DispatchBuffer: Received message is too small to contain message size header" };
         }
         memcpy(&msgSize, _msgBuffer.data(), sizeof msgSize);
         //ensure buffer does not contain data from contiguous messages
