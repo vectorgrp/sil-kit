@@ -31,6 +31,7 @@ target_link_libraries(S_SilKit_Experimental
     PRIVATE I_SilKit_Core_Internal
     PRIVATE S_SilKit_Services_Lin
     PRIVATE I_SilKit_Util
+    PRIVATE I_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_Experimental

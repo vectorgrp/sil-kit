@@ -46,13 +46,12 @@ add_library(S_SilKit_Services_Ethernet STATIC
 target_link_libraries(S_SilKit_Services_Ethernet
     PUBLIC I_SilKit_Services_Ethernet
 
-    PUBLIC
-        S_SilKit_Tracing
-        I_SilKit_Wire_Ethernet
-    PRIVATE
-        I_SilKit_Core_Internal
-        SilKitInterface
-        S_SilKit_Services_Logging
+    PUBLIC S_SilKit_Tracing
+    PUBLIC I_SilKit_Wire_Ethernet
+    PUBLIC I_SilKit_Services_Logging
+    PRIVATE I_SilKit_Core_Internal
+    PRIVATE SilKitInterface
+    PRIVATE S_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_SimEthController

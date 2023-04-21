@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimBehavior.hpp"
 
 #include "SynchronizedHandlers.hpp"
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -183,6 +184,8 @@ private:
     Core::ServiceDescriptor _serviceDescriptor;
     Tracer _tracer;
     bool _replayActive{false};
+    Services::Logging::ILogger* _logger;
+    Services::Logging::LogOnceFlag _logOnce;
 
     CanControllerState _controllerState = CanControllerState::Uninit;
     CanErrorState _errorState = CanErrorState::NotAvailable;

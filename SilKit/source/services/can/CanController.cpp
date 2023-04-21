@@ -36,6 +36,7 @@ CanController::CanController(Core::IParticipantInternal* participant, SilKit::Co
     , _config{std::move(config)}
     , _simulationBehavior{participant, this, timeProvider}
     , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
+    , _logger{participant->GetLogger()}
 {
 }
 
@@ -155,6 +156,8 @@ void CanController::SendFrame(const CanFrame& frame, void* userContext)
     {
         // do not allow user messages from the public API.
         // ReplaySend will send all frames.
+        Logging::Debug(_logger, _logOnce,
+            "CanController: Ignoring SendFrame API call due to Replay config on {}", _config.name);
         return;
     }
     WireCanFrameEvent wireCanFrameEvent{};
@@ -177,6 +180,8 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
 
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
     {
+        Logging::Debug(_logger, _logOnce,
+            "CanController: Ignoring ReceiveMsg API call due to Replay config on {}", _config.name);
         return;
     }
     _tracer.Trace(msg.direction, msg.timestamp, ToCanFrameEvent(msg));

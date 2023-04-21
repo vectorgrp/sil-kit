@@ -36,6 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimBehavior.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "WireLinMessages.hpp"
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -205,6 +206,7 @@ private:
 private:
     // ----------------------------------------
     // private members
+    Logging::LogOnceFlag _logOnce;
     Core::IParticipantInternal* _participant;
     Config::LinController _config;
     Services::Logging::ILogger* _logger;

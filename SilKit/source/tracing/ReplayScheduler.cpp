@@ -56,11 +56,6 @@ TraceMessageType ToTraceMessageType(Config::NetworkType networkType)
     }
 }
 
-// NB: The following block is currently inactive, because MDF4 tracing is not ready yet. It is kept for future
-//     reference, to easy reactivation.
-
-//#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
-
 std::vector<std::string> splitString(std::string input, const std::string& separator)
 {
     std::vector<std::string> tokens;
@@ -136,19 +131,6 @@ private:
     const std::string _defaultSeparator{"/"};
 };
 
-// XXX: There is no link type anymore
-// TraceMessageType to_channelType(Config::Link::Type linkType)
-//{
-//    switch (linkType)
-//    {
-//    case Config::NetworkType::Ethernet: return TraceMessageType::EthernetFrame;
-//    case Config::NetworkType::CAN: return TraceMessageType::CanFrameEvent;
-//    case Config::NetworkType::LIN: return TraceMessageType::LinFrame;
-//    case Config::NetworkType::FlexRay: return TraceMessageType::FrMessage;
-//    default: throw SilKitError("Unknown channel Type");
-//    }
-//}
-
 // Helper to match a channel by a Config::MdfChannel identification supplied by the user
 bool MatchMdfChannel(std::shared_ptr<IReplayChannel> channel, const Config::MdfChannel& mdfId)
 {
@@ -220,8 +202,6 @@ std::string to_string(const Config::MdfChannel& mdf)
     return result.str();
 }
 
-//#endif
-
 // Find the MDF channels associated with the given participant/controller names and types or an MdfChannel identification.
 auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* replayFile,
                        const Config::Replay& replayConfig, const std::string& controllerName,
@@ -245,7 +225,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
         Services::Logging::Warn(log, "Replay: ignoring {} channel '{}' from file '{}'", to_string(channel->Type()),
                                 channel->Name(), replayFile->FilePath());
 
-//#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
 
         if (HasMdfChannelSelection(replayConfig.mdfChannel))
         {
@@ -270,10 +249,7 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             }
         }
 
-//#endif
     }
-
-//#ifdef SILKIT_MDF4_TRACING_IS_READY_REMOVE_THIS_IFDEF
 
     // when an MdfChannel config is given, the channel has to be unique.
     if (HasMdfChannelSelection(replayConfig.mdfChannel) && (channelList.size() != 1))
@@ -284,8 +260,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             << " MdfChannel config must yield a unique channel!";
         throw SilKit::ConfigurationError{msg.str()};
     }
-
-//#endif
 
     if (channelList.size() < 1)
     {

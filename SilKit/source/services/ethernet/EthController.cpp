@@ -36,7 +36,9 @@ EthController::EthController(Core::IParticipantInternal* participant, Config::Et
     : _participant(participant)
     , _config{std::move(config)}
     , _simulationBehavior{participant, this, timeProvider}
+    , _timeProvider{timeProvider}
     , _replayActive{Tracing::IsValidReplayConfig(_config.replay)}
+    , _logger{participant->GetLogger()}
 {
 }
 
@@ -128,14 +130,23 @@ void EthController::Deactivate()
 
 void EthController::SendFrame(EthernetFrame frame, void* userContext)
 {
-    if ((_config.replay.direction == Config::Replay::Direction::Undefined)
-        || (_config.replay.direction == Config::Replay::Direction::Receive))
+    if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
-      WireEthernetFrameEvent msg{};
-        msg.frame = MakeWireEthernetFrame(frame);
-        msg.userContext = userContext;
-        SendMsg(std::move(msg));
-    }  
+        Logging::Debug(_logger, _logOnce,
+            "EthController: Ignoring SendFrame API call due to Replay config on {}", _config.name);
+        return;
+    }
+    return SendFrameInternal(frame, userContext);
+}
+void EthController::SendFrameInternal(EthernetFrame frame, void* userContext)
+{
+    WireEthernetFrameEvent msg{};
+    msg.frame = MakeWireEthernetFrame(frame);
+    msg.userContext = userContext;
+    msg.timestamp = _timeProvider->Now();
+
+    _tracer.Trace(Services::TransmitDirection::TX,msg.timestamp, frame);
+    SendMsg(std::move(msg));
 }
 
 //------------------------
@@ -148,7 +159,17 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
     {
         return;
     }
+    if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Receive))
+    {
+        Logging::Debug(_logger, _logOnce,
+            "EthController: Ignoring ReceiveMsg API call due to Replay config on {}", _config.name);
+        return;
+    }
+    return ReceiveMsgInternal(from, msg);
+}
 
+void EthController::ReceiveMsgInternal(const IServiceEndpoint* from, const WireEthernetFrameEvent& msg)
+{
     // The event instance that is passed to the handlers
     auto ethernetFrameEvent = ToEthernetFrameEvent(msg);
 
@@ -181,7 +202,11 @@ void EthController::ReceiveMsg(const IServiceEndpoint* from, const WireEthernetF
     }
 
     // Only use ethernetFrameEvent, not msg, as it may contain the unpadded frame
-    _tracer.Trace(ethernetFrameEvent.direction, ethernetFrameEvent.timestamp, ethernetFrameEvent.frame);
+    if (from != this)
+    {
+        // Loop back messags are traced in SimBehavior directly
+        _tracer.Trace(ethernetFrameEvent.direction, ethernetFrameEvent.timestamp, ethernetFrameEvent.frame);
+    }
     CallHandlers(ethernetFrameEvent);
 }
 
@@ -356,11 +381,10 @@ void EthController::ReplaySend(const IReplayMessage* replayMessage)
     Services::Ethernet::WireEthernetFrame frame =
         dynamic_cast<const Services::Ethernet::WireEthernetFrame&>(*replayMessage);
 
-    WireEthernetFrameEvent msg{};
-    msg.frame = frame;
-    msg.userContext = nullptr;
+    EthernetFrame msg{};
+    msg.raw = frame.raw.AsSpan();
 
-    SendMsg(std::move(msg));
+    SendFrameInternal(msg, nullptr);
 }
 
 void EthController::ReplayReceive(const IReplayMessage* replayMessage)
@@ -373,7 +397,7 @@ void EthController::ReplayReceive(const IReplayMessage* replayMessage)
     msg.frame = std::move(frame);
     msg.direction = TransmitDirection::RX;
     msg.userContext = nullptr;
-    ReceiveMsg(&replayService, msg);
+    ReceiveMsgInternal(&replayService, msg);
 }
 
 } // namespace Ethernet

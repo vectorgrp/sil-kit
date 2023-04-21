@@ -147,7 +147,7 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns)))
         .Times(1);
 
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(0);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     EthernetFrame frame{};
     controller.SendFrame(frame);
@@ -159,7 +159,7 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
 {
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
 
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(0);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
 
     EthernetFrame frame{};
     controller.SendFrame(frame);

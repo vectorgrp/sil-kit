@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimBehavior.hpp"
 
 #include "SynchronizedHandlers.hpp"
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -113,8 +114,7 @@ public:
 
     EthernetState GetState();
 
-    auto GetTracer() -> Tracer*;
-
+    inline auto GetTracer() -> Tracer*;
 private:
     // ----------------------------------------
     // private methods
@@ -137,20 +137,24 @@ private:
     // IReplayDataProvider Implementation
     void ReplaySend(const IReplayMessage* replayMessage);
     void ReplayReceive(const IReplayMessage* replayMessage);
-
+    void SendFrameInternal(EthernetFrame frame, void* userContext);
+    void ReceiveMsgInternal(const IServiceEndpoint* from, const WireEthernetFrameEvent& msg);
+    
 private:
     // ----------------------------------------
     // private members
-    Core::IParticipantInternal* _participant = nullptr;
+    Core::IParticipantInternal* _participant{ nullptr };
     Config::EthernetController _config;
     ::SilKit::Core::ServiceDescriptor _serviceDescriptor;
     SimBehavior _simulationBehavior;
 
-    EthernetState _ethState = EthernetState::Inactive;
-    uint32_t _ethBitRate = 0;
-
+    EthernetState _ethState{ EthernetState::Inactive };
+    uint32_t _ethBitRate{ 0 };
+    Orchestration::ITimeProvider* _timeProvider{ nullptr };
     Tracer _tracer;
     bool _replayActive{false};
+    Services::Logging::ILogger* _logger;
+    Services::Logging::LogOnceFlag _logOnce;
 
     template <typename MsgT>
     using CallbacksT = Util::SynchronizedHandlers<CallbackT<MsgT>>;
@@ -182,7 +186,7 @@ auto EthController::GetServiceDescriptor() const -> const Core::ServiceDescripto
     return _serviceDescriptor;
 }
 
-inline auto EthController::GetTracer() -> Tracer*
+auto EthController::GetTracer() -> Tracer*
 {
     return &_tracer;
 }

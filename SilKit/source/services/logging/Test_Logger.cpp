@@ -157,4 +157,11 @@ TEST(LoggerTest, get_log_level)
     EXPECT_EQ(logger.GetLogLevel(), Level::Debug);
 }
 
+TEST(LogOnceFlag, check_setter)
+{
+    LogOnceFlag  once;
+    EXPECT_EQ(once.WasCalled(), false);
+    EXPECT_EQ(once.WasCalled(), true);
+    EXPECT_EQ(once.WasCalled(), true);
+}
 }  // anonymous namespace

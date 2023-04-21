@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
+#include <atomic>
+
 #include "silkit/services/logging/ILogger.hpp"
 
 #include "SilKitFmtFormatters.hpp"
@@ -30,6 +32,22 @@ namespace SilKit {
 namespace Services {
 namespace Logging {
 
+
+class LogOnceFlag
+{
+    std::atomic_bool _once{false};
+public:
+    operator bool() const 
+    {
+        return _once.load();
+    }
+    bool WasCalled()
+    {
+        bool expected{ false };
+        return !_once.compare_exchange_strong(expected, true);
+
+    }
+};
 
 template<typename... Args>
 void Log(ILogger* logger, Level level, const char* fmt, const Args&... args)
@@ -52,6 +70,18 @@ void Debug(ILogger* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Debug, fmt, args...);
 }
+
+template<typename... Args>
+void Debug(ILogger* logger, LogOnceFlag& onceflag, const char* fmt, const Args&... args)
+{
+    if (onceflag.WasCalled())
+    {
+        return;
+    }
+
+    Log(logger, Level::Debug, fmt, args...);
+}
+
 template<typename... Args>
 void Info(ILogger* logger, const char* fmt, const Args&... args)
 {

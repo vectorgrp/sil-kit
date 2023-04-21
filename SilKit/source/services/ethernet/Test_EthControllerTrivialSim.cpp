@@ -151,7 +151,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack))).Times(1);
 
     // once for activate and once for sending the frame
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(3);
 
     std::vector<uint8_t> rawFrame;
     SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
@@ -174,7 +174,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_short_eth_frame)
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(ack))).Times(1);
 
     // once for activate and once for sending the frame
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(3);
 
     std::vector<uint8_t> rawFrame;
     // destination and source MAC
@@ -232,7 +232,7 @@ TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
     EXPECT_CALL(callbacks, MessageAck(&controller, EthernetTransmitAckWithouthTransmitIdMatcher(nack))).Times(1);
 
     // once for the nack
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
 
     std::vector<uint8_t> rawFrame;
     SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
@@ -287,7 +287,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
         .Times(1);
 
     // once for activate and once for sending the frame
-    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(3);
     controller.Activate();
     controller.SendFrame(EthernetFrame{rawFrame});
 }
@@ -371,8 +371,7 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
     EthernetFrame ethernetFrame;
     ethernetFrame.raw = rawFrame;
     //Send direction
-    EXPECT_CALL(participant.mockTimeProvider, Now())
-        .Times(1);
+    EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
     EXPECT_CALL(traceSink,
         Trace(SilKit::Services::TransmitDirection::TX, controllerDescriptor, now,ethernetFrame))
         .Times(1);

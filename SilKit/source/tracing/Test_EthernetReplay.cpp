@@ -154,7 +154,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         ctrl.Activate();
 
         EXPECT_CALL(participant, SendMsg(AService(&ctrl), AWireEthernetFrameEvent(msg))).Times(1);
-        EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
+        EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
         ctrl.ReplayMessage(&msg);
     }
 
@@ -170,7 +170,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         ctrl.Activate();
 
         EXPECT_CALL(participant, SendMsg(AService(&ctrl), AWireEthernetFrameEvent(msg))).Times(1);
-        EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
+        EXPECT_CALL(participant.mockTimeProvider, Now()).Times(2);
         ctrl.ReplayMessage(&msg);
     }
 
