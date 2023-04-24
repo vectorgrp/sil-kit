@@ -154,7 +154,7 @@ auto ServiceDescriptor::GetParticipantName() const -> const std::string&
     return _participantName;
 }
 
-void ServiceDescriptor::SetParticipantNameAndComputeId(std::string val) 
+void ServiceDescriptor::SetParticipantNameAndComputeId(std::string val)
 {
     _participantId = SilKit::Util::Hash::Hash(val);
     _participantName = std::move(val);
@@ -180,7 +180,7 @@ void ServiceDescriptor::SetNetworkName(std::string val)
     _networkName = std::move(val);
 }
 
-auto ServiceDescriptor::GetNetworkType() const -> SilKit::Config::NetworkType 
+auto ServiceDescriptor::GetNetworkType() const -> SilKit::Config::NetworkType
 {
     return _networkType;
 }
@@ -200,7 +200,7 @@ void ServiceDescriptor::SetServiceName(std::string val)
     _serviceName = std::move(val);
 }
 
-auto ServiceDescriptor::GetServiceId() const -> SilKit::Core::EndpointId 
+auto ServiceDescriptor::GetServiceId() const -> SilKit::Core::EndpointId
 {
     return _serviceId;
 }

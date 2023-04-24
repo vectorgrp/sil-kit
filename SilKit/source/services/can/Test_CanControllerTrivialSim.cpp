@@ -372,7 +372,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
     CanController controller(&participant, cfg, participant.GetTimeProvider());
     controller.SetServiceDescriptor({"p1", "n1", "c1", 2});
     const auto controllerDescriptor  = controller.GetServiceDescriptor();
-    controller.AddSink(&traceSink);
+    controller.AddSink(&traceSink, SilKit::Config::NetworkType::CAN);
     controller.Start();
 
     WireCanFrame canFrame{};

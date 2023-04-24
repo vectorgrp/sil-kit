@@ -255,10 +255,7 @@ public:
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
 
-    void RegisterCanSimulator(Services::Can::IMsgForCanSimulator*, const std::vector<std::string>& ) override {}
-    void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* , const std::vector<std::string>&) override {}
-    void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* , const std::vector<std::string>&) override {}
-    void RegisterLinSimulator(Services::Lin::IMsgForLinSimulator*, const std::vector<std::string>&) override {}
+    void RegisterSimulator(Core::ISimulator*, const std::vector<Config::SimulatedNetwork>& /*networks*/) {}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Can::WireCanFrameEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Can::CanFrameTransmitEvent& /*msg*/) override {}
@@ -399,6 +396,7 @@ public:
     }
 
     void NotifyShutdown() override {};
+    void RegisterReplayController(ISimulator*, const SilKit::Core::ServiceDescriptor&, const SilKit::Config::SimulatedNetwork& ) override { }
 
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";

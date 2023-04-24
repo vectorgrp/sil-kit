@@ -139,16 +139,28 @@ struct Replay
         Both,
     };
     Direction direction{ Direction::Undefined };
-    std::vector<std::string> filterMessage;
     MdfChannel mdfChannel;
 };
 
-bool operator==(const Sink& lhs, const Sink& rhs);
-bool operator==(const Logging& lhs, const Logging& rhs);
-bool operator==(const TraceSink& lhs, const TraceSink& rhs);
-bool operator==(const TraceSource& lhs, const TraceSource& rhs);
-bool operator==(const Replay& lhs, const Replay& rhs);
-bool operator==(const MdfChannel& lhs, const MdfChannel& rhs);
+struct SimulatedNetwork
+{
+    // This method allows for generic usage, along with ControllerConfigTs
+    auto GetNetworkType() -> NetworkType 
+    {
+        return type;
+    }
+    std::string name;
+    NetworkType type{ NetworkType::Undefined };
+    std::vector<std::string> useTraceSinks;
+    Replay replay;
+};
+
+inline bool operator==(const Sink& lhs, const Sink& rhs);
+inline bool operator==(const Logging& lhs, const Logging& rhs);
+inline bool operator==(const TraceSink& lhs, const TraceSink& rhs);
+inline bool operator==(const TraceSource& lhs, const TraceSource& rhs);
+inline bool operator==(const Replay& lhs, const Replay& rhs);
+inline bool operator==(const MdfChannel& lhs, const MdfChannel& rhs);
 
 inline auto to_string(TraceSink::Type sinkType) -> std::string;
 
@@ -187,6 +199,52 @@ auto to_string(NetworkType networkType) -> std::string
     case NetworkType::RPC: return "RPC";
     default: return "Unknown";
     }
+}
+
+bool operator==(const Sink& lhs, const Sink& rhs)
+{
+    return lhs.type == rhs.type
+        && lhs.level == rhs.level
+        && lhs.logName == rhs.logName;
+}
+
+bool operator==(const Logging& lhs, const Logging& rhs)
+{
+    return lhs.logFromRemotes == rhs.logFromRemotes
+        && lhs.flushLevel == rhs.flushLevel
+        && lhs.sinks == rhs.sinks;
+}
+
+bool operator==(const TraceSink& lhs, const TraceSink& rhs)
+{
+    return lhs.name == rhs.name
+        && lhs.outputPath == rhs.outputPath
+        && lhs.type == rhs.type;
+}
+
+bool operator==(const TraceSource& lhs, const TraceSource& rhs)
+{
+    return lhs.inputPath == rhs.inputPath
+        && lhs.type == rhs.type
+        && lhs.name == rhs.name;
+}
+
+bool operator==(const Replay& lhs, const Replay& rhs)
+{
+    return lhs.useTraceSource == rhs.useTraceSource
+        && lhs.direction == rhs.direction
+        && lhs.mdfChannel == rhs.mdfChannel
+        ;
+}
+
+bool operator==(const MdfChannel& lhs, const MdfChannel& rhs)
+{
+    return lhs.channelName == rhs.channelName
+        && lhs.channelSource == rhs.channelSource
+        && lhs.channelPath == rhs.channelPath
+        && lhs.groupName == rhs.groupName
+        && lhs.groupSource == rhs.groupSource
+        && lhs.groupPath == rhs.groupPath;
 }
 
 } // inline namespace v1

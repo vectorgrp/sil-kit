@@ -39,6 +39,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "WireLinMessages.hpp"
 #include "WireRpcMessages.hpp"
 
+#include "ISimulator.hpp"
+
+
+// forwards
+namespace SilKit {
+namespace Tracing {
+class ReplayScheduler;
+} // end Tracing
+} // end SilKit
+
 namespace SilKit {
 namespace Core {
 
@@ -65,10 +75,7 @@ public:
     virtual void JoinSilKitSimulation() = 0;
 
     // For NetworkSimulator integration:
-    virtual void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
-    virtual void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
-    virtual void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) = 0 ;
-    virtual void RegisterLinSimulator(Services::Lin::IMsgForLinSimulator* busSim, const std::vector<std::string>& networkNames) = 0;
+    virtual void RegisterSimulator(ISimulator* busSim, const std::vector<Config::SimulatedNetwork>& networks) = 0 ;
 
     // The SendMsgs are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.
@@ -230,6 +237,8 @@ public:
                                                         const std::string& msgTypeName) = 0;
 
     virtual void NotifyShutdown() = 0;
+
+    virtual void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork ) = 0;
 };
 
 } // namespace Core

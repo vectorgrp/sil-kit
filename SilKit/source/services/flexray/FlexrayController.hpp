@@ -121,7 +121,7 @@ public:
     void ReceiveMsg(const IServiceEndpoint* from, const FlexrayPocStatusEvent& msg) override;
 
     // ITraceMessageSource
-    inline void AddSink(ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType networkType) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -190,7 +190,7 @@ private:
 // ==================================================================
 //  Inline Implementations
 // ==================================================================
-void FlexrayController::AddSink(ITraceMessageSink* sink)
+void FlexrayController::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
 {
     _tracer.AddSink(GetServiceDescriptor(), *sink);
 }

@@ -222,9 +222,6 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             return channel;
         }
 
-        Services::Logging::Warn(log, "Replay: ignoring {} channel '{}' from file '{}'", to_string(channel->Type()),
-                                channel->Name(), replayFile->FilePath());
-
         if (HasMdfChannelSelection(replayConfig.mdfChannel))
         {
             // User specifies lookup information for us
@@ -244,7 +241,10 @@ auto FindReplayChannel(SilKit::Services::Logging::ILogger* log, IReplayFile* rep
             }
             if (MatchSilKitChannel(channel, networkName, participantName, controllerName))
             {
+                Services::Logging::Debug(log, "Replay: found channel '{}' from file '{}' for type {}",
+                    channel->Name(), replayFile->FilePath(), to_string(channel->Type()));
                 channelList.emplace_back(std::move(channel));
+
             }
         }
     }
@@ -390,15 +390,16 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
                 task.doneReplaying = true;
                 break;
             }
-            // the current time stamps are relative to the trace's initial time.
-            const auto msgNow = msg->Timestamp() - task.initialTime;
+
+            const auto msgNow = msg->Timestamp();
             if (msgNow >= relativeEnd)
             {
                 //message is after the current schedule
                 break;
             }
-            //TODO Currently, the messages are batched at the beginning of the schedule.
-            //     When using wallclock time provider, the message timestamps might be off.
+
+            //NB: Currently, the messages are batched at the beginning of the schedule.
+            //    When using wallclock time provider, the message timestamps might be off.
             task.controller->ReplayMessage(msg.get());
 
             if (!task.replayReader->Seek(1))

@@ -36,14 +36,14 @@ namespace Flexray {
  *
  *  Used by the Participant
  */
-class IMsgForFlexrayBusSimulator
+class IMsgForFlexraySimulator
     : public Core::IReceiver<FlexrayHostCommand, FlexrayControllerConfig, FlexrayTxBufferConfigUpdate,
                              WireFlexrayTxBufferUpdate>
     , public Core::ISender<WireFlexrayFrameEvent, WireFlexrayFrameTransmitEvent, FlexraySymbolEvent,
                            FlexraySymbolTransmitEvent, FlexrayCycleStartEvent, FlexrayPocStatusEvent>
 {
 public:
-    ~IMsgForFlexrayBusSimulator() = default;
+    ~IMsgForFlexraySimulator() = default;
 
     /* NB: There is no setter or getter for an EndpointAddress of the bus
      * simulator, since the network simulator manages multiple controllers with

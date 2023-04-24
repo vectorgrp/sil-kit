@@ -63,7 +63,7 @@ public: // Methods
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor & override;
 
     //ITraceMessageSource
-    inline void AddSink(ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType networkType) override;
 
     auto GetTracer() -> Tracer*;
 
@@ -90,7 +90,7 @@ private: // Member
 //  Inline Implementations
 // ================================================================================
 
-void DataPublisher::AddSink(ITraceMessageSink* sink)
+void DataPublisher::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
 {
     _tracer.AddSink(GetServiceDescriptor(), *sink);
 }

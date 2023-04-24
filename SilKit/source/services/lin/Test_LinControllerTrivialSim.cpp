@@ -848,7 +848,7 @@ TEST_F(LinControllerTrivialSimTest, DISABLED_send_with_tracing)
     ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(now));
 
-    master.AddSink(&traceSink);
+    master.AddSink(&traceSink, SilKit::Config::NetworkType::LIN);
 
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);

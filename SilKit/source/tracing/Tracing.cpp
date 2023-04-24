@@ -35,6 +35,7 @@ namespace Tracing {
 
 // Tracing
 
+//! \brief Creates the ITraceMessageSink's as declared in the configuration.
 auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
                              const Config::ParticipantConfiguration& participantConfig)
     -> std::vector<std::unique_ptr<ITraceMessageSink>>
@@ -57,6 +58,8 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
     // This solves a problem where a stale "TraceSinks" declaration in the config and an active Replay
     // configuration both access the same output/input file: the trace sink would truncate
     // the file to 0 bytes.
+    // However, the network simulator does not define controllers in its ParticipantConfiguration,
+    // so we emit a warning.
     auto sinkInUse = [&participantConfig, &controllerUsesSink](const auto& name) {
         bool ok = false;
         ok |= controllerUsesSink(name, participantConfig.canControllers);
@@ -74,9 +77,9 @@ auto CreateTraceMessageSinks(Services::Logging::ILogger* logger,
     {
         if (!sinkInUse(sinkCfg.name))
         {
-            Services::Logging::Debug(logger, "Tracing: skipping disabled sink {} on participant {}", sinkCfg.name,
-                                     participantConfig.participantName);
-            continue;
+            Services::Logging::Warn(logger,
+                "Tracing: the trace sink '{}' on participant '{}' is not referenced in the config, creating anyway!",
+                sinkCfg.name, participantConfig.participantName);
         }
 
         switch (sinkCfg.type)
@@ -145,36 +148,7 @@ auto CreateReplayFiles(Services::Logging::ILogger* logger, const Config::Partici
 
 bool HasReplayConfig(const Config::ParticipantConfiguration& cfg)
 {
-    // if there are no replay trace sources, the Replay blocks are invalid
-    if (cfg.tracing.traceSources.empty())
-        return false;
-
-    //find replay blocks of services
-    bool ok = false;
-    auto isActive = [&ok](const auto& ctrls) {
-        for (const auto& ctrl : ctrls)
-        {
-            if (IsValidReplayConfig(ctrl.replay))
-            {
-                ok = true;
-                break;
-            }
-        }
-    };
-
-    // Bus controllers
-
-    isActive(cfg.canControllers);
-    isActive(cfg.ethernetControllers);
-    isActive(cfg.linControllers);
-    isActive(cfg.flexrayControllers);
-
-    // Data Pub/Sub
-
-    isActive(cfg.dataPublishers);
-    isActive(cfg.dataSubscribers);
-
-    return ok;
+    return !cfg.tracing.traceSources.empty();
 }
 
 bool IsValidReplayConfig(const Config::Replay& config)

@@ -93,7 +93,7 @@ public:
     void ReceiveMsg(const IServiceEndpoint* from, const EthernetStatus& msg) override;
 
     // ITraceMessageSource
-    inline void AddSink(ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType networkType) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -171,7 +171,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void EthController::AddSink(ITraceMessageSink* sink)
+void EthController::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
 {
     _tracer.AddSink(GetServiceDescriptor(), *sink);
 }

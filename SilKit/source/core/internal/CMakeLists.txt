@@ -38,6 +38,11 @@ target_link_libraries(I_SilKit_Core_Internal
     INTERFACE I_SilKit_Wire_Lin
     INTERFACE I_SilKit_Wire_Rpc
     INTERFACE I_SilKit_Config
+    #for network simulator exports
+    INTERFACE I_SilKit_Services_Can
+    INTERFACE I_SilKit_Services_Lin
+    INTERFACE I_SilKit_Services_Flexray
+    INTERFACE I_SilKit_Services_Ethernet
 )
 
 add_silkit_test(Test_MwVAsio_MessageBuffer SOURCES Test_MessageBuffer.cpp LIBS I_SilKit_Core_Internal)

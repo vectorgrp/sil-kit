@@ -106,7 +106,7 @@ public:
     void ReceiveMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
 
     //ITraceMessageSource
-    inline void AddSink(ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType networkType) override;
 
     // IServiceEndpoint
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
@@ -206,7 +206,7 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void CanController::AddSink(ITraceMessageSink* sink)
+void CanController::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
 {
     _tracer.AddSink(GetServiceDescriptor(), *sink);
 }

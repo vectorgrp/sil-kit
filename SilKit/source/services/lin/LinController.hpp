@@ -113,7 +113,7 @@ public:
     // Public inline interface methods
 
     //ITraceMessageSource
-    inline void AddSink(ITraceMessageSink* sink) override;
+    inline void AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType networkType) override;
 
     // IReplayDataProvider
     void ReplayMessage(const IReplayMessage* replayMessage) override;
@@ -243,7 +243,7 @@ private:
 //  Inline Implementations
 // ==================================================================
 
-void LinController::AddSink(ITraceMessageSink* sink)
+void LinController::AddSink(ITraceMessageSink* sink, SilKit::Config::NetworkType /*networkType*/)
 {
     _tracer.AddSink(GetServiceDescriptor(), *sink);
 }

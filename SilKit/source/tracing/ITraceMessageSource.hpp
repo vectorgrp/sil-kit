@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "EndpointAddress.hpp"
 #include "TraceMessage.hpp"
+#include "Configuration.hpp"
 
 namespace SilKit {
 
@@ -41,7 +42,7 @@ public:
 
     // Adds the given sink to the list of active sinks.
     // Active sinks will receive traced messages.
-    virtual void AddSink(ITraceMessageSink* sink) = 0;
+    virtual void AddSink(ITraceMessageSink* sink, Config::NetworkType networkType) = 0;
 };
 
 class Tracer

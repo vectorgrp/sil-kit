@@ -361,7 +361,7 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
 
     EthController ethController{&participant, cfg, participant.GetTimeProvider()};
     auto controllerDescriptor = ethController.GetServiceDescriptor();
-    ethController.AddSink(&traceSink);
+    ethController.AddSink(&traceSink, SilKit::Config::NetworkType::Ethernet);
     ethController.Activate();
 
     std::vector<uint8_t> rawFrame;

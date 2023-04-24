@@ -165,11 +165,6 @@ public:
     auto GetParticipantName() const -> const std::string& override { return _participantConfig.participantName; }
     auto GetRegistryUri() const -> const std::string& override { return _participantConfig.middleware.registryUri; }
 
-    void RegisterCanSimulator(Services::Can::IMsgForCanSimulator* busSim, const std::vector<std::string>& networkNames) override;
-    void RegisterEthSimulator(Services::Ethernet::IMsgForEthSimulator* busSim, const std::vector<std::string>& networkNames) override;
-    void RegisterFlexraySimulator(Services::Flexray::IMsgForFlexrayBusSimulator* busSim, const std::vector<std::string>& networkNames) override;
-    void RegisterLinSimulator(Services::Lin::IMsgForLinSimulator* busSim, const std::vector<std::string>& networkNames) override;
-
     void SendMsg(const IServiceEndpoint* from, const Services::Can::WireCanFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanFrameTransmitEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Can::CanControllerStatus& msg) override;
@@ -289,6 +284,8 @@ public:
 
     void NotifyShutdown() override;
 
+    void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork) override;
+
 public:
     // ----------------------------------------
     // Public methods
@@ -354,8 +351,7 @@ private:
         -> ControllerT*;
 
 
-    template<class IMsgForSimulatorT>
-    void RegisterSimulator(IMsgForSimulatorT* busSim, Config::NetworkType linkType, const std::vector<std::string>& simulatedNetworkNames);
+    void RegisterSimulator(ISimulator* busSim, const std::vector<Config::SimulatedNetwork>& networks) override;
 
     template<class ConfigT>
     void AddTraceSinksToSource(ITraceMessageSource* controller, ConfigT config);

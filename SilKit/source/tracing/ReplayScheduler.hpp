@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfiguration.hpp"
 #include "ITimeProvider.hpp"
 #include "IReplayDataController.hpp"
+#include "ISimulator.hpp"
 
 namespace SilKit {
 namespace Tracing {
@@ -46,7 +47,6 @@ public:
     void ConfigureController(const std::string& controllerName, IReplayDataController* controller,
                              const Config::Replay& replayConfig, const std::string& networkName,
                              Config::NetworkType networkType);
-
 private:
     // Methods
 
