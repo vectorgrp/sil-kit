@@ -89,49 +89,6 @@ void DataSubscriber::RegisterServiceDiscovery()
             }
         }
     };
-    
-    // Evaluate the discovery lookups
-    std::vector<std::string> discoveryLookupEntries{};
-    std::string allLabelsStr = "";
-    std::string mandatoryLabelsStr = "";
-    bool hasOptionalLabels = false;
-    for (auto l : _labels)
-    {
-        allLabelsStr += l.key + "/" + l.value + "/";
-
-        if (l.kind == MatchingLabel::Kind::Mandatory)
-        {
-            mandatoryLabelsStr += l.key + "/" + l.value + "/";
-        }
-        else
-        {
-            hasOptionalLabels = true;
-        }
-    }
-
-    const auto lookupKeyBase = Core::Discovery::controllerTypeDataPublisher + "/"
-                               + Core::Discovery::supplKeyDataPublisherTopic + "/" + _topic + "/"
-                               + Core::Discovery::supplKeyDataPublisherPubLabels + "/";
-
-    // How this controller is discovered by DataPublisher. Two entries needed for all/optional labels
-    const auto discoveryLookupKeyAllLabels = lookupKeyBase + allLabelsStr;
-    const auto discoveryLookupKeyMandatoryLabels = lookupKeyBase + mandatoryLabelsStr;
-
-    if (_labels.empty())
-    {
-        discoveryLookupEntries.push_back(discoveryLookupKeyAllLabels);
-    }
-    else
-    {
-        // Add entry with all labels to quickly find optional/madatory <-> optional/madatory
-        // Only needed if we have optional labels
-        if (hasOptionalLabels)
-        {
-            discoveryLookupEntries.push_back(discoveryLookupKeyAllLabels);
-        }
-        // Add entry only with mandatory labels. Might boil down to no labels and just topic to find optional <-> empty
-        discoveryLookupEntries.push_back(discoveryLookupKeyMandatoryLabels);
-    }
 
     _participant->GetServiceDiscovery()->RegisterSpecificServiceDiscoveryHandler(
         matchHandler, Core::Discovery::controllerTypeDataPublisher, _topic, _labels);
