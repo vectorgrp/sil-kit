@@ -19,7 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 14)
 
 include(SilKitInstall)
@@ -38,9 +38,6 @@ add_executable(sil-kit-registry
 
     WindowsServiceMain.hpp
     WindowsServiceMain.cpp
-    # we do not link against SilKit::SilKit, but we need the CreateSilKitRegistry symbol
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../SilKit/source/CreateSilKitRegistry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../SilKit/source/SilKit.cpp # CreateParticipant
 )
 
 # Group this demo project into a folder
@@ -57,12 +54,8 @@ target_link_libraries(sil-kit-registry
     I_SilKit_Core_Participant #ValidateAndSanitize
     I_SilKit_Util
 
-    S_SilKit_Config
-    S_SilKit_Util_Filesystem
-    S_SilKit_Util_Uri
+    S_SilKitImpl
     S_SilKit_Dashboard
-    S_SilKit_Core_Participant
-
 )
 
 # Set versioning infos on exe

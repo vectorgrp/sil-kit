@@ -38,7 +38,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Config {
-
 inline namespace v1 {
 
 // ================================================================================
@@ -286,6 +285,5 @@ bool operator==(const Middleware& lhs, const Middleware& rhs);
 bool operator==(const ParticipantConfiguration& lhs, const ParticipantConfiguration& rhs);
 
 } // namespace v1
-
 } // namespace Config
 } // namespace SilKit

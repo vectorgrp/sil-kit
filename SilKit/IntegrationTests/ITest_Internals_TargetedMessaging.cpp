@@ -37,6 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
+#include "InternalHelpers.hpp"
 
 namespace {
 using namespace std::chrono_literals;
@@ -51,10 +52,10 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     auto receiveCount = 0;
 
-    SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri);
+    SilKit::Tests::SimTestHarness testHarness(syncParticipantNames, registryUri, false);
 
     auto* senderComSimPart = testHarness.GetParticipant("Sender");
-    auto* senderCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(senderComSimPart->Participant());
+    auto* senderCom = &SilKit::Tests::ToParticipantInternal(*senderComSimPart->Participant());
 
     auto* senderLifecycleService = senderComSimPart->GetOrCreateLifecycleService();
     auto* senderTimeSyncService = senderComSimPart->GetOrCreateTimeSyncService();
@@ -86,7 +87,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
 
     
     auto* receiverComSimPart = testHarness.GetParticipant("TargetReceiver");
-    auto* receiverCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(receiverComSimPart->Participant());
+    auto* receiverCom = &SilKit::Tests::ToParticipantInternal(*receiverComSimPart->Participant());
     auto* receiverTimeSyncService = receiverComSimPart->GetOrCreateTimeSyncService();
 
     receiverTimeSyncService->SetSimulationStepHandler(
@@ -104,7 +105,7 @@ TEST(TargetedMessagingITest, targeted_messaging)
         });
 
     auto* otherReceiverComSimPart = testHarness.GetParticipant("OtherReceiver");
-    auto* otherReceiverCom = dynamic_cast<SilKit::Core::IParticipantInternal*>(otherReceiverComSimPart->Participant());
+    auto* otherReceiverCom = &SilKit::Tests::ToParticipantInternal(*otherReceiverComSimPart->Participant());
     auto* otherTimeSyncService = otherReceiverComSimPart->GetOrCreateTimeSyncService();
     
     otherTimeSyncService->SetSimulationStepHandler(

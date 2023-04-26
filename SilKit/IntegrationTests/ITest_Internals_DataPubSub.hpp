@@ -185,7 +185,7 @@ protected:
         PubSubParticipant(const std::string& newName, const std::vector<DataPublisherInfo>& newDataPublishers,
                           const std::vector<DataSubscriberInfo>& newDataSubscribers,
                           std::shared_ptr<SilKit::Config::IParticipantConfiguration> newConfig =
-                              SilKit::Config::MakeEmptyParticipantConfiguration())
+                              SilKit::Config::MakeEmptyParticipantConfigurationImpl())
         {
             config = newConfig;
             name = newName;
@@ -193,7 +193,7 @@ protected:
             dataPublishers = newDataPublishers;
         }
 
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config = MakeEmptyParticipantConfiguration();
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config = MakeEmptyParticipantConfigurationImpl();
         bool delayedDefaultDataHandler = false;
         std::string name;
         std::vector<DataSubscriberInfo> dataSubscribers;
@@ -294,7 +294,7 @@ protected:
     {
         try
         {
-            participant.participant = SilKit::CreateParticipant(participant.config, participant.name, registryUri);
+            participant.participant = SilKit::CreateParticipantImpl(participant.config, participant.name, registryUri);
             participant.participantImpl =
                 dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.participant.get());
 

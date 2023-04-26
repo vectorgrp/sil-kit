@@ -21,22 +21,95 @@
 
 
 add_library(
-    SilKit_Hourglass
-    INTERFACE
+    S_Test_Hourglass
+    STATIC
+    MockCapi.hpp
+    MockCapi.cpp
 )
 
 target_include_directories(
-    SilKit_Hourglass
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+    S_Test_Hourglass
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_link_libraries(
-    SilKit_Hourglass
-    INTERFACE SilKitInterface
-    INTERFACE SilKit
+    S_Test_Hourglass
+    PUBLIC SilKitInterface
+    PRIVATE gtest
+    PRIVATE gmock
 )
 
-target_compile_definitions(
-    SilKit_Hourglass
-    INTERFACE SILKIT_HOURGLASS=1
+if (MSVC)
+    target_compile_options(S_Test_Hourglass PRIVATE /bigobj)
+endif ()
+
+
+add_silkit_test(Test_HourglassMappingParticipantLogger
+    SOURCES 
+        Test_HourglassParticipantLogger.cpp
+    LIBS 
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingCan
+    SOURCES
+        Test_HourglassCan.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingEthernet
+    SOURCES
+        Test_HourglassEthernet.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingLin
+    SOURCES
+        Test_HourglassLin.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingFlexRay
+    SOURCES
+        Test_HourglassFlexray.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingRpc
+    SOURCES
+        Test_HourglassRpc.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingPubSub
+    SOURCES
+        Test_HourglassPubSub.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingOrchestration
+    SOURCES
+        Test_HourglassOrchestration.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingVendor
+    SOURCES
+        Test_HourglassVendor.cpp
+    LIBS
+        S_Test_Hourglass
+)
+
+add_silkit_test(Test_HourglassMappingVersion
+    SOURCES
+        Test_HourglassVersion.cpp
+    LIBS
+        S_Test_Hourglass
 )

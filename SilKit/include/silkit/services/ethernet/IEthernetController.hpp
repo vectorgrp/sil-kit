@@ -121,10 +121,11 @@ public:
      *
      * The handler is called when the state of the controller
      * changes. E.g., a call to Activate() causes the controller to
-     * change from state \ref EthernetState::Inactive to \ref EthernetState::LinkDown. Later, when the link
-     * has been established, the state changes again from \ref EthernetState::LinkDown to
-     * \ref EthernetState::LinkUp. Similarly, the status changes back to \ref EthernetState::Inactive upon a
-     * call to Deactivate().
+     * change from state \ref SilKit::Services::Ethernet::EthernetState::Inactive to
+     * \ref SilKit::Services::Ethernet::EthernetState::LinkDown. Later, when the link has been established, the state
+     * changes again from \ref SilKit::Services::Ethernet::EthernetState::LinkDown to
+     * \ref SilKit::Services::Ethernet::EthernetState::LinkUp. Similarly, the status changes back to
+     * \ref SilKit::Services::Ethernet::EthernetState::Inactive upon a call to Deactivate().
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */

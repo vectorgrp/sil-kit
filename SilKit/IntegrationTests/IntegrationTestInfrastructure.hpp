@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ConfigurationTestUtils.hpp"
 #include "IParticipantInternal.hpp"
+#include "CreateParticipantImpl.hpp"
 
 using namespace SilKit;
 using namespace SilKit::Services::Orchestration;
@@ -85,8 +86,8 @@ private:
 
     void RunSystemMaster(const std::string& registryUri, std::vector<std::string> requiredParticipantNames)
     {
-        _systemMaster.participant = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(),
-                                                              systemMasterName, registryUri);
+        _systemMaster.participant = SilKit::CreateParticipantImpl(
+            SilKit::Config::MakeEmptyParticipantConfigurationImpl(), systemMasterName, registryUri);
 
         auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(_systemMaster.participant.get());
         _systemMaster.systemController = participantInternal->GetSystemController();

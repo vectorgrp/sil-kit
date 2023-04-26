@@ -24,17 +24,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <iostream>
 
+#include "silkit/config/IParticipantConfiguration.hpp"
+#include "silkit/experimental/participant/ParticipantExtensions.hpp"
+#include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
-#include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
 #include "SimSystemController.hpp"
-
-#ifdef SILKIT_HOURGLASS
-#include "silkit/hourglass/SilKit.hpp"
-#include "silkit/hourglass/config/IParticipantConfiguration.hpp"
-#endif
 
 using namespace std::literals::chrono_literals;
 
@@ -240,15 +238,8 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
 
-#ifdef SILKIT_HOURGLASS
-    using SilKit::Hourglass::CreateParticipant;
-    using SilKit::Hourglass::Config::ParticipantConfigurationFromString;
-#else
-    using SilKit::CreateParticipant;
-    using SilKit::Config::ParticipantConfigurationFromString;
-#endif
-
-    participant->_participant = CreateParticipant(ParticipantConfigurationFromString(participantConfiguration), participantName, _registryUri);
+    participant->_participant = SilKit::CreateParticipant(
+        SilKit::Config::ParticipantConfigurationFromString(participantConfiguration), participantName, _registryUri);
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this

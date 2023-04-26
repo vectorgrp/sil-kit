@@ -32,7 +32,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-#include "HourglassHelpers.hpp"
 
 namespace {
 
@@ -102,8 +101,8 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> canWriterAllAcksReceivedPromiseLocal;
 
-        auto participant = SilKit::IntegrationTests::CreateParticipant(
-            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "CanWriter", _registryUri);
+        auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                     "CanWriter", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameTransmitHandler(
@@ -137,8 +136,8 @@ protected:
         std::promise<void> canReaderAllReceivedPromiseLocal;
         unsigned numReceived{ 0 };
 
-        auto participant = SilKit::IntegrationTests::CreateParticipant(
-            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "CanReader", _registryUri);
+        auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                     "CanReader", _registryUri);
         auto* controller = participant->CreateCanController("CAN1", "CAN1");
 
         controller->AddFrameHandler(

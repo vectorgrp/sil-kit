@@ -102,8 +102,9 @@ public:
      *
      * The responseType determines if frame.data is used for the frame response or if a different node has to provide 
      * it:
-     * - MasterResponse: \ref LinFrame is sent from this controller to all connected slaves using frame.data. The LIN
-     * Master doesn't have to be configured with LinFrameResponseMode::TxUnconditional on this LIN ID.
+     * - MasterResponse: \ref SilKit::Services::Lin::LinFrame is sent from this controller to all connected slaves using
+     *   frame.data. The LIN Master doesn't have to be configured with LinFrameResponseMode::TxUnconditional on this LIN
+     *   ID.
      * - SlaveResponse: the frame response must be provided by a connected slave and is received by this controller.
      * - SlaveToSlave: the frame response must be provided by a connected slave and is ignored by this controller.
      *
@@ -174,10 +175,12 @@ public:
      */
     virtual void WakeupInternal() = 0;
 
-    /*! \brief Reports the \ref LinFrameStatus of a LIN \ref LinFrame transmission and provides the transmitted frame.
+    /*! \brief Reports the \ref SilKit::Services::Lin::LinFrameStatus of a LIN \ref SilKit::Services::Lin::LinFrame
+     *         transmission and provides the transmitted frame.
      *
      * The FrameStatusHandler is used for reception and acknowledgement of LIN frames. The direction (prefixed with 
-     * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the \ref LinFrameStatus. 
+     * LIN_TX_ or LIN_RX_) and error state of the tranmission is encoded in the
+     * \ref SilKit::Services::Lin::LinFrameStatus.
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
@@ -197,7 +200,7 @@ public:
      * GoToSleepInternal() must be called manually.
      *
      * Note: This handler will always be called, independently of the
-     * \ref LinFrameResponseMode configuration for LIN ID 0x3C. However,
+     * \ref SilKit::Services::Lin::LinFrameResponseMode configuration for LIN ID 0x3C. However,
      * regarding the FrameStatusHandler, the go-to-sleep frame is
      * treated like every other frame, i.e. the FrameStatusHandler is
      * only called for LIN ID 0x3C if configured as

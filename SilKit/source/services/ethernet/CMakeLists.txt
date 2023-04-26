@@ -26,8 +26,15 @@ target_include_directories(I_SilKit_Services_Ethernet
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Services_Ethernet
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Tracing
+    INTERFACE I_SilKit_Wire_Ethernet
+    INTERFACE I_SilKit_Services_Logging
+)
 
-add_library(S_SilKit_Services_Ethernet STATIC
+
+add_library(O_SilKit_Services_Ethernet OBJECT
     EthController.cpp
     EthController.hpp
 
@@ -43,15 +50,11 @@ add_library(S_SilKit_Services_Ethernet STATIC
     EthernetSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Services_Ethernet
+target_link_libraries(O_SilKit_Services_Ethernet
     PUBLIC I_SilKit_Services_Ethernet
 
-    PUBLIC S_SilKit_Tracing
-    PUBLIC I_SilKit_Wire_Ethernet
-    PUBLIC I_SilKit_Services_Logging
     PRIVATE I_SilKit_Core_Internal
     PRIVATE SilKitInterface
-    PRIVATE S_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_SimEthController
@@ -60,9 +63,8 @@ add_silkit_test(Test_SimEthController
         Test_EthControllerDetailedSim.cpp
         Test_EthControllerConfig.cpp
     LIBS
-        S_SilKit_Services_Ethernet
+        S_SilKitImpl
         I_SilKit_Core_Mock_Participant
-        S_SilKit_Tracing
-        S_SilKit_Core_Mock_NullConnection
+        O_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimEthernet_Serdes  SOURCES Test_EthernetSerdes.cpp LIBS S_SilKit_Services_Ethernet)
+add_silkit_test(Test_SimEthernet_Serdes  SOURCES Test_EthernetSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)

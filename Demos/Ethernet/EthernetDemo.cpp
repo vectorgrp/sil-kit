@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #else
 #include "silkit/SilKit.hpp"
 #endif
+#include "silkit/SilKitVersion.hpp"
 
 #include "silkit/services/all.hpp"
 #include "silkit/services/orchestration/all.hpp"
@@ -163,7 +164,7 @@ int main(int argc, char** argv)
                   << "Use \"EthernetWriter\" or \"EthernetReader\" as <ParticipantName>." << std::endl;
         return -1;
     }
-
+    std::cout << "SIL Kit Version: " << SilKit::Version::String() << std::endl;
     try
     {
         std::string participantConfigurationFilename(argv[1]);

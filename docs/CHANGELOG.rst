@@ -6,6 +6,17 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.X.X] - UNRELEASED
+--------------------
+
+Added
+~~~~~
+
+- Header-only C++ API implementation following the hourglass-pattern
+
+  - The C++ symbols are still provided by the shared library, but are not used by default anymore
+
+
 [4.0.23] - 2023-04-17
 ---------------------
 

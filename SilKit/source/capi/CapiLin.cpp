@@ -19,11 +19,15 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include "services/lin/LinControllerExtensionsImpl.hpp"
+
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
 #include "silkit/services/lin/all.hpp"
 #include "silkit/experimental/services/lin/LinControllerExtensions.hpp"
+
 #include "CapiImpl.hpp"
+
 #include <cstring>
 
 
@@ -245,7 +249,7 @@ try
     ASSERT_VALID_OUT_PARAMETER(outLinSlaveConfiguration);
 
     auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-    auto cppSlaveConfiguration = SilKit::Experimental::Services::Lin::GetSlaveConfiguration(linController);
+    auto cppSlaveConfiguration = SilKit::Experimental::Services::Lin::GetSlaveConfigurationImpl(linController);
     SilKit_Struct_Init(SilKit_Experimental_LinSlaveConfiguration, *outLinSlaveConfiguration);
     assign(&outLinSlaveConfiguration, cppSlaveConfiguration);
     return SilKit_ReturnCode_SUCCESS;
@@ -375,7 +379,7 @@ try
     ASSERT_VALID_OUT_PARAMETER(outHandlerId);
 
     auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-    *outHandlerId = (SilKit_HandlerId)SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(
+    *outHandlerId = (SilKit_HandlerId)SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandlerImpl(
         linController,
         [handler, context, controller](
             SilKit::Services::Lin::ILinController* /*ctrl*/,
@@ -397,7 +401,7 @@ try
     ASSERT_VALID_POINTER_PARAMETER(controller);
 
     auto cppController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
-    SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(
+    SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandlerImpl(
         cppController, static_cast<SilKit::Util::HandlerId>(handlerId));
     return SilKit_ReturnCode_SUCCESS;
 }

@@ -19,23 +19,32 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_library(S_SilKit_Experimental STATIC
-   participant/ParticipantExtensions.cpp
-   participant/ParticipantExtensions.hpp
-   services/lin/LinControllerExtensions.cpp
-   services/lin/LinControllerExtensions.hpp
+add_library(I_SilKit_Experimental INTERFACE)
+
+target_include_directories(I_SilKit_Experimental
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+    INTERFACE SilKitInterface
 )
 
-target_link_libraries(S_SilKit_Experimental
-    PUBLIC SilKitInterface
+
+add_library(O_SilKit_Experimental OBJECT
+    participant/ParticipantExtensionsImpl.cpp
+    participant/ParticipantExtensionsImpl.hpp
+    services/lin/LinControllerExtensionsImpl.cpp
+    services/lin/LinControllerExtensionsImpl.hpp
+)
+
+target_link_libraries(O_SilKit_Experimental
+    PUBLIC I_SilKit_Experimental
+
     PRIVATE I_SilKit_Core_Internal
-    PRIVATE S_SilKit_Services_Lin
+    PRIVATE I_SilKit_Services_Lin
     PRIVATE I_SilKit_Util
     PRIVATE I_SilKit_Services_Logging
 )
 
-add_silkit_test(Test_Experimental
-    SOURCES participant/Test_Experimental.cpp 
-    LIBS S_SilKit_Core_Mock_NullConnection S_SilKit_Experimental
+add_silkit_test(Test_ParticipantExtensionsImpl
+    SOURCES participant/Test_ParticipantExtensionsImpl.cpp
+    LIBS O_SilKit_Core_Mock_NullConnection S_SilKitImpl
 )
 

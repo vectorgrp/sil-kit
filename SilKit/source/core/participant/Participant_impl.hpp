@@ -50,7 +50,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "tuple_tools/for_each.hpp"
 #include "tuple_tools/predicative_get.hpp"
 
-#include "silkit/SilKitVersion.hpp"
+#include "SilKitVersionImpl.hpp"
 
 #include "Participant.hpp"
 
@@ -91,7 +91,7 @@ Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration par
     _connection.SetLogger(_logger.get());
 
     Logging::Info(_logger.get(), "Creating participant '{}' at '{}', SIL Kit version: {}", GetParticipantName(),
-                  _participantConfig.middleware.registryUri, Version::String());
+                  _participantConfig.middleware.registryUri, Version::StringImpl());
 
 }
 

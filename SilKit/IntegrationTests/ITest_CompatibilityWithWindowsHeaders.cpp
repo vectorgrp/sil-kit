@@ -41,7 +41,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/util/PrintableHexString.hpp"
 #include "silkit/util/Span.hpp"
-#include "silkit/SilKitVersion.hpp"
 
 // 3. Provide a dummy test for proper integration with our test runner.
 #include "gtest/gtest.h"

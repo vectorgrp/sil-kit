@@ -48,25 +48,28 @@ public:
     virtual ~ILifecycleService() = default;
 
 public:
-    /*! \brief Register a callback that is executed once communication with 
-     * controllers is possible.
+    /*! \brief Register a callback that is executed once communication with controllers is possible.
      *
-     * The handler is called after \ref SystemState::CommunicationInitialized is reached.
-     * This handler is invoked on the SilKit I/O worker thread, and receiving messages during the handler invocation is not possible.
-     * For an asynchronous invocation, see \ref SetCommunicationReadyHandlerAsync and \ref CompleteCommunicationReadyHandlerAsync.
-     * After the handler has been processed, the participant switches to the \ref ParticipantState::ReadyToRun state.
+     * The handler is called after \ref SilKit::Services::Orchestration::SystemState::CommunicationInitialized is
+     * reached. This handler is invoked on the SilKit I/O worker thread, and receiving messages during the handler
+     * invocation is not possible.
+     * For an asynchronous invocation, see \ref SetCommunicationReadyHandlerAsync and
+     * \ref CompleteCommunicationReadyHandlerAsync.
+     * After the handler has been processed, the participant switches to the
+     * \ref SilKit::Services::Orchestration::ParticipantState::ReadyToRun state.
      */
     virtual void SetCommunicationReadyHandler(CommunicationReadyHandler handler) = 0;
 
     /*! \brief Register a callback that is executed once all communication channels between participants
     *          with a lifecycle have been set up and are ready for communication.
     *
-    * The handler when the participant enters the \ref ParticipantState::CommunicationInitialized.
+    * The handler when the participant enters the\
+    * \ref SilKit::Services::Orchestration::ParticipantState::CommunicationInitialized.
     * The API user has to signal the completion of the handler by invoking CompleteCommunicationReadyHandlerAsync().
     * Note that CompleteCommunicationReadyHandlerAsync may not be called from within any CommunicationReadyHandler.
     * The CommunicationReadyHandler is executed in an internal thread and must not be blocked by the user.
     * The participant remains in its state until \ref CompleteCommunicationReadyHandlerAsync() is invoked
-    * in another thread and then switches to the \ref ParticipantState::ReadyToRun.
+    * in another thread and then switches to the \ref SilKit::Services::Orchestration::ParticipantState::ReadyToRun.
     */ 
     virtual void SetCommunicationReadyHandlerAsync(CommunicationReadyHandler handler) = 0;
 
@@ -76,24 +79,26 @@ public:
      */
     virtual void CompleteCommunicationReadyHandlerAsync() = 0;
 
-    /*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the participant enters ParticipantState::Run.
+    /*! \brief (Asynchronous participants only) Register a callback that is executed once directly before the
+     *         participant enters \ref SilKit::Services::Orchestration::ParticipantState::Running.
      *
-     * This handler is triggered just before the participant changes to ParticipantState::Running.
+     * This handler is triggered just before the participant changes to
+     * \ref SilKit::Services::Orchestration::ParticipantState::Running.
      * It is only triggered if the participant does NOT use virtual time synchronization.
-     * It does not block other participants from changing to ParticipantState::Running and should only be used for lightweight operations such as starting timers.
+     * It does not block other participants from changing to
+     * \ref SilKit::Services::Orchestration::ParticipantState::Running and should only be used for lightweight operations such as starting timers.
      * It is executed in the context of an internal thread that received the command. 
      * After the handler has been processed, the participant
-     * switches to the \ref ParticipantState::Running state.
+     * switches to the \ref SilKit::Services::Orchestration::ParticipantState::Running state.
      */
     virtual void SetStartingHandler(StartingHandler handler) = 0;
 
     /*! \brief Register a callback that is executed on simulation stop.
      *
-     * The handler is called when the participant enters the \ref ParticipantState::Stopping state.
-     * It is executed in the context of an internal
-     * thread that received the command. After the handler has been
-     * processed, the participant switches to the
-     * \ref ParticipantState::Stopped state.
+     * The handler is called when the participant enters the
+     * \ref SilKit::Services::Orchestration::ParticipantState::Stopping state.
+     * It is executed in the context of an internal thread that received the command. After the handler has been
+     * processed, the participant switches to the \ref SilKit::Services::Orchestration::ParticipantState::Stopped state.
      *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
@@ -102,11 +107,11 @@ public:
 
     /*! \brief Register a callback that is executed on simulation shutdown.
      *
-     * The handler is called when the participant enters the \ref ParticipantState::ShuttingDown state.
-     * It is executed in the context of an internal
-     * thread that received the command. After the handler has been
-     * processed, the participant switches to the
-     * \ref ParticipantState::Shutdown state and is allowed to terminate.
+     * The handler is called when the participant enters the
+     * \ref SilKit::Services::Orchestration::ParticipantState::ShuttingDown state.
+     * It is executed in the context of an internal thread that received the command. After the handler has been
+     * processed, the participant switches to the \ref SilKit::Services::Orchestration::ParticipantState::Shutdown state
+     * and is allowed to terminate.
      *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
@@ -115,11 +120,11 @@ public:
 
     /*! \brief Register a callback that is executed on simulation shutdown.
      *
-     * The handler is called when the participant enters the \ref ParticipantState::Aborting.
-     * It is executed in the context of an internal
-     * thread that received the command. After the handler has been
-     * processed, the participant switches to the
-     * \ref ParticipantState::Shutdown state and is allowed to terminate.
+     * The handler is called when the participant enters the
+     * \ref SilKit::Services::Orchestration::ParticipantState::Aborting.
+     * It is executed in the context of an internal thread that received the command. After the handler has been
+     * processed, the participant switches to the \ref SilKit::Services::Orchestration::ParticipantState::Shutdown
+     * state and is allowed to terminate.
      *
      * Throwing an error inside the handler will cause a call to
      * ReportError().
@@ -137,27 +142,27 @@ public:
 
     /*! \brief Abort current simulation run due to an error.
      *
-     * Switch to the \ref ParticipantState::Error state and
-     * report the error message in the SIL Kit system.
+     * Switch to the \ref SilKit::Services::Orchestration::ParticipantState::Error state and report the error message
+     * in the SIL Kit system.
      */
     virtual void ReportError(std::string errorMsg) = 0;
 
     /*! \brief Pause execution of the participant
      *
-     * Switch to \ref ParticipantState::Paused due to the provided \p reason.
+     * Switch to \ref SilKit::Services::Orchestration::ParticipantState::Paused due to the provided \p reason.
      *
-     * When a client is in state \ref ParticipantState::Paused,
+     * When a client is in state \ref SilKit::Services::Orchestration::ParticipantState::Paused,
      * it must not be considered as unresponsive even if a
      * health monitoring related timeout occurs.
      *
-     * Precondition: State() == \ref ParticipantState::Running
+     * Precondition: State() == \ref SilKit::Services::Orchestration::ParticipantState::Running
      */
     virtual void Pause(std::string reason) = 0;
 
-    /*! \brief Switch back to \ref ParticipantState::Running
+    /*! \brief Switch back to \ref SilKit::Services::Orchestration::ParticipantState::Running
      * after having paused.
      *
-     * Precondition: State() == \ref ParticipantState::Paused
+     * Precondition: State() == \ref SilKit::Services::Orchestration::ParticipantState::Paused
      */
     virtual void Continue() = 0;
 
@@ -167,14 +172,14 @@ public:
      * is unable to further progress its simulation.
      *
      * Calls the StopHandler and then switches to the
-     * \ref ParticipantState::Stopped state.
+     * \ref SilKit::Services::Orchestration::ParticipantState::Stopped state.
      *
      * NB: In general, Stop should not be called by the participants
      * as the end of simulation is governed by the central execution
      * controller. This method should only be used if the client
      * cannot participate in the system simulation anymore.
      *
-     * Precondition: State() == \ref ParticipantState::Running
+     * Precondition: State() == \ref SilKit::Services::Orchestration::ParticipantState::Running
      */
     virtual void Stop(std::string reason) = 0;
 

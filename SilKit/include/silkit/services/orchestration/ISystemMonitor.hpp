@@ -33,7 +33,7 @@ namespace Orchestration {
 class ISystemMonitor
 {
 public:
-    /*! Callback type to indicate that a ::SystemState has been received.
+    /*! Callback type to indicate that a \ref SilKit::Services::Orchestration::SystemState has been received.
     *  Cf., \ref AddSystemStateHandler(SystemStateHandler);
     */
     using SystemStateHandler = std::function<void(SystemState)>;
@@ -56,9 +56,9 @@ public:
         std::function<void(const ParticipantConnectionInformation& participantInformation)>;
 
 public:
-    /*! \brief Register a callback for ::SystemState changes
+    /*! \brief Register a callback for \ref SilKit::Services::Orchestration::SystemState changes
      *
-     * If the current SystemState is not \ref SystemState::Invalid,
+     * If the current system state is not \ref SilKit::Services::Orchestration::SystemState::Invalid,
      * the handler will be called immediately.
      *
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
@@ -71,10 +71,10 @@ public:
      */
     virtual void RemoveSystemStateHandler(HandlerId handlerId) = 0;
 
-    /*! \brief Register a callback for \ref ParticipantStatus changes
+    /*! \brief Register a callback for \ref SilKit::Services::Orchestration::ParticipantStatus changes
      *
      * The handler will be called immediately for any participant that is
-     * not in \ref ParticipantState::Invalid.
+     * not in \ref SilKit::Services::Orchestration::ParticipantState::Invalid.
      *
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
@@ -86,7 +86,7 @@ public:
      */
     virtual void RemoveParticipantStatusHandler(HandlerId handlerId) = 0;
 
-    //! \brief Get the current ::SystemState
+    //! \brief Get the current \ref SilKit::Services::Orchestration::SystemState
     virtual auto SystemState() const -> Orchestration::SystemState = 0;
 
     /*! \brief Get the current \ref ParticipantStatus of specific participant

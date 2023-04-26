@@ -29,7 +29,7 @@ target_include_directories(SilKitInterface
 )
 
 # Add a custom project SilKitApi for quick access to SIL Kit Headers in Visual Studio
-file(GLOB_RECURSE SILKIT_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
+file(GLOB_RECURSE SILKIT_INTERFACE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.hpp ${CMAKE_CURRENT_LIST_DIR}/*.ipp)
 add_custom_target(SilKitApi SOURCES ${SILKIT_INTERFACE_SOURCES})
 if(CMAKE_VERSION VERSION_GREATER 3.8.0)
     # Easy access to SIL Kit includes for Visual Studio
@@ -52,7 +52,9 @@ install(
     DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/
     DESTINATION ${INSTALL_INCLUDE_DIR}
     COMPONENT bin
-    FILES_MATCHING PATTERN *.hpp
+    FILES_MATCHING
+        PATTERN *.hpp
+        PATTERN *.ipp
 )
 # for C API
 install(

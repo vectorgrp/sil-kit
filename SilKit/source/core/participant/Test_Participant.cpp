@@ -45,14 +45,14 @@ protected:
 
 TEST_F(ParticipantTest, throw_on_empty_participant_name)
 {
-    EXPECT_THROW(CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), ""),
+    EXPECT_THROW(CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), ""),
                  SilKit::ConfigurationError);
 }
 
 TEST_F(ParticipantTest, support_nullptr_in_IParticipantConfiguration)
 {
     EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(nullptr, "TestParticipant"));
-    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(std::make_shared<SilKit::Config::ParticipantConfiguration>(),
+    EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
                                                         "TestParticipant"));
 }
 
@@ -72,7 +72,7 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
 TEST_F(ParticipantTest, make_basic_controller)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
 
     auto* canController = participant->CreateCanController("CAN1", "CAN1");
     auto basicCanController = dynamic_cast<SilKit::Services::Can::CanController*>(canController);
@@ -83,7 +83,7 @@ TEST_F(ParticipantTest, make_basic_controller)
 TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
 
     // ignore returned controller
     EXPECT_NO_THROW(participant->CreateSystemMonitor());
@@ -95,7 +95,7 @@ TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
 TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
 
     // ignore returned controller
     EXPECT_NO_THROW(participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated}));
@@ -108,7 +108,7 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
 TEST_F(ParticipantTest, no_error_on_get_logger_twice)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
 
     EXPECT_NO_THROW({
         participant->GetLogger();
@@ -119,7 +119,7 @@ TEST_F(ParticipantTest, no_error_on_get_logger_twice)
 TEST_F(ParticipantTest, error_on_create_basic_controller_twice)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
 
     participant->CreateCanController("CAN1", "CAN1");
     EXPECT_THROW(participant->CreateCanController("CAN1", "CAN1"), SilKit::ConfigurationError);
@@ -129,7 +129,7 @@ TEST_F(ParticipantTest, error_on_create_basic_controller_twice)
 TEST_F(ParticipantTest, error_on_create_basic_controller_twice_different_network)
 {
     auto participant =
-        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfiguration(), "TestParticipant");
+        CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
 
     participant->CreateCanController("CAN1", "CAN1");
     EXPECT_THROW(participant->CreateCanController("CAN1", "CAN2"), SilKit::ConfigurationError);

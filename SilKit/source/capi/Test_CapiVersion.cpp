@@ -21,9 +21,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
+#include "SilKitVersionImpl.hpp"
+
 #include "silkit/capi/SilKit.h"
 #include "silkit/capi/Version.h"
-#include "silkit/SilKitVersion.hpp"
 
 namespace {
 
@@ -40,31 +42,31 @@ TEST_F(Test_CapiVersion, version_equality)
     const char* outString;
 
     returnCode = SilKit_Version_Major(&outNum);
-    EXPECT_EQ(outNum, SilKit::Version::Major());
+    EXPECT_EQ(outNum, SilKit::Version::MajorImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode = SilKit_Version_Minor(&outNum);
-    EXPECT_EQ(outNum, SilKit::Version::Minor());
+    EXPECT_EQ(outNum, SilKit::Version::MinorImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode = SilKit_Version_Patch(&outNum);
-    EXPECT_EQ(outNum, SilKit::Version::Patch());
+    EXPECT_EQ(outNum, SilKit::Version::PatchImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode = SilKit_Version_BuildNumber(&outNum);
-    EXPECT_EQ(outNum, SilKit::Version::BuildNumber());
+    EXPECT_EQ(outNum, SilKit::Version::BuildNumberImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode = SilKit_Version_String(&outString);
-    EXPECT_EQ(outString, SilKit::Version::String());
+    EXPECT_EQ(outString, SilKit::Version::StringImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode = SilKit_Version_VersionSuffix(&outString);
-    EXPECT_EQ(outString, SilKit::Version::VersionSuffix());
+    EXPECT_EQ(outString, SilKit::Version::VersionSuffixImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 
     returnCode = SilKit_Version_GitHash(&outString);
-    EXPECT_EQ(outString, SilKit::Version::GitHash());
+    EXPECT_EQ(outString, SilKit::Version::GitHashImpl());
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 

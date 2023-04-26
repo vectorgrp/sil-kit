@@ -24,10 +24,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <locale>
 
-#include "silkit/SilKitVersion.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/logging/string_utils.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/SilKitVersion.hpp"
 #include "silkit/SilKit.hpp"
 
 #include "SignalHandler.hpp"
@@ -37,6 +37,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfiguration.hpp"
 #include "Filesystem.hpp"
 #include "YamlParser.hpp"
+#include "CreateSilKitRegistryImpl.hpp"
+#include "ParticipantConfigurationFromXImpl.hpp"
 
 //dashboard
 #include "CreateDashboard.hpp"
@@ -154,7 +156,7 @@ auto StartRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> co
         std::string dashboardUri, bool enableDashboard,
         CommandlineParser::Option generatedConfigurationPathOpt) -> SilKitRegistry::RegistryInstance
 {
-    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(configuration);
+    auto registry = SilKit::Vendor::Vector::CreateSilKitRegistryImpl(configuration);
     const auto chosenListenUri = registry->StartListening(listenUri);
 
     std::cout << "SIL Kit Registry listening on " << chosenListenUri << std::endl;
@@ -320,7 +322,7 @@ int main(int argc, char** argv)
 
     try
     {
-        auto configuration = SilKit::Config::ParticipantConfigurationFromString("");
+        auto configuration = SilKit::Config::ParticipantConfigurationFromStringImpl("");
 
         if (windowsService)
         {

@@ -23,10 +23,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 
 #include "silkit/SilKitVersion.hpp"
-#include "ParticipantConfiguration.hpp"
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
+#include "ParticipantConfiguration.hpp"
 
 #include "MockParticipant.hpp" //for DummyLogger
 #include "SilKitExtensions.hpp"
@@ -118,8 +119,11 @@ TEST_F(SilKitExtensionsTest, load_dummy_lib)
 
 
         triple version;
-        triple reference{SilKit::Version::Major(),
-                 SilKit::Version::Minor(), SilKit::Version::Patch()};
+        triple reference{
+            SilKit::Version::Major(),
+            SilKit::Version::Minor(),
+            SilKit::Version::Patch()
+        };
 
         dummyExtension->GetVersion(std::get<0>(version), std::get<1>(version),
                          std::get<2>(version));

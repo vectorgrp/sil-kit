@@ -30,11 +30,13 @@ target_link_libraries(I_SilKit_Config
         I_SilKit_Util
 )
 
-add_library(S_SilKit_Config STATIC
+add_library(O_SilKit_Config OBJECT
     Configuration.hpp
     Configuration.cpp
     ParticipantConfiguration.hpp
     ParticipantConfiguration.cpp
+    ParticipantConfigurationFromXImpl.hpp
+    ParticipantConfigurationFromXImpl.cpp
     Validation.hpp
     Validation.cpp
     YamlParser.hpp
@@ -47,25 +49,26 @@ add_library(S_SilKit_Config STATIC
     YamlValidator.cpp
 )
 
-target_link_libraries(S_SilKit_Config
+target_link_libraries(O_SilKit_Config
+    PUBLIC I_SilKit_Config
+
     PRIVATE SilKitInterface
     PUBLIC I_SilKit_Util
-    PUBLIC I_SilKit_Config
     PUBLIC yaml-cpp
 )
 
-target_include_directories(S_SilKit_Config
+target_include_directories(O_SilKit_Config
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_silkit_test(Test_MwCfgValidation
     SOURCES Test_Validation.cpp
-    LIBS S_SilKit_Config
+    LIBS O_SilKit_Config
 )
 
 add_silkit_test(Test_ParticipantConfiguration
     SOURCES Test_ParticipantConfiguration.cpp
-    LIBS S_SilKit_Core_Mock_NullConnection
+    LIBS S_SilKitImpl O_SilKit_Core_Mock_NullConnection
     CONFIGS
         ParticipantConfiguration_Minimal.json
         ParticipantConfiguration_Full.json
@@ -75,12 +78,12 @@ add_silkit_test(Test_ParticipantConfiguration
 
 add_silkit_test(Test_MwCfgYamlParser
     SOURCES Test_YamlParser.cpp
-    LIBS S_SilKit_Config yaml-cpp
+    LIBS O_SilKit_Config yaml-cpp
 )
 
 add_silkit_test(Test_MwCfgYamlValidator
     SOURCES Test_YamlValidator.cpp
-    LIBS S_SilKit_Config yaml-cpp
+    LIBS O_SilKit_Config yaml-cpp
 )
 if(SILKIT_BUILD_TESTS)
     add_library(I_SilKit_Config_TestUtils INTERFACE)

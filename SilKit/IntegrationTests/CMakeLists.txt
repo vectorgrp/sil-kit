@@ -21,6 +21,8 @@
 
 # local headers as interface lib
 add_subdirectory(SimTestHarness)
+
+# local headers as interface lib
 add_subdirectory(Hourglass)
 
 add_library(ITest_Utils INTERFACE)
@@ -35,19 +37,11 @@ add_silkit_test(ITest_CatchExceptionsInCallbacks
     SilKit
 )
 
-add_silkit_test(ITest_CatchExceptionsInCallbacks_Hourglass
-    SOURCES
-    ITest_CatchExceptionsInCallbacks.cpp
-
-    LIBS
-    SilKit_Hourglass
-)
-
 add_silkit_test(ITest_Internals_HopOnHopOff
     SOURCES
     ITest_Internals_HopOnHopOff.cpp
     LIBS
-        SilKit
+        S_SilKitImpl
         I_SilKit_Config_TestUtils
         I_SilKit_Core_Internal
 )
@@ -60,22 +54,12 @@ add_silkit_test(ITest_CommunicationReady
     SilKit
 )
 
-add_silkit_test(ITest_CommunicationReady_Hourglass
-    SOURCES
-    ITest_CommunicationReady.cpp
-
-    LIBS
-    SilKit_Hourglass
-)
-
 add_silkit_test(ITest_Internals_DataPubSub
     SOURCES
     ITest_Internals_DataPubSub.cpp
 
     LIBS
-    SilKit
-    I_SilKit_Core_Internal
-    I_SilKit_Config_TestUtils
+    S_SilKitImpl
 )
 
 add_silkit_test(ITest_Internals_TargetedMessaging
@@ -83,10 +67,7 @@ add_silkit_test(ITest_Internals_TargetedMessaging
     ITest_Internals_TargetedMessaging.cpp
 
     LIBS
-    S_SilKit_Tracing      # XXX
-    S_SilKit_Services_Can # XXX
-    I_SilKit_Core_Internal
-    S_ITests_STH
+    S_ITests_STH_Internals
 )
 
 add_silkit_test(ITest_StateMachineVAsio
@@ -126,48 +107,28 @@ add_silkit_test(ITest_Internals_ServiceDiscovery
     SOURCES
       ITest_Internals_ServiceDiscovery.cpp
     LIBS
-      I_SilKit_Core_Internal
-      I_SilKit_Core_Participant
-      I_SilKit_Core_Service
-      I_SilKit_Core_VAsio
-      I_SilKit_Services_Can
-      I_SilKit_Services_Ethernet
-      I_SilKit_Services_Flexray
-      I_SilKit_Services_Lin
-      I_SilKit_Services_Logging
-      I_SilKit_Services_Orchestration
-      I_SilKit_Services_PubSub
-      I_SilKit_Services_Rpc
-      S_ITests_STH
+      S_ITests_STH_Internals
 )
 
 add_silkit_test(FTest_Internals_ServiceDiscoveryPerf
     SOURCES
       FTest_Internals_ServiceDiscoveryPerf.cpp
     LIBS
-      I_SilKit_Core_Participant
-      I_SilKit_Core_VAsio
-      S_ITests_STH
+      S_ITests_STH_Internals
 )
 
 add_silkit_test(ITest_Internals_SystemMonitor
     SOURCES
       ITest_Internals_SystemMonitor.cpp
     LIBS
-      I_SilKit_Core_Internal
-      I_SilKit_Core_Participant
-      I_SilKit_Core_VAsio
-      I_SilKit_Services_Can
-      I_SilKit_Services_Ethernet
-      I_SilKit_Services_Flexray
-      I_SilKit_Services_Lin
-      I_SilKit_Services_Logging
-      I_SilKit_Services_Orchestration
-      I_SilKit_Services_PubSub
-      I_SilKit_Services_Rpc
-      S_ITests_STH
+      S_ITests_STH_Internals
+)
 
-      S_SilKit_Services_Orchestration
+add_silkit_test(FTest_PubSubPerf
+    SOURCES
+      FTest_Internals_PubSubPerf.cpp
+    LIBS
+      S_ITests_STH
 )
 
 add_silkit_test(FTest_Internals_PubSubPerf
@@ -176,7 +137,7 @@ add_silkit_test(FTest_Internals_PubSubPerf
     LIBS
       I_SilKit_Core_Participant
       I_SilKit_Core_VAsio
-      S_ITests_STH
+      S_ITests_STH_Internals
 )
 
 add_silkit_test(ITest_AsyncSimTask
@@ -186,14 +147,6 @@ add_silkit_test(ITest_AsyncSimTask
       S_ITests_STH
 )
 
-add_silkit_test(ITest_AsyncSimTask_Hourglass
-    SOURCES
-    ITest_AsyncSimTask.cpp
-
-    LIBS
-    S_ITests_STH_Hourglass
-)
-
 # Windows specific tests
 if(MSVC)
     add_silkit_test(ITest_CompatibilityWithWindowsHeaders
@@ -201,7 +154,7 @@ if(MSVC)
         ITest_CompatibilityWithWindowsHeaders.cpp
 
         LIBS
-        S_SilKit_Core_Participant
+        S_SilKitImpl
     )
 endif()
 
@@ -220,15 +173,6 @@ add_silkit_test(
     SilKit
 )
 
-add_silkit_test(
-    FTest_CanWithoutSync_Hourglass
-
-    SOURCES FTest_CanWithoutSync.cpp
-
-    LIBS
-    SilKit_Hourglass
-)
-
 add_silkit_test(ITest_ThreeCanController
     SOURCES
     ITest_ThreeCanController.cpp
@@ -237,28 +181,12 @@ add_silkit_test(ITest_ThreeCanController
     S_ITests_STH
 )
 
-add_silkit_test(ITest_ThreeCanController_Hourglass
-    SOURCES
-    ITest_ThreeCanController.cpp
-
-    LIBS
-    S_ITests_STH_Hourglass
-)
-
 add_silkit_test(FTest_CanControllerThreadSafety
     SOURCES
     FTest_CanControllerThreadSafety.cpp
 
     LIBS
     SilKit
-)
-
-add_silkit_test(FTest_CanControllerThreadSafety_Hourglass
-    SOURCES
-    FTest_CanControllerThreadSafety.cpp
-
-    LIBS
-    SilKit_Hourglass
 )
 
 # Ethernet
@@ -271,28 +199,12 @@ add_silkit_test(ITest_ThreeEthController
     S_ITests_STH
 )
 
-add_silkit_test(ITest_ThreeEthController_Hourglass
-    SOURCES
-    ITest_ThreeEthController.cpp
-
-    LIBS
-    S_ITests_STH_Hourglass
-)
-
 add_silkit_test(FTest_EthWithoutSync
     SOURCES
     FTest_EthWithoutSync.cpp
 
     LIBS
     SilKit
-)
-
-add_silkit_test(FTest_EthWithoutSync_Hourglass
-    SOURCES
-    FTest_EthWithoutSync.cpp
-
-    LIBS
-    SilKit_Hourglass
 )
 
 # LIN
@@ -305,14 +217,6 @@ add_silkit_test(ITest_Lin
     S_ITests_STH
 )
 
-add_silkit_test(ITest_Lin_Hourglass
-    SOURCES
-    ITest_Lin.cpp
-
-    LIBS
-    S_ITests_STH_Hourglass
-)
-
 # RPC
 
 add_silkit_test(ITest_Internals_Rpc
@@ -321,14 +225,10 @@ add_silkit_test(ITest_Internals_Rpc
     ITest_Internals_Rpc.hpp
 
     LIBS
-    SilKit
+    S_SilKitImpl
     I_SilKit_Core_Internal
     I_SilKit_Config_TestUtils
 )
-
-# Hourglass:
-# Currently impossible due to explicit use of the ServiceDiscovery, as it is
-# retrieved via through a dynamic_cast to IParticipantInternal.
 
 # ============================================================
 #  Integration Tests based on Demo Applications
@@ -344,12 +244,12 @@ add_silkit_test(ITest_CanDemo
     S_ITests_STH
 )
 
-add_silkit_test(ITest_CanDemo_Hourglass
+add_silkit_test(ITest_CanDemo_Internals
     SOURCES
     ITest_CanDemo.cpp
 
     LIBS
-    S_ITests_STH_Hourglass
+    S_ITests_STH_Internals
 )
 
 # Ethernet
@@ -362,12 +262,12 @@ add_silkit_test(ITest_EthernetDemo
     S_ITests_STH
 )
 
-add_silkit_test(ITest_EthernetDemo_Hourglass
+add_silkit_test(ITest_EthernetDemo_Internals
     SOURCES
     ITest_EthernetDemo.cpp
 
     LIBS
-    S_ITests_STH_Hourglass
+    S_ITests_STH_Internals
 )
 
 # LIN
@@ -380,13 +280,14 @@ add_silkit_test(ITest_LinDemo
     S_ITests_STH
 )
 
-add_silkit_test(ITest_LinDemo_Hourglass
+add_silkit_test(ITest_LinDemo_Internals
     SOURCES
     ITest_LinDemo.cpp
 
     LIBS
-    S_ITests_STH_Hourglass
+    S_ITests_STH_Internals
 )
+
 if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(
         ITest_Dashboard
@@ -394,34 +295,30 @@ if(SILKIT_BUILD_DASHBOARD)
         SOURCES ITest_Dashboard.cpp
 
         LIBS
-        SilKit
-        S_ITests_STH
+        S_ITests_STH_Internals
         S_SilKit_Dashboard
         I_SilKit_Core_Internal
         I_SilKit_Config_TestUtils
         I_SilKit_Services_Ethernet
-        S_SilKit_Config
     )
+
     add_silkit_test(
         ITest_DashboardServerUnavailable
 
         SOURCES ITest_DashboardServerUnavailable.cpp
 
         LIBS
-        SilKit
-        S_ITests_STH
+        S_ITests_STH_Internals
         S_SilKit_Dashboard
-        S_SilKit_Config
     )
+
     add_silkit_test(
         ITest_DashboardServerTimeout
 
         SOURCES ITest_DashboardServerTimeout.cpp
 
         LIBS
-        SilKit
-        S_ITests_STH
+        S_ITests_STH_Internals
         S_SilKit_Dashboard
-        S_SilKit_Config
     )
 endif()

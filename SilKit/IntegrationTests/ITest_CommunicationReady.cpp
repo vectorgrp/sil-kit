@@ -39,8 +39,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ITestThreadSafeLogger.hpp"
 
-#include "HourglassHelpers.hpp"
-
 namespace {
 
 using namespace std::chrono_literals;
@@ -146,8 +144,7 @@ public:
     //Participant's entry point
     void ThreadMain( const std::string& registryUri)
     {
-        participant =
-            IntegrationTests::CreateParticipant(IntegrationTests::ParticipantConfigurationFromString(
+        participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(
                                                     R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Warn"}]}})"),
                                                 name, registryUri);
 

@@ -39,6 +39,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ConfigurationTestUtils.hpp"
 #include "IParticipantInternal.hpp"
+#include "CreateParticipantImpl.hpp"
 
 namespace {
 
@@ -160,7 +161,10 @@ protected:
 
     void AbortAndFailTest(const std::string& reason)
     {
-        systemMaster.systemController->AbortSimulation();
+        if (systemMaster.systemController != nullptr)
+        {
+            systemMaster.systemController->AbortSimulation();
+        }
         FAIL() << reason;
     }
 
@@ -297,8 +301,8 @@ protected:
     {
         try
         {
-            systemMaster.participant =
-                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), systemMasterName, registryUri);
+            systemMaster.participant = SilKit::CreateParticipantImpl(
+                SilKit::Config::MakeEmptyParticipantConfigurationImpl(), systemMasterName, registryUri);
 
             auto participantInternal =
                 dynamic_cast<SilKit::Core::IParticipantInternal*>(systemMaster.participant.get());

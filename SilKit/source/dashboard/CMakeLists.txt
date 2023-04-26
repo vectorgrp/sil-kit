@@ -97,9 +97,8 @@ if(SILKIT_BUILD_DASHBOARD)
             I_SilKit_Core_Participant
             I_SilKit_Services_Logging
         PRIVATE
+            S_SilKitImpl
             Threads::Threads
-            S_SilKit_Util_Uri
-            S_SilKit_Util_SetThreadName
             oatpp
             yaml-cpp
     )
@@ -122,7 +121,7 @@ if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(Test_DashboardCachingSilKitEventHandler
         SOURCES Service/Test_DashboardCachingSilKitEventHandler.cpp 
         LIBS
-        S_SilKit_Config
+        O_SilKit_Config
         S_SilKit_Dashboard
         I_SilKit_Core_Internal
         I_SilKit_Core_Mock_Participant
@@ -131,7 +130,7 @@ if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(Test_DashboardSilKitEventHandler
         SOURCES Service/Test_DashboardSilKitEventHandler.cpp 
         LIBS
-        S_SilKit_Config
+        S_SilKitImpl
         S_SilKit_Dashboard
         I_SilKit_Core_Internal
         I_SilKit_Core_Mock_Participant
@@ -141,7 +140,7 @@ if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(Test_DashboardSilKitToOatppMapper
         SOURCES Service/Test_DashboardSilKitToOatppMapper.cpp 
         LIBS
-        S_SilKit_Config
+        S_SilKitImpl
         S_SilKit_Dashboard
         I_SilKit_Core_Internal
         oatpp
@@ -150,7 +149,7 @@ if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(Test_DashboardSystemServiceClient
         SOURCES Client/Test_DashboardSystemServiceClient.cpp 
         LIBS
-        S_SilKit_Config
+        S_SilKitImpl
         S_SilKit_Dashboard
         I_SilKit_Core_Internal
         I_SilKit_Core_Mock_Participant

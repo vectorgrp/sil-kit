@@ -23,6 +23,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/capi/Types.h"
 
+#include "silkit/services/pubsub/PubSubSpec.hpp"
+#include "silkit/services/rpc/RpcSpec.hpp"
+
+#include <vector>
+#include <string>
+
 namespace {
 
 inline void assign(SilKit::Services::PubSub::PubSubSpec& cppPubSubSpec, SilKit_DataSpec* pubSubSpec)

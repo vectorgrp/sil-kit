@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/config/all.hpp"
 
 #include "CreateDashboard.hpp"
+#include "ParticipantConfigurationFromXImpl.hpp"
 
 namespace {
 using namespace SilKit::Tests;
@@ -47,9 +48,10 @@ protected:
     DashboardTestHarness()
         : ITest_SimTestHarness()
         , _dashboardUri(MakeTestDashboardUri())
-        , _participantConfig(ParticipantConfigurationFromString(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"))
+        , _participantConfig(ParticipantConfigurationFromStringImpl(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"))
     {
     }
+
     ~DashboardTestHarness() {}
 
 protected:

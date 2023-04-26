@@ -26,8 +26,16 @@ target_include_directories(I_SilKit_Core_Service
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Core_Service
+    INTERFACE SilKitInterface
 
-add_library(S_SilKit_Core_Service STATIC
+    INTERFACE I_SilKit_Config
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Util
+)
+
+
+add_library(O_SilKit_Core_Service OBJECT
     ServiceDatatypes.hpp
     ServiceDiscovery.hpp
     ServiceDiscovery.cpp
@@ -38,24 +46,19 @@ add_library(S_SilKit_Core_Service STATIC
     ServiceSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Core_Service
+target_link_libraries(O_SilKit_Core_Service
     PUBLIC I_SilKit_Core_Service
-    PUBLIC I_SilKit_Util
 
-    PRIVATE S_SilKit_Services_Logging
-
-    PUBLIC SilKitInterface
-    PUBLIC S_SilKit_Config
-    PUBLIC I_SilKit_Core_Internal
+    PRIVATE I_SilKit_Services_Logging
 )
 
 
 add_silkit_test(Test_MwServiceDiscovery
     SOURCES Test_ServiceDiscovery.cpp 
-    LIBS S_SilKit_Core_Service I_SilKit_Core_Mock_Participant S_SilKit_Util_Uuid)
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant I_SilKit_Util_Uuid)
 
-add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS S_SilKit_Core_Service)
+add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS S_SilKitImpl)
 
 add_silkit_test(Test_MwSpecificDiscoveryStore
     SOURCES Test_SpecificDiscoveryStore.cpp 
-    LIBS S_SilKit_Core_Service I_SilKit_Core_Mock_Participant S_SilKit_Util_Uuid)
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant I_SilKit_Util_Uuid)

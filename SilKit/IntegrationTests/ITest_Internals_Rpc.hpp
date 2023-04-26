@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
+#include <thread>
+
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/all.hpp"
@@ -377,8 +379,8 @@ protected:
         {
             try
             {
-                participant.participant = SilKit::CreateParticipant(
-                    SilKit::Config::MakeParticipantConfigurationWithLogging(SilKit::Services::Logging::Level::Warn),
+                participant.participant = SilKit::CreateParticipantImpl(
+                    SilKit::Config::MakeParticipantConfigurationWithLoggingImpl(SilKit::Services::Logging::Level::Warn),
                     participant.name, registryUri);
                 participant.participantImpl =
                     dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.participant.get());

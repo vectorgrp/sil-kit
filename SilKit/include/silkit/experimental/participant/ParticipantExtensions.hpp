@@ -25,7 +25,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
+#include "silkit/detail/macros.hpp"
+
+
 namespace SilKit {
+DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Experimental {
 namespace Participant {
 
@@ -35,9 +39,15 @@ namespace Participant {
 *
 * \throw SilKit::SilKitError The participant is invalid.
 */
-SilKitAPI auto CreateSystemController(IParticipant* participant)
+DETAIL_SILKIT_CPP_API auto CreateSystemController(SilKit::IParticipant* participant)
     -> SilKit::Experimental::Services::Orchestration::ISystemController*;
 
 } // namespace Participant
 } // namespace Experimental
+DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
 } // namespace SilKit
+
+
+//! \cond DOCUMENT_HEADER_ONLY_DETAILS
+#include "silkit/detail/impl/experimental/participant/ParticipantExtensions.ipp"
+//! \endcond

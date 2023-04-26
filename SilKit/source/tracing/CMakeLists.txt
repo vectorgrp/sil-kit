@@ -25,7 +25,25 @@
 #   the external sil-kit-mdf4tracing extension.
 ######################################################################
 
-add_library(S_SilKit_Tracing STATIC
+add_library(I_SilKit_Tracing INTERFACE)
+
+target_include_directories(I_SilKit_Tracing
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/mock/
+)
+target_link_libraries(I_SilKit_Tracing
+    INTERFACE SilKitInterface
+
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Services_Ethernet
+    INTERFACE I_SilKit_Services_Can
+    INTERFACE I_SilKit_Services_Flexray
+    INTERFACE I_SilKit_Services_Lin
+    INTERFACE I_SilKit_Services_PubSub
+    INTERFACE I_SilKit_Extensions
+)
+
+add_library(O_SilKit_Tracing OBJECT
     PcapSink.cpp
     PcapSink.hpp
 
@@ -51,35 +69,24 @@ add_library(S_SilKit_Tracing STATIC
     ReplayScheduler.cpp
 )
 
-target_include_directories(S_SilKit_Tracing
+target_include_directories(O_SilKit_Tracing
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         detail
-    PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}
-        ${CMAKE_CURRENT_LIST_DIR}/mock/
 )
-target_link_libraries(S_SilKit_Tracing
-    PRIVATE
-        S_SilKit_Services_Logging
-        S_SilKit_Extensions
-    PUBLIC
-        SilKitInterface
-        I_SilKit_Core_Internal
-        S_SilKit_Services_Ethernet
-        S_SilKit_Services_Can
-        S_SilKit_Services_Flexray
-        S_SilKit_Services_Lin
-        S_SilKit_Services_PubSub
+target_link_libraries(O_SilKit_Tracing
+    PUBLIC I_SilKit_Tracing
+
+    PRIVATE I_SilKit_Services_Logging
 )
 
 if(WIN32)
-    target_sources(S_SilKit_Tracing PRIVATE
+    target_sources(O_SilKit_Tracing PRIVATE
         detail/NamedPipeWin.hpp
         detail/NamedPipeWin.cpp
         )
 elseif(UNIX)
-    target_sources(S_SilKit_Tracing PRIVATE
+    target_sources(O_SilKit_Tracing PRIVATE
         detail/NamedPipeLinux.hpp
         detail/NamedPipeLinux.cpp
         )
@@ -87,7 +94,7 @@ else()
     message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
 endif()
 
-#XXX not viable, yet: add_silkit_test(Test_Replay SOURCES Test_Replay.cpp LIBS I_SilKit_Core_Mock_Participant S_SilKit_Tracing )
-add_silkit_test(Test_Pcap SOURCES Test_Pcap.cpp LIBS S_SilKit_Tracing I_SilKit_Core_Mock_Participant )
+#XXX not viable, yet: add_silkit_test(Test_Replay SOURCES Test_Replay.cpp LIBS I_SilKit_Core_Mock_Participant O_SilKit_Tracing )
+add_silkit_test(Test_Pcap SOURCES Test_Pcap.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
 
-add_silkit_test(Test_EthernetReplay SOURCES Test_EthernetReplay.cpp LIBS I_SilKit_Core_Mock_Participant S_SilKit_Tracing)
+add_silkit_test(Test_EthernetReplay SOURCES Test_EthernetReplay.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant S_SilKitImpl)

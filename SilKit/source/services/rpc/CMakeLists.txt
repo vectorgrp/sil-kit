@@ -26,8 +26,12 @@ target_include_directories(I_SilKit_Services_Rpc
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Services_Rpc
+    INTERFACE SilKitInterface
+)
 
-add_library(S_SilKit_Services_Rpc STATIC
+
+add_library(O_SilKit_Services_Rpc OBJECT
     RpcCallHandle.hpp
     RpcDatatypeUtils.hpp
     RpcDatatypeUtils.cpp
@@ -42,14 +46,13 @@ add_library(S_SilKit_Services_Rpc STATIC
     RpcSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Services_Rpc
+target_link_libraries(O_SilKit_Services_Rpc
     PUBLIC I_SilKit_Services_Rpc
 
-    PRIVATE SilKitInterface
-            I_SilKit_Core_Internal
-            S_SilKit_Util_Uuid
-            I_SilKit_Config
-            S_SilKit_Util_LabelMatching
+    PRIVATE I_SilKit_Core_Internal
+    PRIVATE I_SilKit_Util_Uuid
+    PRIVATE I_SilKit_Config
+    PRIVATE I_SilKit_Util_LabelMatching
 )
 
 add_silkit_test(Test_SimRpc
@@ -58,10 +61,10 @@ add_silkit_test(Test_SimRpc
         Test_RpcServer.cpp
         Test_RpcMatching.cpp
     LIBS
-        S_SilKit_Services_Rpc
+        S_SilKitImpl
         I_SilKit_Core_Mock_Participant
         I_SilKit_Core_Internal
-        S_SilKit_Core_Mock_NullConnection
-        S_SilKit_Config
+        I_SilKit_Core_Mock_NullConnection
+        I_SilKit_Config
 )
-add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Rpc)
+add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)

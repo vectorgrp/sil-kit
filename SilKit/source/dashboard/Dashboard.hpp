@@ -47,7 +47,7 @@ class IServiceDiscovery;
 namespace Config {
 class IParticipantConfiguration;
 } // namespace Config
-} //namespace SilKit
+} // namespace SilKit
 
 namespace SilKit {
 namespace Dashboard {

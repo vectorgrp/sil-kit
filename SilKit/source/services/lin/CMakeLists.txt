@@ -26,8 +26,15 @@ target_include_directories(I_SilKit_Services_Lin
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Services_Lin
+    INTERFACE SilKitInterface
 
-add_library(S_SilKit_Services_Lin STATIC
+    INTERFACE I_SilKit_Wire_Lin
+    INTERFACE I_SilKit_Tracing
+)
+
+
+add_library(O_SilKit_Services_Lin OBJECT
     LinController.cpp
     LinController.hpp
     
@@ -43,14 +50,11 @@ add_library(S_SilKit_Services_Lin STATIC
     LinSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Services_Lin
+target_link_libraries(O_SilKit_Services_Lin
     PUBLIC I_SilKit_Services_Lin
 
-    PUBLIC  SilKitInterface
-            I_SilKit_Wire_Lin
-            S_SilKit_Tracing
     PRIVATE I_SilKit_Core_Internal
-            S_SilKit_Services_Logging
+    PRIVATE I_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_SimLin
@@ -60,9 +64,8 @@ add_silkit_test(Test_SimLin
         Test_LinControllerTrivialSim.cpp
         Test_LinControllerConfig.cpp
     LIBS
-        S_SilKit_Services_Lin
+        S_SilKitImpl
         I_SilKit_Core_Mock_Participant
-        S_SilKit_Tracing
-        S_SilKit_Core_Mock_NullConnection
+        O_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimLin_Serdes  SOURCES Test_LinSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Lin)
+add_silkit_test(Test_SimLin_Serdes  SOURCES Test_LinSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)

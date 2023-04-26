@@ -26,8 +26,28 @@ target_include_directories(I_SilKit_Core_Participant
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Core_Participant
+    INTERFACE SilKitInterface
 
-add_library(S_SilKit_Core_Participant STATIC
+    INTERFACE I_SilKit_Core_VAsio
+    INTERFACE I_SilKit_Services_Can
+    INTERFACE I_SilKit_Services_Ethernet
+    INTERFACE I_SilKit_Services_Flexray
+    INTERFACE I_SilKit_Services_Lin
+    INTERFACE I_SilKit_Services_Logging
+    INTERFACE I_SilKit_Services_Orchestration
+    INTERFACE I_SilKit_Services_PubSub
+    INTERFACE I_SilKit_Services_Rpc
+    INTERFACE I_SilKit_Tracing
+
+    # Due to Participant_impl.hpp being used directly in NullConnectionParticipant and
+    # RpcTestUtilities, this interface library must also depend on the headers used by
+    # the participant implementation.
+    INTERFACE I_SilKit_VersionImpl
+)
+
+
+add_library(O_SilKit_Core_Participant OBJECT
     Participant.hpp
     Participant_impl.hpp
     Participant.cpp
@@ -39,44 +59,32 @@ add_library(S_SilKit_Core_Participant STATIC
     CreateParticipantT.cpp
 )
 
-target_link_libraries(S_SilKit_Core_Participant
+target_link_libraries(O_SilKit_Core_Participant
     PUBLIC I_SilKit_Core_Participant
 
-    INTERFACE  SilKitInterface
-    PUBLIC
-        I_SilKit_Core_Internal
-        S_SilKit_Services_Logging
-        I_SilKit_Config
-        I_SilKit_Util
-        S_SilKit_Util_SetThreadName
-        S_SilKit_Util_Uuid
-        S_SilKit_Services_Orchestration
-        S_SilKit_Services_Can
-        S_SilKit_Services_Ethernet
-        S_SilKit_Services_Flexray
-        S_SilKit_Services_Lin
-        S_SilKit_Services_PubSub
-        S_SilKit_Services_Rpc
-        S_SilKit_Tracing
+    PRIVATE I_SilKit_Config
+    PRIVATE I_SilKit_Core_Internal
+    PRIVATE I_SilKit_Core_Service
+    PRIVATE I_SilKit_Util
+    PRIVATE I_SilKit_Util_SetThreadName
+    PRIVATE I_SilKit_Util_Uuid
 
-    PUBLIC S_SilKit_Core_Service
-
-    PRIVATE SilKitVersion
+    PRIVATE I_SilKit_VersionImpl
 )
 
-target_link_libraries(S_SilKit_Core_Participant PUBLIC S_SilKit_Core_VAsio)
+target_link_libraries(O_SilKit_Core_Participant PUBLIC I_SilKit_Core_VAsio)
 
 if (MSVC)
-    target_compile_options(S_SilKit_Core_Participant PRIVATE "/bigobj")
+    target_compile_options(O_SilKit_Core_Participant PRIVATE "/bigobj")
 endif (MSVC)
 
 add_silkit_test(Test_MwParticipant
     SOURCES Test_Participant.cpp
-    LIBS S_SilKit_Core_Mock_NullConnection I_SilKit_Config_TestUtils
+    LIBS S_SilKitImpl O_SilKit_Core_Mock_NullConnection I_SilKit_Core_Mock_NullConnection I_SilKit_Config_TestUtils
 )
 
 add_silkit_test(
     Test_ValidateAndSanitizeConfig
     SOURCES Test_ValidateAndSanitizeConfig.cpp
-    LIBS S_SilKit_Core_Participant
+    LIBS S_SilKitImpl
 )

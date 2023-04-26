@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 #include <type_traits>
 
-#include "silkit/SilKitVersion.hpp"
+#include "SilKitVersionImpl.hpp"
 
 #include "detail/LoadExtension.hpp"
 #include "SilKitExtensionBase.hpp"
@@ -71,13 +71,15 @@ void VerifyExtension(SilKit::Services::Logging::ILogger* logger, const SilKitExt
         throw ExtensionError("Extension returned invalid SilKitExtensionDescriptor");
     }
     //verify the extensions SILKIT version to ours
-    if (descr->silkit_version_major != SilKit::Version::Major() || descr->silkit_version_minor != SilKit::Version::Minor()
-        || descr->silkit_version_patch != SilKit::Version::Patch())
+    if (descr->silkit_version_major != SilKit::Version::MajorImpl()
+        || descr->silkit_version_minor != SilKit::Version::MinorImpl()
+        || descr->silkit_version_patch != SilKit::Version::PatchImpl())
     {
         std::stringstream ss;
-        ss << "Version mismatch: host SILKIT version is: " << SilKit::Version::Major() << "." << SilKit::Version::Minor() << "."
-           << SilKit::Version::Patch() << " module has version: " << descr->silkit_version_major << "."
-           << descr->silkit_version_minor << "." << descr->silkit_version_patch << ".";
+        ss << "Version mismatch: host SILKIT version is: " << SilKit::Version::MajorImpl() << "."
+           << SilKit::Version::MinorImpl() << "." << SilKit::Version::PatchImpl()
+           << " module has version: " << descr->silkit_version_major << "." << descr->silkit_version_minor << "."
+           << descr->silkit_version_patch << ".";
 
         throw ExtensionError(ss.str());
     }

@@ -36,8 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 
-#include "HourglassHelpers.hpp"
-
 namespace {
 
 using namespace std::chrono_literals;
@@ -87,8 +85,8 @@ protected:
 
         try
         {
-            participant.participant = IntegrationTests::CreateParticipant(
-                IntegrationTests::ParticipantConfigurationFromString(""), participant.name, registryUri);
+            participant.participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                                participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 
@@ -121,8 +119,8 @@ protected:
     {
         try
         {
-            participant.participant = IntegrationTests::CreateParticipant(
-                IntegrationTests::ParticipantConfigurationFromString(""), participant.name, registryUri);
+            participant.participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                                participant.name, registryUri);
             participant.canController = participant.participant->CreateCanController("CAN", "CAN");
             participant.canController->Start();
 

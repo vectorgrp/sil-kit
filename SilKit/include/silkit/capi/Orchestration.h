@@ -690,6 +690,61 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_SystemMonitor_IsParticipantConnect
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_SystemMonitor_IsParticipantConnected_t)(
     SilKit_SystemMonitor* systemMonitor, const char* participantName, SilKit_Bool* out);
 
+/*! \brief Return the experimental ISystemController at a given SIL Kit participant.
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
+ *
+ * @param outSystemController Pointer that refers to the resulting system controller (out parameter).
+ * @param participant The participant instance for which the system controller is created
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_Create(
+    SilKit_Experimental_SystemController** outSystemController, SilKit_Participant* participant);
+
+typedef SilKit_ReturnCode(SilKitFPTR * SilKit_Experimental_SystemController_Create_t)(
+    SilKit_Experimental_SystemController** outSystemController, SilKit_Participant* participant);
+
+/*! \brief Sends a SilKit::Services::Orchestration::SystemCommand::Kind::AbortSimulation to all participants
+ *
+ *  The abort simulation command signals all participants to terminate their lifecycle, regardless of their current
+ *  state.
+ *
+ *  The command is allowed at any time.
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
+ *
+ * @param systemController The system controller obtained via \ref SilKit_Experimental_SystemController_Create.
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_AbortSimulation(
+    SilKit_Experimental_SystemController* systemController);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Experimental_SystemController_AbortSimulation_t)(
+    SilKit_Experimental_SystemController* systemController);
+
+/*! \brief Configures details of the simulation workflow regarding lifecycle and participant coordination.
+ *
+ * Only the required participant defined in the \ref SilKit_WorkflowConfiguration are taken
+ * into account to define the  system state. Further, the simulation time propagation also relies on the required
+ * participants.
+ *
+ * The \ref SilKit_WorkflowConfiguration is distributed to other participants, so it must only be set once by a single
+ * member of the simulation.
+ *
+ * @warning This function is not part of the stable API and ABI of the SIL Kit. It may be removed at any time without
+ *          prior notice.
+ *
+ * @param systemController The system controller obtained via \ref SilKit_Experimental_SystemController_Create.
+ * @param workflowConfiguration The desired configuration, currently containing a list of required participants
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_SetWorkflowConfiguration(
+    SilKit_Experimental_SystemController* systemController,
+    const SilKit_WorkflowConfiguration* workflowConfiguration);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_SystemController_SetWorkflowConfiguration_t)(
+    SilKit_Experimental_SystemController* systemController,
+    const SilKit_WorkflowConfiguration* workflowConfiguration);
+
 SILKIT_END_DECLS
 
 #pragma pack(pop)

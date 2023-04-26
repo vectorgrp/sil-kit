@@ -33,7 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "GetTestPid.hpp"
 #include "EthernetHelpers.hpp"
-#include "HourglassHelpers.hpp"
 
 namespace {
 
@@ -95,8 +94,8 @@ protected:
         unsigned numSent{ 0 }, numAcks{ 0 };
         std::promise<void> ethWriterAllAcksReceivedPromiseLocal;
 
-        const auto participant = SilKit::IntegrationTests::CreateParticipant(
-            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "EthWriter", _registryUri);
+        const auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                           "EthWriter", _registryUri);
         const auto controller = participant->CreateEthernetController("ETH1", "ETH1");
 
         controller->Activate();
@@ -130,8 +129,8 @@ protected:
     {
         unsigned numReceived{ 0 };
         std::promise<void> ethReaderAllReceivedPromiseLocal;
-        const auto participant = SilKit::IntegrationTests::CreateParticipant(
-            SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "EthReader", _registryUri);
+        const auto participant = SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""),
+                                                           "EthReader", _registryUri);
         const auto controller = participant->CreateEthernetController("ETH1", "ETH1");
 
         controller->Activate();

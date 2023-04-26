@@ -26,8 +26,18 @@ target_include_directories(I_SilKit_Services_Can
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Services_Can
+    INTERFACE SilKitInterface
 
-add_library(S_SilKit_Services_Can STATIC
+    INTERFACE I_SilKit_Wire_Can
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Config
+    INTERFACE I_SilKit_Tracing
+    INTERFACE I_SilKit_Services_Logging
+)
+
+
+add_library(O_SilKit_Services_Can OBJECT
     CanDatatypesUtils.cpp
     CanDatatypesUtils.hpp
     CanController.cpp
@@ -44,16 +54,8 @@ add_library(S_SilKit_Services_Can STATIC
     CanSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Services_Can
+target_link_libraries(O_SilKit_Services_Can
     PUBLIC I_SilKit_Services_Can
-
-    PUBLIC  I_SilKit_Wire_Can
-    PRIVATE SilKitInterface
-            S_SilKit_Tracing
-
-    PUBLIC I_SilKit_Core_Internal
-    PUBLIC I_SilKit_Config
-    PUBLIC I_SilKit_Services_Logging
 )
 
 add_silkit_test(Test_SimCanController
@@ -62,12 +64,11 @@ add_silkit_test(Test_SimCanController
         Test_CanControllerDetailedSim.cpp 
         Test_CanControllerTrivialSim.cpp
     LIBS 
-        S_SilKit_Services_Can
+        S_SilKitImpl
         I_SilKit_Core_Mock_Participant
-        S_SilKit_Tracing
-        S_SilKit_Core_Mock_NullConnection
+        O_SilKit_Core_Mock_NullConnection
 )
 
-add_silkit_test(Test_SimCan_Serdes  SOURCES Test_CanSerdes.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Can)
+add_silkit_test(Test_SimCan_Serdes  SOURCES Test_CanSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
 
-add_silkit_test(Test_SimCan_StringUtils SOURCES Test_CanStringUtils.cpp LIBS I_SilKit_Core_Internal S_SilKit_Services_Can)
+add_silkit_test(Test_SimCan_StringUtils SOURCES Test_CanStringUtils.cpp LIBS S_SilKitImpl)

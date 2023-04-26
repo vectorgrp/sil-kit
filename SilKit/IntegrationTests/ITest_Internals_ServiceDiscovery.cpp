@@ -33,6 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ServiceDiscovery.hpp"
 #include "ConfigurationTestUtils.hpp"
 #include "VAsioRegistry.hpp"
+#include "CreateParticipantImpl.hpp"
+#include "ParticipantConfigurationFromXImpl.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -66,11 +68,11 @@ TEST_F(ITest_ServiceDiscovery, discover_services)
     registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher =  SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
+    auto&& publisher =  SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), publisherName, registryUri);
 
     // Subscriber that monitors the services
     auto&& subscriber =
-        SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
+        SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), subscriberName, registryUri);
 
     // Services
     for (auto i = 0u; i < numberOfServices; i++)
@@ -158,10 +160,10 @@ TEST_F(ITest_ServiceDiscovery, discover_specific_services)
     registry->StartListening(registryUri);
 
     // Publisher that will leave the simulation and trigger service removal
-    auto&& publisher = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), publisherName, registryUri);
+    auto&& publisher = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), publisherName, registryUri);
 
     // Subscriber that monitors the services
-    auto&& subscriber = SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), subscriberName, registryUri);
+    auto&& subscriber = SilKit::CreateParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), subscriberName, registryUri);
 
     // Services
     const std::string topic = "Topic";

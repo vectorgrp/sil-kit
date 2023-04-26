@@ -27,7 +27,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/vendor/ISilKitRegistry.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"
 
+#include "silkit/detail/macros.hpp"
+
+
 namespace SilKit {
+DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Vendor {
 namespace Vector {
 
@@ -38,9 +42,15 @@ namespace Vector {
  *
  * \throws SilKit::SilKitError on error.
  */
-SilKitAPI auto CreateSilKitRegistry(std::shared_ptr<Config::IParticipantConfiguration> config)
-    -> std::unique_ptr<ISilKitRegistry>;
+DETAIL_SILKIT_CPP_API auto CreateSilKitRegistry(std::shared_ptr<SilKit::Config::IParticipantConfiguration> config)
+    -> std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry>;
 
-}// namespace Vector
-}// namespace Vendor
-}// namespace SilKit
+} // namespace Vector
+} // namespace Vendor
+DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
+} // namespace SilKit
+
+
+//! \cond DOCUMENT_HEADER_ONLY_DETAILS
+#include "silkit/detail/impl/vendor/CreateSilKitRegistry.ipp"
+//! \endcond

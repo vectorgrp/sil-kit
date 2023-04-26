@@ -26,6 +26,14 @@ target_include_directories(I_SilKit_Services_Logging
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Services_Logging
+    INTERFACE SilKitInterface
+
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Config
+    INTERFACE I_SilKit_Core_Service
+)
+
 ################################################################################
 # Thirdparty -- Logging
 ################################################################################
@@ -44,7 +52,7 @@ if (TARGET fmt-header-only)
 endif()
 
 
-add_library(S_SilKit_Services_Logging STATIC
+add_library(O_SilKit_Services_Logging OBJECT
     SpdlogTypeConversion.hpp
     IMsgForLogMsgSender.hpp
     IMsgForLogMsgReceiver.hpp
@@ -65,19 +73,14 @@ add_library(S_SilKit_Services_Logging STATIC
     LoggingSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Services_Logging
+target_link_libraries(O_SilKit_Services_Logging
     PUBLIC I_SilKit_Services_Logging
-
-    PUBLIC SilKitInterface
-    PUBLIC I_SilKit_Core_Internal
-    PUBLIC I_SilKit_Config
-    PUBLIC S_SilKit_Core_Service
 
     PRIVATE spdlog
 )
 
 if(UNIX)
-    set_target_properties(S_SilKit_Services_Logging
+    set_target_properties(O_SilKit_Services_Logging
         PROPERTIES
         VISIBILITY_INLINES_HIDDEN 1
         CXX_VISIBILITY_PRESET hidden
@@ -86,6 +89,6 @@ endif()
 
 add_silkit_test(Test_MwLoggingLogger 
     SOURCES Test_Logger.cpp 
-    LIBS S_SilKit_Services_Logging I_SilKit_Core_Mock_Participant
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_MwLogging_Serdes SOURCES Test_LoggingSerdes.cpp LIBS S_SilKit_Services_Logging )
+add_silkit_test(Test_MwLogging_Serdes SOURCES Test_LoggingSerdes.cpp LIBS S_SilKitImpl)

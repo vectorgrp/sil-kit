@@ -24,7 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/participant/exception.hpp"
 
-#include "LifecycleService.hpp"
+#include "participant/ParticipantExtensionsImpl.hpp"
+
 #include "CapiImpl.hpp"
 #include "TypeConversion.hpp"
 
@@ -94,10 +95,11 @@ try
     ASSERT_VALID_OUT_PARAMETER(outTimeSyncService);
     ASSERT_VALID_POINTER_PARAMETER(lifecycleService);
 
-    auto cppLifecycleService =
-        reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
-    auto timeSyncService = dynamic_cast<SilKit::Services::Orchestration::LifecycleService*>(cppLifecycleService)->CreateTimeSyncService();
-    *outTimeSyncService = reinterpret_cast<SilKit_TimeSyncService*>(timeSyncService);
+    auto cppLifecycleService = reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(lifecycleService);
+    auto cppTimeSyncService = cppLifecycleService->CreateTimeSyncService();
+
+    *outTimeSyncService = reinterpret_cast<SilKit_TimeSyncService*>(cppTimeSyncService);
+
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -229,6 +231,8 @@ try
 CAPI_CATCH_EXCEPTIONS
 
 
+namespace {
+
 class LifecycleFutureMap
 {
 public:
@@ -266,7 +270,14 @@ private:
     std::map<SilKit_LifecycleService*, ParticipantStateFuture> _map;
 };
 
-static LifecycleFutureMap sLifecycleFutureMap;
+auto GetLifecycleFutureMap() -> std::shared_ptr<LifecycleFutureMap>
+{
+    // XXX: The data stored in the static should be owned and managed by the participant.
+    static auto sLifecycleFutureMap = std::make_shared<LifecycleFutureMap>();
+    return sLifecycleFutureMap;
+}
+
+} // namespace
 
 
 SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_StartLifecycle(SilKit_LifecycleService* clifecycleService)
@@ -278,7 +289,7 @@ try
         reinterpret_cast<SilKit::Services::Orchestration::ILifecycleService*>(
             clifecycleService);
 
-    sLifecycleFutureMap.Add(clifecycleService, cppLifecycleService->StartLifecycle());
+    GetLifecycleFutureMap()->Add(clifecycleService, cppLifecycleService->StartLifecycle());
 
     return SilKit_ReturnCode_SUCCESS;
 }
@@ -292,7 +303,9 @@ try
     ASSERT_VALID_POINTER_PARAMETER(clifecycleService);
     ASSERT_VALID_OUT_PARAMETER(outParticipantState);
 
-    const auto future = sLifecycleFutureMap.Get(clifecycleService);
+    auto lifecycleFutureMap = GetLifecycleFutureMap();
+
+    const auto future = lifecycleFutureMap->Get(clifecycleService);
     if (future == nullptr)
     {
         SilKit_error_string = "Unknown participant to wait for completion of asynchronous run operation";
@@ -305,7 +318,7 @@ try
     }
     const auto finalState = future->get();
     *outParticipantState = static_cast<SilKit_ParticipantState>(finalState);
-    sLifecycleFutureMap.Remove(clifecycleService);
+    lifecycleFutureMap->Remove(clifecycleService);
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -659,6 +672,63 @@ try
     auto* systemMonitor = reinterpret_cast<SilKit::Services::Orchestration::ISystemMonitor*>(cSystemMonitor);
 
     *out = systemMonitor->IsParticipantConnected(std::string{participantName}) ? SilKit_True : SilKit_False;
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_Create(
+    SilKit_Experimental_SystemController** outSystemController, SilKit_Participant* participant)
+try
+{
+    ASSERT_VALID_OUT_PARAMETER(outSystemController);
+    ASSERT_VALID_POINTER_PARAMETER(participant);
+
+    auto* cppParticipant = reinterpret_cast<SilKit::IParticipant*>(participant);
+    auto* cppSystemController = SilKit::Experimental::Participant::CreateSystemControllerImpl(cppParticipant);
+    *outSystemController = reinterpret_cast<SilKit_Experimental_SystemController*>(cppSystemController);
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_AbortSimulation(
+    SilKit_Experimental_SystemController* cSystemController)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(cSystemController);
+
+    auto* cppSystemController =
+        reinterpret_cast<SilKit::Experimental::Services::Orchestration::ISystemController*>(cSystemController);
+
+    cppSystemController->AbortSimulation();
+
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_SystemController_SetWorkflowConfiguration(
+    SilKit_Experimental_SystemController* cSystemController,
+    const SilKit_WorkflowConfiguration* cWorkflowConfiguration)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(cSystemController);
+    ASSERT_VALID_POINTER_PARAMETER(cWorkflowConfiguration);
+
+    auto* cppSystemMonitor =
+        reinterpret_cast<SilKit::Experimental::Services::Orchestration::ISystemController*>(cSystemController);
+
+    SilKit::Services::Orchestration::WorkflowConfiguration cppWorkflowConfiguration{};
+    for (size_t index = 0; index < cWorkflowConfiguration->requiredParticipantNames->numStrings; ++index)
+    {
+        cppWorkflowConfiguration.requiredParticipantNames.emplace_back(
+            cWorkflowConfiguration->requiredParticipantNames->strings[index]);
+    }
+
+    cppSystemMonitor->SetWorkflowConfiguration(cppWorkflowConfiguration);
 
     return SilKit_ReturnCode_SUCCESS;
 }

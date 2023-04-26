@@ -21,41 +21,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/SilKitMacros.hpp"
+#include "silkit/experimental/services/lin/LinDatatypesExtensions.hpp"
 #include "silkit/services/lin/ILinController.hpp"
 
+#include "silkit/detail/macros.hpp"
+
+
 namespace SilKit {
+DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN
 namespace Experimental {
 namespace Services {
 namespace Lin {
-
-using namespace SilKit::Services::Lin;
-
-/*! \brief A LIN frame response update event delivered in the \ref LinSlaveConfigurationHandler
-*
-* The event is received on a LIN Master when a LIN Slave is configured via LinController::Init().
-* This event is mainly for diagnostic purposes and can be used to keep track of LIN Ids, where
-* a response of a LIN Slave is to be expected by using \ref GetSlaveConfiguration() in the handler.
-* 
-*/
-struct LinSlaveConfigurationEvent
-{
-    std::chrono::nanoseconds timestamp; //!< Time of the event.
-};
-
-/*! Callback type to indicate that a LIN Slave configuration has been received.
- *  
- * Triggered when a remote LIN Slave calls LinController::Init() or LinController::SetFrameResponse().
- *  Cf., \ref AddLinSlaveConfigurationHandler
- */
-using LinSlaveConfigurationHandler = ILinController::CallbackT<LinSlaveConfigurationEvent>;
-
-//! \brief The aggregated configuration of all LIN slaves in the network.
-struct LinSlaveConfiguration
-{
-    std::vector<LinId>
-        respondingLinIds; //!< A vector of LinIds on which any LIN Slave has configured LinFrameResponseMode::TxUnconditional
-};
 
 /*! \brief Add a LinSlaveConfigurationHandler on a given controller that triggers when a remote LIN slave is changes its configuration.
  *
@@ -70,8 +46,9 @@ struct LinSlaveConfiguration
  * 
  * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
  */
-SilKitAPI auto AddLinSlaveConfigurationHandler(ILinController* linController, LinSlaveConfigurationHandler handler)
-    -> SilKit::Util::HandlerId;
+DETAIL_SILKIT_CPP_API auto AddLinSlaveConfigurationHandler(
+    SilKit::Services::Lin::ILinController* linController,
+    SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler) -> SilKit::Util::HandlerId;
 
 /*! \brief Remove a LinSlaveConfigurationHandler by HandlerId on a given controller.
  *
@@ -80,7 +57,8 @@ SilKitAPI auto AddLinSlaveConfigurationHandler(ILinController* linController, Li
  * \param linController The LIN controller to remove the handler.
  * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
  */
-SilKitAPI void RemoveLinSlaveConfigurationHandler(ILinController* linController, SilKit::Util::HandlerId handlerId);
+DETAIL_SILKIT_CPP_API void RemoveLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* linController,
+                                                              SilKit::Util::HandlerId handlerId);
 
 /*! \brief Get the aggregated response configuration of all LIN slaves in the network.
  *
@@ -90,9 +68,16 @@ SilKitAPI void RemoveLinSlaveConfigurationHandler(ILinController* linController,
  * 
  * \return A struct containing all LinIds on which LIN Slaves have configured Services::Lin::LinFrameResponseMode::TxUnconditional.
  */
-SilKitAPI auto GetSlaveConfiguration(ILinController* linController) -> LinSlaveConfiguration;
+DETAIL_SILKIT_CPP_API auto GetSlaveConfiguration(SilKit::Services::Lin::ILinController* linController)
+    -> SilKit::Experimental::Services::Lin::LinSlaveConfiguration;
 
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental
+DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE
 } // namespace SilKit
+
+
+//! \cond DOCUMENT_HEADER_ONLY_DETAILS
+#include "silkit/detail/impl/experimental/services/lin/LinControllerExtensions.ipp"
+//! \endcond

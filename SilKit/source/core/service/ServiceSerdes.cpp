@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-// ServiceDescriptor encoding is here, because it pulls in S_SilKit_Config
+// ServiceDescriptor encoding is here, because it pulls in O_SilKit_Config
 inline SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer,
     const SilKit::Core::ServiceDescriptor& msg)
 {

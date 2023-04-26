@@ -20,8 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
-#include <stdint.h>
-#include <limits.h>
+
 #include "silkit/capi/SilKitMacros.h"
 #include "silkit/capi/Types.h"
 #include "silkit/capi/Can.h"
@@ -34,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/capi/InterfaceIdentifiers.h"
 #include "silkit/capi/Participant.h"
 #include "silkit/capi/Orchestration.h"
+#include "silkit/capi/Vendor.h"
 #include "silkit/capi/Version.h"
 
 SILKIT_BEGIN_DECLS

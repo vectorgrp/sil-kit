@@ -141,10 +141,10 @@ public:
 
     /*! \brief Register a callback for controller state changes
      *
-     * The registered handler is called when the ::CanControllerState of
+     * The registered handler is called when the \ref SilKit::Services::Can::CanControllerState of
      * the controller changes. E.g., after starting the controller, the
-     * state changes from CanControllerState::Uninit to
-     * CanControllerState::Started.
+     * state changes from \ref SilKit::Services::Can::CanControllerState::Uninit to
+     * \ref SilKit::Services::Can::CanControllerState::Started.
      * 
      * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
      */
@@ -158,9 +158,9 @@ public:
 
     /*! \brief Register a callback for changes of the controller's error state
      *
-     * The registered handler is called when the ::CanErrorState of the
+     * The registered handler is called when the \ref SilKit::Services::Can::CanErrorState of the
      * controller changes. During normal operation, the controller
-     * should be in state CanErrorState::ErrorActive. The states correspond
+     * should be in state \ref SilKit::Services::Can::CanErrorState::ErrorActive. The states correspond
      * to the error state handling protocol of the CAN specification.
      *
      * NB: Only supported in a detailed simulation. In simple simulation,

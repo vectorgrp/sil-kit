@@ -24,6 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ITest_Internals_DataPubSub.hpp"
 
+#include "ParticipantConfigurationFromXImpl.hpp"
+
 namespace {
 
 using namespace SilKit::Services;
@@ -109,8 +111,8 @@ DataSubscribers:
 - Name: SubCtrl2
 )raw";
 
-    auto configPubSub1 = SilKit::Config::ParticipantConfigurationFromString(configStringPubSub1);
-    auto configPubSub2 = SilKit::Config::ParticipantConfigurationFromString(configStringPubSub2);
+    auto configPubSub1 = SilKit::Config::ParticipantConfigurationFromStringImpl(configStringPubSub1);
+    auto configPubSub2 = SilKit::Config::ParticipantConfigurationFromStringImpl(configStringPubSub2);
 
     std::vector<PubSubParticipant> pubsubs;
     pubsubs.push_back({

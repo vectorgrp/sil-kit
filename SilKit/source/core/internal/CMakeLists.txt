@@ -28,6 +28,7 @@ target_include_directories(I_SilKit_Core_Internal
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../service # ServiceDiscovery is internal only special
 )
 target_link_libraries(I_SilKit_Core_Internal
+    INTERFACE SilKitInterface
     INTERFACE I_SilKit_Wire_Util
     INTERFACE I_SilKit_Wire_Can
     INTERFACE I_SilKit_Wire_Data

@@ -423,6 +423,6 @@ reside in the `SilKit::Experimental::Services::Lin` namespace and might be chang
 
 The experimental API is defined as follows:
 
-.. doxygenfunction:: SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(ILinController* linController, LinSlaveConfigurationHandler handler)
-.. doxygenfunction:: SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(ILinController* linController, SilKit::Util::HandlerId handlerId)
-.. doxygenfunction:: SilKit::Experimental::Services::Lin::GetSlaveConfiguration(ILinController* linController)
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Util::HandlerId handlerId)
+.. doxygenfunction:: SilKit::Experimental::Services::Lin::GetSlaveConfiguration(SilKit::Services::Lin::ILinController* linController)

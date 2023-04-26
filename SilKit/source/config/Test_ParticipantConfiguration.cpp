@@ -27,6 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "NullConnectionParticipant.hpp"
 #include "ParticipantConfiguration.hpp"
+#include "ParticipantConfigurationFromXImpl.hpp"
 #include "silkit/services/all.hpp"
 #include "functional.hpp"
 
@@ -60,19 +61,19 @@ protected:
 
 TEST_F(ParticipantConfigurationExamplesITest, throw_if_logging_is_configured_without_filename)
 {
-    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Logging_Without_File.json"),
+    EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Logging_Without_File.json"),
                  SilKit::ConfigurationError);
 }
 
 TEST_F(ParticipantConfigurationExamplesITest, minimal_configuration_file)
 {
-    auto cfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Minimal.json");
+    auto cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Minimal.json");
     CreateParticipantFromConfiguration(cfg);
 }
 
 TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file)
 {
-    auto cfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.json");
+    auto cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Full.json");
     CreateParticipantFromConfiguration(cfg);
 }
 
@@ -81,8 +82,8 @@ TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file)
 */
 TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file_json_yaml_equal)
 {
-    auto jsonCfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.json");
-    auto yamlCfg = SilKit::Config::ParticipantConfigurationFromFile("ParticipantConfiguration_Full.yaml");
+    auto jsonCfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Full.json");
+    auto yamlCfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Full.yaml");
 
     // cast to ParticipantConfiguration to use right equal operator
     auto participantConfigJson = *std::dynamic_pointer_cast<ParticipantConfiguration>(jsonCfg);

@@ -32,6 +32,7 @@ add_subdirectory(experimental)
 add_subdirectory(dashboard)
 
 find_package(Threads REQUIRED)
+
 # Encode the current GIT and version infos into version_macros.hpp
 # If this file is present in the current source directory we assume
 # that this source-tree is a non-git/packaged source tree and re-use
@@ -79,28 +80,137 @@ if(SILKIT_BUILD_STATIC)
 endif()
 
 
-add_library(SilKit ${silkitLibType}
-    SilKit.hpp
-    SilKit.cpp
+add_library(I_SilKit_CreateParticipantImpl INTERFACE)
 
-    capi/TypeConversion.hpp
-    capi/CapiParticipant.cpp
-    capi/CapiCan.cpp
-    capi/CapiEthernet.cpp
-    capi/CapiFlexray.cpp
-    capi/CapiLogger.cpp
-    capi/CapiLin.cpp
-    capi/CapiOrchestration.cpp
-    capi/CapiDataPubSub.cpp
-    capi/CapiRpc.cpp
-    capi/CapiUtils.cpp
-    capi/CapiVersion.cpp
-    capi/CapiImpl.hpp
-
-    SilKitForceIncludes.cpp
-    CreateSilKitRegistry.cpp
+target_include_directories(I_SilKit_CreateParticipantImpl
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+add_library(O_SilKit_CreateParticipantImpl OBJECT
+    CreateParticipantImpl.hpp
+    CreateParticipantImpl.cpp
+)
+
+target_link_libraries(O_SilKit_CreateParticipantImpl
+    PUBLIC I_SilKit_CreateParticipantImpl
+    PUBLIC SilKitInterface
+
+    PRIVATE I_SilKit_Config
+    PRIVATE I_SilKit_Core_Internal
+
+    PRIVATE O_SilKit_Core_Participant
+)
+
+
+add_library(I_SilKit_CreateSilKitRegistryImpl INTERFACE)
+
+target_include_directories(I_SilKit_CreateSilKitRegistryImpl
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_library(O_SilKit_CreateSilKitRegistryImpl OBJECT
+    CreateSilKitRegistryImpl.hpp
+    CreateSilKitRegistryImpl.cpp
+)
+
+target_link_libraries(O_SilKit_CreateSilKitRegistryImpl
+    PUBLIC I_SilKit_CreateSilKitRegistryImpl
+    PUBLIC SilKitInterface
+
+    PRIVATE O_SilKit_Core_VAsio
+)
+
+
+add_library(I_SilKit_VersionImpl INTERFACE)
+target_include_directories(I_SilKit_VersionImpl
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_library(O_SilKit_VersionImpl OBJECT
+    SilKitVersionImpl.cpp
+    SilKitVersionImpl.hpp
+    ${VERSION_MACROS_HPP}
+)
+target_link_libraries(O_SilKit_VersionImpl
+    PUBLIC I_SilKit_VersionImpl
+    PUBLIC SilKitInterface
+)
+
+
+add_library(O_SilKitLegacyAbi OBJECT
+    # Exported "Legacy" ABI Functions:
+    # - SilKit::Config::ParticipantConfigurationFromFile
+    # - SilKit::Config::ParticipantConfigurationFromString
+    # - SilKit::Experimental::Participant::CreateSystemController
+    # - SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler
+    # - SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler
+    # - SilKit::Experimental::Services::Lin::GetSlaveConfiguration
+    # - SilKit::Vendor::Vector::CreateSilKitRegistry
+    # - SilKit::Version::{Major, Minor, Patch, BuildNumber, String, VersionSuffix, GitHash}
+    # - SilKit::CreateParticipant (x2)
+    LegacyAbi.cpp
+)
+
+target_link_libraries(O_SilKitLegacyAbi
+    PRIVATE SilKitInterface
+    PRIVATE I_SilKit_CreateParticipantImpl
+    PRIVATE I_SilKit_CreateSilKitRegistryImpl
+    PRIVATE I_SilKit_VersionImpl
+    PRIVATE I_SilKit_Config
+    PRIVATE I_SilKit_Experimental
+)
+
+
+set(SilKitImplObjectLibraries "")
+list(APPEND SilKitImplObjectLibraries
+    O_SilKit_Config
+    O_SilKit_Core_Participant
+    O_SilKit_Core_Service
+    O_SilKit_Core_VAsio
+    O_SilKit_Experimental
+    O_SilKit_Extensions
+    O_SilKit_Services_Can
+    O_SilKit_Services_Ethernet
+    O_SilKit_Services_Flexray
+    O_SilKit_Services_Lin
+    O_SilKit_Services_Logging
+    O_SilKit_Services_Orchestration
+    O_SilKit_Services_PubSub
+    O_SilKit_Services_Rpc
+    O_SilKit_Tracing
+    O_SilKit_Util_Filesystem
+    O_SilKit_Util_SetThreadName
+    O_SilKit_Util_Uuid
+    O_SilKit_Util_Uri
+    O_SilKit_Util_LabelMatching
+
+    O_SilKit_Capi
+
+    O_SilKit_CreateParticipantImpl
+    O_SilKit_CreateSilKitRegistryImpl
+    O_SilKit_VersionImpl
+
+    O_SilKitLegacyAbi
+)
+
+
+add_library(S_SilKitImpl STATIC)
+
+target_include_directories(S_SilKitImpl
+    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+target_link_libraries(S_SilKitImpl
+    PUBLIC SilKitInterface
+    PUBLIC Threads::Threads
+
+    PUBLIC ${SilKitImplObjectLibraries}
+)
+
+
+add_library(SilKit ${silkitLibType}
+    SilKitForceIncludes.cpp
+)
 
 if(SILKIT_BUILD_STATIC)
     target_compile_definitions(SilKit PUBLIC -D SILKIT_BUILD_STATIC=1)
@@ -133,7 +243,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     # add the file name (xxx.a) to the list
     list(APPEND SILKIT_LINK_EXCLUDE_LIBS "$<TARGET_FILE_NAME:spdlog>")
     list(APPEND SILKIT_LINK_EXCLUDE_LIBS "$<TARGET_FILE_NAME:yaml-cpp>")
-    list(APPEND SILKIT_LINK_EXCLUDE_LIBS "$<TARGET_FILE_NAME:S_SilKit_Core_VAsio>")
     # format the list such that the linker flag accepts it
     list(JOIN SILKIT_LINK_EXCLUDE_LIBS ":" SILKIT_LINK_EXCLUDE_LIBS)
     # add the excluded libs to the linker command line
@@ -149,24 +258,10 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(SilKit
-    PUBLIC
-    SilKitInterface
-    PRIVATE
-    I_SilKit_Core_Internal
-    S_SilKit_Config
-    S_SilKit_Core_Participant
-    S_SilKit_Extensions
-    I_SilKit_Util
-    S_SilKit_Experimental
-)
+    PUBLIC SilKitInterface
+    PUBLIC Threads::Threads
 
-add_library(SilKitVersion STATIC
-    SilKitVersion.cpp
-    SilKitVersion.hpp
-    ${VERSION_MACROS_HPP}
-)
-target_link_libraries(SilKitVersion
-    PUBLIC  SilKitInterface
+    PRIVATE ${SilKitImplObjectLibraries}
 )
 
 #add an alias for the exported name which includes a namespace

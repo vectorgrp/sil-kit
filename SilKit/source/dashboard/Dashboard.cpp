@@ -35,6 +35,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "SetThreadName.hpp"
 
+#include "ParticipantConfiguration.hpp"
+#include "CreateParticipantImpl.hpp"
+
 #include "CachingSilKitEventHandler.hpp"
 #include "DashboardRetryPolicy.hpp"
 #include "DashboardSystemServiceClient.hpp"
@@ -55,7 +58,7 @@ uint64_t GetCurrentTime()
 Dashboard::Dashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                      const std::string& registryUri)
 {
-    _dashboardParticipant = SilKit::CreateParticipant(participantConfig, "__SilKitDashboard", registryUri);
+    _dashboardParticipant = SilKit::CreateParticipantImpl(participantConfig, "__SilKitDashboard", registryUri);
     _participantInternal = dynamic_cast<Core::IParticipantInternal*>(_dashboardParticipant.get());
     _retryPolicy = std::make_shared<DashboardRetryPolicy>(3);
     OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, objectMapper);

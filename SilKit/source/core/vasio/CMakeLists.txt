@@ -29,11 +29,29 @@ target_include_directories(I_SilKit_Core_VAsio
 )
 
 target_link_libraries(I_SilKit_Core_VAsio
+    INTERFACE SilKitInterface
+
+    INTERFACE I_SilKit_Config
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Core_Service
+    INTERFACE I_SilKit_Services_Can
+    INTERFACE I_SilKit_Services_Ethernet
+    INTERFACE I_SilKit_Services_Flexray
+    INTERFACE I_SilKit_Services_Lin
+    INTERFACE I_SilKit_Services_Logging
+    INTERFACE I_SilKit_Services_Orchestration
+    INTERFACE I_SilKit_Services_PubSub
+    INTERFACE I_SilKit_Services_Rpc
+    INTERFACE I_SilKit_Util
+    INTERFACE I_SilKit_Util_Filesystem
+    INTERFACE I_SilKit_Util_Uri
+
     INTERFACE asio
+    INTERFACE Threads::Threads
 )
 
 
-add_library(S_SilKit_Core_VAsio STATIC
+add_library(O_SilKit_Core_VAsio OBJECT
     VAsioConnection.hpp
     VAsioConnection.cpp
 
@@ -63,53 +81,34 @@ add_library(S_SilKit_Core_VAsio STATIC
     SerializedMessage.cpp
 )
 
-target_link_libraries(S_SilKit_Core_VAsio
+target_link_libraries(O_SilKit_Core_VAsio
     PUBLIC I_SilKit_Core_VAsio
-
-    PUBLIC
-      I_SilKit_Util
-      SilKitInterface
-      I_SilKit_Core_Internal
-      S_SilKit_Services_Orchestration
-      S_SilKit_Services_Logging
-      S_SilKit_Core_Service
-      S_SilKit_Services_PubSub
-      S_SilKit_Services_Rpc
-      S_SilKit_Services_Can
-      S_SilKit_Util_Uri
-      S_SilKit_Services_Ethernet
-      S_SilKit_Services_Lin
-      S_SilKit_Services_Flexray
-      Threads::Threads
-      S_SilKit_Util_Filesystem
-
-    INTERFACE I_SilKit_Config
 )
 
-target_compile_definitions(S_SilKit_Core_VAsio PRIVATE ASIO_STANDALONE)
+target_compile_definitions(O_SilKit_Core_VAsio PRIVATE ASIO_STANDALONE)
 
-target_include_directories(S_SilKit_Core_VAsio
+target_include_directories(O_SilKit_Core_VAsio
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 
 if (MSVC)
-    target_compile_options(S_SilKit_Core_VAsio PRIVATE "/bigobj")
+    target_compile_options(O_SilKit_Core_VAsio PRIVATE "/bigobj")
     target_compile_definitions(I_SilKit_Core_VAsio INTERFACE _WIN32_WINNT=0x0601)
 endif()
 if(MINGW)
     target_compile_definitions(I_SilKit_Core_VAsio INTERFACE _WIN32_WINNT=0x0601)
-    target_link_libraries(S_SilKit_Core_VAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
+    target_link_libraries(O_SilKit_Core_VAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
 endif()
 
-add_silkit_test(Test_MwVAsioConnection SOURCES Test_VAsioConnection.cpp LIBS S_SilKit_Core_VAsio I_SilKit_Core_Mock_Participant)
+add_silkit_test(Test_MwVAsioConnection SOURCES Test_VAsioConnection.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
 
-add_silkit_test(Test_MwVAsio_Serdes  SOURCES Test_VAsioSerdes.cpp LIBS S_SilKit_Core_VAsio)
-add_silkit_test(Test_MwVAsio_SerializedMessage  SOURCES Test_SerializedMessage.cpp LIBS S_SilKit_Core_VAsio)
-add_silkit_test(Test_MwVAsio_Uri  SOURCES Test_Uri.cpp LIBS S_SilKit_Core_VAsio)
-add_silkit_test(Test_MwVAsio_TransformAcceptorUris  SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKit_Core_VAsio)
+add_silkit_test(Test_MwVAsio_Serdes  SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)
+add_silkit_test(Test_MwVAsio_SerializedMessage  SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
+add_silkit_test(Test_MwVAsio_Uri  SOURCES Test_Uri.cpp LIBS S_SilKitImpl)
+add_silkit_test(Test_MwVAsio_TransformAcceptorUris  SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKitImpl)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version
 # and do integration tests here
-add_silkit_test(ITest_ParticipantVersion SOURCES Test_ParticipantVersion.cpp LIBS S_SilKit_Core_Participant S_ITests_STH)
+add_silkit_test(ITest_ParticipantVersion SOURCES Test_ParticipantVersion.cpp LIBS S_SilKitImpl S_ITests_STH)

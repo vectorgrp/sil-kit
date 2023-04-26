@@ -20,6 +20,8 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ParticipantConfiguration.hpp"
+#include "ParticipantConfigurationFromXImpl.hpp"
+#include "CreateParticipantImpl.hpp"
 
 #include "silkit/capi/SilKit.h"
 #include "silkit/SilKit.hpp"
@@ -52,7 +54,7 @@ try
         std::make_shared<SilKit::Config::ParticipantConfiguration>(*cppParticipantConfiguration);
 
     auto participant =
-        SilKit::CreateParticipant(std::move(cppSharedParticipantConfiguration), participantName, registryUri)
+        SilKit::CreateParticipantImpl(std::move(cppSharedParticipantConfiguration), participantName, registryUri)
             .release();
 
     if (participant == nullptr)
@@ -110,7 +112,7 @@ try
 
     // create the configuration using the C++ API function
     auto cppSharedParticipantConfiguration = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(
-        SilKit::Config::ParticipantConfigurationFromString(participantConfigurationString));
+        SilKit::Config::ParticipantConfigurationFromStringImpl(participantConfigurationString));
     if (cppSharedParticipantConfiguration == nullptr)
     {
         SilKit_error_string = "Participant configuration could not be created.";

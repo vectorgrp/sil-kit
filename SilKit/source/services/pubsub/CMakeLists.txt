@@ -26,8 +26,17 @@ target_include_directories(I_SilKit_Services_PubSub
     INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
+target_link_libraries(I_SilKit_Services_PubSub
+    INTERFACE SilKitInterface
 
-add_library(S_SilKit_Services_PubSub STATIC
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Core_Participant
+    INTERFACE I_SilKit_Tracing
+    INTERFACE I_SilKit_Wire_Data
+)
+
+
+add_library(O_SilKit_Services_PubSub OBJECT
     DataMessageDatatypeUtils.hpp
     DataMessageDatatypeUtils.cpp
     DataPublisher.hpp
@@ -42,35 +51,33 @@ add_library(S_SilKit_Services_PubSub STATIC
     DataSerdes.cpp
 )
 
-target_link_libraries(S_SilKit_Services_PubSub
+target_link_libraries(O_SilKit_Services_PubSub
     PUBLIC I_SilKit_Services_PubSub
 
-    PUBLIC  I_SilKit_Wire_Data
-            S_SilKit_Tracing
     PRIVATE SilKitInterface
-            I_SilKit_Core_Internal
-            I_SilKit_Config
-            I_SilKit_Util
-            S_SilKit_Util_LabelMatching
+    PRIVATE I_SilKit_Core_Internal
+    PRIVATE I_SilKit_Config
+    PRIVATE I_SilKit_Util
+    PRIVATE I_SilKit_Util_LabelMatching
 )
 
 add_silkit_test(Test_SimDataPublisher 
     SOURCES Test_DataPublisher.cpp 
-    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
 add_silkit_test(Test_SimDataSubscriber
     SOURCES Test_DataSubscriber.cpp
-    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal 
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
 add_silkit_test(Test_SimDataSubscriberInternal
     SOURCES Test_DataSubscriberInternal.cpp
-    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Mock_Participant I_SilKit_Core_Internal
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
 add_silkit_test(Test_PubSubMatching
     SOURCES Test_PubSubMatching.cpp 
-    LIBS S_SilKit_Services_PubSub I_SilKit_Util
+    LIBS S_SilKitImpl
 )
 add_silkit_test(Test_SimData_Serdes
     SOURCES Test_DataSerdes.cpp
-    LIBS S_SilKit_Services_PubSub I_SilKit_Core_Internal
+    LIBS S_SilKitImpl
 )

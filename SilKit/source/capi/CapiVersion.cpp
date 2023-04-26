@@ -20,7 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/capi/SilKit.h"
-#include "silkit/SilKitVersion.hpp"
+#include "SilKitVersionImpl.hpp"
 #include "CapiImpl.hpp"
 
 
@@ -29,7 +29,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMajor);
 
-    *outVersionMajor = SilKit::Version::Major();
+    *outVersionMajor = SilKit::Version::MajorImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -40,7 +40,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionMinor);
 
-    *outVersionMinor = SilKit::Version::Minor();
+    *outVersionMinor = SilKit::Version::MinorImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -51,7 +51,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionPatch);
 
-    *outVersionPatch = SilKit::Version::Patch();
+    *outVersionPatch = SilKit::Version::PatchImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -62,7 +62,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionBuildNumber);
 
-    *outVersionBuildNumber = SilKit::Version::BuildNumber();
+    *outVersionBuildNumber = SilKit::Version::BuildNumberImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -73,7 +73,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionString);
 
-    *outVersionString = SilKit::Version::String();
+    *outVersionString = SilKit::Version::StringImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -84,7 +84,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionSuffix);
 
-    *outVersionSuffix = SilKit::Version::VersionSuffix();
+    *outVersionSuffix = SilKit::Version::VersionSuffixImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS
@@ -95,7 +95,7 @@ try
 {
     ASSERT_VALID_OUT_PARAMETER(outVersionGitHash);
 
-    *outVersionGitHash = SilKit::Version::GitHash();
+    *outVersionGitHash = SilKit::Version::GitHashImpl();
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

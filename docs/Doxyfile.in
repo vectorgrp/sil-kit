@@ -907,7 +907,7 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */silkit/detail/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -2161,7 +2161,11 @@ PREDEFINED             = "SilKitAPI=" \
                          "SilKitCALL=" \
                          "SilKitFPTR=" \
                          "SILKIT_BEGIN_DECLS" \
-                         "SILKIT_END_DECLS"
+                         "SILKIT_END_DECLS" \
+                         "DETAIL_SILKIT_DETAIL_VN_NAMESPACE_BEGIN=" \
+                         "DETAIL_SILKIT_DETAIL_VN_NAMESPACE_CLOSE=" \
+                         "DETAIL_SILKIT_CPP_API=" \
+                         "__cplusplus"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

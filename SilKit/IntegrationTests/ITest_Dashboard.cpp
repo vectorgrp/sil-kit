@@ -28,11 +28,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ITestFixture.hpp"
 #include "ITestThreadSafeLogger.hpp"
+#include "InternalHelpers.hpp"
 
 #include "silkit/services/all.hpp"
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
 #include "silkit/config/all.hpp"
+#include "ParticipantConfigurationFromXImpl.hpp"
 
 #include "CreateDashboard.hpp"
 
@@ -49,9 +51,10 @@ protected:
         : ITest_SimTestHarness()
         , _dashboardUri(MakeTestDashboardUri())
         , _participantConfig(
-              ParticipantConfigurationFromString(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"))
+              ParticipantConfigurationFromStringImpl(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"))
     {
     }
+
     ~DashboardTestHarness() {}
 
 protected:
@@ -450,7 +453,7 @@ TEST_F(DashboardTestHarness, dashboard_netsim)
             auto* participant = simParticipant->Participant();
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
             auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            auto&& participantInternal = dynamic_cast<IParticipantInternal*>(participant);
+            auto&& participantInternal = &SilKit::Tests::ToParticipantInternal(*participant);
             auto&& serviceDiscovery = participantInternal->GetServiceDiscovery();
 
             lifecycleService->SetCommunicationReadyHandler([participantName, serviceDiscovery]() {

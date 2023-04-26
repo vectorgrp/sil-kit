@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <thread>
 #include <future>
 
+#include "silkit/SilKit.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/participant/exception.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
@@ -32,8 +33,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 #include "GetTestPid.hpp"
-
-#include "HourglassHelpers.hpp"
 
 namespace {
 
@@ -73,11 +72,11 @@ TEST_F(ITest_CatchExceptionsInCallbacks, please_dont_crash_vasio)
     auto registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     registry->StartListening(registryUri);
 
-    auto pubParticipant = SilKit::IntegrationTests::CreateParticipant(
-        SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "Sender", registryUri);
+    auto pubParticipant =
+        SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""), "Sender", registryUri);
 
-    auto subParticipant = SilKit::IntegrationTests::CreateParticipant(
-        SilKit::IntegrationTests::ParticipantConfigurationFromString(""), "Receiver", registryUri);
+    auto subParticipant =
+        SilKit::CreateParticipant(SilKit::Config::ParticipantConfigurationFromString(""), "Receiver", registryUri);
 
     SilKit::Services::PubSub::PubSubSpec dataSpec{"CrashTopic", {}};
     SilKit::Services::PubSub::PubSubSpec matchingDataSpec{"CrashTopic", {}};
