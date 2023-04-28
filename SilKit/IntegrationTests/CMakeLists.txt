@@ -147,6 +147,14 @@ add_silkit_test(ITest_AsyncSimTask
       S_ITests_STH
 )
 
+add_silkit_test(ITest_SimTask
+    SOURCES
+    ITest_SimTask.cpp
+
+    LIBS
+    SilKit
+)
+
 # Windows specific tests
 if(MSVC)
     add_silkit_test(ITest_CompatibilityWithWindowsHeaders
