@@ -529,16 +529,18 @@ TEST_F(ITest_SimTestHarness, lin_demo)
     EXPECT_GT(masterSendTimes.size(), 0u);
     EXPECT_GT(masterRecvTimes.size(), 0u);
 
-    for (auto ts : masterSendTimes)
+    ASSERT_EQ(masterSendTimes.size(), masterRecvTimes.size());
+
+    for (auto i = 0u; i < masterRecvTimes.size(); i++)
     {
-      merged.insert(ts);
+        const auto& sendT = masterSendTimes.at(i);
+        const auto& recvT = masterRecvTimes.at(i);
+        const auto deltaT = recvT - sendT;
+        EXPECT_TRUE(deltaT >= 0ms) << "received response before sending request (sendTime=" << sendT.count()
+                                   << "ns, recvTime=" << recvT.count() << "ns)";
+        EXPECT_TRUE(deltaT <= 1ms) << "received response more than one timestep after sending the request (sendTime="
+                                   << sendT.count() << "ns, recvTime=" << recvT.count() << "ns)";
     }
-    for (auto ts : masterRecvTimes)
-    {
-      merged.insert(ts);
-    }
-    EXPECT_EQ(merged.size(), (masterSendTimes.size() + masterRecvTimes.size())/2)
-      << "The send times and receive times should be the same in trivial simulation.";
 
     // Ensure that the receive times have no least significant digits (i.e., are rounded to 1ms)
     for (auto ts: masterRecvTimes)

@@ -443,25 +443,11 @@ private:
     template <typename... MethodArgs, typename... Args>
     inline void ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)
     {
-        if (std::this_thread::get_id() == _ioWorker.get_id())
-        {
-            (this->*method)(std::forward<Args>(args)...);
-        }
-        else
-        {
-            asio::dispatch(_ioContext.get_executor(), [=]() mutable { (this->*method)(std::move(args)...); });
-        }
+        asio::post(_ioContext.get_executor(), [=]() mutable { (this->*method)(std::move(args)...); });
     }
     inline void ExecuteOnIoThread(std::function<void()> function)
     {
-        if (std::this_thread::get_id() == _ioWorker.get_id())
-        {
-            function();
-        }
-        else
-        {
-            asio::dispatch(_ioContext.get_executor(), std::move(function));
-        }
+        asio::post(_ioContext.get_executor(), std::move(function));
     }
 
     template <class SilKitServiceT>

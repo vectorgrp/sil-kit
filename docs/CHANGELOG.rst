@@ -23,6 +23,14 @@ Added
   - Support can be disabled on a particular participant using the new
     "Middleware/RegistryAsFallbackProxy" field in the participant configuration
 
+Fixed
+~~~~~
+
+- Messages are sent in the same order as the SIL Kit API calls that triggered
+  them, regardless of the thread or handler the API calls were executed from.
+  There are no ordering guarantees for API calls that are executed in parallel
+  from different threads.
+
 
 [4.0.23] - 2023-04-17
 ---------------------
