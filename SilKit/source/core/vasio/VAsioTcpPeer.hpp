@@ -30,12 +30,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "IVAsioPeer.hpp"
 #include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
-#include "IServiceEndpoint.hpp"
 #include "ProtocolVersion.hpp"
+#include "IVAsioConnectionPeer.hpp"
 
 
 namespace SilKit {
@@ -44,8 +43,7 @@ namespace Core {
 class VAsioConnection;
 
 class VAsioTcpPeer
-    : public IVAsioPeer
-    , public IServiceEndpoint
+    : public IVAsioConnectionPeer
     , public std::enable_shared_from_this<VAsioTcpPeer>
 {
 public:

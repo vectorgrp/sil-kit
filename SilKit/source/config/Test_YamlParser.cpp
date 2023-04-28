@@ -206,6 +206,7 @@ Middleware:
   EnableDomainSockets: false
   TcpSendBufferSize: 3456
   TcpReceiveBufferSize: 3456
+  RegistryAsFallbackProxy: false
 
 )raw";
 
@@ -265,6 +266,7 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
     EXPECT_TRUE(config.middleware.tcpNoDelay == true);
     EXPECT_TRUE(config.middleware.tcpReceiveBufferSize == 3456);
     EXPECT_TRUE(config.middleware.tcpSendBufferSize == 3456);
+    EXPECT_FALSE(config.middleware.registryAsFallbackProxy);
 }
 
 const auto emptyConfiguration = R"raw(
@@ -359,7 +361,8 @@ TEST_F(YamlParserTest, middleware_convert)
             "TcpQuickAck": true,
             "TcpSendBufferSize": 3456,
             "TcpReceiveBufferSize": 3456,
-            "EnableDomainSockets": false
+            "EnableDomainSockets": false,
+            "RegistryAsFallbackProxy": false
         }
     )");
     auto config = node.as<Middleware>();
@@ -371,6 +374,7 @@ TEST_F(YamlParserTest, middleware_convert)
     EXPECT_EQ(config.tcpQuickAck, true);
     EXPECT_EQ(config.tcpSendBufferSize, 3456);
     EXPECT_EQ(config.tcpReceiveBufferSize, 3456);
+    EXPECT_EQ(config.registryAsFallbackProxy, false);
 }
 
 TEST_F(YamlParserTest, map_serdes)

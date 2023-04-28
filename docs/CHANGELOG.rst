@@ -16,6 +16,13 @@ Added
 
   - The C++ symbols are still provided by the shared library, but are not used by default anymore
 
+- If a participant cannot establish a direct connection to another participant,
+  it will fall back to using the registry as a proxy for communications with
+  this particular participant
+
+  - Support can be disabled on a particular participant using the new
+    "Middleware/RegistryAsFallbackProxy" field in the participant configuration
+
 
 [4.0.23] - 2023-04-17
 ---------------------

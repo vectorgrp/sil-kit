@@ -227,6 +227,8 @@ struct Middleware
     bool tcpQuickAck{ false }; //!< Setting this Linux specific flag disables delayed TCP/IP acknowledgements.
     bool enableDomainSockets{ true }; //!< By default local domain socket is preferred to TCP/IP sockets.
     std::vector<std::string> acceptorUris{}; //!< Explicit list of endpoints this participant will accept connections on.
+    //! By default, communication with other participants using the registry as a proxy is enabled.
+    bool registryAsFallbackProxy{ true };
 };
 
 // ================================================================================

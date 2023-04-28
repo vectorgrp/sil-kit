@@ -47,6 +47,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceEndpoint.hpp"
 #include "traits/SilKitMsgTraits.hpp"
 #include "traits/SilKitServiceTraits.hpp"
+#include "IVAsioPeerConnection.hpp"
+#include "IVAsioConnectionPeer.hpp"
 
 // private data types for unit testing support:
 #include "TestDataTraits.hpp"
@@ -63,7 +65,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-class VAsioConnection
+class VAsioConnection : public IVAsioPeerConnection
 {
 public:
     // ----------------------------------------
@@ -156,14 +158,19 @@ public:
         asio::post(_ioContext.get_executor(), std::move(function));
     }
 
-    inline auto Config() const -> const SilKit::Config::ParticipantConfiguration&
+    inline auto Config() const -> const SilKit::Config::ParticipantConfiguration& override
     {
         return _config;
     }
 
+    inline auto GetParticipantName() const -> const std::string& override
+    {
+        return _participantName;
+    }
+
     // Temporary Helpers
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer);
+    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
 
     // Prepare Acceptor Sockets (Local Domain and TCP)
     auto PrepareAcceptorEndpointUris(const std::string &connectUri) -> std::vector<std::string>;
@@ -177,7 +184,7 @@ public:
     void StartIoWorker();
 
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback);
-    void OnPeerShutdown(IVAsioPeer* peer);
+    void OnPeerShutdown(IVAsioPeer* peer) override;
 
     void NotifyShutdown();
 
@@ -253,6 +260,7 @@ private:
     void ReceiveSubscriptionAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);
     void ReceiveSubscriptionAcknowledge(IVAsioPeer* from, SerializedMessage&& buffer);
     void ReceiveRegistryMessage(IVAsioPeer* from, SerializedMessage&& buffer);
+    void ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& buffer);
 
     bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
@@ -273,6 +281,8 @@ private:
     void AddParticipantToLookup(const std::string& participantName);
     const std::string& GetParticipantFromLookup(std::uint64_t participantId) const;
 
+    void AssociateParticipantNameAndPeer(const std::string& participantName, IVAsioPeer* peer);
+
     // TCP Related
     void AddPeer(std::shared_ptr<IVAsioPeer> peer);
     template <typename AcceptorT>
@@ -285,6 +295,7 @@ private:
     using PendingAcksIdentifier = std::pair<IVAsioPeer*, VAsioMsgSubscriber>;
     void RemovePendingSubscription(const PendingAcksIdentifier& ackId);
 
+    void SendProxyPeerShutdownNotification(IVAsioPeer* peer);
     void RemovePeerFromLinks(IVAsioPeer* peer);
     void RemovePeerFromConnection(IVAsioPeer* peer);
 
@@ -523,6 +534,15 @@ private:
 
     // Hold mapping from hash to participantName
     std::map<uint64_t, std::string> _hashToParticipantName;
+
+    // Hold mapping from participantName to peer
+    std::unordered_map<std::string, IVAsioPeer *> _participantNameToPeer;
+
+    // Hold mapping from proxy source to all proxy destinations (used by registry for shutdown information)
+    std::unordered_map<std::string, std::unordered_set<std::string>> _proxySourceToDestinations;
+
+    // Hold mapping from proxied peer to all proxy peers being served via the key.
+    std::unordered_map<IVAsioPeer *, std::unordered_set<IVAsioPeer *>> _peerToProxyPeers;
 
     // unit testing support
     ProtocolVersion _version;

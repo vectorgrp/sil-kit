@@ -33,6 +33,7 @@ running on localhost listening on Port 8500. These values can be changed via the
       TcpQuickAck: false
       TcpSendBufferSize: 1024
       TcpReceiveBufferSize: 1024
+      RegistryAsFallbackProxy: false
 
 
 .. list-table:: Middleware Configuration
@@ -70,4 +71,10 @@ running on localhost listening on Port 8500. These values can be changed via the
        listening ports of the participant must have a known, fixed port number
        and address.
        It is *not* required to set this field under normal circumstances.
+
+   * - RegistryAsFallbackProxy
+     - Disable using the registry as a proxy for participant-to-participant
+       communication as a fallback, if the direct connection attempts fail.
+       The feature is enabled by default and can be disabled explicitly via this
+       field.
 

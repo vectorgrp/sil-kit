@@ -20,6 +20,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
+
 #include <chrono>
 #include <string>
 #include <type_traits>
@@ -40,6 +41,23 @@ namespace Core {
 
 // The protocol version is directly tied to the MessageBuffer for backward compatibility in Ser/Des
 struct end_of_buffer : public std::exception {};
+
+
+class MessageBuffer;
+
+
+/// Captures a reference to a MessageBuffer object and stores it's current read position on construction. On
+/// destruction, the read position of the captured MessageBuffer is reset to the stored value.
+class MessageBufferPeeker
+{
+public:
+    inline MessageBufferPeeker(MessageBuffer & messageBuffer);
+    inline ~MessageBufferPeeker();
+
+private:
+    MessageBuffer& _messageBuffer;
+    size_t _readPos;
+};
 
 
 class MessageBuffer
@@ -75,6 +93,7 @@ public:
     inline void SetProtocolVersion(ProtocolVersion version);
     inline auto GetProtocolVersion() -> ProtocolVersion;
 
+    inline void SetReadPos(size_t newReadPos);
 
 public:
     // ----------------------------------------
@@ -545,6 +564,23 @@ inline auto MessageBuffer::PeekData() const  -> SilKit::Util::Span<const uint8_t
 inline auto MessageBuffer::ReadPos() const -> size_t
 {
     return _rPos;
+}
+
+inline void MessageBuffer::SetReadPos(size_t newReadPos)
+{
+    _rPos = newReadPos;
+}
+
+
+MessageBufferPeeker::MessageBufferPeeker(MessageBuffer& messageBuffer)
+    : _messageBuffer{messageBuffer}
+    , _readPos{_messageBuffer.ReadPos()}
+{
+}
+
+MessageBufferPeeker::~MessageBufferPeeker()
+{
+    _messageBuffer.SetReadPos(_readPos);
 }
 
 } // namespace Core

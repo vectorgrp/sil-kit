@@ -40,6 +40,8 @@ template<>
 inline constexpr auto messageKind<SubscriptionAcknowledge>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAcknowledge; }
 template<>
 inline constexpr auto messageKind<VAsioMsgSubscriber>() -> VAsioMsgKind { return VAsioMsgKind::SubscriptionAnnouncement; }
+template<>
+inline constexpr auto messageKind<ProxyMessage>() -> VAsioMsgKind { return VAsioMsgKind::SilKitProxyMessage; }
 
 template<typename MessageT>
 inline constexpr auto registryMessageKind() -> RegistryMessageKind { return RegistryMessageKind::Invalid; }

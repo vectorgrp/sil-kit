@@ -80,6 +80,7 @@ public: // Receiving a SerializedMessage: from binary blob to SilKitMessage<T>
 	auto GetRemoteIndex() const -> EndpointId;
 	auto GetEndpointAddress() const -> EndpointAddress;
 	void SetProtocolVersion(ProtocolVersion version);
+    auto GetProxyMessageHeader() const -> ProxyMessageHeader;
 	auto GetRegistryMessageHeader() const -> RegistryMsgHeader;
 
 private:
@@ -94,6 +95,8 @@ private:
 	EndpointId _remoteIndex{0};
 	// For registry messages
 	RegistryMsgHeader _registryMessageHeader;
+    // For proxy messages
+    ProxyMessageHeader _proxyMessageHeader;
 
 	MessageBuffer _buffer;
 };

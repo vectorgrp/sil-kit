@@ -41,6 +41,8 @@ auto ExtractMessageKind(MessageBuffer& buffer) -> VAsioMsgKind;
 auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind;
 
 auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader;
+auto PeekProxyMessageHeader(MessageBuffer& buffer) -> ProxyMessageHeader;
+
 auto ExtractEndpointId(MessageBuffer& buffer) ->EndpointId;
 auto ExtractEndpointAddress(MessageBuffer& buffer) ->EndpointAddress;
 
@@ -51,12 +53,14 @@ void Serialize(MessageBuffer& buffer, const ParticipantAnnouncementReply& reply)
 void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber);
 void Serialize(MessageBuffer& buffer, const SubscriptionAcknowledge& msg);
 void Serialize(MessageBuffer& buffer, const KnownParticipants& msg);
+void Serialize(MessageBuffer& buffer, const ProxyMessage& msg);
 
 void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out);
 void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
 void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
+void Deserialize(MessageBuffer& buffer, ProxyMessage& out);
 
 } // namespace Core
 } // namespace SilKit

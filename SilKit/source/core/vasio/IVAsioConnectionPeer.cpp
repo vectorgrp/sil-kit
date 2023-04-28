@@ -19,22 +19,4 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#pragma once
-#include <cstdint>
-
-namespace SilKit {
-namespace Core {
-
-enum class VAsioMsgKind: uint8_t
-{
-    Invalid = 0,
-    SubscriptionAnnouncement = 1,
-    SubscriptionAcknowledge = 2,
-    SilKitMwMsg = 3, //Deprecated? and nowhere used as of 3.99.22
-    SilKitSimMsg = 4,
-    SilKitRegistryMessage = 5,
-    SilKitProxyMessage = 6, // 3.1 with "proxy-message" capability
-};
-
-} // namespace Core
-} // namespace SilKit
+#include "IVAsioConnectionPeer.hpp"

@@ -214,6 +214,74 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, KnownParticipants& parti
     return buffer;
 }
 
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const ProxyMessageHeader& msg)
+{
+    //Backward compatibility with legacy peers
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    {
+        throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
+    }
+    else
+    {
+        buffer
+            << msg.version
+            ;
+    }
+    return buffer;
+}
+inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessageHeader& out)
+{
+    //Backward compatibility with legacy peers
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    {
+        throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
+    }
+    else
+    {
+        buffer
+            >> out.version
+            ;
+    }
+    return buffer;
+}
+
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const ProxyMessage& msg)
+{
+    //Backward compatibility with legacy peers
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    {
+        throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
+    }
+    else
+    {
+        buffer
+            << msg.header
+            << msg.source
+            << msg.destination
+            << msg.payload
+            ;
+    }
+    return buffer;
+}
+inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessage& out)
+{
+    //Backward compatibility with legacy peers
+    if (buffer.GetProtocolVersion() < ProtocolVersion{3,1})
+    {
+        throw SilKit::ProtocolError{"ProxyMessage is not supported in protocol versions < 3.1"};
+    }
+    else
+    {
+        buffer
+            >> out.header
+            >> out.source
+            >> out.destination
+            >> out.payload
+            ;
+    }
+    return buffer;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Public Functions
 //////////////////////////////////////////////////////////////////////
@@ -240,8 +308,24 @@ auto ExtractRegistryMessageKind(MessageBuffer& buffer) -> RegistryMessageKind
     return kind;
 }
 
+auto PeekProxyMessageHeader(MessageBuffer& buffer) -> ProxyMessageHeader
+{
+    MessageBufferPeeker peeker{buffer};
+
+    ProxyMessageHeader header{};
+    buffer >> header;
+    return header;
+}
+
 auto PeekRegistryMessageHeader(MessageBuffer& buffer) -> RegistryMsgHeader
 {
+    // NB: At the moment using the MessageBufferPeeker here -although correct- leads to an issue in the
+    //     Test_ParticipantVersion.cpp. The compatibility code between protocol version 3.0 and 3.1 does not
+    //     handle processing the ParticipantAnnouncementReply (3.0) because the protocol version is not communicated
+    //     early enough, when creating the SerializedMessage.
+    //     This requires some deeper refactoring of the ser./des. code which will be tackled together with some other
+    //     improvements.
+
     // read only the header into a new MessageBuffer
     auto data = buffer.PeekData();
     const auto readPos = buffer.ReadPos();
@@ -310,6 +394,15 @@ void Serialize(MessageBuffer& buffer, const KnownParticipants& msg)
     buffer << msg;
 }
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out)
+{
+    buffer >> out;
+}
+
+void Serialize(MessageBuffer& buffer, const ProxyMessage& msg)
+{
+    buffer << msg;
+}
+void Deserialize(MessageBuffer& buffer, ProxyMessage& out)
 {
     buffer >> out;
 }

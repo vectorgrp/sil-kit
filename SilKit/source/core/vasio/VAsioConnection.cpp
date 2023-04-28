@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "VAsioConnection.hpp"
 #include "VAsioProtocolVersion.hpp"
+#include "VAsioCapabilities.hpp"
 
 #include "SerializedMessage.hpp"
 
@@ -34,6 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ILogger.hpp"
 #include "VAsioTcpPeer.hpp"
+#include "VAsioProxyPeer.hpp"
 #include "Filesystem.hpp"
 #include "SetThreadName.hpp"
 #include "Uri.hpp"
@@ -262,6 +264,23 @@ auto selectBestEndpointFromResolverResults(const asio::ip::tcp::resolver::result
 
     // select the endpoint with the smallest penalty
     return endpointsByPenalty.begin()->second;
+}
+
+auto GetCurrentCapabilities(const SilKit::Config::ParticipantConfiguration& participantConfiguration) -> std::string
+{
+    SilKit::Core::VAsioCapabilities capabilities;
+
+    if (participantConfiguration.middleware.registryAsFallbackProxy)
+    {
+        capabilities.AddCapability("proxy-message");
+    }
+
+    return capabilities.ToCapabilitiesString();
+}
+
+auto CapabilitiesSupportProxyMessage(const SilKit::Core::VAsioCapabilities& capabilities) -> bool
+{
+    return capabilities.HasCapability("proxy-message");
 }
 
 } // namespace
@@ -628,7 +647,7 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
 {
     // Legacy Info for interop
     // URI encoded infos
-    VAsioPeerInfo info{_participantName, _participantId, {}, {/*capabilities*/}};
+    VAsioPeerInfo info{_participantName, _participantId, {}, GetCurrentCapabilities(_config)};
 
     size_t openAcceptorCount = 0;
 
@@ -738,6 +757,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
     }
 
     AddParticipantToLookup(announcement.peerInfo.participantName);
+    AssociateParticipantNameAndPeer(announcement.peerInfo.participantName, from);
 
     SendParticipantAnnouncementReply(from);
 }
@@ -855,24 +875,70 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
     Services::Logging::Debug(_logger, "Received known participants list from SilKitRegistry protocol {}.{}",
                              participantsMsg.messageHeader.versionHigh, participantsMsg.messageHeader.versionLow);
 
-    auto connectPeer = [this](const auto peerInfo) {
+    auto connectPeer = [this](const VAsioPeerInfo peerInfo) {
         Services::Logging::Debug(_logger, "Connecting to {} with Id {} on {}", peerInfo.participantName,
                                  peerInfo.participantId, printUris(peerInfo));
 
-        auto peer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
+        // Create the "direct-connection" peer
+        auto directPeer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
 
         // Remember that we expect a reply from this peer
-        _pendingParticipantReplies.push_back(peer);
+        _pendingParticipantReplies.push_back(directPeer);
+
+        std::shared_ptr<IVAsioConnectionPeer> peer;
 
         // Try to connect to the peer only _after_ remembering that we need to connect, otherwise suitable error will
         // be raised.
         try
         {
-            peer->Connect(peerInfo);
+            directPeer->Connect(peerInfo);
+            peer = std::move(directPeer);
         }
-        catch (const std::exception&)
+        catch (const std::exception& exception)
         {
-            return;
+            SilKit::Services::Logging::Warn(
+                _logger,
+                "VAsioConnection: Failed to connect directly to {}, trying to proxy messages through the registry: {}",
+                peerInfo.participantName, exception.what());
+
+            if (!_config.middleware.registryAsFallbackProxy)
+            {
+                SilKit::Services::Logging::Warn(_logger,
+                                                "VAsioConnection: Cannot use ProxyMessage to communicate with {}, "
+                                                "because it is disabled in the configuration",
+                                                peerInfo.participantName);
+                return;
+            }
+
+            // NB: Cannot check the capabilities of the registry, since we do not receive the PeerInfo from the
+            //       registry over the network, but build it ourselves in VAsioConnection::JoinSimulation.
+            //       This is not be a huge issue, since we can just 'throw the messages at the registry' and will
+            //       fail with the participant-connection-timeout if it is not capable of routing it to the other
+            //       participant.
+
+            // Parse the capabilities reported in the remotes VAsioPeerInfo
+            VAsioCapabilities capabilities{peerInfo.capabilities};
+
+            // To use the ProxyMessage, the peer we're trying to connect to must support it
+            if (!CapabilitiesSupportProxyMessage(capabilities))
+            {
+                SilKit::Services::Logging::Warn(_logger,
+                                                "VAsioConnection: Cannot use ProxyMessage to communicate with {}, "
+                                                "because {} does not support it",
+                                                peerInfo.participantName, peerInfo.participantName);
+                return;
+            }
+
+            // Remove the "direct-connection" peer from the list of peers we expect an answer from
+            auto it = std::find(_pendingParticipantReplies.begin(), _pendingParticipantReplies.end(), directPeer);
+            _pendingParticipantReplies.erase(it);
+            // Destroy the peer object
+            directPeer = nullptr;
+
+            // Create the "proxy-peer" object
+            peer = std::make_shared<VAsioProxyPeer>(this, peerInfo, _registry.get(), _logger);
+            // Remember that we expect a reply from this peer
+            _pendingParticipantReplies.push_back(peer);
         }
 
         // We connected to the other peer. tell him who we are.
@@ -890,6 +956,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
             SILKIT_ASSERT(false);
         }
 
+        AssociateParticipantNameAndPeer(peer->GetInfo().participantName, peer.get());
         AddPeer(std::move(peer));
     };
     // check URI first
@@ -915,6 +982,11 @@ void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
             _logger, "Warning: Received announcement of participant '{}', which was already announced before.",
             participantName);
     }
+}
+
+void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& participantName, IVAsioPeer* peer)
+{
+    _participantNameToPeer.insert({participantName, peer});
 }
 
 const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
@@ -1059,6 +1131,13 @@ void VAsioConnection::AddPeer(std::shared_ptr<IVAsioPeer> newPeer)
     newPeer->StartAsyncRead();
 
     std::unique_lock<std::mutex> lock{_peersLock};
+
+    auto * const proxyPeer = dynamic_cast<VAsioProxyPeer *>(newPeer.get());
+    if (proxyPeer != nullptr)
+    {
+        _peerToProxyPeers[proxyPeer->GetPeer()].insert(proxyPeer);
+    }
+
     _peers.emplace_back(std::move(newPeer));
 }
 
@@ -1073,14 +1152,63 @@ void VAsioConnection::OnPeerShutdown(IVAsioPeer* peer)
 {
     if (!_isShuttingDown)
     {
-        std::unique_lock<std::mutex> lock{_peersLock};
-        for (auto&& callback : _peerShutdownCallbacks)
+        std::vector<IVAsioPeer*> proxyPeers;
+
         {
-            callback(peer);
+            std::unique_lock<std::mutex> lock{_peersLock};
+
+            const auto it = _peerToProxyPeers.find(peer);
+            if (it != _peerToProxyPeers.end())
+            {
+                std::copy(it->second.begin(), it->second.end(), std::back_inserter(proxyPeers));
+                _peerToProxyPeers.erase(it);
+            }
         }
-        RemovePeerFromLinks(peer);
-        RemovePeerFromConnection(peer);
-        lock.unlock();
+
+        for (IVAsioPeer* const proxyPeer : proxyPeers)
+        {
+            OnPeerShutdown(proxyPeer);
+        }
+
+        {
+            std::unique_lock<std::mutex> lock{_peersLock};
+
+            SendProxyPeerShutdownNotification(peer);
+
+            for (auto&& callback : _peerShutdownCallbacks)
+            {
+                callback(peer);
+            }
+
+            RemovePeerFromLinks(peer);
+            RemovePeerFromConnection(peer);
+        }
+    }
+}
+
+void VAsioConnection::SendProxyPeerShutdownNotification(IVAsioPeer* peer)
+{
+    const auto & source = peer->GetInfo().participantName;
+
+    const auto proxyDestinationsIt = _proxySourceToDestinations.find(source);
+    if (proxyDestinationsIt != _proxySourceToDestinations.end())
+    {
+        for (const auto& destination : proxyDestinationsIt->second)
+        {
+            // if a destination participant name has no associated peer, ignore it, it was already been disconnected
+            const auto peerIt = _participantNameToPeer.find(destination);
+            if (peerIt == _participantNameToPeer.end())
+            {
+                continue;
+            }
+
+            ProxyMessage msg{};
+            msg.source = source;
+            msg.destination = destination;
+            msg.payload.clear();
+
+            peerIt->second->SendSilKitMsg(SerializedMessage{std::move(msg)});
+        }
     }
 }
 
@@ -1099,6 +1227,8 @@ void VAsioConnection::RemovePeerFromLinks(IVAsioPeer* peer)
 
 void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
 {
+    _participantNameToPeer.erase(peer->GetInfo().participantName);
+
     auto it = std::find_if(_peers.begin(), _peers.end(), [peer](auto&& p) {
         auto localPeerInfo = p->GetInfo();
         auto peerToRemove = peer->GetInfo();
@@ -1164,6 +1294,93 @@ void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
         return ReceiveRawSilKitMessage(from, std::move(buffer));
     case VAsioMsgKind::SilKitRegistryMessage:
         return ReceiveRegistryMessage(from, std::move(buffer));
+    case VAsioMsgKind::SilKitProxyMessage:
+        return ReceiveProxyMessage(from, std::move(buffer));
+    }
+}
+
+void VAsioConnection::ReceiveProxyMessage(IVAsioPeer* from, SerializedMessage&& buffer)
+{
+    const auto proxyMessageHeader = buffer.GetProxyMessageHeader();
+    if (proxyMessageHeader.version != 0)
+    {
+        static SilKit::Services::Logging::LogOnceFlag onceFlag;
+        SilKit::Services::Logging::Warn(
+            _logger, onceFlag,
+            "Ignoring VAsioMsgKind::SilKitProxyMessage because message version is not supported: version {}",
+            proxyMessageHeader.version);
+        return;
+    }
+
+    auto proxyMessage = buffer.Deserialize<ProxyMessage>();
+
+    if (!_config.middleware.registryAsFallbackProxy)
+    {
+        static SilKit::Services::Logging::LogOnceFlag onceFlag;
+        SilKit::Services::Logging::Warn(
+            _logger, onceFlag,
+            "Ignoring VAsioMsgKind::SilKitProxyMessage because feature is disabled via configuration: From {}, To {}",
+            proxyMessage.source, proxyMessage.destination);
+        return;
+    }
+
+    SilKit::Services::Logging::Trace(_logger,
+                                     "Received message with VAsioMsgKind::SilKitProxyMessage: From {}, To {}",
+                                     proxyMessage.source, proxyMessage.destination);
+
+    const bool fromIsSource = from->GetInfo().participantName == proxyMessage.source;
+    if (fromIsSource)
+    {
+        auto it = _participantNameToPeer.find(proxyMessage.destination);
+        if (it == _participantNameToPeer.end())
+        {
+            SilKit::Services::Logging::Error(_logger, "Unable to deliver proxy message from {} to {}",
+                                             proxyMessage.source, proxyMessage.destination);
+            return;
+        }
+
+        it->second->SendSilKitMsg(SerializedMessage{proxyMessage});
+
+        // We are relaying a message from source to destination and acting as a proxy. Record the association between
+        // source and destination. This is used during disconnects, where we create empty ProxyMessages on behalf of
+        // the disconnected peer, to inform the destination that the source peer has disconnected.
+        _proxySourceToDestinations[proxyMessage.source].insert(proxyMessage.destination);
+
+        return;
+    }
+
+    const bool isDestination = GetParticipantName() == proxyMessage.destination;
+    if (isDestination)
+    {
+        auto it = _participantNameToPeer.find(proxyMessage.source);
+
+        IVAsioPeer* peer{nullptr};
+
+        if (it == _participantNameToPeer.end())
+        {
+            SilKit::Services::Logging::Debug(_logger, "Creating VAsioProxyPeer ({})", proxyMessage.source);
+
+            auto proxyPeer = std::make_shared<VAsioProxyPeer>(this, VAsioPeerInfo{}, from, _logger);
+            AddPeer(proxyPeer);
+
+            peer = proxyPeer.get();
+        }
+        else
+        {
+            peer = it->second;
+        }
+
+        // An empty payload signals shutdown of the proxied peer.
+        if (proxyMessage.payload.empty())
+        {
+            OnPeerShutdown(peer);
+        }
+        else
+        {
+            OnSocketData(peer, SerializedMessage{std::move(proxyMessage.payload)});
+        }
+
+        return;
     }
 }
 

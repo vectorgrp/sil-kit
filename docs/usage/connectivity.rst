@@ -66,6 +66,23 @@ Some potential issues might be firewalls, VM network configuration (if using a V
     
     Telnet can be terminated with the key combination Ctrl+C.
 
+Using the Registry as a Proxy for Participant-to-Participant Connections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: powershell
+   :caption: Example warning
+
+   [yyyy-mm-dd hh:mm:ss.sss] [EthernetReader] [info] Connected to registry at 'tcp://127.0.0.1:8501' via 'tcp://127.0.0.1:63107' (silkit://127.0.0.1:8501)
+   [yyyy-mm-dd hh:mm:ss.sss] [EthernetReader] [warning] VAsioConnection: Failed to connect directly to EthernetWriter, trying to proxy messages through the registry: Failed to connect to host URIs: "tcp://127.0.0.1:37117,"
+
+When a SIL Kit participant joins a simulation, it first connects to the SIL Kit registry (:ref:`sec:util-registry`), which informs the participant about all other participants, that have already joined the simulation.
+The participant then tries to connect to all of the other participants.
+
+If another participant cannot be connected to directly, as a last resort, it tries to use the registry as a proxy for participant-to-participant communication.
+The warning is issued, since sending the participant-to-participant messages via the registry will add latency and overhead.
+
+A SIL Kit participant will only attempt to use the registry as a proxy if the remote participant, that could not be connected to directly, supports receiving messages via the registry.
+
 Connectivity issues between participants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

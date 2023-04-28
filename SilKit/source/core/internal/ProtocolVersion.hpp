@@ -31,6 +31,7 @@ struct ProtocolVersion
     uint16_t major;
     uint16_t minor;
 };
+
 // ================================================================================
 //  Inline Implementations
 // ================================================================================
@@ -46,9 +47,20 @@ inline bool operator==(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
         && lhs.minor == rhs.minor
         ;
 }
+
 inline bool operator!=(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
 {
     return !(lhs == rhs);
+}
+
+inline bool operator<(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
+{
+    return (lhs.major < rhs.major) || (lhs.major == rhs.major && lhs.minor < rhs.minor);
+}
+
+inline bool operator>=(const ProtocolVersion& lhs, const ProtocolVersion& rhs)
+{
+    return !(lhs < rhs);
 }
 
 } // namespace Core

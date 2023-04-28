@@ -92,6 +92,18 @@ void Warn(ILogger* logger, const char* fmt, const Args&... args)
 {
     Log(logger, Level::Warn, fmt, args...);
 }
+
+template<typename... Args>
+void Warn(ILogger* logger, LogOnceFlag& onceFlag, const char* fmt, const Args&... args)
+{
+    if (onceFlag.WasCalled())
+    {
+        return;
+    }
+
+    Log(logger, Level::Warn, fmt, args...);
+}
+
 template<typename... Args>
 void Error(ILogger* logger, const char* fmt, const Args&... args)
 {

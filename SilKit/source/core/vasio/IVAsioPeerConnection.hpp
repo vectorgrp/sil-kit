@@ -20,20 +20,38 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
-#include <cstdint>
+
+#include <string>
+
+
+namespace SilKit {
+namespace Config {
+inline namespace v1 {
+struct ParticipantConfiguration;
+} // namespace v1
+} // namespace Config
+} // namespace SilKit
+
+namespace SilKit {
+namespace Core {
+class IVAsioPeer;
+class SerializedMessage;
+} // namespace Core
+} // namespace SilKit
+
 
 namespace SilKit {
 namespace Core {
 
-enum class VAsioMsgKind: uint8_t
+class IVAsioPeerConnection
 {
-    Invalid = 0,
-    SubscriptionAnnouncement = 1,
-    SubscriptionAcknowledge = 2,
-    SilKitMwMsg = 3, //Deprecated? and nowhere used as of 3.99.22
-    SilKitSimMsg = 4,
-    SilKitRegistryMessage = 5,
-    SilKitProxyMessage = 6, // 3.1 with "proxy-message" capability
+public:
+    virtual auto GetParticipantName() const -> const std::string& = 0;
+
+    virtual auto Config() const -> const SilKit::Config::ParticipantConfiguration& = 0;
+
+    virtual void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) = 0;
+    virtual void OnPeerShutdown(IVAsioPeer* peer) = 0;
 };
 
 } // namespace Core

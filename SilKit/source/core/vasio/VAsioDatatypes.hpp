@@ -110,6 +110,19 @@ enum class RegistryMessageKind : uint8_t
     KnownParticipants = 3
 };
 
+struct ProxyMessageHeader
+{
+    uint8_t version;
+};
+
+struct ProxyMessage
+{
+    ProxyMessageHeader header{0};
+    std::string source;
+    std::string destination;
+    std::vector<uint8_t> payload;
+};
+
 // ================================================================================
 //  Inline Implementations
 // ================================================================================

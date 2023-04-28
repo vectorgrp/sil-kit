@@ -83,6 +83,11 @@ auto SerializedMessage::GetRegistryMessageHeader() const -> RegistryMsgHeader
     return _registryMessageHeader;
 }
 
+auto SerializedMessage::GetProxyMessageHeader() const -> ProxyMessageHeader
+{
+    return _proxyMessageHeader;
+}
+
 void SerializedMessage::WriteNetworkHeaders()
 {
     _buffer << _messageSize; // placeholder for finalization via ReleaseStorage()
@@ -139,6 +144,10 @@ void SerializedMessage::ReadNetworkHeaders()
         case RegistryMessageKind::Invalid:
             throw ProtocolError("SerializedMessage: ReadNetworkHeaders() encountered RegistryMessageKind::Invalid");
         }
+    }
+    if (_messageKind == VAsioMsgKind::SilKitProxyMessage)
+    {
+        _proxyMessageHeader = PeekProxyMessageHeader(_buffer);
     }
     if (IsMwOrSim(_messageKind))
     {
