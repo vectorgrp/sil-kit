@@ -358,8 +358,10 @@ void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::ch
 void TimeSyncService::CompleteSimulationStep()
 {
     _logger->Debug("CompleteSimulationStep: calling _timeSyncPolicy->RequestNextStep");
-    _timeSyncPolicy->SetSimStepCompleted();
-    _timeSyncPolicy->RequestNextStep();
+    _participant->ExecuteDeferred([this] {
+        _timeSyncPolicy->SetSimStepCompleted();
+        _timeSyncPolicy->RequestNextStep();
+    });
 }
 
 //! \brief Create a time provider that caches the current simulation time.
