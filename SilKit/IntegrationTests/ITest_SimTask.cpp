@@ -24,6 +24,7 @@
 #include "silkit/SilKit.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
+#include "silkit/util/PrintableHexString.hpp"
 
 #include <atomic>
 #include <future>
@@ -36,20 +37,77 @@ using namespace std::chrono_literals;
 
 using SilKit::Services::Orchestration::OperationMode;
 
+class Counter
+{
+    std::atomic<uint32_t> _major{0};
+    std::atomic<uint32_t> _minor{0};
+
+public:
+    void IncrementMajor()
+    {
+        ++_major;
+        _minor = 0;
+    }
+
+    void IncrementMinor() { ++_minor; }
+
+    auto Value() const -> uint64_t { return (static_cast<uint64_t>(_major) << 32) | static_cast<uint64_t>(_minor); }
+
+    auto Major() const -> uint32_t { return _major; }
+
+    auto Minor() const -> uint32_t { return _minor; }
+
+    void PublishValue(SilKit::Services::PubSub::IDataPublisher *publisher) const
+    {
+        const uint64_t value = Value();
+
+        uint8_t bytes[8];
+        for (unsigned i = 0; i < 8; ++i)
+        {
+            bytes[i] = static_cast<uint8_t>((value >> (i * 8)) & 0xFF);
+        }
+
+        publisher->Publish(SilKit::Util::Span<const uint8_t>{bytes, sizeof(bytes)});
+    }
+
+    static auto ExtractValue(SilKit::Util::Span<const uint8_t> bytes) -> uint64_t
+    {
+        uint64_t value{0};
+
+        for (unsigned i = 0; i < 8; ++i)
+        {
+            value |= (static_cast<uint64_t>(bytes[i]) << (i * 8));
+        }
+
+        return value;
+    }
+
+    static auto ExtractMajor(const uint64_t value) -> uint32_t { return static_cast<uint32_t>(value >> 32); }
+
+    static auto ExtractMinor(const uint64_t value) -> uint32_t { return static_cast<uint32_t>(value & 0xFFFFFFFF); }
+};
+
 TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
 {
     // This test creates one publisher and one subscriber participant. Both use the "synchronous"
     // simulation step handler.
     //
+    // The publisher sends two uint32_t values packaged as a single uint64_t value. This packaging is handled by the
+    // Counter class above. The Major field counts the simulation step, the Minor field counts the individual message
+    // sent in a single simulation step. Each time the Major value is incremented, the minor value resets.
+    //
+    // Neither the Major, nor the Minor are zero when the message is sent.
+    //
     // When the publisher enters the simulation step handler with a particular now timestamp, it
-    // - sends a message with contents: now, 1
+    // - increments the Major value and resets the Minor value (1)
+    // - increments the Minor value and publishes the resulting value
     // - blocks and signals a worker thread
-    // - in the worker thread: sends a message with contents: now, 2
+    // - in the worker thread: increments the Minor value and publishes the resulting value (2)
     // - waits until the worker thread has completed
-    // - sends a message with contents: now, 3
+    // - increments the Minor value and publishes the resulting value (3)
     //
     // After the test completes (100ms virtual timestamp has been reached), the test code checks that the
-    // messages were received in the correct order, i.e., the timestamps and counter values (1, 2, 3) are
+    // messages were received in the correct order, i.e., the major and minor values (1, 2, 3) are
     // in the correct order.
 
     const auto registryParticipantConfiguration = SilKit::Config::ParticipantConfigurationFromString("");
@@ -86,7 +144,7 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         const auto pTimeSyncService = pLifecycleService->CreateTimeSyncService();
         const auto pPublisher = p->CreateDataPublisher("Pub", spec);
 
-        uint32_t counter = 0;
+        Counter counter;
 
         using Mutex = std::mutex;
         using Lock = std::unique_lock<Mutex>;
@@ -95,16 +153,16 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         {
             Mutex mx;
             std::condition_variable cv;
-            bool blocking;
+            bool blocking{false};
             std::atomic<bool> completing{true};
         } s;
 
         pTimeSyncService->SetSimulationStepHandler(
             [pLifecycleService, pPublisher, &counter, &s](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
-                counter = (((counter >> (3 * 8)) & 0xFF) + 1) << (3 * 8);
+                counter.IncrementMajor();
 
-                counter = (counter & 0xFF000000) | 1;
-                pPublisher->Publish(SilKit::Util::Span<const uint8_t>{reinterpret_cast<const uint8_t *>(&counter), 4});
+                counter.IncrementMinor();
+                counter.PublishValue(pPublisher);
 
                 if (now >= 100ms)
                 {
@@ -127,8 +185,8 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
                     });
                 }
 
-                counter = (counter & 0xFF000000) | 3;
-                pPublisher->Publish(SilKit::Util::Span<const uint8_t>{reinterpret_cast<const uint8_t *>(&counter), 4});
+                counter.IncrementMinor();
+                counter.PublishValue(pPublisher);
             },
             1ms);
 
@@ -140,8 +198,8 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
                     return s.blocking;
                 });
 
-                counter = (counter & 0xFF000000) | 2;
-                pPublisher->Publish(SilKit::Util::Span<const uint8_t>{reinterpret_cast<const uint8_t *>(&counter), 4});
+                counter.IncrementMinor();
+                counter.PublishValue(pPublisher);
 
                 s.blocking = false;
                 s.cv.notify_one();
@@ -153,7 +211,7 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         ASSERT_EQ(completerDone.wait_for(5s), std::future_status::ready);
     });
 
-    std::vector<uint32_t> received;
+    std::vector<uint64_t> received;
 
     auto subscriberDone = std::async(std::launch::async, [participantConfiguration, &registryUri, spec, &received] {
         const auto s = SilKit::CreateParticipant(participantConfiguration, "Sub", registryUri);
@@ -163,7 +221,12 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         s->CreateDataSubscriber("Sub", spec,
                                 [&received](SilKit::Services::PubSub::IDataSubscriber *,
                                             const SilKit::Services::PubSub::DataMessageEvent &event) {
-                                    const auto value = *reinterpret_cast<const uint32_t *>(event.data.data());
+                                    ASSERT_EQ(event.data.size(), 8);
+                                    const auto value = Counter::ExtractValue(event.data);
+                                    ASSERT_GT(Counter::ExtractMajor(value), uint32_t{0})
+                                        << SilKit::Util::AsHexString(event.data).WithSeparator(":");
+                                    ASSERT_GT(Counter::ExtractMinor(value), uint32_t{0})
+                                        << SilKit::Util::AsHexString(event.data).WithSeparator(":");
                                     received.emplace_back(value);
                                 });
 
@@ -189,15 +252,17 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
 
     ASSERT_GT(received.size(), static_cast<size_t>(100 * 3));
 
-    for (size_t i = 0; i < received.size() / 3; ++i)
+    for (size_t major = 1; major <= received.size() / 3; ++major)
     {
-        EXPECT_EQ((received[i * 3 + 0] >> (3 * 8)) & 0xFF, static_cast<uint32_t>(i) + 1);
-        EXPECT_EQ((received[i * 3 + 1] >> (3 * 8)) & 0xFF, static_cast<uint32_t>(i) + 1);
-        EXPECT_EQ((received[i * 3 + 2] >> (3 * 8)) & 0xFF, static_cast<uint32_t>(i) + 1);
+        for (size_t minor = 1; minor <= 3; ++minor)
+        {
+            const auto receivedValue = received[(major - 1) * 3 + (minor - 1)];
+            const auto receivedMajor = Counter::ExtractMajor(receivedValue);
+            const auto receivedMinor = Counter::ExtractMinor(receivedValue);
 
-        EXPECT_EQ(received[i * 3 + 0] & 0xFF, 1);
-        EXPECT_EQ(received[i * 3 + 1] & 0xFF, 2);
-        EXPECT_EQ(received[i * 3 + 2] & 0xFF, 3);
+            EXPECT_EQ(major, receivedMajor);
+            EXPECT_EQ(minor, receivedMinor);
+        }
     }
 }
 
