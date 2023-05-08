@@ -43,7 +43,7 @@ Properties of Participants
 ==========================
 
 Generally, a |ProductName| participant can communicate with other participants without knowledge about their existence.
-However, participants can register a :cpp:func:`SetParticipantConnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantConnectedHandler()>`  callback that notifies them once a new participant connects.
+However, participants can register a :cpp:func:`SetParticipantConnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantConnectedHandler()>` callback that notifies them once a new participant connects.
 Analogously, they can register a :cpp:func:`SetParticipantDisconnectedHandler()<SilKit::Services::Orchestration::ISystemMonitor::SetParticipantDisconnectedHandler()>` callback that notifies them when a participant disconnects.
 
 However, participants can also use a lifecycle service that allows them to coordinate their startup and shutdown phase with other participants (see :ref:`Lifecycle Coordination Between Participants<sec:sim-lifecycle-management>`).
@@ -66,7 +66,7 @@ The following introduces the three components that can affect and observe the in
 
 .. _subsubsec:sim-lifecycle-lifecycleService:
 
-Lifecycle service
+Lifecycle Service
 ~~~~~~~~~~~~~~~~~
 The |LifecycleServiceAPI| interface allows each participant to access various functions related to its lifecycle.
 Users can register callbacks that trigger once a participant reaches certain states.
@@ -77,7 +77,7 @@ Once all needed controllers are registered and, if needed, the time synchronizat
 
 .. _subsubsec:sim-lifecycle-timeSyncService:
 
-Time synchronization service
+Time Synchronization Service
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The |TimeSyncServiceAPI| interface allows users to set a simulation step, which is important for participants with virtual time synchronization.
 A simulation step defines the operations that are repeatedly performed in the interval of the simulation step size.
@@ -85,7 +85,7 @@ The simulation step as well as the initial step size are configured via :cpp:fun
 
 .. _subsubsec:sim-lifecycle-systemMonitor:
 
-System monitor
+System Monitor
 ~~~~~~~~~~~~~~
 To observe the state transitions of other participants, users first need to retrieve the |SystemMonitorAPI| interface via :cpp:func:`CreateSystemMonitor()<SilKit::IParticipant::CreateSystemMonitor()>`.
 Afterwards, they can register a participant status callback via :cpp:func:`AddParticipantStatusHandler()<SilKit::Services::Orchestration::ISystemMonitor::AddParticipantStatusHandler()>`.
@@ -95,7 +95,7 @@ For example, two Participants A and B are required. A is in state :cpp:enumerato
 
 .. _subsubsec:sim-lifecycle-systemController:
 
-System controller
+System Controller
 ~~~~~~~~~~~~~~~~~
 .. warning::
   The System Controller is experimental and might be changed or removed in future versions of the SIL Kit.
@@ -125,7 +125,7 @@ Each participant has an independent lifecycle that other participants can observ
    : |ProductName| participant state machine.
 
 A participant enters the distributed state machine by calling |StartLifecycle|.
-This will cause the |LifecycleService| to anounce its state as :cpp:enumerator:`ServicesCreated<SilKit::Services::Orchestration::ParticipantState::ServicesCreated>`, indicating that all services were created and announced to other participants.
+This will cause the |LifecycleService| to announce its state as :cpp:enumerator:`ServicesCreated<SilKit::Services::Orchestration::ParticipantState::ServicesCreated>`, indicating that all services were created and announced to other participants.
 
 A participant that uses the lifecycle service may choose to coordinate its state with other participants.
 In that case, they will align their participant state based on the current system state until they reach :cpp:enumerator:`CommunicationInitialized<SilKit::Services::Orchestration::ParticipantState::CommunicationInitialized>`.
@@ -134,17 +134,17 @@ This information is propagated to the user if they registered the callback via :
 Once the callback is finished, the participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`.
 The participant will wait for the system state to change to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::SystemState::ReadyToRun>` as well and then proceeds to the :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` state.
 
-During the execution of a CommunicationReadyHandler, the network communication of the participant is blocked. Therefore, it is impossible to exchange information with other participants during the execution of a CommunicationReadyHandler.
-If it is necessary to exchange information during the CommunicationInitialized state, :cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` and :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` can be used.
-:cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` signals that the CommunicationInitialized state has been reached. After its execution, a participant is still in the CommunicationInitialized state and can exchange information.
+During the execution of a ``CommunicationReadyHandler``, the network communication of the participant is blocked. Therefore, it is impossible to exchange information with other participants during the execution of a ``CommunicationReadyHandler``.
+If it is necessary to exchange information during the ``CommunicationInitialized`` state, :cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` and :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` can be used.
+:cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` signals that the ``CommunicationInitialized`` state has been reached. After its execution, a participant is still in the ``CommunicationInitialized`` state and can exchange information.
 After :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` is called, the participants state will switch to participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`. 
 
 Participants that coordinate their state but do not use the virtual time synchronization can register a :cpp:func:`SetStartingHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStartingHandler()>`, which indicates that the synchronized participants will start the virtual time synchronization and thus the simulation.
-This callback does not block the other participants and should only be used to start timers etc and will trigger when the state transition to :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` is immenent.
+This callback does not block the other participants and should only be used to start timers etc., it will trigger when the state transition to :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` is imminent.
 
 Participants may also choose not to coordinate their state with other participants.
 In this case, their state will transition to the Running phase without waiting for any system states.
-They still receive the CommunicationReady callback before changing to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`, but the communication guarantee does not apply.
+They still receive the ``CommunicationReady`` callback before changing to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`, but the communication guarantee does not apply.
 
 Participants that use the virtual time synchronization repeatedly execute their registered simulation steps while advancement of time is handled by the middleware implementation.
 If a participant temporarily cannot advance the simulation, e.g., because a debugger is attached to investigate its internal state, a participant can be put into the :cpp:enumerator:`Paused<SilKit::Services::Orchestration::ParticipantState::Paused>` state.
@@ -156,14 +156,14 @@ Please note that participants that are not coordinated must call stop by themsel
 Coordinated participants will also stop their simulation if the system state changes to :cpp:enumerator:`Stopping<SilKit::Services::Orchestration::ParticipantState::Stopping>`.
 A callback registered via :cpp:func:`SetStopHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStopHandler()>` can be used to detect the state transition and perform a collection of simulation results.
 Once the callback execution is finished, the participant will change its state to :cpp:enumerator:`Stop<SilKit::Services::Orchestration::ParticipantState::Stop>`.
-Afterwards, they transition to the ShuttingDown state, call the :cpp:func:`SetShutdownHandler()<SilKit::Services::Orchestration::ILifecycleService::SetShutdownHandler()>` and transition to the Shutdown state.
+Afterwards, they transition to the ``ShuttingDown`` state, call the :cpp:func:`SetShutdownHandler()<SilKit::Services::Orchestration::ILifecycleService::SetShutdownHandler()>` and transition to the ``Shutdown`` state.
 
 Whenever a participant encounters an error from which it cannot recover, it switches to the :cpp:enumerator:`Error<SilKit::Services::Orchestration::ParticipantState::Error>` state to indicate this situation to the system. 
 Users can manually trigger a transition to the error state and provide more information about the cause by calling :cpp:func:`ReportError()<SilKit::Services::Orchestration::ILifecycleService::ReportError()>`.
 In some situations, a lifecycle service automatically enters the error state, e.g., when an uncaught exception is thrown in a callback.
 A participant can only recover from the :cpp:enumerator:`Error<SilKit::Services::Orchestration::ParticipantState::Error>` state in one way: by shutting down.
 
-All participants can also be forced to end their lifecycle by calling ISystemController::AbortSimulation from any participant.
+All participants can also be forced to end their lifecycle by calling ``ISystemController::AbortSimulation`` from any participant.
 This will trigger the ``Abort`` callback, which indicates that the simulation was aborted and provide the participant state that was active when the abort event was received.
 
 .. _subsec:sim-lifecycle:
@@ -172,7 +172,7 @@ Simulation-wide Lifecycle (System State)
 -----------------------------------------
 
 The lifecycle of the overall simulation is derived from the states of a defined set of participants.
-Changes to the system state can be observed via the SystemMonitor.
+Changes to the system state can be observed via the System Monitor.
 
 The set of participants that define the system state must be defined via :cpp:func:`SetWorkflowConfiguration()<SilKit::Experimental::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>` before the simulation is started (see :ref:`above<subsubsec:sim-lifecycle-systemController>` for details).
 The system state is defined as follows:
@@ -204,7 +204,7 @@ The last part details what time information |ProductName| clients provide, depen
 
 .. admonition:: Note
 
-    A mixed operation mode in which some participants operate synchronized and some participants operate unsynchronized
+    A mixed operation mode, where some participants operate synchronized and some unsynchronized,
     is not supported. Therefore, all participants of a simulation must either be synchronized or unsynchronized.
 
 Simulation Overview
@@ -212,7 +212,7 @@ Simulation Overview
 A |ProductName| simulation is designed as a discrete-event simulation. 
 This means, that each event of a participant occurs at a distinct point in time.
 Synchronized participants exchange information about the next point in time at which they intend to execute their *simulation step*.
-Based on this information they can infer if they can trigger their next simulation step or if they still need to wait for other participans to finish their steps.
+Based on this information they can infer if they can trigger their next simulation step or if they still need to wait for other participants to finish their steps.
 Each participant executes its simulation step periodically. 
 The simulation time between the execution must be set when registering the simulation step.
 
@@ -225,7 +225,7 @@ The synchronous simulation step is set by calling :cpp:func:`SetSimulationStepHa
 and providing the simulation step to be executed as a delegate function.
 Note that the simulation step is not necessarily executed on the main thread of the application.
 After the execution of the simulation step is finished, the other participants are informed about the next point in time at which the participant intends to execute its next step.
-Users can exchange the simulation step by calling SetSimulationStepHandler again, but they cannot intervene during its execution.
+Users can exchange the simulation step by calling ``SetSimulationStepHandler`` again, but they cannot intervene during its execution.
 
 Sometimes, it may be desirable to have more control about the simulation step execution.
 In these cases, the asynchronous simulation step execution may be preferable.
@@ -254,7 +254,7 @@ Timestamps in Messages
 Each sent bus event is annotated with a timestamp, at which it was sent. 
 The timestamp is set automatically by the |ProductName| client.
 Users do not have to (and should not try to) manually set the timestamp of a message.
-Depending on the mode of the participant (synchronized/unsynchronized) and whether the network is managed by a a network simulator, the timestamp's meaning and precision may differ.
+Depending on the mode of the participant (synchronized/unsynchronized) and whether the network is managed by a network simulator, the timestamp's meaning and precision may differ.
 If a network simulator is available for a given network, it takes precedence of the timestamp control and overrides the timestamps of any bus message.
 
 The following table provides an overview of the behavior, if no network simulator is available.

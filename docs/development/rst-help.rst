@@ -68,10 +68,10 @@ For more information about the toctree, you can read this:
     Sub heading
     ~~~~~~~~~~~
 
-* To create an enumeration add a star in front of your text and be aware of intendations::
+* To create an enumeration add a star in front of your text and be aware of indentations::
 
     * This creates a point enumeration
-      after a line break, be aware of the correct intendation
+      after a line break, be aware of the correct indentation
 
 * The 'Cross-Referencing' and 'how to add reference labels' is described here:
   `Inline markup <https://www.sphinx-doc.org/en/1.5/markup/inline.html>`_

@@ -114,13 +114,13 @@ FlexrayControllers
    * - Name
      - The name of the FlexRay Controller
    * - ClusterParameters
-     - Allows to configure cluster specific settings. See ParticipantConfiguration.schema.json for a full set of parameters. (optional)
+     - Allows to configure cluster specific settings. See ``ParticipantConfiguration.schema.json`` for a full set of parameters. (optional)
    * - NodeParameters
-     - Allows to configure node specific settings. See ParticipantConfiguration.schema.json for a full set of parameters. (optional)
+     - Allows to configure node specific settings. See ``ParticipantConfiguration.schema.json`` for a full set of parameters. (optional)
    * - TxBufferConfigurations
-     - Allows to configure TXBuffers by specifying "channels" (A, B, AB, None), 
+     - Allows to configure TXBuffers by specifying "channels" (``A``, ``B``, ``AB``, ``None``), 
        "slotId", "offset", "repetition", "PPindicator", "headerCrc" 
-       and "transmissionMode" (SingleShot, Continuous). See ParticipantConfiguration.schema.json for a full set of parameters.(optional)
+       and "transmissionMode" (``SingleShot``, ``Continuous``). See ``ParticipantConfiguration.schema.json`` for a full set of parameters. (optional)
 
 
 .. _sec:cfg-participant-data-publishers:
@@ -142,9 +142,9 @@ DataPublishers
    * - Property Name
      - Description
    * - Name
-     - The name of the DataPublisher.
+     - The name of the data publisher.
    * - Topic
-     - The topic on which the DataPublisher publishs its information. (optional)
+     - The topic on which the data publisher publishes its information. (optional)
 
 
 .. _sec:cfg-participant-data-subscribers:
@@ -166,9 +166,9 @@ DataSubscribers
    * - Property Name
      - Description
    * - Name
-     - The name of the DataSubscriber.
+     - The name of the data subscriber.
    * - Topic
-     - The topic on which the DataSubscriber publishs its information. (optional)
+     - The topic on which the data subscriber publishes its information. (optional)
 
 
 .. _sec:cfg-participant-rpc-servers:
@@ -191,9 +191,9 @@ RpcServers
    * - Property Name
      - Description
    * - Name
-     - The name of the RpcServer.
+     - The name of the RPC server.
    * - FunctionName
-     - The function name on which the RpcServer offers its service. (optional)
+     - The function name on which the RPC server offers its service. (optional)
 
 
 .. _sec:cfg-participant-rpc-clients:
@@ -215,6 +215,6 @@ RpcClients
    * - Property Name
      - Description
    * - Name
-     - The name of the RpcClient.
+     - The name of the RPC client.
    * - FunctionName
-     - The function name to which the RpcClient wants to connect to. (optional)
+     - The function name to which the RPC client wants to connect to. (optional)

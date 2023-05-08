@@ -33,7 +33,7 @@ As a rule of thumb, each component has a subdirectory with its own namespace:
 The subdirectory layout follows mostly a uniform scheme for substantial SIL Kit components:
  - `silkit/<component>/all.hpp` is sufficient to use the component.
  - `silkit/<component>/fwd_decl.hpp` contains forward declarations. 
- - Datatypes are declared in ``silkit/<component>/<Component>Datatypes.hpp``.
+ - Data types are declared in ``silkit/<component>/<Component>Datatypes.hpp``.
 
 
 Using the SIL Kit Headers

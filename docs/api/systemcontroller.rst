@@ -20,7 +20,7 @@ System Controller
 .. admonition:: Note
 
   The SIL Kit provides a utility called :ref:`sil-kit-system-controller<sec:util-system-controller>`, that provides a 
-  command line linterface to define the required participant names of a simulation. In most cases this utility can be 
+  command line interface to define the required participant names of a simulation. In most cases this utility can be 
   used and no own implementation is needed.
 
 Create a System Controller

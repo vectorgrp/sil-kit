@@ -20,7 +20,7 @@ Configuration
 
 For the initial discovery of the SIL Kit participants, the SIL Kit uses a central registry
 process at a preconfigured hostname and port. By default, the registry is expected to be
-running on localhost listening on Port 8500. These values can be changed via the
+running on 'localhost' listening on port 8500. These values can be changed via the
 `RegistryUri`, for example:
 
 
@@ -45,7 +45,7 @@ running on localhost listening on Port 8500. These values can be changed via the
 
    * - RegistryUri
      - The URI used by participants when connecting to the SIL Kit Registry.
-       By default, the registry is expected to be running on "localhost" with port 8500.
+       By default, the registry is expected to be running on 'localhost' with port 8500.
        The URI uses a scheme of 'silkit', i.e., ``silkit://localhost:8500``.
 
    * - ConnectAttempts

@@ -31,6 +31,6 @@ See samples/docker-compose-linux.yaml:
 
 Issues:
 
-* Launching the CanWriter on windows fails. It will connect to the registry, but the connection between the 
+* Launching the CanWriter on Windows fails. It will connect to the registry, but the connection between the 
   participants cannot be established.
 

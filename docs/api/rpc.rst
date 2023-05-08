@@ -25,19 +25,19 @@ Using the RPC API
 -----------------
 
 This API provides a client-server model for remote calls with arbitrary argument- and return data.
-The RpcClient and RpcServer interfaces are instantiated from an |IParticipant| interface by calling 
+The ``RpcClient`` and ``RpcServer`` interfaces are instantiated from an |IParticipant| interface by calling 
 |CreateRpcClient| and |CreateRpcServer|, respectively. 
 
-The RpcClient can trigger a call using the |Call| method providing argument data as a vector of bytes.
+The ``RpcClient`` can trigger a call using the |Call| method providing argument data as a vector of bytes.
 The |Call| method is non-blocking and allows for later identification of the call through an
 additional user context pointer passed as an optional second argument.
-The call arrives at the RpcServer and is delivered via a callback, which has to be specified on
-creation of the RpcServer and can be overwritten using the |SetCallHandler| method.
+The call arrives at the ``RpcServer`` and is delivered via a callback, which has to be specified on
+creation of the ``RpcServer`` and can be overwritten using the |SetCallHandler| method.
 There, the argument data and call handle arrive and can be processed.
-The RpcServer must submit the answer to the call at a later point in time with the call handle
-obtained in the RpcCallHandler by using the |SubmitResult| method providing the return data for the
-calling RpcClient.
-The RpcClient receives the call return in a callback which is also specified on creation and can
+The ``RpcServer`` must submit the answer to the call at a later point in time with the call handle
+obtained in the ``RpcCallHandler`` by using the |SubmitResult| method providing the return data for the
+calling ``RpcClient``.
+The ``RpcClient`` receives the call return in a callback which is also specified on creation and can
 be overwritten with |SetCallResultHandler|.
 The callback provides the user context pointer passed to |Call|, the return data and a call status indicating
 success or an error during the procedure.
@@ -45,29 +45,29 @@ success or an error during the procedure.
 Function Name
 ~~~~~~~~~~~~~
 
-RpcClients and RpcServers provide a function name which is part of their |RpcSpec|.
-Communications only takes place among RpcClients and RpcServers with the same function name.
+RPC clients and RPC servers provide a function name which is part of their |RpcSpec|.
+Communications only takes place among RPC clients and RPC servers with the same function name.
 
 Media Type
 ~~~~~~~~~~
 
-Both RpcClients and RpcServers define a media type as part of their |RpcSpec|. It is a meta description
+Both RPC clients and RPC servers define a media type as part of their |RpcSpec|. It is a meta description
 of the transmitted data in accordance to `RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_ and should be used
-to provide infomation about the de- / serialization of the underlying user data. Just like the topic, the media type 
-has to match between RpcClients / RpcServers for communication to take place. An empty string on a RpcClient will 
+to provide information about the de-/serialization of the underlying user data. Just like the topic, the media type 
+has to match between RPC clients / RPC servers for communication to take place. An empty string on an RPC client will 
 match any other media type on a server.
 
 Labels
 ~~~~~~
 
-Both RpcClients and RpcServers can be annotated with string-based key-value pairs (labels) which can be either
-mandatory or optional. In addition to the matching requirements given by topic and mediaType, RpcClients and 
-RpcServers will only communicate if their labels conform to the following matching rules:
+Both RPC clients and RPC servers can be annotated with string-based key-value pairs (labels) which can be either
+mandatory or optional. In addition to the matching requirements given by topic and media type, RPC clients and 
+RPC servers will only communicate if their labels conform to the following matching rules:
 
 * A mandatory label matches, if a label of the same key and value is found on the corresponding counterpart.
 * An optional label matches, if the label key does not exist on the counterpart or both its key and value are equal.
 
-The following table shows how RpcClients and RpcServers with matching topics and matching media type would 
+The following table shows how RPC clients and RPC servers with matching topics and matching media type would 
 match corresponding to their labels. Note that the label matching is symmetric, so clients and servers
 are interchangeable here.
 
@@ -105,17 +105,17 @@ see the following code snippet:
 Error handling
 ~~~~~~~~~~~~~~
 
-* If using |Call| with no corresponding server available, the CallReturnHandler is triggered immediately with
+* If using |Call| with no corresponding server available, the ``CallReturnHandler`` is triggered immediately with
   ``RpcCallStatus::ServerNotReachable``.
-* |SubmitResult| must only be used with a valid call handle received in the RpcHandler.
+* |SubmitResult| must only be used with a valid call handle received in the ``RpcHandler``.
 * The ``RpcCallResultEvent::resultData`` member is only valid if ``callStatus == RpcCallStatus::Success``.
-* If the RpcServer receives a call but does not have a valid call handler, the RpcClient will receive a
+* If the RPC server receives a call but does not have a valid call handler, the RPC client will receive an
   ``RpcCallResultEvent`` with ``callStatus == RpcCallStatus::InternalServerError``.
 
 Usage Example
 ~~~~~~~~~~~~~
 
-The interfaces for the Rpc mechanism can be instantiated from an IParticipant:
+The interfaces for the RPC mechanism can be instantiated from an ``IParticipant``:
 
 .. code-block:: cpp
 

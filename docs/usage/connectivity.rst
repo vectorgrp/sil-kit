@@ -8,7 +8,7 @@ Connectivity
 SIL Kit provides interoperability between participants and utilities from different released versions of SIL Kit.
 This section documents known issues and potentially misleading messages reported by SIL Kit participants in certain cases.
 
-Connectivity issues with registry
+Connectivity Issues with Registry
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: console
@@ -23,39 +23,39 @@ Connectivity issues with registry
   [yyyy-mm-dd hh:mm:ss] [CanWriter] [info]      INSTALL_DIR/bin/sil-kit-registry[.exe]
   Something went wrong: ERROR: Failed to connect to SIL Kit Registry
 
-This error message is based on the fact, that your SIL Kit simulation participant was not able to connect to the :ref:`sec:util-registry` with the specified registryUri.
+This error message is based on the fact, that your SIL Kit simulation participant was not able to connect to the :ref:`sec:util-registry` with the specified registry URI.
 A SIL Kit simulation needs a running :ref:`sec:util-registry` that will tell new simulation participants where to find other participants.
-For connecting to a simulation, a SIL Kit participant will use the registryUri specified in its 
-:cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>` call or if specified, the registryUri provided in the Participant Configuration file.
+For connecting to a simulation, a SIL Kit participant will use the registry URI specified in its 
+:cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>` call or if specified, the ``RegistryUri`` provided in the Participant Configuration file.
 To find out where your participant is trying to connect to, refer to the printed error message. In this case, it is looked up by hostname `localhost` and TCP port `8500`, with a value of `silkit://localhost:8500` in the log output.
 
-The registry not being reachable for a participant might have two reasons: There is no registry running under the specified registryUri, 
+The registry not being reachable for a participant might have two reasons: There is no registry running under the specified URI, 
 or the registry is not reachable for this specific participant because of networking issues.
 
 .. admonition:: Note
 
-    By default a SIL Kit registry will bind to silkit://localhost:8500. If you want to reach a registry from somewhere where this localhost is not reachable (VM, WSL, Docker),
-    you have to bind the SIL Kit registry to a publicly reachable URI, such as silkit://0.0.0.0:8501. Make sure that the chosen port is not conflicting to the one of an other SIL Kit registry instance.
-    Also please note, that this opens a public listening port and might not be suitable for your work environment.
+    By default, a SIL Kit registry will bind to ``silkit://localhost:8500``. If you want to reach a registry from somewhere where this 'localhost' is not reachable (VM, WSL, Docker),
+    you have to bind the SIL Kit registry to a publicly reachable URI, such as ``silkit://0.0.0.0:8501``. Make sure that the chosen port is not conflicting to the one of another SIL Kit registry instance.
+    Please note that this opens a public listening port and may not be suitable for your work environment.
     Consult your system administrator when in doubt.
 
 When starting a registry, you can provide a `--listen-uri` under which the registry will be reachable. 
 Make sure that a :ref:`sec:util-registry` is running and that it binds to the address and port specified for your connecting participant.
 
 Often, issues within your network will lead to this error message. To verify, that you are not having networking issues, you can verify that 
-your host running the SIL Kit participant is able to establish a TCP connection to the registry. One way of doing so, is to use the telnet utility:
+your host running the SIL Kit participant is able to establish a TCP connection to the registry. One way of doing so, is to use the Telnet utility:
 
 .. code-block:: powershell
 
-   # Use your ip (here 192.168.1.12) and port (here 8500) of the registry
+   # Use your IP (here 192.168.1.12) and port (here 8500) of the registry
    telnet 192.168.1.12 8500
 
-If telnet does not print that it established a connection, you are having networking issues.
+If Telnet does not print that it established a connection, you are having networking issues.
 
 .. code-block:: powershell
    
-   Trying <ip of registry>...
-   Connected to <ip of registry>.
+   Trying <IP of registry>...
+   Connected to <IP of registry>.
    Escape character is '^]'.
 
 In this case your network configuration prevents a connection to the registry.
@@ -76,7 +76,7 @@ Using the Registry as a Proxy for Participant-to-Participant Connections
    [yyyy-mm-dd hh:mm:ss.sss] [EthernetReader] [warning] VAsioConnection: Failed to connect directly to EthernetWriter, trying to proxy messages through the registry: Failed to connect to host URIs: "tcp://127.0.0.1:37117,"
 
 When a SIL Kit participant joins a simulation, it first connects to the SIL Kit registry (:ref:`sec:util-registry`), which informs the participant about all other participants, that have already joined the simulation.
-The participant then tries to connect to all of the other participants.
+The participant then tries to connect to all the other participants.
 
 If another participant cannot be connected to directly, as a last resort, it tries to use the registry as a proxy for participant-to-participant communication.
 The warning is issued, since sending the participant-to-participant messages via the registry will add latency and overhead.

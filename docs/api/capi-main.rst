@@ -14,7 +14,7 @@ Entry Point and API Organization
 SIL Kit Entry Point and API Organization
 ========================================
 
-The main entry point of the C API is the function to obtain a SilKit_Participant::
+The main entry point of the C API is the function to obtain a ``SilKit_Participant``::
 
     SilKit_ParticipantConfiguration* participantConfiguration = NULL;
     SilKit_Participant* participant = NULL;
@@ -31,11 +31,11 @@ The main entry point of the C API is the function to obtain a SilKit_Participant
 All further services of the C API of the SIL Kit are requested through this Participant.
 
 Entities obtained through the Participant must not be destroyed/deleted by the user of the API.
-All entities, that are provided through the API expect for the SilKit_Participant are destroyed through
+All entities, that are provided through the API expect for the ``SilKit_Participant`` are destroyed through
 the internals of the SIL Kit implementation.
 
-After creation of a Participant it must be ensured that eventually SilKit_Participant_Destroy is called
-with the corresponding pointer to the SilKit_Participant entity.
+After creation of a Participant it must be ensured that eventually ``SilKit_Participant_Destroy`` is called
+with the corresponding pointer to the ``SilKit_Participant`` entity.
 
 
 API and Data Type Reference
@@ -52,7 +52,7 @@ Participant API
 .. doxygenfunction:: SilKit_Participant_Create
 .. doxygenfunction:: SilKit_Participant_Destroy
 
-Most creator functions for other objects (such as bus controllers) require an SilKit_Participant, 
+Most creator functions for other objects (such as bus controllers) require a ``SilKit_Participant``, 
 which is the factory object, as input parameter.
 
 Logger API 

@@ -17,7 +17,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Vector SIL Kit'
-copyright = 'Copyright (c) 2022 Vector Informatik GmbH'
+copyright = '2022 Vector Informatik GmbH'
 author = 'Vector Informatik GmbH'
 version = '1.0.0'
 # The full version, including alpha/beta/rc tags

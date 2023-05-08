@@ -5,7 +5,7 @@ Troubleshooting
 .. contents::
    :depth: 3
    
-This section provides trouble shooting information and answers to frequently asked questions about running
+This section provides troubleshooting information and answers to frequently asked questions about performing
 SIL Kit simulations.
 
 .. include:: connectivity.rst

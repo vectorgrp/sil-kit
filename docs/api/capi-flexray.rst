@@ -10,24 +10,24 @@ The FlexRay API consists of the following parts:
 * The FlexRay controller
 * The FlexRay controller and TX buffer configuration
 * A set of FlexRay specific messages, each with its own function to register callbacks: 
-  Message, MessageAck, Wakeup, ControllerStatus, PocStatus, Symbol, SymbolAck, CycleStart
+  ``Message``, ``MessageAck``, ``Wakeup``, ``ControllerStatus``, ``PocStatus``, ``Symbol``, ``SymbolAck``, ``CycleStart``
   
  
 FlexRay Controller
 ~~~~~~~~~~~~~~~~~~
-A FlexRay controller interacts with the configured FlexRay bus and sends FlexRay frames and other events on it's own behalf.
+A FlexRay controller interacts with the configured FlexRay bus and sends FlexRay frames and other events on its own behalf.
 Note that it is not possible to explicitly send frames or other events, nor exist any API functions to construct these events.
 This is because the FlexRay bus works completely time triggered, sending preconfigured frames.
-To configure these frames, the API provides functions to manipulate TX buffers.
+To configure these frames, the API provides functions to manipulate Tx buffers.
 
-**The following functions can be used to create a FlexRay controller and manipulate it's configuration:**
+**The following functions can be used to create a FlexRay controller and manipulate its configuration:**
 
 .. doxygenfunction:: SilKit_FlexrayController_Create
 .. doxygenfunction:: SilKit_FlexrayController_Configure
 .. doxygenfunction:: SilKit_FlexrayController_ReconfigureTxBuffer
 .. doxygenfunction:: SilKit_FlexrayController_UpdateTxBuffer
 
-**The following function can be used to manipulate the controller's state by triggering chi commands:**
+**The following function can be used to manipulate the controller's state by triggering Controller Host Interface (CHI) commands:**
 
 .. doxygenfunction:: SilKit_FlexrayController_ExecuteCmd
 

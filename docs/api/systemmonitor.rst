@@ -10,16 +10,16 @@ System Monitor
 .. highlight:: cpp
 
 Using the System Monitor
--------------------------
+------------------------
 
 Each participant has access to a System Monitor and can register callbacks to get informed about
-changes of the ParticipantState or the SystemState that occur during the simulation.
+changes of the ``ParticipantState`` or the ``SystemState`` that occur during the simulation.
 
 Register Callbacks for State Transitions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To be notified about transitions of the ParticipantState, a ParticipantStatusHandler has to be registered. The
-:cpp:class:`ParticipantStatus<SilKit::Services::Orchestration::ParticipantStatus>` contains the new ParticipantState and further details 
+To be notified about transitions of the ``ParticipantState``, a ``ParticipantStatusHandler`` has to be registered. The
+:cpp:class:`ParticipantStatus<SilKit::Services::Orchestration::ParticipantStatus>` contains the new ``ParticipantState`` and further details 
 about the transition such as the name of the participant, the reason for the status change and timing information:
 
 .. code-block:: c++
@@ -31,7 +31,7 @@ about the transition such as the name of the participant, the reason for the sta
   auto* systemMonitor = participant->GetSystemMonitor();
   systemMonitor->AddParticipantStatusHandler(participantStatusHandler);
 
-A SystemStateHandler can be registered to get informed about system state transitions:
+A ``SystemStateHandler`` can be registered to get informed about system state transitions:
 
 .. code-block:: c++
 
@@ -72,7 +72,7 @@ API and Data Type Reference
 --------------------------------------------------
 
 System Monitor API
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 .. doxygenclass:: SilKit::Services::Orchestration::ISystemMonitor
    :members:
 

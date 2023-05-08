@@ -69,7 +69,7 @@ Initialization
 ~~~~~~~~~~~~~~
 
 Before the FlexRay controller can be used and participate in FlexRay communication cycles,
-it must be configured and a startup phase must take place at the beginning of the simulation.
+it must be configured, and a startup phase must take place at the beginning of the simulation.
 
 Configuration
 _____________
@@ -81,7 +81,7 @@ The |FlexrayControllerConfig| consists of global |FlexrayClusterParameters| and 
 which are both best set in the participant configuration (see config section 
 :ref:`FlexrayControllers<sec:cfg-participant-flexray>`). Furthermore, the |FlexrayControllerConfig| contains one or 
 more |FlexrayTxBufferConfig| instances, which can either be specified in the participant configuration or added 
-manually at runtime. TxBuffers are used to initiate a transmission from one FlexRay controller to another.
+manually at runtime. Tx buffers are used to initiate a transmission from one FlexRay controller to another.
 
 The following example configures a FlexRay controller with two |FlexrayTxBufferConfig| instances specifying two
 |FlexrayFrameEvent| instances, which will be sent during simulation. The |FlexrayClusterParameters| and the
@@ -109,22 +109,22 @@ The following example configures a FlexRay controller with two |FlexrayTxBufferC
 
     flexrayController->Configure(controllerConfig);
 
-Note that |Configure| should be called in the CommunicationReadyHandler of the LifecycleService.
+Note that |Configure| should be called in the ``CommunicationReadyHandler`` of the ``LifecycleService``.
 
 Startup
 _______
 
 At least two FlexRay controllers are always required for a successful startup in a FlexRay cluster.
-The two participants responsible for startup are also called coldstart nodes. The "leading" coldstart node 
+The two participants responsible for startup are also called cold start nodes. The "leading" cold start node 
 (normally the first node that is in |FlexrayPocState_Ready|) has to send the |Wakeup| command to the other 
-"following" coldstart node(s)::
+"following" cold start node(s)::
 
   leadingColdStartNode->Wakeup();
   // The leading controllers FlexrayPocState will change from
   // Ready to Wakeup triggering the PocStatusHandler.
 
-The response of the following coldstart node must be the |AllowColdstart| and |Run| command that can be send in the 
-WakeupHandler callback::
+The response of the following cold start node must be the |AllowColdstart| and |Run| command that can be sent in the 
+``WakeupHandler`` callback::
 
   void WakeupHandler(IFlexrayController* controller, const FlexraySymbolEvent& symbol)
   {
@@ -132,8 +132,8 @@ WakeupHandler callback::
       followingColdStartNode->Run();
   }
 
-Finally, the leading coldstart node has also to respond by sending the same commands after
-the FlexrayPocState state changed from |FlexrayPocState_Wakeup| to |FlexrayPocState_Ready|::
+Finally, the leading cold start node has also to respond by sending the same commands after
+the ``FlexrayPocState`` changed from |FlexrayPocState_Wakeup| to |FlexrayPocState_Ready|::
     
   if (oldState == FlexrayPocState::Wakeup
       && newState == FlexrayPocState::Ready)
@@ -142,14 +142,14 @@ the FlexrayPocState state changed from |FlexrayPocState_Wakeup| to |FlexrayPocSt
       leadingColdStartNode->Run();
   }
 
-Note that the leading coldstart node must send these commands in the next FlexRay cycle and not
-directly in a handler like the PocStatusHandler.
+Note that the leading cold start node must send these commands in the next FlexRay cycle and not
+directly in a handler like the ``PocStatusHandler``.
 
 Tx Buffer Update (Sending FlexRay Messages)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In each FlexRay cycle, data can be sent by using the |UpdateTxBuffer|. For this, an existing txBufferIndex, 
-a payload and the payloadDataValid flag must be provided::
+In each FlexRay cycle, data can be sent by using the |UpdateTxBuffer|. For this, an existing ``txBufferIndex``, 
+a ``payload`` and the ``payloadDataValid`` flag must be provided::
 
   std::string payloadString{"FlexRay message"};
 
@@ -162,7 +162,7 @@ a payload and the payloadDataValid flag must be provided::
 
   controller->UpdateTxBuffer(update);
 
-To be notified for the success or failure of the transmission, a FrameTransmitHandler should
+To be notified for the success or failure of the transmission, a ``FrameTransmitHandler`` should
 be added::
   
   // Add FrameTransmitHandler to receive FlexRay transmit events from other FlexRay controllers.
@@ -183,7 +183,7 @@ by the FlexRay controller whenever a |FlexrayFrameEvent| is received::
 
 .. admonition:: Note
 
-  For a successful Startup, also the ``PocStatusHandler``, the ``WakeupHandler``, the ``SymbolHandler``
+  For a successful startup, also the ``PocStatusHandler``, the ``WakeupHandler``, the ``SymbolHandler``
   and the ``SymbolTransmitHandler`` should be added to invoke the different necessary commands.
 
 .. _sec:poc-status-changes:
@@ -191,7 +191,7 @@ by the FlexRay controller whenever a |FlexrayFrameEvent| is received::
 Receiving POC Status Changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The protocol operation control (POC) status is a structure consisting of status variables, substates and flags. It is 
+The protocol operation control (POC) status is a structure consisting of status variables, sub-states and flags. It is 
 modelled by the |FlexrayPocStatusEvent| structure. Updates to the controller's POC status can be monitored using 
 handlers added with a call to |AddPocStatusHandler|::
     

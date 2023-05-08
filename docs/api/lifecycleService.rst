@@ -25,21 +25,21 @@ Configuring the Lifecycle Service
 
 To create the lifecycle service, a valid lifecycle configuration must be provided.
 Currently, only the mode that the lifecycle operates in can be configured.
-There are two possible operation modi:
+There are two possible operation modes:
 
 * Coordinated: 
   
   * The lifecycle service will coordinate its state with other participants. It will do so by reacting to changes of the system state, which is based on the list of required participants.
   * A coordinated participant will only work, if any participant set a list of required participants as part of :cpp:func:`ISystemController::SetWorkflowConfiguration()<SilKit::Experimental::Services::Orchestration::ISystemController::SetWorkflowConfiguration()>`.
   * Coordinated participants will stop, as soon as the system state changes to the stopping state.
-  * The `CommunicationReady` callback guarantees that communication via RPC and Publish/Subscribe services is possible.
+  * The ``CommunicationReady`` callback guarantees that communication via RPC and publish/subscribe services is possible.
   * Coordinated participants can also be terminated externally using the :cpp:func:`ISystemController::AbortSimulation()<SilKit::Experimental::Services::Orchestration::ISystemController::AbortSimulation()>` call.
   
 * Autonomous: 
   
   * An autonomous participant will not align its state to the system state or any participant state of other participants.
-  * The lifecycle service will run through all participant states until it is running and it will trigger all callbacks.
-  * The `CommunicationReady` callback will trigger, but the communication guarantee is not given.
+  * The lifecycle service will run through all participant states until it is running, and it will trigger all callbacks.
+  * The ``CommunicationReady`` callback will trigger, but the communication guarantee is not given.
   * Autonomous participants must stop themselves by explicitly calling :cpp:func:`Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`.
   * The only way to stop an autonomous participant externally is the :cpp:func:`ISystemController::AbortSimulation()<SilKit::Experimental::Services::Orchestration::ISystemController::AbortSimulation()>` call.
 
@@ -96,7 +96,7 @@ They are always executed in the middleware's worker thread::
     );
 
 
-If a participant does not use the virtual time synchronization, a separate callback informs about the transition to the Running state.
+If a participant does not use the virtual time synchronization, a separate callback informs about the transition to the ``Running`` state.
 This can be used to start local timers::
 
     lifecycleService->SetStartingHandler(
@@ -105,7 +105,7 @@ This can be used to start local timers::
         }
     );
 
-The ``CommunicationReady`` handler should be used to intialize and configure :doc:`services and controllers<api>`. 
+The ``CommunicationReady`` handler should be used to initialize and configure :doc:`services and controllers<api>`. 
 
 
 Controlling the Participant
@@ -113,11 +113,11 @@ Controlling the Participant
 After a successful startup, the participant will enter the :cpp:enumerator:`Running<SilKit::Services::Orchestration::Running>` state.
 :cpp:func:`State()<SilKit::Services::Orchestration::ILifecycleService::State()>` returns the
 current state as a plain enumeration, whereas :cpp:func:`Status()<SilKit::Services::Orchestration::ILifecycleService::Status()>`
-returns additional information such as the participant's name, the human readable 
+returns additional information such as the participant's name, the human-readable 
 reason for entering the state, and the wall clock time when the state was entered.
 
 To temporarily pause a simulation task, the :cpp:func:`Pause()<SilKit::Services::Orchestration::ILifecycleService::Pause()>`
-method can be invoked with a human readable explanation as a string argument.
+method can be invoked with a human-readable explanation as a string argument.
 Execution can be resumed using the :cpp:func:`Continue()<SilKit::Services::Orchestration::ILifecycleService::Continue()>`
 method.
 
@@ -128,7 +128,7 @@ to the SIL Kit runtime system. ReportError is also called when the invocation of
 
 To stop a particular participant, use the :cpp:func:`Stop()<SilKit::Services::Orchestration::ILifecycleService::Stop()>`
 method. This will exit the :cpp:func:`StartLifecycle<SilKit::Services::Orchestration::ILifecycleService::StartLifecycle()>` loop,
-call the registered StopHandler (if it was set) and switch to the :cpp:enumerator:`Stopped<SilKit::Services::Orchestration::Stopped>` state.
+call the registered ``StopHandler`` (if it was set) and switch to the :cpp:enumerator:`Stopped<SilKit::Services::Orchestration::Stopped>` state.
 Afterwards, the participant will shut down by first changing to the :cpp:enumerator:`ShuttingDown<SilKit::Services::Orchestration::ShuttingDown>` state, 
 which triggers the shutdown handler (if it was set) and then finishing at the :cpp:enumerator:`Shutdown<SilKit::Services::Orchestration::Shutdown>` state.
 At this point, the future provided by :cpp:func:`StartLifecycle()<SilKit::Services::Orchestration::ILifecycleService::StartLifecycle()>` will return.
@@ -143,7 +143,7 @@ Usage Example
 --------------
 The following example is based on the ``SilKitCanDemo`` source code which is
 distributed with the SIL Kit, and slightly adapted for clarity.
-It demonstrates how to setup a lifecycle service and register callbacks
+It demonstrates how to set up a lifecycle service and register callbacks
 to monitor participant state changes.
 
 To demonstrate how to properly initialize other services, a can controller is 

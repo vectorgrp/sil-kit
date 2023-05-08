@@ -60,7 +60,7 @@ CAN controllers will only communicate within the same network.
 Sending CAN Frames
 ~~~~~~~~~~~~~~~~~~
 
-Data is transfered in the form of a |CanFrame| and received as a |CanFrameEvent|. To send a |CanFrame|, it must be setup 
+Data is transferred in the form of a |CanFrame| and received as a |CanFrameEvent|. To send a |CanFrame|, it must be setup 
 with a CAN ID and the data to be transmitted. Furthermore, valid |CanFrameFlag| have to be set::
 
   // Prepare a CAN message with id 0x17
@@ -93,10 +93,10 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
   always be |Transmitted|. If a detailed simulation is used, it is possible that the transmit queue overflows
   causing the handler to be called with |TransmitQueueFull| signaling a transmission failure.
 
-Receiving CAN FrameEvents
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Receiving CAN Frame Events
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A |CanFrame| is received as a |CanFrameEvent| consisting of a transmitId used to identify the acknowledge of the 
+A |CanFrame| is received as a |CanFrameEvent| consisting of a ``transmitId`` used to identify the acknowledgement of the 
 frame, a timestamp and the actual |CanFrame|. The handler is called whenever a |CanFrame| is received::
 
   auto frameHandler = [](ICanController*, const CanFrameEvent& frameEvent) 
@@ -137,7 +137,7 @@ rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
 
 .. admonition:: Note
 
-   Both |SetBaudRate| and |Start|  should not be called earlier than in the life cycle service's
+   Both |SetBaudRate| and |Start| should not be called earlier than in the life cycle service's
    :cpp:func:`communication ready handler<SilKit::Core::synd::ILifecycleService::SetCommunicationReadyHandler()>`. Otherwise, it is not guaranteed 
    that all participants are already connected, which can cause the call to have no effect.
 
@@ -146,7 +146,7 @@ Managing the Event Handlers
 
 Adding a handler will return a |HandlerId|. This ID can be used to remove the handler via:
 
-- |RemoveFrameTransmitHandler|  
+- |RemoveFrameTransmitHandler|
 - |RemoveStateChangeHandler|
 - |RemoveErrorStateChangeHandler|
 - |RemoveFrameHandler|
@@ -187,7 +187,7 @@ processes, their interaction is shown sequentially to demonstrate cause and effe
 
 Assumptions:
 
-- *canReceiver*, *canSender* are of type |ICanController|.
+- Variables ``canReceiver`` and ``canSender`` are of type |ICanController|.
 - All CAN controllers use the same CAN network.
 
 Simple CAN Sender / Receiver Example

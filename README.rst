@@ -18,11 +18,11 @@ The Vector SIL Kit
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
 
-For documentation on using the Vector SIL Kit, see the html documentation,
+For documentation on using the Vector SIL Kit, see the HTML documentation,
 which can be generated when building the Vector SIL Kit (cf. Customizing the
 Build) and is provided in pre-built form with the SIL Kit packages.
 
-The SIL Kit source and documentation is licensed under a permissable open
+The SIL Kit source and documentation is licensed under a permissible open
 source license, see LICENSE file. For licenses of third party dependencies,
 see `ThirdParty/LICENSES.rst`.
 
@@ -63,7 +63,7 @@ required third party software::
 The SIL Kit uses CMake for its build system. CMake can generate a
 platform specific project, e.g., a Visual Studio solution or Linux make
 files. To generate a project using the default project generator, create a build
-directory and configure cmake::
+directory and configure CMake::
 
     mkdir build
     cd build
@@ -88,31 +88,31 @@ To install the SIL Kit to a previously configured location, run::
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is often helpful to specify a directory where the build should be
-installed. With cmake, this can be configured via the variable
-CMAKE_INSTALL_PREFIX. E.g., to installed the SIL Kit into a folder
-called "install" next to the build folder, run cmake as follows::
+installed. With CMake, this can be configured via the variable
+CMAKE_INSTALL_PREFIX. E.g., to install the SIL Kit into a folder
+called "install" next to the build folder, run CMake as follows::
 
     cmake -DCMAKE_INSTALL_PREFIX=../install ..
 
 There are also specific options to toggle details of the build:
 
-    1. SILKIT_BUILD_DOCS=ON (default: OFF) generates html documentation using
+    1. SILKIT_BUILD_DOCS=ON (default: OFF) generates HTML documentation using
        Doxygen and Sphinx. Both must be installed beforehand. To install the needed
        dependencies use `pip`:
        `pip3 install -r SilKit/ci/docker/docs_requirements.txt`
 
     2. SILKIT_BUILD_TESTS=OFF (default: ON) disables the generation of unit and
-       integration tests. The tests are based on the google test framework,
+       integration tests. The tests are based on the GoogleTest framework,
        which is bundled with the SIL Kit.
 
     3. SILKIT_BUILD_DEMOS=OFF (default: ON) disables the generation of demo
        applications for the SIL Kit.
 
     4. SILKIT_BUILD_UTILITIES=OFF (default: ON) disables the generation of utility tools
-       (registry, system controller and system monitor).
+       (sil-kit-registry, sil-kit-system-controller and sil-kit-monitor).
 
 For example, if you want to build the SIL Kit with documentation enabled,
-call cmake in your build directory as follows::
+call CMake in your build directory as follows::
 
     pip3 install -r SilKit/ci/docker/docs_requirements.txt
     pip3 install pipenv

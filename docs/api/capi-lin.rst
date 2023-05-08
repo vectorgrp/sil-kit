@@ -5,7 +5,7 @@ LIN C API
    :local:
    :depth: 3
 
-The LIN API for the C language provides communication in a LIN-Bus master/slave-architecture. 
+The LIN API for the C language provides communication in a LIN bus master/slave-architecture. 
 The functionality is analogous to the C++ API described in :ref:`sec:lin`.
   
 LIN Controller
@@ -15,7 +15,7 @@ LIN Controller
 
 .. doxygenfunction:: SilKit_LinController_Create
 
-**It's configuration is handed over to the function:**
+**A LIN controller's configuration is handed over to the function:**
 
 .. doxygenfunction:: SilKit_LinController_Init
 

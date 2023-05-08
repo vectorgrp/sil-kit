@@ -30,7 +30,7 @@ Building the Demos
 ~~~~~~~~~~~~~~~~~~
 
 Building the demos from within the source tree is straight forward,
-just build the  ``Demos`` CMake target::
+just build the ``Demos`` CMake target::
     
     cmake --build . --target Demos
 
@@ -39,9 +39,9 @@ The individual demos are build as a dependency.
 .. admonition:: Note
    
    The distributed Demos, as packaged by CPack, are preconfigured to build against 
-   a copy of the SIL Kit binaries in ``../SilKit/`` .
-   This can be overriden by providing your own ``SilKit`` CMake target library,
-   before the demos are configured by cmake.
+   a copy of the SIL Kit binaries in ``../SilKit/``.
+   This can be overridden by providing your own ``SilKit`` CMake target library,
+   before the demos are configured by CMake.
    Or by changing the ``find_package(SilKit ... PATHS path/to/SilKit)`` statement directly
    in the ``SilKit-Demos/CMakeLists.txt`` directory.
 
@@ -66,7 +66,7 @@ CAN Demo
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
-           File name of the ParticipantConfiguration to be used; 
+           File name of the participant configuration to be used; 
            use ``DemoCan.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``CanWriter`` or 
@@ -79,7 +79,7 @@ CAN Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
             
-            # Creates a CAN Writer Process with the default registry URI
+            # Creates a CAN Writer Process with the registry's default URI
             |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter
    *  -  System Example
       - For synchronized execution:
@@ -89,7 +89,7 @@ CAN Demo
             # Registry (if not already running):
             |Registry|
             
-            # System Monitor (optional):
+            # Monitor (optional):
             |Monitor|
 
             # CAN Reader:
@@ -136,20 +136,20 @@ Ethernet Demo
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
-           File name of the ParticipantConfiguraiton to be used; 
+           File name of the participant configuration to be used; 
            use ``DemoEthernet.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
            ``EthernetReader``.
          [RegistryUri] 
-           The silkit:// URI of the registry to connect to; defaults to silkit://localhost:8500 (optional).
+           The ``silkit://`` URI of the registry to connect to; defaults to ``silkit://localhost:8500`` (optional).
          [\-\-async] 
            If async flag is set, the participant will join the simulation unsynchronized and it will not need
            the |SystemController| to start.
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates an Ethernet Writer Process with the default registry URI:
+            # Creates an Ethernet Writer Process with the registry's default URI:
             |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
    *  -  System Example
       - For synchronized execution:
@@ -159,7 +159,7 @@ Ethernet Demo
             # Registry (if not already running):
             |Registry|
 
-            # System Monitor (optional):
+            # Monitor (optional):
             |Monitor|
 
             # Ethernet Reader:
@@ -207,7 +207,7 @@ LIN Demo
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
-           File name of the ParticipantConfiguraiton to be used; 
+           File name of the participant configuration to be used; 
            use ``DemoLin.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``EthernetWriter`` or 
@@ -220,7 +220,7 @@ LIN Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a LIN Master Process with the default registry URI:
+            # Creates a LIN Master Process with the registry's default URI:
             |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster
    *  -  System Example
       -  For synchronized execution:
@@ -230,7 +230,7 @@ LIN Demo
             # Registry (if not already running):
             |Registry|
 
-            # System Monitor (optional):
+            # Monitor (optional):
             |Monitor|
 
             # LIN Master:
@@ -279,7 +279,7 @@ FlexRay Demo
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
-           File name of the ParticipantConfiguraiton to be used; 
+           File name of the participant configuration to be used; 
            use ``DemoFlexRay.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Node0`` or 
@@ -290,30 +290,30 @@ FlexRay Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a FlexRay Process for Node 0 with the default registry URI:
-            |DemoDir|/SilKitDemoFlexray Demos/FlexRayDemoFlexray.silkit.yaml Node0
+            # Creates a FlexRay Process for Node 0 with the registry's default URI:
+            |DemoDir|/SilKitDemoFlexRay Demos/FlexRayDemoFlexRay.silkit.yaml Node0
    *  -  System Example
       -  .. parsed-literal:: 
 
             # Registry (if not already running):
             |Registry|
 
-            # Network simulator (assumed to be in PATH, necessary):
+            # Network Simulator (assumed to be in PATH, necessary):
             sil-kit-network-simulator Demos/FlexRay/NetworkSimulatorConfig.yaml
 
-            # System Monitor (optional):
+            # Monitor (optional):
             |Monitor|
 
             # Node 0:
-            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/DemoFlexray.silkit.yaml Node0
+            |DemoDir|/SilKitDemoFlexRay Demos/FlexRay/DemoFlexRay.silkit.yaml Node0
 
             # Node 1:
-            |DemoDir|/SilKitDemoFlexray Demos/FlexRay/DemoFlexray.silkit.yaml Node1
+            |DemoDir|/SilKitDemoFlexRay Demos/FlexRay/DemoFlexRay.silkit.yaml Node1
 
             # System Controller:
             |SystemController| Node0 Node1 NetworkSimulator
    *  -  Notes
-      -  Starting the FlexRay cycle takes quite some time, which is accurately modeled by the NetworkSimulator. 
+      -  Starting the FlexRay cycle takes quite some time, which is accurately modeled by the SIL Kit Network Simulator. 
          It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.
 
 
@@ -334,7 +334,7 @@ Publish & Subscribe Demo
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
-           File name of the ParticipantConfiguraiton to be used; 
+           File name of the participant configuration to be used; 
            use ``DemoPubSub.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Publisher`` or 
@@ -348,7 +348,7 @@ Publish & Subscribe Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a combined publisher and subscriber with the default registry URI:
+            # Creates a combined publisher and subscriber with the registry's default URI:
             |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher
    *  -  System Example
       -  .. parsed-literal:: 
@@ -356,7 +356,7 @@ Publish & Subscribe Demo
             # Registry (if not already running):
             |Registry|
 
-            # System Monitor (optional):
+            # Monitor (optional):
             |Monitor|
 
             # Publisher:
@@ -369,7 +369,7 @@ Publish & Subscribe Demo
             |SystemController| Publisher Subscriber
 
    *  -  Notes
-      -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built in serializer/deserializer.
+      -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built-in serializer/deserializer.
 
 RPC Demo
 ~~~~~~~~~~~~~~~~~~~~
@@ -389,7 +389,7 @@ RPC Demo
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
       -  <ParticipantConfiguration.json|yaml> 
-           File name of the ParticipantConfiguraiton to be used; 
+           File name of the participant configuration to be used; 
            use ``DemoRpc.silkit.yaml`` for an example configuration.
          <ParticipantName> 
            The name of the participant within the simulation; must either be ``Server`` or 
@@ -403,7 +403,7 @@ RPC Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a Rpc-Server Process with the default registry URI:
+            # Creates an RPC server process with the registry's default URI:
             |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server
    *  -  System Example
       -  .. parsed-literal:: 
@@ -411,7 +411,7 @@ RPC Demo
             # Registry (if not already running):
             |Registry|
 
-            # System Monitor (optional):
+            # Monitor (optional):
             |Monitor|
 
             # Server:
@@ -423,7 +423,7 @@ RPC Demo
             # System Controller:
             |SystemController| Server Client
    *  -  Notes
-      -  ``Client`` participant has two RpcClients that call the ``Add100`` and ``Sort`` functions on the two RpcServers of the ``Server`` participant.
+      -  ``Client`` participant has two RPC clients which call the ``Add100`` and ``Sort`` functions on the ``Server`` participant's two RPC servers.
 
 .. _sec:util-benchmark-demo:
 
@@ -435,7 +435,7 @@ Benchmark Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  Benchmark Demo. Used for evaluating SIL Kit performance of PubSub communication.
+      -  Benchmark Demo. Used for evaluating SIL Kit performance of publish/subscribe communication.
    *  -  Source location
       -  Demos/Benchmark
    *  -  Requirements
@@ -471,13 +471,13 @@ Benchmark Demo
           --configuration 
             Path and filename of the participant configuration YAML or JSON file. Default: empty
           --write-csv
-            Path and filename of csv file with benchmark results. Default: empty
+            Path and filename of CSV file with benchmark results. Default: empty
    *  -  Parameter Example
       -  .. parsed-literal:: 
-            # Launch the BenchmarkDemo with positional arguments and a specified configuration file:
+            # Launch the benchmark demo with positional arguments and a specified configuration file:
             |DemoDir|/SilKitDemoBenchmark.exe 4 1 2 1 10 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
 
-            # Launch the BenchmarkDemo with default arguments but 4 participants:
+            # Launch the benchmark demo with default arguments but 4 participants:
             |DemoDir|/SilKitDemoBenchmark.exe --number-participants 4
    *  -  Notes
       -  This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> 
@@ -485,13 +485,13 @@ Benchmark Demo
          This simulation run is repeated <K> times and averages over all runs are calculated. Results for average 
          runtime, speedup (virtual time/runtime), throughput (data size/runtime), message rate (count/runtime) 
          including the standard deviation are printed. 
-         The demo uses PubSub controllers with the same topic for the message exchange, so each participant broadcasts
+         The demo uses publish/subscribe controllers with the same topic for the message exchange, so each participant broadcasts
          the messages to all other participants. The configuration file 
          ``DemoBenchmarkDomainSocketsOff.silkit.yaml`` can be used to disable domain socket usage 
          for more realistic timings of TCP/IP traffic. With ``DemoBenchmarkTCPNagleOff.silkit.yaml``, 
          Nagle's algorithm and domain sockets are switched off.
          The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding
-         differen message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and 
+         different message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and 
          ``Demos\Benchmark\performance-diff\Readme.md`` for further information.
 
 
@@ -503,7 +503,7 @@ Latency Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  Latency Demo. Used for evaluating SIL Kit performance of PubSub communication.
+      -  Latency Demo. Used for evaluating SIL Kit performance of publish/subscribe communication.
    *  -  Source location
       -  Demos/Latency
    *  -  Requirements
@@ -536,6 +536,6 @@ Latency Demo
             |DemoDir|/SilKitDemoLatency.exe 100 1000 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
    *  -  Notes
       -  This latency demo produces timings of a configurable simulation setup. Two participants exchange <M> messages 
-         of <B> bytes without time synchronization. The demo uses PubSub controllers performing a message roundtrip (ping-pong) 
+         of <B> bytes without time synchronization. The demo uses publish/subscribe controllers performing a message roundtrip (ping-pong) 
          to calculate latency and throughput timings. Note that the two participants must use the same parameters for a 
          valid measurement and one participant must use the --isReceiver flag.

@@ -105,7 +105,7 @@ Configuration Options
        :doc:`DataSubscribers<configuration-services>`,
        :doc:`RpcClients<configuration-services>`,
        :doc:`RpcServers<configuration-services>`
-     - These sections allow to configure bus controllers and other communication services. 
+     - These sections are used to configure bus controllers and other communication services. 
 
    * - :ref:`Logging<sec:cfg-participant-logging>`
      - The logger configuration for this participant.
@@ -122,5 +122,3 @@ Configuration Options
    * - :doc:`Middleware<middleware-configuration>`
      - This optional section can be used to configure the middleware running the Vector SIL Kit.
        If this section is omitted, defaults will be used.
-
-

@@ -1,19 +1,19 @@
-Can C API
+CAN C API
 ----------
 
 .. contents::
    :local:
    :depth: 3
 
-Can Controller
+CAN Controller
 ~~~~~~~~~~~~~~~
 
-**A Can controller is created and configured with the following functions:**
+**A CAN controller is created and configured with the following functions:**
 
 .. doxygenfunction:: SilKit_CanController_Create
 .. doxygenfunction:: SilKit_CanController_SetBaudRate
 
-**It's status can be controlled with the functions:**
+**Its status can be controlled with the functions:**
 
 .. doxygenfunction:: SilKit_CanController_Start
 .. doxygenfunction:: SilKit_CanController_Stop

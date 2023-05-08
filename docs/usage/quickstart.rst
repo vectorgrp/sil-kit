@@ -32,13 +32,13 @@ Terminology
      :doc:`Life Cycle Service<../api/lifecycleService>`, which
      provides state handling and access to the time synchronization service.
  * - :doc:`Configuration<../configuration/configuration>`
-   - The optional participant configuration file allows to easily configure a participant and its interconnection within the 
-     simulation. It can be used to change a participants behavior without needing to recompile its sources.
+   - The optional participant configuration file allows easy configuration of a participant and its interconnection within the 
+     simulation. It can be used to change a participant's behavior without recompiling its sources.
  * - Registry
    - The registry is a central service that enables participant discovery in a distributed simulation.
  * - Registry URI
-   - The registry URI specifies where the registry can be reached.
-     It defaults to 'silkit://localhost:8500', that is, the registry is reachable via TCP on the localhost on port 8500.
+   - The registry's URI specifies where the registry can be reached.
+     It defaults to ``silkit://localhost:8500``, that is, the registry is reachable via TCP on the 'localhost' on port 8500.
  * - :doc:`Middleware<../configuration/middleware-configuration>`
    - The concrete distributed communication implementation. That is, the software layer
      implementing the distributed message passing mechanism.
@@ -46,7 +46,7 @@ Terminology
    - The simulated time within a simulation as it is perceived by a participant. Participants might be synchronized or
      unsynchronized.
 
-A simulation consists of participants which all connect to the same registry URI.
+A simulation consists of participants which all connect to the same registry's URI.
 An instance of the registry is required for coordination, either as a standalone process (see :ref:`sec:util-registry`) or created programmatically.
 The participants might be physically distributed in a network or running on the same host.
 
@@ -60,11 +60,11 @@ This tutorial assumes that you are familiar with `CMake (https://cmake.org) <htt
 Using the SIL Kit package
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The SIL Kit distribution contains a self-contained and deployable installation in the *SilKit* directory.
-The  CMake build configuration required is exported to ``SilKit/lib/cmake/SilKit`` and
+The CMake build configuration required is exported to ``SilKit/lib/cmake/SilKit`` and
 defines the ``SilKit::SilKit`` target. 
 
-From CMake this can be easily used via the  ``find_package(SilKit CONFIG)`` mechanism.
-For example, the following CMakeLists.txt is able to import the SIL Kit library based on its filesystem path.
+From CMake this can be easily used via the ``find_package(SilKit CONFIG)`` mechanism.
+For example, the following CMakeLists.txt is able to import the SIL Kit library based on its file system path.
 
 .. literalinclude::
    sample_silkit/CMakeLists.txt
@@ -81,7 +81,7 @@ A simple Publish / Subscribe application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We'll create a simple, self-contained SIL Kit application that uses :doc:`Publish/Subscribe<../api/pubsub>`
 to exchange user-defined data among two participants. First, we include the system and SIL Kit headers and 
-define namespaces and constants in our cpp file ``simple.cpp``:
+define namespaces and constants in our C++ file ``simple.cpp``:
 
 .. literalinclude::
    sample_silkit/simple.cpp
@@ -113,10 +113,10 @@ One thread will act as a publisher by sending a test string to its subscribers:
    :lines: 33-69
 
 First, the simulation is joined by creating the participant called "PublisherParticipant".
-This properly initializes the SIL Kit library and allows to instantiate
+This properly initializes the SIL Kit library; enables the instantiation of
 :doc:`Services<../api/api>` and offers access to the :doc:`Life Cycle Service<../api/lifecycleService>`, which 
 controls the orchestration of our simulation. Next, we create a 
-:cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic. Later, we subscibe 
+:cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic. Later, we subscribe 
 to the same topic name in our subscriber to enable communication between the participants. The actual simulation 
 is performed in the simulation task. This is a callback that is executed by the SIL Kit runtime whenever the
 simulation time advances. This callback has to be registered with the time synchronization service's
@@ -145,9 +145,9 @@ Also, we use a try-catch block here to get proper error handling e.g. if the con
    :language: cpp
    :lines: 104-127
 
-The appication is built with cmake on the command line (from a build directory) by calling ``cmake ..`` to generate 
-and then build via ``cmake --build .``. A more conveniant way is to open the folder in an IDE with CMake support.
-To run this sample, copy the shared library files  (e.g. on Windows  the ``SilKit.dll``, ``SilKitd.dll`` from ``SilKit/bin`` ) and the ``simple.yaml`` next 
+The application is built with CMake on the command line (from a build directory) by calling ``cmake ..`` to generate 
+and then build via ``cmake --build .``. A more convenient way is to open the folder in an IDE with CMake support.
+To run this sample, copy the shared library files (e.g. on Windows the ``SilKit.dll``, ``SilKitd.dll`` from ``SilKit/bin``) and the ``simple.yaml`` next 
 to the compiled executable.
 
 Running the simulation
@@ -155,7 +155,7 @@ Running the simulation
 
 Our sample needs the utility processes :ref:`sec:util-registry` and :ref:`sec:util-system-controller` to run. The 
 registry is required for participant discovery. The :ref:`sec:util-system-controller` takes the participant names
-as commandline arguments, initializes the connected participants and starts the simulation until the return key is 
+as command line arguments, initializes the connected participants and starts the simulation until the return key is 
 pressed. For convenience and to reduce code duplication, these utility programs are implemented in separate executables
 and distributed in binary forms.
 

@@ -26,7 +26,7 @@ The Participant constitutes the main entry point into the SIL Kit API.
 Services
 --------
 
-The services API includes common datatypes, supports various vehicular networks, and provides generic Pub/Sub and RPC facilities.
+The services API includes common data types, supports various vehicular networks, and provides generic publish/subscribe and RPC facilities.
 
 .. toctree::
    :maxdepth: 1

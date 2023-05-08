@@ -84,7 +84,7 @@ Usage Example
 
 The following example is based on the ``SilKitCanDemo`` source code which is
 distributed with the SIL Kit, and slightly abridged for clarity.
-It demonstrates how to setup a life cycle service and register callbacks
+It demonstrates how to set up a life cycle service and register callbacks
 to monitor participant state changes.
 
 To demonstrate how to properly initialize other services, a CAN controller is 

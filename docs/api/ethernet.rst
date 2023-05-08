@@ -51,7 +51,7 @@ Initialization
 ~~~~~~~~~~~~~~
 
 The Ethernet controller first has to call |Activate| before being able to
-send frames. Note that |Activate| can be called in the CommunicationReadyHandler of a LifecycleService.
+send frames. Note that |Activate| can be called in the ``CommunicationReadyHandler`` of a ``LifecycleService``.
 
 
 Sending Ethernet Frames
@@ -62,7 +62,7 @@ according to layer 2 of IEEE 802.3, with
 
 - a source and destination MAC address (6 octets each), 
 - an optional 802.1Q tag (4 octets), 
-- the Ethertype or length (Ethernet II or IEEE 802.3, 2 octets), and
+- the `EtherType` or length (Ethernet II or IEEE 802.3, 2 octets), and
 - the payload to be transmitted (46 octets or more).
 
 .. admonition:: Note
@@ -114,13 +114,13 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
   In a simple simulation, the |EthernetTransmitStatus| of the 
   |EthernetFrameTransmitEvent| will always be |Transmitted|. 
 
-Receiving Ethernet FrameEvents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Receiving Ethernet Frame Events
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a transmitId used to identify
-the acknowledge of the frame, a timestamp and the actual |EthernetFrame|.
+An |EthernetFrame| is received as an |EthernetFrameEvent| consisting of a ``transmitId`` used to identify
+the acknowledgement of the frame, a timestamp and the actual |EthernetFrame|.
 
-To receive Ethernet frames, a FrameHandler must be registered using |AddFrameHandler|. The handler is called whenever 
+To receive Ethernet frames, a frame handler must be registered using |AddFrameHandler|. The handler is called whenever 
 an Ethernet frame is received::
 
   auto frameHandler = [](IEthernetController*, const EthernetFrameEvent& frameEvent) 
@@ -129,8 +129,8 @@ an Ethernet frame is received::
   };
   ethernetController->AddFrameHandler(frameHandler);
 
-An optional second parameter of |AddFrameHandler| allows to specify the direction (TX, RX, TX/RX) of the Ethernet frames to be
-received. By default, only frames of RX direction are handled.
+An optional second parameter of |AddFrameHandler| allows to specify the direction (Tx, Rx, Tx/Rx) of the Ethernet frames to be
+received. By default, only frames of Rx direction are handled.
 
 Managing the Event Handlers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -210,7 +210,7 @@ interaction is shown sequentially to demonstrate cause and effect.
 
 Assumptions:
 
-- *ethernetReceiver*, *ethernetSender* are of type |IEthernetController|.
+- Variables ``ethernetReceiver``, ``ethernetSender`` are of type |IEthernetController|.
 - All Ethernet controllers are connected to the same switch.
 
 Simple Ethernet Sender / Receiver Example

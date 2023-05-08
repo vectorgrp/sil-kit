@@ -7,7 +7,7 @@ Participant
 
 This document describes the main entry point to the SIL Kit simulation, the participant.
 By creating a participant with a given configuration, a connection 
-to a simulation is established and the configured participant joins the simulation.
+to a simulation is established, and the configured participant joins the simulation.
 
 .. |IParticipant| replace:: :cpp:class:`IParticipant<SilKit::IParticipant>` 
 
@@ -32,7 +32,7 @@ IParticipant API
 ~~~~~~~~~~~~~~~~
 
 The instantiated |IParticipant| can then be used to create and access services of the SIL Kit.
-A controller name (the ``canonicalName`` given in Create*-Calls) must be unqiue within a controller type, using the same name twice resuts in
+A controller name (the ``canonicalName`` given in Create*-Calls) must be unique within a controller type, using the same name twice results in
 a ``ConfigurationError``.
 
 .. admonition:: Warning.

@@ -137,16 +137,16 @@ It is widely supported by tools, e.g., by Wireshark and the ``tcpdump`` family o
 PcapFile
 ~~~~~~~~
 
-When ``PcapFile`` is used for the ``Type`` property in the trace sink or source definition,
+If ``PcapFile`` is used for the ``Type`` property in the trace sink or source definition,
 SIL Kit will write/read the trace to/from a normal file,
-identified by the ``OutputPath`` or ``InputPath`` properties.
+identified by the ``OutputPath`` or ``InputPath`` properties respectively.
 
 PcapPipe
 ~~~~~~~~
 
-When ``PcapPipe`` is used for the ``Type`` property in the trace sink or source definition,
+If ``PcapPipe`` is used for the ``Type`` property in the trace sink or source definition,
 SIL Kit will write/read the trace to/from a named pipe,
-identified by the ``OutputPath`` or ``InputPath`` properties.
+identified by the ``OutputPath`` or ``InputPath`` properties respectively.
 
 SIL Kit will wait until the other end of the named pipe has been opened, e.g., opening Wireshark on the named pipe.
 

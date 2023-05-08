@@ -37,7 +37,7 @@ slaveConfig.frameResponses.push_back(LinFrameResponse{slaveFrame, LinFrameRespon
 
 slave->Init(slaveConfig);
 
-// Register FrameStatusHandler to receive an acknowledgment for
+// Register FrameStatusHandler to receive an acknowledgement for
 // the successful transmission
 auto slave_FrameStatusHandler =
     [](ILinController*,  const LinFrameStatusEvent& frameStatusEvent) {};

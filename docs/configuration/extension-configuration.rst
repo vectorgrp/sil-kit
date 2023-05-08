@@ -12,7 +12,7 @@ Overview
 ========================================
 
 The Vector SIL Kit Extensions are developed by Vector and provided in binary form.
-To facilitate the lookup of these binaries, specific search paths can be configured in the extensions configuration.
+To facilitate the lookup of these binaries, specific search paths can be configured as explained below.
 
 Configuration
 --------------------
@@ -34,6 +34,6 @@ Configuration
      - Description
    * - SearchPathHints
      - Optional search path hints which will be considered if an extension is loaded by the SIL Kit,
-       additionally to the default ones. A search path hint can contain the prefix "ENV:"
+       additionally to the default ones. A search path hint can contain the prefix ``ENV:``
        to refer to an environment variable name. The default search paths are the 
-       environment variable "SILKIT_EXTENSION_PATH" and the current working directory.
+       environment variable ``SILKIT_EXTENSION_PATH`` and the current working directory.

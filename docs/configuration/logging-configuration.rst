@@ -18,10 +18,10 @@ levels.
 
 Configuration
 ========================================
-The Logging configuration allows to configure the logging behaviour of the simulation participant.
-Within the Vector SIL Kit, the Logger uses so called sinks to store log messages.
+The Logging configuration allows to configure the logging behavior of the simulation participant.
+Within the Vector SIL Kit, the Logger uses so-called sinks to store log messages.
 Multiple sinks can be configured at the same time. For example, to send log
-messages with log level Debug or higher to a remote logger and write Trace level
+messages with log level ``Debug`` or higher to a remote logger and write ``Trace`` level
 logs to a file, the following configuration could be used:
 
 .. code-block:: yaml

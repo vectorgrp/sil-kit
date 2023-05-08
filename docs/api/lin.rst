@@ -144,7 +144,7 @@ payload provided in the frame parameter of |SendFrame| will be used. If the LIN 
 |SendFrameHeader|, a LIN node has to be configured with |LinFrameResponseMode_Tx| on that ID, possibly the master 
 itself.
 
-In all cases except |SendFrame| with |LinFrameResponseType_MasterResponse|, the responing node will receive the 
+In all cases except |SendFrame| with |LinFrameResponseType_MasterResponse|, the responding node will receive the 
 header and complete the transmission using the payload of its current transmit buffer. The buffer can be updated
 with |UpdateTxBuffer| on the node that is configured with |LinFrameResponseMode_Tx| for the corresponding ID.
 
@@ -155,7 +155,7 @@ The transmission of a frame can be initiated using |SendFrame| or |SendFrameHead
 
 1. Using |SendFrame| with |LinFrameResponseType_MasterResponse|, the frame can be sent in one call
    and the master provides both header and response. A |LinFrame| must be setup with the LIN ID,
-   data, dataLength and the desired checksum model::
+   data, data length and the desired checksum model::
 
         // Prepare a frame with id 0x10 for transmission
         LinFrame masterFrame;
@@ -170,7 +170,7 @@ The transmission of a frame can be initiated using |SendFrame| or |SendFrameHead
 2. When using |SendFrame| with |LinFrameResponseType_SlaveResponse| or |LinFrameResponseType_SlaveToSlave|, 
    a slave has to be preconfigured with |LinFrameResponseMode_Tx| on that ID. With these response types, only the 
    ID of the |LinFrame| used in |SendFrame| is taken into account. The actual payload and frame settings are provided
-   by the TX buffer of the responing slave. The following example assumes that a slave is configure as seen in 
+   by the Tx buffer of the responing slave. The following example assumes that a slave is configured as seen in 
    :ref:`Initialization<sec:lin-initialization>`::
 
         // The slave is configured to respond on ID 0x11
@@ -185,8 +185,8 @@ and will configure itself for reception (|LinFrameResponseMode_Rx|).
 
 3. When using |SendFrameHeader|, the transmission is initiated by sending the header. The node (either master or slave) configured with
    |LinFrameResponseMode_Tx| will provide the response. The actual payload and frame settings are 
-   provided by the TX buffer of the responing LIN node. The following example also assumes that a slave is 
-   configure as seen in :ref:`Initialization<sec:lin-initialization>`::
+   provided by the Tx buffer of the responing LIN node. The following example also assumes that a slave is 
+   configured as seen in :ref:`Initialization<sec:lin-initialization>`::
 
         // Slave:
         LinFrame updatedSlaveResponse;
@@ -225,7 +225,7 @@ which is indicated by |LinFrameStatus_LIN_TX_ERROR|.
 Receiving data from a slave
 ___________________________
 
-Beside transmission acknowledgemets, the |FrameStatusHandler| is also used for reception. To receive data, the 
+Beside transmission acknowledgements, the |FrameStatusHandler| is also used for reception. To receive data, the 
 |FrameStatusHandler| must be registered using |AddFrameStatusHandler|, which is called by the LIN controller when 
 a frame is received and the LIN node is configured for reception with |LinFrameResponseMode_Rx| on that LIN ID::
 
@@ -316,11 +316,11 @@ shown here sequentially to demonstrate cause and effect.
 
 Assumptions:
 
-- *master*, *slave*, *slave1*, and *slave2* are of type |ILinController|.
-- *timeEndOfFrame* indicates the end of frame time stamp when using the detiled simulation. Otherwise the value of 
-  *timeEndOfFrame* is undefined.
-- *UseAutosarInterface* is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API. 
-  It will most likely not be used in practice and it merely intended to show the different usages of the API.
+- Variables ``master``, ``slave``, ``slave1``, and ``slave2`` are of type |ILinController|.
+- Variable ``timeEndOfFrame`` indicates the end of frame time stamp when using the detailed simulation. Otherwise, the value of 
+  ``timeEndOfFrame`` is undefined.
+- ``UseAutosarInterface`` is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API. 
+  It will most likely not be used in practice, and only serves to show the various uses of the API.
   
 Successful Transmission from Master to slave
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -355,7 +355,7 @@ LIN master.
 Erroneous Transmission from Master to Slave - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows what happens when a master atempts to send a Frame while there is slave that has configured a TX 
+This example shows what happens when a master attempts to send a Frame while there is slave that has configured a Tx 
 response for the same LIN ID.
 
 .. literalinclude::
@@ -365,7 +365,7 @@ response for the same LIN ID.
 Erroneous Transmission from Slave to Master - No Response
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows what happens when a master initiates a transmission and no slave has configured a TX response for 
+This example shows what happens when a master initiates a transmission and no slave has configured a Tx response for 
 this LIN ID.
 
 .. literalinclude::
@@ -376,7 +376,7 @@ this LIN ID.
 Erroneous Transmission from Slave to Master - Multiple Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows what happens when a master initiates a transmission where multiple slaves have configured TX 
+This example shows what happens when a master initiates a transmission where multiple slaves have configured Tx 
 responses for the same LIN ID.
 
 .. literalinclude::
@@ -394,8 +394,8 @@ This example shows how to use |GoToSleep| and when the controller will switch fr
 
 .. admonition:: Note
     
-    The |GoToSleepHandler| is triggered even without configuring ID 0x3C for reception. However, the 
-    |FrameStatusHandler| for slaves is only called if ID 0x3C is configured for reception. The master initiated
+    The |GoToSleepHandler| is triggered even without configuring ID ``0x3C`` for reception. However, the 
+    |FrameStatusHandler| for slaves is only called if ID ``0x3C`` is configured for reception. The master initiated
     the sleep mode, it's |FrameStatusHandler| is called with |LinFrameStatus_LIN_TX_OK|.
 
 Wake Up

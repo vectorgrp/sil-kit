@@ -5,23 +5,23 @@ RPC C API
    :local:
    :depth: 3
 
-The Rpc API provides client/server based Rpc functionality. 
-It consists of RpcClients and RpcServers and a method to discover remote RpcServers.
+The RPC API provides client/server based RPC functionality. 
+It consists of RPC clients and RPC servers and a method to discover remote RPC servers.
 
-RpcClients
-~~~~~~~~~~
+RPC Clients
+~~~~~~~~~~~
 .. doxygenfunction:: SilKit_RpcClient_Create
 .. doxygenfunction:: SilKit_RpcClient_Call
 
-A RpcClient is created with a handler for the call return by RpcServers:
+An ``RpcClient`` is created with a handler for the call return by RPC servers:
 .. doxygentypedef:: SilKit_CallResultHandler_t
 
-RpcServers
-~~~~~~~~~~
+RPC Servers
+~~~~~~~~~~~
 .. doxygenfunction:: SilKit_RpcServer_Create
 .. doxygenfunction:: SilKit_RpcServer_SubmitResult
 
-A RpcServers is created with a handler to process incoming calls by RpcClients:
+An ``RpcServer`` is created with a handler to process incoming calls by RPC clients:
 .. doxygentypedef:: SilKit_RpcCallHandler_t
 
 Data Structures

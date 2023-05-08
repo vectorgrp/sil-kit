@@ -65,10 +65,9 @@ Scenario D
 - First Participant: Any version
 - Second Participant 4.0.8 or higher
 
-
 The registry transmits an error to the second participant in SIL Kit 4.0.8 via the ``ParticipantAnnouncementReply`` message with the ``status`` field set to ``Failed``.
 
-The second participant does not report a timeout anymore, but immediately reports a an error message containing the diagnositc message reported by the registry:
+The second participant does not report a timeout anymore, but immediately reports an error message containing the diagnostic message reported by the registry:
 
 .. code-block:: powershell
 

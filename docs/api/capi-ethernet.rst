@@ -40,7 +40,7 @@ Ethernet Controller
 Ethernet Frame
 ~~~~~~~~~~~~~~
 
-The SilKit_EthernetFrame is a raw Ethernet frame consisting of the destination mac, the source mac, the ethertype and a 
+The ``SilKit_EthernetFrame`` is a raw Ethernet frame consisting of the destination MAC, the source MAC, the `EtherType` and a 
 payload.
 
 .. note:: For an example of manual frame construction one can refer to the C Ethernet demo.

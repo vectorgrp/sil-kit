@@ -5,8 +5,8 @@ System Monitor C API
    :local:
    :depth: 3
 
-The features of the SystemMonitor in the Cpp API are not provided through a SystemMonitor abstraction 
-in the C API but directly provided through the SilKit_Participant.
+The features of the System Monitor in the C++ API are not provided through a ``SystemMonitor`` abstraction 
+in the C API but directly provided through the ``SilKit_Participant``.
 
 .. doxygenfunction:: SilKit_SystemMonitor_AddSystemStateHandler
 .. doxygenfunction:: SilKit_SystemMonitor_AddParticipantStatusHandler

@@ -5,22 +5,22 @@ Data Publish/Subscribe C API
    :local:
    :depth: 3
 
-The Publish/Subscribe API provides a topic-based publish / subscribe mechanism to exchange arbitrary user data. 
-It consists of DataPublishers and DataSubscribers.
+The publish/subscribe API provides a topic-based publish/subscribe mechanism to exchange arbitrary user data. 
+It consists of data publishers and data subscribers.
 
-DataPublishers
-~~~~~~~~~~~~~~
+Data Publishers
+~~~~~~~~~~~~~~~
 .. doxygenfunction:: SilKit_DataPublisher_Create
 .. doxygenfunction:: SilKit_DataPublisher_Publish
 
-DataSubscribers
-~~~~~~~~~~~~~~~
+Data Subscribers
+~~~~~~~~~~~~~~~~
 .. doxygenfunction:: SilKit_DataSubscriber_Create
 .. doxygenfunction:: SilKit_DataSubscriber_SetDataMessageHandler
 
 Handlers
 ~~~~~~~~
-The DataSubscriber is created with a handler for data reception:
+The ``DataSubscriber`` is created with a handler for data reception:
 
 .. doxygentypedef:: SilKit_DataMessageHandler_t
 

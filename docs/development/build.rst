@@ -33,15 +33,15 @@ The following options are available:
  * - SILKIT_BUILD_TESTS
    - Build the test cases
  * - SILKIT_BUILD_UTILITIES
-   - Build the utility tools like the system controller or system monitor.
+   - Build the utility tools like the System Controller or Monitor.
  * - SILKIT_BUILD_DEMOS
    - Build the demo applications
  * - SILKIT_BUILD_DOCS
-   - Build the documentation using doxygen and sphinx
+   - Build the documentation using Doxygen and Sphinx
  * - SILKIT_INSTALL_SOURCE
    - Installs the source-tree (used for packaging releases). Implies SILKIT_BUILD_DOCS.
 
-In general, the options can be combined and set using the cmake-gui, your IDE, or command line::
+In general, the options can be combined and set using the CMake GUI, your IDE, or command line::
 
     cmake .. -D SILKIT_BUILD_TESTS=ON -D SILKIT_BUILD_DOCS=ON 
 
@@ -88,10 +88,10 @@ Its contents are as follows:
      - Documented changes
    * - SilKit/
      - 
-     - The SIL Kit binaries and cmake config export
+     - The SIL Kit binaries and CMake config export
    * - SilKit-Demos/
      - SILKIT_INSTALL_SOURCE
-     - Source code of the demos. builds against ../SilKit
+     - Source code of the demos, builds against ``../SilKit``
    * - SilKit-Source/
      - SILKIT_INSTALL_SOURCE
      - The SIL Kit sources.
@@ -104,13 +104,13 @@ Its contents are as follows:
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Building the demos from within the source tree is straight forward: 
-just build the  ``Demos`` CMake target.
+just build the ``Demos`` CMake target.
 The individual demos are build as a dependency.
 
 The distributed Demos, as packaged by CPack, are preconfigured to build against 
-a copy of the SIL Kit binaries in ``../SilKit/`` .
+a copy of the SIL Kit binaries in ``../SilKit/``.
 This can be overriden by providing your own ``SilKit`` CMake target library,
-before the demos are configured by cmake.
+before the demos are configured by CMake.
 Or by changing the ``find_package(SilKit ... PATHS path/to/SilKit)`` statement directly
 in the ``SilKit-Demos/CMakeLists.txt`` directory.
 

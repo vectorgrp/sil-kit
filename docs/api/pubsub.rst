@@ -24,40 +24,40 @@ Using the Data Publish/Subscribe API
 ------------------------------------
 
 The Data Publish/Subscribe API provides a topic-based publish/subscribe mechanism to exchange plain byte vectors 
-containing arbitrary user data. The DataPublisher and DataSubscriber interfaces are instantiated from an |IParticipant| 
+containing arbitrary user data. The ``DataPublisher`` and ``DataSubscriber`` interfaces are instantiated from an |IParticipant| 
 interface by calling |CreateDataPublisher| and |CreateDataSubscriber|, respectively. 
 
-Data can be transmitted using the |Publish| method of a DataPublisher, either providing a standard vector of data or a
+Data can be transmitted using the |Publish| method of a ``DataPublisher``, either providing a standard vector of data or a
 data pointer and size. Published messages are transmitted immediately to all matching subscribers, that is, without 
-any modelled latency. DataSubscribers provide a handler that is called upon incoming data on their topic.
+any modelled latency. Data subscribers provide a handler that is called upon incoming data on their topic.
 
 Topics
 ~~~~~~
 
-DataPublishers and DataSubscribers provide a topic name which is part of their |PubSubSpec|.
+Data publishers and data subscribers provide a topic name which is part of their |PubSubSpec|.
 Communications only takes place among controllers with the same topic. The topic has no wildcard functionality. 
 
 Media Type
 ~~~~~~~~~~
 
-Both DataPublishers and DataSubscribers define a media type as part of their |PubSubSpec|. It is a meta description
+Both data publishers and data subscribers define a media type as part of their |PubSubSpec|. It is a meta description
 of the transmitted data in accordance to `RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_ and should be used
-to provide infomation about the de-/serialization of the underlying user data. Just like the topic, the media type has
-to match between DataPublishers/DataSubscribers for communicaiton to take place. An empty string on a DataSubscriber
-is a wildcard and will match any other media type of a DataPublisher. DataPublishers should provide information
+to provide information about the de-/serialization of the underlying user data. Just like the topic, the media type has
+to match between data publishers/Subscribers for communication to take place. An empty string on a Data subscriber
+is a wildcard and will match any other media type of data publishers. Data publishers should provide information
 about the data they are going to publish and have no wildcard functionality for the media type.
 
 Labels
 ~~~~~~
 
-Both DataPublishers and DataSubscribers can be annotated with string-based key-value pairs (labels) which can be either
-mandatory or optional. In addition to the matching requirements given by topic and mediaType, DataPublishers and
-DataSubscribers will only communicate if their labels conform to the following matching rules:
+Both data publishers and data subscribers can be annotated with string-based key-value pairs (labels) which can be either
+mandatory or optional. In addition to the matching requirements given by topic and media type, data publishers and
+Data subscribers will only communicate if their labels conform to the following matching rules:
 
 * A mandatory label matches, if a label of the same key and value is found on the corresponding counterpart.
 * An optional label matches, if the label key does not exist on the counterpart or both its key and value are equal.
 
-The following table shows how DataPublishers and DataSubscribers with matching topics and matching media type would 
+The following table shows how data publishers and data subscribers with matching topics and matching media type would 
 match corresponding to their labels. Note that the label matching is symmetric, so publishers and subscribers
 are interchangeable here.
 
@@ -96,9 +96,9 @@ see the following code snippet:
 History
 ~~~~~~~
 
-DataPublishers additionally specify a history length N (restricted to 0 or 1). DataSubscribers that are created after a 
-publication will still receive the N historic Data Messages from a DataPublisher with history > 0. Note that the
-particiant that created the DataPublisher still has to be connected to the distributed simulation for the historic 
+Data publishers additionally specify a history length N (restricted to 0 or 1). Data subscribers that are created after a 
+publication will still receive the N historic Data Messages from a data publisher with history > 0. Note that the
+participant that created the data publisher still has to be connected to the distributed simulation for the historic 
 messages to be delivered.
 
 Configuration
@@ -121,7 +121,7 @@ be preferred over a programmatically set topic.
 Usage Examples
 ~~~~~~~~~~~~~~
 
-The interfaces for the publish/subscribe mechanism can be instantiated from an IParticipant:
+The interfaces for the publish/subscribe mechanism can be instantiated from an ``IParticipant``:
 
 .. code-block:: cpp
 
@@ -152,7 +152,7 @@ The |IDataPublisher| provides a simple publish interface for standard vector. An
 pointer and size exists for ease of use.
 
 The |IDataSubscriber| provides a callback registration mechanism for the default callback via 
-|SetDataMessageHandler| and for targeting explicit DataPublishers via |AddExplicitDataMessageHandler|.
+|SetDataMessageHandler| and for targeting explicit data publishers via |AddExplicitDataMessageHandler|.
 
 Data Publisher API
 ~~~~~~~~~~~~~~~~~~
