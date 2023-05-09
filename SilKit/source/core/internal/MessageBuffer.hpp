@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/util/Span.hpp"
 
+#include "Uuid.hpp"
 #include "ProtocolVersion.hpp"
 #include "SharedVector.hpp"
 
@@ -233,6 +234,12 @@ public:
     // std::map<string,string>
     inline MessageBuffer& operator<<(const std::map<std::string, std::string>& msg);
     inline MessageBuffer& operator>>(std::map<std::string, std::string>& updatedMsg);
+
+    // --------------------------------------------------------------------------------
+    // Uuid
+    inline MessageBuffer& operator<<(const Util::Uuid& uuid);
+    inline MessageBuffer& operator>>(Util::Uuid& uuid);
+
 
 private:
     // ----------------------------------------
@@ -546,6 +553,24 @@ inline MessageBuffer& MessageBuffer::operator>>(std::map<std::string,std::string
     updatedMsg = std::move(tmp);
     return *this;
 }
+
+// --------------------------------------------------------------------------------
+// Uuid
+
+inline MessageBuffer& MessageBuffer::operator<<(const Util::Uuid& uuid)
+{
+    *this << uuid.ab << uuid.cd;
+    return *this;
+}
+
+inline MessageBuffer& MessageBuffer::operator>>(Util::Uuid& uuid)
+{
+    *this >> uuid.ab >> uuid.cd;
+    return *this;
+}
+
+// --------------------------------------------------------------------------------
+// Public methods for backward compatibility.
 
 inline void MessageBuffer::SetProtocolVersion(ProtocolVersion version)
 {

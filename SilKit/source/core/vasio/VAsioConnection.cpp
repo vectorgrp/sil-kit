@@ -756,9 +756,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
         return;
     }
 
-    AddParticipantToLookup(announcement.peerInfo.participantName);
     AssociateParticipantNameAndPeer(announcement.peerInfo.participantName, from);
-
     SendParticipantAnnouncementReply(from);
 }
 
@@ -973,32 +971,12 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
                              _pendingParticipantReplies.size());
 }
 
-void VAsioConnection::AddParticipantToLookup(const std::string& participantName)
-{
-    const auto result = _hashToParticipantName.insert({SilKit::Util::Hash::Hash(participantName), participantName});
-    if (result.second == false)
-    {
-        Services::Logging::Warn(
-            _logger, "Warning: Received announcement of participant '{}', which was already announced before.",
-            participantName);
-    }
-}
+
 
 void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& participantName, IVAsioPeer* peer)
 {
     _participantNameToPeer.insert({participantName, peer});
 }
-
-const std::string& VAsioConnection::GetParticipantFromLookup(const std::uint64_t participantId) const
-{
-    const auto participantIter = _hashToParticipantName.find(participantId);
-    if (participantIter == _hashToParticipantName.end())
-    {
-        throw SilKitError{"GetParticipantFromLookup: could not find participant in participant cache"};
-    }
-    return participantIter->second;
-}
-
 void VAsioConnection::StartIoWorker()
 {
     _ioWorker = std::thread{[this]() {
@@ -1273,7 +1251,9 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     peerService.SetServiceDescriptor(peerId);
     link->DistributeRemoteSilKitMessage(&peerService, std::move(msg));
 
-    Services::Logging::Error(_logger, "Lost connection to participant {}", peerId);
+    // TODO: This might be a connection break or a regular shutdown of a remote peer.
+    // For an improved error handling, the message may take these cases into account
+    Services::Logging::Debug(_logger, "Lost connection to participant {}", peerId);
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
@@ -1569,6 +1549,63 @@ void VAsioConnection::SetAsyncSubscriptionsCompletionHandler(std::function<void(
     }
 }
 
+auto VAsioConnection::GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName)
+    -> size_t
+{
+    auto networkName = service->GetServiceDescriptor().GetNetworkName();
+
+    size_t result = 0;
+    tt::for_each(_links, [this, &networkName, msgTypeName, &result](auto&& linkMap) {
+        using LinkPtr = typename std::decay_t<decltype(linkMap)>::mapped_type;
+        using LinkType = typename LinkPtr::element_type;
+
+        if (result != 0)
+            return;
+
+        if (msgTypeName != LinkType::MessageSerdesName())
+            return;
+
+        // access the link under lock
+        std::unique_lock<decltype(_linksMx)> lock{_linksMx};
+        auto& link = linkMap[networkName];
+        if (link)
+        {
+            result = link->GetNumberOfRemoteReceivers();
+        }
+    });
+    
+    return result;
+}
+
+auto VAsioConnection::GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
+                                                           const std::string& msgTypeName)
+    -> std::vector<std::string>
+{
+    auto networkName = service->GetServiceDescriptor().GetNetworkName();
+
+    std::vector<std::string> result{};
+    tt::for_each(_links, [this, &networkName, msgTypeName, &result](auto&& linkMap) {
+        using LinkPtr = typename std::decay_t<decltype(linkMap)>::mapped_type;
+        using LinkType = typename LinkPtr::element_type;
+
+        if (!result.empty())
+            return;
+
+        if (msgTypeName != LinkType::MessageSerdesName())
+            return;
+
+        // access the link under lock
+        std::unique_lock<decltype(_linksMx)> lock{_linksMx};
+        auto& link = linkMap[networkName];
+        if (link)
+        {
+            result = link->GetParticipantNamesOfRemoteReceivers();
+        }
+    });
+
+    return result;
+}
+
 void VAsioConnection::SyncSubscriptionsCompleted()
 {
     _receivedAllSubscriptionAcknowledges.set_value();
@@ -1583,6 +1620,7 @@ void VAsioConnection::AsyncSubscriptionsCompleted()
     }
     _hasPendingAsyncSubscriptions = false;
 }
+
 
 } // namespace Core
 } // namespace SilKit

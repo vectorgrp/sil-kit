@@ -19,11 +19,36 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-add_subdirectory(internal)
-add_subdirectory(service)
-add_subdirectory(requests)
-add_subdirectory(participant)
-add_subdirectory(vasio)
-if(SILKIT_BUILD_TESTS)
-    add_subdirectory(mock)
-endif()
+
+add_library(I_SilKit_Core_RequestReply INTERFACE)
+
+target_include_directories(I_SilKit_Core_RequestReply
+    INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
+target_link_libraries(I_SilKit_Core_RequestReply
+    INTERFACE SilKitInterface
+
+    INTERFACE I_SilKit_Core_Internal
+    INTERFACE I_SilKit_Util_Uuid
+)
+
+add_library(O_SilKit_Core_RequestReply OBJECT
+    RequestReplyDatatypes.hpp
+    
+    RequestReplyService.hpp
+    RequestReplyService.cpp
+
+    RequestReplySerdes.hpp
+    RequestReplySerdes.cpp
+)
+
+target_link_libraries(O_SilKit_Core_RequestReply
+    PUBLIC I_SilKit_Core_RequestReply
+)
+
+add_subdirectory(procedures)
+
+add_silkit_test(Test_MwRequestReplyService
+    SOURCES Test_RequestReplyService.cpp 
+    LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)

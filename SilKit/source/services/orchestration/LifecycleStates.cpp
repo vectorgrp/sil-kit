@@ -22,33 +22,47 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LifecycleStates.hpp"
 #include "LifecycleService.hpp"
 #include "LifecycleManagement.hpp"
+#include "IRequestReplyService.hpp"
+#include "procedures/IParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
+// ------------------------------------
 // State
+// ------------------------------------
 
-void State::InitializeLifecycle(std::string reason)
+void State::Initialize(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
+
 void State::ServicesCreated(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
+
 void State::CommunicationInitializing(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
+
 void State::CommunicationInitialized(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
+
+void State::CompleteCommunicationReadyHandler(std::string reason)
+{
+    InvalidStateTransition(__FUNCTION__, true, std::move(reason));
+}
+
 void State::ReadyToRun(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
+
 void State::RunSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -68,21 +82,19 @@ void State::StopSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
-
 void State::RestartParticipant(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
 }
 
-bool State::ShutdownParticipant(std::string reason)
+void State::ShutdownParticipant(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
-    return false;
 }
 
 void State::Error(std::string reason)
 {
-    _lifecycleManager->SetStateError(std::move(reason));
+    _lifecycleManager->SetState(_lifecycleManager->GetErrorState(), std::move(reason));
 }
 
 void State::InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason)
@@ -115,11 +127,15 @@ void State::ProcessAbortCommand()
 {
     std::string reason = "Received SystemCommand::AbortSimulation during callback.";
     _abortRequested = false;
-    _lifecycleManager->SetAbortingState(reason);
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
+// ------------------------------------
 // InvalidState
-void InvalidState::InitializeLifecycle(std::string reason)
+// ------------------------------------
+
+void InvalidState::Initialize(std::string reason)
 {
     _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
 }
@@ -128,7 +144,7 @@ void InvalidState::AbortSimulation()
 {
     std::string msg = "Received Abort message before lifecycle was started.";
     _lifecycleManager->GetLogger()->Warn(msg);
-    _lifecycleManager->SetStateError(std::move(msg));
+    _lifecycleManager->SetState(_lifecycleManager->GetErrorState(), std::move(msg));
 }
 
 void InvalidState::ResolveAbortSimulation(std::string)
@@ -146,10 +162,22 @@ auto InvalidState::GetParticipantState() -> ParticipantState
     return ParticipantState::Invalid;
 }
 
+// ------------------------------------
 // ServicesCreatedState
+// ------------------------------------
+
 void ServicesCreatedState::ServicesCreated(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializingState(), std::move(reason));
+    // ServicesCreated will only advance to CommunicationInitializing after receiving replies from all participants.
+    // This guarantees that the ServiceDiscoveryEvents sent before all have arrived and internal pubsub/rpc controllers
+    // have been created. Then, the state machine will only advance to CommunicationInitialized after all pending
+    // subscriptions have been received.
+    _lifecycleManager->GetParticipant()->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(
+        [reason, this]() {
+            // If done, move forward to CommunicationInitializingState and call ServicesCreated
+            _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetCommunicationInitializingState(),
+                                                 &ILifecycleState::ServicesCreated, reason);
+    });
 }
 
 void ServicesCreatedState::AbortSimulation()
@@ -160,7 +188,8 @@ void ServicesCreatedState::AbortSimulation()
 void ServicesCreatedState::ResolveAbortSimulation(std::string reason)
 {
     // Skip stopping as the simulation was not running yet
-    _lifecycleManager->SetAbortingState(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
 auto ServicesCreatedState::toString() -> std::string
@@ -173,26 +202,24 @@ auto ServicesCreatedState::GetParticipantState() -> ParticipantState
     return ParticipantState::ServicesCreated;
 }
 
+// ------------------------------------
 // CommunicationInitializingState
+// ------------------------------------
+
+void CommunicationInitializingState::ServicesCreated(std::string reason)
+{
+    _lifecycleManager->CommunicationInitializing(std::move(reason));
+}
+
 void CommunicationInitializingState::CommunicationInitializing(std::string reason)
 {
-        auto advanceToInitializedState =
-            [this, reason]() {
-				_lifecycleManager->SetState(_lifecycleManager->GetCommunicationInitializedState(), std::move(reason));
-            };
-        
-        if (_lifecycleManager->GetOperationMode() == OperationMode::Coordinated)
-        {
-            // Delay the next state until pending subscriptions of controllers are completed. 
-            // Applies to all controllers that are included in the trait UseAsyncRegistration().
-            _lifecycleManager->SetAsyncSubscriptionsCompletionHandler(std::move(advanceToInitializedState));
-        }
-        else
-        {
-            // No CommunicationReady guarantees for uncoordinated participants
-            advanceToInitializedState();
-        }
-
+    // Delay the next state until pending subscriptions of controllers are completed.
+    // Applies to all controllers that are included in the trait UseAsyncRegistration().
+    _lifecycleManager->SetAsyncSubscriptionsCompletionHandler([reason, this]() {
+        // If done, move forward to CommunicationInitializedState and call CommunicationInitializing
+        _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetCommunicationInitializedState(),
+                                             &ILifecycleState::CommunicationInitializing, reason);
+    });
 }
 
 void CommunicationInitializingState::AbortSimulation()
@@ -203,7 +230,8 @@ void CommunicationInitializingState::AbortSimulation()
 void CommunicationInitializingState::ResolveAbortSimulation(std::string reason)
 {
     // Skip stopping as the simulation was not running yet
-    _lifecycleManager->SetAbortingState(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
 auto CommunicationInitializingState::toString() -> std::string
@@ -216,11 +244,24 @@ auto CommunicationInitializingState::GetParticipantState() -> ParticipantState
     return ParticipantState::CommunicationInitializing;
 }
 
+// ------------------------------------
 // CommunicationInitializedState
+// ------------------------------------
+
+void CommunicationInitializedState::CommunicationInitializing(std::string /*reason*/)
+{
+    // Autonomous advance, coordinated wait for SystemState Change
+    if (_lifecycleManager->GetOperationMode() == OperationMode::Autonomous)
+    {
+        // Trigger the CommunicationReadyHandler (which can be completed asynchronously)
+        _lifecycleManager->CommunicationInitialized("CommunicationInitialized for autonomous participant.");
+    }
+}
+
 void CommunicationInitializedState::CommunicationInitialized(std::string reason) 
 {
-    auto success = _lifecycleManager->HandleCommunicationReady();
-    switch (success)
+    auto callbackResult = _lifecycleManager->HandleCommunicationReady();
+    switch (callbackResult)
     {
     case SilKit::Services::Orchestration::CallbackResult::Error:
         if (_abortRequested)
@@ -230,7 +271,7 @@ void CommunicationInitializedState::CommunicationInitialized(std::string reason)
         else
         {
             // Switch to error state if handle triggers error
-            _lifecycleManager->SetStateError("Exception during CommunicationReadyHandle execution.");
+            _lifecycleManager->SetState(_lifecycleManager->GetErrorState(), "Exception during CommunicationReadyHandle execution.");
         }
         break;
     case SilKit::Services::Orchestration::CallbackResult::Completed:
@@ -240,7 +281,7 @@ void CommunicationInitializedState::CommunicationInitialized(std::string reason)
         }
         else
         {
-            _lifecycleManager->SetState(_lifecycleManager->GetReadyToRunState(), std::move(reason));
+            CompleteCommunicationReadyHandler(std::move(reason));
         }
         break;
     case SilKit::Services::Orchestration::CallbackResult::Deferred: 
@@ -249,6 +290,13 @@ void CommunicationInitializedState::CommunicationInitialized(std::string reason)
     default: break;
     }
 }
+
+void CommunicationInitializedState::CompleteCommunicationReadyHandler(std::string reason)
+{
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetReadyToRunState(), &ILifecycleState::CommunicationInitialized,
+                                         reason);
+}
+
 
 void CommunicationInitializedState::AbortSimulation()
 {
@@ -259,7 +307,6 @@ void CommunicationInitializedState::ResolveAbortSimulation(std::string /*reason*
 {
     _lifecycleManager->GetLogger()->Warn(
         "Reached CommunicationInitializedState::ResolveAbortSimulation. Discarding call.");
-    // NOP 
 }
 
 auto CommunicationInitializedState::toString() -> std::string
@@ -272,7 +319,23 @@ auto CommunicationInitializedState::GetParticipantState() -> ParticipantState
     return ParticipantState::CommunicationInitialized;
 }
 
+// ------------------------------------
 // ReadyToRunState
+// ------------------------------------
+
+void ReadyToRunState::CommunicationInitializing(std::string /*reason*/)
+{
+    // NOP for possible concurrent SystemState transition
+}
+
+void ReadyToRunState::CommunicationInitialized(std::string /*reason*/)
+{
+    if (_lifecycleManager->GetOperationMode() == OperationMode::Autonomous)
+    {
+        _lifecycleManager->ReadyToRun("ReadyToRun for autonomous participant.");
+    }
+}
+
 void ReadyToRunState::ReadyToRun(std::string reason) 
 {
     if (!_lifecycleManager->GetService()->IsTimeSyncActive())
@@ -290,8 +353,7 @@ void ReadyToRunState::ReadyToRun(std::string reason)
             }
             else
             {
-                _lifecycleManager->SetState(_lifecycleManager->GetRunningState(),
-                                            "Finished StartingHandler execution.");
+                _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), "Finished StartingHandler execution.");
             }
         }
         else
@@ -303,7 +365,7 @@ void ReadyToRunState::ReadyToRun(std::string reason)
             else
             {
                 // Switch to error state if handle triggers error
-                _lifecycleManager->SetStateError("Exception during StartingHandler execution.");
+                _lifecycleManager->SetState(_lifecycleManager->GetErrorState(), "Exception during StartingHandler execution.");
             }
         }
         _handlerExecuting = false;
@@ -316,7 +378,8 @@ void ReadyToRunState::ReadyToRun(std::string reason)
         }
         else
         {
-            _lifecycleManager->SetState(_lifecycleManager->GetRunningState(), std::move(reason));
+            _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetRunningState(), &ILifecycleState::ReadyToRun,
+                                                 std::move(reason));
         }
     }
 }
@@ -337,7 +400,8 @@ void ReadyToRunState::AbortSimulation()
 void ReadyToRunState::ResolveAbortSimulation(std::string reason)
 {
     // Skip stopping as the simulation was not running yet
-    _lifecycleManager->SetAbortingState(reason);
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
 std::string ReadyToRunState::toString()
@@ -350,10 +414,23 @@ auto ReadyToRunState::GetParticipantState() -> ParticipantState
     return ParticipantState::ReadyToRun;
 }
 
+// ------------------------------------
 // RunningState
-void RunningState::RunSimulation(std::string /*reason*/) 
+// ------------------------------------
+
+void RunningState::CommunicationInitializing(std::string /*reason*/)
 {
-    _lifecycleManager->StartRunning();
+    // NOP for possible concurrent SystemState transition
+}
+
+void RunningState::CommunicationInitialized(std::string /*reason*/)
+{
+    // NOP for possible concurrent SystemState transition
+}
+
+void RunningState::ReadyToRun(std::string /*reason*/)
+{
+    _lifecycleManager->StartTime();
 }
 
 void RunningState::PauseSimulation(std::string reason)
@@ -368,8 +445,8 @@ void RunningState::ContinueSimulation(std::string reason)
 
 void RunningState::StopSimulation(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), reason);
-    _lifecycleManager->Stop(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetStoppingState(), &ILifecycleState::StopSimulation,
+                                         std::move(reason));
 }
 
 void RunningState::AbortSimulation()
@@ -381,9 +458,9 @@ void RunningState::AbortSimulation()
 
 void RunningState::ResolveAbortSimulation(std::string reason)
 {
-    _lifecycleManager->SetAbortingState(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
-
 
 auto RunningState::toString() -> std::string
 {
@@ -395,7 +472,10 @@ auto RunningState::GetParticipantState() -> ParticipantState
     return ParticipantState::Running;
 }
 
+// ------------------------------------
 // PausedState
+// ------------------------------------
+
 void PausedState::PauseSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -408,28 +488,8 @@ void PausedState::ContinueSimulation(std::string reason)
 
 void PausedState::StopSimulation(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetStoppingState(), std::move(reason));
-    auto success = _lifecycleManager->HandleStop();
-    if (success)
-    {
-        _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), "Finished StopHandler execution.");
-        if (_abortRequested)
-        {
-            ProcessAbortCommand();
-        }
-    }
-    else
-    {
-        if (_abortRequested)
-        {
-            ProcessAbortCommand();
-        }
-        else
-        {
-            // Switch to error state if handle triggers error
-            _lifecycleManager->SetStateError("Exception during StopHandler execution.");
-        }
-    }
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetStoppingState(), &ILifecycleState::StopSimulation,
+                                         std::move(reason));
 }
 
 void PausedState::AbortSimulation()
@@ -441,7 +501,8 @@ void PausedState::AbortSimulation()
 
 void PausedState::ResolveAbortSimulation(std::string reason)
 {
-    _lifecycleManager->SetAbortingState(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
 auto PausedState::toString() -> std::string
@@ -454,7 +515,10 @@ auto PausedState::GetParticipantState() -> ParticipantState
     return ParticipantState::Paused;
 }
 
+// ------------------------------------
 // StoppingState
+// ------------------------------------
+
 void StoppingState::StopSimulation(std::string reason)
 {
     auto success = _lifecycleManager->HandleStop();
@@ -466,7 +530,8 @@ void StoppingState::StopSimulation(std::string reason)
         }
         else
         {
-            _lifecycleManager->SetState(_lifecycleManager->GetStoppedState(), std::move(reason));
+            _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetStoppedState(), &ILifecycleState::StopSimulation,
+                                                 std::move(reason));
         }
     }
     else
@@ -478,7 +543,7 @@ void StoppingState::StopSimulation(std::string reason)
         else
         {
             // Switch to error state if handle triggers error
-            _lifecycleManager->SetStateError("Exception during StopHandler execution.");
+            _lifecycleManager->SetState(_lifecycleManager->GetErrorState(), "Exception during StopHandler execution.");
         }
     }
 }
@@ -490,7 +555,8 @@ void StoppingState::AbortSimulation()
 
 void StoppingState::ResolveAbortSimulation(std::string reason)
 {
-    _lifecycleManager->SetAbortingState(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
 auto StoppingState::toString() -> std::string
@@ -503,25 +569,30 @@ auto StoppingState::GetParticipantState() -> ParticipantState
     return ParticipantState::Stopping;
 }
 
+// ------------------------------------
 // StoppedState
-void StoppedState::StopSimulation(std::string /*reason*/)
-{
-    // NOP - stop was already processed (e.g., via a userStop)
-}
+// ------------------------------------
 
+void StoppedState::StopSimulation(std::string reason)
+{
+    // StoppedState will only advance to ShuttingDown after receiving replies from all participants.
+    // This guarantees that the ParticipantState::Stopping has arrived and other participants will 
+    // evaluate the correct SystemState and stop themselves.
+    _lifecycleManager->GetParticipant()->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(
+        [this, reason]() {
+            _lifecycleManager->ShutdownAfterStop(reason);
+    });
+}
 
 void StoppedState::RestartParticipant(std::string /*reason*/)
 {
     throw SilKitError("Restart is currently not supported.");
-
-    //_lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
-    //_lifecycleManager->Restart(std::move(reason));
 }
 
-bool StoppedState::ShutdownParticipant(std::string reason)
+void StoppedState::ShutdownParticipant(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), reason);
-    return _lifecycleManager->Shutdown(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShuttingDownState(), &ILifecycleState::ShutdownParticipant,
+                                         std::move(reason));
 }
 
 void StoppedState::AbortSimulation()
@@ -531,7 +602,8 @@ void StoppedState::AbortSimulation()
 
 void StoppedState::ResolveAbortSimulation(std::string reason)
 {
-    _lifecycleManager->SetAbortingState(std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(), &ILifecycleState::ResolveAbortSimulation,
+                                         std::move(reason));
 }
 
 auto StoppedState::toString() -> std::string
@@ -544,21 +616,26 @@ auto StoppedState::GetParticipantState() -> ParticipantState
     return ParticipantState::Stopped;
 }
 
+// ------------------------------------
 // ShuttingDownState
-bool ShuttingDownState::ShutdownParticipant(std::string reason)
+// ------------------------------------
+
+void ShuttingDownState::StopSimulation(std::string /*reason*/)
 {
+    // Ignore Stop() in ShuttingDownState
+}
+
+void ShuttingDownState::ShutdownParticipant(std::string reason)
+{
+    _lifecycleManager->ShutdownConnection();
+
     auto success = _lifecycleManager->HandleShutdown();
-    if (success)
+    if (!success)
     {
-        // NOP
-    }
-    else
-    {
-        std::string msg = "ShutdownHandler threw an exception. This is ignored. The participant will now shut down.";
-        _lifecycleManager->GetLogger()->Warn(msg);
+        _lifecycleManager->GetLogger()->Warn(
+            "ShutdownHandler threw an exception. This is ignored. The participant will now shut down.");
     }
     _lifecycleManager->SetState(_lifecycleManager->GetShutdownState(), std::move(reason));
-    return true;
 }
 
 void ShuttingDownState::AbortSimulation()
@@ -581,7 +658,20 @@ auto ShuttingDownState::GetParticipantState() -> ParticipantState
     return ParticipantState::ShuttingDown;
 }
 
+// ------------------------------------
 // ShutdownState
+// ------------------------------------
+
+void ShutdownState::StopSimulation(std::string /*reason*/)
+{
+    // Ignore Stop() in ShutdownState
+}
+
+void ShutdownState::ShutdownParticipant(std::string /*reason*/)
+{
+    // NOP for possible concurrent SystemState transition
+}
+
 void ShutdownState::AbortSimulation()
 {
     _lifecycleManager->GetLogger()->Info("Received abort signal after shutdown - ignoring abort.");
@@ -602,16 +692,16 @@ auto ShutdownState::GetParticipantState() -> ParticipantState
     return ParticipantState::Shutdown;
 }
 
+// ------------------------------------
 // AbortingState
-bool AbortingState::ShutdownParticipant(std::string reason)
+// ------------------------------------
+
+void AbortingState::ShutdownParticipant(std::string reason)
 {
     _lifecycleManager->SetState(_lifecycleManager->GetShutdownState(), std::move(reason));
-    return true;
 }
-void AbortingState::AbortSimulation()
-{
-    // NOP - we are already in the aborting state
-}
+
+void AbortingState::AbortSimulation() {}
 
 void AbortingState::ResolveAbortSimulation(std::string reason)
 {
@@ -638,12 +728,13 @@ auto AbortingState::GetParticipantState() -> ParticipantState
     return ParticipantState::Aborting;
 }
 
+// ------------------------------------
 // ErrorState
+// ------------------------------------
+
 void ErrorState::RestartParticipant(std::string /*reason*/)
 {
     throw SilKitError("Restart feature is currently not supported.");
-
-    //_lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
 }
 
 void ErrorState::StopSimulation(std::string reason)
@@ -651,11 +742,10 @@ void ErrorState::StopSimulation(std::string reason)
     _lifecycleManager->Shutdown(std::move(reason));
 }
 
-bool ErrorState::ShutdownParticipant(std::string reason)
+void ErrorState::ShutdownParticipant(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), std::move(reason));
-    _lifecycleManager->Shutdown("Error recovery via shutdown.");
-    return true;
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShuttingDownState(), &ILifecycleState::ShutdownParticipant,
+                                         std::move(reason));
 }
 
 void ErrorState::AbortSimulation()
@@ -665,8 +755,8 @@ void ErrorState::AbortSimulation()
 
 void ErrorState::ResolveAbortSimulation(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetShuttingDownState(), std::move(reason));
-    _lifecycleManager->Shutdown("Error recovery via abort simulation.");
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShuttingDownState(), &ILifecycleState::ShutdownParticipant,
+                                         std::move(reason));
 }
 
 void ErrorState::Error(std::string reason)

@@ -54,6 +54,12 @@ uint64_t numMsgToReceiveTotal;
 
 const std::chrono::milliseconds communicationTimeout{5000s};
 
+enum class TimeMode
+{
+    Async,
+    Sync
+};
+
 class TestParticipant
 {
 public:
@@ -63,9 +69,11 @@ public:
     TestParticipant& operator=(TestParticipant&&) = default;
 
     TestParticipant(const std::string& newName, std::vector<std::string> newPubTopics,
-                    std::vector<std::string> newSubTopics)
+                    std::vector<std::string> newSubTopics, Services::Orchestration::OperationMode newOperationMode, TimeMode newTimeMode)
     {
         name = newName;
+        operationMode = newOperationMode;
+        timeMode = newTimeMode;
         pubTopics = newPubTopics;
         subTopics = newSubTopics;
 
@@ -121,10 +129,26 @@ public:
         }
     }
 
+    void AwaitControllerCreation()
+    {
+        auto futureStatus = controllerCreationPromise.get_future().wait_for(communicationTimeout);
+        EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting controller creation timed out";
+    }
+
     void AwaitAllDone()
     {
         auto futureStatus = allDonePromise.get_future().wait_for(communicationTimeout);
         EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting all done timed out";
+    }
+
+    auto ToByteVec(uint64_t x)
+    {
+        std::vector<uint8_t> byteVec{};
+        for (auto i = 0; i < 8; i++)
+        {
+            byteVec.push_back(static_cast<uint8_t>(x >> 8 * i));
+        }
+        return byteVec;
     }
 
     void Publish()
@@ -135,7 +159,7 @@ public:
         {
             for (uint64_t i = 0; i < numMsgToPublishPerController; i++)
             {
-                (*publisher)->Publish(std::vector<uint8_t>{0});
+                (*publisher)->Publish(ToByteVec(i));
             }
         }
         Log() << "[" << name << "] ...all published";
@@ -149,12 +173,37 @@ public:
                                                 name, registryUri);
 
         LifecycleConfiguration lc{};
-        lc.operationMode = OperationMode::Coordinated;
+        lc.operationMode = operationMode;
         lifecycleService = participant->CreateLifecycleService(lc);
-        auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+        ITimeSyncService* timeSyncService = nullptr;
+        ISystemMonitor* systemMonitor = nullptr;
+        if (timeMode == TimeMode::Sync)
+        {
+            // Sync participant stop the test in the first SimTask
+            timeSyncService = lifecycleService->CreateTimeSyncService();
+            timeSyncService->SetSimulationStepHandler(
+                [this](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
+                    AffirmAllDone();
+                },
+                1s);
+        }
+        else
+        {
+            // Async participant stop the test on enter RunningState
+            systemMonitor = participant->CreateSystemMonitor();
+            systemMonitor->AddParticipantStatusHandler([this](ParticipantStatus status) {
+                if (status.state == ParticipantState::Running && status.participantName == name)
+                {
+                    Log() << "[" << name << "] End test via system monitor";
+                    AffirmAllDone();
+                    std::string reason = "Autonomous Participant " + name + " ends test via system monitor";
+                    lifecycleService->Stop(reason);
+                }
+            });
+        }
 
         // We need to create a dedicated thread, so we do not block the 
-        // CommunicationReadyHandlerAsync when we communication becomes ready.
+        // CommunicationReadyHandlerAsync when the communication becomes ready.
         preSimulationStart = preSimulationPromise.get_future();
         preSimulationWorker = std::thread{[this] {
             preSimulationStart.wait_for(communicationTimeout);
@@ -169,6 +218,7 @@ public:
                 AwaitCommunication();
             }
 
+            Log() << "[" << name << "] CompleteCommunicationReadyHandlerAsync";
             lifecycleService->CompleteCommunicationReadyHandlerAsync();
         }};
 
@@ -225,21 +275,24 @@ public:
             Log() << "[" << name << "] ...created subscribers";
         }
 
-        timeSyncService->SetSimulationStepHandler(
-            [this](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
-                AffirmAllDone();
-            }, 1s);
+        controllerCreationPromise.set_value();
 
+        Log() << "[" << name << "] Starting Lifecycle...";
         auto finalStateFuture = lifecycleService->StartLifecycle();
-        Log() << "[" << name << "] Started Lifecycle";
+        Log() << "[" << name << "] ... Lifecycle started";
 
         finalStateFuture.get();
     }
 
     auto Name() const -> std::string { return name; }
 
-private: //Members
+public:
     std::string name;
+    Services::Orchestration::OperationMode operationMode;
+    TimeMode timeMode;
+
+private: //Members
+
     std::unique_ptr<IParticipant> participant;
     Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
     std::vector<IDataPublisher*> pubControllers;
@@ -254,6 +307,8 @@ private: //Members
 
     bool allReceived{false};
     std::promise<void> allReceivedPromise = std::promise<void>{};
+
+    std::promise<void> controllerCreationPromise = std::promise<void>{};
 
     bool allDone{false};
     std::promise<void> allDonePromise = std::promise<void>{};
@@ -278,6 +333,7 @@ protected:
 
         std::promise<void> systemStateRunningPromise;
         std::future<void> systemStateRunning;
+        bool active;
     };
 
     void SystemStateHandler(SystemState newState)
@@ -285,17 +341,25 @@ protected:
         switch (newState)
         {
         case SystemState::Error:
-            Log() << "SystemState = " << newState;
+            Log() << "[Monitor] "
+                  << "SystemState = " << newState;
             AbortAndFailTest("Reached SystemState::Error");
             break;
         case SystemState::Running:
-            Log() << "SystemState = " << newState;
+            Log() << "[Monitor] "
+                  << "SystemState = " << newState;
             systemMaster.systemStateRunningPromise.set_value();
             break;
         default:
-            Log() << "SystemState = " << newState;
+            Log() << "[Monitor] "
+                  << "SystemState = " << newState;
             break;
         }
+    }
+
+    void ParticipantStatusHandler(ParticipantStatus newStatus)
+    {
+        Log() << "[Monitor] " << newStatus.participantName << ": ParticipantState = " << newStatus.state;
     }
 
     void AbortAndFailTest(const std::string& reason)
@@ -324,10 +388,14 @@ protected:
 
         systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
 
-        systemMaster.systemController->SetWorkflowConfiguration({participantNames});
+        systemMaster.systemController->SetWorkflowConfiguration({requiredParticipantNames});
 
         systemMaster.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
             SystemStateHandler(newState);
+        });
+
+        systemMaster.systemMonitor->AddParticipantStatusHandler([this](ParticipantStatus newStatus) {
+            ParticipantStatusHandler(newStatus);
         });
 
         systemMaster.systemStateRunning = systemMaster.systemStateRunningPromise.get_future();
@@ -355,20 +423,34 @@ protected:
 
     void SetupSystem(const std::string& registryUri, std::vector<TestParticipant>& participants)
     {
+        RunRegistry(registryUri);
+
         for (auto&& p : participants)
         {
-            participantNames.push_back(p.Name());
+            if (p.operationMode == OperationMode::Coordinated)
+            {
+                requiredParticipantNames.push_back(p.Name());
+            }
         }
-        participantNames.push_back(systemMasterName);
 
-        RunRegistry(registryUri);
-        RunSystemMaster(registryUri);
+        if (!requiredParticipantNames.empty())
+        {
+            systemMaster.active = true;
+            requiredParticipantNames.push_back(systemMasterName);
+            RunSystemMaster(registryUri);
+        }
+        else
+        {
+            systemMaster.active = false;
+        }
     }
 
     void ShutdownSystem()
     {
         systemMaster.participant.reset();
         registry.reset();
+        requiredParticipantNames.clear();
+
     }
 
     void ExecuteTest(std::vector<TestParticipant>& participants)
@@ -381,10 +463,18 @@ protected:
             Log() << ">> Await all done";
             for (auto& p : participants)
                 p.AwaitAllDone();
-            Log() << ">> SystemMaster: Waiting for SystemState::Running";
-            ASSERT_EQ(systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
-            Log() << ">> SystemMaster: Stopping due to END-OF-TEST";
-            systemMaster.lifecycleService->Stop("End of test");
+
+            if (systemMaster.active)
+            {
+                Log() << ">> SystemMaster: Waiting for SystemState::Running";
+                ASSERT_EQ(systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
+                Log() << ">> SystemMaster: Stopping due to END-OF-TEST";
+                systemMaster.lifecycleService->Stop("End of test");
+            }
+            else
+            {
+            }
+
             Log() << ">> Joining participant threads";
             JoinParticipantThreads();
             ShutdownSystem();
@@ -398,14 +488,81 @@ protected:
     }
 
 protected:
-    std::vector<std::string> participantNames;
+    std::vector<std::string> requiredParticipantNames;
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     SystemMaster systemMaster;
     std::vector<std::thread> participantThreads;
 };
 
-// Tests that basic pubsub communication in the CommunicationReadyHandler works
-TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler)
+// Tests that basic pubsub communication in the CommunicationReadyHandler works with autonomous participants
+TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler_autonomous)
+{
+    const uint32_t numPub = 10u;
+    const uint32_t numSub = 10u;
+    const std::string commonTopic = "Topic";
+
+    numMsgToPublishPerController = 100u;
+    numMsgToReceiveTotal = numMsgToPublishPerController * numPub * numSub;
+
+    std::vector<std::string> pubTopics;
+    for (uint32_t i = 0; i < numPub; i++)
+    {
+        pubTopics.push_back(commonTopic);
+    }
+
+    std::vector<std::string> subTopics;
+    for (uint32_t i = 0; i < numSub; i++)
+    {
+        subTopics.push_back(commonTopic);
+    }
+
+    std::vector<TestParticipant> autonomousAsyncParticipantsSub;
+    std::vector<TestParticipant> autonomousAsyncParticipantsPub;
+    autonomousAsyncParticipantsSub.push_back({"Sub", {}, subTopics, OperationMode::Autonomous, TimeMode::Async});
+    autonomousAsyncParticipantsPub.push_back({"Pub", pubTopics, {}, OperationMode::Autonomous, TimeMode::Async});
+
+    try
+    {
+        auto registryUri = MakeTestRegistryUri();
+        RunRegistry(registryUri);
+        RunParticipantThreads(autonomousAsyncParticipantsSub, registryUri);
+        // If we would start all participants at once, we cannot guarantee communication because 
+        // the publish might happen even before the subscriber created it's controllers.
+        // We can guarantee communication in the CommReadyHandler between PubSub/RPC controllers 
+        // that have been created by the time the participant calls StartLifecycle. 
+        // E.g. Subscribers that are created on Participant1 after Participant2 called StartLifecycle may 
+        // not see a publication stemming from the CommReadyHandler of participant2
+
+        // In this test, we wait until the subscriber participant has called StartLifecycle. Then, all of 
+        // his controllers have been created.
+        Log() << ">> Await controller creation";
+        for (auto& p : autonomousAsyncParticipantsSub)
+            p.AwaitControllerCreation();
+
+        // Then, start the publishers
+        RunParticipantThreads(autonomousAsyncParticipantsPub, registryUri);
+
+        Log() << ">> Await all done";
+        for (auto& p : autonomousAsyncParticipantsPub)
+            p.AwaitAllDone();
+
+        for (auto& p : autonomousAsyncParticipantsSub)
+            p.AwaitAllDone();
+
+        Log() << ">> Joining participant threads";
+        JoinParticipantThreads();
+        ShutdownSystem();
+    }
+    catch (const std::exception& error)
+    {
+        std::stringstream ss;
+        ss << "Something went wrong: " << error.what();
+        AbortAndFailTest(ss.str());
+    }
+}
+
+// Tests that basic pubsub communication in the CommunicationReadyHandler works with coordinated participants
+TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler_coordinated_sync)
 {
 
     const uint32_t numPub = 1u;
@@ -427,11 +584,10 @@ TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler)
         subTopics.push_back(commonTopic);
     }
 
-    std::vector<TestParticipant> participants;
-    participants.push_back({"Pub", pubTopics, {}});
-    participants.push_back({"Sub", {}, subTopics});
-
-    ExecuteTest(participants);
+    std::vector<TestParticipant> coordinatedSyncParticipants;
+    coordinatedSyncParticipants.push_back({"Pub", pubTopics, {}, OperationMode::Coordinated, TimeMode::Sync});
+    coordinatedSyncParticipants.push_back({"Sub", {}, subTopics, OperationMode::Coordinated, TimeMode::Sync});
+    ExecuteTest(coordinatedSyncParticipants);
 }
 
 // Setup lots of publishers and 1 subscriber on each side that both sides are busy doing the subscription handshakes.
@@ -463,8 +619,8 @@ TEST_F(ITest_CommunicationReady, test_delay_comm_ready_handler)
     }
 
     std::vector<TestParticipant> participants;
-    participants.push_back({"PubSub1", pubTopics1, {topic2}});
-    participants.push_back({"PubSub2", pubTopics2, {topic1}});
+    participants.push_back({"PubSub1", pubTopics1, {topic2}, OperationMode::Coordinated, TimeMode::Sync});
+    participants.push_back({"PubSub2", pubTopics2, {topic1}, OperationMode::Coordinated, TimeMode::Sync});
 
     ExecuteTest(participants);
 }

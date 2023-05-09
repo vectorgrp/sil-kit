@@ -52,17 +52,25 @@ int main(int argc, char** argv)
 {
     SilKit::Util::CommandlineParser commandlineParser;
     commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("version", "v", "[--version]",
-        "-v, --version: Get version info.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "[--help]",
-        "-h, --help: Get this help.");
+                                                                 "-v, --version: Get version info.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
 
     commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("name", "n", "SystemMonitor", "[--name <participantName>]",
-        "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemMonitor'.");
-    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
+        "name", "n", "SystemMonitor", "[--name <participantName>]",
+        "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to "
+        "'SystemMonitor'.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Option>(
+        "configuration", "c", "", "[--configuration <configuration>]",
+        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file.");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("autonomous", "a", "[--autonomous]",
+                                                                 "-a, --autonomous: Run with an autonomous lifecycle");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("coordinated", "r", "[--coordinated]",
+                                                                 "-r, --coordinated: Run with a coordinated lifecycle");
+    commandlineParser.Add<SilKit::Util::CommandlineParser::Flag>("sync", "s", "[--sync]",
+                                                                 "-s, --sync: Run with virtual time synchronization");
 
     std::cout << "Vector SIL Kit -- System Monitor, SIL Kit version: " << SilKit::Version::String() << std::endl
               << std::endl;
@@ -78,7 +86,7 @@ int main(int argc, char** argv)
 
         return -1;
     }
-    catch (const std::runtime_error & e)
+    catch (const std::runtime_error& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
         commandlineParser.PrintUsageInfo(std::cerr, argv[0]);
@@ -95,29 +103,48 @@ int main(int argc, char** argv)
 
     if (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("version").Value())
     {
-        std::string hash{ SilKit::Version::GitHash() };
+        std::string hash{SilKit::Version::GitHash()};
         auto shortHash = hash.substr(0, 7);
-        std::cout
-            << "Version Info:" << std::endl
-            << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
+        std::cout << "Version Info:" << std::endl
+                  << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }
 
-    auto connectUri{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("connect-uri").Value() };
-    auto participantName{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value() };
-    auto configurationFilename{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("configuration").Value() };
+    auto connectUri{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("connect-uri").Value()};
+    auto participantName{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("name").Value()};
+    auto configurationFilename{commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("configuration").Value()};
+
+    bool autonomousMode =
+        (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("autonomous").Value()) ? true : false;
+    bool coordinatedMode =
+        (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("coordinated").Value()) ? true : false;
+    bool sync = (commandlineParser.Get<SilKit::Util::CommandlineParser::Flag>("sync").Value()) ? true : false;
+
+    if (autonomousMode && coordinatedMode)
+    {
+        std::cerr << "Invalid command line arguments. Choose either autonomous or coordinated mode." << std::endl;
+        return -1;
+    }
+    if (sync && !coordinatedMode && !autonomousMode)
+    {
+        std::cerr
+            << "Invalid command line arguments. Time synchonization requires either autonomous or coordinated mode."
+            << std::endl;
+        return -1;
+    }
 
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
-        configuration = !configurationFilename.empty() ?
-            SilKit::Config::ParticipantConfigurationFromFile(configurationFilename) :
-            SilKit::Config::ParticipantConfigurationFromString("");
+        configuration = !configurationFilename.empty()
+                            ? SilKit::Config::ParticipantConfigurationFromFile(configurationFilename)
+                            : SilKit::Config::ParticipantConfigurationFromString("");
     }
-    catch (const SilKit::ConfigurationError & error)
+    catch (const SilKit::ConfigurationError& error)
     {
-        std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
+        std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what()
+                  << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
 
@@ -135,8 +162,8 @@ int main(int argc, char** argv)
 
         systemMonitor->AddParticipantStatusHandler([logger](const Services::Orchestration::ParticipantStatus& status) {
             std::stringstream buffer;
-            buffer << "New ParticipantState: " << status.participantName << " is " << status.state
-                   << ",\tReason: " << status.enterReason;
+            buffer << "New ParticipantState of \'" << status.participantName << "\': " << status.state
+                   << ", reason: " << status.enterReason;
             logger->Info(buffer.str());
         });
 
@@ -147,9 +174,38 @@ int main(int argc, char** argv)
         });
 
         std::cout << "Press enter to terminate the SystemMonitor..." << std::endl;
-        std::cin.ignore();
+        if (autonomousMode || coordinatedMode)
+        {
+            auto opMode = autonomousMode ? Services::Orchestration::OperationMode::Autonomous
+                                         : Services::Orchestration::OperationMode::Coordinated;
+
+            auto* lifecycle = participant->CreateLifecycleService({opMode});
+
+            if (sync)
+            {
+                auto* timeSyncService = lifecycle->CreateTimeSyncService();
+                timeSyncService->SetSimulationStepHandler(
+                    [logger](auto now, auto) {
+                        std::stringstream buffer;
+                        buffer << "now=" << now;
+                        logger->Info(buffer.str());
+                    },
+                    1ms);
+            }
+            auto finalStateFuture = lifecycle->StartLifecycle();
+
+            std::cin.ignore();
+
+            lifecycle->Stop("Stopping the SystemMonitor");
+            auto finalState = finalStateFuture.get();
+            std::cout << "SystemMonitor stopped. Final State: " << finalState << std::endl;
+        }
+        else
+        {
+            std::cin.ignore();
+        }
     }
-    catch (const std::exception & error)
+    catch (const std::exception& error)
     {
         std::cerr << "Something went wrong: " << error.what() << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;

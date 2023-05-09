@@ -106,6 +106,8 @@ DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, WireFlexrayTxBufferUpda
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, FlexrayPocStatusEvent)
 DefineSilKitMsgTrait_TypeName(SilKit::Core::Discovery, ParticipantDiscoveryEvent)
 DefineSilKitMsgTrait_TypeName(SilKit::Core::Discovery, ServiceDiscoveryEvent)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::RequestReply, RequestReplyCall)
+DefineSilKitMsgTrait_TypeName(SilKit::Core::RequestReply, RequestReplyCallReturn)
 
 // Messages with history
 DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, ParticipantStatus, 1)

@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
 #include "ServiceDatatypes.hpp"
+#include "RequestReplyDatatypes.hpp"
 #include "OrchestrationDatatypes.hpp"
 #include "LoggingDatatypesInternal.hpp"
 #include "WireCanMessages.hpp"
@@ -120,6 +121,9 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Discovery::ServiceDiscoveryEvent& msg) = 0;
 
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const RequestReply::RequestReplyCall& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const RequestReply::RequestReplyCallReturn& msg) = 0;
+
     // targeted messaging
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::WireCanFrameEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameTransmitEvent& msg) = 0;
@@ -169,13 +173,19 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ParticipantDiscoveryEvent& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Discovery::ServiceDiscoveryEvent& msg) = 0;
 
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const RequestReply::RequestReplyCall& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const RequestReply::RequestReplyCallReturn& msg) = 0;
+
     // For Connection/middleware support:
     virtual void OnAllMessagesDelivered(std::function<void()> callback) = 0;
     virtual void FlushSendBuffers() = 0;
     virtual void ExecuteDeferred(std::function<void()> callback) = 0;
 
-    //Service discovery for dynamic, configuration-less simulations
+    // Service discovery for dynamic, configuration-less simulations
     virtual auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* = 0;
+    // Request replay service for internal RPC and barriers
+    virtual auto GetRequestReplyService() -> RequestReply::IRequestReplyService* = 0;
+    virtual auto GetParticipantRepliesProcedure()->RequestReply::IParticipantReplies* = 0;
 
 	// Internal DataSubscriber that is only created on a matching data connection
     virtual auto CreateDataSubscriberInternal(
@@ -213,6 +223,13 @@ public:
     
     virtual bool GetIsSystemControllerCreated() = 0;
     virtual void SetIsSystemControllerCreated(bool isCreated) = 0;
+
+    virtual size_t GetNumberOfConnectedParticipants() = 0;
+    virtual size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) = 0;
+    virtual std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
+                                                        const std::string& msgTypeName) = 0;
+
+    virtual void NotifyShutdown() = 0;
 };
 
 } // namespace Core

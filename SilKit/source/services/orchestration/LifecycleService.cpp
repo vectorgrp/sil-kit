@@ -37,25 +37,19 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-LifecycleService::LifecycleService(Core::IParticipantInternal* participant,
-                                   std::chrono::milliseconds systemStateReachedShuttingDownTimeout)
+LifecycleService::LifecycleService(Core::IParticipantInternal* participant)
     : _participant{participant}
     , _logger{participant->GetLogger()}
-    , _lifecycleManagement{participant->GetLogger(), this}
+    , _lifecycleManager{participant, participant->GetLogger(), this}
     , _finalStatePromise{std::make_unique<std::promise<ParticipantState>>()}
     , _finalStateFuture{_finalStatePromise->get_future()}
-    , _systemStateReachedShuttingDownTimeout{systemStateReachedShuttingDownTimeout}
 {
     _timeSyncService = _participant->CreateTimeSyncService(this);
 }
 
  LifecycleService::~LifecycleService()
 {
-     if (_finalStatePromiseSetterThread.joinable())
-     {
-         _finalStatePromiseSetterThread.join();
-     }
- }
+}
 
 void LifecycleService::SetCommunicationReadyHandler(CommunicationReadyHandler handler)
 {
@@ -75,17 +69,20 @@ void LifecycleService::CompleteCommunicationReadyHandlerAsync()
     // async handler is finished, now continue to the Running state without triggering the CommunicationReadyHandler again
     if(!_commReadyHandlerInvoked)
     {
-        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler: Handler invoked is false, exiting.");
+        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler was called without invoking the CommunicationReadyHandler, ignoring.");
         return;
     }
-    if((_lifecycleManagement.GetCurrentState() == _lifecycleManagement.GetCommunicationInitializedState())
-        || (_lifecycleManagement.GetCurrentState() == _lifecycleManagement.GetServicesCreatedState())
-        )
+    if (_commReadyHandlerCompleted)
     {
-        _commReadyHandlerInvoked = true;
-        _lifecycleManagement.SetState(_lifecycleManagement.GetReadyToRunState(),
-            "LifecycleService::CompleteCommunicationReadyHandler: triggering communication ready transition.");
+        _logger->Debug("LifecycleService::CompleteCommunicationReadyHandler has been called already, ignoring.");
+        return;
     }
+    _commReadyHandlerCompleted = true;
+
+    _participant->ExecuteDeferred([this] {
+        _lifecycleManager.CompleteCommunicationReadyHandler(
+            "LifecycleService::CompleteCommunicationReadyHandler: triggering communication ready transition.");
+    });
 }
 
 void LifecycleService::SetStartingHandler(StartingHandler handler)
@@ -111,7 +108,7 @@ void LifecycleService::SetAbortHandler(AbortHandler handler)
 auto LifecycleService::StartLifecycle()
     -> std::future<ParticipantState>
 {
-    if (_finalStatePromise == nullptr || _finalStatePromiseSetterThread.joinable())
+    if (_finalStatePromise == nullptr)
     {
         throw LogicError{"LifecycleService::StartLifecycle must not be called twice"};
     }
@@ -146,18 +143,22 @@ auto LifecycleService::StartLifecycle()
         this->NewSystemState(systemState);
     });
 
-    _isRunning = true;
-    _lifecycleManagement.InitLifecycleManagement("LifecycleService::StartLifecycle was called.");
+    _isLifecycleStarted = true;
+    _lifecycleManager.Initialize("LifecycleService::StartLifecycle was called.");
+
     switch (_operationMode)
     {
     case OperationMode::Invalid: 
         throw ConfigurationError("OperationMode was not set. This is mandatory.");
     case OperationMode::Coordinated: 
+        // ServicesCreated is triggered by SystemState
         break;
     case OperationMode::Autonomous:
-        // Skip state guarantees if start is autonomous
-        _lifecycleManagement.StartUncoordinated(
-            "LifecycleService::StartLifecycle was called without start coordination.");
+        // Autonomous start direcly, coordinated wait for SystemState Change
+        _participant->ExecuteDeferred([this]{
+            _lifecycleManager.StartAutonomous("LifecycleService::StartLifecycle was called without start coordination.");
+        });
+
         break;
     }
     return std::move(_finalStateFuture);
@@ -174,7 +175,7 @@ void LifecycleService::ReportError(std::string errorMsg)
         return;
     }
 
-    _lifecycleManagement.Error(std::move(errorMsg));
+    _lifecycleManager.Error(std::move(errorMsg));
 }
 
 void LifecycleService::Pause(std::string reason)
@@ -188,7 +189,7 @@ void LifecycleService::Pause(std::string reason)
     }
     _pauseDonePromise = decltype(_pauseDonePromise){};
     _timeSyncService->SetPaused(_pauseDonePromise.get_future());
-    _lifecycleManagement.Pause(reason);
+    _lifecycleManager.Pause(reason);
 }
 
 void LifecycleService::Continue()
@@ -201,18 +202,21 @@ void LifecycleService::Continue()
         throw SilKitError(errorMessage);
     }
 
-    _lifecycleManagement.Continue("Pause finished");
+    _lifecycleManager.Continue("Pause finished");
     _pauseDonePromise.set_value();
 }
 
 void LifecycleService::Stop(std::string reason)
 {
-    _lifecycleManagement.UserStop(reason);
+    _participant->ExecuteDeferred([this, reason] {
+        _lifecycleManager.Stop(reason);
+    });
 }
 
 void LifecycleService::Shutdown(std::string reason)
 {
-    auto success = _lifecycleManagement.Shutdown(reason);
+    _lifecycleManager.Shutdown(reason);
+    bool success = _lifecycleManager.GetCurrentState() != _lifecycleManager.GetErrorState();
     if (success)
     {
         try
@@ -221,40 +225,8 @@ void LifecycleService::Shutdown(std::string reason)
             ss << "Confirming shutdown of " << _participant->GetParticipantName();
             _logger->Debug(ss.str());
 
-            // The following code is a workaround which alleviates the potential loss of the 'stop' signal issued by
-            // the lifecycle service of (e.g.) the system-controller.
-            //
-            // Setting the final-state promise is delayed up to a timeout value.
+            _finalStatePromise->set_value(State());
 
-            // steal the final state promise pointer in a thread-safe way (protected by a mutex)
-            auto finalStatePromise = [this] {
-                const auto lock = std::unique_lock<decltype(_finalStatePromiseMutex)>{_finalStatePromiseMutex};
-                return std::move(_finalStatePromise);
-            }();
-
-            // if we stole the actual promise object, we start the thread which actually sets it
-            if (finalStatePromise)
-            {
-                _finalStatePromiseSetterThread = std::thread{
-                    [logger = _logger, timeout = _systemStateReachedShuttingDownTimeout,
-                     systemStateReachedShuttingDownFuture = _systemStateReachedShuttingDownPromise.get_future(),
-                     finalStatePromise = std::move(finalStatePromise), state = State()] {
-                        try
-                        {
-                            systemStateReachedShuttingDownFuture.wait_for(timeout);
-                        }
-                        catch (const std::exception& exception)
-                        {
-                            Logging::Warn(logger, "LifecycleService: Waiting for the system state failed: {}",
-                                          exception.what());
-                        }
-                        catch (...)
-                        {
-                            Logging::Warn(logger, "LifecycleService: Waiting for the system state failed: unknown");
-                        }
-                        finalStatePromise->set_value(state);
-                    }};
-            }
         }
         catch (const std::future_error&)
         {
@@ -270,15 +242,7 @@ void LifecycleService::Shutdown(std::string reason)
 
 void LifecycleService::Restart(std::string /*reason*/)
 {
-    // Currently inoperable
-    throw SilKitError("Restarting is currently deactivated.");
-
-    //_lifecycleManagement.Restart(reason);
-    //
-    //if (!_hasCoordinatedSimulationStart)
-    //{
-    //    _lifecycleManagement->Run("LifecycleService::Restart() was called without start coordination.");
-    //}
+    throw SilKitError("Restarting is currently not supported.");
 }
 
 void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startConfiguration)
@@ -303,7 +267,8 @@ bool LifecycleService::TriggerCommunicationReadyHandler()
         {
             if(!_commReadyHandlerInvoked)
             {
-                _commReadyHandlerInvoked=true;
+                _commReadyHandlerInvoked = true;
+                _commReadyHandlerCompleted = false;
                 _commReadyHandler();
             }
             // Tell the LifecycleManager to not advance to the next state
@@ -352,7 +317,7 @@ void LifecycleService::TriggerAbortHandler(ParticipantState lastState)
 
 void LifecycleService::AbortSimulation(std::string reason)
 {
-    _lifecycleManagement.AbortSimulation(reason);
+    _lifecycleManager.AbortSimulation(reason);
 }
 
 bool LifecycleService::CheckForValidConfiguration()
@@ -434,8 +399,8 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
 
 void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& command)
 {
-    // Ignore messages if the lifecycle is not being executed yet
-    if (!_isRunning)
+    // Ignore messages if StartLifecycle has not been called yet
+    if (!_isLifecycleStarted)
     {
         std::stringstream msg;
         msg << "Received SystemCommand::" << command.kind
@@ -469,7 +434,7 @@ void LifecycleService::SetWorkflowConfiguration(const WorkflowConfiguration& con
     }
 }
 
-void LifecycleService::ChangeState(ParticipantState newState, std::string reason)
+void LifecycleService::ChangeParticipantState(ParticipantState newState, std::string reason)
 {
     ParticipantStatus status{};
     status.participantName = _participant->GetParticipantName();
@@ -506,52 +471,55 @@ void LifecycleService::NewSystemState(SystemState systemState)
     case OperationMode::Coordinated: 
         break;
     case OperationMode::Autonomous:
-        // uncoordinated participants do not react to system states changes!
+        // autonomous participants do not react to system states changes!
         return;
     }
 
     std::stringstream ss;
     ss << "Received new system state: " << systemState;
+    Logging::Debug(_logger, ss.str().c_str());
 
     switch (systemState)
     {
-    case SystemState::Invalid: break; // NOP
+    case SystemState::Invalid: 
+        break; 
     case SystemState::ServicesCreated: 
-        _lifecycleManagement.SystemwideServicesCreated(ss.str());
+        _lifecycleManager.ServicesCreated(ss.str());
         break;
-    case SystemState::CommunicationInitializing: break; // ignore
+    case SystemState::CommunicationInitializing: 
+        break; 
     case SystemState::CommunicationInitialized: 
-        _lifecycleManagement.SystemwideCommunicationInitialized(ss.str());
+        _lifecycleManager.CommunicationInitialized(ss.str());
         break;
     case SystemState::ReadyToRun: 
-        _lifecycleManagement.SystemwideReadyToRun(ss.str()); 
+        _lifecycleManager.ReadyToRun(ss.str()); 
         break;
     case SystemState::Running: 
         _logger->Info("Simulation running");
-        break; // ignore
+        break; 
     case SystemState::Paused: 
         _logger->Info("Simulation paused"); 
-        break; // ignore
+        break; 
     case SystemState::Stopping: 
         _logger->Info("Simulation stopping");
-        _lifecycleManagement.SystemwideStopping(ss.str()); 
+        // Only allow external stop signal if we are actually running or paused
+        if (_lifecycleManager.GetCurrentState() == _lifecycleManager.GetRunningState() ||
+            _lifecycleManager.GetCurrentState() == _lifecycleManager.GetPausedState())
+        {
+            _lifecycleManager.Stop(ss.str());
+        }
         break;
     case SystemState::Stopped:
-        _lifecycleManagement.SystemwideStopping(ss.str());
-        break; // To Sync or not to Sync - that is the question -- for now don't
+        break;
     case SystemState::ShuttingDown:
-        HandleSystemStateShuttingDown();
-        _lifecycleManagement.SystemwideStopping(ss.str());
-        break; // ignore
+        break; 
     case SystemState::Shutdown: 
         _logger->Info("Simulation has shutdown");
-        HandleSystemStateShuttingDown();
-        _lifecycleManagement.SystemwideStopping(ss.str());
-        break; // ignore
+        break; 
     case SystemState::Aborting: 
-        break; // ignore - we will receive an abort command separately
+        break; 
     case SystemState::Error: 
-        break; // ignore - not relevant for lifecycle (only for simulation)
+        break;
     }
 }
 
@@ -563,18 +531,6 @@ void LifecycleService::SetTimeSyncActive(bool isTimeSyncActive)
 bool LifecycleService::IsTimeSyncActive() const
 {
     return _timeSyncActive;
-}
-
-void LifecycleService::HandleSystemStateShuttingDown()
-{
-    try
-    {
-        _systemStateReachedShuttingDownPromise.set_value();
-    }
-    catch (...)
-    {
-        // Ignore any exception. This function will be called multiple times.
-    }
 }
 
 void LifecycleService::SetRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames)

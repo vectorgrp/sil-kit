@@ -38,6 +38,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "WireRpcMessages.hpp"
 
 #include "ServiceDatatypes.hpp" //concrete, no forwards
+#include "RequestReplyDatatypes.hpp" //concrete, no forwards
 #include "LoggingDatatypesInternal.hpp" //concrete, no forwards
 #include "OrchestrationDatatypes.hpp" //concrete, no forwards
 

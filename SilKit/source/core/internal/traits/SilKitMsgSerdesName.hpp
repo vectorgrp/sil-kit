@@ -72,7 +72,9 @@ DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayTxBufferConfig
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::WireFlexrayTxBufferUpdate, "TXBUFFERUPDATE" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::FlexrayPocStatusEvent, "POCSTATUS" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Core::Discovery::ParticipantDiscoveryEvent, "SERVICEANNOUNCEMENT" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Core::Discovery::ServiceDiscoveryEvent, "SERVICEDISCOVERYEVENT" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::Discovery::ServiceDiscoveryEvent, "SERVICEDISCOVERYEVENT");
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::RequestReply::RequestReplyCall, "REQUESTREPLYCALL");
+DefineSilKitMsgTrait_SerdesName(SilKit::Core::RequestReply::RequestReplyCallReturn, "REQUESTREPLYCALLRETURN");
 
 } // namespace Core
 } // namespace SilKit

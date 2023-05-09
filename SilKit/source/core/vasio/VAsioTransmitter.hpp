@@ -121,6 +121,21 @@ public:
         }
     }
 
+    size_t GetNumberOfRemoteReceivers()
+    { 
+        return _remoteReceivers.size();
+    }
+
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers() 
+    {
+        std::vector<std::string> participantNames{};
+        for (auto it = _remoteReceivers.begin(); it != _remoteReceivers.end(); ++it)
+        {
+            participantNames.push_back((*it).peer->GetInfo().participantName);
+        }
+        return participantNames; 
+    }
+
     void SendMessageToTarget(const IServiceEndpoint* from, const std::string& targetParticipantName, const MsgT& msg)
     {
         _hist.Save(from, msg);

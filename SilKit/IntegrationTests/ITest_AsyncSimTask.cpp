@@ -166,12 +166,12 @@ TEST(ITest_AsyncSimTask, test_async_simtask_nodeadlock)
         std::cout << "Async SimTask now=" << now.count() 
             << " expectedTime=" << expectedTime.count()
             << std::endl;
-        async->CompleteSimulationStep();
         if (now == expectedTime)
         {
             std::cout << "Stopping simulation at expected time" << std::endl;
             asyncParticipant->GetOrCreateLifecycleService()->Stop("Test");
         }
+        async->CompleteSimulationStep();
     }, 1ms);
 
     ASSERT_TRUE(testHarness.Run(5s)) << "TestSim Harness should not reach timeout";

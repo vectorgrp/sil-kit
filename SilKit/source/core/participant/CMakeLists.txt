@@ -65,6 +65,7 @@ target_link_libraries(O_SilKit_Core_Participant
     PRIVATE I_SilKit_Config
     PRIVATE I_SilKit_Core_Internal
     PRIVATE I_SilKit_Core_Service
+    PRIVATE I_SilKit_Core_RequestReply
     PRIVATE I_SilKit_Util
     PRIVATE I_SilKit_Util_SetThreadName
     PRIVATE I_SilKit_Util_Uuid

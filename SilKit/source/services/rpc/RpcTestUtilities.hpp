@@ -36,7 +36,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ILogger.hpp"
 
-
 namespace SilKit {
 namespace Services {
 namespace Rpc {
@@ -141,6 +140,20 @@ struct MockConnection
             service->SetTimeProvider(timeProvider);
         }
     }
+
+    size_t GetNumberOfConnectedParticipants() { return 0; }
+
+    size_t GetNumberOfRemoteReceivers(const SilKit::Core::IServiceEndpoint* /*service*/,
+                                      const std::string& /*msgTypeName*/)
+    {
+        return 0;
+    };
+
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const SilKit::Core::IServiceEndpoint* /*service*/,
+                                                                  const std::string& /*msgTypeName*/)
+    {
+        return {};
+    };
 
     struct
     {

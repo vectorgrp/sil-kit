@@ -28,6 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "OrchestrationDatatypes.hpp"
 #include "ILifecycleStates.hpp"
+#include "IParticipantInternal.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -39,68 +40,72 @@ class LifecycleService;
 class LifecycleManagement 
 {
 public: //CTors
-    LifecycleManagement(Services::Logging::ILogger* logger, LifecycleService* parentService);
+    LifecycleManagement(
+        Core::IParticipantInternal* participant, 
+        Services::Logging::ILogger* logger,
+        LifecycleService* parentService);
 
-    void InitLifecycleManagement(std::string reason);
+    // Triggered by Public API calls
+    void Pause(std::string reason);            // ILifecycleService::Pause
+    void Continue(std::string reason);         // ILifecycleService::Continue
+    void Stop(std::string reason);             // ILifecycleService::Stop
+    void AbortSimulation(std::string reason);  // ISystemController::AbortSimulation
+    void Error(std::string reason);            // ILifecycleService::ReportError
 
-    void SystemwideServicesCreated(std::string reason);
-    void SystemwideCommunicationInitialized(std::string reason);
-    void SystemwideReadyToRun(std::string reason);
-    void SystemwideStopping(std::string reason);
+    // Currently not part of ILifecycleService
+    void Restart(std::string reason);          // LifecycleService::Restart
 
-    void Restart(std::string reason);
-    bool Shutdown(std::string reason);
-
-
-    // Actions during simulation
-    void Pause(std::string reason);
-    void Continue(std::string reason);
-    void UserStop(std::string reason);
-
-    // Error / Abort handling
-    void Error(std::string reason);
-    void AbortSimulation(std::string reason);
-
-    // uncoordinated lifecycle state initialization
-    void StartUncoordinated(std::string reason);
-
-public:
-    // internal intermediate step between ServicesCreated and Comm.Initialized
+    // Common internal actions
+    void Initialize(std::string reason);
+    void ServicesCreated(std::string reason);
+    void ReadyToRun(std::string reason);
+    void CommunicationInitialized(std::string reason);
+    void CompleteCommunicationReadyHandler(std::string reason);
     void CommunicationInitializing(std::string reason);
+    void Shutdown(std::string reason);
 
-    void Stop(std::string reason);
+    // Autonomous lifecycle state initialization
+    void StartAutonomous(std::string reason);
 
+    // Send NextSimTask
+    void StartTime();
+
+    // Callback handling
     CallbackResult HandleCommunicationReady();
     bool HandleStarting();
     bool HandleStop();
     bool HandleShutdown();
     bool HandleAbort();
 
-    void StartRunning();
+    // Wait for pending subscriptions before advancing from CommunicationInitializing to CommunicationInitialized
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
-    void ContinueAfterStop();
-
+    // Abort handling
     void ResolveAbortSimulation(std::string reason);
 
-    // (Internal) Action after Stop
+    // Actions after Stop
     void RestartAfterStop(std::string reason);
     void ShutdownAfterStop(std::string reason);
     void ShutdownAfterAbort(std::string reason);
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+    // Ignore peer disconnects after stop
+    void ShutdownConnection();
 
-    // Internal state handling
-    void SetState(ILifecycleState* state, std::string message);
-    void SetStateError(std::string reason);
-    void SetAbortingState(std::string message);
+    // State setter
+    void SetState(ILifecycleState* newState, std::string message);
 
+    // Set state and trigger an action on the new state.
+    void SetStateAndForwardIntent(
+        ILifecycleState* nextState, 
+        void (ILifecycleState::*intent)(std::string),
+        std::string reason);
+
+    // State getter
     ILifecycleState* GetCurrentState();
-
     ILifecycleState* GetInvalidState();
     ILifecycleState* GetOperationalState();
     ILifecycleState* GetErrorState();
     ILifecycleState* GetAbortingState();
-    
     ILifecycleState* GetServicesCreatedState();
     ILifecycleState* GetCommunicationInitializingState();
     ILifecycleState* GetCommunicationInitializedState();
@@ -112,18 +117,24 @@ public:
     ILifecycleState* GetShuttingDownState();
     ILifecycleState* GetShutdownState();
 
-    Services::Logging::ILogger* GetLogger();
-
-    LifecycleService* GetService();
-
+    // Property getters
     OperationMode GetOperationMode() const;
 
+    // Interface getters
+    Logging::ILogger* GetLogger();
+    LifecycleService* GetService();
+    Core::IParticipantInternal* GetParticipant();
+
 private:
+    void UpdateLifecycleState(ILifecycleState* newState);
+    void UpdateParticipantState(std::string reason);
+
+    Core::IParticipantInternal* _participant{nullptr};
+
     std::shared_ptr<ILifecycleState> _invalidState;
     std::shared_ptr<ILifecycleState> _operationalState;
     std::shared_ptr<ILifecycleState> _errorState;
     std::shared_ptr<ILifecycleState> _abortingState;
-
     std::shared_ptr<ILifecycleState> _servicesCreatedState;
     std::shared_ptr<ILifecycleState> _communicationInitializingState;
     std::shared_ptr<ILifecycleState> _communicationInitializedState;
@@ -137,10 +148,9 @@ private:
 
     ILifecycleState* _currentState;
     ILifecycleState* _lastBeforeAbortingState{nullptr};
-    LifecycleService* _parentService;
+    LifecycleService* _lifecycleService;
 
     Services::Logging::ILogger* _logger;
-    std::atomic<bool> _stopInitialized{false};
 };
 
 } // namespace Orchestration

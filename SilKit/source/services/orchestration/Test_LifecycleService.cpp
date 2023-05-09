@@ -143,17 +143,17 @@ auto StartCoordinated()
     return sc;
 }
 
-auto StartUncoordinated()
+auto StartAutonomous()
 {
     LifecycleConfiguration sc;
     sc.operationMode = OperationMode::Autonomous;
     return sc;
 }
 
-TEST_F(LifecycleServiceTest, uncoordinated_must_not_react_to_system_states)
+TEST_F(LifecycleServiceTest, autonomous_must_not_react_to_system_states)
 {
     LifecycleConfiguration lc{OperationMode::Autonomous};
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(lc);
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -196,7 +196,7 @@ TEST_F(LifecycleServiceTest, uncoordinated_must_not_react_to_system_states)
         .Times(0);
 
     lifecycleService.StartLifecycle();
-    // coordinated participants stay in ServicesCreated
+    // coordinated participants stay in ServicesCreated, autonomous advance to running
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // participant must not change state upon receiving system states
     lifecycleService.NewSystemState(SystemState::ServicesCreated);
@@ -221,10 +221,10 @@ TEST_F(LifecycleServiceTest, uncoordinated_must_not_react_to_system_states)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
 }
 
-TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
+TEST_F(LifecycleServiceTest, start_stop_autonomous)
 {
     LifecycleConfiguration lc{OperationMode::Autonomous};
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(lc);
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -270,10 +270,10 @@ TEST_F(LifecycleServiceTest, start_stop_uncoordinated)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, start_restart_stop_coordinated_self_stop)
+TEST_F(LifecycleServiceTest, start_stop_coordinated_self_stop)
 {
-    // Intended state order: Create, ..., start, stop, restart, create, start, stop, shutdown
-    LifecycleService lifecycleService(&participant, {});
+    // Intended state order: Create, ..., start, stop, create, start, stop, shutdown
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -347,10 +347,10 @@ TEST_F(LifecycleServiceTest, start_restart_stop_coordinated_self_stop)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, start_restart_stop_coordinated_external_stop)
+TEST_F(LifecycleServiceTest, start_stop_coordinated_external_stop)
 {
-    // Intended state order: Create, ..., start, stop, restart, create, start, stop, shutdown
-    LifecycleService lifecycleService(&participant, {});
+    // Intended state order: Create, ..., start, stop, create, start, stop, shutdown
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -412,7 +412,7 @@ TEST_F(LifecycleServiceTest, start_restart_stop_coordinated_external_stop)
 
 TEST_F(LifecycleServiceTest, error_on_double_pause)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -455,7 +455,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
 
 TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -496,13 +496,13 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
     // run & stop
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
     // shutdown (invalid transition -> error)
-    lifecycleService.NewSystemState(SystemState::CommunicationInitialized);
+    lifecycleService.NewSystemState(SystemState::ServicesCreated);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
 TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -564,7 +564,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
 
 TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -619,7 +619,7 @@ TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
 
 TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -670,8 +670,8 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
 
 TEST_F(LifecycleServiceTest, Abort_Starting)
 {
-    LifecycleService lifecycleService(&participant, {});
-    lifecycleService.SetLifecycleConfiguration(StartUncoordinated());
+    LifecycleService lifecycleService(&participant);
+    lifecycleService.SetLifecycleConfiguration(StartAutonomous());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
@@ -717,13 +717,12 @@ TEST_F(LifecycleServiceTest, Abort_Starting)
         .Times(1);
 
     lifecycleService.StartLifecycle();
-    PrepareLifecycle(&lifecycleService);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
 TEST_F(LifecycleServiceTest, Abort_Running)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -780,7 +779,7 @@ TEST_F(LifecycleServiceTest, Abort_Running)
 
 TEST_F(LifecycleServiceTest, Abort_Paused)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -844,7 +843,7 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
 
 TEST_F(LifecycleServiceTest, Abort_Stopping)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -907,67 +906,9 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-// Currently, abort is an intermediate state that is not does not react to external input
-TEST_F(LifecycleServiceTest, DISABLED_Abort_Stop)
-{
-    LifecycleService lifecycleService(&participant, {});
-    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
-    lifecycleService.SetTimeSyncService(&mockTimeSync);
-    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
-
-    // Abort callback registration
-    lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
-    EXPECT_CALL(callbacks, AbortHandler(_)).Times(1).WillRepeatedly(Invoke([&](auto participantState) {
-        EXPECT_EQ(participantState, ParticipantState::Stopped);
-    }));
-
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
-
-    EXPECT_CALL(participant,
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
-        .Times(1);
-    EXPECT_CALL(participant, SendMsg(&lifecycleService,
-                                           AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
-        .Times(1);
-    EXPECT_CALL(participant, SendMsg(&lifecycleService,
-                                           AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
-        .Times(1);
-    EXPECT_CALL(participant,
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
-        .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
-        .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopping)))
-        .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopped)))
-        .Times(1);
-    EXPECT_CALL(participant,
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))
-        .Times(1);
-    EXPECT_CALL(participant, 
-                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
-        .Times(1);
-
-    lifecycleService.StartLifecycle();
-    PrepareLifecycle(&lifecycleService);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
-    // stop
-    lifecycleService.NewSystemState(SystemState::Stopping);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Stopped);
-    // Abort right away
-    SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
-    lifecycleService.ReceiveMsg(&masterId, abortCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
-}
-
 TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -1031,7 +972,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
 
 TEST_F(LifecycleServiceTest, Abort_Shutdown)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -1086,7 +1027,7 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
 
 TEST_F(LifecycleServiceTest, Abort_Aborting)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -1135,7 +1076,7 @@ TEST_F(LifecycleServiceTest, Abort_Aborting)
 
 TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -1177,7 +1118,7 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
 
 TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
 {
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -1215,7 +1156,7 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
 {
     // Goal: ensure that the basic calls to SetCommunicationReadyHandlerAsync() and
     // CompleteCommunicationReadyHandler() are working as expected.
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
@@ -1226,6 +1167,9 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
 
     std::promise<void> myPromise;
     auto completed = myPromise.get_future();
+
+    // Calling this before the CommunicationReadyHandler has been invoked should not result in an error:
+    lifecycleService.CompleteCommunicationReadyHandlerAsync();
 
     lifecycleService.SetCommunicationReadyHandlerAsync([&myPromise] {
         std::cout <<"async_comm_ready_handler: signaling myPromise" << std::endl;
@@ -1242,8 +1186,8 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
 
         std::cout <<"async_comm_ready_Handler: completer calling CommunicationReadyHandler 1st" << std::endl;
         lifecycleService.CompleteCommunicationReadyHandlerAsync();
-        // A user accidentally calling this multiple times should not
-        // result in an error:
+        
+        // Calling this multiple times should not result in an error:
         std::cout <<"async_comm_ready_Handler: completer calling CommunicationReadyHandler 2nd" << std::endl;
         lifecycleService.CompleteCommunicationReadyHandlerAsync();
 
@@ -1265,7 +1209,7 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
 TEST_F(LifecycleServiceTest, error_on_create_time_sync_service_twice)
 {
     // Goal: make sure that CreateTimeSync cannot be called more than once (must throw exception)
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
 
     EXPECT_NO_THROW({
@@ -1297,7 +1241,7 @@ TEST_F(LifecycleServiceTest, error_on_coordinated_not_required)
 {
     // Goal: make sure that the lifecycleService throws an exception if it is first 
     // set to be coordinated and then receives a required participant list without its own name
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 
@@ -1311,7 +1255,7 @@ TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)
 {
     // Goal: make sure that the lifecycleService throws an exception if it first 
     // receives a required participant list without its own name and is then set to be coordinated
-    LifecycleService lifecycleService(&participant, {});
+    LifecycleService lifecycleService(&participant);
 
     WorkflowConfiguration workflowConfiguration;
     workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};

@@ -44,6 +44,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
+#include "IRequestReplyService.hpp"
+#include "IRequestReplyProcedure.hpp"
+#include "procedures/IParticipantReplies.hpp"
 #include "LifecycleService.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "MockTimeProvider.hpp"
@@ -138,6 +141,29 @@ public:
     MOCK_METHOD(std::vector<ServiceDescriptor>, GetServices, (), (const, override));
     MOCK_METHOD(void, OnParticpantRemoval, (const std::string& participantName), (override));
 
+};
+
+class MockRequestReplyService : public RequestReply::IRequestReplyService
+{
+public:
+    MOCK_METHOD((Util::Uuid), Call, (RequestReply::FunctionType functionType, std::vector<uint8_t> callData),
+                (override));
+    MOCK_METHOD(void, SubmitCallReturn,
+                (Util::Uuid callUuid, RequestReply::FunctionType functionType, std::vector<uint8_t> callReturnData,
+                 RequestReply::CallReturnStatus callReturnStatus),
+                (override));
+};
+
+
+class MockParticipantReplies : public RequestReply::IParticipantReplies
+{
+public:
+
+    void CallAfterAllParticipantsReplied(std::function<void()> completionFunction) override
+    { 
+        // Directly trigger
+        completionFunction();
+    }
 };
 
 class DummyParticipant : public IParticipantInternal
@@ -280,7 +306,10 @@ public:
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Logging::LogMsg& /*msg*/)  override{}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ParticipantDiscoveryEvent& /*msg*/) override {}
-    void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ServiceDiscoveryEvent& /*msg*/)  override{}
+    void SendMsg(const IServiceEndpoint* /*from*/, const Discovery::ServiceDiscoveryEvent& /*msg*/) override {}
+
+    void SendMsg(const IServiceEndpoint* /*from*/, const RequestReply::RequestReplyCall& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const RequestReply::RequestReplyCallReturn& /*msg*/) override {}
 
     // targeted messaging
 
@@ -331,6 +360,9 @@ public:
 
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Discovery::ParticipantDiscoveryEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const Discovery::ServiceDiscoveryEvent& /*msg*/) override {}
+    
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const RequestReply::RequestReplyCall& /*msg*/) override {}
+    void SendMsg(const IServiceEndpoint* /*from*/, const std::string& /*targetParticipantName*/, const RequestReply::RequestReplyCallReturn& /*msg*/) override {}
 
 
     void OnAllMessagesDelivered(std::function<void()> /*callback*/) override {}
@@ -347,11 +379,26 @@ public:
     void JoinSilKitSimulation() override {}
 
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override { return &mockServiceDiscovery; }
+    auto GetRequestReplyService() -> RequestReply::IRequestReplyService* override { return &mockRequestReplyService; }
+    auto GetParticipantRepliesProcedure() -> RequestReply::IParticipantReplies* override { return &mockParticipantReplies; }
 
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override { handler(); };
     
     void SetIsSystemControllerCreated(bool /*isCreated*/) override{};
     bool GetIsSystemControllerCreated() override { return false; };
+    size_t GetNumberOfConnectedParticipants() override { return 0; };
+    size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/) override
+    {
+        return 0;
+    }
+
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* /*service*/,
+                                                                  const std::string& /*msgTypeName*/) override
+    {
+        return {};
+    }
+
+    void NotifyShutdown() override {};
 
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
@@ -362,6 +409,8 @@ public:
     MockSystemController mockSystemController;
     MockSystemMonitor mockSystemMonitor;
     MockServiceDiscovery mockServiceDiscovery;
+    MockRequestReplyService mockRequestReplyService;
+    MockParticipantReplies mockParticipantReplies;
 };
 
 // ================================================================================

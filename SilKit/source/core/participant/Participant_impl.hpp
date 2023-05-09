@@ -43,6 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "TimeProvider.hpp"
 #include "TimeSyncService.hpp"
 #include "ServiceDiscovery.hpp"
+#include "RequestReplyService.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "YamlParser.hpp"
 
@@ -111,11 +112,17 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
     // Ensure Service discovery is started
     (void)GetServiceDiscovery();
 
+    // Ensure RequestReplyService is started
+    (void)GetRequestReplyService();
+
     // Create the participants trace message sinks as declared in the configuration.
     _traceSinks = Tracing::CreateTraceMessageSinks(GetLogger(), _participantConfig);
 
     // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
     (void)GetLifecycleService();
+
+    // NB: Create the systemMonitor to receive WorkflowConfigurations
+    (void)GetSystemMonitor();
 
     // Enable replaying mechanism.
     if (Tracing::HasReplayConfig(_participantConfig))
@@ -124,15 +131,6 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
         _replayScheduler->ConfigureTimeProvider(&_timeProvider);
         _logger->Info("Replay Scheduler active.");
     }
-
-    // Ensure shutdowns are cleanly handled.
-    auto&& monitor = GetSystemMonitor();
-    monitor->AddSystemStateHandler([&conn = GetSilKitConnection()](auto newState) {
-        if (newState == Services::Orchestration::SystemState::ShuttingDown)
-        {
-            conn.NotifyShutdown();
-        }
-    });
 }
 
 template <class SilKitConnectionT>
@@ -832,6 +830,39 @@ auto Participant<SilKitConnectionT>::GetServiceDiscovery() -> Discovery::IServic
     return controller;
 }
 
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetRequestReplyService() -> RequestReply::IRequestReplyService*
+{
+    auto* controller =
+        GetController<RequestReply::RequestReplyService>(SilKit::Core::Discovery::controllerTypeRequestReplyService);
+    if (!controller)
+    {
+        Core::SupplementalData supplementalData;
+        supplementalData[SilKit::Core::Discovery::controllerType] =
+            SilKit::Core::Discovery::controllerTypeRequestReplyService;
+
+        _participantReplies = std::make_unique<RequestReply::ParticipantReplies>(this, controller);
+
+        RequestReply::ProcedureMap procedures{{RequestReply::FunctionType::ParticipantReplies, _participantReplies.get()}};
+
+        controller = CreateInternalController<RequestReply::RequestReplyService>(
+            "RequestReplyService", Core::ServiceType::InternalController, std::move(supplementalData), true,
+            GetParticipantName(), procedures);
+
+        _connection.RegisterPeerShutdownCallback([controller](IVAsioPeer* peer) {
+            controller->OnParticpantRemoval(peer->GetInfo().participantName);
+        });
+    }
+    return controller;
+}
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::GetParticipantRepliesProcedure() -> RequestReply::IParticipantReplies*
+{
+    return _participantReplies.get();
+}
+
 template <class SilKitConnectionT>
 bool Participant<SilKitConnectionT>::GetIsSystemControllerCreated()
 {
@@ -1126,6 +1157,18 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const RequestReply::RequestReplyCall& msg)
+{
+    SendMsgImpl(from, std::move(msg));
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const RequestReply::RequestReplyCallReturn& msg)
+{
+    SendMsgImpl(from, std::move(msg));
+}
+
+template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, SilKitMessageT&& msg)
 {
@@ -1133,7 +1176,7 @@ void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, S
     _connection.SendMsg(from, std::forward<SilKitMessageT>(msg));
 }
 
-// targeted messaging
+// Targeted messaging
 template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Can::WireCanFrameEvent& msg)
 {
@@ -1375,6 +1418,18 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const RequestReply::RequestReplyCall& msg)
+{
+    SendMsgImpl(from, targetParticipantName, msg);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const RequestReply::RequestReplyCallReturn& msg)
+{
+    SendMsgImpl(from, targetParticipantName, msg);
+}
+
+template <class SilKitConnectionT>
 template <typename SilKitMessageT>
 void Participant<SilKitConnectionT>::SendMsgImpl(const IServiceEndpoint* from, const std::string& targetParticipantName, SilKitMessageT&& msg)
 {
@@ -1568,6 +1623,32 @@ void Participant<SilKitConnectionT>::LogMismatchBetweenConfigAndPassedValue(cons
        << "Configured value: " << configuredValue << std::endl;
 
     _logger->Info(ss.str());
+}
+
+template <class SilKitConnectionT>
+size_t Participant<SilKitConnectionT>::GetNumberOfConnectedParticipants()
+{
+    return _connection.GetNumberOfConnectedParticipants();
+}
+
+template <class SilKitConnectionT>
+size_t Participant<SilKitConnectionT>::GetNumberOfRemoteReceivers(const IServiceEndpoint* service,
+                                                                  const std::string& msgTypeName)
+{
+    return _connection.GetNumberOfRemoteReceivers(service, msgTypeName);
+}
+
+template <class SilKitConnectionT>
+std::vector<std::string> Participant<SilKitConnectionT>::GetParticipantNamesOfRemoteReceivers(
+    const IServiceEndpoint* service, const std::string& msgTypeName)
+{
+    return _connection.GetParticipantNamesOfRemoteReceivers(service, msgTypeName);
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::NotifyShutdown()
+{
+    _connection.NotifyShutdown();
 }
 
 } // namespace Core

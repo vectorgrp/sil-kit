@@ -21,46 +21,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
+#include "MessageBuffer.hpp"
+#include "RequestReplyDatatypes.hpp"
+
 namespace SilKit {
-namespace Services {
-namespace Can {
-class IMsgForCanSimulator;
-} // namespace Can
-namespace Ethernet {
-class IMsgForEthSimulator;
-} // namespace Ethernet
-namespace Flexray {
-class IMsgForFlexrayBusSimulator;
-} // namespace Flexray
-namespace Lin {
-class IMsgForLinSimulator;
-} // namespace Lin
-namespace PubSub {
-class IMsgForDataPublisher;
-class IMsgForDataSubscriber;
-class IMsgForDataSubscriberInternal;
-class DataSubscriberInternal;
-} // namespace PubSub
-namespace Rpc {
-class IMsgForRpcClient;
-class IMsgForRpcServer;
-class IMsgForRpcServerInternal;
-class RpcServerInternal;
-class RpcDiscoverer;
-} // namespace Rpc
-namespace Orchestration {
-class LifecycleService;
-class TimeSyncService;
-} // namespace Orchestration
-} // namespace Services
 namespace Core {
-namespace Discovery {
-class IServiceDiscovery;
-} // namespace Discovery
 namespace RequestReply {
-class IRequestReplyService;
-class IParticipantReplies;
-} // namespace RequestReply
+
+void Serialize(SilKit::Core::MessageBuffer& buffer, const RequestReplyCall& msg);
+void Serialize(SilKit::Core::MessageBuffer& buffer, const RequestReplyCallReturn& msg);
+
+void Deserialize(MessageBuffer& buffer, RequestReplyCall& out);
+void Deserialize(MessageBuffer& buffer, RequestReplyCallReturn& out);
+
+} // namespace RequestReply    
 } // namespace Core
 } // namespace SilKit
-

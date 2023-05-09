@@ -166,7 +166,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_SendFrameHeader)
         nullptr, "LinController1", "LinNetwork1");
 
     EXPECT_CALL(capi, SilKit_LinController_SendFrameHeader(mockLinController, 3)).Times(1);
-    LinController.SendFrameHeader({3});
+    LinController.SendFrameHeader(3);
 }
 
 TEST_F(HourglassLinTest, SilKit_LinController_UpdateTxBuffer)

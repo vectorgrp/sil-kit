@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
@@ -49,27 +48,47 @@ using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Config;
 using namespace SilKit::Services::PubSub;
 
-const std::string systemMasterName{"SystemMaster"};
+const std::string systemControllerParticipantName{"systemControllerParticipant"};
 const std::string topic{"Topic"};
-const std::string mediaType{ "A" };
-static size_t numParticipants;
+const std::string mediaType{"A"};
+static size_t expectedReceptions;
 std::chrono::milliseconds communicationTimeout{8000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
+std::chrono::seconds simStepSize{1s};
+
+static std::vector<std::string> participantNames{};
+static std::map<size_t, bool> participantIsSync{};
+
+enum class TimeMode
+{
+    Async,
+    Sync
+};
 
 class ITest_HopOnHopOff : public testing::Test
 {
-
 protected:
-    ITest_HopOnHopOff()
-    {
-    }
+    ITest_HopOnHopOff() {}
 
     struct TestParticipant
     {
-        TestParticipant(const std::string& newName)
+        TestParticipant(const std::string& newName, TimeMode newTimeMode, OperationMode mode)
         {
+            static size_t globalParticipantIndex = 0;
+
+            if (globalParticipantIndex == 0)
+            {
+                participantNames.clear();
+                participantIsSync.clear();
+            }
+
+            participantNames.push_back(newName);
+            participantIsSync.emplace(globalParticipantIndex, newTimeMode == TimeMode::Sync);
+
             name = newName;
-            id = static_cast<uint8_t>(numParticipants++);
+            id = static_cast<uint8_t>(globalParticipantIndex++);
+            timeMode = newTimeMode;
+            lifeCycleOperationMode = mode;
         }
 
         TestParticipant(TestParticipant&&) = default;
@@ -102,18 +121,27 @@ protected:
 
         ImmovableMembers i{};
 
-        std::string                  name;
+        std::string name;
         uint8_t id;
         std::unique_ptr<IParticipant> participant;
         IDataPublisher* publisher;
         IDataSubscriber* subscriber;
         std::set<uint8_t> receivedIds;
-        std::promise<void>           allReceivedPromise;
+        std::promise<void> allReceivedPromise;
 
+        struct PubData
+        {
+            uint8_t participantId;
+            int64_t nowNs;
+        };
+
+        std::chrono::nanoseconds now;
         bool simtimePassed{false};
-        std::promise<void>           simtimePassedPromise;
+        std::promise<void> simtimePassedPromise;
 
-        SilKit::Services::Orchestration::ILifecycleService* lifecycleService{nullptr};
+        TimeMode timeMode;
+        OperationMode lifeCycleOperationMode;
+        ILifecycleService* lifecycleService{nullptr};
 
         void ResetReception()
         {
@@ -122,24 +150,29 @@ protected:
             i.allReceived = false;
         }
 
-        void AwaitCommunication() 
+        void AwaitCommunication()
         {
             auto futureStatus = allReceivedPromise.get_future().wait_for(communicationTimeout);
-            EXPECT_EQ(futureStatus, std::future_status::ready)
-                << "Test Failure: Awaiting test communication timed out";
+            if (futureStatus != std::future_status::ready)
+            {
+                EXPECT_EQ(futureStatus, std::future_status::ready)
+                    << "Test Failure: Awaiting test communication timed out";
+            }
+            else
+            {
+                std::cout << ">> AwaitCommunication of " << name << " done" << std ::endl;
+            }
+            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting test communication timed out";
         }
     };
 
-    struct SystemMaster
+    struct SystemControllerParticipant
     {
         std::unique_ptr<IParticipant> participant;
         SilKit::Experimental::Services::Orchestration::ISystemController* systemController;
-        ISystemMonitor*               systemMonitor;
+        ISystemMonitor* systemMonitor;
         ILifecycleService* lifecycleService;
         std::future<ParticipantState> finalState;
-
-        std::promise<void> systemStateRunningPromise;
-        std::future<void> systemStateRunning;
     };
 
     void SystemStateHandler(SystemState newState)
@@ -147,314 +180,396 @@ protected:
         switch (newState)
         {
         case SystemState::Error:
-            std::cout << "SystemState::Error -> Aborting simulation" << std ::endl; 
-            systemMaster.systemController->AbortSimulation();
+            std::cout << "SystemState::Error -> Aborting simulation" << std ::endl;
+            systemControllerParticipant.systemController->AbortSimulation();
             break;
 
-        case SystemState::Running:
-            systemMaster.systemStateRunningPromise.set_value();
-            break;
+        case SystemState::Running: break;
 
         default: break;
         }
     }
 
-    void AbortAndFailTest(const std::string& reason)
+    void SyncParticipantThread(TestParticipant& testParticipant)
     {
-        if (systemMaster.systemController != nullptr)
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
+        if (verbose)
         {
-            systemMaster.systemController->AbortSimulation();
+            config = SilKit::Config::MakeEmptyParticipantConfiguration();
         }
-        FAIL() << reason;
-    }
-
-    void SyncParticipantThread(TestParticipant& participant, const std::string& registryUri)
-    {
-        try
+        else
         {
-            participant.participant =
-                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
+            config = SilKit::Config::MakeEmptyParticipantConfiguration();
+        }
 
-            auto* lifecycleService = participant.participant->CreateLifecycleService(
-                {SilKit::Services::Orchestration::OperationMode::Coordinated});
-            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, registryUri);
+        testParticipant.lifecycleService =
+            testParticipant.participant->CreateLifecycleService({testParticipant.lifeCycleOperationMode});
+        auto* timeSyncService = testParticipant.lifecycleService->CreateTimeSyncService();
+        auto* logger = testParticipant.participant->GetLogger();
 
-            SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
-            SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
-            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
-            participant.subscriber = participant.participant->CreateDataSubscriber(
-                "TestSubscriber", matchingDataSpec,
-                [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                    if (!participant.i.allReceived)
+        SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
+        SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
+        testParticipant.publisher = testParticipant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
+        testParticipant.subscriber = testParticipant.participant->CreateDataSubscriber(
+            "TestSubscriber", matchingDataSpec,
+            [&testParticipant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
+                auto participantId = dataMessageEvent.data[0];
+
+                if (participantIsSync[participantId] && testParticipant.now >= 0ns)
+                {
+                    auto delta = testParticipant.now - dataMessageEvent.timestamp;
+                    if (delta > simStepSize)
                     {
-                        participant.receivedIds.insert(dataMessageEvent.data[0]);
-                        // No self delivery: Expect numParticipants-1 receptions
-                        if (participant.receivedIds.size() == numParticipants-1)
+                        testParticipant.lifecycleService->Stop("Fail with chronology error");
+                        FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
+                               << participantNames[participantId] << " with timestamp "
+                               << dataMessageEvent.timestamp.count() << " while this participant's time is "
+                               << testParticipant.now.count();
+                    }
+                }
+
+                if (!testParticipant.i.allReceived)
+                {
+                    if (participantId != testParticipant.id)
+                    {
+                        testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+                        // No self delivery: Expect expectedReceptions-1 receptions
+                        if (testParticipant.receivedIds.size() == expectedReceptions - 1)
                         {
-                            participant.i.allReceived = true;
-                            participant.allReceivedPromise.set_value();
+                            testParticipant.i.allReceived = true;
+                            testParticipant.allReceivedPromise.set_value();
                         }
                     }
-                });
-
-            timeSyncService->SetSimulationStepHandler(
-                [&participant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
-                    participant.publisher->Publish(std::vector<uint8_t>{participant.id});
-                    if (!participant.simtimePassed && now > simtimeToPass)
-                    {
-                        participant.simtimePassed = true;
-                        participant.simtimePassedPromise.set_value();
-                    }
-                }, 1s);
-            auto finalStateFuture = lifecycleService->StartLifecycle();
-            finalStateFuture.get();
-        }
-        catch (const SilKit::ConfigurationError& error)
-        {
-            std::stringstream ss;
-            ss << "Invalid configuration: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-        catch (const std::exception& error)
-        {
-            std::stringstream ss;
-            ss << "Something went wrong: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-
-    }
-
-    void AsyncParticipantThread(TestParticipant& participant, const std::string& registryUri)
-    {
-        try
-        {
-            participant.participant =
-                SilKit::CreateParticipant(SilKit::Config::MakeEmptyParticipantConfiguration(), participant.name, registryUri);
-            SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
-            SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
-            participant.publisher = participant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
-            participant.subscriber = participant.participant->CreateDataSubscriber(
-                "TestSubscriber", matchingDataSpec,
-                [&participant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
-                    if (!participant.i.allReceived)
-                    {
-                        auto participantId = dataMessageEvent.data[0];
-                        if (participantId != participant.id)
-                        {
-                            participant.receivedIds.insert(dataMessageEvent.data[0]);
-                            // No self delivery: Expect numParticipants-1 receptions
-                            if (participant.receivedIds.size() == numParticipants - 1)
-                            {
-                                participant.i.allReceived = true;
-                                participant.allReceivedPromise.set_value();
-                            }
-                        }
-                    }
-                });
-
-            while (participant.i.runAsync)
-            {
-                participant.publisher->Publish(std::vector<uint8_t>{participant.id});
-                std::this_thread::sleep_for(asyncDelayBetweenPublication);
-            }
-
-        }
-        catch (const SilKit::ConfigurationError& error)
-        {
-            std::stringstream ss;
-            ss << "Invalid configuration: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-        catch (const std::exception& error)
-        {
-            std::stringstream ss;
-            ss << "Something went wrong: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-
-        // Explicitly delete the com adapter to end the async participant
-        participant.participant.reset();
-    }
-
-    void RunRegistry(const std::string& registryUri)
-    {
-        try
-        {
-            registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::MakeParticipantConfigurationWithLogging(Services::Logging::Level::Info));
-            registry->StartListening(registryUri);
-        }
-        catch (const SilKit::ConfigurationError& error)
-        {
-            std::stringstream ss;
-            ss << "Invalid configuration: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-        catch (const std::exception& error)
-        {
-            std::stringstream ss;
-            ss << "Something went wrong: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-    }
-
-    void RunSystemMaster(const std::string& registryUri)
-    {
-        try
-        {
-            systemMaster.participant = SilKit::CreateParticipantImpl(
-                SilKit::Config::MakeEmptyParticipantConfigurationImpl(), systemMasterName, registryUri);
-
-            auto participantInternal =
-                dynamic_cast<SilKit::Core::IParticipantInternal*>(systemMaster.participant.get());
-            systemMaster.systemController = participantInternal->GetSystemController();
-
-            systemMaster.systemMonitor = systemMaster.participant->CreateSystemMonitor();
-            systemMaster.lifecycleService = systemMaster.participant->CreateLifecycleService(
-                {SilKit::Services::Orchestration::OperationMode::Coordinated});
-
-            systemMaster.systemController->SetWorkflowConfiguration({syncParticipantNames});
-
-            systemMaster.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
-                SystemStateHandler(newState);
+                }
             });
 
-            systemMaster.systemStateRunning = systemMaster.systemStateRunningPromise.get_future();
+        timeSyncService->SetSimulationStepHandler(
+            [logger, &testParticipant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+                testParticipant.now = now;
+                testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
+                std::stringstream ss;
+                ss << "now=" << now.count() / 1e9 << "s";
+                logger->Info(ss.str());
+                if (!testParticipant.simtimePassed && now > simtimeToPass)
+                {
+                    testParticipant.simtimePassed = true;
+                    testParticipant.simtimePassedPromise.set_value();
+                }
+            },
+            simStepSize);
+        auto finalStateFuture = testParticipant.lifecycleService->StartLifecycle();
+        finalStateFuture.get();
 
-            systemMaster.finalState = systemMaster.lifecycleService->StartLifecycle();
-        }
-        catch (const SilKit::ConfigurationError& error)
-        {
-            std::stringstream ss;
-            ss << "Invalid configuration: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-        catch (const std::exception& error)
-        {
-            std::stringstream ss;
-            ss << "Something went wrong: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
+        testParticipant.participant.reset();
     }
 
-    void RunSyncParticipants(std::vector<TestParticipant>& participants, const std::string& registryUri)
+    void AsyncParticipantThread(TestParticipant& testParticipant)
     {
-        try
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
+        config = SilKit::Config::MakeEmptyParticipantConfiguration();
+
+        if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
         {
-            for (auto& p : participants)
+            testParticipant.lifecycleService =
+                testParticipant.participant->CreateLifecycleService({testParticipant.lifeCycleOperationMode});
+        }
+
+        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, registryUri);
+        SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
+        SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
+        testParticipant.publisher = testParticipant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
+        testParticipant.subscriber = testParticipant.participant->CreateDataSubscriber(
+            "TestSubscriber", matchingDataSpec,
+            [&testParticipant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
+                if (!testParticipant.i.allReceived)
+                {
+                    auto participantId = dataMessageEvent.data[0];
+                    if (participantId != testParticipant.id)
+                    {
+                        testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+                        // No self delivery: Expect expectedReceptions-1 receptions
+                        if (testParticipant.receivedIds.size() == expectedReceptions - 1)
+                        {
+                            testParticipant.i.allReceived = true;
+                            testParticipant.allReceivedPromise.set_value();
+                        }
+                    }
+                }
+            });
+
+        auto runTask = [&testParticipant]() {
+            while (testParticipant.i.runAsync)
             {
-                syncParticipantThreads.emplace_back(
-                    [this, &p, registryUri] { SyncParticipantThread(p, registryUri); });
+                testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
+                std::this_thread::sleep_for(asyncDelayBetweenPublication);
             }
+        };
 
-        }
-        catch (const SilKit::ConfigurationError& error)
+        if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
         {
-            std::stringstream ss;
-            ss << "Invalid configuration: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
+            std::thread runTaskThread{runTask};
+            runTaskThread.detach();
+
+            auto finalStateFuture = testParticipant.lifecycleService->StartLifecycle();
+            finalStateFuture.get();
         }
-        catch (const std::exception& error)
+        else
         {
-            std::stringstream ss;
-            ss << "Something went wrong: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
+            runTask();
+        }
+
+        testParticipant.participant.reset();
+    }
+
+    void SystemControllerParticipantThread(const std::vector<std::string>& required)
+    {
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
+        config = SilKit::Config::MakeEmptyParticipantConfigurationImpl();
+
+        systemControllerParticipant.participant =
+            SilKit::CreateParticipantImpl(config, systemControllerParticipantName, registryUri);
+
+        auto participantInternal =
+            dynamic_cast<SilKit::Core::IParticipantInternal*>(systemControllerParticipant.participant.get());
+        systemControllerParticipant.systemController = participantInternal->GetSystemController();
+
+        systemControllerParticipant.systemMonitor = systemControllerParticipant.participant->CreateSystemMonitor();
+        systemControllerParticipant.lifecycleService = systemControllerParticipant.participant->CreateLifecycleService(
+            {SilKit::Services::Orchestration::OperationMode::Coordinated});
+
+        systemControllerParticipant.systemController->SetWorkflowConfiguration({required});
+
+        systemControllerParticipant.systemMonitor->AddSystemStateHandler([this](SystemState newState) {
+            SystemStateHandler(newState);
+        });
+
+        systemControllerParticipant.finalState = systemControllerParticipant.lifecycleService->StartLifecycle();
+        systemControllerParticipant.finalState.get();
+    }
+
+    void RunSystemController(const std::vector<std::string>& requiredParticipants)
+    {
+        if (!requiredParticipants.empty())
+        {
+            std::vector<std::string> required{};
+            for (auto&& p : requiredParticipants)
+            {
+                required.push_back(p);
+            }
+            required.push_back(systemControllerParticipantName);
+
+            participantThread_SystemController = ParticipantThread{[this, required] {
+                SystemControllerParticipantThread(required);
+            }};
         }
     }
 
-    void RunAsyncParticipants(std::vector<TestParticipant>& participants, const std::string& registryUri)
+    void StopSystemController()
     {
-        try
+        systemControllerParticipant.lifecycleService->Stop("Stop Test.");
+        participantThread_SystemController.shutdownFuture.get();
+        participantThread_SystemController.thread.join();
+    }
+
+    void RunRegistry()
+    {
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
+        config = SilKit::Config::MakeEmptyParticipantConfiguration();
+        registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
+        registry->StartListening(registryUri);
+    }
+
+    void StopRegistry() { registry.reset(); }
+
+    void RunParticipants(std::vector<TestParticipant>& participants, std::string set = "A")
+    {
+        for (auto& p : participants)
         {
-            for (auto& p : participants)
+            if (p.timeMode == TimeMode::Async)
             {
                 p.i.runAsync = true;
-                asyncParticipantThreads.emplace_back([this, &p, registryUri] { AsyncParticipantThread(p, registryUri); });
+
+                if (p.lifeCycleOperationMode == OperationMode::Invalid)
+                {
+                    participantThreads_Async_Invalid.emplace_back([this, &p] {
+                        AsyncParticipantThread(p);
+                    });
+                }
+                else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
+                {
+                    participantThreads_Async_Autonomous.emplace_back([this, &p] {
+                        AsyncParticipantThread(p);
+                    });
+                }
+                else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
+                {
+                    participantThreads_Async_Coordinated.emplace_back([this, &p] {
+                        AsyncParticipantThread(p);
+                    });
+                }
+            }
+            else if (p.timeMode == TimeMode::Sync)
+            {
+                if (p.lifeCycleOperationMode == OperationMode::Invalid)
+                {
+                    participantThreads_Sync_Invalid.emplace_back([this, &p] {
+                        SyncParticipantThread(p);
+                    });
+                }
+                else if (p.lifeCycleOperationMode == OperationMode::Autonomous)
+                {
+                    if (set == "A")
+                    {
+                        participantThreads_Sync_AutonomousA.emplace_back([this, &p] {
+                            SyncParticipantThread(p);
+                        });
+                    }
+                    else if (set == "B")
+                    {
+                        participantThreads_Sync_AutonomousB.emplace_back([this, &p] {
+                            SyncParticipantThread(p);
+                        });
+                    }
+                }
+                else if (p.lifeCycleOperationMode == OperationMode::Coordinated)
+                {
+                    participantThreads_Sync_Coordinated.emplace_back([this, &p] {
+                        SyncParticipantThread(p);
+                    });
+                }
             }
         }
-        catch (const SilKit::ConfigurationError& error)
-        {
-            std::stringstream ss;
-            ss << "Invalid configuration: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
-        catch (const std::exception& error)
-        {
-            std::stringstream ss;
-            ss << "Something went wrong: " << error.what() << std::endl;
-            AbortAndFailTest(ss.str());
-        }
     }
 
-    void JoinSyncParticipantsThreads()
+    struct ParticipantThread
     {
-        for (auto&& thread : syncParticipantThreads)
+        struct ThreadMain
         {
-            thread.join();
-        }
-        syncParticipantThreads.clear();
-    }
+            void operator()(std::function<void()> f)
+            {
+                try
+                {
+                    f();
+                }
+                catch (...)
+                {
+                    promise.set_exception(std::current_exception());
+                    return;
+                }
 
-    void JoinAsyncParticipantsThreads()
-    {
-        for (auto&& thread : asyncParticipantThreads)
+                promise.set_value();
+            }
+
+            std::promise<void> promise;
+        };
+
+        ParticipantThread() {}
+        ParticipantThread(ParticipantThread&&) = default;
+        ParticipantThread(const ParticipantThread&) = delete;
+
+        ParticipantThread& operator=(ParticipantThread&&) = default;
+        ParticipantThread& operator=(const ParticipantThread&) = delete;
+
+        template <typename T>
+        ParticipantThread(T&& t)
         {
-            thread.join();
+            ThreadMain threadMain;
+            shutdownFuture = threadMain.promise.get_future();
+            thread = std::thread{std::move(threadMain), std::forward<T>(t)};
         }
-        asyncParticipantThreads.clear();
-    }
 
-    void SetupSystem(const std::string& registryUri, std::vector<TestParticipant>& syncParticipants)
-    {
-        for (auto&& p : syncParticipants)
+        ~ParticipantThread()
         {
-            syncParticipantNames.push_back(p.name);
+            if (shutdownFuture.valid())
+            {
+                try
+                {
+                    shutdownFuture.wait();
+                }
+                catch (...)
+                {
+                }
+            }
+            if (thread.joinable())
+            {
+                try
+                {
+                    thread.join();
+                }
+                catch (...)
+                {
+                }
+            }
         }
-        syncParticipantNames.push_back(systemMasterName);
 
-        RunRegistry(registryUri);
-        RunSystemMaster(registryUri);
-    }
+        std::thread thread;
+        std::future<void> shutdownFuture;
+    };
 
-    void ShutdownSystem()
+    void JoinParticipantThreads(std::vector<ParticipantThread>& threads)
     {
-        asyncParticipantThreads.clear();
-        syncParticipantThreads.clear();
-        systemMaster.participant.reset();
-        registry.reset();
+        for (auto&& thread : threads)
+        {
+            if (thread.shutdownFuture.valid())
+            {
+                thread.shutdownFuture.get();
+            }
+        }
+        threads.clear();
     }
+
+    void SetUp() override { registryUri = MakeTestRegistryUri(); }
 
 protected:
-    std::vector<std::string> syncParticipantNames{};
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
-    SystemMaster systemMaster;
-    std::vector<std::thread> syncParticipantThreads;
-    std::vector<std::thread> asyncParticipantThreads;
 
-    std::chrono::seconds simtimeToPass{ 3s };
-    bool runAsync{ true };
+    SystemControllerParticipant systemControllerParticipant;
+    ParticipantThread participantThread_SystemController;
 
+    std::vector<ParticipantThread> participantThreads_Sync_Invalid;
+    std::vector<ParticipantThread> participantThreads_Sync_AutonomousA;
+    std::vector<ParticipantThread> participantThreads_Sync_AutonomousB;
+    std::vector<ParticipantThread> participantThreads_Sync_Coordinated;
 
+    std::vector<ParticipantThread> participantThreads_Async_Invalid;
+    std::vector<ParticipantThread> participantThreads_Async_Autonomous;
+    std::vector<ParticipantThread> participantThreads_Async_Coordinated;
+
+    std::chrono::seconds simtimeToPass{3s};
+    bool runAsync{true};
+
+    const bool verbose = true;
+
+    std::string registryUri;
 };
-
 
 TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 {
-    numParticipants = 0;
-    auto registryUri = MakeTestRegistryUri();
+    RunRegistry();
 
     std::vector<TestParticipant> syncParticipants;
-    syncParticipants.push_back({ "SyncParticipant1" });
-    syncParticipants.push_back({ "SyncParticipant2" });
+    syncParticipants.push_back({"SyncParticipant1", TimeMode::Sync, OperationMode::Coordinated});
+    syncParticipants.push_back({"SyncParticipant2", TimeMode::Sync, OperationMode::Coordinated});
 
     std::vector<TestParticipant> asyncParticipants;
-    asyncParticipants.push_back({ "AsyncParticipant1" });
-    asyncParticipants.push_back({ "AsyncParticipant2" });
+    asyncParticipants.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
+    asyncParticipants.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
+    expectedReceptions = syncParticipants.size() + asyncParticipants.size();
 
-    SetupSystem(registryUri, syncParticipants);
+    std::vector<std::string> required{};
+    for (auto&& p : syncParticipants)
+    {
+        required.push_back(p.name);
+    }
+    RunSystemController(required);
 
-    RunSyncParticipants(syncParticipants, registryUri);
+    RunParticipants(syncParticipants);
 
-    std::cout << "Await simtime progress" << std::endl;
+    if (verbose)
+    {
+        std::cout << "Await simtime progress" << std::endl;
+    }
     // Await simtime progress
     for (auto& p : syncParticipants)
     {
@@ -465,71 +580,84 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 
     for (int i = 0; i < 3; i++)
     {
-        std::cout << ">> Cycle " << i + 1 << "/3" << std::endl;
-        std::cout << ">> Hop on async participants" << std::endl;
+        if (verbose)
+        {
+            std::cout << ">> Cycle " << i + 1 << "/3" << std::endl;
+            std::cout << ">> Hop on async participants" << std::endl;
+        }
 
         // Hop on with async participant
-        RunAsyncParticipants(asyncParticipants, registryUri);
+        RunParticipants(asyncParticipants);
 
-        std::cout << ">> Await successful communication of async/sync participants" << std::endl;
+        if (verbose)
+        {
+            std::cout << ">> Await successful communication of async/sync participants" << std::endl;
+        }
         // Await successful communication of async/sync participants
         for (auto& p : syncParticipants)
             p.AwaitCommunication();
         for (auto& p : asyncParticipants)
             p.AwaitCommunication();
 
-        std::cout << ">> Hop off async participants" << std::endl;
+        if (verbose)
+        {
+            std::cout << ">> Hop off async participants" << std::endl;
+        }
         // Hop off: Stop while-loop of async participants
         for (auto& p : asyncParticipants)
             p.i.runAsync = false;
-        JoinAsyncParticipantsThreads();
+        JoinParticipantThreads(participantThreads_Async_Invalid);
 
         // Reset communication and wait for reception once more for remaining sync participants
-        numParticipants = syncParticipants.size();
+        expectedReceptions = syncParticipants.size();
         for (auto& p : syncParticipants)
             p.ResetReception();
 
-        std::cout << ">> Await successful communication of remaining sync participants" << std::endl;
+        if (verbose)
+        {
+            std::cout << ">> Await successful communication of remaining sync participants" << std::endl;
+        }
         for (auto& p : syncParticipants)
             p.AwaitCommunication();
 
         // Reset communication to repeat the cycle
-        numParticipants = syncParticipants.size() + asyncParticipants.size();
+        expectedReceptions = syncParticipants.size() + asyncParticipants.size();
         for (auto& p : syncParticipants)
             p.ResetReception();
         for (auto& p : asyncParticipants)
             p.ResetReception();
     }
+    if (verbose)
+    {
+        std::cout << ">> Cycles done" << std::endl;
+    }
 
-    std::cout << ">> Cycles done" << std::endl;
-    ASSERT_EQ(systemMaster.systemStateRunning.wait_for(1s), std::future_status::ready);
-    systemMaster.lifecycleService->Stop("Stop Test.");
+    // Shutdown coordinated participants
+    for (auto& p : syncParticipants)
+        p.lifecycleService->Stop("Hop Off");
+    JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
-    JoinSyncParticipantsThreads();
-
-    ShutdownSystem();
+    StopSystemController();
+    StopRegistry();
 }
-
 
 TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
 {
-    numParticipants = 0;
-    auto registryUri = MakeTestRegistryUri();
-
     std::vector<TestParticipant> asyncParticipants1;
-    asyncParticipants1.push_back({"AsyncParticipant1"});
+    asyncParticipants1.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
     std::vector<TestParticipant> asyncParticipants2;
-    asyncParticipants2.push_back({"AsyncParticipant2"});
+    asyncParticipants2.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
+    expectedReceptions = asyncParticipants1.size() + asyncParticipants2.size();
 
-    // No lifecylce, only registry needed (no systemController)
-    RunRegistry(registryUri);
+    // No lifecycle, only registry needed (no systemController)
+    RunRegistry();
 
     for (int i = 0; i < 3; i++)
     {
         // Start with asyncParticipant1
-        RunAsyncParticipants(asyncParticipants1, registryUri);
+        RunParticipants(asyncParticipants1);
         // Async2 is second
-        RunAsyncParticipants(asyncParticipants2, registryUri);
+        RunParticipants(asyncParticipants2);
 
         // Await successful communication of async participants
         for (auto& p : asyncParticipants1)
@@ -538,7 +666,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
             p.AwaitCommunication();
 
         // Reset communication
-        numParticipants = 2;
+        expectedReceptions = 2;
         for (auto& p : asyncParticipants1)
             p.ResetReception();
         for (auto& p : asyncParticipants2)
@@ -546,11 +674,10 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
 
         // Hop off with asyncParticipants1
         asyncParticipants1[0].i.runAsync = false;
-        asyncParticipantThreads[0].join();
-        asyncParticipantThreads.erase(asyncParticipantThreads.begin());
+        participantThreads_Async_Invalid[0].shutdownFuture.get();
 
         // Reconnect with asyncParticipant1
-        RunAsyncParticipants(asyncParticipants1, registryUri);
+        RunParticipants(asyncParticipants1);
 
         // Await successful communication of async participants
         for (auto& p : asyncParticipants1)
@@ -559,7 +686,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
             p.AwaitCommunication();
 
         // Reset communication
-        numParticipants = 2;
+        expectedReceptions = 2;
         for (auto& p : asyncParticipants1)
             p.ResetReception();
         for (auto& p : asyncParticipants2)
@@ -570,32 +697,30 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
             p.i.runAsync = false;
         for (auto& p : asyncParticipants2)
             p.i.runAsync = false;
-        JoinAsyncParticipantsThreads();
+
+        JoinParticipantThreads(participantThreads_Async_Invalid);
     }
 
-    ShutdownSystem();
+    StopRegistry();
 }
-
 
 TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
 {
-    numParticipants = 0;
-    auto registryUri = MakeTestRegistryUri();
-
     std::vector<TestParticipant> asyncParticipants1;
-    asyncParticipants1.push_back({"AsyncParticipant1"});
+    asyncParticipants1.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
     std::vector<TestParticipant> asyncParticipants2;
-    asyncParticipants2.push_back({"AsyncParticipant2"});
+    asyncParticipants2.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
+    expectedReceptions = asyncParticipants1.size() + asyncParticipants2.size();
 
-    // No lifecylce, only registry needed (no systemController)
-    RunRegistry(registryUri);
+    // No lifecycle, only registry needed (no systemController)
+    RunRegistry();
 
     for (int i = 0; i < 3; i++)
     {
         // Start with asyncParticipant1
-        RunAsyncParticipants(asyncParticipants1, registryUri);
+        RunParticipants(asyncParticipants1);
         // Async2 is second
-        RunAsyncParticipants(asyncParticipants2, registryUri);
+        RunParticipants(asyncParticipants2);
 
         // Await successful communication of async participants
         for (auto& p : asyncParticipants1)
@@ -604,7 +729,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
             p.AwaitCommunication();
 
         // Reset communication
-        numParticipants = 2;
+        expectedReceptions = 2;
         for (auto& p : asyncParticipants1)
             p.ResetReception();
         for (auto& p : asyncParticipants2)
@@ -612,11 +737,11 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
 
         // Hop off with asyncParticipants2
         asyncParticipants2[0].i.runAsync = false;
-        asyncParticipantThreads[1].join();
-        asyncParticipantThreads.erase(asyncParticipantThreads.begin()+1);
+        participantThreads_Async_Invalid[1].shutdownFuture.get();
+        //participantThreads_Async_Invalid.erase(participantThreads_Async_Invalid.begin()+1);
 
         // Reconnect with asyncParticipant2
-        RunAsyncParticipants(asyncParticipants2, registryUri);
+        RunParticipants(asyncParticipants2);
 
         // Await successful communication of async participants
         for (auto& p : asyncParticipants1)
@@ -625,7 +750,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
             p.AwaitCommunication();
 
         // Reset communication
-        numParticipants = 2;
+        expectedReceptions = 2;
         for (auto& p : asyncParticipants1)
             p.ResetReception();
         for (auto& p : asyncParticipants2)
@@ -636,29 +761,26 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
             p.i.runAsync = false;
         for (auto& p : asyncParticipants2)
             p.i.runAsync = false;
-        JoinAsyncParticipantsThreads();
+
+        JoinParticipantThreads(participantThreads_Async_Invalid);
     }
 
-    ShutdownSystem();
+    StopRegistry();
 }
-
 
 TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
 {
-    numParticipants = 0;
-    auto registryUri = MakeTestRegistryUri();
+    RunRegistry();
 
-    std::vector<TestParticipant> syncParticipants;
     std::vector<TestParticipant> asyncParticipants;
-    asyncParticipants.push_back({ "AsyncParticipant1" });
-    asyncParticipants.push_back({ "AsyncParticipant2" });
-
-    SetupSystem(registryUri, syncParticipants);
+    asyncParticipants.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
+    asyncParticipants.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
+    expectedReceptions = asyncParticipants.size();
 
     for (int i = 0; i < 3; i++)
     {
         // Hop on with async participant on empty sim
-        RunAsyncParticipants(asyncParticipants, registryUri);
+        RunParticipants(asyncParticipants);
 
         // Await successful communication of async/sync participants
         for (auto& p : asyncParticipants)
@@ -667,14 +789,225 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
         // Hop off async participants
         for (auto& p : asyncParticipants)
             p.i.runAsync = false;
-        JoinAsyncParticipantsThreads();
+
+        JoinParticipantThreads(participantThreads_Async_Invalid);
 
         // Reset communication to repeat the cycle
         for (auto& p : asyncParticipants)
             p.ResetReception();
     }
 
-    ShutdownSystem();
+    StopRegistry();
+}
+
+TEST_F(ITest_HopOnHopOff, DISABLED_test_HopOnHopOff_Autonomous_To_Coordinated)
+{
+    RunRegistry();
+
+    // The coordinated and required participants
+    std::vector<TestParticipant> syncParticipantsCoordinated;
+    syncParticipantsCoordinated.push_back({"SyncCoordinated1", TimeMode::Sync, OperationMode::Coordinated});
+    syncParticipantsCoordinated.push_back({"SyncCoordinated2", TimeMode::Sync, OperationMode::Coordinated});
+
+    // The autonomous, non-required participants that will hop on/off
+    std::vector<TestParticipant> syncParticipantsAutonomous;
+    syncParticipantsAutonomous.push_back({"SyncAutonomous1", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomous.push_back({"SyncAutonomous2", TimeMode::Sync, OperationMode::Autonomous});
+
+    // Additional async, non-required participants for testing the mixture
+    std::vector<TestParticipant> asyncParticipants;
+    asyncParticipants.push_back({"ASync1", TimeMode::Async, OperationMode::Invalid});
+
+    // Coordinated are required
+    std::vector<std::string> required{};
+    for (auto&& p : syncParticipantsCoordinated)
+    {
+        required.push_back(p.name);
+    }
+    RunSystemController(required);
+
+    // Run coordinated
+    expectedReceptions = syncParticipantsCoordinated.size() + asyncParticipants.size();
+    RunParticipants(asyncParticipants);
+    RunParticipants(syncParticipantsCoordinated);
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (verbose)
+        {
+            std::cout << ">> Cycle " << i + 1 << "/3" << std::endl;
+        }
+
+        if (verbose)
+        {
+            std::cout << ">> Await successful communication of coordinated participants" << std::endl;
+        }
+
+        // Await successful communication of avaliable participants (coordinated, async)
+        for (auto& p : syncParticipantsCoordinated)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants)
+            p.AwaitCommunication();
+
+        // Reset communication
+        expectedReceptions =
+            syncParticipantsCoordinated.size() + syncParticipantsAutonomous.size() + asyncParticipants.size();
+        for (auto& p : syncParticipantsCoordinated)
+            p.ResetReception();
+        for (auto& p : asyncParticipants)
+            p.ResetReception();
+
+        if (verbose)
+        {
+            std::cout << ">> Hop on with autonomous participants" << std::endl;
+        }
+
+        // Hop on with autonomous
+        RunParticipants(syncParticipantsAutonomous);
+
+        if (verbose)
+        {
+            std::cout << ">> Await successful communication of all participants" << std::endl;
+        }
+        for (auto& p : syncParticipantsCoordinated)
+            p.AwaitCommunication();
+        for (auto& p : syncParticipantsAutonomous)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants)
+            p.AwaitCommunication();
+
+        if (verbose)
+        {
+            std::cout << ">> Hop off with autonomous participants" << std::endl;
+        }
+
+        for (auto& p : syncParticipantsAutonomous)
+            p.lifecycleService->Stop("Hop Off");
+
+        JoinParticipantThreads(participantThreads_Sync_AutonomousA);
+
+        // Reset communication to repeat the cycle
+        expectedReceptions = syncParticipantsCoordinated.size() + asyncParticipants.size();
+        for (auto& p : syncParticipantsCoordinated)
+            p.ResetReception();
+        for (auto& p : syncParticipantsAutonomous)
+            p.ResetReception();
+        for (auto& p : asyncParticipants)
+            p.ResetReception();
+    }
+
+    // Shutdown async participants
+    for (auto& p : asyncParticipants)
+        p.i.runAsync = false;
+    JoinParticipantThreads(participantThreads_Async_Invalid);
+
+    // Shutdown coordinated participants
+    for (auto& p : syncParticipantsCoordinated)
+        p.lifecycleService->Stop("Hop Off");
+    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+
+    StopSystemController();
+    StopRegistry();
+}
+
+TEST_F(ITest_HopOnHopOff, DISABLED_test_HopOnHopOff_Autonomous_To_Autonomous)
+{
+    RunRegistry();
+
+    // The autonomous, non-required participants that are there from the start
+    std::vector<TestParticipant> syncParticipantsAutonomousA;
+    syncParticipantsAutonomousA.push_back({"SyncAutonomousA1", TimeMode::Sync, OperationMode::Autonomous});
+
+    // The autonomous, non-required participants that will hop on/off
+    std::vector<TestParticipant> syncParticipantsAutonomousB;
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB1", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB2", TimeMode::Sync, OperationMode::Autonomous});
+
+    // Additional async, non-required participants for testing the mixture
+    std::vector<TestParticipant> asyncParticipants;
+    asyncParticipants.push_back({"ASync1", TimeMode::Async, OperationMode::Invalid});
+
+    // Run coordinated
+    expectedReceptions = syncParticipantsAutonomousA.size() + asyncParticipants.size();
+    RunParticipants(asyncParticipants);
+    RunParticipants(syncParticipantsAutonomousA);
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (verbose)
+        {
+            std::cout << ">> Cycle " << i + 1 << "/3" << std::endl;
+        }
+
+        if (verbose)
+        {
+            std::cout << ">> Await successful communication of coordinated participants" << std::endl;
+        }
+
+        // Await successful communication of avaliable participants (autonomous A, async)
+        for (auto& p : syncParticipantsAutonomousA)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants)
+            p.AwaitCommunication();
+
+        // Reset communication
+        expectedReceptions =
+            syncParticipantsAutonomousA.size() + syncParticipantsAutonomousB.size() + asyncParticipants.size();
+        for (auto& p : syncParticipantsAutonomousA)
+            p.ResetReception();
+        for (auto& p : asyncParticipants)
+            p.ResetReception();
+
+        if (verbose)
+        {
+            std::cout << ">> Hop on with autonomous participants" << std::endl;
+        }
+
+        // Hop on with autonomous B
+        RunParticipants(syncParticipantsAutonomousB, "B");
+
+        if (verbose)
+        {
+            std::cout << ">> Await successful communication of all participants" << std::endl;
+        }
+        for (auto& p : syncParticipantsAutonomousA)
+            p.AwaitCommunication();
+        for (auto& p : syncParticipantsAutonomousB)
+            p.AwaitCommunication();
+        for (auto& p : asyncParticipants)
+            p.AwaitCommunication();
+
+        if (verbose)
+        {
+            std::cout << ">> Hop off with autonomous B participants" << std::endl;
+        }
+
+        // Shutdown autonomous B participants
+        for (auto& p : syncParticipantsAutonomousB)
+            p.lifecycleService->Stop("Hop Off");
+        JoinParticipantThreads(participantThreads_Sync_AutonomousB);
+
+        // Reset communication to repeat the cycle
+        expectedReceptions = syncParticipantsAutonomousA.size() + asyncParticipants.size();
+        for (auto& p : syncParticipantsAutonomousA)
+            p.ResetReception();
+        for (auto& p : syncParticipantsAutonomousB)
+            p.ResetReception();
+        for (auto& p : asyncParticipants)
+            p.ResetReception();
+    }
+
+    // Shutdown async participants
+    for (auto& p : asyncParticipants)
+        p.i.runAsync = false;
+    JoinParticipantThreads(participantThreads_Async_Invalid);
+
+    // Shutdown autonomous A participants
+    for (auto& p : syncParticipantsAutonomousA)
+        p.lifecycleService->Stop("End Test Off");
+    JoinParticipantThreads(participantThreads_Sync_AutonomousA);
+
+    StopRegistry();
 }
 
 } // anonymous namespace

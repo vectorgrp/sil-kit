@@ -267,7 +267,7 @@ void TimeSyncService::ReportError(const std::string& errorMsg)
                       "transition to ParticipantState::Error is ignored.");
         return;
     }
-    _lifecycleService->ChangeState(ParticipantState::Error, errorMsg);
+    _lifecycleService->ChangeParticipantState(ParticipantState::Error, errorMsg);
 }
 
 bool TimeSyncService::IsSynchronizingVirtualTime()

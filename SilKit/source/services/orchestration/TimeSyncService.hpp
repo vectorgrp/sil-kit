@@ -89,7 +89,6 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
-    //void ChangeState(ParticipantState newState, std::string reason);
     void SetPaused(std::future<void> pausedFuture);
     void AwaitNotPaused();
     void ReportError(const std::string& errorMsg);

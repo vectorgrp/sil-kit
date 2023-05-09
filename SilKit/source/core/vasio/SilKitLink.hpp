@@ -53,6 +53,8 @@ public:
     void AddLocalReceiver(ReceiverT* receiver);
     void AddRemoteReceiver(IVAsioPeer* peer, EndpointId remoteIdx);
     void RemoveRemoteReceiver(IVAsioPeer* peer);
+    size_t GetNumberOfRemoteReceivers();
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers();
 
     void DistributeRemoteSilKitMessage(const IServiceEndpoint* from, MsgT&& msg);
     void DistributeLocalSilKitMessage(const IServiceEndpoint* from, const MsgT& msg);
@@ -104,6 +106,17 @@ template <class MsgT>
 void SilKitLink<MsgT>::RemoveRemoteReceiver(IVAsioPeer* peer)
 {
     _vasioTransmitter.RemoveRemoteReceiver(peer);
+}
+template <class MsgT>
+auto SilKitLink<MsgT>::GetNumberOfRemoteReceivers() -> size_t
+{
+    return _vasioTransmitter.GetNumberOfRemoteReceivers();
+}
+
+template <class MsgT>
+auto SilKitLink<MsgT>::GetParticipantNamesOfRemoteReceivers() -> std::vector<std::string>
+{
+    return _vasioTransmitter.GetParticipantNamesOfRemoteReceivers();
 }
 
 // ==================================================================

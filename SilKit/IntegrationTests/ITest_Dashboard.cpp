@@ -248,7 +248,7 @@ TEST_F(DashboardTestHarness, dashboard_can)
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
     CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"CanWriter", {{4, {"", "cancontroller", "CanController1", "CAN1", {}}}}}}));
+                                    {{"CanWriter", {{5, {"", "cancontroller", "CanController1", "CAN1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_ethernet)
@@ -274,7 +274,7 @@ TEST_F(DashboardTestHarness, dashboard_ethernet)
     });
     CheckTestResult(testResult,
                     CreateExpectedTestResult(
-                        {{"EthernetWriter", {{4, {"", "ethernetcontroller", "EthernetController1", "ETH1", {}}}}}}));
+                        {{"EthernetWriter", {{5, {"", "ethernetcontroller", "EthernetController1", "ETH1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_flexray)
@@ -299,7 +299,7 @@ TEST_F(DashboardTestHarness, dashboard_flexray)
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
     CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"Node", {{4, {"", "flexraycontroller", "FlexrayController1", "FR1", {}}}}}}));
+                                    {{"Node", {{5, {"", "flexraycontroller", "FlexrayController1", "FR1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_lin)
@@ -324,7 +324,7 @@ TEST_F(DashboardTestHarness, dashboard_lin)
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
     });
     CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"LinMaster", {{4, {"", "lincontroller", "LinController1", "LIN1", {}}}}}}));
+                                    {{"LinMaster", {{5, {"", "lincontroller", "LinController1", "LIN1", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_pubsub)
@@ -367,20 +367,20 @@ TEST_F(DashboardTestHarness, dashboard_pubsub)
     CheckTestResult(
         testResult,
         CreateExpectedTestResult({{"Publisher",
-                                   {{4,
+                                   {{5,
                                      {"",
                                       "datapublisher",
                                       "PubCtrl",
                                       "IGNORED",
                                       {"Topic", "IGNORED", "A", {{"Key", "Value", MatchingLabel::Kind::Optional}}}}}}},
                                   {"Subscriber",
-                                   {{4,
+                                   {{5,
                                      {"",
                                       "datasubscriber",
                                       "SubCtrl",
                                       "IGNORED",
                                       {"Topic", "IGNORED", "A", {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}},
-                                    {5, {"4", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}));
+                                    {6, {"5", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_rpc)
@@ -424,20 +424,20 @@ TEST_F(DashboardTestHarness, dashboard_rpc)
     CheckTestResult(
         testResult,
         CreateExpectedTestResult({{"Client",
-                                   {{4,
+                                   {{5,
                                      {"",
                                       "rpcclient",
                                       "ClientCtrl",
                                       "IGNORED",
                                       {"IGNORED", "func", "A", {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}}}},
                                   {"Server",
-                                   {{4,
+                                   {{5,
                                      {"",
                                       "rpcserver",
                                       "ServerCtrl",
                                       "IGNORED",
                                       {"IGNORED", "func", "A", {{"Key", "Value", MatchingLabel::Kind::Optional}}}}},
-                                    {5, {"4", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}));
+                                    {6, {"5", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}));
 }
 
 TEST_F(DashboardTestHarness, dashboard_netsim)

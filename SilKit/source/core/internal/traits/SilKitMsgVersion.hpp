@@ -72,6 +72,8 @@ DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::WireFlexrayTxBufferUpdat
 DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::FlexrayPocStatusEvent, 1);
 DefineSilKitMsgTrait_Version(SilKit::Core::Discovery::ParticipantDiscoveryEvent, 1);
 DefineSilKitMsgTrait_Version(SilKit::Core::Discovery::ServiceDiscoveryEvent, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::RequestReply::RequestReplyCall, 1);
+DefineSilKitMsgTrait_Version(SilKit::Core::RequestReply::RequestReplyCallReturn, 1);
 
 } // namespace Core
 } // namespace SilKit

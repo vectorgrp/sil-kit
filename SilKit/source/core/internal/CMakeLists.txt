@@ -26,6 +26,7 @@ target_include_directories(I_SilKit_Core_Internal
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
     # for internal type definitions
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../service # ServiceDiscovery is internal only special
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../requests # RequestReply is internal 
 )
 target_link_libraries(I_SilKit_Core_Internal
     INTERFACE SilKitInterface

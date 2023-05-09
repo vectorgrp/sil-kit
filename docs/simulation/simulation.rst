@@ -163,7 +163,7 @@ Users can manually trigger a transition to the error state and provide more info
 In some situations, a lifecycle service automatically enters the error state, e.g., when an uncaught exception is thrown in a callback.
 A participant can only recover from the :cpp:enumerator:`Error<SilKit::Services::Orchestration::ParticipantState::Error>` state in one way: by shutting down.
 
-All participants can also be forced to end their lifecycle by calling ``ISystemController::AbortSimulation`` from any participant.
+All participants can also be forced to end their lifecycle by calling :cpp:func:`AbortSimulation()<SilKit::Experimental::Services::Orchestration::ISystemController::AbortSimulation()>` from any participant.
 This will trigger the ``Abort`` callback, which indicates that the simulation was aborted and provide the participant state that was active when the abort event was received.
 
 .. _subsec:sim-lifecycle:

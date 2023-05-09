@@ -191,6 +191,15 @@ public:
     // Register handlers for completion of async service creation
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
+    size_t GetNumberOfConnectedParticipants() 
+    { 
+        return _peers.size();
+    };
+
+    auto GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) -> size_t;
+    auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName)
+        -> std::vector<std::string>;
+
 public: //members
     static constexpr const ParticipantId RegistryParticipantId { 0 };
 private:
@@ -246,6 +255,8 @@ private:
         Services::Flexray::FlexrayPocStatusEvent,
         Core::Discovery::ParticipantDiscoveryEvent,
         Core::Discovery::ServiceDiscoveryEvent,
+        Core::RequestReply::RequestReplyCall,
+        Core::RequestReply::RequestReplyCallReturn,
 
         // Private testing data types
         Core::Tests::Version1::TestMessage,
@@ -277,9 +288,6 @@ private:
     void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer);
 
     void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
-
-    void AddParticipantToLookup(const std::string& participantName);
-    const std::string& GetParticipantFromLookup(std::uint64_t participantId) const;
 
     void AssociateParticipantNameAndPeer(const std::string& participantName, IVAsioPeer* peer);
 

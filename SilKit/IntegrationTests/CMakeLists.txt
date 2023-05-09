@@ -41,9 +41,16 @@ add_silkit_test(ITest_Internals_HopOnHopOff
     SOURCES
     ITest_Internals_HopOnHopOff.cpp
     LIBS
-        S_SilKitImpl
-        I_SilKit_Config_TestUtils
-        I_SilKit_Core_Internal
+    S_SilKitImpl
+
+)
+
+add_silkit_test(ITest_Internals_ParticipantModes
+    SOURCES
+    ITest_Internals_ParticipantModes.cpp
+    LIBS
+    S_SilKitImpl
+
 )
 
 add_silkit_test(ITest_CommunicationReady
@@ -110,6 +117,13 @@ add_silkit_test(ITest_Internals_ServiceDiscovery
       S_ITests_STH_Internals
 )
 
+add_silkit_test(ITest_Internals_RequestReply
+    SOURCES
+      ITest_Internals_RequestReply.cpp
+    LIBS
+      S_SilKitImpl
+)
+
 add_silkit_test(FTest_Internals_ServiceDiscoveryPerf
     SOURCES
       FTest_Internals_ServiceDiscoveryPerf.cpp
@@ -152,7 +166,7 @@ add_silkit_test(ITest_SimTask
     ITest_SimTask.cpp
 
     LIBS
-    SilKit
+      SilKit
 )
 
 # Windows specific tests

@@ -166,6 +166,8 @@ list(APPEND SilKitImplObjectLibraries
     O_SilKit_Config
     O_SilKit_Core_Participant
     O_SilKit_Core_Service
+    O_SilKit_Core_RequestReply
+    O_SilKit_Core_RequestReply_ParticipantReplies
     O_SilKit_Core_VAsio
     O_SilKit_Experimental
     O_SilKit_Extensions

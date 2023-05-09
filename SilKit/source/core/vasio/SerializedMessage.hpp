@@ -34,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "InternalSerdes.hpp"
 #include "SyncSerdes.hpp"
 #include "ServiceSerdes.hpp"
+#include "RequestReplySerdes.hpp"
 #include "LoggingSerdes.hpp"
 #include "DataSerdes.hpp"
 

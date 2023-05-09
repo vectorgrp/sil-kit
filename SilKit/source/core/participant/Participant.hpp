@@ -70,11 +70,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // core/service
 #include "ServiceDiscovery.hpp"
 
+// core/requests
+#include "RequestReplyService.hpp"
+#include "procedures/ParticipantReplies.hpp"
+
 #include "ProtocolVersion.hpp"
 #include "TimeProvider.hpp"
 
 // Add connection types here and make sure they are instantiated in Participant.cpp
 #include "VAsioConnection.hpp"
+
 
 using namespace std::chrono_literals;
 
@@ -146,6 +151,9 @@ public:
     auto GetSystemMonitor() -> Services::Orchestration::ISystemMonitor* override;
     auto GetSystemController() -> Experimental::Services::Orchestration::ISystemController* override;
     auto GetServiceDiscovery() -> Discovery::IServiceDiscovery* override;
+    auto GetRequestReplyService() -> RequestReply::IRequestReplyService* override;
+    auto GetParticipantRepliesProcedure() -> RequestReply::IParticipantReplies* override;
+
     auto GetLogger() -> Services::Logging::ILogger* override;
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
         -> Services::Orchestration::ILifecycleService* override;
@@ -207,6 +215,9 @@ public:
     void SendMsg(const IServiceEndpoint*, const Discovery::ParticipantDiscoveryEvent& msg) override;
     void SendMsg(const IServiceEndpoint*, const Discovery::ServiceDiscoveryEvent& msg) override;
 
+    void SendMsg(const IServiceEndpoint*, const RequestReply::RequestReplyCall& msg) override;
+    void SendMsg(const IServiceEndpoint*, const RequestReply::RequestReplyCallReturn& msg) override;
+
     // targeted messaging
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::WireCanFrameEvent& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Can::CanFrameTransmitEvent& msg) override;
@@ -255,6 +266,9 @@ public:
 
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Discovery::ParticipantDiscoveryEvent& msg) override;
     void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const Discovery::ServiceDiscoveryEvent& msg) override;
+    
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const RequestReply::RequestReplyCall& msg) override;
+    void SendMsg(const IServiceEndpoint*, const std::string& targetParticipantName, const RequestReply::RequestReplyCallReturn& msg) override;
 
     void OnAllMessagesDelivered(std::function<void()> callback) override;
     void FlushSendBuffers() override;
@@ -264,6 +278,14 @@ public:
 
     void SetIsSystemControllerCreated(bool isCreated) override;
     bool GetIsSystemControllerCreated() override;
+
+    size_t GetNumberOfConnectedParticipants() override;
+
+    size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) override;
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service,
+                                                                  const std::string& msgTypeName) override;
+
+    void NotifyShutdown() override;
 
 public:
     // ----------------------------------------
@@ -352,6 +374,7 @@ private:
     std::unique_ptr<Services::Logging::ILogger> _logger;
     std::vector<std::unique_ptr<ITraceMessageSink>> _traceSinks;
     std::unique_ptr<Tracing::ReplayScheduler> _replayScheduler;
+    std::unique_ptr<RequestReply::ParticipantReplies> _participantReplies;
 
     std::tuple<
         ControllerMap<Services::Can::IMsgForCanController>,
@@ -370,7 +393,8 @@ private:
         ControllerMap<Services::Orchestration::IMsgForSystemMonitor>,
         ControllerMap<Services::Orchestration::IMsgForSystemController>,
         ControllerMap<Services::Orchestration::IMsgForTimeSyncService>,
-        ControllerMap<Discovery::ServiceDiscovery>
+        ControllerMap<Discovery::ServiceDiscovery>,
+        ControllerMap<RequestReply::RequestReplyService>
     > _controllers;
 
     std::atomic<EndpointId> _localEndpointId{ 0 };

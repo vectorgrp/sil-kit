@@ -51,11 +51,6 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/,
 
 void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string>& requiredParticipantNames)
 {
-    // Prevent calling this method more than once
-    if (!_requiredParticipantNames.empty())
-    {
-        throw SilKitError{"Required participant names are already set."};
-    }
 
     _requiredParticipantNames = requiredParticipantNames;
 
@@ -68,8 +63,6 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
         auto&& statusIter = _participantStatus.find(name);
         if (statusIter == _participantStatus.end())
         {
-            _participantStatus[name] = Orchestration::ParticipantStatus{};
-            _participantStatus[name].state = Orchestration::ParticipantState::Invalid;
             allRequiredParticipantsKnown = false;
         }
     }
@@ -83,7 +76,7 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
             Orchestration::ParticipantStatus status{};
             {
                 std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
-                status = _participantStatus[name];
+                status = _participantStatus.at(name);
             }
             UpdateSystemState(status);
         }
@@ -156,30 +149,47 @@ auto SystemMonitor::ParticipantStatus(const std::string& participantName) const 
     return statusIter->second;
 }
 
+
 void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestration::ParticipantStatus& newParticipantStatus)
 {
     auto participantName = newParticipantStatus.participantName;
 
-    // Validation
+    // Explicitly initialize unknown participants
+    auto&& statusIter = _participantStatus.find(participantName);
+    if (statusIter == _participantStatus.end())
+    {
+        std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+        auto initialStatus = Orchestration::ParticipantStatus{};
+        initialStatus.participantName = participantName;
+        initialStatus.state = Orchestration::ParticipantState::Invalid;
+        _participantStatus.emplace(participantName, initialStatus);
+    }
+
+    // Save former state
     ParticipantState oldParticipantState;
     {
         std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
-        oldParticipantState = _participantStatus[participantName].state;
+        oldParticipantState = _participantStatus.at(participantName).state;
     }
 
+    // Check if transition is valid
     ValidateParticipantStatusUpdate(newParticipantStatus, oldParticipantState);
+
+    // Ignores transition if ParticipantState is Shutdown already
     if (oldParticipantState == Orchestration::ParticipantState::Shutdown)
     {
-        Logging::Debug(_logger, "Ignoring ParticipantState update from participant {} to ParticipantState::{} because "
-                       "participant is already in terminal state ParticipantState::Shutdown.",
-                       newParticipantStatus.participantName, newParticipantStatus.state);
+        Logging::Debug(_logger,
+                        "Ignoring ParticipantState update from participant \'{}\' to ParticipantState::{} because "
+                        "participant is already in terminal state ParticipantState::Shutdown.",
+                        newParticipantStatus.participantName, newParticipantStatus.state);
         return;
     }
+
 
     // Update status map
     {
         std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
-        _participantStatus[participantName] = newParticipantStatus;
+        _participantStatus.at(participantName) = newParticipantStatus;
     }
 
     // On new participant state
@@ -234,14 +244,23 @@ void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformatio
 
 void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
+    // Erase participant from connectedParticipant map
     {
         std::unique_lock<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};
-
-        // Remove the participant name from the map of connected participant names/connections
         auto it = _connectedParticipants.find(participantConnectionInformation.participantName);
         if (it != _connectedParticipants.end())
         {
             _connectedParticipants.erase(it);
+        }
+    }
+
+    // Erase participant from participantStatus map
+    {
+        std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
+        auto it = _participantStatus.find(participantConnectionInformation.participantName);
+        if (it != _participantStatus.end())
+        {
+            _participantStatus.erase(it);
         }
     }
 
@@ -256,6 +275,14 @@ bool SystemMonitor::AllRequiredParticipantsInState(std::initializer_list<Orchest
 {
     for (auto&& name : _requiredParticipantNames)
     {
+        // Check if required participant hasn't been removed from _participantStatus map.
+        // This also blocks any SystemState updates if a required participant has disconnected and thus removed from _participantStatus.
+        auto&& it = _participantStatus.find(name);
+        if (it == _participantStatus.end())
+        {
+            return false;
+        }
+
         auto participantState = [this, &name] {
             std::unique_lock<decltype(_participantStatusMx)> lock{_participantStatusMx};
             return _participantStatus.at(name).state;
@@ -318,6 +345,9 @@ void SystemMonitor::ValidateParticipantStatusUpdate(const Orchestration::Partici
     case Orchestration::ParticipantState::Shutdown:
         if (oldState == Orchestration::ParticipantState::ShuttingDown)
             return;
+
+    case Orchestration::ParticipantState::Aborting: 
+        return;
 
     case Orchestration::ParticipantState::Error:
         return;

@@ -64,7 +64,18 @@ struct NullConnection
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* /*peer*/, ParticipantAnnouncement)> /*callback*/) {}
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/) {};
+    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/) {}
+
+    size_t GetNumberOfConnectedParticipants() { return 0; }
+
+    size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/)
+    {
+        return 0;
+    };
+    std::vector<std::string> GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* /*service*/, const std::string& /*msgTypeName*/)
+    {
+        return {};
+    };
 };
 } // anonymous namespace
     

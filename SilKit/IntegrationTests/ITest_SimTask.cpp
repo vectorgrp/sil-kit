@@ -128,6 +128,7 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
 
         cTimeSyncService->SetSimulationStepHandler(
             [](std::chrono::nanoseconds, std::chrono::nanoseconds) {
+
                 // do nothing
             },
             1ms);
@@ -154,35 +155,47 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
             Mutex mx;
             std::condition_variable cv;
             bool blocking{false};
-            std::atomic<bool> completing{true};
+            std::atomic<bool> running{true};
         } s;
 
         pTimeSyncService->SetSimulationStepHandler(
             [pLifecycleService, pPublisher, &counter, &s](std::chrono::nanoseconds now, std::chrono::nanoseconds) {
+                if (!s.running)
+                {
+                    return;
+                }
+
+                if (now >= 100ms)
+                {
+                    pLifecycleService->Stop("test reached limit");
+                    s.running = false;
+                    s.cv.notify_all();
+                    return;
+                }
+                
                 counter.IncrementMajor();
 
                 counter.IncrementMinor();
                 counter.PublishValue(pPublisher);
 
-                if (now >= 100ms)
-                {
-                    pLifecycleService->Stop("test reached limit");
-                    s.completing = false;
-                }
-
                 {
                     Lock lock{s.mx};
                     s.blocking = true;
                 }
-                s.cv.notify_one();
+                s.cv.notify_all();
 
                 // do nothing
 
                 {
                     Lock lock{s.mx};
                     s.cv.wait(lock, [&s] {
-                        return !s.blocking;
+                        return !s.blocking || !s.running;
                     });
+
+                    if (!s.running)
+                    {
+                        return;
+                    }
                 }
 
                 counter.IncrementMinor();
@@ -191,18 +204,23 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
             1ms);
 
         auto completerDone = std::async(std::launch::async, [pPublisher, &counter, &s] {
-            while (s.completing)
+            while (s.running)
             {
                 Lock lock{s.mx};
                 s.cv.wait(lock, [&s] {
-                    return s.blocking;
+                    return s.blocking || !s.running;
                 });
+
+                if (!s.running)
+                {
+                    break;
+                }
 
                 counter.IncrementMinor();
                 counter.PublishValue(pPublisher);
 
                 s.blocking = false;
-                s.cv.notify_one();
+                s.cv.notify_all();
             }
         });
 
@@ -241,16 +259,16 @@ TEST(ITest_SimTask, blocking_during_simtask_does_not_affect_processing_order)
         ASSERT_EQ(lifecycleDone.wait_for(5s), std::future_status::ready);
     });
 
-    controlDone.wait_for(5s);
+    ASSERT_EQ(controlDone.wait_for(5s), std::future_status::ready);
     controlDone.get();
 
-    publisherDone.wait_for(5s);
+    ASSERT_EQ(publisherDone.wait_for(5s), std::future_status::ready);
     publisherDone.get();
 
-    subscriberDone.wait_for(5s);
+    ASSERT_EQ(subscriberDone.wait_for(5s), std::future_status::ready);
     subscriberDone.get();
 
-    ASSERT_GT(received.size(), static_cast<size_t>(100 * 3));
+    ASSERT_GE(received.size(), static_cast<size_t>(100 * 3));
 
     for (size_t major = 1; major <= received.size() / 3; ++major)
     {

@@ -34,6 +34,7 @@ target_link_libraries(I_SilKit_Core_VAsio
     INTERFACE I_SilKit_Config
     INTERFACE I_SilKit_Core_Internal
     INTERFACE I_SilKit_Core_Service
+    INTERFACE I_SilKit_Core_RequestReply
     INTERFACE I_SilKit_Services_Can
     INTERFACE I_SilKit_Services_Ethernet
     INTERFACE I_SilKit_Services_Flexray

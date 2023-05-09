@@ -227,7 +227,7 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LifecycleService_CompleteCommunica
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync_t)(
     SilKit_LifecycleService* lifecycleService);
 
-/*! \brief  This handler is triggered just before the lifecylce service changes to SilKit_ParticipantState_Running.
+/*! \brief  This handler is triggered just before the lifecycle service changes to SilKit_ParticipantState_Running.
  * It is only triggered if the participant does NOT use virtual time synchronization.
  * It does not block other participants from changing to SilKit_ParticipantState_Running and should only be used for lightweight operations such as starting timers.
  *

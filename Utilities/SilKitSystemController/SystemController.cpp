@@ -73,7 +73,11 @@ public:
         {
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
-        else
+        else if (_monitor->SystemState() != SystemState::Stopping || _monitor->SystemState() != SystemState::Stopped
+                 || _monitor->SystemState() != SystemState::ShuttingDown
+                 || _monitor->SystemState() != SystemState::Shutdown || _monitor->SystemState() != SystemState::Aborting
+                 || _monitor->SystemState() != SystemState::Error
+            )
         {
             std::cerr << "SilKit is not Running. Terminating Process without Stopping." << std::endl;
             std::cout << "Sending SystemCommand::AbortSimulation" << std::endl;

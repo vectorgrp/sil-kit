@@ -53,8 +53,7 @@ class LifecycleService
 public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
-    LifecycleService(Core::IParticipantInternal* participant,
-                     std::chrono::milliseconds systemStateReachedShuttingDownTimeout = std::chrono::seconds{2});
+    LifecycleService(Core::IParticipantInternal* participant);
 
     ~LifecycleService();
 
@@ -108,7 +107,7 @@ public:
     void TriggerShutdownHandler();
     void TriggerAbortHandler(ParticipantState lastState);
 
-    void ChangeState(ParticipantState newState, std::string reason);
+    void ChangeParticipantState(ParticipantState newState, std::string reason);
 
     void SetTimeSyncService(TimeSyncService* timeSyncService);
 
@@ -130,8 +129,6 @@ private:
     // private methods
     void AbortSimulation(std::string reason);
     bool CheckForValidConfiguration();
-
-    void HandleSystemStateShuttingDown();
 
     /// Thread-safe assignment of the required participant names.
     /// Uses the mutex _requiredParticipantNamesMx.
@@ -158,24 +155,21 @@ private:
     /// LifecycleService::Status() always causes a data-race because the access cannot be protected.
     mutable ParticipantStatus _returnValueForStatus;
 
-    bool _isRunning{false};
-    LifecycleManagement _lifecycleManagement;
+    bool _isLifecycleStarted{false};
+    LifecycleManagement _lifecycleManager;
     bool _timeSyncActive = false;
 
     // Final State Handling and Shutdown-Workaround
     std::mutex _finalStatePromiseMutex;
     std::unique_ptr<std::promise<ParticipantState>> _finalStatePromise;
-    std::thread _finalStatePromiseSetterThread;
 
     std::future<ParticipantState> _finalStateFuture;
-
-    const std::chrono::milliseconds _systemStateReachedShuttingDownTimeout;
-    std::promise<void> _systemStateReachedShuttingDownPromise;
 
     //Async communication handler support
     CommunicationReadyHandler _commReadyHandler;
     bool _commReadyHandlerIsAsync{false};
     std::atomic<bool> _commReadyHandlerInvoked{false};
+    std::atomic<bool> _commReadyHandlerCompleted{false};
     std::thread _commReadyHandlerThread;
 
     StartingHandler _startingHandler;

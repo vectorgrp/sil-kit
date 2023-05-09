@@ -32,6 +32,7 @@ target_link_libraries(I_SilKit_Services_Logging
     INTERFACE I_SilKit_Core_Internal
     INTERFACE I_SilKit_Config
     INTERFACE I_SilKit_Core_Service
+    INTERFACE I_SilKit_Core_RequestReply
 )
 
 ################################################################################

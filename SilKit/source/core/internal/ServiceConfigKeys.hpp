@@ -74,6 +74,7 @@ const std::string supplKeyRpcServerInternalParentServiceID = "Rpc::serverinterna
 const std::string controllerTypeLoggerSender = "LoggerSender";
 const std::string controllerTypeLoggerReceiver = "LoggerReceiver";
 const std::string controllerTypeServiceDiscovery = "ServiceDiscovery";
+const std::string controllerTypeRequestReplyService = "RequestReplyService";
 const std::string controllerTypeSystemMonitor = "SystemMonitor";
 const std::string controllerTypeSystemController = "SystemController";
 const std::string controllerTypeLifecycleService = "LifecycleService";

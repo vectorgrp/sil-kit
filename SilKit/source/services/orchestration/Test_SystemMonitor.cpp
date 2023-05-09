@@ -128,9 +128,7 @@ protected:
 TEST_F(SystemMonitorTest, init_with_state_invalid)
 {
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
-    EXPECT_EQ(monitor.ParticipantStatus("P1").state, ParticipantState::Invalid);
-    EXPECT_EQ(monitor.ParticipantStatus("P2").state, ParticipantState::Invalid);
-    EXPECT_EQ(monitor.ParticipantStatus("P3").state, ParticipantState::Invalid);
+    EXPECT_THROW(monitor.ParticipantStatus("P1"), SilKitError);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
