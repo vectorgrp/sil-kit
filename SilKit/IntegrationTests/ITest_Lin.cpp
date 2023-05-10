@@ -93,14 +93,22 @@ public:
         ScheduleNextTask();
     }
 
+    void SetCyclic(bool enabled)
+    {
+        _isCyclic = enabled;
+    }
+
     void ScheduleNextTask()
     {
+        if(_nextTask == _schedule.end())
+        {
+            return;
+        }
         auto currentTask = _nextTask++;
-        if (_nextTask == _schedule.end())
+        if (_isCyclic && (_nextTask == _schedule.end()))
         {
             _nextTask = _schedule.begin();
         }
-
         _timer.Set(_now + currentTask->delay, currentTask->action);
     }
 
@@ -122,6 +130,7 @@ private:
     std::vector<Task> _schedule;
     std::vector<Task>::iterator _nextTask;
     std::chrono::nanoseconds _now = 0ns;
+    bool _isCyclic{false};
 };
 
 struct TestResult
@@ -173,7 +182,7 @@ public:
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
             {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
-            {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(now); }}
+            {5ms, [this](std::chrono::nanoseconds now) { GoToSleep(now); }},
         };
     }
 
