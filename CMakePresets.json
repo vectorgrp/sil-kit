@@ -507,6 +507,9 @@
             },
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-qnx-x86_64.cmake",
             "binaryDir": "${sourceDir}/_build/${presetName}",
+            "cacheVariables": {
+                "SILKIT_BUILD_DASHBOARD": "OFF"
+            },
             "vendor": {
                 "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
                     "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
