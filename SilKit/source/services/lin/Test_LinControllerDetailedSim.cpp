@@ -67,17 +67,17 @@ protected:
             callbacks.LinSlaveConfigurationHandler(ctrl);
         };
 
-        master.SetServiceDescriptor(from_endpointAddress(addr1_proxy));
-        slave1.SetServiceDescriptor(from_endpointAddress(addr2_proxy));
-        controllerBusSim.SetServiceDescriptor(from_endpointAddress(addr1_netsim));
-        master.SetDetailedBehavior(from_endpointAddress(addr1_netsim));
-        slave1.SetDetailedBehavior(from_endpointAddress(addr1_netsim));
+        master.SetServiceDescriptor(addr1_proxy);
+        slave1.SetServiceDescriptor(addr2_proxy);
+        controllerBusSim.SetServiceDescriptor(addr1_netsim);
+        master.SetDetailedBehavior(addr1_netsim);
+        slave1.SetDetailedBehavior(addr1_netsim);
     }
 
 protected:
-    const EndpointAddress addr1_netsim{4, 5};
-    const EndpointAddress addr1_proxy{7, 5};
-    const EndpointAddress addr2_proxy{4, 9};
+    const ServiceDescriptor addr1_netsim{"P1", "N1", "C1",5};
+    const ServiceDescriptor addr1_proxy{"P2", "N1", "C1", 5};
+    const ServiceDescriptor addr2_proxy{"P1", "N1", "C2", 9};
 
     SilKit::Config::LinController cfg;
     LinMockParticipant participant;

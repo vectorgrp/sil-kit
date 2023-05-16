@@ -68,13 +68,10 @@ public:
 
 TEST(CanControllerDetailedSimTest, send_can_message)
 {
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = {19, 8};
-
     MockParticipant mockParticipant;
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior({ "bussim", "n1", "c1", 8 });
+    canController.SetServiceDescriptor({ "p1", "n1", "c1", 8 });
 
     WireCanFrameEvent testFrameEvent{};
 
@@ -88,15 +85,14 @@ TEST(CanControllerDetailedSimTest, receive_can_message)
 {
     using namespace std::placeholders;
 
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = { 19, 8 };
+    ServiceDescriptor busSimAddress { "bussim", "n1", "c1", 8 };
 
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior(busSimAddress);
+    canController.SetServiceDescriptor({ "p1", "n1", "c1", 8 });
     canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
 
     WireCanFrameEvent testFrameEvent{};
@@ -106,21 +102,18 @@ TEST(CanControllerDetailedSimTest, receive_can_message)
         .Times(1);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+    canControllerFrom.SetServiceDescriptor(busSimAddress);
 
     canController.ReceiveMsg(&canControllerFrom, testFrameEvent);
 }
 
 TEST(CanControllerDetailedSimTest, start_stop_sleep_reset)
 {
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = {19, 8};
-
     MockParticipant mockParticipant;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior({ "bussim", "n1", "c1", 8 });
+    canController.SetServiceDescriptor({ "p1", "n1", "c1", 8 });
 
     CanSetControllerMode startCommand = { {0, 0}, CanControllerState::Started };
     CanSetControllerMode stopCommand = { { 0, 0 }, CanControllerState::Stopped };
@@ -144,14 +137,11 @@ TEST(CanControllerDetailedSimTest, start_stop_sleep_reset)
 
 TEST(CanControllerDetailedSimTest, set_baudrate)
 {
-    EndpointAddress controllerAddress = {3, 8};
-    EndpointAddress busSimAddress = {19, 8};
-
     MockParticipant mockParticipant;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior({ "bussim", "n1", "c1", 8 });
+    canController.SetServiceDescriptor({ "p1", "n1", "c1", 8 });
 
     CanConfigureBaudrate baudrate1 = { 3000, 0, 0 };
     CanConfigureBaudrate baudrate2 = { 3000, 500000, 0 };
@@ -169,14 +159,13 @@ TEST(CanControllerDetailedSimTest, receive_new_controller_state)
 {
     using namespace std::placeholders;
 
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = {19, 8};
+    ServiceDescriptor busSimAddress{ "bussim", "n1", "c1", 8 };
 
     MockParticipant mockParticipant;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior(busSimAddress);
+    canController.SetServiceDescriptor({ "p1", "n1", "c1", 8 });
 
     CanControllerCallbacks callbackProvider;
     canController.AddStateChangeHandler(std::bind(&CanControllerCallbacks::StateChangeHandler, &callbackProvider, _1, _2));
@@ -191,7 +180,7 @@ TEST(CanControllerDetailedSimTest, receive_new_controller_state)
     CanControllerStatus controllerStatus{};
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+    canControllerFrom.SetServiceDescriptor(busSimAddress);
 
     // should not trigger a callback
     controllerStatus.controllerState = CanControllerState::Uninit;
@@ -212,15 +201,13 @@ TEST(CanControllerDetailedSimTest, receive_new_controller_state)
 TEST(CanControllerDetailedSimTest, receive_ack)
 {
     using namespace std::placeholders;
-
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = {19, 8};
+    ServiceDescriptor busSimAddress{ "bussim", "n1", "c1", 8 };
 
     MockParticipant mockParticipant;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior(busSimAddress);
+    canController.SetServiceDescriptor({ "p1", "n1", "c1", 8 });
 
     CanControllerCallbacks callbackProvider;
     canController.AddFrameTransmitHandler(std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
@@ -236,7 +223,7 @@ TEST(CanControllerDetailedSimTest, receive_ack)
         .Times(1);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+    canControllerFrom.SetServiceDescriptor(busSimAddress);
 
     canController.ReceiveMsg(&canControllerFrom, ack1);
     canController.ReceiveMsg(&canControllerFrom, ack2);
@@ -252,22 +239,22 @@ TEST(CanControllerDetailedSimTest, must_not_generate_ack)
 {
     using namespace std::placeholders;
 
-    EndpointAddress controllerAddress = { 3, 8 };
-    EndpointAddress busSimAddress = {19, 8};
+    ServiceDescriptor controllerAddress{ "P1", "N1", "C1",8 };
+    ServiceDescriptor busSimAddress{ "P2", "N1", "C1", 8 };
 
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
 
     CanController canController(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canController.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetDetailedBehavior(busSimAddress);
+    canController.SetServiceDescriptor(controllerAddress);
 
     WireCanFrameEvent msg{};
     EXPECT_CALL(mockParticipant, SendMsg(An<const IServiceEndpoint*>(), A<const CanFrameTransmitEvent&>()))
         .Times(0);
 
     CanController canControllerFrom(&mockParticipant, {}, mockParticipant.GetTimeProvider());
-    canControllerFrom.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+    canControllerFrom.SetServiceDescriptor(busSimAddress);
 
     canController.ReceiveMsg(&canControllerFrom, msg);
 }

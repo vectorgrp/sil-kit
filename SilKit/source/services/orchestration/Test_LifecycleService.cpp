@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "LifecycleService.hpp"
 #include "MockParticipant.hpp"
+#include "MockServiceEndpoint.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "SyncDatatypeUtils.hpp"
 #include "TimeSyncService.hpp"
@@ -43,6 +44,7 @@ using namespace testing;
 
 using namespace SilKit;
 using namespace SilKit::Core;
+using namespace SilKit::Core::Tests;
 using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Util;
 
@@ -76,22 +78,6 @@ public:
 public:
 };
 
-class MockServiceDescriptor : public IServiceEndpoint
-{
-public:
-    ServiceDescriptor serviceDescriptor;
-    MockServiceDescriptor(EndpointAddress ea, std::string participantName)
-    {
-        ServiceDescriptor id = from_endpointAddress(ea);
-        id.SetParticipantName(participantName);
-        SetServiceDescriptor(id);
-    }
-    void SetServiceDescriptor(const ServiceDescriptor& _serviceDescriptor) override
-    {
-        serviceDescriptor = _serviceDescriptor;
-    }
-    auto GetServiceDescriptor() const -> const ServiceDescriptor& override { return serviceDescriptor; }
-};
 
 // Factory method to create a ParticipantStatus matcher that checks the state field
 auto AParticipantStatusWithState(ParticipantState expected)
@@ -115,11 +101,9 @@ protected:
 protected:
     // ----------------------------------------
     // Members
-    EndpointAddress addr{1, 1024};
-    EndpointAddress addrP2{2, 1024};
-    EndpointAddress masterAddr{3, 1027};
-    MockServiceDescriptor p2Id{addrP2, "P2"};
-    MockServiceDescriptor masterId{masterAddr, "Master"};
+    MockServiceEndpoint p1Id{"P1","N1", "C1", 1024};
+    MockServiceEndpoint p2Id{"P2","N1", "C1", 1024};
+    MockServiceEndpoint masterId{"Master", "N1", "C2", 1027};
 
     MockParticipant participant;
     Callbacks callbacks;
@@ -159,8 +143,7 @@ TEST_F(LifecycleServiceTest, autonomous_must_not_react_to_system_states)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -230,8 +213,7 @@ TEST_F(LifecycleServiceTest, start_stop_autonomous)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
     lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
@@ -279,8 +261,7 @@ TEST_F(LifecycleServiceTest, start_stop_coordinated_self_stop)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
     lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
@@ -356,8 +337,7 @@ TEST_F(LifecycleServiceTest, start_stop_coordinated_external_stop)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
     lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
@@ -418,8 +398,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -461,8 +440,7 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
@@ -508,8 +486,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
     lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
@@ -572,8 +549,7 @@ TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
 
     lifecycleService.SetCommunicationReadyHandler(bind_method(&callbacks, &Callbacks::CommunicationReadyHandler));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(callbacks, CommunicationReadyHandler()).Times(1).WillRepeatedly(Invoke([&]() {
         SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
@@ -631,8 +607,7 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
         EXPECT_EQ(participantState, ParticipantState::ReadyToRun);
     }));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -678,8 +653,7 @@ TEST_F(LifecycleServiceTest, Abort_Starting)
 
     lifecycleService.SetStartingHandler(bind_method(&callbacks, &Callbacks::StartingHandler));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     // Abort callback registration
     lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
@@ -734,8 +708,7 @@ TEST_F(LifecycleServiceTest, Abort_Running)
         EXPECT_EQ(participantState, ParticipantState::Running);
     }));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -791,8 +764,7 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
         EXPECT_EQ(participantState, ParticipantState::Paused);
     }));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -857,8 +829,7 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
         EXPECT_EQ(participantState, ParticipantState::Stopping);
     }));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(callbacks, StopHandler())
         .Times(1)
@@ -920,8 +891,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
     lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
     EXPECT_CALL(callbacks, AbortHandler(_)).Times(0);
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(callbacks, ShutdownHandler())
         .Times(1)
@@ -982,8 +952,7 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
     lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
     EXPECT_CALL(callbacks, AbortHandler(_)).Times(0);
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -1086,8 +1055,7 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
     lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
     EXPECT_CALL(callbacks, AbortHandler(_)).Times(0);
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -1129,8 +1097,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
         .Times(1)
         .WillRepeatedly(Throw(SilKitError("StartingException")));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -1162,8 +1129,7 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
-    auto descriptor = from_endpointAddress(addr);
-    lifecycleService.SetServiceDescriptor(descriptor);
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     std::promise<void> myPromise;
     auto completed = myPromise.get_future();

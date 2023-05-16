@@ -77,13 +77,13 @@ TEST(LoggerTest, log_level_conversion)
 
 TEST(LoggerTest, send_log_message_with_sender)
 {
-    EndpointAddress controllerAddress = {3, 8};
+    ServiceDescriptor controllerAddress { "P1", "N1", "C2", 8};
 
     MockParticipant mockParticipant;
 
     LogMsgSender logMsgSender(&mockParticipant);
     
-    logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    logMsgSender.SetServiceDescriptor(controllerAddress);
 
     LogMsg msg;
     msg.logger_name = "Logger";
@@ -109,10 +109,11 @@ TEST(LoggerTest, send_log_message_from_logger)
 
     Logger logger{loggerName, config};
 
-    EndpointAddress controllerAddress = {3, 8};
+    ServiceDescriptor controllerAddress { "P1", "N1", "C2" , 8};
     MockParticipant mockParticipant;
     LogMsgSender logMsgSender(&mockParticipant);
-    logMsgSender.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    logMsgSender.SetServiceDescriptor(controllerAddress);
+
 
     logger.RegisterRemoteLogging([&logMsgSender](LogMsg logMsg) {
 

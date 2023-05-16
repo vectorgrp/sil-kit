@@ -114,17 +114,17 @@ protected:
         : controller(&participant, cfg, participant.GetTimeProvider())
         , controllerOther(&participant, cfg, participant.GetTimeProvider())
     {
-        controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+        controller.SetServiceDescriptor(controllerAddress);
 
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
         controller.AddFrameTransmitHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::MessageAck));
 
-        controllerOther.SetServiceDescriptor(from_endpointAddress(otherAddress));
+        controllerOther.SetServiceDescriptor(otherAddress);
     }
 
 protected:
-    const EndpointAddress controllerAddress = {3, 8};
-    const EndpointAddress otherAddress = {7, 2};
+    const ServiceDescriptor controllerAddress{ "Participant1", "eth1", "EthController1", 8};
+    const ServiceDescriptor otherAddress{ "Participant1", "eth1", "EthController1", 2 };
 
     MockTraceSink traceSink;
     MockParticipant participant;

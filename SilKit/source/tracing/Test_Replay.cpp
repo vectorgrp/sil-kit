@@ -135,11 +135,9 @@ public:
     {
         SendMsg_proxy(from, msg);
     }
-    MOCK_METHOD2(ReceiveMsg, void(EndpointAddress, const GenericMessage&));
 
     // CAN
     MOCK_METHOD2(SendMsg_proxy, void(const IServiceEndpoint*, const CanMessage&));
-    MOCK_METHOD2(ReceiveMsg, void(EndpointAddress, const CanMessage&));
     void SendMsg(const IServiceEndpoint* from, CanMessage&& msg) override
     {
         SendMsg_proxy(from, msg);
@@ -163,10 +161,7 @@ struct MockReplayMessage
     {
         return _direction;
     }
-    auto EndpointAddress() const -> SilKit::Core::EndpointAddress
-    {
-        return _address;
-    }
+
     auto Type() const -> TraceMessageType
     {
         return _type;
@@ -174,7 +169,6 @@ struct MockReplayMessage
 
     std::chrono::nanoseconds _timestamp{0};
     SilKit::Services::TransmitDirection _direction{ SilKit::Services::TransmitDirection::RX};
-    SilKit::Core::EndpointAddress _address{0, 0};
     TraceMessageType _type{TraceMessageType::InvalidReplayData};
 };
 
@@ -197,7 +191,6 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     Config::EthernetController cfg{};
 
     MockEthFrame msg;
-    msg._address = {1,2};
 
     // Replay Send / Send
     {

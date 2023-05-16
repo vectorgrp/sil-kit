@@ -173,17 +173,17 @@ protected:
                           participant.GetTimeProvider())
     {
         
-        controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
-        controller.SetDetailedBehavior(from_endpointAddress(busSimAddress));
+        controller.SetServiceDescriptor(controllerAddress);
+        controller.SetDetailedBehavior(busSimAddress);
         referencePayload.resize(20);
         std::iota(referencePayload.begin(), referencePayload.end(), '\000');
 
-        controllerBusSim.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+        controllerBusSim.SetServiceDescriptor(busSimAddress);
     }
 
 protected:
-    const EndpointAddress controllerAddress{4, 5};
-    const EndpointAddress busSimAddress{9, 5};
+    const ServiceDescriptor controllerAddress{"p1", "n1", "c1", 5};
+    const ServiceDescriptor busSimAddress{"bussim", "n1", "c1", 5};
 
     std::vector<uint8_t> referencePayload;
 

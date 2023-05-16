@@ -54,16 +54,16 @@ protected:
         : subscriber{&participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr}
         , subscriberOther{&participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr}
     {
-        subscriber.SetServiceDescriptor(from_endpointAddress(endpointAddress));
+        subscriber.SetServiceDescriptor(endpointAddress);
         subscriber.SetDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault));
 
-        subscriberOther.SetServiceDescriptor(from_endpointAddress(otherEndpointAddress));
+        subscriberOther.SetServiceDescriptor(otherEndpointAddress);
         subscriberOther.SetDataMessageHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault));
     }
 
 protected:
-    const EndpointAddress endpointAddress{4, 5};
-    const EndpointAddress otherEndpointAddress{5, 7};
+    const ServiceDescriptor endpointAddress{ "P1", "N1", "C1" , 5};
+    const ServiceDescriptor otherEndpointAddress{ "P2", "N1", "C3", 7 };
 
     SilKit::Core::Tests::DummyParticipant participant;
     Callbacks callbacks;

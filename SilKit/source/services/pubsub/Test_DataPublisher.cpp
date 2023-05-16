@@ -55,11 +55,11 @@ protected:
     DataPublisherTest()
         : publisher{ &participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID", {} }
     {
-        publisher.SetServiceDescriptor(from_endpointAddress(portAddress));
+        publisher.SetServiceDescriptor(portAddress);
     }
 
 protected:
-    const EndpointAddress portAddress{4, 5};
+    const ServiceDescriptor portAddress{ "P1", "N1", "C1", 5};
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
     MockParticipant participant;

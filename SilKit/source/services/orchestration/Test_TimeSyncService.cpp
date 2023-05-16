@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "TimeSyncService.hpp"
 #include "MockParticipant.hpp"
+#include "MockServiceEndpoint.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "SyncDatatypeUtils.hpp"
 #include "TimeSyncService.hpp"
@@ -44,27 +45,11 @@ using namespace testing;
 
 using namespace SilKit;
 using namespace SilKit::Core;
+using namespace SilKit::Core::Tests;
 using namespace SilKit::Services::Orchestration;
 using namespace SilKit::Util;
 
 using ::SilKit::Core::Tests::DummyParticipant;
-
-
-class MockServiceEndpoint : public IServiceEndpoint
-{
-public:
-    MockServiceEndpoint(EndpointAddress ea, std::string participantName)
-    {
-        _serviceDescriptor = from_endpointAddress(ea);
-        _serviceDescriptor.SetParticipantName(std::move(participantName));
-
-        ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
-    }
-    MOCK_METHOD(void,SetServiceDescriptor, (const ServiceDescriptor& ), (override));
-    MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (),(const,override));
-
-    ServiceDescriptor _serviceDescriptor;
-};
 
 
 class TimeSyncServiceTest : public testing::Test
@@ -109,8 +94,7 @@ protected: // Methods
 protected:
     // ----------------------------------------
     // Members
-    EndpointAddress addr{1, 1024};
-    MockServiceEndpoint endpoint{addr, "P1"};
+    MockServiceEndpoint endpoint{"P1", "N1", "C1"};
 
     DummyParticipant participant;
     Callbacks callbacks;

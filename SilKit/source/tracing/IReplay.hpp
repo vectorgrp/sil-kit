@@ -89,9 +89,8 @@ public:
     virtual auto Timestamp() const -> std::chrono::nanoseconds = 0;
     //! The recorded direction of the replay message.
     virtual auto GetDirection() const -> SilKit::Services::TransmitDirection = 0;
-    //! The endpoint address of the recording service.
-    //! If unavailable from the underlying ReplayChannel, default value is returned.
-    virtual auto EndpointAddress() const -> SilKit::Core::EndpointAddress = 0;
+    //! Get the string representation of the ServiceDescriptor of the original sender
+    virtual auto ServiceDescriptorStr() const -> std::string = 0;
     //! Get the replay messages type, which is similar to the type used during tracing.
     virtual auto Type() const -> SilKit::TraceMessageType = 0;
 };

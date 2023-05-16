@@ -69,8 +69,7 @@ protected:
 protected:
     // ----------------------------------------
     // Members
-    EndpointAddress addr{103, 1026};
-    ServiceDescriptor descriptor = from_endpointAddress(addr);
+    ServiceDescriptor descriptor{"P1", "N1", "C1", 1026};
 
     MockParticipant participant;
     SystemController controller;
@@ -78,6 +77,6 @@ protected:
 
 TEST_F(SystemControllerTest, configure_serviceDescriptor)
 {
-    EXPECT_EQ(controller.GetServiceDescriptor(), from_endpointAddress(addr));
+    EXPECT_EQ(controller.GetServiceDescriptor(), descriptor);
 }
 } // anonymous namespace

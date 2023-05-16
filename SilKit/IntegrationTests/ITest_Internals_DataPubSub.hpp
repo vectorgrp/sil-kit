@@ -317,7 +317,7 @@ protected:
                     [&ds, &participant](auto type, auto&& serviceDescr) {
                         if (type == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                         {
-                            if (serviceDescr._networkType == SilKit::Config::NetworkType::Data)
+                            if (serviceDescr.GetNetworkType() == SilKit::Config::NetworkType::Data)
                             {
                                 ds.OnNewServiceDiscovery(serviceDescr);
                                 participant.CheckAllDiscoveredPromise();

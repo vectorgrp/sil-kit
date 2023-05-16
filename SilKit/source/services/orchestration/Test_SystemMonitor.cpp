@@ -65,7 +65,7 @@ protected:
     {
         syncParticipantNames = {"P1", "P2", "P3"};
         monitor.UpdateRequiredParticipantNames(syncParticipantNames);
-        monitor.SetServiceDescriptor(from_endpointAddress(addr));
+        monitor.SetServiceDescriptor(addr);
     }
 
     auto AddSystemStateHandler() -> HandlerId
@@ -90,11 +90,9 @@ protected:
         status.participantName = syncParticipantNames.at(static_cast<size_t>(id));
         status.enterReason = reason;
 
-        EndpointAddress from;
-        from.participant = id;
-        from.endpoint = 1024;
+        ServiceDescriptor from{ "P1", "N1", "C2" , 1024};
 
-        monitorFrom.SetServiceDescriptor(from_endpointAddress(from));
+        monitorFrom.SetServiceDescriptor(from);
 
         monitor.ReceiveMsg(&monitorFrom, status);
     }
@@ -115,7 +113,7 @@ protected:
 protected:
     // ----------------------------------------
     // Members
-    EndpointAddress addr{19, 1025};
+    ServiceDescriptor addr{ "P1", "N1", "C1", 1025};
 
     std::vector<std::string> syncParticipantNames;
 

@@ -31,15 +31,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Core {
+//forward
+class MessageBuffer;
 
-typedef std::map<std::string, std::string> SupplementalData;
+using SupplementalData = std::map<std::string, std::string>;
 
 enum class ServiceType : uint8_t
 {
     Undefined = 0,
     Link = 1,
     Controller = 2,
-    SimulatedController = 3, 
+    SimulatedController = 3,
     InternalController = 4
 };
 inline std::string to_string(const ServiceType& serviceType)
@@ -65,54 +67,161 @@ public:
     inline Core::EndpointAddress to_endpointAddress() const;
 
 public:
-    inline ParticipantId GetParticipantId() const { return _participantId; }
-    std::string GetParticipantName() const { return _participantName; }
-    void SetParticipantName(std::string val) 
-    {
-        _participantId = SilKit::Util::Hash::Hash(val);
-        _participantName = std::move(val);
-    }
+    inline auto GetParticipantId() const -> ParticipantId;
+    inline auto GetParticipantName() const -> std::string;
+    inline void SetParticipantName(std::string val);
 
-    SilKit::Core::ServiceType GetServiceType() const { return _serviceType; }
-    void SetServiceType(SilKit::Core::ServiceType val) {_serviceType = std::move(val); }
+    inline auto GetServiceType() const -> SilKit::Core::ServiceType;
+    inline void SetServiceType(SilKit::Core::ServiceType val);
 
-    std::string GetNetworkName() const { return _networkName; }
-    void SetNetworkName(std::string val) {_networkName = std::move(val); }
+    inline auto GetNetworkName() const -> std::string;
+    inline void SetNetworkName(std::string val);
 
-    SilKit::Config::NetworkType GetNetworkType() const { return _networkType; }
-    void SetNetworkType(SilKit::Config::NetworkType val) { _networkType = std::move(val); }
+    inline auto GetNetworkType() const -> SilKit::Config::NetworkType;
+    inline void SetNetworkType(SilKit::Config::NetworkType val);
 
-    std::string GetServiceName() const { return _serviceName; }
-    void SetServiceName(std::string val) {_serviceName = std::move(val); }
+    inline auto GetServiceName() const -> std::string ;
+    inline void SetServiceName(std::string val);
 
-    SilKit::Core::EndpointId GetServiceId() const { return _serviceId; }
-    void SetServiceId(SilKit::Core::EndpointId val) {_serviceId = std::move(val); }
+    inline auto GetServiceId() const -> SilKit::Core::EndpointId ;
+    inline void SetServiceId(SilKit::Core::EndpointId val);
 
-    SupplementalData GetSupplementalData() const { return _supplementalData; }
-    void SetSupplementalData(SupplementalData val) { _supplementalData = std::move(val); }
+    inline auto GetSupplementalData() const -> SupplementalData;
+    inline void SetSupplementalData(SupplementalData val);
 
-    bool GetSupplementalDataItem(const std::string& key, std::string& value) const 
-    {
-        auto valueIter = _supplementalData.find(key);
-        if (valueIter == _supplementalData.end())
-        {
-            return false;
-        }
-        value = valueIter->second;
-        return true;
-    }
-    void SetSupplementalDataItem(std::string key, std::string val) { _supplementalData[key] = std::move(val); }
+    inline bool GetSupplementalDataItem(const std::string& key, std::string& value) const;
+    inline void SetSupplementalDataItem(std::string key, std::string val);
 
-public:
+public: // CTor
+    ServiceDescriptor() = default;
+    ServiceDescriptor(ServiceDescriptor&&) noexcept = default;
+    ServiceDescriptor(const ServiceDescriptor&) = default;
+    ServiceDescriptor& operator=(ServiceDescriptor&&) = default;
+    ServiceDescriptor& operator=(const ServiceDescriptor&) = default;
+    // for unit tests
+    inline ServiceDescriptor(std::string participantName, std::string networkName, std::string serviceName, EndpointId serviceId);
+private:
+    // Ser/Des
+    friend auto operator<<(SilKit::Core::MessageBuffer& buffer,
+            const SilKit::Core::ServiceDescriptor& msg) -> SilKit::Core::MessageBuffer&;
+    friend auto operator>>(SilKit::Core::MessageBuffer& buffer,
+            SilKit::Core::ServiceDescriptor& updatedMsg) -> SilKit::Core::MessageBuffer&;
+private:
     std::string _participantName; //!< name of the participant
     ParticipantId _participantId{0};
     ServiceType _serviceType{ServiceType::Undefined};
     std::string _networkName; //!< the service's link name
     SilKit::Config::NetworkType _networkType{SilKit::Config::NetworkType::Invalid};
     std::string _serviceName;
-    EndpointId _serviceId;
+    EndpointId _serviceId{0};
     SupplementalData _supplementalData;
 };
+
+//////////////////////////////////////////////////////////////////////
+// Inline Implementations
+//////////////////////////////////////////////////////////////////////
+ 
+bool ServiceDescriptor::GetSupplementalDataItem(const std::string& key, std::string& value) const 
+{
+    auto valueIter = _supplementalData.find(key);
+    if (valueIter == _supplementalData.end())
+    {
+        return false;
+    }
+    value = valueIter->second;
+    return true;
+}
+
+void ServiceDescriptor::SetSupplementalDataItem(std::string key, std::string val)
+{
+    _supplementalData[key] = std::move(val); 
+}
+
+auto ServiceDescriptor::GetParticipantId() const -> ParticipantId
+{
+    return _participantId;
+}
+
+auto ServiceDescriptor::GetParticipantName() const -> std::string 
+{
+    return _participantName;
+}
+
+void ServiceDescriptor::SetParticipantName(std::string val) 
+{
+    _participantId = SilKit::Util::Hash::Hash(val);
+    _participantName = std::move(val);
+}
+
+auto ServiceDescriptor::GetServiceType() const -> SilKit::Core::ServiceType
+{
+    return _serviceType;
+}
+
+void ServiceDescriptor::SetServiceType(SilKit::Core::ServiceType val)
+{
+    _serviceType = std::move(val);
+}
+
+auto ServiceDescriptor::GetNetworkName() const -> std::string 
+{
+    return _networkName;
+}
+
+void ServiceDescriptor::SetNetworkName(std::string val)
+{
+    _networkName = std::move(val);
+}
+
+auto ServiceDescriptor::GetNetworkType() const -> SilKit::Config::NetworkType 
+{
+    return _networkType;
+}
+
+void ServiceDescriptor::SetNetworkType(SilKit::Config::NetworkType val)
+{
+    _networkType = std::move(val);
+}
+
+auto ServiceDescriptor::GetServiceName() const -> std::string 
+{
+    return _serviceName;
+}
+
+void ServiceDescriptor::SetServiceName(std::string val)
+{
+    _serviceName = std::move(val);
+}
+
+auto ServiceDescriptor::GetServiceId() const -> SilKit::Core::EndpointId 
+{
+    return _serviceId;
+}
+
+void ServiceDescriptor::SetServiceId(SilKit::Core::EndpointId val)
+{
+    _serviceId = std::move(val);
+}
+
+auto  ServiceDescriptor::GetSupplementalData() const -> SupplementalData
+{
+    return _supplementalData;
+}
+
+void ServiceDescriptor::SetSupplementalData(SupplementalData val)
+{
+    _supplementalData = std::move(val);
+}
+
+//Ctors
+ServiceDescriptor::ServiceDescriptor(std::string participantName, std::string networkName, std::string serviceName,
+    EndpointId serviceId)
+{
+    SetParticipantName(std::move(participantName));
+    SetNetworkName(std::move(networkName));
+    SetServiceName(std::move(serviceName));
+    SetServiceId(serviceId);
+}
 
 // operators
 inline bool ServiceDescriptor::operator==(const ServiceDescriptor& rhs) const

@@ -67,20 +67,20 @@ protected:
             callbacks.LinSlaveConfigurationHandler(ctrl);
         };
         
-        master.SetServiceDescriptor(from_endpointAddress(addr1));
+        master.SetServiceDescriptor(addr1);
 
         ON_CALL(participant.mockTimeProvider, Now())
             .WillByDefault(testing::Return(35s));
 
-        slave1.SetServiceDescriptor(from_endpointAddress(addr2));
-        slave2.SetServiceDescriptor(from_endpointAddress(addr3));
+        slave1.SetServiceDescriptor(addr2);
+        slave2.SetServiceDescriptor(addr3);
     }
 
 
 protected:
-    const EndpointAddress addr1{4, 5};
-    const EndpointAddress addr2{5, 8};
-    const EndpointAddress addr3{6, 13};
+    const ServiceDescriptor addr1{"p1", "n1", "c1", 5};
+    const ServiceDescriptor addr2{"p2", "n1", "c1", 8};
+    const ServiceDescriptor addr3{"p3", "n1", "c1", 13};
 
     SilKit::Config::LinController cfg;
     LinMockParticipant participant;

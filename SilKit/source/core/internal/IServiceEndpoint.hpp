@@ -36,8 +36,6 @@ namespace Core {
 inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& descriptor);
 
 inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor);
-// Creates a ServiceDescriptor based on an endpoint address - for testing purposes only!
-inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceDescriptor;
 
 inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDescriptor& rhs);
 
@@ -58,16 +56,6 @@ inline bool AllowMessageProcessing(const ServiceDescriptor& lhs, const ServiceDe
 inline EndpointAddress to_endpointAddress(const ServiceDescriptor& descriptor)
 {
     return descriptor.to_endpointAddress();
-}
-
-inline auto from_endpointAddress(const EndpointAddress& epa) -> ServiceDescriptor
-{
-    ServiceDescriptor endpoint{};
-    endpoint.SetParticipantName(std::to_string(epa.participant));
-    endpoint.SetServiceName(std::to_string((unsigned int)epa.endpoint));
-    endpoint.SetServiceId(epa.endpoint);
-    endpoint.SetNetworkName("generated");
-    return endpoint;
 }
 
 inline std::ostream& operator<<(std::ostream& out, const ServiceDescriptor& descriptor)

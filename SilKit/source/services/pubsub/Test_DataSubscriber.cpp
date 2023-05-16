@@ -73,44 +73,27 @@ protected:
                      SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveDataDefault)}
         , publisher{ &participant, participant.GetTimeProvider(), dataSpec, publisherUuid,{} }
     {
-        subscriber.SetServiceDescriptor(from_endpointAddress(subscriberEndpointAddress));
-        SetupPublisherServiceDescriptor(publisher, publisherUuid, publisherEndpointAddress);
+        subscriber.SetServiceDescriptor(subscriberDescriptor);
+        SetupPublisherServiceDescriptor(publisher, publisherUuid);
     }
 
 private:
-    void SetupPublisherServiceDescriptor(DataPublisher& dataPublisher, const std::string& uuid,
-                                         const EndpointAddress& endpointAddress)
+    void SetupPublisherServiceDescriptor(DataPublisher& dataPublisher, const std::string& uuid)
     {
-        auto publisherServiceDescriptor = from_endpointAddress(endpointAddress);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherTopic, topic);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherMediaType, mediaType);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels,
+        publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherTopic, topic);
+        publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherMediaType, mediaType);
+        publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels,
                                                            labelsSerialized);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubUUID, uuid);
-        dataPublisher.SetServiceDescriptor(publisherServiceDescriptor);
-    }
-
-protected:
-    ServiceDescriptor MakePublisherServiceDescriptor(const std::string& uuid, const EndpointAddress& endpointAddress)
-    {
-        auto publisherServiceDescriptor = from_endpointAddress(endpointAddress);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherTopic, topic);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherMediaType, mediaType);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubLabels,
-                                                           labelsSerialized);
-        publisherServiceDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubUUID, uuid);
-        return publisherServiceDescriptor;
+        publisherDescriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataPublisherPubUUID, uuid);
+        dataPublisher.SetServiceDescriptor(publisherDescriptor);
     }
 
 protected:
     const std::vector<uint8_t> sampleData{0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u};
 
-    const EndpointAddress subscriberEndpointAddress{4, 5};
-
-    const EndpointAddress publisherEndpointAddress{6, 7};
+    const ServiceDescriptor subscriberDescriptor{"P1", "N1", "C1", 5};
+    ServiceDescriptor publisherDescriptor{"P1", "N1", "C2", 7};
     const std::string publisherUuid{"pubUUID"};
-
-    const EndpointAddress publisher2EndpointAddress{8, 9};
     const std::string publisher2Uuid{"pubUUID-2"};
 
     const std::string topic{"Topic"};

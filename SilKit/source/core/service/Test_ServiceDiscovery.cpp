@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "string_utils_internal.hpp"
 #include "Uuid.hpp"
 #include "MockParticipant.hpp"
-#include "MockServiceDescriptor.hpp"
+#include "MockServiceEndpoint.hpp"
 
 namespace {
 
@@ -41,6 +41,7 @@ using namespace testing;
 
 using namespace SilKit;
 using namespace SilKit::Core;
+using namespace SilKit::Core::Tests;
 using namespace SilKit::Core::Discovery;
 using namespace SilKit::Util;
 
@@ -128,7 +129,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     disco.NotifyServiceCreated(descr);
 
     // trigger notifications on reception path from different participant
-    MockServiceDescriptor otherParticipant{ {1, 2} };
+    MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
     descr.SetParticipantName("ParticipantOther");
     event.serviceDescriptor = descr;
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
@@ -140,7 +141,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 }
 TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 {
-    MockServiceDescriptor otherParticipant{ {1, 2} };
+    MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
     ServiceDiscovery disco{ &participant, "ParticipantA" };
 
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {
@@ -181,7 +182,7 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
 
 TEST_F(DiscoveryServiceTest, service_removal)
 {
-    MockServiceDescriptor otherParticipant{ {1, 2} };
+    MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
     ServiceDiscovery disco{ &participant, "ParticipantA" };
 
     disco.RegisterServiceDiscoveryHandler([this](auto type, auto&& descr) {

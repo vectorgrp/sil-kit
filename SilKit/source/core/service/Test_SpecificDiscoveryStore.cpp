@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Uuid.hpp"
 #include "LabelMatching.hpp"
 #include "MockParticipant.hpp"
-#include "MockServiceDescriptor.hpp"
+#include "MockServiceEndpoint.hpp"
 #include "YamlParser.hpp"
 
 namespace {

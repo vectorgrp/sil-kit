@@ -31,7 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "string_utils_internal.hpp"
 #include "Uuid.hpp"
 #include "MockParticipant.hpp"
-#include "MockServiceDescriptor.hpp"
+#include "MockServiceEndpoint.hpp"
 
 namespace {
 
@@ -41,6 +41,7 @@ using namespace testing;
 
 using namespace SilKit;
 using namespace SilKit::Core;
+using namespace SilKit::Core::Tests;
 using namespace SilKit::Core::RequestReply;
 using namespace SilKit::Util;
 
@@ -133,7 +134,7 @@ TEST_F(RequestReplyServiceTests, test_functiontype_route_call_to_participantrepl
     EXPECT_CALL(_participantReplies, ReceiveCall(&reqReplService, reqReplCall.callUuid, reqReplCall.callData));
 
     // Initiate receive
-    MockServiceDescriptor from{{1, 2}};
+    MockServiceEndpoint from{"p1", "n1","c1", 2};
     reqReplService.ReceiveMsg(&from, reqReplCall);
 
     // Invalid function type should throw
@@ -161,7 +162,7 @@ TEST_F(RequestReplyServiceTests, test_submitcallreturn)
     reqReplCallReturn.callReturnStatus = CallReturnStatus::Success;
 
     // Receive a call, test reception
-    MockServiceDescriptor from{{1, 2}}; 
+    MockServiceEndpoint from{"p1", "n1","c1", 2};
     EXPECT_CALL(_participantReplies, ReceiveCall(&reqReplService, reqReplCall.callUuid, reqReplCall.callData));
     reqReplService.ReceiveMsg(&from, reqReplCall);
 
@@ -200,7 +201,7 @@ TEST_F(RequestReplyServiceTests, test_functiontype_route_callreturn_to_participa
                 ReceiveCallReturn(reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData, reqReplCallReturn.callReturnStatus));
 
     // Initiate receive
-    MockServiceDescriptor from{{1, 2}};
+    MockServiceEndpoint from{"p1", "n1","c1", 2};
     reqReplService.ReceiveMsg(&from, reqReplCallReturn);
 }
 
@@ -255,7 +256,7 @@ TEST_F(RequestReplyServiceTests, test_unknown_function_type)
     reqReplCallReturn.callReturnStatus = CallReturnStatus::UnknownFunctionType;
 
     // Initiate receive
-    MockServiceDescriptor from{{1, 2}};
+    MockServiceEndpoint from{"p1", "n1","c1", 2};
     // The unknown function type cannot be routed to a procedure, the CallReturn is directly
     // submitted with CallReturnStatus::UnknownFunctionType and empty data
     EXPECT_CALL(_participant,

@@ -209,7 +209,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
 {
     using namespace std::placeholders;
 
-    EndpointAddress senderAddress{ 17, 4 };
+    ServiceDescriptor senderAddress{"P1", "N1", "C1", 4};
 
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
@@ -229,7 +229,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
     EXPECT_CALL(mockParticipant.mockTimeProvider, Now()).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
+    canControllerPlaceholder.SetServiceDescriptor(senderAddress);
     canController.SendFrame(ToCanFrame(testFrameEvent.frame));
 }
 
@@ -238,7 +238,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter2)
 {
     using namespace std::placeholders;
 
-    EndpointAddress senderAddress{ 17, 4 };
+    ServiceDescriptor senderAddress{"P1", "N1", "C1", 4};
 
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
@@ -257,7 +257,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter2)
     EXPECT_CALL(mockParticipant.mockTimeProvider, Now()).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canControllerPlaceholder.SetServiceDescriptor(from_endpointAddress(senderAddress));
+    canControllerPlaceholder.SetServiceDescriptor(senderAddress);
     canController.SendFrame(testFrameEvent.frame);
 }
 
@@ -307,14 +307,12 @@ TEST(CanControllerTrivialSimTest, receive_ack)
 {
     using namespace std::placeholders;
 
-    EndpointAddress controllerAddress = { 3, 8 };
-
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
     SilKit::Config::CanController cfg;
 
     CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
     canController.AddFrameTransmitHandler(std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
     canController.Start();
 
@@ -372,7 +370,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
         .WillByDefault(testing::Return(now));
 
     CanController controller(&participant, cfg, participant.GetTimeProvider());
-    controller.SetServiceDescriptor(from_endpointAddress(EndpointAddress{1, 2}));
+    controller.SetServiceDescriptor({"p1", "n1", "c1", 2});
     const auto controllerDescriptor  = controller.GetServiceDescriptor();
     controller.AddSink(&traceSink);
     controller.Start();
@@ -392,7 +390,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
     controller.SendFrame(ToCanFrame(canFrame));
 
     CanController otherController(&participant, {}, participant.GetTimeProvider());
-    otherController.SetServiceDescriptor(from_endpointAddress(EndpointAddress{2, 2}));
+    otherController.SetServiceDescriptor({"p2", "n1", "c1", 2});
 
     // Receive direction
     EXPECT_CALL(traceSink,
@@ -429,14 +427,12 @@ TEST(CanControllerTrivialSimTest, sendmsg_distributes_before_txreceive)
 {
     using namespace std::placeholders;
 
-    EndpointAddress controllerAddress = { 3, 8 };
-
     MockParticipant mockParticipant;
     CanControllerCallbacks callbackProvider;
     SilKit::Config::CanController cfg;
 
     CanController canController(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
-    canController.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+    canController.SetServiceDescriptor({"p1", "n1", "c1", 8});
     canController.AddFrameHandler(std::bind(&CanControllerCallbacks::FrameHandler, &callbackProvider, _1, _2));
     canController.AddFrameTransmitHandler(std::bind(&CanControllerCallbacks::FrameTransmitHandler, &callbackProvider, _1, _2));
     canController.Start();

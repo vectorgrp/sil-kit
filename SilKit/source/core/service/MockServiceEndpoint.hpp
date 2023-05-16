@@ -18,33 +18,38 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
-
+#pragma once 
 #include <functional>
 #include <set>
 #include <string>
 
+#include "gmock/gmock.h"
 
 #include "IServiceEndpoint.hpp"
 #include "ServiceDiscovery.hpp"
 
-using namespace SilKit;
-using namespace SilKit::Core;
+namespace SilKit {
+namespace Core {
+namespace Tests {
 using namespace SilKit::Core::Discovery;
+using namespace testing;
 
-class MockServiceDescriptor : public SilKit::Core::IServiceEndpoint
+class MockServiceEndpoint : public IServiceEndpoint
 {
 public:
-    ServiceDescriptor serviceDescriptor;
-    MockServiceDescriptor(EndpointAddress ea)
+    MockServiceEndpoint(std::string participantName, std::string networkName,
+        std::string serviceName, EndpointId serviceId = 0)
+        : _serviceDescriptor{participantName, networkName, serviceName, serviceId}
     {
-        serviceDescriptor.SetNetworkName(to_string(ea));
-        serviceDescriptor.SetParticipantName(std::to_string(ea.participant));
-        serviceDescriptor.SetServiceName(to_string(ea));
-        serviceDescriptor.SetServiceId(ea.endpoint);
+        ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
-    void SetServiceDescriptor(const ServiceDescriptor& _serviceDescriptor) override
-    {
-        serviceDescriptor = _serviceDescriptor;
-    }
-    auto GetServiceDescriptor() const -> const ServiceDescriptor& override { return serviceDescriptor; }
+    MOCK_METHOD(void,SetServiceDescriptor, (const ServiceDescriptor& ), (override));
+    MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (),(const,override));
+public:
+    ServiceDescriptor _serviceDescriptor;
 };
+
+
+} // namespace Tests
+} // namespace Core
+} // namespace SilKit

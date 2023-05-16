@@ -80,23 +80,23 @@ protected:
 
 protected:
     EthernetControllerDetailedSimTest()
-        : controller(&participant, cfg, participant.GetTimeProvider())
-        , controllerBusSim(&participant, cfg, participant.GetTimeProvider())
+        : controller{&participant, cfg, participant.GetTimeProvider()}
+        , controllerBusSim{&participant, cfg, participant.GetTimeProvider()}
     {
-        controller.SetDetailedBehavior(from_endpointAddress(busSimAddress));
-        controller.SetServiceDescriptor(from_endpointAddress(controllerAddress));
+        controller.SetDetailedBehavior(busSimAddress);
+        controller.SetServiceDescriptor(controllerAddress);
 
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::FrameHandler));
         controller.AddFrameTransmitHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::FrameTransmitHandler));
         controller.AddBitrateChangeHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::BitrateChangedHandler));
         controller.AddStateChangeHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::StateChangeHandler));
 
-        controllerBusSim.SetServiceDescriptor(from_endpointAddress(busSimAddress));
+        controllerBusSim.SetServiceDescriptor(busSimAddress);
     }
 
 protected:
-    const EndpointAddress controllerAddress = {3, 8};
-    const EndpointAddress busSimAddress = {7, 8};
+    ServiceDescriptor controllerAddress{ "controller", "n1", "c1", 8 };
+    ServiceDescriptor busSimAddress{ "bussim", "n1", "c1", 8};
 
     MockParticipant participant;
     Callbacks callbacks;

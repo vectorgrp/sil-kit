@@ -105,13 +105,13 @@ struct MockReplayMessage : public IReplayMessage
 {
     auto Timestamp() const -> std::chrono::nanoseconds override { return _timestamp; }
     auto GetDirection() const -> SilKit::Services::TransmitDirection override { return _direction; }
-    auto EndpointAddress() const -> SilKit::Core::EndpointAddress override { return _address; }
+    auto ServiceDescriptorStr() const -> std::string override { return _serviceDescriptorStr; }
     auto Type() const -> TraceMessageType override { return _type; }
 
     std::chrono::nanoseconds _timestamp{0};
     SilKit::Services::TransmitDirection _direction{SilKit::Services::TransmitDirection::RX};
-    SilKit::Core::EndpointAddress _address{0, 0};
     TraceMessageType _type{TraceMessageType::InvalidReplayData};
+    std::string _serviceDescriptorStr{ "ServiceDescriptorString" };
 };
 
 struct MockEthFrame
@@ -131,8 +131,13 @@ struct MockEthFrame
         static_cast<EthernetFrame*>(this)->raw = static_cast<WireEthernetFrame*>(this)->raw.AsSpan();
     }
 };
+struct ReplayTest : public testing::Test
+{
+    ServiceDescriptor _serviceDescriptor{ "EthernetReplay", "Eth0", "EthController0", 2};
+    ServiceDescriptor _otherServiceDescriptor{ "EthernetReplay2", "Eth1", "EthController2", 4 };
+};
 
-TEST(ReplayTest, ethcontroller_replay_config_send)
+TEST_F(ReplayTest, ethcontroller_replay_config_send)
 {
     MockParticipant participant{};
 
@@ -140,7 +145,6 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     cfg.replay.useTraceSource = "ReplayTest.TraceSource";
 
     MockEthFrame msg;
-    msg._address = {1, 2};
 
     // Replay Send / Send
     {
@@ -148,7 +152,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Send;
 
         EthController ctrl{&participant, cfg, participant.GetTimeProvider()};
-        ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
+        ctrl.SetServiceDescriptor(_serviceDescriptor);
 
         EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
         ctrl.Activate();
@@ -164,7 +168,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Both;
 
         EthController ctrl{&participant, cfg, participant.GetTimeProvider()};
-        ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
+        ctrl.SetServiceDescriptor(_serviceDescriptor);
 
         EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
         ctrl.Activate();
@@ -180,7 +184,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
         cfg.replay.direction = Config::Replay::Direction::Send;
 
         EthController ctrl{&participant, cfg, participant.GetTimeProvider()};
-        ctrl.SetServiceDescriptor(from_endpointAddress(msg._address));
+        ctrl.SetServiceDescriptor(_serviceDescriptor);
 
         EXPECT_CALL(participant.mockTimeProvider, Now()).Times(1);
         ctrl.Activate();
@@ -191,7 +195,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
     }
 }
 
-TEST(ReplayTest, ethcontroller_replay_config_receive)
+TEST_F(ReplayTest, ethcontroller_replay_config_receive)
 {
     Callbacks callbacks;
     MockParticipant participant{};
@@ -207,7 +211,6 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
 
     MockEthFrame msg;
 
-    msg._address = {1, 2};
 
     // Replay Receive / Receive
     {
@@ -215,7 +218,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         cfg.replay.direction = Config::Replay::Direction::Receive;
 
         EthController controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
+        controller.SetServiceDescriptor({ "p1","n1", "c1", 4 });
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
 
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthernetFrameEvent(msg))).Times(1);
@@ -228,7 +231,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         cfg.replay.direction = Config::Replay::Direction::Both;
 
         EthController controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
+        controller.SetServiceDescriptor(_otherServiceDescriptor);
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
 
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthernetFrameEvent(msg))).Times(1);
@@ -241,7 +244,7 @@ TEST(ReplayTest, ethcontroller_replay_config_receive)
         cfg.replay.direction = Config::Replay::Direction::Receive;
 
         EthController controller{&participant, cfg, participant.GetTimeProvider()};
-        controller.SetServiceDescriptor(from_endpointAddress({3, 4}));
+        controller.SetServiceDescriptor(_otherServiceDescriptor);
         controller.AddFrameHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::ReceiveMessage));
 
         EXPECT_CALL(callbacks, ReceiveMessage(A<IEthernetController*>(), AnEthernetFrameEvent(msg))).Times(0);

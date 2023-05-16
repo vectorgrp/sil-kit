@@ -389,7 +389,7 @@ protected:
                     [&participant](auto type, auto&& serviceDescr) {
                         if (type == SilKit::Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
                         {
-                            if (serviceDescr._networkType == SilKit::Config::NetworkType::RPC)
+                            if (serviceDescr.GetNetworkType() == SilKit::Config::NetworkType::RPC)
                             {
                                 participant.OnNewServiceDiscovery(serviceDescr);
                             }

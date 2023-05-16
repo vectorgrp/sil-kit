@@ -42,17 +42,14 @@ class PcapMessage
 public:
     auto Timestamp() const -> std::chrono::nanoseconds override;
     void SetTimestamp(std::chrono::nanoseconds timeStamp);
-
     auto GetDirection() const -> SilKit::Services::TransmitDirection override;
-
-    auto EndpointAddress() const -> SilKit::Core::EndpointAddress override;
-
+    auto ServiceDescriptorStr() const -> std::string override;
     auto Type() const -> SilKit::TraceMessageType override;
 
 private:
     std::chrono::nanoseconds _timeStamp{0};
     SilKit::Services::TransmitDirection _direction{SilKit::Services::TransmitDirection::TX};
-    SilKit::Core::EndpointAddress _endpointAddress{};
+    std::string _serviceDescriptorStr;
 };
 
 void PcapMessage::SetTimestamp(std::chrono::nanoseconds timeStamp)
@@ -70,9 +67,9 @@ auto PcapMessage::GetDirection() const -> SilKit::Services::TransmitDirection
     return _direction;
 }
 
-auto PcapMessage::EndpointAddress() const -> SilKit::Core::EndpointAddress
+auto PcapMessage::ServiceDescriptorStr() const -> std::string
 {
-    return _endpointAddress;
+    return _serviceDescriptorStr;
 }
 
 auto PcapMessage::Type() const -> TraceMessageType
