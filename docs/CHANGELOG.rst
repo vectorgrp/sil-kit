@@ -1,3 +1,4 @@
+
 Changelog
 ================================
 
@@ -5,7 +6,8 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.25] - Unreleased
+
+[4.0.25] - 2023-05-17
 ---------------------
 
 Added
@@ -13,17 +15,11 @@ Added
 
 - Introducing an internal communication barrier between participant states. This happens in the transition from the states ServicesCreated to CommunicationInitializing and from Stopped to ShuttingDown. It leads to extended communication guarantees in the CommunicationReadyHandler, primarily for participants that use the autonomous lifecycle (see the documentation for details).
 
-
-[4.0.25] - UNRELEASED
----------------------
-
-Added
-~~~~~
-
 Fixed
 ~~~~~
 
 - Corrected spelling mistakes in the documentation
+- The dashboard is disabled for cross-builds to QNX, to avoid build errors
 
 
 [4.0.24] - 2023-05-04
