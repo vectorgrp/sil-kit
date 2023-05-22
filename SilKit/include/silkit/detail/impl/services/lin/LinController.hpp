@@ -178,7 +178,7 @@ void LinController::Init(SilKit::Services::Lin::LinControllerConfig config)
 
 auto LinController::Status() const noexcept -> SilKit::Services::Lin::LinControllerStatus
 {
-    SilKit_LinControllerStatus status;
+    SilKit_LinControllerStatus status{SilKit_LinControllerStatus_Unknown};
 
     const auto returnCode = SilKit_LinController_Status(_linController, &status);
     ThrowOnError(returnCode); // will call std::terminate on exception (! because noexcept !)

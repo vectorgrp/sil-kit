@@ -149,7 +149,7 @@ auto Logger::GetLogLevel() const -> SilKit::Services::Logging::Level
 {
     // TODO: SILKIT_HOURGLASS_NOT_UNDER_TEST
 
-    SilKit_LoggingLevel loggingLevel;
+    SilKit_LoggingLevel loggingLevel{SilKit_LoggingLevel_Info};
 
     const auto returnCode = SilKit_Logger_GetLogLevel(_logger, &loggingLevel);
     ThrowOnError(returnCode);
