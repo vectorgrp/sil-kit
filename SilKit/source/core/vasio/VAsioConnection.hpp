@@ -345,7 +345,7 @@ private:
             std::unique_ptr<IVAsioReceiver> rawReceiver = std::make_unique<VAsioReceiver<SilKitMessageT>>(subscriptionInfo, link, _logger);
             auto* serviceEndpointPtr = dynamic_cast<IServiceEndpoint*>(rawReceiver.get());
             ServiceDescriptor tmpServiceDescriptor(GetServiceDescriptor(receiver));
-            tmpServiceDescriptor.SetParticipantName(_participantName);
+            tmpServiceDescriptor.SetParticipantNameAndComputeId(_participantName);
             // copy the Service Endpoint Id
             serviceEndpointPtr->SetServiceDescriptor(tmpServiceDescriptor);
             _vasioReceivers.emplace_back(std::move(rawReceiver));

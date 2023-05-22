@@ -91,6 +91,8 @@ public:
     virtual auto GetDirection() const -> SilKit::Services::TransmitDirection = 0;
     //! Get the string representation of the ServiceDescriptor of the original sender
     virtual auto ServiceDescriptorStr() const -> std::string = 0;
+    //! Deprecated:
+    virtual auto EndpointAddress() const -> SilKit::Core::EndpointAddress = 0;
     //! Get the replay messages type, which is similar to the type used during tracing.
     virtual auto Type() const -> SilKit::TraceMessageType = 0;
 };

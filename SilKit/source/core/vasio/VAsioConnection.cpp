@@ -732,7 +732,7 @@ void VAsioConnection::ReceiveParticipantAnnouncement(IVAsioPeer* from, Serialize
     from->SetInfo(announcement.peerInfo);
     auto& service = dynamic_cast<IServiceEndpoint&>(*from);
     auto serviceDescriptor = service.GetServiceDescriptor();
-    serviceDescriptor.SetParticipantName(announcement.peerInfo.participantName);
+    serviceDescriptor.SetParticipantNameAndComputeId(announcement.peerInfo.participantName);
     service.SetServiceDescriptor(serviceDescriptor);
 
     // If one of the handlers for ParticipantAnnouncements throws an exception, report failure to the remote peer
@@ -944,7 +944,7 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
 
         // The service ID is incomplete at this stage.
         ServiceDescriptor peerId;
-        peerId.SetParticipantName(peerInfo.participantName);
+        peerId.SetParticipantNameAndComputeId(peerInfo.participantName);
         peer->SetServiceDescriptor(peerId);
 
         const auto result =
@@ -1246,7 +1246,7 @@ void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
     // link and participant names.
     auto& peerService = dynamic_cast<IServiceEndpoint&>(*peer);
     auto peerId = peerService.GetServiceDescriptor();
-    peerId.SetParticipantName(peer->GetInfo().participantName);
+    peerId.SetParticipantNameAndComputeId(peer->GetInfo().participantName);
     peerId.SetNetworkName(link->Name());
     peerService.SetServiceDescriptor(peerId);
     link->DistributeRemoteSilKitMessage(&peerService, std::move(msg));

@@ -103,7 +103,7 @@ public:
             return;
 
 
-        _serviceDescriptor.SetParticipantName(peer->GetInfo().participantName);
+        _serviceDescriptor.SetParticipantNameAndComputeId(peer->GetInfo().participantName);
         _remoteReceivers.push_back(remoteReceiver);
         _hist.NotifyPeer(peer, remoteIdx);
     }

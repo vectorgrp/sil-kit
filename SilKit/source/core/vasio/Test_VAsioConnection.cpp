@@ -80,7 +80,7 @@ struct MockSilKitMessageReceiver
     MockSilKitMessageReceiver()
     {
         _serviceDescriptor.SetServiceId(1);
-        _serviceDescriptor.SetParticipantName("MockSilkitMessageReceiver");
+        _serviceDescriptor.SetParticipantNameAndComputeId("MockSilkitMessageReceiver");
 
         ON_CALL(*this, GetServiceDescriptor()).WillByDefault(ReturnRef(_serviceDescriptor));
     }
@@ -110,7 +110,7 @@ struct MockVAsioPeer
         _peerInfo.acceptorUris.push_back("tcp://localhost:1234");
 
         _serviceDescriptor.SetServiceId(1);
-        _serviceDescriptor.SetParticipantName(_peerInfo.participantName);
+        _serviceDescriptor.SetParticipantNameAndComputeId(_peerInfo.participantName);
 
         _protocolVersion = CurrentProtocolVersion();
 

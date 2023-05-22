@@ -55,7 +55,7 @@ struct ReplayServiceDescriptor : public Core::IServiceEndpoint
     auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override
     {
         static Core::ServiceDescriptor id;
-        id.SetParticipantName("__!!Replay");
+        id.SetParticipantNameAndComputeId("__!!Replay");
         id.SetServiceName("ReplayController");
         id.SetServiceId(ReplayEndpointAddress().endpoint);
         return id;

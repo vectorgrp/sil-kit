@@ -34,7 +34,7 @@ TEST(MwVAsioSerdes, Mw_Service)
         supplementalData["hello"] = "world";
 
         SilKit::Core::ServiceDescriptor descr;
-        descr.SetParticipantName("Participant" + std::to_string(i));
+        descr.SetParticipantNameAndComputeId("Participant" + std::to_string(i));
         descr.SetNetworkName("Link" + std::to_string(i));
         descr.SetServiceName("Service" + std::to_string(i));
         descr.SetServiceId(static_cast<SilKit::Core::EndpointId>(i));

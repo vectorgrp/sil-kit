@@ -238,7 +238,7 @@ Core::ServiceDescriptor BuildDescriptor(const std::string& type, SilKit::Core::E
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Controller);
     descriptor.SetServiceId(serviceId);
-    descriptor.SetParticipantName(participant);
+    descriptor.SetParticipantNameAndComputeId(participant);
     descriptor.SetSupplementalDataItem(Core::Discovery::controllerType, type);
     return descriptor;
 }
@@ -577,7 +577,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_A
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
-    descriptor.SetParticipantName("Network Simulator");
+    descriptor.SetParticipantNameAndComputeId("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::CAN);
     descriptor.SetNetworkName("my networkname");
 
@@ -609,7 +609,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
-    descriptor.SetParticipantName("Network Simulator");
+    descriptor.SetParticipantNameAndComputeId("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::Ethernet);
     descriptor.SetNetworkName("my networkname");
 
@@ -641,7 +641,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
-    descriptor.SetParticipantName("Network Simulator");
+    descriptor.SetParticipantNameAndComputeId("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::FlexRay);
     descriptor.SetNetworkName("my networkname");
 
@@ -672,7 +672,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_A
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
-    descriptor.SetParticipantName("Network Simulator");
+    descriptor.SetParticipantNameAndComputeId("Network Simulator");
     descriptor.SetNetworkType(Config::NetworkType::LIN);
     descriptor.SetNetworkName("my networkname");
 

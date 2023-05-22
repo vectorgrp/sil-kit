@@ -44,6 +44,7 @@ public:
     void SetTimestamp(std::chrono::nanoseconds timeStamp);
     auto GetDirection() const -> SilKit::Services::TransmitDirection override;
     auto ServiceDescriptorStr() const -> std::string override;
+    auto EndpointAddress() const -> SilKit::Core::EndpointAddress override;
     auto Type() const -> SilKit::TraceMessageType override;
 
 private:
@@ -70,6 +71,11 @@ auto PcapMessage::GetDirection() const -> SilKit::Services::TransmitDirection
 auto PcapMessage::ServiceDescriptorStr() const -> std::string
 {
     return _serviceDescriptorStr;
+}
+
+auto PcapMessage::EndpointAddress() const -> SilKit::Core::EndpointAddress
+{
+    return {};
 }
 
 auto PcapMessage::Type() const -> TraceMessageType

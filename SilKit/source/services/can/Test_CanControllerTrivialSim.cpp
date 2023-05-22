@@ -98,7 +98,7 @@ TEST(CanControllerTrivialSimTest, send_can_frame)
     MockParticipant mockParticipant;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetParticipantNameAndComputeId("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
     SilKit::Config::CanController cfg;
 
@@ -123,7 +123,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message)
     using namespace std::placeholders;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetParticipantNameAndComputeId("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
 
     MockParticipant mockParticipant;
@@ -152,7 +152,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
     using namespace std::placeholders;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetParticipantNameAndComputeId("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
 
     MockParticipant mockParticipant;
@@ -181,7 +181,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter2)
     using namespace std::placeholders;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetParticipantNameAndComputeId("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
 
     MockParticipant mockParticipant;
@@ -405,7 +405,7 @@ TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)
     MockParticipant mockParticipant;
 
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.SetParticipantName("canControllerPlaceholder");
+    senderDescriptor.SetParticipantNameAndComputeId("canControllerPlaceholder");
     senderDescriptor.SetServiceId(17);
     SilKit::Config::CanController cfg;
 

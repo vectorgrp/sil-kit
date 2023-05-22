@@ -106,12 +106,14 @@ struct MockReplayMessage : public IReplayMessage
     auto Timestamp() const -> std::chrono::nanoseconds override { return _timestamp; }
     auto GetDirection() const -> SilKit::Services::TransmitDirection override { return _direction; }
     auto ServiceDescriptorStr() const -> std::string override { return _serviceDescriptorStr; }
+    auto EndpointAddress() const -> SilKit::Core::EndpointAddress { return _endpointAddress; }
     auto Type() const -> TraceMessageType override { return _type; }
 
     std::chrono::nanoseconds _timestamp{0};
     SilKit::Services::TransmitDirection _direction{SilKit::Services::TransmitDirection::RX};
     TraceMessageType _type{TraceMessageType::InvalidReplayData};
     std::string _serviceDescriptorStr{ "ServiceDescriptorString" };
+    SilKit::Core::EndpointAddress _endpointAddress; //! Deprecated
 };
 
 struct MockEthFrame

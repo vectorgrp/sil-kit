@@ -94,7 +94,7 @@ TEST_F(SpecificDiscoveryStoreTest, no_reaction_on_irrelevant_services)
                                      controllerTypeSystemController};
 
     ServiceDescriptor testDescriptor{};
-    testDescriptor.SetParticipantName("ParticipantA");
+    testDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     testDescriptor.SetNetworkName("Link1");
     testDescriptor.SetServiceName("ServiceDiscovery");
 
@@ -114,7 +114,7 @@ TEST_F(SpecificDiscoveryStoreTest, no_reaction_on_irrelevant_services)
 TEST_F(SpecificDiscoveryStoreTest, lookup_entries_pubsub)
 {
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);
@@ -172,7 +172,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_entries_pubsub)
 TEST_F(SpecificDiscoveryStoreTest, lookup_entries_rpc_client)
 {
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeRpcClient);
@@ -231,7 +231,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_entries_rpc_server_internal)
 {
     std::string uuid = "dda9a411-2bc8-4428-9e62-bd3000278b9e";
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeRpcServerInternal);
@@ -261,7 +261,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_handler_then_service_discovery)
     TestWrapperSpecificDiscoveryStore testStore;
 
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);
@@ -287,7 +287,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_no_labe
     TestWrapperSpecificDiscoveryStore testStore;
 
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);
@@ -315,7 +315,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_labels)
     SilKit::Services::MatchingLabel label = {"keyA", "valA", SilKit::Services::MatchingLabel::Kind::Mandatory};
 
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);
@@ -343,7 +343,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_issues)
     TestWrapperSpecificDiscoveryStore testStore;
 
     ServiceDescriptor baseDescriptor{};
-    baseDescriptor.SetParticipantName("ParticipantA");
+    baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     baseDescriptor.SetNetworkName("Link1");
     baseDescriptor.SetServiceName("ServiceDiscovery");
     baseDescriptor.SetSupplementalDataItem(Core::Discovery::controllerType, controllerTypeDataPublisher);

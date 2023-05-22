@@ -459,7 +459,7 @@ TEST_F(DashboardTestHarness, dashboard_netsim)
             lifecycleService->SetCommunicationReadyHandler([participantName, serviceDiscovery]() {
                 ServiceDescriptor linkDescriptor{};
                 linkDescriptor.SetServiceType(ServiceType::Link);
-                linkDescriptor.SetParticipantName(participantName);
+                linkDescriptor.SetParticipantNameAndComputeId(participantName);
                 for (auto cfg :
                      {std::make_pair(NetworkType::CAN, "CAN1"), std::make_pair(NetworkType::Ethernet, "ETH1"),
                       std::make_pair(NetworkType::FlexRay, "FR1"), std::make_pair(NetworkType::LIN, "LIN1")})

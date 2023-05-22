@@ -1512,7 +1512,7 @@ auto Participant<SilKitConnectionT>::CreateController(const SilKitServiceTraitCo
 
     auto descriptor = ServiceDescriptor{};
     descriptor.SetNetworkName(network);
-    descriptor.SetParticipantName(GetParticipantName());
+    descriptor.SetParticipantNameAndComputeId(GetParticipantName());
     descriptor.SetServiceName(config.name);
     descriptor.SetNetworkType(config.GetNetworkType());
     descriptor.SetServiceId(localEndpoint);
@@ -1579,7 +1579,7 @@ void Participant<SilKitConnectionT>::RegisterSimulator(IMsgForSimulatorT* busSim
         id.SetNetworkName(network);
         id.SetServiceName(network);
         id.SetNetworkType(linkType);
-        id.SetParticipantName(GetParticipantName());
+        id.SetParticipantNameAndComputeId(GetParticipantName());
 
         serviceEndpoint.SetServiceDescriptor(id);
         // Tell the middleware we are interested in this named network of the given type

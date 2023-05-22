@@ -99,7 +99,7 @@ TEST(ServiceDescriptor, portable_hash_function)
 TEST_F(DiscoveryServiceTest, service_creation_notification)
 {
     ServiceDescriptor senderDescriptor{};
-    senderDescriptor.SetParticipantName("ParticipantA");
+    senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     senderDescriptor.SetNetworkName("Link1");
     senderDescriptor.SetServiceName("ServiceDiscovery");
     ServiceDiscovery disco{ &participant, "ParticipantA" };
@@ -130,7 +130,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
 
     // trigger notifications on reception path from different participant
     MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
-    descr.SetParticipantName("ParticipantOther");
+    descr.SetParticipantNameAndComputeId("ParticipantOther");
     event.serviceDescriptor = descr;
     EXPECT_CALL(callbacks, ServiceDiscoveryHandler(ServiceDiscoveryEvent::Type::ServiceCreated,
         descr)).Times(1);
@@ -149,7 +149,7 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
     });
 
     ServiceDescriptor senderDescriptor;
-    senderDescriptor.SetParticipantName("ParticipantA");
+    senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     senderDescriptor.SetNetworkName("Link1");
     senderDescriptor.SetServiceName("ServiceDiscovery");
 
@@ -190,7 +190,7 @@ TEST_F(DiscoveryServiceTest, service_removal)
     });
 
     ServiceDescriptor senderDescriptor;
-    senderDescriptor.SetParticipantName("ParticipantA");
+    senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
     senderDescriptor.SetNetworkName("Link1");
     senderDescriptor.SetServiceName("ServiceDiscovery");
 

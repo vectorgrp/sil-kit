@@ -68,19 +68,21 @@ public:
 
 public:
     inline auto GetParticipantId() const -> ParticipantId;
-    inline auto GetParticipantName() const -> std::string;
-    inline void SetParticipantName(std::string val);
+    inline void SetParticipantId(ParticipantId id);
+    inline auto GetParticipantName() const -> const std::string&;
+    //! \brief Setting the participant name will also set the participant ID to a computed value.
+    inline void SetParticipantNameAndComputeId(std::string val);
 
     inline auto GetServiceType() const -> SilKit::Core::ServiceType;
     inline void SetServiceType(SilKit::Core::ServiceType val);
 
-    inline auto GetNetworkName() const -> std::string;
+    inline auto GetNetworkName() const -> const std::string&;
     inline void SetNetworkName(std::string val);
 
     inline auto GetNetworkType() const -> SilKit::Config::NetworkType;
     inline void SetNetworkType(SilKit::Config::NetworkType val);
 
-    inline auto GetServiceName() const -> std::string ;
+    inline auto GetServiceName() const -> const std::string&;
     inline void SetServiceName(std::string val);
 
     inline auto GetServiceId() const -> SilKit::Core::EndpointId ;
@@ -142,12 +144,17 @@ auto ServiceDescriptor::GetParticipantId() const -> ParticipantId
     return _participantId;
 }
 
-auto ServiceDescriptor::GetParticipantName() const -> std::string 
+void ServiceDescriptor::SetParticipantId(ParticipantId id)
+{
+    _participantId = id;
+}
+
+auto ServiceDescriptor::GetParticipantName() const -> const std::string&
 {
     return _participantName;
 }
 
-void ServiceDescriptor::SetParticipantName(std::string val) 
+void ServiceDescriptor::SetParticipantNameAndComputeId(std::string val) 
 {
     _participantId = SilKit::Util::Hash::Hash(val);
     _participantName = std::move(val);
@@ -163,7 +170,7 @@ void ServiceDescriptor::SetServiceType(SilKit::Core::ServiceType val)
     _serviceType = std::move(val);
 }
 
-auto ServiceDescriptor::GetNetworkName() const -> std::string 
+auto ServiceDescriptor::GetNetworkName() const -> const std::string&
 {
     return _networkName;
 }
@@ -183,7 +190,7 @@ void ServiceDescriptor::SetNetworkType(SilKit::Config::NetworkType val)
     _networkType = std::move(val);
 }
 
-auto ServiceDescriptor::GetServiceName() const -> std::string 
+auto ServiceDescriptor::GetServiceName() const -> const std::string&
 {
     return _serviceName;
 }
@@ -217,7 +224,7 @@ void ServiceDescriptor::SetSupplementalData(SupplementalData val)
 ServiceDescriptor::ServiceDescriptor(std::string participantName, std::string networkName, std::string serviceName,
     EndpointId serviceId)
 {
-    SetParticipantName(std::move(participantName));
+    SetParticipantNameAndComputeId(std::move(participantName));
     SetNetworkName(std::move(networkName));
     SetServiceName(std::move(serviceName));
     SetServiceId(serviceId);
