@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.25] - 2023-05-17
+[4.0.26] - 2023-05-22
 ---------------------
 
 Added
@@ -20,6 +20,12 @@ Fixed
 
 - Corrected spelling mistakes in the documentation
 - The dashboard is disabled for cross-builds to QNX, to avoid build errors
+
+
+[4.0.25] - 2023-05-17
+---------------------
+
+This version was skipped due to compatibility issues with dependent projects.
 
 
 [4.0.24] - 2023-05-04
