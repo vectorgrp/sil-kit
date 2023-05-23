@@ -155,12 +155,13 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
     response1.frame.checksumModel = LinChecksumModel::Classic;
     response1.responseMode = LinFrameResponseMode::Rx;
 
-    LinControllerConfig in;
-    LinControllerConfig out;
+    WireLinControllerConfig in;
+    WireLinControllerConfig out;
     in.controllerMode = LinControllerMode::Slave;
     in.baudRate = 1235345;
     in.frameResponses.push_back(response1);
     in.frameResponses.push_back(response2);
+    in.simulationMode = WireLinControllerConfig::SimulationMode::Dynamic;
 
     Serialize(buffer , in);
     Deserialize(buffer , out);

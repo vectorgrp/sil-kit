@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "silkit/services/lin/LinDatatypes.hpp"
+#include "WireLinMessages.hpp"
 
 #include "IServiceEndpoint.hpp"
 
@@ -37,12 +38,12 @@ public:
 
     virtual void SendMsg(LinSendFrameRequest&& sendFrameRequest) = 0;
     virtual void SendMsg(LinTransmission&& transmission) = 0;
-    virtual void SendMsg(LinControllerConfig&& controllerConfig) = 0;
+    virtual void SendMsg(WireLinControllerConfig&& controllerConfig) = 0;
     virtual void SendMsg(LinSendFrameHeaderRequest&& header) = 0;
     virtual void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) = 0;
     virtual void SendMsg(LinControllerStatusUpdate&& statusUpdate) = 0;
-    
-    virtual void ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header) = 0;
+
+    virtual void ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& header) = 0;
 
     virtual void UpdateTxBuffer(const LinFrame& frame) = 0;
 

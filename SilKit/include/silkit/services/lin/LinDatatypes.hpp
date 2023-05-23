@@ -264,6 +264,7 @@ struct LinControllerConfig
      * ILinController::SetFrameResponses().
      */
     std::vector<LinFrameResponse> frameResponses;
+
 };
 
 /*! The operational state of the controller, i.e., operational or

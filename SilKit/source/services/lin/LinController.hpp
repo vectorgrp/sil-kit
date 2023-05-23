@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <set>
 
 #include "silkit/services/lin/ILinController.hpp"
+#include "silkit/experimental/services/lin/LinDatatypesExtensions.hpp"
 
 #include "ILinControllerExtensions.hpp"
 #include "ITimeConsumer.hpp"
@@ -75,10 +76,15 @@ public:
     //
     // ILinController
     void Init(LinControllerConfig config) override;
+    void InitDynamic(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) override; // Experimental
+
     auto Status() const noexcept->LinControllerStatus override;
 
     void SendFrame(LinFrame frame, LinFrameResponseType responseType) override;
     void SendFrameHeader(LinId linId) override;
+
+    void SendDynamicResponse(const LinFrame& frame) override; // Experimental
+
     void UpdateTxBuffer(LinFrame frame) override;
     void SetFrameResponse(LinFrameResponse response) override;
 
@@ -92,6 +98,9 @@ public:
         Experimental::Services::Lin::LinSlaveConfigurationHandler handler) override; // Exprimental
     void RemoveLinSlaveConfigurationHandler(HandlerId handlerId) override; // Exprimental
 
+    auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> HandlerId override; // Experimental
+    void RemoveFrameHeaderHandler(HandlerId handlerId) override; // Experimental
+
     HandlerId AddFrameStatusHandler(FrameStatusHandler handler) override;
     HandlerId AddGoToSleepHandler(GoToSleepHandler handler) override;
     HandlerId AddWakeupHandler(WakeupHandler handler) override;
@@ -103,7 +112,7 @@ public:
     // IMsgForLinController
     void ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg) override;
-    void ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg) override;
+    void ReceiveMsg(const IServiceEndpoint* from, const WireLinControllerConfig& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinControllerStatusUpdate& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameHeaderRequest& msg) override;
     void ReceiveMsg(const IServiceEndpoint* from, const LinFrameResponseUpdate& msg) override;
@@ -132,6 +141,7 @@ public:
         Core::EndpointAddress address{};
         LinControllerMode controllerMode{LinControllerMode::Inactive};
         LinControllerStatus controllerStatus{LinControllerStatus::Unknown};
+        WireLinControllerConfig::SimulationMode simulationMode{WireLinControllerConfig::SimulationMode::Default};
         std::array<LinFrameResponse, 64> responses;
 
         void UpdateResponses(std::vector<LinFrameResponse> responsesToUpdate, Services::Logging::ILogger* logger);
@@ -184,6 +194,8 @@ private:
     void ThrowOnDuplicateInitialization() const;
     void ThrowIfUninitialized(const std::string& callingMethodName) const;
     void ThrowIfNotMaster(const std::string& callingMethodName) const;
+    void ThrowIfDynamic(const std::string& callingMethodName) const;
+    void ThrowIfNotDynamic(const std::string& callingMethodName) const;
     void ThrowIfNotConfiguredTxUnconditional(LinId linId);
     void WarnOnReceptionWithInvalidDataLength(LinDataLength invalidDataLength, const std::string& fromParticipantName,
                                               const std::string& fromServiceName) const;
@@ -202,6 +214,9 @@ private:
     void UpdateFrameResponse(LinFrameResponse response);
 
     bool HasRespondingSlave(LinId id);
+
+public:
+    bool HasDynamicNode();
 
 private:
     // ----------------------------------------
@@ -224,7 +239,8 @@ private:
         CallbacksT<LinFrameStatusEvent>,
         CallbacksT<LinGoToSleepEvent>,
         CallbacksT<LinWakeupEvent>,
-        CallbacksT<Experimental::Services::Lin::LinSlaveConfigurationEvent>
+        CallbacksT<Experimental::Services::Lin::LinSlaveConfigurationEvent>,
+        CallbacksT<SilKit::Experimental::Services::Lin::LinFrameHeaderEvent>
     > _callbacks;
 
     Services::Orchestration::ITimeProvider* _timeProvider{nullptr};
@@ -237,6 +253,10 @@ private:
 
     const LinId _maxDataLength = 8;
     const LinId _maxLinId = 64;
+
+    // DynamicResponses: no preallocated FrameResponses
+    std::chrono::nanoseconds _receptionTimeFrameHeader{std::chrono::nanoseconds::min()};
+    bool _useDynamicResponse{false};
 };
 
 // ==================================================================

@@ -1053,7 +1053,7 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerConfig& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const Services::Lin::WireLinControllerConfig& msg)
 {
     SendMsgImpl(from, msg);
 }
@@ -1309,7 +1309,7 @@ void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerConfig& msg)
+void Participant<SilKitConnectionT>::SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::WireLinControllerConfig& msg)
 {
     SendMsgImpl(from, targetParticipantName, msg);
 }

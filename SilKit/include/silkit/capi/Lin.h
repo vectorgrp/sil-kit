@@ -248,6 +248,17 @@ struct SilKit_LinControllerConfig
 };
 typedef struct SilKit_LinControllerConfig SilKit_LinControllerConfig;
 
+struct SilKit_Experimental_LinControllerDynamicConfig
+{
+    /*! The interface id specifying which version of this struct was obtained */
+    SilKit_StructHeader structHeader;
+    /*! Configure as LIN master or LIN slave */
+    SilKit_LinControllerMode controllerMode;
+    /*! The operational baud rate of the controller. */
+    SilKit_LinBaudRate baudRate;
+};
+typedef struct SilKit_Experimental_LinControllerDynamicConfig SilKit_Experimental_LinControllerDynamicConfig;
+
 /*! \brief The aggregated configuration of all LIN slaves in the network.
  * \param numRespondingLinIds The number of entries in respondingLinIds.
  * \param respondingLinIds An array of SilKit_LinId on which any LIN Slave has configured SilKit_LinFrameResponseMode_TxUnconditional
@@ -259,6 +270,15 @@ struct SilKit_Experimental_LinSlaveConfiguration
     SilKit_Bool isLinIdResponding[64];
 };
 typedef struct SilKit_Experimental_LinSlaveConfiguration SilKit_Experimental_LinSlaveConfiguration;
+
+/*! \brief A LIN frame header event delivered in the \ref SilKit_Experimental_LinFrameHeaderHandler_t. */
+struct SilKit_Experimental_LinFrameHeaderEvent
+{
+    SilKit_StructHeader    structHeader; //!< The interface id specifying which version of this struct was obtained
+    SilKit_NanosecondsTime timestamp;    //!< Time of the event.
+    SilKit_LinId           id;           //!< LIN Identifier
+};
+typedef struct SilKit_Experimental_LinFrameHeaderEvent SilKit_Experimental_LinFrameHeaderEvent;
 
 /*!
  * The LIN controller can assume the role of a LIN master or a LIN
@@ -308,6 +328,14 @@ typedef void (SilKitFPTR *SilKit_LinWakeupHandler_t)(void* context, SilKit_LinCo
 typedef void (SilKitFPTR *SilKit_Experimental_LinSlaveConfigurationHandler_t)(void* context, SilKit_LinController* controller,
                                           const SilKit_Experimental_LinSlaveConfigurationEvent* slaveConfigurationEvent);
 
+/*! Callback type to indicate the reception of a LIN frame header.
+ * \param context The context provided by the user on registration.
+ * \param controller The LIN controller that received the acknowledge.
+ * \param frameHeaderEvent The event containing information about the frame header.
+ */
+typedef void (SilKitFPTR* SilKit_Experimental_LinFrameHeaderHandler_t)(
+    void* context, SilKit_LinController* controller, const SilKit_Experimental_LinFrameHeaderEvent* frameHeaderEvent);
+
 
 /*! \brief Create a LIN controller at this SIL Kit simulation participant.
  *
@@ -354,6 +382,25 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Create_t)(
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_Init(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Init_t)(SilKit_LinController* controller, const SilKit_LinControllerConfig* config);
 
+
+/*! \brief Initialize the LIN controller defining its role in a dynamic response mode.
+ * 
+ * All controllers must be initialized exactly once to take part in LIN communication.
+ * Only available on Slave LinControllers.
+ * 
+ * \param controller The LIN controller to initialize
+ * \param config The controller configuration contains:
+ *  - controllerMode, either sets LIN master or LIN slave mode.
+ *  - baudRate, determine transmission speeds (only used for detailed simulation).
+ *  - simulationMode, must be SilKit_LinSimulationMode_DynamicResponse.
+ *
+ * \return \ref SilKit_ReturnCode
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_InitDynamic(
+    SilKit_LinController* controller, const SilKit_Experimental_LinControllerDynamicConfig* config);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_InitDynamic_t)(
+    SilKit_LinController* controller, const SilKit_Experimental_LinControllerDynamicConfig* config);
+
 /*! \brief Set a RX/TX configuration during operation.
  *
  * \param controller The LIN controller to set the configuration.
@@ -366,6 +413,19 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_LinController_SetFrameResponse(Sil
 typedef SilKit_ReturnCode(SilKitFPTR* SilKit_LinController_SetFrameResponse_t)(SilKit_LinController* controller,
                                                                                const SilKit_LinFrameResponse* response);
 
+/*! \brief When in LinSimulationMode_Default, send a response for the previously received LIN header.
+ *
+ * \param controller The LIN controller to set the configuration.
+ * \param frame The frame to send immediately.
+ *
+ * \throws SilKit::StateError if the LIN Controller is not initialized.
+ * \throws SilKit::StateError if the  simulation mode is not SilKit_LinSimulationMode_DynamicResponse.
+ * 
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_SendDynamicResponse(
+    SilKit_LinController* controller, const SilKit_LinFrame* frame);
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_SendDynamicResponse_t)(
+    SilKit_LinController* controller, const SilKit_LinFrame* frame);
 
 /*! \brief Get the current status of the LIN Controller, i.e., Operational or Sleep.
  *
@@ -625,6 +685,31 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveL
 
 typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler_t)(SilKit_LinController* controller,
                                                                         SilKit_HandlerId handlerId);
+
+
+/*! \brief The LinFrameHeaderHandler is called whenever the master sends a LIN header.
+ *
+ * \param controller The LIN controller for which the callback should be registered.
+ * \param context The user provided context pointer that is obtained in the callback.
+ * \param handler The handler to be called.
+ * \param outHandlerId The handler identifier that can be used to remove the callback.
+ *
+ * \throws SilKit::StateError if the LIN Controller is not in simulation mode SilKit_LinSimulationMode_DynamicResponse.
+ * \return \ref SilKit_ReturnCode
+ */
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddFrameHeaderHandler(
+    SilKit_LinController* controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_AddFrameHeaderHandler_t)(
+    SilKit_LinController* controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
+    SilKit_HandlerId* outHandlerId);
+
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveFrameHeaderHandler(
+    SilKit_LinController* controller, SilKit_HandlerId handlerId);
+
+typedef SilKit_ReturnCode (SilKitFPTR *SilKit_Experimental_LinController_RemoveFrameHeaderHandler_t)(
+    SilKit_LinController* controller, SilKit_HandlerId handlerId);
 
 
 SILKIT_END_DECLS

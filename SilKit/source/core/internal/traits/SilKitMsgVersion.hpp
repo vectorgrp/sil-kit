@@ -57,7 +57,7 @@ DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinSendFrameRequest, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinSendFrameHeaderRequest, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinTransmission, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinWakeupPulse, 1);
-DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinControllerConfig, 1);
+DefineSilKitMsgTrait_Version(SilKit::Services::Lin::WireLinControllerConfig, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinControllerStatusUpdate, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Lin::LinFrameResponseUpdate, 1);
 DefineSilKitMsgTrait_Version(SilKit::Services::Flexray::WireFlexrayFrameEvent, 1);

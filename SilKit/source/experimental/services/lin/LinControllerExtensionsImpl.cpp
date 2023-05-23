@@ -64,6 +64,32 @@ auto GetSlaveConfigurationImpl(SilKit::Services::Lin::ILinController* linControl
     return GetLinController(linController)->GetSlaveConfiguration();
 }
 
+void InitDynamicImpl(SilKit::Services::Lin::ILinController* linController,
+    const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
+{
+    return GetLinController(linController)->InitDynamic(dynamicConfig);
+}
+
+auto AddFrameHeaderHandlerImpl(SilKit::Services::Lin::ILinController* linController,
+    std::function<void(SilKit::Services::Lin::ILinController*,
+        const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& msg)>
+    handler) -> SilKit::Util::HandlerId
+{
+    return GetLinController(linController)->AddFrameHeaderHandler(handler);
+}
+
+void RemoveFrameHeaderHandlerImpl(SilKit::Services::Lin::ILinController* linController,
+    SilKit::Util::HandlerId handlerId)
+{
+    return GetLinController(linController)->RemoveFrameHeaderHandler(handlerId);
+}
+
+void SendDynamicResponseImpl(SilKit::Services::Lin::ILinController* linController,
+    const SilKit::Services::Lin::LinFrame& frame)
+{
+    return GetLinController(linController)->SendDynamicResponse(frame);
+}
+
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental

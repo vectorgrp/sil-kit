@@ -236,6 +236,13 @@ add_silkit_test(ITest_Lin
     LIBS
     S_ITests_STH
 )
+add_silkit_test(ITest_LinDynamicResponse
+    SOURCES
+    ITest_LinDynamicResponse.cpp
+
+    LIBS
+    S_ITests_STH
+)
 
 # RPC
 

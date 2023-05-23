@@ -66,6 +66,12 @@ void assign(SilKit::Services::Lin::LinControllerConfig& cppConfig, const SilKit_
     assign(cppConfig.frameResponses, cConfig->frameResponses, cConfig->numFrameResponses);
 }
 
+void assign(SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& cppConfig, const SilKit_Experimental_LinControllerDynamicConfig* cConfig)
+{
+    cppConfig.baudRate = static_cast<SilKit::Services::Lin::LinBaudRate>(cConfig->baudRate);
+    cppConfig.controllerMode = static_cast<SilKit::Services::Lin::LinControllerMode>(cConfig->controllerMode);
+}
+
 // Assign the cppLinSlaveConfiguration to cLinSlaveConfiguration
 void assign(SilKit_Experimental_LinSlaveConfiguration** cLinSlaveConfiguration,
             const SilKit::Experimental::Services::Lin::LinSlaveConfiguration& cppLinSlaveConfiguration)
@@ -403,6 +409,77 @@ try
     auto cppController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
     SilKit::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandlerImpl(
         cppController, static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_InitDynamic(
+    SilKit_LinController* controller, const SilKit_Experimental_LinControllerDynamicConfig* config)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(config);
+    ASSERT_VALID_STRUCT_HEADER(config);
+    auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
+    auto cppDynamicConfig = SilKit::Experimental::Services::Lin::LinControllerDynamicConfig{};
+    assign(cppDynamicConfig, config);
+    SilKit::Experimental::Services::Lin::InitDynamicImpl(linController, cppDynamicConfig);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddFrameHeaderHandler(
+    SilKit_LinController* controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
+    SilKit_HandlerId* outHandlerId)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_HANDLER_PARAMETER(handler);
+    ASSERT_VALID_OUT_PARAMETER(outHandlerId);
+
+    auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
+    auto cppHandlerId = SilKit::Experimental::Services::Lin::AddFrameHeaderHandlerImpl(
+        linController, [handler, context, controller](auto* /*ctrl*/, auto&& cppEvent) {
+            SilKit_Experimental_LinFrameHeaderEvent cEvent{};
+            SilKit_Struct_Init(SilKit_LinWakeupEvent, cEvent);
+            cEvent.timestamp = (SilKit_NanosecondsTime)cppEvent.timestamp.count();
+            cEvent.id = (SilKit_LinId)cppEvent.id;
+            handler(context, controller, &cEvent);
+        });
+    *outHandlerId = static_cast<SilKit_HandlerId>(cppHandlerId);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL
+SilKit_Experimental_LinController_RemoveFrameHeaderHandler(SilKit_LinController* controller, SilKit_HandlerId handlerId)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+
+    auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
+    SilKit::Experimental::Services::Lin::RemoveFrameHeaderHandlerImpl(linController,
+                                                                      static_cast<SilKit::Util::HandlerId>(handlerId));
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
+
+SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_SendDynamicResponse(SilKit_LinController* controller,
+    const SilKit_LinFrame* frame)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(controller);
+    ASSERT_VALID_POINTER_PARAMETER(frame);
+
+    auto linController = reinterpret_cast<SilKit::Services::Lin::ILinController*>(controller);
+    SilKit::Services::Lin::LinFrame cppLinFrame;
+    assign(cppLinFrame, frame);
+    SilKit::Experimental::Services::Lin::SendDynamicResponseImpl(linController, cppLinFrame);
+
     return SilKit_ReturnCode_SUCCESS;
 }
 CAPI_CATCH_EXCEPTIONS

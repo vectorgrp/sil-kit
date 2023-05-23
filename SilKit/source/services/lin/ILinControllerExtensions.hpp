@@ -32,10 +32,21 @@ class ILinControllerExtensions
 {
 public:
     virtual ~ILinControllerExtensions() = default;
-    virtual auto AddLinSlaveConfigurationHandler(Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
+
+    virtual auto AddLinSlaveConfigurationHandler(SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler handler)
         -> SilKit::Util::HandlerId = 0;
+
     virtual void RemoveLinSlaveConfigurationHandler(SilKit::Util::HandlerId handlerId) = 0;
-    virtual auto GetSlaveConfiguration() -> Experimental::Services::Lin::LinSlaveConfiguration = 0;
+
+    virtual auto GetSlaveConfiguration() -> SilKit::Experimental::Services::Lin::LinSlaveConfiguration = 0;
+
+    virtual void InitDynamic(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig) = 0;
+
+    virtual auto AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> SilKit::Util::HandlerId = 0;
+
+    virtual void RemoveFrameHeaderHandler(SilKit::Util::HandlerId handlerId) = 0;
+
+    virtual void SendDynamicResponse(const SilKit::Services::Lin::LinFrame& frame) = 0;
 };
 
 } // namespace Lin

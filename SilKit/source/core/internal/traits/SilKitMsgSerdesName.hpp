@@ -58,7 +58,7 @@ DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinSendFrameRequest, "SEN
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinSendFrameHeaderRequest, "SENDFRAMEHEADERREQUEST" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinTransmission, "TRANSMISSION" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinWakeupPulse, "WAKEUPPULSE" );
-DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinControllerConfig, "CONTROLLERCONFIG" );
+DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::WireLinControllerConfig, "CONTROLLERCONFIG" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinControllerStatusUpdate, "CONTROLLERSTATUSUPDATE" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Lin::LinFrameResponseUpdate, "FRAMERESPONSEUPDATE" );
 DefineSilKitMsgTrait_SerdesName(SilKit::Services::Flexray::WireFlexrayFrameEvent, "FRMESSAGE" );

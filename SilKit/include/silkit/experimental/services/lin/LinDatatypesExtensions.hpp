@@ -56,6 +56,30 @@ struct LinSlaveConfiguration
         respondingLinIds; //!< A vector of LinIds on which any LIN Slave has configured LinFrameResponseMode::TxUnconditional
 };
 
+/*! Configuration data to initialize the LIN Controller in the given LinSimulationMode
+ *  Cf.: \ref InitDynamic(ILinController*,const LinControllerDynamicConfig&);
+ */
+struct LinControllerDynamicConfig
+{
+    //! Configure as LIN master or LIN slave
+    LinControllerMode controllerMode{LinControllerMode::Inactive};
+    /*! The operational baud rate of the controller. Used in a detailed simulation.
+     */
+    LinBaudRate baudRate{0};
+};
+
+//! \brief A frame header event delivered in the \ref LinFrameHeaderHandler.
+struct LinFrameHeaderEvent
+{
+    std::chrono::nanoseconds timestamp; //!< Time of the event.
+    LinId id;
+};
+
+/*! Callback type to indicate that a frame header has been received.
+ *  Cf., \ref AddFrameHeaderHandler(ILinController*,LinFrameHeaderHandler);
+ */
+using LinFrameHeaderHandler = ILinController::CallbackT<LinFrameHeaderEvent>;
+
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental

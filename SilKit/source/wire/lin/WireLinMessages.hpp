@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/lin/LinDatatypes.hpp"
 #include "silkit/services/lin/string_utils.hpp"
+#include "silkit/experimental/services/lin/LinDatatypesExtensions.hpp"
 
 #include "SharedVector.hpp"
 
@@ -81,12 +82,41 @@ struct LinFrameResponseUpdate
     std::vector<LinFrameResponse> frameResponses; //!< Vector of new FrameResponses.
 };
 
+
+//! \brief Data type for configuring a LinController. Contains members for DynamicResponse and Default simulationmode.
+struct WireLinControllerConfig
+{
+    //! Used to configure the simulation mode of the LinController.
+    enum class SimulationMode : uint8_t
+    {
+        //! The LIN controller sets frame responses using SetFrameResponses in advance.
+        Default = 0,
+        //! The LIN controller does not send frame responses automatically, users must call SendDynamicResponse.
+        Dynamic = 1,
+    };
+
+    //! Configure as LIN master or LIN slave
+    LinControllerMode controllerMode{LinControllerMode::Inactive};
+    //! The operational baud rate of the controller. Used in a detailed simulation.
+    LinBaudRate baudRate{0};
+    //! Optional LinFrameResponse configuration.
+    //!
+    //! FrameResponses can also be configured at a later point using
+    //! ILinController::UpdateTxBuffer() and
+    //! ILinController::SetFrameResponses().
+    std::vector<LinFrameResponse> frameResponses;
+
+    //! The LinController's simulation mode.
+    SimulationMode simulationMode{SimulationMode::Default};
+};
+
 inline bool operator==(const LinTransmission& lhs, const LinTransmission& rhs);
 inline bool operator==(const LinSendFrameRequest& lhs, const LinSendFrameRequest& rhs);
 inline bool operator==(const LinSendFrameHeaderRequest& lhs, const LinSendFrameHeaderRequest& rhs);
 inline bool operator==(const LinWakeupPulse& lhs, const LinWakeupPulse& rhs);
 inline bool operator==(const LinControllerStatusUpdate& lhs, const LinControllerStatusUpdate& rhs);
 inline bool operator==(const LinFrameResponseUpdate& lhs, const LinFrameResponseUpdate& rhs);
+inline bool operator==(const WireLinControllerConfig& lhs, const WireLinControllerConfig& rhs);
 
 inline std::string to_string(const LinTransmission& transmission);
 inline std::string to_string(const LinSendFrameRequest& request);
@@ -94,6 +124,7 @@ inline std::string to_string(const LinSendFrameHeaderRequest& request);
 inline std::string to_string(const LinWakeupPulse& pulse);
 inline std::string to_string(const LinControllerStatusUpdate& controllerStatusUpdate);
 inline std::string to_string(const LinFrameResponseUpdate& frameResponseUpdate);
+inline std::string to_string(const WireLinControllerConfig& frameResponseUpdate);
 
 inline std::ostream& operator<<(std::ostream& out, const LinTransmission& transmission);
 inline std::ostream& operator<<(std::ostream& out, const LinSendFrameRequest& request);
@@ -101,6 +132,7 @@ inline std::ostream& operator<<(std::ostream& out, const LinSendFrameHeaderReque
 inline std::ostream& operator<<(std::ostream& out, const LinWakeupPulse& pulse);
 inline std::ostream& operator<<(std::ostream& out, const LinControllerStatusUpdate& controllerStatusUpdate);
 inline std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameResponseUpdate);
+inline std::ostream& operator<<(std::ostream& out, const WireLinControllerConfig& frameResponseUpdate);
 
 // ================================================================================
 //  Inline Implementations
@@ -140,6 +172,16 @@ bool operator==(const LinControllerStatusUpdate& lhs, const LinControllerStatusU
 bool operator==(const LinFrameResponseUpdate& lhs, const LinFrameResponseUpdate& rhs)
 {
     return lhs.frameResponses == rhs.frameResponses;
+}
+
+//! \brief operator== for WireLinControllerConfig
+bool operator==(const WireLinControllerConfig& lhs, const WireLinControllerConfig& rhs)
+{
+    return lhs.baudRate == rhs.baudRate
+        && lhs.controllerMode == rhs.controllerMode
+        && lhs.frameResponses == rhs.frameResponses
+        && lhs.simulationMode == rhs.simulationMode
+        ;
 }
 
 std::ostream& operator<<(std::ostream& out, const LinTransmission& transmission)
@@ -190,6 +232,22 @@ std::ostream& operator<<(std::ostream& out, const LinFrameResponseUpdate& frameR
     return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const WireLinControllerConfig& config)
+{
+    out << "lin::WireLinControllerConfig{" << config.baudRate << ", "
+        << static_cast<int>(config.controllerMode) << ", "
+        << static_cast<int>(config.simulationMode) << ", "
+        ;
+    out << "{";
+    for (auto&& response: config.frameResponses)
+    {
+        out << "," << static_cast<uint16_t>(response.frame.id);
+    }
+    out << "}";
+
+    return out;
+}
+
 std::string to_string(const LinTransmission& transmission)
 {
     std::stringstream out;
@@ -229,6 +287,13 @@ std::string to_string(const LinFrameResponseUpdate& frameResponseUpdate)
 {
     std::stringstream out;
     out << frameResponseUpdate;
+    return out.str();
+}
+
+std::string to_string(const WireLinControllerConfig& config)
+{
+    std::stringstream out;
+    out << config;
     return out.str();
 }
 

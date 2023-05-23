@@ -69,6 +69,25 @@ MATCHER_P(LinControllerConfigMatcher, controlFrame, "")
     return true;
 }
 
+MATCHER_P(LinControllerDynamicConfigMatcher, controlFrame, "")
+{
+    *result_listener << "matches LinControllerDynamicConfig of the c-api to the cpp api";
+
+    SilKit::Experimental::Services::Lin::LinControllerDynamicConfig config1 = controlFrame;
+    const SilKit_Experimental_LinControllerDynamicConfig* config2 = arg;
+
+    const auto sameControllerMode =
+        static_cast<uint8_t>(config1.controllerMode) == static_cast<uint8_t>(config2->controllerMode);
+    if ((config1.baudRate != config2->baudRate)
+        || !sameControllerMode
+        )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 MATCHER_P(LinFrameMatcher, controlFrame, "")
 {
     *result_listener << "matches Lin frames of the c-api to the cpp api";
@@ -132,6 +151,20 @@ TEST_F(HourglassLinTest, SilKit_LinController_Init)
     EXPECT_CALL(capi, SilKit_LinController_Init(mockLinController, LinControllerConfigMatcher(controllerConfig)))
         .Times(1);
     LinController.Init(controllerConfig);
+}
+
+TEST_F(HourglassLinTest, SilKit_LinController_InitDynamic)
+{
+    SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
+        nullptr, "LinController1", "LinNetwork1");
+
+    SilKit::Experimental::Services::Lin::LinControllerDynamicConfig controllerConfig{};
+    controllerConfig.baudRate = 1234;
+    controllerConfig.controllerMode = LinControllerMode::Master;
+
+    EXPECT_CALL(capi, SilKit_Experimental_LinController_InitDynamic(mockLinController, LinControllerDynamicConfigMatcher(controllerConfig)))
+        .Times(1);
+    LinController.ExperimentalInitDynamic(controllerConfig);
 }
 
 TEST_F(HourglassLinTest, SilKit_LinController_Status)

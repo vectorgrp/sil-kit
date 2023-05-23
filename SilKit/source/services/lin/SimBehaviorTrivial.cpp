@@ -100,7 +100,7 @@ void SimBehaviorTrivial::SendMsg(LinTransmission&& msg)
     SendMsgImpl(msg);
 }
 
-void SimBehaviorTrivial::SendMsg(LinControllerConfig&& msg)
+void SimBehaviorTrivial::SendMsg(WireLinControllerConfig&& msg)
 {
     // Only slaves need to distribute updates
     if (_parentController->Mode() == LinControllerMode::Slave)
@@ -124,7 +124,7 @@ void SimBehaviorTrivial::SendMsg(LinSendFrameHeaderRequest&& msg)
     auto numResponses = 0;
     std::tie(numResponses, frame) = _parentController->GetResponse(msg.id);
 
-    if (numResponses == 1)
+    if (numResponses == 1 || (numResponses == 0 && _parentController->HasDynamicNode()))
     {
         // Send the header, the Tx-Node will generate the LinTransmission (possibly the master itself)
         SendMsgImpl(msg);
@@ -174,7 +174,7 @@ void SimBehaviorTrivial::SendMsg(LinControllerStatusUpdate&& msg)
     SendMsgImpl(msg);
 }
 
-void SimBehaviorTrivial::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header)
+void SimBehaviorTrivial::ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& header)
 {
     LinFrameResponse response = _parentController->GetThisLinNode().responses[header.id];
     if (response.responseMode != LinFrameResponseMode::TxUnconditional)
@@ -211,6 +211,12 @@ void SimBehaviorTrivial::UpdateTxBuffer(const LinFrame& /*frame*/)
 auto SimBehaviorTrivial::CalcFrameStatus(const LinTransmission& linTransmission, bool /*isGoToSleepFrame*/)
     -> LinFrameStatus
 {
+    // dynamic controllers report every transmission as it was received
+    if (_parentController->GetThisLinNode().simulationMode == WireLinControllerConfig::SimulationMode::Dynamic)
+    {
+        return linTransmission.status;
+    }
+
     // Evaluate locally known response
     auto& thisLinNode = _parentController->GetThisLinNode();
     const auto response = thisLinNode.responses[linTransmission.frame.id];

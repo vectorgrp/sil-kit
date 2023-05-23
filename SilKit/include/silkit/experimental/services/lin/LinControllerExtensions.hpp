@@ -71,6 +71,42 @@ DETAIL_SILKIT_CPP_API void RemoveLinSlaveConfigurationHandler(SilKit::Services::
 DETAIL_SILKIT_CPP_API auto GetSlaveConfiguration(SilKit::Services::Lin::ILinController* linController)
     -> SilKit::Experimental::Services::Lin::LinSlaveConfiguration;
 
+/*! \brief Initialize the LIN controller with the given LinControllerDynamicConfig
+ *
+ * All controllers must be initialized exactly once to take part in LIN communication.
+ *
+ * \param linController The controller to act upon
+ * \param dynamicConfig The controller configuration contains:
+ *  - controllerMode, either sets LIN master or LIN slave mode.
+ *  - baudRate, determine transmission speeds (only used for detailed simulation).
+ *  - simulationMode, can be used to enable LinSimulationMode::DynamicResponse
+ *
+ * \throws SilKit::StateError if the LIN Controller is configured with LinControllerMode::Inactive
+ * \throws SilKit::StateError if Init() is called a second time on this LIN Controller.
+ */
+DETAIL_SILKIT_CPP_API void InitDynamic(SilKit::Services::Lin::ILinController* linController, const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig);
+
+/*! \brief The FrameHeaderHandler is called whenever a LIN frame header is received.
+ *
+ * \return Returns a \ref SilKit::Util::HandlerId that can be used to remove the callback.
+ */
+DETAIL_SILKIT_CPP_API auto AddFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> SilKit::Services::HandlerId;
+
+/*! \brief Remove a FrameHeaderHandler by \ref SilKit::Util::HandlerId on this controller
+ *
+ * \param linController The controller to act upon
+ * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
+ */
+DETAIL_SILKIT_CPP_API void RemoveFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Services::HandlerId handlerId);
+
+/*! \brief Send a response for the previously received LIN header, but only when the controller was initialized using \ref InitDynamic.
+ *
+ * \throws SilKit::StateError if the LIN Controller is not initialized.
+ * \throws SilKit::StateError if the LIN controller was not initialized using \ref InitDynamic.
+ * \throws SilKit::StateError if no prior LinFrameHeaderEvent was received before the call.
+ */
+DETAIL_SILKIT_CPP_API void SendDynamicResponse(SilKit::Services::Lin::ILinController* linController, const SilKit::Services::Lin::LinFrame& linFrame);
+
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental

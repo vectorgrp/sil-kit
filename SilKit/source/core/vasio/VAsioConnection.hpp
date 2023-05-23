@@ -61,6 +61,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SerializedMessage.hpp"
 #include "Assert.hpp"
 #include "ILogger.hpp"
+#include "WireLinMessages.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -240,7 +241,7 @@ private:
         Services::Lin::LinSendFrameHeaderRequest,
         Services::Lin::LinTransmission,
         Services::Lin::LinWakeupPulse,
-        Services::Lin::LinControllerConfig,
+        Services::Lin::WireLinControllerConfig,
         Services::Lin::LinControllerStatusUpdate,
         Services::Lin::LinFrameResponseUpdate,
         Services::Flexray::WireFlexrayFrameEvent,

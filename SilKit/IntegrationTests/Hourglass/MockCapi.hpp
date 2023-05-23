@@ -266,6 +266,21 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler,
                 (SilKit_LinController * controller, SilKit_HandlerId handlerId));
 
+    // Lin RespondeDynamic
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_LinController_InitDynamic,
+                (SilKit_LinController * controller, const SilKit_Experimental_LinControllerDynamicConfig* config));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_LinController_SendDynamicResponse,
+                (SilKit_LinController * controller, const SilKit_LinFrame* frame));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_LinController_AddFrameHeaderHandler,
+                (SilKit_LinController * controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
+                 SilKit_HandlerId* outHandlerId));
+
+    MOCK_METHOD(SilKit_ReturnCode, SilKit_Experimental_LinController_RemoveFrameHeaderHandler,
+                (SilKit_LinController * controller, SilKit_HandlerId handlerId));
+
     // LifecycleService
 
     MOCK_METHOD(SilKit_ReturnCode, SilKit_LifecycleService_Create,
