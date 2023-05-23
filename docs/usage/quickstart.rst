@@ -100,7 +100,7 @@ We load it in the main function of our code::
 
     int main(int argc, char** argv)
     {
-        auto config = SilKit::Config::ParticipantConfigurationFromFile("simple.yaml")
+        auto config = SilKit::Config::ParticipantConfigurationFromFile("simple.yaml");
         // TODO: Use config to create participants
     }
 
