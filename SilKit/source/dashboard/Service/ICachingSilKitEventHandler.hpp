@@ -21,54 +21,22 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <mutex>
-#include <functional>
-#include <tuple>
-
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 #include "ServiceDatatypes.hpp"
 
 namespace SilKit {
-
 namespace Dashboard {
-
-//helper to cache multiple callback parameters
-struct ServiceData
+class ICachingSilKitEventHandler
 {
-    SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType;
-    SilKit::Core::ServiceDescriptor serviceDescriptor;
+public:
+    virtual ~ICachingSilKitEventHandler() = default;
+    virtual void OnLastParticipantDisconnected() = 0;
+    virtual void OnParticipantConnected(
+        const Services::Orchestration::ParticipantConnectionInformation& participantInformation) = 0;
+    virtual void OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus) = 0;
+    virtual void OnSystemStateChanged(Services::Orchestration::SystemState systemState) = 0;
+    virtual void OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                                         const Core::ServiceDescriptor& serviceDescriptor) = 0;
 };
-
-struct CachedData
-{
-    template <typename... Ts>
-    using ContainterT = std::vector<Ts...>;
-
-    std::mutex _mutex;
-    using LockT = std::unique_lock<decltype(_mutex)>;
-    std::tuple<ContainterT<Services::Orchestration::ParticipantConnectionInformation>,
-               ContainterT<Services::Orchestration::SystemState>,
-               ContainterT<Services::Orchestration::ParticipantStatus>, ContainterT<ServiceData>>
-        _dataSets;
-    template <typename T>
-    void Insert(const T& datum)
-    {
-        LockT lock{_mutex};
-        using data_t = ContainterT<std::decay_t<T>>;
-        auto&& dataSet = std::get<data_t>(_dataSets);
-        dataSet.push_back(datum);
-    }
-
-    template <typename T>
-    ContainterT<T> GetAndClear()
-    {
-        LockT lock{_mutex};
-        using data_t = ContainterT<std::decay_t<T>>;
-        auto&& dataSet = std::get<data_t>(_dataSets);
-        auto dataCopy = std::move(dataSet);
-        return dataCopy;
-    }
-};
-
 } // namespace Dashboard
 } // namespace SilKit

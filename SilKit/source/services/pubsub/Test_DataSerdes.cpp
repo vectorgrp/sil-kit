@@ -30,7 +30,7 @@ using namespace std::chrono_literals;
 namespace SilKit {
 namespace Services {
 namespace PubSub {
-    bool operator==(const WireDataMessageEvent& lhs, const WireDataMessageEvent& rhs)
+    static bool operator==(const WireDataMessageEvent& lhs, const WireDataMessageEvent& rhs)
     {
         return Util::ItemsAreEqual(lhs.data, rhs.data)
             && lhs.timestamp == rhs.timestamp;

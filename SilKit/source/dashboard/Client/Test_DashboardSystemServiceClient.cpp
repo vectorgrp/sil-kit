@@ -38,41 +38,6 @@ using namespace testing;
 namespace SilKit {
 namespace Dashboard {
 
-class MockDecodeAsync : public oatpp::async::Coroutine<MockDecodeAsync>
-{
-public:
-    MockDecodeAsync() {}
-
-public:
-    Action act() override { return std::forward<Action>(finish()); }
-};
-
-class MockExecuteRequestAsync
-    : public oatpp::async::CoroutineWithResult<MockExecuteRequestAsync, const std::shared_ptr<incoming::Response> &>
-{
-public:
-    MockExecuteRequestAsync(Status status, std::shared_ptr<MockInputStream> nullInput,
-                            std::shared_ptr<StrictMock<MockBodyDecoder>> mockBodyDecoder)
-        : _status(status)
-        , _nullInput(nullInput)
-        , _mockBodyDecoder(mockBodyDecoder)
-    {
-    }
-
-public:
-    Action act() override
-    {
-        oatpp::data::share::LazyStringMultimap<oatpp::data::share::StringKeyLabelCI> headers;
-        return _return(
-            incoming::Response::createShared(_status.code, _status.description, headers, _nullInput, _mockBodyDecoder));
-    }
-
-private:
-    Status _status;
-    std::shared_ptr<MockInputStream> _nullInput;
-    std::shared_ptr<StrictMock<MockBodyDecoder>> _mockBodyDecoder;
-};
-
 class TestDashboardSystemServiceClient : public Test
 {
 public:
@@ -81,7 +46,6 @@ public:
         _mockObjectMapper = std::make_shared<MockObjectMapper>(_info);
         _objectMapper = std::static_pointer_cast<ObjectMapper>(_mockObjectMapper);
         _mockDashboardSystemApiClient = std::make_shared<StrictMock<MockDashboardSystemApiClient>>(_objectMapper);
-        _executor = std::make_shared<oatpp::async::Executor>(1, 1, 1);
         _mockBodyDecoder = std::make_shared<StrictMock<MockBodyDecoder>>();
         _nullInput = std::make_shared<MockInputStream>();
 
@@ -91,21 +55,28 @@ public:
     std::shared_ptr<IDashboardSystemServiceClient> CreateService()
     {
         return std::make_shared<DashboardSystemServiceClient>(&_dummyLogger, _mockDashboardSystemApiClient,
-                                                              _objectMapper, _executor);
+                                                              _objectMapper);
     }
 
-    void WaitForExecutor()
+    void SetupExecuteRequest(
+        Status status,
+        const std::function<void(const oatpp::String&, const oatpp::data::share::StringTemplate&,
+                                 const std::unordered_map<oatpp::String, oatpp::String>& pathParams)>& OnRequest)
     {
-        _executor->waitTasksFinished();
-        _executor->stop();
-        _executor->join();
+        std::shared_ptr<oatpp::web::protocol::http::incoming::Response> response =
+            oatpp::web::protocol::http::incoming::Response::createShared(status.code, status.description, Headers(),
+                                                                         _nullInput, _mockBodyDecoder);
+        EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequest)
+            .WillOnce(DoAll(WithArgs<0, 1, 3>([OnRequest](auto currentMethod, auto pathTemplate, auto map) {
+                                OnRequest(currentMethod, pathTemplate, map);
+                            }),
+                            Return(response)));
     }
 
     Core::Tests::MockLogger _dummyLogger;
     std::shared_ptr<StrictMock<MockDashboardSystemApiClient>> _mockDashboardSystemApiClient;
     std::shared_ptr<MockObjectMapper> _mockObjectMapper;
     std::shared_ptr<ObjectMapper> _objectMapper;
-    std::shared_ptr<oatpp::async::Executor> _executor;
     std::shared_ptr<MockInputStream> _nullInput;
     std::shared_ptr<StrictMock<MockBodyDecoder>> _mockBodyDecoder;
     ObjectMapper::Info _info = "application/json";
@@ -114,29 +85,30 @@ public:
 TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Success)
 {
     // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write).Times(1);
+    EXPECT_CALL(*_mockObjectMapper, write);
     oatpp::String actualPath;
     oatpp::String actualMethod;
-    EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequestAsync)
-        .WillOnce(DoAll(WithArgs<0, 1, 3>([&](auto currentMethod, auto pathTemplate, auto map) {
+    SetupExecuteRequest(Status::CODE_201,
+                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
                             actualMethod = currentMethod;
                             actualPath = pathTemplate.format(map);
-                        }),
-                        Return(MockExecuteRequestAsync::startForResult(Status::CODE_201, _nullInput, _mockBodyDecoder))));
-    EXPECT_CALL(*_mockBodyDecoder, decodeAsync).WillOnce(Return(MockDecodeAsync::start()));
+                        });
+    EXPECT_CALL(*_mockBodyDecoder, decode);
     auto expectedResponse = SimulationCreationResponseDto::createShared();
     expectedResponse->id = 123;
     EXPECT_CALL(*_mockObjectMapper, read).WillOnce(Return(expectedResponse));
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: created simulation with id 123"));
+    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: creating simulation returned 201"));
 
     // Act
-    const auto service = CreateService();
-    auto request = SimulationCreationRequestDto::createShared();
-    auto res = service->CreateSimulation(request);
-    WaitForExecutor();
+    oatpp::Object<SimulationCreationResponseDto> response;
+    {
+        const auto service = CreateService();
+        auto request = SimulationCreationRequestDto::createShared();
+        response = service->CreateSimulation(request);
+    }
 
     // Assert
-    ASSERT_EQ(res.get(), expectedResponse);
+    ASSERT_EQ(response, expectedResponse);
     ASSERT_STREQ(actualMethod->c_str(), "POST");
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
 }
@@ -144,26 +116,26 @@ TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Success)
 TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Failure)
 {
     // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write).Times(1);
+    EXPECT_CALL(*_mockObjectMapper, write);
     oatpp::String actualPath;
     oatpp::String actualMethod;
-    EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequestAsync)
-        .WillOnce(
-            DoAll(WithArgs<0, 1, 3>([&](auto currentMethod, auto pathTemplate, auto map) {
-                      actualMethod = currentMethod;
-                      actualPath = pathTemplate.format(map);
-                  }),
-                  Return(MockExecuteRequestAsync::startForResult(Status::CODE_500, _nullInput, _mockBodyDecoder))));
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: creating simulation failed: 500"));
+    SetupExecuteRequest(Status::CODE_500,
+                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
+                            actualMethod = currentMethod;
+                            actualPath = pathTemplate.format(map);
+                        });
+    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: creating simulation returned 500"));
 
     // Act
-    const auto service = CreateService();
-    auto request = SimulationCreationRequestDto::createShared();
-    auto res = service->CreateSimulation(request);
-    WaitForExecutor();
+    oatpp::Object<SimulationCreationResponseDto> response;
+    {
+        const auto service = CreateService();
+        auto request = SimulationCreationRequestDto::createShared();
+        service->CreateSimulation(request);
+    }
 
     // Assert
-    ASSERT_FALSE(res.get());
+    ASSERT_TRUE(response == nullptr);
     ASSERT_STREQ(actualMethod->c_str(), "POST");
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
 }
@@ -171,24 +143,23 @@ TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Failure)
 TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Success)
 {
     // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write).Times(1);
+    EXPECT_CALL(*_mockObjectMapper, write);
     oatpp::String actualPath;
     oatpp::String actualMethod;
-    EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequestAsync)
-        .WillOnce(
-            DoAll(WithArgs<0, 1, 3>([&](auto currentMethod, auto pathTemplate, auto map) {
-                      actualMethod = currentMethod;
-                      actualPath = pathTemplate.format(map);
-                  }),
-                  Return(MockExecuteRequestAsync::startForResult(Status::CODE_204, _nullInput, _mockBodyDecoder))));
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: setting simulation end succeeded: 204"));
+    SetupExecuteRequest(Status::CODE_204,
+                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
+                            actualMethod = currentMethod;
+                            actualPath = pathTemplate.format(map);
+                        });
+    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Debug, "Dashboard: setting simulation end returned 204"));
 
     // Act
-    const auto service = CreateService();
-    const oatpp::UInt64 expectedSimulationId = 123;
-    auto request = SimulationEndDto::createShared();
-    service->SetSimulationEnd(expectedSimulationId, request);
-    WaitForExecutor();
+    {
+        const auto service = CreateService();
+        const oatpp::UInt64 expectedSimulationId = 123;
+        auto request = SimulationEndDto::createShared();
+        service->SetSimulationEnd(expectedSimulationId, request);
+    }
 
     // Assert
     ASSERT_STREQ(actualMethod->c_str(), "POST");
@@ -198,24 +169,23 @@ TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Success)
 TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Failure)
 {
     // Arrange
-    EXPECT_CALL(*_mockObjectMapper, write).Times(1);
+    EXPECT_CALL(*_mockObjectMapper, write);
     oatpp::String actualPath;
     oatpp::String actualMethod;
-    EXPECT_CALL(*_mockDashboardSystemApiClient, executeRequestAsync)
-        .WillOnce(
-            DoAll(WithArgs<0, 1, 3>([&](auto currentMethod, auto pathTemplate, auto map) {
-                      actualMethod = currentMethod;
-                      actualPath = pathTemplate.format(map);
-                  }),
-                  Return(MockExecuteRequestAsync::startForResult(Status::CODE_500, _nullInput, _mockBodyDecoder))));
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: setting simulation end failed: 500"));
+    SetupExecuteRequest(Status::CODE_500,
+                        [&actualPath, &actualMethod](auto currentMethod, auto pathTemplate, auto map) {
+                            actualMethod = currentMethod;
+                            actualPath = pathTemplate.format(map);
+                        });
+    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Error, "Dashboard: setting simulation end returned 500"));
 
     // Act
-    const auto service = CreateService();
-    const oatpp::UInt64 expectedSimulationId = 123;
-    auto request = SimulationEndDto::createShared();
-    service->SetSimulationEnd(expectedSimulationId, request);
-    WaitForExecutor();
+    {
+        const auto service = CreateService();
+        const oatpp::UInt64 expectedSimulationId = 123;
+        auto request = SimulationEndDto::createShared();
+        service->SetSimulationEnd(expectedSimulationId, request);
+    }
 
     // Assert
     ASSERT_STREQ(actualMethod->c_str(), "POST");

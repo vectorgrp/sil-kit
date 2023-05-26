@@ -39,7 +39,7 @@ SilKitAPI auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfi
 //! returns information about simulation, participants and networks
 SilKitAPI auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                                 const std::string& registryUri, const std::string& dashboardUri,
-                                std::function<void()> testCode,
+                                std::function<void()> testCode, uint64_t expectedSimulationsCount = 1, 
                                 std::chrono::seconds creationTimeout = std::chrono::seconds{0},
                                 std::chrono::seconds updateTimeout = std::chrono::seconds{0}) -> TestResult;
 

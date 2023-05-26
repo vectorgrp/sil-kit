@@ -23,9 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ISilKitEventHandler.hpp"
 
-#include <atomic>
 #include <memory>
-#include <thread>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -44,32 +42,25 @@ public:
     ~SilKitEventHandler();
 
 public: //methods
-
-    std::future<bool> OnStart(const std::string& connectUri, uint64_t time) override;
-    void OnShutdown(uint64_t time) override;
+    uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) override;
+    void OnSimulationEnd(uint64_t simulationId, uint64_t time) override;
     void OnParticipantConnected(
+        uint64_t simulationId,
         const Services::Orchestration::ParticipantConnectionInformation& participantInformation) override;
-    void OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus) override;
-    void OnSystemStateChanged(Services::Orchestration::SystemState systemState) override;
-    void OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+    void OnParticipantStatusChanged(uint64_t simulationId,
+                                    const Services::Orchestration::ParticipantStatus& participantStatus) override;
+    void OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState) override;
+    void OnServiceDiscoveryEvent(uint64_t simulationId, Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                  const Core::ServiceDescriptor& serviceDescriptor) override;
 
 private: //methods
-    void Run(const std::string& connectUri, uint64_t time);
-    void OnControllerCreated(uint32_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
-    void OnLinkCreated(uint32_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
+    void OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
+    void OnLinkCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor);
 
 private: //member
-    std::atomic<bool> _stopping{false};
-    std::thread _simulationCreationThread;
-    std::promise<bool> _simulationCreatedPromise;
-    std::atomic<uint64_t> _simulationId{0};
-
     Services::Logging::ILogger* _logger;
     std::shared_ptr<IDashboardSystemServiceClient> _dashboardSystemServiceClient;
     std::shared_ptr<ISilKitToOatppMapper> _silKitToOatppMapper;
-
-    friend class TestDashboardSilKitEventHandler;
 };
 
 } // namespace Dashboard

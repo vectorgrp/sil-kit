@@ -26,14 +26,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "gtest/gtest.h"
 
+#include "silkit/services/orchestration/string_utils.hpp"
+
 #include "ITestFixture.hpp"
 #include "ITestThreadSafeLogger.hpp"
 #include "InternalHelpers.hpp"
 
-#include "silkit/services/all.hpp"
 #include "IParticipantInternal.hpp"
 #include "IServiceDiscovery.hpp"
-#include "silkit/config/all.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
 
 #include "CreateDashboard.hpp"
@@ -44,39 +44,87 @@ using namespace SilKit::Core;
 using namespace SilKit::Config;
 using namespace SilKit::Services;
 
-class DashboardTestHarness : public ITest_SimTestHarness
+class DashboardTestHarness : public ITest_DashboardTestHarness
 {
 protected:
     DashboardTestHarness()
-        : ITest_SimTestHarness()
-        , _dashboardUri(MakeTestDashboardUri())
-        , _participantConfig(
-              ParticipantConfigurationFromStringImpl(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"))
+        : ITest_DashboardTestHarness()
     {
     }
 
     ~DashboardTestHarness() {}
 
 protected:
-    Orchestration::ITimeSyncService::SimulationStepHandler CreateSimulationStepHandler(
-        const std::string& participantName, Orchestration::ILifecycleService* lifecycleService)
+    void RunCanDemo(const std::string& participantName1, const std::string& participantName2,
+                    const std::string& canonicalName, const std::string& networkName)
     {
-        return [this, participantName, lifecycleService](auto now, auto) {
-            if (now < 200ms)
+        _simTestHarness->CreateSystemController();
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
+            auto&& participant = simParticipant->Participant();
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& canController = participant->CreateCanController(canonicalName, networkName);
+            canController->AddFrameHandler([simParticipant](auto, auto) {
+                Log() << simParticipant->Name() << ": stopping";
+                simParticipant->Stop();
+            });
+            lifecycleService->SetCommunicationReadyHandler([canController, participantName1]() {
+                Log() << participantName1 << ": Init called, setting baud rate and starting";
+                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
+                canController->Start();
+            });
+        }
+        {
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
+            auto&& participant = simParticipant->Participant();
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            auto&& canController = participant->CreateCanController(canonicalName, networkName);
+            timeSyncService->SetSimulationStepHandler(
+                [canController](auto, auto) {
+                    const std::vector<uint8_t> canFrameData = {'d', 'a', 't', 'a', 0, 1, 2, 3};
+                    SilKit::Services::Can::CanFrame canFrame{};
+                    canFrame.canId = 17;
+                    canFrame.flags =
+                        // FD Format Indicator
+                        static_cast<SilKit::Services::Can::CanFrameFlagMask>(SilKit::Services::Can::CanFrameFlag::Fdf)
+                        // Bit Rate Switch  (for FD Format only)
+                        | static_cast<SilKit::Services::Can::CanFrameFlagMask>(
+                            SilKit::Services::Can::CanFrameFlag::Brs);
+                    canFrame.dataField = canFrameData;
+                    canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
+                    canController->SendFrame(canFrame);
+                },
+                10ms);
+            lifecycleService->SetCommunicationReadyHandler([canController, participantName2]() {
+                Log() << participantName2 << ": Init called, setting baud rate and starting";
+                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
+                canController->Start();
+            });
+        }
+        auto ok = _simTestHarness->Run(5s);
+        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        _simTestHarness->ResetParticipants();
+    }
+
+    Orchestration::ISystemMonitor::ParticipantStatusHandler CreateParticipantStatusHandler(
+        const std::string& participantName, Orchestration::ILifecycleService* lifecycleService, size_t expectedCount)
+    {
+        return [this, participantName, lifecycleService, expectedCount](auto status) {
+            if (status.state == Orchestration::ParticipantState::Running)
             {
-                return;
-            }
-            if (!_result)
-            {
-                _result = true;
-                lifecycleService->Stop("Test done");
-                Log() << "---   " << participantName << ": Sending Stop from";
+                Log() << participantName << " got " << status.state << " from " << status.participantName;
+                if (AddRunningParticipant(participantName, status.participantName) == expectedCount)
+                {
+                    Log() << participantName << ": stopping";
+                    lifecycleService->Stop("All participants are running...");
+                }
             }
         };
     }
 
     SilKit::Dashboard::TestResult CreateExpectedTestResult(
-        std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> servicesByParticipant)
+        std::vector<std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>>> simulations, bool sync)
     {
         std::set<std::string> expectedStates{"servicescreated",
                                              "communicationinitializing",
@@ -85,59 +133,84 @@ protected:
                                              "running",
                                              "stopping",
                                              "stopped",
-                                             "shuttingdown",
-                                             "shutdown"};
+                                             "shuttingdown"};
         SilKit::Dashboard::TestResult expected{};
         expected.objectCount = 0;
-        expected.dataBySimulation[1].participants = {"InternalSystemMonitor"};
-        expected.dataBySimulation[1].statesByParticipant = {{"InternalSystemMonitor", expectedStates}};
-        for (auto i = servicesByParticipant.begin(); i != servicesByParticipant.end(); ++i)
+        for (auto simulationIdx = 0u; simulationIdx < simulations.size(); simulationIdx++)
         {
-            expected.dataBySimulation[1].participants.insert(i->first);
-            expected.dataBySimulation[1].statesByParticipant[i->first] = expectedStates;
+            std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> servicesByParticipant =
+                simulations[simulationIdx];
+            auto simulationId = simulationIdx + 1;
+            if (sync)
+            {
+                expected.dataBySimulation[simulationId].participants.insert("SystemController");
+                expected.dataBySimulation[simulationId].participants.insert("InternalSystemMonitor");
+                expected.dataBySimulation[simulationId].statesByParticipant["InternalSystemMonitor"] = expectedStates;
+            }
+            for (auto i = servicesByParticipant.begin(); i != servicesByParticipant.end(); ++i)
+            {
+                expected.dataBySimulation[simulationId].participants.insert(i->first);
+                expected.dataBySimulation[simulationId].statesByParticipant[i->first] = expectedStates;
+            }
+            expected.dataBySimulation[simulationId].servicesByParticipant = servicesByParticipant;
+            if (sync)
+            {
+                expected.dataBySimulation[simulationId].systemStates = expectedStates;
+            }
+            expected.dataBySimulation[simulationId].stopped = true;
         }
-        expected.dataBySimulation[1].servicesByParticipant = servicesByParticipant;
-        expected.dataBySimulation[1].linksByParticipant = {};
-        expected.dataBySimulation[1].systemStates = expectedStates;
-        expected.dataBySimulation[1].stopped = true;
         return expected;
     }
 
-protected: // members
-    std::string _dashboardUri;
-    std::shared_ptr<IParticipantConfiguration> _participantConfig;
-    bool _result{false};
+    size_t AddRunningParticipant(const std::string& participantName, const std::string& otherParticipantName)
+    {
+        std::lock_guard<decltype(_runningParticipantsMx)> lock{_runningParticipantsMx};
+        _runningParticipants[participantName].insert(otherParticipantName);
+        return _runningParticipants[participantName].size();
+    }
+
+private:
+    std::mutex _runningParticipantsMx;
+    std::map<std::string, std::set<std::string>> _runningParticipants;
 };
 
-void CheckStates(std::set<std::string> actual, std::set<std::string> expected, const std::string& participantName)
+void CheckStates(std::set<std::string> actual, std::set<std::string> expected, const std::string& participantName,
+                 uint64_t simulationId)
 {
-    ASSERT_EQ(actual.size(), expected.size()) << "Wrong number of states for " << participantName << "!";
+    ASSERT_TRUE(actual.size() >= expected.size())
+        << "Wrong number of states for " << participantName << " of simulation " << simulationId << "!";
     for (auto&& state : expected)
     {
         ASSERT_TRUE(actual.find(state) != actual.end())
-            << "State " << state << " for " << participantName << " not found!";
+            << "State " << state << " for " << participantName << " of simulation " << simulationId << " not found!";
     }
 }
 
-void CheckMatchingLabel(MatchingLabel actual, MatchingLabel expected, const std::string& participantName)
+void CheckMatchingLabel(MatchingLabel actual, MatchingLabel expected, const std::string& participantName,
+                        uint64_t simulationId)
 {
-    ASSERT_EQ(actual.key, expected.key) << "Unexpected label key for " << participantName << "!";
-    ASSERT_EQ(actual.value, expected.value) << "Unexpected label value for " << participantName << "!";
+    ASSERT_EQ(actual.key, expected.key) << "Unexpected label key for " << participantName << " of simulation "
+                                        << simulationId << "!";
+    ASSERT_EQ(actual.value, expected.value)
+        << "Unexpected label value for " << participantName << " of simulation " << simulationId << "!";
 }
 
 void CheckService(SilKit::Dashboard::Service actual, SilKit::Dashboard::Service expected,
-                  const std::string& participantName)
+                  const std::string& participantName, uint64_t simulationId)
 {
     ASSERT_EQ(actual.parentServiceId, expected.parentServiceId)
-        << "Unexpected parent service id for " << participantName << "!";
-    ASSERT_EQ(actual.serviceType, expected.serviceType) << "Unexpected service type for " << participantName << "!";
+        << "Unexpected parent service id for " << participantName << " of simulation " << simulationId << "!";
+    ASSERT_EQ(actual.serviceType, expected.serviceType)
+        << "Unexpected service type for " << participantName << " of simulation " << simulationId << "!";
     if (expected.serviceType == "datapublisher" || expected.serviceType == "datasubscriber")
     {
-        ASSERT_EQ(actual.serviceName, expected.serviceName) << "Unexpected service name for " << participantName << "!";
-        ASSERT_EQ(actual.spec.topic, expected.spec.topic) << "Unexpected topic for " << participantName << "!";
+        ASSERT_EQ(actual.serviceName, expected.serviceName)
+            << "Unexpected service name for " << participantName << " of simulation " << simulationId << "!";
+        ASSERT_EQ(actual.spec.topic, expected.spec.topic)
+            << "Unexpected topic for " << participantName << " of simulation " << simulationId << "!";
         for (auto i = 0u; i < expected.spec.labels.size(); i++)
         {
-            CheckMatchingLabel(actual.spec.labels.at(i), expected.spec.labels.at(i), participantName);
+            CheckMatchingLabel(actual.spec.labels.at(i), expected.spec.labels.at(i), participantName, simulationId);
         }
         return;
     }
@@ -147,12 +220,13 @@ void CheckService(SilKit::Dashboard::Service actual, SilKit::Dashboard::Service 
     }
     if (expected.serviceType == "rpcclient" || expected.serviceType == "rpcserver")
     {
-        ASSERT_EQ(actual.serviceName, expected.serviceName) << "Unexpected service name for " << participantName << "!";
+        ASSERT_EQ(actual.serviceName, expected.serviceName)
+            << "Unexpected service name for " << participantName << " of simulation " << simulationId << "!";
         ASSERT_EQ(actual.spec.functionName, expected.spec.functionName)
-            << "Unexpected functionName for " << participantName << "!";
+            << "Unexpected functionName for " << participantName << " of simulation " << simulationId << "!";
         for (auto i = 0u; i < expected.spec.labels.size(); i++)
         {
-            CheckMatchingLabel(actual.spec.labels.at(i), expected.spec.labels.at(i), participantName);
+            CheckMatchingLabel(actual.spec.labels.at(i), expected.spec.labels.at(i), participantName, simulationId);
         }
         return;
     }
@@ -160,56 +234,65 @@ void CheckService(SilKit::Dashboard::Service actual, SilKit::Dashboard::Service 
     {
         return;
     }
-    ASSERT_EQ(actual.serviceName, expected.serviceName) << "Unexpected service name for " << participantName << "!";
-    ASSERT_EQ(actual.networkName, expected.networkName) << "Unexpected network name for " << participantName << "!";
+    ASSERT_EQ(actual.serviceName, expected.serviceName)
+        << "Unexpected service name for " << participantName << " of simulation " << simulationId << "!";
+    ASSERT_EQ(actual.networkName, expected.networkName)
+        << "Unexpected network name for " << participantName << " of simulation " << simulationId << "!";
 }
 
 void CheckServices(std::map<uint64_t, SilKit::Dashboard::Service> actual,
-                   std::map<uint64_t, SilKit::Dashboard::Service> expected, const std::string& participantName)
+                   std::map<uint64_t, SilKit::Dashboard::Service> expected, const std::string& participantName,
+                   uint64_t simulationId)
 {
-    ASSERT_EQ(actual.size(), expected.size()) << "Wrong number of services for " << participantName << "!";
+    ASSERT_EQ(actual.size(), expected.size())
+        << "Wrong number of services for " << participantName << " of simulation " << simulationId << "!";
     for (auto i = expected.begin(); i != expected.end(); ++i)
     {
-        CheckService(actual[i->first], i->second, participantName);
+        CheckService(actual[i->first], i->second, participantName, simulationId);
     }
 }
 
-void CheckLinks(std::set<SilKit::Dashboard::Link> actual, std::set<SilKit::Dashboard::Link> expected)
+void CheckLinks(std::set<SilKit::Dashboard::Link> actual, std::set<SilKit::Dashboard::Link> expected,
+                uint64_t simulationId)
 {
-    ASSERT_EQ(actual.size(), expected.size()) << "Wrong number of links!";
+    ASSERT_EQ(actual.size(), expected.size()) << "Wrong number of links for simulation " << simulationId << "!";
     for (auto&& link : expected)
     {
-        ASSERT_TRUE(actual.find(link) != actual.end()) << "Link " << link.name << " " << link.type << " not found!";
+        ASSERT_TRUE(actual.find(link) != actual.end())
+            << "Link " << link.name << " " << link.type << " not found for simulation " << simulationId << "!";
     }
 }
 
-void CheckSimulationData(SilKit::Dashboard::SimulationData actual, SilKit::Dashboard::SimulationData expected)
+void CheckSimulationData(SilKit::Dashboard::SimulationData actual, SilKit::Dashboard::SimulationData expected,
+                         uint64_t simulationId)
 {
-    ASSERT_EQ(actual.participants.size(), expected.participants.size()) << "Unexpected participant count!";
+    ASSERT_EQ(actual.participants.size(), expected.participants.size())
+        << "Unexpected participant count for simulation " << simulationId << "!";
     for (auto participantName : expected.participants)
     {
         ASSERT_TRUE(actual.participants.find(participantName) != actual.participants.end())
-            << "Participant " << participantName << " should have been created!";
+            << "Participant " << participantName << " should have been created for simulation " << simulationId << "!";
     }
     for (auto j = expected.statesByParticipant.begin(); j != expected.statesByParticipant.end(); ++j)
     {
         auto participantName = j->first;
         CheckStates(actual.statesByParticipant[participantName], expected.statesByParticipant[participantName],
-                    participantName);
+                    participantName, simulationId);
     }
     for (auto j = expected.servicesByParticipant.begin(); j != expected.servicesByParticipant.end(); ++j)
     {
         auto participantName = j->first;
         CheckServices(actual.servicesByParticipant[participantName], expected.servicesByParticipant[participantName],
-                      participantName);
+                      participantName, simulationId);
     }
     for (auto j = expected.linksByParticipant.begin(); j != expected.linksByParticipant.end(); ++j)
     {
         auto participantName = j->first;
-        CheckLinks(actual.linksByParticipant[participantName], expected.linksByParticipant[participantName]);
+        CheckLinks(actual.linksByParticipant[participantName], expected.linksByParticipant[participantName],
+                   simulationId);
     }
-    CheckStates(actual.systemStates, expected.systemStates, "system");
-    ASSERT_EQ(actual.stopped, expected.stopped) << "Wrong simulation state!";
+    CheckStates(actual.systemStates, expected.systemStates, "system", simulationId);
+    ASSERT_EQ(actual.stopped, expected.stopped) << "Simulation " << simulationId << " should have been stopped!";
 }
 
 void CheckTestResult(SilKit::Dashboard::TestResult actual, SilKit::Dashboard::TestResult expected)
@@ -217,270 +300,220 @@ void CheckTestResult(SilKit::Dashboard::TestResult actual, SilKit::Dashboard::Te
     ASSERT_EQ(actual.errorStatus, expected.errorStatus) << "No error expected!";
     ASSERT_EQ(actual.errorMessage, expected.errorMessage) << "No error expected!";
     ASSERT_EQ(actual.objectCount, expected.objectCount) << "Oatpp should not leak objects!";
+    ASSERT_EQ(actual.allSimulationsFinished, expected.allSimulationsFinished) << "All simulations should be finished!";
     ASSERT_EQ(actual.dataBySimulation.size(), expected.dataBySimulation.size()) << "Unexpected simulation count!";
     for (auto i = expected.dataBySimulation.begin(); i != expected.dataBySimulation.end(); ++i)
     {
         auto simulationId = i->first;
         ASSERT_EQ(actual.dataBySimulation.count(simulationId), 1) << "Simulation Ids differ!";
-        CheckSimulationData(actual.dataBySimulation[simulationId], i->second);
+        CheckSimulationData(actual.dataBySimulation[simulationId], i->second, simulationId);
     }
 }
 
-TEST_F(DashboardTestHarness, dashboard_can)
+TEST_F(DashboardTestHarness, dashboard_no_simulation)
 {
-    SetupFromParticipantList({"CanWriter"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // CanWriter
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "CanWriter";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateCanController("CanController1", "CAN1");
-
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
-    CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"CanWriter", {{5, {"", "cancontroller", "CanController1", "CAN1", {}}}}}}));
+    SetupFromParticipantLists({}, {});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this]() {
+            auto ok = _simTestHarness->Run(5s);
+            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+        },
+        0);
+    _simTestHarness->ResetRegistry();
+    CheckTestResult(testResult, CreateExpectedTestResult({}, false));
 }
 
-TEST_F(DashboardTestHarness, dashboard_ethernet)
+TEST_F(DashboardTestHarness, dashboard_can_coordinated)
 {
-    SetupFromParticipantList({"EthernetWriter"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // EthernetWriter
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "EthernetWriter";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            auto* lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateEthernetController("EthernetController1", "ETH1");
-
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
-    CheckTestResult(testResult,
-                    CreateExpectedTestResult(
-                        {{"EthernetWriter", {{5, {"", "ethernetcontroller", "EthernetController1", "ETH1", {}}}}}}));
-}
-
-TEST_F(DashboardTestHarness, dashboard_flexray)
-{
-    SetupFromParticipantList({"Node"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // Node0
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "Node";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            auto* lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto* timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateFlexrayController("FlexrayController1", "FR1");
-
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
-    CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"Node", {{5, {"", "flexraycontroller", "FlexrayController1", "FR1", {}}}}}}));
-}
-
-TEST_F(DashboardTestHarness, dashboard_lin)
-{
-    SetupFromParticipantList({"LinMaster"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // LinMaster
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "LinMaster";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateLinController("LinController1", "LIN1");
-
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
-    CheckTestResult(testResult, CreateExpectedTestResult(
-                                    {{"LinMaster", {{5, {"", "lincontroller", "LinController1", "LIN1", {}}}}}}));
-}
-
-TEST_F(DashboardTestHarness, dashboard_pubsub)
-{
-    SetupFromParticipantList({"Publisher", "Subscriber"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        PubSub::PubSubSpec dataPublisherSpec{"Topic", "A"};
-        dataPublisherSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Optional});
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // Publisher
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "Publisher";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            (void)simParticipant->GetOrCreateLifecycleService();
-            (void)simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateDataPublisher("PubCtrl", dataPublisherSpec, 1);
-        }
-        PubSub::PubSubSpec dataSubscriberSpec{"Topic", "A"};
-        dataSubscriberSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Mandatory});
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // Subscriber
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "Subscriber";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateDataSubscriber("SubCtrl", dataSubscriberSpec, [](auto, const auto&) {
-            });
-
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
+    const auto participantName1 = "CanReader";
+    const auto participantName2 = "CanWriter";
+    const auto canonicalName = "CanController1";
+    const auto networkName = "CAN1";
+    SetupFromParticipantLists({participantName1, participantName2}, {});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
+            RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+        });
+    _simTestHarness->ResetRegistry();
     CheckTestResult(
         testResult,
-        CreateExpectedTestResult({{"Publisher",
-                                   {{5,
-                                     {"",
-                                      "datapublisher",
-                                      "PubCtrl",
-                                      "IGNORED",
-                                      {"Topic", "IGNORED", "A", {{"Key", "Value", MatchingLabel::Kind::Optional}}}}}}},
-                                  {"Subscriber",
-                                   {{5,
-                                     {"",
-                                      "datasubscriber",
-                                      "SubCtrl",
-                                      "IGNORED",
-                                      {"Topic", "IGNORED", "A", {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}},
-                                    {6, {"5", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}));
+        CreateExpectedTestResult({{{participantName1, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}},
+                                   {participantName2, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}}}},
+                                 true));
 }
 
-TEST_F(DashboardTestHarness, dashboard_rpc)
+TEST_F(DashboardTestHarness, dashboard_can_repeat)
 {
-    SetupFromParticipantList({"Client", "Server"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        Rpc::RpcSpec rpcClientSpec{"func", "A"};
-        rpcClientSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Mandatory});
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // Client
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "Client";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            (void)simParticipant->GetOrCreateLifecycleService();
-            (void)simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateRpcClient("ClientCtrl", rpcClientSpec, [](auto, const auto&) {
-            });
-        }
-        Rpc::RpcSpec rpcServerSpec{"func", "A"};
-        rpcServerSpec.AddLabel({"Key", "Value", MatchingLabel::Kind::Optional});
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // Server
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "Server";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            (void)participant->CreateRpcServer("ServerCtrl", rpcServerSpec, [](auto, const auto&) {
-            });
+    const auto participantName1 = "CanReader";
+    const auto participantName2 = "CanWriter";
+    const auto canonicalName = "CanController1";
+    const auto networkName = "CAN1";
+    SetupFromParticipantLists({participantName1, participantName2}, {});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName1, &participantName2, &canonicalName, &networkName]() {
+            RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+            RunCanDemo(participantName1, participantName2, canonicalName, networkName);
+        },
+        2);
+    _simTestHarness->ResetRegistry();
+    std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> simulation{
+        {participantName1, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}},
+        {participantName2, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}}};
+    CheckTestResult(testResult, CreateExpectedTestResult({simulation, simulation}, true));
+}
 
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
+TEST_F(DashboardTestHarness, dashboard_pubsub_mix)
+{
+    const auto participantName1 = "Publisher";
+    const auto canonicalName1 = "PubCtrl";
+    const auto topic{"Topic"};
+    const auto mediaType{"A"};
+    PubSub::PubSubSpec spec1{topic, mediaType};
+    SilKit::Services::MatchingLabel label1{"Key", "Value", MatchingLabel::Kind::Optional};
+    spec1.AddLabel(label1);
+    const auto participantName2 = "Subscriber";
+    const auto canonicalName2 = "SubCtrl";
+    PubSub::PubSubSpec spec2{topic, mediaType};
+    SilKit::Services::MatchingLabel label2{"Key", "Value", MatchingLabel::Kind::Mandatory};
+    spec2.AddLabel(label2);
+    SetupFromParticipantLists({participantName1}, {participantName2});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName1, &canonicalName1, &spec1, &participantName2, &canonicalName2, &spec2]() {
+            _simTestHarness->CreateSystemController();
+            {
+                auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
+                auto&& participant = simParticipant->Participant();
+                (void)participant->CreateDataPublisher(canonicalName1, spec1);
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
+                    CreateParticipantStatusHandler(participantName1, lifecycleService, 3));
+            }
+            {
+                auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
+                auto&& participant = simParticipant->Participant();
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                (void)participant->CreateDataSubscriber(canonicalName2, spec2, [](auto, const auto&) {
+                });
+                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
+                    CreateParticipantStatusHandler(participantName2, lifecycleService, 3));
+            }
+            auto ok = _simTestHarness->Run(5s);
+            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+            _simTestHarness->ResetParticipants();
+        });
+    _simTestHarness->ResetRegistry();
     CheckTestResult(
         testResult,
-        CreateExpectedTestResult({{"Client",
-                                   {{5,
-                                     {"",
-                                      "rpcclient",
-                                      "ClientCtrl",
-                                      "IGNORED",
-                                      {"IGNORED", "func", "A", {{"Key", "Value", MatchingLabel::Kind::Mandatory}}}}}}},
-                                  {"Server",
-                                   {{5,
-                                     {"",
-                                      "rpcserver",
-                                      "ServerCtrl",
-                                      "IGNORED",
-                                      {"IGNORED", "func", "A", {{"Key", "Value", MatchingLabel::Kind::Optional}}}}},
-                                    {6, {"5", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}));
+        CreateExpectedTestResult(
+            {{{participantName1,
+               {{5, {"", "datapublisher", canonicalName1, "IGNORED", {topic, "IGNORED", mediaType, {label1}}}}}},
+              {participantName2,
+               {{5, {"", "datasubscriber", canonicalName2, "IGNORED", {topic, "IGNORED", mediaType, {label2}}}},
+                {6, {"5", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}},
+            true));
 }
 
-TEST_F(DashboardTestHarness, dashboard_netsim)
+TEST_F(DashboardTestHarness, dashboard_rpc_autonomous)
 {
-    SetupFromParticipantList({"NetSim"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(_participantConfig, _registryUri, _dashboardUri, [this]() {
-        {
-            /////////////////////////////////////////////////////////////////////////
-            // NetSim
-            /////////////////////////////////////////////////////////////////////////
-            const auto participantName = "NetSim";
-            auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-            auto* participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            auto&& participantInternal = &SilKit::Tests::ToParticipantInternal(*participant);
-            auto&& serviceDiscovery = participantInternal->GetServiceDiscovery();
+    const auto participantName1 = "Client";
+    const auto canonicalName1 = "ClientCtrl";
+    const auto functionName{"func"};
+    const auto mediaType{"A"};
+    Rpc::RpcSpec spec1{functionName, mediaType};
+    SilKit::Services::MatchingLabel label1{"Key", "Value", MatchingLabel::Kind::Mandatory};
+    spec1.AddLabel(label1);
+    const auto participantName2 = "Server";
+    const auto canonicalName2 = "ServerCtrl";
+    Rpc::RpcSpec spec2{functionName, mediaType};
+    SilKit::Services::MatchingLabel label2{"Key", "Value", MatchingLabel::Kind::Optional};
+    spec2.AddLabel(label2);
+    SetupFromParticipantLists({}, {participantName1, participantName2});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName1, &canonicalName1, &spec1, &participantName2, &canonicalName2, &spec2]() {
+            {
+                auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
+                auto&& participant = simParticipant->Participant();
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                (void)participant->CreateRpcClient(canonicalName1, spec1, [](auto*, const auto&) {
+                });
+                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
+                    CreateParticipantStatusHandler(participantName1, lifecycleService, 2));
+            }
+            {
+                auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
+                auto&& participant = simParticipant->Participant();
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                (void)participant->CreateRpcServer(canonicalName2, spec2, [](auto*, const auto&) {
+                });
+                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
+                    CreateParticipantStatusHandler(participantName2, lifecycleService, 2));
+            }
+            auto ok = _simTestHarness->Run(5s);
+            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+            _simTestHarness->ResetParticipants();
+        });
+    _simTestHarness->ResetRegistry();
+    CheckTestResult(
+        testResult,
+        CreateExpectedTestResult(
+            {{{participantName1,
+               {{5, {"", "rpcclient", canonicalName1, "IGNORED", {"IGNORED", functionName, mediaType, {label1}}}}}},
+              {participantName2,
+               {{5, {"", "rpcserver", canonicalName2, "IGNORED", {"IGNORED", functionName, mediaType, {label2}}}},
+                {6, {"5", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}},
+            false));
+}
 
-            lifecycleService->SetCommunicationReadyHandler([participantName, serviceDiscovery]() {
-                ServiceDescriptor linkDescriptor{};
-                linkDescriptor.SetServiceType(ServiceType::Link);
-                linkDescriptor.SetParticipantNameAndComputeId(participantName);
-                for (auto cfg :
-                     {std::make_pair(NetworkType::CAN, "CAN1"), std::make_pair(NetworkType::Ethernet, "ETH1"),
-                      std::make_pair(NetworkType::FlexRay, "FR1"), std::make_pair(NetworkType::LIN, "LIN1")})
-                {
-                    linkDescriptor.SetNetworkType(cfg.first);
-                    linkDescriptor.SetNetworkName(cfg.second);
-                    linkDescriptor.SetServiceName(cfg.second);
-                    serviceDiscovery->NotifyServiceCreated(std::move(linkDescriptor));
-                }
-            });
+TEST_F(DashboardTestHarness, dashboard_netsim_coordinated)
+{
+    const auto participantName = "NetSim";
+    SetupFromParticipantLists({participantName}, {});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName]() {
+            _simTestHarness->CreateSystemController();
+            {
+                auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+                auto&& participant = simParticipant->Participant();
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+                auto&& participantInternal = &SilKit::Tests::ToParticipantInternal(*participant);
+                auto&& serviceDiscovery = participantInternal->GetServiceDiscovery();
 
-            timeSyncService->SetSimulationStepHandler(CreateSimulationStepHandler(participantName, lifecycleService),
-                                                      1ms);
-        }
-
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    });
-    auto expected = DashboardTestHarness::CreateExpectedTestResult({{"NetSim", {}}});
+                lifecycleService->SetCommunicationReadyHandler([participantName, serviceDiscovery]() {
+                    ServiceDescriptor linkDescriptor{};
+                    linkDescriptor.SetServiceType(ServiceType::Link);
+                    linkDescriptor.SetParticipantNameAndComputeId(participantName);
+                    for (auto cfg :
+                         {std::make_pair(NetworkType::CAN, "CAN1"), std::make_pair(NetworkType::Ethernet, "ETH1"),
+                          std::make_pair(NetworkType::FlexRay, "FR1"), std::make_pair(NetworkType::LIN, "LIN1")})
+                    {
+                        linkDescriptor.SetNetworkType(cfg.first);
+                        linkDescriptor.SetNetworkName(cfg.second);
+                        linkDescriptor.SetServiceName(cfg.second);
+                        serviceDiscovery->NotifyServiceCreated(std::move(linkDescriptor));
+                    }
+                });
+                timeSyncService->SetSimulationStepHandler(
+                    [simParticipant](auto, auto) {
+                        Log() << simParticipant->Name() << ": stopping";
+                        simParticipant->Stop();
+                    },
+                    10ms);
+            }
+            auto ok = _simTestHarness->Run(5s);
+            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+            _simTestHarness->ResetParticipants();
+        });
+    _simTestHarness->ResetRegistry();
+    auto expected = DashboardTestHarness::CreateExpectedTestResult({{{participantName, {}}}}, true);
     expected.dataBySimulation[1].linksByParticipant = {
-        {"NetSim", {{"can", "CAN1"}, {"ethernet", "ETH1"}, {"flexray", "FR1"}, {"lin", "LIN1"}}}};
+        {participantName, {{"can", "CAN1"}, {"ethernet", "ETH1"}, {"flexray", "FR1"}, {"lin", "LIN1"}}}};
     CheckTestResult(testResult, expected);
 }
 

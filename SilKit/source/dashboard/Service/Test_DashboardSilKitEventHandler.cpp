@@ -42,7 +42,7 @@ public:
         _mockDashboardSystemServiceClient = std::make_shared<StrictMock<MockDashboardSystemServiceClient>>();
         _mockSilKitToOatppMapper = std::make_shared<StrictMock<MockSilKitToOatppMapper>>();
 
-        EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Info));
+        EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Warn));
     }
 
     std::shared_ptr<SilKitEventHandler> CreateService()
@@ -51,99 +51,68 @@ public:
                                                     _mockSilKitToOatppMapper);
     }
 
-    std::shared_ptr<SilKitEventHandler> CreateService(oatpp::UInt64 expectedSimulationId)
-    {
-        const auto service = CreateService();
-        service->_simulationId = expectedSimulationId;
-        return service;
-    }
-
     Core::Tests::MockLogger _dummyLogger;
     std::shared_ptr<StrictMock<MockDashboardSystemServiceClient>> _mockDashboardSystemServiceClient;
     std::shared_ptr<StrictMock<MockSilKitToOatppMapper>> _mockSilKitToOatppMapper;
 };
 
-TEST_F(TestDashboardSilKitEventHandler, OnStart_CreateSimulationSent_NoResponse)
+TEST_F(TestDashboardSilKitEventHandler, Create)
 {
     // Arrange
-    auto request = SimulationCreationRequestDto::createShared();
-    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
-    std::promise<oatpp::Object<SimulationCreationResponseDto>> simulationCreationPromise;
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation(request)).WillOnce(Return(simulationCreationPromise.get_future()));
-    EXPECT_CALL(_dummyLogger, Info("Dashboard: creating simulation"))
-        .WillOnce(Return());
-    EXPECT_CALL(_dummyLogger, Warn("Dashboard: creating simulation: giving up...")).WillOnce(Return());
 
     // Act
-    std::future<bool> res;
-    {
-        const auto service = CreateService();
-        res = service->OnStart("silkit://localhost:8500", 0);
-    }
-
-    // Assert
-    ASSERT_FALSE(res.get());
-}
-
-TEST_F(TestDashboardSilKitEventHandler, OnStart_CreateSimulationSent_Success)
-{
-    // Arrange
-    const oatpp::UInt64 expectedSimulationId = 123;
-    auto request = SimulationCreationRequestDto::createShared();
-    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
-    std::promise<oatpp::Object<SimulationCreationResponseDto>> simulationCreationPromise;
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation(request))
-        .WillOnce(Return(simulationCreationPromise.get_future()));
-    EXPECT_CALL(_dummyLogger, Info("Dashboard: creating simulation")).WillOnce(Return());
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Info, "Dashboard: created simulation with id 123"))
-        .WillOnce(Return());
     const auto service = CreateService();
 
-    // Act
-    auto res = service->OnStart("silkit://localhost:8500", 0);
+    // Assert
+}
+
+TEST_F(TestDashboardSilKitEventHandler, OnSimulationStart_CreateSimulationSuccess)
+{
+    // Arrange
+    const uint64_t expectedSimulationId = 123;
+    auto request = SimulationCreationRequestDto::createShared();
+    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
     auto response = SimulationCreationResponseDto::createShared();
     response->id = expectedSimulationId;
-    simulationCreationPromise.set_value(response);
-
-    // Assert
-    ASSERT_TRUE(res.get());
-}
-
-TEST_F(TestDashboardSilKitEventHandler, OnStart_CreateSimulatioSend_Failed)
-{
-    // Arrange
-    const oatpp::UInt64 expectedSimulationId = 123;
-    auto request = SimulationCreationRequestDto::createShared();
-    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
-    std::promise<oatpp::Object<SimulationCreationResponseDto>> simulationCreationPromise;
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation(request))
-        .WillOnce(Return(simulationCreationPromise.get_future()));
-    EXPECT_CALL(_dummyLogger, Info("Dashboard: creating simulation")).WillOnce(Return());
+    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation).WillOnce(Return(response));
     const auto service = CreateService();
 
     // Act
-    auto res = service->OnStart("silkit://localhost:8500", 0);
-    simulationCreationPromise.set_value(nullptr);
+    auto res = service->OnSimulationStart("silkit://localhost:8500", 0);
 
     // Assert
-    ASSERT_FALSE(res.get());
+    ASSERT_EQ(res, expectedSimulationId) << "Wrong simulationId!";
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnShutdown_SimulationEndRequestSent)
+TEST_F(TestDashboardSilKitEventHandler, OnSimulationStart_CreateSimulationFailure)
+{
+    // Arrange
+    auto request = SimulationCreationRequestDto::createShared();
+    EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationCreationRequestDto).WillOnce(Return(request));
+    EXPECT_CALL(*_mockDashboardSystemServiceClient, CreateSimulation).WillOnce(Return(nullptr));
+    EXPECT_CALL(_dummyLogger, Warn("Dashboard: creating simulation failed"));
+    const auto service = CreateService();
+
+    // Act
+    auto res = service->OnSimulationStart("silkit://localhost:8500", 0);
+
+    // Assert
+    ASSERT_EQ(res, 0) << "Wrong simulationId!";
+}
+
+TEST_F(TestDashboardSilKitEventHandler, OnSimulationEnd)
 {
     // Arrange
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
-    EXPECT_CALL(_dummyLogger, Log(Services::Logging::Level::Info, "Dashboard: setting end for simulation 123"))
-        .WillOnce(Return());
-
-    // Setup request for OnShutdown()
     auto request = SimulationEndDto::createShared();
     EXPECT_CALL(*_mockSilKitToOatppMapper, CreateSimulationEndDto).WillOnce(Return(request));
-    EXPECT_CALL(*_mockDashboardSystemServiceClient, SetSimulationEnd(expectedSimulationId, request)).Times(1);
-    
+    EXPECT_CALL(*_mockDashboardSystemServiceClient, SetSimulationEnd(expectedSimulationId, request));
+    const auto service = CreateService();
+
     // Act
-    service->OnShutdown(0);
+    service->OnSimulationEnd(expectedSimulationId, 0);
+
+    // Assert
 }
 
 TEST_F(TestDashboardSilKitEventHandler, OnParticipantConnected_AddParticipantRequestIsSent)
@@ -152,19 +121,19 @@ TEST_F(TestDashboardSilKitEventHandler, OnParticipantConnected_AddParticipantReq
 
     // Arrange
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     oatpp::UInt64 actualSimulationId;
     oatpp::String actualParticipantName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddParticipantToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1>([&](auto simulationId, auto participantName) {
+        .WillOnce(WithArgs<0, 1>([&](auto simulationId, auto participantName) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
-        })));
+        }));
 
     // Act
     const connectionInfo info{"my Participant"};
-    service->OnParticipantConnected(info);
+    service->OnParticipantConnected(expectedSimulationId, info);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -177,7 +146,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnSystemStateChanged_UpdateSystemStatusR
 
     // Arrange
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     auto dummyRequestDto = SystemStatusDto::createShared();
     auto expectedSystemState = SilKit::Dashboard::SystemState::Running;
@@ -186,13 +155,13 @@ TEST_F(TestDashboardSilKitEventHandler, OnSystemStateChanged_UpdateSystemStatusR
     oatpp::UInt64 actualSimulationId;
     SilKit::Dashboard::SystemState actualSystemState;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, UpdateSystemStatusForSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1>([&](auto simulationId, auto systemStatus) {
+        .WillOnce(WithArgs<0, 1>([&](auto simulationId, auto systemStatus) {
             actualSimulationId = simulationId;
             actualSystemState = systemStatus->state;
-        })));
+        }));
 
     // Act
-    service->OnSystemStateChanged(systemState::Running);
+    service->OnSystemStateChanged(expectedSimulationId, Services::Orchestration::SystemState::Running);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -205,7 +174,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnParticipantStatusChanged_AddParticipan
 
     // Arrange
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     auto dummyRequestDto = ParticipantStatusDto::createShared();
     auto expectedParticipantState = SilKit::Dashboard::ParticipantState::Running;
@@ -216,16 +185,16 @@ TEST_F(TestDashboardSilKitEventHandler, OnParticipantStatusChanged_AddParticipan
     oatpp::String actualParticipantName;
     SilKit::Dashboard::ParticipantState actualParticipantState;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddParticipantStatusForSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto participantStatus) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto participantStatus) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualParticipantState = participantStatus->state;
-        })));
+        }));
 
     // Act
     participantStatus status;
     status.participantName = "my/Participant";
-    service->OnParticipantStatusChanged(status);
+    service->OnParticipantStatusChanged(expectedSimulationId, status);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -233,7 +202,8 @@ TEST_F(TestDashboardSilKitEventHandler, OnParticipantStatusChanged_AddParticipan
     ASSERT_EQ(actualParticipantState, expectedParticipantState);
 }
 
-Core::ServiceDescriptor BuildDescriptor(const std::string& type, SilKit::Core::EndpointId serviceId, const std::string& participant)
+Core::ServiceDescriptor BuildDescriptor(const std::string& type, SilKit::Core::EndpointId serviceId,
+                                        const std::string& participant)
 {
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Controller);
@@ -247,7 +217,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanControllerCre
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     SilKit::Core::EndpointId expectedServiceId = 456;
     auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeCan, expectedServiceId, "my participant");
@@ -258,14 +228,15 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanControllerCre
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddCanControllerForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -278,7 +249,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     SilKit::Core::EndpointId expectedServiceId = 456;
     auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeEthernet, expectedServiceId, "my participant");
@@ -289,14 +260,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddEthernetControllerForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -309,7 +281,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     SilKit::Core::EndpointId expectedServiceId = 456;
     auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeFlexray, expectedServiceId, "my participant");
@@ -320,14 +292,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddFlexrayControllerForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -339,7 +312,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinControllerCre
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     SilKit::Core::EndpointId expectedServiceId = 456;
     auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeLin, expectedServiceId, "my participant");
@@ -350,14 +323,15 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinControllerCre
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddLinControllerForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -369,11 +343,12 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCre
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     const char* expectedParticipantName{"my%20participant"};
     SilKit::Core::EndpointId expectedServiceId = 456;
-    auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeDataPublisher, expectedServiceId, "my participant");
+    auto descriptor =
+        BuildDescriptor(Core::Discovery::controllerTypeDataPublisher, expectedServiceId, "my participant");
     auto dummyRequestDto = DataPublisherDto::createShared();
     EXPECT_CALL(*_mockSilKitToOatppMapper, CreateDataPublisherDto(descriptor)).WillOnce(Return(dummyRequestDto));
 
@@ -381,14 +356,15 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCre
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddDataPublisherForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -396,12 +372,11 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCre
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
-       OnServiceDiscoveryEvent_DataSubscriberCreated_AddDataSubscriberRequestSent)
+TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataSubscriberCreated_AddDataSubscriberRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     const char* expectedParticipantName{"my%20participant"};
     SilKit::Core::EndpointId expectedServiceId = 456;
@@ -414,14 +389,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddDataSubscriberForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -437,9 +413,10 @@ TEST_F(TestDashboardSilKitEventHandler,
     const char* expectedParentServiceId{"1"};
     const char* expectedParticipantName{"my%20participant"};
     SilKit::Core::EndpointId expectedServiceId = 456;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
-    auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeDataSubscriberInternal, expectedServiceId, "my participant");
+    auto descriptor =
+        BuildDescriptor(Core::Discovery::controllerTypeDataSubscriberInternal, expectedServiceId, "my participant");
     descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyDataSubscriberInternalParentServiceID,
                                        expectedParentServiceId);
     auto dummyRequestDto = ServiceDto::createShared();
@@ -450,15 +427,17 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParentServiceId;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddDataSubscriberInternalForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2, 3>([&](auto simulationId, auto participantName, auto parentServiceId, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualParentServiceId = parentServiceId;
-            actualServiceId = serviceId;
-        })));
+        .WillOnce(
+            WithArgs<0, 1, 2, 3>([&](auto simulationId, auto participantName, auto parentServiceId, auto serviceId) {
+                actualSimulationId = simulationId;
+                actualParticipantName = participantName;
+                actualParentServiceId = parentServiceId;
+                actualServiceId = serviceId;
+            }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -467,12 +446,11 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
-       OnServiceDiscoveryEvent_RpcClientCreated_AddRpcClientRequestSent)
+TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcClientCreated_AddRpcClientRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     const char* expectedParticipantName{"my%20participant"};
     SilKit::Core::EndpointId expectedServiceId = 456;
@@ -484,14 +462,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddRpcClientForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -499,12 +478,11 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
-       OnServiceDiscoveryEvent_RpcServerCreated_AddRpcServerRequestSent)
+TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcServerCreated_AddRpcServerRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     const char* expectedParticipantName{"my%20participant"};
     SilKit::Core::EndpointId expectedServiceId = 456;
@@ -516,14 +494,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddRpcServerForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto serviceId) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualServiceId = serviceId;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -538,10 +517,11 @@ TEST_F(TestDashboardSilKitEventHandler,
     const oatpp::UInt64 expectedSimulationId = 123;
     const char* expectedParentServiceId{"1"};
     const char* expectedParticipantName{"my%20participant"};
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     SilKit::Core::EndpointId expectedServiceId = 456;
-    auto descriptor = BuildDescriptor(Core::Discovery::controllerTypeRpcServerInternal, expectedServiceId, "my participant");
+    auto descriptor =
+        BuildDescriptor(Core::Discovery::controllerTypeRpcServerInternal, expectedServiceId, "my participant");
     descriptor.SetSupplementalDataItem(Core::Discovery::supplKeyRpcServerInternalParentServiceID,
                                        expectedParentServiceId);
     auto dummyRequestDto = ServiceDto::createShared();
@@ -552,15 +532,17 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParentServiceId;
     oatpp::UInt64 actualServiceId;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddRpcServerInternalForParticipantOfSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2, 3>([&](auto simulationId, auto participantName, auto parentServiceId, auto serviceId) {
-            actualSimulationId = simulationId;
-            actualParticipantName = participantName;
-            actualParentServiceId = parentServiceId;
-            actualServiceId = serviceId;
-        })));
+        .WillOnce(
+            WithArgs<0, 1, 2, 3>([&](auto simulationId, auto participantName, auto parentServiceId, auto serviceId) {
+                actualSimulationId = simulationId;
+                actualParticipantName = participantName;
+                actualParentServiceId = parentServiceId;
+                actualServiceId = serviceId;
+            }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -573,7 +555,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_A
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
@@ -585,14 +567,15 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_A
     oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddCanNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualNetworkName = networkName;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -605,7 +588,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
@@ -617,14 +600,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddEthernetNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualNetworkName = networkName;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -637,7 +621,7 @@ TEST_F(TestDashboardSilKitEventHandler,
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
@@ -649,14 +633,15 @@ TEST_F(TestDashboardSilKitEventHandler,
     oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddFlexrayNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualNetworkName = networkName;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -668,7 +653,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_A
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     Core::ServiceDescriptor descriptor;
     descriptor.SetServiceType(Core::ServiceType::Link);
@@ -680,14 +665,15 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_A
     oatpp::String actualParticipantName;
     oatpp::String actualNetworkName;
     EXPECT_CALL(*_mockDashboardSystemServiceClient, AddLinNetworkToSimulation)
-        .WillOnce(DoAll(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
+        .WillOnce(WithArgs<0, 1, 2>([&](auto simulationId, auto participantName, auto networkName) {
             actualSimulationId = simulationId;
             actualParticipantName = participantName;
             actualNetworkName = networkName;
-        })));
+        }));
 
     // Act
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated,
+                                     descriptor);
 
     // Assert
     ASSERT_EQ(actualSimulationId, expectedSimulationId);
@@ -699,11 +685,12 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_Invalid_Ignore)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
-    const auto service = CreateService(expectedSimulationId);
+    const auto service = CreateService();
 
     // Act
     Core::ServiceDescriptor descriptor;
-    service->OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type::Invalid, descriptor);
+    service->OnServiceDiscoveryEvent(expectedSimulationId, Core::Discovery::ServiceDiscoveryEvent::Type::Invalid,
+                                     descriptor);
 }
 
 } // namespace Dashboard

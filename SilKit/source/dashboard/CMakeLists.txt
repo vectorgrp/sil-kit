@@ -40,7 +40,6 @@ if(SILKIT_BUILD_DASHBOARD)
     )
 
     add_library(S_SilKit_Dashboard STATIC
-        Client/CreateSimulationCoroutine.hpp
         Client/DashboardComponents.hpp
         Client/DashboardSystemApiClient.hpp
         Client/DashboardSystemServiceClient.cpp
@@ -48,7 +47,6 @@ if(SILKIT_BUILD_DASHBOARD)
         Client/DashboardRetryPolicy.cpp
         Client/DashboardRetryPolicy.hpp
         Client/IDashboardSystemServiceClient.hpp
-        Client/SendCoroutine.hpp
 
         Dto/DataPublisherDto.hpp
         Dto/DataSpecDto.hpp
@@ -68,14 +66,18 @@ if(SILKIT_BUILD_DASHBOARD)
         IntegrationTests/ClientServerTestRunner.hpp
         IntegrationTests/DashboardSystemApiController.hpp
         IntegrationTests/DashboardTestComponents.hpp
-
-        Service/CachedData.hpp
+        
         Service/CachingSilKitEventHandler.cpp
         Service/CachingSilKitEventHandler.hpp
+        Service/ICachingSilKitEventHandler.hpp
         Service/ISilKitEventHandler.hpp
+        Service/ISilKitEventQueue.hpp
         Service/ISilKitToOatppMapper.hpp
+        Service/SilKitEvent.hpp
         Service/SilKitEventHandler.cpp
         Service/SilKitEventHandler.hpp
+        Service/SilKitEventQueue.cpp
+        Service/SilKitEventQueue.hpp
         Service/SilKitToOatppMapper.cpp
         Service/SilKitToOatppMapper.hpp
 
@@ -125,6 +127,14 @@ if(SILKIT_BUILD_DASHBOARD)
         S_SilKit_Dashboard
         I_SilKit_Core_Internal
         I_SilKit_Core_Mock_Participant
+        )
+
+    add_silkit_test(Test_DashboardSilKitEventQueue
+        SOURCES Service/Test_DashboardSilKitEventQueue.cpp 
+        LIBS
+        S_SilKitImpl
+        S_SilKit_Dashboard
+        I_SilKit_Core_Internal
         )
 
     add_silkit_test(Test_DashboardSilKitEventHandler

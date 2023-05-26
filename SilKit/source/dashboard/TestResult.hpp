@@ -70,7 +70,8 @@ struct TestResult
     int32_t errorStatus{-1};
     std::string errorMessage{};
     int64_t objectCount{-1};
-    std::map<uint32_t, SimulationData> dataBySimulation;
+    std::map<uint64_t, SimulationData> dataBySimulation;
+    bool allSimulationsFinished{true};
 };
 
 } // namespace Dashboard

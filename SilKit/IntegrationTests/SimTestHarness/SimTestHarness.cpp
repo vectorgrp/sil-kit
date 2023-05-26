@@ -36,8 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::literals::chrono_literals;
 
-namespace
-{
+namespace {
 auto Now()
 {
     auto now = std::chrono::system_clock::now().time_since_epoch();
@@ -86,12 +85,13 @@ auto SimParticipant::GetOrCreateSystemController() -> Experimental::Services::Or
     return _systemController;
 }
 
-auto SimParticipant::GetOrCreateLifecycleService() -> Services::Orchestration::ILifecycleService*
+auto SimParticipant::GetOrCreateLifecycleService(
+    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration)
+    -> Services::Orchestration::ILifecycleService*
 {
     if (!_lifecycleService)
     {
-        _lifecycleService =
-            _participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
+        _lifecycleService = _participant->CreateLifecycleService(startConfiguration);
     }
     return _lifecycleService;
 }
@@ -118,11 +118,12 @@ auto SimParticipant::GetOrGetLogger() -> Services::Logging::ILogger*
 // SimTestHarness
 ////////////////////////////////////////
 SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
-                               bool deferParticipantCreation)
-    : _syncParticipantNames{ syncParticipantNames }
+                               bool deferParticipantCreation, bool deferSystemControllerCreation,
+                               const std::vector<std::string>& asyncParticipantNames)
+    : _syncParticipantNames{syncParticipantNames}
+    , _asyncParticipantNames{asyncParticipantNames}
     , _registryUri{registryUri}
 {
-
     // start registry
     _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
     _registry->StartListening(_registryUri);
@@ -136,27 +137,40 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
         }
     }
 
-    _syncParticipantNames.push_back(internalSystemMonitorName);
-    _simSystemController = std::make_unique<SimSystemController>(_syncParticipantNames, _registryUri);
+    if (!deferSystemControllerCreation)
+    {
+        CreateSystemController();
+    }
 }
 
 SimTestHarness::~SimTestHarness() = default;
+
+void SimTestHarness::CreateSystemController()
+{
+    if (!_syncParticipantNames.empty())
+    {
+        _syncParticipantNames.push_back(internalSystemMonitorName);
+        _simSystemController = std::make_unique<SimSystemController>(_syncParticipantNames, _registryUri);
+    }
+}
 
 bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
 {
     auto lock = Lock();
     std::promise<void> simulationFinishedPromise;
     auto simulationFinishedFuture = simulationFinishedPromise.get_future();
-
-    // Create a monitor, add it to the list of simParticipants, then start all participants
-    AddParticipant(internalSystemMonitorName, "");
-    auto monitor = _simParticipants[internalSystemMonitorName]->GetOrCreateSystemMonitor();
-    monitor->AddSystemStateHandler([&](auto systemState) {
-        if (systemState == SilKit::Services::Orchestration::SystemState::Shutdown)
-        {
-            simulationFinishedPromise.set_value();
-        }
-    });
+    if (!_syncParticipantNames.empty())
+    {
+        // Create a monitor, add it to the list of simParticipants, then start all participants
+        AddParticipant(internalSystemMonitorName, "");
+        auto monitor = _simParticipants[internalSystemMonitorName]->GetOrCreateSystemMonitor();
+        monitor->AddSystemStateHandler([&](auto systemState) {
+            if (systemState == SilKit::Services::Orchestration::SystemState::Shutdown)
+            {
+                simulationFinishedPromise.set_value();
+            }
+        });
+    }
 
     // start all participants
     for (auto& kv : _simParticipants)
@@ -200,30 +214,42 @@ bool SimTestHarness::Run(std::chrono::nanoseconds testRunTimeout)
         {
             timeRemaining = testRunTimeout - timeSlept;
         }
-
     }
 
-    if (simulationFinishedFuture.wait_for(1s) != std::future_status::ready)
+    if (!_syncParticipantNames.empty())
     {
-        runStatus = false;
+        if (simulationFinishedFuture.wait_for(1s) != std::future_status::ready)
+        {
+            runStatus = false;
+        }
     }
 
     return runStatus;
 }
 
-SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName, const std::string& participantConfiguration)
+SimParticipant* SimTestHarness::GetParticipant(const std::string& participantName,
+                                               const std::string& participantConfiguration)
 {
     auto lock = Lock();
     if (_simParticipants.count(participantName) == 0)
     {
         //deferred participant creation
-        auto it = std::find(_syncParticipantNames.begin(), _syncParticipantNames.end(), participantName);
-
-        if (it == _syncParticipantNames.end())
+        if (!IsSync(participantName))
         {
-            throw SilKitError{ "SimTestHarness::GetParticipant: unknown participant " + participantName };
+            if (!IsAsync(participantName))
+            {
+                throw SilKitError{"SimTestHarness::GetParticipant: unknown participant " + participantName};
+            }
+            else
+            {
+                AddParticipant(participantName, participantConfiguration,
+                               {SilKit::Services::Orchestration::OperationMode::Autonomous});
+            }
         }
-        AddParticipant(*it, participantConfiguration);
+        else
+        {
+            AddParticipant(participantName, participantConfiguration);
+        }
     }
     return _simParticipants[participantName].get();
 }
@@ -233,7 +259,8 @@ SimParticipant* SimTestHarness::GetParticipant(const std::string& participantNam
     return GetParticipant(participantName, "");
 }
 
-void SimTestHarness::AddParticipant(const std::string& participantName, const std::string& participantConfiguration)
+void SimTestHarness::AddParticipant(const std::string& participantName, const std::string& participantConfiguration,
+                                    SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration)
 {
     auto participant = std::make_unique<SimParticipant>();
     participant->_name = participantName;
@@ -243,10 +270,15 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
 
     // mandatory sim task for time synced simulation
     // by default, we do no operation during simulation task, the user should override this
-    auto* lifecycleService = participant->GetOrCreateLifecycleService();
-    auto* timeSyncService = participant->GetOrCreateTimeSyncService();
-    timeSyncService->SetSimulationStepHandler([](auto, auto) {
-    }, 1ms);
+    auto* lifecycleService = participant->GetOrCreateLifecycleService(startConfiguration);
+    if (startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Coordinated)
+    {
+        auto* timeSyncService = participant->GetOrCreateTimeSyncService();
+        timeSyncService->SetSimulationStepHandler(
+            [](auto, auto) {
+            },
+            1ms);
+    }
 
     lifecycleService->SetCommunicationReadyHandler([]() {
     });
@@ -254,15 +286,42 @@ void SimTestHarness::AddParticipant(const std::string& participantName, const st
     _simParticipants[participantName] = std::move(participant);
 }
 
+bool SimTestHarness::IsSync(const std::string& participantName)
+{
+    auto it = std::find(_syncParticipantNames.begin(), _syncParticipantNames.end(), participantName);
+    return (it != _syncParticipantNames.end());
+}
+
+bool SimTestHarness::IsAsync(const std::string& participantName)
+{
+    auto it = std::find(_asyncParticipantNames.begin(), _asyncParticipantNames.end(), participantName);
+    return (it != _asyncParticipantNames.end());
+}
 
 void SimTestHarness::Reset()
 {
+    ResetParticipants();
+    ResetRegistry();
+}
+
+void SimTestHarness::ResetRegistry()
+{
     auto lock = Lock();
-    _simParticipants.clear();
-    _simSystemController.reset();
     _registry.reset();
     _registryUri.clear();
     _syncParticipantNames.clear();
+    _asyncParticipantNames.clear();
 }
+
+void SimTestHarness::ResetParticipants()
+{
+    auto lock = Lock();
+    _simParticipants.clear();
+    if (_simSystemController)
+    {
+        _simSystemController.reset();
+    }
+}
+
 } // namespace Tests
 } // namespace SilKit

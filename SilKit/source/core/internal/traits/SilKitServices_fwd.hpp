@@ -24,7 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 //forwards
 namespace Config {
-namespace v1 {
+inline namespace v1 {
 struct CanController;
 struct EthernetController;
 struct LinController;

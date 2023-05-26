@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <atomic>
 #include <cstdint>
 #include <chrono>
+#include <future>
 #include <map>
 #include <set>
 #include <thread>
@@ -49,6 +50,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "TestResult.hpp"
 
+using namespace std::chrono_literals;
+
 namespace SilKit {
 namespace Dashboard {
 
@@ -57,30 +60,42 @@ namespace Dashboard {
 class DashboardSystemApiController : public oatpp::web::server::api::ApiController
 {
 public:
-    DashboardSystemApiController(std::chrono::seconds creationTimeout, std::chrono::seconds updateTimeout,
-                                 const std::shared_ptr<ObjectMapper>& objectMapper)
+    DashboardSystemApiController(uint64_t expectedSimulationsCount, std::chrono::seconds creationTimeout,
+                                 std::chrono::seconds updateTimeout, const std::shared_ptr<ObjectMapper>& objectMapper)
         : oatpp::web::server::api::ApiController(objectMapper)
+        , _expectedSimulationsCount(expectedSimulationsCount)
         , _creationTimeout(creationTimeout)
         , _updateTimeout(updateTimeout)
     {
+        _allSimulationsFinishedFuture = _allSimulationsFinishedPromise.get_future();
+        if (_expectedSimulationsCount == 0)
+        {
+            _allSimulationsFinishedPromise.set_value();
+        }
     }
 
 private:
+    uint64_t _expectedSimulationsCount;
     std::chrono::seconds _creationTimeout;
     std::chrono::seconds _updateTimeout;
-    std::atomic<uint32_t> _simulationId{0};
+    std::atomic<uint64_t> _simulationId{0};
     std::mutex _mutex;
-    std::map<uint32_t, SimulationData> _data;
+    std::map<uint64_t, SimulationData> _data;
+    std::promise<void> _allSimulationsFinishedPromise;
+    std::future<void> _allSimulationsFinishedFuture;
+    std::future_status _allSimulationsFinishedStatus;
 
 public:
     static std::shared_ptr<DashboardSystemApiController> createShared(
-        std::chrono::seconds creationTimeout, std::chrono::seconds updateTimeout,
+        uint64_t expectedFinishedSimulationsCount, std::chrono::seconds creationTimeout,
+        std::chrono::seconds updateTimeout,
         const std::shared_ptr<ObjectMapper>& objectMapper = OATPP_GET_COMPONENT(std::shared_ptr<ObjectMapper>))
     {
-        return std::make_shared<DashboardSystemApiController>(creationTimeout, updateTimeout, objectMapper);
+        return std::make_shared<DashboardSystemApiController>(expectedFinishedSimulationsCount, creationTimeout,
+                                                              updateTimeout, objectMapper);
     }
 
-    std::map<uint32_t, SimulationData> GetData() { return _data; }
+    std::map<uint64_t, SimulationData> GetData() { return _data; }
 
     ENDPOINT("POST", "system-service/v1.0/simulations", createSimulation,
              BODY_DTO(Object<SilKit::Dashboard::SimulationCreationRequestDto>, simulation))
@@ -99,7 +114,7 @@ public:
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].participants.insert(participantName);
+        _data[simulationId].participants.insert(participantName);
         return createResponse(Status::CODE_204, "");
     }
 
@@ -111,7 +126,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(participantStatus, Status::CODE_400, "participantStatus not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].statesByParticipant[participantName].insert(
+        _data[simulationId].statesByParticipant[participantName].insert(
             oatpp::Enum<ParticipantState>::getEntryByValue(participantStatus->state).name.toString());
         return createResponse(Status::CODE_204, "");
     }
@@ -125,7 +140,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(canController, Status::CODE_400, "canController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId, {"", "cancontroller", canController->name, canController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
@@ -140,7 +155,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(ethernetController, Status::CODE_400, "ethernetController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId, {"", "ethernetcontroller", ethernetController->name, ethernetController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
@@ -155,7 +170,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(flexrayController, Status::CODE_400, "flexrayController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId, {"", "flexraycontroller", flexrayController->name, flexrayController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
@@ -169,7 +184,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(linController, Status::CODE_400, "linController not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId, {"", "lincontroller", linController->name, linController->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
@@ -183,7 +198,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(dataPublisher, Status::CODE_400, "dataPublisher not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
+        _data[simulationId].servicesByParticipant[participantName].insert(
             std::pair<uint64_t, Service>(serviceId, {"",
                                                      "datapublisher",
                                                      dataPublisher->name,
@@ -203,7 +218,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(dataSubscriber, Status::CODE_400, "dataSubscriber not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
+        _data[simulationId].servicesByParticipant[participantName].insert(
             std::pair<uint64_t, Service>(serviceId, {"",
                                                      "datasubscriber",
                                                      dataSubscriber->name,
@@ -224,7 +239,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(dataSubscriberInternal, Status::CODE_400, "dataSubscriberInternal not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(
+        _data[simulationId].servicesByParticipant[participantName].insert(
             std::pair<uint64_t, Service>(serviceId, {parentServiceId,
                                                      "datasubscriberinternal",
                                                      dataSubscriberInternal->name,
@@ -242,7 +257,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(rpcClient, Status::CODE_400, "rpcClient not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId,
             {"",
              "rpcclient",
@@ -261,7 +276,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(rpcServer, Status::CODE_400, "rpcServer not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId,
             {"",
              "rpcserver",
@@ -282,53 +297,59 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(rpcServerInternal, Status::CODE_400, "rpcServerInternal not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
+        _data[simulationId].servicesByParticipant[participantName].insert(std::pair<uint64_t, Service>(
             serviceId,
             {parentServiceId, "rpcserverinternal", rpcServerInternal->name, rpcServerInternal->networkName, {}}));
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/cannetworks/{networkName}",
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/cannetworks/{networkName}",
              addCanNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
              PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].linksByParticipant[participantName].insert({"can", networkName});
+        _data[simulationId].linksByParticipant[participantName].insert({"can", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/ethernetnetworks/{networkName}",
+    ENDPOINT(
+        "PUT",
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/ethernetnetworks/{networkName}",
         addEthernetNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
         PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].linksByParticipant[participantName].insert({"ethernet", networkName});
+        _data[simulationId].linksByParticipant[participantName].insert({"ethernet", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/flexraynetworks/{networkName}",
+    ENDPOINT(
+        "PUT",
+        "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/flexraynetworks/{networkName}",
         addFlexrayNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
         PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].linksByParticipant[participantName].insert({"flexray", networkName});
+        _data[simulationId].linksByParticipant[participantName].insert({"flexray", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
-    ENDPOINT("PUT", "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/linnetworks/{networkName}",
+    ENDPOINT("PUT",
+             "system-service/v1.0/simulations/{simulationId}/participants/{participantName}/linnetworks/{networkName}",
              addLinNetworkToSimulation, PATH(UInt64, simulationId), PATH(String, participantName),
              PATH(String, networkName))
     {
         std::this_thread::sleep_for(_updateTimeout);
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].linksByParticipant[participantName].insert({"lin", networkName});
+        _data[simulationId].linksByParticipant[participantName].insert({"lin", networkName});
         return createResponse(Status::CODE_204, "");
     }
 
@@ -339,7 +360,7 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(systemStatus, Status::CODE_400, "systemStatus not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].systemStates.insert(
+        _data[simulationId].systemStates.insert(
             oatpp::Enum<SystemState>::getEntryByValue(systemStatus->state).name.toString());
         return createResponse(Status::CODE_204, "");
     }
@@ -351,8 +372,33 @@ public:
         OATPP_ASSERT_HTTP(simulationId <= _simulationId, Status::CODE_404, "simulationId not found");
         OATPP_ASSERT_HTTP(simulation, Status::CODE_400, "simulation not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
-        _data[_simulationId].stopped = true;
+        _data[simulationId].stopped = true;
+        if (CountFinishedSimulations() == _expectedSimulationsCount)
+        {
+            _allSimulationsFinishedPromise.set_value();
+        }
         return createResponse(Status::CODE_204, "");
+    }
+
+    int CountFinishedSimulations()
+    {
+        auto finishedSimulationsCount = 0;
+        for (auto const& d : _data)
+        {
+            if (d.second.stopped)
+            {
+                finishedSimulationsCount++;
+            }
+        }
+        return finishedSimulationsCount;
+    }
+
+    void WaitSimulationsFinished() { 
+        _allSimulationsFinishedStatus = _allSimulationsFinishedFuture.wait_for(2s); 
+    }
+
+    bool AllSimulationsFinished() { 
+        return _allSimulationsFinishedStatus == std::future_status::ready; 
     }
 
 private:

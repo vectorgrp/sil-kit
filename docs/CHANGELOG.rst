@@ -7,6 +7,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.27] - UNRELEASED
+---------------------
+
+Changed
+~~~~~~~
+
+- Added detection of simulation start and end for the dashboard. 
+
+  - The simulation id initialization is deferred until the first dashboard relevant event happens.
+  - A simulation is considered as ended, when the last participant disconnects.
+
+
 [4.0.26] - 2023-05-22
 ---------------------
 

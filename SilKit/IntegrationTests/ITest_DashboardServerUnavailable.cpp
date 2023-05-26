@@ -24,7 +24,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <iostream>
 
 #include "ITestFixture.hpp"
-#include "ITestThreadSafeLogger.hpp"
 
 #include "silkit/services/can/all.hpp"
 
@@ -37,104 +36,35 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace {
 using namespace SilKit::Tests;
 using namespace SilKit::Config;
-using namespace SilKit::Services;
-using namespace SilKit::Services::Can;
+using namespace std::chrono_literals;
 
-struct TestState
+TEST_F(ITest_DashboardTestHarness, dashboard_server_unavailable)
 {
-    std::vector<uint8_t> payloadBytes;
-
-    CanFrame msg;
-
-    //Reader variables
-    bool result = false;
-    size_t messageCount{0};
-};
-
-TEST_F(ITest_SimTestHarness, dashboard_server_unavailable)
-{
-    //Create a simulation setup with 2 participants
-    SetupFromParticipantList({"CanReader", "CanWriter"});
-
-    //Test Results
-    auto state = std::make_shared<TestState>();
-
-    //Test data
-    const std::string payload = "Hallo Welt";
-
-    state->payloadBytes.resize(payload.size());
-    std::copy(payload.begin(), payload.end(), state->payloadBytes.begin());
-
-    state->msg = CanFrame{};
-    state->msg.canId = 123;
-    state->msg.dataField = state->payloadBytes;
-
-    auto dashboard =
-        SilKit::Dashboard::CreateDashboard(SilKit::Config::ParticipantConfigurationFromStringImpl(
-                                               R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"),
-                                                        _registryUri, MakeTestDashboardUri());
-
-    //Set up the Sending and receiving participants
+    const auto participantName = "CanWriter";
+    const auto canonicalName = "CanController1";
+    const auto networkName = "CAN1";
+    SetupFromParticipantLists({participantName}, {});
     {
-        /////////////////////////////////////////////////////////////////////////
-        // CanWriter
-        /////////////////////////////////////////////////////////////////////////
-        const auto participantName = "CanWriter";
-        auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-        auto&& participant = simParticipant->Participant();
-        auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-        auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-        auto&& canController = participant->CreateCanController("CanController1", "CAN1");
-
-        lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
-            Log() << "---   " << participantName << ": Init called, setting baud rate and starting";
-            canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
-            canController->Start();
-        });
-
-        timeSyncService->SetSimulationStepHandler(
-            [canController, state](std::chrono::nanoseconds /*now*/, std::chrono::nanoseconds /*duration*/) {
-                Log() << "---   CanWriter sending CanFrame";
-                canController->SendFrame(state->msg, (void*)(intptr_t)(0xDEADBEEF));
-            },
-            1ms);
+        auto dashboard =
+            SilKit::Dashboard::CreateDashboard(ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, MakeTestDashboardUri());
+        {
+            _simTestHarness->CreateSystemController();
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+            auto&& participant = simParticipant->Participant();
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            (void)participant->CreateCanController(canonicalName, networkName);
+            timeSyncService->SetSimulationStepHandler(
+                [lifecycleService](auto, auto) {
+                    lifecycleService->Stop("Test done");
+                },
+                1ms);
+            auto ok = _simTestHarness->Run(5s);
+            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+            _simTestHarness->ResetParticipants();
+        }
     }
-
-    {
-        /////////////////////////////////////////////////////////////////////////
-        // CanReader
-        /////////////////////////////////////////////////////////////////////////
-        const auto participantName = "CanReader";
-        auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-        auto&& participant = simParticipant->Participant();
-        auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-        (void)simParticipant->GetOrCreateTimeSyncService();
-        auto&& canController = participant->CreateCanController("CanController1", "CAN1");
-
-        lifecycleService->SetCommunicationReadyHandler([canController, participantName]() {
-            Log() << participantName << ": Init called, setting baud rate and starting";
-            canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
-            canController->Start();
-        });
-
-        canController->AddFrameHandler([state, lifecycleService](auto, const Can::CanFrameEvent& frameEvent) {
-            if (frameEvent.userContext == nullptr)
-            {
-                //Ignore the early test messages
-                return;
-            }
-            if (state->messageCount++ == 10)
-            {
-                lifecycleService->Stop("Test done");
-                Log() << "---   CanReader: Sending Stop from";
-            }
-            state->result = true;
-        });
-    }
-
-    auto ok = _simTestHarness->Run(5s);
-    ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-    EXPECT_TRUE(state->result) << " Expecting a message";
+    _simTestHarness->ResetRegistry();
 }
 
 } //end namespace

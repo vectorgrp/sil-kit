@@ -61,7 +61,9 @@ public:
     // Helpers to circumvent one-time-only orchestration service creation
     auto GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*;
     auto GetOrCreateSystemController() -> Experimental::Services::Orchestration::ISystemController*;
-    auto GetOrCreateLifecycleService() -> Services::Orchestration::ILifecycleService*;
+    auto GetOrCreateLifecycleService(SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration =
+                                         {SilKit::Services::Orchestration::OperationMode::Coordinated})
+        -> Services::Orchestration::ILifecycleService*;
     auto GetOrCreateTimeSyncService() -> Services::Orchestration::ITimeSyncService*;
     auto GetOrGetLogger() -> Services::Logging::ILogger*;
 
@@ -87,9 +89,12 @@ class SimTestHarness
 public:
     //! when deferParticipantCreation is true, SimParticipants will be created in the GetParticipant calls instead of in the constructor.
     SimTestHarness(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
-                   bool deferParticipantCreation = false);
+                   bool deferParticipantCreation = false, bool deferSystemControllerCreation = false,
+                   const std::vector<std::string>& asyncParticipantNames = std::vector<std::string>());
 
     ~SimTestHarness();
+
+    void CreateSystemController();
     //! \brief Run the simulation, return false if timeout is reached.
     bool Run(std::chrono::nanoseconds testRunTimeout = std::chrono::nanoseconds::min());
     //! \brief Get the SimParticipant by name
@@ -99,8 +104,14 @@ public:
 
     // clear everything and destroy participants:
     void Reset();
+    void ResetRegistry();
+    void ResetParticipants();
+
 private:
-    void AddParticipant(const std::string& participantName, const std::string& participantConfiguration);
+    void AddParticipant(const std::string& participantName, const std::string& participantConfiguration,
+                        SilKit::Services::Orchestration::LifecycleConfiguration startConfiguration = {SilKit::Services::Orchestration::OperationMode::Coordinated});
+    bool IsSync(const std::string& participantName);
+    bool IsAsync(const std::string& participantName);
 
     std::mutex _mutex;
     auto Lock() -> std::unique_lock<decltype(_mutex)>
@@ -109,6 +120,7 @@ private:
     }
 
     std::vector<std::string> _syncParticipantNames;
+    std::vector<std::string> _asyncParticipantNames;
     std::string _registryUri;
     std::unique_ptr<SimSystemController> _simSystemController;
     std::map<std::string, std::unique_ptr<SimParticipant>> _simParticipants;

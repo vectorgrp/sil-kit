@@ -21,20 +21,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <future>
-#include <thread>
-
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
-#include "ISilKitEventHandler.hpp"
-
-//forwards
-namespace oatpp {
-namespace async {
-class Executor;
-} // namespace async
-} // namespace oatpp
+#include "ICachingSilKitEventHandler.hpp"
 
 //forwards
 namespace SilKit {
@@ -62,7 +52,18 @@ public:
     ~Dashboard();
 
 private:
-    void Run(std::future<void> stopSignal);
+    void OnParticipantConnected(
+        const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
+    void OnParticipantDisconnected(
+        const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
+    void OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus);
+    void OnSystemStateChanged(Services::Orchestration::SystemState systemState);
+    void OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+                                            const Core::ServiceDescriptor& serviceDescriptor);
+    bool LastParticipantDisconnected(
+        const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
+    template <typename T, typename... A>
+    void AccessCachingEventHandler(T&& func, A&&... args);
 
 private:
     std::unique_ptr<SilKit::IParticipant> _dashboardParticipant;
@@ -71,15 +72,26 @@ private:
     SilKit::Services::Orchestration::ISystemMonitor* _systemMonitor{ nullptr };
     SilKit::Core::Discovery::IServiceDiscovery* _serviceDiscovery{ nullptr };
     SilKit::Services::Logging::ILogger* _logger{ nullptr };
-
-    std::shared_ptr<ISilKitEventHandler> _cachingEventHandler;
+    std::shared_ptr<DashboardRetryPolicy> _retryPolicy;
+    std::mutex _cachingEventHandlerMx;
+    std::unique_ptr<ICachingSilKitEventHandler> _cachingEventHandler;
+    
+    std::mutex _connectedParticipantsMx;
+    std::vector<std::string> _connectedParticipants;
 
     SilKit::Util::HandlerId _participantStatusHandlerId{};
     SilKit::Util::HandlerId _systemStateHandlerId{};
-    std::thread _dashboardThread;
-    std::promise<void> _dashboardStopPromise;
-    std::shared_ptr<DashboardRetryPolicy> _retryPolicy;
-    std::shared_ptr<oatpp::async::Executor> _asyncExecutor;
 };
+
+template <typename T, typename... A>
+void Dashboard::AccessCachingEventHandler(T&& func, A&&... args)
+{
+    std::unique_lock<decltype(_cachingEventHandlerMx)> lock(_cachingEventHandlerMx);
+    if (_cachingEventHandler)
+    {
+        std::forward<T>(func)(_cachingEventHandler.get(), std::forward<A>(args)...);
+    }
+}
+
 } // namespace Dashboard
 } // namespace SilKit

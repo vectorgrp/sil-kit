@@ -33,8 +33,9 @@ public:
     {
     }
 
-    MOCK_METHOD(std::future<oatpp::Object<SimulationCreationResponseDto>>, CreateSimulation,
-                (oatpp::Object<SimulationCreationRequestDto>), (override));
+    MOCK_METHOD(oatpp::Object<SimulationCreationResponseDto>, CreateSimulation,
+                (oatpp::Object<SimulationCreationRequestDto>),
+                (override));
 
     MOCK_METHOD(void, AddParticipantToSimulation, (oatpp::UInt64, oatpp::String), (override));
 

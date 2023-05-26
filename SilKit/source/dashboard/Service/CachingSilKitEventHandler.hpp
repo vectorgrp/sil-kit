@@ -21,38 +21,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "ISilKitEventHandler.hpp"
+#include "ICachingSilKitEventHandler.hpp"
 
 #include <atomic>
+#include <future>
 #include <memory>
-#include <thread>
 
 #include "silkit/services/logging/ILogger.hpp"
 
-#include "CachedData.hpp"
+#include "ISilKitEventQueue.hpp"
+#include "ISilKitEventHandler.hpp"
+
 
 namespace SilKit {
 namespace Dashboard {
 
-enum CachingSilKitEventHandlerState
-{
-    Caching,
-    Sending,
-    Disabled
-};   
-
-// Filters own events and caches SIL Kit Event as long as the dashboard has not allocated a simulation id
-class CachingSilKitEventHandler : public ISilKitEventHandler
+// Filters own events and process others using a queue
+class CachingSilKitEventHandler : public ICachingSilKitEventHandler
 {
 public:
-    CachingSilKitEventHandler(Services::Logging::ILogger* logger, const std::string& participantName,
-                              std::shared_ptr<ISilKitEventHandler> eventHandler);
+    CachingSilKitEventHandler(const std::string& connectUri, Services::Logging::ILogger* logger,
+                              std::shared_ptr<ISilKitEventHandler> eventHandler,
+                              std::shared_ptr<ISilKitEventQueue> eventQueue);
     ~CachingSilKitEventHandler();
 
 public: //methods
 
-    std::future<bool> OnStart(const std::string& connectUri, uint64_t time) override;
-    void OnShutdown(uint64_t time) override;
+    void OnLastParticipantDisconnected() override;
     void OnParticipantConnected(
         const Services::Orchestration::ParticipantConnectionInformation& participantInformation) override;
     void OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus) override;
@@ -61,21 +56,17 @@ public: //methods
                                  const Core::ServiceDescriptor& serviceDescriptor) override;
 
 private: //methods
-    void Run(const std::string& connectUri, uint64_t time);
-    void NotifyCachedEvents();
+    void StartSimulationIfNeeded();
 
 private: //member
-    std::thread _simulationCreationThread;
-    std::promise<bool> _simulationCreatedPromise;
-    std::atomic<CachingSilKitEventHandlerState> _state{Caching};
-
+    std::string _connectUri;
     Services::Logging::ILogger* _logger;
-    std::string _participantName;
     std::shared_ptr<ISilKitEventHandler> _eventHandler;
+    std::shared_ptr<ISilKitEventQueue> _eventQueue;
 
-    CachedData _dataCache;
-
-    friend class TestDashboardCachingSilKitEventHandler;
+    std::atomic<bool> _simulationRunning{false};
+    std::future<void> _done;
+    std::atomic<bool> _abort{false};
 };
 
 } // namespace Dashboard

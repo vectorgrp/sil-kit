@@ -27,7 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 #include "ITestFixture.hpp"
-#include "ITestThreadSafeLogger.hpp"
 
 #include "silkit/services/can/all.hpp"
 #include "IParticipantInternal.hpp"
@@ -38,95 +37,66 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 using namespace SilKit::Tests;
-using namespace SilKit::Core;
 using namespace SilKit::Config;
-using namespace SilKit::Services;
+using namespace std::chrono_literals;
 
-class DashboardTestHarness : public ITest_SimTestHarness
+
+TEST_F(ITest_DashboardTestHarness, dashboard_creationtimeout)
 {
-protected:
-    DashboardTestHarness()
-        : ITest_SimTestHarness()
-        , _dashboardUri(MakeTestDashboardUri())
-        , _participantConfig(ParticipantConfigurationFromStringImpl(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})"))
-    {
-    }
-
-    ~DashboardTestHarness() {}
-
-protected:
-    Orchestration::ITimeSyncService::SimulationStepHandler CreateSimulationStepHandler(
-        const std::string& participantName, Orchestration::ILifecycleService* lifecycleService)
-    {
-        return [this, participantName, lifecycleService](auto now, auto) {
-            if (now < 200ms)
-            {
-                return;
-            }
-            if (!_result)
-            {
-                _result = true;
-                lifecycleService->Stop("Test done");
-                Log() << "---   " << participantName << ": Sending Stop from";
-            }
-        };
-    }
-
-protected: // members
-    std::string _dashboardUri;
-    std::shared_ptr<IParticipantConfiguration> _participantConfig;
-    bool _result{false};
-};
-
-TEST_F(DashboardTestHarness, dashboard_creationtimeout)
-{
-    SetupFromParticipantList({"CanWriter"});
+    const auto participantName = "CanWriter";
+    const auto canonicalName = "CanController1";
+    const auto networkName = "CAN1";
+    SetupFromParticipantLists({participantName}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
-        _participantConfig, _registryUri, _dashboardUri,
-        [this]() {
-            {
-                /////////////////////////////////////////////////////////////////////////
-                // CanWriter
-                /////////////////////////////////////////////////////////////////////////
-                const auto participantName = "CanWriter";
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-                auto&& participant = simParticipant->Participant();
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-                (void)participant->CreateCanController("CanController1", "CAN1");
-
-                timeSyncService->SetSimulationStepHandler(
-                    CreateSimulationStepHandler(participantName, lifecycleService), 1ms);
-            }
-        auto ok = _simTestHarness->Run(5s);
-        ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
-        },
-        std::chrono::seconds{5}, std::chrono::seconds{0});
-}
-
-TEST_F(DashboardTestHarness, dashboard_updatetimeout)
-{
-    SetupFromParticipantList({"CanWriter"});
-    auto testResult = SilKit::Dashboard::RunDashboardTest(
-        _participantConfig, _registryUri, _dashboardUri, [this]() {
-            {
-                /////////////////////////////////////////////////////////////////////////
-                // CanWriter
-                /////////////////////////////////////////////////////////////////////////
-                const auto participantName = "CanWriter";
-                auto&& simParticipant = _simTestHarness->GetParticipant(participantName);
-                auto&& participant = simParticipant->Participant();
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-                (void)participant->CreateCanController("CanController1", "CAN1");
-
-                timeSyncService->SetSimulationStepHandler(
-                    CreateSimulationStepHandler(participantName, lifecycleService), 1ms);
-            }
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName, &canonicalName, &networkName]() {
+            _simTestHarness->CreateSystemController();
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+            auto&& participant = simParticipant->Participant();
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            (void)participant->CreateCanController(canonicalName, networkName);
+            timeSyncService->SetSimulationStepHandler(
+                [lifecycleService](auto, auto) {
+                    lifecycleService->Stop("Test done");
+                },
+                1ms);
             auto ok = _simTestHarness->Run(5s);
             ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+            _simTestHarness->ResetParticipants();
         },
-        std::chrono::seconds{0}, std::chrono::seconds{5});
+        1, std::chrono::seconds{5}, std::chrono::seconds{0});
+    ASSERT_FALSE(testResult.allSimulationsFinished) << "Simulation should not be finished!";
+    _simTestHarness->ResetRegistry();
+}
+
+TEST_F(ITest_DashboardTestHarness, dashboard_updatetimeout)
+{
+    const auto participantName = "CanWriter";
+    const auto canonicalName = "CanController1";
+    const auto networkName = "CAN1";
+    SetupFromParticipantLists({participantName}, {});
+    auto testResult = SilKit::Dashboard::RunDashboardTest(
+        ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri,
+        [this, &participantName, &canonicalName, &networkName]() {
+            _simTestHarness->CreateSystemController();
+            auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
+            auto&& participant = simParticipant->Participant();
+            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            (void)participant->CreateCanController(canonicalName, networkName);
+            timeSyncService->SetSimulationStepHandler(
+                [lifecycleService](auto, auto) {
+                    lifecycleService->Stop("Test done");
+                },
+                1ms);
+            auto ok = _simTestHarness->Run(5s);
+            ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
+            _simTestHarness->ResetParticipants();
+        },
+        1, std::chrono::seconds{0}, std::chrono::seconds{5});
+    ASSERT_FALSE(testResult.allSimulationsFinished) << "Simulation should not be finished!";
+    _simTestHarness->ResetRegistry();
 }
 
 } //end namespace

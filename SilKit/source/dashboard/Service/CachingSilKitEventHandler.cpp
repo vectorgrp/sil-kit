@@ -29,116 +29,129 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Dashboard {
 
-CachingSilKitEventHandler::CachingSilKitEventHandler(Services::Logging::ILogger* logger,
-                                                     const std::string& participantName,
-                                                     std::shared_ptr<ISilKitEventHandler> eventHandler)
-    : _logger(logger)
-    , _participantName(participantName)
-    , _eventHandler(eventHandler)
+uint64_t GetCurrentTime()
 {
+    auto now = std::chrono::system_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+}
+
+CachingSilKitEventHandler::CachingSilKitEventHandler(const std::string& connectUri, Services::Logging::ILogger* logger,
+                                                     std::shared_ptr<ISilKitEventHandler> eventHandler,
+                                                     std::shared_ptr<ISilKitEventQueue> eventQueue)
+    : _connectUri(connectUri)
+    , _logger(logger)
+    , _eventHandler(eventHandler)
+    , _eventQueue(eventQueue)
+{
+    _done = std::async(std::launch::async, [this]() {
+        SilKit::Util::SetThreadName("SK-Dash-Cons");
+        uint64_t simulationId = 0;
+        std::vector<SilKitEvent> events;
+        while (_eventQueue->DequeueAllInto(events))
+        {
+            for (SilKitEvent& evt : events)
+            {
+                if (_abort)
+                {
+                    return;
+                }
+                switch (evt.Type())
+                {
+                case SilKitEventType::OnSimulationStart:
+                {
+                    const SimulationStart& simulationStart = evt.GetSimulationStart();
+                    simulationId = _eventHandler->OnSimulationStart(simulationStart.connectUri, simulationStart.time);
+                }
+                break;
+
+                case SilKitEventType::OnParticipantConnected:
+                    if (simulationId > 0)
+                    {
+                        const Services::Orchestration::ParticipantConnectionInformation&
+                            participantConnectionInformation = evt.GetParticipantConnectionInformation();
+                        _eventHandler->OnParticipantConnected(simulationId, participantConnectionInformation);
+                    }
+                    break;
+
+                case SilKitEventType::OnSystemStateChanged:
+                    if (simulationId > 0)
+                    {
+                        const Services::Orchestration::SystemState& systemState = evt.GetSystemState();
+                        _eventHandler->OnSystemStateChanged(simulationId, systemState);
+                    }
+                    break;
+
+                case SilKitEventType::OnParticipantStatusChanged:
+                    if (simulationId > 0)
+                    {
+                        const Services::Orchestration::ParticipantStatus& participantStatus =
+                            evt.GetParticipantStatus();
+                        _eventHandler->OnParticipantStatusChanged(simulationId, participantStatus);
+                    }
+                    break;
+
+                case SilKitEventType::OnServiceDiscoveryEvent:
+                    if (simulationId > 0)
+                    {
+                        const ServiceData& serviceData = evt.GetServiceData();
+                        _eventHandler->OnServiceDiscoveryEvent(simulationId, serviceData.discoveryType,
+                                                               serviceData.serviceDescriptor);
+                    }
+                    break;
+
+                case SilKitEventType::OnSimulationEnd:
+                    if (simulationId > 0)
+                    {
+                        const SimulationEnd& simulationEnd = evt.GetSimulationEnd();
+                        _eventHandler->OnSimulationEnd(simulationId, simulationEnd.time);
+                    }
+                    simulationId = 0;
+                    break;
+                default: _logger->Error("Dashboard: unexpected SilKitEventType");
+                }
+            }
+            events.clear();
+        }
+    });
 }
 
 CachingSilKitEventHandler::~CachingSilKitEventHandler()
 {
-    if (_simulationCreationThread.joinable())
+    _eventQueue->Stop();
+    auto status = _done.wait_for(std::chrono::seconds{2});
+    if (status != std::future_status::ready)
     {
-        _simulationCreationThread.join();
+        _logger->Warn("Dashboard: aborting");
+        _abort = true;
     }
+    _done.wait();
 }
 
-std::future<bool> CachingSilKitEventHandler::OnStart(const std::string& connectUri, uint64_t time)
+void CachingSilKitEventHandler::OnLastParticipantDisconnected()
 {
-    _simulationCreationThread = std::thread{[this, &connectUri, time]() {
-        SilKit::Util::SetThreadName("SK-Dash-Caching");
-        Run(connectUri, time);
-    }};
-    return _simulationCreatedPromise.get_future();
-}
-
-void CachingSilKitEventHandler::Run(const std::string& connectUri, uint64_t time)
-{
-    auto simulationCreated = _eventHandler->OnStart(connectUri, time);
-    std::future_status simulationCreatedStatus;
-    do
-    {
-        simulationCreatedStatus = simulationCreated.wait_for(std::chrono::seconds{1});
-    } while (_state != Disabled && simulationCreatedStatus != std::future_status::ready);
-    if (simulationCreatedStatus != std::future_status::ready)
-    {
-        _logger->Warn("Dashboard: already disabled");
-        _simulationCreatedPromise.set_value(false);
-        return;
-    }
-    if (simulationCreated.get())
-    {
-        auto expectedState = Caching;
-        if (_state.compare_exchange_strong(expectedState, Sending))
-        {
-            _logger->Info("Dashboard: notifying cached events");
-            NotifyCachedEvents();
-            _simulationCreatedPromise.set_value(true);
-            return;
-        }
-        _logger->Warn("Dashboard: already disabled");
-        _simulationCreatedPromise.set_value(false);
-        return;
-    }
-    _logger->Warn("Dashboard: simulation creation failed, disabling caching");
-    _state = Disabled;
-    _simulationCreatedPromise.set_value(false);
-    return;
-}
-
-void CachingSilKitEventHandler::OnShutdown(uint64_t time)
-{
-    auto expectedState = Sending;
-    if (_state.compare_exchange_strong(expectedState, Disabled))
-    {
-        _eventHandler->OnShutdown(time);
-        return;
-    }
-    _logger->Warn("Dashboard: not sending, skipping setting an end");
-    _state = Disabled;
+    StartSimulationIfNeeded();
+    _eventQueue->Enqueue(SilKitEvent(SimulationEnd{GetCurrentTime()}));
+    _simulationRunning = false;
 }
 
 void CachingSilKitEventHandler::OnParticipantConnected(
     const Services::Orchestration::ParticipantConnectionInformation& participantInformation)
 {
-    if (participantInformation.participantName == _participantName)
-    {
-        return;
-    }
-    switch (_state)
-    {
-    case Disabled: return;
-    case Caching: _dataCache.Insert(participantInformation); return;
-    case Sending: _eventHandler->OnParticipantConnected(participantInformation);
-    }
+    StartSimulationIfNeeded();
+    _eventQueue->Enqueue(SilKitEvent(participantInformation));
 }
 
 void CachingSilKitEventHandler::OnSystemStateChanged(Services::Orchestration::SystemState systemState)
 {
-    switch (_state)
-    {
-    case Disabled: return;
-    case Caching: _dataCache.Insert(systemState); return;
-    case Sending: _eventHandler->OnSystemStateChanged(systemState);
-    }
+    StartSimulationIfNeeded();
+    _eventQueue->Enqueue(SilKitEvent(systemState));
 }
 
 void CachingSilKitEventHandler::OnParticipantStatusChanged(
     const Services::Orchestration::ParticipantStatus& participantStatus)
 {
-    if (participantStatus.participantName == _participantName)
-    {
-        return;
-    }
-    switch (_state)
-    {
-    case Disabled: return;
-    case Caching: _dataCache.Insert(participantStatus); return;
-    case Sending: _eventHandler->OnParticipantStatusChanged(participantStatus);
-    }
+    StartSimulationIfNeeded();
+    _eventQueue->Enqueue(SilKitEvent(participantStatus));
 }
 
 bool ShouldSkipServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
@@ -152,67 +165,20 @@ bool ShouldSkipServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Typ
 void CachingSilKitEventHandler::OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                                         const Core::ServiceDescriptor& serviceDescriptor)
 {
-    if (serviceDescriptor.GetParticipantName() == _participantName)
-    {
-        return;
-    }
     if (ShouldSkipServiceDiscoveryEvent(discoveryType, serviceDescriptor))
     {
         return;
     }
-    switch (_state)
-    {
-    case Disabled: return;
-    case Caching: _dataCache.Insert(ServiceData{discoveryType, serviceDescriptor}); return;
-    case Sending: _eventHandler->OnServiceDiscoveryEvent(discoveryType, serviceDescriptor);
-    }
+    StartSimulationIfNeeded();
+    _eventQueue->Enqueue(SilKitEvent(ServiceData{discoveryType, serviceDescriptor}));
 }
 
-void CachingSilKitEventHandler::NotifyCachedEvents()
+void CachingSilKitEventHandler::StartSimulationIfNeeded()
 {
+    bool simulationRunning = false;
+    if (_simulationRunning.compare_exchange_strong(simulationRunning, true))
     {
-        auto&& cacheCopy = _dataCache.GetAndClear<Services::Orchestration::ParticipantConnectionInformation>();
-        for (auto&& pci : cacheCopy)
-        {
-            if (_state == Disabled)
-            {
-                return;
-            }
-            _eventHandler->OnParticipantConnected(pci);
-        }
-    }
-    {
-        auto&& cacheCopy = _dataCache.GetAndClear<ServiceData>();
-        for (auto&& descr : cacheCopy)
-        {
-            if (_state == Disabled)
-            {
-                return;
-            }
-            _eventHandler->OnServiceDiscoveryEvent(descr.discoveryType, descr.serviceDescriptor);
-        }
-    }
-    {
-        auto&& cacheCopy = _dataCache.GetAndClear<Services::Orchestration::ParticipantStatus>();
-        for (auto&& status : cacheCopy)
-        {
-            if (_state == Disabled)
-            {
-                return;
-            }
-            _eventHandler->OnParticipantStatusChanged(status);
-        }
-    }
-    {
-        auto&& cacheCopy = _dataCache.GetAndClear<Services::Orchestration::SystemState>();
-        for (auto&& state : cacheCopy)
-        {
-            if (_state == Disabled)
-            {
-                return;
-            }
-            _eventHandler->OnSystemStateChanged(state);
-        }
+        _eventQueue->Enqueue(SilKitEvent(SimulationStart{_connectUri, GetCurrentTime()}));
     }
 }
 

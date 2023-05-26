@@ -42,8 +42,8 @@ auto CreateDashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
 
 auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                       const std::string& registryUri, const std::string& dashboardUri, std::function<void()> testCode,
-                      std::chrono::seconds creationTimeout, std::chrono::seconds updateTimeout)
-    -> TestResult
+                      uint64_t expectedSimulationsCount, std::chrono::seconds creationTimeout,
+                      std::chrono::seconds updateTimeout) -> TestResult
 {
     TestResult testResult{};
     oatpp::base::Environment::init();
@@ -52,17 +52,21 @@ auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
         auto uri = SilKit::Core::Uri::Parse(dashboardUri);
         SilKit::Dashboard::DashboardTestComponents components{uri.Host(), uri.Port()};
         SilKit::Dashboard::ClientServerTestRunner runner;
-        auto controller = SilKit::Dashboard::DashboardSystemApiController::createShared(creationTimeout, updateTimeout);
+        auto controller = SilKit::Dashboard::DashboardSystemApiController::createShared(expectedSimulationsCount,
+                                                                                        creationTimeout, updateTimeout);
         runner.addController(controller);
 
         runner.run(
-            [testCode = std::move(testCode), participantConfig, &registryUri]() {
-                auto&& dashboard = std::make_unique<Dashboard>(participantConfig, registryUri);
+            [testCode = std::move(testCode), participantConfig, &registryUri, controller]() {
+                auto&& dashboard =
+                    std::make_unique<Dashboard>(participantConfig, registryUri);
                 testCode();
+                controller->WaitSimulationsFinished();
             },
-            std::chrono::seconds(30));
+            std::chrono::seconds(10));
 
         testResult.dataBySimulation = controller->GetData();
+        testResult.allSimulationsFinished = controller->AllSimulationsFinished();
     }
     catch (oatpp::web::protocol::http::HttpError& error)
     {

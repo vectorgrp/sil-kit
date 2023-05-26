@@ -21,26 +21,51 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-#include "ServiceDatatypes.hpp"
+#include "SilKitEventQueue.hpp"
 
 namespace SilKit {
+
 namespace Dashboard {
-class ISilKitEventHandler
+
+SilKitEventQueue::SilKitEventQueue()
 {
-public:
-    virtual ~ISilKitEventHandler() = default;
-    virtual uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) = 0;
-    virtual void OnSimulationEnd(uint64_t simulationId, uint64_t time) = 0;
-    virtual void OnParticipantConnected(
-        uint64_t simulationId,
-        const Services::Orchestration::ParticipantConnectionInformation& participantInformation) = 0;
-    virtual void OnParticipantStatusChanged(uint64_t simulationId,
-                                            const Services::Orchestration::ParticipantStatus& participantStatus) = 0;
-    virtual void OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState) = 0;
-    virtual void OnServiceDiscoveryEvent(uint64_t simulationId,
-                                         Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                         const Core::ServiceDescriptor& serviceDescriptor) = 0;
-};
+}
+
+SilKitEventQueue::~SilKitEventQueue()
+{
+}
+
+void SilKitEventQueue::Enqueue(const SilKitEvent& obj)
+{
+    {
+        std::lock_guard<decltype(_mutex)> lock{_mutex};
+        if (!_stop)
+        {
+            _queue.push_back(obj);
+        }
+    }
+    _cv.notify_one();
+}
+
+bool SilKitEventQueue::DequeueAllInto(std::vector<SilKitEvent>& events)
+{
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
+    _cv.wait(lock, [this] {
+        return !_queue.empty() || _stop;
+    });
+    std::move(_queue.begin(), _queue.end(), std::back_inserter(events));
+    _queue.clear();
+    return !events.empty();
+}
+
+void SilKitEventQueue::Stop()
+{
+    {
+        std::lock_guard<decltype(_mutex)> lock{_mutex};
+        _stop = true;
+    }
+    _cv.notify_one();
+}
+
 } // namespace Dashboard
 } // namespace SilKit

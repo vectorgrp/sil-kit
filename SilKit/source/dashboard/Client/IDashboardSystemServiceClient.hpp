@@ -21,9 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include <future>
-#include <memory>
-
 #include "SimulationCreationRequestDto.hpp"
 #include "SimulationCreationResponseDto.hpp"
 #include "SystemStatusDto.hpp"
@@ -43,7 +40,7 @@ class IDashboardSystemServiceClient
 public:
     virtual ~IDashboardSystemServiceClient() = default;
 
-    virtual std::future<oatpp::Object<SimulationCreationResponseDto>> CreateSimulation(
+    virtual oatpp::Object<SimulationCreationResponseDto> CreateSimulation(
         oatpp::Object<SimulationCreationRequestDto> simulation) = 0;
 
     virtual void AddParticipantToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName) = 0;

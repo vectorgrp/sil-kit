@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "IDashboardSystemServiceClient.hpp"
 
-#include "oatpp/core/async/Executor.hpp"
+#include <memory>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -37,12 +37,11 @@ class DashboardSystemServiceClient : public IDashboardSystemServiceClient
 public:
     DashboardSystemServiceClient(Services::Logging::ILogger* logger,
                                  std::shared_ptr<DashboardSystemApiClient> dashboardSystemApiClient,
-                                 std::shared_ptr<oatpp::data::mapping::ObjectMapper> objectMapper,
-                                 std::shared_ptr<oatpp::async::Executor> executor);
+                                 std::shared_ptr<oatpp::data::mapping::ObjectMapper> objectMapper);
     ~DashboardSystemServiceClient();
 
 public:
-    std::future<oatpp::Object<SimulationCreationResponseDto>> CreateSimulation(
+    oatpp::Object<SimulationCreationResponseDto> CreateSimulation(
         oatpp::Object<SimulationCreationRequestDto> simulation) override;
 
     void AddParticipantToSimulation(oatpp::UInt64 simulationId, oatpp::String participantName) override;
@@ -108,14 +107,12 @@ public:
     void SetSimulationEnd(oatpp::UInt64 simulationId, oatpp::Object<SimulationEndDto> simulation) override;
 
 private:
-    void OnSimulationCreationResponseBody(oatpp::Object<SimulationCreationResponseDto> simulation);
+    void Log(std::shared_ptr<oatpp::web::client::RequestExecutor::Response> response, const std::string& message);
 
 private:
-    std::promise<oatpp::Object<SimulationCreationResponseDto>> _simulationCreationPromise;
     Services::Logging::ILogger* _logger;
     std::shared_ptr<DashboardSystemApiClient> _dashboardSystemApiClient;
     std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
-    std::shared_ptr<oatpp::async::Executor> _executor;
 };
 
 } // namespace Dashboard

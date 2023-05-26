@@ -22,7 +22,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SilKitEventHandler.hpp"
 
 #include "ILogger.hpp"
-#include "SetThreadName.hpp"
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/SilKit.hpp"
 #include "Uri.hpp"
@@ -41,92 +40,68 @@ SilKitEventHandler::SilKitEventHandler(Services::Logging::ILogger* logger,
 
 SilKitEventHandler::~SilKitEventHandler()
 {
-    _stopping = true;
-    if (_simulationCreationThread.joinable())
-    {
-        _simulationCreationThread.join();
-    }
 }
 
-std::future<bool> SilKitEventHandler::OnStart(const std::string& connectUri, uint64_t time)
+uint64_t SilKitEventHandler::OnSimulationStart(const std::string& connectUri, uint64_t time)
 {
-    _logger->Info("Dashboard: creating simulation");
-    _simulationCreationThread = std::thread{[this, &connectUri, time]() {
-        SilKit::Util::SetThreadName("SK-Dash-Evt");
-        Run(connectUri, time);
-    }};
-    return _simulationCreatedPromise.get_future();
-}
-
-void SilKitEventHandler::Run(const std::string& connectUri, uint64_t time)
-{
-    auto simulationCreated = _dashboardSystemServiceClient->CreateSimulation(
+    Services::Logging::Info(_logger, "Dashboard: creating simulation {} {}", connectUri, time);
+    auto simulation = _dashboardSystemServiceClient->CreateSimulation(
         _silKitToOatppMapper->CreateSimulationCreationRequestDto(connectUri, time));
-    std::future_status simulationCreatedStatus;
-    do
+    if (simulation)
     {
-        simulationCreatedStatus = simulationCreated.wait_for(std::chrono::seconds{1});
-    } while (!_stopping && simulationCreatedStatus != std::future_status::ready);
-    if (simulationCreatedStatus == std::future_status::ready)
-    {
-        auto simulation = simulationCreated.get();
-        if (simulation)
-        {
-            Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", simulation->id);
-            _simulationId = simulation->id;
-        }
-        _simulationCreatedPromise.set_value(simulation != nullptr);
-        return;
+        Services::Logging::Info(_logger, "Dashboard: created simulation with id {}", simulation->id);
+        return simulation->id;
     }
-    _logger->Warn("Dashboard: creating simulation: giving up...");
-    _simulationCreatedPromise.set_value(false);
+    _logger->Warn("Dashboard: creating simulation failed");
+    return 0;
 }
 
-void SilKitEventHandler::OnShutdown(uint64_t time)
+void SilKitEventHandler::OnSimulationEnd(uint64_t simulationId, uint64_t time)
 {
-    Services::Logging::Info(_logger, "Dashboard: setting end for simulation {}", _simulationId);
-    _dashboardSystemServiceClient->SetSimulationEnd(_simulationId.load(),
-                                                    _silKitToOatppMapper->CreateSimulationEndDto(time));
+    Services::Logging::Info(_logger, "Dashboard: setting end for simulation {}", simulationId);
+    _dashboardSystemServiceClient->SetSimulationEnd(simulationId, _silKitToOatppMapper->CreateSimulationEndDto(time));
 }
 
 void SilKitEventHandler::OnParticipantConnected(
-    const Services::Orchestration::ParticipantConnectionInformation& participantInformation)
+    uint64_t simulationId, const Services::Orchestration::ParticipantConnectionInformation& participantInformation)
 {
-    Services::Logging::Debug(_logger, "Dashboard: adding participant for simulation {} {}", _simulationId,
+    Services::Logging::Debug(_logger, "Dashboard: adding participant for simulation {} {}", simulationId,
                              participantInformation.participantName);
     auto participantName = SilKit::Core::Uri::UrlEncode(participantInformation.participantName);
-    _dashboardSystemServiceClient->AddParticipantToSimulation(_simulationId.load(), participantName);
+    _dashboardSystemServiceClient->AddParticipantToSimulation(simulationId, participantName);
 }
 
-void SilKitEventHandler::OnSystemStateChanged(Services::Orchestration::SystemState systemState)
+void SilKitEventHandler::OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState)
 {
-    Services::Logging::Debug(_logger, "Dashboard: updating system state for simulation {} {}", _simulationId,
+    Services::Logging::Debug(_logger, "Dashboard: updating system state for simulation {} {}", simulationId,
                              systemState);
     _dashboardSystemServiceClient->UpdateSystemStatusForSimulation(
-        _simulationId.load(), _silKitToOatppMapper->CreateSystemStatusDto(systemState));
+        simulationId, _silKitToOatppMapper->CreateSystemStatusDto(systemState));
 }
 
-void SilKitEventHandler::OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus)
+void SilKitEventHandler::OnParticipantStatusChanged(uint64_t simulationId,
+                                                    const Services::Orchestration::ParticipantStatus& participantStatus)
 {
-    Services::Logging::Debug(_logger, "Dashboard: adding participant status for simulation {} {} {}", _simulationId,
+    Services::Logging::Debug(_logger, "Dashboard: adding participant status for simulation {} {} {}", simulationId,
                              participantStatus.participantName, participantStatus.state);
     auto participantName = SilKit::Core::Uri::UrlEncode(participantStatus.participantName);
     _dashboardSystemServiceClient->AddParticipantStatusForSimulation(
-        _simulationId.load(), participantName, _silKitToOatppMapper->CreateParticipantStatusDto(participantStatus));
+        simulationId, participantName, _silKitToOatppMapper->CreateParticipantStatusDto(participantStatus));
 }
 
-void SilKitEventHandler::OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
+void SilKitEventHandler::OnServiceDiscoveryEvent(uint64_t simulationId,
+                                                 Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                                  const Core::ServiceDescriptor& serviceDescriptor)
 {
     switch (serviceDescriptor.GetServiceType())
     {
-    case Core::ServiceType::Controller: OnControllerCreated(_simulationId, serviceDescriptor); break;
-    case Core::ServiceType::Link: OnLinkCreated(_simulationId, serviceDescriptor); break;
+    case Core::ServiceType::Controller: OnControllerCreated(simulationId, serviceDescriptor); break;
+    case Core::ServiceType::Link: OnLinkCreated(simulationId, serviceDescriptor); break;
     default: break;
     }
 }
 
-void SilKitEventHandler::OnControllerCreated(uint32_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
+void SilKitEventHandler::OnControllerCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
     Services::Logging::Debug(_logger, "Dashboard: adding service for simulation {} {}", simulationId,
                              serviceDescriptor);
@@ -212,7 +187,7 @@ void SilKitEventHandler::OnControllerCreated(uint32_t simulationId, const Core::
     }
 }
 
-void SilKitEventHandler::OnLinkCreated(uint32_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
+void SilKitEventHandler::OnLinkCreated(uint64_t simulationId, const Core::ServiceDescriptor& serviceDescriptor)
 {
     Services::Logging::Debug(_logger, "Dashboard: adding network for simulation {} {}", simulationId,
                              serviceDescriptor);

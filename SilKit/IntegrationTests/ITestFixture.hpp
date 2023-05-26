@@ -60,5 +60,33 @@ protected:// members
     std::unique_ptr<SimTestHarness> _simTestHarness;
 };
 
+class ITest_DashboardTestHarness : public ITest_SimTestHarness
+{
+protected:
+    ITest_DashboardTestHarness()
+        : ITest_SimTestHarness()
+        , _dashboardUri(MakeTestDashboardUri())
+        , _dashboardParticipantConfig(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})")
+        , _participantConfig(R"({"Logging": {"Sinks": [{"Type": "Stdout", "Level":"Info"}]}})")
+    {
+    }
+    ~ITest_DashboardTestHarness() {}
+
+protected:
+    void SetupFromParticipantLists(std::vector<std::string> coordinatedParticipantNames,
+                                   std::vector<std::string> autonomousParticipantNames)
+    {
+        // create test harness with deferred participant and controller creation.
+        // Will only create the SIL Kit Registry and tell the SystemController the participantNames
+        _simTestHarness = std::make_unique<SimTestHarness>(coordinatedParticipantNames, _registryUri, true, true,
+                                                           autonomousParticipantNames);
+    }
+
+protected: // members
+    std::string _dashboardUri;
+    std::string _dashboardParticipantConfig;
+    std::string _participantConfig;
+};
+
 } //namespace Tests
 } //namespace SilKit

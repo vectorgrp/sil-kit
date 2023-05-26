@@ -21,26 +21,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
-#include "ServiceDatatypes.hpp"
+#include "SilKitEvent.hpp"
 
 namespace SilKit {
+
 namespace Dashboard {
-class ISilKitEventHandler
+
+class ISilKitEventQueue
 {
+
 public:
-    virtual ~ISilKitEventHandler() = default;
-    virtual uint64_t OnSimulationStart(const std::string& connectUri, uint64_t time) = 0;
-    virtual void OnSimulationEnd(uint64_t simulationId, uint64_t time) = 0;
-    virtual void OnParticipantConnected(
-        uint64_t simulationId,
-        const Services::Orchestration::ParticipantConnectionInformation& participantInformation) = 0;
-    virtual void OnParticipantStatusChanged(uint64_t simulationId,
-                                            const Services::Orchestration::ParticipantStatus& participantStatus) = 0;
-    virtual void OnSystemStateChanged(uint64_t simulationId, Services::Orchestration::SystemState systemState) = 0;
-    virtual void OnServiceDiscoveryEvent(uint64_t simulationId,
-                                         Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                         const Core::ServiceDescriptor& serviceDescriptor) = 0;
+    virtual ~ISilKitEventQueue() = default;
+    virtual void Enqueue(const SilKitEvent& obj) = 0;
+    virtual bool DequeueAllInto(std::vector<SilKitEvent>& events) = 0;
+    virtual void Stop() = 0;
 };
+
 } // namespace Dashboard
 } // namespace SilKit

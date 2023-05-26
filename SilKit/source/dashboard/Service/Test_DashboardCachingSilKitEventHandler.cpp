@@ -26,6 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "CachingSilKitEventHandler.hpp"
 
+#include "Mocks/MockSilKitEventQueue.hpp"
 #include "Mocks/MockSilKitEventHandler.hpp"
 
 using namespace testing;
@@ -49,228 +50,197 @@ public:
     void SetUp() override
     {
         _mockEventHandler = std::make_shared<StrictMock<MockSilKitEventHandler>>();
-
-        EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Info));
+        _mockEventQueue = std::make_shared<StrictMock<MockSilKitEventQueue>>();
+        EXPECT_CALL(_dummyLogger, GetLogLevel).WillRepeatedly(Return(Services::Logging::Level::Warn));
     }
 
-    std::shared_ptr<CachingSilKitEventHandler> CreateService(const std::string& participantName,
-                                                             CachingSilKitEventHandlerState state = Caching)
+    std::shared_ptr<CachingSilKitEventHandler> CreateService()
     {
-        auto service = std::make_shared<CachingSilKitEventHandler>(&_dummyLogger, participantName, _mockEventHandler);
-        service->_state = state;
-        return service;
+        return std::make_shared<CachingSilKitEventHandler>(_connectUri, &_dummyLogger, _mockEventHandler,
+                                                           _mockEventQueue);
     }
 
-    template <typename T>
-    std::shared_ptr<CachingSilKitEventHandler> CreateService(const std::string& participantName,
-                                                             CachingSilKitEventHandlerState state, const T& cacheDatum)
-    {
-        auto service = CreateService(participantName, state);
-        service->_dataCache.Insert(cacheDatum);
-        return service;
-    }
+    void CheckConnectUri(const std::string& actual) { ASSERT_EQ(actual, _connectUri) << "Wrong connectUri!"; }
 
-    void CheckState(std::shared_ptr<CachingSilKitEventHandler> service, CachingSilKitEventHandlerState expectedState)
-    {
-        ASSERT_EQ(service->_state, expectedState) << "Wrong state!";
-    }
+    void CheckTime(uint64_t actual) { ASSERT_TRUE(actual > 0) << "Wrong time!"; }
 
-    template <typename T>
-    void CheckCache(std::shared_ptr<CachingSilKitEventHandler> service, std::vector<T> expected)
-    {
-        auto actual = service->_dataCache.GetAndClear<T>();
-        ASSERT_EQ(actual.size(), expected.size()) << "Vectors have different size!";
-        for (int i = 0; i < expected.size(); ++i)
-        {
-            ASSERT_EQ(actual[i], expected[i]) << "Vectors differ at index " << i;
-        }
-    }
+    void CheckSimulationId(uint64_t actual) { ASSERT_EQ(actual, _simulationId) << "Wrong simulationId!"; }
 
     Core::Tests::MockLogger _dummyLogger;
     std::shared_ptr<StrictMock<MockSilKitEventHandler>> _mockEventHandler;
+    std::shared_ptr<StrictMock<MockSilKitEventQueue>> _mockEventQueue;
+    const std::string _connectUri{"silkit://localhost:8500"};
+    const uint64_t _simulationId{123};
+    const uint64_t _invalidSimulationId{0};
 };
 
-TEST_F(TestDashboardCachingSilKitEventHandler, Inital_StateCaching)
+TEST_F(TestDashboardCachingSilKitEventHandler, NoEvents)
 {
     // Arrange
+    EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            evts.clear();
+                        }),
+                        Return(false)));
+    EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act
-    const auto service = CreateService("SilKitDashboard");
+    {
+        const auto service = CreateService();
+    }
 
     // Assert
-    CheckState(service, CachingSilKitEventHandlerState::Caching);
 }
 
-TEST_F(TestDashboardCachingSilKitEventHandler, OnStart_Failure_SetDisabledState)
+TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimulationFailure)
 {
     // Arrange
-    std::promise<bool> simulationCreated;
-    EXPECT_CALL(*_mockEventHandler, OnStart).WillOnce(Return(simulationCreated.get_future()));
-    EXPECT_CALL(_dummyLogger, Warn("Dashboard: simulation creation failed, disabling caching")).WillOnce(Return());
-    const auto service = CreateService("SilKitDashboard");
+    bool simulationStartFound = false;
+    bool participantConnectionInformationFound = false;
+    EXPECT_CALL(*_mockEventQueue, Enqueue).WillRepeatedly(WithArgs<0>([&](const auto& evt) {
+        switch (evt.Type())
+        {
+        case SilKitEventType::OnSimulationStart: simulationStartFound = true; break;
+        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true;
+        }
+    }));
+
+    Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
+    EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            SimulationStart simulationStart{"silkit://localhost:8500", 123456};
+                            std::vector<SilKitEvent> events;
+                            events.emplace_back(simulationStart);
+                            events.emplace_back(participantConnectionInformation);
+                            evts.swap(events);
+                        }),
+                        Return(true)))
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            evts.clear();
+                        }),
+                        Return(false)));
+    std::string actualConnectUri;
+    uint64_t actualTime = 0;
+    EXPECT_CALL(*_mockEventHandler, OnSimulationStart)
+        .WillOnce(DoAll(WithArgs<0, 1>([&](auto connectUri, auto time) {
+                            actualConnectUri = connectUri;
+                            actualTime = time;
+                        }),
+                        Return(_invalidSimulationId)));
+    EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act
-    auto res = service->OnStart("silkit://localhost:8500", 0);
-    simulationCreated.set_value(false);
+    {
+        const auto service = CreateService();
+        service->OnParticipantConnected(participantConnectionInformation);
+    }
 
     // Assert
-    ASSERT_FALSE(res.get());
-    CheckState(service, CachingSilKitEventHandlerState::Disabled);
+    ASSERT_TRUE(simulationStartFound) << "No simulation start event produced!";
+    ASSERT_TRUE(participantConnectionInformationFound) << "No participant connection event produced!";
+    CheckConnectUri(actualConnectUri);
+    CheckTime(actualTime);
 }
 
-TEST_F(TestDashboardCachingSilKitEventHandler, OnStart_StateCachingAndSuccess_SetSendingStateAndNotifyCachedEvents)
+TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimulationSuccess)
 {
     // Arrange
-    std::promise<bool> simulationCreated;
-    EXPECT_CALL(*_mockEventHandler, OnStart).WillOnce(Return(simulationCreated.get_future()));
-    EXPECT_CALL(_dummyLogger, Info("Dashboard: notifying cached events"))
-        .WillOnce(Return());
-    Services::Orchestration::ParticipantConnectionInformation expectedInfo;
+    bool simulationStartFound = false;
+    bool participantConnectionInformationFound = false;
+    EXPECT_CALL(*_mockEventQueue, Enqueue).WillRepeatedly(WithArgs<0>([&](const auto& evt) {
+        switch (evt.Type())
+        {
+        case SilKitEventType::OnSimulationStart: simulationStartFound = true; break;
+        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true;
+        }
+    }));
+    Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
+    EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            SimulationStart simulationStart{"silkit://localhost:8500", 123456};
+                            std::vector<SilKitEvent> events;
+                            events.emplace_back(simulationStart);
+                            events.emplace_back(participantConnectionInformation);
+                            evts.swap(events);
+                        }),
+                        Return(true)))
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            evts.clear();
+                        }),
+                        Return(false)));
+    std::string actualConnectUri;
+    uint64_t actualTime = 0;
+    EXPECT_CALL(*_mockEventHandler, OnSimulationStart)
+        .WillOnce(DoAll(WithArgs<0, 1>([&](auto connectUri, auto time) {
+                            actualConnectUri = connectUri;
+                            actualTime = time;
+                        }),
+                        Return(_simulationId)));
+    uint64_t actualSimulationId = 0;
     Services::Orchestration::ParticipantConnectionInformation actualInfo;
-    EXPECT_CALL(*_mockEventHandler, OnParticipantConnected).WillOnce(DoAll(WithArgs<0>([&](auto info) {
+    EXPECT_CALL(*_mockEventHandler, OnParticipantConnected).WillOnce(WithArgs<0, 1>([&](auto simulationId, auto info) {
+        actualSimulationId = simulationId;
         actualInfo = info;
-    })));
-    const auto service = CreateService("SilKitDashboard", Caching, expectedInfo);
+    }));
+    EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act
-    auto res = service->OnStart("silkit://localhost:8500", 0);
-    simulationCreated.set_value(true);
+    {
+        const auto service = CreateService();
+        service->OnParticipantConnected(participantConnectionInformation);
+    }
 
     // Assert
-    ASSERT_TRUE(res.get());
-    CheckState(service, CachingSilKitEventHandlerState::Sending);
-    std::vector<Services::Orchestration::ParticipantConnectionInformation> expected{};
-    CheckCache(service, expected);
-    ASSERT_EQ(actualInfo, expectedInfo) << "Wrong ParticipantConnectionInformation!";
+    ASSERT_TRUE(simulationStartFound) << "No simulation start event produced!";
+    ASSERT_TRUE(participantConnectionInformationFound) << "No participant connection event produced!";
+    CheckConnectUri(actualConnectUri);
+    CheckTime(actualTime);
+    CheckSimulationId(actualSimulationId);
+    ASSERT_EQ(actualInfo, participantConnectionInformation) << "Wrong ParticipantConnectionInformation!";
 }
 
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnShutdown_StateCaching_SetDisabledState)
+TEST_F(TestDashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_CreateSimulationSuccess)
 {
     // Arrange
-    EXPECT_CALL(_dummyLogger, Warn("Dashboard: not sending, skipping setting an end")).WillOnce(Return());
-    const auto service = CreateService("SilKitDashboard");
+    EXPECT_CALL(*_mockEventQueue, Enqueue).Times(2);
+    EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            SimulationStart simulationStart{"silkit://localhost:8500", 123456};
+                            std::vector<SilKitEvent> events;
+                            events.emplace_back(simulationStart);
+                            evts.swap(events);
+                        }),
+                        Return(true)))
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            SimulationEnd simulationEnd{456789};
+                            std::vector<SilKitEvent> events;
+                            events.emplace_back(simulationEnd);
+                            evts.swap(events);
+                        }),
+                        Return(true)))
+        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
+                            evts.clear();
+                        }),
+                        Return(false)));
+    ;
+    EXPECT_CALL(*_mockEventHandler, OnSimulationStart).WillOnce(Return(_simulationId));
+    uint64_t actualSimulationId = 0;
+    uint64_t actualTime = 0;
+    EXPECT_CALL(*_mockEventHandler, OnSimulationEnd).WillOnce(WithArgs<0, 1>([&](auto simulationId, auto time) {
+        actualSimulationId = simulationId;
+        actualTime = time;
+    }));
+    EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act
-    service->OnShutdown(0);
+    {
+        const auto service = CreateService();
+        service->OnLastParticipantDisconnected();
+    }
 
     // Assert
-    CheckState(service, CachingSilKitEventHandlerState::Disabled);
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnShutdown_StateSending_SetDisabledStateAndSend)
-{
-    // Arrange
-    uint64_t actualStopTime;
-    EXPECT_CALL(*_mockEventHandler, OnShutdown).WillOnce(DoAll(WithArgs<0>([&](auto stopTime) {
-        actualStopTime = stopTime;
-    })));
-    const auto service = CreateService("SilKitDashboard", Sending);
-
-    // Act
-    const uint64_t expectedStopTime = 123456;
-    service->OnShutdown(expectedStopTime);
-
-    // Assert
-    CheckState(service, CachingSilKitEventHandlerState::Disabled);
-    ASSERT_EQ(actualStopTime, expectedStopTime) << "Wrong time!";
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnShutdown_StateDisabled_SetDisabledState)
-{
-    // Arrange
-    EXPECT_CALL(_dummyLogger, Warn("Dashboard: not sending, skipping setting an end"))
-        .WillOnce(Return());
-    const auto service = CreateService("SilKitDashboard", Disabled);
-
-    // Act
-    const uint64_t stopTime = 123456;
-    service->OnShutdown(stopTime);
-
-    // Assert
-    CheckState(service, CachingSilKitEventHandlerState::Disabled);
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnStartOnShutdown_NoResponse_SetDisabledState)
-{
-    // Arrange
-    std::promise<bool> simulationCreated;
-    EXPECT_CALL(*_mockEventHandler, OnStart).WillOnce(Return(simulationCreated.get_future()));
-    EXPECT_CALL(_dummyLogger, Warn("Dashboard: not sending, skipping setting an end"))
-        .WillOnce(Return());
-    EXPECT_CALL(_dummyLogger, Warn("Dashboard: already disabled")).WillOnce(Return());
-    const auto service = CreateService("SilKitDashboard");
-
-    // Act
-    auto res = service->OnStart("silkit://localhost:8500", 0);
-    service->OnShutdown(0);
-
-    // Assert
-    ASSERT_FALSE(res.get());
-    CheckState(service, CachingSilKitEventHandlerState::Disabled);
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_IgnoreOwnEvents)
-{
-    // Arrange
-    const auto participantName = "SilKitDashboard";
-    const auto service = CreateService(participantName);
-
-    // Act
-    Services::Orchestration::ParticipantConnectionInformation info;
-    info.participantName = participantName;
-    service->OnParticipantConnected(info);
-
-    // Assert
-    std::vector<Services::Orchestration::ParticipantConnectionInformation> expected{};
-    CheckCache(service, expected);
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_StateCaching_InsertInCache)
-{
-    // Arrange
-    const auto service = CreateService("SilKitDashboard");
-
-    // Act
-    Services::Orchestration::ParticipantConnectionInformation expectedInfo;
-    service->OnParticipantConnected(expectedInfo);
-
-    // Assert
-    std::vector<Services::Orchestration::ParticipantConnectionInformation> expected{expectedInfo};
-    CheckCache(service, expected);
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_StateSending_Send)
-{
-    // Arrange
-    Services::Orchestration::ParticipantConnectionInformation actualInfo;
-    EXPECT_CALL(*_mockEventHandler, OnParticipantConnected).WillOnce(DoAll(WithArgs<0>([&](auto info) {
-        actualInfo = info;
-    })));
-    const auto service = CreateService("SilKitDashboard", Sending);
-
-    // Act
-    Services::Orchestration::ParticipantConnectionInformation expectedInfo;
-    service->OnParticipantConnected(expectedInfo);
-
-    // Assert
-    ASSERT_EQ(actualInfo, expectedInfo) << "Wrong ParticipantConnectionInformation!";
-    std::vector<Services::Orchestration::ParticipantConnectionInformation> expected;
-    CheckCache(service, expected);
-}
-
-TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_StateDisabled_Ignore)
-{
-    // Arrange
-    const auto service = CreateService("SilKitDashboard", Disabled);
-
-    // Act
-    Services::Orchestration::ParticipantConnectionInformation info;
-    service->OnParticipantConnected(info);
-
-    // Assert
-    std::vector<Services::Orchestration::ParticipantConnectionInformation> expected;
-    CheckCache(service, expected);
+    CheckSimulationId(actualSimulationId);
+    CheckTime(actualTime);
 }
 
 } // namespace Dashboard

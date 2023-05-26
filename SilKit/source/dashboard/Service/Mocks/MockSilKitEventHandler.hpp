@@ -30,15 +30,15 @@ namespace Dashboard {
 class MockSilKitEventHandler : public ISilKitEventHandler
 {
 public:
-    MOCK_METHOD(std::future<bool>, OnStart, (const std::string&, uint64_t), (override));
-    MOCK_METHOD(void, OnShutdown, (uint64_t), (override));
-    MOCK_METHOD(void, OnParticipantConnected, (const Services::Orchestration::ParticipantConnectionInformation&),
+    MOCK_METHOD(uint64_t, OnSimulationStart, (const std::string&, uint64_t), (override));
+    MOCK_METHOD(void, OnSimulationEnd, (uint64_t, uint64_t), (override));
+    MOCK_METHOD(void, OnParticipantConnected,
+                (uint64_t, const Services::Orchestration::ParticipantConnectionInformation&), (override));
+    MOCK_METHOD(void, OnParticipantStatusChanged, (uint64_t, const Services::Orchestration::ParticipantStatus&),
                 (override));
-    MOCK_METHOD(void, OnParticipantStatusChanged, (const Services::Orchestration::ParticipantStatus&),
-                (override));
-    MOCK_METHOD(void, OnSystemStateChanged, (Services::Orchestration::SystemState), (override));
+    MOCK_METHOD(void, OnSystemStateChanged, (uint64_t, Services::Orchestration::SystemState), (override));
     MOCK_METHOD(void, OnServiceDiscoveryEvent,
-                (Core::Discovery::ServiceDiscoveryEvent::Type, const Core::ServiceDescriptor&), (override));
+                (uint64_t, Core::Discovery::ServiceDiscoveryEvent::Type, const Core::ServiceDescriptor&), (override));
 };
 
 } // namespace Dashboard
