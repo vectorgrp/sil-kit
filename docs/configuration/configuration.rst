@@ -105,7 +105,7 @@ Configuration Options
        :doc:`DataSubscribers<configuration-services>`,
        :doc:`RpcClients<configuration-services>`,
        :doc:`RpcServers<configuration-services>`
-     - These sections are used to configure bus controllers and other communication services. 
+     - These sections are used to configure bus controllers and other communication services.
 
    * - :ref:`Logging<sec:cfg-participant-logging>`
      - The logger configuration for this participant.
@@ -122,3 +122,67 @@ Configuration Options
    * - :doc:`Middleware<middleware-configuration>`
      - This optional section can be used to configure the middleware running the Vector SIL Kit.
        If this section is omitted, defaults will be used.
+
+
+The Registry Configuration File
+===============================
+
+An instance of the SIL Kit Registry (``sil-kit-registry(.exe)``) can be
+configured via a YAML/JSON file.
+The configuration file is optional and overrides the settings specified on the
+command line.
+It also allows extended configuration, beyond what the command line allows,
+particularly for logging.
+
+The outline of a registry configuration file is as follows:
+
+.. code-block:: yaml
+
+    ---
+    SchemaVersion: 1
+    Description: Sample registry configuration.
+
+    ListenUri: silkit://0.0.0.0:8501
+
+    Logging:
+      Sinks:
+        - Type: Stdout
+          Level: Trace
+        - Type: File
+          Level: Trace
+          LogName: SampleRegistryLogFile
+
+
+Configuration Options
+~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Setting Name
+     - Description
+
+   * - ``SchemaVersion``
+     - The version of the used registry configuration schema. Current version is 1.
+
+   * - ``Description``
+     - Free text field allowing a user to describe the configuration file in
+       their own words.
+       The contents of this field are not parsed or used internally.
+
+   * - ``ListenUri``
+     - The configured registry instance will listen on this address for
+       incoming connections.
+       This field overrides the ``-u``, and ``--listen-uri`` command line
+       parameters.
+
+   * - ``Logging``
+     - Configuration of where and how logs produced by the registry are
+       processed. See :ref:`Logging<sec:cfg-participant-logging>`.
+
+       **NOTE** It is not possible to configure ``LogFromRemotes``. Using this
+       value will lead to an error during registry startup.
+
+       **NOTE** It is only possible to use the Sink types ``Stdout`` and
+       ``File``. Using ``Remote`` will lead to an error during registry startup.

@@ -42,6 +42,18 @@ target_link_libraries(O_SilKit_Util_Filesystem
 )
 
 
+add_library(I_SilKit_Util_FileHelpers INTERFACE)
+target_include_directories(I_SilKit_Util_FileHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(I_SilKit_Util_FileHelpers INTERFACE SilKitInterface)
+
+add_library(O_SilKit_Util_FileHelpers OBJECT
+    FileHelpers.hpp
+    FileHelpers.cpp
+)
+target_include_directories(O_SilKit_Util_FileHelpers INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(O_SilKit_Util_FileHelpers PRIVATE I_SilKit_Util_FileHelpers)
+
+
 add_library(I_SilKit_Util_SetThreadName INTERFACE)
 target_include_directories(I_SilKit_Util_SetThreadName INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(I_SilKit_Util_SetThreadName INTERFACE SilKitInterface)

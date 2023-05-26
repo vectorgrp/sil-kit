@@ -23,6 +23,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <random>
 #include <future>
 #include <locale>
+#include <iostream>
+#include <iomanip>
 
 #include "silkit/config/IParticipantConfiguration.hpp"
 #include "silkit/services/logging/string_utils.hpp"
@@ -32,10 +34,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "SignalHandler.hpp"
 #include "WindowsServiceMain.hpp"
+#include "RegistryConfiguration.hpp"
 
 #include "CommandlineParser.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "Filesystem.hpp"
+#include "FileHelpers.hpp"
 #include "YamlParser.hpp"
 #include "CreateSilKitRegistryImpl.hpp"
 #include "ParticipantConfigurationFromXImpl.hpp"
@@ -84,25 +88,72 @@ void ConfigureLogging(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 }
 
 void ConfigureLoggingForWindowsService(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
-                                       const std::string& logLevel)
+                                       const std::string& logLevel, bool explicitWorkingDirectory)
 {
     namespace fs = SilKit::Filesystem;
 
     auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
     SILKIT_ASSERT(config != nullptr);
 
-    SilKit::Config::Sink newSink{};
-    newSink.type = SilKit::Config::Sink::Type::File;
-    newSink.level = SilKit::Services::Logging::from_string(logLevel);
-    newSink.logName = []() -> std::string {
-        std::ostringstream path;
-        path << fs::temp_directory_path().string() << fs::path::preferred_separator
-             << "sil-kit-registry_windows-service";
-        return path.str();
-    }();
-    config->logging.sinks.emplace_back(std::move(newSink));
+    const auto silkitLogLevel = SilKit::Services::Logging::from_string(logLevel);
+
+    if (silkitLogLevel != SilKit::Services::Logging::Level::Off)
+    {
+        SilKit::Config::Sink newSink{};
+        newSink.type = SilKit::Config::Sink::Type::File;
+        newSink.level = silkitLogLevel;
+        newSink.logName = [explicitWorkingDirectory]() -> std::string {
+          std::ostringstream path;
+          const char * logName = "VectorSilKitRegistry_WindowsService";
+          if (explicitWorkingDirectory)
+          {
+              path << logName;
+          }
+          else
+          {
+              path << fs::temp_directory_path().string() << fs::path::preferred_separator << logName;
+          }
+          return path.str();
+        }();
+        config->logging.sinks.emplace_back(std::move(newSink));
+    }
 
     config->middleware.enableDomainSockets = false;
+}
+
+void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
+                                       std::string& dashboardUri, bool& enableDashboard,
+                                       const SilKitRegistry::Config::V1::RegistryConfiguration& registryConfiguration)
+{
+    auto config = std::dynamic_pointer_cast<SilKit::Config::ParticipantConfiguration>(configuration);
+    SILKIT_ASSERT(config != nullptr);
+
+    if (!registryConfiguration.description.empty())
+    {
+        config->description = registryConfiguration.description;
+    }
+
+    if (registryConfiguration.listenUri.has_value())
+    {
+        config->middleware.registryUri = registryConfiguration.listenUri.value();
+    }
+
+    if (!registryConfiguration.logging.sinks.empty())
+    {
+        config->logging.sinks = registryConfiguration.logging.sinks;
+    }
+
+    enableDashboard = registryConfiguration.dashboardUri.has_value();
+
+    if (registryConfiguration.dashboardUri.has_value())
+    {
+        dashboardUri = registryConfiguration.dashboardUri.value();
+    }
+
+    if (registryConfiguration.enableDomainSockets.has_value())
+    {
+        config->middleware.enableDomainSockets = registryConfiguration.enableDomainSockets.value();
+    }
 }
 
 void SanitizeConfiguration(std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration,
@@ -244,11 +295,18 @@ int main(int argc, char** argv)
         "registry listens on. ");
     commandlineParser.Add<CliParser::Option>(
         "dashboard-uri", "d", "http://localhost:8082", "[--dashboard-uri <uri>]",
-        "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to. Defaults to 'http://localhost:8082'.");
+        "-d, --dashboard-uri <dashboard-uri>: The http:// URI the data should be sent to. Defaults to 'http://localhost:8082'.", CliParser::Hidden);
     commandlineParser.Add<CliParser::Option>("log", "l", "info", "[--log <level>]",
             "-l, --log <level>: Log to stdout with level 'trace', 'debug', 'warn', 'info', 'error', 'critical' or 'off'. Defaults to 'info'.");
     commandlineParser.Add<CliParser::Flag>("enable-dashboard", "Q", "[--enable-dashboard]",
         "-Q, --enable-dashboard: Enable the built-in dashboard REST client (experimental).", CliParser::Hidden);
+    commandlineParser.Add<CliParser::Option>("registry-configuration", "c", "", "[--registry-configuration <path>]",
+                                             "-c, --registry-configuration: The configuration read from this file "
+                                             "overrides the values specified on the command line.");
+    commandlineParser.Add<CliParser::Option>(
+        "directory", "C", "", "[--directory <path>]",
+        "-C, --directory <path>: Change the working directory to the specified path before doing anything else.",
+        CliParser::Hidden);
 
 
     if (SilKitRegistry::HasWindowsServiceSupport())
@@ -286,6 +344,25 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    const bool explicitWorkingDirectory = commandlineParser.Get<CliParser::Option>("directory").HasValue();
+    if (explicitWorkingDirectory)
+    {
+        const auto directory = commandlineParser.Get<CliParser::Option>("directory").Value();
+        if (!directory.empty())
+        {
+            try
+            {
+                SilKit::Filesystem::current_path(SilKit::Filesystem::path{directory});
+            }
+            catch (const std::exception& error)
+            {
+                std::cerr << "Error: Failed to change working directory to " << std::quoted(directory) << ": "
+                          << error.what() << std::endl;
+                return -1;
+            }
+        }
+    }
+
     if (commandlineParser.Get<CliParser::Flag>("version").Value())
     {
         std::string hash{ SilKit::Version::GitHash() };
@@ -301,7 +378,7 @@ int main(int argc, char** argv)
     auto listenUri{ commandlineParser.Get<CliParser::Option>("listen-uri").Value() };
     auto logLevel{ commandlineParser.Get<SilKit::Util::CommandlineParser::Option>("log").Value() };
     auto dashboardUri{commandlineParser.Get<CliParser::Option>("dashboard-uri").Value()};
-    const auto enableDashboard{commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value()};
+    auto enableDashboard{commandlineParser.Get<CliParser::Flag>("enable-dashboard").Value()};
 
     bool windowsService{SilKitRegistry::HasWindowsServiceSupport()
                         && commandlineParser.Get<CliParser::Flag>("windows-service").Value()};
@@ -322,16 +399,23 @@ int main(int argc, char** argv)
 
     try
     {
+        const auto registryConfiguration = SilKitRegistry::Config::Parse(
+            SilKit::Util::ReadTextFile(commandlineParser.Get<CliParser::Option>("registry-configuration").Value()));
+
         auto configuration = SilKit::Config::ParticipantConfigurationFromStringImpl("");
 
         if (windowsService)
         {
-            ConfigureLoggingForWindowsService(configuration, logLevel);
+            ConfigureLoggingForWindowsService(configuration, logLevel,
+                                              commandlineParser.Get<CliParser::Option>("directory").HasValue());
         }
         else
         {
             ConfigureLogging(configuration, logLevel);
         }
+
+        OverrideFromRegistryConfiguration(configuration, dashboardUri, enableDashboard, registryConfiguration);
+
         SanitizeConfiguration(configuration, listenUri);
 
         listenUri = ExtractRegistryUriFromConfiguration(configuration);

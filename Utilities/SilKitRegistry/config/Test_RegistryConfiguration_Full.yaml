@@ -1,0 +1,16 @@
+SchemaVersion: 1
+
+Description: Test_RegistryConfiguration_Full
+
+ListenUri: silkit://0.0.0.0:8501
+EnableDomainSockets: false
+
+Logging:
+  Sinks:
+    - Type: Stdout
+      Level: Trace
+    - Type: File
+      Level: Debug
+      LogName: FileSink
+
+DashboardUri: http://dashboard.example.com:1234

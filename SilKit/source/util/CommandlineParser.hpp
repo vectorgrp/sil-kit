@@ -258,6 +258,9 @@ public:
         Option(std::string name, std::string shortName, std::string defaultValue, std::string usage, std::string description)
             : Argument(std::move(name), std::move(usage), std::move(description)), _shortName(std::move(shortName)), _defaultValue(std::move(defaultValue)), _value() {}
 
+        Option(std::string name, std::string shortName, std::string defaultValue, std::string usage, std::string description, decltype(Hidden))
+            : Argument(std::move(name), std::move(usage), std::move(description), true), _shortName(std::move(shortName)), _defaultValue(std::move(defaultValue)), _value() {}
+
         auto ShortName() const -> std::string { return _shortName; }
         auto DefaultValue() const -> std::string { return _defaultValue; }
         auto Value() const -> std::string { return _value.empty() ? _defaultValue : _value; }

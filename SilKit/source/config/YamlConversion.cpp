@@ -33,63 +33,9 @@ using namespace SilKit;
 // Local utilities
 namespace {
 
-template<typename ConfigT, typename std::enable_if<
-    !(std::is_fundamental<ConfigT>::value || std::is_same<ConfigT, std::string>::value), bool>::type = true>
-void optional_encode(const SilKit::Util::Optional<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.has_value())
-    {
-        node[fieldName] = YAML::Converter::encode(value.value());
-    }
-}
-
-template<typename ConfigT>
-void optional_encode(const std::vector<ConfigT>& value, YAML::Node& node, const std::string& fieldName)
-{
-    if (value.size() > 0)
-    {
-        node[fieldName] = value;
-    }
-}
-
 void optional_encode(const Replay& value, YAML::Node& node, const std::string& fieldName)
 {
     if (value.useTraceSource.size() > 0)
-    {
-        node[fieldName] = value;
-    }
-}
-
-template <typename ConfigT>
-auto non_default_encode(const std::vector<ConfigT>& values, YAML::Node& node, const std::string& fieldName, 
-    const std::vector<ConfigT>& defaultValue)
-{
-    // Only encode vectors that have members that deviate from a default-value.
-    // And also ensure we only encode values that are user-defined.
-    if (!values.empty() && !(values == defaultValue))
-    {
-        std::vector<ConfigT> userValues;
-        static const ConfigT defaultObj{};
-        // only encode non-default values
-        for (const auto& value : values)
-        {
-            if (!(value == defaultObj))
-            {
-                userValues.push_back(value);
-            }
-        }
-        if (userValues.size() > 0)
-        {
-            node[fieldName] = values;
-        }
-    }
-}
-
-template <typename ConfigT>
-auto non_default_encode(const ConfigT& value, YAML::Node& node, const std::string& fieldName, 
-    const ConfigT& defaultValue)
-{
-    if (!(value == defaultValue))
     {
         node[fieldName] = value;
     }

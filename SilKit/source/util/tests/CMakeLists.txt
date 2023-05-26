@@ -24,3 +24,4 @@ add_silkit_test(Test_UtilsSilSerDes SOURCES Test_SilSerializer.cpp Test_SilSerDe
 add_silkit_test(Test_UtilsCommandlineParser SOURCES Test_CommandlineParser.cpp LIBS I_SilKit_Util)
 add_silkit_test(Test_UtilsSynchronizedHandlers SOURCES Test_SynchronizedHandlers.cpp LIBS I_SilKit_Util)
 add_silkit_test(Test_UtilsTimer SOURCES Test_Timer.cpp LIBS I_SilKit_Util O_SilKit_Util_SetThreadName)
+add_silkit_test(Test_Util_FileHelpers SOURCES Test_Util_FileHelpers.cpp LIBS O_SilKit_Util_FileHelpers)

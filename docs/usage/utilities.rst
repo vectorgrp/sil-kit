@@ -37,6 +37,7 @@ sil-kit-registry
         -l, --log <level>                    Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info``.
         -g, --generate-configuration <path>  Path and filename of a participant configuration file to generate containing the URI the registry is using.
         -d, --dashboard-uri <dashboard-uri>  The ``http://`` URI the data should be sent to. Defaults to ``http://localhost:8082``.
+        -c, --registry-configuration <path>  Path to the registry configuration file (YAML/JSON).
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -72,7 +73,7 @@ sil-kit-system-controller
    *  -  Source location
       -  ``Utilities/SilKitSystemController``
    *  -  Requirements
-      -  The ``sil-kit-system-controller`` needs a running ``sil-kit-registry`` to connect to. 
+      -  The ``sil-kit-system-controller`` needs a running ``sil-kit-registry`` to connect to.
          Furthermore, it requires a list of synchronized participants that are needed to start the simulation as input.
    *  -  Parameters
       -  -v, --version                                Get version info.

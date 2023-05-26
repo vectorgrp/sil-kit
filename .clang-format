@@ -104,7 +104,7 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 #LambdaBodyIntdentation: Signature
 MacroBlockBegin: ''
 MacroBlockEnd:   ''
-MaxEmptyLinesToKeep: 1
+MaxEmptyLinesToKeep: 2
 NamespaceIndentation: None
 ObjCBinPackProtocolList: Never
 ObjCBlockIndentWidth: 2

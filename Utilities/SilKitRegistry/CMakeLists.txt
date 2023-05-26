@@ -31,6 +31,8 @@ if(MSVC)
     endif()
 endif (MSVC)
 
+add_subdirectory(config)
+
 add_executable(sil-kit-registry
     SignalHandler.hpp
     SignalHandler.cpp
@@ -56,6 +58,8 @@ target_link_libraries(sil-kit-registry
 
     S_SilKitImpl
     S_SilKit_Dashboard
+
+    O_SilKitRegistry_Config
 )
 
 # Set versioning infos on exe

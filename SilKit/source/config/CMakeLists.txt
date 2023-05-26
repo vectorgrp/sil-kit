@@ -55,6 +55,7 @@ target_link_libraries(O_SilKit_Config
     PRIVATE SilKitInterface
     PUBLIC I_SilKit_Util
     PUBLIC yaml-cpp
+    PRIVATE I_SilKit_Util_FileHelpers
 )
 
 target_include_directories(O_SilKit_Config

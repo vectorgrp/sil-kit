@@ -18,6 +18,13 @@ Changed
   - The simulation id initialization is deferred until the first dashboard relevant event happens.
   - A simulation is considered as ended, when the last participant disconnects.
 
+Added
+~~~~~
+
+- SIL Kit Registry (``sil-kit-registry(.exe)``)
+
+  - Support for overriding command line settings via a YAML configuration file
+
 
 [4.0.26] - 2023-05-22
 ---------------------
