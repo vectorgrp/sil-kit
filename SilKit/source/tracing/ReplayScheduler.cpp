@@ -80,7 +80,7 @@ public:
     {
     }
 
-    // Meta data uses fixed terms from the MDF spec, see Config.hpp:MdfChannel and vibe-mdf4tracing
+    // Meta data uses fixed terms from the MDF spec, see Config.hpp:MdfChannel and SilKitExtension_Mdf
     value ChannelName() const { return Get("mdf/channel_name"); }
 
     value ChannelSource() const { return Get("mdf/source_info_name"); }

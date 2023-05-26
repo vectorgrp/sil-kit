@@ -141,7 +141,7 @@ def parseArgs():
     parser.add_argument('--projectroot', metavar='PROJECT_ROOT', type=str,
             help="the toplevel project directory containing the source")
     parser.add_argument('zipfiles', metavar='SilKit-<CONFIG>.zip', type=str,
-            help="""Zip files which contain the IB binaries and are packaged by CPack.
+            help="""Zip files which contain the SIL Kit binaries and are packaged by CPack.
             The distribution will contain all merged zipfiles. 
             The pattern of <name>-<sem_version>-<compiler>-<arch>-<buildtype> is significant for computing the output name.
             For Example: SilKit-1.0.0-VS2015-Win32-Debug.zip SilKit-1.0.0-VS2015-Win32-Release.zip""",

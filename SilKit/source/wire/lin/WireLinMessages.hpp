@@ -36,7 +36,7 @@ namespace Lin {
 //! \brief Data type representing a finished LIN transmission, independent of success or error.
 struct LinTransmission
 {
-    std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in VIBE simulation.
+    std::chrono::nanoseconds timestamp; //!< Time at the end of the transmission. Only valid in detailed simulation.
     LinFrame frame; //!< The transmitted frame
     LinFrameStatus status; //!< The status of the transmitted frame
 };
@@ -64,11 +64,11 @@ struct LinSendFrameHeaderRequest
 //! \brief Data type representing a LIN WakeUp pulse.
 struct LinWakeupPulse
 {
-    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in VIBE Simulation.
+    std::chrono::nanoseconds timestamp; //!< Time of the WakeUp pulse. Only valid in detailed Simulation.
     TransmitDirection direction; //!< The direction of the wakeup pulse.
 };
 
-//! \brief Data type used to inform other LIN participants (LIN controllers and VIBE Simulator) about changed LinControllerStatus.
+//! \brief Data type used to inform other LIN participants (LIN controllers and detailed Simulator) about changed LinControllerStatus.
 struct LinControllerStatusUpdate
 {
     std::chrono::nanoseconds timestamp; //!< Time of the controller status change.

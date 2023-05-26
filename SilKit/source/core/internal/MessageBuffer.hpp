@@ -198,7 +198,7 @@ public:
     template<typename ValueT>
     inline MessageBuffer& operator>>(std::vector<ValueT>& vector);
     // --------------------------------------------------------------------------------
-    // ib::util::SharedVector<T>
+    // Util::SharedVector<T>
     template <typename ValueT>
     inline MessageBuffer& operator<<(const Util::SharedVector<ValueT>& sharedData);
     template <typename ValueT>
@@ -372,7 +372,7 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<ValueT>& vector)
 }
 
 // --------------------------------------------------------------------------------
-// ib::util::SharedVector<T>
+// Util::SharedVector<T>
 
 template <typename ValueT>
 inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedVector<ValueT>& sharedData)

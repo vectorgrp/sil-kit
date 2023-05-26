@@ -79,6 +79,6 @@ bool operator==(const WireCanFrameEvent& lhs, const WireCanFrameEvent&rhs)
     return ToCanFrameEvent(lhs) == ToCanFrameEvent(rhs);
 }
 
-} // namespace can
-} // namespace sim
-} // namespace ib
+} // namespace Can
+} // namespace Services
+} // namespace SilKit

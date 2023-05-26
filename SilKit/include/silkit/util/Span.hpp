@@ -166,7 +166,7 @@ auto ToSpan(std::vector<T>& vector) -> Span<T>;
 template <typename T>
 auto ToSpan(const std::vector<T>& vector) -> Span<const T>;
 
-inline auto ToSpan(const SilKit_ByteVector& ibByteVector) -> Span<const uint8_t>;
+inline auto ToSpan(const SilKit_ByteVector& skByteVector) -> Span<const uint8_t>;
 
 inline auto ToSilKitByteVector(Span<const uint8_t> span) -> SilKit_ByteVector;
 
@@ -353,9 +353,9 @@ auto ToSpan(const std::vector<T>& vector) -> Span<const T>
     return {vector.data(), vector.size()};
 }
 
-auto ToSpan(const SilKit_ByteVector& ibByteVector) -> Span<const uint8_t>
+auto ToSpan(const SilKit_ByteVector& skByteVector) -> Span<const uint8_t>
 {
-    return {ibByteVector.data, ibByteVector.size};
+    return {skByteVector.data, skByteVector.size};
 }
 
 auto ToSilKitByteVector(Span<const uint8_t> span) -> SilKit_ByteVector
