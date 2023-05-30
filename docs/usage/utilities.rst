@@ -50,6 +50,8 @@ sil-kit-registry
            either with this process or using the :cpp:func:`StartListening()<SilKit::Vendor::Vector::ISilKitRegistry::StartListening()>` API.
          * When the port ``0`` is specified in the URI (``--listen-uri``) the operating system will choose a random port for the registry.
            This port is used in the generated configuration file (``--generate-configuration``) for use in CI environments.
+         * When the file specified by ``--generate-configuration`` was created by the registry, it is guaranteed that the registry process
+           has completed initialization and is ready to accept incoming connections of SIL Kit participants.
          * The registry will run if either binding to the TCP socket, or the Domain socket, or both succeeds.
            If only TCP or Domain sockets are used, because one of the bindings failed for some reason, a warning will be logged.
            It will exit with an error if neither is available.
