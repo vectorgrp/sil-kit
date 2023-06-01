@@ -72,7 +72,6 @@ management.
   systemcontroller
   systemmonitor
 
-
 Common Data Types
 ~~~~~~~~~~~~~~~~~
 
@@ -80,6 +79,14 @@ Common Data Types
   :maxdepth: 1
 
   common
+
+Utilities
+~~~~~~~~~~~~~~~~~
+
+.. toctree::
+  :maxdepth: 1
+
+  serdes
 
 C API
 -----
@@ -106,8 +113,8 @@ Vehicle Network Controller
   capi-lin
   capi-flexray
 
-Data Messages and RPC
-+++++++++++++++++++++
+Data Publish/Subscribe and RPC
+++++++++++++++++++++++++++++++
 
 .. toctree::
   :maxdepth: 1

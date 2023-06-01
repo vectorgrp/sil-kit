@@ -38,7 +38,7 @@ namespace Config {
 // Configuration Parsing
 //////////////////////////////////////////////////////////////////////
 
-//!< Helper to print the YAML position in line and column format.
+//! Helper to print the YAML position in line and column format.
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark);
 
 template<typename SilKitConfigT>
@@ -74,7 +74,7 @@ auto from_yaml(const YAML::Node& node) -> SilKitConfigT
     }
 }
 
-//!< Convert a YAML document node into json, using the internal emitter.
+//! Convert a YAML document node into json, using the internal emitter.
 auto yaml_to_json(YAML::Node node) -> std::string;
 
 

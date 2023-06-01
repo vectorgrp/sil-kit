@@ -1,4 +1,4 @@
-Description: Sample Configuration for Data Messages
+Description: Sample Configuration for Data Publish/Subscribe
 Logging:
   Sinks:
     - Level: Info

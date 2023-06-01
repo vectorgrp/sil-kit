@@ -50,9 +50,9 @@ typedef struct
     SilKit_ByteVector data; 
 } SilKit_DataMessageEvent;
 
-/*! \brief represents a handle to a data publisher instance */
+/*! \brief Represents a handle to a data publisher instance */
 typedef struct SilKit_DataPublisher SilKit_DataPublisher;
-/*! \brief represents a handle to a data subscriber instance */
+/*! \brief Represents a handle to a data subscriber instance */
 typedef struct SilKit_DataSubscriber SilKit_DataSubscriber;
 
 /*! \brief Handler type for incoming data message events on DataSubscribers. 

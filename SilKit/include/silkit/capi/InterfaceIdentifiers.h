@@ -35,7 +35,7 @@ typedef struct
 } SilKit_StructHeader;
 
 
-//!< The SK_ID_ macros are internal helpers. They are not to be used directly.
+//! The SK_ID_ macros are internal helpers. They are not to be used directly.
 //Service Ids
 #define SK_ID_SERVICE_START 0 //!< sentinel
 #define SK_ID_SERVICE_Can 1
@@ -51,13 +51,13 @@ typedef struct
 #define SK_INVALID_VERSION 0
 
 
-//!< The identifiers service id
+//! The identifiers service id
 #define SK_ID_GET_SERVICE(ID) \
     ((ID >> 40)  & 0xFF)
-//!< The identifiers data type id
+//! The identifiers data type id
 #define SK_ID_GET_DATATYPE(ID)\
     ((ID >> 32)  & 0xFF)
-//!< The identifiers data type version
+//! The identifiers data type version
 #define SK_ID_GET_VERSION(ID)\
     ((ID >> 24)  & 0xFF)
 
@@ -80,11 +80,11 @@ typedef struct
         && ((ID >> 48 & 0xff) == /*K*/ 75)\
     )
 
-//!< Helper to access the Interface ID member
+//! Helper to access the Interface ID member
 #define SilKit_Struct_GetHeader(VALUE) ((VALUE).structHeader)
-//!< Helper to access the Interface ID member
+//! Helper to access the Interface ID member
 #define SilKit_Struct_GetId(VALUE) (SilKit_Struct_GetHeader(VALUE).version)
-//!< Initialize the struct VALUE with a valid type specific struct header for the given type DATATYPE
+//! Initialize the struct VALUE with a valid type specific struct header for the given type DATATYPE
 #define SilKit_Struct_Init(DATATYPE, VALUE) \
     do \
     { \

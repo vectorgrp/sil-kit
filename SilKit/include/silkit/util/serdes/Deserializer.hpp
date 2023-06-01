@@ -52,8 +52,10 @@ public:
     auto operator=(const Deserializer& other) -> Deserializer& = default;
     auto operator=(Deserializer&& other) -> Deserializer& = default;
 
-    //! \brief Deserializes uint8_t through uint64_t, int8_t through int64_t.
-    //! \param bitSize The number of bit which shall be deserialized.
+    /*! \brief Deserializes uint8_t through uint64_t, int8_t through int64_t.
+     *  \param bitSize The number of bits which shall be deserialized.
+     *  \returns The deserialized value
+     */
     template <typename T,
               typename std::enable_if_t<
                   std::is_integral<T>::value && !std::is_same<bool, typename std::decay_t<T>>::value, int> = 0>
@@ -68,14 +70,18 @@ public:
             return DeserializeAligned<T>(byteSize);
     }
 
-    //! \brief Deserializes a boolean value.
+    /*! \brief Deserializes a boolean value.
+     *  \returns The deserialized value
+     */
     template <typename T, typename std::enable_if_t<std::is_same<bool, typename std::decay_t<T>>::value, int> = 0>
     auto Deserialize() -> T
     {
         return DeserializeAligned<uint8_t>(1) ? true : false;
     }
 
-    //! \brief Deserializes a float or double value.
+    /*! \brief Deserializes a float or double value.
+     *  \returns The deserialized value
+     */
     template <typename T, typename std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
     auto Deserialize() -> T
     {
@@ -92,7 +98,9 @@ public:
         return result;
     }
 
-    //! \brief Deserializes a string.
+    /*! \brief Deserializes a string value.
+     *  \returns The deserialized value
+     */
     template <typename T, typename std::enable_if_t<std::is_same<std::string, T>::value, int> = 0>
     auto Deserialize() -> T
     {
@@ -103,7 +111,9 @@ public:
         return result;
     }
 
-    //! \brief Deserializes a byte array
+    /*! \brief Deserializes a byte array.
+     *  \returns The deserialized value
+     */
     template <typename T, typename std::enable_if_t<std::is_same<std::vector<uint8_t>, T>::value, int> = 0>
     auto Deserialize() -> T
     {
@@ -120,14 +130,13 @@ public:
     /*! \brief Deserializes the end of a struct. */
     void EndStruct() {}
 
-    /*! \brief Deserializes the start of an array.
-     *  NB: Dynamic arrays, i.e. also usable for lists.
-     *  \returns the size of the array (in elements).
+    /*! \brief Deserializes the start of an array or list.
+     *  Note: Because the array size is serialized as well, dynamic arrays aka. lists are also supported.
+     *  \returns The size of the array (in elements).
      */
     auto BeginArray() -> std::size_t { return DeserializeAligned<uint32_t>(sizeof(uint32_t)); }
 
-    /*! \brief Deserializes the end of an array.
-     *  NB: Dynamic arrays, i.e. also usable for lists.
+    /*! \brief Deserializes the end of an array or list.
      */
     void EndArray() {}
 
@@ -143,7 +152,7 @@ public:
     void EndUnion() { throw SilKitError("Unions are currently not supported."); }
 
     /*! \brief Resets the buffer and replaces it with another one.
-     *  \param buffer the new data buffer.
+     *  \param buffer The new data buffer.
      */
     void Reset(std::vector<uint8_t> buffer)
     {

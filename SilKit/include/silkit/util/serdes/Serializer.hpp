@@ -54,8 +54,7 @@ public:
      *  \param bitSize The number of bits which shall be serialized.
      */
     template <typename T, typename std::enable_if<std::is_integral<T>::value
-                                                      && !std::is_same<bool, typename std::decay<T>::type>::value,
-                                                  int>::type = 0>
+        && !std::is_same<bool, typename std::decay<T>::type>::value, int>::type = 0>
     void Serialize(T data, std::size_t bitSize)
     {
         auto byteSize = bitSize / 8;
@@ -75,9 +74,9 @@ public:
     }
 
     /*! \brief Serializes a float or double value.
-     *
-     *  NB: long double is disabled via static assert as they are treated
-     *  differently by MSVC and GCC.
+     * Note: long double is disabled via static assert as they are treated
+     * differently by MSVC and GCC.
+     *  \param data The primitively typed value to be serialized
      */
     template <typename T, typename std::enable_if_t<std::is_floating_point<T>::value, int> = 0>
     void Serialize(T data)
@@ -92,7 +91,9 @@ public:
         std::memcpy(&mBuffer[oldSize], &data, sizeof(T));
     }
 
-    //! \brief Serializes a string.
+    /*! \brief Serializes a string.
+     *  \param string The string value to be serialized
+     */
     void Serialize(std::string string)
     {
         SerializeAligned(static_cast<uint32_t>(string.size()), 4);
@@ -101,7 +102,9 @@ public:
         std::copy(string.begin(), string.end(), mBuffer.begin() + oldSize);
     }
 
-    //! \brief Serializes a dynamic byte array.
+    /*! \brief Serializes a dynamic byte array.
+     *  \param bytes The bytes to be serialized
+     */
     void Serialize(const std::vector<uint8_t>& bytes)
     {
         SerializeAligned(static_cast<uint32_t>(bytes.size()), 4);
@@ -110,14 +113,15 @@ public:
         std::copy(bytes.begin(), bytes.end(), mBuffer.begin() + oldSize);
     }
 
-    /*! \brief Serializes the start of an struct. */
+    /*! \brief Serializes the start of a struct. */
     void BeginStruct() { Align(); }
 
-    /*! \brief Serializes the end of an struct.*/
+    /*! \brief Serializes the end of a struct. */
     void EndStruct() {}
 
-    /*!  \brief Serializes the start of an array.
-     *   NB: Dynamic array, i.e. also usable for lists.
+    /*! \brief Serializes the start of an array or list.
+     *  Note: Because the array size is serialized as well, dynamic arrays aka. lists are also supported.
+     *  \param size The number of elements
      */
     void BeginArray(std::size_t size)
     {
@@ -128,9 +132,7 @@ public:
         SerializeAligned(static_cast<uint32_t>(size), sizeof(uint32_t));
     }
 
-    /*!  \brief Serializes the end of an array.
-     *   NB: Dynamic array, i.e. also usable for lists.
-     */
+    /*!  \brief Serializes the end of an array or list. */
     void EndArray() {}
 
     /*! \brief Serializes the start of an optional value.
@@ -153,8 +155,9 @@ public:
         mUnalignedBits = 0;
     }
 
-    /*! \brief Releases and resets serializer buffer.
-     *  \returns the serialized data.
+    /*! \brief Retrieve the serialized data and release the buffer.
+     *  After the call, this instance can be used to serialize a new data set.
+     *  \returns The serialized data.
      */
     auto ReleaseBuffer() -> std::vector<uint8_t>
     {

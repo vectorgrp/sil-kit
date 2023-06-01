@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-//!< Recursive validation helper to iterate through the YAML document
+//! Recursive validation helper to iterate through the YAML document
 bool ValidateDoc(YAML::Node& doc, const SilKit::Config::YamlValidator& v,
     std::ostream& warnings, const std::string& parent)
 {

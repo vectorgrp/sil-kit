@@ -16,6 +16,8 @@ Data Publish/Subscribe API
 
 .. |IDataPublisher| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataPublisher>`
 .. |IDataSubscriber| replace:: :cpp:class:`IDataPublisher<SilKit::Services::PubSub::IDataSubscriber>`
+
+.. |MediaTypeData| replace:: :cpp:func:`MediaTypeData()<SilKit::Util::SerDes::MediaTypeData()>`
 .. contents::
    :local:
    :depth: 3
@@ -31,6 +33,12 @@ Data can be transmitted using the |Publish| method of a ``DataPublisher``, eithe
 data pointer and size. Published messages are transmitted immediately to all matching subscribers, that is, without 
 any modelled latency. Data subscribers provide a handler that is called upon incoming data on their topic.
 
+Data
+~~~~
+
+Data is represented as a byte vector, so the serialization schema can be chosen by the user. Nonetheless, it is highly recommended 
+to use SIL Kit's :doc:`Data Serialization/Deserialization API</api/serdes>` to ensure compatibility among all SIL Kit participants.
+
 Topics
 ~~~~~~
 
@@ -43,9 +51,12 @@ Media Type
 Both data publishers and data subscribers define a media type as part of their |PubSubSpec|. It is a meta description
 of the transmitted data in accordance to `RFC2046 <https://datatracker.ietf.org/doc/html/rfc2046>`_ and should be used
 to provide information about the de-/serialization of the underlying user data. Just like the topic, the media type has
-to match between data publishers/Subscribers for communication to take place. An empty string on a Data subscriber
+to match between data publishers/subscribers for communication to take place. An empty string on a data subscriber
 is a wildcard and will match any other media type of data publishers. Data publishers should provide information
 about the data they are going to publish and have no wildcard functionality for the media type.
+
+When data is serialized using SIL Kit's :doc:`Data Serialization/Deserialization API</api/serdes>`, media type constant |MediaTypeData| 
+must be used.
 
 Labels
 ~~~~~~
@@ -97,7 +108,7 @@ History
 ~~~~~~~
 
 Data publishers additionally specify a history length N (restricted to 0 or 1). Data subscribers that are created after a 
-publication will still receive the N historic Data Messages from a data publisher with history > 0. Note that the
+publication will still receive the N historic data messages from a data publisher with history > 0. Note that the
 participant that created the data publisher still has to be connected to the distributed simulation for the historic 
 messages to be delivered.
 
@@ -121,7 +132,7 @@ be preferred over a programmatically set topic.
 Usage Examples
 ~~~~~~~~~~~~~~
 
-The interfaces for the publish/subscribe mechanism can be instantiated from an ``IParticipant``:
+The interfaces for the publish/subscribe mechanism can be instantiated from an |IParticipant|:
 
 .. code-block:: cpp
 

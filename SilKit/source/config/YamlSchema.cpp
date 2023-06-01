@@ -25,7 +25,7 @@ namespace SilKit {
 namespace Config {
 inline namespace v1 {
 
-//!< Create the YAML schema for VAsio ParticipantConfigurations.
+//! Create the YAML schema for VAsio ParticipantConfigurations.
 auto MakeYamlSchema() -> YamlSchemaElem
 {
     // Note: Keep these definitions in sync with ParticipantConfiguration.schema.json,

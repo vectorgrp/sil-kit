@@ -68,7 +68,7 @@ public:
     /// This function waits until either, the mock time has reached the current limit, or, the wall-clock timeout has
     /// been reached.
     ///
-    /// \param wallClockTimeout how long this function should wait for the limit to be reached
+    /// \param wallClockTimeout How long this function should wait for the limit to be reached
     /// \return true if the limit was reached, false if the wall-clock timeout was reached
     bool WaitUntilLimitReachedFor(std::chrono::nanoseconds wallClockTimeout)
     {
@@ -79,7 +79,7 @@ public:
     /// Advances the limit and resets the reached flag. Therefore WaitUntilLimitReachedFor can be called again
     /// afterwards, even if the limit had been reached before.
     ///
-    /// \param advance by how much the current limit should be advanced
+    /// \param advance By how much the current limit should be advanced
     void AdvanceLimitBy(std::chrono::nanoseconds advance)
     {
         _limitRep += static_cast<std::chrono::nanoseconds>(advance).count();

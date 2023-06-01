@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Config {
 
-//!< YamlValidator is able to check the element <-> sub-element relations in a YAML document
+//! YamlValidator is able to check the element <-> sub-element relations in a YAML document
 class YamlValidator
 {
 public:

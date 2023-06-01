@@ -38,7 +38,7 @@ struct NextSimTask
     std::chrono::nanoseconds duration{0};
 };
 
-//!< System-wide command for the simulation flow.
+//! System-wide command for the simulation flow.
 struct SystemCommand
 {
     //!< The different kinds of a SystemCommand

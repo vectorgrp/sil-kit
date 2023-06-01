@@ -64,20 +64,20 @@ private:
 
 // Functions
 
-//!< return the current working directory of the running process.
+//! Return the current working directory of the running process.
 path current_path();
-//!< set the current working directory of the running process.
+//! Set the current working directory of the running process.
 void current_path(const path& p);
-//!< Create a directory like in POSIX mkdir
+//! Create a directory like in POSIX mkdir
 bool create_directory(const path& where);
 
-//!< Get the path to the temp directory.
+//! Get the path to the temp directory.
 path temp_directory_path();
 
-//!< Remove a file or directory.
+//! Remove a file or directory.
 bool remove(const path&);
 
-//!< Rename a file.
+//! Rename a file.
 void rename(const path& old_p, const path& new_p);
 
 } // namespace Filesystem

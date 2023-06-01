@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Tracing {
 
-//!< Helper to check whether Direction `dir` is active in the config
+//! Helper to check whether Direction `dir` is active in the config
 inline bool IsReplayEnabledFor(const Config::Replay& cfg, Config::Replay::Direction dir)
 {
     if (cfg.direction == Config::Replay::Direction::Undefined)
@@ -42,7 +42,7 @@ inline bool IsReplayEnabledFor(const Config::Replay& cfg, Config::Replay::Direct
     return cfg.direction == dir || cfg.direction == Config::Replay::Direction::Both;
 }
 
-//!< For replaying in the receive path we use an unlikely EndpointAddress
+//! For replaying in the receive path we use an unlikely EndpointAddress
 inline auto ReplayEndpointAddress() -> SilKit::Core::EndpointAddress
 {
     return {std::numeric_limits<decltype(SilKit::Core::EndpointAddress::participant)>::max(),

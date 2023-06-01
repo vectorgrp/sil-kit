@@ -37,7 +37,7 @@ class YamlParserTest : public testing::Test
 using namespace SilKit::Config;
 using namespace std::chrono_literals;
 
-//!< Yaml config which has almost complete list of config elements.
+//! Yaml config which has almost complete list of config elements.
 const auto completeConfiguration = R"raw(
 ---
 Description: Example configuration to test YAML Parser

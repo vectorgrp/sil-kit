@@ -110,8 +110,8 @@ public:
      *
      * *AUTOSAR Name:* Lin_SendFrame
      *
-     * \param frame provides the LIN identifier, checksum model, and optional data.
-     * \param responseType determines which LIN Node will provide the frame response.
+     * \param frame Provides the LIN identifier, checksum model, and optional data.
+     * \param responseType Determines which LIN Node will provide the frame response.
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
      */
@@ -119,7 +119,7 @@ public:
 
     /*! \brief Initiate a LIN data transfer by sending a LIN header (AUTOSAR LIN master interface)
      * 
-     * \param linId provides the LIN header identifier. The node that is configured to respond on this ID will complete
+     * \param linId Provides the LIN header identifier. The node that is configured to respond on this ID will complete
      * the transmission and provide the response data.
      *
      * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
@@ -128,7 +128,7 @@ public:
 
     /*! \brief Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID.
      * 
-     * \param frame provides the LIN ID and data used for the update.
+     * \param frame Provides the LIN ID and data used for the update.
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized.
      * \throws SilKit::ConfigurationError if the LIN Controller is not configured with TxUnconditional on this ID.

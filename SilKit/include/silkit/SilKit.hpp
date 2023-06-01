@@ -53,7 +53,7 @@ DETAIL_SILKIT_CPP_API auto CreateParticipant(
  *
  * \param participantConfig Configuration of the participant
  * \param participantName Name of the participant
- * \param registryUri the URI of the registry
+ * \param registryUri The URI of the registry
  * \return Instance of the communication adapter
  *
  * \throw SilKit::ConfigurationError if the config has errors

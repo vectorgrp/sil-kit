@@ -317,7 +317,9 @@ FlexRay Demo
          It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.
 
 
-Publish & Subscribe Demo
+.. _sec:util-pubsub-demo:
+
+Publish/Subscribe Demo
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
@@ -325,7 +327,7 @@ Publish & Subscribe Demo
    :stub-columns: 1
 
    *  -  Abstract
-      -  Data Message Publish Subscribe Demo for a set of Publishers/Subscribers
+      -  Data Message Publish/Subscribe Demo for a set of Publishers/Subscribers
    *  -  Source location
       -  Demos/PubSub
    *  -  Requirements
@@ -369,7 +371,7 @@ Publish & Subscribe Demo
             |SystemController| Publisher Subscriber
 
    *  -  Notes
-      -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built-in serializer/deserializer.
+      -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built-in :doc:`Data Serialization API</api/serdes>`.
 
 RPC Demo
 ~~~~~~~~~~~~~~~~~~~~

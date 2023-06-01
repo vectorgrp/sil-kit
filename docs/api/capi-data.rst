@@ -28,5 +28,3 @@ Data Structures
 ~~~~~~~~~~~~~~~
 .. doxygenstruct:: SilKit_DataMessageEvent
    :members:
-
-

@@ -66,7 +66,7 @@ struct ThreadSafeLogger
     std::stringstream buf;
 };
 
-//!< thread safe stream logger for testing
+//! thread safe stream logger for testing
 inline auto Log() -> ThreadSafeLogger
 {
     return ThreadSafeLogger();

@@ -389,8 +389,8 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_Status_t)(SilKit_Lin
  * *AUTOSAR Name:* Lin_SendFrame
  *
  * \param controller The LIN controller to operate on
- * \param frame provides the LIN identifier, checksum model, and optional data.
- * \param responseType determines which LIN Node will provide the frame response.
+ * \param frame Provides the LIN identifier, checksum model, and optional data.
+ * \param responseType Determines which LIN Node will provide the frame response.
  * 
  * \return \ref SilKit_ReturnCode
  */
@@ -403,7 +403,7 @@ typedef SilKit_ReturnCode (SilKitFPTR *SilKit_LinController_SendFrame_t)(SilKit_
 /*! \brief Initiate a LIN data transfer by sending a LIN header (AUTOSAR LIN master interface)
  * 
  * \param controller The LIN controller to operate on
- * \param linId provides the LIN header identifier. The node that is configured to respond on this ID will complete
+ * \param linId Provides the LIN header identifier. The node that is configured to respond on this ID will complete
  * the transmission and provide the response data.
  *
  * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
@@ -413,7 +413,7 @@ typedef SilKit_ReturnCode(SilKitFPTR *SilKit_LinController_SendFrameHeader_t)(Si
 
 /*! Update the response data. The LIN controller needs to be configured with TxUnconditional on this ID. 
  * 
- * \param frame provides the LIN ID and data used for the update.
+ * \param frame Provides the LIN ID and data used for the update.
  * 
  * \param controller The LIN controller to operate on
  * 

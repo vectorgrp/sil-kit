@@ -32,25 +32,24 @@ SILKIT_BEGIN_DECLS
 
 typedef uint32_t SilKit_EthernetTransmitStatus;
 
-/*! The message was successfully transmitted on the CAN bus. */
+//! The message was successfully transmitted on the CAN bus.
 #define SilKit_EthernetTransmitStatus_Transmitted ((SilKit_EthernetTransmitStatus) BIT(0))
 
-/*! The transmit request was rejected, because the Ethernet controller is not active. */
+//! The transmit request was rejected, because the Ethernet controller is not active.
 #define SilKit_EthernetTransmitStatus_ControllerInactive ((SilKit_EthernetTransmitStatus) BIT(1))
 
-/*! The transmit request was rejected, because the Ethernet link is down. */
+//! The transmit request was rejected, because the Ethernet link is down.
 #define SilKit_EthernetTransmitStatus_LinkDown ((SilKit_EthernetTransmitStatus) BIT(2))
 
-/*! The transmit request was dropped, because the transmit queue is full. */
+//! The transmit request was dropped, because the transmit queue is full.
 #define SilKit_EthernetTransmitStatus_Dropped ((SilKit_EthernetTransmitStatus) BIT(3))
 
 /* (SilKit_EthernetTransmitStatus) BIT(4) is RESERVED (used to be SilKit_EthernetTransmitStatus_DuplicatedTransmitId) */
 
-/*! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, etc.). */
+//! The given raw Ethernet frame is ill formated (e.g. frame length is too small or too large, etc.).
 #define SilKit_EthernetTransmitStatus_InvalidFrameFormat ((SilKit_EthernetTransmitStatus) BIT(5))
 
-/*! Combines all available transmit statuses.
- */
+//! Combines all available transmit statuses.
 #define SilKit_EthernetTransmitStatus_DefaultMask \
     (SilKit_EthernetTransmitStatus_Transmitted | SilKit_EthernetTransmitStatus_ControllerInactive \
      | SilKit_EthernetTransmitStatus_LinkDown | SilKit_EthernetTransmitStatus_Dropped \
@@ -59,13 +58,13 @@ typedef uint32_t SilKit_EthernetTransmitStatus;
 
 typedef uint32_t SilKit_EthernetState;
 
-//!< The Ethernet controller is switched off (default after reset).
+//! The Ethernet controller is switched off (default after reset).
 #define SilKit_EthernetState_Inactive ((SilKit_EthernetState) 0)
 
-//!< The Ethernet controller is active, but a link to another Ethernet controller in not yet established.
+//! The Ethernet controller is active, but a link to another Ethernet controller in not yet established.
 #define SilKit_EthernetState_LinkDown ((SilKit_EthernetState) 1)
 
-//!< The Ethernet controller is active and the link to another Ethernet controller is established.
+//! The Ethernet controller is active and the link to another Ethernet controller is established.
 #define SilKit_EthernetState_LinkUp ((SilKit_EthernetState) 2)
 
 
@@ -85,7 +84,7 @@ typedef struct
     SilKit_EthernetBitrate bitrate; //!< New bitrate in kBit/sec
 } SilKit_EthernetBitrateChangeEvent;
 
-//!< A raw Ethernet frame
+//! A raw Ethernet frame
 typedef struct
 {
     SilKit_StructHeader structHeader; //!< The interface id that specifies which version of this struct was obtained

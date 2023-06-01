@@ -58,7 +58,7 @@ typedef SilKit_ReturnCode(SilKitFPTR* SilKit_Logger_Log_t)(SilKit_Logger* logger
 /*! \brief Get the lowest configured log level of the log sinks
  *
  * \param logger The logger for which the log level should be obtained.
- * \param outLevel a pointer to a logging level where the result will be stored.
+ * \param outLevel A pointer to a logging level where the result will be stored.
  */
 SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_Logger_GetLogLevel(SilKit_Logger* logger, SilKit_LoggingLevel* outLevel);
 

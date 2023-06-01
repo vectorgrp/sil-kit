@@ -17,6 +17,8 @@ RPC (Remote Procedure Call) API
 
 .. |IRpcClient| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcClient>`
 .. |IRpcServer| replace:: :cpp:class:`IRpcClient<SilKit::Services::Rpc::IRpcServer>`
+
+.. |MediaTypeRpc| replace:: :cpp:func:`MediaTypeRpc()<SilKit::Util::SerDes::MediaTypeRpc()>`
 .. contents::
    :local:
    :depth: 3
@@ -42,11 +44,18 @@ be overwritten with |SetCallResultHandler|.
 The callback provides the user context pointer passed to |Call|, the return data and a call status indicating
 success or an error during the procedure.
 
+Argument and Return Data
+========================
+
+In theory, users can freely decide on how to de/serialize argument and return data into and out of a byte vector. 
+However, it is strongly recommended to use SIL Kit's serialization schema implemented by the :doc:`Data Serialization/Deserialization API</api/serdes>` 
+to ensure compatibility among all SIL Kit participants.
+
 Function Name
 ~~~~~~~~~~~~~
 
 RPC clients and RPC servers provide a function name which is part of their |RpcSpec|.
-Communications only takes place among RPC clients and RPC servers with the same function name.
+Communication only takes place among RPC clients and RPC servers with the same function name.
 
 Media Type
 ~~~~~~~~~~
@@ -56,6 +65,9 @@ of the transmitted data in accordance to `RFC2046 <https://datatracker.ietf.org/
 to provide information about the de-/serialization of the underlying user data. Just like the topic, the media type 
 has to match between RPC clients / RPC servers for communication to take place. An empty string on an RPC client will 
 match any other media type on a server.
+
+When data is serialized using SIL Kit's :doc:`Data Serialization/Deserialization API</api/serdes>`, media type constant |MediaTypeRpc| 
+must be used.
 
 Labels
 ~~~~~~
@@ -115,7 +127,7 @@ Error handling
 Usage Example
 ~~~~~~~~~~~~~
 
-The interfaces for the RPC mechanism can be instantiated from an ``IParticipant``:
+The interfaces for the RPC mechanism can be instantiated from an |IParticipant|:
 
 .. code-block:: cpp
 

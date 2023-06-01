@@ -43,9 +43,9 @@ typedef struct SilKit_RpcSpec
 /*! \brief A unique handle of a remote call. */
 typedef struct SilKit_RpcCallHandle SilKit_RpcCallHandle;
 
-/*! \brief represents a handle to a RPC server instance */
+/*! \brief Represents a handle to a RPC server instance */
 typedef struct SilKit_RpcServer SilKit_RpcServer;
-/*! \brief represents a handle to a RPC client instance */
+/*! \brief Represents a handle to a RPC client instance */
 typedef struct SilKit_RpcClient SilKit_RpcClient;
 
 

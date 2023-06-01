@@ -150,7 +150,7 @@ auto printUris(const std::vector<std::string>& uris)
     return fmt::format("{}", fmt::join(uris, ", "));
 }
 
-//!< Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
+//! Note that local ipc (unix domain) sockets have a path limit (108 characters, typically)
 // Using the current working directory as part of a domain socket path might result in
 // a runtime exception. We create a unique temporary file path, with a fixed length.
 auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::ParticipantId& id,

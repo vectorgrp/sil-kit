@@ -114,7 +114,7 @@ struct TraceSource
     std::string inputPath;
 };
 
-//!< MdfChannel identification for replaying, refer to ASAM MDF 4.1 Specification, Chapter 5.4.3
+//! MdfChannel identification for replaying, refer to ASAM MDF 4.1 Specification, Chapter 5.4.3
 struct MdfChannel
 {
     // A user supplied empty string in the configuration is valid

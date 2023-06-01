@@ -52,7 +52,7 @@ struct FilterTypeHash
 
 using HandlerValue = std::shared_ptr<ServiceDiscoveryHandler>;
 
-//!< Stores all potential nodes (service descriptors) and handlers to call for a specific data matching branch
+//! Stores all potential nodes (service descriptors) and handlers to call for a specific data matching branch
 class DiscoveryCluster
 {
 public:
@@ -60,7 +60,7 @@ public:
     std::vector<HandlerValue> handlers;
 };
 
-//!< Holds all relevant information for a controllerType and key (topic/functionName/clientUUID)
+//! Holds all relevant information for a controllerType and key (topic/functionName/clientUUID)
 class DiscoveryKeyNode
 {
 public:
@@ -74,7 +74,7 @@ public:
     DiscoveryCluster allCluster;
 };
 
-//!< Store to prevent quadratic lookup of services
+//! Store to prevent quadratic lookup of services
 class SpecificDiscoveryStore
 {
 public: 

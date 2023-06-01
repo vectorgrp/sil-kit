@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 
-//!< Base class of all SilKit exceptions
+//! \brief Base class of all SilKit exceptions
 class SilKitError: public std::exception
 {
 protected:
@@ -71,39 +71,39 @@ public:
     using SilKitError::SilKitError;
 };
 
-class ProtocolError: public SilKitError
+class ProtocolError : public SilKitError
 {
 public:
     using SilKitError::SilKitError;
 };
 
-//!< AssertionError is a replacement for cassert's assert.
+//! \brief Error thrown as a replacement for cassert's assert.
 class AssertionError: public SilKitError
 {
 public:
     using SilKitError::SilKitError;
 };
  
-//! \brief ExtensionError is thrown when an extension could not be loaded
+//! \brief Error thrown when an extension could not be loaded.
 class ExtensionError : public SilKitError
 {
     using SilKitError::SilKitError;
 };
 
-//! \brief LogicError reports errors as a consequence of faulty logic within the program such as violating logical
+//! \brief Error thrown as a consequence of faulty logic within the program such as violating logical
 //! preconditions or class invariants and may be preventable.
 class LogicError : public SilKitError
 {
     using SilKitError::SilKitError;
 };
 
-//! \brief LengthError is thrown on attempts to exceed implementation defined length limits for some object.
+//! \brief Error thrown on attempts to exceed implementation defined length limits for some object.
 class LengthError : public LogicError
 {
     using LogicError::LogicError;
 };
 
-//! \brief OutOfRangeError is thrown on attempts to access elements out of defined range.
+//! \brief Error thrown when trying to access elements outside the defined range.
 class OutOfRangeError : public LogicError
 {
     using LogicError::LogicError;

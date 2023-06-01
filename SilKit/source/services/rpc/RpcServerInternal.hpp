@@ -52,7 +52,7 @@ public:
     //! \brief Tries to submit the result to the call associated with the call handle.
     //! \param callHandlePtr The call handle identifying the call to submit a result for
     //! \param resultData The result of the call
-    //! \returns true if the call was handled, false if the call was unknown to this RpcServerInternal
+    //! \returns True if the call was handled, false if the call was unknown to this RpcServerInternal
     bool SubmitResult(IRpcCallHandle* callHandlePtr, Util::Span<const uint8_t> resultData);
 
     //! \brief Accepts messages originating from SIL Kit communications.

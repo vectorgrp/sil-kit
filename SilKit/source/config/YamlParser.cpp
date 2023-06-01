@@ -246,7 +246,7 @@ void EmitValidJson(YAML::ostream_wrapper& out, YAML::Node& node,
 namespace SilKit {
 namespace Config {
 
-//!< Helper to print the YAML document position
+//! Helper to print the YAML document position
 std::ostream& operator<<(std::ostream& out, const YAML::Mark& mark)
 {
     if (!mark.is_null())

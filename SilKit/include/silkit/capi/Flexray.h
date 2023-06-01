@@ -399,11 +399,11 @@ typedef struct SilKit_FlexrayFrameTransmitEvent SilKit_FlexrayFrameTransmitEvent
  * \brief FlexRay symbols patterns.
  */
 typedef uint8_t SilKit_FlexraySymbolPattern;
-//!< Collision avoidance symbol (CAS) OR media access test symbol (MTS).
+//! Collision avoidance symbol (CAS) OR media access test symbol (MTS).
 #define SilKit_FlexraySymbolPattern_CasMts ((SilKit_FlexraySymbolPattern)0x00)
-//!< Wakeup symbol (WUS).
+//! Wakeup symbol (WUS).
 #define SilKit_FlexraySymbolPattern_Wus    ((SilKit_FlexraySymbolPattern)0x01)
-//!< Wakeup During Operation Pattern (WUDOP).
+//! Wakeup During Operation Pattern (WUDOP).
 #define SilKit_FlexraySymbolPattern_Wudop  ((SilKit_FlexraySymbolPattern)0x02)
 
 /*!
@@ -436,21 +436,21 @@ typedef struct SilKit_FlexrayCycleStartEvent SilKit_FlexrayCycleStartEvent;
  * *AUTOSAR Name:* Fr_POCStateType
  */
 typedef uint8_t SilKit_FlexrayPocState;
-//!< CC expects configuration. Initial state after reset.
+//! CC expects configuration. Initial state after reset.
 #define SilKit_FlexrayPocState_DefaultConfig ((SilKit_FlexrayPocState)0x00)
-//!< CC is in configuration mode for setting communication parameters
+//! CC is in configuration mode for setting communication parameters
 #define SilKit_FlexrayPocState_Config        ((SilKit_FlexrayPocState)0x01)
-//!< intermediate state for initialization process (after Config).
+//! intermediate state for initialization process (after Config).
 #define SilKit_FlexrayPocState_Ready         ((SilKit_FlexrayPocState)0x02)
-//!< FlexRay startup phase
+//! FlexRay startup phase
 #define SilKit_FlexrayPocState_Startup       ((SilKit_FlexrayPocState)0x03)
-//!< FlexRay wakeup phase
+//! FlexRay wakeup phase
 #define SilKit_FlexrayPocState_Wakeup        ((SilKit_FlexrayPocState)0x04)
-//!< Normal operating mode
+//! Normal operating mode
 #define SilKit_FlexrayPocState_NormalActive  ((SilKit_FlexrayPocState)0x05)
-//!< Operating mode with transient or tolerable errors
+//! Operating mode with transient or tolerable errors
 #define SilKit_FlexrayPocState_NormalPassive ((SilKit_FlexrayPocState)0x06)
-//!< CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
+//! CC is halted (caused by the application (FlexrayChiCommand::DEFERRED_HALT) or by a fatal error).
 #define SilKit_FlexrayPocState_Halt          ((SilKit_FlexrayPocState)0x07)
 
 /*!

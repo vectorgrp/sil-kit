@@ -323,7 +323,7 @@ inline auto GoToSleepFrame() -> LinFrame
     frame.data = {0x0, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     return frame;
 }
-//! \brief operator== for LinFrame
+//! \brief Comparison operator for LinFrame
 inline bool operator==(const LinFrame& lhs, const LinFrame& rhs)
 {
     return lhs.id == rhs.id
@@ -331,13 +331,13 @@ inline bool operator==(const LinFrame& lhs, const LinFrame& rhs)
         && lhs.dataLength == rhs.dataLength
         && lhs.data == rhs.data;
 }
-//! \brief operator== for LinFrameResponse
+//! \brief Comparison operator for LinFrameResponse
 inline bool operator==(const LinFrameResponse& lhs, const LinFrameResponse& rhs)
 {
     return lhs.frame == rhs.frame
         && lhs.responseMode == rhs.responseMode;
 }
-//! \brief operator== for LinControllerConfig
+//! \brief Comparison operator for LinControllerConfig
 inline bool operator==(const LinControllerConfig& lhs, const LinControllerConfig& rhs)
 {
     return lhs.controllerMode == rhs.controllerMode

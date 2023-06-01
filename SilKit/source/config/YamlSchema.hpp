@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Config {
 
-//!< A single element in a schema tree.
+//! A single element in a schema tree.
 struct YamlSchemaElem
 {
     std::string name;
