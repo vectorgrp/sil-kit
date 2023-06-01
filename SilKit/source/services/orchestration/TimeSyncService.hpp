@@ -100,7 +100,12 @@ public:
 private:
     // ----------------------------------------
     // private methods
-    auto MakeTimeSyncPolicy(bool isSynchronizingVirtualTime) -> std::shared_ptr<ITimeSyncPolicy>;
+
+    //! Creates the _timeSyncPolicy. Returns true if the call assigned the _timeSyncPolicy, and false if it was already
+    //! assigned before.
+    bool SetupTimeSyncPolicy(bool isSynchronizingVirtualTime);
+
+    inline auto GetTimeSyncPolicy() const -> ITimeSyncPolicy *;
 
 private:
     // ----------------------------------------
@@ -112,7 +117,9 @@ private:
     ITimeProvider* _timeProvider{nullptr};
     TimeConfiguration _timeConfiguration;
 
+    mutable std::mutex _timeSyncPolicyMx;
     std::shared_ptr<ITimeSyncPolicy> _timeSyncPolicy{nullptr};
+
     std::vector<std::string> _requiredParticipants;
 
     bool _isRunning{false};
@@ -149,6 +156,12 @@ void TimeSyncService::SetServiceDescriptor(const Core::ServiceDescriptor& servic
 auto TimeSyncService::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
+}
+
+auto TimeSyncService::GetTimeSyncPolicy() const -> ITimeSyncPolicy*
+{
+    std::unique_lock<decltype(_timeSyncPolicyMx)> lock{_timeSyncPolicyMx};
+    return _timeSyncPolicy.get();
 }
 
 } // namespace Orchestration

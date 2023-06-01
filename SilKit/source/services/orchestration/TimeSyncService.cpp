@@ -299,17 +299,26 @@ void TimeSyncService::SetPeriod(std::chrono::nanoseconds period)
     _timeConfiguration.SetStepDuration(period);
 }
 
-auto TimeSyncService::MakeTimeSyncPolicy(bool isSynchronizingVirtualTime) -> std::shared_ptr<ITimeSyncPolicy>
+bool TimeSyncService::SetupTimeSyncPolicy(bool isSynchronizingVirtualTime)
 {
+    std::lock_guard<decltype(_timeSyncPolicyMx)> lock{_timeSyncPolicyMx};
+
+    if (_timeSyncPolicy != nullptr)
+    {
+        return false;
+    }
+
     _timeSyncConfigured = true;
     if (isSynchronizingVirtualTime)
     {
-        return std::make_shared<SynchronizedPolicy>(*this, _participant, &_timeConfiguration);
+        _timeSyncPolicy = std::make_shared<SynchronizedPolicy>(*this, _participant, &_timeConfiguration);
     }
     else
     {
-        return std::make_shared<UnsynchronizedPolicy>();
+        _timeSyncPolicy = std::make_shared<UnsynchronizedPolicy>();
     }
+
+    return true;
 }
 
 void TimeSyncService::SetPaused(std::future<void> pausedFuture)
@@ -327,9 +336,10 @@ void TimeSyncService::AwaitNotPaused()
 
 void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task)
 {
-    if (_timeSyncPolicy)
+    const auto timeSyncPolicy = GetTimeSyncPolicy();
+    if (timeSyncPolicy != nullptr)
     {
-        _timeSyncPolicy->ReceiveNextSimTask(from, task);
+        timeSyncPolicy->ReceiveNextSimTask(from, task);
     }
 }
 
@@ -359,8 +369,8 @@ void TimeSyncService::CompleteSimulationStep()
 {
     _logger->Debug("CompleteSimulationStep: calling _timeSyncPolicy->RequestNextStep");
     _participant->ExecuteDeferred([this] {
-        _timeSyncPolicy->SetSimStepCompleted();
-        _timeSyncPolicy->RequestNextStep();
+        GetTimeSyncPolicy()->SetSimStepCompleted();
+        GetTimeSyncPolicy()->RequestNextStep();
     });
 }
 
@@ -370,14 +380,15 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
     _isSynchronizingVirtualTime = isSynchronizingVirtualTime;
     _timeProvider->SetSynchronizeVirtualTime(isSynchronizingVirtualTime);
 
-    if (_timeSyncPolicy != nullptr)
-    {
-        return;
-    }
-
     try
     {
-        _timeSyncPolicy = MakeTimeSyncPolicy(isSynchronizingVirtualTime);
+        // create and assign time sync policy
+        const auto timeSyncPolicyCreated = SetupTimeSyncPolicy(isSynchronizingVirtualTime);
+        if (timeSyncPolicyCreated == false)
+        {
+            return;
+        }
+
         _serviceDescriptor.SetSupplementalDataItem(SilKit::Core::Discovery::timeSyncActive, (isSynchronizingVirtualTime) ? "1" : "0");
         ResetTime();
     }
@@ -390,7 +401,7 @@ void TimeSyncService::InitializeTimeSyncPolicy(bool isSynchronizingVirtualTime)
 
 void TimeSyncService::ResetTime()
 {
-    _timeSyncPolicy->Initialize();
+    GetTimeSyncPolicy()->Initialize();
 }
 
 void TimeSyncService::ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind)
@@ -402,8 +413,9 @@ void TimeSyncService::StartTime()
 {
     if (_timeSyncConfigured)
     {
-        SILKIT_ASSERT(_timeSyncPolicy);
-        _timeSyncPolicy->RequestInitialStep();
+        const auto timeSyncPolicy = GetTimeSyncPolicy();
+        SILKIT_ASSERT(timeSyncPolicy);
+        timeSyncPolicy->RequestInitialStep();
     }
 }
 
