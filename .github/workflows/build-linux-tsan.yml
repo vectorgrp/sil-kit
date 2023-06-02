@@ -14,5 +14,6 @@ jobs:
     - uses: ./.github/actions/build-cmake-preset
       with:
         preset-name: clang-tsan-debug
+        cmake-args: "-D SILKIT_BUILD_DASHBOARD=OFF"
 
 
