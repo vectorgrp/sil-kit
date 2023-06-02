@@ -399,8 +399,14 @@ int main(int argc, char** argv)
 
     try
     {
-        const auto registryConfiguration = SilKitRegistry::Config::Parse(
-            SilKit::Util::ReadTextFile(commandlineParser.Get<CliParser::Option>("registry-configuration").Value()));
+        SilKitRegistry::Config::V1::RegistryConfiguration registryConfiguration{};
+
+        const auto registryConfigurationPathOpt = commandlineParser.Get<CliParser::Option>("registry-configuration");
+        if (registryConfigurationPathOpt.HasValue())
+        {
+            registryConfiguration =
+                SilKitRegistry::Config::Parse(SilKit::Util::ReadTextFile(registryConfigurationPathOpt.Value()));
+        }
 
         auto configuration = SilKit::Config::ParticipantConfigurationFromStringImpl("");
 

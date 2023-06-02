@@ -18,7 +18,8 @@ Added
 Fixed
 ~~~~~
 
-- Fixed inconsistencies in API documentation 
+- Fixed inconsistencies in API documentation
+- Fixed starting the registry without the ``--registry-configuration`` parameter
 
 
 [4.0.27] - 2023-05-30
