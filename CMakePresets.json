@@ -561,41 +561,28 @@
             "configurePreset": "linux-release"
         },
         {
+            "displayName": "1: x64-debug",
             "name": "x64-debug",
             "inherits": "windows-base",
             "configurePreset": "x64-debug"
         },
         {
+            "displayName": "1: x64-release",
             "name": "x64-release",
             "inherits": "windows-base",
             "configurePreset": "x64-release"
         },
         {
+            "displayName": "2: x86-debug",
             "name": "x86-debug",
             "inherits": "windows-base",
             "configurePreset": "x86-debug"
         },
         {
+            "displayName": "2: x86-release",
             "name": "x86-release",
             "inherits": "windows-base",
             "configurePreset": "x86-release"
-        },
-
-        {
-            "name": "vs140-x86-debug",
-            "configurePreset": "vs140-x86-debug"
-        },
-        {
-            "name": "vs140-x86-release",
-            "configurePreset": "vs140-x86-release"
-        },
-        {
-            "name": "vs140-x64-debug",
-            "configurePreset": "vs140-x64-debug"
-        },
-        {
-            "name": "vs140-x64-release",
-            "configurePreset": "vs140-x64-release"
         },
         {
             "name": "vs141-x86-debug",
