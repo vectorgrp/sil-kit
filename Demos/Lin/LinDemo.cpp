@@ -132,11 +132,11 @@ public:
         : controller{controller}
     {
         schedule = {
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
-            {0ns, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
+            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
+            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
+            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
+            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
+            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
             {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
         };
     }
@@ -481,7 +481,7 @@ int main(int argc, char** argv) try
                 {
                     master.DoAction(now);
                     now += 1ms;
-                    std::this_thread::sleep_for(1s);
+                    std::this_thread::sleep_for(200ms);
                 }
             }};
 
@@ -520,7 +520,7 @@ int main(int argc, char** argv) try
                               << std::endl;
                     slave.DoAction(now);
 
-                    std::this_thread::sleep_for(500ms);
+                    std::this_thread::sleep_for(100ms);
                 },
                 1ms);
 
@@ -544,7 +544,7 @@ int main(int argc, char** argv) try
                 {
                     slave.DoAction(now);
                     now += 1ms;
-                    std::this_thread::sleep_for(1s);
+                    std::this_thread::sleep_for(200ms);
                 }
             }};
 
