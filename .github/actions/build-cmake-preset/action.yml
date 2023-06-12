@@ -36,13 +36,13 @@ runs:
       id: setup-host-macos
       shell: bash
 
-    #- name: Prepare build env on Windows
-    #  if: runner.os == 'Windows'
-    #  uses: ilammy/msvc-dev-cmd@v1.12.0
-    #  with:
-    #    arch: x64
-    #    toolset: '14.1'
-    #  id: setup-env-windows
+    - name: Prepare build env on Windows
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1.12.0
+      with:
+        arch: x64
+        toolset: '14.1'
+      id: setup-env-windows
 
     - name: Configure ${{ inputs.preset-name }}
       run: cmake --preset ${{ inputs.preset-name }} ${{ inputs.cmake-args }}

@@ -14,6 +14,8 @@ The Vector SIL Kit
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml
 .. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-tsan.yml/badge.svg
    :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-linux-ubsan.yml
+.. image:: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml/badge.svg
+   :target: https://github.com/vectorgrp/sil-kit/actions/workflows/build-win.yml
 
 The Vector SIL Kit is an open-source library for connecting Software-in-the-Loop Environments.
 This README is intended to provide you with quick start on how to build the Vector SIL Kit.
