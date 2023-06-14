@@ -92,7 +92,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
 
     if (gStartFunction == nullptr)
     {
-        SvcReportStatus(SERVICE_ERROR_CRITICAL, ERROR_INTERNAL_ERROR, 0);
+        SvcReportStatus(SERVICE_STOPPED, ERROR_INTERNAL_ERROR, 0);
         return;
     }
 
@@ -102,13 +102,13 @@ VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
     }
     catch (...)
     {
-        SvcReportStatus(SERVICE_ERROR_CRITICAL, ERROR_INTERNAL_ERROR, 0);
+        SvcReportStatus(SERVICE_STOPPED, ERROR_INTERNAL_ERROR, 0);
         return;
     }
 
     if (registry._registry == nullptr)
     {
-        SvcReportStatus(SERVICE_ERROR_CRITICAL, ERROR_INTERNAL_ERROR, 0);
+        SvcReportStatus(SERVICE_STOPPED, ERROR_INTERNAL_ERROR, 0);
         return;
     }
 
@@ -120,7 +120,7 @@ VOID SvcInit(DWORD dwArgc, LPTSTR *lpszArgv)
     }
     catch (...)
     {
-        SvcReportStatus(SERVICE_ERROR_CRITICAL, ERROR_INTERNAL_ERROR, 0);
+        SvcReportStatus(SERVICE_STOPPED, ERROR_INTERNAL_ERROR, 0);
         return;
     }
 
@@ -136,7 +136,14 @@ VOID WINAPI SvcControlHandler(DWORD controlCode)
     {
     case SERVICE_CONTROL_STOP:
         SvcReportStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
-        gServiceStopped.set_value();
+        try
+        {
+            gServiceStopped.set_value();
+        }
+        catch (...)
+        {
+            // ignore any exception from setting the promise
+        }
         break;
 
     default: break;
