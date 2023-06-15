@@ -365,6 +365,12 @@ void ReplayScheduler::ReplayMessages(std::chrono::nanoseconds now, std::chrono::
         return;
     }
 
+    if (!_timeProvider->IsSynchronizingVirtualTime())
+    {
+        // we are still attached to a NoSync timeProvider
+        return;
+    }
+
     if (_startTime == std::chrono::nanoseconds::min())
     {
         _startTime = _timeProvider->Now();
