@@ -42,7 +42,6 @@ add_silkit_test(ITest_Internals_HopOnHopOff
     ITest_Internals_HopOnHopOff.cpp
     LIBS
     S_SilKitImpl
-
 )
 
 add_silkit_test(ITest_Internals_ParticipantModes
@@ -50,7 +49,6 @@ add_silkit_test(ITest_Internals_ParticipantModes
     ITest_Internals_ParticipantModes.cpp
     LIBS
     S_SilKitImpl
-
 )
 
 add_silkit_test(ITest_CommunicationReady

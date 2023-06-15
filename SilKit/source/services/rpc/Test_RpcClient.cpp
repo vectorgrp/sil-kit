@@ -56,12 +56,30 @@ TEST_F(RpcClientTest, rpc_client_calls_result_handler_with_error_when_no_server_
     rpcClient->Call(sampleData);
 }
 
+TEST_F(RpcClientTest, rpc_client_does_not_fail_on_timeout_reply)
+{
+    // Rpc client should ignore unknown (late timout) call results
+
+    IRpcClient* rpcClient = CreateRpcClient();
+    rpcClient->SetCallResultHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallResultHandler));
+    rpcClient->Call(sampleData);
+
+    RpcClient* rpcClientInternal = dynamic_cast<RpcClient*>(rpcClient);
+
+    const FunctionCallResponse response{};
+    EXPECT_NO_THROW(rpcClientInternal->ReceiveMessage(response));
+
+    EXPECT_CALL(callbacks, CallResultHandler(testing::Eq(rpcClient), testing::_))
+        .Times(0);
+}
+
 TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_data)
 {
     SilKit::Core::Tests::MockTimeProvider fixedTimeProvider;
     fixedTimeProvider.now = std::chrono::nanoseconds{123456};
     ON_CALL(fixedTimeProvider, Now()).WillByDefault(testing::Return(fixedTimeProvider.now));
 
+    participant->GetSilKitConnection().Test_SetTimeProvider(&fixedTimeProvider);
     IRpcServer* iRpcServer = CreateRpcServer();
     iRpcServer->SetCallHandler(SilKit::Util::bind_method(&callbacks, &Callbacks::CallHandler));
 

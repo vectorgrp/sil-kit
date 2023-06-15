@@ -58,6 +58,14 @@ RpcClient::RpcClient(Core::IParticipantInternal* participant, Services::Orchestr
 {
 }
 
+RpcClient::~RpcClient()
+{
+    if (_isTimeoutHandlerSet)
+    {
+        _timeProvider->RemoveNextSimStepHandler(_timeoutHandlerId);
+    }
+}
+
 void RpcClient::RegisterServiceDiscovery()
 {
     auto matchHandler = [this](SilKit::Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
@@ -93,6 +101,60 @@ void RpcClient::RegisterServiceDiscovery()
 
 void RpcClient::Call(Util::Span<const uint8_t> data, void* userContext)
 {
+    TriggerCall(std::move(data), false, {}, userContext);
+}
+
+void RpcClient::CallWithTimeout(Util::Span<const uint8_t> data, std::chrono::nanoseconds timeout, void* userContext)
+{
+    TriggerCall(std::move(data), true, timeout, userContext);
+}
+
+
+void RpcClient::TimeHandler(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
+{
+    std::vector<TimeoutEntry> timeoutedEntries;
+
+    {
+        std::unique_lock<decltype(_timeoutQueueMx)> lockTimeout{_timeoutQueueMx};
+
+        for (auto it = _timeoutEntries.begin(); it != _timeoutEntries.end();)
+        {
+            it->timeLeft -= duration;
+            if (it->timeLeft <= static_cast<std::chrono::nanoseconds>(0))
+            {
+                timeoutedEntries.insert(timeoutedEntries.end(), std::make_move_iterator(it),
+                                        std::make_move_iterator(it + 1));
+                it = _timeoutEntries.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    for (auto&& entry : timeoutedEntries)
+    {
+        auto uuid = entry.callUuid;
+
+        std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
+        auto it = _activeCalls.find(uuid);
+        auto userContext = it->second.GetUserContext();
+
+        if (it != _activeCalls.end())
+        {
+            _activeCalls.erase(it);
+            lock.unlock();
+
+            _handler(this, RpcCallResultEvent{now, userContext, RpcCallStatus::Timeout, {}});
+        }
+    }
+    timeoutedEntries.clear();
+}
+
+
+void RpcClient::TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout, void* userContext)
+{
     if (_numCounterparts == 0)
     {
         if (_handler)
@@ -105,12 +167,32 @@ void RpcClient::Call(Util::Span<const uint8_t> data, void* userContext)
     {
         const auto callUuid = Util::Uuid::GenerateRandom();
 
+        FunctionCall msg{_timeProvider->Now(), callUuid, Util::ToStdVector(data)};
+
         {
-            std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
-            _activeCalls.emplace(callUuid, RpcCallInfo{static_cast<int32_t>(_numCounterparts), userContext});
+            {
+                std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
+                _activeCalls.emplace(callUuid, RpcCallInfo{static_cast<int32_t>(_numCounterparts), userContext});
+            }
+
+            if (hasTimeout)
+            {
+                {
+                    std::unique_lock<decltype(_timeoutQueueMx)> lockTimeout{_timeoutQueueMx};
+                    _timeoutEntries.push_back({timeout, callUuid});
+                }
+
+                if (!_isTimeoutHandlerSet)
+                {
+                    _timeoutHandlerId = _timeProvider->AddNextSimStepHandler(
+                        [this](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
+                            this->TimeHandler(now, duration);
+                        });
+                    _isTimeoutHandlerSet = true;
+                }
+            }
         }
 
-        FunctionCall msg{_timeProvider->Now(), callUuid, Util::ToStdVector(data)};
         _participant->SendMsg(this, std::move(msg));
     }
 }
@@ -127,20 +209,19 @@ void RpcClient::ReceiveMsg(const Core::IServiceEndpoint* /*from*/, const Functio
 
 void RpcClient::ReceiveMessage(const FunctionCallResponse& msg)
 {
-    auto it = [this, &msg] {
+    std::map<SilKit::Util::Uuid, SilKit::Services::Rpc::RpcClient::RpcCallInfo>::iterator it;
+    {
         std::unique_lock<decltype(_activeCallsMx)> lock{_activeCallsMx};
 
-        auto it = _activeCalls.find(msg.callUuid);
+        it = _activeCalls.find(msg.callUuid);
 
         if (it == _activeCalls.end())
         {
-            std::string errorMsg{"RpcClient: Received function call response with an unknown uuid"};
-            _logger->Error(errorMsg);
-            throw SilKit::StateError{errorMsg};
+            std::string warningMsg{"RpcClient: Received function call response with an unknown/deleted uuid. Might be a call reply that ran into a timeout."};
+            _logger->Warn(warningMsg);
+            return;
         }
-
-        return it;
-    }();
+    };
 
     if (_handler)
     {

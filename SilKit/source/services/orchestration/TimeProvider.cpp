@@ -133,12 +133,30 @@ public:
     {
     }
 
+    // From Wall clock provider
+    HandlerId AddNextSimStepHandler(NextSimStepHandler simStepHandler) override
+    {
+        const auto handlerId = ProviderBase::AddNextSimStepHandler(std::move(simStepHandler));
+
+        _timer.WithPeriod(_tickPeriod, [this](const auto& now) {
+            _handlers.InvokeAll(now, _tickPeriod);
+        });
+
+        return handlerId;
+    }
+
     auto Now() const -> std::chrono::nanoseconds override
     {
         // always return std::chrono::nanoseconds::min
         return std::chrono::nanoseconds::duration::min();
     }
+
+
+private:
+    std::chrono::nanoseconds _tickPeriod{100000};
+    Util::Timer _timer;
 };
+
 
 
 //! \brief  A caching time provider: we update its internal state whenever the controller's
@@ -149,7 +167,7 @@ class SynchronizedVirtualTimeProvider : public ProviderBase
 {
 public:
     SynchronizedVirtualTimeProvider()
-        : ProviderBase("SyncrhonizedVirtualTimeProvider")
+        : ProviderBase("SynchronizedVirtualTimeProvider")
     {
     }
 

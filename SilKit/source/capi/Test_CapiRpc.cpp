@@ -50,6 +50,7 @@ MATCHER_P(PayloadMatcher, controlPayload, "") {
 class MockRpcClient : public SilKit::Services::Rpc::IRpcClient {
 public:
     MOCK_METHOD(void, Call, (SilKit::Util::Span<const uint8_t> data, void* userContext), (override));
+    MOCK_METHOD(void, CallWithTimeout, (SilKit::Util::Span<const uint8_t> data, std::chrono::nanoseconds timeout, void* userContext), (override));
 
     MOCK_METHOD1(SetCallResultHandler, void(RpcCallResultHandler handler));
 };
@@ -143,6 +144,11 @@ TEST_F(CapiRpcTest, rpc_client_function_mapping)
     EXPECT_CALL(mockRpcClient, Call(testing::_, userContext)).Times(testing::Exactly(1));
     returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, &data, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
+
+    EXPECT_CALL(mockRpcClient, CallWithTimeout(testing::_, std::chrono::nanoseconds{123456}, userContext))
+        .Times(testing::Exactly(1));
+    returnCode = SilKit_RpcClient_CallWithTimeout((SilKit_RpcClient*)&mockRpcClient, &data, 123456, userContext);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
 TEST_F(CapiRpcTest, rpc_server_function_mapping)
@@ -214,6 +220,12 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 
     returnCode = SilKit_RpcClient_Call((SilKit_RpcClient*)&mockRpcClient, nullptr, userContext);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_RpcClient_CallWithTimeout(nullptr, &data, 987654321, userContext);
+    EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
+
+    returnCode = SilKit_RpcClient_CallWithTimeout((SilKit_RpcClient*)&mockRpcClient, nullptr, 987654321, userContext);
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 

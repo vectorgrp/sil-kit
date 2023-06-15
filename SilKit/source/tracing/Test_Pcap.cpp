@@ -104,7 +104,7 @@ TEST(ReplayTest, read_from_pcap)
             break;
         }
     }
-    EXPECT_EQ(numMessages, 10);
+    EXPECT_EQ((int)numMessages, 10);
 }
 
 } // namespace

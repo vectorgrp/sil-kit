@@ -92,6 +92,9 @@ void CallReturn(IRpcClient* /*client*/, RpcCallResultEvent event)
     case RpcCallStatus::InternalServerError:
         std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::InternalServerError" << std::endl;
         break;
+    case RpcCallStatus::Timeout:
+        std::cout << "Warning: Call " << event.userContext << " failed with RpcCallStatus::Timeout" << std::endl;
+        break;
     }
 }
 

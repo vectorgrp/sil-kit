@@ -90,6 +90,8 @@ protected:
         uint32_t numCalls;
         uint32_t numCallsToReturn;
         std::vector<std::vector<uint8_t>> expectedReturnDataUnordered;
+        uint32_t numCallsToTimeout{0};
+        std::chrono::nanoseconds timeout{};
     };
 
     class RpcClientState
@@ -106,6 +108,7 @@ protected:
         std::atomic<uint32_t> callReturnedSuccessCounter{0};
         std::atomic<bool> allCalled{false};
         std::atomic<bool> allCallsReturned{false};
+        std::atomic<uint32_t> callReturnedTimeoutCounter{0};
 
         IRpcClient* rpcClient = nullptr;
 
@@ -114,7 +117,14 @@ protected:
             if (!allCalled)
             {
                 auto argumentData = std::vector<uint8_t>(info.messageSizeInBytes, static_cast<uint8_t>(callCounter));
-                rpcClient->Call(argumentData, reinterpret_cast<void*>(uintptr_t(callCounter)));
+                if (info.numCallsToTimeout > 0)
+                {
+                    rpcClient->CallWithTimeout(argumentData, info.timeout, reinterpret_cast<void*>(uintptr_t(callCounter)));
+                }
+                else
+                {
+                    rpcClient->Call(argumentData, reinterpret_cast<void*>(uintptr_t(callCounter)));
+                }
 
                 callCounter++;
                 if (callCounter >= info.numCalls)
@@ -144,7 +154,18 @@ protected:
             }
 
             callReturnedSuccessCounter++;
-            if (callReturnedSuccessCounter >= info.numCallsToReturn)
+            if (callReturnedSuccessCounter + callReturnedTimeoutCounter
+                >= info.numCallsToReturn + info.numCallsToTimeout)
+            {
+                allCallsReturned = true;
+            }
+        }
+
+        void OnCallTimeout()
+        {
+            callReturnedTimeoutCounter++;
+            if (callReturnedSuccessCounter + callReturnedTimeoutCounter
+                >= info.numCallsToReturn + info.numCallsToTimeout)
             {
                 allCallsReturned = true;
             }
@@ -189,6 +210,7 @@ protected:
         bool expectIncreasingData;
         std::vector<std::vector<uint8_t>> expectedDataUnordered;
         IRpcServer* rpcServer = nullptr;
+        bool doNotReply {false};
     };
 
     struct RpcServerState
@@ -407,6 +429,10 @@ protected:
                             {
                                 c->OnCallReturned(SilKit::Util::ToStdVector(event.resultData));
                             }
+                            if (event.callStatus == RpcCallStatus::Timeout)
+                            {
+                                c->OnCallTimeout();
+                            }
                         }
                         participant.CheckAllCallsReturnedPromise();
                     };
@@ -433,7 +459,10 @@ protected:
                         {
                             d += rpcFuncIncrement;
                         }
-                        server->SubmitResult(event.callHandle, returnData);
+                        if (!s->info.doNotReply)
+                        {
+                            server->SubmitResult(event.callHandle, returnData);
+                        }
 
                         // Evaluate data and reception count
                         s->ReceiveCall(SilKit::Util::ToStdVector(event.argumentData));
@@ -501,6 +530,7 @@ protected:
                 {
                     EXPECT_EQ(c->callCounter, c->info.numCalls);
                     EXPECT_EQ(c->callReturnedSuccessCounter, c->info.numCallsToReturn);
+                    EXPECT_EQ(c->callReturnedTimeoutCounter, c->info.numCallsToTimeout);
                 }
                 for (const auto& s : participant.rpcServers)
                 {

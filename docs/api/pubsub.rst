@@ -132,6 +132,7 @@ be preferred over a programmatically set topic.
 Usage Examples
 ~~~~~~~~~~~~~~
 
+
 The interfaces for the publish/subscribe mechanism can be instantiated from an |IParticipant|:
 
 .. code-block:: cpp

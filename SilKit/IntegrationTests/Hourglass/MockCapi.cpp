@@ -844,6 +844,14 @@ extern "C"
         return globalCapi->SilKit_RpcClient_Call(self, argumentData, userContext);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_RpcClient_CallWithTimeout(SilKit_RpcClient* self,
+        const SilKit_ByteVector* argumentData,
+        SilKit_NanosecondsTime timeout,
+        void* userContext)
+    {
+        return globalCapi->SilKit_RpcClient_CallWithTimeout(self, argumentData, timeout, userContext);
+    } 
+
     SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context,
                                                                        SilKit_RpcCallResultHandler_t handler)
     {

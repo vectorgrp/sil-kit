@@ -7,6 +7,7 @@ RPC (Remote Procedure Call) API
 .. |CreateRpcClient| replace:: :cpp:func:`CreateRpcClient()<SilKit::IParticipant::CreateRpcClient()>`
 .. |CreateRpcServer| replace:: :cpp:func:`CreateRpcServer()<SilKit::IParticipant::CreateRpcServer()>`
 .. |Call| replace:: :cpp:func:`Call()<SilKit::Services::Rpc::IRpcClient::Call()>`
+.. |CallWithTimeout| replace:: :cpp:func:`CallWithTimeout()<SilKit::Services::Rpc::IRpcClient::CallWithTimeout()>`
 .. |SubmitResult| replace:: :cpp:func:`SubmitResult()<SilKit::Services::Rpc::IRpcServer::SubmitResult()>`
 .. |SetCallHandler| replace:: :cpp:func:`SetRpcHandler()<SilKit::Services::Rpc::IRpcServer::SetCallHandler()>`
 .. |SetCallResultHandler| replace:: :cpp:func:`SetCallReturnHandler()<SilKit::Services::Rpc::IRpcClient::SetCallResultHandler()>`
@@ -43,6 +44,9 @@ The ``RpcClient`` receives the call return in a callback which is also specified
 be overwritten with |SetCallResultHandler|.
 The callback provides the user context pointer passed to |Call|, the return data and a call status indicating
 success or an error during the procedure.
+Additionally, |CallWithTimeout| can be used to trigger calls that have to be replied to within a specified 
+timeout duration.
+Otherwise the call will lead to a timeout RpcCallResultEvent.
 
 Argument and Return Data
 ========================
@@ -55,6 +59,7 @@ Function Name
 ~~~~~~~~~~~~~
 
 RPC clients and RPC servers provide a function name which is part of their |RpcSpec|.
+
 Communication only takes place among RPC clients and RPC servers with the same function name.
 
 Media Type
@@ -123,6 +128,8 @@ Error handling
 * The ``RpcCallResultEvent::resultData`` member is only valid if ``callStatus == RpcCallStatus::Success``.
 * If the RPC server receives a call but does not have a valid call handler, the RPC client will receive an
   ``RpcCallResultEvent`` with ``callStatus == RpcCallStatus::InternalServerError``.
+* If the RpcServer does not reply within the specified timeout of |CallWithTimeout|, the CallReturnHandler is triggered 
+  immediately with ``RpcCallStatus::Timeout``.
 
 Usage Example
 ~~~~~~~~~~~~~

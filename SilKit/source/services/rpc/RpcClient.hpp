@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <vector>
 #include <future>
+#include <queue>
 #include <set>
 
 #include "silkit/services/rpc/IRpcClient.hpp"
@@ -30,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/rpc/string_utils.hpp"
 
 #include "ITimeConsumer.hpp"
+#include "ITimeProvider.hpp"
 #include "IMsgForRpcClient.hpp"
 #include "IParticipantInternal.hpp"
 #include "RpcCallHandle.hpp"
@@ -50,10 +52,13 @@ public:
     RpcClient(Core::IParticipantInternal* participant, Services::Orchestration::ITimeProvider* timeProvider,
               const SilKit::Services::Rpc::RpcSpec& dataSpec, const std::string& clientUUID,
               RpcCallResultHandler handler);
+    ~RpcClient();
 
     void RegisterServiceDiscovery();
 
     void Call(Util::Span<const uint8_t> data, void* userContext = nullptr) override;
+    void CallWithTimeout(Util::Span<const uint8_t> data, std::chrono::nanoseconds timeout,
+                         void* userContext = nullptr) override;
 
     void SetCallResultHandler(RpcCallResultHandler handler) override;
 
@@ -69,6 +74,10 @@ public:
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
 private:
+    void TriggerCall(Util::Span<const uint8_t> data, bool hasTimeout, std::chrono::nanoseconds timeout,
+                         void* userContext);
+    void TimeHandler(std::chrono::nanoseconds now, std::chrono::nanoseconds duration);
+
     class RpcCallInfo
     {
     public:
@@ -100,7 +109,20 @@ private:
     Core::IParticipantInternal* _participant{nullptr};
 
     std::mutex _activeCallsMx;
+    std::mutex _timeoutQueueMx;
     std::map<Util::Uuid, RpcCallInfo> _activeCalls;
+
+    struct TimeoutEntry
+    {
+        std::chrono::nanoseconds timeLeft;
+        Util::Uuid callUuid;
+    };
+
+
+    std::vector<TimeoutEntry> _timeoutEntries{};
+    std::function<void(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)> _timeoutHandler{};
+    Services::HandlerId _timeoutHandlerId{};
+    std::atomic<bool> _isTimeoutHandlerSet{ false };
 };
 
 // ================================================================================

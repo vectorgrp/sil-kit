@@ -401,6 +401,48 @@ TEST_F(ITest_Internals_Rpc, test_1_participant_selfdelivery_same_functionname)
     RunSyncTest(rpcs);
 }
 
+// One client participant, one server participant, calling with timeout, failing with timeout
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_with_timeout_timeout)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls;
+
+    RpcClientInfo clientInfo{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, 0};
+
+    clientInfo.timeout = 1ms;
+    clientInfo.numCallsToTimeout = numCallsToReturn;
+
+    RpcServerInfo serverInfo{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive};
+    serverInfo.doNotReply = true;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1", {}, {clientInfo}, {"TestFuncA"}});
+    rpcs.push_back({"Server1", {serverInfo}, {}, {}});
+
+    RunSyncTest(rpcs);
+}
+
+// One client participant, one server participant, calling with timeout, no timeout
+TEST_F(ITest_Internals_Rpc, test_1client_1server_sync_with_timeout_no_timeout)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+
+    RpcClientInfo clientInfo{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReceive};
+
+    clientInfo.timeout = 1ms;
+    clientInfo.numCallsToTimeout = 0;
+
+    RpcServerInfo serverInfo{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive};
+    serverInfo.doNotReply = false;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1", {}, {clientInfo}, {"TestFuncA"}});
+    rpcs.push_back({"Server1", {serverInfo}, {}, {}});
+
+    RunSyncTest(rpcs);
+}
+
+
 //-----------------------------------------------------
 // Async tests: No TimeSyncService/SimulationTask
 //-----------------------------------------------------
@@ -412,8 +454,51 @@ TEST_F(ITest_Internals_Rpc, test_1client_1server_async_vasio)
     const uint32_t numCallsToReturn = defaultNumCalls;
 
     std::vector<RpcParticipant> rpcs;
-    rpcs.push_back({ "Client1", {}, { {"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn } }, {"TestFuncA"} });
-    rpcs.push_back({ "Server1", { { "ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive }}, {}, {}});
+    rpcs.push_back({"Client1",
+                    {},
+                    {{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReturn}},
+                    {"TestFuncA"}});
+    rpcs.push_back({"Server1", {{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive}}, {}, {}});
+
+    RunAsyncTest(rpcs);
+}
+
+// One client participant, one server participant, calling with timeout, failing with timeout
+TEST_F(ITest_Internals_Rpc, test_1client_1server_async_with_timeout_timeout)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+    const uint32_t numCallsToReturn = defaultNumCalls;
+
+    RpcClientInfo clientInfo{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, 0};
+
+    clientInfo.timeout = 1ms;
+    clientInfo.numCallsToTimeout = numCallsToReturn;
+
+    RpcServerInfo serverInfo{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive};
+    serverInfo.doNotReply = true;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1", {}, {clientInfo}, {"TestFuncA"}});
+    rpcs.push_back({"Server1", {serverInfo}, {}, {}});
+
+    RunAsyncTest(rpcs);
+}
+// One client participant, one server participant, calling with timeout, no timeout
+TEST_F(ITest_Internals_Rpc, test_1client_1server_async_with_timeout_no_timeout)
+{
+    const uint32_t numCallsToReceive = defaultNumCalls;
+
+    RpcClientInfo clientInfo{"ClientCtrl1", "TestFuncA", "A", {}, defaultMsgSize, defaultNumCalls, numCallsToReceive};
+
+    clientInfo.timeout = 1ms;
+    clientInfo.numCallsToTimeout = 0;
+
+    RpcServerInfo serverInfo{"ServerCtrl1", "TestFuncA", "A", {}, defaultMsgSize, numCallsToReceive};
+    serverInfo.doNotReply = false;
+
+    std::vector<RpcParticipant> rpcs;
+    rpcs.push_back({"Client1", {}, {clientInfo}, {"TestFuncA"}});
+    rpcs.push_back({"Server1", {serverInfo}, {}, {}});
 
     RunAsyncTest(rpcs);
 }

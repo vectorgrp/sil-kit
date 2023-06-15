@@ -52,13 +52,17 @@ typedef struct SilKit_RpcClient SilKit_RpcClient;
 /*! \brief The status of a RpcCallResultEvent. Informs whether a call was successful.
 */
 typedef uint32_t SilKit_RpcCallStatus;
-#define SilKit_RpcCallStatus_Success             ((uint32_t) 0) //!< Call was successful
-#define SilKit_RpcCallStatus_ServerNotReachable  ((uint32_t) 1) //!< No server matching the RpcSpec was found
-#define SilKit_RpcCallStatus_UndefinedError      ((uint32_t) 2) //!< An unidentified error occured
+#define SilKit_RpcCallStatus_Success             ((SilKit_RpcCallStatus)0) //!< Call was successful
+#define SilKit_RpcCallStatus_ServerNotReachable  ((SilKit_RpcCallStatus)1) //!< No server matching the RpcSpec was found
+#define SilKit_RpcCallStatus_UndefinedError      ((SilKit_RpcCallStatus)2) //!< An unidentified error occured
 /*! \brief The Call lead to an internal RpcServer error.
  * This might happen if no CallHandler was specified for the RpcServer.
  */
-#define SilKit_RpcCallStatus_InternalServerError ((uint32_t) 3)
+#define SilKit_RpcCallStatus_InternalServerError ((SilKit_RpcCallStatus)3)
+/*! \brief The Call did run into a timeout and was canceled.
+ * This might happen if a corresponding server crashed, ran into an error or took too long to answer the call
+ */
+#define SilKit_RpcCallStatus_Timeout             ((SilKit_RpcCallStatus)4)
 
 typedef struct {
     SilKit_StructHeader structHeader;
@@ -171,6 +175,25 @@ SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcClient_Call(SilKit_RpcClient* s
 
 typedef SilKit_ReturnCode(SilKitFPTR *SilKit_RpcClient_Call_t)(SilKit_RpcClient* self,
     const SilKit_ByteVector* argumentData, void* userContext);
+
+/*! \brief Initiate a remote procedure call with a specified timeout.
+*
+*  In a synchronized execution, simulation time is used for the timeout, 
+*  in a unsynchronized execution, system time is used for the timeout.
+* 
+* \param self The RPC client that should trigger the remote procedure call.
+* \param argumentData A non-owning reference to an opaque block of raw data
+* \param timeout A duration in nanoseconds after which the call runs into a timeout and the CallResultHandler is called with status timeout. 
+*  After the timeout occurred, no further call result events will be triggered for this call. 
+* \param userContext An optional user provided pointer that is
+* reobtained when receiving the call result.
+*/
+
+SilKitAPI SilKit_ReturnCode SilKitCALL SilKit_RpcClient_CallWithTimeout(SilKit_RpcClient* self,
+    const SilKit_ByteVector* argumentData, SilKit_NanosecondsTime timeout, void* userContext);
+
+typedef SilKit_ReturnCode(SilKitFPTR* SilKit_RpcClient_CallWithTimeout_t)(SilKit_RpcClient* self,
+    const SilKit_ByteVector* argumentData, SilKit_NanosecondsTime timeout, void* userContext);
 
 /*! \brief Overwrite the call result handler of this client
  * \param self The RPC client that should trigger the remote procedure call.

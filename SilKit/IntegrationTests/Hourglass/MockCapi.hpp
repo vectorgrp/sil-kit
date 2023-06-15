@@ -456,6 +456,10 @@ public:
     MOCK_METHOD(SilKit_ReturnCode, SilKit_RpcClient_Call,
                 (SilKit_RpcClient * self, const SilKit_ByteVector* argumentData, void* userContext));
 
+    MOCK_METHOD( SilKit_ReturnCode, SilKit_RpcClient_CallWithTimeout,(SilKit_RpcClient* self,
+                                                                  const SilKit_ByteVector* argumentData,
+                                                                  SilKit_NanosecondsTime timeout, void* userContext));
+
     MOCK_METHOD(SilKit_ReturnCode, SilKit_RpcClient_SetCallResultHandler,
                 (SilKit_RpcClient * self, void* context, SilKit_RpcCallResultHandler_t handler));
 

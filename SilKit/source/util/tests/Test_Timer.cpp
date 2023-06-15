@@ -53,7 +53,7 @@ TEST(UtilsTimerTest, ensure_util_timer_works)
         ASSERT_TRUE(timer.IsActive());
         isDone.wait_for(1s);
         ASSERT_TRUE(!timer.IsActive());
-        ASSERT_EQ(numCalls, 5);
+        ASSERT_EQ((int)numCalls, 5);
     }
 }
 

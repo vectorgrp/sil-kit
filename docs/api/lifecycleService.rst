@@ -185,11 +185,14 @@ All participants that take part in the distributed time algorithm are ready to e
 Controlling the Participant
 """""""""""""""""""""""""""
 
+
 After a successful startup, the participant will enter the |RunningState| state.
 |State| returns the current state as a plain enumeration, whereas |Status| returns additional information such as the participant's name, the human-readable reason for entering the state, and the wall clock time when the state was entered.
 
+
 To temporarily pause a simulation task, the |Pause| method can be invoked with a human-readable explanation as a string argument.
 Execution can be resumed using the |Continue| method.
+
 
 To abort the simulation and report an error message, use the |ReportError| method.
 This will change the current participant state to the |ErrorState| state and report the error message to the SIL Kit runtime system.
@@ -226,6 +229,7 @@ Data Structures
 
 Usage Example
 --------------
+
 The following example is based on the ``SilKitCanDemo`` source code which is distributed with the SIL Kit, and slightly adapted for clarity.
 It demonstrates how to setup a lifecycle service and register callbacks to monitor participant state changes.
 

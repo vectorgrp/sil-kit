@@ -44,7 +44,7 @@ TEST(TestTimeProvider, check_time_provider_impls)
 	ASSERT_EQ(timeProvider.TimeProviderName(), "NoSyncProvider");
 
 	timeProvider.ConfigureTimeProvider(TimeProviderKind::SyncTime);
-	ASSERT_EQ(timeProvider.TimeProviderName(), "SyncrhonizedVirtualTimeProvider");
+	ASSERT_EQ(timeProvider.TimeProviderName(), "SynchronizedVirtualTimeProvider");
 
 	timeProvider.ConfigureTimeProvider(TimeProviderKind::WallClock);
 	ASSERT_EQ(timeProvider.TimeProviderName(), "WallclockProvider");

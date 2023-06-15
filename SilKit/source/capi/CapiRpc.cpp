@@ -154,6 +154,19 @@ try
 }
 CAPI_CATCH_EXCEPTIONS
 
+SilKit_ReturnCode SilKitCALL SilKit_RpcClient_CallWithTimeout(SilKit_RpcClient* self, const SilKit_ByteVector* argumentData,
+    SilKit_NanosecondsTime duration, void* userContext)
+try
+{
+    ASSERT_VALID_POINTER_PARAMETER(self);
+    ASSERT_VALID_POINTER_PARAMETER(argumentData);
+
+    auto cppClient = reinterpret_cast<SilKit::Services::Rpc::IRpcClient*>(self);
+    cppClient->CallWithTimeout(SilKit::Util::ToSpan(*argumentData), std::chrono::nanoseconds{duration}, userContext);
+    return SilKit_ReturnCode_SUCCESS;
+}
+CAPI_CATCH_EXCEPTIONS
+
 
 SilKit_ReturnCode SilKitCALL SilKit_RpcClient_SetCallResultHandler(SilKit_RpcClient* self, void* context, SilKit_RpcCallResultHandler_t handler)
 try
