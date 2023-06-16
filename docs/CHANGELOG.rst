@@ -13,6 +13,11 @@ Added
 ~~~~~
 - Added optional timeout mechanism to RPC service. 
 
+Fixed
+~~~~~
+
+- Fix builds with CMake versions before ``3.19``
+
 
 [4.0.29] - 2023-06-14
 ---------------------

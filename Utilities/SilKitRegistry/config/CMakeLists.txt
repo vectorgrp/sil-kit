@@ -1,8 +1,5 @@
 
-add_library(I_SilKitRegistry_Config INTERFACE
-    RegistryConfiguration.hpp
-    RegistryYamlConversion.hpp
-)
+add_library(I_SilKitRegistry_Config INTERFACE)
 
 target_include_directories(I_SilKitRegistry_Config
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
