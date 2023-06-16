@@ -19,20 +19,35 @@ Configuration
 The Participant Configuration File
 =======================================
 
-Simulation participants of the Vector SIL Kit can be configured via a YAML/JSON file, often
-referred to as *participant configuration*. A configuration file is optional, 
-it is intended to be used to configure behavior and connections of a simulation participant that was distributed in 
-binary form.
-A participant configuration can be passed to a simulation when a simulation participant is created 
-through :cpp:func:`CreateParticipant()<SilKit::CreateParticipant()>`.
+Vector SIL Kit simulation participants are primarily configured by developers in source code using the SIL Kit API.
+However, the following scenarios are conceivable in which some flexibility is useful even after compile-time:
 
+- A simulation participant is distributed in binary form to integrators. In order to integrate such 
+  participants into simulations, an integrator must be able to post-configure some aspects of the participant to make it fit,
+  particularly its properties, behavior and how it interconnects within a simulation.
+- A simulation consists of multiple participants that share the same behavior. An integrator would have to ask developers to compile 
+  these participants from the same sources multiple times, with only the participant names differing.
+- Developers or integrators want to temporarily enable debugging features without the need or the ability to recompile the sources, 
+  for example logging, tracing, and health checking.
+
+To cover these scenarios, Vector SIL Kit offers the ability to modify a participant's configuration via participant configuration files,
+often simply referred to as *participant configuration*. The feature can be enabled by passing the file as an argument when a participant 
+is created, :cpp:func:`CreateParticipant(std::shared_ptr\<SilKit::Config::IParticipantConfiguration\> participantConfig, ...)<SilKit::CreateParticipant()>`.
+
+Participant configuration files allow to override a subset of parameters which are configurable via the SIL Kit API.
 Configuration parameters that are specified within the participant configuration override corresponding 
 programmatically defined values. For example, the ``ParticipantName`` field of the participant configuration overrides the 
 participant name that is provided through the API of the Vector SIL Kit when participants are created, namely 
-:cpp:func:`CreateParticipant(..., const std::string& participantName, ...)<SilKit::CreateParticipant()>`.
+:cpp:func:`CreateParticipant(..., const std::string& participantName, ...)<SilKit::CreateParticipant()>`. This gives integrators the ability to run
+a simulation with multiple instances of a participant from a single implementation.
 
-A participant configuration file begins with some general information about the configuration file itself, followed by several 
-subsections for the different services of the Vector SIL Kit.
+.. admonition:: Note
+
+    It is recommended that all configuration be done at the source code level so that an empty configuration file can be provided for most simulation runs. 
+    A user should be able to create (or modify an existing) configuration file for a participant, if behavior or network connections need to be reconfigured.
+
+A participant configuration file is written in YAML/JSON syntax according to a specified schema. It begins with some general information 
+about the configuration file itself, followed by several subsections for the different services of the Vector SIL Kit.
 
 .. admonition:: Note
 

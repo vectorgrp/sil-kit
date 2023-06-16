@@ -18,6 +18,11 @@ Fixed
 
 - Fix builds with CMake versions before ``3.19``
 
+Changed
+~~~~~~~
+
+- Refactored documentation for participant configurations: The intent was made clearer, noting that it is an optional feature.
+
 
 [4.0.29] - 2023-06-14
 ---------------------
