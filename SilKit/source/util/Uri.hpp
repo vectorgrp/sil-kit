@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <string>
 #include <sstream>
+#include <cstdint>
 
 #include "Optional.hpp"
 // URI encoding of asio endpoint types.
