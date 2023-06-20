@@ -19,6 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include <future>
 #include <iostream>
 #include <sstream>
 #include <thread>
@@ -144,6 +145,15 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    std::string participantName(argv[2]);
+
+    if (participantName != "Publisher" && participantName != "Subscriber")
+    {
+        std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
+                  << std::endl;
+        return 1;
+    }
+
     std::string mediaType{SilKit::Util::SerDes::MediaTypeData()};
     SilKit::Services::PubSub::PubSubSpec dataSpecPubGps{"Gps", mediaType};
     SilKit::Services::PubSub::PubSubSpec dataSpecPubTemperature{"Temperature", mediaType};
@@ -151,7 +161,6 @@ int main(int argc, char** argv)
     try
     {
         std::string participantConfigurationFilename(argv[1]);
-        std::string participantName(argv[2]);
 
         std::string registryUri = "silkit://localhost:8500";
 
@@ -172,39 +181,53 @@ int main(int argc, char** argv)
             }
         }
 
-
         auto participantConfiguration = SilKit::Config::ParticipantConfigurationFromFile(participantConfigurationFilename);
 
         std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
         auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
+        auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
+                              : SilKit::Services::Orchestration::OperationMode::Autonomous);
+        auto* lifecycleService = participant->CreateLifecycleService({operationMode});
+        lifecycleService->SetStopHandler([]() {
+            std::cout << "Stop handler called" << std::endl;
+        });
+
+        lifecycleService->SetShutdownHandler([]() {
+            std::cout << "Shutdown handler called" << std::endl;
+        });
+
+        auto isPublisher = (participantName == "Publisher");
+
+        // Create a data publisher for GPS data
+        auto* gpsPublisher = (isPublisher
+                              ? participant->CreateDataPublisher("GpsPublisher", dataSpecPubGps, 0)
+                              : nullptr);
+        // Create a data publisher for temperature data
+        auto* temperaturePublisher = (
+            isPublisher
+            ? participant->CreateDataPublisher("TemperaturePublisher", dataSpecPubTemperature, 0)
+            : nullptr);
+
+        if (!isPublisher)
+        {
+            participant->CreateDataSubscriber(
+                "GpsSubscriber", dataSpecPubGps,
+                &ReceiveGpsData);
+            participant->CreateDataSubscriber(
+                "TemperatureSubscriber", dataSpecPubTemperature,
+                &ReceiveTemperatureData);
+        }
 
         if (runSync)
         {
-            auto* lifecycleService =
-                participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
             auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             lifecycleService->SetCommunicationReadyHandler([&participantName]() {
                 std::cout << "Communication ready handler called for " << participantName << std::endl;
             });
-            lifecycleService->SetStopHandler([]() {
-                std::cout << "Stop handler called" << std::endl;
-            });
 
-            lifecycleService->SetShutdownHandler([]() {
-                std::cout << "Shutdown handler called" << std::endl;
-            });
-
-            if (participantName == "Publisher")
+            if (isPublisher)
             {
-                // Create a data publisher for GPS data
-                auto* gpsPublisher = participant->CreateDataPublisher(
-                    "GpsPublisher", dataSpecPubGps, 0);
-
-                // Create a data publisher for temperature data
-                auto* temperaturePublisher = participant->CreateDataPublisher(
-                    "TemperaturePublisher", dataSpecPubTemperature, 0);
-
                 timeSyncService->SetSimulationStepHandler(
                     [gpsPublisher, temperaturePublisher](std::chrono::nanoseconds now,
                                                          std::chrono::nanoseconds /*duration*/) {
@@ -212,22 +235,16 @@ int main(int argc, char** argv)
                             std::chrono::duration_cast<std::chrono::milliseconds>(now);
                         std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
-                        PublishData(gpsPublisher, temperaturePublisher);
-
+                        if (gpsPublisher && temperaturePublisher)
+                        {
+                            PublishData(gpsPublisher, temperaturePublisher);
+                        }
                         std::this_thread::sleep_for(1s);
                     },
                     1s);
             }
-            else if (participantName == "Subscriber")
+            else
             {
-                participant->CreateDataSubscriber(
-                    "GpsSubscriber", dataSpecPubGps,
-                    &ReceiveGpsData);
-
-                participant->CreateDataSubscriber(
-                    "TemperatureSubscriber", dataSpecPubTemperature,
-                    &ReceiveTemperatureData);
-
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                         auto nowMs = 
@@ -236,12 +253,6 @@ int main(int argc, char** argv)
                         std::this_thread::sleep_for(1s);
                     },
                     1s);
-            }
-            else
-            {
-                std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
-                          << std::endl;
-                return 1;
             }
 
             auto lifecycleFuture = lifecycleService->StartLifecycle();
@@ -253,52 +264,42 @@ int main(int argc, char** argv)
         }
         else
         {
-
             bool isStopped = false;
             std::thread workerThread;
-
-            if (participantName == "Publisher")
-            {
-                // Create a data publisher for GPS data
-                auto* gpsPublisher = participant->CreateDataPublisher(
-                    "GpsPublisher", dataSpecPubGps, 0);
-
-                // Create a data publisher for temperature data
-                auto* temperaturePublisher = participant->CreateDataPublisher(
-                    "TemperaturePublisher", dataSpecPubTemperature, 0);
-
+            std::promise<void> startHandlerPromise;
+            auto startHandlerFuture = startHandlerPromise.get_future();
+            lifecycleService->SetCommunicationReadyHandler([&]() {
+                std::cout << "Communication ready handler called for " << participantName << std::endl;
                 workerThread = std::thread{[&]() {
+                    startHandlerFuture.get();
                     while (!isStopped)
                     {
-                        PublishData(gpsPublisher, temperaturePublisher);
+                        if (gpsPublisher && temperaturePublisher)
+                        {
+                            PublishData(gpsPublisher, temperaturePublisher);
+                        }
                         std::this_thread::sleep_for(1s);
                     }
+                    lifecycleService->Stop("User Requested to Stop");
                 }};
-            }
-            else if (participantName == "Subscriber")
-            {
-                participant->CreateDataSubscriber(
-                    "GpsSubscriber", dataSpecPubGps, &ReceiveGpsData);
+            });
 
-                participant->CreateDataSubscriber(
-                    "TemperatureSubscriber", dataSpecPubTemperature, &ReceiveTemperatureData);
-            } 
-            else
-            {
-                std::cout << "Wrong participant name provided. Use either \"Publisher\" or \"Subscriber\"."
-                          << std::endl;
-                return 1;
-            }
+            lifecycleService->SetStartingHandler([&]() {
+                startHandlerPromise.set_value();
+            });
 
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
+
             isStopped = true;
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
+            auto finalState = finalStateFuture.get();
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         }
-        
     }
     catch (const SilKit::ConfigurationError& error)
     {

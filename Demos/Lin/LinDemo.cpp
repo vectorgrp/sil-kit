@@ -19,6 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include <future>
 #include <iostream>
 #include <thread>
 
@@ -420,9 +421,11 @@ int main(int argc, char** argv) try
 
     std::cout << "Creating participant '" << participantName << "' with registry " << registryUri << std::endl;
     auto participant = SilKit::CreateParticipant(participantConfiguration, participantName, registryUri);
-    auto* lifecycleService =
-        participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
-    auto* timeSyncService = lifecycleService->CreateTimeSyncService();
+
+    auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
+                          : SilKit::Services::Orchestration::OperationMode::Autonomous);
+    auto* lifecycleService = participant->CreateLifecycleService({operationMode});
+    auto* timeSyncService = (runSync ? lifecycleService->CreateTimeSyncService() : nullptr);
     auto* linController = participant->CreateLinController("LIN1", "LIN1");
 
     // Set a Stop and Shutdown Handler
@@ -438,10 +441,6 @@ int main(int argc, char** argv) try
 
     if (participantName == "LinMaster")
     {
-
-        lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-            InitLinMaster(linController, participantName);
-        });
         linController->AddFrameStatusHandler(
             [&master](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
                 master.FrameStatusHandler(linController, frameStatusEvent);
@@ -452,6 +451,9 @@ int main(int argc, char** argv) try
 
         if (runSync)
         {
+            lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
+                InitLinMaster(linController, participantName);
+            });
             timeSyncService->SetSimulationStepHandler(
                 [&master](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(now);
@@ -461,7 +463,6 @@ int main(int argc, char** argv) try
                 },
                 1ms);
 
-            
             auto lifecycleFuture = lifecycleService->StartLifecycle();
             auto finalState = lifecycleFuture.get();
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
@@ -470,36 +471,46 @@ int main(int argc, char** argv) try
         }
         else
         {
-            InitLinMaster(linController, participantName);
-
             bool isStopped = false;
             std::thread workerThread;
             auto now = 0ms;
 
-            workerThread = std::thread{[&]() {
-                while (!isStopped)
-                {
-                    master.DoAction(now);
-                    now += 1ms;
-                    std::this_thread::sleep_for(200ms);
-                }
-            }};
+            std::promise<void> startHandlerPromise;
+            auto startHandlerFuture = startHandlerPromise.get_future();
 
+            lifecycleService->SetCommunicationReadyHandler([&]() {
+                InitLinMaster(linController, participantName);
+                workerThread = std::thread{[&]() {
+                    startHandlerFuture.get();
+                    while (!isStopped)
+                    {
+                        master.DoAction(now);
+                        now += 1ms;
+                        std::this_thread::sleep_for(200ms);
+                    }
+                    lifecycleService->Stop("User requested to Stop");
+                }};
+            });
+
+            lifecycleService->SetStartingHandler([&]() {
+                startHandlerPromise.set_value();
+            });
+
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
+
             isStopped = true;
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
+            auto finalState = finalStateFuture.get();
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         }
     }
     else if (participantName == "LinSlave")
     {
-        lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
-            InitLinSlave(linController, participantName);
-        });
-
         linController->AddFrameStatusHandler(
             [&slave](ILinController* linController, const LinFrameStatusEvent& frameStatusEvent) {
                 slave.FrameStatusHandler(linController, frameStatusEvent);
@@ -514,6 +525,9 @@ int main(int argc, char** argv) try
 
         if (runSync)
         {
+            lifecycleService->SetCommunicationReadyHandler([&participantName, linController]() {
+                InitLinSlave(linController, participantName);
+            });
             timeSyncService->SetSimulationStepHandler(
                 [&slave](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                     std::cout << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms"
@@ -533,28 +547,41 @@ int main(int argc, char** argv) try
         }
         else
         {
-            InitLinSlave(linController, participantName);
-
             bool isStopped = false;
             std::thread workerThread;
             auto now = 0ms;
+            std::promise<void> startHandlerPromise;
+            auto startHandlerFuture = startHandlerPromise.get_future();
 
-            workerThread = std::thread{[&]() {
-                while (!isStopped)
-                {
-                    slave.DoAction(now);
-                    now += 1ms;
-                    std::this_thread::sleep_for(200ms);
-                }
-            }};
+            lifecycleService->SetCommunicationReadyHandler([&]() {
+                InitLinSlave(linController, participantName);
+                workerThread = std::thread{[&]() {
+                    startHandlerFuture.get();
+                    while (!isStopped)
+                    {
+                        slave.DoAction(now);
+                        now += 1ms;
+                        std::this_thread::sleep_for(200ms);
+                    }
+                    lifecycleService->Stop("User requested to Stop");
+                }};
+            });
 
+            lifecycleService->SetStartingHandler([&]() {
+                startHandlerPromise.set_value();
+            });
+
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
+
             isStopped = true;
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
+            auto finalState = finalStateFuture.get();
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         }
     }
     else

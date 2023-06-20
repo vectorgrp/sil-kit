@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <algorithm>
 #include <cstring>
+#include <future>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -164,12 +165,18 @@ int main(int argc, char** argv)
                   << "Use \"EthernetWriter\" or \"EthernetReader\" as <ParticipantName>." << std::endl;
         return -1;
     }
+
+    std::string participantName(argv[2]);
+    if (participantName != "EthernetWriter" && participantName != "EthernetReader")
+    {
+        std::cout << "Wrong participant name provided. Use either \"EthernetWriter\" or \"EthernetReader\"."
+                  << std::endl;
+        return 1;
+    }
     std::cout << "SIL Kit Version: " << SilKit::Version::String() << std::endl;
     try
     {
         std::string participantConfigurationFilename(argv[1]);
-        std::string participantName(argv[2]);
-
         std::string registryUri{"silkit://localhost:8500"};
 
         bool runSync = true;
@@ -207,26 +214,28 @@ int main(int argc, char** argv)
         ethernetController->AddFrameHandler(&FrameHandler);
         ethernetController->AddFrameTransmitHandler(&FrameTransmitHandler);
 
+        auto operationMode = (runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
+                              : SilKit::Services::Orchestration::OperationMode::Autonomous);
+        auto* lifecycleService = participant->CreateLifecycleService({operationMode});
+
+        // Set a Stop Handler
+        lifecycleService->SetStopHandler([]() {
+            std::cout << "Stop handler called" << std::endl;
+        });
+
+        // Set a Shutdown Handler
+        lifecycleService->SetShutdownHandler([]() {
+            std::cout << "Shutdown handler called" << std::endl;
+        });
+
         if (runSync)
         {
-            auto* lifecycleService =
-                participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
             auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([&participantName, ethernetController]() {
                 std::cout << "Communication ready handler called for " << participantName << std::endl;
                 ethernetController->Activate();
-            });
-
-            // Set a Stop Handler
-            lifecycleService->SetStopHandler([]() {
-                std::cout << "Stop handler called" << std::endl;
-            });
-
-            // Set a Shutdown Handler
-            lifecycleService->SetShutdownHandler([]() {
-                std::cout << "Shutdown handler called" << std::endl;
             });
 
             if (participantName == "EthernetWriter")
@@ -240,7 +249,7 @@ int main(int argc, char** argv)
                         std::this_thread::sleep_for(300ms);
                     }, 1ms);
             }
-            else if (participantName == "EthernetReader")
+            else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
@@ -248,12 +257,6 @@ int main(int argc, char** argv)
                                   << "ms" << std::endl;
                         std::this_thread::sleep_for(300ms);
                     }, 1ms);
-            }
-            else
-            {
-                std::cout << "Wrong participant name provided. Use either \"EthernetWriter\" or \"EthernetReader\"."
-                          << std::endl;
-                return 1;
             }
 
             auto finalStateFuture = lifecycleService->StartLifecycle();
@@ -265,31 +268,45 @@ int main(int argc, char** argv)
         }
         else
         {
+            std::promise<void> startHandlerPromise;
+            auto startHandlerFuture = startHandlerPromise.get_future();
             bool isStopped = false;
             std::thread workerThread;
-
-            ethernetController->Activate();
-
-            if (participantName == "EthernetWriter")
-            {
+            // Set a CommunicationReady Handler
+            lifecycleService->SetCommunicationReadyHandler([&]() {
+                std::cout << "Communication ready handler called for " << participantName << std::endl;
                 workerThread = std::thread{[&]() {
+                    startHandlerFuture.get();
                     while (!isStopped)
                     {
-                        SendFrame(ethernetController, WriterMacAddr, BroadcastMacAddr);
+                        if (participantName == "EthernetWriter")
+                        {
+                            SendFrame(ethernetController, WriterMacAddr, BroadcastMacAddr);
+                        }
                         std::this_thread::sleep_for(1s);
                     }
+                    lifecycleService->Stop("User requested to Stop");
                 }};
-            }
+                ethernetController->Activate();
+            });
 
+
+            lifecycleService->SetStartingHandler([&]() {
+                startHandlerPromise.set_value();
+            });
+
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
+
             isStopped = true;
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
+            auto finalState = finalStateFuture.get();
+            std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
         }
-
     }
     catch (const SilKit::ConfigurationError& error)
     {

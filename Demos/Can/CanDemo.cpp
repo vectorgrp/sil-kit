@@ -21,6 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <algorithm>
 #include <cstring>
+#include <future>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -121,11 +122,18 @@ int main(int argc, char** argv)
                   << "Use \"CanWriter\" or \"CanReader\" as <ParticipantName>." << std::endl;
         return -1;
     }
-    
+
+    std::string participantName(argv[2]);
+
+    if (participantName != "CanWriter" && participantName != "CanReader")
+    {
+        std::cout << "Wrong participant name provided. Use either \"CanWriter\" or \"CanReader\"." << std::endl;
+        return -1;
+    }
+
     try
     {
         std::string participantConfigurationFilename(argv[1]);
-        std::string participantName(argv[2]);
 
         std::string registryUri = "silkit://localhost:8500";
 
@@ -165,12 +173,25 @@ int main(int argc, char** argv)
                 FrameHandler(frameEvent, logger);
             });
 
+        auto operationMode = (
+            runSync ? SilKit::Services::Orchestration::OperationMode::Coordinated
+                : SilKit::Services::Orchestration::OperationMode::Autonomous
+        );
+
+        auto* lifecycleService = participant->CreateLifecycleService({operationMode});
+
+        // Set a Stop Handler
+        lifecycleService->SetStopHandler([]() {
+            std::cout << "Stop handler called" << std::endl;
+        });
+
+        // Set a Shutdown Handler
+        lifecycleService->SetShutdownHandler([]() {
+            std::cout << "Shutdown handler called" << std::endl;
+        });
+
         if (runSync)
         {
-            auto* lifecycleService =
-                participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
-            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
-            
             // Set a CommunicationReady Handler
             lifecycleService->SetCommunicationReadyHandler([canController, &participantName]() {
                 std::cout << "Communication ready for " << participantName << std::endl;
@@ -178,15 +199,7 @@ int main(int argc, char** argv)
                 canController->Start();
             });
 
-            // Set a Stop Handler
-            lifecycleService->SetStopHandler([]() {
-                std::cout << "Stop handler called" << std::endl;
-            });
-
-            // Set a Shutdown Handler
-            lifecycleService->SetShutdownHandler([]() {
-                std::cout << "Shutdown handler called" << std::endl;
-            });
+            auto* timeSyncService = lifecycleService->CreateTimeSyncService();
 
             if (participantName == "CanWriter")
             {
@@ -198,7 +211,7 @@ int main(int argc, char** argv)
                         std::this_thread::sleep_for(sleepTimePerTick);
                     }, 5ms);
             }
-            else if (participantName == "CanReader")
+            else
             {
                 timeSyncService->SetSimulationStepHandler(
                     [sleepTimePerTick](std::chrono::nanoseconds now, std::chrono::nanoseconds duration) {
@@ -206,14 +219,8 @@ int main(int argc, char** argv)
                         std::this_thread::sleep_for(sleepTimePerTick);
                     }, 5ms);
             }
-            else
-            {
-                std::cout << "Wrong participant name provided. Use either \"CanWriter\" or \"CanReader\"." << std::endl;
-                return 1;
-            }
 
-            auto finalStateFuture =
-                lifecycleService->StartLifecycle();
+            auto finalStateFuture = lifecycleService->StartLifecycle();
             auto finalState = finalStateFuture.get();
 
             std::cout << "Simulation stopped. Final State: " << finalState << std::endl;
@@ -225,27 +232,43 @@ int main(int argc, char** argv)
             bool isStopped = false;
             std::thread workerThread;
 
-            canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
-            canController->Start();
+            std::promise<void> promiseObj;
+            std::future<void> futureObj = promiseObj.get_future();
+            // Set a CommunicationReady Handler
+            lifecycleService->SetCommunicationReadyHandler([&]() {
+                std::cout << "Communication ready for " << participantName << std::endl;
+                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
 
-            if (participantName == "CanWriter")
-            {
                 workerThread = std::thread{[&]() {
+                    futureObj.get();
                     while (!isStopped)
                     {
-                        SendFrame(canController, logger);
+                        if (participantName == "CanWriter")
+                        {
+                            SendFrame(canController, logger);
+                        }
                         std::this_thread::sleep_for(sleepTimePerTick);
-                    }
+                   }
+                   lifecycleService->Stop("User requested to Stop");
                 }};
-            }
+                canController->Start();
+            });
 
+            lifecycleService->SetStartingHandler([&]() {
+                promiseObj.set_value();
+            });
+
+            auto futureLifecycleState = lifecycleService->StartLifecycle();
             std::cout << "Press enter to stop the process..." << std::endl;
             std::cin.ignore();
+
             isStopped = true;
             if (workerThread.joinable())
             {
                 workerThread.join();
             }
+            auto finalState = futureLifecycleState.get();
+            std::cout << "Simulation stopped. Final state: " << finalState << std::endl;
         }
     }
     catch (const SilKit::ConfigurationError& error)
