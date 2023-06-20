@@ -76,8 +76,12 @@ void CallReturn(IRpcClient* /*client*/, RpcCallResultEvent event)
 {
     // Deserialize call result data
     auto resultDataVector = SilKit::Util::ToStdVector(event.resultData);
-    SilKit::Util::SerDes::Deserializer deserializer(resultDataVector);
-    std::vector<uint8_t> resultData = deserializer.Deserialize<std::vector<uint8_t>>();
+    std::vector<uint8_t> resultData{};
+    if (!resultDataVector.empty())
+    {
+        SilKit::Util::SerDes::Deserializer deserializer(resultDataVector);
+        resultData = deserializer.Deserialize<std::vector<uint8_t>>();
+    }
     
     switch (event.callStatus)
     {

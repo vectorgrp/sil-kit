@@ -17,6 +17,7 @@ Fixed
 ~~~~~
 
 - Fix builds with CMake versions before ``3.19``
+- Fixed crash in SilKitRpcDemo when run with ``<config> Client --async`` without a server.
 
 Changed
 ~~~~~~~
