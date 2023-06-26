@@ -6,11 +6,12 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.30] - UNRELEASED
+[4.0.30] - 2023-06-26
 ---------------------
 
 Added
 ~~~~~
+
 - Added optional timeout mechanism to RPC service. 
 
 Fixed
@@ -22,6 +23,7 @@ Fixed
 Changed
 ~~~~~~~
 
+- SIL Kit Demos (Can, Ethernet, Rpc, Lin, and PubSub) with ``--async`` now use an autonomous lifecycle.
 - Refactored documentation for participant configurations: The intent was made clearer, noting that it is an optional feature.
 
 
