@@ -32,8 +32,7 @@ ParticipantReplies::ParticipantReplies(IParticipantInternal* participant, IServi
     : _participant{participant}
     , _requestReplyServiceEndpoint{requestReplyServiceEndpoint}
     , _barrierActive{false}
-    , _numExpectedCallReturns{0}
-    , _numReceivedCallReturns{0}
+    , _expectedParticipantsToSendCallReturns{}
     , _completionFunction{nullptr}
     , _activeUuid{}
 {
@@ -52,11 +51,12 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
             return;
         }
 
-        auto numExpectedCallReturns =
-            _participant->GetNumberOfRemoteReceivers(_requestReplyServiceEndpoint, "REQUESTREPLYCALL");
+        auto remoteReceivers =
+            _participant->GetParticipantNamesOfRemoteReceivers(_requestReplyServiceEndpoint, "REQUESTREPLYCALL");
+        _expectedParticipantsToSendCallReturns = std::set<std::string>(remoteReceivers.begin(), remoteReceivers.end());
         Services::Logging::Debug(_participant->GetLogger(), "Request replies of {} participant(s).",
-                                 numExpectedCallReturns);
-        if (numExpectedCallReturns == 0)
+                                 _expectedParticipantsToSendCallReturns.size());
+        if (_expectedParticipantsToSendCallReturns.empty())
         {
             Services::Logging::Debug(_participant->GetLogger(),
                                      "Called CallAfterAllParticipantsReplied() with no other known participants.");
@@ -65,8 +65,6 @@ void ParticipantReplies::CallAfterAllParticipantsReplied(std::function<void()> c
         }
 
         _barrierActive = true;
-        _numExpectedCallReturns = numExpectedCallReturns;
-        _numReceivedCallReturns = 0;
         _completionFunction = std::move(completionFunction);
         _activeUuid = _participant->GetRequestReplyService()->Call(_functionType, {});
     });
@@ -86,14 +84,14 @@ void ParticipantReplies::ReceiveCall(IRequestReplyService* requestReplyService, 
     requestReplyService->SubmitCallReturn(callUuid, _functionType, {}, CallReturnStatus::Success);
 }
 
-void ParticipantReplies::ReceiveCallReturn(Util::Uuid callUuid, std::vector<uint8_t> /*callReturnData*/, CallReturnStatus /*callReturnStatus*/)
+void ParticipantReplies::ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> /*callReturnData*/, CallReturnStatus /*callReturnStatus*/)
 {
     // All values of callReturnStatus are ok to complete the request.
     // If we know the callUuid, collect call returns and call the completion function
     if (_barrierActive && callUuid == _activeUuid)
     {
-        _numReceivedCallReturns++;
-        if (_numReceivedCallReturns >= _numExpectedCallReturns)
+        _expectedParticipantsToSendCallReturns.erase(fromParticipant);
+        if (_expectedParticipantsToSendCallReturns.empty())
         {
             if (_completionFunction)
             {

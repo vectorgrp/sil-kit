@@ -77,7 +77,7 @@ class MockParticipantReplies : public IRequestReplyProcedure, public IParticipan
 public:
     // IRequestReplyProcedure
     MOCK_METHOD(void, ReceiveCall, (IRequestReplyService * requestReplyService, Util::Uuid callUuid, std::vector<uint8_t> callData), (override));
-    MOCK_METHOD(void, ReceiveCallReturn, (Util::Uuid callUuid, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus), (override));
+    MOCK_METHOD(void, ReceiveCallReturn, (std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus), (override));
     MOCK_METHOD(void, SetRequestReplyServiceEndpoint, (IServiceEndpoint* requestReplyServiceEndpoint), (override));
     // IParticipantReplies
     MOCK_METHOD(void, CallAfterAllParticipantsReplied, (std::function<void()> completionFunction), (override));
@@ -197,8 +197,8 @@ TEST_F(RequestReplyServiceTests, test_functiontype_route_callreturn_to_participa
     reqReplCallReturn.callReturnStatus = CallReturnStatus::Success;
 
     // Test that FunctionType::ParticipantReplies is routed to ParticipantReplies
-    EXPECT_CALL(_participantReplies,
-                ReceiveCallReturn(reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData, reqReplCallReturn.callReturnStatus));
+    EXPECT_CALL(_participantReplies, ReceiveCallReturn("p1", reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
+                                                       reqReplCallReturn.callReturnStatus));
 
     // Initiate receive
     MockServiceEndpoint from{"p1", "n1","c1", 2};
@@ -228,12 +228,14 @@ TEST_F(RequestReplyServiceTests, test_disconnect_during_call)
     reqReplCallReturn.callUuid = reqReplCall.callUuid;
 
     // Removing "P1" will trigger the CallReturn via disconnect
-    EXPECT_CALL(_participantReplies, ReceiveCallReturn(reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
+    EXPECT_CALL(_participantReplies,
+                ReceiveCallReturn("P1", reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
                                                        CallReturnStatus::RecipientDisconnected));
     reqReplService.OnParticpantRemoval("P1");
 
     // Removing "P2" will trigger the CallReturn via disconnect
-    EXPECT_CALL(_participantReplies, ReceiveCallReturn(reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
+    EXPECT_CALL(_participantReplies,
+                ReceiveCallReturn("P2" , reqReplCallReturn.callUuid, reqReplCallReturn.callReturnData,
                                                        CallReturnStatus::RecipientDisconnected));
     reqReplService.OnParticpantRemoval("P2");
 }

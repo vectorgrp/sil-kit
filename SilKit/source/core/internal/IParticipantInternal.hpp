@@ -222,7 +222,7 @@ public:
     virtual auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* = 0;
 
     //! \brief Create the ITimeSyncService for the given lifecycle service (one time per lifecycle service).
-    virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
+    virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* lifecycleService)
         -> Services::Orchestration::TimeSyncService* = 0;
 
     // Register handlers for completion of async service creation
@@ -239,6 +239,7 @@ public:
     virtual void NotifyShutdown() = 0;
 
     virtual void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork ) = 0;
+    virtual bool ParticiantHasCapability(const std::string& participantName, const std::string& capability) const = 0;
 };
 
 } // namespace Core

@@ -117,7 +117,10 @@ public:
     void AwaitCommunication()
     {
         auto futureStatus = allReceivedPromise.get_future().wait_for(communicationTimeout);
-        EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting test communication timed out";
+        if (futureStatus != std::future_status::ready)
+        {
+            FAIL() << "Test Failure: Awaiting test communication timed out";
+        }
     }
 
     void AffirmAllDone()

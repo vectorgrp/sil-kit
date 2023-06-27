@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <sstream>
 #include <string>
 #include <thread>
+#include <list>
 
 #include "GetTestPid.hpp"
 
@@ -56,8 +57,13 @@ std::chrono::milliseconds communicationTimeout{8000ms};
 std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
 std::chrono::seconds simStepSize{1s};
 
+static size_t globalParticipantIndex = 0;
 static std::vector<std::string> participantNames{};
 static std::map<size_t, bool> participantIsSync{};
+
+const bool verbose = true;
+const bool logging = false;
+const Services::Logging::Level logLevel = Services::Logging::Level::Info;
 
 enum class TimeMode
 {
@@ -74,14 +80,6 @@ protected:
     {
         TestParticipant(const std::string& newName, TimeMode newTimeMode, OperationMode mode)
         {
-            static size_t globalParticipantIndex = 0;
-
-            if (globalParticipantIndex == 0)
-            {
-                participantNames.clear();
-                participantIsSync.clear();
-            }
-
             participantNames.push_back(newName);
             participantIsSync.emplace(globalParticipantIndex, newTimeMode == TimeMode::Sync);
 
@@ -135,7 +133,7 @@ protected:
             int64_t nowNs;
         };
 
-        std::chrono::nanoseconds now;
+        std::chrono::nanoseconds now{-1};
         bool simtimePassed{false};
         std::promise<void> simtimePassedPromise;
 
@@ -155,14 +153,12 @@ protected:
             auto futureStatus = allReceivedPromise.get_future().wait_for(communicationTimeout);
             if (futureStatus != std::future_status::ready)
             {
-                EXPECT_EQ(futureStatus, std::future_status::ready)
-                    << "Test Failure: Awaiting test communication timed out";
+                FAIL() << "Test Failure: Awaiting test communication timed out";
             }
-            else
+            else if (verbose)
             {
                 std::cout << ">> AwaitCommunication of " << name << " done" << std ::endl;
             }
-            EXPECT_EQ(futureStatus, std::future_status::ready) << "Test Failure: Awaiting test communication timed out";
         }
     };
 
@@ -180,7 +176,10 @@ protected:
         switch (newState)
         {
         case SystemState::Error:
-            std::cout << "SystemState::Error -> Aborting simulation" << std ::endl;
+            if (verbose)
+            {
+                std::cout << "SystemState::Error -> Aborting simulation" << std ::endl;
+            }
             systemControllerParticipant.systemController->AbortSimulation();
             break;
 
@@ -192,10 +191,10 @@ protected:
 
     void SyncParticipantThread(TestParticipant& testParticipant)
     {
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
-        if (verbose)
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
+        if (logging)
         {
-            config = SilKit::Config::MakeEmptyParticipantConfiguration();
+            config = SilKit::Config::MakeParticipantConfigurationWithLogging(logLevel);
         }
         else
         {
@@ -213,26 +212,34 @@ protected:
         testParticipant.publisher = testParticipant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
         testParticipant.subscriber = testParticipant.participant->CreateDataSubscriber(
             "TestSubscriber", matchingDataSpec,
-            [&testParticipant](IDataSubscriber* /*subscriber*/, const DataMessageEvent& dataMessageEvent) {
+            [logger, timeSyncService, &testParticipant](IDataSubscriber* /*subscriber*/,
+                                                const DataMessageEvent& dataMessageEvent) {
                 auto participantId = dataMessageEvent.data[0];
-
-                if (participantIsSync[participantId] && testParticipant.now >= 0ns)
-                {
-                    auto delta = testParticipant.now - dataMessageEvent.timestamp;
-                    if (delta > simStepSize)
-                    {
-                        testParticipant.lifecycleService->Stop("Fail with chronology error");
-                        FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
-                               << participantNames[participantId] << " with timestamp "
-                               << dataMessageEvent.timestamp.count() << " while this participant's time is "
-                               << testParticipant.now.count();
-                    }
-                }
 
                 if (!testParticipant.i.allReceived)
                 {
                     if (participantId != testParticipant.id)
                     {
+                        auto now = timeSyncService->Now();
+
+                        std::stringstream ss;
+                        ss << testParticipant.name << ": receive from " << participantNames[participantId]
+                           << " at now=" << now.count() << " with timestamp=" << dataMessageEvent.timestamp.count();
+                        logger->Info(ss.str());
+
+                        if (participantIsSync[participantId] && now >= 0ns)
+                        {
+                            auto delta = now - dataMessageEvent.timestamp;
+                            if (delta > simStepSize)
+                            {
+                                testParticipant.lifecycleService->Stop("Fail with chronology error");
+
+                                FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
+                                       << participantNames[participantId] << " with timestamp "
+                                       << dataMessageEvent.timestamp.count() << " while this participant's time is " << now.count();
+                            }
+                        }
+
                         testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
                         // No self delivery: Expect expectedReceptions-1 receptions
                         if (testParticipant.receivedIds.size() == expectedReceptions - 1)
@@ -247,10 +254,10 @@ protected:
         timeSyncService->SetSimulationStepHandler(
             [logger, &testParticipant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                 testParticipant.now = now;
-                testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
                 std::stringstream ss;
                 ss << "now=" << now.count() / 1e9 << "s";
                 logger->Info(ss.str());
+                testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
                 if (!testParticipant.simtimePassed && now > simtimeToPass)
                 {
                     testParticipant.simtimePassed = true;
@@ -266,8 +273,15 @@ protected:
 
     void AsyncParticipantThread(TestParticipant& testParticipant)
     {
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
-        config = SilKit::Config::MakeEmptyParticipantConfiguration();
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
+        if (logging)
+        {
+            config = SilKit::Config::MakeParticipantConfigurationWithLogging(logLevel);
+        }
+        else
+        {
+            config = SilKit::Config::MakeEmptyParticipantConfiguration();
+        }
 
         if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
         {
@@ -324,8 +338,15 @@ protected:
 
     void SystemControllerParticipantThread(const std::vector<std::string>& required)
     {
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
-        config = SilKit::Config::MakeEmptyParticipantConfigurationImpl();
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
+        if (logging)
+        {
+            config = SilKit::Config::MakeParticipantConfigurationWithLogging(logLevel);
+        }
+        else
+        {
+            config = SilKit::Config::MakeEmptyParticipantConfigurationImpl();
+        }
 
         systemControllerParticipant.participant =
             SilKit::CreateParticipantImpl(config, systemControllerParticipantName, registryUri);
@@ -374,7 +395,7 @@ protected:
 
     void RunRegistry()
     {
-        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config;
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> config{nullptr};
         config = SilKit::Config::MakeEmptyParticipantConfiguration();
         registry = SilKit::Vendor::Vector::CreateSilKitRegistry(config);
         registry->StartListening(registryUri);
@@ -382,7 +403,7 @@ protected:
 
     void StopRegistry() { registry.reset(); }
 
-    void RunParticipants(std::vector<TestParticipant>& participants, std::string set = "A")
+    void RunParticipants(std::list<TestParticipant>& participants, std::string set = "A")
     {
         for (auto& p : participants)
         {
@@ -519,7 +540,12 @@ protected:
         threads.clear();
     }
 
-    void SetUp() override { registryUri = MakeTestRegistryUri(); }
+    void SetUp() override { 
+        globalParticipantIndex = 0;
+        participantNames.clear();
+        participantIsSync.clear();
+        registryUri = MakeTestRegistryUri(); 
+    }
 
 protected:
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
@@ -539,8 +565,6 @@ protected:
     std::chrono::seconds simtimeToPass{3s};
     bool runAsync{true};
 
-    const bool verbose = true;
-
     std::string registryUri;
 };
 
@@ -548,11 +572,11 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 {
     RunRegistry();
 
-    std::vector<TestParticipant> syncParticipants;
+    std::list<TestParticipant> syncParticipants;
     syncParticipants.push_back({"SyncParticipant1", TimeMode::Sync, OperationMode::Coordinated});
     syncParticipants.push_back({"SyncParticipant2", TimeMode::Sync, OperationMode::Coordinated});
 
-    std::vector<TestParticipant> asyncParticipants;
+    std::list<TestParticipant> asyncParticipants;
     asyncParticipants.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
     asyncParticipants.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
     expectedReceptions = syncParticipants.size() + asyncParticipants.size();
@@ -643,9 +667,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 
 TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
 {
-    std::vector<TestParticipant> asyncParticipants1;
+    std::list<TestParticipant> asyncParticipants1;
     asyncParticipants1.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
-    std::vector<TestParticipant> asyncParticipants2;
+    std::list<TestParticipant> asyncParticipants2;
     asyncParticipants2.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
     expectedReceptions = asyncParticipants1.size() + asyncParticipants2.size();
 
@@ -673,7 +697,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
             p.ResetReception();
 
         // Hop off with asyncParticipants1
-        asyncParticipants1[0].i.runAsync = false;
+        asyncParticipants1.front().i.runAsync = false;
         participantThreads_Async_Invalid[0].shutdownFuture.get();
 
         // Reconnect with asyncParticipant1
@@ -706,9 +730,9 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_first_joined)
 
 TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
 {
-    std::vector<TestParticipant> asyncParticipants1;
+    std::list<TestParticipant> asyncParticipants1;
     asyncParticipants1.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
-    std::vector<TestParticipant> asyncParticipants2;
+    std::list<TestParticipant> asyncParticipants2;
     asyncParticipants2.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
     expectedReceptions = asyncParticipants1.size() + asyncParticipants2.size();
 
@@ -736,7 +760,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_reconnect_second_joined)
             p.ResetReception();
 
         // Hop off with asyncParticipants2
-        asyncParticipants2[0].i.runAsync = false;
+        asyncParticipants2.front().i.runAsync = false;
         participantThreads_Async_Invalid[1].shutdownFuture.get();
         //participantThreads_Async_Invalid.erase(participantThreads_Async_Invalid.begin()+1);
 
@@ -772,7 +796,7 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
 {
     RunRegistry();
 
-    std::vector<TestParticipant> asyncParticipants;
+    std::list<TestParticipant> asyncParticipants;
     asyncParticipants.push_back({"AsyncParticipant1", TimeMode::Async, OperationMode::Invalid});
     asyncParticipants.push_back({"AsyncParticipant2", TimeMode::Async, OperationMode::Invalid});
     expectedReceptions = asyncParticipants.size();
@@ -800,22 +824,22 @@ TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToEmpty)
     StopRegistry();
 }
 
-TEST_F(ITest_HopOnHopOff, DISABLED_test_HopOnHopOff_Autonomous_To_Coordinated)
+TEST_F(ITest_HopOnHopOff, test_HopOnHopOff_Autonomous_To_Coordinated)
 {
     RunRegistry();
 
     // The coordinated and required participants
-    std::vector<TestParticipant> syncParticipantsCoordinated;
+    std::list<TestParticipant> syncParticipantsCoordinated;
     syncParticipantsCoordinated.push_back({"SyncCoordinated1", TimeMode::Sync, OperationMode::Coordinated});
     syncParticipantsCoordinated.push_back({"SyncCoordinated2", TimeMode::Sync, OperationMode::Coordinated});
 
     // The autonomous, non-required participants that will hop on/off
-    std::vector<TestParticipant> syncParticipantsAutonomous;
+    std::list<TestParticipant> syncParticipantsAutonomous;
     syncParticipantsAutonomous.push_back({"SyncAutonomous1", TimeMode::Sync, OperationMode::Autonomous});
     syncParticipantsAutonomous.push_back({"SyncAutonomous2", TimeMode::Sync, OperationMode::Autonomous});
 
     // Additional async, non-required participants for testing the mixture
-    std::vector<TestParticipant> asyncParticipants;
+    std::list<TestParticipant> asyncParticipants;
     asyncParticipants.push_back({"ASync1", TimeMode::Async, OperationMode::Invalid});
 
     // Coordinated are required
@@ -910,21 +934,29 @@ TEST_F(ITest_HopOnHopOff, DISABLED_test_HopOnHopOff_Autonomous_To_Coordinated)
     StopRegistry();
 }
 
-TEST_F(ITest_HopOnHopOff, DISABLED_test_HopOnHopOff_Autonomous_To_Autonomous)
+TEST_F(ITest_HopOnHopOff, test_HopOnHopOff_Autonomous_To_Autonomous)
 {
     RunRegistry();
 
-    // The autonomous, non-required participants that are there from the start
-    std::vector<TestParticipant> syncParticipantsAutonomousA;
+    // The autonomous, non-required participant that is there from the start
+    std::list<TestParticipant> syncParticipantsAutonomousA;
     syncParticipantsAutonomousA.push_back({"SyncAutonomousA1", TimeMode::Sync, OperationMode::Autonomous});
 
     // The autonomous, non-required participants that will hop on/off
-    std::vector<TestParticipant> syncParticipantsAutonomousB;
+    std::list<TestParticipant> syncParticipantsAutonomousB;
     syncParticipantsAutonomousB.push_back({"SyncAutonomousB1", TimeMode::Sync, OperationMode::Autonomous});
     syncParticipantsAutonomousB.push_back({"SyncAutonomousB2", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB3", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB4", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB5", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB6", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB7", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB8", TimeMode::Sync, OperationMode::Autonomous});
+    syncParticipantsAutonomousB.push_back({"SyncAutonomousB9", TimeMode::Sync, OperationMode::Autonomous});
+
 
     // Additional async, non-required participants for testing the mixture
-    std::vector<TestParticipant> asyncParticipants;
+    std::list<TestParticipant> asyncParticipants;
     asyncParticipants.push_back({"ASync1", TimeMode::Async, OperationMode::Invalid});
 
     // Run coordinated

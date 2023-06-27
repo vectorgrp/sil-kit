@@ -29,7 +29,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "functional.hpp"
 
-#include "TimeSyncService.hpp"
 #include "MockParticipant.hpp"
 #include "MockServiceEndpoint.hpp"
 #include "ParticipantConfiguration.hpp"
@@ -66,24 +65,24 @@ protected:
 
 protected: // CTor
     TimeSyncServiceTest()
-        : timeSyncService{&participant, participant.GetTimeProvider(), healthCheckConfig}
     {
-        // Fix the dependencies between lifecycle and timesync services:
-        ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault([this](auto arg) {
-            timeSyncService.SetLifecycleService(arg);
-            return &timeSyncService;
-        });
-
         // this CTor calls CreateTimeSyncService implicitly
         lifecycleService =
             std::make_unique<LifecycleService>(&participant);
         lifecycleService->SetLifecycleConfiguration(LifecycleConfiguration{OperationMode::Coordinated});
+        timeSyncService =
+            std::make_unique<TimeSyncService>(&participant, &timeProvider, healthCheckConfig, lifecycleService.get());
+        lifecycleService->SetTimeSyncService(timeSyncService.get());
     }
 protected: // Methods
     void PrepareLifecycle()
     {
         lifecycleService->SetTimeSyncActive(true);
         (void)lifecycleService->StartLifecycle();
+        
+        // Add other participant to lookup
+        timeSyncService->GetTimeConfiguration()->AddSynchronizedParticipant("P1");
+        
         // skip uninteresting states
         lifecycleService->NewSystemState(SystemState::ServicesCreated);
         lifecycleService->NewSystemState(SystemState::CommunicationInitializing);
@@ -94,40 +93,29 @@ protected: // Methods
 protected:
     // ----------------------------------------
     // Members
-    MockServiceEndpoint endpoint{"P1", "N1", "C1"};
+    NiceMock<MockServiceEndpoint> endpoint{"P1", "N1", "C1"};
 
-    DummyParticipant participant;
+    NiceMock<DummyParticipant> participant;
     Callbacks callbacks;
     Config::HealthCheck healthCheckConfig;
 
     std::unique_ptr<LifecycleService> lifecycleService;
-    TimeSyncService timeSyncService;
+    TimeProvider timeProvider{};
+    std::unique_ptr<TimeSyncService> timeSyncService;
 };
-
-auto makeTask(std::chrono::milliseconds timepoint)
-{
-    // remove this once we get rid of VS2015, initalizer_list is broken there
-    NextSimTask task;
-    task.timePoint = timepoint;
-    task.duration = 0ms;
-    return task;
-}
 
 TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
 {
     auto numAsyncTaskCalled{0};
-    timeSyncService.SetSimulationStepHandlerAsync([&](auto, auto){
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
         numAsyncTaskCalled++;
     }, 1ms);
 
     PrepareLifecycle();
 
-    auto task =  makeTask(0ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    task = makeTask(1ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    task = makeTask(2ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    timeSyncService->ReceiveMsg(&endpoint, {1ms});
+    timeSyncService->ReceiveMsg(&endpoint, {2ms});
     ASSERT_EQ(numAsyncTaskCalled, 1)
         << "SimulationStepHandlerAsync should only be called once"
         << " until completed with a call to CompleteSimulationStep().";
@@ -136,23 +124,20 @@ TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
 TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
 {
     auto numAsyncTaskCalled{0};
-    timeSyncService.SetSimulationStepHandlerAsync([&](auto, auto){
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
         numAsyncTaskCalled++;
     }, 1ms);
 
     PrepareLifecycle();
 
-    auto task = makeTask(0ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationStep();
-
-    task = makeTask(1ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationStep();
-
-    task = makeTask(2ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationStep();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    timeSyncService->CompleteSimulationStep();
+    
+    timeSyncService->ReceiveMsg(&endpoint, {1ms});
+    timeSyncService->CompleteSimulationStep();
+    
+    timeSyncService->ReceiveMsg(&endpoint, {2ms});
+    timeSyncService->CompleteSimulationStep();
     ASSERT_EQ(numAsyncTaskCalled, 3)
         << "SimulationStepHandlerAsync should be called in lockstep with calls to CompleteSimulationStep().";
 }
@@ -161,26 +146,23 @@ TEST_F(TimeSyncServiceTest, async_simtask_mismatching_number_of_complete_calls)
 {
     // What happens when the User calls CompleteSimulationStep() multiple times?
     auto numAsyncTaskCalled{0};
-    timeSyncService.SetSimulationStepHandlerAsync([&](auto, auto){
+    timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
         numAsyncTaskCalled++;
     }, 1ms);
 
     PrepareLifecycle();
 
-    auto task = makeTask(0ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationStep();
-    timeSyncService.CompleteSimulationStep();
+    timeSyncService->ReceiveMsg(&endpoint, {0ms});
+    timeSyncService->CompleteSimulationStep();
+    timeSyncService->CompleteSimulationStep();
 
-    task = makeTask(1ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationStep();
-    timeSyncService.CompleteSimulationStep();
+    timeSyncService->ReceiveMsg(&endpoint, {1ms});
+    timeSyncService->CompleteSimulationStep();
+    timeSyncService->CompleteSimulationStep();
 
-    task = makeTask(2ms);
-    timeSyncService.ReceiveMsg(&endpoint, task);
-    timeSyncService.CompleteSimulationStep();
-    timeSyncService.CompleteSimulationStep();
+    timeSyncService->ReceiveMsg(&endpoint, {2ms});
+    timeSyncService->CompleteSimulationStep();
+    timeSyncService->CompleteSimulationStep();
 
     ASSERT_EQ(numAsyncTaskCalled, 3)
         << "Calling too many CompleteSimulationStep() should not wreak havoc"; 

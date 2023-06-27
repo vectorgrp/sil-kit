@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <future>
 #include <tuple>
 #include <map>
+#include <atomic>
 
 #include "silkit/services/orchestration/ITimeSyncService.hpp"
 
@@ -60,7 +61,7 @@ public:
     // ----------------------------------------
     // Constructors, Destructor, and Assignment
     TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
-                    const Config::HealthCheck& healthCheckConfig);
+                    const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService);
 
 public:
     // ----------------------------------------
@@ -95,7 +96,11 @@ public:
 
     bool IsSynchronizingVirtualTime();
 
-    void SetLifecycleService(LifecycleService* lifecycleService);
+    // To add other participants in unit tests
+    auto GetTimeConfiguration() -> TimeConfiguration*;
+
+    bool ParticipantHasAutonomousSynchronousCapability(const std::string& participantName) const;
+    bool AbortHopOnForCoordinatedParticipants() const;
 
 private:
     // ----------------------------------------

@@ -6,6 +6,32 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+
+[4.0.31] - UNRELEASED
+---------------------
+
+Added
+~~~~~
+
+- Improved Lifecycle and TimeSyncService features:
+  - Full support for Operation Mode Autonomous with TimeSyncService including hopping onto / leaving a running simulation
+  - Abort simulation in case Coordinated participants want to join a running simulation
+  - Abort simulation in case an Autonomous with TimeSyncService sees an incompatible participant 
+
+Fixed
+~~~~~
+
+- Fix a bug in internal barriers where in-between connecting participants could break the communicaiton guarantees
+- Fix transition when aborting from ErrorState, now the state changes to Shutdown like all aborting paths (formery the transition was to ShuttingDown)
+- Internal fixes for thread-safety
+
+
+Changed
+~~~~~~~
+
+- CreateLifecycleService with OperationMode::Invalid now throws a ConfigurationError
+
+
 [4.0.30] - 2023-06-26
 ---------------------
 

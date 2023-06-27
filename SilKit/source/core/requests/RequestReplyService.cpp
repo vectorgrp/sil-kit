@@ -125,8 +125,9 @@ void RequestReplyService::ReceiveMsg(const IServiceEndpoint* from, const Request
 
 void RequestReplyService::ReceiveMsg(const IServiceEndpoint* from, const RequestReplyCallReturn& msg)
 {
-    RemovePartcipantFromDisconnectLookup(msg.callUuid, from->GetServiceDescriptor().GetParticipantName());
-    ForwardCallReturnToProcedure(msg);
+    auto fromParticipant = from->GetServiceDescriptor().GetParticipantName();
+    RemovePartcipantFromDisconnectLookup(msg.callUuid, fromParticipant);
+    ForwardCallReturnToProcedure(fromParticipant, msg);
 }
 
 // DisconnectLookup bookkeeping
@@ -163,7 +164,7 @@ void RequestReplyService::OnParticpantRemoval(const std::string& participantName
     {
         for (auto&& msg : (*callIt).second)
         {
-            ForwardCallReturnToProcedure(msg.second);
+            ForwardCallReturnToProcedure(participantName, msg.second);
         }
         _participantDisconnectCallReturns.erase(callIt);
     }
@@ -191,14 +192,14 @@ void RequestReplyService::ForwardCallToProcedure(const RequestReplyCall& msg)
     }
 }
 
-void RequestReplyService::ForwardCallReturnToProcedure(const RequestReplyCallReturn& msg)
+void RequestReplyService::ForwardCallReturnToProcedure(std::string fromParticipant, const RequestReplyCallReturn& msg)
 {
     auto it = _procedures.find(msg.functionType);
     if (it == _procedures.end())
     {
         throw SilKitError("RequestReplyService::ForwardCallReturnToProcedure(): FunctionType unknown");
     }
-    it->second->ReceiveCallReturn(msg.callUuid, msg.callReturnData, msg.callReturnStatus);
+    it->second->ReceiveCallReturn(fromParticipant, msg.callUuid, msg.callReturnData, msg.callReturnStatus);
 }
 
 // IServiceEndpoint

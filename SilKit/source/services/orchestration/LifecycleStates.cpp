@@ -82,6 +82,7 @@ void State::StopSimulation(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, false, std::move(reason));
 }
+
 void State::RestartParticipant(std::string reason)
 {
     InvalidStateTransition(__FUNCTION__, true, std::move(reason));
@@ -698,7 +699,8 @@ auto ShutdownState::GetParticipantState() -> ParticipantState
 
 void AbortingState::ShutdownParticipant(std::string reason)
 {
-    _lifecycleManager->SetState(_lifecycleManager->GetShutdownState(), std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShutdownState(),
+                                                &ILifecycleState::ShutdownParticipant, std::move(reason));
 }
 
 void AbortingState::AbortSimulation() {}
@@ -755,8 +757,8 @@ void ErrorState::AbortSimulation()
 
 void ErrorState::ResolveAbortSimulation(std::string reason)
 {
-    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShuttingDownState(), &ILifecycleState::ShutdownParticipant,
-                                         std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(),
+                                                &ILifecycleState::ResolveAbortSimulation, std::move(reason));
 }
 
 void ErrorState::Error(std::string reason)

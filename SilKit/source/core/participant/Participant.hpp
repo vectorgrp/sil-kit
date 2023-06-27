@@ -160,7 +160,7 @@ public:
     auto CreateLifecycleService(Services::Orchestration::LifecycleConfiguration startConfiguration)
         -> Services::Orchestration::ILifecycleService* override;
     auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;
-    auto CreateTimeSyncService(Services::Orchestration::LifecycleService* service)
+    auto CreateTimeSyncService(Services::Orchestration::LifecycleService* lifecycleService)
         -> Services::Orchestration::TimeSyncService* override;
     auto GetParticipantName() const -> const std::string& override { return _participantConfig.participantName; }
     auto GetRegistryUri() const -> const std::string& override { return _participantConfig.middleware.registryUri; }
@@ -285,6 +285,8 @@ public:
     void NotifyShutdown() override;
 
     void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork) override;
+    bool ParticiantHasCapability(const std::string& /*participantName*/,
+                                 const std::string& /*capability*/) const override;
 
 public:
     // ----------------------------------------

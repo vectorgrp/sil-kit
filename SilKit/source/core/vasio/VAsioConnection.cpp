@@ -21,7 +21,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "VAsioConnection.hpp"
 #include "VAsioProtocolVersion.hpp"
-#include "VAsioCapabilities.hpp"
 
 #include "SerializedMessage.hpp"
 
@@ -274,6 +273,8 @@ auto GetCurrentCapabilities(const SilKit::Config::ParticipantConfiguration& part
     {
         capabilities.AddCapability("proxy-message");
     }
+
+    capabilities.AddCapability("autonomous-synchronous");
 
     return capabilities.ToCapabilitiesString();
 }
@@ -1395,7 +1396,7 @@ void VAsioConnection::ReceiveSubscriptionAnnouncement(IVAsioPeer* from, Serializ
     {
         Services::Logging::Warn(_logger,
             "Received SubscriptionAnnouncement from {} for message type {}"
-            "for an unknown subscriber version {}",
+            " for an unknown subscriber version {}",
             from->GetInfo().participantName, subscriber.msgTypeName, subscriber.version);
     }
     else
@@ -1621,6 +1622,21 @@ void VAsioConnection::AsyncSubscriptionsCompleted()
     _hasPendingAsyncSubscriptions = false;
 }
 
+bool VAsioConnection::ParticiantHasCapability(const std::string& participantName, const std::string& capability) const
+{
+    const auto it = _participantNameToPeer.find(participantName);
+    if (it == _participantNameToPeer.end())
+    {
+        SilKit::Services::Logging::Warn(_logger, "GetParticiantCapabilities: Participant \'{}\' unknown",
+                                        participantName);
+        return false;
+    }
+    else
+    {
+        auto capabilities = SilKit::Core::VAsioCapabilities{it->second->GetInfo().capabilities};
+        return capabilities.HasCapability(capability);
+    }
+}
 
 } // namespace Core
 } // namespace SilKit

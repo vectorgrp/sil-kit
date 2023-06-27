@@ -24,8 +24,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 #include <mutex>
 
-
 #include "OrchestrationDatatypes.hpp"
+#include "silkit/services/logging/ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -35,10 +35,13 @@ using namespace std::chrono_literals;
 class TimeConfiguration
 {
 public: //Ctor
-    TimeConfiguration() ;
+    TimeConfiguration(Logging::ILogger* logger);
+
 public: //Methods
     void SetBlockingMode(bool blocking);
-    void SynchronizedParticipantAdded(const std::string& otherParticipantName);
+    void AddSynchronizedParticipant(const std::string& otherParticipantName);
+    bool RemoveSynchronizedParticipant(const std::string& otherParticipantName);
+    auto GetSynchronizedParticipantNames() -> std::vector<std::string>;
     void OnReceiveNextSimStep(const std::string& participantName, NextSimTask nextStep);
     void SynchronizedParticipantRemoved(const std::string& otherParticipantName);
     void SetStepDuration(std::chrono::nanoseconds duration);
@@ -49,6 +52,11 @@ public: //Methods
     void Initialize();
     bool IsBlocking() const;
 
+    bool ShouldResendNextSimStep();
+
+    // Returns true (only once) in the step the actual hop-on happened
+    bool HandleHopOn();
+
 private: //Members
     mutable std::mutex _mx;
     using Lock = std::unique_lock<decltype(_mx)>;
@@ -56,6 +64,9 @@ private: //Members
     NextSimTask _myNextTask;
     std::map<std::string, NextSimTask> _otherNextTasks;
     bool _blocking;
+
+    bool _hoppedOn = false;
+    Logging::ILogger* _logger;
 };
 
 } // namespace Orchestration

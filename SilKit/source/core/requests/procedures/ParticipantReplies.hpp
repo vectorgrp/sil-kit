@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <vector>
 #include <future>
 #include <functional>
+#include <set>
 
 #include "IParticipantReplies.hpp"
 #include "IParticipantInternal.hpp"
@@ -52,7 +53,7 @@ public:
 
     void ReceiveCall(IRequestReplyService* requestReplyService, Util::Uuid callUuid,
                      std::vector<uint8_t> callData) override;
-    void ReceiveCallReturn(Util::Uuid callUuid, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus) override;
+    void ReceiveCallReturn(std::string fromParticipant, Util::Uuid callUuid, std::vector<uint8_t> callReturnData, CallReturnStatus callReturnStatus) override;
     void SetRequestReplyServiceEndpoint(IServiceEndpoint* requestReplyService) override;
 
 
@@ -63,8 +64,7 @@ private:
     IServiceEndpoint* _requestReplyServiceEndpoint;
 
     bool _barrierActive;
-    size_t _numExpectedCallReturns;
-    size_t _numReceivedCallReturns;
+    std::set<std::string> _expectedParticipantsToSendCallReturns;
     std::function<void()> _completionFunction;
     Util::Uuid _activeUuid;
 };

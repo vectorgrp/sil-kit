@@ -75,7 +75,7 @@ private:
 
     void RemovePartcipantFromDisconnectLookup(Util::Uuid callUuid, const std::string& participantName);
     void ForwardCallToProcedure(const RequestReplyCall& msg);
-    void ForwardCallReturnToProcedure(const RequestReplyCallReturn& msg);
+    void ForwardCallReturnToProcedure(std::string fromParticipant, const RequestReplyCallReturn& msg);
     
 private:
     IParticipantInternal* _participant{nullptr};

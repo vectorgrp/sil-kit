@@ -112,7 +112,6 @@ private:
     bool AllRequiredParticipantsInState(std::initializer_list<Orchestration::ParticipantState> acceptedStates) const;
     void ValidateParticipantStatusUpdate(const Orchestration::ParticipantStatus& newStatus, Orchestration::ParticipantState oldState);
     void UpdateSystemState(const Orchestration::ParticipantStatus& newStatus);
-
     inline void SetSystemState(Orchestration::SystemState newState);
 
 private:
@@ -124,6 +123,7 @@ private:
 
     std::vector<std::string> _requiredParticipantNames{};
 
+    mutable std::mutex _systemStateMx;
     mutable std::mutex _participantStatusMx;
     std::map<std::string, Orchestration::ParticipantStatus> _participantStatus;
 

@@ -20,13 +20,16 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "TimeConfiguration.hpp"
+#include "ILogger.hpp"
 
 namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-TimeConfiguration::TimeConfiguration() 
+TimeConfiguration::TimeConfiguration(Logging::ILogger* logger) 
     : _blocking(false)
+    , _logger(logger)
+
 {
     Initialize();
     // NB: This is used when SetPeriod is never called
@@ -38,7 +41,7 @@ void TimeConfiguration::SetBlockingMode(bool blocking)
     _blocking = blocking;
 }
 
-void TimeConfiguration::SynchronizedParticipantAdded(const std::string& otherParticipantName)
+void TimeConfiguration::AddSynchronizedParticipant(const std::string& otherParticipantName)
 {
     Lock lock{_mx};
     if (_otherNextTasks.find(otherParticipantName) != _otherNextTasks.end())
@@ -49,13 +52,54 @@ void TimeConfiguration::SynchronizedParticipantAdded(const std::string& otherPar
     NextSimTask task;
     task.timePoint = -1ns;
     task.duration = 0ns;
-    _otherNextTasks[otherParticipantName] = task;
+    _otherNextTasks.emplace(otherParticipantName, task);
+}
+
+
+bool TimeConfiguration::RemoveSynchronizedParticipant(const std::string& otherParticipantName)
+{
+    Lock lock{_mx};
+    auto it = _otherNextTasks.find(otherParticipantName);
+    if (it != _otherNextTasks.end())
+    {
+        _otherNextTasks.erase(it);
+        return true;
+    }
+    return false;
+}
+
+auto TimeConfiguration::GetSynchronizedParticipantNames() -> std::vector<std::string>
+{
+    std::vector<std::string> participantNames;
+    for (auto const& it : _otherNextTasks)
+    {
+        participantNames.push_back(it.first);
+    }
+    return participantNames;
 }
 
 void TimeConfiguration::OnReceiveNextSimStep(const std::string& participantName, NextSimTask nextStep)
 {
     Lock lock{_mx};
-    _otherNextTasks[participantName] = std::move(nextStep);
+
+    auto&& itOtherNextTask = _otherNextTasks.find(participantName);
+    if (itOtherNextTask == _otherNextTasks.end())
+    {
+        Logging::Error(_logger, "Received NextSimTask from unknown participant {}", participantName);
+        return;
+    }
+
+    if (nextStep.timePoint < itOtherNextTask->second.timePoint)
+    {
+        Logging::Error(_logger,
+                       "Chonology error: Received NextSimTask from participant \'{}\' with lower timePoint {} than last "
+                       "known timePoint {}",
+                       participantName, nextStep.timePoint.count(), itOtherNextTask->second.timePoint.count());
+    }
+
+    _otherNextTasks.at(participantName) = std::move(nextStep);
+    Logging::Debug(_logger, "Updated _otherNextTasks for participant {} with time {}", participantName,
+                   nextStep.timePoint.count());
 }
 
 void TimeConfiguration::SynchronizedParticipantRemoved(const std::string& otherParticipantName)
@@ -104,7 +148,11 @@ bool TimeConfiguration::OtherParticipantHasLowerTimepoint() const
     for (const auto& otherTask : _otherNextTasks)
     {
         if (_myNextTask.timePoint > otherTask.second.timePoint)
+        {
+            Debug(_logger, "Not advancing because participant \'{}\' has lower timepoint {}", otherTask.first,
+                  otherTask.second.timePoint.count());
             return true;
+        }
     }
     return false;
 }
@@ -115,11 +163,46 @@ void TimeConfiguration::Initialize()
     _currentTask.timePoint = -1ns;
     _currentTask.duration = 0ns;
     _myNextTask.timePoint = 0ns;
+    _hoppedOn = false;
 }
 
 bool TimeConfiguration::IsBlocking() const
 {
     return _blocking;
+}
+
+bool TimeConfiguration::HandleHopOn()
+{
+    // HopOn can happen only once
+    if (!_hoppedOn)
+    {
+        Lock lock{_mx};
+
+        if (_currentTask.timePoint == -1ns) // On initial time
+        {
+            std::chrono::nanoseconds minimalOtherTime = std::chrono::nanoseconds::max();
+            for (const auto& otherTask : _otherNextTasks)
+            {
+                // Any other participant has already advanced further that its duration -> HopOn
+                if (otherTask.second.timePoint > otherTask.second.duration)
+                {
+                    _hoppedOn = true;
+                    if (otherTask.second.timePoint < minimalOtherTime)
+                    {
+                        minimalOtherTime = otherTask.second.timePoint;
+                    }
+                }
+            }
+            if (_hoppedOn)
+            {
+                _myNextTask.timePoint = minimalOtherTime;
+                Logging::Debug(_logger, "Simulation time already advanced. Starting at {}ns",
+                               _myNextTask.timePoint.count());
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace Orchestration

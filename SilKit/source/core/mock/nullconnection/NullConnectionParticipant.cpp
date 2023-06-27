@@ -76,6 +76,11 @@ struct NullConnection
     {
         return {};
     };
+
+    bool ParticiantHasCapability(const std::string& /*participantName*/, const std::string& /*capability*/) const
+    {
+        return true;
+    }
 };
 } // anonymous namespace
     

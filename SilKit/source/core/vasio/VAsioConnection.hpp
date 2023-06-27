@@ -56,11 +56,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/orchestration/string_utils.hpp"
 #include "silkit/services/can/string_utils.hpp"
 
-
 #include "ProtocolVersion.hpp"
 #include "SerializedMessage.hpp"
 #include "Assert.hpp"
 #include "ILogger.hpp"
+#include "VAsioCapabilities.hpp"
 
 namespace SilKit {
 namespace Core {
@@ -199,6 +199,9 @@ public:
     auto GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) -> size_t;
     auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName)
         -> std::vector<std::string>;
+
+    bool ParticiantHasCapability(const std::string& participantName, const std::string& capability) const;
+
 
 public: //members
     static constexpr const ParticipantId RegistryParticipantId { 0 };

@@ -155,17 +155,17 @@ private:
     /// LifecycleService::Status() always causes a data-race because the access cannot be protected.
     mutable ParticipantStatus _returnValueForStatus;
 
-    bool _isLifecycleStarted{false};
+    std::atomic<bool> _isLifecycleStarted{false};
     LifecycleManagement _lifecycleManager;
-    bool _timeSyncActive = false;
+    std::atomic<bool> _timeSyncActive{false};
 
-    // Final State Handling and Shutdown-Workaround
+    // Final State Handling
     std::mutex _finalStatePromiseMutex;
     std::unique_ptr<std::promise<ParticipantState>> _finalStatePromise;
 
     std::future<ParticipantState> _finalStateFuture;
 
-    //Async communication handler support
+    // Async communication handler support
     CommunicationReadyHandler _commReadyHandler;
     bool _commReadyHandlerIsAsync{false};
     std::atomic<bool> _commReadyHandlerInvoked{false};

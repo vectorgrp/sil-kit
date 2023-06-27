@@ -255,7 +255,7 @@ public:
 
     auto GetLogger() -> Services::Logging::ILogger* override { return &logger; }
 
-    void RegisterSimulator(Core::ISimulator*, const std::vector<Config::SimulatedNetwork>& /*networks*/) {}
+    void RegisterSimulator(Core::ISimulator*, const std::vector<Config::SimulatedNetwork>& /*networks*/) override {}
 
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Can::WireCanFrameEvent& /*msg*/) override {}
     void SendMsg(const IServiceEndpoint* /*from*/, const Services::Can::CanFrameTransmitEvent& /*msg*/) override {}
@@ -398,15 +398,20 @@ public:
     void NotifyShutdown() override {};
     void RegisterReplayController(ISimulator*, const SilKit::Core::ServiceDescriptor&, const SilKit::Config::SimulatedNetwork& ) override { }
 
+    bool ParticiantHasCapability(const std::string& /*participantName*/, const std::string& /*capability*/) const override
+    {
+        return true;
+    }
+
     const std::string _name = "MockParticipant";
     const std::string _registryUri = "silkit://mock.participant.silkit:0";
-    MockLogger logger;
-    MockTimeProvider mockTimeProvider;
+    testing::NiceMock<MockLogger> logger;
+    testing::NiceMock<MockTimeProvider> mockTimeProvider;
     MockLifecycleService mockLifecycleService;
     MockTimeSyncService mockTimeSyncService;
     MockSystemController mockSystemController;
-    MockSystemMonitor mockSystemMonitor;
-    MockServiceDiscovery mockServiceDiscovery;
+    testing::NiceMock<MockSystemMonitor> mockSystemMonitor;
+    testing::NiceMock<MockServiceDiscovery> mockServiceDiscovery;
     MockRequestReplyService mockRequestReplyService;
     MockParticipantReplies mockParticipantReplies;
 };

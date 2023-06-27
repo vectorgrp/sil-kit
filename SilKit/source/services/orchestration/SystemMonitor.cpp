@@ -70,7 +70,13 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
     // Update / propagate the system state in case status updated for all required participants have been received already
     if (allRequiredParticipantsKnown)
     {
-        auto oldSystemState = _systemState;
+
+        Orchestration::SystemState oldSystemState;
+        {
+            std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
+            oldSystemState = _systemState;
+        }
+
         for (auto&& name : _requiredParticipantNames)
         {
             Orchestration::ParticipantStatus status{};
@@ -80,17 +86,30 @@ void SystemMonitor::UpdateRequiredParticipantNames(const std::vector<std::string
             }
             UpdateSystemState(status);
         }
-        if (oldSystemState != _systemState)
+
+        Orchestration::SystemState newSystemState;
         {
-            _systemStateHandlers.InvokeAll(_systemState);
+            std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
+            newSystemState = _systemState;
+        }
+
+        if (oldSystemState != newSystemState)
+        {
+            _systemStateHandlers.InvokeAll(newSystemState);
         }
     }
 }
 auto SystemMonitor::AddSystemStateHandler(SystemStateHandler handler) -> HandlerId
 {
-    if (_systemState != Orchestration::SystemState::Invalid)
+    Orchestration::SystemState systemStateCopy;
     {
-        handler(_systemState);
+        std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
+        systemStateCopy = _systemState;
+    }
+
+    if (systemStateCopy != Orchestration::SystemState::Invalid)
+    {
+        handler(systemStateCopy);
     }
 
     return _systemStateHandlers.Add(std::move(handler));
@@ -133,6 +152,7 @@ void SystemMonitor::RemoveParticipantStatusHandler(HandlerId handlerId)
 
 auto SystemMonitor::SystemState() const -> Orchestration::SystemState
 {
+    //std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
     return _systemState;
 }
 
@@ -198,12 +218,24 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestra
         // Fire status / state handlers
         _participantStatusHandlers.InvokeAll(newParticipantStatus);
 
-        auto oldSystemState = _systemState;
+        Orchestration::SystemState oldSystemState;
+        {
+            std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
+            oldSystemState = _systemState;
+        }
+
         // Update the system state for required participants, others are ignored
         UpdateSystemState(newParticipantStatus);
-        if (oldSystemState != _systemState)
+
+        Orchestration::SystemState newSystemState;
         {
-            _systemStateHandlers.InvokeAll(_systemState);
+            std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
+            newSystemState = _systemState;
+        }
+
+        if (oldSystemState != newSystemState)
+        {
+            _systemStateHandlers.InvokeAll(newSystemState);
         }
     }
 }
@@ -557,6 +589,7 @@ void SystemMonitor::UpdateSystemState(const Orchestration::ParticipantStatus& ne
 
 void SystemMonitor::SetSystemState(Orchestration::SystemState newState)
 {
+    std::unique_lock<decltype(_systemStateMx)> lock{_systemStateMx};
     _systemState = newState;
 }
 

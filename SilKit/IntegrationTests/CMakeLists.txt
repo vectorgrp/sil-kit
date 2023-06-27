@@ -40,6 +40,7 @@ add_silkit_test(ITest_CatchExceptionsInCallbacks
 add_silkit_test(ITest_Internals_HopOnHopOff
     SOURCES
     ITest_Internals_HopOnHopOff.cpp
+
     LIBS
     S_SilKitImpl
 )
@@ -47,6 +48,7 @@ add_silkit_test(ITest_Internals_HopOnHopOff
 add_silkit_test(ITest_Internals_ParticipantModes
     SOURCES
     ITest_Internals_ParticipantModes.cpp
+
     LIBS
     S_SilKitImpl
 )

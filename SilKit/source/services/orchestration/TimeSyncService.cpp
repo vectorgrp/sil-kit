@@ -41,10 +41,10 @@ struct ITimeSyncPolicy
 public:
     virtual ~ITimeSyncPolicy() = default;
     virtual void Initialize() = 0;
-    virtual void RequestInitialStep() = 0;
     virtual void RequestNextStep() = 0;
     virtual void SetSimStepCompleted() = 0;
     virtual void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) = 0;
+    virtual void ProcessSimulationTimeUpdate() = 0;
 };
 
 //! brief Synchronization policy for unsynchronized participants
@@ -53,10 +53,10 @@ struct UnsynchronizedPolicy : public ITimeSyncPolicy
 public:
     UnsynchronizedPolicy() {}
     void Initialize() override {}
-    void RequestInitialStep() override {}
     void RequestNextStep() override {}
     void SetSimStepCompleted() override {}
     void ReceiveNextSimTask(const Core::IServiceEndpoint* /*from*/, const NextSimTask& /*task*/) override {}
+    void ProcessSimulationTimeUpdate() override {};
 };
 
 //! brief Synchronization policy of the VAsio middleware
@@ -75,16 +75,6 @@ public:
         _configuration->Initialize();
     }
 
-    void RequestInitialStep() override
-    {
-        _controller.SendMsg(_configuration->NextSimStep());
-        // Bootstrap checked execution, in case there is no other participant.
-        // Else, checked execution is initiated when we receive their NextSimTask messages.
-        _participant->ExecuteDeferred([this]() {
-            this->ProcessSimulationTimeUpdate();
-        });
-    }
-
     void SetSimStepCompleted() override
     {
         // after completing the SimTask in Async mode, reset the _isExecutingSimStep guard
@@ -94,6 +84,8 @@ public:
     void RequestNextStep() override
     {
         _controller.SendMsg(_configuration->NextSimStep());
+        // Bootstrap checked execution, in case there is no other participant.
+        // Else, checked execution is initiated when we receive their NextSimTask messages.
         _participant->ExecuteDeferred([this]() {
             this->ProcessSimulationTimeUpdate();
         });
@@ -128,6 +120,22 @@ public:
         }
     }
 
+    void ProcessSimulationTimeUpdate() override
+    {
+        // Check if we meet the conditions to trigger our local time advancement
+        if (IsTimeAdvancePossible())
+        {
+            if (IsSimStepSync())
+            {
+                AdvanceTimeSimStepSync();
+            }
+            else
+            {
+                AdvanceTimeSimStepAsync();
+            }
+        }
+    }
+
 private:
     bool IsSimStepSync() const
     {
@@ -149,24 +157,6 @@ private:
 
         // No other participant has a lower time point: It is our turn
         return true;
-    }
-
-    void ProcessSimulationTimeUpdate()
-    {
-        // Check if we meet the conditions to trigger our local time advancement
-        if (IsTimeAdvancePossible())
-        {
-            if (IsSimStepSync())
-            {
-                AdvanceTimeSimStepSync();
-            }
-            else
-            {
-                AdvanceTimeSimStepAsync();
-            }
-
-        }
-
     }
 
     void AdvanceTimeSimStepSync() 
@@ -197,13 +187,26 @@ private:
 
     void AdvanceTimeAndExecuteSimStep()
     {
-        // update the current and next sim. step timestamps
-        _configuration->AdvanceTimeStep();
-        // Execute the simulation step callback with the current simulation time
-        auto currentStep = _configuration->CurrentSimStep();
-        _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
-        // if the participant was paused, wait until it is unpaused
-        _controller.AwaitNotPaused();
+        if (_controller.State() == ParticipantState::Paused ||
+            _controller.State() == ParticipantState::Running)
+        {
+            if (_configuration->HandleHopOn())
+            {
+                if (_controller.AbortHopOnForCoordinatedParticipants())
+                {
+                    // Prevent that the sim task is triggered
+                    return;
+                }
+            }
+
+            // update the current and next sim. step timestamps
+            _configuration->AdvanceTimeStep();
+            // Execute the simulation step callback with the current simulation time
+            auto currentStep = _configuration->CurrentSimStep();
+            _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
+            // if the participant was paused, wait until it is unpaused
+            _controller.AwaitNotPaused();
+        }
     }
 
     std::atomic<bool> _isExecutingSimStep{false};
@@ -213,11 +216,12 @@ private:
 };
 
 TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeProvider* timeProvider,
-                                 const Config::HealthCheck& healthCheckConfig)
+                                 const Config::HealthCheck& healthCheckConfig, LifecycleService* lifecycleService)
     : _participant{participant}
-    , _lifecycleService{nullptr}
+    , _lifecycleService{lifecycleService}
     , _logger{participant->GetLogger()}
     , _timeProvider{timeProvider}
+    , _timeConfiguration{participant->GetLogger()}
     , _watchDog{healthCheckConfig}
 {
     _watchDog.SetWarnHandler([logger = _logger](std::chrono::milliseconds timeout) {
@@ -233,16 +237,13 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
 
     ConfigureTimeProvider(TimeProviderKind::NoSync);
 
-    participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler([&](auto, const Core::ServiceDescriptor& descriptor) {
+    participant->GetServiceDiscovery()->RegisterServiceDiscoveryHandler(
+        [&](auto discoveryEventType, const Core::ServiceDescriptor& descriptor) {
             if (descriptor.GetServiceType() == Core::ServiceType::InternalController)
-        {
-            std::string controllerType;
-            descriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType);
-            if (controllerType == Core::Discovery::controllerTypeTimeSyncService)
             {
-                std::string timeSyncActive;
-                descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncActive, timeSyncActive);
-                if (timeSyncActive == "1")
+                std::string controllerType;
+                descriptor.GetSupplementalDataItem(Core::Discovery::controllerType, controllerType);
+                if (controllerType == Core::Discovery::controllerTypeTimeSyncService)
                 {
                     auto descriptorParticipantName = descriptor.GetParticipantName();
                     if (descriptorParticipantName == _participant->GetParticipantName())
@@ -250,11 +251,59 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                         // ignore self
                         return;
                     }
-                    _timeConfiguration.SynchronizedParticipantAdded(descriptorParticipantName);
+
+                    std::string timeSyncActive;
+                    descriptor.GetSupplementalDataItem(Core::Discovery::timeSyncActive, timeSyncActive);
+                    if (timeSyncActive == "1")
+                    {
+                        if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceCreated)
+                        {
+                            // Check capabilities of newly discovered participants. 
+                            // This might happen before TimeSyncService and LifecycleService are finally configured,
+                            // so this check happens also in TimeSyncService::StartTime() 
+                            if (!ParticipantHasAutonomousSynchronousCapability(descriptorParticipantName))
+                            {
+                                _participant->GetSystemController()->AbortSimulation();
+                                return;
+                            }
+
+                            Debug(_participant->GetLogger(), "TimeSyncService: Participant \'{}\' is added to the distributed time synchronization",
+                                  descriptorParticipantName);
+
+                            _timeConfiguration.AddSynchronizedParticipant(descriptorParticipantName);
+
+                            // If our time has advanced, we just added a late-joining participant. 
+                            if (_timeConfiguration.CurrentSimStep().timePoint >= 0ns)
+                            {
+                                // Resend our NextSimTask again because it is not assured that the late-joiner has seen our last update.
+                                // At this point, the late-joiner will receive it because its TimeSyncPolicy is configured when the 
+                                // discovery arrives that triggered this handler.
+                                Debug(_participant->GetLogger(), "Participant \'{}\' is joining an already running simulation. Resending our NextSimTask.",
+                                      descriptorParticipantName);
+                                SendMsg(_timeConfiguration.NextSimStep());
+                            }
+                        }
+                        else if (discoveryEventType == Core::Discovery::ServiceDiscoveryEvent::Type::ServiceRemoved)
+                        {
+                            // Other participant hopped off
+                            if (_timeConfiguration.RemoveSynchronizedParticipant(descriptorParticipantName))
+                            {
+                                Debug(_logger,
+                                      "TimeSyncService: Participant '{}' is no longer part of the "
+                                      "distributed time synchronization.",
+                                      descriptorParticipantName);
+
+                                if (_timeSyncPolicy)
+                                {
+                                    // _otherNextTasks has changed, check if our sim task is due
+                                    GetTimeSyncPolicy()->ProcessSimulationTimeUpdate();
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }
-    });
+        });
 }
 
 void TimeSyncService::ReportError(const std::string& errorMsg)
@@ -341,6 +390,11 @@ void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask
     {
         timeSyncPolicy->ReceiveNextSimTask(from, task);
     }
+	else
+    {
+        Logging::Debug(_logger, "Received NextSimTask from participant \'{}\' but TimeSyncPolicy is not yet configured",
+                      from->GetServiceDescriptor().GetParticipantName());
+    }
 }
 
 void TimeSyncService::ExecuteSimStep(std::chrono::nanoseconds timePoint, std::chrono::nanoseconds duration)
@@ -415,7 +469,24 @@ void TimeSyncService::StartTime()
     {
         const auto timeSyncPolicy = GetTimeSyncPolicy();
         SILKIT_ASSERT(timeSyncPolicy);
-        timeSyncPolicy->RequestInitialStep();
+        if (_isSynchronizingVirtualTime)
+        {
+            // Check if all synchronous participants have the neccessary capabilities
+            bool missingCapability = false;
+            for (auto&& participantName : _timeConfiguration.GetSynchronizedParticipantNames())
+            {
+                if (!ParticipantHasAutonomousSynchronousCapability(participantName))
+                {
+                    missingCapability = true; 
+                }
+            }
+            if (missingCapability)
+            {
+                _participant->GetSystemController()->AbortSimulation();
+            }
+        }
+        // Start the distributed time algorithm by sending our NextSimStep
+        GetTimeSyncPolicy()->RequestNextStep();
     }
 }
 
@@ -424,9 +495,42 @@ auto TimeSyncService::Now() const -> std::chrono::nanoseconds
     return _timeProvider->Now();
 }
 
-void TimeSyncService::SetLifecycleService(LifecycleService* lifecycleService)
+auto TimeSyncService::GetTimeConfiguration() -> TimeConfiguration*
 {
-    _lifecycleService = lifecycleService;
+    return &_timeConfiguration;
+}
+
+bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::string& participantName) const
+{
+    if ( _lifecycleService && _lifecycleService->GetOperationMode() == OperationMode::Autonomous && 
+        _lifecycleService->IsTimeSyncActive() &&
+        !_participant->ParticiantHasCapability(participantName, "autonomous-synchronous"))
+    {
+        // We are a participant with autonomous lifecycle and virtual time sync.
+        // The remote participant must support this, otherwise Hop-On / Hop-Off will fail.
+        Error(_participant->GetLogger(),
+              "Participant \'{}\' does not support simulations with participants that use an autonomous lifecycle "
+              "and virtual time synchronization. Please consider upgrading Participant \'{}\'. Aborting simulation...",
+              participantName, participantName);
+        return false;
+    }
+    return true;
+}
+
+bool TimeSyncService::AbortHopOnForCoordinatedParticipants() const
+{
+    if (_lifecycleService)
+    {
+        if (_lifecycleService->GetOperationMode() == OperationMode::Coordinated)
+        {
+            Error(_participant->GetLogger(),
+                  "This participant is running with a coordinated lifecycle and virtual time synchronization and wants "
+                  "to join an already running simulation. This is not allowed, aborting simulation...");
+            _participant->GetSystemController()->AbortSimulation();
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace Orchestration
 } // namespace Services

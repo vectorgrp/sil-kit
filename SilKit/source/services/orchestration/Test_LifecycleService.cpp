@@ -101,11 +101,11 @@ protected:
 protected:
     // ----------------------------------------
     // Members
-    MockServiceEndpoint p1Id{"P1","N1", "C1", 1024};
-    MockServiceEndpoint p2Id{"P2","N1", "C1", 1024};
-    MockServiceEndpoint masterId{"Master", "N1", "C2", 1027};
+    NiceMock<MockServiceEndpoint> p1Id{"P1","N1", "C1", 1024};
+    NiceMock<MockServiceEndpoint> p2Id{"P2","N1", "C1", 1024};
+    NiceMock<MockServiceEndpoint> masterId{"Master", "N1", "C2", 1027};
 
-    MockParticipant participant;
+    NiceMock<MockParticipant> participant;
     Callbacks callbacks;
     Config::HealthCheck healthCheckConfig;
 };
@@ -139,7 +139,7 @@ TEST_F(LifecycleServiceTest, autonomous_must_not_react_to_system_states)
     LifecycleConfiguration lc{OperationMode::Autonomous};
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(lc);
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -209,7 +209,7 @@ TEST_F(LifecycleServiceTest, start_stop_autonomous)
     LifecycleConfiguration lc{OperationMode::Autonomous};
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(lc);
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -257,7 +257,7 @@ TEST_F(LifecycleServiceTest, start_stop_coordinated_self_stop)
     // Intended state order: Create, ..., start, stop, create, start, stop, shutdown
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -333,7 +333,7 @@ TEST_F(LifecycleServiceTest, start_stop_coordinated_external_stop)
     // Intended state order: Create, ..., start, stop, create, start, stop, shutdown
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -394,7 +394,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -436,7 +436,7 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -478,25 +478,19 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
-TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
+TEST_F(LifecycleServiceTest, error_handling_exception_in_stop_callback)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
     lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
 
     lifecycleService.SetStopHandler(bind_method(&callbacks, &Callbacks::StopHandler));
-    lifecycleService.SetShutdownHandler(bind_method(&callbacks, &Callbacks::ShutdownHandler));
 
-    EXPECT_CALL(callbacks, StopHandler())
-        .Times(1)
-        .WillRepeatedly(Throw(SilKitError("StopCallbackException")));
-    EXPECT_CALL(callbacks, ShutdownHandler())
-        .Times(1)
-        .WillRepeatedly(Throw(SilKitError("ShutdownCallbackException")));
+    EXPECT_CALL(callbacks, StopHandler()).Times(1).WillRepeatedly(Throw(SilKitError("StopCallbackException")));
 
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
@@ -519,9 +513,12 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
     EXPECT_CALL(participant, 
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
         .Times(1);
+    EXPECT_CALL(participant, 
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Aborting)))
+        .Times(1);
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))
-        .Times(1);
+        .Times(0);
     EXPECT_CALL(participant,
                 SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(1);
@@ -533,7 +530,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_callback)
     // stop - callback throws -> expect error state
     lifecycleService.NewSystemState(SystemState::Stopping);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
-    // recover via abortSimulation - callback throws -> expect shutdown state (error will be ignored)
+    // recover via abortSimulation - callback throws -> finally expect shutdown state (error will be ignored)
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
     lifecycleService.ReceiveMsg(&masterId, abortCommand);
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
@@ -543,7 +540,7 @@ TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -597,7 +594,7 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -647,7 +644,7 @@ TEST_F(LifecycleServiceTest, Abort_Starting)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartAutonomous());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -698,7 +695,7 @@ TEST_F(LifecycleServiceTest, Abort_Running)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -754,7 +751,7 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -817,7 +814,7 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -881,7 +878,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -944,7 +941,7 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -998,7 +995,7 @@ TEST_F(LifecycleServiceTest, Abort_Aborting)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -1047,7 +1044,7 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -1088,7 +1085,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -1125,7 +1122,7 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
     // CompleteCommunicationReadyHandler() are working as expected.
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
-    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig);
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
     lifecycleService.SetTimeSyncService(&mockTimeSync);
     ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
 
@@ -1222,12 +1219,19 @@ TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)
     // Goal: make sure that the lifecycleService throws an exception if it first 
     // receives a required participant list without its own name and is then set to be coordinated
     LifecycleService lifecycleService(&participant);
+    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
+
+    lifecycleService.StartLifecycle();
+    
     WorkflowConfiguration workflowConfiguration;
     workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};
     lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
-    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
+    
 }
 } // namespace

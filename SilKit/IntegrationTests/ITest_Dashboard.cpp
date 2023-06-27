@@ -132,8 +132,7 @@ protected:
                                              "readytorun",
                                              "running",
                                              "stopping",
-                                             "stopped",
-                                             "shuttingdown"};
+                                             "stopped"};
         SilKit::Dashboard::TestResult expected{};
         expected.objectCount = 0;
         for (auto simulationIdx = 0u; simulationIdx < simulations.size(); simulationIdx++)
@@ -339,8 +338,8 @@ TEST_F(DashboardTestHarness, dashboard_can_coordinated)
     _simTestHarness->ResetRegistry();
     CheckTestResult(
         testResult,
-        CreateExpectedTestResult({{{participantName1, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}},
-                                   {participantName2, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}}}},
+        CreateExpectedTestResult({{{participantName1, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}},
+                                   {participantName2, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}}}},
                                  true));
 }
 
@@ -360,8 +359,8 @@ TEST_F(DashboardTestHarness, dashboard_can_repeat)
         2);
     _simTestHarness->ResetRegistry();
     std::map<std::string, std::map<uint64_t, SilKit::Dashboard::Service>> simulation{
-        {participantName1, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}},
-        {participantName2, {{5, {"", "cancontroller", canonicalName, networkName, {}}}}}};
+        {participantName1, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}},
+        {participantName2, {{6, {"", "cancontroller", canonicalName, networkName, {}}}}}};
     CheckTestResult(testResult, CreateExpectedTestResult({simulation, simulation}, true));
 }
 
@@ -410,10 +409,10 @@ TEST_F(DashboardTestHarness, dashboard_pubsub_mix)
         testResult,
         CreateExpectedTestResult(
             {{{participantName1,
-               {{5, {"", "datapublisher", canonicalName1, "IGNORED", {topic, "IGNORED", mediaType, {label1}}}}}},
+               {{6, {"", "datapublisher", canonicalName1, "IGNORED", {topic, "IGNORED", mediaType, {label1}}}}}},
               {participantName2,
-               {{5, {"", "datasubscriber", canonicalName2, "IGNORED", {topic, "IGNORED", mediaType, {label2}}}},
-                {6, {"5", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}},
+               {{6, {"", "datasubscriber", canonicalName2, "IGNORED", {topic, "IGNORED", mediaType, {label2}}}},
+                {7, {"6", "datasubscriberinternal", "IGNORED", "IGNORED", {}}}}}}},
             true));
 }
 
@@ -462,10 +461,10 @@ TEST_F(DashboardTestHarness, dashboard_rpc_autonomous)
         testResult,
         CreateExpectedTestResult(
             {{{participantName1,
-               {{5, {"", "rpcclient", canonicalName1, "IGNORED", {"IGNORED", functionName, mediaType, {label1}}}}}},
+               {{6, {"", "rpcclient", canonicalName1, "IGNORED", {"IGNORED", functionName, mediaType, {label1}}}}}},
               {participantName2,
-               {{5, {"", "rpcserver", canonicalName2, "IGNORED", {"IGNORED", functionName, mediaType, {label2}}}},
-                {6, {"5", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}},
+               {{6, {"", "rpcserver", canonicalName2, "IGNORED", {"IGNORED", functionName, mediaType, {label2}}}},
+                {7, {"6", "rpcserverinternal", "IGNORED", "IGNORED", {}}}}}}},
             false));
 }
 

@@ -108,6 +108,9 @@ template <class SilKitConnectionT>
 void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
 {
     SetupRemoteLogging();
+    
+    // NB: Create the systemController to abort the simulation already in the startup phase
+    (void)GetSystemController();
 
     // Ensure Service discovery is started
     (void)GetServiceDiscovery();
@@ -118,7 +121,7 @@ void Participant<SilKitConnectionT>::OnSilKitSimulationJoined()
     // Create the participants trace message sinks as declared in the configuration.
     _traceSinks = Tracing::CreateTraceMessageSinks(GetLogger(), _participantConfig);
 
-    // NB: Create the lifecycleService to prevent nested controller creation in SystemMonitor
+    // NB: Create the lifecycleService and timeSyncService
     (void)GetLifecycleService();
 
     // NB: Create the systemMonitor to receive WorkflowConfigurations
@@ -693,7 +696,7 @@ auto Participant<SilKitConnectionT>::CreateRpcServer(const std::string& canonica
 }
 
 template <class SilKitConnectionT>
-auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::LifecycleService* service) -> Services::Orchestration::TimeSyncService*
+auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::LifecycleService* lifecycleService) -> Services::Orchestration::TimeSyncService*
 {
     auto* timeSyncService =
         GetController<Orchestration::TimeSyncService>(SilKit::Core::Discovery::controllerTypeTimeSyncService);
@@ -706,14 +709,12 @@ auto Participant<SilKitConnectionT>::CreateTimeSyncService(Orchestration::Lifecy
     Core::SupplementalData timeSyncSupplementalData;
     timeSyncSupplementalData[SilKit::Core::Discovery::controllerType] = SilKit::Core::Discovery::controllerTypeTimeSyncService;
 
-        Config::InternalController config;
-        config.name = Discovery::controllerTypeTimeSyncService;
-        config.network = "default";
-        timeSyncService = CreateController<Orchestration::TimeSyncService>(
-            config, std::move(timeSyncSupplementalData), false, &_timeProvider, _participantConfig.healthCheck);
+    Config::InternalController config;
+    config.name = Discovery::controllerTypeTimeSyncService;
+    config.network = "default";
+    timeSyncService = CreateController<Orchestration::TimeSyncService>(
+        config, std::move(timeSyncSupplementalData), false, &_timeProvider, _participantConfig.healthCheck, lifecycleService);
 
-    //Ensure that the TimeSyncService is able to affect the life cycle
-    timeSyncService->SetLifecycleService(service);
     return timeSyncService;
 }
 
@@ -764,6 +765,11 @@ template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::CreateLifecycleService(
     Services::Orchestration::LifecycleConfiguration startConfiguration) -> Services::Orchestration::ILifecycleService*
 {
+    if (startConfiguration.operationMode == SilKit::Services::Orchestration::OperationMode::Invalid)
+    {
+        throw ConfigurationError("Cannot create lifecycle service with OperationMode::Invalid");
+    }
+
     if (_isLifecycleServiceCreated)
     {
         throw SilKitError("You may not create the lifecycle service more than once.");
@@ -1666,6 +1672,14 @@ void Participant<SilKitConnectionT>::RegisterReplayController(ISimulator* simula
         simulator->SetReplayActive(serviceDescriptor.GetNetworkType(), true);
     }
 }
+
+template <class SilKitConnectionT>
+bool Participant<SilKitConnectionT>::ParticiantHasCapability(const std::string& participantName,
+                                                             const std::string& capability) const
+{
+    return _connection.ParticiantHasCapability(participantName, capability);
+}
+
 
 } // namespace Core
 } // namespace SilKit

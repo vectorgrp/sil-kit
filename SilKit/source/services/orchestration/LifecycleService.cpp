@@ -108,6 +108,12 @@ void LifecycleService::SetAbortHandler(AbortHandler handler)
 auto LifecycleService::StartLifecycle()
     -> std::future<ParticipantState>
 {
+    std::stringstream ss;
+    ss << "Lifecycle of participant " << _participant->GetParticipantName() << " started";
+    _logger->Debug(ss.str());
+
+	_isLifecycleStarted = true;
+	
     if (_finalStatePromise == nullptr)
     {
         throw LogicError{"LifecycleService::StartLifecycle must not be called twice"};
@@ -117,6 +123,7 @@ auto LifecycleService::StartLifecycle()
     {
         if (!CheckForValidConfiguration())
         {
+            _finalStatePromise->set_value(ParticipantState::Invalid);
             return std::move(_finalStateFuture);
         }
     }
@@ -143,7 +150,6 @@ auto LifecycleService::StartLifecycle()
         this->NewSystemState(systemState);
     });
 
-    _isLifecycleStarted = true;
     _lifecycleManager.Initialize("LifecycleService::StartLifecycle was called.");
 
     switch (_operationMode)
@@ -337,8 +343,8 @@ bool LifecycleService::CheckForValidConfiguration()
             std::stringstream ss;
             
             ss << _participant->GetParticipantName()
-               << ": This participant is in OperationMode::Coordinated but it is not part of the"
-                  "set of \"required\" participants declared to the system controller. ";
+               << ": This participant is in OperationMode::Coordinated but it is not part of the "
+                  "set of \"required\" participants declared by the system controller. ";
             ReportError(ss.str());
             return false;
         }
