@@ -255,10 +255,8 @@ LIN Demo
             # LIN Slave:
             |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinSlave --async
 
-            
    *  -  Notes
-      -  | \- The LIN demo can only run in a synchronized mode.
-         | \- Both Master and Slave sleep for 500 milliseconds per simulation step to slow down execution.
+      -  | Both Master and Slave sleep for 500 milliseconds per simulation step to slow down execution.
 
 
 FlexRay Demo
@@ -370,6 +368,19 @@ Publish/Subscribe Demo
             # System Controller:
             |SystemController| Publisher Subscriber
 
+         For unsynchronized execution:
+
+         .. parsed-literal::
+
+            # Registry (if not already running):
+            |Registry|
+
+            # Publisher:
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher --async
+
+            # Subscriber:
+            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Subscriber --async
+
    *  -  Notes
       -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built-in :doc:`Data Serialization API</api/serdes>`.
 
@@ -424,6 +435,20 @@ RPC Demo
 
             # System Controller:
             |SystemController| Server Client
+
+         For unsynchronized execution:
+
+         .. parsed-literal::
+
+            # Registry (if not already running):
+            |Registry|
+
+            # Server:
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server --async
+
+            # Client:
+            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Client --async
+
    *  -  Notes
       -  ``Client`` participant has two RPC clients which call the ``Add100`` and ``Sort`` functions on the ``Server`` participant's two RPC servers.
 
@@ -482,19 +507,13 @@ Benchmark Demo
             # Launch the benchmark demo with default arguments but 4 participants:
             |DemoDir|/SilKitDemoBenchmark.exe --number-participants 4
    *  -  Notes
-      -  This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> 
-         of <B> bytes per simulation step with a fixed period of 1ms and run for <S> seconds (virtual time). 
-         This simulation run is repeated <K> times and averages over all runs are calculated. Results for average 
-         runtime, speedup (virtual time/runtime), throughput (data size/runtime), message rate (count/runtime) 
-         including the standard deviation are printed. 
-         The demo uses publish/subscribe controllers with the same topic for the message exchange, so each participant broadcasts
-         the messages to all other participants. The configuration file 
-         ``DemoBenchmarkDomainSocketsOff.silkit.yaml`` can be used to disable domain socket usage 
-         for more realistic timings of TCP/IP traffic. With ``DemoBenchmarkTCPNagleOff.silkit.yaml``, 
-         Nagle's algorithm and domain sockets are switched off.
-         The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding
-         different message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and 
-         ``Demos\Benchmark\performance-diff\Readme.md`` for further information.
+      -  | This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> of <B> bytes per simulation step with a fixed period of 1ms and run for <S> seconds (virtual time).
+         |
+         | This simulation run is repeated <K> times and averages over all runs  are calculated. Results for average runtime, speedup (virtual time/runtime), throughput (data size/runtime), message rate (count/runtime) including the standard deviation are printed.
+         |
+         | The demo uses publish/subscribe controllers with the same topic for the message exchange, so each participant broadcasts the messages to all other participants. The configuration file ``DemoBenchmarkDomainSocketsOff.silkit.yaml`` can be used to disable domain socket usage for more realistic timings of TCP/IP traffic. With ``DemoBenchmarkTCPNagleOff.silkit.yaml``, Nagle's algorithm and domain sockets are switched off.
+         |
+         | The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding different message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and ``Demos\Benchmark\performance-diff\Readme.md`` for further information.
 
 
 Latency Demo
@@ -537,7 +556,8 @@ Latency Demo
             # Launch the LatencyDemo with positional arguments and a specified configuration file:
             |DemoDir|/SilKitDemoLatency.exe 100 1000 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
    *  -  Notes
-      -  This latency demo produces timings of a configurable simulation setup. Two participants exchange <M> messages 
-         of <B> bytes without time synchronization. The demo uses publish/subscribe controllers performing a message roundtrip (ping-pong) 
-         to calculate latency and throughput timings. Note that the two participants must use the same parameters for a 
-         valid measurement and one participant must use the --isReceiver flag.
+      -  | This latency demo produces timings of a configurable simulation setup. Two participants exchange <M> messages of <B> bytes without time synchronization.
+         |
+         | The demo uses publish/subscribe controllers performing a message roundtrip (ping-pong) to calculate latency and throughput timings.
+         |
+         | Note that the two participants must use the same parameters for valid measurement and one participant must use the ``--isReceiver`` flag.
