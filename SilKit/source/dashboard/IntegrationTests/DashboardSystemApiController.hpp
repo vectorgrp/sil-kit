@@ -393,13 +393,9 @@ public:
         return finishedSimulationsCount;
     }
 
-    void WaitSimulationsFinished() { 
-        _allSimulationsFinishedStatus = _allSimulationsFinishedFuture.wait_for(2s); 
-    }
+    void WaitSimulationsFinished() { _allSimulationsFinishedStatus = _allSimulationsFinishedFuture.wait_for(5s); }
 
-    bool AllSimulationsFinished() { 
-        return _allSimulationsFinishedStatus == std::future_status::ready; 
-    }
+    bool AllSimulationsFinished() { return _allSimulationsFinishedStatus == std::future_status::ready; }
 
 private:
     std::vector<SilKit::Services::MatchingLabel> GetLabels(oatpp::Vector<Object<MatchingLabelDto>> labels)

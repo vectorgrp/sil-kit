@@ -62,63 +62,43 @@ protected:
         {
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
             auto&& participant = simParticipant->Participant();
+            (void)participant->CreateCanController(canonicalName, networkName);
             auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& canController = participant->CreateCanController(canonicalName, networkName);
-            canController->AddFrameHandler([simParticipant](auto, auto) {
-                Log() << simParticipant->Name() << ": stopping";
-                simParticipant->Stop();
-            });
-            lifecycleService->SetCommunicationReadyHandler([canController, participantName1]() {
-                Log() << participantName1 << ": Init called, setting baud rate and starting";
-                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
-                canController->Start();
-            });
+            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+            timeSyncService->SetSimulationStepHandler(
+                CreateSimulationStepHandler(participantName1, lifecycleService),
+                10ms);
         }
         {
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
             auto&& participant = simParticipant->Participant();
-            auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-            auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
-            auto&& canController = participant->CreateCanController(canonicalName, networkName);
-            timeSyncService->SetSimulationStepHandler(
-                [canController](auto, auto) {
-                    const std::vector<uint8_t> canFrameData = {'d', 'a', 't', 'a', 0, 1, 2, 3};
-                    SilKit::Services::Can::CanFrame canFrame{};
-                    canFrame.canId = 17;
-                    canFrame.flags =
-                        // FD Format Indicator
-                        static_cast<SilKit::Services::Can::CanFrameFlagMask>(SilKit::Services::Can::CanFrameFlag::Fdf)
-                        // Bit Rate Switch  (for FD Format only)
-                        | static_cast<SilKit::Services::Can::CanFrameFlagMask>(
-                            SilKit::Services::Can::CanFrameFlag::Brs);
-                    canFrame.dataField = canFrameData;
-                    canFrame.dlc = static_cast<uint16_t>(canFrame.dataField.size());
-                    canController->SendFrame(canFrame);
-                },
-                10ms);
-            lifecycleService->SetCommunicationReadyHandler([canController, participantName2]() {
-                Log() << participantName2 << ": Init called, setting baud rate and starting";
-                canController->SetBaudRate(10'000, 1'000'000, 2'000'000);
-                canController->Start();
-            });
+            (void)participant->CreateCanController(canonicalName, networkName);
         }
         auto ok = _simTestHarness->Run(5s);
         ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
         _simTestHarness->ResetParticipants();
     }
 
-    Orchestration::ISystemMonitor::ParticipantStatusHandler CreateParticipantStatusHandler(
-        const std::string& participantName, Orchestration::ILifecycleService* lifecycleService, size_t expectedCount)
+    Orchestration::ITimeSyncService::SimulationStepHandler CreateSimulationStepHandler(
+        const std::string& participantName, Orchestration::ILifecycleService* lifecycleService)
     {
-        return [this, participantName, lifecycleService, expectedCount](auto status) {
-            if (status.state == Orchestration::ParticipantState::Running)
+        return [participantName, lifecycleService](auto now, auto /*duration*/) {
+            if (now > 20ms)
             {
-                Log() << participantName << " got " << status.state << " from " << status.participantName;
-                if (AddRunningParticipant(participantName, status.participantName) == expectedCount)
-                {
-                    Log() << participantName << ": stopping";
-                    lifecycleService->Stop("All participants are running...");
-                }
+                Log() << participantName << ": stopping";
+                lifecycleService->Stop("Coordinated Participant " + participantName + " ends test");
+            }
+        };
+    }
+
+    Orchestration::ISystemMonitor::ParticipantStatusHandler CreateAutonomousParticipantStatusHandler(
+        const std::string& participantName, Orchestration::ILifecycleService* lifecycleService)
+    {
+        return [participantName, lifecycleService](auto status) {
+            if (status.state == Orchestration::ParticipantState::Running && status.participantName == participantName)
+            {
+                Log() << participantName << ": stopping";
+                lifecycleService->Stop("Autonomous Participant " + participantName + " ends test");
             }
         };
     }
@@ -160,24 +140,13 @@ protected:
         }
         return expected;
     }
-
-    size_t AddRunningParticipant(const std::string& participantName, const std::string& otherParticipantName)
-    {
-        std::lock_guard<decltype(_runningParticipantsMx)> lock{_runningParticipantsMx};
-        _runningParticipants[participantName].insert(otherParticipantName);
-        return _runningParticipants[participantName].size();
-    }
-
-private:
-    std::mutex _runningParticipantsMx;
-    std::map<std::string, std::set<std::string>> _runningParticipants;
 };
 
 void CheckStates(std::set<std::string> actual, std::set<std::string> expected, const std::string& participantName,
                  uint64_t simulationId)
 {
-    ASSERT_TRUE(actual.size() >= expected.size())
-        << "Wrong number of states for " << participantName << " of simulation " << simulationId << "!";
+    ASSERT_GE(actual.size(), expected.size()) << "Wrong number of states for " << participantName << " of simulation "
+                                              << simulationId << "!";
     for (auto&& state : expected)
     {
         ASSERT_TRUE(actual.find(state) != actual.end())
@@ -388,17 +357,19 @@ TEST_F(DashboardTestHarness, dashboard_pubsub_mix)
                 auto&& participant = simParticipant->Participant();
                 (void)participant->CreateDataPublisher(canonicalName1, spec1);
                 auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
-                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
-                    CreateParticipantStatusHandler(participantName1, lifecycleService, 3));
+                auto&& timeSyncService = simParticipant->GetOrCreateTimeSyncService();
+                timeSyncService->SetSimulationStepHandler(
+                    CreateSimulationStepHandler(participantName1, lifecycleService), 10ms);
             }
             {
                 auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
                 auto&& participant = simParticipant->Participant();
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
                 (void)participant->CreateDataSubscriber(canonicalName2, spec2, [](auto, const auto&) {
                 });
-                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
-                    CreateParticipantStatusHandler(participantName2, lifecycleService, 3));
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
+                (void)systemMonitor->AddParticipantStatusHandler(
+                    CreateAutonomousParticipantStatusHandler(participantName2, lifecycleService));
             }
             auto ok = _simTestHarness->Run(5s);
             ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
@@ -437,20 +408,22 @@ TEST_F(DashboardTestHarness, dashboard_rpc_autonomous)
             {
                 auto&& simParticipant = _simTestHarness->GetParticipant(participantName1);
                 auto&& participant = simParticipant->Participant();
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
                 (void)participant->CreateRpcClient(canonicalName1, spec1, [](auto*, const auto&) {
                 });
-                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
-                    CreateParticipantStatusHandler(participantName1, lifecycleService, 2));
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
+                (void)systemMonitor->AddParticipantStatusHandler(
+                    CreateAutonomousParticipantStatusHandler(participantName1, lifecycleService));
             }
             {
                 auto&& simParticipant = _simTestHarness->GetParticipant(participantName2);
                 auto&& participant = simParticipant->Participant();
-                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
                 (void)participant->CreateRpcServer(canonicalName2, spec2, [](auto*, const auto&) {
                 });
-                simParticipant->GetOrCreateSystemMonitor()->AddParticipantStatusHandler(
-                    CreateParticipantStatusHandler(participantName2, lifecycleService, 2));
+                auto&& lifecycleService = simParticipant->GetOrCreateLifecycleService();
+                auto&& systemMonitor = simParticipant->GetOrCreateSystemMonitor();
+                (void)systemMonitor->AddParticipantStatusHandler(
+                    CreateAutonomousParticipantStatusHandler(participantName2, lifecycleService));
             }
             auto ok = _simTestHarness->Run(5s);
             ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";

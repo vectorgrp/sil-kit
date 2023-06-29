@@ -65,7 +65,7 @@ TEST_F(ITest_DashboardTestHarness, dashboard_creationtimeout)
             ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
             _simTestHarness->ResetParticipants();
         },
-        1, std::chrono::seconds{5}, std::chrono::seconds{0});
+        1, std::chrono::seconds{7}, std::chrono::seconds{0});
     ASSERT_FALSE(testResult.allSimulationsFinished) << "Simulation should not be finished!";
     _simTestHarness->ResetRegistry();
 }
@@ -94,7 +94,7 @@ TEST_F(ITest_DashboardTestHarness, dashboard_updatetimeout)
             ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
             _simTestHarness->ResetParticipants();
         },
-        1, std::chrono::seconds{0}, std::chrono::seconds{5});
+        1, std::chrono::seconds{0}, std::chrono::seconds{7});
     ASSERT_FALSE(testResult.allSimulationsFinished) << "Simulation should not be finished!";
     _simTestHarness->ResetRegistry();
 }

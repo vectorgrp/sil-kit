@@ -63,7 +63,7 @@ auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
                 testCode();
                 controller->WaitSimulationsFinished();
             },
-            std::chrono::seconds(10));
+            std::chrono::seconds(30));
 
         testResult.dataBySimulation = controller->GetData();
         testResult.allSimulationsFinished = controller->AllSimulationsFinished();

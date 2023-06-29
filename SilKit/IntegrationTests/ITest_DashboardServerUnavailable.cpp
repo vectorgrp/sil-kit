@@ -46,7 +46,7 @@ TEST_F(ITest_DashboardTestHarness, dashboard_server_unavailable)
     SetupFromParticipantLists({participantName}, {});
     {
         auto dashboard =
-            SilKit::Dashboard::CreateDashboard(ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, MakeTestDashboardUri());
+            SilKit::Dashboard::CreateDashboard(ParticipantConfigurationFromStringImpl(_dashboardParticipantConfig), _registryUri, _dashboardUri);
         {
             _simTestHarness->CreateSystemController();
             auto&& simParticipant = _simTestHarness->GetParticipant(participantName, _participantConfig);
