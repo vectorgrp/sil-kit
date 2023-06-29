@@ -154,6 +154,15 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
     // When the IVAsioPeer connects to us we see its actual endpoint address and need
     // to substitute it here.
 
+    // Do not allow multiple participants with identical names
+    if(FindConnectedPeer(peerInfo.participantName) != _connectedParticipants.end())
+    {
+        Services::Logging::Warn(
+                GetLogger(),
+                "A participant with the same name '{}' already exists", peerInfo.participantName);
+        throw SilKitError{fmt::format("A Participant with the name '{}' already exists!", peerInfo.participantName)};
+    }
+
     SendKnownParticipants(from);
 
     ConnectedParticipantInfo newParticipantInfo;
