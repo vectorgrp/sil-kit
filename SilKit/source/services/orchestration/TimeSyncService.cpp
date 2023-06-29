@@ -83,12 +83,16 @@ public:
 
     void RequestNextStep() override
     {
-        _controller.SendMsg(_configuration->NextSimStep());
-        // Bootstrap checked execution, in case there is no other participant.
-        // Else, checked execution is initiated when we receive their NextSimTask messages.
-        _participant->ExecuteDeferred([this]() {
-            this->ProcessSimulationTimeUpdate();
-        });
+        if (_controller.State() == ParticipantState::Running
+            && !_controller.StopRequested()) // ensure that a call to Stop() in a SimTask won't send out a new step and eventually call the SimTask again
+        {
+            _controller.SendMsg(_configuration->NextSimStep());
+            // Bootstrap checked execution, in case there is no other participant.
+            // Else, checked execution is initiated when we receive their NextSimTask messages.
+            _participant->ExecuteDeferred([this]() {
+                this->ProcessSimulationTimeUpdate();
+            });
+        }
     }
 
     void ReceiveNextSimTask(const Core::IServiceEndpoint* from, const NextSimTask& task) override
@@ -146,6 +150,12 @@ private:
     {
         // Deferred execution of this callback was initiated, but simulation stopped in the meantime
         if (_controller.State() != ParticipantState::Running)
+        {
+            return false;
+        }
+
+        // State check is not enough is user called Stop() in the SimTask and directly receives a NextSimTask
+        if (_controller.StopRequested())
         {
             return false;
         }
@@ -327,6 +337,11 @@ bool TimeSyncService::IsSynchronizingVirtualTime()
 auto TimeSyncService::State() const -> ParticipantState
 {
     return _lifecycleService->State();
+}
+
+auto TimeSyncService::StopRequested() const -> bool
+{
+    return _lifecycleService->StopRequested();
 }
 
 void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)

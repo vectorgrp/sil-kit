@@ -214,6 +214,7 @@ void LifecycleService::Continue()
 
 void LifecycleService::Stop(std::string reason)
 {
+    _stopRequested = true;
     _participant->ExecuteDeferred([this, reason] {
         _lifecycleManager.Stop(reason);
     });
@@ -356,6 +357,11 @@ auto LifecycleService::State() const -> ParticipantState
 {
     std::unique_lock<decltype(_statusMx)> lock{_statusMx};
     return _status.state;
+}
+
+auto LifecycleService::StopRequested() const -> bool
+{
+    return _stopRequested;
 }
 
 auto LifecycleService::Status() const -> const ParticipantStatus&

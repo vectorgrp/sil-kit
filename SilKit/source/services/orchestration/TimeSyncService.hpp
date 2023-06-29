@@ -102,6 +102,8 @@ public:
     bool ParticipantHasAutonomousSynchronousCapability(const std::string& participantName) const;
     bool AbortHopOnForCoordinatedParticipants() const;
 
+    auto StopRequested() const -> bool;
+
 private:
     // ----------------------------------------
     // private methods

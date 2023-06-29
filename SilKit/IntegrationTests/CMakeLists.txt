@@ -310,6 +310,14 @@ add_silkit_test(ITest_LinDemo_Internals
     S_ITests_STH_Internals
 )
 
+add_silkit_test(ITest_Orchestration
+    SOURCES
+    ITest_Orchestration.cpp
+
+    LIBS
+    S_ITests_STH
+)
+
 if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(
         ITest_Dashboard

@@ -98,7 +98,6 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
-
 public:
     //!< Returns true if we are ready to leave the CommunicationReady state (i.e. handler invocation is done).
     bool TriggerCommunicationReadyHandler();
@@ -123,6 +122,8 @@ public:
 
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
     OperationMode GetOperationMode() const;
+
+    auto StopRequested() const -> bool;
 
 private:
     // ----------------------------------------
@@ -185,6 +186,10 @@ private:
     // used to check for valid participant configuration
     mutable std::mutex _requiredParticipantNamesMx;
     std::vector<std::string> _requiredParticipantNames;
+
+    // The code path for setting the ParticipantState is deferred, this is to flag a call to Stop()
+    // for immediate checks (e.g., not to send out the NextSimTask after a stopping in the SimTaskHandler).
+    std::atomic<bool> _stopRequested{false};
 };
 
 // ================================================================================

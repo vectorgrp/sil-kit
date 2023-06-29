@@ -21,9 +21,10 @@ Added
 Fixed
 ~~~~~
 
-- Fix a bug in internal barriers where in-between connecting participants could break the communicaiton guarantees
-- Fix transition when aborting from ErrorState, now the state changes to Shutdown like all aborting paths (formery the transition was to ShuttingDown)
+- Fixed a bug in internal barriers where in-between connecting participants could break the communicaiton guarantees
+- Fixed transition when aborting from ErrorState, now the state changes to Shutdown like all aborting paths (formery the transition was to ShuttingDown)
 - Internal fixes for thread-safety
+- Fixed that the SimTask cannot be triggered again after calling ``ILifecycleService::Stop()`` in the SimTask
 
 
 Changed
