@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <sstream>
 
 #include "asio.hpp"
 
@@ -90,7 +91,9 @@ public:
     auto GetRemoteAddress() const -> std::string override;
     auto GetLocalAddress() const -> std::string override;
 
-    void Connect(VAsioPeerInfo info);
+    void Connect(VAsioPeerInfo info,
+                 std::stringstream& attemptedUris,
+                 bool& success);
 
     inline auto Socket() -> asio::generic::stream_protocol::socket& { return _socket; }
 
@@ -115,6 +118,8 @@ private:
     void DispatchBuffer();
     void Shutdown();
     bool ConnectLocal(const std::string& path);
+    void ResetSocket();
+    void ResetTcpSocket(const std::string& host, uint16_t port, const std::string& message);
     bool ConnectTcp(const std::string& host, uint16_t port);
 
 private:

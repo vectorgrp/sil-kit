@@ -217,15 +217,12 @@ bool connectWithRetry(SilKit::Core::VAsioTcpPeer* peer, const SilKit::Core::VAsi
 {
     for (auto i = 0u; i < connectAttempts; i++)
     {
-        try
-        {
-            peer->Connect(pi);
+        bool success = false;
+        std::stringstream attemptedUris;
+        peer->Connect(pi, attemptedUris, success);
+        if (success)
             return true;
-        }
-        catch (const std::exception&)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds{100});
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds{100});
     }
     return false;
 }
@@ -847,6 +844,57 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     }
 }
 
+bool VAsioConnection::TryCreatingProxy(std::shared_ptr<IVAsioConnectionPeer> directPeer,
+                                       std::shared_ptr<IVAsioConnectionPeer> peer,
+                                       const VAsioPeerInfo& peerInfo,
+                                       const std::string& message)
+{
+    SilKit::Services::Logging::Warn(
+        _logger,
+        "VAsioConnection: Failed to connect directly to {}, trying to proxy messages through the registry: {}",
+        peerInfo.participantName, message);
+
+    if (!_config.middleware.registryAsFallbackProxy)
+    {
+        SilKit::Services::Logging::Warn(_logger,
+                                        "VAsioConnection: Cannot use ProxyMessage to communicate with {}, "
+                                        "because it is disabled in the configuration",
+                                        peerInfo.participantName);
+        return false;
+    }
+
+    // NB: Cannot check the capabilities of the registry, since we do not receive the PeerInfo from the
+    //       registry over the network, but build it ourselves in VAsioConnection::JoinSimulation.
+    //       This is not be a huge issue, since we can just 'throw the messages at the registry' and will
+    //       fail with the participant-connection-timeout if it is not capable of routing it to the other
+    //       participant.
+
+    // Parse the capabilities reported in the remotes VAsioPeerInfo
+    VAsioCapabilities capabilities{peerInfo.capabilities};
+
+    // To use the ProxyMessage, the peer we're trying to connect to must support it
+    if (!CapabilitiesSupportProxyMessage(capabilities))
+    {
+        SilKit::Services::Logging::Warn(_logger,
+                                        "VAsioConnection: Cannot use ProxyMessage to communicate with {}, "
+                                        "because {} does not support it",
+                                        peerInfo.participantName, peerInfo.participantName);
+        return false;
+    }
+
+    // Remove the "direct-connection" peer from the list of peers we expect an answer from
+    auto it = std::find(_pendingParticipantReplies.begin(), _pendingParticipantReplies.end(), directPeer);
+    _pendingParticipantReplies.erase(it);
+    // Destroy the peer object
+    directPeer = nullptr;
+
+    // Create the "proxy-peer" object
+    peer = std::make_shared<VAsioProxyPeer>(this, peerInfo, _registry.get(), _logger);
+    // Remember that we expect a reply from this peer
+    _pendingParticipantReplies.push_back(peer);
+    return true;
+}
+
 void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer)
 {
     auto participantsMsg = buffer.Deserialize<KnownParticipants>();
@@ -888,56 +936,16 @@ void VAsioConnection::ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessag
 
         // Try to connect to the peer only _after_ remembering that we need to connect, otherwise suitable error will
         // be raised.
-        try
-        {
-            directPeer->Connect(peerInfo);
-            peer = std::move(directPeer);
+        bool success = false;
+        std::stringstream attemptedUris;
+        directPeer->Connect(peerInfo, attemptedUris, success);
+        if (!success) {
+            auto errorMsg = fmt::format("Failed to connect to host URIs: \"{}\"", attemptedUris.str());
+            if (!TryCreatingProxy(directPeer, peer, peerInfo, errorMsg))
+                return;
         }
-        catch (const std::exception& exception)
-        {
-            SilKit::Services::Logging::Warn(
-                _logger,
-                "VAsioConnection: Failed to connect directly to {}, trying to proxy messages through the registry: {}",
-                peerInfo.participantName, exception.what());
-
-            if (!_config.middleware.registryAsFallbackProxy)
-            {
-                SilKit::Services::Logging::Warn(_logger,
-                                                "VAsioConnection: Cannot use ProxyMessage to communicate with {}, "
-                                                "because it is disabled in the configuration",
-                                                peerInfo.participantName);
-                return;
-            }
-
-            // NB: Cannot check the capabilities of the registry, since we do not receive the PeerInfo from the
-            //       registry over the network, but build it ourselves in VAsioConnection::JoinSimulation.
-            //       This is not be a huge issue, since we can just 'throw the messages at the registry' and will
-            //       fail with the participant-connection-timeout if it is not capable of routing it to the other
-            //       participant.
-
-            // Parse the capabilities reported in the remotes VAsioPeerInfo
-            VAsioCapabilities capabilities{peerInfo.capabilities};
-
-            // To use the ProxyMessage, the peer we're trying to connect to must support it
-            if (!CapabilitiesSupportProxyMessage(capabilities))
-            {
-                SilKit::Services::Logging::Warn(_logger,
-                                                "VAsioConnection: Cannot use ProxyMessage to communicate with {}, "
-                                                "because {} does not support it",
-                                                peerInfo.participantName, peerInfo.participantName);
-                return;
-            }
-
-            // Remove the "direct-connection" peer from the list of peers we expect an answer from
-            auto it = std::find(_pendingParticipantReplies.begin(), _pendingParticipantReplies.end(), directPeer);
-            _pendingParticipantReplies.erase(it);
-            // Destroy the peer object
-            directPeer = nullptr;
-
-            // Create the "proxy-peer" object
-            peer = std::make_shared<VAsioProxyPeer>(this, peerInfo, _registry.get(), _logger);
-            // Remember that we expect a reply from this peer
-            _pendingParticipantReplies.push_back(peer);
+        else {
+            peer = std::move(directPeer);
         }
 
         // We connected to the other peer. tell him who we are.

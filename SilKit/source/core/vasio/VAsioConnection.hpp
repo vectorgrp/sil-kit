@@ -208,6 +208,10 @@ public: //members
 private:
     template<typename AcceptorT, typename EndpointT>
     auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
+    bool TryCreatingProxy(std::shared_ptr<IVAsioConnectionPeer> directPeer,
+                          std::shared_ptr<IVAsioConnectionPeer> peer,
+                          const VAsioPeerInfo& peerInfo,
+                          const std::string& message);
 
     // ----------------------------------------
     // private data types

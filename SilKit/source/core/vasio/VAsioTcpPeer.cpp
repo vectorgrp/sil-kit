@@ -256,22 +256,33 @@ bool VAsioTcpPeer::ConnectLocal(const std::string& socketPath)
         return false;
     }
 
-    try
-    {
-        SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Connecting to {}", socketPath);
-        asio::local::stream_protocol::endpoint ep{socketPath};
-        _socket.connect(ep);
-        return true;
-    }
-    catch (const std::exception& err)
-    {
+    SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Connecting to {}", socketPath);
+    asio::error_code errorCode;
+    asio::local::stream_protocol::endpoint ep{socketPath};
+    _socket.connect(ep, errorCode);
+
+    if (errorCode) {
         // reset the socket
         SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Error while connecting to '{}': {}",
-                                         socketPath, err.what());
-        _socket = decltype(_socket){_socket.get_executor()};
+                                         socketPath, errorCode.message());
+        ResetSocket();
         // move on to TCP connections
+        return false;
     }
-    return false;
+    return true;
+}
+
+void VAsioTcpPeer::ResetSocket()
+{
+    _socket = decltype(_socket){_socket.get_executor()};
+}
+
+void VAsioTcpPeer::ResetTcpSocket(const std::string& host, uint16_t port,
+                                  const std::string& message)
+{
+    SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Error while connecting to '{}:{}': {}",
+                                     host, port, message);
+    ResetSocket();
 }
 
 bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
@@ -285,58 +296,75 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
     auto config = _connection->Config();
     for (auto&& resolverEntry : resolverResults)
     {
-        try
+        SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Connecting to [{}]:{} ({})",
+            resolverEntry.host_name(),
+            resolverEntry.service_name(),
+            (resolverEntry.endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6")
+        );
+        asio::error_code errorCode;
+        // Set  pre-connection platform options
+        _socket.open(resolverEntry.endpoint().protocol(), errorCode);
+
+        if (errorCode)
         {
-            SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Connecting to [{}]:{} ({})",
-                resolverEntry.host_name(),
-                resolverEntry.service_name(),
-                (resolverEntry.endpoint().protocol().family() == asio::ip::tcp::v4().family() ? "TCPv4" : "TCPv6")
-            );
-            // Set  pre-connection platform options
-            _socket.open(resolverEntry.endpoint().protocol());
-            SetConnectOptions(_logger, _socket);
-
-            _socket.connect(resolverEntry.endpoint());
-
-            if (config.middleware.tcpNoDelay)
-            {
-                _socket.set_option(asio::ip::tcp::no_delay{true});
-            }
-
-            if (config.middleware.tcpQuickAck)
-            {
-                _enableQuickAck = true;
-                EnableQuickAck(_logger, _socket);
-            }
-
-            if(config.middleware.tcpReceiveBufferSize > 0)
-            {
-                _socket.set_option(asio::socket_base::receive_buffer_size{config.middleware.tcpReceiveBufferSize});
-            }
-
-            if (config.middleware.tcpSendBufferSize > 0)
-            {
-                _socket.set_option(asio::socket_base::send_buffer_size{config.middleware.tcpSendBufferSize});
-            }
-
-
-            return true;
+            ResetTcpSocket(host, port, errorCode.message());
+            continue;
         }
-        catch (asio::system_error& err)
+        SetConnectOptions(_logger, _socket);
+
+        _socket.connect(resolverEntry.endpoint(), errorCode);
+        if (errorCode)
         {
-            // reset the socket
-            SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Error while connecting to '{}:{}': {}",
-                                             host, port, err.what());
-            _socket = decltype(_socket){_socket.get_executor()};
+            ResetTcpSocket(host, port, errorCode.message());
+            continue;
         }
+
+        if (config.middleware.tcpNoDelay)
+        {
+            _socket.set_option(asio::ip::tcp::no_delay{true}, errorCode);
+            if (errorCode)
+            {
+                ResetTcpSocket(host, port, errorCode.message());
+                continue;
+            }
+        }
+
+        if (config.middleware.tcpQuickAck)
+        {
+            _enableQuickAck = true;
+            EnableQuickAck(_logger, _socket);
+        }
+
+        if(config.middleware.tcpReceiveBufferSize > 0)
+        {
+            _socket.set_option(asio::socket_base::receive_buffer_size{config.middleware.tcpReceiveBufferSize},
+                               errorCode);
+            if (errorCode)
+            {
+                ResetTcpSocket(host, port, errorCode.message());
+                continue;
+            }
+        }
+
+        if (config.middleware.tcpSendBufferSize > 0)
+        {
+            _socket.set_option(asio::socket_base::send_buffer_size{config.middleware.tcpSendBufferSize},
+                               errorCode);
+            if (errorCode)
+            {
+                ResetTcpSocket(host, port, errorCode.message());
+                continue;
+            }
+        }
+
+        return true;
     }
     return false;
 }
-void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
+
+void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo, std::stringstream& attemptedUris, bool& success)
 {
     _info = std::move(peerInfo);
-
-    std::stringstream attemptedUris;
 
     // parse endpoints into Uri objects
     const auto& uriStrings = _info.acceptorUris;
@@ -344,6 +372,8 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
     std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris), [](const auto& uriStr) {
         return Uri::Parse(uriStr);
     });
+
+    success = true;
 
     // Attempt connecting via local-domain socket first
     if (_connection->Config().middleware.enableDomainSockets)
@@ -357,18 +387,11 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
             attemptedUris << uri.EncodedString() << ",";
 
-            try
+            if (ConnectLocal(uri.Path()))
             {
-                if (ConnectLocal(uri.Path()))
-                {
-                    return;
-                }
+                return;
             }
-            catch (...)
-            {
-                // reset the socket
-                _socket = decltype(_socket){_socket.get_executor()};
-            }
+            ResetSocket();
         }
     }
 
@@ -381,27 +404,18 @@ void VAsioTcpPeer::Connect(VAsioPeerInfo peerInfo)
 
         attemptedUris << uri.EncodedString() << ",";
 
-        try
+        if (ConnectTcp(uri.Host(), uri.Port()))
         {
-            if (ConnectTcp(uri.Host(), uri.Port()))
-            {
-                return;
-            }
+            return;
         }
-        catch (...)
-        {
-            // reset the socket
-            _socket = decltype(_socket){_socket.get_executor()};
-        }
+        ResetSocket();
     }
 
     if (!_socket.is_open())
     {
-        auto errorMsg = fmt::format("Failed to connect to host URIs: \"{}\"", attemptedUris.str());
         SilKit::Services::Logging::Debug(_logger, "Tried the following URIs: {}", attemptedUris.str());
-
-        throw SilKitError{errorMsg};
     }
+    success = false;
 }
 
 void VAsioTcpPeer::SendSilKitMsg(SerializedMessage buffer)
