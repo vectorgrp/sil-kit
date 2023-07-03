@@ -110,6 +110,14 @@ add_silkit_test(ITest_SingleParticipant
     S_ITests_STH
 )
 
+add_silkit_test(ITest_SameParticipants
+    SOURCES
+    ITest_SameParticipants.cpp
+
+    LIBS
+    S_ITests_STH
+)
+
 add_silkit_test(ITest_Internals_ServiceDiscovery
     SOURCES
       ITest_Internals_ServiceDiscovery.cpp
