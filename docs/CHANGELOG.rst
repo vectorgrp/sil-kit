@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.31] - UNRELEASED
+[4.0.31] - 2023-07-10
 ---------------------
 
 Added
@@ -31,6 +31,7 @@ Changed
 ~~~~~~~
 
 - CreateLifecycleService with OperationMode::Invalid now throws a ConfigurationError
+- Improved documentation on how to run demos in asynchronous mode
 
 
 [4.0.30] - 2023-06-26
