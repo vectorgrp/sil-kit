@@ -8,6 +8,7 @@ The SIL Kit uses the following third party software components which are governe
  3. Spdlog
  4. Fmtlib
  5. Yaml-cpp
+ 6. OATPP
 
 The full and unmodified license of each component is printed below.
 

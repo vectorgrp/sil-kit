@@ -10,7 +10,7 @@ API can be used:
 The build system is based on cmake.
 Supported target platforms and build tools:
 * Ubuntu 18.04 (GCC 7 or later)
-* Visual Studio 2015 / 2017
+* Visual Studio 2017
 
 ## Build Instructions
 
@@ -51,7 +51,7 @@ compilation.
   exported build of the SIL Kit. You can override this by providing your own
   SilKit::SilKit target in cmake.
 
-* **Windows: VisualStudio 2015 and VisualStudio 2017**
+* **Windows: Visual Studio 2017 and later**
   It is possible to use Visual Studio directly, without project files or
   solutions, thanks to the built-in CMake support.
   Open this directory in Explorer, right click and select 'open in Visual
