@@ -7,6 +7,18 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.32] - 2023-07-19
+---------------------
+
+This is a Quality Assured Release.
+
+Fixed
+~~~~~
+
+- Ensure that the registry rejects a connecting participant if a participant with the same name
+  is already connected.
+
+
 [4.0.31] - 2023-07-10
 ---------------------
 
