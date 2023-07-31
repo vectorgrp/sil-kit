@@ -47,7 +47,7 @@ target_link_libraries(O_SilKit_Core_RequestReply
     PUBLIC I_SilKit_Core_RequestReply
 )
 
-add_subdirectory(procedures)
+add_subdirectory(procs)
 
 add_silkit_test(Test_MwRequestReplyService
     SOURCES Test_RequestReplyService.cpp 

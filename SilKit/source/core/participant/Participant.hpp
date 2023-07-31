@@ -72,7 +72,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 // core/requests
 #include "RequestReplyService.hpp"
-#include "procedures/ParticipantReplies.hpp"
+#include "procs/ParticipantReplies.hpp"
 
 #include "ProtocolVersion.hpp"
 #include "TimeProvider.hpp"

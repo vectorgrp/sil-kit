@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "LifecycleService.hpp"
 #include "LifecycleManagement.hpp"
 #include "IRequestReplyService.hpp"
-#include "procedures/IParticipantReplies.hpp"
+#include "procs/IParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Services {

@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IRequestReplyProcedure.hpp"
 
 #include "Uuid.hpp"
-#include "procedures/ParticipantReplies.hpp"
+#include "procs/ParticipantReplies.hpp"
 
 namespace SilKit {
 namespace Core {

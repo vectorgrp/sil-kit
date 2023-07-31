@@ -703,7 +703,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, DISABLED_test_SyncCoordinatedNonReq_disallowed)
+TEST_F(ITest_ParticipantModes, test_SyncCoordinatedNonReq_disallowed)
 {
     RunRegistry();
 

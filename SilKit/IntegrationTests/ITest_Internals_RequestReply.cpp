@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
 
 #include "IRequestReplyService.hpp"
-#include "procedures/IParticipantReplies.hpp"
+#include "procs/IParticipantReplies.hpp"
 
 #include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"

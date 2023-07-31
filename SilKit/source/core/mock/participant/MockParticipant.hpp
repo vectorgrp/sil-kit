@@ -46,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "IRequestReplyService.hpp"
 #include "IRequestReplyProcedure.hpp"
-#include "procedures/IParticipantReplies.hpp"
+#include "procs/IParticipantReplies.hpp"
 #include "LifecycleService.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "MockTimeProvider.hpp"
