@@ -45,6 +45,9 @@ The SIL Kit ecosystem comprises the following turn-key solutions:
 * The `SIL Kit Adapter for SocketCAN <https://github.com/vectorgrp/sil-kit-adapters-vcan>`_
   can be used to attach a virtual CAN (Controller Area Network) interface (SocketCAN) to a Vector SIL Kit CAN bus.
 
+* The `SIL Kit FMU Importer <https://github.com/vectorgrp/sil-kit-fmu-importer>`_
+  allows to import Functional Mockup Units (FMUs) as SIL Kit participants.
+
 Getting Started - GIT Clone
 ----------------------------------------
 
