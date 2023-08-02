@@ -224,7 +224,8 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 {"TcpReceiveBufferSize"},
                 {"TcpSendBufferSize"},
                 {"EnableDomainSockets"},
-                {"AcceptorUris"}
+                {"AcceptorUris"},
+                {"RegistryAsFallbackProxy"},
             }
         }
     };

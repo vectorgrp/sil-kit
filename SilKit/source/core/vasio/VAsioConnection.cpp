@@ -844,8 +844,8 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
     }
 }
 
-bool VAsioConnection::TryCreatingProxy(std::shared_ptr<IVAsioConnectionPeer> directPeer,
-                                       std::shared_ptr<IVAsioConnectionPeer> peer,
+bool VAsioConnection::TryCreatingProxy(std::shared_ptr<VAsioTcpPeer>& directPeer,
+                                       std::shared_ptr<IVAsioConnectionPeer>& peer,
                                        const VAsioPeerInfo& peerInfo,
                                        const std::string& message)
 {

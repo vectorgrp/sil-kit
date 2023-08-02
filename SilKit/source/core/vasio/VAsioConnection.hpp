@@ -65,6 +65,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
+class VAsioTcpPeer; //fwd
+
 class VAsioConnection : public IVAsioPeerConnection
 {
 public:
@@ -208,8 +210,8 @@ public: //members
 private:
     template<typename AcceptorT, typename EndpointT>
     auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
-    bool TryCreatingProxy(std::shared_ptr<IVAsioConnectionPeer> directPeer,
-                          std::shared_ptr<IVAsioConnectionPeer> peer,
+    bool TryCreatingProxy(std::shared_ptr<VAsioTcpPeer>& directPeer,
+                          std::shared_ptr<IVAsioConnectionPeer>& peer,
                           const VAsioPeerInfo& peerInfo,
                           const std::string& message);
 
