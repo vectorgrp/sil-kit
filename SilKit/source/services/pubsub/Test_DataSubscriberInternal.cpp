@@ -40,7 +40,7 @@ using namespace SilKit;
 using namespace SilKit::Core;
 using namespace SilKit::Services::PubSub;
 
-class DataSubscriberInternalTest : public ::testing::Test
+class Test_DataSubscriberInternal : public ::testing::Test
 {
 protected:
     struct Callbacks
@@ -50,7 +50,7 @@ protected:
     };
 
 protected:
-    DataSubscriberInternalTest()
+    Test_DataSubscriberInternal()
         : subscriber{&participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr}
         , subscriberOther{&participant, participant.GetTimeProvider(), "Topic", {}, {}, {}, nullptr}
     {
@@ -71,7 +71,7 @@ protected:
     DataSubscriberInternal subscriberOther;
 };
 
-TEST_F(DataSubscriberInternalTest, trigger_default_data_handler)
+TEST_F(Test_DataSubscriberInternal, trigger_default_data_handler)
 {
     const WireDataMessageEvent msg{0ns, {0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u}};
 

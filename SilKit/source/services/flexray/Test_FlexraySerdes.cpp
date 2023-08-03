@@ -28,7 +28,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameEvent){
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -66,7 +66,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameEvent){
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.payload, out.frame.payload));
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -106,7 +106,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayFrameTransmitEvent) {
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.frame.payload, out.frame.payload));
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolEvent) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -125,7 +125,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolEvent) {
     EXPECT_EQ(in.pattern, out.pattern);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolTransmitEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexraySymbolTransmitEvent) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -144,7 +144,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexraySymbolTransmitEvent) {
     EXPECT_EQ(in.pattern, out.pattern);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayCycleStartEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayCycleStartEvent) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -161,7 +161,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayCycleStartEvent) {
     EXPECT_EQ(in.cycleCounter, out.cycleCounter);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayHostCommand) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayHostCommand) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -176,7 +176,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayHostCommand) {
     EXPECT_EQ(in.command, out.command);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayControllerConfig) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayControllerConfig) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -301,7 +301,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayControllerConfig) {
     }
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -324,7 +324,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferConfigUpdate) {
     EXPECT_EQ(in.txBufferConfig, out.txBufferConfig);
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayTxBufferUpdate) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 
@@ -343,7 +343,7 @@ TEST(MwVAsioSerdes, SimFlexray_FlexrayTxBufferUpdate) {
     EXPECT_TRUE(SilKit::Util::ItemsAreEqual(in.payload, out.payload));
 }
 
-TEST(MwVAsioSerdes, SimFlexray_FlexrayPocStatusEvent) {
+TEST(Test_FlexraySerdes, SimFlexray_FlexrayPocStatusEvent) {
     using namespace SilKit::Services::Flexray;
     SilKit::Core::MessageBuffer buffer;
 

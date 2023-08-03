@@ -66,10 +66,10 @@ public:
     MOCK_METHOD(void, RemoveCycleStartHandler, (SilKit::Services::HandlerId));
 };
 
-class CapiFlexrayTest : public testing::Test
+class Test_CapiFlexray : public testing::Test
 {
 public:
-    CapiFlexrayTest() {}
+    Test_CapiFlexray() {}
 
     void SetUp() override {}
     void TearDown() override {}
@@ -119,7 +119,7 @@ protected:
     MockFlexrayController mockController;
 };
 
-TEST_F(CapiFlexrayTest, make_flexray_controller)
+TEST_F(Test_CapiFlexray, make_flexray_controller)
 {
     SilKit_ReturnCode returnCode;
     SilKit_FlexrayController* frController = nullptr;
@@ -132,7 +132,7 @@ TEST_F(CapiFlexrayTest, make_flexray_controller)
     //EXPECT_NE(frController, nullptr);
 }
 
-TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
+TEST_F(Test_CapiFlexray, fr_controller_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     SilKit_FlexrayClusterParameters clusterParameters;
@@ -244,7 +244,7 @@ TEST_F(CapiFlexrayTest, fr_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiFlexrayTest, fr_controller_nullpointer_params)
+TEST_F(Test_CapiFlexray, fr_controller_nullpointer_params)
 {
     auto cMockParticipant = (SilKit_Participant*)&participant;
     SilKit_ReturnCode returnCode;

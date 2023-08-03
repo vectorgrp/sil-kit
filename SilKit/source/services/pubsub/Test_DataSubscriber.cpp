@@ -55,7 +55,7 @@ public:
                 (override));
 };
 
-class DataSubscriberTest : public ::testing::Test
+class Test_DataSubscriber : public ::testing::Test
 {
 protected:
     struct Callbacks
@@ -66,7 +66,7 @@ protected:
     };
 
 protected:
-    DataSubscriberTest()
+    Test_DataSubscriber()
         : subscriber{&participant,
                      {},
                      participant.GetTimeProvider(), matchingDataSpec,

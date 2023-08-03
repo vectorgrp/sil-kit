@@ -38,11 +38,11 @@ namespace {
 using namespace SilKit::Services::Rpc;
 using namespace SilKit::Services::Rpc::Tests;
 
-class RpcServerTest : public RpcTestBase
+class Test_RpcServer : public RpcTestBase
 {
 };
 
-TEST_F(RpcServerTest, rpc_server_call_response_sends_message_with_timestamp_and_data)
+TEST_F(Test_RpcServer, rpc_server_call_response_sends_message_with_timestamp_and_data)
 {
     SilKit::Core::Tests::MockTimeProvider fixedTimeProvider;
     fixedTimeProvider.now = std::chrono::nanoseconds{123456};

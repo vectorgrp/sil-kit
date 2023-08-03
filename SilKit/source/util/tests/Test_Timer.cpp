@@ -28,7 +28,7 @@ namespace {
 
 using namespace std::chrono_literals;
 
-TEST(UtilsTimerTest, ensure_util_timer_works)
+TEST(Test_Timer, ensure_util_timer_works)
 {
     {
         //Make sure DTor is able to stop a running timer

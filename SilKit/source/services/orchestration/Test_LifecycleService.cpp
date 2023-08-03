@@ -85,7 +85,7 @@ auto AParticipantStatusWithState(ParticipantState expected)
     return MatcherCast<const ParticipantStatus&>(Field(&ParticipantStatus::state, expected));
 }
 
-class LifecycleServiceTest : public testing::Test
+class Test_LifecycleService : public testing::Test
 {
 protected:
     struct Callbacks
@@ -134,7 +134,7 @@ auto StartAutonomous()
     return sc;
 }
 
-TEST_F(LifecycleServiceTest, autonomous_must_not_react_to_system_states)
+TEST_F(Test_LifecycleService, autonomous_must_not_react_to_system_states)
 {
     LifecycleConfiguration lc{OperationMode::Autonomous};
     LifecycleService lifecycleService(&participant);
@@ -204,7 +204,7 @@ TEST_F(LifecycleServiceTest, autonomous_must_not_react_to_system_states)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Running);
 }
 
-TEST_F(LifecycleServiceTest, start_stop_autonomous)
+TEST_F(Test_LifecycleService, start_stop_autonomous)
 {
     LifecycleConfiguration lc{OperationMode::Autonomous};
     LifecycleService lifecycleService(&participant);
@@ -252,7 +252,7 @@ TEST_F(LifecycleServiceTest, start_stop_autonomous)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, start_stop_coordinated_self_stop)
+TEST_F(Test_LifecycleService, start_stop_coordinated_self_stop)
 {
     // Intended state order: Create, ..., start, stop, create, start, stop, shutdown
     LifecycleService lifecycleService(&participant);
@@ -328,7 +328,7 @@ TEST_F(LifecycleServiceTest, start_stop_coordinated_self_stop)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, start_stop_coordinated_external_stop)
+TEST_F(Test_LifecycleService, start_stop_coordinated_external_stop)
 {
     // Intended state order: Create, ..., start, stop, create, start, stop, shutdown
     LifecycleService lifecycleService(&participant);
@@ -390,7 +390,7 @@ TEST_F(LifecycleServiceTest, start_stop_coordinated_external_stop)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, error_on_double_pause)
+TEST_F(Test_LifecycleService, error_on_double_pause)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -432,7 +432,7 @@ TEST_F(LifecycleServiceTest, error_on_double_pause)
 
 
 
-TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
+TEST_F(Test_LifecycleService, error_handling_run_run_shutdown)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -478,7 +478,7 @@ TEST_F(LifecycleServiceTest, error_handling_run_run_shutdown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
-TEST_F(LifecycleServiceTest, error_handling_exception_in_stop_callback)
+TEST_F(Test_LifecycleService, error_handling_exception_in_stop_callback)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -536,7 +536,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_stop_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_BeforeLifecycleStart)
+TEST_F(Test_LifecycleService, Abort_BeforeLifecycleStart)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -584,7 +584,7 @@ TEST_F(LifecycleServiceTest, Abort_BeforeLifecycleStart)
     EXPECT_EQ(finalState, ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_AfterLifecycleStart)
+TEST_F(Test_LifecycleService, Abort_AfterLifecycleStart)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -638,7 +638,7 @@ TEST_F(LifecycleServiceTest, Abort_AfterLifecycleStart)
     EXPECT_EQ(finalState, ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
+TEST_F(Test_LifecycleService, Abort_CommunicationReady_Callback)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -692,7 +692,7 @@ TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
+TEST_F(Test_LifecycleService, Abort_ReadyToRun)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -742,7 +742,7 @@ TEST_F(LifecycleServiceTest, Abort_ReadyToRun)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_Starting)
+TEST_F(Test_LifecycleService, Abort_Starting)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartAutonomous());
@@ -793,7 +793,7 @@ TEST_F(LifecycleServiceTest, Abort_Starting)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_Running)
+TEST_F(Test_LifecycleService, Abort_Running)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -849,7 +849,7 @@ TEST_F(LifecycleServiceTest, Abort_Running)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_Paused)
+TEST_F(Test_LifecycleService, Abort_Paused)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -912,7 +912,7 @@ TEST_F(LifecycleServiceTest, Abort_Paused)
 }
 
 
-TEST_F(LifecycleServiceTest, Abort_Stopping)
+TEST_F(Test_LifecycleService, Abort_Stopping)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -976,7 +976,7 @@ TEST_F(LifecycleServiceTest, Abort_Stopping)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
+TEST_F(Test_LifecycleService, Abort_ShuttingDown)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -1039,7 +1039,7 @@ TEST_F(LifecycleServiceTest, Abort_ShuttingDown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_Shutdown)
+TEST_F(Test_LifecycleService, Abort_Shutdown)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -1093,7 +1093,7 @@ TEST_F(LifecycleServiceTest, Abort_Shutdown)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_Aborting)
+TEST_F(Test_LifecycleService, Abort_Aborting)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -1142,7 +1142,7 @@ TEST_F(LifecycleServiceTest, Abort_Aborting)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
-TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
+TEST_F(Test_LifecycleService, Abort_LifecycleNotExecuted)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -1183,7 +1183,7 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 }
 
-TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
+TEST_F(Test_LifecycleService, error_handling_exception_in_starting_callback)
 {
     LifecycleService lifecycleService(&participant);
     lifecycleService.SetLifecycleConfiguration(StartCoordinated());
@@ -1218,7 +1218,7 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
 }
 
-TEST_F(LifecycleServiceTest, async_comm_ready_handler)
+TEST_F(Test_LifecycleService, async_comm_ready_handler)
 {
     // Goal: ensure that the basic calls to SetCommunicationReadyHandlerAsync() and
     // CompleteCommunicationReadyHandler() are working as expected.
@@ -1271,7 +1271,7 @@ TEST_F(LifecycleServiceTest, async_comm_ready_handler)
     ASSERT_EQ(lifecycleService.State(), ParticipantState::ReadyToRun);
 }
 
-TEST_F(LifecycleServiceTest, error_on_create_time_sync_service_twice)
+TEST_F(Test_LifecycleService, error_on_create_time_sync_service_twice)
 {
     // Goal: make sure that CreateTimeSync cannot be called more than once (must throw exception)
     LifecycleService lifecycleService(&participant);
@@ -1302,7 +1302,7 @@ TEST_F(LifecycleServiceTest, error_on_create_time_sync_service_twice)
         ConfigurationError);
 }
 
-TEST_F(LifecycleServiceTest, error_on_coordinated_not_required)
+TEST_F(Test_LifecycleService, error_on_coordinated_not_required)
 {
     // Goal: make sure that the lifecycleService throws an exception if it is first 
     // set to be coordinated and then receives a required participant list without its own name
@@ -1316,7 +1316,7 @@ TEST_F(LifecycleServiceTest, error_on_coordinated_not_required)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 }
 
-TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)
+TEST_F(Test_LifecycleService, error_on_not_required_coordinated)
 {
     // Goal: make sure that the lifecycleService throws an exception if it first 
     // receives a required participant list without its own name and is then set to be coordinated

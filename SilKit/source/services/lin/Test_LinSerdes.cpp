@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsioSerdes, SimLin_Frame)
+TEST(Test_LinSerdes, SimLin_Frame)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -46,7 +46,7 @@ TEST(MwVAsioSerdes, SimLin_Frame)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
+TEST(Test_LinSerdes, SimLin_SendFrameRequest)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -66,7 +66,7 @@ TEST(MwVAsioSerdes, SimLin_SendFrameRequest)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
+TEST(Test_LinSerdes, SimLin_SendFrameHeaderRequest)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -82,7 +82,7 @@ TEST(MwVAsioSerdes, SimLin_SendFrameHeaderRequest)
 
     EXPECT_EQ(in, out);
 }
-TEST(MwVAsioSerdes, SimLin_Transmission)
+TEST(Test_LinSerdes, SimLin_Transmission)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -103,7 +103,7 @@ TEST(MwVAsioSerdes, SimLin_Transmission)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_WakeupPulse)
+TEST(Test_LinSerdes, SimLin_WakeupPulse)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -119,7 +119,7 @@ TEST(MwVAsioSerdes, SimLin_WakeupPulse)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_FrameResponse)
+TEST(Test_LinSerdes, SimLin_FrameResponse)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -139,7 +139,7 @@ TEST(MwVAsioSerdes, SimLin_FrameResponse)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_ControllerConfig)
+TEST(Test_LinSerdes, SimLin_ControllerConfig)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -169,7 +169,7 @@ TEST(MwVAsioSerdes, SimLin_ControllerConfig)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
+TEST(Test_LinSerdes, SimLin_ControllerStatusUpdate)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;
@@ -186,7 +186,7 @@ TEST(MwVAsioSerdes, SimLin_ControllerStatusUpdate)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimLin_FrameResponseUpdate)
+TEST(Test_LinSerdes, SimLin_FrameResponseUpdate)
 {
     using namespace SilKit::Services::Lin;
     SilKit::Core::MessageBuffer buffer;

@@ -112,12 +112,12 @@ MATCHER_P(LinFrameMatcher, controlFrame, "")
     return true;
 }
 
-class HourglassLinTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassLin : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_LinController* mockLinController{reinterpret_cast<SilKit_LinController*>(uintptr_t(0x12345678))};
 
-    HourglassLinTest()
+    Test_HourglassLin()
     {
         using testing::_;
         ON_CALL(capi, SilKit_LinController_Create(_, _, _, _))
@@ -125,7 +125,7 @@ public:
     }
 };
 
-TEST_F(HourglassLinTest, SilKit_LinController_Create)
+TEST_F(Test_HourglassLin, SilKit_LinController_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     std::string name = "LinController1";
@@ -138,7 +138,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_Create)
                                                                                                   network);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_Init)
+TEST_F(Test_HourglassLin, SilKit_LinController_Init)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -153,7 +153,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_Init)
     LinController.Init(controllerConfig);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_InitDynamic)
+TEST_F(Test_HourglassLin, SilKit_LinController_InitDynamic)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -167,7 +167,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_InitDynamic)
     LinController.ExperimentalInitDynamic(controllerConfig);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_Status)
+TEST_F(Test_HourglassLin, SilKit_LinController_Status)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -176,7 +176,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_Status)
     LinController.Status();
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_SendFrame)
+TEST_F(Test_HourglassLin, SilKit_LinController_SendFrame)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -193,7 +193,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_SendFrame)
     LinController.SendFrame(frame, LinFrameResponseType::MasterResponse);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_SendFrameHeader)
+TEST_F(Test_HourglassLin, SilKit_LinController_SendFrameHeader)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -202,7 +202,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_SendFrameHeader)
     LinController.SendFrameHeader(3);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_UpdateTxBuffer)
+TEST_F(Test_HourglassLin, SilKit_LinController_UpdateTxBuffer)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -217,7 +217,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_UpdateTxBuffer)
     LinController.UpdateTxBuffer(frame);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_GoToSleep)
+TEST_F(Test_HourglassLin, SilKit_LinController_GoToSleep)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -226,7 +226,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_GoToSleep)
     LinController.GoToSleep();
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_GoToSleepInternal)
+TEST_F(Test_HourglassLin, SilKit_LinController_GoToSleepInternal)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -235,7 +235,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_GoToSleepInternal)
     LinController.GoToSleepInternal();
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_Wakeup)
+TEST_F(Test_HourglassLin, SilKit_LinController_Wakeup)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -244,7 +244,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_Wakeup)
     LinController.Wakeup();
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_WakeupInternal)
+TEST_F(Test_HourglassLin, SilKit_LinController_WakeupInternal)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -253,7 +253,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_WakeupInternal)
     LinController.WakeupInternal();
 }
 
-TEST_F(HourglassLinTest, SilKit_Experimental_LinController_GetSlaveConfiguration)
+TEST_F(Test_HourglassLin, SilKit_Experimental_LinController_GetSlaveConfiguration)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -263,7 +263,7 @@ TEST_F(HourglassLinTest, SilKit_Experimental_LinController_GetSlaveConfiguration
     SilKit::Experimental::Services::Lin::GetSlaveConfiguration(&LinController);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_AddFrameStatusHandler)
+TEST_F(Test_HourglassLin, SilKit_LinController_AddFrameStatusHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -273,7 +273,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_AddFrameStatusHandler)
     LinController.AddFrameStatusHandler(nullptr);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_RemoveFrameStatusHandler)
+TEST_F(Test_HourglassLin, SilKit_LinController_RemoveFrameStatusHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -282,7 +282,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_RemoveFrameStatusHandler)
     LinController.RemoveFrameStatusHandler({});
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_AddGoToSleepHandler)
+TEST_F(Test_HourglassLin, SilKit_LinController_AddGoToSleepHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -292,7 +292,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_AddGoToSleepHandler)
     LinController.AddGoToSleepHandler(nullptr);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_RemoveGoToSleepHandler)
+TEST_F(Test_HourglassLin, SilKit_LinController_RemoveGoToSleepHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -301,7 +301,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_RemoveGoToSleepHandler)
     LinController.RemoveGoToSleepHandler({});
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_AddWakeupHandler)
+TEST_F(Test_HourglassLin, SilKit_LinController_AddWakeupHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -311,7 +311,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_AddWakeupHandler)
     LinController.AddWakeupHandler(nullptr);
 }
 
-TEST_F(HourglassLinTest, SilKit_LinController_RemoveWakeupHandler)
+TEST_F(Test_HourglassLin, SilKit_LinController_RemoveWakeupHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -320,7 +320,7 @@ TEST_F(HourglassLinTest, SilKit_LinController_RemoveWakeupHandler)
     LinController.RemoveWakeupHandler({});
 }
 
-TEST_F(HourglassLinTest, SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler)
+TEST_F(Test_HourglassLin, SilKit_Experimental_LinController_AddLinSlaveConfigurationHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");
@@ -331,7 +331,7 @@ TEST_F(HourglassLinTest, SilKit_Experimental_LinController_AddLinSlaveConfigurat
     SilKit::Experimental::Services::Lin::AddLinSlaveConfigurationHandler(&LinController, {});
 }
 
-TEST_F(HourglassLinTest, SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler)
+TEST_F(Test_HourglassLin, SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Lin::LinController LinController(
         nullptr, "LinController1", "LinNetwork1");

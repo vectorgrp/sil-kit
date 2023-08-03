@@ -84,10 +84,10 @@ public:
 };
 
 
-class RequestReplyServiceTests : public testing::Test
+class Test_RequestReplyService : public testing::Test
 {
 protected:
-    RequestReplyServiceTests()
+    Test_RequestReplyService()
     {
     }
 
@@ -97,7 +97,7 @@ protected:
 };
 
 // RCP flow 1/4: Client: Call() sends out RequestReplyCall
-TEST_F(RequestReplyServiceTests, test_call)
+TEST_F(Test_RequestReplyService, test_call)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
     RequestReplyService reqReplService{
@@ -118,7 +118,7 @@ TEST_F(RequestReplyServiceTests, test_call)
 }
 
 // RCP flow 2/4: Server: Receive a RequestReplyCall and route to procedure
-TEST_F(RequestReplyServiceTests, test_functiontype_route_call_to_participantreplies)
+TEST_F(Test_RequestReplyService, test_functiontype_route_call_to_participantreplies)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
     RequestReplyService reqReplService{
@@ -143,7 +143,7 @@ TEST_F(RequestReplyServiceTests, test_functiontype_route_call_to_participantrepl
 }
 
 // RCP flow 3/4: Server: Reveice a RequestReplyCall; SubmitCallReturn() sends out RequestReplyCallReturn 
-TEST_F(RequestReplyServiceTests, test_submitcallreturn)
+TEST_F(Test_RequestReplyService, test_submitcallreturn)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
     RequestReplyService reqReplService{
@@ -183,7 +183,7 @@ TEST_F(RequestReplyServiceTests, test_submitcallreturn)
 }
 
 // RCP flow 4/4: Client: Receive a RequestReplyCallReturn and route to procedure
-TEST_F(RequestReplyServiceTests, test_functiontype_route_callreturn_to_participantreplies)
+TEST_F(Test_RequestReplyService, test_functiontype_route_callreturn_to_participantreplies)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
     RequestReplyService reqReplService{
@@ -206,7 +206,7 @@ TEST_F(RequestReplyServiceTests, test_functiontype_route_callreturn_to_participa
 }
 
 // Call() for two participants, disconnects should trigger a RequestReplyCallReturn in the procedure
-TEST_F(RequestReplyServiceTests, test_disconnect_during_call)
+TEST_F(Test_RequestReplyService, test_disconnect_during_call)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
     RequestReplyService reqReplService{
@@ -240,7 +240,7 @@ TEST_F(RequestReplyServiceTests, test_disconnect_during_call)
     reqReplService.OnParticpantRemoval("P2");
 }
 
-TEST_F(RequestReplyServiceTests, test_unknown_function_type)
+TEST_F(Test_RequestReplyService, test_unknown_function_type)
 {
     EXPECT_CALL(_participantReplies, SetRequestReplyServiceEndpoint(_));
     RequestReplyService reqReplService{

@@ -86,7 +86,7 @@ auto AGenericMessage(const GenericMessage& msg) -> testing::Matcher<const Generi
     return Field(&GenericMessage::data, Eq(msg.data));
 }
 
-TEST(ReplayTest, ensure_util_timer_works)
+TEST(Test_Replay, ensure_util_timer_works)
 {
 
     {
@@ -184,7 +184,7 @@ struct MockEthFrame
     }
 };
 
-TEST(ReplayTest, ethcontroller_replay_config_send)
+TEST(Test_Replay, ethcontroller_replay_config_send)
 {
     MockParticipant participant{};
 
@@ -232,7 +232,7 @@ TEST(ReplayTest, ethcontroller_replay_config_send)
 }
 
 
-TEST(ReplayTest, ethcontroller_replay_config_receive)
+TEST(Test_Replay, ethcontroller_replay_config_receive)
 {
     Callbacks callbacks;
     MockParticipant participant{};
@@ -301,7 +301,7 @@ struct MockCanMessage
     }
 };
 
-TEST(ReplayTest, DISABLED_cancontroller_replay_config_send)
+TEST(Test_Replay, DISABLED_cancontroller_replay_config_send)
 {
     MockParticipant participant{};
 
@@ -372,7 +372,7 @@ TEST(ReplayTest, DISABLED_cancontroller_replay_config_send)
     }
 }
 
-TEST(ReplayTest, DISABLED_cancontroller_replay_config_receive)
+TEST(Test_Replay, DISABLED_cancontroller_replay_config_receive)
 {
     Callbacks callbacks;
     MockParticipant participant{};
@@ -436,7 +436,7 @@ struct MockGenericMessage
     }
 };
 
-TEST(ReplayTest, genericpublisher_replay_config_send)
+TEST(Test_Replay, genericpublisher_replay_config_send)
 {
     MockParticipant participant{};
 
@@ -495,7 +495,7 @@ TEST(ReplayTest, genericpublisher_replay_config_send)
     }
 }
 
-TEST(ReplayTest, genericsubscriber_replay_config_send)
+TEST(Test_Replay, genericsubscriber_replay_config_send)
 {
     MockParticipant participant{};
 

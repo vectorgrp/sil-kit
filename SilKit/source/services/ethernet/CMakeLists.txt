@@ -57,7 +57,7 @@ target_link_libraries(O_SilKit_Services_Ethernet
     PRIVATE SilKitInterface
 )
 
-add_silkit_test(Test_SimEthController
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES 
         Test_EthControllerTrivialSim.cpp
         Test_EthControllerDetailedSim.cpp
@@ -67,4 +67,4 @@ add_silkit_test(Test_SimEthController
         I_SilKit_Core_Mock_Participant
         O_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimEthernet_Serdes  SOURCES Test_EthernetSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_EthernetSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)

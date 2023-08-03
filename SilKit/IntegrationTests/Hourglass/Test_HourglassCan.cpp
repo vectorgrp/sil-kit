@@ -101,12 +101,12 @@ MATCHER_P(CanFrameMatcher, controlFrame, "")
     return true;
 }
 
-class HourglassCanTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassCan : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_CanController* mockCanController{reinterpret_cast<SilKit_CanController*>(uintptr_t(0x12345678))};
 
-    HourglassCanTest()
+    Test_HourglassCan()
     {
         using testing::_;
         ON_CALL(capi, SilKit_CanController_Create(_, _, _, _))
@@ -114,7 +114,7 @@ public:
     }
 };
 
-TEST_F(HourglassCanTest, SilKit_CanController_Create)
+TEST_F(Test_HourglassCan, SilKit_CanController_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     std::string name = "CanController1";
@@ -127,7 +127,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_Create)
                                                                                                   network);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_Start)
+TEST_F(Test_HourglassCan, SilKit_CanController_Start)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -136,7 +136,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_Start)
     canController.Start();
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_Stop)
+TEST_F(Test_HourglassCan, SilKit_CanController_Stop)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -145,7 +145,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_Stop)
     canController.Stop();
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_Reset)
+TEST_F(Test_HourglassCan, SilKit_CanController_Reset)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -154,7 +154,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_Reset)
     canController.Reset();
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_Sleep)
+TEST_F(Test_HourglassCan, SilKit_CanController_Sleep)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -163,7 +163,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_Sleep)
     canController.Sleep();
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_SendFrame)
+TEST_F(Test_HourglassCan, SilKit_CanController_SendFrame)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -175,7 +175,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_SendFrame)
     canController.SendFrame(frame, userContext);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_SetBaudRate)
+TEST_F(Test_HourglassCan, SilKit_CanController_SetBaudRate)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -184,7 +184,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_SetBaudRate)
     canController.SetBaudRate(12345, 23456, 34567);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_AddFrameTransmitHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_AddFrameTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -196,7 +196,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_AddFrameTransmitHandler)
                                                        SilKit::Services::Can::CanTransmitStatus::Transmitted));
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_RemoveFrameTransmitHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_RemoveFrameTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -206,7 +206,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_RemoveFrameTransmitHandler)
     canController.RemoveFrameTransmitHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_AddFrameHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_AddFrameHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -218,7 +218,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_AddFrameHandler)
         nullptr, static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TXRX));
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_RemoveFrameHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_RemoveFrameHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -228,7 +228,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_RemoveFrameHandler)
     canController.RemoveFrameHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_AddStateChangeHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_AddStateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -238,7 +238,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_AddStateChangeHandler)
     canController.AddStateChangeHandler(nullptr);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_RemoveStateChangeHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_RemoveStateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -248,7 +248,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_RemoveStateChangeHandler)
     canController.RemoveStateChangeHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_AddErrorStateChangeHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_AddErrorStateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");
@@ -259,7 +259,7 @@ TEST_F(HourglassCanTest, SilKit_CanController_AddErrorStateChangeHandler)
     canController.AddErrorStateChangeHandler(nullptr);
 }
 
-TEST_F(HourglassCanTest, SilKit_CanController_RemoveErrorStateChangeHandler)
+TEST_F(Test_HourglassCan, SilKit_CanController_RemoveErrorStateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Can::CanController canController(
         nullptr, "CanController1", "CanNetwork1");

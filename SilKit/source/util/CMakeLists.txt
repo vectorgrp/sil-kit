@@ -105,7 +105,7 @@ add_library(O_SilKit_Util_LabelMatching OBJECT
 target_include_directories(O_SilKit_Util_LabelMatching INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(O_SilKit_Util_LabelMatching PRIVATE I_SilKit_Util_LabelMatching)
 
-add_silkit_test(Test_LabelMatching
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_LabelMatching.cpp 
     LIBS O_SilKit_Util_LabelMatching
 )

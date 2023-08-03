@@ -34,10 +34,10 @@ namespace {
 using namespace SilKit::Core;
 using namespace SilKit::Services::Flexray;
 
-class FlexrayControllerConfigTest : public testing::Test
+class Test_FlexrayControllerConfig : public testing::Test
 {
 public:
-    FlexrayControllerConfigTest(){};
+    Test_FlexrayControllerConfig(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -57,7 +57,7 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::Partic
     return mockConfig;
 }
 
-TEST(FlexrayControllerConfigTest, create_controller_configured_no_network)
+TEST(Test_FlexrayControllerConfig, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -74,7 +74,7 @@ TEST(FlexrayControllerConfigTest, create_controller_configured_no_network)
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(FlexrayControllerConfigTest, create_controller_configured_with_network)
+TEST(Test_FlexrayControllerConfig, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";

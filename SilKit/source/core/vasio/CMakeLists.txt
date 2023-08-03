@@ -122,17 +122,16 @@ if(MINGW)
     target_link_libraries(O_SilKit_Core_VAsio PUBLIC -lwsock32 -lws2_32) #windows socket/ wsa
 endif()
 
-add_silkit_test(Test_MwVAsioConnection SOURCES Test_VAsioConnection.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioConnection.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
 
-add_silkit_test(Test_MwVAsio_Serdes  SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)
-add_silkit_test(Test_MwVAsio_SerializedMessage  SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
-add_silkit_test(Test_MwVAsio_Uri  SOURCES Test_Uri.cpp LIBS S_SilKitImpl)
-add_silkit_test(Test_MwVAsio_TransformAcceptorUris  SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKitImpl)
-add_silkit_test(Test_VAsioCapabilities SOURCES Test_VAsioCapabilities.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioSerdes.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SerializedMessage.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Uri.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TransformAcceptorUris.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_VAsioCapabilities.cpp LIBS S_SilKitImpl)
 
 # Testing interoperability between different protocol versions requires testing on a higher level:
 # We instantiate a complete Participant<VAsioConnection> with a specific version
 # and do integration tests here
-add_silkit_test(ITest_ParticipantVersion SOURCES Test_ParticipantVersion.cpp LIBS S_SilKitImpl S_ITests_STH)
-
-add_silkit_test(Test_TracingMacrosDetails SOURCES io/util/Test_TracingMacrosDetails.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ParticipantVersion.cpp LIBS S_SilKitImpl S_ITests_STH)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES io/util/Test_TracingMacrosDetails.cpp LIBS S_SilKitImpl)

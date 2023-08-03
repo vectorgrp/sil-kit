@@ -94,7 +94,7 @@ else()
     message(FATAL_ERROR "ERROR: unsupported platform for NamedPipe!")
 endif()
 
-#XXX not viable, yet: add_silkit_test(Test_Replay SOURCES Test_Replay.cpp LIBS I_SilKit_Core_Mock_Participant O_SilKit_Tracing )
-add_silkit_test(Test_Pcap SOURCES Test_Pcap.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
+#XXX not viable, yet: add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Replay.cpp LIBS I_SilKit_Core_Mock_Participant O_SilKit_Tracing )
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_Pcap.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_EthernetReplay.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant S_SilKitImpl)
 
-add_silkit_test(Test_EthernetReplay SOURCES Test_EthernetReplay.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant S_SilKitImpl)

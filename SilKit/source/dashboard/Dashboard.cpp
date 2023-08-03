@@ -23,10 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <chrono>
 
-#include "oatpp/core/macro/component.hpp"
-#include "oatpp/web/client/HttpRequestExecutor.hpp"
-#include "oatpp/network/ConnectionProvider.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "OatppHeaders.hpp"
 
 #include "silkit/SilKit.hpp"
 #include "silkit/config/IParticipantConfiguration.hpp"

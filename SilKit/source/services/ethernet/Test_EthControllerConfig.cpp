@@ -34,10 +34,10 @@ namespace {
 using namespace SilKit::Core;
 using namespace SilKit::Services::Ethernet;
 
-class EthernetControllerConfigTest : public testing::Test
+class Test_EthControllerConfig : public testing::Test
 {
 public:
-    EthernetControllerConfigTest(){};
+    Test_EthControllerConfig(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -57,7 +57,7 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::Partic
     return mockConfig;
 }
 
-TEST(EthernetControllerConfigTest, create_controller_configured_no_network)
+TEST(Test_EthControllerConfig, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -74,7 +74,7 @@ TEST(EthernetControllerConfigTest, create_controller_configured_no_network)
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(EthernetControllerConfigTest, create_controller_configured_with_network)
+TEST(Test_EthControllerConfig, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";

@@ -93,6 +93,7 @@ void SilKitEventHandler::OnServiceDiscoveryEvent(uint64_t simulationId,
                                                  Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                                  const Core::ServiceDescriptor& serviceDescriptor)
 {
+    SILKIT_UNUSED_ARG(discoveryType);
     switch (serviceDescriptor.GetServiceType())
     {
     case Core::ServiceType::Controller: OnControllerCreated(simulationId, serviceDescriptor); break;

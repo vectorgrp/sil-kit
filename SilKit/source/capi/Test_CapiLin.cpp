@@ -81,17 +81,17 @@ void SilKitCALL CFrameHeaderHandler(void* /*context*/, SilKit_LinController* /*c
 void SilKitCALL CLinSlaveConfigurationHandler(void* /*context*/, SilKit_LinController* /*controller*/,
                                    const SilKit_Experimental_LinSlaveConfigurationEvent* /*slaveConfigurationEvent*/) { }
 
-class CapiLinTest : public testing::Test
+class Test_CapiLin : public testing::Test
 {
 public:
-    CapiLinTest() {}
+    Test_CapiLin() {}
 
 protected:
     MockLinController mockController;
     SilKit::Core::Tests::DummyParticipant mockParticipant;
 };
 
-TEST_F(CapiLinTest, lin_controller_function_mapping)
+TEST_F(Test_CapiLin, lin_controller_function_mapping)
 {
     using SilKit::Util::HandlerId;
 
@@ -209,7 +209,7 @@ TEST_F(CapiLinTest, lin_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiLinTest, lin_controller_nullpointer_params)
+TEST_F(Test_CapiLin, lin_controller_nullpointer_params)
 {
     SilKit_HandlerId handlerId;
     SilKit_ReturnCode returnCode;

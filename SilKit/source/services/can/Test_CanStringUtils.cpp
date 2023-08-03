@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(TestSimCan_StringUtils, CanFrameFlag_to_string_and_ostream_same_result)
+TEST(Test_CanStringUtils, CanFrameFlag_to_string_and_ostream_same_result)
 {
     for (uint32_t bit = 0; bit != 32; ++bit)
     {
@@ -42,7 +42,7 @@ TEST(TestSimCan_StringUtils, CanFrameFlag_to_string_and_ostream_same_result)
     }
 }
 
-TEST(TestSimCan_StringUtils, CanFrameFlag_known_flags_do_not_produce_unkown_string)
+TEST(Test_CanStringUtils, CanFrameFlag_known_flags_do_not_produce_unkown_string)
 {
     EXPECT_EQ(to_string(SilKit::Services::Can::CanFrameFlag::Ide).find("unknown("), std::string::npos);
     EXPECT_EQ(to_string(SilKit::Services::Can::CanFrameFlag::Rtr).find("unknown("), std::string::npos);
@@ -53,7 +53,7 @@ TEST(TestSimCan_StringUtils, CanFrameFlag_known_flags_do_not_produce_unkown_stri
     EXPECT_EQ(to_string(SilKit::Services::Can::CanFrameFlag::Sec).find("unknown("), std::string::npos);
 }
 
-TEST(TestSimCan_StringUtils, CanFrameFlag_unknown_flags_produce_unkown_string)
+TEST(Test_CanStringUtils, CanFrameFlag_unknown_flags_produce_unkown_string)
 {
     using SilKit::Services::Can::CanFrameFlag;
 

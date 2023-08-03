@@ -37,7 +37,7 @@ using testing::SetArgPointee;
 using testing::StrEq;
 using testing::Return;
 
-class HourglassVendorTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassVendor : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_ParticipantConfiguration* mockParticipantConfiguration{
@@ -46,7 +46,7 @@ public:
         reinterpret_cast<SilKit_Vendor_Vector_SilKitRegistry*>(uintptr_t(0x12345678))};
     SilKit_Logger* mockLogger{reinterpret_cast<SilKit_Logger*>(uintptr_t(0x21436587))};
 
-    HourglassVendorTest()
+    Test_HourglassVendor()
     {
         using testing::_;
         ON_CALL(capi, SilKit_ParticipantConfiguration_FromString(_, _))
@@ -60,7 +60,7 @@ public:
 
 // LifecycleService
 
-TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_Create_Destroy)
+TEST_F(Test_HourglassVendor, SilKit_Vendor_Vector_SilKitRegistry_Create_Destroy)
 {
     auto cppParticipantConfiguration =
         std::make_shared<SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Config::ParticipantConfiguration>(
@@ -75,7 +75,7 @@ TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_Create_Destroy)
     cppRegistry.reset();
 }
 
-TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_SetAllDisconnectedHandler)
+TEST_F(Test_HourglassVendor, SilKit_Vendor_Vector_SilKitRegistry_SetAllDisconnectedHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Vendor::Vector::SilKitRegistry registry{mockRegistry};
 
@@ -87,7 +87,7 @@ TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_SetAllDisconnect
     });
 }
 
-TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_GetLogger)
+TEST_F(Test_HourglassVendor, SilKit_Vendor_Vector_SilKitRegistry_GetLogger)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Vendor::Vector::SilKitRegistry registry{mockRegistry};
 
@@ -96,7 +96,7 @@ TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_GetLogger)
     registry.GetLogger();
 }
 
-TEST_F(HourglassVendorTest, SilKit_Vendor_Vector_SilKitRegistry_StartListening)
+TEST_F(Test_HourglassVendor, SilKit_Vendor_Vector_SilKitRegistry_StartListening)
 {
     const std::string listenUri{"silkit://127.0.0.1:0"};
     const std::string mockRegistryUri{"silkit://127.0.0.1:12345"};

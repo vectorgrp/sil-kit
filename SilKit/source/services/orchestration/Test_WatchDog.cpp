@@ -106,7 +106,7 @@ private:
     mutable std::promise<void> _limitReached{};
 };
 
-class WatchDogTest : public testing::Test
+class Test_WatchDog : public testing::Test
 {
 protected:
     struct Callbacks
@@ -118,7 +118,7 @@ protected:
     };
 
 protected:
-    WatchDogTest() = default;
+    Test_WatchDog() = default;
 
 protected:
     // ----------------------------------------
@@ -143,17 +143,17 @@ protected:
 //       tests entirely deterministic, this stepping must be refactored out
 //       of the watchdog into it's own interface as well.
 
-TEST_F(WatchDogTest, throw_if_warn_timeout_is_zero)
+TEST_F(Test_WatchDog, throw_if_warn_timeout_is_zero)
 {
     EXPECT_THROW(WatchDog(Config::HealthCheck{0ms, 10ms}), SilKitError);
 }
 
-TEST_F(WatchDogTest, throw_if_error_timeout_is_zero)
+TEST_F(Test_WatchDog, throw_if_error_timeout_is_zero)
 {
     EXPECT_THROW(WatchDog(Config::HealthCheck{10ms, 0ms}), SilKitError);
 }
 
-TEST_F(WatchDogTest, warn_after_timeout)
+TEST_F(Test_WatchDog, warn_after_timeout)
 {
     LimitedMockClock mockClock{50ms, 2ms};
 
@@ -167,7 +167,7 @@ TEST_F(WatchDogTest, warn_after_timeout)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, error_after_timeout)
+TEST_F(Test_WatchDog, error_after_timeout)
 {
     LimitedMockClock mockClock{100ms, 5ms};
 
@@ -181,7 +181,7 @@ TEST_F(WatchDogTest, error_after_timeout)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, warn_only_once)
+TEST_F(Test_WatchDog, warn_only_once)
 {
     LimitedMockClock mockClock{100ms, 10ms};
 
@@ -197,7 +197,7 @@ TEST_F(WatchDogTest, warn_only_once)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, error_only_once)
+TEST_F(Test_WatchDog, error_only_once)
 {
     LimitedMockClock mockClock{100ms, 10ms};
 
@@ -211,7 +211,7 @@ TEST_F(WatchDogTest, error_only_once)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, no_callback_if_reset_in_time)
+TEST_F(Test_WatchDog, no_callback_if_reset_in_time)
 {
     LimitedMockClock mockClock{1s, 100ms};
 
@@ -239,7 +239,7 @@ TEST_F(WatchDogTest, no_callback_if_reset_in_time)
     ASSERT_FALSE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_TIMEOUT));
 }
 
-TEST_F(WatchDogTest, create_health_check_unconfigured)
+TEST_F(Test_WatchDog, create_health_check_unconfigured)
 {
     Config::HealthCheck healthCheck;
     WatchDog watchDog(healthCheck);
@@ -256,7 +256,7 @@ TEST_F(WatchDogTest, create_health_check_unconfigured)
     EXPECT_EQ(watchDogWithHardTimeout.GetErrorTimeout(), 5ms);
 }
 
-TEST_F(WatchDogTest, create_health_check_configured)
+TEST_F(Test_WatchDog, create_health_check_configured)
 {
     LimitedMockClock mockClock{1000ms, 250ms};
 
@@ -274,7 +274,7 @@ TEST_F(WatchDogTest, create_health_check_configured)
     watchDog.Reset();
 }
 
-TEST_F(WatchDogTest, nothing_without_soft_and_hard)
+TEST_F(Test_WatchDog, nothing_without_soft_and_hard)
 {
     LimitedMockClock mockClock{200ms, 50ms};
 
@@ -290,7 +290,7 @@ TEST_F(WatchDogTest, nothing_without_soft_and_hard)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, warn_with_soft_without_hard)
+TEST_F(Test_WatchDog, warn_with_soft_without_hard)
 {
     LimitedMockClock mockClock{200ms, 50ms};
 
@@ -306,7 +306,7 @@ TEST_F(WatchDogTest, warn_with_soft_without_hard)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, error_with_hard_without_soft)
+TEST_F(Test_WatchDog, error_with_hard_without_soft)
 {
     LimitedMockClock mockClock{200ms, 50ms};
 
@@ -322,7 +322,7 @@ TEST_F(WatchDogTest, error_with_hard_without_soft)
     ASSERT_TRUE(mockClock.WaitUntilLimitReachedFor(WAIT_EXPECT_READY));
 }
 
-TEST_F(WatchDogTest, warn_and_error_with_soft_and_hard)
+TEST_F(Test_WatchDog, warn_and_error_with_soft_and_hard)
 {
     LimitedMockClock mockClock{150ms, 10ms};
 

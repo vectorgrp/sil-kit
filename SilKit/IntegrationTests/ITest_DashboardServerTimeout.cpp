@@ -36,12 +36,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfigurationFromXImpl.hpp"
 
 namespace {
+
 using namespace SilKit::Tests;
 using namespace SilKit::Config;
 using namespace std::chrono_literals;
 
+struct ITest_DashboardServerTimeout : ITest_DashboardTestHarness
+{
+};
 
-TEST_F(ITest_DashboardTestHarness, dashboard_creationtimeout)
+TEST_F(ITest_DashboardServerTimeout, dashboard_creationtimeout)
 {
     const auto participantName = "CanWriter";
     const auto canonicalName = "CanController1";
@@ -70,7 +74,7 @@ TEST_F(ITest_DashboardTestHarness, dashboard_creationtimeout)
     _simTestHarness->ResetRegistry();
 }
 
-TEST_F(ITest_DashboardTestHarness, dashboard_updatetimeout)
+TEST_F(ITest_DashboardServerTimeout, dashboard_updatetimeout)
 {
     const auto participantName = "CanWriter";
     const auto canonicalName = "CanController1";

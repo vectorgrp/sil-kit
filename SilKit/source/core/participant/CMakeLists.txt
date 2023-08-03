@@ -79,13 +79,13 @@ if (MSVC)
     target_compile_options(O_SilKit_Core_Participant PRIVATE "/bigobj")
 endif (MSVC)
 
-add_silkit_test(Test_MwParticipant
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_Participant.cpp
     LIBS S_SilKitImpl O_SilKit_Core_Mock_NullConnection I_SilKit_Core_Mock_NullConnection I_SilKit_Config_TestUtils
 )
 
-add_silkit_test(
-    Test_ValidateAndSanitizeConfig
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_ValidateAndSanitizeConfig.cpp
     LIBS S_SilKitImpl
 )
+

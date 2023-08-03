@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsio_MessageBuffer, integral_types)
+TEST(Test_MessageBuffer, integral_types)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -41,7 +41,7 @@ TEST(MwVAsio_MessageBuffer, integral_types)
 }
 
 
-TEST(MwVAsio_MessageBuffer, integral_types_multiple)
+TEST(Test_MessageBuffer, integral_types_multiple)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -57,7 +57,7 @@ TEST(MwVAsio_MessageBuffer, integral_types_multiple)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, floating_types)
+TEST(Test_MessageBuffer, floating_types)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -70,7 +70,7 @@ TEST(MwVAsio_MessageBuffer, floating_types)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, floating_types_multiple)
+TEST(Test_MessageBuffer, floating_types_multiple)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -96,7 +96,7 @@ enum class TestEnumT : uint8_t
 };
 }
 
-TEST(MwVAsio_MessageBuffer, enum_types)
+TEST(Test_MessageBuffer, enum_types)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -109,7 +109,7 @@ TEST(MwVAsio_MessageBuffer, enum_types)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_string)
+TEST(Test_MessageBuffer, std_string)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -122,7 +122,7 @@ TEST(MwVAsio_MessageBuffer, std_string)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_vector_uint8_t)
+TEST(Test_MessageBuffer, std_vector_uint8_t)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -137,7 +137,7 @@ TEST(MwVAsio_MessageBuffer, std_vector_uint8_t)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_vector_string)
+TEST(Test_MessageBuffer, std_vector_string)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -150,7 +150,7 @@ TEST(MwVAsio_MessageBuffer, std_vector_string)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_array_uint8_t)
+TEST(Test_MessageBuffer, std_array_uint8_t)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -163,7 +163,7 @@ TEST(MwVAsio_MessageBuffer, std_array_uint8_t)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_array_string)
+TEST(Test_MessageBuffer, std_array_string)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -176,7 +176,7 @@ TEST(MwVAsio_MessageBuffer, std_array_string)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_chrono_nanoseconds)
+TEST(Test_MessageBuffer, std_chrono_nanoseconds)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -189,7 +189,7 @@ TEST(MwVAsio_MessageBuffer, std_chrono_nanoseconds)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsio_MessageBuffer, std_chrono_system_time)
+TEST(Test_MessageBuffer, std_chrono_system_time)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -224,7 +224,7 @@ bool operator==(const TestData& lhs, const TestData& rhs)
 }
 }
 
-TEST(MwVAsio_MessageBuffer, mixed_types)
+TEST(Test_MessageBuffer, mixed_types)
 {
     SilKit::Core::MessageBuffer buffer;
 

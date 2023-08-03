@@ -88,8 +88,9 @@ if(UNIX)
     )
 endif()
 
-add_silkit_test(Test_MwLoggingLogger 
+add_silkit_test_to_executable(SilKitUnitTests 
     SOURCES Test_Logger.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_MwLogging_Serdes SOURCES Test_LoggingSerdes.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_LoggingSerdes.cpp LIBS S_SilKitImpl)
+

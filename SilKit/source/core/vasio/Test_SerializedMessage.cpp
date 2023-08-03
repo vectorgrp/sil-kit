@@ -55,7 +55,7 @@ struct PackedHandshake
 
 using namespace SilKit::Core;
 
-TEST(VAsioSerializedMessage, packed_handshake_message)
+TEST(Test_SerializedMessage, packed_handshake_message)
 {
     //test if network layout of connection handshake changed
     ParticipantAnnouncement announcement;

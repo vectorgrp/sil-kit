@@ -151,7 +151,7 @@ public:
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const WireFlexrayTxBufferUpdate&));
 };
 
-class FlexrayControllerTest : public testing::Test
+class Test_FlexrayController : public testing::Test
 {
 protected:
     struct Callbacks
@@ -166,7 +166,7 @@ protected:
     };
 
 protected:
-    FlexrayControllerTest()
+    Test_FlexrayController()
         : controller(&participant, GetDummyConfig(), participant.GetTimeProvider())
         , controllerBusSim(&participant, GetDummyConfig(), participant.GetTimeProvider())
         , controllerConfigured(&participant, GetDummyConfigWithValues(),
@@ -197,7 +197,7 @@ protected:
 
 };
 
-TEST_F(FlexrayControllerTest, send_controller_config)
+TEST_F(Test_FlexrayController, send_controller_config)
 {
     // Configure Controller
     FlexrayControllerConfig controllerCfg{};
@@ -211,7 +211,7 @@ TEST_F(FlexrayControllerTest, send_controller_config)
     controller.Configure(controllerCfg);
 }
 
-TEST_F(FlexrayControllerTest, send_controller_config_override_identical)
+TEST_F(Test_FlexrayController, send_controller_config_override_identical)
 {
     // Configure Controller
     FlexrayControllerConfig configuredControllerCfg{};
@@ -229,7 +229,7 @@ TEST_F(FlexrayControllerTest, send_controller_config_override_identical)
     controllerConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FlexrayControllerTest, send_controller_config_override_cluster_params)
+TEST_F(Test_FlexrayController, send_controller_config_override_cluster_params)
 {
     // Configure Controller
     FlexrayControllerConfig configuredControllerCfg{};
@@ -252,7 +252,7 @@ TEST_F(FlexrayControllerTest, send_controller_config_override_cluster_params)
     controllerConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FlexrayControllerTest, send_controller_config_override_node_params)
+TEST_F(Test_FlexrayController, send_controller_config_override_node_params)
 {
     // Configure Controller
     FlexrayControllerConfig configuredControllerCfg{};
@@ -275,7 +275,7 @@ TEST_F(FlexrayControllerTest, send_controller_config_override_node_params)
     controllerConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FlexrayControllerTest, send_controller_config_override_tx_buffer)
+TEST_F(Test_FlexrayController, send_controller_config_override_tx_buffer)
 {
     // Configure Controller
     FlexrayControllerConfig configuredControllerCfg{};
@@ -298,7 +298,7 @@ TEST_F(FlexrayControllerTest, send_controller_config_override_tx_buffer)
     controllerConfigured.Configure(testControllerCfg);
 }
 
-TEST_F(FlexrayControllerTest, send_txbuffer_configupdate)
+TEST_F(Test_FlexrayController, send_txbuffer_configupdate)
 {
     FlexrayTxBufferConfig bufferCfg{};
     bufferCfg.channels = FlexrayChannel::AB;
@@ -332,7 +332,7 @@ TEST_F(FlexrayControllerTest, send_txbuffer_configupdate)
     controller.ReconfigureTxBuffer(0, bufferCfg);
 }
 
-TEST_F(FlexrayControllerTest, throw_on_unconfigured_tx_buffer_configupdate)
+TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_configupdate)
 {
     FlexrayControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
@@ -349,7 +349,7 @@ TEST_F(FlexrayControllerTest, throw_on_unconfigured_tx_buffer_configupdate)
 }
 
 
-TEST_F(FlexrayControllerTest, send_txbuffer_update)
+TEST_F(Test_FlexrayController, send_txbuffer_update)
 {
     FlexrayTxBufferConfig bufferCfg{};
 
@@ -373,7 +373,7 @@ TEST_F(FlexrayControllerTest, send_txbuffer_update)
 }
 
 
-TEST_F(FlexrayControllerTest, throw_on_unconfigured_tx_buffer_update)
+TEST_F(Test_FlexrayController, throw_on_unconfigured_tx_buffer_update)
 {
     FlexrayControllerConfig controllerCfg;
     controllerCfg.clusterParams = MakeValidClusterParams();
@@ -389,7 +389,7 @@ TEST_F(FlexrayControllerTest, throw_on_unconfigured_tx_buffer_update)
     EXPECT_THROW(controller.UpdateTxBuffer(update), SilKit::OutOfRangeError);
 }
 
-TEST_F(FlexrayControllerTest, send_run_command)
+TEST_F(Test_FlexrayController, send_run_command)
 {
     EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::RUN}))
         .Times(1);
@@ -397,7 +397,7 @@ TEST_F(FlexrayControllerTest, send_run_command)
     controller.Run();
 }
 
-TEST_F(FlexrayControllerTest, send_deferred_halt_command)
+TEST_F(Test_FlexrayController, send_deferred_halt_command)
 {
     EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::DEFERRED_HALT}))
         .Times(1);
@@ -405,7 +405,7 @@ TEST_F(FlexrayControllerTest, send_deferred_halt_command)
     controller.DeferredHalt();
 }
 
-TEST_F(FlexrayControllerTest, send_freeze_command)
+TEST_F(Test_FlexrayController, send_freeze_command)
 {
     EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::FREEZE}))
         .Times(1);
@@ -413,7 +413,7 @@ TEST_F(FlexrayControllerTest, send_freeze_command)
     controller.Freeze();
 }
 
-TEST_F(FlexrayControllerTest, send_allow_coldstart_command)
+TEST_F(Test_FlexrayController, send_allow_coldstart_command)
 {
     EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::ALLOW_COLDSTART}))
         .Times(1);
@@ -421,7 +421,7 @@ TEST_F(FlexrayControllerTest, send_allow_coldstart_command)
     controller.AllowColdstart();
 }
 
-TEST_F(FlexrayControllerTest, send_all_slots_command)
+TEST_F(Test_FlexrayController, send_all_slots_command)
 {
     FlexrayHostCommand cmd;
     cmd.command = FlexrayChiCommand::ALL_SLOTS;
@@ -432,7 +432,7 @@ TEST_F(FlexrayControllerTest, send_all_slots_command)
     controller.AllSlots();
 }
 
-TEST_F(FlexrayControllerTest, send_wakeup_command)
+TEST_F(Test_FlexrayController, send_wakeup_command)
 {
     EXPECT_CALL(participant, SendMsg(&controller, FlexrayHostCommand{FlexrayChiCommand::WAKEUP}))
         .Times(1);
@@ -441,7 +441,7 @@ TEST_F(FlexrayControllerTest, send_wakeup_command)
 }
 
 
-TEST_F(FlexrayControllerTest, call_message_handler)
+TEST_F(Test_FlexrayController, call_message_handler)
 {
     controller.AddFrameHandler(bind_method(&callbacks, &Callbacks::MessageHandler));
 
@@ -458,7 +458,7 @@ TEST_F(FlexrayControllerTest, call_message_handler)
     controller.ReceiveMsg(&controllerBusSim, message);
 }
 
-TEST_F(FlexrayControllerTest, call_message_ack_handler)
+TEST_F(Test_FlexrayController, call_message_ack_handler)
 {
     controller.AddFrameTransmitHandler(bind_method(&callbacks, &Callbacks::MessageAckHandler));
 
@@ -475,7 +475,7 @@ TEST_F(FlexrayControllerTest, call_message_ack_handler)
     controller.ReceiveMsg(&controllerBusSim, ack);
 }
 
-TEST_F(FlexrayControllerTest, call_wakeup_handler)
+TEST_F(Test_FlexrayController, call_wakeup_handler)
 {
     controller.AddWakeupHandler(bind_method(&callbacks, &Callbacks::WakeupHandler));
 
@@ -502,7 +502,7 @@ TEST_F(FlexrayControllerTest, call_wakeup_handler)
     controller.ReceiveMsg(&controllerBusSim, casMtsSymbolEvent);
 }
 
-TEST_F(FlexrayControllerTest, call_pocstatus_handler)
+TEST_F(Test_FlexrayController, call_pocstatus_handler)
 {
     // new POC API
     controller.AddPocStatusHandler(bind_method(&callbacks, &Callbacks::PocStatusHandler));
@@ -516,7 +516,7 @@ TEST_F(FlexrayControllerTest, call_pocstatus_handler)
     controller.ReceiveMsg(&controllerBusSim, poc);
 }
 
-TEST_F(FlexrayControllerTest, call_symbol_handler)
+TEST_F(Test_FlexrayController, call_symbol_handler)
 {
     controller.AddSymbolHandler(bind_method(&callbacks, &Callbacks::SymbolHandler));
 
@@ -540,7 +540,7 @@ TEST_F(FlexrayControllerTest, call_symbol_handler)
     controller.ReceiveMsg(&controllerBusSim, casMts);
 }
 
-TEST_F(FlexrayControllerTest, call_symbol_ack_handler)
+TEST_F(Test_FlexrayController, call_symbol_ack_handler)
 {
     controller.AddSymbolTransmitHandler(bind_method(&callbacks, &Callbacks::SymbolAckHandler));
 
@@ -554,7 +554,7 @@ TEST_F(FlexrayControllerTest, call_symbol_ack_handler)
     controller.ReceiveMsg(&controllerBusSim, ack);
 }
 
-TEST_F(FlexrayControllerTest, call_cyclestart_handler)
+TEST_F(Test_FlexrayController, call_cyclestart_handler)
 {
     controller.AddCycleStartHandler(bind_method(&callbacks, &Callbacks::CycleStartHandler));
 
@@ -570,7 +570,7 @@ TEST_F(FlexrayControllerTest, call_cyclestart_handler)
 
 /*! \brief Multiple handlers added and removed
  */
-TEST_F(FlexrayControllerTest, add_remove_handler)
+TEST_F(Test_FlexrayController, add_remove_handler)
 {
     const int numHandlers = 10;
     std::vector<SilKit::Services::HandlerId> handlerIds;
@@ -598,7 +598,7 @@ TEST_F(FlexrayControllerTest, add_remove_handler)
     controller.ReceiveMsg(&controllerBusSim, message);
 }
 
-TEST_F(FlexrayControllerTest, txbuffer_update_in_static_segment_produces_warning)
+TEST_F(Test_FlexrayController, txbuffer_update_in_static_segment_produces_warning)
 {
     // Configure Controller
     auto config = GetDummyConfigWithValues();

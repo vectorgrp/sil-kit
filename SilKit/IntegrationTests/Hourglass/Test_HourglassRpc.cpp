@@ -122,13 +122,13 @@ MATCHER_P(RpcSpecMatcher, rpcSpecParam, "")
     return true;
 }
 
-class HourglassRpcTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassRpc : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_RpcServer* mockRpcServer{reinterpret_cast<SilKit_RpcServer*>(uintptr_t(0x78563412))};
     SilKit_RpcClient* mockRpcClient{reinterpret_cast<SilKit_RpcClient*>(uintptr_t(0x87654321))};
 
-    HourglassRpcTest()
+    Test_HourglassRpc()
     {
         using testing::_;
         ON_CALL(capi, SilKit_RpcServer_Create(_, _, _, _, _, _))
@@ -140,7 +140,7 @@ public:
 
 // RpcServer
 
-TEST_F(HourglassRpcTest, SilKit_RpcServer_Create)
+TEST_F(Test_HourglassRpc, SilKit_RpcServer_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     std::string serverName = "RpcServer1";
@@ -164,7 +164,7 @@ TEST_F(HourglassRpcTest, SilKit_RpcServer_Create)
         }};
 }
 
-TEST_F(HourglassRpcTest, SilKit_RpcServer_SubmitResult)
+TEST_F(Test_HourglassRpc, SilKit_RpcServer_SubmitResult)
 {
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcServer rpcServer{
@@ -182,7 +182,7 @@ TEST_F(HourglassRpcTest, SilKit_RpcServer_SubmitResult)
     rpcServer.SubmitResult(reinterpret_cast<IRpcCallHandle*>(rpcCallHandle), byteSpan);
 }
 
-TEST_F(HourglassRpcTest, SilKit_RpcServer_SetCallHandler)
+TEST_F(Test_HourglassRpc, SilKit_RpcServer_SetCallHandler)
 {
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Rpc::RpcServer rpcServer{
@@ -199,7 +199,7 @@ TEST_F(HourglassRpcTest, SilKit_RpcServer_SetCallHandler)
 
 // RpcClient
 
-TEST_F(HourglassRpcTest, SilKit_RpcClient_Create)
+TEST_F(Test_HourglassRpc, SilKit_RpcClient_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     std::string clientName = "RpcClient1";
@@ -223,7 +223,7 @@ TEST_F(HourglassRpcTest, SilKit_RpcClient_Create)
         }};
 }
 
-TEST_F(HourglassRpcTest, SilKit_RpcClient_Call)
+TEST_F(Test_HourglassRpc, SilKit_RpcClient_Call)
 {
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
 
@@ -240,7 +240,7 @@ TEST_F(HourglassRpcTest, SilKit_RpcClient_Call)
     rpcClient.Call(byteSpan, nullptr);
 }
 
-TEST_F(HourglassRpcTest, SilKit_RpcClient_SetCallResultHandler)
+TEST_F(Test_HourglassRpc, SilKit_RpcClient_SetCallResultHandler)
 {
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
 

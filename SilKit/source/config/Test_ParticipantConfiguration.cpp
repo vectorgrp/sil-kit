@@ -47,10 +47,10 @@ using testing::Return;
 
 using namespace SilKit::Config;
 
-class ParticipantConfigurationExamplesITest : public testing::Test
+class Test_ParticipantConfiguration : public testing::Test
 {
 protected:
-    ParticipantConfigurationExamplesITest() {}
+    Test_ParticipantConfiguration() {}
 
     void CreateParticipantFromConfiguration(std::shared_ptr<IParticipantConfiguration> cfg)
     {
@@ -59,19 +59,19 @@ protected:
     }
 };
 
-TEST_F(ParticipantConfigurationExamplesITest, throw_if_logging_is_configured_without_filename)
+TEST_F(Test_ParticipantConfiguration, throw_if_logging_is_configured_without_filename)
 {
     EXPECT_THROW(SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Logging_Without_File.json"),
                  SilKit::ConfigurationError);
 }
 
-TEST_F(ParticipantConfigurationExamplesITest, minimal_configuration_file)
+TEST_F(Test_ParticipantConfiguration, minimal_configuration_file)
 {
     auto cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Minimal.json");
     CreateParticipantFromConfiguration(cfg);
 }
 
-TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file)
+TEST_F(Test_ParticipantConfiguration, full_configuration_file)
 {
     auto cfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Full.json");
     CreateParticipantFromConfiguration(cfg);
@@ -80,7 +80,7 @@ TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file)
 /*
     Test whether json and yaml configurations are parsed equivalently
 */
-TEST_F(ParticipantConfigurationExamplesITest, full_configuration_file_json_yaml_equal)
+TEST_F(Test_ParticipantConfiguration, full_configuration_file_json_yaml_equal)
 {
     auto jsonCfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Full.json");
     auto yamlCfg = SilKit::Config::ParticipantConfigurationFromFileImpl("ParticipantConfiguration_Full.yaml");

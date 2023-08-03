@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "oatpp/core/data/stream/Stream.hpp"
+#include "OatppHeaders.hpp"
 
 struct MockInputStream : public oatpp::data::stream::InputStream
 {

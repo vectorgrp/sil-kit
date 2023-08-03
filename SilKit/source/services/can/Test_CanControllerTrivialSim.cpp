@@ -87,13 +87,13 @@ public:
     MOCK_METHOD2(FrameTransmitHandler, void(ICanController*, CanFrameTransmitEvent));
 };
 
-class CanControllerTrivialSimTest : public testing::Test
+class Test_CanControllerTrivialSim : public testing::Test
 {
 public:
-    CanControllerTrivialSimTest() {};
+    Test_CanControllerTrivialSim() {};
 };
 
-TEST(CanControllerTrivialSimTest, send_can_frame)
+TEST(Test_CanControllerTrivialSim, send_can_frame)
 {
     MockParticipant mockParticipant;
 
@@ -118,7 +118,7 @@ TEST(CanControllerTrivialSimTest, send_can_frame)
     canController.SendFrame(ToCanFrame(testFrameEvent.frame));
 }
 
-TEST(CanControllerTrivialSimTest, receive_can_message)
+TEST(Test_CanControllerTrivialSim, receive_can_message)
 {
     using namespace std::placeholders;
 
@@ -150,7 +150,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message)
     canController.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
 }
 
-TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
+TEST(Test_CanControllerTrivialSim, receive_can_message_rx_filter1)
 {
     using namespace std::placeholders;
 
@@ -182,7 +182,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
 }
 
 
-TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter2)
+TEST(Test_CanControllerTrivialSim, receive_can_message_rx_filter2)
 {
     using namespace std::placeholders;
 
@@ -211,7 +211,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter2)
     canController.ReceiveMsg(&canControllerPlaceholder, testFrameEvent);
 }
 
-TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
+TEST(Test_CanControllerTrivialSim, receive_can_message_tx_filter1)
 {
     using namespace std::placeholders;
 
@@ -240,7 +240,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter1)
 }
 
 
-TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter2)
+TEST(Test_CanControllerTrivialSim, receive_can_message_tx_filter2)
 {
     using namespace std::placeholders;
 
@@ -274,7 +274,7 @@ TEST(CanControllerTrivialSimTest, receive_can_message_tx_filter2)
  *   ControllerModes are not supported by the CanController. This feature requires
  *   the usage of a proper CanBusSimulator and CanControllerProxies.
  */
-TEST(CanControllerTrivialSimTest, start_stop_sleep_reset)
+TEST(Test_CanControllerTrivialSim, start_stop_sleep_reset)
 {
     MockParticipant mockParticipant;
     SilKit::Config::CanController cfg;
@@ -296,7 +296,7 @@ TEST(CanControllerTrivialSimTest, start_stop_sleep_reset)
 *   BaudRate is not supported by the CanController. This feature requires
 *   the usage of a proper CanBusSimulator and CanControllerProxies.
 */
-TEST(CanControllerTrivialSimTest, set_baudrate)
+TEST(Test_CanControllerTrivialSim, set_baudrate)
 {
     MockParticipant mockParticipant;
     SilKit::Config::CanController cfg;
@@ -309,7 +309,7 @@ TEST(CanControllerTrivialSimTest, set_baudrate)
     canController.SetBaudRate(3000, 500000, 1000000);
 }
 
-TEST(CanControllerTrivialSimTest, receive_ack)
+TEST(Test_CanControllerTrivialSim, receive_ack)
 {
     using namespace std::placeholders;
 
@@ -331,7 +331,7 @@ TEST(CanControllerTrivialSimTest, receive_ack)
     canController.SendFrame(msg);
 }
 
-TEST(CanControllerTrivialSimTest, add_remove_handler)
+TEST(Test_CanControllerTrivialSim, add_remove_handler)
 {
     using namespace std::placeholders;
 
@@ -365,7 +365,7 @@ TEST(CanControllerTrivialSimTest, add_remove_handler)
     canController.SendFrame(msg);
 }
 
-TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
+TEST(Test_CanControllerTrivialSim, cancontroller_uses_tracing)
 {
     SilKit::Tests::MockTraceSink traceSink;
     Tests::DummyParticipant participant;
@@ -406,7 +406,7 @@ TEST(CanControllerTrivialSimTest, cancontroller_uses_tracing)
     controller.ReceiveMsg(&otherController, wireCanFrameEvent);
 }
 
-TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)
+TEST(Test_CanControllerTrivialSim, fail_can_frame_not_started)
 {
     MockParticipant mockParticipant;
 
@@ -429,7 +429,7 @@ TEST(CanControllerTrivialSimTest, fail_can_frame_not_started)
     canController.SendFrame(ToCanFrame(testFrameEvent.frame));
 }
 
-TEST(CanControllerTrivialSimTest, sendmsg_distributes_before_txreceive)
+TEST(Test_CanControllerTrivialSim, sendmsg_distributes_before_txreceive)
 {
     using namespace std::placeholders;
 

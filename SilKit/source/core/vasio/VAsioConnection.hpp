@@ -569,7 +569,7 @@ private:
 
     // unit testing support
     ProtocolVersion _version;
-    friend class VAsioConnectionTest;
+    friend class Test_VAsioConnection;
 
     //Remote connection support
     const std::chrono::nanoseconds _remoteConnectionTimeout{std::chrono::seconds{4}};

@@ -34,7 +34,7 @@ using namespace testing;
 namespace SilKit {
 namespace Dashboard {
 
-class TestDashboardSilKitEventHandler : public Test
+class Test_DashboardSilKitEventHandler : public Test
 {
 public:
     void SetUp() override
@@ -56,7 +56,7 @@ public:
     std::shared_ptr<StrictMock<MockSilKitToOatppMapper>> _mockSilKitToOatppMapper;
 };
 
-TEST_F(TestDashboardSilKitEventHandler, Create)
+TEST_F(Test_DashboardSilKitEventHandler, Create)
 {
     // Arrange
 
@@ -66,7 +66,7 @@ TEST_F(TestDashboardSilKitEventHandler, Create)
     // Assert
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnSimulationStart_CreateSimulationSuccess)
+TEST_F(Test_DashboardSilKitEventHandler, OnSimulationStart_CreateSimulationSuccess)
 {
     // Arrange
     const uint64_t expectedSimulationId = 123;
@@ -84,7 +84,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnSimulationStart_CreateSimulationSucces
     ASSERT_EQ(res, expectedSimulationId) << "Wrong simulationId!";
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnSimulationStart_CreateSimulationFailure)
+TEST_F(Test_DashboardSilKitEventHandler, OnSimulationStart_CreateSimulationFailure)
 {
     // Arrange
     auto request = SimulationCreationRequestDto::createShared();
@@ -100,7 +100,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnSimulationStart_CreateSimulationFailur
     ASSERT_EQ(res, 0) << "Wrong simulationId!";
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnSimulationEnd)
+TEST_F(Test_DashboardSilKitEventHandler, OnSimulationEnd)
 {
     // Arrange
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -115,7 +115,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnSimulationEnd)
     // Assert
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnParticipantConnected_AddParticipantRequestIsSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnParticipantConnected_AddParticipantRequestIsSent)
 {
     using connectionInfo = Services::Orchestration::ParticipantConnectionInformation;
 
@@ -140,10 +140,8 @@ TEST_F(TestDashboardSilKitEventHandler, OnParticipantConnected_AddParticipantReq
     ASSERT_STREQ(actualParticipantName->c_str(), "my%20Participant");
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnSystemStateChanged_UpdateSystemStatusRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnSystemStateChanged_UpdateSystemStatusRequestSent)
 {
-    using systemState = Services::Orchestration::SystemState;
-
     // Arrange
     const oatpp::UInt64 expectedSimulationId = 123;
     const auto service = CreateService();
@@ -168,7 +166,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnSystemStateChanged_UpdateSystemStatusR
     ASSERT_EQ(actualSystemState, expectedSystemState);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnParticipantStatusChanged_AddParticipantStatusRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnParticipantStatusChanged_AddParticipantStatusRequestSent)
 {
     using participantStatus = Services::Orchestration::ParticipantStatus;
 
@@ -213,7 +211,7 @@ Core::ServiceDescriptor BuildDescriptor(const std::string& type, SilKit::Core::E
     return descriptor;
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanControllerCreated_AddCanControllerRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanControllerCreated_AddCanControllerRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -244,7 +242,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanControllerCre
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
+TEST_F(Test_DashboardSilKitEventHandler,
        OnServiceDiscoveryEvent_EthernetControllerCreated_AddEthernetControllerRequestSent)
 {
     // Arrange & Assert
@@ -276,7 +274,7 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
+TEST_F(Test_DashboardSilKitEventHandler,
        OnServiceDiscoveryEvent_FlexrayControllerCreated_AddFlexrayControllerRequestSent)
 {
     // Arrange & Assert
@@ -308,7 +306,7 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinControllerCreated_AddLinControllerRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinControllerCreated_AddLinControllerRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -339,7 +337,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinControllerCre
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCreated_AddDataPublisherRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCreated_AddDataPublisherRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -372,7 +370,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataPublisherCre
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataSubscriberCreated_AddDataSubscriberRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataSubscriberCreated_AddDataSubscriberRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -405,7 +403,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_DataSubscriberCr
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
+TEST_F(Test_DashboardSilKitEventHandler,
        OnServiceDiscoveryEvent_DataSubscriberInternalCreated_AddDataSubscriberInternalRequestSent)
 {
     // Arrange & Assert
@@ -446,7 +444,7 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcClientCreated_AddRpcClientRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcClientCreated_AddRpcClientRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -478,7 +476,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcClientCreated
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcServerCreated_AddRpcServerRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcServerCreated_AddRpcServerRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -510,7 +508,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_RpcServerCreated
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
+TEST_F(Test_DashboardSilKitEventHandler,
        OnServiceDiscoveryEvent_RpcServerInternalCreated_AddRpcServerInternalRequestSent)
 {
     // Arrange & Assert
@@ -551,7 +549,7 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_EQ(actualServiceId, expectedServiceId);
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_AddCanNetworkToSimulationRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_AddCanNetworkToSimulationRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -583,7 +581,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_CanLinkCreated_A
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
+TEST_F(Test_DashboardSilKitEventHandler,
        OnServiceDiscoveryEvent_EthernetLinkCreated_AddEthernetNetworkToSimulationRequestSent)
 {
     // Arrange & Assert
@@ -616,7 +614,7 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
-TEST_F(TestDashboardSilKitEventHandler,
+TEST_F(Test_DashboardSilKitEventHandler,
        OnServiceDiscoveryEvent_FlexrayLinkCreated_AddFlexrayNetworkToSimulationRequestSent)
 {
     // Arrange & Assert
@@ -649,7 +647,7 @@ TEST_F(TestDashboardSilKitEventHandler,
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_AddLinNetworkToSimulationRequestSent)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_AddLinNetworkToSimulationRequestSent)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;
@@ -681,7 +679,7 @@ TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_LinLinkCreated_A
     ASSERT_STREQ(actualNetworkName->c_str(), "my%20networkname");
 }
 
-TEST_F(TestDashboardSilKitEventHandler, OnServiceDiscoveryEvent_Invalid_Ignore)
+TEST_F(Test_DashboardSilKitEventHandler, OnServiceDiscoveryEvent_Invalid_Ignore)
 {
     // Arrange & Assert
     const oatpp::UInt64 expectedSimulationId = 123;

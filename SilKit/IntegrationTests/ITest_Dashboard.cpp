@@ -39,20 +39,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "CreateDashboard.hpp"
 
 namespace {
+
 using namespace SilKit::Tests;
 using namespace SilKit::Core;
 using namespace SilKit::Config;
 using namespace SilKit::Services;
 
-class DashboardTestHarness : public ITest_DashboardTestHarness
+class ITest_Dashboard : public ITest_DashboardTestHarness
 {
 protected:
-    DashboardTestHarness()
+    ITest_Dashboard()
         : ITest_DashboardTestHarness()
     {
     }
 
-    ~DashboardTestHarness() {}
+    ~ITest_Dashboard() {}
 
 protected:
     void RunCanDemo(const std::string& participantName1, const std::string& participantName2,
@@ -278,7 +279,7 @@ void CheckTestResult(SilKit::Dashboard::TestResult actual, SilKit::Dashboard::Te
     }
 }
 
-TEST_F(DashboardTestHarness, dashboard_no_simulation)
+TEST_F(ITest_Dashboard, dashboard_no_simulation)
 {
     SetupFromParticipantLists({}, {});
     auto testResult = SilKit::Dashboard::RunDashboardTest(
@@ -292,7 +293,7 @@ TEST_F(DashboardTestHarness, dashboard_no_simulation)
     CheckTestResult(testResult, CreateExpectedTestResult({}, false));
 }
 
-TEST_F(DashboardTestHarness, dashboard_can_coordinated)
+TEST_F(ITest_Dashboard, dashboard_can_coordinated)
 {
     const auto participantName1 = "CanReader";
     const auto participantName2 = "CanWriter";
@@ -312,7 +313,7 @@ TEST_F(DashboardTestHarness, dashboard_can_coordinated)
                                  true));
 }
 
-TEST_F(DashboardTestHarness, dashboard_can_repeat)
+TEST_F(ITest_Dashboard, dashboard_can_repeat)
 {
     const auto participantName1 = "CanReader";
     const auto participantName2 = "CanWriter";
@@ -333,7 +334,7 @@ TEST_F(DashboardTestHarness, dashboard_can_repeat)
     CheckTestResult(testResult, CreateExpectedTestResult({simulation, simulation}, true));
 }
 
-TEST_F(DashboardTestHarness, dashboard_pubsub_mix)
+TEST_F(ITest_Dashboard, dashboard_pubsub_mix)
 {
     const auto participantName1 = "Publisher";
     const auto canonicalName1 = "PubCtrl";
@@ -387,7 +388,7 @@ TEST_F(DashboardTestHarness, dashboard_pubsub_mix)
             true));
 }
 
-TEST_F(DashboardTestHarness, dashboard_rpc_autonomous)
+TEST_F(ITest_Dashboard, dashboard_rpc_autonomous)
 {
     const auto participantName1 = "Client";
     const auto canonicalName1 = "ClientCtrl";
@@ -441,7 +442,7 @@ TEST_F(DashboardTestHarness, dashboard_rpc_autonomous)
             false));
 }
 
-TEST_F(DashboardTestHarness, dashboard_netsim_coordinated)
+TEST_F(ITest_Dashboard, dashboard_netsim_coordinated)
 {
     const auto participantName = "NetSim";
     SetupFromParticipantLists({participantName}, {});
@@ -483,7 +484,7 @@ TEST_F(DashboardTestHarness, dashboard_netsim_coordinated)
             _simTestHarness->ResetParticipants();
         });
     _simTestHarness->ResetRegistry();
-    auto expected = DashboardTestHarness::CreateExpectedTestResult({{{participantName, {}}}}, true);
+    auto expected = ITest_Dashboard::CreateExpectedTestResult({{{participantName, {}}}}, true);
     expected.dataBySimulation[1].linksByParticipant = {
         {participantName, {{"can", "CAN1"}, {"ethernet", "ETH1"}, {"flexray", "FR1"}, {"lin", "LIN1"}}}};
     CheckTestResult(testResult, expected);

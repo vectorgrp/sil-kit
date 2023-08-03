@@ -46,14 +46,14 @@ void SerializeAlignedIntegral()
     EXPECT_EQ(buffer, refBuffer);
 }
 
-TEST(SerializerTest, serialize_integral)
+TEST(Test_SilSerializer, serialize_integral)
 {
     SerializeAlignedIntegral<int8_t>();
     SerializeAlignedIntegral<int16_t>();
     SerializeAlignedIntegral<int32_t>();
     SerializeAlignedIntegral<int64_t>();
 }
-TEST(SerializerTest, serialize_integral_unsigned)
+TEST(Test_SilSerializer, serialize_integral_unsigned)
 {
     SerializeAlignedIntegral<uint8_t>();
     SerializeAlignedIntegral<uint16_t>();
@@ -61,7 +61,7 @@ TEST(SerializerTest, serialize_integral_unsigned)
     SerializeAlignedIntegral<uint64_t>();
 }
 
-TEST(SerializerTest, serialize_unaligned_4_uint2)
+TEST(Test_SilSerializer, serialize_unaligned_4_uint2)
 {
     // serialize 4 int2 values
     const uint16_t a_2 = 3;
@@ -83,7 +83,7 @@ TEST(SerializerTest, serialize_unaligned_4_uint2)
     EXPECT_EQ(buffer[0], ref);
 }
 
-TEST(SerializerTest, serialize_unaligned_4_int2)
+TEST(Test_SilSerializer, serialize_unaligned_4_int2)
 {
     // serialize 4 int2 values
     const int16_t a_2 = -1;
@@ -105,7 +105,7 @@ TEST(SerializerTest, serialize_unaligned_4_int2)
     EXPECT_EQ(buffer[0], ref);
 }
 
-TEST(SerializerTest, serialize_unaligned_with_overlap)
+TEST(Test_SilSerializer, serialize_unaligned_with_overlap)
 {
     // serialize an int7, followed by an int2
     // This should result in 2 bytes.
@@ -128,7 +128,7 @@ TEST(SerializerTest, serialize_unaligned_with_overlap)
     EXPECT_EQ(raw, ref);
 }
 
-TEST(SerializerTest, serialize_unaligned_mixed)
+TEST(Test_SilSerializer, serialize_unaligned_mixed)
 {
     // alternates between unaligned and aligned serialization.
     // Should end up with 4 bytes
@@ -152,7 +152,7 @@ TEST(SerializerTest, serialize_unaligned_mixed)
     EXPECT_EQ(buffer[2] & 0x7, c_3);
     EXPECT_EQ(buffer[3] & 0xff, d_8);
 }
-TEST(SerializerTest, serialize_bool)
+TEST(Test_SilSerializer, serialize_bool)
 {
     Serializer serializer;
     serializer.Serialize(true);
@@ -184,13 +184,13 @@ void SerializeFloatingPoint()
     ASSERT_EQ(buffer.size(), refBuffer.size());
     EXPECT_EQ(buffer, refBuffer);
 }
-TEST(SerializerTest, serialize_floatingpoint)
+TEST(Test_SilSerializer, serialize_floatingpoint)
 {
     SerializeFloatingPoint<float>();
     SerializeFloatingPoint<double>();
 }
 
-TEST(SerializerTest, serialize_string)
+TEST(Test_SilSerializer, serialize_string)
 {
     std::string value{"Hello world! I love you so much."};
     Serializer serializer;
@@ -206,7 +206,7 @@ TEST(SerializerTest, serialize_string)
     EXPECT_EQ(buffer, refBuffer);
 }
 
-TEST(SerializerTest, serialize_bytes)
+TEST(Test_SilSerializer, serialize_bytes)
 {
     std::vector<uint8_t> bytes{'a', 'b', 'c', 'd'};
     Serializer serializer;

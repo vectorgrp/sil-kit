@@ -52,7 +52,7 @@ using namespace std::chrono_literals;
 // TraceSink and Tracer related tests
 // ================================================================================
 
-TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
+TEST(Test_Validation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
 {
     TraceSink sink;
     sink.name = "Sink1";
@@ -70,7 +70,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_unknown_trace_sink)
     EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
-TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
+TEST(Test_Validation, throw_if_usetracesinks_refers_to_empty_sink_name)
 {
     TraceSink sink;
     sink.name = "Sink1";
@@ -88,7 +88,7 @@ TEST(TestMwCfgValidation, throw_if_usetracesinks_refers_to_empty_sink_name)
     EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
-TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
+TEST(Test_Validation, throw_if_replay_refers_to_unknown_source_name)
 {
     TraceSource source;
     source.name = "Source1";
@@ -109,7 +109,7 @@ TEST(TestMwCfgValidation, throw_if_replay_refers_to_unknown_source_name)
     EXPECT_THROW(Validate(cfg), SilKit::ConfigurationError);
 }
 
-TEST(TestMwCfgValidation, throw_if_tracesink_has_empty_fields)
+TEST(Test_Validation, throw_if_tracesink_has_empty_fields)
 {
     TraceSource source;
     source.name = "Source1";

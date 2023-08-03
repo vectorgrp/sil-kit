@@ -11,6 +11,12 @@
 
 namespace {
 
+using namespace SilKit::Tests;
+struct ITest_Orchestration : ITest_SimTestHarness
+{
+    using ITest_SimTestHarness::ITest_SimTestHarness;
+};
+
 using namespace std::chrono_literals;
 inline std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 {
@@ -30,7 +36,7 @@ struct StopTestState
   std::atomic<std::chrono::nanoseconds> lastNow{};
 };
 
-TEST_F(ITest_SimTestHarness, stop_in_simtask_does_not_trigger_simtask_again)
+TEST_F(ITest_Orchestration, stop_in_simtask_does_not_trigger_simtask_again)
 {
   std::vector<std::string> canParticipantNames;
   for (char participantSuffix = 'A'; participantSuffix <= 'K'; ++participantSuffix)

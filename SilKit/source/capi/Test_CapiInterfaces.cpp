@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-TEST(TestCapi_Interfaces, compile_test_capi_interface_ids)
+TEST(Test_CapiInterfaces, compile_test_capi_interface_ids)
 {
 	constexpr const auto foo = SilKit_CanStateChangeEvent_STRUCT_VERSION;
     static_assert(SK_ID_GET_SERVICE(foo) == SK_ID_SERVICE_Can, "service id extraction");
@@ -82,13 +82,13 @@ constexpr uint64_t allSilkidIds[]= {
 };
 constexpr auto allSilkidIdsSize = sizeof(allSilkidIds) / sizeof(uint64_t);
 
-TEST(TestCapi_Interfaces, interface_identifiers_are_unique)
+TEST(Test_CapiInterfaces, interface_identifiers_are_unique)
 {
     std::set<uint64_t> all{std::begin(allSilkidIds), std::end(allSilkidIds)};
     ASSERT_EQ(allSilkidIdsSize, all.size()) << "The IDs must not be duplicate";
 }
 
-TEST(TestCapi_Interfaces, silkit_struct_init_zeros_whole_structure)
+TEST(Test_CapiInterfaces, silkit_struct_init_zeros_whole_structure)
 {
     SilKit_CanFrameEvent value;
     // first member

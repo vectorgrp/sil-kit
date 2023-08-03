@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "LoggingSerdes.hpp"
 
-TEST(MwLoggingSerdes, LoggingSerdes)
+TEST(Test_LoggingSerdes, LoggingSerdes)
 {
     SilKit::Core::MessageBuffer buffer;
     SilKit::Services::Logging::LogMsg in, out;

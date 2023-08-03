@@ -29,13 +29,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-class YamlValidatorTest : public testing::Test
+class Test_YamlValidator : public testing::Test
 {
 };
 
 using namespace SilKit::Config;
 
-TEST_F(YamlValidatorTest, yaml_doc_relations)
+TEST_F(Test_YamlValidator, yaml_doc_relations)
 {
     YamlValidator v;
     // Ensure that YAML validation of top-level elements works
@@ -56,7 +56,7 @@ TEST_F(YamlValidatorTest, yaml_doc_relations)
     EXPECT_FALSE(v.IsRootElement("/Tracing/TraceSinks"));
 }
 
-TEST_F(YamlValidatorTest, validate_without_warnings)
+TEST_F(Test_YamlValidator, validate_without_warnings)
 {
     ParticipantConfiguration cfg;
     cfg.schemaVersion = "1";
@@ -77,7 +77,7 @@ TEST_F(YamlValidatorTest, validate_without_warnings)
     EXPECT_TRUE(warnings.empty()) << "Warnings: " << warnings;
 }
 
-TEST_F(YamlValidatorTest, validate_unknown_toplevel)
+TEST_F(Test_YamlValidator, validate_unknown_toplevel)
 {
     auto yamlString = R"yaml(
 SchemaVersion: 1
@@ -95,7 +95,7 @@ CanControllerss:
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 
-TEST_F(YamlValidatorTest, validate_duplicate_element)
+TEST_F(Test_YamlValidator, validate_duplicate_element)
 {
     const auto yamlString = R"raw(
 LinControllers:
@@ -112,7 +112,7 @@ LinControllers:
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 
-TEST_F(YamlValidatorTest, validate_unnamed_children)
+TEST_F(Test_YamlValidator, validate_unnamed_children)
 {
     auto yamlString = R"yaml(
 ParticipantName: P1

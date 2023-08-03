@@ -61,23 +61,24 @@ target_link_libraries(O_SilKit_Services_PubSub
     PRIVATE I_SilKit_Util_LabelMatching
 )
 
-add_silkit_test(Test_SimDataPublisher 
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_DataPublisher.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_SimDataSubscriber
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_DataSubscriber.cpp
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_SimDataSubscriberInternal
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_DataSubscriberInternal.cpp
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_PubSubMatching
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_PubSubMatching.cpp 
     LIBS S_SilKitImpl
 )
-add_silkit_test(Test_SimData_Serdes
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_DataSerdes.cpp
     LIBS S_SilKitImpl
 )
+

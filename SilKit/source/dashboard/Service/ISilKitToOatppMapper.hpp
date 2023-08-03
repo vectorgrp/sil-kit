@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <cstdint>
 
-#include "oatpp/core/Types.hpp"
+#include "OatppHeaders.hpp"
 
 #include "silkit/services/orchestration/OrchestrationDatatypes.hpp"
 

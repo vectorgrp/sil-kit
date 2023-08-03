@@ -38,7 +38,7 @@ namespace PubSub {
 }
 }
 }
-TEST(MwVAsioSerdes, SimData_LargeDataMessage)
+TEST(Test_DataSerdes, SimData_LargeDataMessage)
 {
     using namespace SilKit::Services::PubSub;
     using namespace SilKit::Core;

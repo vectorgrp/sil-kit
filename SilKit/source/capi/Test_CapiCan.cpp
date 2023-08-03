@@ -120,16 +120,16 @@ namespace {
                                                const std::string& /*networkName*/));
     };
 
-    class CapiCanTest : public testing::Test
+    class Test_CapiCan : public testing::Test
     {
     public:
         MockCanController mockController;
-        CapiCanTest()
+        Test_CapiCan()
         {
         }
     };
 
-    TEST_F(CapiCanTest, can_controller_function_mapping)
+    TEST_F(Test_CapiCan, can_controller_function_mapping)
     {
         using SilKit::Util::HandlerId;
 
@@ -205,7 +205,7 @@ namespace {
 
     }
 
-    TEST_F(CapiCanTest, can_controller_send_frame_no_flags)
+    TEST_F(Test_CapiCan, can_controller_send_frame_no_flags)
     {
 
         SilKit_ReturnCode returnCode;
@@ -221,7 +221,7 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
 
-    TEST_F(CapiCanTest, can_controller_send_frame_flags1)
+    TEST_F(Test_CapiCan, can_controller_send_frame_flags1)
     {
 
         SilKit_ReturnCode returnCode;
@@ -237,7 +237,7 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
 
-    TEST_F(CapiCanTest, can_controller_send_frame_flags2)
+    TEST_F(Test_CapiCan, can_controller_send_frame_flags2)
     {
 
         SilKit_ReturnCode returnCode;
@@ -254,7 +254,7 @@ namespace {
     }
 
 
-    TEST_F(CapiCanTest, can_controller_nullpointer_params)
+    TEST_F(Test_CapiCan, can_controller_nullpointer_params)
     {
         SilKit_ReturnCode returnCode;
         SilKit_HandlerId handlerId;
@@ -332,7 +332,7 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
 
-TEST_F(CapiCanTest, send_with_invalud_struct_header)
+TEST_F(Test_CapiCan, send_with_invalud_struct_header)
 {
     SilKit_CanFrame cf{};// we do not call SilKit_Struct_Init(SilKit_CanFrame, cf) here
     cf.id = 1;

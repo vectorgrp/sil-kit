@@ -58,7 +58,7 @@ target_link_libraries(O_SilKit_Services_Can
     PUBLIC I_SilKit_Services_Can
 )
 
-add_silkit_test(Test_SimCanController
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES 
         Test_CanControllerConfig.cpp
         Test_CanControllerDetailedSim.cpp 
@@ -69,6 +69,6 @@ add_silkit_test(Test_SimCanController
         O_SilKit_Core_Mock_NullConnection
 )
 
-add_silkit_test(Test_SimCan_Serdes  SOURCES Test_CanSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CanSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
 
-add_silkit_test(Test_SimCan_StringUtils SOURCES Test_CanStringUtils.cpp LIBS S_SilKitImpl)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_CanStringUtils.cpp LIBS S_SilKitImpl)

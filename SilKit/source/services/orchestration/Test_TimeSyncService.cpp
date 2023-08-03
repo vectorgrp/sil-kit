@@ -51,7 +51,7 @@ using namespace SilKit::Util;
 using ::SilKit::Core::Tests::DummyParticipant;
 
 
-class TimeSyncServiceTest : public testing::Test
+class Test_TimeSyncService : public testing::Test
 {
 protected:
     struct Callbacks
@@ -64,7 +64,7 @@ protected:
     };
 
 protected: // CTor
-    TimeSyncServiceTest()
+    Test_TimeSyncService()
     {
         // this CTor calls CreateTimeSyncService implicitly
         lifecycleService =
@@ -104,7 +104,7 @@ protected:
     std::unique_ptr<TimeSyncService> timeSyncService;
 };
 
-TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
+TEST_F(Test_TimeSyncService, async_simtask_once_without_complete_call)
 {
     auto numAsyncTaskCalled{0};
     timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
@@ -121,7 +121,7 @@ TEST_F(TimeSyncServiceTest, async_simtask_once_without_complete_call)
         << " until completed with a call to CompleteSimulationStep().";
 }
 
-TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
+TEST_F(Test_TimeSyncService, async_simtask_complete_lockstep)
 {
     auto numAsyncTaskCalled{0};
     timeSyncService->SetSimulationStepHandlerAsync([&](auto, auto){
@@ -142,7 +142,7 @@ TEST_F(TimeSyncServiceTest, async_simtask_complete_lockstep)
         << "SimulationStepHandlerAsync should be called in lockstep with calls to CompleteSimulationStep().";
 }
 
-TEST_F(TimeSyncServiceTest, async_simtask_mismatching_number_of_complete_calls)
+TEST_F(Test_TimeSyncService, async_simtask_mismatching_number_of_complete_calls)
 {
     // What happens when the User calls CompleteSimulationStep() multiple times?
     auto numAsyncTaskCalled{0};

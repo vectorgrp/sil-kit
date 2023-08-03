@@ -45,10 +45,10 @@ using namespace SilKit::Services::Lin;
 using namespace SilKit::Services::Lin::Tests;
 using namespace SilKit::Util;
 
-class LinControllerTrivialSimTest : public testing::Test
+class Test_LinControllerTrivialSim : public testing::Test
 {
 protected:
-    LinControllerTrivialSimTest()
+    Test_LinControllerTrivialSim()
         : master(&participant, cfg, participant.GetTimeProvider())
         , slave1(&participant, cfg, participant.GetTimeProvider())
         , slave2(&participant, cfg, participant.GetTimeProvider())
@@ -96,13 +96,13 @@ protected:
 };
 
 
-TEST_F(LinControllerTrivialSimTest, throw_on_inactive_init)
+TEST_F(Test_LinControllerTrivialSim, throw_on_inactive_init)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Inactive);
     EXPECT_THROW(master.Init(config), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, throw_on_duplicate_init)
+TEST_F(Test_LinControllerTrivialSim, throw_on_duplicate_init)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     
@@ -110,7 +110,7 @@ TEST_F(LinControllerTrivialSimTest, throw_on_duplicate_init)
     EXPECT_THROW(master.Init(config), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_configured_master_response)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_configured_master_response)
 {
     
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -126,7 +126,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_configured_master_response)
     master.SendFrame(frame, LinFrameResponseType::MasterResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_unconfigured_master_response)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_unconfigured_master_response)
 {
     
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -140,7 +140,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_unconfigured_master_response
     master.SendFrame(frame, LinFrameResponseType::MasterResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_via_slave_config)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_one_slave_response_via_slave_config)
 {
     // Configure Slave 1
     auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
@@ -163,7 +163,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_via_slave
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_via_slave_response_update)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_one_slave_response_via_slave_response_update)
 {
     // Init Master
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -191,7 +191,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_response_via_slave
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_slave_response_undefined_datalength)
+TEST_F(Test_LinControllerTrivialSim, send_frame_slave_response_undefined_datalength)
 {
     // Init Master
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -219,7 +219,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_slave_response_undefined_dataleng
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_unconfigured_slave_response)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_unconfigured_slave_response)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     
@@ -235,7 +235,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_unconfigured_slave_response)
 }
 
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_multiple_slave_responses)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_multiple_slave_responses)
 {
     // Configure Slave 1
     auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
@@ -265,7 +265,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_multiple_slave_responses)
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_master_and_slave_responses)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_master_and_slave_responses)
 {
     // Configure Slave 1
     auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
@@ -294,7 +294,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_master_and_slave_responses)
 }
 
 
-TEST_F(LinControllerTrivialSimTest, send_frame_slave_to_slave_receive_tx)
+TEST_F(Test_LinControllerTrivialSim, send_frame_slave_to_slave_receive_tx)
 {
     // Configure Slave 1
     auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
@@ -319,7 +319,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_slave_to_slave_receive_tx)
 }
 
 
-TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_and_slave_responses)
+TEST_F(Test_LinControllerTrivialSim, send_frame_header_with_master_and_slave_responses)
 {
     // Configure Slave 1
     auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
@@ -346,7 +346,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_and_slave_resp
     master.SendFrameHeader(17);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_sleeping)
+TEST_F(Test_LinControllerTrivialSim, send_frame_with_one_slave_sleeping)
 {
     // Configure Slave 1
     auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
@@ -374,7 +374,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_with_one_slave_sleeping)
     master.SendFrame(frame, LinFrameResponseType::SlaveResponse);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_header_with_unconfigured_response)
+TEST_F(Test_LinControllerTrivialSim, send_frame_header_with_unconfigured_response)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     
@@ -395,7 +395,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_with_unconfigured_response
     slave1.ReceiveMsg(&master, LinTransmission{35s, frame, LinFrameStatus::LIN_RX_NO_RESPONSE});
 }
 
-TEST_F(LinControllerTrivialSimTest, receive_frame_wrong_checksum)
+TEST_F(Test_LinControllerTrivialSim, receive_frame_wrong_checksum)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     LinFrame configuredFrame = MakeFrame(17, LinChecksumModel::Enhanced); // Configure with Enhanced
@@ -416,7 +416,7 @@ TEST_F(LinControllerTrivialSimTest, receive_frame_wrong_checksum)
     master.ReceiveMsg(&slave1, LinTransmission{35s, receivedFrame, LinFrameStatus::LIN_RX_OK});
 }
 
-TEST_F(LinControllerTrivialSimTest, receive_frame_wrong_datalength)
+TEST_F(Test_LinControllerTrivialSim, receive_frame_wrong_datalength)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     LinFrame configuredFrame = MakeFrame(17, LinChecksumModel::Enhanced); 
@@ -437,7 +437,7 @@ TEST_F(LinControllerTrivialSimTest, receive_frame_wrong_datalength)
     master.ReceiveMsg(&slave1, LinTransmission{35s, receivedFrame, LinFrameStatus::LIN_RX_OK});
 }
 
-TEST_F(LinControllerTrivialSimTest, receive_frame_overwrite_checksum_and_datalength)
+TEST_F(Test_LinControllerTrivialSim, receive_frame_overwrite_checksum_and_datalength)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     LinFrame configuredFrame = MakeFrame(17, LinChecksumModel::Unknown, LinDataLengthUnknown); // Configure with Undefined
@@ -463,7 +463,7 @@ TEST_F(LinControllerTrivialSimTest, receive_frame_overwrite_checksum_and_datalen
 }
 
 
-TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_tx_slave_rx)
+TEST_F(Test_LinControllerTrivialSim, send_frame_header_with_master_tx_slave_rx)
 {
     // Master Tx on 17 with preinitialized payload
     auto masterConfig = MakeControllerConfig(LinControllerMode::Master);
@@ -514,7 +514,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_tx_slave_rx)
     slave1.ReceiveMsg(&master, LinTransmission{35s, frame, LinFrameStatus::LIN_RX_OK });
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_rx_slave_tx)
+TEST_F(Test_LinControllerTrivialSim, send_frame_header_with_master_rx_slave_tx)
 {
     // Master Rx on 17 with preinitialized payload
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
@@ -564,7 +564,7 @@ TEST_F(LinControllerTrivialSimTest, send_frame_header_with_master_rx_slave_tx)
     master.ReceiveMsg(&slave1, LinTransmission{35s, frame, LinFrameStatus::LIN_RX_OK});
 }
 
-TEST_F(LinControllerTrivialSimTest, trigger_slave_callbacks)
+TEST_F(Test_LinControllerTrivialSim, trigger_slave_callbacks)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     LinFrameResponse response;
@@ -610,7 +610,7 @@ TEST_F(LinControllerTrivialSimTest, trigger_slave_callbacks)
     master.ReceiveMsg(&slave1, transmission);
 }
 
-TEST_F(LinControllerTrivialSimTest, trigger_slave_configuration_handler)
+TEST_F(Test_LinControllerTrivialSim, trigger_slave_configuration_handler)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
     master.AddLinSlaveConfigurationHandler(slaveConfigurationHandler);
@@ -631,7 +631,7 @@ TEST_F(LinControllerTrivialSimTest, trigger_slave_configuration_handler)
     master.ReceiveMsg(&slave1, ToWire(slaveCfg));
 }
 
-TEST_F(LinControllerTrivialSimTest, go_to_sleep)
+TEST_F(Test_LinControllerTrivialSim, go_to_sleep)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
@@ -641,7 +641,7 @@ TEST_F(LinControllerTrivialSimTest, go_to_sleep)
     master.GoToSleep();
 }
 
-TEST_F(LinControllerTrivialSimTest, go_to_sleep_internal)
+TEST_F(Test_LinControllerTrivialSim, go_to_sleep_internal)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
@@ -653,7 +653,7 @@ TEST_F(LinControllerTrivialSimTest, go_to_sleep_internal)
     master.GoToSleepInternal();
 }
 
-TEST_F(LinControllerTrivialSimTest, call_gotosleep_handler)
+TEST_F(Test_LinControllerTrivialSim, call_gotosleep_handler)
 {
     EXPECT_CALL(participant, SendMsg(&slave1, A<const WireLinControllerConfig&>())).Times(1);
     slave1.Init(MakeControllerConfig(LinControllerMode::Slave));
@@ -666,7 +666,7 @@ TEST_F(LinControllerTrivialSimTest, call_gotosleep_handler)
     slave1.ReceiveMsg(&master, goToSleep);
 }
 
-TEST_F(LinControllerTrivialSimTest, not_call_gotosleep_handler)
+TEST_F(Test_LinControllerTrivialSim, not_call_gotosleep_handler)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
     master.AddFrameStatusHandler(frameStatusHandler);
@@ -683,7 +683,7 @@ TEST_F(LinControllerTrivialSimTest, not_call_gotosleep_handler)
     master.ReceiveMsg(&slave1, goToSleep);
 }
 
-TEST_F(LinControllerTrivialSimTest, wake_up)
+TEST_F(Test_LinControllerTrivialSim, wake_up)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
@@ -697,7 +697,7 @@ TEST_F(LinControllerTrivialSimTest, wake_up)
     master.Wakeup();
 }
 
-TEST_F(LinControllerTrivialSimTest, wake_up_internal)
+TEST_F(Test_LinControllerTrivialSim, wake_up_internal)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
@@ -711,7 +711,7 @@ TEST_F(LinControllerTrivialSimTest, wake_up_internal)
 }
 
 
-TEST_F(LinControllerTrivialSimTest, call_wakeup_handler)
+TEST_F(Test_LinControllerTrivialSim, call_wakeup_handler)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
     master.AddFrameStatusHandler(frameStatusHandler);
@@ -725,7 +725,7 @@ TEST_F(LinControllerTrivialSimTest, call_wakeup_handler)
     master.ReceiveMsg(&slave1, wakeupPulse);
 }
 
-TEST_F(LinControllerTrivialSimTest, receive_frame_unknown_checksum)
+TEST_F(Test_LinControllerTrivialSim, receive_frame_unknown_checksum)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     LinFrame configuredFrame =
@@ -746,7 +746,7 @@ TEST_F(LinControllerTrivialSimTest, receive_frame_unknown_checksum)
     slave1.ReceiveMsg(&master, LinTransmission{35s, receivedFrame, LinFrameStatus::LIN_RX_OK});
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_master_response_throw_on_unitialized_datalength)
+TEST_F(Test_LinControllerTrivialSim, send_frame_master_response_throw_on_unitialized_datalength)
 {
     master.Init(MakeControllerConfig(LinControllerMode::Master));
 
@@ -759,47 +759,47 @@ TEST_F(LinControllerTrivialSimTest, send_frame_master_response_throw_on_unitiali
     EXPECT_THROW(master.ReceiveMsg(&master, LinSendFrameHeaderRequest{35s, frame.id}), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, go_to_sleep_throw_uninitialized)
+TEST_F(Test_LinControllerTrivialSim, go_to_sleep_throw_uninitialized)
 {
     EXPECT_THROW(master.GoToSleep(), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, go_to_sleep_internal_throw_uninitialized)
+TEST_F(Test_LinControllerTrivialSim, go_to_sleep_internal_throw_uninitialized)
 {
     EXPECT_THROW(master.GoToSleepInternal(), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, wake_up_throw_uninitialized)
+TEST_F(Test_LinControllerTrivialSim, wake_up_throw_uninitialized)
 {
     EXPECT_THROW(master.Wakeup(), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_throw_unitialized)
+TEST_F(Test_LinControllerTrivialSim, send_frame_throw_unitialized)
 {
     EXPECT_THROW(master.SendFrame({}, LinFrameResponseType::MasterResponse), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, send_frame_header_throw_unitialized)
+TEST_F(Test_LinControllerTrivialSim, send_frame_header_throw_unitialized)
 {
     EXPECT_THROW(master.SendFrameHeader({}), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, update_tx_buffer_throw_unitialized)
+TEST_F(Test_LinControllerTrivialSim, update_tx_buffer_throw_unitialized)
 {
     EXPECT_THROW(master.UpdateTxBuffer({}), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, wake_up_internal_throw_uninitialized)
+TEST_F(Test_LinControllerTrivialSim, wake_up_internal_throw_uninitialized)
 {
     EXPECT_THROW(master.WakeupInternal(), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, set_frame_response_throw_uninitialized)
+TEST_F(Test_LinControllerTrivialSim, set_frame_response_throw_uninitialized)
 {
     EXPECT_THROW(master.SetFrameResponse({}), SilKit::StateError);
 }
 
-TEST_F(LinControllerTrivialSimTest, add_remove_handler)
+TEST_F(Test_LinControllerTrivialSim, add_remove_handler)
 {
     LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
     LinFrameResponse response;
@@ -840,7 +840,7 @@ TEST_F(LinControllerTrivialSimTest, add_remove_handler)
 // Tracing
 ////////////
 
-TEST_F(LinControllerTrivialSimTest, DISABLED_send_with_tracing)
+TEST_F(Test_LinControllerTrivialSim, DISABLED_send_with_tracing)
 {
     
 

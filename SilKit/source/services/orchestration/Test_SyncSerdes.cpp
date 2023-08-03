@@ -29,7 +29,7 @@ using namespace std::chrono_literals;
 
 namespace {
 
-TEST(MwVAsioSerdes, MwSync_SystemCommand)
+TEST(Test_SyncSerdes, MwSync_SystemCommand)
 {
     using namespace SilKit::Services::Orchestration;
     SilKit::Core::MessageBuffer buffer;
@@ -43,7 +43,7 @@ TEST(MwVAsioSerdes, MwSync_SystemCommand)
     EXPECT_EQ(in.kind, out.kind);
 }
 
-TEST(MwVAsioSerdes, MwSync_ParticipantStatus)
+TEST(Test_SyncSerdes, MwSync_ParticipantStatus)
 {
     using namespace SilKit::Services::Orchestration;
     SilKit::Core::MessageBuffer buffer;

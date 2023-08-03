@@ -25,10 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <memory>
 #include <string>
 
-#include "oatpp/core/macro/component.hpp"
-#include "oatpp/network/ConnectionPool.hpp"
-#include "oatpp/network/tcp/client/ConnectionProvider.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
+#include "OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {

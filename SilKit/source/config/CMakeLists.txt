@@ -63,12 +63,12 @@ target_include_directories(O_SilKit_Config
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_silkit_test(Test_MwCfgValidation
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_Validation.cpp
     LIBS O_SilKit_Config
 )
 
-add_silkit_test(Test_ParticipantConfiguration
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_ParticipantConfiguration.cpp
     LIBS S_SilKitImpl O_SilKit_Core_Mock_NullConnection
     CONFIGS
@@ -78,15 +78,16 @@ add_silkit_test(Test_ParticipantConfiguration
         ParticipantConfiguration_Logging_Without_File.json
 )
 
-add_silkit_test(Test_MwCfgYamlParser
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_YamlParser.cpp
     LIBS O_SilKit_Config yaml-cpp
 )
 
-add_silkit_test(Test_MwCfgYamlValidator
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_YamlValidator.cpp
     LIBS O_SilKit_Config yaml-cpp
 )
+
 if(SILKIT_BUILD_TESTS)
     add_library(I_SilKit_Config_TestUtils INTERFACE)
 
@@ -96,5 +97,5 @@ if(SILKIT_BUILD_TESTS)
     target_link_libraries(I_SilKit_Config_TestUtils
         INTERFACE I_SilKit_Config
     )
-
 endif()
+

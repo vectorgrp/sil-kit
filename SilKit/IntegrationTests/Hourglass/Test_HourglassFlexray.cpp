@@ -243,12 +243,12 @@ MATCHER_P(FlexrayTxBufferUpdateMatcher, controlFrame, "")
     return true;
 }
 
-class HourglassFlexrayTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassFlexray : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_FlexrayController* mockFlexrayController{reinterpret_cast<SilKit_FlexrayController*>(uintptr_t(0x12345678))};
 
-    HourglassFlexrayTest()
+    Test_HourglassFlexray()
     {
         using testing::_;
         ON_CALL(capi, SilKit_FlexrayController_Create(_, _, _, _))
@@ -256,7 +256,7 @@ public:
     }
 };
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_Create)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     std::string name = "FlexrayController1";
@@ -269,7 +269,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_Create)
         participant, name, network);
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_Configure)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_Configure)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -327,7 +327,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_Configure)
     FlexrayController.Configure(controllerConfig);
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_ReconfigureTxBuffer)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ReconfigureTxBuffer)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -339,7 +339,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_ReconfigureTxBuffer)
     FlexrayController.ReconfigureTxBuffer(1234, bufferConfig);
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_UpdateTxBuffer)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_UpdateTxBuffer)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -352,7 +352,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_UpdateTxBuffer)
     FlexrayController.UpdateTxBuffer(bufferUpdate);
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_ExecuteCmd)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_ExecuteCmd)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -362,7 +362,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_ExecuteCmd)
     FlexrayController.Freeze();
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddFrameHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddFrameHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -373,7 +373,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddFrameHandler)
     FlexrayController.AddFrameHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveFrameHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemoveFrameHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -382,7 +382,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveFrameHandler)
     FlexrayController.RemoveFrameHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddFrameTransmitHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddFrameTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -393,7 +393,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddFrameTransmitHandler)
     FlexrayController.AddFrameTransmitHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveFrameTransmitHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemoveFrameTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -402,7 +402,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveFrameTransmitHandler
     FlexrayController.RemoveFrameTransmitHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddWakeupHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddWakeupHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -413,7 +413,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddWakeupHandler)
     FlexrayController.AddWakeupHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveWakeupHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemoveWakeupHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -422,7 +422,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveWakeupHandler)
     FlexrayController.RemoveWakeupHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddPocStatusHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddPocStatusHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -433,7 +433,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddPocStatusHandler)
     FlexrayController.AddPocStatusHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemovePocStatusHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemovePocStatusHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -442,7 +442,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemovePocStatusHandler)
     FlexrayController.RemovePocStatusHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddSymbolHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddSymbolHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -453,7 +453,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddSymbolHandler)
     FlexrayController.AddSymbolHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveSymbolHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemoveSymbolHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -462,7 +462,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveSymbolHandler)
     FlexrayController.RemoveSymbolHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddSymbolTransmitHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddSymbolTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -473,7 +473,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddSymbolTransmitHandler)
     FlexrayController.AddSymbolTransmitHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveSymbolTransmitHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemoveSymbolTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -482,7 +482,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveSymbolTransmitHandle
     FlexrayController.RemoveSymbolTransmitHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddCycleStartHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_AddCycleStartHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");
@@ -493,7 +493,7 @@ TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_AddCycleStartHandler)
     FlexrayController.AddCycleStartHandler({});
 }
 
-TEST_F(HourglassFlexrayTest, SilKit_FlexrayController_RemoveCycleStartHandler)
+TEST_F(Test_HourglassFlexray, SilKit_FlexrayController_RemoveCycleStartHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Flexray::FlexrayController FlexrayController(
         nullptr, "FlexrayController1", "FlexrayNetwork1");

@@ -32,18 +32,18 @@ namespace SilKit {
 
 namespace Dashboard {
 
-class TestDashboardSilKitEventQueue : public Test
+class Test_DashboardSilKitEventQueue : public Test
 {
 public:
     std::shared_ptr<SilKitEventQueue> CreateService() { return std::make_shared<SilKitEventQueue>(); }
 };
 
-TEST_F(TestDashboardSilKitEventQueue, ManyProducersAndOneConsumer)
+TEST_F(Test_DashboardSilKitEventQueue, ManyProducersAndOneConsumer)
 {
     // Arrange
 
     // Act
-    int eventCount = 0;
+    size_t eventCount = 0;
     {
         const auto service = CreateService();
 
@@ -63,7 +63,7 @@ TEST_F(TestDashboardSilKitEventQueue, ManyProducersAndOneConsumer)
         std::vector<std::thread> producers;
         for (int participantIndex = 0; participantIndex < 50; ++participantIndex)
         {
-            producers.push_back(std::thread([&service, participantIndex]() {
+            producers.push_back(std::thread([&service]() {
                 Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
                 service->Enqueue(SilKitEvent(participantConnectionInformation));
                 Services::Orchestration::ParticipantStatus participantStatus;
@@ -74,7 +74,7 @@ TEST_F(TestDashboardSilKitEventQueue, ManyProducersAndOneConsumer)
         {
             producer.join();
         }
-        Services::Orchestration::SystemState systemState;
+        Services::Orchestration::SystemState systemState{};
         service->Enqueue(SilKitEvent(systemState));
         SimulationEnd simulatioEnd{456789};
         service->Enqueue(SilKitEvent(simulatioEnd));
@@ -85,7 +85,7 @@ TEST_F(TestDashboardSilKitEventQueue, ManyProducersAndOneConsumer)
     }
 
     // Assert
-    ASSERT_EQ(eventCount, 103) << "Wrong event count!";
+    ASSERT_EQ(eventCount, 103u) << "Wrong event count!";
 }
 
 } // namespace Dashboard

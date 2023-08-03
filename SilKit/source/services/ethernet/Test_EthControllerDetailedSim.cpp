@@ -67,7 +67,7 @@ public:
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetSetMode&));
 };
 
-class EthernetControllerDetailedSimTest : public testing::Test
+class Test_EthControllerDetailedSim : public testing::Test
 {
 protected:
     struct Callbacks
@@ -79,7 +79,7 @@ protected:
     };
 
 protected:
-    EthernetControllerDetailedSimTest()
+    Test_EthControllerDetailedSim()
         : controller{&participant, cfg, participant.GetTimeProvider()}
         , controllerBusSim{&participant, cfg, participant.GetTimeProvider()}
     {
@@ -121,7 +121,7 @@ protected:
 *   - call Deactivate() again
 *     - CHECK that NO EthSetMessage is sent
 */
-TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
+TEST_F(Test_EthControllerDetailedSim, keep_track_of_state)
 {
     EthernetSetMode Activate{ EthernetMode::Active };
     EthernetSetMode Deactivate{ EthernetMode::Inactive };
@@ -142,7 +142,7 @@ TEST_F(EthernetControllerDetailedSimTest, keep_track_of_state)
 }
 
 
-TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
+TEST_F(Test_EthControllerDetailedSim, send_eth_message)
 {
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns)))
         .Times(1);
@@ -155,7 +155,7 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_message)
 
 /*! \brief SendFrame must not invoke the TimeProvider and triggers SendMsg on the participant
  */
-TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
+TEST_F(Test_EthControllerDetailedSim, send_eth_frame)
 {
     EXPECT_CALL(participant, SendMsg(&controller, AnEthMessageWith(0ns))).Times(1);
 
@@ -168,7 +168,7 @@ TEST_F(EthernetControllerDetailedSimTest, send_eth_frame)
 
 /*! \brief Passing an EthernetFrameEvent to an EthControllerProxy must trigger the registered callback
  */
-TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
+TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_receive_message)
 {
     WireEthernetFrameEvent msg{};
     msg.frame.raw = SilKit::Util::SharedVector<uint8_t>{std::vector<uint8_t>(123)};
@@ -182,7 +182,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_message)
 
 /*! \brief Passing an Ack to an EthControllerProxy must trigger the registered callback
  */
-TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
+TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_receive_ack)
 {
     EthernetFrameTransmitEvent expectedAck{ 42ms, EthernetTransmitStatus::Transmitted, reinterpret_cast<void *>(17) };
 
@@ -198,7 +198,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_receive_ack)
  *   The EthControllerProxy is used in conjunction with a network simulator, which is
  *   responsible for Ack generation.
  */
-TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
+TEST_F(Test_EthControllerDetailedSim, must_not_generate_ack)
 {
     WireEthernetFrameEvent msg{};
     msg.userContext = reinterpret_cast<void *>(17);
@@ -221,7 +221,7 @@ TEST_F(EthernetControllerDetailedSimTest, must_not_generate_ack)
 *   - Check that the callback is executed
 *   - Deliver an EthernetStatus with the same bitrate again 0 directly to the EthControllerProxy; this should NOT trigger the callback
 */
-TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_bitrate_change)
+TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_bitrate_change)
 {
     EXPECT_CALL(callbacks, BitrateChangedHandler(&controller, EthernetBitrateChangeEvent{ 0ns, 100 }))
         .Times(1);
@@ -253,7 +253,7 @@ TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_bitrate_change)
 *   - Deliver an EthernetStatus with Inactive directly to the EthControllerProxy
 *      -> this should trigger the callback
 */
-TEST_F(EthernetControllerDetailedSimTest, trigger_callback_on_state_change)
+TEST_F(Test_EthControllerDetailedSim, trigger_callback_on_state_change)
 {
     InSequence executionSequence;
     EXPECT_CALL(callbacks, StateChangeHandler(&controller, Ethernet::EthernetStateChangeEvent{ 0ns, EthernetState::LinkUp }))

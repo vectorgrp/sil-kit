@@ -122,13 +122,13 @@ MATCHER_P(PubSubSpecMatcher, pubSubSpecParam, "")
     return true;
 }
 
-class HourglassPubSubTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassPubSub : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_DataPublisher* mockDataPublisher{reinterpret_cast<SilKit_DataPublisher*>(uintptr_t(0x78563412))};
     SilKit_DataSubscriber* mockDataSubscriber{reinterpret_cast<SilKit_DataSubscriber*>(uintptr_t(0x87654321))};
 
-    HourglassPubSubTest()
+    Test_HourglassPubSub()
     {
         using testing::_;
         ON_CALL(capi, SilKit_DataPublisher_Create(_, _, _, _, _))
@@ -140,7 +140,7 @@ public:
 
 // DataPublisher
 
-TEST_F(HourglassPubSubTest, SilKit_DataPublisher_Create)
+TEST_F(Test_HourglassPubSub, SilKit_DataPublisher_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
 
@@ -163,7 +163,7 @@ TEST_F(HourglassPubSubTest, SilKit_DataPublisher_Create)
         participant, publisherName, pubSubSpec, 0x42};
 }
 
-TEST_F(HourglassPubSubTest, SilKit_DataPublisher_Publish)
+TEST_F(Test_HourglassPubSub, SilKit_DataPublisher_Publish)
 {
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
 
@@ -180,7 +180,7 @@ TEST_F(HourglassPubSubTest, SilKit_DataPublisher_Publish)
 
 // DataSubscriber
 
-TEST_F(HourglassPubSubTest, SilKit_DataSubscriber_Create)
+TEST_F(Test_HourglassPubSub, SilKit_DataSubscriber_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
 
@@ -205,7 +205,7 @@ TEST_F(HourglassPubSubTest, SilKit_DataSubscriber_Create)
         }};
 }
 
-TEST_F(HourglassPubSubTest, SilKit_DataSubscriber_SetDataMessageHandler)
+TEST_F(Test_HourglassPubSub, SilKit_DataSubscriber_SetDataMessageHandler)
 {
     auto* const participant = reinterpret_cast<SilKit_Participant*>(uintptr_t(123456));
 

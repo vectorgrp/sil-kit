@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "gtest/gtest.h"
 
 using namespace SilKit::Core;
-TEST(UriTest, parse_uris)
+TEST(Test_Uri, parse_uris)
 {
 	auto uri = Uri::Parse("silkit://hostname:1234/path?params");
 	ASSERT_EQ(uri.Scheme(), "silkit");

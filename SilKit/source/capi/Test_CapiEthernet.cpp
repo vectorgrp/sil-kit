@@ -66,11 +66,11 @@ public:
     MOCK_METHOD(void, SendFrame, (EthernetFrame, void*), (override));
 };
 
-class CapiEthernetTest : public testing::Test
+class Test_CapiEthernet : public testing::Test
 {
 public: 
     MockEthernetController mockController;
-    CapiEthernetTest() 
+    Test_CapiEthernet() 
     {
     }
 };
@@ -98,7 +98,7 @@ public:
                                                                     const std::string& /*networkName*/));
 };
 
-TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
+TEST_F(Test_CapiEthernet, ethernet_controller_function_mapping)
 {
     using SilKit::Util::HandlerId;
 
@@ -238,7 +238,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiEthernetTest, ethernet_controller_nullptr_params)
+TEST_F(Test_CapiEthernet, ethernet_controller_nullptr_params)
 {
     SilKit_ReturnCode returnCode;
     SilKit_HandlerId handlerId;
@@ -316,7 +316,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_nullptr_params)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
-TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
+TEST_F(Test_CapiEthernet, ethernet_controller_send_frame)
 {
     SilKit_ReturnCode returnCode = 0;
     // create payload
@@ -357,7 +357,7 @@ TEST_F(CapiEthernetTest, ethernet_controller_send_frame)
 
 }
 
-TEST_F(CapiEthernetTest, ethernet_controller_send_short_frame)
+TEST_F(Test_CapiEthernet, ethernet_controller_send_short_frame)
 {
     std::vector<uint8_t> buffer;
 

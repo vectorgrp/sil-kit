@@ -133,13 +133,13 @@ struct MockEthFrame
         static_cast<EthernetFrame*>(this)->raw = static_cast<WireEthernetFrame*>(this)->raw.AsSpan();
     }
 };
-struct ReplayTest : public testing::Test
+struct Test_EthernetReplay : public testing::Test
 {
     ServiceDescriptor _serviceDescriptor{ "EthernetReplay", "Eth0", "EthController0", 2};
     ServiceDescriptor _otherServiceDescriptor{ "EthernetReplay2", "Eth1", "EthController2", 4 };
 };
 
-TEST_F(ReplayTest, ethcontroller_replay_config_send)
+TEST_F(Test_EthernetReplay, ethcontroller_replay_config_send)
 {
     MockParticipant participant{};
 
@@ -197,7 +197,7 @@ TEST_F(ReplayTest, ethcontroller_replay_config_send)
     }
 }
 
-TEST_F(ReplayTest, ethcontroller_replay_config_receive)
+TEST_F(Test_EthernetReplay, ethcontroller_replay_config_receive)
 {
     Callbacks callbacks;
     MockParticipant participant{};

@@ -48,7 +48,12 @@ using SilKit::IntegrationTests::CreateEthernetFrameFromString;
 
 constexpr uintptr_t sendFrameUserContext = 0x12345678;
 
-TEST_F(ITest_SimTestHarness, ethernet_demo)
+struct ITest_EthernetDemo : ITest_SimTestHarness
+{
+    using ITest_SimTestHarness::ITest_SimTestHarness;
+};
+
+TEST_F(ITest_EthernetDemo, ethernet_demo)
 {
     //Create a simulation setup with 2 participants 
     SetupFromParticipantList({"EthernetReader", "EthernetWriter"});

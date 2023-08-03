@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "InternalSerdes.hpp"
 
-TEST(MwVAsioSerdes, Mw_EndpointAddress)
+TEST(Test_InternalSerdes, Mw_EndpointAddress)
 {
     SilKit::Core::MessageBuffer buffer;
 
@@ -36,7 +36,7 @@ TEST(MwVAsioSerdes, Mw_EndpointAddress)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, Mw_EndpointAddress_multiple)
+TEST(Test_InternalSerdes, Mw_EndpointAddress_multiple)
 {
     SilKit::Core::MessageBuffer buffer;
 

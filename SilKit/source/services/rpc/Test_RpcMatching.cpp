@@ -11,13 +11,13 @@ using namespace testing;
 
 using namespace SilKit::Services::Rpc;
 
-class RpcMatchingTest : public ::testing::Test
+class Test_RpcMatching : public ::testing::Test
 {
 protected:
-    RpcMatchingTest() {}
+    Test_RpcMatching() {}
 };
 
-TEST_F(RpcMatchingTest, match_mediatype)
+TEST_F(Test_RpcMatching, match_mediatype)
 {
     std::string mediaTypePub{"A"};
     std::string mediaTypeSub{"A"};

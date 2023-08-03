@@ -23,72 +23,112 @@
 # Helper Functions
 ################################################################################
 
-function(add_silkit_test)
+function(add_silkit_test_executable SILKIT_TEST_EXECUTABLE_NAME)
     if(NOT ${SILKIT_BUILD_TESTS})
         return()
     endif()
 
-    set(multiValueArgs SOURCES LIBS CONFIGS)
+    add_executable("${SILKIT_TEST_EXECUTABLE_NAME}")
 
-    cmake_parse_arguments(PARSED_ARGS
-        ""
-        ""
-        "${multiValueArgs}"
-        ${ARGN}
-    )
-
-    if(NOT PARSED_ARGS_UNPARSED_ARGUMENTS)
-        message(FATAL_ERROR "add_silkit_test function failed because no executable name was specified (UNPARSED_ARGUMENTS were empty).")
-    endif()
-
-    list(GET PARSED_ARGS_UNPARSED_ARGUMENTS 0 executableName)
-
-    if(NOT PARSED_ARGS_SOURCES)
-        message(FATAL_ERROR "add_silkit_test function for ${executableName} has an empty source list.")
-    endif()
-
-    add_executable(${executableName}
-        ${PARSED_ARGS_SOURCES}
-    )
-
-    set_property(TARGET ${executableName} PROPERTY FOLDER "Tests")
-
-    target_link_libraries(${executableName}
+    target_link_libraries("${SILKIT_TEST_EXECUTABLE_NAME}"
         PRIVATE SilKitInterface
-        gtest
-        gmock_main
-        ${PARSED_ARGS_LIBS}
+        PRIVATE gtest
+        PRIVATE gmock_main
     )
-    target_compile_definitions(${executableName}
-        PRIVATE
-        UNIT_TEST
+
+    target_compile_definitions("${SILKIT_TEST_EXECUTABLE_NAME}"
+        PRIVATE UNIT_TEST
     )
-    set_target_properties(${executableName} PROPERTIES
+
+    set_property(TARGET "${SILKIT_TEST_EXECUTABLE_NAME}" PROPERTY FOLDER "Tests")
+
+    set(dummyConfig "${CMAKE_CURRENT_BINARY_DIR}/${SILKIT_TEST_EXECUTABLE_NAME}.dummyconfig")
+    file(TOUCH "${dummyConfig}")
+
+    set_target_properties("${SILKIT_TEST_EXECUTABLE_NAME}" PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
         WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIG>"
+        SILKIT_TEST_CONFIGURATION_FILES "${dummyConfig}"
     )
 
-    foreach(config ${PARSED_ARGS_CONFIGS})
-        get_filename_component(configFileName ${config} NAME)
-        add_custom_command(
-            TARGET ${executableName} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_CURRENT_SOURCE_DIR}/${config} $<TARGET_FILE_DIR:${executableName}>/${configFileName}
-        )
-    endforeach()
+    add_custom_command(
+        TARGET ${SILKIT_TEST_EXECUTABLE_NAME} POST_BUILD
+        COMMAND
+            ${CMAKE_COMMAND} -E copy
+                $<TARGET_PROPERTY:${SILKIT_TEST_EXECUTABLE_NAME},SILKIT_TEST_CONFIGURATION_FILES>
+                $<TARGET_FILE_DIR:${SILKIT_TEST_EXECUTABLE_NAME}>/
+        COMMAND_EXPAND_LISTS
+    )
 
     if (MSVC)
-        target_compile_options(${executableName} PRIVATE "/bigobj")
+        target_compile_options("${SILKIT_TEST_EXECUTABLE_NAME}" PRIVATE "/bigobj")
     endif(MSVC)
 
-    add_test(NAME ${executableName}
-             COMMAND ${executableName} --gtest_output=xml:${executableName}_gtestresults.xml
-             WORKING_DIRECTORY $<TARGET_FILE_DIR:${executableName}>
-    )
     #ensure test execution has the MinGW libraries in PATH
     if(MINGW)
         get_filename_component(compilerDir ${CMAKE_CXX_COMPILER} DIRECTORY)
-        set_tests_properties(${executableName} PROPERTIES ENVIRONMENT "PATH=${compilerDir};")
+        set_tests_properties(${SILKIT_TEST_EXECUTABLE_NAME} PROPERTIES ENVIRONMENT "PATH=${compilerDir};")
     endif()
-endfunction(add_silkit_test)
+endfunction()
+
+function(add_silkit_test_to_executable SILKIT_TEST_EXECUTABLE_NAME)
+    if(NOT ${SILKIT_BUILD_TESTS})
+        return()
+    endif()
+
+    set(mva SOURCES LIBS CONFIGS TESTSUITE_NAME)
+
+    cmake_parse_arguments(arg
+        ""
+        ""
+        "${mva}"
+        ${ARGN}
+    )
+
+    target_sources("${SILKIT_TEST_EXECUTABLE_NAME}" PRIVATE ${arg_SOURCES})
+
+    target_link_libraries("${SILKIT_TEST_EXECUTABLE_NAME}" PRIVATE ${arg_LIBS})
+
+    foreach(config ${arg_CONFIGS})
+        get_filename_component(configPath "${config}" ABSOLUTE)
+        set_property(TARGET "${SILKIT_TEST_EXECUTABLE_NAME}" APPEND PROPERTY SILKIT_TEST_CONFIGURATION_FILES "${configPath}")
+    endforeach()
+
+    # initialize the list of test suite names with the multi-value argument
+    set(testSuiteNames "${arg_TESTSUITE_NAME}")
+
+    # add each matching TU name as a test suite name
+    foreach(translationUnit ${arg_SOURCES})
+        if (NOT ${translationUnit} MATCHES .*Test_.*\.cpp$)
+            continue()
+        endif ()
+
+        get_filename_component(tuName "${translationUnit}" NAME_WE)
+        list(APPEND testSuiteNames "${tuName}")
+    endforeach()
+
+    # strip each test suite name and remove duplicates
+    list(TRANSFORM testSuiteNames STRIP)
+    list(REMOVE_DUPLICATES testSuiteNames)
+
+    # check that the test has at least a single test suite name
+    list(LENGTH testSuiteNames numberOfTestSuiteNames)
+    if (numberOfTestSuiteNames EQUAL 0)
+        message(FATAL_ERROR "SIL Kit: No test suites were added to ${SILKIT_TEST_EXECUTABLE_NAME}")
+    endif ()
+
+    # use the test suite names to add tests (CTest)
+    foreach (testSuite ${testSuiteNames})
+        message(VERBOSE "-- SIL Kit: CTest ${testSuite} (${SILKIT_TEST_EXECUTABLE_NAME})")
+
+        add_test(
+            NAME "${testSuite}"
+            COMMAND
+                "${SILKIT_TEST_EXECUTABLE_NAME}"
+                "--gtest_output=xml:${testSuite}_gtestresults.xml"
+                "--gtest_filter=${testSuite}.*"
+            WORKING_DIRECTORY $<TARGET_FILE_DIR:${SILKIT_TEST_EXECUTABLE_NAME}>
+        )
+    endforeach ()
+endfunction()

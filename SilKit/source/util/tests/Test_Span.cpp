@@ -39,7 +39,7 @@ using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Throw;
 
-TEST(SilKitSpanTest, test_view_data_and_size)
+TEST(Test_Span, test_view_data_and_size)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -58,7 +58,7 @@ TEST(SilKitSpanTest, test_view_data_and_size)
     EXPECT_EQ(constIntSequenceView.data(), constIntSequence.data());
 }
 
-TEST(SilKitSpanTest, test_view_content_equals_sourcevector)
+TEST(Test_Span, test_view_content_equals_sourcevector)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -73,7 +73,7 @@ TEST(SilKitSpanTest, test_view_content_equals_sourcevector)
     }
 }
 
-TEST(SilKitSpanTest, test_trim_view)
+TEST(Test_Span, test_trim_view)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -95,7 +95,7 @@ TEST(SilKitSpanTest, test_trim_view)
     }
 }
 
-TEST(SilKitSpanTest, test_iterators)
+TEST(Test_Span, test_iterators)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -123,7 +123,7 @@ TEST(SilKitSpanTest, test_iterators)
     }
 }
 
-TEST(SilKitSpanTest, test_modify_view)
+TEST(Test_Span, test_modify_view)
 {
     using namespace std::placeholders;
     using namespace ::SilKit::Util;
@@ -148,7 +148,7 @@ TEST(SilKitSpanTest, test_modify_view)
     }
 }
 
-TEST(SilKitSpanTest, test_ctor_vector)
+TEST(Test_Span, test_ctor_vector)
 {
     std::vector<uint8_t> bytes{1, 2, 3, 4, 5};
 
@@ -175,7 +175,7 @@ TEST(SilKitSpanTest, test_ctor_vector)
     }
 }
 
-TEST(SilKitSpanTest, test_assign_vector)
+TEST(Test_Span, test_assign_vector)
 {
     std::vector<uint8_t> bytes{1, 2, 3, 4, 5};
 

@@ -22,7 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "gmock/gmock-function-mocker.h"
-#include "oatpp/web/protocol/http/incoming/BodyDecoder.hpp"
+
+#include "OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {

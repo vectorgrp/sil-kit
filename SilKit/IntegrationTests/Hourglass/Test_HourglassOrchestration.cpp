@@ -149,7 +149,7 @@ MATCHER_P(CppParticipantStatusMatcher, cParticipantStatusParam, "")
     return true;
 }
 
-class HourglassOrchestrationTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassOrchestration : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_Participant* mockParticipant{reinterpret_cast<SilKit_Participant*>(uintptr_t(0x12345678))};
@@ -159,7 +159,7 @@ public:
     SilKit_Experimental_SystemController* mockSystemController{
         reinterpret_cast<SilKit_Experimental_SystemController*>(uintptr_t(0x45362718))};
 
-    HourglassOrchestrationTest()
+    Test_HourglassOrchestration()
     {
         using testing::_;
         ON_CALL(capi, SilKit_LifecycleService_Create(_, _, _))
@@ -175,7 +175,7 @@ public:
 
 // LifecycleService
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Create)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_Create)
 {
     LifecycleConfiguration lifecycleConfiguration{};
     lifecycleConfiguration.operationMode = OperationMode::Coordinated;
@@ -187,7 +187,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Create)
         mockParticipant, lifecycleConfiguration};
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetCommunicationReadyHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_SetCommunicationReadyHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -200,7 +200,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetCommunicationReady
     });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetCommunicationReadyHandlerAsync)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_SetCommunicationReadyHandlerAsync)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -213,7 +213,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetCommunicationReady
     });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_CompleteCommunicationReadyHandlerAsync)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -223,7 +223,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_CompleteCommunication
     lifecycleService.CompleteCommunicationReadyHandlerAsync();
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetStartingHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_SetStartingHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -235,7 +235,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetStartingHandler)
     });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetStopHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_SetStopHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -247,7 +247,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetStopHandler)
     });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetShutdownHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_SetShutdownHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -259,7 +259,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetShutdownHandler)
     });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetAbortHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_SetAbortHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -271,7 +271,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_SetAbortHandler)
     });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_StartLifecycle_WaitForLifecycleToComplete)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_StartLifecycle_WaitForLifecycleToComplete)
 {
     const auto participantState{ParticipantState::Running};
 
@@ -287,7 +287,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_StartLifecycle_WaitFo
     EXPECT_EQ(future.get(), participantState);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_ReportError)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_ReportError)
 {
     const std::string reason{"Reason"};
 
@@ -299,7 +299,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_ReportError)
     lifecycleService.ReportError(reason);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Pause)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_Pause)
 {
     const std::string reason{"Reason"};
 
@@ -311,7 +311,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Pause)
     lifecycleService.Pause(reason);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Continue)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_Continue)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::LifecycleService lifecycleService{
         mockParticipant, LifecycleConfiguration{OperationMode::Coordinated}};
@@ -321,7 +321,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Continue)
     lifecycleService.Continue();
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Stop)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_Stop)
 {
     const std::string reason{"Reason"};
 
@@ -333,7 +333,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Stop)
     lifecycleService.Stop(reason);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_State)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_State)
 {
     const auto participantState{ParticipantState::Running};
 
@@ -347,7 +347,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_State)
     EXPECT_EQ(lifecycleService.State(), participantState);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Status)
+TEST_F(Test_HourglassOrchestration, SilKit_LifecycleService_Status)
 {
     const std::string participantName{"Participant1"};
     const std::string enterReason{"EnterReason"};
@@ -372,7 +372,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_LifecycleService_Status)
 
 // TimeSyncService
 
-TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_Create)
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Create)
 {
     EXPECT_CALL(capi, SilKit_TimeSyncService_Create(testing::_, mockLifecycleService));
 
@@ -380,7 +380,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_Create)
         mockLifecycleService};
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_SetSimulationStepHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetSimulationStepHandler)
 {
     const std::chrono::nanoseconds initialStepSize{0x123456};
 
@@ -397,7 +397,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_SetSimulationStepHandl
         initialStepSize);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_SetSimulationStepHandlerAsync)
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_SetSimulationStepHandlerAsync)
 {
     const std::chrono::nanoseconds initialStepSize{0x123456};
 
@@ -414,7 +414,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_SetSimulationStepHandl
         initialStepSize);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_CompleteSimulationStep)
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_CompleteSimulationStep)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::TimeSyncService timeSyncService{
         mockLifecycleService};
@@ -424,7 +424,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_CompleteSimulationStep
     timeSyncService.CompleteSimulationStep();
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_Now)
+TEST_F(Test_HourglassOrchestration, SilKit_TimeSyncService_Now)
 {
     const std::chrono::nanoseconds nanoseconds{0x123456};
 
@@ -439,7 +439,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_TimeSyncService_Now)
 
 // SystemMonitor
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_Create)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_Create)
 {
     EXPECT_CALL(capi, SilKit_SystemMonitor_Create(testing::_, mockParticipant));
 
@@ -447,7 +447,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_Create)
         mockParticipant};
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_GetParticipantStatus)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_GetParticipantStatus)
 {
     const std::string participantName{"Participant1"};
     const std::string enterReason{"EnterReason"};
@@ -471,7 +471,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_GetParticipantStatus)
     EXPECT_THAT(participantStatus, CppParticipantStatusMatcher(&cParticipantStatus));
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_GetSystemState)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_GetSystemState)
 {
     const auto systemState{SystemState::Running};
 
@@ -485,7 +485,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_GetSystemState)
     EXPECT_EQ(systemMonitor.SystemState(), systemState);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_AddSystemStateHandler_RemoveSystemStateHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_AddSystemStateHandler_RemoveSystemStateHandler)
 {
     const auto cHandlerId = static_cast<SilKit_HandlerId>(0x1234);
 
@@ -502,7 +502,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_AddSystemStateHandler_Re
     systemMonitor.RemoveSystemStateHandler(cppHandlerId);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_AddParticipantStatusHandler_RemoveParticipantStatusHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_AddParticipantStatusHandler_RemoveParticipantStatusHandler)
 {
     const auto cHandlerId = static_cast<SilKit_HandlerId>(0x1234);
 
@@ -521,7 +521,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_AddParticipantStatusHand
     systemMonitor.RemoveParticipantStatusHandler(cppHandlerId);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_SetParticipantConnectedHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_SetParticipantConnectedHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::SystemMonitor systemMonitor{
         mockParticipant};
@@ -534,7 +534,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_SetParticipantConnectedH
         });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_SetParticipantDisconnectedHandler)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_SetParticipantDisconnectedHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Orchestration::SystemMonitor systemMonitor{
         mockParticipant};
@@ -548,7 +548,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_SetParticipantDisconnect
         });
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_IsParticipantConnected)
+TEST_F(Test_HourglassOrchestration, SilKit_SystemMonitor_IsParticipantConnected)
 {
     const std::string participantName{"Participant1"};
 
@@ -564,7 +564,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_SystemMonitor_IsParticipantConnected)
 
 // SystemController
 
-TEST_F(HourglassOrchestrationTest, SilKit_Experimental_SystemController_Create)
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_SystemController_Create)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Participant participant{mockParticipant};
 
@@ -573,7 +573,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_Experimental_SystemController_Create)
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Participant::CreateSystemController(&participant);
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_Experimental_SystemController_AbortSimulation)
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_SystemController_AbortSimulation)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::Services::Orchestration::SystemController
         systemController{mockParticipant};
@@ -583,7 +583,7 @@ TEST_F(HourglassOrchestrationTest, SilKit_Experimental_SystemController_AbortSim
     systemController.AbortSimulation();
 }
 
-TEST_F(HourglassOrchestrationTest, SilKit_Experimental_SystemController_SetWorkflowConfiguration)
+TEST_F(Test_HourglassOrchestration, SilKit_Experimental_SystemController_SetWorkflowConfiguration)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Experimental::Services::Orchestration::SystemController
         systemController{mockParticipant};

@@ -58,13 +58,13 @@ MATCHER_P(EthernetFrameMatcher, controlFrame, "")
     return true;
 }
 
-class HourglassCanTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassEthernet : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_EthernetController* mockEthernetController{
         reinterpret_cast<SilKit_EthernetController*>(uintptr_t(0x12345678))};
 
-    HourglassCanTest()
+    Test_HourglassEthernet()
     {
         using testing::_;
         ON_CALL(capi, SilKit_EthernetController_Create(_, _, _, _))
@@ -72,7 +72,7 @@ public:
     }
 };
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_Create)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_Create)
 {
     SilKit_Participant* participant{(SilKit_Participant*)123456};
     std::string name = "EthernetController1";
@@ -85,7 +85,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_Create)
         participant, name, network);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_Activate)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_Activate)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -94,7 +94,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_Activate)
     ethernetController.Activate();
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_Deactivate)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_Deactivate)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -103,7 +103,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_Deactivate)
     ethernetController.Deactivate();
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_AddFrameHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_AddFrameHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -115,7 +115,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_AddFrameHandler)
         nullptr, static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TXRX));
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveFrameHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_RemoveFrameHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -125,7 +125,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveFrameHandler)
     ethernetController.RemoveFrameHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_AddFrameTransmitHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_AddFrameTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -139,7 +139,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_AddFrameTransmitHandler)
                                                    SilKit::Services::Ethernet::EthernetTransmitStatus::Transmitted));
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveFrameTransmitHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_RemoveFrameTransmitHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -149,7 +149,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveFrameTransmitHandler)
     ethernetController.RemoveFrameTransmitHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_AddStateChangeHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_AddStateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -160,7 +160,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_AddStateChangeHandler)
     ethernetController.AddStateChangeHandler(nullptr);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveStateChangeHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_RemoveStateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -170,7 +170,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveStateChangeHandler)
     ethernetController.RemoveStateChangeHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_AddBitrateChangeHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_AddBitrateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -181,7 +181,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_AddBitrateChangeHandler)
     ethernetController.AddBitrateChangeHandler(nullptr);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveBitrateChangeHandler)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_RemoveBitrateChangeHandler)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");
@@ -191,7 +191,7 @@ TEST_F(HourglassCanTest, SilKit_EthernetController_RemoveBitrateChangeHandler)
     ethernetController.RemoveBitrateChangeHandler(handlerId);
 }
 
-TEST_F(HourglassCanTest, SilKit_EthernetController_SendFrame)
+TEST_F(Test_HourglassEthernet, SilKit_EthernetController_SendFrame)
 {
     SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Impl::Services::Ethernet::EthernetController ethernetController(
         nullptr, "EthernetController1", "EthernetNetwork1");

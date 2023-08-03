@@ -46,7 +46,7 @@ using namespace SilKit::Util;
 
 using ::SilKit::Core::Tests::DummyParticipant;
 
-class SystemMonitorTest : public testing::Test
+class Test_SystemMonitor : public testing::Test
 {
 protected:
     struct Callbacks
@@ -59,7 +59,7 @@ protected:
     };
 
 protected:
-    SystemMonitorTest()
+    Test_SystemMonitor()
         : monitor{&participant}
         , monitorFrom{&participant}
     {
@@ -123,14 +123,14 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(SystemMonitorTest, init_with_state_invalid)
+TEST_F(Test_SystemMonitor, init_with_state_invalid)
 {
     EXPECT_EQ(monitor.SystemState(), SystemState::Invalid);
     EXPECT_THROW(monitor.ParticipantStatus("P1"), SilKitError);
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_controllers_created)
+TEST_F(Test_SystemMonitor, detect_system_controllers_created)
 {
     AddSystemStateHandler();
     EXPECT_CALL(callbacks, SystemStateHandler(SystemState::ServicesCreated)).Times(1);
@@ -148,7 +148,7 @@ TEST_F(SystemMonitorTest, detect_system_controllers_created)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_communication_initializing)
+TEST_F(Test_SystemMonitor, detect_system_communication_initializing)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
 
@@ -170,7 +170,7 @@ TEST_F(SystemMonitorTest, detect_system_communication_initializing)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_communication_initialized)
+TEST_F(Test_SystemMonitor, detect_system_communication_initialized)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -193,7 +193,7 @@ TEST_F(SystemMonitorTest, detect_system_communication_initialized)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_readyToRun)
+TEST_F(Test_SystemMonitor, detect_system_readyToRun)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -217,7 +217,7 @@ TEST_F(SystemMonitorTest, detect_system_readyToRun)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_running)
+TEST_F(Test_SystemMonitor, detect_system_running)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -242,7 +242,7 @@ TEST_F(SystemMonitorTest, detect_system_running)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_pause)
+TEST_F(Test_SystemMonitor, detect_system_pause)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -267,7 +267,7 @@ TEST_F(SystemMonitorTest, detect_system_pause)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_multiple_paused_clients)
+TEST_F(Test_SystemMonitor, detect_multiple_paused_clients)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -300,7 +300,7 @@ TEST_F(SystemMonitorTest, detect_multiple_paused_clients)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, DISABLED_detect_system_stopping)
+TEST_F(Test_SystemMonitor, DISABLED_detect_system_stopping)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -318,7 +318,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_system_stopping)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_system_stopped)
+TEST_F(Test_SystemMonitor, detect_system_stopped)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -357,7 +357,7 @@ TEST_F(SystemMonitorTest, detect_system_stopped)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, DISABLED_detect_reinitializing_after_stopped)
+TEST_F(Test_SystemMonitor, DISABLED_detect_reinitializing_after_stopped)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -371,7 +371,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_reinitializing_after_stopped)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_controllers_com_initialized_after_stopped)
+TEST_F(Test_SystemMonitor, detect_controllers_com_initialized_after_stopped)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -402,7 +402,7 @@ TEST_F(SystemMonitorTest, detect_controllers_com_initialized_after_stopped)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_shuttingdown)
+TEST_F(Test_SystemMonitor, detect_shuttingdown)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -423,7 +423,7 @@ TEST_F(SystemMonitorTest, detect_shuttingdown)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_shutdown)
+TEST_F(Test_SystemMonitor, detect_shutdown)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -452,7 +452,7 @@ TEST_F(SystemMonitorTest, detect_shutdown)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_controllers_created)
+TEST_F(Test_SystemMonitor, detect_error_from_controllers_created)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
@@ -467,7 +467,7 @@ TEST_F(SystemMonitorTest, detect_error_from_controllers_created)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_initializing)
+TEST_F(Test_SystemMonitor, detect_error_from_initializing)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -484,7 +484,7 @@ TEST_F(SystemMonitorTest, detect_error_from_initializing)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_initialized)
+TEST_F(Test_SystemMonitor, detect_error_from_initialized)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -502,7 +502,7 @@ TEST_F(SystemMonitorTest, detect_error_from_initialized)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_running)
+TEST_F(Test_SystemMonitor, detect_error_from_running)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -521,7 +521,7 @@ TEST_F(SystemMonitorTest, detect_error_from_running)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_paused)
+TEST_F(Test_SystemMonitor, detect_error_from_paused)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -544,7 +544,7 @@ TEST_F(SystemMonitorTest, detect_error_from_paused)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_stopping)
+TEST_F(Test_SystemMonitor, detect_error_from_stopping)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -567,7 +567,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopping)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_stopped)
+TEST_F(Test_SystemMonitor, detect_error_from_stopped)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -587,7 +587,7 @@ TEST_F(SystemMonitorTest, detect_error_from_stopped)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
+TEST_F(Test_SystemMonitor, detect_error_from_shuttingdown)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     SetAllParticipantStates(ParticipantState::CommunicationInitializing);
@@ -623,7 +623,7 @@ TEST_F(SystemMonitorTest, detect_error_from_shuttingdown)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_error)
+TEST_F(Test_SystemMonitor, DISABLED_detect_initializing_after_error)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
@@ -641,7 +641,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_error)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
+TEST_F(Test_SystemMonitor, detect_shuttingdown_after_error)
 {
     SetAllParticipantStates(ParticipantState::ServicesCreated);
     EXPECT_EQ(monitor.SystemState(), SystemState::ServicesCreated);
@@ -660,7 +660,7 @@ TEST_F(SystemMonitorTest, detect_shuttingdown_after_error)
     EXPECT_EQ(monitor.InvalidTransitionCount(), 0u);
 }
 
-TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_invalid)
+TEST_F(Test_SystemMonitor, DISABLED_detect_initializing_after_invalid)
 {
     // Test that the monitor recovers from seemingly erroneous state transitions.
     //
@@ -684,7 +684,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initializing_after_invalid)
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitializing);
 }
 
-TEST_F(SystemMonitorTest, DISABLED_detect_initialized_after_invalid)
+TEST_F(Test_SystemMonitor, DISABLED_detect_initialized_after_invalid)
 {
     // Test that the monitor recovers from seemingly erroneous state transitions.
 
@@ -714,7 +714,7 @@ TEST_F(SystemMonitorTest, DISABLED_detect_initialized_after_invalid)
     EXPECT_EQ(monitor.SystemState(), SystemState::CommunicationInitialized);
 }
 
-TEST_F(SystemMonitorTest, check_on_partitipant_connected_triggers_callback)
+TEST_F(Test_SystemMonitor, check_on_partitipant_connected_triggers_callback)
 {
     monitor.SetParticipantConnectedHandler([this](const ParticipantConnectionInformation& participantInformation) {
         callbacks.ParticipantConnectedHandler(participantInformation);
@@ -727,7 +727,7 @@ TEST_F(SystemMonitorTest, check_on_partitipant_connected_triggers_callback)
     EXPECT_TRUE(monitor.IsParticipantConnected(pci.participantName));
 }
 
-TEST_F(SystemMonitorTest, check_on_partitipant_disconnected_triggers_callback)
+TEST_F(Test_SystemMonitor, check_on_partitipant_disconnected_triggers_callback)
 {
     monitor.SetParticipantDisconnectedHandler([this](const ParticipantConnectionInformation& participantInformation) {
         callbacks.ParticipantDisconnectedHandler(participantInformation);
@@ -741,7 +741,7 @@ TEST_F(SystemMonitorTest, check_on_partitipant_disconnected_triggers_callback)
     EXPECT_FALSE(monitor.IsParticipantConnected(pci.participantName));
 }
 
-TEST_F(SystemMonitorTest, add_and_remove_system_state_and_participant_status_handlers)
+TEST_F(Test_SystemMonitor, add_and_remove_system_state_and_participant_status_handlers)
 {
     const auto systemStateHandlerId = AddSystemStateHandler();
     const auto participantStatusHandlerId = AddParticipantStatusHandler();

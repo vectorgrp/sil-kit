@@ -42,7 +42,7 @@ struct Callbacks
     MOCK_METHOD(void, TestD, ());
 };
 
-TEST(SynchronizedHandlersTest, add_and_remove_functions_during_calling)
+TEST(Test_SynchronizedHandlers, add_and_remove_functions_during_calling)
 {
     SilKit::Util::SynchronizedHandlers<TestFunction> callables;
 
@@ -93,7 +93,7 @@ struct CallbacksTwoArgs
     MOCK_METHOD(void, TestD, (int i, float f));
 };
 
-TEST(SynchronizedHandlersTest, add_and_remove_functions_during_calling_two_args)
+TEST(Test_SynchronizedHandlers, add_and_remove_functions_during_calling_two_args)
 {
     SilKit::Util::SynchronizedHandlers<TestFunctionTwoArgs> callables;
 
@@ -137,7 +137,7 @@ TEST(SynchronizedHandlersTest, add_and_remove_functions_during_calling_two_args)
     callables.InvokeAll(i, f);
 }
 
-TEST(SynchronizedHandlersTest, add_remove_call_concurrently)
+TEST(Test_SynchronizedHandlers, add_remove_call_concurrently)
 {
     SilKit::Util::SynchronizedHandlers<TestFunction> callables;
 
@@ -217,7 +217,7 @@ TEST(SynchronizedHandlersTest, add_remove_call_concurrently)
     EXPECT_EQ(handlerIds.size(), 0);
 }
 
-TEST(SynchronizedHandlersTest, swap_transfers_handlers)
+TEST(Test_SynchronizedHandlers, swap_transfers_handlers)
 {
     using TestHandlers = SilKit::Util::SynchronizedHandlers<TestFunction>;
     using std::swap;

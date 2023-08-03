@@ -41,6 +41,11 @@ using namespace SilKit::Config;
 using namespace SilKit::Services;
 using namespace SilKit::Services::Can;
 
+struct ITest_CanDemo : ITest_SimTestHarness
+{
+    using ITest_SimTestHarness::ITest_SimTestHarness;
+};
+
 struct TestState
 {
     bool writerHasReceivedTx = false;
@@ -63,7 +68,7 @@ struct TestState
     size_t messageCount{0};
 };
 
-TEST_F(ITest_SimTestHarness, can_demo)
+TEST_F(ITest_CanDemo, can_demo)
 {
     //Create a simulation setup with 2 participants and the netsim
     SetupFromParticipantList({"CanReader", "CanWriter", "CanMonitor"});

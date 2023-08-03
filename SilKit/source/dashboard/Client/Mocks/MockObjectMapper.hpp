@@ -22,7 +22,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "gmock/gmock-function-mocker.h"
-#include <oatpp/parser/json/mapping/ObjectMapper.hpp>
+
+#include "OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -30,6 +31,8 @@ class MockObjectMapper : public oatpp::data::mapping::ObjectMapper
 {
 public:
     explicit MockObjectMapper(const Info& info) : ObjectMapper(info) {}
+
+    virtual ~MockObjectMapper() = default;
 
     MOCK_METHOD(void, write, (oatpp::data::stream::ConsistentOutputStream*, const oatpp::Void&), (const, override));
     MOCK_METHOD(oatpp::Void, read, (oatpp::parser::Caret&, const oatpp::Type* const), (const, override));

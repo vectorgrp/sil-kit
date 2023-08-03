@@ -43,7 +43,7 @@ target_link_libraries(O_SilKit_Experimental
     PRIVATE I_SilKit_Services_Logging
 )
 
-add_silkit_test(Test_ParticipantExtensionsImpl
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES participant/Test_ParticipantExtensionsImpl.cpp
     LIBS O_SilKit_Core_Mock_NullConnection S_SilKitImpl
 )

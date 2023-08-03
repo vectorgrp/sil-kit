@@ -36,7 +36,7 @@ using namespace testing;
 
 using namespace SilKit::Services::Orchestration;
 
-TEST(TestTimeProvider, check_time_provider_impls)
+TEST(Test_TimeProvider, check_time_provider_impls)
 {
 	TimeProvider timeProvider{};
 	timeProvider.SetSynchronizeVirtualTime(true);
@@ -53,7 +53,7 @@ TEST(TestTimeProvider, check_time_provider_impls)
 	ASSERT_TRUE(timeProvider.IsSynchronizingVirtualTime());
 }
 
-TEST(TestTimeProvider, check_handlers)
+TEST(Test_TimeProvider, check_handlers)
 {
 	TimeProvider timeProvider{};
 	// handlers only work for ::SyncTime and ::WallClock

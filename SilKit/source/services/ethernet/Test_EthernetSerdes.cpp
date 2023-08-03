@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsioSerdes, SimEthernet_EthMessage)
+TEST(Test_EthernetSerdes, SimEthernet_EthMessage)
 {
     using namespace SilKit::Services::Ethernet;
     SilKit::Core::MessageBuffer buffer;
@@ -56,7 +56,7 @@ TEST(MwVAsioSerdes, SimEthernet_EthMessage)
     EXPECT_EQ(in.userContext, out.userContext);
 }
 
-TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
+TEST(Test_EthernetSerdes, SimEthernet_EthTransmitAcknowledge)
 {
     using namespace SilKit::Services::Ethernet;
     SilKit::Core::MessageBuffer buffer;
@@ -76,7 +76,7 @@ TEST(MwVAsioSerdes, SimEthernet_EthTransmitAcknowledge)
     EXPECT_EQ(in.userContext, out.userContext);
 }
 
-TEST(MwVAsioSerdes, SimEthernet_EthStatus)
+TEST(Test_EthernetSerdes, SimEthernet_EthStatus)
 {
     using namespace SilKit::Services::Ethernet;
     SilKit::Core::MessageBuffer buffer;
@@ -96,7 +96,7 @@ TEST(MwVAsioSerdes, SimEthernet_EthStatus)
     EXPECT_EQ(in.bitrate, out.bitrate);
 }
 
-TEST(MwVAsioSerdes, SimEthernet_EthSetMode)
+TEST(Test_EthernetSerdes, SimEthernet_EthSetMode)
 {
     using namespace SilKit::Services::Ethernet;
     SilKit::Core::MessageBuffer buffer;

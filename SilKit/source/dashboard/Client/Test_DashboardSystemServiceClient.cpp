@@ -19,8 +19,17 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4702)
+#endif
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #include "MockParticipant.hpp"
 
@@ -38,7 +47,7 @@ using namespace testing;
 namespace SilKit {
 namespace Dashboard {
 
-class TestDashboardSystemServiceClient : public Test
+class Test_DashboardSystemServiceClient : public Test
 {
 public:
     void SetUp() override
@@ -82,7 +91,7 @@ public:
     ObjectMapper::Info _info = "application/json";
 };
 
-TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Success)
+TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Success)
 {
     // Arrange
     EXPECT_CALL(*_mockObjectMapper, write);
@@ -113,7 +122,7 @@ TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Success)
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
 }
 
-TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Failure)
+TEST_F(Test_DashboardSystemServiceClient, CreateSimulation_Failure)
 {
     // Arrange
     EXPECT_CALL(*_mockObjectMapper, write);
@@ -140,7 +149,7 @@ TEST_F(TestDashboardSystemServiceClient, CreateSimulation_Failure)
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations");
 }
 
-TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Success)
+TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Success)
 {
     // Arrange
     EXPECT_CALL(*_mockObjectMapper, write);
@@ -166,7 +175,7 @@ TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Success)
     ASSERT_STREQ(actualPath->c_str(), "system-service/v1.0/simulations/123");
 }
 
-TEST_F(TestDashboardSystemServiceClient, SetSimulationEnd_Failure)
+TEST_F(Test_DashboardSystemServiceClient, SetSimulationEnd_Failure)
 {
     // Arrange
     EXPECT_CALL(*_mockObjectMapper, write);

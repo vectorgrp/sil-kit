@@ -38,14 +38,14 @@ using SilKitHourglassTests::MockCapi;
 
 using namespace SilKit::Services::Logging;
 
-class HourglassParticipantLoggerTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassParticipantLogger : public SilKitHourglassTests::MockCapiTest
 {
 public:
     SilKit_Participant* mockParticipant{(SilKit_Participant*)784324};
     SilKit_Logger* mockLogger{(SilKit_Logger*)876453};
     SilKit_ParticipantConfiguration* mockConfiguration{(SilKit_ParticipantConfiguration*)123456};
 
-    HourglassParticipantLoggerTest()
+    Test_HourglassParticipantLogger()
     {
         using testing::_;
         ON_CALL(capi, SilKit_Participant_Create(_, _, _, _))
@@ -57,7 +57,7 @@ public:
     }
 };
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_ParticipantConfiguration_FromString)
+TEST_F(Test_HourglassParticipantLogger, SilKit_ParticipantConfiguration_FromString)
 {
     std::string configString = "";
 
@@ -66,7 +66,7 @@ TEST_F(HourglassParticipantLoggerTest, SilKit_ParticipantConfiguration_FromStrin
     SilKit::Config::ParticipantConfigurationFromString(configString);
 }
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_ParticipantConfiguration_Destroy)
+TEST_F(Test_HourglassParticipantLogger, SilKit_ParticipantConfiguration_Destroy)
 {
     std::string configString = "";
 
@@ -76,7 +76,7 @@ TEST_F(HourglassParticipantLoggerTest, SilKit_ParticipantConfiguration_Destroy)
     }
 }
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_Create1)
+TEST_F(Test_HourglassParticipantLogger, SilKit_Participant_Create1)
 {
     std::string name = "Participant1";
     std::string registryUri = "silkit://localhost:1234";
@@ -89,7 +89,7 @@ TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_Create1)
     SilKit::CreateParticipant(config, name, registryUri);
 }
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_Create2)
+TEST_F(Test_HourglassParticipantLogger, SilKit_Participant_Create2)
 {
     std::string name = "Participant1";
     std::string registryUri = "silkit://localhost:1234";
@@ -101,7 +101,7 @@ TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_Create2)
     SilKit::CreateParticipant(config, name);
 }
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_Destroy)
+TEST_F(Test_HourglassParticipantLogger, SilKit_Participant_Destroy)
 {
     std::string name = "Participant1";
     std::string registryUri = "silkit://localhost:1234";
@@ -114,7 +114,7 @@ TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_Destroy)
     }
 }
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_GetLogger)
+TEST_F(Test_HourglassParticipantLogger, SilKit_Participant_GetLogger)
 {
     std::string name = "Participant1";
     std::string registryUri = "silkit://localhost:1234";
@@ -129,7 +129,7 @@ TEST_F(HourglassParticipantLoggerTest, SilKit_Participant_GetLogger)
     participant->GetLogger();
 }
 
-TEST_F(HourglassParticipantLoggerTest, SilKit_Logger_Log)
+TEST_F(Test_HourglassParticipantLogger, SilKit_Logger_Log)
 {
     std::string name = "Participant1";
     std::string registryUri = "silkit://localhost:1234";

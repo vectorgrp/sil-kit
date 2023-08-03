@@ -61,14 +61,14 @@ void Create_StringList(SilKit_StringList** outStringList, const char** strings, 
     *outStringList = newStrings;
 }
 
-class CapiParticipantStateHandlingTest : public testing::Test
+class Test_CapiParticipantStateHandling : public testing::Test
 {
 protected:
     SilKit::Core::Tests::DummyParticipant mockParticipant;
 
     std::unique_ptr<SilKit_WorkflowConfiguration> workflowConfiguration;
 
-    CapiParticipantStateHandlingTest()
+    Test_CapiParticipantStateHandling()
     {
         uint32_t numNames = 2;
         const char* names[2] = {"Participant1", "Participant2"};
@@ -82,7 +82,7 @@ protected:
         Create_StringList(&workflowConfiguration->requiredParticipantNames, names, numNames);
     }
 
-    ~CapiParticipantStateHandlingTest()
+    ~Test_CapiParticipantStateHandling()
     {
         for (uint32_t index = 0; index != workflowConfiguration->requiredParticipantNames->numStrings; ++index)
         {
@@ -106,7 +106,7 @@ void SilKitCALL ParticipantStatusHandler(void* /*context*/, SilKit_SystemMonitor
 /*
 * check whether the api rejects bad parameters
 */
-TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_params)
+TEST_F(Test_CapiParticipantStateHandling, participant_state_handling_nullpointer_params)
 {
     SilKit_ReturnCode returnCode;
     SilKit_SystemMonitor* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
@@ -246,7 +246,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_nullpointer_
 
 }
 
-TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_no_time_sync_function_mapping)
+TEST_F(Test_CapiParticipantStateHandling, participant_state_handling_no_time_sync_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());
@@ -300,7 +300,7 @@ TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_no_time_sync
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiParticipantStateHandlingTest, participant_state_handling_function_mapping)
+TEST_F(Test_CapiParticipantStateHandling, participant_state_handling_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     auto* systemMonitor = (SilKit_SystemMonitor*)(mockParticipant.GetSystemMonitor());

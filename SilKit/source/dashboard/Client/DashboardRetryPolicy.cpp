@@ -42,7 +42,7 @@ bool DashboardRetryPolicy::canRetry(const Context& context)
         return false;
     if (_retryCount == InfiniteRetries)
         return true;
-    return context.attempt < _retryCount;
+    return context.attempt < static_cast<int64_t>(_retryCount);
 }
 
 bool DashboardRetryPolicy::retryOnResponse(v_int32 responseStatusCode, const Context& context)
@@ -57,6 +57,7 @@ bool DashboardRetryPolicy::retryOnResponse(v_int32 responseStatusCode, const Con
 
 v_int64 DashboardRetryPolicy::waitForMicroseconds(const Context& context)
 {
+    SILKIT_UNUSED_ARG(context);
     if (_abortRetries)
         return 0;
     return std::chrono::duration_cast<std::chrono::microseconds>(_defaultSleep).count();

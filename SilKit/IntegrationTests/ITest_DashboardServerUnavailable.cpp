@@ -34,11 +34,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ParticipantConfigurationFromXImpl.hpp"
 
 namespace {
+
 using namespace SilKit::Tests;
 using namespace SilKit::Config;
 using namespace std::chrono_literals;
 
-TEST_F(ITest_DashboardTestHarness, dashboard_server_unavailable)
+struct ITest_DashboardServerUnavailable : ITest_DashboardTestHarness
+{
+};
+
+TEST_F(ITest_DashboardServerUnavailable, dashboard_server_unavailable)
 {
     const auto participantName = "CanWriter";
     const auto canonicalName = "CanController1";

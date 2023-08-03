@@ -19,7 +19,7 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 ################################################################################
 # Project definition
@@ -53,6 +53,10 @@ include(SilKitInstall)
 # Test related tools
 include(SilKitTest)
 include(CTest)
+
+add_silkit_test_executable(SilKitUnitTests)
+add_silkit_test_executable(SilKitIntegrationTests)
+add_silkit_test_executable(SilKitFunctionalTests)
 
 ################################################################################
 # Include of our repositories

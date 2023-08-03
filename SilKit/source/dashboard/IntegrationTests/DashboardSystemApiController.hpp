@@ -31,11 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <vector>
 #include <utility>
 
-#include "oatpp/core/macro/codegen.hpp"
-#include "oatpp/core/macro/component.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
-#include "oatpp/web/protocol/http/Http.hpp"
-#include "oatpp/web/server/api/ApiController.hpp"
+#include "OatppHeaders.hpp"
 
 #include "DataPublisherDto.hpp"
 #include "DataSubscriberDto.hpp"
@@ -100,6 +96,7 @@ public:
     ENDPOINT("POST", "system-service/v1.0/simulations", createSimulation,
              BODY_DTO(Object<SilKit::Dashboard::SimulationCreationRequestDto>, simulation))
     {
+        SILKIT_UNUSED_ARG(simulation);
         std::this_thread::sleep_for(_creationTimeout);
         auto body = SilKit::Dashboard::SimulationCreationResponseDto::createShared();
         body->id = ++_simulationId;
@@ -373,7 +370,7 @@ public:
         OATPP_ASSERT_HTTP(simulation, Status::CODE_400, "simulation not set");
         std::unique_lock<decltype(_mutex)> lock(_mutex);
         _data[simulationId].stopped = true;
-        if (CountFinishedSimulations() == _expectedSimulationsCount)
+        if (static_cast<uint64_t>(CountFinishedSimulations()) == _expectedSimulationsCount)
         {
             _allSimulationsFinishedPromise.set_value();
         }

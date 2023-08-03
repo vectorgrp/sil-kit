@@ -34,7 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-TEST(ITest_SameParticipant, test_participants_with_unique_name)
+TEST(ITest_SameParticipants, test_participants_with_unique_name)
 {
     // Needed otherwise temp participants would run out of scope in
     // EXPECT_THROW/EXPECT_NO_THROW and disconnect from the registry
@@ -51,7 +51,7 @@ TEST(ITest_SameParticipant, test_participants_with_unique_name)
     EXPECT_NO_THROW(participant2 = SilKit::CreateParticipant(pCfg, "Participant2", registryUri));
 }
 
-TEST(ITest_SameParticipant, test_participants_with_same_name)
+TEST(ITest_SameParticipants, test_participants_with_same_name)
 {
     // Needed otherwise temp participants would run out of scope in
     // EXPECT_THROW/EXPECT_NO_THROW and disconnect from the registry

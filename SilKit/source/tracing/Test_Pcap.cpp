@@ -74,7 +74,7 @@ std::vector<uint8_t> MakePcapTestData(WireEthernetFrame& wireFrame, size_t numMe
     return data;
 }
 
-TEST(ReplayTest, read_from_pcap)
+TEST(Test_Pcap, read_from_pcap)
 {
     MockLogger log;
     std::stringstream ss;

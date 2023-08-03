@@ -64,10 +64,10 @@ struct VersionedParticipant
     ProtocolVersion version;
 };
 
-class ParticipantVersionTest : public testing::Test
+class Test_ParticipantVersion : public testing::Test
 {
 protected:
-    ParticipantVersionTest() = default;
+    Test_ParticipantVersion() = default;
 
     void SetupRegistry(ProtocolVersion registryVersion)
     {
@@ -136,7 +136,7 @@ protected:
     const std::string registryUri = "silkit://localhost:0";
 };
 
-TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)
+TEST_F(Test_ParticipantVersion, unsupported_version_connect_to_current)
 {
     SetupRegistry(CurrentProtocolVersion());
     //NB: the following causes internal compiler bug in VS2017:
@@ -146,7 +146,7 @@ TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)
     EXPECT_THROW(JoinSimulation(), SilKit::ProtocolError);
 }
 
-TEST_F(ParticipantVersionTest, Registry30_Participant31_Participant30)
+TEST_F(Test_ParticipantVersion, Registry30_Participant31_Participant30)
 {
     SetupRegistry({3, 0});
     SetupParticipants(
@@ -155,7 +155,7 @@ TEST_F(ParticipantVersionTest, Registry30_Participant31_Participant30)
     ExchangeData();
 }
 
-TEST_F(ParticipantVersionTest, Registry31_Participant31_2xParticipant30)
+TEST_F(Test_ParticipantVersion, Registry31_Participant31_2xParticipant30)
 {
     SetupRegistry({3, 1});
     SetupParticipants({VersionedParticipant{"LegacyParticipant", {3, 0}},

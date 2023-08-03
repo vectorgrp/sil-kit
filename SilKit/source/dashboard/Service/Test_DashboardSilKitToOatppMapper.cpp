@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace SilKit {
 namespace Dashboard {
-class TestSilKitToOatppMapper : public testing::Test
+class Test_DashboardSilKitToOatppMapper : public testing::Test
 {
 public:
     void SetUp() override
@@ -43,7 +43,7 @@ public:
     }
 };
 
-TEST_F(TestSilKitToOatppMapper, CreateSimulationCreationRequestDto_MapEndpoint)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_MapEndpoint)
 {
     // Arrange
     const std::string endpoint("silkit://myhost:1234");
@@ -58,7 +58,7 @@ TEST_F(TestSilKitToOatppMapper, CreateSimulationCreationRequestDto_MapEndpoint)
     ASSERT_STREQ(dto->configuration->connectUri->c_str(), endpoint.c_str());
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateSimulationCreationRequestDto_StartTimeEqualsCreationTime)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationCreationRequestDto_StartTimeEqualsCreationTime)
 {
     // Arrange
     const auto now = std::chrono::system_clock::now().time_since_epoch();
@@ -72,7 +72,7 @@ TEST_F(TestSilKitToOatppMapper, CreateSimulationCreationRequestDto_StartTimeEqua
     ASSERT_EQ(dto->started, expectedStartTime);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateSystemStatusDto_MapState)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateSystemStatusDto_MapState)
 {
     // Act
     const auto dataMapper = CreateService();
@@ -82,7 +82,7 @@ TEST_F(TestSilKitToOatppMapper, CreateSystemStatusDto_MapState)
     ASSERT_EQ(dto->state, SystemState::ReadyToRun);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAndTimeAndState)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAndTimeAndState)
 {
     namespace orchestration = Services::Orchestration;
 
@@ -104,11 +104,11 @@ TEST_F(TestSilKitToOatppMapper, CreateParticipantStatusDto_MapReasonAndTimeAndSt
 
     // Assert
     ASSERT_STREQ(dto->enterReason->c_str(), expectedReason.c_str());
-    ASSERT_EQ(dto->enterTime, expectedEnterTime);
+    ASSERT_EQ(dto->enterTime, static_cast<uint64_t>(expectedEnterTime));
     ASSERT_EQ(dto->state, ParticipantState::ReadyToRun);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateServiceDto_MapNameAndNetworkName)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateServiceDto_MapNameAndNetworkName)
 {
     // Arrange
     const std::string expectedName("myService");
@@ -126,7 +126,7 @@ TEST_F(TestSilKitToOatppMapper, CreateServiceDto_MapNameAndNetworkName)
     ASSERT_STREQ(dto->networkName->c_str(), expectedNetwork.c_str());
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateDataPublisherDto_MapNameAndNetworkNameAndTopicAndMediaTypeAndLabel)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateDataPublisherDto_MapNameAndNetworkNameAndTopicAndMediaTypeAndLabel)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
@@ -163,7 +163,7 @@ TEST_F(TestSilKitToOatppMapper, CreateDataPublisherDto_MapNameAndNetworkNameAndT
     ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateDataSubscriberDto_MapNetworkNameAndTopicAndMediaTypeAndLabel)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateDataSubscriberDto_MapNetworkNameAndTopicAndMediaTypeAndLabel)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
@@ -196,7 +196,7 @@ TEST_F(TestSilKitToOatppMapper, CreateDataSubscriberDto_MapNetworkNameAndTopicAn
     ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
 {
     // Arrange 
     Core::ServiceDescriptor descriptor;
@@ -233,7 +233,7 @@ TEST_F(TestSilKitToOatppMapper, CreateRpcClientDto_MapNetworkNameAndFunctionName
     ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateRpcServerDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateRpcServerDto_MapNetworkNameAndFunctionNameAndMediaTypeAndLabel)
 {
     // Arrange
     Core::ServiceDescriptor descriptor;
@@ -265,7 +265,7 @@ TEST_F(TestSilKitToOatppMapper, CreateRpcServerDto_MapNetworkNameAndFunctionName
     ASSERT_EQ(dto->spec->labels->at(0)->kind, LabelKind::Mandatory);
 }
 
-TEST_F(TestSilKitToOatppMapper, CreateSimulationEndDto)
+TEST_F(Test_DashboardSilKitToOatppMapper, CreateSimulationEndDto)
 {
     // Arrange 
     const auto now = std::chrono::system_clock::now().time_since_epoch();

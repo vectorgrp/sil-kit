@@ -44,7 +44,7 @@ bool operator==(const ParticipantConnectionInformation& lhs, const ParticipantCo
 
 namespace Dashboard {
 
-class TestDashboardCachingSilKitEventHandler : public Test
+class Test_DashboardCachingSilKitEventHandler : public Test
 {
 public:
     void SetUp() override
@@ -74,7 +74,7 @@ public:
     const uint64_t _invalidSimulationId{0};
 };
 
-TEST_F(TestDashboardCachingSilKitEventHandler, NoEvents)
+TEST_F(Test_DashboardCachingSilKitEventHandler, NoEvents)
 {
     // Arrange
     EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
@@ -92,7 +92,7 @@ TEST_F(TestDashboardCachingSilKitEventHandler, NoEvents)
     // Assert
 }
 
-TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimulationFailure)
+TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimulationFailure)
 {
     // Arrange
     bool simulationStartFound = false;
@@ -101,7 +101,8 @@ TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimu
         switch (evt.Type())
         {
         case SilKitEventType::OnSimulationStart: simulationStartFound = true; break;
-        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true;
+        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true; break;
+        default: /* do nothing */ break;
         }
     }));
 
@@ -142,7 +143,7 @@ TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimu
     CheckTime(actualTime);
 }
 
-TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimulationSuccess)
+TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimulationSuccess)
 {
     // Arrange
     bool simulationStartFound = false;
@@ -151,7 +152,8 @@ TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimu
         switch (evt.Type())
         {
         case SilKitEventType::OnSimulationStart: simulationStartFound = true; break;
-        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true;
+        case SilKitEventType::OnParticipantConnected: participantConnectionInformationFound = true; break;
+        default: /* do nothing */ break;
         }
     }));
     Services::Orchestration::ParticipantConnectionInformation participantConnectionInformation;
@@ -199,7 +201,7 @@ TEST_F(TestDashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSimu
     ASSERT_EQ(actualInfo, participantConnectionInformation) << "Wrong ParticipantConnectionInformation!";
 }
 
-TEST_F(TestDashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_CreateSimulationSuccess)
+TEST_F(Test_DashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_CreateSimulationSuccess)
 {
     // Arrange
     EXPECT_CALL(*_mockEventQueue, Enqueue).Times(2);

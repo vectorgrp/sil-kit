@@ -60,10 +60,10 @@ public:
     MOCK_METHOD(void, ServiceDiscoveryHandler,
         (ServiceDiscoveryEvent::Type, const ServiceDescriptor&));
 };
-class DiscoveryServiceTest : public testing::Test
+class Test_ServiceDiscovery : public testing::Test
 {
 protected:
-    DiscoveryServiceTest()
+    Test_ServiceDiscovery()
     {
     }
 
@@ -80,7 +80,7 @@ protected:
     MockParticipant participant;
 };
 
-TEST(ServiceDescriptor, portable_hash_function)
+TEST_F(Test_ServiceDiscovery, portable_hash_function)
 {
     const auto numStrings = 1000;
     std::vector<std::string> testStrings;
@@ -96,7 +96,7 @@ TEST(ServiceDescriptor, portable_hash_function)
     ASSERT_EQ(hashes.size(), testStrings.size()) << "The test strings need unique 64-bit hashes";
 }
 
-TEST_F(DiscoveryServiceTest, service_creation_notification)
+TEST_F(Test_ServiceDiscovery, service_creation_notification)
 {
     ServiceDescriptor senderDescriptor{};
     senderDescriptor.SetParticipantNameAndComputeId("ParticipantA");
@@ -139,7 +139,7 @@ TEST_F(DiscoveryServiceTest, service_creation_notification)
     disco.ReceiveMsg(&otherParticipant, event);
     disco.ReceiveMsg(&otherParticipant, event);//should not trigger callback, is cached
 }
-TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
+TEST_F(Test_ServiceDiscovery, multiple_service_creation_notification)
 {
     MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
     ServiceDiscovery disco{ &participant, "ParticipantA" };
@@ -180,7 +180,7 @@ TEST_F(DiscoveryServiceTest, multiple_service_creation_notification)
     }
 }
 
-TEST_F(DiscoveryServiceTest, service_removal)
+TEST_F(Test_ServiceDiscovery, service_removal)
 {
     MockServiceEndpoint otherParticipant{ "P1", "N1", "C1", 2 };
     ServiceDiscovery disco{ &participant, "ParticipantA" };

@@ -60,9 +60,9 @@ const std::string systemControllerParticipantName{"systemControllerParticipant"}
 const std::string topic{"Topic"};
 const std::string mediaType{"A"};
 static size_t expectedReceptions;
-std::chrono::milliseconds communicationTimeout{8000ms};
-std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
-std::chrono::seconds simStepSize{1s};
+static const std::chrono::milliseconds communicationTimeout{8000ms};
+static const std::chrono::milliseconds asyncDelayBetweenPublication{50ms};
+static const std::chrono::seconds simStepSize{1s};
 
 static size_t globalParticipantIndex = 0;
 static std::vector<std::string> participantNames{};

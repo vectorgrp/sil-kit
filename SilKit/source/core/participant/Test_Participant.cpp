@@ -35,28 +35,28 @@ namespace {
 using namespace SilKit::Core;
 using namespace SilKit::Config;
 
-class ParticipantTest : public testing::Test
+class Test_Participant : public testing::Test
 {
 protected:
-    ParticipantTest()
+    Test_Participant()
     {
     }
 };
 
-TEST_F(ParticipantTest, throw_on_empty_participant_name)
+TEST_F(Test_Participant, throw_on_empty_participant_name)
 {
     EXPECT_THROW(CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), ""),
                  SilKit::ConfigurationError);
 }
 
-TEST_F(ParticipantTest, support_nullptr_in_IParticipantConfiguration)
+TEST_F(Test_Participant, support_nullptr_in_IParticipantConfiguration)
 {
     EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(nullptr, "TestParticipant"));
     EXPECT_NO_THROW(CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(),
                                                         "TestParticipant"));
 }
 
-TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
+TEST_F(Test_Participant, use_configured_name_on_participant_name_mismatch)
 {
     const auto configuredParticipantName = "ConfiguredParticipantName";
     auto mockConfig = std::make_shared<SilKit::Config::ParticipantConfiguration>();
@@ -69,7 +69,7 @@ TEST_F(ParticipantTest, use_configured_name_on_participant_name_mismatch)
     EXPECT_EQ(participant->GetParticipantName(), configuredParticipantName);
 }
 
-TEST_F(ParticipantTest, make_basic_controller)
+TEST_F(Test_Participant, make_basic_controller)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
@@ -80,7 +80,7 @@ TEST_F(ParticipantTest, make_basic_controller)
     EXPECT_NE(basicCanController, nullptr);
 }
 
-TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
+TEST_F(Test_Participant, error_on_create_system_monitor_twice)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
@@ -92,7 +92,7 @@ TEST_F(ParticipantTest, error_on_create_system_monitor_twice)
     EXPECT_THROW(participant->CreateSystemMonitor(), SilKit::SilKitError);
 }
 
-TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
+TEST_F(Test_Participant, error_on_create_lifecycle_service_twice)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
@@ -105,7 +105,7 @@ TEST_F(ParticipantTest, error_on_create_lifecycle_service_twice)
                  SilKit::SilKitError);
 }
 
-TEST_F(ParticipantTest, no_error_on_get_logger_twice)
+TEST_F(Test_Participant, no_error_on_get_logger_twice)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
@@ -116,7 +116,7 @@ TEST_F(ParticipantTest, no_error_on_get_logger_twice)
     });
 }
 
-TEST_F(ParticipantTest, error_on_create_basic_controller_twice)
+TEST_F(Test_Participant, error_on_create_basic_controller_twice)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");
@@ -126,7 +126,7 @@ TEST_F(ParticipantTest, error_on_create_basic_controller_twice)
 }
 
 
-TEST_F(ParticipantTest, error_on_create_basic_controller_twice_different_network)
+TEST_F(Test_Participant, error_on_create_basic_controller_twice_different_network)
 {
     auto participant =
         CreateNullConnectionParticipantImpl(SilKit::Config::MakeEmptyParticipantConfigurationImpl(), "TestParticipant");

@@ -58,8 +58,9 @@ auto RunDashboardTest(std::shared_ptr<SilKit::Config::IParticipantConfiguration>
 
         runner.run(
             [testCode = std::move(testCode), participantConfig, &registryUri, controller]() {
-                auto&& dashboard =
-                    std::make_unique<Dashboard>(participantConfig, registryUri);
+                auto dashboard = std::make_unique<Dashboard>(participantConfig, registryUri);
+                SILKIT_UNUSED_ARG(dashboard);
+
                 testCode();
                 controller->WaitSimulationsFinished();
             },

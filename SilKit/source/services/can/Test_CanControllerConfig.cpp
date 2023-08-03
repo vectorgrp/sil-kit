@@ -34,10 +34,10 @@ namespace {
 using namespace SilKit::Core;
 using namespace SilKit::Services::Can;
 
-class CanControllerConfigTest : public testing::Test
+class Test_CanControllerConfig : public testing::Test
 {
 public:
-    CanControllerConfigTest(){};
+    Test_CanControllerConfig(){};
 };
 
 auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::ParticipantConfiguration>
@@ -57,7 +57,7 @@ auto PrepareParticipantConfiguration() -> std::shared_ptr<SilKit::Config::Partic
     return mockConfig;
 }
 
-TEST(CanControllerConfigTest, create_controller_configured_no_network)
+TEST(Test_CanControllerConfig, create_controller_configured_no_network)
 {
     auto controllerName = "ControllerWithoutNetwork";
     auto networkName = "TestNetwork";
@@ -73,7 +73,7 @@ TEST(CanControllerConfigTest, create_controller_configured_no_network)
     EXPECT_EQ(serviceDescr.GetNetworkName(), expectedNetworkName);
 }
 
-TEST(CanControllerConfigTest, create_controller_configured_with_network)
+TEST(Test_CanControllerConfig, create_controller_configured_with_network)
 {
     auto controllerName = "ControllerWithNetwork";
     auto networkName = "TestNetwork";

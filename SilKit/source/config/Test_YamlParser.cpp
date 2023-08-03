@@ -30,7 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-class YamlParserTest : public testing::Test
+class Test_YamlParser : public testing::Test
 {
 };
 
@@ -210,7 +210,7 @@ Middleware:
 
 )raw";
 
-TEST_F(YamlParserTest, yaml_complete_configuration)
+TEST_F(Test_YamlParser, yaml_complete_configuration)
 {
     auto node = YAML::Load(completeConfiguration);
     auto config = node.as<ParticipantConfiguration>();
@@ -272,7 +272,7 @@ TEST_F(YamlParserTest, yaml_complete_configuration)
 const auto emptyConfiguration = R"raw(
 )raw";
 
-TEST_F(YamlParserTest, yaml_empty_configuration)
+TEST_F(Test_YamlParser, yaml_empty_configuration)
 {
     auto node = YAML::Load(emptyConfiguration);
     EXPECT_THROW({
@@ -292,14 +292,14 @@ const auto minimalConfiguration = R"raw(
 ParticipantName: Node1
 )raw";
 
-TEST_F(YamlParserTest, yaml_minimal_configuration)
+TEST_F(Test_YamlParser, yaml_minimal_configuration)
 {
     auto node = YAML::Load(minimalConfiguration);
     auto config = node.as<ParticipantConfiguration>();
     EXPECT_TRUE(config.participantName == "Node1");
 }
 
-TEST_F(YamlParserTest, yaml_native_type_conversions)
+TEST_F(Test_YamlParser, yaml_native_type_conversions)
 {
     {
         uint16_t a{ 0x815 };
@@ -351,7 +351,7 @@ TEST_F(YamlParserTest, yaml_native_type_conversions)
     }
 }
 
-TEST_F(YamlParserTest, middleware_convert)
+TEST_F(Test_YamlParser, middleware_convert)
 {
     auto node = YAML::Load(R"(
         {
@@ -377,7 +377,7 @@ TEST_F(YamlParserTest, middleware_convert)
     EXPECT_EQ(config.registryAsFallbackProxy, false);
 }
 
-TEST_F(YamlParserTest, map_serdes)
+TEST_F(Test_YamlParser, map_serdes)
 {
     std::map<std::string, std::string> mapin{
         {"keya", "vala"}, {"keyb", "valb"}, {"keyc", ""}, {"", "vald"}, 
@@ -393,7 +393,7 @@ FlexRayControllers:
 - Name: FlexRay2
 )raw";
 
-TEST_F(YamlParserTest, yaml_deprecated_FlexRayControllers_configuration)
+TEST_F(Test_YamlParser, yaml_deprecated_FlexRayControllers_configuration)
 {
     auto node = YAML::Load(deprecatedFlexRayControllersConfiguration);
     const auto participantConfiguration = node.as<ParticipantConfiguration>();
@@ -412,7 +412,7 @@ FlexrayControllers:
 )raw";
 
 // Check that having both the correct "FlexrayControllers" and the deprecated "FlexRayControllers" keys present throws.
-TEST_F(YamlParserTest, yaml_both_FlexrayControllers_and_deprecated_FlexRayControllers_configuration)
+TEST_F(Test_YamlParser, yaml_both_FlexrayControllers_and_deprecated_FlexRayControllers_configuration)
 {
     auto node = YAML::Load(bothFlexrayControllersAndDeprecatedFlexRayControllersConfiguration);
     EXPECT_THROW({ node.as<ParticipantConfiguration>(); }, ConversionError);
@@ -428,7 +428,7 @@ RpcClients:
   RpcChannel: TheFunction3
 )raw";
 
-TEST_F(YamlParserTest, yaml_deprecated_RpcClient_configuration)
+TEST_F(Test_YamlParser, yaml_deprecated_RpcClient_configuration)
 {
     auto node = YAML::Load(rpcClientConfiguration);
     const auto participantConfiguration = node.as<ParticipantConfiguration>();
@@ -477,7 +477,7 @@ RpcClients:
   RpcChannel: TheFunctionName
 )raw";
 
-TEST_F(YamlParserTest, yaml_broken_RpcClient_configuration)
+TEST_F(Test_YamlParser, yaml_broken_RpcClient_configuration)
 {
     const std::initializer_list<const char*> brokenConfigurations = {
         brokenRpcClientConfigurationA,
@@ -502,7 +502,7 @@ RpcServers:
   RpcChannel: TheFunction3
 )raw";
 
-TEST_F(YamlParserTest, yaml_deprecated_RpcServer_configuration)
+TEST_F(Test_YamlParser, yaml_deprecated_RpcServer_configuration)
 {
     auto node = YAML::Load(rpcServerConfiguration);
     const auto participantConfiguration = node.as<ParticipantConfiguration>();

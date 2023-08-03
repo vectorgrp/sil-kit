@@ -100,14 +100,14 @@ void Create_Labels(SilKit_LabelList** outLabelList, const SilKit_Label* labels, 
     *outLabelList = newLabelList;
 }
 
-class CapiDataTest : public testing::Test
+class Test_CapiData : public testing::Test
 {
 public:
     MockDataPublisher mockDataPublisher;
     MockDataSubscriber mockDataSubscriber;
     MockParticipant mockParticipant;
 
-    CapiDataTest()
+    Test_CapiData()
     {
         uint32_t numLabels = 1;
         SilKit_Label labels[1] = {{"KeyA", "ValA", SilKit_LabelKind_Optional}};
@@ -119,7 +119,7 @@ public:
         dummyContextPtr = (void*)&dummyContext;
     }
 
-    ~CapiDataTest()
+    ~Test_CapiData()
     {
         for (uint32_t index = 0; index != labelList->numLabels; ++index)
         {
@@ -146,7 +146,7 @@ void SilKitCALL DefaultDataHandler(void* /*context*/, SilKit_DataSubscriber* /*s
 {
 }
 
-TEST_F(CapiDataTest, data_publisher_function_mapping)
+TEST_F(Test_CapiData, data_publisher_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     SilKit_DataPublisher* publisher;
@@ -169,7 +169,7 @@ TEST_F(CapiDataTest, data_publisher_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiDataTest, data_subscriber_function_mapping)
+TEST_F(Test_CapiData, data_subscriber_function_mapping)
 {
     SilKit_ReturnCode returnCode;
 
@@ -195,7 +195,7 @@ TEST_F(CapiDataTest, data_subscriber_function_mapping)
 
 }
 
-TEST_F(CapiDataTest, data_publisher_bad_parameters)
+TEST_F(Test_CapiData, data_publisher_bad_parameters)
 {
     SilKit_ByteVector data = {0, 0};
     SilKit_ReturnCode returnCode;
@@ -227,7 +227,7 @@ TEST_F(CapiDataTest, data_publisher_bad_parameters)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
-TEST_F(CapiDataTest, data_subscriber_bad_parameters)
+TEST_F(Test_CapiData, data_subscriber_bad_parameters)
 {
     SilKit_ReturnCode returnCode;
     SilKit_DataSubscriber* subscriber;
@@ -265,7 +265,7 @@ TEST_F(CapiDataTest, data_subscriber_bad_parameters)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
-TEST_F(CapiDataTest, data_publisher_publish)
+TEST_F(Test_CapiData, data_publisher_publish)
 {
     SilKit_ReturnCode returnCode = 0;
     // create payload

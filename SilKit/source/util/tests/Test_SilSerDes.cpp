@@ -45,7 +45,7 @@ void DeserializeAlignedIntegral(Deserializer& deserializer)
     EXPECT_EQ(value_max, std::numeric_limits<T>::max());
 }
 
-TEST(SerDesTest, serdes_integral)
+TEST(Test_SilSerDes, serdes_integral)
 {
     Serializer serializer;
     SerializeAlignedIntegral<int8_t>(serializer);
@@ -59,7 +59,7 @@ TEST(SerDesTest, serdes_integral)
     DeserializeAlignedIntegral<int32_t>(deserializer);
     DeserializeAlignedIntegral<int64_t>(deserializer);
 }
-TEST(SerDesTest, serdes_integral_unsigned)
+TEST(Test_SilSerDes, serdes_integral_unsigned)
 {
     Serializer serializer;
     SerializeAlignedIntegral<uint8_t>(serializer);
@@ -73,7 +73,7 @@ TEST(SerDesTest, serdes_integral_unsigned)
     DeserializeAlignedIntegral<uint32_t>(deserializer);
     DeserializeAlignedIntegral<uint64_t>(deserializer);
 }
-TEST(SerDesTest, serdes_integral_smaller_bitwidth)
+TEST(Test_SilSerDes, serdes_integral_smaller_bitwidth)
 {
     // 64bit value initalized with negative 16bit value
     constexpr int64_t reference = (std::numeric_limits<int16_t>::min)();
@@ -86,7 +86,7 @@ TEST(SerDesTest, serdes_integral_smaller_bitwidth)
     const auto result = deserializer.Deserialize<int64_t>(16);
     EXPECT_EQ(reference, result);
 }
-TEST(SerDesTest, serdes_unaligned_int63)
+TEST(Test_SilSerDes, serdes_unaligned_int63)
 {
     // all are treated as int63
     int64_t a = -112353;
@@ -120,7 +120,7 @@ TEST(SerDesTest, serdes_unaligned_int63)
     EXPECT_EQ(h, deserializer.Deserialize<int64_t>(63));
 }
 
-TEST(SerDesTest, serdes_unaligned_int)
+TEST(Test_SilSerDes, serdes_unaligned_int)
 {
     int16_t a_3 = 3;
     int16_t b_3 = -2;
@@ -153,7 +153,7 @@ TEST(SerDesTest, serdes_unaligned_int)
     EXPECT_EQ(h_3, deserializer.Deserialize<int16_t>(3));
 }
 
-TEST(SerDesTest, serdes_unaligned_uint)
+TEST(Test_SilSerDes, serdes_unaligned_uint)
 {
     uint16_t a_3 = 3;
     uint16_t b_3 = 2;
@@ -186,7 +186,7 @@ TEST(SerDesTest, serdes_unaligned_uint)
     EXPECT_EQ(h_3, deserializer.Deserialize<uint16_t>(3));
 }
 
-TEST(SerDesTest, serdes_bool)
+TEST(Test_SilSerDes, serdes_bool)
 {
     Serializer serializer;
     serializer.Serialize(true);
@@ -198,7 +198,7 @@ TEST(SerDesTest, serdes_bool)
     EXPECT_EQ(false, deserializer.Deserialize<bool>());
 }
 
-TEST(SerDesTest, serdes_floatingpoint)
+TEST(Test_SilSerDes, serdes_floatingpoint)
 {
     const float f_neg = -13.37f;
     const float f_pos = 13.37f;
@@ -219,7 +219,7 @@ TEST(SerDesTest, serdes_floatingpoint)
     EXPECT_EQ(d_pos, deserializer.Deserialize<double>());
 }
 
-TEST(SerDesTest, serdes_string)
+TEST(Test_SilSerDes, serdes_string)
 {
     const std::string value{"Hello world! I love you so much."};
     Serializer serializer;
@@ -230,7 +230,7 @@ TEST(SerDesTest, serdes_string)
     EXPECT_EQ(value, deserializer.Deserialize<std::string>());
 }
 
-TEST(SerDesTest, serdes_bytes)
+TEST(Test_SilSerDes, serdes_bytes)
 {
     const std::vector<uint8_t> bytes{'a', 'b', 'c', 'd'};
     Serializer serializer;
@@ -241,7 +241,7 @@ TEST(SerDesTest, serdes_bytes)
     EXPECT_EQ(bytes, deserializer.Deserialize<std::vector<uint8_t>>());
 }
 
-TEST(SerDesTest, serdes_unaligned_mixed_madness)
+TEST(Test_SilSerDes, serdes_unaligned_mixed_madness)
 {
     // all int64_t are treated as int63
     int64_t a = -112353;
@@ -269,7 +269,7 @@ TEST(SerDesTest, serdes_unaligned_mixed_madness)
     EXPECT_EQ(f, deserializer.Deserialize<double>());
 }
 
-TEST(SerDesTest, serdes_array)
+TEST(Test_SilSerDes, serdes_array)
 {
     Serializer serializer;
     serializer.BeginArray(3);

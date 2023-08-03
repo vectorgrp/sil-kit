@@ -49,10 +49,10 @@ public:
 
 SilKit::Services::PubSub::PubSubSpec testDataNodeSpec{"Topic", {}};
 
-class DataPublisherTest : public ::testing::Test
+class Test_DataPublisher : public ::testing::Test
 {
 protected:
-    DataPublisherTest()
+    Test_DataPublisher()
         : publisher{ &participant, participant.GetTimeProvider(), testDataNodeSpec, "pubUUID", {} }
     {
         publisher.SetServiceDescriptor(portAddress);
@@ -66,7 +66,7 @@ protected:
     DataPublisher publisher;
 };
 
-TEST_F(DataPublisherTest, publish)
+TEST_F(Test_DataPublisher, publish)
 {
     WireDataMessageEvent msg{0ns, sampleData};
 

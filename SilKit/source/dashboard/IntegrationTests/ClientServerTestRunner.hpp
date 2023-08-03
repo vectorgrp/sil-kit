@@ -22,13 +22,7 @@
  *
  ***************************************************************************/
 
-#include "oatpp/web/server/api/ApiController.hpp"
-#include "oatpp/web/server/HttpRouter.hpp"
-
-#include "oatpp/network/Server.hpp"
-#include "oatpp/network/ConnectionProvider.hpp"
-
-#include "oatpp/core/macro/component.hpp"
+#include "OatppHeaders.hpp"
 
 #include <atomic>
 #include <list>
@@ -105,7 +99,7 @@ public:
             // stop moved here end
         });
 
-        std::thread clientThread([&runConditionForLambda, this, &lambda] {
+        std::thread clientThread([&runConditionForLambda, &lambda] {
             lambda();
             //      m_server->stop();
             runConditionForLambda = false;

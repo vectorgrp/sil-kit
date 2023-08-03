@@ -45,5 +45,7 @@ target_link_libraries(I_SilKit_Core_Internal
     INTERFACE I_SilKit_Services_Ethernet
 )
 
-add_silkit_test(Test_MwVAsio_MessageBuffer SOURCES Test_MessageBuffer.cpp LIBS I_SilKit_Core_Internal)
-add_silkit_test(Test_MwInternal_Serdes  SOURCES Test_InternalSerdes.cpp LIBS I_SilKit_Core_Internal)
+
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_MessageBuffer.cpp LIBS I_SilKit_Core_Internal)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_InternalSerdes.cpp LIBS I_SilKit_Core_Internal)
+

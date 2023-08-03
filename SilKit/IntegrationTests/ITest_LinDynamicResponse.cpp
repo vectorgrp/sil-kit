@@ -666,7 +666,7 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
     masterFrame.checksumModel = LinChecksumModel::Enhanced;
     masterFrame.dataLength = 6;
 
-    const size_t maxResponses = 10;
+    static constexpr size_t MAX_RESPONSES = 10;
     std::vector<std::chrono::nanoseconds> sentTimes;
     std::vector<std::chrono::nanoseconds> responseTimes;
 
@@ -731,14 +731,14 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
             });
 
         timeSyncService->SetSimulationStepHandler(
-            [lifecycleService, linController, &headerReceived, &slaveResponseFrame, &responseTimes, maxResponses](
+            [lifecycleService, linController, &headerReceived, &slaveResponseFrame, &responseTimes](
                 auto now, auto /*duration*/) {
                 //Send response delayed by 2ms
                 if (now == ( headerReceived + 2ms))
                 {
                     SilKit::Experimental::Services::Lin::SendDynamicResponse(linController, slaveResponseFrame);
                     responseTimes.push_back(now);
-                    if (responseTimes.size() == maxResponses)
+                    if (responseTimes.size() == MAX_RESPONSES)
                     {
                         lifecycleService->Stop("Test done");
                     }

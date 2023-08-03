@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 using namespace std::chrono_literals;
 
-TEST(MwVAsioSerdes, SimCan_CanMessage)
+TEST(Test_CanSerdes, SimCan_CanMessage)
 {
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;
@@ -62,7 +62,7 @@ TEST(MwVAsioSerdes, SimCan_CanMessage)
     EXPECT_EQ(in.userContext, out.userContext);
 }
 
-TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
+TEST(Test_CanSerdes, SimCan_CanTransmitAcknowledge)
 {
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;
@@ -82,7 +82,7 @@ TEST(MwVAsioSerdes, SimCan_CanTransmitAcknowledge)
     EXPECT_EQ(in.userContext, out.userContext);
 }
 
-TEST(MwVAsioSerdes, SimCan_CanControllerStatus)
+TEST(Test_CanSerdes, SimCan_CanControllerStatus)
 {
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;
@@ -102,7 +102,7 @@ TEST(MwVAsioSerdes, SimCan_CanControllerStatus)
     EXPECT_EQ(in.errorState, out.errorState);
 }
 
-TEST(MwVAsioSerdes, SimCan_CanConfigureBaudrate)
+TEST(Test_CanSerdes, SimCan_CanConfigureBaudrate)
 {
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;
@@ -120,7 +120,7 @@ TEST(MwVAsioSerdes, SimCan_CanConfigureBaudrate)
     EXPECT_EQ(in.fdBaudRate, out.fdBaudRate);
 }
 
-TEST(MwVAsioSerdes, SimCan_CanSetControllerMode)
+TEST(Test_CanSerdes, SimCan_CanSetControllerMode)
 {
     using namespace SilKit::Services::Can;
     SilKit::Core::MessageBuffer buffer;

@@ -36,13 +36,13 @@ using namespace SilKit::Util;
 using namespace SilKit::Services;
 using namespace SilKit::Services::PubSub;
 
-class PubSubMatchingTest : public ::testing::Test
+class Test_PubSubMatching : public ::testing::Test
 {
 protected:
-    PubSubMatchingTest() {}
+    Test_PubSubMatching() {}
 };
 
-TEST_F(PubSubMatchingTest, add_labels)
+TEST_F(Test_PubSubMatching, add_labels)
 {
     PubSubSpec spec{"topic", "mediatype"};
     EXPECT_EQ(spec.Topic(), "topic");
@@ -63,7 +63,7 @@ TEST_F(PubSubMatchingTest, add_labels)
     EXPECT_EQ(spec.Labels()[0].kind, MatchingLabel::Kind::Mandatory);
 }
 
-TEST_F(PubSubMatchingTest, match_mediatype)
+TEST_F(Test_PubSubMatching, match_mediatype)
 {
     std::string mediaTypePub{"A"};
     std::string mediaTypeSub{"A"};

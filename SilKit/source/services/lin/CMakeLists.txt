@@ -57,7 +57,7 @@ target_link_libraries(O_SilKit_Services_Lin
     PRIVATE I_SilKit_Services_Logging
 )
 
-add_silkit_test(Test_SimLin
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES
         LinTestUtils.hpp
         Test_LinControllerDetailedSim.cpp
@@ -68,4 +68,4 @@ add_silkit_test(Test_SimLin
         I_SilKit_Core_Mock_Participant
         O_SilKit_Core_Mock_NullConnection
 )
-add_silkit_test(Test_SimLin_Serdes  SOURCES Test_LinSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_LinSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)

@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <atomic>
 
-#include "oatpp/web/client/RetryPolicy.hpp"
+#include "OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {

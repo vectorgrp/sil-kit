@@ -168,11 +168,11 @@ MATCHER_P(SubscriptionAcknowledgeMatcher, subscriber,
 namespace SilKit {
 namespace Core {
 
-class VAsioConnectionTest : public testing::Test
+class Test_VAsioConnection : public testing::Test
 {
 protected:
-    VAsioConnectionTest()
-        : _connection(nullptr, {}, "VAsioConnectionTest", 1, &_timeProvider)
+    Test_VAsioConnection()
+        : _connection(nullptr, {}, "Test_VAsioConnection", 1, &_timeProvider)
     {
         _connection.SetLogger(&_dummyLogger);
     }
@@ -198,7 +198,7 @@ protected:
 // Versioned initial handshake
 //////////////////////////////////////////////////////////////////////
 
-TEST_F(VAsioConnectionTest, unsupported_version_connect)
+TEST_F(Test_VAsioConnection, unsupported_version_connect)
 {
     ParticipantAnnouncement announcement{};
     announcement.peerInfo = _from.GetInfo();
@@ -214,7 +214,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_connect)
     _connection.OnSocketData(&_from, std::move(message));
 }
 
-TEST_F(VAsioConnectionTest, unsupported_version_reply_from_registry_should_throw)
+TEST_F(Test_VAsioConnection, unsupported_version_reply_from_registry_should_throw)
 {
     ParticipantAnnouncementReply reply{};
     reply.remoteHeader.versionHigh = 1;
@@ -230,7 +230,7 @@ TEST_F(VAsioConnectionTest, unsupported_version_reply_from_registry_should_throw
         SilKit::ProtocolError);
 }
 
-TEST_F(VAsioConnectionTest, supported_version_reply_from_registry_must_not_throw)
+TEST_F(Test_VAsioConnection, supported_version_reply_from_registry_must_not_throw)
 {
     ParticipantAnnouncementReply reply{};
     reply.status = ParticipantAnnouncementReply::Status::Success;
@@ -243,7 +243,7 @@ TEST_F(VAsioConnectionTest, supported_version_reply_from_registry_must_not_throw
     );
 }
 
-TEST_F(VAsioConnectionTest, current_version_connect)
+TEST_F(Test_VAsioConnection, current_version_connect)
 {
     ParticipantAnnouncement announcement{}; //sets correct version in header
     announcement.peerInfo = _from.GetInfo();
@@ -265,7 +265,7 @@ TEST_F(VAsioConnectionTest, current_version_connect)
 
 // Disabled because we do not have a versioned Ser/Des that detects
 // the different version used for transmission, this is a work in progress.
-TEST_F(VAsioConnectionTest, DISABLED_versioned_send_testmessage)
+TEST_F(Test_VAsioConnection, DISABLED_versioned_send_testmessage)
 {
     // We send a 'version1', but expect to receive a 'version2' 
     Tests::Version1::TestMessage message;

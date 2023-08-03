@@ -564,7 +564,7 @@ protected:
 
             // One large message
             testParam_numMsgToPublishPerController = 1u;
-            testParam_messageSizeInBytes = 1e7;
+            testParam_messageSizeInBytes = size_t{10000000};
 
             std::vector<TestParticipant> participants;
             participants.reserve(2);

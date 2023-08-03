@@ -174,7 +174,6 @@ include_spdlog()
 if(SILKIT_BUILD_DASHBOARD)
     function(include_oatpp)
         silkit_clean_default_compileflags()
-        add_compile_options(-w)
 
         set(OATPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         set(OATPP_INSTALL OFF CACHE BOOL "" FORCE)
@@ -186,8 +185,14 @@ if(SILKIT_BUILD_DASHBOARD)
         set(CMAKE_C_VISIBILITY_PRESET hidden)
         # work around old cmake in oatpp:
         set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+
         add_subdirectory(oatpp)
         silkit_target_clean_compileflags(oatpp)
+
+        if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+            target_compile_options(oatpp PRIVATE "/wd4244")
+        endif ()
+
         set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
         set_property(TARGET oatpp PROPERTY VISIBILITY_INLINES_HIDDEN ON)
     endfunction()

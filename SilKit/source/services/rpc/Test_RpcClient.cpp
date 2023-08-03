@@ -39,11 +39,11 @@ namespace {
 using namespace SilKit::Services::Rpc;
 using namespace SilKit::Services::Rpc::Tests;
 
-class RpcClientTest : public RpcTestBase
+class Test_RpcClient : public RpcTestBase
 {
 };
 
-TEST_F(RpcClientTest, rpc_client_calls_result_handler_with_error_when_no_server_available)
+TEST_F(Test_RpcClient, rpc_client_calls_result_handler_with_error_when_no_server_available)
 {
     IRpcClient* rpcClient = CreateRpcClient();
 
@@ -56,7 +56,7 @@ TEST_F(RpcClientTest, rpc_client_calls_result_handler_with_error_when_no_server_
     rpcClient->Call(sampleData);
 }
 
-TEST_F(RpcClientTest, rpc_client_does_not_fail_on_timeout_reply)
+TEST_F(Test_RpcClient, rpc_client_does_not_fail_on_timeout_reply)
 {
     // Rpc client should ignore unknown (late timout) call results
 
@@ -73,7 +73,7 @@ TEST_F(RpcClientTest, rpc_client_does_not_fail_on_timeout_reply)
         .Times(0);
 }
 
-TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_data)
+TEST_F(Test_RpcClient, rpc_client_call_sends_message_with_current_timestamp_and_data)
 {
     SilKit::Core::Tests::MockTimeProvider fixedTimeProvider;
     fixedTimeProvider.now = std::chrono::nanoseconds{123456};
@@ -98,7 +98,7 @@ TEST_F(RpcClientTest, rpc_client_call_sends_message_with_current_timestamp_and_d
     iRpcClient->Call(sampleData);
 }
 
-TEST_F(RpcClientTest, rpc_client_call_receives_internal_server_error_when_server_has_no_handler)
+TEST_F(Test_RpcClient, rpc_client_call_receives_internal_server_error_when_server_has_no_handler)
 {
     SilKit::Core::Tests::MockTimeProvider fixedTimeProvider;
     fixedTimeProvider.now = std::chrono::nanoseconds{123456};

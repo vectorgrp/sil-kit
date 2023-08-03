@@ -44,7 +44,7 @@ using namespace std::chrono_literals;
 using namespace SilKit::Core;
 using namespace SilKit::Services::Orchestration;
 
-TEST(TargetedMessagingITest, targeted_messaging)
+TEST(ITest_TargetedMessaging, targeted_messaging)
 {
     auto registryUri = MakeTestRegistryUri();
 

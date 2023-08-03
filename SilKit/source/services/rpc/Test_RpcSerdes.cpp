@@ -30,7 +30,7 @@ using namespace std::chrono_literals;
 
 const std::vector<uint8_t> referenceData(114'793, 'D');
 
-TEST(MwVAsioSerdes, SimRpc_functionCall)
+TEST(Test_RpcSerdes, SimRpc_functionCall)
 {
     using namespace SilKit::Services::Rpc;
     using namespace SilKit::Core;
@@ -46,7 +46,7 @@ TEST(MwVAsioSerdes, SimRpc_functionCall)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, SimRpc_functioncall_response)
+TEST(Test_RpcSerdes, SimRpc_functioncall_response)
 {
     using namespace SilKit::Services::Rpc;
     using namespace SilKit::Core;

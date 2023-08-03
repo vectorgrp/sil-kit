@@ -21,11 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "oatpp/core/macro/component.hpp"
-#include "oatpp/network/tcp/client/ConnectionProvider.hpp"
-#include "oatpp/network/tcp/server/ConnectionProvider.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
-#include "oatpp/web/server/HttpConnectionHandler.hpp"
+#include "OatppHeaders.hpp"
 
 namespace SilKit {
 namespace Dashboard {

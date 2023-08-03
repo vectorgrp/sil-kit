@@ -35,21 +35,21 @@ namespace {
 
 using namespace SilKit::Services::Flexray;
 
-TEST(TestSimFlexrayValidation, throw_if_gColdstartAttempts_is_out_of_range)
+TEST(Test_Validation, throw_if_gColdstartAttempts_is_out_of_range)
 {
     FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 0;
     EXPECT_THROW(Validate(clusterParams), SilKit::ConfigurationError);
 }
 
-TEST(TestSimFlexrayValidation, throw_if_pAllowHaltDueToClock_is_not_0_or_1)
+TEST(Test_Validation, throw_if_pAllowHaltDueToClock_is_not_0_or_1)
 {
     FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 2;
     EXPECT_THROW(Validate(nodeParams), SilKit::ConfigurationError);
 }
 
-TEST(TestSimFlexrayValidation, valid_cluster_params_lower_boundary_must_not_throw)
+TEST(Test_Validation, valid_cluster_params_lower_boundary_must_not_throw)
 {
     FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 2;
@@ -76,7 +76,7 @@ TEST(TestSimFlexrayValidation, valid_cluster_params_lower_boundary_must_not_thro
     EXPECT_NO_THROW(Validate(clusterParams));
 }
 
-TEST(TestSimFlexrayValidation, valid_cluster_params_upper_boundary_must_not_throw)
+TEST(Test_Validation, valid_cluster_params_upper_boundary_must_not_throw)
 {
     FlexrayClusterParameters clusterParams;
     clusterParams.gColdstartAttempts = 31;
@@ -103,7 +103,7 @@ TEST(TestSimFlexrayValidation, valid_cluster_params_upper_boundary_must_not_thro
     EXPECT_NO_THROW(Validate(clusterParams));
 }
 
-TEST(TestSimFlexrayValidation, valid_node_parameters_lower_boundary_must_not_throw)
+TEST(Test_Validation, valid_node_parameters_lower_boundary_must_not_throw)
 {
     FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 0;
@@ -134,7 +134,7 @@ TEST(TestSimFlexrayValidation, valid_node_parameters_lower_boundary_must_not_thr
 }
 
 
-TEST(TestSimFlexrayValidation, valid_node_parameters_upper_boundary_must_not_throw)
+TEST(Test_Validation, valid_node_parameters_upper_boundary_must_not_throw)
 {
     FlexrayNodeParameters nodeParams;
     nodeParams.pAllowHaltDueToClock = 1;

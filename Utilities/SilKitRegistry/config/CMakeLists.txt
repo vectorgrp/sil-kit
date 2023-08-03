@@ -29,10 +29,17 @@ target_link_libraries(O_SilKitRegistry_Config
 )
 
 
-add_silkit_test(Test_RegistryConfiguration
-    SOURCES Test_RegistryConfiguration.cpp
-    LIBS S_SilKitImpl O_SilKitRegistry_Config
+add_silkit_test_executable(SilKitRegistryTests)
+
+add_silkit_test_to_executable(SilKitRegistryTests
+    SOURCES
+    Test_RegistryConfiguration.cpp
+
+    LIBS
+    S_SilKitImpl
+    O_SilKitRegistry_Config
+
     CONFIGS
-        Test_RegistryConfiguration_Full.json
-        Test_RegistryConfiguration_Full.yaml
+    Test_RegistryConfiguration_Full.json
+    Test_RegistryConfiguration_Full.yaml
 )

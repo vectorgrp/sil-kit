@@ -23,7 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "ServiceSerdes.hpp"
 
-TEST(MwVAsioSerdes, Mw_Service)
+TEST(Test_ServiceSerdes, Mw_Service)
 {
     SilKit::Core::MessageBuffer buffer;
 

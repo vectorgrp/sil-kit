@@ -98,7 +98,7 @@ public:
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const EthernetSetMode&));
 };
 
-class EthernetControllerTrivialSimTest : public testing::Test
+class Test_EthControllerTrivialSim : public testing::Test
 {
 protected:
     struct Callbacks
@@ -110,7 +110,7 @@ protected:
     };
 
 protected:
-    EthernetControllerTrivialSimTest()
+    Test_EthControllerTrivialSim()
         : controller(&participant, cfg, participant.GetTimeProvider())
         , controllerOther(&participant, cfg, participant.GetTimeProvider())
     {
@@ -137,7 +137,7 @@ protected:
 
 /*! \brief SendFrame must invoke the TimeProvider and triggers SendMsg on the participant
 */
-TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
+TEST_F(Test_EthControllerTrivialSim, send_eth_frame)
 {
     ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(42ns));
@@ -162,7 +162,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_eth_frame)
 }
 
 //! \brief SendFrame must pad the Ethernet frame to the minimum length of 60 bytes (without the Frame Check Sequence).
-TEST_F(EthernetControllerTrivialSimTest, send_short_eth_frame)
+TEST_F(Test_EthControllerTrivialSim, send_short_eth_frame)
 {
     ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(42ns));
 
@@ -219,7 +219,7 @@ TEST_F(EthernetControllerTrivialSimTest, send_short_eth_frame)
 
 /*! \brief SendFrame without Activate must trigger a nack
 */
-TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
+TEST_F(Test_EthControllerTrivialSim, nack_on_inactive_controller)
 {
     ON_CALL(participant.mockTimeProvider, Now()).WillByDefault(testing::Return(42ns));
 
@@ -244,7 +244,7 @@ TEST_F(EthernetControllerTrivialSimTest, nack_on_inactive_controller)
 
 /*! \brief The controller must change it's state when a Call to Activate/Deactivate is triggered
 */
-TEST_F(EthernetControllerTrivialSimTest, linkup_controller_inactive_on_activate_deactivate)
+TEST_F(Test_EthControllerTrivialSim, linkup_controller_inactive_on_activate_deactivate)
 {
     controller.Activate();
     ASSERT_TRUE(controller.GetState() == EthernetState::LinkUp);
@@ -254,7 +254,7 @@ TEST_F(EthernetControllerTrivialSimTest, linkup_controller_inactive_on_activate_
 
 /*! \brief Passing an EthernetFrameEvent to an EthControllers must trigger the registered callback
  */
-TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_message)
+TEST_F(Test_EthControllerTrivialSim, trigger_callback_on_receive_message)
 {
     std::vector<uint8_t> rawFrame;
     SetSourceMac(rawFrame, EthernetMac{ 0, 0, 0, 0, 0, 0 });
@@ -273,7 +273,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_message)
 /*! \brief Passing an Ack to an EthControllers must trigger the registered callback, if
  *         it sent a message with corresponding transmit ID and source MAC
  */
-TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
+TEST_F(Test_EthControllerTrivialSim, trigger_callback_on_receive_ack)
 {
     std::vector<uint8_t> rawFrame;
     SetSourceMac(rawFrame, EthernetMac{ 1, 2, 3, 4, 5, 6 });
@@ -294,7 +294,7 @@ TEST_F(EthernetControllerTrivialSimTest, trigger_callback_on_receive_ack)
 
 /*! \brief Multiple handlers added and removed
  */
-TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
+TEST_F(Test_EthControllerTrivialSim, add_remove_handler)
 {
     EthController testController{&participant, cfg, participant.GetTimeProvider()};
 
@@ -326,7 +326,7 @@ TEST_F(EthernetControllerTrivialSimTest, add_remove_handler)
 
 /*! \brief Removed handler in handler
  */
-TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
+TEST_F(Test_EthControllerTrivialSim, remove_handler_in_handler)
 {
     EthController testController{&participant, cfg, participant.GetTimeProvider()};
 
@@ -353,7 +353,7 @@ TEST_F(EthernetControllerTrivialSimTest, remove_handler_in_handler)
     testController.ReceiveMsg(&controllerOther, msg);
 }
 
-TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
+TEST_F(Test_EthControllerTrivialSim, ethcontroller_uses_tracing)
 {
     const auto now = 1337ns;
     ON_CALL(participant.mockTimeProvider, Now())
@@ -390,7 +390,7 @@ TEST_F(EthernetControllerTrivialSimTest, ethcontroller_uses_tracing)
     ethController.ReceiveMsg(&controllerOther, wireEthernetFrame);
 }
 
-TEST_F(EthernetControllerTrivialSimTest, receive_pads_with_zeros)
+TEST_F(Test_EthControllerTrivialSim, receive_pads_with_zeros)
 {
     WireEthernetFrameEvent msg{};
     msg.direction = TransmitDirection::RX;
@@ -406,7 +406,7 @@ TEST_F(EthernetControllerTrivialSimTest, receive_pads_with_zeros)
     controller.ReceiveMsg(&controllerOther, msg);
 }
 
-TEST_F(EthernetControllerTrivialSimTest, sendmsg_distributes_before_txreceive)
+TEST_F(Test_EthControllerTrivialSim, sendmsg_distributes_before_txreceive)
 {
     ON_CALL(participant.mockTimeProvider, Now())
         .WillByDefault(testing::Return(42ns));

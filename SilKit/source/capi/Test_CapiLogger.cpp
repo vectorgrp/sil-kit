@@ -40,16 +40,16 @@ namespace {
         MOCK_CONST_METHOD0(GetLogLevel, Level());
     };
 
-    class CapiLoggerTest : public testing::Test
+    class Test_CapiLogger : public testing::Test
     {
     public:
         MockLogger mockLogger;
-        CapiLoggerTest()
+        Test_CapiLogger()
         {
         }
     };
 
-    TEST_F(CapiLoggerTest, logger_function_mapping)
+    TEST_F(Test_CapiLogger, logger_function_mapping)
     {
         SilKit_ReturnCode returnCode;
 
@@ -58,7 +58,7 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
     }
 
-    TEST_F(CapiLoggerTest, logger_nullpointer_params)
+    TEST_F(Test_CapiLogger, logger_nullpointer_params)
     {
         SilKit_ReturnCode returnCode;
 
@@ -69,7 +69,7 @@ namespace {
         EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
     }
 
-    TEST_F(CapiLoggerTest, logger_enum_mappings)
+    TEST_F(Test_CapiLogger, logger_enum_mappings)
     {
         SilKit_ReturnCode returnCode;
 

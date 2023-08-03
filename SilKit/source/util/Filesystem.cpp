@@ -82,8 +82,9 @@ auto path::native() const noexcept -> const string_type&
 // Functions
 path current_path()
 {
-    std::array<char, 4096> buffer;
-    if (::getcwd(buffer.data(), static_cast<int>(buffer.size())) == nullptr)
+    thread_local std::array<char, 4096> buffer{};
+
+    if (::getcwd(buffer.data(), static_cast<int>(buffer.size() - 1)) == nullptr)
     {
         throw SilKitError("Couldn't get current working directory.");
     }

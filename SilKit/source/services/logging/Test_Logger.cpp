@@ -64,7 +64,7 @@ auto ALogMsgWith(std::string logger_name, Level level, std::string payload) -> M
     );
 }
 
-TEST(LoggerTest, log_level_conversion)
+TEST(Test_Logger, log_level_conversion)
 {
     Level in{Level::Critical};
     auto lvlStr = to_string(in);
@@ -75,7 +75,7 @@ TEST(LoggerTest, log_level_conversion)
     EXPECT_EQ(out, Level::Off);
 }
 
-TEST(LoggerTest, send_log_message_with_sender)
+TEST(Test_Logger, send_log_message_with_sender)
 {
     ServiceDescriptor controllerAddress { "P1", "N1", "C2", 8};
 
@@ -96,7 +96,7 @@ TEST(LoggerTest, send_log_message_with_sender)
     logMsgSender.SendLogMsg(std::move(msg));
 }
 
-TEST(LoggerTest, send_log_message_from_logger)
+TEST(Test_Logger, send_log_message_from_logger)
 {
     std::string loggerName{"ParticipantAndLogger"};
 
@@ -136,7 +136,7 @@ TEST(LoggerTest, send_log_message_from_logger)
     logger.Critical(payload);
 }
 
-TEST(LoggerTest, get_log_level)
+TEST(Test_Logger, get_log_level)
 {
     std::string loggerName{"ParticipantAndLogger"};
 

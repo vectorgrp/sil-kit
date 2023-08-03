@@ -51,7 +51,7 @@ auto BuildArguments(const std::vector<const char*>& arguments) -> std::vector<ch
     return argv;
 }
 
-TEST(SilKitCommandlineParserTest, test_mixed_arguments)
+TEST(Test_CommandlineParser, test_mixed_arguments)
 {
     auto arguments = { "main", "-u=silkit://localhost:8501", "XYZ", "--name=Xxxx", "--version" };
     auto args = BuildArguments(arguments);
@@ -91,7 +91,7 @@ TEST(SilKitCommandlineParserTest, test_mixed_arguments)
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").Value(), "XYZ");
 }
 
-TEST(SilKitCommandlineParserTest, test_spaced_option_values)
+TEST(Test_CommandlineParser, test_spaced_option_values)
 {
     auto arguments = { "main", "-u", "silkit://localhost:8501", "XYZ", "--name", "Xxxx", "--version" };
     auto args = BuildArguments(arguments);
@@ -117,7 +117,7 @@ TEST(SilKitCommandlineParserTest, test_spaced_option_values)
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").Value(), "XYZ");
 }
 
-TEST(SilKitCommandlineParserTest, test_bad_argument)
+TEST(Test_CommandlineParser, test_bad_argument)
 {
     auto arguments = { "main", "-registryUri=silkit://localhost:8501", "XYZ", "--name=Xxxx", "--version" };
     auto args = BuildArguments(arguments);
@@ -134,7 +134,7 @@ TEST(SilKitCommandlineParserTest, test_bad_argument)
     EXPECT_THROW(commandlineParser.ParseArguments(argc, argv), SilKitError);
 }
 
-TEST(SilKitCommandlineParserTest, test_no_arguments)
+TEST(Test_CommandlineParser, test_no_arguments)
 {
     auto arguments = { "main" };
     auto args = BuildArguments(arguments);
@@ -160,7 +160,7 @@ TEST(SilKitCommandlineParserTest, test_no_arguments)
     EXPECT_EQ(commandlineParser.Get<SilKit::Util::CommandlineParser::Positional>("configuration").Value(), "");
 }
 
-TEST(SilKitCommandlineParserTest, test_missing_option_value)
+TEST(Test_CommandlineParser, test_missing_option_value)
 {
     auto arguments = { "main", "--registryUri" };
     auto args = BuildArguments(arguments);

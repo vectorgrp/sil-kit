@@ -44,70 +44,73 @@ if (MSVC)
 endif ()
 
 
-add_silkit_test(Test_HourglassMappingParticipantLogger
+add_silkit_test_executable(SilKitHourglassTests)
+
+
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES 
         Test_HourglassParticipantLogger.cpp
     LIBS 
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingCan
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassCan.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingEthernet
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassEthernet.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingLin
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassLin.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingFlexRay
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassFlexray.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingRpc
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassRpc.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingPubSub
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassPubSub.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingOrchestration
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassOrchestration.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingVendor
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassVendor.cpp
     LIBS
         S_Test_Hourglass
 )
 
-add_silkit_test(Test_HourglassMappingVersion
+add_silkit_test_to_executable(SilKitHourglassTests
     SOURCES
         Test_HourglassVersion.cpp
     LIBS

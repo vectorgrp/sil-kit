@@ -75,22 +75,22 @@ target_link_libraries(O_SilKit_Services_Orchestration
     PRIVATE I_SilKit_Experimental
 )
 
-add_silkit_test(Test_MwLifecycleService
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_LifecycleService.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_MwSystemController 
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_SystemController.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_MwSystemMonitor 
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_SystemMonitor.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )
-add_silkit_test(Test_MwWatchDog
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_WatchDog.cpp
     LIBS S_SilKitImpl
 )
-add_silkit_test(Test_MwSync_Serdes SOURCES Test_SyncSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
-add_silkit_test(Test_TimeProvider SOURCES Test_TimeProvider.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
-add_silkit_test(Test_TimeSyncService SOURCES Test_TimeSyncService.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_SyncSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TimeProvider.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_TimeSyncService.cpp LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)

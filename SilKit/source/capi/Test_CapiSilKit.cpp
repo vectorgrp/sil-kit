@@ -69,17 +69,17 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
 
     using SilKit::Core::Tests::DummyParticipant;
 
-    class CapiSilKitTest : public testing::Test
+    class Test_CapiSilKit : public testing::Test
     {
     public: 
         SilKit::Core::Tests::DummyParticipant mockParticipant;
-        CapiSilKitTest()
+        Test_CapiSilKit()
         {
             
         }
     };
 
-    TEST_F(CapiSilKitTest, silkit_function_mapping)
+    TEST_F(Test_CapiSilKit, silkit_function_mapping)
     {
         SilKit_ReturnCode returnCode;
 
@@ -104,7 +104,7 @@ const auto SILKIT_MALFORMED_CONFIG_STRING = R"aw(
     }
 
 
-    TEST_F(CapiSilKitTest, silkit_bad_params)
+    TEST_F(Test_CapiSilKit, silkit_bad_params)
     {
         SilKit_ReturnCode returnCode;
 

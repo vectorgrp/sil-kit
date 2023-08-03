@@ -53,12 +53,14 @@ target_link_libraries(O_SilKit_Core_Service
 )
 
 
-add_silkit_test(Test_MwServiceDiscovery
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_ServiceDiscovery.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant I_SilKit_Util_Uuid)
 
-add_silkit_test(Test_MwService_Serdes SOURCES Test_ServiceSerdes.cpp LIBS S_SilKitImpl)
 
-add_silkit_test(Test_MwSpecificDiscoveryStore
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_ServiceSerdes.cpp LIBS S_SilKitImpl)
+
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_SpecificDiscoveryStore.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant I_SilKit_Util_Uuid)
+

@@ -75,13 +75,13 @@ public:
                 (override));
 };
 
-class CapiRpcTest : public testing::Test
+class Test_CapiRpc : public testing::Test
 {
 public:
     MockRpcClient mockRpcClient;
     MockRpcServer mockRpcServer;
     MockParticipant mockParticipant;
-    CapiRpcTest()
+    Test_CapiRpc()
     {
         dummyCallHandle = std::make_unique<RpcCallHandle>(SilKit::Util::Uuid{ 1, 1 });
         callHandlePtr = dummyCallHandle.get();
@@ -117,7 +117,7 @@ void SilKitCALL CallReturnHandler(void* /*context*/, SilKit_RpcClient* /*client*
 {
 }
 
-TEST_F(CapiRpcTest, rpc_client_function_mapping)
+TEST_F(Test_CapiRpc, rpc_client_function_mapping)
 {
     SilKit_ReturnCode returnCode;
     SilKit_RpcClient* client;
@@ -151,7 +151,7 @@ TEST_F(CapiRpcTest, rpc_client_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiRpcTest, rpc_server_function_mapping)
+TEST_F(Test_CapiRpc, rpc_server_function_mapping)
 {
     SilKit_ReturnCode returnCode;
 
@@ -176,7 +176,7 @@ TEST_F(CapiRpcTest, rpc_server_function_mapping)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiRpcTest, rpc_client_bad_parameters)
+TEST_F(Test_CapiRpc, rpc_client_bad_parameters)
 {
     SilKit_ReturnCode returnCode;
     SilKit_RpcClient* client;
@@ -229,7 +229,7 @@ TEST_F(CapiRpcTest, rpc_client_bad_parameters)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
-TEST_F(CapiRpcTest, rpc_server_bad_parameters)
+TEST_F(Test_CapiRpc, rpc_server_bad_parameters)
 {
     SilKit_ReturnCode returnCode;
     SilKit_RpcServer* server;
@@ -266,7 +266,7 @@ TEST_F(CapiRpcTest, rpc_server_bad_parameters)
 }
 
 
-TEST_F(CapiRpcTest, rpc_client_call)
+TEST_F(Test_CapiRpc, rpc_client_call)
 {
     SilKit_ReturnCode returnCode = 0;
     // create payload
@@ -284,7 +284,7 @@ TEST_F(CapiRpcTest, rpc_client_call)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_SUCCESS);
 }
 
-TEST_F(CapiRpcTest, rpc_server_submit)
+TEST_F(Test_CapiRpc, rpc_server_submit)
 {
     SilKit_ReturnCode returnCode = 0;
     // create payload
@@ -309,7 +309,7 @@ void SilKitCALL CallHandlerWithStringContext(void* context, SilKit_RpcServer* /*
     *static_cast<std::string*>(context) = "CallHandlerWithStringContext";
 }
 
-TEST_F(CapiRpcTest, rpc_server_set_call_handler_wraps_c_handler_and_passes_context)
+TEST_F(Test_CapiRpc, rpc_server_set_call_handler_wraps_c_handler_and_passes_context)
 {
     const auto cRpcServer = reinterpret_cast<SilKit_RpcServer*>(&mockRpcServer);
 
@@ -335,7 +335,7 @@ void SilKitCALL CallResultHandlerWithStringContext(void* context, SilKit_RpcClie
     *static_cast<std::string*>(context) = "CallResultHandlerWithStringContext";
 }
 
-TEST_F(CapiRpcTest, rpc_client_set_call_result_handler_wraps_c_handler_and_passes_context)
+TEST_F(Test_CapiRpc, rpc_client_set_call_result_handler_wraps_c_handler_and_passes_context)
 {
     const auto cRpcClient = reinterpret_cast<SilKit_RpcClient*>(&mockRpcClient);
 

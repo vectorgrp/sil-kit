@@ -61,10 +61,10 @@ public:
     MOCK_METHOD(void, ServiceDiscoveryHandler,
         (ServiceDiscoveryEvent::Type, const ServiceDescriptor&));
 };
-class SpecificDiscoveryStoreTest : public testing::Test
+class Test_SpecificDiscoveryStore : public testing::Test
 {
 protected:
-    SpecificDiscoveryStoreTest()
+    Test_SpecificDiscoveryStore()
     {
     }
 
@@ -80,7 +80,7 @@ protected:
     Callbacks callbacks;
 };
 
-TEST_F(SpecificDiscoveryStoreTest, no_reaction_on_irrelevant_services)
+TEST_F(Test_SpecificDiscoveryStore, no_reaction_on_irrelevant_services)
 {
     std::string controllerTypes[] = {controllerTypeServiceDiscovery,
                                      controllerTypeCan,
@@ -111,7 +111,7 @@ TEST_F(SpecificDiscoveryStoreTest, no_reaction_on_irrelevant_services)
     ASSERT_EQ(lookup.size(), 0);
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_entries_pubsub)
+TEST_F(Test_SpecificDiscoveryStore, lookup_entries_pubsub)
 {
     ServiceDescriptor baseDescriptor{};
     baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
@@ -169,7 +169,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_entries_pubsub)
     ASSERT_EQ(entry.notLabelMap["kA"].nodes[0], noLabelTestDescriptor);
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_entries_rpc_client)
+TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_client)
 {
     ServiceDescriptor baseDescriptor{};
     baseDescriptor.SetParticipantNameAndComputeId("ParticipantA");
@@ -227,7 +227,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_entries_rpc_client)
     ASSERT_EQ(entry.notLabelMap["kA"].nodes[0], noLabelTestDescriptor);
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_entries_rpc_server_internal)
+TEST_F(Test_SpecificDiscoveryStore, lookup_entries_rpc_server_internal)
 {
     std::string uuid = "dda9a411-2bc8-4428-9e62-bd3000278b9e";
     ServiceDescriptor baseDescriptor{};
@@ -256,7 +256,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_entries_rpc_server_internal)
     ASSERT_EQ(entry.allCluster.nodes.size(), 0);
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_handler_then_service_discovery)
+TEST_F(Test_SpecificDiscoveryStore, lookup_handler_then_service_discovery)
 {
     TestWrapperSpecificDiscoveryStore testStore;
 
@@ -282,7 +282,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_handler_then_service_discovery)
     testStore.ServiceChange(ServiceDiscoveryEvent::Type::ServiceCreated, noLabelTestDescriptor);
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_no_labels)
+TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_no_labels)
 {
     TestWrapperSpecificDiscoveryStore testStore;
 
@@ -309,7 +309,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_no_labe
         controllerTypeDataPublisher, "Topic1", {});
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_labels)
+TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_labels)
 {
     TestWrapperSpecificDiscoveryStore testStore;
     SilKit::Services::MatchingLabel label = {"keyA", "valA", SilKit::Services::MatchingLabel::Kind::Mandatory};
@@ -338,7 +338,7 @@ TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_labels)
         controllerTypeDataPublisher, "Topic1", {label});
 }
 
-TEST_F(SpecificDiscoveryStoreTest, lookup_service_discovery_then_handler_issues)
+TEST_F(Test_SpecificDiscoveryStore, lookup_service_discovery_then_handler_issues)
 {
     TestWrapperSpecificDiscoveryStore testStore;
 

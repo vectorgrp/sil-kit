@@ -21,7 +21,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "oatpp/web/client/ApiClient.hpp"
+#include "OatppHeaders.hpp"
 
 #include "SimulationCreationRequestDto.hpp"
 #include "SystemStatusDto.hpp"

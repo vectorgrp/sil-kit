@@ -29,12 +29,12 @@ namespace {
 using namespace SilKit::Services::Orchestration;
 using SilKit::Core::Tests::DummyParticipant;
 
-class CapiTimeSyncTest : public testing::Test
+class Test_CapiTimeSync : public testing::Test
 {
 protected: 
     SilKit::Core::Tests::DummyParticipant mockParticipant;
 
-    CapiTimeSyncTest() {}
+    Test_CapiTimeSync() {}
 
 };
 
@@ -43,7 +43,7 @@ void SilKitCALL SimTask(void* /*context*/, SilKit_TimeSyncService* /*timeSyncSer
 {
 }
 
-TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
+TEST_F(Test_CapiTimeSync, participant_state_handling_nullpointer_params)
 {
     SilKit_ReturnCode returnCode;
 
@@ -58,7 +58,7 @@ TEST_F(CapiTimeSyncTest, participant_state_handling_nullpointer_params)
     EXPECT_EQ(returnCode, SilKit_ReturnCode_BADPARAMETER);
 }
 
-TEST_F(CapiTimeSyncTest, participant_state_handling_function_mapping)
+TEST_F(Test_CapiTimeSync, participant_state_handling_function_mapping)
 {
     SilKit_ReturnCode returnCode;
 

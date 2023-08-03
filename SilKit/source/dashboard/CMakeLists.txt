@@ -25,9 +25,17 @@ if(SILKIT_BUILD_DASHBOARD)
     find_package(Threads REQUIRED)
     message(STATUS "SIL Kit: building dashboard")
 
-    message(STATUS "SIL Kit: disabling warnings for dashboard. Fixme")
-    silkit_clean_default_compileflags()
-    add_compile_options(-w)
+    function(silkit_dashboard_target_compile_flags TARGET_NAME)
+        if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+            target_compile_options("${TARGET_NAME}"
+                PRIVATE -Wno-gnu-zero-variadic-macro-arguments
+                PRIVATE -Wno-pessimizing-move
+            )
+        endif ()
+    endfunction()
+
+    add_silkit_test_executable(SilKitDashboardTests)
+    silkit_dashboard_target_compile_flags(SilKitDashboardTests)
 
     add_library(I_SilKit_Dashboard INTERFACE)
     target_include_directories(I_SilKit_Dashboard
@@ -66,7 +74,7 @@ if(SILKIT_BUILD_DASHBOARD)
         IntegrationTests/ClientServerTestRunner.hpp
         IntegrationTests/DashboardSystemApiController.hpp
         IntegrationTests/DashboardTestComponents.hpp
-        
+
         Service/CachingSilKitEventHandler.cpp
         Service/CachingSilKitEventHandler.hpp
         Service/ICachingSilKitEventHandler.hpp
@@ -89,6 +97,8 @@ if(SILKIT_BUILD_DASHBOARD)
         OatppContext.cpp
         OatppContext.hpp
         TestResult.hpp
+        OatppHeaders.cpp
+        OatppHeaders.hpp
     )
     target_link_libraries(S_SilKit_Dashboard
         PUBLIC
@@ -117,10 +127,13 @@ if(SILKIT_BUILD_DASHBOARD)
         INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}
     )
+
     silkit_target_clean_compileflags(S_SilKit_Dashboard)
+    silkit_dashboard_target_compile_flags(S_SilKit_Dashboard)
+
     set_property(TARGET S_SilKit_Dashboard PROPERTY FOLDER "Dashboard")
 
-    add_silkit_test(Test_DashboardCachingSilKitEventHandler
+    add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES Service/Test_DashboardCachingSilKitEventHandler.cpp 
         LIBS
         O_SilKit_Config
@@ -129,7 +142,7 @@ if(SILKIT_BUILD_DASHBOARD)
         I_SilKit_Core_Mock_Participant
         )
 
-    add_silkit_test(Test_DashboardSilKitEventQueue
+    add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES Service/Test_DashboardSilKitEventQueue.cpp 
         LIBS
         S_SilKitImpl
@@ -137,7 +150,7 @@ if(SILKIT_BUILD_DASHBOARD)
         I_SilKit_Core_Internal
         )
 
-    add_silkit_test(Test_DashboardSilKitEventHandler
+    add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES Service/Test_DashboardSilKitEventHandler.cpp 
         LIBS
         S_SilKitImpl
@@ -147,7 +160,7 @@ if(SILKIT_BUILD_DASHBOARD)
         oatpp
         )
 
-    add_silkit_test(Test_DashboardSilKitToOatppMapper
+    add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES Service/Test_DashboardSilKitToOatppMapper.cpp 
         LIBS
         S_SilKitImpl
@@ -156,7 +169,7 @@ if(SILKIT_BUILD_DASHBOARD)
         oatpp
         )
 
-    add_silkit_test(Test_DashboardSystemServiceClient
+    add_silkit_test_to_executable(SilKitDashboardTests
         SOURCES Client/Test_DashboardSystemServiceClient.cpp 
         LIBS
         S_SilKitImpl

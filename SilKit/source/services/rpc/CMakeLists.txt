@@ -55,7 +55,7 @@ target_link_libraries(O_SilKit_Services_Rpc
     PRIVATE I_SilKit_Util_LabelMatching
 )
 
-add_silkit_test(Test_SimRpc
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES
         Test_RpcClient.cpp
         Test_RpcServer.cpp
@@ -67,4 +67,4 @@ add_silkit_test(Test_SimRpc
         I_SilKit_Core_Mock_NullConnection
         I_SilKit_Config
 )
-add_silkit_test(Test_RpcSerdes SOURCES Test_RpcSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)
+add_silkit_test_to_executable(SilKitUnitTests SOURCES Test_RpcSerdes.cpp LIBS S_SilKitImpl I_SilKit_Core_Internal)

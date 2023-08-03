@@ -36,7 +36,7 @@ using testing::DoAll;
 using testing::SetArgPointee;
 using testing::Return;
 
-class HourglassVersionTest : public SilKitHourglassTests::MockCapiTest
+class Test_HourglassVersion : public SilKitHourglassTests::MockCapiTest
 {
 public:
     const uint32_t mockVersionMajor{1};
@@ -47,7 +47,7 @@ public:
     const std::string mockVersionSuffix{"VersionSuffix"};
     const std::string mockVersionGitHash{"GitHash"};
 
-    HourglassVersionTest()
+    Test_HourglassVersion()
     {
         using testing::_;
         ON_CALL(capi, SilKit_Version_Major(_))
@@ -67,49 +67,49 @@ public:
     }
 };
 
-TEST_F(HourglassVersionTest, SilKit_Version_Major)
+TEST_F(Test_HourglassVersion, SilKit_Version_Major)
 {
     EXPECT_CALL(capi, SilKit_Version_Major(testing::_));
 
     EXPECT_EQ(SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Version::Major(), mockVersionMajor);
 }
 
-TEST_F(HourglassVersionTest, SilKit_Version_Minor)
+TEST_F(Test_HourglassVersion, SilKit_Version_Minor)
 {
     EXPECT_CALL(capi, SilKit_Version_Minor(testing::_));
 
     EXPECT_EQ(SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Version::Minor(), mockVersionMinor);
 }
 
-TEST_F(HourglassVersionTest, SilKit_Version_Patch)
+TEST_F(Test_HourglassVersion, SilKit_Version_Patch)
 {
     EXPECT_CALL(capi, SilKit_Version_Patch(testing::_));
 
     EXPECT_EQ(SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Version::Patch(), mockVersionPatch);
 }
 
-TEST_F(HourglassVersionTest, SilKit_Version_BuildNumber)
+TEST_F(Test_HourglassVersion, SilKit_Version_BuildNumber)
 {
     EXPECT_CALL(capi, SilKit_Version_BuildNumber(testing::_));
 
     EXPECT_EQ(SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Version::BuildNumber(), mockVersionBuildNumber);
 }
 
-TEST_F(HourglassVersionTest, SilKit_Version_String)
+TEST_F(Test_HourglassVersion, SilKit_Version_String)
 {
     EXPECT_CALL(capi, SilKit_Version_String(testing::_));
 
     EXPECT_EQ(SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Version::String(), mockVersionString);
 }
 
-TEST_F(HourglassVersionTest, SilKit_Version_VersionSuffix)
+TEST_F(Test_HourglassVersion, SilKit_Version_VersionSuffix)
 {
     EXPECT_CALL(capi, SilKit_Version_VersionSuffix(testing::_));
 
     EXPECT_EQ(SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Version::VersionSuffix(), mockVersionSuffix);
 }
 
-TEST_F(HourglassVersionTest, SilKit_Version_GitHash)
+TEST_F(Test_HourglassVersion, SilKit_Version_GitHash)
 {
     EXPECT_CALL(capi, SilKit_Version_GitHash(testing::_));
 

@@ -52,10 +52,10 @@ public:
     MOCK_METHOD2(SendMsg, void(const IServiceEndpoint*, const SystemCommand& msg));
 };
 
-class SystemControllerTest : public testing::Test
+class Test_SystemController : public testing::Test
 {
 protected:
-    SystemControllerTest()
+    Test_SystemController()
         : controller{&participant}
     {
         controller.SetServiceDescriptor(descriptor);
@@ -75,7 +75,7 @@ protected:
     SystemController controller;
 };
 
-TEST_F(SystemControllerTest, configure_serviceDescriptor)
+TEST_F(Test_SystemController, configure_serviceDescriptor)
 {
     EXPECT_EQ(controller.GetServiceDescriptor(), descriptor);
 }

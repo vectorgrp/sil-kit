@@ -68,7 +68,7 @@ auto MakePeerInfo() -> VAsioPeerInfo
     return in;
 }
 
-TEST(MwVAsioSerdes, vasio_participantAnouncement)
+TEST(Test_VAsioSerdes, vasio_participantAnouncement)
 {
     MessageBuffer buffer;
     ParticipantAnnouncement in{}, out{};
@@ -94,7 +94,7 @@ auto MakeSubscriber() -> VAsioMsgSubscriber
     return out;
 }
 
-TEST(MwVAsioSerdes, vasio_VasioMsgSubscribers)
+TEST(Test_VAsioSerdes, vasio_VasioMsgSubscribers)
 {
     MessageBuffer buffer;
     VAsioMsgSubscriber in = MakeSubscriber();
@@ -105,7 +105,7 @@ TEST(MwVAsioSerdes, vasio_VasioMsgSubscribers)
 
     EXPECT_EQ(in, out);
 }
-TEST(MwVAsioSerdes, vasio_participantAnouncementReply)
+TEST(Test_VAsioSerdes, vasio_participantAnouncementReply)
 {
     MessageBuffer buffer;
     ParticipantAnnouncementReply in{}, out{};
@@ -121,7 +121,7 @@ TEST(MwVAsioSerdes, vasio_participantAnouncementReply)
     EXPECT_EQ(in, out);
 }
 
-TEST(MwVAsioSerdes, vasio_knownParticipants)
+TEST(Test_VAsioSerdes, vasio_knownParticipants)
 {
     MessageBuffer buffer;
     KnownParticipants in{};

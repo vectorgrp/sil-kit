@@ -22,6 +22,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #pragma once
 
 #include "gmock/gmock-function-mocker.h"
+
 #include "DashboardSystemApiClient.hpp"
 
 namespace SilKit {

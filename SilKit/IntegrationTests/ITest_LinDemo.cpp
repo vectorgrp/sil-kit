@@ -41,6 +41,11 @@ using namespace SilKit;
 using namespace SilKit::Services;
 using namespace SilKit::Services::Lin;
 
+struct ITest_LinDemo : ITest_SimTestHarness
+{
+    using ITest_SimTestHarness::ITest_SimTestHarness;
+};
+
 class Timer
 {
 public:
@@ -409,7 +414,7 @@ auto MakeControllerConfig(const std::string& participantName)
     return config;
 }
 
-TEST_F(ITest_SimTestHarness, DISABLED_lin_demo)
+TEST_F(ITest_LinDemo, DISABLED_lin_demo)
 {
     // Create required setup
     SetupFromParticipantList({"LinMaster", "LinSlave"});

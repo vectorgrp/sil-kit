@@ -45,10 +45,10 @@ using namespace SilKit::Services::Lin;
 using namespace SilKit::Services::Lin::Tests;
 using namespace SilKit::Util;
 
-class LinControllerDetailedSimTest : public testing::Test
+class Test_LinControllerDetailedSim : public testing::Test
 {
 protected:
-    LinControllerDetailedSimTest()
+    Test_LinControllerDetailedSim()
         : master(&participant, cfg, participant.GetTimeProvider())
         , slave1(&participant, cfg, participant.GetTimeProvider())
         , controllerBusSim(&participant, cfg, participant.GetTimeProvider())
@@ -91,12 +91,12 @@ protected:
     SilKit::Experimental::Services::Lin::LinSlaveConfigurationHandler slaveConfigurationHandler;
 };
 
-TEST_F(LinControllerDetailedSimTest, send_frame_unitialized)
+TEST_F(Test_LinControllerDetailedSim, send_frame_unitialized)
 {
     EXPECT_THROW(master.SendFrame({}, LinFrameResponseType::MasterResponse), SilKit::StateError);
 }
 
-TEST_F(LinControllerDetailedSimTest, send_frame)
+TEST_F(Test_LinControllerDetailedSim, send_frame)
 {
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
     auto config = MakeControllerConfig(LinControllerMode::Master);
@@ -121,7 +121,7 @@ TEST_F(LinControllerDetailedSimTest, send_frame)
     master.SendFrame(expectedMsg.frame, expectedMsg.responseType);
 }
 
-TEST_F(LinControllerDetailedSimTest, send_frame_without_configured_slave_response)
+TEST_F(Test_LinControllerDetailedSim, send_frame_without_configured_slave_response)
 {
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
     auto config = MakeControllerConfig(LinControllerMode::Master);
@@ -137,12 +137,12 @@ TEST_F(LinControllerDetailedSimTest, send_frame_without_configured_slave_respons
     master.SendFrame(frame, LinFrameResponseType::SlaveToSlave);
 }
 
-TEST_F(LinControllerDetailedSimTest, send_frame_header_unitialized)
+TEST_F(Test_LinControllerDetailedSim, send_frame_header_unitialized)
 {
     EXPECT_THROW(master.SendFrameHeader({}), SilKit::StateError);
 }
 
-TEST_F(LinControllerDetailedSimTest, send_frame_header)
+TEST_F(Test_LinControllerDetailedSim, send_frame_header)
 {
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
     auto config = MakeControllerConfig(LinControllerMode::Master);
@@ -157,7 +157,7 @@ TEST_F(LinControllerDetailedSimTest, send_frame_header)
     master.SendFrameHeader(expectedMsg.id);
 }
 
-TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
+TEST_F(Test_LinControllerDetailedSim, call_frame_status_handler)
 {
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
     auto config = MakeControllerConfig(LinControllerMode::Slave);
@@ -175,7 +175,7 @@ TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
     master.ReceiveMsg(&controllerBusSim, transmission);
 }
 
-TEST_F(LinControllerDetailedSimTest, trigger_slave_configuration_handler)
+TEST_F(Test_LinControllerDetailedSim, trigger_slave_configuration_handler)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -200,7 +200,7 @@ TEST_F(LinControllerDetailedSimTest, trigger_slave_configuration_handler)
     master.ReceiveMsg(&slave1, slaveCfg);
 }
 
-TEST_F(LinControllerDetailedSimTest, go_to_sleep)
+TEST_F(Test_LinControllerDetailedSim, go_to_sleep)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -218,7 +218,7 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep)
     master.GoToSleep();
 }
 
-TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal)
+TEST_F(Test_LinControllerDetailedSim, go_to_sleep_internal)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -231,7 +231,7 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal)
     master.GoToSleepInternal();
 }
 
-TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
+TEST_F(Test_LinControllerDetailedSim, call_gotosleep_handler)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -250,7 +250,7 @@ TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
     master.ReceiveMsg(&controllerBusSim, goToSleep);
 }
 
-TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
+TEST_F(Test_LinControllerDetailedSim, not_call_gotosleep_handler)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -270,7 +270,7 @@ TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
     master.ReceiveMsg(&controllerBusSim, goToSleep);
 }
 
-TEST_F(LinControllerDetailedSimTest, wake_up)
+TEST_F(Test_LinControllerDetailedSim, wake_up)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -284,7 +284,7 @@ TEST_F(LinControllerDetailedSimTest, wake_up)
     master.Wakeup();
 }
 
-TEST_F(LinControllerDetailedSimTest, wake_up_internal)
+TEST_F(Test_LinControllerDetailedSim, wake_up_internal)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -298,7 +298,7 @@ TEST_F(LinControllerDetailedSimTest, wake_up_internal)
     master.WakeupInternal();
 }
 
-TEST_F(LinControllerDetailedSimTest, call_wakeup_handler)
+TEST_F(Test_LinControllerDetailedSim, call_wakeup_handler)
 {
     // Configure Master
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
@@ -316,33 +316,33 @@ TEST_F(LinControllerDetailedSimTest, call_wakeup_handler)
 }
 
 // No initialization causes exception
-TEST_F(LinControllerDetailedSimTest, go_to_sleep_uninitialized)
+TEST_F(Test_LinControllerDetailedSim, go_to_sleep_uninitialized)
 {
     EXPECT_THROW(master.GoToSleep(), SilKit::StateError);
 }
 
-TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal_uninitialized)
+TEST_F(Test_LinControllerDetailedSim, go_to_sleep_internal_uninitialized)
 {
     EXPECT_THROW(master.GoToSleepInternal(), SilKit::StateError);
 }
 
-TEST_F(LinControllerDetailedSimTest, wake_up_uninitialized)
+TEST_F(Test_LinControllerDetailedSim, wake_up_uninitialized)
 {
     EXPECT_THROW(master.Wakeup(), SilKit::StateError);
 }
 
-TEST_F(LinControllerDetailedSimTest, wake_up_internal_uninitialized)
+TEST_F(Test_LinControllerDetailedSim, wake_up_internal_uninitialized)
 {
     EXPECT_THROW(master.WakeupInternal(), SilKit::StateError);
 }
 
 
-TEST_F(LinControllerDetailedSimTest, update_tx_buffer_unitialized)
+TEST_F(Test_LinControllerDetailedSim, update_tx_buffer_unitialized)
 {
     EXPECT_THROW(master.UpdateTxBuffer({}), SilKit::StateError);
 }
 
-TEST_F(LinControllerDetailedSimTest, update_tx_buffer_not_configured_for_tx)
+TEST_F(Test_LinControllerDetailedSim, update_tx_buffer_not_configured_for_tx)
 {
     EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
     auto config = MakeControllerConfig(LinControllerMode::Slave);
@@ -356,7 +356,7 @@ TEST_F(LinControllerDetailedSimTest, update_tx_buffer_not_configured_for_tx)
     EXPECT_THROW(master.UpdateTxBuffer(frame), SilKit::ConfigurationError);
 }
 
-TEST_F(LinControllerDetailedSimTest, update_tx_buffer)
+TEST_F(Test_LinControllerDetailedSim, update_tx_buffer)
 {
     auto config = MakeControllerConfig(LinControllerMode::Slave);
     LinFrame frame = MakeFrame(19, LinChecksumModel::Enhanced);

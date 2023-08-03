@@ -63,7 +63,7 @@ inline void ExpectStandardAddress(const UriInfo& hostInfo)
     EXPECT_FALSE(hostInfo.catchallIp);
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, GetUriInfo)
+TEST(Test_TransformAcceptorUris, GetUriInfo)
 {
     // Domain Name
 
@@ -282,7 +282,7 @@ void RunTest(AdvertisedVAsioPeer advertised, AudienceVAsioPeer audience, std::se
     }
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaLocal_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaLocal_ViaLocal_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -309,7 +309,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaLocal_Audience)
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaLocal_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaLocal_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -336,7 +336,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaLocal_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaLocal_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaLocal_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -362,7 +362,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaLocal_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaLocal_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaLocal_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -389,7 +389,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaLocal_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaLocal_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaLocal_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -415,7 +415,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaLocal_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp4Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp4Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -442,7 +442,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp4Loopback_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp4Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp4Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -469,7 +469,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp4Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp4Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp4Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -495,7 +495,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp4Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp4Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp4Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -522,7 +522,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp4Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp4Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp4Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -548,7 +548,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp4Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp4Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp4Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -574,7 +574,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp4Standard_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp4Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp4Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -601,7 +601,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp4Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp4Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp4Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -627,7 +627,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp4Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp4Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp4Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -654,7 +654,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp4Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp4Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp4Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -680,7 +680,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp4Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp6Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp6Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -707,7 +707,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp6Loopback_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp6Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp6Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -734,7 +734,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp6Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp6Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp6Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -760,7 +760,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp6Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp6Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp6Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -787,7 +787,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp6Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp6Loopback_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp6Loopback_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -813,7 +813,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp6Loopb
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp6Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp6Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -839,7 +839,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaLocal_ViaTcp6Standard_Aud
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp6Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp6Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -866,7 +866,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Loopback_ViaTcp6Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp6Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp6Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -892,7 +892,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp4Standard_ViaTcp6Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp6Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp6Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -919,7 +919,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Loopback_ViaTcp6Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp6Standard_Audience)
+TEST(Test_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp6Standard_Audience)
 {
     AdvertisedVAsioPeer advertised;
     advertised.peerInfo.acceptorUris.emplace_back("local://advertised.silkit");
@@ -945,7 +945,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, Advertised_ViaTcp6Standard_ViaTcp6Stand
             });
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, AllParticipantsAndRegistryOnSeparateHosts_DefaultCatchall)
+TEST(Test_TransformAcceptorUris, AllParticipantsAndRegistryOnSeparateHosts_DefaultCatchall)
 {
     // Advertised <== TCPv4 ==> Registry <== TCPv4 ==> Audience
     {
@@ -1020,7 +1020,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, AllParticipantsAndRegistryOnSeparateHos
     }
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, AdvertisedAndRegistrySameHost_AudienceSeparate_DefaultCatchall)
+TEST(Test_TransformAcceptorUris, AdvertisedAndRegistrySameHost_AudienceSeparate_DefaultCatchall)
 {
     // Advertised <== TCPv4 Loopback ==> Registry <== TCPv4 ==> Audience
     {
@@ -1135,7 +1135,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, AdvertisedAndRegistrySameHost_AudienceS
     }
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, AdvertisedFqdn)
+TEST(Test_TransformAcceptorUris, AdvertisedFqdn)
 {
     // Advertised <== TCPv4 Loopback ==> Registry <== TCPv4 ==> Audience
     {
@@ -1153,7 +1153,7 @@ TEST(Test_MwVAsio_TransformAcceptorUris, AdvertisedFqdn)
     }
 }
 
-TEST(Test_MwVAsio_TransformAcceptorUris, CheckOrder)
+TEST(Test_TransformAcceptorUris, CheckOrder)
 {
     // Advertised <== TCPv4 Loopback ==> Registry <== TCPv4 ==> Audience
     {

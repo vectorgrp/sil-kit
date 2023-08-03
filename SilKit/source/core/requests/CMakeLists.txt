@@ -49,6 +49,7 @@ target_link_libraries(O_SilKit_Core_RequestReply
 
 add_subdirectory(procs)
 
-add_silkit_test(Test_MwRequestReplyService
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_RequestReplyService.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant)
+
