@@ -29,6 +29,7 @@ Added
   - Full support for Operation Mode Autonomous with TimeSyncService including hopping onto / leaving a running simulation
   - Abort simulation in case Coordinated participants want to join a running simulation
   - Abort simulation in case an Autonomous with TimeSyncService sees an incompatible participant 
+  - Extended integration tests for communication ready guarantees
 
 Fixed
 ~~~~~

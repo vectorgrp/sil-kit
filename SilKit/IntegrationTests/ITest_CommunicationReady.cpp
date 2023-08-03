@@ -60,6 +60,7 @@ enum class TimeMode
     Sync
 };
 
+
 class TestParticipant
 {
 public:
@@ -69,13 +70,14 @@ public:
     TestParticipant& operator=(TestParticipant&&) = default;
 
     TestParticipant(const std::string& newName, std::vector<std::string> newPubTopics,
-                    std::vector<std::string> newSubTopics, Services::Orchestration::OperationMode newOperationMode, TimeMode newTimeMode)
+                    std::vector<std::string> newSubTopics, Services::Orchestration::OperationMode newOperationMode, TimeMode newTimeMode, bool newWaitForCommunicationInCommReadyHandler = true)
     {
         name = newName;
         operationMode = newOperationMode;
         timeMode = newTimeMode;
         pubTopics = newPubTopics;
         subTopics = newSubTopics;
+        waitForCommunicationInCommReadyHandler = newWaitForCommunicationInCommReadyHandler;
 
         if (pubTopics.size() > 0)
         {
@@ -216,7 +218,7 @@ public:
                 Publish();
             }
 
-            if (hasSubControllers)
+            if (hasSubControllers && waitForCommunicationInCommReadyHandler)
             {
                 AwaitCommunication();
             }
@@ -305,6 +307,7 @@ private: //Members
 
     bool hasPubControllers = false;
     bool hasSubControllers = false;
+    bool waitForCommunicationInCommReadyHandler = true;
 
     uint64_t receiveMsgCount = 0;
 
@@ -403,7 +406,7 @@ protected:
 
         systemMaster.systemStateRunning = systemMaster.systemStateRunningPromise.get_future();
 
-        systemMaster.lifecycleService->StartLifecycle();
+        finalStateSystemMaster = systemMaster.lifecycleService->StartLifecycle();
     }
 
     void RunParticipantThreads(std::vector<TestParticipant>& participants, const std::string& registryUri)
@@ -494,6 +497,7 @@ protected:
     std::vector<std::string> requiredParticipantNames;
     std::unique_ptr<SilKit::Vendor::Vector::ISilKitRegistry> registry;
     SystemMaster systemMaster;
+    std::future<ParticipantState> finalStateSystemMaster;
     std::vector<std::thread> participantThreads;
 };
 
@@ -591,6 +595,68 @@ TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler_coordinated_
     coordinatedSyncParticipants.push_back({"Pub", pubTopics, {}, OperationMode::Coordinated, TimeMode::Sync});
     coordinatedSyncParticipants.push_back({"Sub", {}, subTopics, OperationMode::Coordinated, TimeMode::Sync});
     ExecuteTest(coordinatedSyncParticipants);
+}
+
+// Tests that basic pubsub communication in the CommunicationReadyHandler works with 
+// already active coordinated participants and a late-joining autonomous participants that published in the commReadyHandler
+TEST_F(ITest_CommunicationReady, test_receive_in_comm_ready_handler_mixed)
+{
+    const uint32_t numPub = 10u;
+    const uint32_t numSub = 10u;
+    const std::string commonTopic = "Topic";
+
+    numMsgToPublishPerController = 100u;
+    numMsgToReceiveTotal = numMsgToPublishPerController * numPub * numSub;
+
+    std::vector<std::string> topics;
+    for (uint32_t i = 0; i < numPub; i++)
+    {
+        topics.push_back(commonTopic);
+    }
+
+    std::vector<TestParticipant> coordinatedSyncParticipantsSub;
+    bool waitForCommunicationInCommReadyHandler = false;
+    coordinatedSyncParticipantsSub.push_back({"CoordSub1", {}, topics, OperationMode::Coordinated, TimeMode::Sync, waitForCommunicationInCommReadyHandler});
+    coordinatedSyncParticipantsSub.push_back({"CoordSub2", {}, topics, OperationMode::Coordinated, TimeMode::Sync, waitForCommunicationInCommReadyHandler});
+
+    std::vector<TestParticipant> autonomousAsyncParticipantsPub;
+    autonomousAsyncParticipantsPub.push_back({"Pub", topics, {}, OperationMode::Autonomous, TimeMode::Async});
+
+    try
+    {
+        auto registryUri = MakeTestRegistryUri();
+
+        SetupSystem(registryUri, coordinatedSyncParticipantsSub);
+
+        // Start the coordinated participants
+        RunParticipantThreads(coordinatedSyncParticipantsSub, registryUri);
+        Log() << ">> Await sim task";
+        // AwaitAllDone is set in the simtask and used here to await the simtask
+        for (auto& p : coordinatedSyncParticipantsSub)
+            p.AwaitAllDone();
+
+        // Start the publishers
+        RunParticipantThreads(autonomousAsyncParticipantsPub, registryUri);
+
+        Log() << ">> Await communication";
+        for (auto& p : coordinatedSyncParticipantsSub)
+            p.AwaitCommunication();
+
+        systemMaster.lifecycleService->Stop("End of test");
+        auto futureStatus = finalStateSystemMaster.wait_for(communicationTimeout);
+        EXPECT_EQ(futureStatus, std::future_status::ready)
+            << "Test Failure: Awaiting final state for system master timed out";
+
+        Log() << ">> Joining participant threads";
+        JoinParticipantThreads();
+        ShutdownSystem();
+    }
+    catch (const std::exception& error)
+    {
+        std::stringstream ss;
+        ss << "Something went wrong: " << error.what();
+        AbortAndFailTest(ss.str());
+    }
 }
 
 // Setup lots of publishers and 1 subscriber on each side that both sides are busy doing the subscription handshakes.
