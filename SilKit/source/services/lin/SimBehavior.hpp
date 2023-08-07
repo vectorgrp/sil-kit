@@ -30,6 +30,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/services/lin/LinDatatypes.hpp"
 #include "IServiceEndpoint.hpp"
+#include "WireLinMessages.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -47,12 +48,12 @@ public:
 
     void SendMsg(LinSendFrameRequest&& sendFrameRequest) override;
     void SendMsg(LinTransmission&& transmission) override;
-    void SendMsg(LinControllerConfig&& controllerConfig) override;
+    void SendMsg(WireLinControllerConfig&& controllerConfig) override;
     void SendMsg(LinSendFrameHeaderRequest&& header) override;
     void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) override;
     void SendMsg(LinControllerStatusUpdate&& statusUpdate) override;
 
-    void ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header) override;
+    void ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& header) override;
 
     void UpdateTxBuffer(const LinFrame& frame) override;
 

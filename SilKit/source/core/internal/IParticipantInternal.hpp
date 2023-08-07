@@ -106,7 +106,7 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinSendFrameHeaderRequest& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinTransmission& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinWakeupPulse& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinControllerConfig& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::WireLinControllerConfig& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 
@@ -158,7 +158,7 @@ public:
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameHeaderRequest& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinTransmission& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinWakeupPulse& msg) = 0;
-    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerConfig& msg) = 0;
+    virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::WireLinControllerConfig& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg) = 0;
     virtual void SendMsg(const SilKit::Core::IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg) = 0;
 

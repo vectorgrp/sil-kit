@@ -49,7 +49,7 @@ void SimBehaviorDetailed::SendMsg(LinTransmission&& msg)
 {
     SendMsgImpl(msg);
 }
-void SimBehaviorDetailed::SendMsg(LinControllerConfig&& msg)
+void SimBehaviorDetailed::SendMsg(WireLinControllerConfig&& msg)
 {
     SendMsgImpl(msg);
 }
@@ -66,7 +66,7 @@ void SimBehaviorDetailed::SendMsg(LinControllerStatusUpdate&& msg)
     SendMsgImpl(msg);
 }
 
-void SimBehaviorDetailed::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& /*header*/)
+void SimBehaviorDetailed::ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& /*header*/)
 {
     // NOP
 }
@@ -108,6 +108,12 @@ void SimBehaviorDetailed::Wakeup()
 auto SimBehaviorDetailed::CalcFrameStatus(const LinTransmission& linTransmission, bool isGoToSleepFrame)
     -> LinFrameStatus
 {
+    // dynamic controllers report every transmission as it was received
+    if (_parentController->GetThisLinNode().simulationMode == WireLinControllerConfig::SimulationMode::Dynamic)
+    {
+        return linTransmission.status;
+    }
+
     // If GoToSleepFrame comes with RX_OK, use only if configured for RX
     if (isGoToSleepFrame && linTransmission.status == LinFrameStatus::LIN_RX_OK)
     {

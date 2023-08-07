@@ -92,6 +92,7 @@ public:
      * 
      * \throws SilKit::StateError if the LIN Controller is configured with LinControllerMode::Inactive
      * \throws SilKit::StateError if Init() is called a second time on this LIN Controller.
+     * \throws SilKit::StateError if InitDynamic() has already been called on the LIN Controller.
      */
     virtual void Init(LinControllerConfig config) = 0;
 
@@ -114,6 +115,7 @@ public:
      * \param responseType Determines which LIN Node will provide the frame response.
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized or not a master node.
+     * \throws SilKit::StateError if InitDynamic() has been called on the LIN Controller.
      */
     virtual void SendFrame(LinFrame frame, LinFrameResponseType responseType) = 0;
 
@@ -132,6 +134,7 @@ public:
      * 
      * \throws SilKit::StateError if the LIN Controller is not initialized.
      * \throws SilKit::ConfigurationError if the LIN Controller is not configured with TxUnconditional on this ID.
+     * \throws SilKit::StateError if InitDynamic() has been called on the LIN Controller.
      */
     virtual void UpdateTxBuffer(LinFrame frame) = 0;
 
@@ -140,6 +143,7 @@ public:
      * \param response The frame and response mode to be configured.
      *
      * \throws SilKit::StateError if the LIN Controller is not initialized.
+     * \throws SilKit::StateError if InitDynamic() has been called on the LIN Controller.
      */
     virtual void SetFrameResponse(LinFrameResponse response) = 0;
 
@@ -231,7 +235,6 @@ public:
      * \param handlerId Identifier of the callback to be removed. Obtained upon adding to respective handler.
      */
     virtual void RemoveWakeupHandler(HandlerId handlerId) = 0;
-
 };
 
 } // namespace Lin

@@ -42,14 +42,14 @@ public:
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinSendFrameHeaderRequest&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinTransmission&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinFrameResponseUpdate&));
-    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinControllerConfig&));
+    MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const WireLinControllerConfig&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinControllerStatusUpdate&));
     MOCK_METHOD(void, SendMsg, (const Core::IServiceEndpoint*, const LinWakeupPulse&));
 };
 
 inline auto MakeControllerConfig(LinControllerMode mode) -> LinControllerConfig
 {
-    LinControllerConfig config;
+    LinControllerConfig config{};
     config.controllerMode = mode;
     return config;
 }
@@ -124,6 +124,18 @@ struct Callbacks
     MOCK_METHOD1(WakeupHandler, void(ILinController*));
     MOCK_METHOD1(LinSlaveConfigurationHandler, void(ILinController*));
 };
+
+inline auto ToWire(LinControllerConfig config, WireLinControllerConfig::SimulationMode simulationMode =
+                                                   WireLinControllerConfig::SimulationMode::Default)
+    -> WireLinControllerConfig
+{
+    WireLinControllerConfig result{};
+    result.baudRate = config.baudRate;
+    result.controllerMode = config.controllerMode;
+    result.frameResponses = config.frameResponses;
+    result.simulationMode = simulationMode;
+    return result;
+}
 
 } // namespace Tests
 } // namespace Lin

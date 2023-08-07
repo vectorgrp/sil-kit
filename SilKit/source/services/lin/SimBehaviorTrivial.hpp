@@ -44,12 +44,12 @@ public:
     
     void SendMsg(LinSendFrameRequest&& sendFrameRequest) override;
     void SendMsg(LinTransmission&& transmission) override;
-    void SendMsg(LinControllerConfig&& controllerConfig) override;
+    void SendMsg(WireLinControllerConfig&& controllerConfig) override;
     void SendMsg(LinSendFrameHeaderRequest&& header) override;
     void SendMsg(LinFrameResponseUpdate&& frameResponseUpdate) override;
     void SendMsg(LinControllerStatusUpdate&& statusUpdate) override;
 
-    void ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header) override;
+    void ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& header) override;
 
     void UpdateTxBuffer(const LinFrame& frame) override;
 

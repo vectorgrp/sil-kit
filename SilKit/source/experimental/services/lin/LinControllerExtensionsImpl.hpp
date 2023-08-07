@@ -36,6 +36,7 @@ namespace SilKit {
 namespace Services {
 namespace Lin {
 class ILinController;
+struct LinFrame;
 } // namespace Lin
 } // namespace Services
 } // namespace SilKit
@@ -46,6 +47,8 @@ namespace Services {
 namespace Lin {
 struct LinSlaveConfigurationEvent;
 struct LinSlaveConfiguration;
+struct LinControllerDynamicConfig;
+struct LinFrameHeaderEvent;
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental
@@ -75,6 +78,20 @@ void RemoveLinSlaveConfigurationHandlerImpl(SilKit::Services::Lin::ILinControlle
 
 auto GetSlaveConfigurationImpl(SilKit::Services::Lin::ILinController* linController)
     -> SilKit::Experimental::Services::Lin::LinSlaveConfiguration;
+
+void InitDynamicImpl(SilKit::Services::Lin::ILinController* linController,
+                     const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig);
+
+auto AddFrameHeaderHandlerImpl(SilKit::Services::Lin::ILinController* linController,
+                               std::function<void(SilKit::Services::Lin::ILinController*,
+                                                  const SilKit::Experimental::Services::Lin::LinFrameHeaderEvent& msg)>
+                                   handler) -> SilKit::Util::HandlerId;
+
+void RemoveFrameHeaderHandlerImpl(SilKit::Services::Lin::ILinController* linController,
+                                  SilKit::Util::HandlerId handlerId);
+
+void SendDynamicResponseImpl(SilKit::Services::Lin::ILinController* linController,
+                             const SilKit::Services::Lin::LinFrame& linFrame);
 
 } // namespace Lin
 } // namespace Services

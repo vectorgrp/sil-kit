@@ -199,6 +199,8 @@ typedef struct
 #define SilKit_LinWakeupEvent_DATATYPE_ID 6
 #define SilKit_Experimental_LinSlaveConfigurationEvent_DATATYPE_ID 7
 #define SilKit_Experimental_LinSlaveConfiguration_DATATYPE_ID 8
+#define SilKit_Experimental_LinControllerDynamicConfig_DATATYPE_ID 9
+#define SilKit_Experimental_LinFrameHeaderEvent_DATATYPE_ID 10
 
 // LIN data type versions
 #define SilKit_LinFrame_VERSION 1
@@ -209,6 +211,8 @@ typedef struct
 #define SilKit_LinWakeupEvent_VERSION 1
 #define SilKit_Experimental_LinSlaveConfigurationEvent_VERSION 1
 #define SilKit_Experimental_LinSlaveConfiguration_VERSION 1
+#define SilKit_Experimental_LinControllerDynamicConfig_VERSION 1
+#define SilKit_Experimental_LinFrameHeaderEvent_VERSION 1
 
 // LIN make versioned IDs
 #define SilKit_LinFrame_STRUCT_VERSION                     SK_ID_MAKE(Lin, SilKit_LinFrame)
@@ -219,6 +223,8 @@ typedef struct
 #define SilKit_LinWakeupEvent_STRUCT_VERSION               SK_ID_MAKE(Lin, SilKit_LinWakeupEvent)
 #define SilKit_Experimental_LinSlaveConfigurationEvent_STRUCT_VERSION   SK_ID_MAKE(Lin, SilKit_Experimental_LinSlaveConfigurationEvent)
 #define SilKit_Experimental_LinSlaveConfiguration_STRUCT_VERSION        SK_ID_MAKE(Lin, SilKit_Experimental_LinSlaveConfiguration)
+#define SilKit_Experimental_LinControllerDynamicConfig_STRUCT_VERSION   SK_ID_MAKE(Lin, SilKit_Experimental_LinControllerDynamicConfig)
+#define SilKit_Experimental_LinFrameHeaderEvent_STRUCT_VERSION          SK_ID_MAKE(Lin, SilKit_Experimental_LinFrameHeaderEvent)
 
 // Data
 // Data data type IDs

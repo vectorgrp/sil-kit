@@ -35,10 +35,10 @@ namespace Lin {
  *  Used by the Participant, implemented by the LinControllerProxy
  */
 class IMsgForLinController
-    : public Core::IReceiver<LinTransmission, LinWakeupPulse, LinControllerConfig, LinControllerStatusUpdate,
+    : public Core::IReceiver<LinTransmission, LinWakeupPulse, WireLinControllerConfig, LinControllerStatusUpdate,
                              LinSendFrameHeaderRequest, LinFrameResponseUpdate>
     , public Core::ISender<LinTransmission, LinSendFrameRequest, LinSendFrameHeaderRequest, LinWakeupPulse,
-                           LinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
+                           WireLinControllerConfig, LinControllerStatusUpdate, LinFrameResponseUpdate>
 {
 };
 

@@ -191,7 +191,7 @@ public:
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinSendFrameHeaderRequest& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinTransmission& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinWakeupPulse& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerConfig& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const Services::Lin::WireLinControllerConfig& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinControllerStatusUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const Services::Lin::LinFrameResponseUpdate& msg) override;
 
@@ -242,7 +242,7 @@ public:
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinSendFrameHeaderRequest& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinTransmission& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinWakeupPulse& msg) override;
-    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerConfig& msg) override;
+    void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::WireLinControllerConfig& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinControllerStatusUpdate& msg) override;
     void SendMsg(const IServiceEndpoint* from, const std::string& targetParticipantName, const Services::Lin::LinFrameResponseUpdate& msg) override;
 

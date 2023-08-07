@@ -382,6 +382,12 @@ extern "C"
         return globalCapi->SilKit_LinController_Init(controller, config);
     }
 
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_InitDynamic(SilKit_LinController* controller,
+                                                           const SilKit_Experimental_LinControllerDynamicConfig* config)
+    {
+        return globalCapi->SilKit_Experimental_LinController_InitDynamic(controller, config);
+    }
+
     SilKit_ReturnCode SilKitCALL SilKit_LinController_SetFrameResponse(SilKit_LinController* controller,
                                                                        const SilKit_LinFrameResponse* response)
     {
@@ -493,6 +499,26 @@ extern "C"
         SilKit_LinController* controller, SilKit_HandlerId handlerId)
     {
         return globalCapi->SilKit_Experimental_LinController_RemoveLinSlaveConfigurationHandler(controller, handlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_AddFrameHeaderHandler(
+        SilKit_LinController* controller, void* context, SilKit_Experimental_LinFrameHeaderHandler_t handler,
+        SilKit_HandlerId* outHandlerId)
+    {
+        return globalCapi->SilKit_Experimental_LinController_AddFrameHeaderHandler(controller, context, handler,
+                                                                                   outHandlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_RemoveFrameHeaderHandler(
+        SilKit_LinController* controller, SilKit_HandlerId handlerId)
+    {
+        return globalCapi->SilKit_Experimental_LinController_RemoveFrameHeaderHandler(controller, handlerId);
+    }
+
+    SilKit_ReturnCode SilKitCALL SilKit_Experimental_LinController_SendDynamicResponse(
+        SilKit_LinController* controller, const SilKit_LinFrame* frame)
+    {
+        return globalCapi->SilKit_Experimental_LinController_SendDynamicResponse(controller, frame);
     }
 
     // LifecycleService

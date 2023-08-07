@@ -122,20 +122,26 @@ SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, Lin
     return buffer;
 }
 
-SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const LinControllerConfig& config)
+SilKit::Core::MessageBuffer& operator<<(SilKit::Core::MessageBuffer& buffer, const WireLinControllerConfig& config)
 {
     buffer
         << config.controllerMode
         << config.baudRate
-        << config.frameResponses;
+        << config.frameResponses
+        << config.simulationMode
+        ;
     return buffer;
 }
-SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, LinControllerConfig& config)
+SilKit::Core::MessageBuffer& operator>>(SilKit::Core::MessageBuffer& buffer, WireLinControllerConfig& config)
 {
     buffer
         >> config.controllerMode
         >> config.baudRate
         >> config.frameResponses;
+    if (buffer.RemainingBytesLeft() >= sizeof(WireLinControllerConfig::SimulationMode))
+    {
+        buffer >> config.simulationMode;
+    }
     return buffer;
 }
 
@@ -193,7 +199,7 @@ void Serialize(MessageBuffer& buffer, const LinWakeupPulse& msg)
     buffer << msg;
     return;
 }
-void Serialize(MessageBuffer& buffer, const LinControllerConfig& msg)
+void Serialize(MessageBuffer& buffer, const WireLinControllerConfig& msg)
 {
     buffer << msg;
     return;
@@ -233,7 +239,7 @@ void Deserialize(MessageBuffer& buffer, LinWakeupPulse& out)
 {
     buffer >> out;
 }
-void Deserialize(MessageBuffer& buffer, LinControllerConfig& out)
+void Deserialize(MessageBuffer& buffer, WireLinControllerConfig& out)
 {
     buffer >> out;
 }

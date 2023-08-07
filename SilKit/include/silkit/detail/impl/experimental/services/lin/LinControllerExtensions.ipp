@@ -57,6 +57,34 @@ auto GetSlaveConfiguration(SilKit::Services::Lin::ILinController* cppILinControl
     return cppLinController.ExperimentalGetSlaveConfiguration();
 }
 
+void InitDynamic(SilKit::Services::Lin::ILinController* linController, const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& dynamicConfig)
+{
+    auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
+
+    cppLinController.ExperimentalInitDynamic(dynamicConfig);
+}
+
+auto AddFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler) -> SilKit::Services::HandlerId
+{
+    auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
+
+    return cppLinController.ExperimentalAddFrameHeaderHandler(std::move(handler));
+}
+
+void RemoveFrameHeaderHandler(SilKit::Services::Lin::ILinController* linController, SilKit::Services::HandlerId handlerId)
+{
+    auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
+
+    cppLinController.ExperimentalRemoveFrameHeaderHandler(handlerId);
+}
+
+void SendDynamicResponse(SilKit::Services::Lin::ILinController* linController, const SilKit::Services::Lin::LinFrame& linFrame)
+{
+    auto& cppLinController = dynamic_cast<Impl::Services::Lin::LinController&>(*linController);
+
+    cppLinController.ExperimentalSendDynamicResponse(linFrame);
+}
+
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental
@@ -71,6 +99,10 @@ namespace Lin {
 using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::AddLinSlaveConfigurationHandler;
 using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::GetSlaveConfiguration;
 using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::RemoveLinSlaveConfigurationHandler;
+using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::InitDynamic;
+using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::AddFrameHeaderHandler;
+using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::RemoveFrameHeaderHandler;
+using SilKit::DETAIL_SILKIT_DETAIL_NAMESPACE_NAME::Experimental::Services::Lin::SendDynamicResponse;
 } // namespace Lin
 } // namespace Services
 } // namespace Experimental

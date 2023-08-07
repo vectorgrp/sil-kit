@@ -91,7 +91,7 @@ DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinSendFrameRequest)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinSendFrameHeaderRequest)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinTransmission)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinWakeupPulse)
-DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinControllerConfig)
+DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, WireLinControllerConfig)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinControllerStatusUpdate)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Lin, LinFrameResponseUpdate)
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Flexray, WireFlexrayFrameEvent)
@@ -114,7 +114,7 @@ DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, ParticipantStatus
 DefineSilKitMsgTrait_HistSize(SilKit::Core::Discovery, ParticipantDiscoveryEvent, 1)
 DefineSilKitMsgTrait_HistSize(SilKit::Services::PubSub, WireDataMessageEvent, 1)
 DefineSilKitMsgTrait_HistSize(SilKit::Services::Orchestration, WorkflowConfiguration, 1)
-DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, LinControllerConfig, 1)
+DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, WireLinControllerConfig, 1)
 
 // Messages with enforced self delivery
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus)

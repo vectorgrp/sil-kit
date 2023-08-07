@@ -7,6 +7,16 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.33] - UNRELEASED
+---------------------
+
+Added
+~~~~~
+
+- New experimental extension of the LIN API that allows a user to send frame headers and respond to them
+  without setting up a static configuration beforehand.
+
+
 [4.0.32] - 2023-07-19
 ---------------------
 

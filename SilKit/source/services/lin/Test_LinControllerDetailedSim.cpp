@@ -98,8 +98,8 @@ TEST_F(LinControllerDetailedSimTest, send_frame_unitialized)
 
 TEST_F(LinControllerDetailedSimTest, send_frame)
 {
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
 
@@ -108,7 +108,7 @@ TEST_F(LinControllerDetailedSimTest, send_frame)
     expectedMsg.responseType = LinFrameResponseType::SlaveResponse;
 
     // Slave has to be configured with Tx on 17
-    LinControllerConfig slaveConfig = MakeControllerConfig(LinControllerMode::Slave);
+    auto slaveConfig = ToWire(MakeControllerConfig(LinControllerMode::Slave));
     LinFrameResponse response;
     response.frame = expectedMsg.frame;
     response.responseMode = LinFrameResponseMode::TxUnconditional;
@@ -123,8 +123,8 @@ TEST_F(LinControllerDetailedSimTest, send_frame)
 
 TEST_F(LinControllerDetailedSimTest, send_frame_without_configured_slave_response)
 {
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
 
@@ -144,8 +144,8 @@ TEST_F(LinControllerDetailedSimTest, send_frame_header_unitialized)
 
 TEST_F(LinControllerDetailedSimTest, send_frame_header)
 {
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
 
@@ -159,8 +159,8 @@ TEST_F(LinControllerDetailedSimTest, send_frame_header)
 
 TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
 {
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Slave);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
 
@@ -178,8 +178,8 @@ TEST_F(LinControllerDetailedSimTest, call_frame_status_handler)
 TEST_F(LinControllerDetailedSimTest, trigger_slave_configuration_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
     master.AddLinSlaveConfigurationHandler(slaveConfigurationHandler);
@@ -191,7 +191,7 @@ TEST_F(LinControllerDetailedSimTest, trigger_slave_configuration_handler)
     response2.frame = MakeFrame(19, LinChecksumModel::Classic);
     response2.responseMode = LinFrameResponseMode::TxUnconditional;
 
-    LinControllerConfig slaveCfg = MakeControllerConfig(LinControllerMode::Slave);
+    auto slaveCfg = ToWire(MakeControllerConfig(LinControllerMode::Slave));
     slaveCfg.frameResponses.push_back(response1);
     slaveCfg.frameResponses.push_back(response2);
 
@@ -203,8 +203,8 @@ TEST_F(LinControllerDetailedSimTest, trigger_slave_configuration_handler)
 TEST_F(LinControllerDetailedSimTest, go_to_sleep)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
     LinSendFrameRequest expectedMsg;
@@ -221,8 +221,8 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep)
 TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, A<const LinSendFrameRequest&>())).Times(0);
@@ -234,8 +234,8 @@ TEST_F(LinControllerDetailedSimTest, go_to_sleep_internal)
 TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Slave);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
     master.AddGoToSleepHandler(goToSleepHandler);
@@ -253,8 +253,8 @@ TEST_F(LinControllerDetailedSimTest, call_gotosleep_handler)
 TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Slave);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
     master.AddGoToSleepHandler(goToSleepHandler);
@@ -273,8 +273,8 @@ TEST_F(LinControllerDetailedSimTest, not_call_gotosleep_handler)
 TEST_F(LinControllerDetailedSimTest, wake_up)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, A<const LinWakeupPulse&>())).Times(1);
@@ -287,8 +287,8 @@ TEST_F(LinControllerDetailedSimTest, wake_up)
 TEST_F(LinControllerDetailedSimTest, wake_up_internal)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Master);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Master);
     master.Init(config);
 
     EXPECT_CALL(participant, SendMsg(&master, A<const LinWakeupPulse&>())).Times(0);
@@ -301,8 +301,8 @@ TEST_F(LinControllerDetailedSimTest, wake_up_internal)
 TEST_F(LinControllerDetailedSimTest, call_wakeup_handler)
 {
     // Configure Master
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Slave);
     master.Init(config);
     master.AddFrameStatusHandler(frameStatusHandler);
     master.AddWakeupHandler(wakeupHandler);
@@ -344,8 +344,8 @@ TEST_F(LinControllerDetailedSimTest, update_tx_buffer_unitialized)
 
 TEST_F(LinControllerDetailedSimTest, update_tx_buffer_not_configured_for_tx)
 {
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
+    auto config = MakeControllerConfig(LinControllerMode::Slave);
     LinFrame frame = MakeFrame(19, LinChecksumModel::Enhanced);
     LinFrameResponse response;
     response.frame = frame;
@@ -358,7 +358,7 @@ TEST_F(LinControllerDetailedSimTest, update_tx_buffer_not_configured_for_tx)
 
 TEST_F(LinControllerDetailedSimTest, update_tx_buffer)
 {
-    LinControllerConfig config = MakeControllerConfig(LinControllerMode::Slave);
+    auto config = MakeControllerConfig(LinControllerMode::Slave);
     LinFrame frame = MakeFrame(19, LinChecksumModel::Enhanced);
     frame.dataLength = 8;
     frame.data = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -367,7 +367,7 @@ TEST_F(LinControllerDetailedSimTest, update_tx_buffer)
     response.frame = frame;
     response.responseMode = LinFrameResponseMode::TxUnconditional;
     config.frameResponses.push_back(response);
-    EXPECT_CALL(participant, SendMsg(&master, A<const LinControllerConfig&>()));
+    EXPECT_CALL(participant, SendMsg(&master, A<const WireLinControllerConfig&>()));
     master.Init(config);
 
     EXPECT_EQ(master.GetThisLinNode().responses[frame.id].frame.data, frame.data);

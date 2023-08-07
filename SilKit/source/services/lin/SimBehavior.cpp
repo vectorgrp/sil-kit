@@ -55,7 +55,7 @@ void SimBehavior::SendMsg(LinTransmission&& msg)
 {
     SendMsgImpl(std::move(msg));
 }
-void SimBehavior::SendMsg(LinControllerConfig&& msg)
+void SimBehavior::SendMsg(WireLinControllerConfig&& msg)
 {
     SendMsgImpl(std::move(msg));
 }
@@ -72,9 +72,9 @@ void SimBehavior::SendMsg(LinControllerStatusUpdate&& msg)
     SendMsgImpl(std::move(msg));
 }
 
-void SimBehavior::ReceiveFrameHeaderRequest(const LinSendFrameHeaderRequest& header)
+void SimBehavior::ProcessFrameHeaderRequest(const LinSendFrameHeaderRequest& header)
 {
-    _currentBehavior->ReceiveFrameHeaderRequest(header);
+    _currentBehavior->ProcessFrameHeaderRequest(header);
 }
 
 void SimBehavior::UpdateTxBuffer(const LinFrame& frame)

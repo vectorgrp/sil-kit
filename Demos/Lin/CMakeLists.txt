@@ -24,3 +24,9 @@ target_sources(SilKitDemoLin
 	PRIVATE DemoLin.silkit.yaml
     PRIVATE NetworkSimulatorConfig.yaml
 )
+
+make_silkit_demo(SilKitDemoLinDynamic LinDemoDynamic.cpp)
+target_sources(SilKitDemoLinDynamic
+    PRIVATE DemoLin.silkit.yaml
+    PRIVATE NetworkSimulatorConfig.yaml
+)

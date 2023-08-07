@@ -30,7 +30,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Tracing.hpp"
 
 #include "ILogger.hpp"
+#include "WireLinMessages.hpp"
 
+namespace
+{
+using namespace SilKit::Services::Lin;
+auto to_wire(const LinControllerConfig& config) -> WireLinControllerConfig
+{
+    WireLinControllerConfig result{};
+    result.baudRate = config.baudRate;
+    result.controllerMode = config.controllerMode;
+    result.frameResponses = config.frameResponses;
+
+    return result;
+}
+
+auto to_wire(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config) -> WireLinControllerConfig
+{
+    WireLinControllerConfig result{};
+    result.baudRate = config.baudRate;
+    result.controllerMode = config.controllerMode;
+    result.simulationMode = WireLinControllerConfig::SimulationMode::Dynamic;
+
+    return result;
+}
+
+}
 namespace SilKit {
 namespace Services {
 namespace Lin {
@@ -127,6 +152,28 @@ void LinController::ThrowIfNotMaster(const std::string& callingMethodName) const
     {
         std::string errorMsg = callingMethodName
                                + " must only be called in master mode!";
+        _logger->Error(errorMsg);
+        throw SilKitError{errorMsg};
+    }
+}
+
+void LinController::ThrowIfDynamic(const std::string& callingMethodName) const
+{
+    if (_useDynamicResponse)
+    {
+        std::string errorMsg = callingMethodName
+                               + " can not be called if the node was initialized using InitDynamic!";
+        _logger->Error(errorMsg);
+        throw SilKitError{errorMsg};
+    }
+}
+
+void LinController::ThrowIfNotDynamic(const std::string& callingMethodName) const
+{
+    if (_useDynamicResponse)
+    {
+        std::string errorMsg = callingMethodName
+                               + " can only be called if the node was initialized using InitDynamic!";
         _logger->Error(errorMsg);
         throw SilKitError{errorMsg};
     }
@@ -284,7 +331,54 @@ void LinController::Init(LinControllerConfig config)
 
     _controllerMode = config.controllerMode;
     _controllerStatus = LinControllerStatus::Operational;
-    SendMsg(config);
+
+    SendMsg(to_wire(config));
+}
+
+void LinController::InitDynamic(const SilKit::Experimental::Services::Lin::LinControllerDynamicConfig& config)
+{
+    if (config.controllerMode == LinControllerMode::Inactive)
+    {
+        ThrowOnErroneousInitialization();
+    }
+
+    if (_controllerStatus != LinControllerStatus::Unknown)
+    {
+        ThrowOnDuplicateInitialization();
+    }
+
+    auto& node = GetThisLinNode();
+    node.controllerMode = config.controllerMode;
+    node.controllerStatus = LinControllerStatus::Operational;
+    node.simulationMode = WireLinControllerConfig::SimulationMode::Dynamic;
+
+    _controllerMode = config.controllerMode;
+    _controllerStatus = LinControllerStatus::Operational;
+    _useDynamicResponse = true;
+
+    SendMsg(to_wire(config));
+}
+
+void LinController::SendDynamicResponse(const LinFrame& frame)
+{
+    if (!_useDynamicResponse)
+    {
+        ThrowIfNotDynamic(__FUNCTION__);
+    }
+
+    // prepare the response update
+    LinFrameResponse response{};
+    response.frame = frame;
+    response.responseMode = LinFrameResponseMode::TxUnconditional;
+
+    // distribute the response update
+    UpdateFrameResponse(response);
+
+    // invoke actual response
+    LinSendFrameHeaderRequest request{};
+    request.id = response.frame.id;
+    request.timestamp = _timeProvider->Now();
+    _simulationBehavior.ProcessFrameHeaderRequest(request);
 }
 
 auto LinController::Mode() const noexcept -> LinControllerMode
@@ -311,14 +405,14 @@ void LinController::SendFrameInternal(LinFrame frame, LinFrameResponseType respo
     {
         // Only allow SendFrame of unconfigured LIN Ids for LinFrameResponseType::MasterResponse
         // that LinSlaveConfigurationHandler and GetSlaveConfiguration stays valid.
-        if (!HasRespondingSlave(frame.id))
+        if (!HasRespondingSlave(frame.id) && !HasDynamicNode())
         {
             WarnOnUnconfiguredSlaveResponse(frame.id);
             CallLinFrameStatusEventHandler(
                 LinFrameStatusEvent{_timeProvider->Now(), frame, LinFrameStatus::LIN_RX_NO_RESPONSE});
             return;
         }
-        
+
         if (responseType == LinFrameResponseType::SlaveResponse)
         {
             // As the master, we configure for RX in case of unconfigured SlaveResponse
@@ -347,19 +441,21 @@ void LinController::SendFrameInternal(LinFrame frame, LinFrameResponseType respo
     // Detailed: Send LinSendFrameRequest to BusSim
     // Trivial: SendFrameHeader
     SendMsg(LinSendFrameRequest{frame, responseType});
-
 }
 
 void LinController::SendFrame(LinFrame frame, LinFrameResponseType responseType)
 {
     ThrowIfUninitialized(__FUNCTION__);
     ThrowIfNotMaster(__FUNCTION__);
+    ThrowIfDynamic(__FUNCTION__);
+
     if (Tracing::IsReplayEnabledFor(_config.replay, Config::Replay::Direction::Send))
     {
         Logging::Debug(_logger, _logOnce,
             "LinController: Ignoring SendFrame API call due to Replay config on {}", _config.name);
         return;
     }
+
     SendFrameInternal(std::move(frame), responseType);
 }
 
@@ -378,6 +474,7 @@ void LinController::SendFrameHeader(LinId linId)
 void LinController::UpdateTxBuffer(LinFrame frame)
 {
     ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfDynamic(__FUNCTION__);
     ThrowIfNotConfiguredTxUnconditional(frame.id);
 
     // Update the local payload
@@ -391,6 +488,7 @@ void LinController::UpdateTxBuffer(LinFrame frame)
 void LinController::SetFrameResponse(LinFrameResponse response)
 {
     ThrowIfUninitialized(__FUNCTION__);
+    ThrowIfDynamic(__FUNCTION__);
 
     if (response.frame.id >= _maxLinId)
     {
@@ -487,7 +585,17 @@ Experimental::Services::Lin::LinSlaveConfiguration LinController::GetSlaveConfig
 bool LinController::HasRespondingSlave(LinId id)
 {
     auto it = std::find(_linIdsRespondedBySlaves.begin(), _linIdsRespondedBySlaves.end(), id);
-    return it != _linIdsRespondedBySlaves.end();
+    const bool result = it != _linIdsRespondedBySlaves.end();
+    return result;
+}
+
+bool LinController::HasDynamicNode()
+{
+    const auto it = std::find_if(_linNodes.begin(), _linNodes.end(), [](const LinNode& node) {
+        return node.simulationMode == WireLinControllerConfig::SimulationMode::Dynamic;
+    });
+    const bool result = it != _linNodes.end();
+    return result;
 }
 
 void LinController::UpdateLinIdsRespondedBySlaves(const std::vector<LinFrameResponse>& responsesUpdate)
@@ -634,10 +742,19 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinSendFrameH
         return;
     }
 
+    if (_useDynamicResponse)
+    {
+        SilKit::Experimental::Services::Lin::LinFrameHeaderEvent headerEvent{};
+        headerEvent.id = msg.id;
+        headerEvent.timestamp = msg.timestamp;
+        CallHandlers(headerEvent);
+        return;
+    }
+
     // Detailed: Depends on how LinSendFrameHeaderRequest will work with BusSim, currently NOP
     // Trivial: Generate LinTransmission
     // In future: Also Trigger OnHeaderCallback
-    _simulationBehavior.ReceiveFrameHeaderRequest(msg);
+    _simulationBehavior.ProcessFrameHeaderRequest(msg);
 }
 
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmission& msg)
@@ -652,8 +769,9 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
         WarnOnReceptionWhileInactive();
         return;
     }
-    
-    auto& frame = msg.frame;
+
+    const auto& frame = msg.frame;
+    bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
 
     if (frame.dataLength != LinDataLengthUnknown && frame.dataLength > _maxDataLength)
     {
@@ -671,7 +789,6 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
 
     _tracer.Trace(SilKit::Services::TransmitDirection::RX, msg.timestamp, frame);
 
-    bool isGoToSleepFrame = frame.id == GoToSleepFrame().id && frame.data == GoToSleepFrame().data;
 
     // Detailed: Just use msg.status
     // Trivial: Evaluate status using cached response
@@ -692,6 +809,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinTransmissi
             CallHandlers(LinGoToSleepEvent{msg.timestamp});
         }
     }
+
 }
 
 void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinWakeupPulse& msg)
@@ -713,7 +831,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinFrameRespo
     HandleResponsesUpdate(from, msg.frameResponses);
 }
 
-void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinControllerConfig& msg)
+void LinController::ReceiveMsg(const IServiceEndpoint* from, const WireLinControllerConfig& msg)
 {
     // Self-delivered messages are rejected
     if (from->GetServiceDescriptor() == _serviceDescriptor)
@@ -722,6 +840,7 @@ void LinController::ReceiveMsg(const IServiceEndpoint* from, const LinController
     auto& linNode = GetLinNode(from->GetServiceDescriptor().to_endpointAddress());
     linNode.controllerMode = msg.controllerMode;
     linNode.controllerStatus = LinControllerStatus::Operational;
+    linNode.simulationMode = msg.simulationMode;
 
     HandleResponsesUpdate(from, msg.frameResponses);
 }
@@ -767,11 +886,24 @@ HandlerId LinController::AddWakeupHandler(WakeupHandler handler)
     return AddHandler(std::move(handler));
 }
 
+auto LinController::AddFrameHeaderHandler(SilKit::Experimental::Services::Lin::LinFrameHeaderHandler handler ) -> HandlerId
+{
+    return AddHandler(std::move(handler));
+}
+
 void LinController::RemoveWakeupHandler(HandlerId handlerId)
 {
     if (!RemoveHandler<LinWakeupEvent>(handlerId))
     {
         _participant->GetLogger()->Warn("RemoveWakeupHandler failed: Unknown HandlerId.");
+    }
+}
+
+void LinController::RemoveFrameHeaderHandler(HandlerId handlerId)
+{
+    if (!RemoveHandler<SilKit::Experimental::Services::Lin::LinFrameHeaderEvent>(handlerId))
+    {
+        _participant->GetLogger()->Warn("RemoveFrameHeaderHandler failed: Unknown HandlerId.");
     }
 }
 
@@ -866,7 +998,6 @@ void LinController::ReplayMessage(const IReplayMessage* replayMessage)
     auto responseType = isReceive ? LinFrameResponseType::SlaveResponse : LinFrameResponseType::MasterResponse;
     SendFrameInternal(tm.frame, responseType);
 }
-
 
 } // namespace Lin
 } // namespace Services
