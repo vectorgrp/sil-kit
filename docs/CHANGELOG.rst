@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.33] - UNRELEASED
+[4.0.33] - 2023-08-07
 ---------------------
 
 Added
@@ -15,12 +15,21 @@ Added
 
 - New experimental extension of the LIN API that allows a user to send frame headers and respond to them
   without setting up a static configuration beforehand.
+- Added link to FMU importer in Readme.md
+
 
 Changed
 ~~~~~~~
 
 - Restructured the documentation to have separate sections for overview.
   It is now divided into an overall introduction, a developer guide, and a user guide.
+- Removed internal use of exceptions for failing connections to the registry if another connection mechanism succeeded. 
+
+
+Fixed
+~~~~~
+
+- Fixed missing entry of RegistryAsFallbackProxy in YAML schema.
 
 
 [4.0.32] - 2023-07-19
