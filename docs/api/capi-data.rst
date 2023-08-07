@@ -5,7 +5,7 @@ Data Publish/Subscribe C API
    :local:
    :depth: 3
 
-The publish/subscribe API provides a topic-based publish/subscribe mechanism to exchange arbitrary user data. 
+The publish/subscribe API provides a topic-based publish/subscribe mechanism to exchange arbitrary user data.
 It consists of data publishers and data subscribers.
 
 Data Publishers

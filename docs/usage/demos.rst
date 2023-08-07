@@ -65,7 +65,7 @@ CAN Demo
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml> 
+      -  <ParticipantConfiguration.yaml> 
            File name of the participant configuration to be used; 
            use ``DemoCan.silkit.yaml`` for an example configuration.
          <ParticipantName> 
@@ -135,7 +135,7 @@ Ethernet Demo
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml> 
+      -  <ParticipantConfiguration.yaml> 
            File name of the participant configuration to be used; 
            use ``DemoEthernet.silkit.yaml`` for an example configuration.
          <ParticipantName> 
@@ -206,7 +206,7 @@ LIN Demo
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
          * SIL Kit Network Simulator (optional)
    *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml> 
+      -  <ParticipantConfiguration.yaml> 
            File name of the participant configuration to be used; 
            use ``DemoLin.silkit.yaml`` for an example configuration.
          <ParticipantName> 
@@ -276,7 +276,7 @@ FlexRay Demo
          * SIL Kit Network Simulator (mandatory)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml> 
+      -  <ParticipantConfiguration.yaml> 
            File name of the participant configuration to be used; 
            use ``DemoFlexRay.silkit.yaml`` for an example configuration.
          <ParticipantName> 
@@ -311,7 +311,7 @@ FlexRay Demo
             # System Controller:
             |SystemController| Node0 Node1 NetworkSimulator
    *  -  Notes
-      -  Starting the FlexRay cycle takes quite some time, which is accurately modeled by the SIL Kit Network Simulator. 
+      -  Starting the FlexRay cycle takes quite some time, which is accurately modeled by the SIL Kit Network Simulator.
          It takes somewhat between 50 and 100 ms until the first FlexRay messages are transmitted.
 
 
@@ -333,7 +333,7 @@ Publish/Subscribe Demo
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml> 
+      -  <ParticipantConfiguration.yaml> 
            File name of the participant configuration to be used; 
            use ``DemoPubSub.silkit.yaml`` for an example configuration.
          <ParticipantName> 
@@ -401,7 +401,7 @@ RPC Demo
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
          * :ref:`sil-kit-monitor<sec:util-monitor>` (optional)
    *  -  Parameters
-      -  <ParticipantConfiguration.json|yaml> 
+      -  <ParticipantConfiguration.yaml> 
            File name of the participant configuration to be used; 
            use ``DemoRpc.silkit.yaml`` for an example configuration.
          <ParticipantName> 
@@ -496,7 +496,7 @@ Benchmark Demo
           --simulation-duration
             Sets the simulation duration (virtual time). Default: 1s
           --configuration 
-            Path and filename of the participant configuration YAML or JSON file. Default: empty
+            Path and filename of the participant configuration YAML file. Default: empty
           --write-csv
             Path and filename of CSV file with benchmark results. Default: empty
    *  -  Parameter Example
@@ -548,7 +548,7 @@ Latency Demo
           --message-count
             Sets the number of messages to be send in each simulation step. Default: 1000
           --configuration 
-            Path and filename of the participant configuration YAML or JSON file. Default: empty
+            Path and filename of the participant configuration YAML file. Default: empty
           --write-csv
             Path and filename of csv file with benchmark results. Default: empty
    *  -  Parameter Example

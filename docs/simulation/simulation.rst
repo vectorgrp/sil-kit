@@ -2,7 +2,7 @@
 ==========
 Simulation
 ==========
-.. 
+..
   macros for internal use
 ..
   General macros
@@ -16,7 +16,7 @@ Simulation
 .. |CompleteSimulationStep| replace:: :cpp:func:`CompleteSimulationStep()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationStep()>`
 .. |StartLifecycle| replace:: :cpp:func:`StartLifecycle()<SilKit::Services::Orchestration::ILifecycleService::StartLifecycle()>`
 
-.. 
+..
   Section references 
 .. |LifecycleService| replace:: :ref:`Lifecycle Service<subsubsec:sim-lifecycle-lifecycleService>`
 .. |TimeSyncService| replace:: :ref:`Time Synchronization Service<subsubsec:sim-lifecycle-timeSyncService>`
@@ -137,7 +137,7 @@ The participant will wait for the system state to change to :cpp:enumerator:`Rea
 During the execution of a ``CommunicationReadyHandler``, the network communication of the participant is blocked. Therefore, it is impossible to exchange information with other participants during the execution of a ``CommunicationReadyHandler``.
 If it is necessary to exchange information during the ``CommunicationInitialized`` state, :cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` and :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` can be used.
 :cpp:func:`SetCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::SetCommunicationReadyHandlerAsync()>` signals that the ``CommunicationInitialized`` state has been reached. After its execution, a participant is still in the ``CommunicationInitialized`` state and can exchange information.
-After :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` is called, the participants state will switch to participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`. 
+After :cpp:func:`CompleteCommunicationReadyHandlerAsync()<SilKit::Services::Orchestration::ILifecycleService::CompleteCommunicationReadyHandlerAsync()>` is called, the participants state will switch to participant state changes to :cpp:enumerator:`ReadyToRun<SilKit::Services::Orchestration::ParticipantState::ReadyToRun>`.
 
 Participants that coordinate their state but do not use the virtual time synchronization can register a :cpp:func:`SetStartingHandler()<SilKit::Services::Orchestration::ILifecycleService::SetStartingHandler()>`, which indicates that the synchronized participants will start the virtual time synchronization and thus the simulation.
 This callback does not block the other participants and should only be used to start timers etc., it will trigger when the state transition to :cpp:enumerator:`Running<SilKit::Services::Orchestration::ParticipantState::Running>` is imminent.
@@ -158,7 +158,7 @@ A callback registered via :cpp:func:`SetStopHandler()<SilKit::Services::Orchestr
 Once the callback execution is finished, the participant will change its state to :cpp:enumerator:`Stop<SilKit::Services::Orchestration::ParticipantState::Stop>`.
 Afterwards, they transition to the ``ShuttingDown`` state, call the :cpp:func:`SetShutdownHandler()<SilKit::Services::Orchestration::ILifecycleService::SetShutdownHandler()>` and transition to the ``Shutdown`` state.
 
-Whenever a participant encounters an error from which it cannot recover, it switches to the :cpp:enumerator:`Error<SilKit::Services::Orchestration::ParticipantState::Error>` state to indicate this situation to the system. 
+Whenever a participant encounters an error from which it cannot recover, it switches to the :cpp:enumerator:`Error<SilKit::Services::Orchestration::ParticipantState::Error>` state to indicate this situation to the system.
 Users can manually trigger a transition to the error state and provide more information about the cause by calling :cpp:func:`ReportError()<SilKit::Services::Orchestration::ILifecycleService::ReportError()>`.
 In some situations, a lifecycle service automatically enters the error state, e.g., when an uncaught exception is thrown in a callback.
 A participant can only recover from the :cpp:enumerator:`Error<SilKit::Services::Orchestration::ParticipantState::Error>` state in one way: by shutting down.
@@ -198,7 +198,7 @@ This should typically not occur.
 Synchronized Simulation Run
 ===========================
 
-The following first gives a general overview of a simulation run using the |ProductName|. 
+The following first gives a general overview of a simulation run using the |ProductName|.
 Afterwards, possibilities to configure the simulation step length of a simulation step and to define the simulation step that is being executed are introduced.
 The last part details what time information |ProductName| clients provide, depending on their synchronization mode.
 
@@ -207,13 +207,15 @@ The last part details what time information |ProductName| clients provide, depen
     A mixed operation mode, where some participants operate synchronized and some unsynchronized,
     is not supported. Therefore, all participants of a simulation must either be synchronized or unsynchronized.
 
+.. _subsec:sim-overview:
+
 Simulation Overview
 -------------------
-A |ProductName| simulation is designed as a discrete-event simulation. 
+A |ProductName| simulation is designed as a discrete-event simulation.
 This means, that each event of a participant occurs at a distinct point in time.
 Synchronized participants exchange information about the next point in time at which they intend to execute their *simulation step*.
 Based on this information they can infer if they can trigger their next simulation step or if they still need to wait for other participants to finish their steps.
-Each participant executes its simulation step periodically. 
+Each participant executes its simulation step periodically.
 The simulation time between the execution must be set when registering the simulation step.
 
 Configuration of the Simulation Step
@@ -238,7 +240,7 @@ Also, this allows two participants to communicate without increasing the simulat
 
 .. admonition:: Note
 
-    Asynchronous simulation steps are non-blocking. 
+    Asynchronous simulation steps are non-blocking.
     This means that it is possible that callbacks from received messages are triggered concurrently during the execution of the simulation step.
     Users need to make sure that their data is protected against concurrent read/write access.
 
@@ -251,7 +253,7 @@ Also, this allows two participants to communicate without increasing the simulat
 Timestamps in Messages
 ----------------------
 
-Each sent bus event is annotated with a timestamp, at which it was sent. 
+Each sent bus event is annotated with a timestamp, at which it was sent.
 The timestamp is set automatically by the |ProductName| client.
 Users do not have to (and should not try to) manually set the timestamp of a message.
 Depending on the mode of the participant (synchronized/unsynchronized) and whether the network is managed by a network simulator, the timestamp's meaning and precision may differ.
@@ -276,7 +278,7 @@ The following table provides an overview of the behavior, if no network simulato
 .. _subsec:sim-syncExample:
 
 SIL Kit Middleware
--------------------------------------------
+------------------
 
 The provided implementation of the |ProductName| headers uses an internal middleware that is provided with the |ProductName|.
 Within it, all participants exchange their messages via direct messaging based on TCP connections or Unix domain sockets.

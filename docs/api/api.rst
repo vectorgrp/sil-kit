@@ -7,7 +7,7 @@ API
 
 This document describes the user available programming interfaces of the Vector
 SIL Kit (SIL Kit). If you are not yet familiar with the SIL Kit, have a look at
-the :doc:`Quick Start<../usage/quickstart>`.
+the :doc:`Developers Guide<../for-developers/developers>`.
 
 
 API Entry Point and API Organization

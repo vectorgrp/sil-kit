@@ -37,7 +37,7 @@ sil-kit-registry
         -l, --log <level>                    Log to stdout with level ``trace``, ``debug``, ``warn``, ``info``, ``error``, ``critical`` or ``off``. Defaults to ``info``.
         -g, --generate-configuration <path>  Path and filename of a participant configuration file to generate containing the URI the registry is using.
         -d, --dashboard-uri <dashboard-uri>  The ``http://`` URI the data should be sent to. Defaults to ``http://localhost:8082``.
-        -c, --registry-configuration <path>  Path to the registry configuration file (YAML/JSON).
+        -c, --registry-configuration <path>  Path to the registry configuration file (YAML).
 
    *  - Usage Example
       - .. code-block:: powershell
@@ -68,10 +68,8 @@ sil-kit-system-controller
    :stub-columns: 1
 
    *  -  Abstract
-      -  The ``sil-kit-system-controller`` implements state handling for the participants of
-         a SIL Kit system.
-         Examples for state change commands called by the System Controller are
-         ``Run`` or ``Stop``.
+      -  The ``sil-kit-system-controller`` defines which participants are required for a simulation.
+         Coordinated participants will wait until all required participants joined a simulation before they progress their state.
    *  -  Source location
       -  ``Utilities/SilKitSystemController``
    *  -  Requirements
@@ -82,7 +80,7 @@ sil-kit-system-controller
          -h, --help                                   Show the help of ``sil-kit-system-controller``.
          -u, --connect-uri <silkitUri>                The registry's URI to connect to. Defaults to ``silkit://localhost:8500``.
          -n, --name <participantName>                 The participant name used to take part in the simulation. Defaults to ``SystemController``.
-         -c, --configuration <configuration>          Path and filename of the participant configuration YAML or JSON file.
+         -c, --configuration <configuration>          Path and filename of the participant configuration YAML file.
          -ni, --non-interactive                       Run without awaiting any user interactions at any time.
          
          | **<participantName1>, <participantName2> ...**
@@ -119,7 +117,7 @@ sil-kit-monitor
          -h, --help                              Show the help of the ``sil-kit-monitor``.
          -u, --connect-uri <silkitUri>           The registry's URI to connect to. Defaults to ``silkit://localhost:8500``.
          -n, --name <participantName>            The participant name used to take part in the simulation. Defaults to '``SystemMonitor``'.
-         -c, --configuration  <configuration>    Path and filename of the participant configuration YAML or JSON file.
+         -c, --configuration  <configuration>    Path and filename of the participant configuration YAML file.
 
    *  -  Usage Example
       -  .. code-block:: powershell

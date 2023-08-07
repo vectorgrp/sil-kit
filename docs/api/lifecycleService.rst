@@ -161,11 +161,11 @@ Remote services that have been created at the point a participant calls |StartLi
 As an example, a call to |Publish| on a |IDataPublisher| on participant A in the |CommunicationReadyHandler| is guaranteed to arrive at 
 participant B if its |IDataSubscriber| has been created before participant A has called |StartLifecycle|.
 
-Communication in the |CommunicationReadyHandler| between participants that use the |OperationMode_Coordinated| is guaranteed. 
-After |StartLifecycle| is called, these participants will wait for each other until all reached the |ServicesCreatedState| state. 
+Communication in the |CommunicationReadyHandler| between participants that use the |OperationMode_Coordinated| is guaranteed.
+After |StartLifecycle| is called, these participants will wait for each other until all reached the |ServicesCreatedState| state.
 Therefore all services have already been created when the |CommunicationReadyHandler| is triggered.
 
-A common use-case where the guarantee also applies is described as follows: A participant with |OperationMode_Autonomous| wants to join an already running simulation. 
+A common use-case where the guarantee also applies is described as follows: A participant with |OperationMode_Autonomous| wants to join an already running simulation.
 In this case, the services of the running participants have been created and the newly joining participant can communicate in the |CommunicationReadyHandler|.
 
 If several participants are defined with |OperationMode_Autonomous| and are executed 'simultaneously' in a distributed setup, their intention is to proceed through the lifecycle states without coordination.

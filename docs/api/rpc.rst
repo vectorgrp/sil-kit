@@ -29,7 +29,7 @@ Using the RPC API
 
 This API provides a client-server model for remote calls with arbitrary argument- and return data.
 The ``RpcClient`` and ``RpcServer`` interfaces are instantiated from an |IParticipant| interface by calling 
-|CreateRpcClient| and |CreateRpcServer|, respectively. 
+|CreateRpcClient| and |CreateRpcServer|, respectively.
 
 The ``RpcClient`` can trigger a call using the |Call| method providing argument data as a vector of bytes.
 The |Call| method is non-blocking and allows for later identification of the call through an
@@ -51,7 +51,7 @@ Otherwise the call will lead to a timeout RpcCallResultEvent.
 Argument and Return Data
 ========================
 
-In theory, users can freely decide on how to de/serialize argument and return data into and out of a byte vector. 
+In theory, users can freely decide on how to de/serialize argument and return data into and out of a byte vector.
 However, it is strongly recommended to use SIL Kit's serialization schema implemented by the :doc:`Data Serialization/Deserialization API</api/serdes>` 
 to ensure compatibility among all SIL Kit participants.
 

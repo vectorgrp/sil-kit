@@ -55,6 +55,7 @@ set(SPHINX_INDEX_FILE ${SPHINX_BUILD}/index.html)
 # - Our doc files have been updated
 # - The Sphinx config has been updated
 file(GLOB_RECURSE SPHINX_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
+file(GLOB_RECURSE SVG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.svg)
 
 if (UNIX)
   if (${SILKIT_WARNINGS_AS_ERRORS})
@@ -74,6 +75,7 @@ add_custom_command(OUTPUT ${DOXYGEN_INDEX_FILE}
                    DEPENDS
                        ${SILKIT_API_HEADERS}
                        ${SPHINX_SOURCE_FILES}
+                       ${SVG_FILES}
                    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
                    # generate docs
                    COMMAND ${Python3_EXECUTABLE} -m pipenv run sphinx-build -b html

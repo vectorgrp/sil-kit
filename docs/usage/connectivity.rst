@@ -39,7 +39,7 @@ or the registry is not reachable for this specific participant because of networ
     Please note that this opens a public listening port and may not be suitable for your work environment.
     Consult your system administrator when in doubt.
 
-When starting a registry, you can provide a `--listen-uri` under which the registry will be reachable. 
+When starting a registry, you can provide a `--listen-uri` under which the registry will be reachable.
 Make sure that a :ref:`sec:util-registry` is running and that it binds to the address and port specified for your connecting participant.
 
 Often, issues within your network will lead to this error message. To verify, that you are not having networking issues, you can verify that 
@@ -59,7 +59,7 @@ If Telnet does not print that it established a connection, you are having networ
    Escape character is '^]'.
 
 In this case your network configuration prevents a connection to the registry.
-Refer to your network administrator for further assistance. 
+Refer to your network administrator for further assistance.
 Some potential issues might be firewalls, VM network configuration (if using a VM), NATs, Docker network configuration (if using Docker).
 
 .. admonition:: Note
@@ -90,7 +90,7 @@ Connectivity issues between participants
    :caption: Example error message
 
    [yyyy-mm-dd hh:mm:ss] [CanReader] [info] Connected to registry at 'tcp://192.168.1.12:8500' via 'tcp://192.168.1.12:8500' (silkit://192.168.1.12:8500)
-   [yyyy-mm-dd hh:mm:ss] [CanReader] [error] Timeout during connection setup. The participant was able to connect to the registry, but not to all participants. 
+   [yyyy-mm-dd hh:mm:ss] [CanReader] [error] Timeout during connection setup. The participant was able to connect to the registry, but not to all participants.
       There might be network issues. Check network settings and firewall configuration. Was not able to connect to the following participant(s): 
       CanWriter(local://D:\TEMP\\CanWriterd81c9d2684952765.silkit, tcp://192.168.1.12:52125)
    

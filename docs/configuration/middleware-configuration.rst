@@ -10,7 +10,7 @@ Middleware Configuration
 Overview
 --------------------
 
-The Vector SIL Kit uses an internal middleware for message exchange. 
+The Vector SIL Kit uses an internal middleware for message exchange.
 This middleware is open source and included in the sources of the Vector SIL Kit.
 
 The middleware can be configured as follows.

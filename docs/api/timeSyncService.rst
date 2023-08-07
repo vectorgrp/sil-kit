@@ -39,7 +39,7 @@ The simulation step will be executed asynchronously::
 
 .. admonition:: Note
 
-    Please note that the lifecycle service and the time synchronization service can only be created once. 
+    Please note that the lifecycle service and the time synchronization service can only be created once.
     Calling these methods more than once throws an exception.
 
 Controlling the Participant
@@ -52,17 +52,17 @@ The participant can now access the current simulation time using the
 Synchronizing an Application Thread with the Simulation Step
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-In special cases, it may be required to synchronize an application thread with the execution of the simulation step. 
+In special cases, it may be required to synchronize an application thread with the execution of the simulation step.
 That is, the application wants to execute some code between time steps (given by invocations of the simulation step), *but on a different thread*
 than where the simulation step is executing.
 To achieve this, use :cpp:func:`SetSimulationStepHandlerAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandlerAsync()>` to assign
 the simulation step function, and :cpp:func:`CompleteSimulationStep()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationStep()>` to let
-the SIL Kit continue the simulation. 
+the SIL Kit continue the simulation.
 If the simulation step has been assigned using that function, execution will stop after the simulation step has finished executing.
 By invoking :cpp:func:`CompleteSimulationStep()<SilKit::Services::Orchestration::ITimeSyncService::CompleteSimulationStep()>` SIL Kit's simulation loop 
 (implemented in :cpp:func:`SetSimulationStepHandlerAsync()<SilKit::Services::Orchestration::ITimeSyncService::SetSimulationStepHandlerAsync()>`) will continue to the next time step.
 
-.. 
+..
   Changing Simulation Step Duration
   """""""""""""""""""""""""""""""""
   
@@ -73,8 +73,8 @@ By invoking :cpp:func:`CompleteSimulationStep()<SilKit::Services::Orchestration:
   :cpp:func:`SetPeriod()<SilKit::Services::Orchestration::ITimeSyncService::SetPeriod()>`. When calling it within a simulation step, 
   the duration of the current simulation step will already be affected by the call.
 
-API and Data Type Reference
----------------------------
+API Reference
+-------------
 
 .. doxygenclass:: SilKit::Services::Orchestration::ITimeSyncService
    :members:

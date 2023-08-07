@@ -15,7 +15,7 @@ The Vector SIL Kit Extensions are developed by Vector and provided in binary for
 To facilitate the lookup of these binaries, specific search paths can be configured as explained below.
 
 Configuration
---------------------
+=============
 
 
 .. code-block:: yaml

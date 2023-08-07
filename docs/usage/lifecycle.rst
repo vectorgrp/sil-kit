@@ -38,7 +38,7 @@ Attempt to instantiate a service multiple times
    Tried to instantiate LifecycleService multiple times
    Tried to instantiate SystemMonitor multiple times
    
-Some services within SIL Kit can not be instantiated multiple times on the same simulation participant. 
+Some services within SIL Kit can not be instantiated multiple times on the same simulation participant.
 If a user tries to instantiate these services a second time, an exception with the error message `Tried to instantiate service multiple times` is thrown.
 These semantics mirror the underlying implementation. No implicit caching of the service instances is performed.
 Since a participant can only have one lifecycle status, having multiple lifecycle services or the expectation to instantiate multiple lifecycle services are most likely a misunderstanding of the SIL Kit APIs.

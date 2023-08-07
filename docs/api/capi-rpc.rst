@@ -5,7 +5,7 @@ RPC C API
    :local:
    :depth: 3
 
-The RPC API provides client/server based RPC functionality. 
+The RPC API provides client/server based RPC functionality.
 It consists of RPC clients and RPC servers and a method to discover remote RPC servers.
 
 RPC Clients

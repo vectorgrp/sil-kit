@@ -2,19 +2,17 @@
 Configuration
 ========================================
 
-.. _sec:ibconfig-json:
+.. _sec:sil-kit-config-yaml:
 
-.. toctree::
-   :maxdepth: 2
+The Vector SIL Kit provides optional configuration to enhance flexibility and control through use of YAML files.
+This allows users to modify behavior without recompiling source code.
+Further, it allows configuration of services which are inactive by default, such as tracing and logging.
 
-   configuration-services
-   logging-configuration
-   healthcheck-configuration
-   configuration-tracing
-   extension-configuration
-   middleware-configuration
+.. contents::
+   :local:
+   :depth: 2
 
-
+.. _sec:participant-config:
 
 The Participant Configuration File
 =======================================
@@ -43,10 +41,10 @@ a simulation with multiple instances of a participant from a single implementati
 
 .. admonition:: Note
 
-    It is recommended that all configuration be done at the source code level so that an empty configuration file can be provided for most simulation runs. 
+    It is recommended that all configuration be done at the source code level so that an empty configuration file can be provided for most simulation runs.
     A user should be able to create (or modify an existing) configuration file for a participant, if behavior or network connections need to be reconfigured.
 
-A participant configuration file is written in YAML/JSON syntax according to a specified schema. It begins with some general information 
+A participant configuration file is written in YAML syntax according to a specified schema. It begins with some general information 
 about the configuration file itself, followed by several subsections for the different services of the Vector SIL Kit.
 
 .. admonition:: Note
@@ -89,9 +87,10 @@ The outline of a participant configuration file is as follows:
     Middleware: 
     - ...
 
+.. _subsec:participant-config-overview:
 
-Configuration Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Overview
+~~~~~~~~
 
 .. list-table::
    :widths: 15 85
@@ -138,12 +137,28 @@ Configuration Options
      - This optional section can be used to configure the middleware running the Vector SIL Kit.
        If this section is omitted, defaults will be used.
 
+.. _subsec:participant-config-options:
+
+Configuration Options
+~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   configuration-services
+   logging-configuration
+   healthcheck-configuration
+   configuration-tracing
+   extension-configuration
+   middleware-configuration
+
+.. _sec:registry-config:
 
 The Registry Configuration File
 ===============================
 
 An instance of the SIL Kit Registry (``sil-kit-registry(.exe)``) can be
-configured via a YAML/JSON file.
+configured via a YAML file.
 The configuration file is optional and overrides the settings specified on the
 command line.
 It also allows extended configuration, beyond what the command line allows,
@@ -167,9 +182,10 @@ The outline of a registry configuration file is as follows:
           Level: Trace
           LogName: SampleRegistryLogFile
 
+.. _subsec:registry-config-overview:
 
-Configuration Options
-~~~~~~~~~~~~~~~~~~~~~
+Overview
+~~~~~~~~
 
 .. list-table::
    :widths: 15 85
@@ -201,3 +217,13 @@ Configuration Options
 
        **NOTE** It is only possible to use the Sink types ``Stdout`` and
        ``File``. Using ``Remote`` will lead to an error during registry startup.
+
+.. _subsec:registry-config-options:
+
+Configuration Options
+~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   logging-configuration

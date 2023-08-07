@@ -112,7 +112,7 @@ An optional second parameter of |AddFrameTransmitHandler| allows to specify the 
 .. admonition:: Note
 
   In a simple simulation, the |EthernetTransmitStatus| of the 
-  |EthernetFrameTransmitEvent| will always be |Transmitted|. 
+  |EthernetFrameTransmitEvent| will always be |Transmitted|.
 
 Receiving Ethernet Frame Events
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -144,7 +144,7 @@ Adding a handler will return a |HandlerId| which can be used to remove the handl
 Switches
 ________
 
-Switches can be used in a detailed simulation. 
+Switches can be used in a detailed simulation.
 Refer to the documentation of the network simulator for further information.
 
 Receiving State Change Events
@@ -216,7 +216,7 @@ Assumptions:
 Simple Ethernet Sender / Receiver Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example shows a successful data transfer from one Ethernet controller to another. 
+This example shows a successful data transfer from one Ethernet controller to another.
 
 .. literalinclude::
    examples/eth/ETH_Sender_Receiver.cpp

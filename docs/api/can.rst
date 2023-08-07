@@ -39,6 +39,9 @@ CAN Service API
 
 .. |HandlerId| replace:: :cpp:class:`HandlerId<SilKit::Services::HandlerId>`
 
+.. |_| unicode:: 0xA0 
+   :trim:
+
 .. contents::
    :local:
    :depth: 3
@@ -126,11 +129,11 @@ Initialization
 ~~~~~~~~~~~~~~
 
 A CAN controller's baud rate must first be configured by passing a value to |SetBaudRate|.
-Then, the controller must be started explicitly by calling |Start|. Now the controller can be used. 
-Additional control commands are |Stop| and |Reset|. 
+Then, the controller must be started explicitly by calling |Start|. Now the controller can be used.
+Additional control commands are |Stop| and |Reset|.
 
 The following example configures a CAN controller with a baud rate of 10'000 baud for regular CAN messages and a baud 
-rate of 1'000'000 baud for CAN FD messages. Then, the controller is started::
+rate of 1'000'000 baud for CAN |_| FD messages. Then, the controller is started::
 
     canController->SetBaudRate(10000, 1000000);
     canController->Start();

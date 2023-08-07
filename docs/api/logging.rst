@@ -7,13 +7,21 @@ or distribute them with remote logging to other simulation participants. The log
 :cpp:func:`GetLogger()<SilKit::IParticipant::GetLogger>`. Refer to :ref:`Logging Configuration<sec:cfg-logging-configuration-overview>` for 
 how to configure the logging service.
 
-API and Data Type Reference
----------------------------
+.. contents::
+   :local:
+   :depth: 2
+
+.. _sec:logging-api:
+
+API
+---
 
 .. doxygenclass:: SilKit::Services::Logging::ILogger
    :members:
 
-Enumerations and Typedefs
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _sec:logging-data-types:
+
+Data Type Reference
+-------------------
 
 .. doxygenenum:: SilKit::Services::Logging::Level

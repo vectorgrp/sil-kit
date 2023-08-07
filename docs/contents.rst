@@ -1,12 +1,13 @@
-==========
+========
 Contents
-==========
-           
+========
+
 .. toctree::
   :maxdepth: 2
-  
+
   index
-  usage/quickstart
+  for-users/users
+  for-developers/developers
   simulation/simulation
   api/api
   usage/demos
@@ -14,5 +15,5 @@ Contents
   usage/utilities
   usage/troubleshooting
   faq/faq
-  CHANGELOG
   licenses/license
+  CHANGELOG

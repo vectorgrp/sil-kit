@@ -27,7 +27,7 @@ Using the Data Publish/Subscribe API
 
 The Data Publish/Subscribe API provides a topic-based publish/subscribe mechanism to exchange plain byte vectors 
 containing arbitrary user data. The ``DataPublisher`` and ``DataSubscriber`` interfaces are instantiated from an |IParticipant| 
-interface by calling |CreateDataPublisher| and |CreateDataSubscriber|, respectively. 
+interface by calling |CreateDataPublisher| and |CreateDataSubscriber|, respectively.
 
 Data can be transmitted using the |Publish| method of a ``DataPublisher``, either providing a standard vector of data or a
 data pointer and size. Published messages are transmitted immediately to all matching subscribers, that is, without 
@@ -43,7 +43,7 @@ Topics
 ~~~~~~
 
 Data publishers and data subscribers provide a topic name which is part of their |PubSubSpec|.
-Communications only takes place among controllers with the same topic. The topic has no wildcard functionality. 
+Communications only takes place among controllers with the same topic. The topic has no wildcard functionality.
 
 Media Type
 ~~~~~~~~~~
@@ -116,7 +116,7 @@ Configuration
 ~~~~~~~~~~~~~
 
 The controller name passed in |CreateDataPublisher| and |CreateDataSubscriber| is used to identify the controller in 
-a YAML/JSON configuration. Currently, only the topic can be configured. If a topic is set in the configuration, it will
+a YAML configuration. Currently, only the topic can be configured. If a topic is set in the configuration, it will
 be preferred over a programmatically set topic.
 
 .. code-block:: yaml

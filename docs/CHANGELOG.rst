@@ -16,6 +16,12 @@ Added
 - New experimental extension of the LIN API that allows a user to send frame headers and respond to them
   without setting up a static configuration beforehand.
 
+Changed
+~~~~~~~
+
+- Restructured the documentation to have separate sections for overview.
+  It is now divided into an overall introduction, a developer guide, and a user guide.
+
 
 [4.0.32] - 2023-07-19
 ---------------------
@@ -6000,7 +6006,7 @@ Added
 - Documented Generic Messages API: (AFTMAGT-204).
 - Documented the simulation state machine and synchronization types: :doc:`simulation/simulation`
 - Added docs for the ComAdapter:
-- Added quick start guide: :doc:`usage/quickstart`
+- Added quick start guide: usage/quickstart
 - Elaborate the user APIs and overview pages: :doc:`api/api`
 - Add docs for :doc:`api/systemcontroller` (AFTMAGT-242).
 - Add docs for :doc:`api/systemmonitor` (AFTMAGT-242).

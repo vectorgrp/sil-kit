@@ -92,7 +92,7 @@ Before the LIN Controller can be used, it must be initialized. The initializatio
 |LinControllerConfig| and passing it to |Init|. The |LinControllerMode| must be set to either 
 |LinControllerMode_Master| or |LinControllerMode_Slave| and the baud rate must be specified. Further, the 
 |LinControllerConfig| provides the configuration on which LIN IDs the controller will receive 
-(|LinFrameResponseMode_Rx|) or respond to (|LinFrameResponseMode_Tx|) frames. 
+(|LinFrameResponseMode_Rx|) or respond to (|LinFrameResponseMode_Tx|) frames.
 
 The following example configures a LIN controller as a LIN slave with a baud rate of 20'000 baud. Furthermore, LIN ID 
 0x11 is configured for transmission::
@@ -119,7 +119,7 @@ but only during operation.
 Extending the configuration during operation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Initialized LIN nodes can use |SetFrameResponse| to configure a response or reception during operation. 
+Initialized LIN nodes can use |SetFrameResponse| to configure a response or reception during operation.
 |SetFrameResponse| is useful for cases where a LIN slave is not aware of its full configuration upon initialization.
 Reconfiguration of already used ID on the particular node are discarded. If used on a slave, the new configuration 
 will become active once the master receives the updated configuration.
@@ -134,10 +134,10 @@ initiation of the slave-to-slave communication.
 Initiating LIN Transmissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Data is transferred in the form of a |LinFrame|, reception and acknowledgement is handled in the |FrameStatusHandler|. 
+Data is transferred in the form of a |LinFrame|, reception and acknowledgement is handled in the |FrameStatusHandler|.
 A LIN master can initiate the transmission of a frame using the AUTOSAR API |SendFrame| or the non-AUTOSAR API 
 |SendFrameHeader|. If a LIN slave provides the response, |SendFrame| requires that a corresponding frame 
-response was configured before at a LIN slave using |Init| or |SetFrameResponse|. 
+response was configured before at a LIN slave using |Init| or |SetFrameResponse|.
 
 If using |SendFrame| with |LinFrameResponseType_MasterResponse|, the response doesn't have to be preconfigured and the 
 payload provided in the frame parameter of |SendFrame| will be used. If the LIN master uses the non-AUTOSAR API 
@@ -319,7 +319,7 @@ Assumptions:
 - Variables ``master``, ``slave``, ``slave1``, and ``slave2`` are of type |ILinController|.
 - Variable ``timeEndOfFrame`` indicates the end of frame time stamp when using the detailed simulation. Otherwise, the value of 
   ``timeEndOfFrame`` is undefined.
-- ``UseAutosarInterface`` is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API. 
+- ``UseAutosarInterface`` is a boolean variable that indicates whether to use the AUTOSAR API or the non-AUTOSAR API.
   It will most likely not be used in practice, and only serves to show the various uses of the API.
   
 Successful Transmission from Master to slave
