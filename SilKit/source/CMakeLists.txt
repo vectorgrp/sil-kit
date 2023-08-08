@@ -71,7 +71,7 @@ install(FILES
     ${VERSION_MACROS_HPP}
     DESTINATION ${INSTALL_INCLUDE_DIR}/silkit/capi
     RENAME SilKitVersionMacros.h
-    COMPONENT bin
+    COMPONENT dev
 )
 
 set(silkitLibType SHARED)
@@ -290,19 +290,33 @@ if(NOT SILKIT_BUILD_STATIC)
         TARGETS SilKit
         EXPORT SilKitTargets
         CONFIGURATIONS Release Debug RelWithDebInfo
-        COMPONENT bin
-        DESTINATION ${INSTALL_LIB_DIR}
-        LIBRARY DESTINATION ${INSTALL_LIB_DIR} # for Linux shared object libraries (.so)
-        ARCHIVE DESTINATION ${INSTALL_LIB_DIR} # for static libraries (.lib/.a)
-        RUNTIME DESTINATION ${INSTALL_BIN_DIR} # for executables and dynamic libraries (.dll)
-        PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
+        LIBRARY
+            COMPONENT bin
+            DESTINATION ${INSTALL_LIB_DIR}
+            NAMELINK_SKIP
+            LIBRARY DESTINATION ${INSTALL_LIB_DIR} # for Linux shared object libraries (.so)
+            ARCHIVE DESTINATION ${INSTALL_LIB_DIR} # for static libraries (.lib/.a)
+            RUNTIME DESTINATION ${INSTALL_BIN_DIR} # for executables and dynamic libraries (.dll)
+        PUBLIC_HEADER
+            PUBLIC_HEADER DESTINATION ${INSTALL_INCLUDE_DIR} # Destination for header files
+            COMPONENT dev
+    )
+
+    install(
+        TARGETS SilKit
+        EXPORT SilKitTargets
+        CONFIGURATIONS Release Debug RelWithDebInfo
+        LIBRARY
+            COMPONENT dev
+            DESTINATION ${INSTALL_LIB_DIR}
+            NAMELINK_ONLY
     )
 # portable installation  definitions
     install(EXPORT SilKitTargets
         DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
         NAMESPACE "SilKit::"
         FILE SilKitTargets.cmake
-        COMPONENT bin
+        COMPONENT dev
     )
 endif()
 # Also install CmakeTargets for MinSizeRel and RelWithDebInfo
@@ -316,7 +330,7 @@ install(
         cmake/SilKitTargets-relwithdebinfo.cmake
     DESTINATION ${INSTALL_LIB_DIR}/cmake/SilKit
     CONFIGURATIONS Release Debug RelWithDebInfo
-    COMPONENT bin
+    COMPONENT dev
 )
 
 #make our local build dir usable for other projects

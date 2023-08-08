@@ -79,7 +79,7 @@ write_basic_package_version_file(
 )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SilKitConfigVersion.cmake
     DESTINATION ${_DEPLOY_CMAKE_DIR}
-    COMPONENT bin
+    COMPONENT dev
     )
 #create a portable packageConfig.cmake
 configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/SilKitConfig.cmake.in
@@ -89,6 +89,6 @@ configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/cmake/SilKitConfig.cmake
 )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SilKitConfig.cmake
     DESTINATION ${_DEPLOY_CMAKE_DIR}
-    COMPONENT bin
+    COMPONENT dev
     )
 
