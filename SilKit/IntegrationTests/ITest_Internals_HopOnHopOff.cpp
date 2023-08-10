@@ -33,6 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/SilKit.hpp"
 #include "silkit/services/orchestration/all.hpp"
+
 #include "silkit/vendor/CreateSilKitRegistry.hpp"
 #include "silkit/services/all.hpp"
 #include "silkit/services/pubsub/PubSubSpec.hpp"
@@ -99,6 +100,8 @@ protected:
             ImmovableMembers(ImmovableMembers&& other) noexcept
                 : allReceived{other.allReceived.load()}
                 , runAsync{other.runAsync.load()}
+
+                , stopRequested{other.stopRequested.load()}
             {
             }
 
@@ -108,6 +111,7 @@ protected:
                 {
                     allReceived = other.allReceived.load();
                     runAsync = other.runAsync.load();
+                    stopRequested = other.stopRequested.load();
                 }
 
                 return *this;
@@ -115,6 +119,7 @@ protected:
 
             std::atomic<bool> allReceived{false};
             std::atomic<bool> runAsync{true};
+            std::atomic<bool> stopRequested{false};
         };
 
         ImmovableMembers i{};
@@ -140,7 +145,8 @@ protected:
         TimeMode timeMode;
         OperationMode lifeCycleOperationMode;
         ILifecycleService* lifecycleService{nullptr};
-
+        std::map<std::string, ParticipantState> participantStates;
+        
         void ResetReception()
         {
             receivedIds.clear();
@@ -164,11 +170,48 @@ protected:
 
     struct SystemControllerParticipant
     {
+        struct ImmovableMembers
+        {
+            ImmovableMembers() = default;
+            ImmovableMembers(ImmovableMembers&& other) noexcept
+                : runningStateReached{other.runningStateReached.load()}
+            {
+            }
+
+            ImmovableMembers& operator=(ImmovableMembers&& other) noexcept
+            {
+                if (this != &other)
+                {
+                    runningStateReached = other.runningStateReached.load();
+                }
+
+                return *this;
+            }
+
+            std::atomic<bool> runningStateReached{false};
+        };
+
+        ImmovableMembers i{};
+        std::promise<void> runningStatePromise;
         std::unique_ptr<IParticipant> participant;
         SilKit::Experimental::Services::Orchestration::ISystemController* systemController;
         ISystemMonitor* systemMonitor;
         ILifecycleService* lifecycleService;
         std::future<ParticipantState> finalState;
+
+        void AwaitRunning()
+        {
+            auto runningStateFuture = runningStatePromise.get_future();
+            auto futureStatus = runningStateFuture.wait_for(communicationTimeout);
+            if (futureStatus != std::future_status::ready)
+            {
+                FAIL() << "Test Failure: Awaiting system controller timed out";
+            }
+            else if (verbose)
+            {
+                std::cout << ">> AwaitRunning of " << systemControllerParticipantName << " done" << std ::endl;
+            }
+        }
     };
 
     void SystemStateHandler(SystemState newState)
@@ -216,38 +259,35 @@ protected:
                                                 const DataMessageEvent& dataMessageEvent) {
                 auto participantId = dataMessageEvent.data[0];
 
-                if (!testParticipant.i.allReceived)
+                if (testParticipant.i.allReceived || participantId == testParticipant.id)
+                    return;
+
+                auto now = timeSyncService->Now();
+
+                std::stringstream ss;
+                ss << testParticipant.name << ": receive from " << participantNames[participantId]
+                   << " at now=" << now.count() << " with timestamp=" << dataMessageEvent.timestamp.count();
+                logger->Info(ss.str());
+
+                if (participantIsSync[participantId] && now >= 0ns)
                 {
-                    if (participantId != testParticipant.id)
+                    auto delta = now - dataMessageEvent.timestamp;
+                    if (delta > simStepSize)
                     {
-                        auto now = timeSyncService->Now();
+                        testParticipant.lifecycleService->Stop("Fail with chronology error");
 
-                        std::stringstream ss;
-                        ss << testParticipant.name << ": receive from " << participantNames[participantId]
-                           << " at now=" << now.count() << " with timestamp=" << dataMessageEvent.timestamp.count();
-                        logger->Info(ss.str());
-
-                        if (participantIsSync[participantId] && now >= 0ns)
-                        {
-                            auto delta = now - dataMessageEvent.timestamp;
-                            if (delta > simStepSize)
-                            {
-                                testParticipant.lifecycleService->Stop("Fail with chronology error");
-
-                                FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
-                                       << participantNames[participantId] << " with timestamp "
-                                       << dataMessageEvent.timestamp.count() << " while this participant's time is " << now.count();
-                            }
-                        }
-
-                        testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
-                        // No self delivery: Expect expectedReceptions-1 receptions
-                        if (testParticipant.receivedIds.size() == expectedReceptions - 1)
-                        {
-                            testParticipant.i.allReceived = true;
-                            testParticipant.allReceivedPromise.set_value();
-                        }
+                        FAIL() << "Chronology error: Participant " << testParticipant.name << " received message from "
+                               << participantNames[participantId] << " with timestamp "
+                               << dataMessageEvent.timestamp.count() << " while this participant's time is " << now.count();
                     }
+                }
+
+                testParticipant.receivedIds.insert(dataMessageEvent.data[0]);
+                // No self delivery: Expect expectedReceptions-1 receptions
+                if (testParticipant.receivedIds.size() == expectedReceptions - 1)
+                {
+                    testParticipant.i.allReceived = true;
+                    testParticipant.allReceivedPromise.set_value();
                 }
             });
 
@@ -283,13 +323,17 @@ protected:
             config = SilKit::Config::MakeEmptyParticipantConfiguration();
         }
 
+        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, registryUri);
         if (testParticipant.lifeCycleOperationMode != OperationMode::Invalid)
         {
             testParticipant.lifecycleService =
                 testParticipant.participant->CreateLifecycleService({testParticipant.lifeCycleOperationMode});
         }
+        auto systemMonitor = testParticipant.participant->CreateSystemMonitor();
+        systemMonitor->AddParticipantStatusHandler([&testParticipant](ParticipantStatus status) {
+            testParticipant.participantStates[status.participantName] = status.state;
+        });
 
-        testParticipant.participant = SilKit::CreateParticipant(config, testParticipant.name, registryUri);
         SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
         SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
         testParticipant.publisher = testParticipant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
@@ -317,6 +361,13 @@ protected:
             {
                 testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
                 std::this_thread::sleep_for(asyncDelayBetweenPublication);
+                if (testParticipant.i.stopRequested)
+                {
+                    testParticipant.lifecycleService->Stop("Stop requested");
+                    // TODO: Causes TSAN issue that is not fully understood, will be fixed in SILKIT-1361.
+                    //testParticipant.i.stopRequested = false;
+                    break;
+                }
             }
         };
 
@@ -327,6 +378,10 @@ protected:
 
             auto finalStateFuture = testParticipant.lifecycleService->StartLifecycle();
             finalStateFuture.get();
+            if (runTaskThread.joinable())
+            {
+                runTaskThread.join();
+            }
         }
         else
         {
@@ -356,6 +411,18 @@ protected:
         systemControllerParticipant.systemController = participantInternal->GetSystemController();
 
         systemControllerParticipant.systemMonitor = systemControllerParticipant.participant->CreateSystemMonitor();
+        systemControllerParticipant.systemMonitor->AddParticipantStatusHandler(
+            [this](const Services::Orchestration::ParticipantStatus& status) {
+                {
+                    if (status.participantName == systemControllerParticipantName
+                            && status.state == ParticipantState::Running
+                            && !systemControllerParticipant.i.runningStateReached)
+                    {
+                        systemControllerParticipant.i.runningStateReached = true;
+                        systemControllerParticipant.runningStatePromise.set_value();
+                    }
+                }
+            });
         systemControllerParticipant.lifecycleService = systemControllerParticipant.participant->CreateLifecycleService(
             {SilKit::Services::Orchestration::OperationMode::Coordinated});
 
@@ -567,6 +634,58 @@ protected:
 
     std::string registryUri;
 };
+
+
+TEST_F(ITest_HopOnHopOff, test_GracefulShutdown)
+{
+    RunRegistry();
+
+    std::list<TestParticipant> syncParticipants;
+    syncParticipants.push_back({"SyncParticipant1", TimeMode::Sync, OperationMode::Coordinated});
+    syncParticipants.push_back({"SyncParticipant2", TimeMode::Sync, OperationMode::Coordinated});
+
+    std::list<TestParticipant> monitorParticipants;
+    monitorParticipants.push_back({"MonitorParticipant1", TimeMode::Async, OperationMode::Autonomous});
+
+    expectedReceptions = syncParticipants.size() + monitorParticipants.size();
+
+    std::vector<std::string> required{};
+    for (auto&& p : syncParticipants)
+    {
+        required.push_back(p.name);
+    }
+    RunSystemController(required);
+
+    RunParticipants(monitorParticipants);
+    RunParticipants(syncParticipants);
+
+    // Each participant knows that all other participants have started.
+    for (auto& p : syncParticipants)
+    {
+        p.AwaitCommunication();
+    }
+    for (auto& p : monitorParticipants)
+    {
+        p.AwaitCommunication();
+    }
+    systemControllerParticipant.AwaitRunning();
+
+    // Stop via system controller participant
+    StopSystemController();
+
+    // Wait for coordinated to end
+    JoinParticipantThreads(participantThreads_Sync_Coordinated);
+
+    // Expect shutdown state
+    EXPECT_EQ(monitorParticipants.front().participantStates["SyncParticipant1"], ParticipantState::Shutdown);
+    EXPECT_EQ(monitorParticipants.front().participantStates["SyncParticipant2"], ParticipantState::Shutdown);
+
+    monitorParticipants.front().i.stopRequested = true;
+    JoinParticipantThreads(participantThreads_Async_Autonomous);
+
+    StopRegistry();
+}
+
 
 TEST_F(ITest_HopOnHopOff, test_Async_HopOnHopOff_ToSynced)
 {

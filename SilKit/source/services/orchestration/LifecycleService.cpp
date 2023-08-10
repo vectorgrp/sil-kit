@@ -220,33 +220,6 @@ void LifecycleService::Stop(std::string reason)
     });
 }
 
-void LifecycleService::Shutdown(std::string reason)
-{
-    _lifecycleManager.Shutdown(reason);
-    bool success = _lifecycleManager.GetCurrentState() != _lifecycleManager.GetErrorState();
-    if (success)
-    {
-        try
-        {
-            std::stringstream ss;
-            ss << "Confirming shutdown of " << _participant->GetParticipantName();
-            _logger->Debug(ss.str());
-
-            _finalStatePromise->set_value(State());
-
-        }
-        catch (const std::future_error&)
-        {
-            // NOP - received shutdown multiple times
-        }
-    }
-    else
-    {
-        Logging::Warn(_logger, "lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
-                      std::move(reason));
-    }
-}
-
 void LifecycleService::Restart(std::string /*reason*/)
 {
     throw SilKitError("Restarting is currently not supported.");
@@ -351,6 +324,23 @@ bool LifecycleService::CheckForValidConfiguration()
         }
     }
     return true;
+}
+
+void LifecycleService::SetFinalStatePromise()
+{
+    try
+    {
+        std::stringstream ss;
+        ss << "Confirming shutdown of " << _participant->GetParticipantName();
+        _logger->Debug(ss.str());
+
+        _finalStatePromise->set_value(State());
+
+    }
+    catch (const std::future_error&)
+    {
+        // NOP - received shutdown multiple times
+    }
 }
 
 auto LifecycleService::State() const -> ParticipantState

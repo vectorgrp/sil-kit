@@ -114,7 +114,6 @@ public:
 
     bool IsTimeSyncActive() const;
 
-    void Shutdown(std::string reason);
     void Restart(std::string reason);
 
     void SetLifecycleConfiguration(LifecycleConfiguration startConfiguration);
@@ -124,6 +123,7 @@ public:
     OperationMode GetOperationMode() const;
 
     auto StopRequested() const -> bool;
+    void SetFinalStatePromise();
 
 private:
     // ----------------------------------------

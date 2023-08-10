@@ -285,8 +285,6 @@ private:
 
     bool TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSubscriber& subscriber);
 
-    void UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer);
-
     // Registry related send / receive methods
     void SendParticipantAnnouncement(IVAsioPeer* peer);
     void ReceiveParticipantAnnouncement(IVAsioPeer* from, SerializedMessage&& buffer);

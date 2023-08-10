@@ -85,11 +85,10 @@ public: //CTors
 
     // Actions after Stop
     void RestartAfterStop(std::string reason);
-    void ShutdownAfterStop(std::string reason);
     void ShutdownAfterAbort(std::string reason);
 
     // Ignore peer disconnects after stop
-    void ShutdownConnection();
+    void NotifyShutdownInConnection();
 
     // State setter
     void SetState(ILifecycleState* newState, std::string message);

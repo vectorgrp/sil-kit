@@ -47,7 +47,7 @@ struct end_of_buffer : public std::exception {};
 class MessageBuffer;
 
 
-/// Captures a reference to a MessageBuffer object and stores it's current read position on construction. On
+/// Captures a reference to a MessageBuffer object and stores its current read position on construction. On
 /// destruction, the read position of the captured MessageBuffer is reset to the stored value.
 class MessageBufferPeeker
 {

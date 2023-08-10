@@ -89,9 +89,9 @@ void LifecycleManagement::Shutdown(std::string reason)
     _currentState->ShutdownParticipant(std::move(reason));
 }
 
-void LifecycleManagement::ShutdownConnection()
+void LifecycleManagement::NotifyShutdownInConnection()
 {
-    return _participant->NotifyShutdown();
+    _participant->NotifyShutdown();
 }
 
 void LifecycleManagement::Pause(std::string reason)
@@ -121,18 +121,11 @@ void LifecycleManagement::RestartAfterStop(std::string reason)
     _lifecycleService->Restart(std::move(reason));
 }
 
-void LifecycleManagement::ShutdownAfterStop(std::string reason)
-{
-    // for now, the participant will always shut down after stopping
-    _lifecycleService->Shutdown(std::move(reason));
-}
-
 void LifecycleManagement::ShutdownAfterAbort(std::string reason)
 {
     // for now, the participant will always shut down after stopping
-    _lifecycleService->Shutdown(std::move(reason));
+    Shutdown(std::move(reason));
 }
-
 
 void LifecycleManagement::StartAutonomous(std::string reason)
 {

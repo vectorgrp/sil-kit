@@ -29,6 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceDiscovery.hpp"
 #include "ILogger.hpp"
 #include "LifecycleService.hpp"
+#include "OrchestrationDatatypes.hpp"
 
 namespace SilKit {
 namespace Services {
@@ -198,13 +199,8 @@ void SystemMonitor::ReceiveMsg(const IServiceEndpoint* /*from*/, const Orchestra
     // Ignores transition if ParticipantState is Shutdown already
     if (oldParticipantState == Orchestration::ParticipantState::Shutdown)
     {
-        Logging::Debug(_logger,
-                        "Ignoring ParticipantState update from participant \'{}\' to ParticipantState::{} because "
-                        "participant is already in terminal state ParticipantState::Shutdown.",
-                        newParticipantStatus.participantName, newParticipantStatus.state);
         return;
     }
-
 
     // Update status map
     {
@@ -276,6 +272,46 @@ void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformatio
 
 void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
+    // If participant has lifecycle, update disconnected participant to Error State
+    // If current known participant state is Shutdown State, we do not bother changing state
+    auto& participantName = participantConnectionInformation.participantName;
+    auto&& statusIter = _participantStatus.find(participantName);
+    if (statusIter != _participantStatus.end())
+    {
+        auto previousState = statusIter->second.state;
+        auto status = Orchestration::ParticipantStatus{};
+        status.participantName = participantName;
+        status.state = SilKit::Services::Orchestration::ParticipantState::Error;
+        status.enterReason = "Connection Lost";
+        status.enterTime = std::chrono::system_clock::now();
+        status.refreshTime = std::chrono::system_clock::now();
+        ReceiveMsg(/*from*/nullptr, status);
+
+        if (previousState == Orchestration::ParticipantState::Shutdown)
+        {
+            Logging::Info(_logger,
+                          "Participant \'{}\' has disconnected after gracefully shutting down",
+                          participantName);
+        }
+        else
+        {
+            Logging::Error(
+                _logger,
+                "Participant \'{}\' has disconnected without gracefully shutting down.",
+                participantName);
+        }
+    }
+    else if (participantName == "SilKitRegistry")
+    {
+        Logging::Error(_logger,
+                       "Connection to SIL Kit Registry was lost - no new participant connections can be established.");
+    }
+    else
+    {
+        // This disconnecting participant is not the SIL Kit Registry and has no lifecycle.
+        Logging::Info(_logger, "Participant \'{}\' has disconnected.", participantConnectionInformation.participantName);
+    }
+
     // Erase participant from connectedParticipant map
     {
         std::unique_lock<decltype(_connectedParticipantsMx)> lock{_connectedParticipantsMx};

@@ -19,6 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
+#include "ILogger.hpp"
 #include "LifecycleStates.hpp"
 #include "LifecycleService.hpp"
 #include "LifecycleManagement.hpp"
@@ -581,7 +582,7 @@ void StoppedState::StopSimulation(std::string reason)
     // evaluate the correct SystemState and stop themselves.
     _lifecycleManager->GetParticipant()->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(
         [this, reason]() {
-            _lifecycleManager->ShutdownAfterStop(reason);
+            _lifecycleManager->Shutdown(reason);
     });
 }
 
@@ -628,15 +629,15 @@ void ShuttingDownState::StopSimulation(std::string /*reason*/)
 
 void ShuttingDownState::ShutdownParticipant(std::string reason)
 {
-    _lifecycleManager->ShutdownConnection();
-
     auto success = _lifecycleManager->HandleShutdown();
     if (!success)
     {
         _lifecycleManager->GetLogger()->Warn(
             "ShutdownHandler threw an exception. This is ignored. The participant will now shut down.");
     }
-    _lifecycleManager->SetState(_lifecycleManager->GetShutdownState(), std::move(reason));
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShutdownState(),
+                                                &ILifecycleState::ShutdownParticipant,
+                                                std::move(reason));
 }
 
 void ShuttingDownState::AbortSimulation()
@@ -668,9 +669,23 @@ void ShutdownState::StopSimulation(std::string /*reason*/)
     // Ignore Stop() in ShutdownState
 }
 
-void ShutdownState::ShutdownParticipant(std::string /*reason*/)
+void ShutdownState::ShutdownParticipant(std::string reason)
 {
-    // NOP for possible concurrent SystemState transition
+    _lifecycleManager->GetParticipant()->GetParticipantRepliesProcedure()->CallAfterAllParticipantsReplied(
+        [this, reason]() {
+            bool success = _lifecycleManager->GetCurrentState() != _lifecycleManager->GetErrorState();
+            if (success)
+            {
+                _lifecycleManager->NotifyShutdownInConnection();
+                _lifecycleManager->GetService()->SetFinalStatePromise();
+            }
+            else
+            {
+                Logging::Warn(_lifecycleManager->GetLogger(),
+                              "lifecycle failed to shut down correctly - original shutdown reason was '{}'.",
+                              std::move(reason));
+            }
+    });
 }
 
 void ShutdownState::AbortSimulation()

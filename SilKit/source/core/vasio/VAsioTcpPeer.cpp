@@ -173,7 +173,6 @@ void VAsioTcpPeer::Shutdown()
 {
     if (_socket.is_open())
     {
-        SilKit::Services::Logging::Info(_logger, "Shutting down connection to {}", _info.participantName);
         _socket.close();
 
         std::unique_lock<std::mutex> lock{_sendingQueueLock};

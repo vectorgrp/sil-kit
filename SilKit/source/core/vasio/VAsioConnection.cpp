@@ -331,7 +331,6 @@ VAsioConnection::VAsioConnection(SilKit::Config::ParticipantConfiguration config
     , _timeProvider{timeProvider}
     , _version{version}
 {
-    RegisterPeerShutdownCallback([this](IVAsioPeer* peer) { UpdateParticipantStatusOnConnectionLoss(peer); });
     _hashToParticipantName.insert(std::pair<uint64_t, std::string>(SilKit::Util::Hash::Hash(_participantName), _participantName));
 }
 
@@ -1230,39 +1229,6 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
 void VAsioConnection::NotifyShutdown()
 {
     _isShuttingDown = true;
-}
-
-void VAsioConnection::UpdateParticipantStatusOnConnectionLoss(IVAsioPeer* peer)
-{
-    if (_isShuttingDown)
-    {
-        _logger->Debug("Ignoring UpdateParticipantStatusOnConnectionLoss because we're shutting down");
-        return;
-    }
-
-    auto& info = peer->GetInfo();
-
-    SilKit::Services::Orchestration::ParticipantStatus msg;
-    msg.participantName = info.participantName;
-    msg.state = SilKit::Services::Orchestration::ParticipantState::Error;
-    msg.enterReason = "Connection Lost";
-    msg.enterTime = std::chrono::system_clock::now();
-    msg.refreshTime = std::chrono::system_clock::now();
-
-    auto&& link = GetLinkByName<SilKit::Services::Orchestration::ParticipantStatus>("default");
-
-    // The VAsioTcpPeer has an incomplete Service ID, fill in the missing
-    // link and participant names.
-    auto& peerService = dynamic_cast<IServiceEndpoint&>(*peer);
-    auto peerId = peerService.GetServiceDescriptor();
-    peerId.SetParticipantNameAndComputeId(peer->GetInfo().participantName);
-    peerId.SetNetworkName(link->Name());
-    peerService.SetServiceDescriptor(peerId);
-    link->DistributeRemoteSilKitMessage(&peerService, std::move(msg));
-
-    // TODO: This might be a connection break or a regular shutdown of a remote peer.
-    // For an improved error handling, the message may take these cases into account
-    Services::Logging::Debug(_logger, "Lost connection to participant {}", peerId);
 }
 
 void VAsioConnection::OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer)
