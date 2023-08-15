@@ -481,7 +481,8 @@ void VAsioTcpPeer::WriteSomeAsync()
 
 void VAsioTcpPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    SilKit::Services::Logging::Debug(_logger, "Announcing subscription for [{}] {}", subscriber.networkName, subscriber.msgTypeName); 
+    Services::Logging::Debug(_logger, "VAsioTcpPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
+                             subscriber.msgTypeName, subscriber.networkName, _info.participantName);
     SendSilKitMsg(SerializedMessage{subscriber});
 }
 

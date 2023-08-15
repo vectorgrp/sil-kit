@@ -118,8 +118,8 @@ public:
         case ParticipantState::Shutdown: // [[fallthrough]]
             return;
         default:
-            _controller.ReportError("Received NextSimTask in state ParticipantState::"
-                                    + to_string(_controller.State()));
+            _participant->GetLifecycleService()->ReportError("Received NextSimTask in state ParticipantState::"
+                                                             + to_string(_controller.State()));
             return;
         }
     }
@@ -242,7 +242,7 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
         std::stringstream buffer;
         buffer << "SimStep did not finish within hard time limit. Timeout detected after "
                << std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(timeout).count() << "ms";
-        this->ReportError(buffer.str());
+        _lifecycleService->ReportError(buffer.str());
     });
 
     ConfigureTimeProvider(TimeProviderKind::NoSync);
@@ -314,19 +314,6 @@ TimeSyncService::TimeSyncService(Core::IParticipantInternal* participant, ITimeP
                 }
             }
         });
-}
-
-void TimeSyncService::ReportError(const std::string& errorMsg)
-{
-    _logger->Error(errorMsg);
-
-    if (State() == ParticipantState::Shutdown)
-    {
-        Warn(_logger, "TimeSyncService::ReportError() was called in terminal state ParticipantState::Shutdown; "
-                      "transition to ParticipantState::Error is ignored.");
-        return;
-    }
-    _lifecycleService->ChangeParticipantState(ParticipantState::Error, errorMsg);
 }
 
 bool TimeSyncService::IsSynchronizingVirtualTime()

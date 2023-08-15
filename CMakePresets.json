@@ -135,7 +135,7 @@
             "vendor": {
                 "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
                     "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}",
-                    "rsyncCommandArgs": [ "--copy-links",  "--exclude", "_build" ]
+                    "rsyncCommandArgs": [ "--copy-links", "--exclude", "_build" ]
                 }
             }
         },
@@ -360,19 +360,19 @@
         {
             "name": "mixin-crossarmeabihf",
             "description": "Crossbuild with toolchain file",
-            "hidden":true,
+            "hidden": true,
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabihf.cmake"
         },
 
         {
             "name": "mixin-crossarmeabi",
             "description": "Crossbuild with toolchain file",
-            "hidden":true,
+            "hidden": true,
             "toolchainFile": "${sourceDir}/SilKit/cmake/toolchain-arm-linux-gnueabi.cmake"
         },
         {
             "name": "vs140-x86-debug",
-            "inherits": ["mixin-windows", "mixin-dirs", "mixin-ninja" , "mixin-arch-x86", "mixin-toolset-v140", "mixin-debug", "mixin-werror"]
+            "inherits": [ "mixin-windows", "mixin-dirs", "mixin-ninja", "mixin-arch-x86", "mixin-toolset-v140", "mixin-debug", "mixin-werror" ]
         },
         {
             "name": "vs140-x86-release",
@@ -380,122 +380,133 @@
         },
         {
             "name": "vs140-x64-debug",
-            "inherits": [ "mixin-arch-x64", "vs140-x86-debug"]
+            "inherits": [ "mixin-arch-x64", "vs140-x86-debug" ]
         },
         {
             "name": "vs140-x64-release",
-            "inherits": [ "mixin-release","vs140-x64-debug"]
+            "inherits": [ "mixin-release", "vs140-x64-debug" ]
         },
 
         {
             "name": "vs141-x86-debug",
-            "inherits": ["mixin-windows", "mixin-dirs", "mixin-ninja" , "mixin-arch-x86", "mixin-toolset-v141", "mixin-debug", "mixin-werror"]
+            "inherits": [ "mixin-windows", "mixin-dirs", "mixin-ninja", "mixin-arch-x86", "mixin-toolset-v141", "mixin-debug", "mixin-werror" ]
         },
         {
             "name": "vs141-x86-release",
-            "inherits": ["mixin-release","vs141-x86-debug"]
+            "inherits": [ "mixin-release", "vs141-x86-debug" ]
         },
         {
             "name": "vs141-x64-debug",
-            "inherits": ["mixin-arch-x64", "vs141-x86-debug"]
+            "inherits": [ "mixin-arch-x64", "vs141-x86-debug" ]
         },
         {
             "name": "vs141-x64-release",
-            "inherits": ["mixin-release", "vs141-x64-debug"]
+            "inherits": [ "mixin-release", "vs141-x64-debug" ]
         },
 
         {
             "name": "gcc7-debug",
-            "inherits": ["mixin-posix", "mixin-dirs", "mixin-ninja" , "mixin-debug", "mixin-gcc7", "mixin-werror"]
+            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc7", "mixin-werror" ]
         },
 
         {
             "name": "gcc7-release",
-            "inherits": ["mixin-release", "gcc7-debug", "mixin-build-docs"]
+            "inherits": [ "mixin-release", "gcc7-debug", "mixin-build-docs" ]
         },
 
         {
             "name": "gcc8-debug",
-            "inherits": ["mixin-posix", "mixin-dirs", "mixin-ninja" , "mixin-debug", "mixin-gcc8", "mixin-werror"]
+            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc8", "mixin-werror" ]
         },
 
         {
             "name": "gcc8-release",
-            "inherits": ["mixin-release", "gcc8-debug", "mixin-build-docs"]
+            "inherits": [ "mixin-release", "gcc8-debug", "mixin-build-docs" ]
         },
 
         {
             "name": "gcc9-debug",
-            "inherits": ["mixin-posix", "mixin-dirs", "mixin-ninja" , "mixin-debug", "mixin-gcc9"]
+            "inherits": [ "mixin-posix", "mixin-dirs", "mixin-ninja", "mixin-debug", "mixin-gcc9" ]
         },
         {
             "name": "gcc9-release",
-            "inherits": ["mixin-release", "gcc9-debug", "mixin-build-docs"]
+            "inherits": [ "mixin-release", "gcc9-debug", "mixin-build-docs" ]
         },
         {
             "name": "clang10-debug",
-            "inherits": [ "mixin-clang10","gcc9-debug"]
+            "inherits": [ "mixin-clang10", "gcc9-debug" ]
         },
         {
             "name": "clang10-release",
-            "inherits": [ "mixin-release", "clang10-debug"]
+            "inherits": [ "mixin-release", "clang10-debug" ]
         },
         {
             "name": "clang12-debug",
-            "inherits": [ "mixin-clang12","gcc9-debug"]
+            "inherits": [ "mixin-clang12", "gcc9-debug" ]
         },
         {
             "name": "clang12-release",
-            "inherits": [ "mixin-release", "clang12-debug"]
+            "inherits": [ "mixin-release", "clang12-debug" ]
         },
         {
             "name": "clang14-debug",
-            "inherits": [ "mixin-clang14","gcc9-debug"]
+            "inherits": [ "mixin-clang14", "gcc9-debug" ]
         },
         {
             "name": "clang14-release",
-            "inherits": [ "mixin-release", "clang14-debug"]
+            "inherits": [ "mixin-release", "clang14-debug" ]
         },
 
         {
             "name": "clang15-debug",
-            "inherits": [ "mixin-clang15","gcc9-debug"]
+            "inherits": [ "mixin-clang15", "gcc9-debug" ]
         },
         {
             "name": "clang15-release",
-            "inherits": [ "mixin-release", "clang15-debug"]
+            "inherits": [ "mixin-release", "clang15-debug" ]
         },
 
         {
             "name": "clang-debug",
-            "inherits": [ "mixin-clang","gcc9-debug"]
+            "inherits": [ "mixin-clang", "gcc9-debug" ]
         },
         {
             "name": "clang-release",
-            "inherits": [ "mixin-release", "clang-debug"]
+            "inherits": [ "mixin-release", "clang-debug" ]
         },
 
         {
-            "name": "clang-asan-debug",
-            "inherits": ["clang12-debug", "mixin-asan", "mixin-nosplitdebug" ]
+            "name": "clang12-asan-debug",
+            "inherits": [ "clang12-debug", "mixin-asan", "mixin-nosplitdebug" ]
         },
         {
-            "name": "clang-tsan-debug",
-            "inherits": ["clang12-debug", "mixin-tsan", "mixin-nosplitdebug" ]
+            "name": "clang12-tsan-debug",
+            "inherits": [ "clang12-debug", "mixin-tsan", "mixin-nosplitdebug" ]
         },
         {
-            "name": "clang-ubsan-debug",
-            "inherits": ["clang12-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
+            "name": "clang12-ubsan-debug",
+            "inherits": [ "clang12-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
         },
-
+        {
+            "name": "clang15-asan-debug",
+            "inherits": [ "clang15-debug", "mixin-asan", "mixin-nosplitdebug" ]
+        },
+        {
+            "name": "clang15-tsan-debug",
+            "inherits": [ "clang15-debug", "mixin-tsan", "mixin-nosplitdebug" ]
+        },
+        {
+            "name": "clang15-ubsan-debug",
+            "inherits": [ "clang15-debug", "mixin-ubsan", "mixin-nosplitdebug" ]
+        },
         {
             "name": "cross-armeabihf-debug",
-            "inherits": ["mixin-crossarmeabihf", "gcc9-debug" ],
+            "inherits": [ "mixin-crossarmeabihf", "gcc9-debug" ],
             "displayName": "Debian cross build for GNU arm eabihf"
         },
         {
             "name": "cross-armeabi-debug",
-            "inherits": ["mixin-crossarmeabi", "gcc9-debug" , "mixin-nosplitdebug"],
+            "inherits": [ "mixin-crossarmeabi", "gcc9-debug", "mixin-nosplitdebug" ],
             "displayName": "Debian cross build for GNU arm eabi"
         },
         {
@@ -671,18 +682,29 @@
             "configurePreset": "clang-release"
         },
         {
-            "name": "clang-asan-debug",
-            "configurePreset": "clang-asan-debug"
+            "name": "clang12-asan-debug",
+            "configurePreset": "clang12-asan-debug"
         },
         {
-            "name": "clang-ubsan-debug",
-            "configurePreset": "clang-ubsan-debug"
+            "name": "clang12-tsan-debug",
+            "configurePreset": "clang12-tsan-debug"
         },
         {
-            "name": "clang-tsan-debug",
-            "configurePreset": "clang-tsan-debug"
+            "name": "clang12-ubsan-debug",
+            "configurePreset": "clang12-ubsan-debug"
         },
-
+        {
+            "name": "clang15-asan-debug",
+            "configurePreset": "clang15-asan-debug"
+        },
+        {
+            "name": "clang15-tsan-debug",
+            "configurePreset": "clang15-tsan-debug"
+        },
+        {
+            "name": "clang15-ubsan-debug",
+            "configurePreset": "clang15-ubsan-debug"
+        },
         {
             "name": "cross-qnx-x86_64",
             "configurePreset": "cross-qnx-x86_64"
@@ -859,18 +881,29 @@
             "configurePreset": "clang-release"
         },
         {
-            "name": "clang-asan-debug",
-            "configurePreset": "clang-asan-debug"
+            "name": "clang12-asan-debug",
+            "configurePreset": "clang12-asan-debug"
         },
         {
-            "name": "clang-tsan-debug",
-            "configurePreset": "clang-tsan-debug"
+            "name": "clang12-tsan-debug",
+            "configurePreset": "clang12-tsan-debug"
         },
         {
-            "name": "clang-ubsan-debug",
-            "configurePreset": "clang-ubsan-debug"
+            "name": "clang12-ubsan-debug",
+            "configurePreset": "clang12-ubsan-debug"
         },
-
+        {
+            "name": "clang15-asan-debug",
+            "configurePreset": "clang15-asan-debug"
+        },
+        {
+            "name": "clang15-tsan-debug",
+            "configurePreset": "clang15-tsan-debug"
+        },
+        {
+            "name": "clang15-ubsan-debug",
+            "configurePreset": "clang15-ubsan-debug"
+        },
         {
             "name": "cross-qnx-x86_64",
             "configurePreset": "cross-qnx-x86_64"

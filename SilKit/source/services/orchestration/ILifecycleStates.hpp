@@ -77,7 +77,7 @@ public:
     // Trigger the ShutdownHandler; If completed, advance to ShutdownState.
     virtual void ShutdownParticipant(std::string reason) = 0;
 
-    virtual void AbortSimulation() = 0;
+    virtual void AbortSimulation(std::string reason) = 0;
     virtual void ResolveAbortSimulation(std::string reason) = 0;
 
     virtual void Error(std::string reason) = 0;

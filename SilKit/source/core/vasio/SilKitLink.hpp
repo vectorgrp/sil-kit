@@ -25,6 +25,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "VAsioTransmitter.hpp"
 #include "traits/SilKitMsgTraits.hpp"
+#include "MessageTracing.hpp"
 
 #include "IMessageReceiver.hpp"
 #include "TimeSyncService.hpp"
@@ -168,6 +169,9 @@ void SilKitLink<MsgT>::DistributeLocalSilKitMessage(const IServiceEndpoint* from
         {
             if (receiverId->GetServiceDescriptor() == from->GetServiceDescriptor()) continue;
         }
+        // Trace reception of self delivery
+        Services::TraceRx(_logger, receiverId, msg, from->GetServiceDescriptor());
+
         DispatchSilKitMessage(receiver, from, msg);
     }
 }

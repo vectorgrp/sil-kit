@@ -7,6 +7,34 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.34] - Unreleased
+---------------------
+
+Changed
+~~~~~~~
+
+- Behavior change of ``ParticipantState::Error``
+
+  - Old: Several situations could lead to an ``ParticipantState::Error`` before the user called ``StartLifecycle()``
+
+    - Reception of an invalid ``WorkflowConfiguration``
+    - Remote participant disconnected
+    - Reception of ``AbortSimulation``
+
+  - New: ParticipantState::Error should only be reached after ``StartLifecycle()`` was called
+
+    - Reception of a WorkflowConfiguration is not validated before ``StartLifecycle()``
+    - A disconnected remote participant is only transitioned to ``ParticipantState::Error`` if he had a started Lifecycle
+    - Reaction on ``SystemCommang::AbortSimulation`` is deferred before ``StartLifecycle()`` (see below)
+
+- Behavior change of ``SystemCommand::AbortSimulation``
+
+  - Old: Reception of ``AbortSimulation`` before ``StartLifecycle()`` led to ``ParticipantState::Error``
+  - New: Reception of ``AbortSimulation`` before ``StartLifecycle()`` is firstly ignored. A later call to ``StartLifecycle()`` then directly leads to an abort (transition to ``ParticipantState::Aborting``, calling the ``AbortHandler``)
+
+- clang presets in ``CMakePresets.json`` now have the clang version in their names
+
+
 [4.0.33] - 2023-08-07
 ---------------------
 

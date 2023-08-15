@@ -92,7 +92,6 @@ public:
 
     void SetPaused(std::future<void> pausedFuture);
     void AwaitNotPaused();
-    void ReportError(const std::string& errorMsg);
 
     bool IsSynchronizingVirtualTime();
 

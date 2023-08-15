@@ -64,7 +64,7 @@ static std::map<size_t, bool> participantIsSync{};
 
 const bool verbose = true;
 const bool logging = false;
-const Services::Logging::Level logLevel = Services::Logging::Level::Info;
+const Services::Logging::Level logLevel = Services::Logging::Level::Trace;
 
 enum class TimeMode
 {
@@ -100,7 +100,6 @@ protected:
             ImmovableMembers(ImmovableMembers&& other) noexcept
                 : allReceived{other.allReceived.load()}
                 , runAsync{other.runAsync.load()}
-
                 , stopRequested{other.stopRequested.load()}
             {
             }

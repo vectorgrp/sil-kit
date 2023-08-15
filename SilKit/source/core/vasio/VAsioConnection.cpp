@@ -1456,9 +1456,15 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     });
 
     if (wasAdded)
-        Services::Logging::Debug(_logger, "Registered subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
+    {
+        Services::Logging::Debug(_logger, "Messages of type '{}' on link '{}' will be sent to participant '{}'",
+                                 from->GetInfo().participantName, subscriber.msgTypeName, subscriber.networkName);
+    }
     else
-        Services::Logging::Warn(_logger, "Cannot register subscription for [{}] {} from {}", subscriber.networkName, subscriber.msgTypeName, from->GetInfo().participantName);
+    {
+        Services::Logging::Warn(_logger, "Participant '{}' could not be registered as receiver for messages of type '{}' on link '{}'",
+                                from->GetInfo().participantName, subscriber.msgTypeName, subscriber.networkName);
+    }
 
     return wasAdded;
 }
@@ -1601,7 +1607,7 @@ bool VAsioConnection::ParticiantHasCapability(const std::string& participantName
     const auto it = _participantNameToPeer.find(participantName);
     if (it == _participantNameToPeer.end())
     {
-        SilKit::Services::Logging::Warn(_logger, "GetParticiantCapabilities: Participant \'{}\' unknown",
+        SilKit::Services::Logging::Warn(_logger, "GetParticiantCapabilities: Participant '{}' unknown",
                                         participantName);
         return false;
     }

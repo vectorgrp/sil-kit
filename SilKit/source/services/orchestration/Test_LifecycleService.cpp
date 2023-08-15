@@ -536,6 +536,108 @@ TEST_F(LifecycleServiceTest, error_handling_exception_in_stop_callback)
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
 }
 
+TEST_F(LifecycleServiceTest, Abort_BeforeLifecycleStart)
+{
+    LifecycleService lifecycleService(&participant);
+    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
+    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
+    lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
+
+    EXPECT_CALL(callbacks, AbortHandler(_)).Times(1).WillRepeatedly(Invoke([&](auto participantState) {
+        EXPECT_EQ(participantState, ParticipantState::Invalid);
+    }));
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
+        .Times(0);
+    EXPECT_CALL(participant,
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(0);
+    EXPECT_CALL(participant,
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopping)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopped)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Aborting)))
+        .Times(1);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
+        .Times(1);
+
+    // Receive abort...
+    SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
+    // ...than call StartLifecycle
+    auto finalStateFuture = lifecycleService.StartLifecycle();
+    // Final state must be reached
+    auto finalState = finalStateFuture.get();
+    // Abort must result in Shutdown state
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
+    EXPECT_EQ(finalState, ParticipantState::Shutdown);
+}
+
+TEST_F(LifecycleServiceTest, Abort_AfterLifecycleStart)
+{
+    LifecycleService lifecycleService(&participant);
+    lifecycleService.SetLifecycleConfiguration(StartCoordinated());
+    MockTimeSync mockTimeSync(&participant, &participant.mockTimeProvider, healthCheckConfig, &lifecycleService);
+    lifecycleService.SetTimeSyncService(&mockTimeSync);
+    ON_CALL(participant, CreateTimeSyncService(_)).WillByDefault(Return(&mockTimeSync));
+    lifecycleService.SetServiceDescriptor(p1Id.GetServiceDescriptor());
+    lifecycleService.SetAbortHandler(bind_method(&callbacks, &Callbacks::AbortHandler));
+
+    EXPECT_CALL(callbacks, AbortHandler(_)).Times(1).WillRepeatedly(Invoke([&](auto participantState) {
+        EXPECT_EQ(participantState, ParticipantState::Running);
+    }));
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ServicesCreated)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::CommunicationInitializing)))
+        .Times(1);
+    EXPECT_CALL(participant,
+                SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::CommunicationInitialized)))
+        .Times(1);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ReadyToRun)))
+        .Times(1);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Running)))
+        .Times(1);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopping)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Stopped)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::ShuttingDown)))
+        .Times(0);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Aborting)))
+        .Times(1);
+    EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
+        .Times(1);
+
+    // Call StartLifecycle...
+    auto finalStateFuture = lifecycleService.StartLifecycle();
+    lifecycleService.NewSystemState(SystemState::ServicesCreated);
+    lifecycleService.NewSystemState(SystemState::CommunicationInitializing);
+    lifecycleService.NewSystemState(SystemState::CommunicationInitialized);
+    lifecycleService.NewSystemState(SystemState::ReadyToRun);
+
+    // ...then receive abort
+    SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
+    lifecycleService.ReceiveMsg(&masterId, abortCommand);
+
+    // Final state must be reached
+    auto finalState = finalStateFuture.get();
+    // Abort must result in Shutdown state
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Shutdown);
+    EXPECT_EQ(finalState, ParticipantState::Shutdown);
+}
+
 TEST_F(LifecycleServiceTest, Abort_CommunicationReady_Callback)
 {
     LifecycleService lifecycleService(&participant);
@@ -1072,13 +1174,13 @@ TEST_F(LifecycleServiceTest, Abort_LifecycleNotExecuted)
     EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Shutdown)))
         .Times(0);
     EXPECT_CALL(participant, SendMsg(&lifecycleService, AParticipantStatusWithState(ParticipantState::Error)))
-        .Times(1);
+        .Times(0);
 
     EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
     // Abort right away
     SystemCommand abortCommand{SystemCommand::Kind::AbortSimulation};
     lifecycleService.ReceiveMsg(&masterId, abortCommand);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 }
 
 TEST_F(LifecycleServiceTest, error_handling_exception_in_starting_callback)
@@ -1211,7 +1313,7 @@ TEST_F(LifecycleServiceTest, error_on_coordinated_not_required)
     WorkflowConfiguration workflowConfiguration;
     workflowConfiguration.requiredParticipantNames = {"NotThisParticipant", "AlsoNotThisParticipant"};
     lifecycleService.SetWorkflowConfiguration(workflowConfiguration);
-    EXPECT_EQ(lifecycleService.State(), ParticipantState::Error);
+    EXPECT_EQ(lifecycleService.State(), ParticipantState::Invalid);
 }
 
 TEST_F(LifecycleServiceTest, error_on_not_required_coordinated)

@@ -109,12 +109,6 @@ void LifecycleManagement::Stop(std::string reason)
     _currentState->StopSimulation(std::move(reason));
 }
 
-void LifecycleManagement::ResolveAbortSimulation(std::string reason)
-{
-    _currentState->ResolveAbortSimulation(reason);
-    ShutdownAfterAbort(std::move(reason));
-}
-
 void LifecycleManagement::RestartAfterStop(std::string reason)
 {
     // for now, the participant will always shut down after stopping
@@ -137,9 +131,9 @@ void LifecycleManagement::Error(std::string reason)
     _currentState->Error(std::move(reason));
 }
 
-void LifecycleManagement::AbortSimulation(std::string /*reason*/)
+void LifecycleManagement::AbortSimulation(std::string reason)
 {
-    _currentState->AbortSimulation();
+    _currentState->AbortSimulation(std::move(reason));
     if (_currentState == GetErrorState())
     {
         GetLogger()->Warn("AbortSimulation caused a transition to an error state");

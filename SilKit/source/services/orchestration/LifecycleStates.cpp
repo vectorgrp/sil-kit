@@ -142,16 +142,15 @@ void InvalidState::Initialize(std::string reason)
     _lifecycleManager->SetState(_lifecycleManager->GetServicesCreatedState(), std::move(reason));
 }
 
-void InvalidState::AbortSimulation()
+void InvalidState::AbortSimulation(std::string reason)
 {
-    std::string msg = "Received Abort message before lifecycle was started.";
-    _lifecycleManager->GetLogger()->Warn(msg);
-    _lifecycleManager->SetState(_lifecycleManager->GetErrorState(), std::move(msg));
+    ResolveAbortSimulation(std::move(reason));
 }
 
-void InvalidState::ResolveAbortSimulation(std::string)
+void InvalidState::ResolveAbortSimulation(std::string reason)
 {
-    // NOP -- we are not even initialized yet...
+    _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetAbortingState(),
+                                                &ILifecycleState::ResolveAbortSimulation, std::move(reason));
 }
 
 std::string InvalidState::toString()
@@ -182,9 +181,9 @@ void ServicesCreatedState::ServicesCreated(std::string reason)
     });
 }
 
-void ServicesCreatedState::AbortSimulation()
+void ServicesCreatedState::AbortSimulation(std::string reason)
 {
-    ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+    ResolveAbortSimulation(std::move(reason));
 }
 
 void ServicesCreatedState::ResolveAbortSimulation(std::string reason)
@@ -224,9 +223,9 @@ void CommunicationInitializingState::CommunicationInitializing(std::string reaso
     });
 }
 
-void CommunicationInitializingState::AbortSimulation()
+void CommunicationInitializingState::AbortSimulation(std::string reason)
 {
-    ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+    ResolveAbortSimulation(std::move(reason));
 }
 
 void CommunicationInitializingState::ResolveAbortSimulation(std::string reason)
@@ -300,7 +299,7 @@ void CommunicationInitializedState::CompleteCommunicationReadyHandler(std::strin
 }
 
 
-void CommunicationInitializedState::AbortSimulation()
+void CommunicationInitializedState::AbortSimulation(std::string /*reason*/)
 {
     _abortRequested = true;
 }
@@ -386,7 +385,7 @@ void ReadyToRunState::ReadyToRun(std::string reason)
     }
 }
 
-void ReadyToRunState::AbortSimulation()
+void ReadyToRunState::AbortSimulation(std::string reason)
 {
     if (_handlerExecuting)
     {
@@ -395,7 +394,7 @@ void ReadyToRunState::AbortSimulation()
     else
     {
         // if we are still waiting for a system state update and receive an abort command, execute immediately.
-        ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+        ResolveAbortSimulation(std::move(reason));
     }
 }
 
@@ -451,11 +450,11 @@ void RunningState::StopSimulation(std::string reason)
                                          std::move(reason));
 }
 
-void RunningState::AbortSimulation()
+void RunningState::AbortSimulation(std::string reason)
 {
     // TODO handle abort during executeSimStep
     // For now, just abort and hope for the best...
-    ResolveAbortSimulation("Received SystemCommand::AbortSimulation.");
+    ResolveAbortSimulation(std::move(reason));
 }
 
 void RunningState::ResolveAbortSimulation(std::string reason)
@@ -494,11 +493,11 @@ void PausedState::StopSimulation(std::string reason)
                                          std::move(reason));
 }
 
-void PausedState::AbortSimulation()
+void PausedState::AbortSimulation(std::string reason)
 {
     // TODO handle abort during executeSimStep
     // For now, just abort and hope for the best...
-    ResolveAbortSimulation("Received abort simulation.");
+    ResolveAbortSimulation(std::move(reason));
 }
 
 void PausedState::ResolveAbortSimulation(std::string reason)
@@ -550,7 +549,7 @@ void StoppingState::StopSimulation(std::string reason)
     }
 }
 
-void StoppingState::AbortSimulation()
+void StoppingState::AbortSimulation(std::string /*reason*/)
 {
     _abortRequested = true;
 }
@@ -597,9 +596,9 @@ void StoppedState::ShutdownParticipant(std::string reason)
                                          std::move(reason));
 }
 
-void StoppedState::AbortSimulation()
+void StoppedState::AbortSimulation(std::string reason)
 {
-    ResolveAbortSimulation("Received abort simulation.");
+    ResolveAbortSimulation(std::move(reason));
 }
 
 void StoppedState::ResolveAbortSimulation(std::string reason)
@@ -640,7 +639,7 @@ void ShuttingDownState::ShutdownParticipant(std::string reason)
                                                 std::move(reason));
 }
 
-void ShuttingDownState::AbortSimulation()
+void ShuttingDownState::AbortSimulation(std::string /*reason*/)
 {
     _lifecycleManager->GetLogger()->Info("Received abort signal while shutting down - ignoring abort.");
 }
@@ -688,7 +687,7 @@ void ShutdownState::ShutdownParticipant(std::string reason)
     });
 }
 
-void ShutdownState::AbortSimulation()
+void ShutdownState::AbortSimulation(std::string /*reason*/)
 {
     _lifecycleManager->GetLogger()->Info("Received abort signal after shutdown - ignoring abort.");
 }
@@ -718,7 +717,10 @@ void AbortingState::ShutdownParticipant(std::string reason)
                                                 &ILifecycleState::ShutdownParticipant, std::move(reason));
 }
 
-void AbortingState::AbortSimulation() {}
+void AbortingState::AbortSimulation(std::string /*reason*/) 
+{
+    // NOP: Ignore AbortSimulation() in AbortingState
+}
 
 void AbortingState::ResolveAbortSimulation(std::string reason)
 {
@@ -765,9 +767,9 @@ void ErrorState::ShutdownParticipant(std::string reason)
                                          std::move(reason));
 }
 
-void ErrorState::AbortSimulation()
+void ErrorState::AbortSimulation(std::string reason)
 {
-    ResolveAbortSimulation("Received abort simulation.");
+    ResolveAbortSimulation(std::move(reason));
 }
 
 void ErrorState::ResolveAbortSimulation(std::string reason)

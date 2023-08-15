@@ -272,29 +272,33 @@ void SystemMonitor::OnParticipantConnected(const ParticipantConnectionInformatio
 
 void SystemMonitor::OnParticipantDisconnected(const ParticipantConnectionInformation& participantConnectionInformation)
 {
-    // If participant has lifecycle, update disconnected participant to Error State
-    // If current known participant state is Shutdown State, we do not bother changing state
     auto& participantName = participantConnectionInformation.participantName;
     auto&& statusIter = _participantStatus.find(participantName);
     if (statusIter != _participantStatus.end())
     {
         auto previousState = statusIter->second.state;
-        auto status = Orchestration::ParticipantStatus{};
-        status.participantName = participantName;
-        status.state = SilKit::Services::Orchestration::ParticipantState::Error;
-        status.enterReason = "Connection Lost";
-        status.enterTime = std::chrono::system_clock::now();
-        status.refreshTime = std::chrono::system_clock::now();
-        ReceiveMsg(/*from*/nullptr, status);
 
         if (previousState == Orchestration::ParticipantState::Shutdown)
         {
+            // If current known participant state is ParticipantState::Shutdown, we do not bother changing state
             Logging::Info(_logger,
                           "Participant \'{}\' has disconnected after gracefully shutting down",
                           participantName);
         }
-        else
+        else if (previousState != ParticipantState::Invalid)
         {
+            // If participant has any other state except ParticipantState::Invalid and ParticipantState::Shutdown, 
+            // he has a started lifecycle that was not shut down gracefully. 
+            
+            // Update disconnected participant to ParticipantState::Error
+            auto status = Orchestration::ParticipantStatus{};
+            status.participantName = participantName;
+            status.state = SilKit::Services::Orchestration::ParticipantState::Error;
+            status.enterReason = "Connection Lost";
+            status.enterTime = std::chrono::system_clock::now();
+            status.refreshTime = std::chrono::system_clock::now();
+            ReceiveMsg(nullptr, status);
+
             Logging::Error(
                 _logger,
                 "Participant \'{}\' has disconnected without gracefully shutting down.",

@@ -80,7 +80,7 @@ public:
 
     void Initialize(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -96,7 +96,7 @@ public:
 
     void ServicesCreated(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -113,7 +113,7 @@ public:
     void ServicesCreated(std::string reason) override;
     void CommunicationInitializing(std::string reason) override;
     
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -131,7 +131,7 @@ public:
     void CommunicationInitialized(std::string reason) override;
     void CompleteCommunicationReadyHandler(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -149,7 +149,7 @@ public:
     void CommunicationInitialized(std::string reason) override;
     void ReadyToRun(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -173,7 +173,7 @@ public:
     void ContinueSimulation(std::string reason) override;
     void StopSimulation(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -191,7 +191,7 @@ public:
     void ContinueSimulation(std::string reason) override;
     void StopSimulation(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -207,7 +207,7 @@ public:
 
     void StopSimulation(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -226,7 +226,7 @@ public:
     void RestartParticipant(std::string reason) override;
     void ShutdownParticipant(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -244,7 +244,7 @@ public:
 
     void ShutdownParticipant(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -262,7 +262,7 @@ public:
 
     void ShutdownParticipant(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -278,7 +278,7 @@ public:
 
     void ShutdownParticipant(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
@@ -297,7 +297,7 @@ public:
     void ShutdownParticipant(std::string reason) override;
     void Error(std::string reason) override;
 
-    void AbortSimulation() override;
+    void AbortSimulation(std::string reason) override;
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;

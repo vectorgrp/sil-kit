@@ -157,6 +157,8 @@ private:
     mutable ParticipantStatus _returnValueForStatus;
 
     std::atomic<bool> _isLifecycleStarted{false};
+    std::atomic<bool> _abortedBeforeLifecycleStart{false};
+    
     LifecycleManagement _lifecycleManager;
     std::atomic<bool> _timeSyncActive{false};
 

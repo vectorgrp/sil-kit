@@ -94,6 +94,8 @@ protected:
             ImmovableMembers(ImmovableMembers&& other) noexcept
                 : allReceived{other.allReceived.load()}
                 , stopRequested{other.stopRequested.load()}
+                , errorStateReached{other.errorStateReached.load()}
+                , runningStateReached{other.runningStateReached.load()}
             {
             }
 
@@ -103,6 +105,8 @@ protected:
                 {
                     allReceived = other.allReceived.load();
                     stopRequested = other.stopRequested.load();
+                    errorStateReached = other.errorStateReached.load();
+                    runningStateReached = other.runningStateReached.load();
                 }
 
                 return *this;
@@ -112,7 +116,6 @@ protected:
             std::atomic<bool> stopRequested{false};
             std::atomic<bool> errorStateReached{false};
             std::atomic<bool> runningStateReached{false};
-
         };
 
         ImmovableMembers i{};
@@ -180,6 +183,7 @@ protected:
         }
 
         auto participant = SilKit::CreateParticipantImpl(config, testParticipant.name, registryUri);
+        auto* logger = participant->GetLogger();
 
         ILifecycleService* lifecycleService{};
         if (testParticipant.allowInvalidLifeCycleOperationMode
@@ -194,13 +198,21 @@ protected:
 
         auto systemMonitor = participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler(
-            [&testParticipant, systemController](const Services::Orchestration::ParticipantStatus& status) {
-                if (status.participantName == testParticipant.name && status.state == ParticipantState::Error)
+            [&testParticipant, systemController, logger, this](const Services::Orchestration::ParticipantStatus& status) {
+                if (status.participantName == testParticipant.name)
                 {
                     if (status.state == ParticipantState::Error && !testParticipant.i.errorStateReached)
                     {
                         testParticipant.i.errorStateReached = true;
                         testParticipant.errorStatePromise.set_value();
+
+                        if (logging)
+                        {
+                            std::stringstream ss;
+                            ss << "AbortSimulation due to ErrorState of participant \'" << testParticipant.name << "\'";
+                            logger->Info(ss.str());
+                        }
+            
                         systemController->AbortSimulation();
                     }
                     else if (status.state == ParticipantState::Running && !testParticipant.i.runningStateReached)
@@ -218,8 +230,6 @@ protected:
         {
             timeSyncService = lifecycleService->CreateTimeSyncService();
         }
-
-        auto* logger = participant->GetLogger();
 
         SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
         SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
@@ -284,6 +294,7 @@ protected:
         }
 
         auto participant = SilKit::CreateParticipantImpl(config, testParticipant.name, registryUri);
+        auto* logger = participant->GetLogger();
 
         ILifecycleService* lifecycleService{};
         if (testParticipant.allowInvalidLifeCycleOperationMode
@@ -291,14 +302,13 @@ protected:
         {
             lifecycleService = participant->CreateLifecycleService({testParticipant.lifeCycleOperationMode});
         }
-        
+
         auto participantInternal = dynamic_cast<SilKit::Core::IParticipantInternal*>(participant.get());
         Experimental::Services::Orchestration::ISystemController* systemController =
             participantInternal->GetSystemController();
-
         auto systemMonitor = participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler(
-            [&testParticipant, systemController](const Services::Orchestration::ParticipantStatus& status) {
+            [&testParticipant, systemController, logger, this](const Services::Orchestration::ParticipantStatus& status) {
                 if (status.participantName == testParticipant.name)
                 {
                     if (status.state == ParticipantState::Error && !testParticipant.i.errorStateReached)
@@ -308,6 +318,12 @@ protected:
 
                         testParticipant.i.errorStateReached = true;
                         testParticipant.errorStatePromise.set_value();
+                        if (logging)
+                        {
+                            std::stringstream ss;
+                            ss << "AbortSimulation due to ErrorState of participant \'" << testParticipant.name << "\'";
+                            logger->Info(ss.str());
+                        }
                         systemController->AbortSimulation();
                     }
                     else if (status.state == ParticipantState::Running && !testParticipant.i.runningStateReached)
@@ -375,10 +391,7 @@ protected:
             // Stop the lifecycle
             lifecycleService->Stop("End Test");
 
-            if (!testParticipant.i.errorStateReached)
-            {
-                finalStateFuture.get();
-            }
+            finalStateFuture.get();
 
             if (runTaskThread.joinable())
             {
@@ -389,6 +402,7 @@ protected:
         {
             runTask();
         }
+
     }
 
     void SystemControllerParticipantThread(const std::vector<std::string>& required)
@@ -438,6 +452,10 @@ protected:
                 {
                     std::cout << "SystemState::Error -> Aborting simulation" << std ::endl;
                 }
+                if (logging)
+                {
+                    logger->Info("Aborting simulation due to SystemState::Error");
+                }
                 systemController->AbortSimulation();
                 break;
 
@@ -454,23 +472,28 @@ protected:
 
         auto finalState = systemControllerLifecycleService->StartLifecycle();
 
-        std::promise<void> stopThreadDone{};
-        auto waitForStopTask = [&stopThreadDone, systemController]() {
+        std::promise<void> abortThreadDone{};
+        auto waitForAbortTask = [&abortThreadDone, systemController, logger, this]() {
             while (!abortSystemControllerRequested)
             {
                 std::this_thread::sleep_for(1ms);
             }
-            abortSystemControllerRequested = false;
+            
+            if (logging)
+            {
+                logger->Info("AbortSimulation requested");
+            }
             systemController->AbortSimulation();
-            stopThreadDone.set_value();
+            abortThreadDone.set_value();
         };
-        std::thread stopThread{waitForStopTask};
-        stopThread.detach();
-        stopThreadDone.get_future().get();
-        if (stopThread.joinable())
+        std::thread abortThread{waitForAbortTask};
+        abortThread.detach();
+        abortThreadDone.get_future().get();
+        if (abortThread.joinable())
         {
-            stopThread.join();
+            abortThread.join();
         }
+        abortSystemControllerRequested = false;
 
         finalState.get();
     }
@@ -492,7 +515,7 @@ protected:
         }
     }
 
-    void StopSystemController()
+    void AbortSystemController()
     {
         abortSystemControllerRequested = true;
         participantThread_SystemController.shutdownFuture.get();
@@ -676,7 +699,7 @@ protected:
 // Sync     Coordinated     NonReq      -> Disallowed: Coordinated must be required
 // Sync     Invalid         Req/NonReq  -> Disallowed
 
-TEST_F(ITest_ParticipantModes, DISABLED_test_AsyncCoordinatedNonReq_disallowed)
+TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
 {
     RunRegistry();
 
@@ -699,11 +722,11 @@ TEST_F(ITest_ParticipantModes, DISABLED_test_AsyncCoordinatedNonReq_disallowed)
 
     // Shutdown
     JoinParticipantThreads(participantThreads_Async_Coordinated);
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, DISABLED_test_SyncCoordinatedNonReq_disallowed)
+TEST_F(ITest_ParticipantModes, test_SyncCoordinatedNonReq_disallowed)
 {
     RunRegistry();
 
@@ -726,7 +749,7 @@ TEST_F(ITest_ParticipantModes, DISABLED_test_SyncCoordinatedNonReq_disallowed)
 
     // Shutdown
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
@@ -854,7 +877,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncAutonomousReq)
 
     // Shutdown
     JoinParticipantThreads(participantThreads_Async_Autonomous);
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
@@ -895,7 +918,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedReq)
     // Shutdown
     JoinParticipantThreads(participantThreads_Async_Coordinated);
 
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
@@ -964,7 +987,7 @@ TEST_F(ITest_ParticipantModes, test_SyncAutonomousReq)
     // Shutdown
     JoinParticipantThreads(participantThreads_Sync_Autonomous);
     
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
@@ -1003,7 +1026,7 @@ TEST_F(ITest_ParticipantModes, test_SyncCoordinatedReq)
     // Shutdown
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
@@ -1049,7 +1072,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncAutonomousReq_with_SyncCoordinated)
     JoinParticipantThreads(participantThreads_Async_Autonomous);
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
-    StopSystemController();
+    AbortSystemController();
     StopRegistry();
 }
 
@@ -1235,7 +1258,7 @@ TEST_F(ITest_ParticipantModes, test_Combinations)
                     }
                     if (!required.empty())
                     {
-                        StopSystemController();
+                        AbortSystemController();
                     }
 
                     if (verbose)

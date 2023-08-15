@@ -80,9 +80,6 @@ public: //CTors
     // Wait for pending subscriptions before advancing from CommunicationInitializing to CommunicationInitialized
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
-    // Abort handling
-    void ResolveAbortSimulation(std::string reason);
-
     // Actions after Stop
     void RestartAfterStop(std::string reason);
     void ShutdownAfterAbort(std::string reason);

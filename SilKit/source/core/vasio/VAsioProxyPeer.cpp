@@ -62,8 +62,10 @@ void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
 
 void VAsioProxyPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    SilKit::Services::Logging::Debug(_logger, "VAsioProxyPeer ({}): Announcing subscription for [{}] {}",
-                                     _peerInfo.participantName, subscriber.networkName, subscriber.msgTypeName);
+    Services::Logging::Debug(_logger,
+                             "VAsioProxyPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
+                             subscriber.msgTypeName, subscriber.networkName, _peerInfo.participantName);
+
     SendSilKitMsg(SerializedMessage{subscriber});
 }
 

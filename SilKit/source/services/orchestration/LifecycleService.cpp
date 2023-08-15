@@ -112,18 +112,27 @@ auto LifecycleService::StartLifecycle()
     ss << "Lifecycle of participant " << _participant->GetParticipantName() << " started";
     _logger->Debug(ss.str());
 
-	_isLifecycleStarted = true;
+	  _isLifecycleStarted = true;
 	
     if (_finalStatePromise == nullptr)
     {
         throw LogicError{"LifecycleService::StartLifecycle must not be called twice"};
     }
 
+    if (_abortedBeforeLifecycleStart)
+    {
+        _participant->ExecuteDeferred([this] {
+            _logger->Warn(
+                "LifecycleService::StartLifecycle(...) was called after receiving SystemCommand::AbortSimulation;");
+            _lifecycleManager.AbortSimulation("Lifecycle was aborted by SystemCommand::AbortSimulation");
+        });
+        return std::move(_finalStateFuture);
+    }
+
     if (HasRequiredParticipantNames())
     {
         if (!CheckForValidConfiguration())
         {
-            _finalStatePromise->set_value(ParticipantState::Invalid);
             return std::move(_finalStateFuture);
         }
     }
@@ -150,7 +159,11 @@ auto LifecycleService::StartLifecycle()
         this->NewSystemState(systemState);
     });
 
-    _lifecycleManager.Initialize("LifecycleService::StartLifecycle was called.");
+    // Initialize switches to ServicesCreated. In parallel, the reception of an invalid WorkflowConfiguration could 
+    // lead to ErrorState, so we need to defer this to the IO-Worker Thread
+    _participant->ExecuteDeferred([this] {
+        _lifecycleManager.Initialize("LifecycleService::StartLifecycle was called.");
+    });
 
     switch (_operationMode)
     {
@@ -172,16 +185,26 @@ auto LifecycleService::StartLifecycle()
 
 void LifecycleService::ReportError(std::string errorMsg)
 {
-    _logger->Error(errorMsg);
+    _participant->ExecuteDeferred([errorMsg, this] {
 
-    if (State() == ParticipantState::Shutdown)
-    {
-        _logger->Warn("LifecycleService::ReportError() was called in terminal state ParticipantState::Shutdown; "
-                      "transition to ParticipantState::Error is ignored.");
-        return;
-    }
+        _logger->Error(errorMsg);
 
-    _lifecycleManager.Error(std::move(errorMsg));
+        if (!_isLifecycleStarted)
+        {
+            _logger->Warn(
+                "LifecycleService::ReportError() was called before LifecycleService::StartLifecycle() was called;"
+                "transition to ParticipantState::Error is ignored.");
+            return;
+        }
+        else if (State() == ParticipantState::Shutdown)
+        {
+            _logger->Warn("LifecycleService::ReportError() was called in terminal state ParticipantState::Shutdown; "
+                          "transition to ParticipantState::Error is ignored.");
+            return;
+        }
+
+        _lifecycleManager.Error(std::move(errorMsg));
+    });
 }
 
 void LifecycleService::Pause(std::string reason)
@@ -228,10 +251,6 @@ void LifecycleService::Restart(std::string /*reason*/)
 void LifecycleService::SetLifecycleConfiguration(LifecycleConfiguration startConfiguration)
 {
     _operationMode = startConfiguration.operationMode;
-    if (HasRequiredParticipantNames())
-    {
-        CheckForValidConfiguration();
-    }
 }
 
 OperationMode LifecycleService::GetOperationMode() const
@@ -297,7 +316,7 @@ void LifecycleService::TriggerAbortHandler(ParticipantState lastState)
 
 void LifecycleService::AbortSimulation(std::string reason)
 {
-    _lifecycleManager.AbortSimulation(reason);
+    _lifecycleManager.AbortSimulation(std::move(reason));
 }
 
 bool LifecycleService::CheckForValidConfiguration()
@@ -315,11 +334,13 @@ bool LifecycleService::CheckForValidConfiguration()
         {
             // participants that are coordinated but not required are currently not supported
             std::stringstream ss;
-            
+
             ss << _participant->GetParticipantName()
-               << ": This participant is in OperationMode::Coordinated but it is not part of the "
-                  "set of \"required\" participants declared by the system controller. ";
+                << ": This participant is in OperationMode::Coordinated but it is not part of the "
+                    "set of \"required\" participants declared by the system controller. ";
+            
             ReportError(ss.str());
+
             return false;
         }
     }
@@ -330,12 +351,8 @@ void LifecycleService::SetFinalStatePromise()
 {
     try
     {
-        std::stringstream ss;
-        ss << "Confirming shutdown of " << _participant->GetParticipantName();
-        _logger->Debug(ss.str());
-
+        _logger->Debug("Setting the final state promise");
         _finalStatePromise->set_value(State());
-
     }
     catch (const std::future_error&)
     {
@@ -401,14 +418,19 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
 
 void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& command)
 {
-    // Ignore messages if StartLifecycle has not been called yet
+    // Handle reception of SystemCommands if StartLifecycle has not been called yet
     if (!_isLifecycleStarted)
     {
         std::stringstream msg;
-        msg << "Received SystemCommand::" << command.kind
-            << " before LifecycleService::StartLifecycle(...) was called."
-            << " Origin of current command was " << from->GetServiceDescriptor();
-        ReportError(msg.str());
+        msg << "Received SystemCommand::" << command.kind << " from " << from->GetServiceDescriptor()
+            << " before the lifecycle was started. This has no immediate effect, but calling "
+               "ILifecycleService::StartLifecycle() will trigger the abort.";
+        _logger->Warn(msg.str());
+        if (command.kind == SystemCommand::Kind::AbortSimulation)
+        {
+            // If StartLifecycle is called afterwards, this flag is checked to trigger the actual abort handling.  
+            _abortedBeforeLifecycleStart = true;
+        }
         return;
     }
 
@@ -430,7 +452,8 @@ void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemComm
 void LifecycleService::SetWorkflowConfiguration(const WorkflowConfiguration& configuration)
 {
     SetRequiredParticipantNames(configuration.requiredParticipantNames);
-    if (_operationMode != OperationMode::Invalid)
+    // Receiving the WorkflowConfiguration after lifecycle start
+    if (_operationMode != OperationMode::Invalid && _isLifecycleStarted)
     {
         CheckForValidConfiguration();
     }
