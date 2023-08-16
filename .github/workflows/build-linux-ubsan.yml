@@ -3,7 +3,7 @@ on:
   push:
     branches: [ "main" ]
 jobs:
-  clang-ubsan-debug:
+  clang12-ubsan-debug:
     name: Undefined Behavior Sanitizer Tests
     environment: public-github-runners
     runs-on: ubuntu-20.04
@@ -13,7 +13,7 @@ jobs:
         submodules: true
     - uses: ./.github/actions/build-cmake-preset
       with:
-        preset-name: clang-ubsan-debug
+        preset-name: clang12-ubsan-debug
         cmake-args: "-D SILKIT_BUILD_DASHBOARD=OFF"
 
 
