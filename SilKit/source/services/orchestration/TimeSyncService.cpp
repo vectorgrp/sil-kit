@@ -24,6 +24,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <atomic>
 
 #include "silkit/services/orchestration/string_utils.hpp"
+#include "silkit/services/orchestration/ISystemMonitor.hpp"
 
 #include "TimeSyncService.hpp"
 #include "IServiceDiscovery.hpp"
@@ -156,6 +157,13 @@ private:
 
         // State check is not enough is user called Stop() in the SimTask and directly receives a NextSimTask
         if (_controller.StopRequested())
+        {
+            return false;
+        }
+
+        // Another coordinated participant has disconnected without gracefully shutting down
+        if (static_cast<LifecycleService*>(_participant->GetLifecycleService())->GetOperationMode() == OperationMode::Coordinated && 
+            _participant->GetSystemMonitor()->SystemState() == SystemState::Error)
         {
             return false;
         }

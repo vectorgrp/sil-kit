@@ -34,6 +34,11 @@ Changed
 
 - clang presets in ``CMakePresets.json`` now have the clang version in their names
 
+Fixed
+~~~~~
+
+- Made simulation time stop for all coordinated participants when one coordinated participant disconnects ungracefully
+
 
 [4.0.33] - 2023-08-07
 ---------------------
