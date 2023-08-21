@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.34] - Unreleased
+[4.0.34] - 2023-08-21
 ---------------------
 
 Changed
@@ -21,7 +21,7 @@ Changed
     - Remote participant disconnected
     - Reception of ``AbortSimulation``
 
-  - New: ParticipantState::Error should only be reached after ``StartLifecycle()`` was called
+  - New: ``ParticipantState::Error`` should only be reached after ``StartLifecycle()`` was called
 
     - Reception of a WorkflowConfiguration is not validated before ``StartLifecycle()``
     - A disconnected remote participant is only transitioned to ``ParticipantState::Error`` if he had a started Lifecycle
@@ -33,6 +33,16 @@ Changed
   - New: Reception of ``AbortSimulation`` before ``StartLifecycle()`` is firstly ignored. A later call to ``StartLifecycle()`` then directly leads to an abort (transition to ``ParticipantState::Aborting``, calling the ``AbortHandler``)
 
 - clang presets in ``CMakePresets.json`` now have the clang version in their names
+
+- Added an internal barrier between ``ParticipantState::Shutdown`` and setting the final state promise. This ensures that the participant state updates are all transmitted while shutting down. 
+
+- Revised log messages when shutting down / disconnecting participants
+
+  - Graceful, participant has lifecycle: "Participant <participantName> has disconnected after gracefully shutting down",
+  - Not graceful, participant has lifecycle: "Participant <participantName> has disconnected without gracefully shutting down."
+  - Registry shutdown: "Connection to SIL Kit Registry was lost - no new participant connections can be established."
+  - Participant without lifecycle: "Participant <participantName> has disconnected."
+
 
 Fixed
 ~~~~~
