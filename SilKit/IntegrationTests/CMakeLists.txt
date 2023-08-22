@@ -333,6 +333,14 @@ add_silkit_test(ITest_Orchestration
     S_ITests_STH
 )
 
+add_silkit_test(ITest_RequestRemoteParticipantConnect
+    SOURCES
+    ITest_RequestRemoteParticipantConnect.cpp
+
+    LIBS
+    S_ITests_STH
+)
+
 if(SILKIT_BUILD_DASHBOARD)
     add_silkit_test(
         ITest_Dashboard

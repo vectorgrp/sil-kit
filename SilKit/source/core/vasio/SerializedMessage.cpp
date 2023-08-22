@@ -141,6 +141,7 @@ void SerializedMessage::ReadNetworkHeaders()
                 throw ProtocolError("SerializedMessage: Unsupported protocol version encountered during handshake");
             }
             break;
+        case RegistryMessageKind::RemoteParticipantConnectRequest: break; // nothing to do
         case RegistryMessageKind::Invalid:
             throw ProtocolError("SerializedMessage: ReadNetworkHeaders() encountered RegistryMessageKind::Invalid");
         }

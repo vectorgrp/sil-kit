@@ -43,7 +43,7 @@ namespace Tests {
 
 struct MockConnection
 {
-    MockConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
+    MockConnection(SilKit::Core::IParticipantInternal*, SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
                    SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Services::Orchestration::ITimeProvider* /*timeProvider*/, SilKit::Core::ProtocolVersion)
     {
@@ -52,7 +52,6 @@ struct MockConnection
     void SetLogger(SilKit::Services::Logging::ILogger* /*logger*/) {}
     void SetTimeSyncService(SilKit::Services::Orchestration::TimeSyncService* /*timeSyncService*/) {}
     void JoinSimulation(std::string /*registryUri*/) {}
-
     template <class SilKitServiceT>
     void RegisterSilKitService(SilKitServiceT* /*service*/)
     {

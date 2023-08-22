@@ -282,6 +282,24 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessage& out)
     return buffer;
 }
 
+
+inline MessageBuffer& operator<<(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg)
+{
+	buffer
+		<< msg.peerUnableToConnect
+		<< msg.connectTargetPeer
+		;
+    return buffer;
+}
+inline MessageBuffer& operator>>(MessageBuffer& buffer, RemoteParticipantConnectRequest& out)
+{
+	buffer
+		>> out.peerUnableToConnect
+		>> out.connectTargetPeer
+		;
+    return buffer;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Public Functions
 //////////////////////////////////////////////////////////////////////
@@ -403,6 +421,16 @@ void Serialize(MessageBuffer& buffer, const ProxyMessage& msg)
     buffer << msg;
 }
 void Deserialize(MessageBuffer& buffer, ProxyMessage& out)
+{
+    buffer >> out;
+}
+
+
+void Serialize(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg)
+{
+    buffer << msg;
+}
+void Deserialize(MessageBuffer& buffer, RemoteParticipantConnectRequest& out)
 {
     buffer >> out;
 }

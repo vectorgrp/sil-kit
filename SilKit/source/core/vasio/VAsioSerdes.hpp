@@ -54,6 +54,7 @@ void Serialize(MessageBuffer& buffer, const VAsioMsgSubscriber& subscriber);
 void Serialize(MessageBuffer& buffer, const SubscriptionAcknowledge& msg);
 void Serialize(MessageBuffer& buffer, const KnownParticipants& msg);
 void Serialize(MessageBuffer& buffer, const ProxyMessage& msg);
+void Serialize(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg);
 
 void Deserialize(MessageBuffer& buffer, ParticipantAnnouncement& out);
 void Deserialize(MessageBuffer& buffer,ParticipantAnnouncementReply& out);
@@ -61,6 +62,7 @@ void Deserialize(MessageBuffer&, VAsioMsgSubscriber&);
 void Deserialize(MessageBuffer&, SubscriptionAcknowledge&);
 void Deserialize(MessageBuffer& buffer,KnownParticipants& out);
 void Deserialize(MessageBuffer& buffer, ProxyMessage& out);
+void Deserialize(MessageBuffer& buffer, RemoteParticipantConnectRequest& out);
 
 } // namespace Core
 } // namespace SilKit

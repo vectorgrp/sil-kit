@@ -31,6 +31,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 #include <atomic>
 #include <list>
+#include <set>
+#include <condition_variable>
 
 #include "asio.hpp"
 
@@ -79,7 +81,7 @@ public:
     // Constructors and Destructor
     VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
     VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
-    VAsioConnection(SilKit::Config::ParticipantConfiguration config, std::string participantName,
+    VAsioConnection(IParticipantInternal* participant, SilKit::Config::ParticipantConfiguration config, std::string participantName,
                     ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
                     ProtocolVersion version = CurrentProtocolVersion());
     ~VAsioConnection();
@@ -95,7 +97,6 @@ public:
     // Public methods
     void SetLogger(Services::Logging::ILogger* logger);
     void JoinSimulation(std::string registryUri);
-
 
     template <class SilKitServiceT>
     void RegisterSilKitService(SilKitServiceT* service)
@@ -208,11 +209,15 @@ public:
 
 public: //members
     static constexpr const ParticipantId RegistryParticipantId { 0 };
-private:
+
+private: // methods
     template<typename AcceptorT, typename EndpointT>
     auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
     bool TryCreatingProxy(std::shared_ptr<VAsioTcpPeer>& directPeer,
                           std::shared_ptr<IVAsioConnectionPeer>& peer,
+                          const VAsioPeerInfo& peerInfo,
+                          const std::string& message);
+    bool TryRequestRemoteConnection(std::shared_ptr<VAsioTcpPeer>& directPeer,
                           const VAsioPeerInfo& peerInfo,
                           const std::string& message);
 
@@ -294,6 +299,8 @@ private:
     void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer);
 
     void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer);
+    void ReceiveRemoteParticipantConnectRequest(SerializedMessage&& buffer);
+    void ConnectPeer(const VAsioPeerInfo& peerInfo, bool connectDirectly = false);
 
     void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 
@@ -472,6 +479,10 @@ private:
         return dynamic_cast<IServiceEndpoint&>(*service).GetServiceDescriptor();
     }
 
+    // Remote connection support:
+    void HandleExpiredConnection(const asio::error_code& ec);
+    void RemovePeerFromPendingLists(IVAsioPeer* peer);
+
 private:
     // ----------------------------------------
     // private members
@@ -549,6 +560,31 @@ private:
     // unit testing support
     ProtocolVersion _version;
     friend class VAsioConnectionTest;
+
+    //Remote connection support
+    const std::chrono::nanoseconds _remoteConnectionTimeout{std::chrono::seconds{4}};
+
+    class PendingRemoteConnection
+    {
+    public:
+        PendingRemoteConnection() = default;
+        PendingRemoteConnection(asio::io_context& ioContext, const VAsioPeerInfo& _peerInfo)
+            : timer{std::make_unique<asio::steady_timer>(ioContext)}
+            , peerInfo{_peerInfo}
+        {
+        }
+
+        std::unique_ptr<asio::steady_timer> timer;
+        std::promise<void> connected;
+        VAsioPeerInfo peerInfo;
+    };
+
+    std::map<std::string /*participantName*/, PendingRemoteConnection> _pendingRemoteConnections;
+    std::mutex _pendingRemoteMx;
+    std::unique_ptr<asio::steady_timer> _remoteReconnectTimer;
+
+    // for debugging purposes:
+    IParticipantInternal* _participant{nullptr};
 };
 
 inline auto ResolveHostAndPort(const asio::any_io_executor& executor, Services::Logging::ILogger* logger, const std::string& host, const uint16_t port)

@@ -172,7 +172,7 @@ class VAsioConnectionTest : public testing::Test
 {
 protected:
     VAsioConnectionTest()
-        : _connection({}, "VAsioConnectionTest", 1, &_timeProvider)
+        : _connection(nullptr, {}, "VAsioConnectionTest", 1, &_timeProvider)
     {
         _connection.SetLogger(&_dummyLogger);
     }

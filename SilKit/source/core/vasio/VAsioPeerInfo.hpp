@@ -42,5 +42,10 @@ struct VAsioPeerInfo
     std::string capabilities;
 };
 
+inline bool operator<(const VAsioPeerInfo& lhs, const VAsioPeerInfo& rhs)
+{
+    return lhs.participantName < rhs.participantName;
+}
+
 } // namespace Core
 } // namespace SilKit

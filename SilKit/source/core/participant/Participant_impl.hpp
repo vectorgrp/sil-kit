@@ -84,7 +84,7 @@ template <class SilKitConnectionT>
 Participant<SilKitConnectionT>::Participant(Config::ParticipantConfiguration participantConfig, ProtocolVersion version)
     : _participantConfig{participantConfig}
     , _participantId{Util::Hash::Hash(participantConfig.participantName)}
-    , _connection{_participantConfig, participantConfig.participantName, _participantId, &_timeProvider, version}
+    , _connection{this, _participantConfig, participantConfig.participantName, _participantId, &_timeProvider, version}
 {
     // NB: do not create the _logger in the initializer list. If participantName is empty,
     //  this will cause a fairly unintuitive exception in spdlog.

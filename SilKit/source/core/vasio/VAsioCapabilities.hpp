@@ -26,6 +26,31 @@
 namespace SilKit {
 namespace Core {
 
+// Protocol Capability literals
+struct CapabilityLiteral
+{
+  std::string _value;
+  explicit CapabilityLiteral(const char* capabilityString)
+    : _value{ capabilityString }
+  {}
+
+  operator const char* () const 
+  {
+    return _value.c_str();
+  }
+  operator const std::string& () const
+  {
+    return _value;
+  }
+};
+
+namespace Capabilities {
+const auto ProxyMessage = CapabilityLiteral{ "proxy-message" };
+const auto AutonomousSynchronous = CapabilityLiteral{ "autonomous-synchronous" };
+const auto RequestParticipantConnection = CapabilityLiteral{ "request-participant-connection" };
+}
+
+
 class VAsioCapabilities
 {
 public:

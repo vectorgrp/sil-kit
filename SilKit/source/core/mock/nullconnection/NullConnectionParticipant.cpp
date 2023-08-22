@@ -32,7 +32,7 @@ namespace Core {
 namespace {
 struct NullConnection
 {
-    NullConnection(SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
+    NullConnection(SilKit::Core::IParticipantInternal*, SilKit::Config::ParticipantConfiguration /*config*/, std::string /*participantName*/,
                    SilKit::Core::ParticipantId /*participantId*/,
                    SilKit::Core::Orchestration::ITimeProvider* /*timeProvider*/, ProtocolVersion)
     {

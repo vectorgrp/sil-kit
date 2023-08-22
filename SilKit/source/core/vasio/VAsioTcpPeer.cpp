@@ -292,7 +292,7 @@ bool VAsioTcpPeer::ConnectTcp(const std::string& host, uint16_t port)
         SilKit::Services::Logging::Warn(_logger, "Unable to resolve hostname \"{}:{}\"", host, port);
         return false;
     }
-    auto config = _connection->Config();
+    auto&& config = _connection->Config();
     for (auto&& resolverEntry : resolverResults)
     {
         SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Connecting to [{}]:{} ({})",

@@ -95,6 +95,12 @@ struct KnownParticipants
     std::vector<SilKit::Core::VAsioPeerInfo> peerInfos;
 };
 
+struct RemoteParticipantConnectRequest
+{
+    SilKit::Core::VAsioPeerInfo peerUnableToConnect; //!< peer which attempted to connect.
+    SilKit::Core::VAsioPeerInfo connectTargetPeer; //!< connection target which should attempt to connect back.
+};
+
 enum class RegistryMessageKind : uint8_t
 {
     Invalid = 0,
@@ -107,7 +113,8 @@ enum class RegistryMessageKind : uint8_t
     // with older participants.
     ParticipantAnnouncement = 1,
     ParticipantAnnouncementReply = 2,
-    KnownParticipants = 3
+    KnownParticipants = 3,
+    RemoteParticipantConnectRequest = 4,
 };
 
 struct ProxyMessageHeader
