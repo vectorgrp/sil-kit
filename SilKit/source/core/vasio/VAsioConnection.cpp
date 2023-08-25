@@ -1652,7 +1652,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
 
 void VAsioConnection::ReceiveRawSilKitMessage(IVAsioPeer* from, SerializedMessage&& buffer)
 {
-    auto receiverIdx =  buffer.GetRemoteIndex();//ExtractEndpointId(buffer);
+    auto receiverIdx = static_cast<size_t>(buffer.GetRemoteIndex());//ExtractEndpointId(buffer);
     if (receiverIdx >= _vasioReceivers.size())
     {
         Services::Logging::Warn(_logger, "Ignoring RawSilKitMessage for unknown receiverIdx={}", receiverIdx);
