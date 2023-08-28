@@ -45,6 +45,14 @@ add_silkit_test(ITest_Internals_HopOnHopOff
     S_SilKitImpl
 )
 
+add_silkit_test(ITest_Internals_Abort
+    SOURCES
+    ITest_Internals_Abort.cpp
+
+    LIBS
+    S_SilKitImpl
+)
+
 add_silkit_test(ITest_Internals_ParticipantModes
     SOURCES
     ITest_Internals_ParticipantModes.cpp

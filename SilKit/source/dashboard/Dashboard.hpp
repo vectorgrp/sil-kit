@@ -21,6 +21,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
+#include <future>
+
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/services/orchestration/all.hpp"
 #include "silkit/services/logging/ILogger.hpp"
@@ -80,6 +82,7 @@ private:
     SilKit::Util::HandlerId _systemStateHandlerId{};
 
     std::future<SilKit::Services::Orchestration::ParticipantState> _lifecycleDone;
+    std::promise<void> _runningReachedPromise;
 };
 
 } // namespace Dashboard

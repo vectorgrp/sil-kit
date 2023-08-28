@@ -124,11 +124,13 @@ public:
 
     auto StopRequested() const -> bool;
     void SetFinalStatePromise();
+    void SetPauseDonePromise();
+
+    void AbortSimulation(std::string reason);
 
 private:
     // ----------------------------------------
     // private methods
-    void AbortSimulation(std::string reason);
     bool CheckForValidConfiguration();
 
     /// Thread-safe assignment of the required participant names.

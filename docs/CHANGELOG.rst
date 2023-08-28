@@ -6,6 +6,14 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.35] - Unreleased
+---------------------
+
+Fixed
+~~~~~
+
+- Ensured that calling ``ISystemController::AbortSimulation()`` does not lead to the system controller terminating
+  prior to other participants receiving its abort message.
 
 [4.0.34] - 2023-08-21
 ---------------------

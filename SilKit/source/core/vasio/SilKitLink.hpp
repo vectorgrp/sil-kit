@@ -164,6 +164,12 @@ void SilKitLink<MsgT>::DistributeLocalSilKitMessage(const IServiceEndpoint* from
     for (auto&& receiver : _localReceivers)
     {
         auto* receiverId = dynamic_cast<const IServiceEndpoint*>(receiver);
+
+        // C++ 17 -> if constexpr
+        if (SilKitMsgTraits<MsgT>::IsSelfDeliveryForbidden())
+        {
+            continue;
+        }
         // C++ 17 -> if constexpr
         if (!SilKitMsgTraits<MsgT>::IsSelfDeliveryEnforced())
         {

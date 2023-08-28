@@ -209,16 +209,18 @@ void LifecycleService::ReportError(std::string errorMsg)
 
 void LifecycleService::Pause(std::string reason)
 {
-    if (State() != ParticipantState::Running)
-    {
-        const std::string errorMessage{"TimeSyncService::Pause() was called in state ParticipantState::"
-                                       + to_string(State())};
-        ReportError(errorMessage);
-        throw SilKitError(errorMessage);
-    }
-    _pauseDonePromise = decltype(_pauseDonePromise){};
-    _timeSyncService->SetPaused(_pauseDonePromise.get_future());
-    _lifecycleManager.Pause(reason);
+    _participant->ExecuteDeferred([this, reason] {
+        if (State() != ParticipantState::Running)
+        {
+            const std::string errorMessage{"TimeSyncService::Pause() was called in state ParticipantState::"
+                                           + to_string(State())};
+            ReportError(errorMessage);
+            throw SilKitError(errorMessage);
+        }
+        _pauseDonePromise = decltype(_pauseDonePromise){};
+        _timeSyncService->SetPaused(_pauseDonePromise.get_future());
+        _lifecycleManager.Pause(reason);
+    });
 }
 
 void LifecycleService::Continue()
@@ -232,6 +234,11 @@ void LifecycleService::Continue()
     }
 
     _lifecycleManager.Continue("Pause finished");
+    SetPauseDonePromise();
+}
+
+void LifecycleService::SetPauseDonePromise()
+{
     _pauseDonePromise.set_value();
 }
 
@@ -316,7 +323,17 @@ void LifecycleService::TriggerAbortHandler(ParticipantState lastState)
 
 void LifecycleService::AbortSimulation(std::string reason)
 {
-    _lifecycleManager.AbortSimulation(std::move(reason));
+    // Ignore messages if StartLifecycle has not been called yet
+    if (!_isLifecycleStarted)
+    {
+        std::stringstream msg;
+        msg << "Received SystemCommand::AbortSimulation before LifecycleService::StartLifecycle(...) was called.";
+        _logger->Warn(msg.str());
+        // If StartLifecycle is called afterwards, this flag is checked to trigger the actual abort handling.
+        _abortedBeforeLifecycleStart = true;
+        return;
+    }
+    _lifecycleManager.AbortSimulation(reason);
 }
 
 bool LifecycleService::CheckForValidConfiguration()
@@ -416,24 +433,8 @@ auto LifecycleService::CreateTimeSyncService() -> ITimeSyncService*
     }
 }
 
-void LifecycleService::ReceiveMsg(const IServiceEndpoint* from, const SystemCommand& command)
+void LifecycleService::ReceiveMsg(const IServiceEndpoint*, const SystemCommand& command)
 {
-    // Handle reception of SystemCommands if StartLifecycle has not been called yet
-    if (!_isLifecycleStarted)
-    {
-        std::stringstream msg;
-        msg << "Received SystemCommand::" << command.kind << " from " << from->GetServiceDescriptor()
-            << " before the lifecycle was started. This has no immediate effect, but calling "
-               "ILifecycleService::StartLifecycle() will trigger the abort.";
-        _logger->Warn(msg.str());
-        if (command.kind == SystemCommand::Kind::AbortSimulation)
-        {
-            // If StartLifecycle is called afterwards, this flag is checked to trigger the actual abort handling.  
-            _abortedBeforeLifecycleStart = true;
-        }
-        return;
-    }
-
     switch (command.kind)
     {
     case SystemCommand::Kind::Invalid: break;

@@ -63,7 +63,8 @@ protected:
     void InvalidStateTransition(std::string transitionName, bool triggerErrorState, std::string originalReason);
     bool IsAnyOf(SystemState state, std::initializer_list<SystemState> stateList);
 
-    void ProcessAbortCommand();
+    void ProcessAbortCommandInCallback();
+    void ProcessAbortCommand(std::string reason);
 
 protected:
     LifecycleManagement* _lifecycleManager;
@@ -135,6 +136,9 @@ public:
     void ResolveAbortSimulation(std::string reason) override;
     auto toString() -> std::string override;
     auto GetParticipantState() -> ParticipantState override;
+
+private:
+    std::atomic<bool> _handlerExecuting{false};
 };
 
 class ReadyToRunState : public State
@@ -258,6 +262,8 @@ public:
     {
     }
 
+    void CommunicationInitialized(std::string reason) override;
+    void ReadyToRun(std::string reason) override;
     void StopSimulation(std::string reason) override;
 
     void ShutdownParticipant(std::string reason) override;

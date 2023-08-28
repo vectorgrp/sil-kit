@@ -91,8 +91,12 @@ Dashboard::Dashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> 
 
 Dashboard::~Dashboard()
 {
-    _lifecycleService->Stop("Stop");
-    _lifecycleDone.wait_for(2s);
+    auto timeout = 10s;
+    if (std::future_status::ready == _runningReachedPromise.get_future().wait_for(timeout))
+    {
+        _lifecycleService->Stop("Stop");
+        _lifecycleDone.wait_for(timeout);
+    }
     _systemMonitor->RemoveParticipantStatusHandler(_participantStatusHandlerId);
     _systemMonitor->RemoveSystemStateHandler(_systemStateHandlerId);
     _retryPolicy->AbortAllRetries();
@@ -129,6 +133,10 @@ void Dashboard::OnParticipantStatusChanged(const Services::Orchestration::Partic
 {
     if (participantStatus.participantName == _participantInternal->GetParticipantName())
     {
+        if (participantStatus.state == Services::Orchestration::ParticipantState::Running)
+        {
+            _runningReachedPromise.set_value();
+        }
         return;
     }
     _cachingEventHandler->OnParticipantStatusChanged(participantStatus);

@@ -49,6 +49,7 @@ struct HasTimestamp<T, Util::VoidT<decltype(std::declval<std::decay_t<T>>().time
 template <class MsgT> struct SilKitMsgTraitTypeName { static constexpr const char *TypeName(); };
 template <class MsgT> struct SilKitMsgTraitHistSize { static constexpr std::size_t HistSize() { return 0; } };
 template <class MsgT> struct SilKitMsgTraitEnforceSelfDelivery { static constexpr bool IsSelfDeliveryEnforced() { return false; } };
+template <class MsgT> struct SilKitMsgTraitForbidSelfDelivery { static constexpr bool IsSelfDeliveryForbidden() { return false; } };
 
 // The final message traits
 template <class MsgT> struct SilKitMsgTraits
@@ -57,6 +58,7 @@ template <class MsgT> struct SilKitMsgTraits
     , SilKitMsgTraitEnforceSelfDelivery<MsgT>
     , SilKitMsgTraitVersion<MsgT>
     , SilKitMsgTraitSerdesName<MsgT>
+    , SilKitMsgTraitForbidSelfDelivery<MsgT>
 {
 };
 
@@ -68,6 +70,9 @@ template <class MsgT> struct SilKitMsgTraits
     };
 #define DefineSilKitMsgTrait_EnforceSelfDelivery(Namespace, MsgName) template<> struct SilKitMsgTraitEnforceSelfDelivery<Namespace::MsgName>{\
     static constexpr bool IsSelfDeliveryEnforced() { return true; }\
+    };
+#define DefineSilKitMsgTrait_ForbidSelfDelivery(Namespace, MsgName) template<> struct SilKitMsgTraitForbidSelfDelivery<Namespace::MsgName>{\
+    static constexpr bool IsSelfDeliveryForbidden() { return true; }\
     };
 
 DefineSilKitMsgTrait_TypeName(SilKit::Services::Logging, LogMsg)
@@ -118,8 +123,10 @@ DefineSilKitMsgTrait_HistSize(SilKit::Services::Lin, WireLinControllerConfig, 1)
 
 // Messages with enforced self delivery
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, ParticipantStatus)
-DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Orchestration, SystemCommand)
 DefineSilKitMsgTrait_EnforceSelfDelivery(SilKit::Services::Lin, LinSendFrameHeaderRequest)
+
+// Messages with forbidden self delivery
+DefineSilKitMsgTrait_ForbidSelfDelivery(SilKit::Services::Orchestration, SystemCommand)
 
 } // namespace Core
 } // namespace SilKit
