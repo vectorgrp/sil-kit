@@ -402,7 +402,7 @@ def doBuild(Map config) {
             }
 
             stage("${buildName}: cmake build for preset ${buildPreset}") {
-                run("cmake --build --preset ${buildPreset}")
+                run("python -m pipenv run cmake --build --preset ${buildPreset}")
             }
 
             stage("${buildName}: ctest for preset ${buildPreset}") {
