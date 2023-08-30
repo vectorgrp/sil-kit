@@ -15,6 +15,8 @@ Fixed
 - Ensured that calling ``ISystemController::AbortSimulation()`` does not lead to the system controller terminating
   prior to other participants receiving its abort message.
 
+- Ensure that userContext field for external CanFrameTransmitEvents is allways null.
+
 [4.0.34] - 2023-08-21
 ---------------------
 

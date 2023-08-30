@@ -86,7 +86,7 @@ protected:
                 | static_cast<CanFrameFlagMask>(CanFrameFlag::Esi) | static_cast<CanFrameFlagMask>(CanFrameFlag::Sec);
             canmsg.timestamp = 1s;
             canmsg.direction = SilKit::Services::TransmitDirection::RX;
-            canmsg.userContext = (void*)((size_t)index+1);
+            canmsg.userContext = 0;
 
             auto& canack = _testMessages[index].expectedAck;
             canack.canId = index;
@@ -108,6 +108,9 @@ protected:
         controller->AddFrameTransmitHandler(
             [this, &canWriterAllAcksReceivedPromiseLocal, &numAcks](SilKit::Services::Can::ICanController* /*ctrl*/, const SilKit::Services::Can::CanFrameTransmitEvent& ack) {
                 _testMessages.at(numAcks++).receivedAck = ack;
+                auto tempUserContext = ack.userContext;
+                // double check that userContext is not nullified for frame transmit handler
+                EXPECT_TRUE(tempUserContext == (void*)((size_t)numAcks));
                 if (numAcks >= _testMessages.size())
                 {
                     std::cout << "All can acks received" << std::endl;
@@ -115,6 +118,14 @@ protected:
                     canWriterAllAcksReceivedPromiseLocal.set_value();
                 }
             });
+
+        
+        controller->AddFrameHandler(
+            [](SilKit::Services::Can::ICanController*, const SilKit::Services::Can::CanFrameEvent& msg) {
+                // make sure that userContext fo TX is not nullified
+                EXPECT_TRUE(msg.userContext > (void*)((size_t)0));
+            },
+            static_cast<SilKit::Services::DirectionMask>(SilKit::Services::TransmitDirection::TX));
 
         controller->Start();
 

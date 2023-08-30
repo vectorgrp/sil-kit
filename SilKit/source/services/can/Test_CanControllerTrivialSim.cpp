@@ -139,7 +139,10 @@ TEST(CanControllerTrivialSimTest, receive_can_message)
     testFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
     testFrameEvent.userContext = (void*)1234;
 
-    EXPECT_CALL(callbackProvider, FrameHandler(&canController, ToCanFrameEvent(testFrameEvent)))
+    auto canFrameEvent = ToCanFrameEvent(testFrameEvent);
+    canFrameEvent.userContext = 0;
+
+    EXPECT_CALL(callbackProvider, FrameHandler(&canController, canFrameEvent))
         .Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
@@ -168,7 +171,10 @@ TEST(CanControllerTrivialSimTest, receive_can_message_rx_filter1)
     testFrameEvent.direction = SilKit::Services::TransmitDirection::RX;
     testFrameEvent.userContext = (void*)1234;
 
-    EXPECT_CALL(callbackProvider, FrameHandler(&canController, ToCanFrameEvent(testFrameEvent))).Times(1);
+    auto canFrameEvent = ToCanFrameEvent(testFrameEvent);
+    canFrameEvent.userContext = 0;
+
+    EXPECT_CALL(callbackProvider, FrameHandler(&canController, canFrameEvent)).Times(1);
 
     CanController canControllerPlaceholder(&mockParticipant, cfg, mockParticipant.GetTimeProvider());
     canControllerPlaceholder.SetServiceDescriptor(senderDescriptor);

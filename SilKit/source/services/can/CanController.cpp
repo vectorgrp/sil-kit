@@ -184,8 +184,19 @@ void CanController::ReceiveMsg(const IServiceEndpoint* from, const WireCanFrameE
             "CanController: Ignoring ReceiveMsg API call due to Replay config on {}", _config.name);
         return;
     }
-    _tracer.Trace(msg.direction, msg.timestamp, ToCanFrameEvent(msg));
-    CallHandlers(ToCanFrameEvent(msg));
+
+    auto canFrameEvent = ToCanFrameEvent(msg);
+
+    const auto frameDirection = static_cast<DirectionMask>(msg.direction);
+    constexpr auto txDirection = static_cast<DirectionMask>(TransmitDirection::TX);
+    if ((frameDirection & txDirection) != txDirection)
+    {
+        canFrameEvent.userContext = nullptr;
+    }
+
+    _tracer.Trace(msg.direction, msg.timestamp, canFrameEvent);
+
+    CallHandlers(canFrameEvent);
 }
 
 void CanController::ReceiveMsg(const IServiceEndpoint* from, const CanFrameTransmitEvent& msg)

@@ -191,16 +191,17 @@ TEST_F(ITest_SimTestHarness, can_demo)
       canController->AddFrameHandler(
         [state, lifecycleService](auto, const Can::CanFrameEvent& frameEvent)
         {
-          if (frameEvent.userContext == nullptr)
+          if (frameEvent.timestamp < 20ms)
           {
-            //Ignore the early test messages
-            return;
+              //Ignore the early test messages
+              return;
           }
           EXPECT_EQ(frameEvent.direction, SilKit::Services::TransmitDirection::RX);
 
           EXPECT_EQ(frameEvent.frame.canId, 123u);
-          const auto expectedUsercontext = (void*) (intptr_t) 0xDEADBEEF;
-          EXPECT_EQ(frameEvent.userContext, expectedUsercontext) << "frameEvent.frame.userContext is mangled!";
+
+          EXPECT_TRUE(frameEvent.userContext == (void*)((size_t)(0)));
+
           if (state->messageCount++ == 10)
           {
             lifecycleService->Stop("Test done");
