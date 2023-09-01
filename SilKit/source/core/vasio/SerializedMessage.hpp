@@ -48,6 +48,22 @@ auto AdlDeserialize(Args&&... args) -> decltype(auto)
 	return Deserialize(std::forward<Args>(args)...);
 }
 
+template<typename T>
+struct SerializedSize
+{
+    size_t _size{};
+    SerializedSize(const T& message)
+    {
+        MessageBuffer buffer;
+        Serialize(buffer, message);
+        _size = buffer.ReleaseStorage().size();
+    }
+    size_t Size() const
+    {
+        return _size;
+    }
+};
+
 // A serialized message used as binary wire format for the VAsio transport.
 class SerializedMessage
 {
@@ -108,6 +124,9 @@ private:
 template <typename MessageT>
 SerializedMessage::SerializedMessage(const MessageT& message)
 {
+    static SerializedSize<MessageT> messageSize{message};
+    _buffer.IncreaseCapacity(messageSize.Size());
+
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     WriteNetworkHeaders();
@@ -119,6 +138,9 @@ SerializedMessage::SerializedMessage(const MessageT& message)
 template <typename MessageT>
 SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& message)
 {
+    static SerializedSize<MessageT> messageSize{message};
+    _buffer.IncreaseCapacity(messageSize.Size());
+
     _messageKind = messageKind<MessageT>();
     _registryKind = registryMessageKind<MessageT>();
     _buffer.SetProtocolVersion(version);
@@ -131,6 +153,9 @@ SerializedMessage::SerializedMessage(ProtocolVersion version, const MessageT& me
 template <typename MessageT>
 SerializedMessage::SerializedMessage(const MessageT& message, EndpointAddress endpointAddress, EndpointId remoteIndex)
 {
+    static SerializedSize<MessageT> messageSize{message};
+    _buffer.IncreaseCapacity(messageSize.Size());
+
     _remoteIndex = remoteIndex;
     _endpointAddress = endpointAddress;
     _messageKind = messageKind<MessageT>();

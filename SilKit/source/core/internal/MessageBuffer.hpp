@@ -204,6 +204,13 @@ public:
     template <typename ValueT>
     inline MessageBuffer& operator>>(Util::SharedVector<ValueT>& sharedData);
     // --------------------------------------------------------------------------------
+    // Util::Span<T>
+    inline MessageBuffer& operator<<(const Util::Span<const uint8_t>& sharedData);
+    inline MessageBuffer& operator<<(const Util::Span<uint8_t>& sharedData);
+    template <typename ValueT>
+    inline MessageBuffer& operator<<(const Util::Span<ValueT>& sharedData);
+    // --------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------
     // std::array<uint8_t, SIZE>
     template<size_t SIZE>
     inline MessageBuffer& operator<<(const std::array<uint8_t, SIZE>& array);
@@ -240,7 +247,11 @@ public:
     inline MessageBuffer& operator<<(const Util::Uuid& uuid);
     inline MessageBuffer& operator>>(Util::Uuid& uuid);
 
-
+public:
+    void IncreaseCapacity(size_t capacity)
+    {
+        _storage.reserve( _storage.size() + capacity);
+    }
 private:
     // ----------------------------------------
     // private members
@@ -279,6 +290,8 @@ MessageBuffer& MessageBuffer::operator<<(const std::string& str)
     if (str.size() > std::numeric_limits<uint32_t>::max())
         throw end_of_buffer{};
 
+    IncreaseCapacity(sizeof(uint32_t) + str.size());
+
     *this << static_cast<uint32_t>(str.length());
 
     if (_wPos + str.size() > _storage.size())
@@ -309,20 +322,8 @@ MessageBuffer& MessageBuffer::operator>>(std::string& str)
 // std::vector<uint8_t>
 MessageBuffer& MessageBuffer::operator<<(const std::vector<uint8_t>& vector)
 {
-    if (vector.size() > std::numeric_limits<uint32_t>::max())
-        throw end_of_buffer{};
-
-    *this << static_cast<uint32_t>(vector.size());
-
-    if (_wPos + vector.size() > _storage.size())
-    {
-        _storage.resize(_wPos + vector.size());
-    }
-
-    std::copy(vector.begin(), vector.end(), _storage.begin() + _wPos);
-    _wPos += vector.size();
-
-    return *this;
+    const auto span = Util::ToSpan(vector);
+    return *this << span;
 }
 MessageBuffer& MessageBuffer::operator>>(std::vector<uint8_t>& vector)
 {
@@ -346,10 +347,14 @@ MessageBuffer& MessageBuffer::operator<<(const std::vector<ValueT>& vector)
     if (vector.size() > std::numeric_limits<uint32_t>::max())
         throw end_of_buffer{};
 
+    IncreaseCapacity(sizeof(uint32_t) + vector.size());
+
     *this << static_cast<uint32_t>(vector.size());
 
     for (auto&& value : vector)
+    {
         *this << value;
+    }
 
     return *this;
 }
@@ -371,18 +376,43 @@ MessageBuffer& MessageBuffer::operator>>(std::vector<ValueT>& vector)
     return *this;
 }
 
+
 // --------------------------------------------------------------------------------
-// Util::SharedVector<T>
+// Util::Span<T>
+inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<uint8_t>& span)
+{
+    const auto cspan = Util::Span<const uint8_t>{span};
+    return *this << cspan;
+}
+
+inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<const uint8_t>& span)
+{
+    if (span.size() > std::numeric_limits<uint32_t>::max())
+        throw end_of_buffer{};
+
+    IncreaseCapacity(sizeof(uint32_t) + span.size());
+
+    *this << static_cast<uint32_t>(span.size());
+
+
+    if (_wPos + span.size() > _storage.size())
+    {
+        _storage.resize(_wPos + span.size());
+    }
+
+    std::copy(span.begin(), span.end(), _storage.begin() + _wPos);
+    _wPos += span.size();
+    return *this;
+}
 
 template <typename ValueT>
-inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedVector<ValueT>& sharedData)
+inline MessageBuffer& MessageBuffer::operator<<(const Util::Span<ValueT>& span)
 {
-    const auto span = sharedData.AsSpan();
-
     if (span.size() > std::numeric_limits<uint32_t>::max())
     {
         throw end_of_buffer{};
     }
+    IncreaseCapacity(sizeof(uint32_t) + span.size());
 
     *this << static_cast<uint32_t>(span.size());
 
@@ -392,6 +422,14 @@ inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedVector<ValueT>
     }
 
     return *this;
+}
+// --------------------------------------------------------------------------------
+// Util::SharedVector<T>
+template <typename ValueT>
+inline MessageBuffer& MessageBuffer::operator<<(const Util::SharedVector<ValueT>& sharedData)
+{
+    const auto span = sharedData.AsSpan();
+    return *this << span;
 }
 
 template <typename ValueT>
