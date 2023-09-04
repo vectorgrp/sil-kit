@@ -20,6 +20,7 @@ The Participant constitutes the main entry point into the SIL Kit API.
    
    participant
    header
+   memory-management
    
 .. _sec:api-services:
 
