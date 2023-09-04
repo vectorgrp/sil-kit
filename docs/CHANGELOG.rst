@@ -6,21 +6,27 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.35] - Unreleased
+[4.0.35] - 2023-09-04
 ---------------------
 
 Added
 ~~~~~
 
 - Memory management documentation introduced.
+- Integration tests for communication in the stop/shutdown/abort handlers.
+
+Changed
+~~~~~~~
+
+- When building the SIL Kit documentation, the sphinx build command is no longer called in a pipenv. 
 
 Fixed
 ~~~~~
 
 - Ensured that calling ``ISystemController::AbortSimulation()`` does not lead to the system controller terminating
   prior to other participants receiving its abort message.
-
 - Ensure that userContext field for external CanFrameTransmitEvents is allways null.
+- Fixed warning in VS2017 (x86) build  
 
 [4.0.34] - 2023-08-21
 ---------------------
