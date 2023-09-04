@@ -351,7 +351,7 @@ protected:
             SilKit::Util::bind_method(&callbacks, &Callbacks::AbortHandler));
 
         auto systemMonitor = testParticipant.participant->CreateSystemMonitor();
-        systemMonitor->AddParticipantStatusHandler([&testParticipant, this](ParticipantStatus status) {
+        systemMonitor->AddParticipantStatusHandler([&testParticipant](ParticipantStatus status) {
             if (status.participantName == testParticipant.name
                     && status.state == ParticipantState::Paused
                     && !testParticipant.i.pausedStateReached)
@@ -369,14 +369,13 @@ protected:
         });
 
         auto* timeSyncService = testParticipant.lifecycleService->CreateTimeSyncService();
-        auto* logger = testParticipant.participant->GetLogger();
 
         SilKit::Services::PubSub::PubSubSpec dataSpec{topic, mediaType};
         SilKit::Services::PubSub::PubSubSpec matchingDataSpec{topic, mediaType};
         testParticipant.publisher = testParticipant.participant->CreateDataPublisher("TestPublisher", dataSpec, 0);
         testParticipant.subscriber = testParticipant.participant->CreateDataSubscriber(
             "TestSubscriber", matchingDataSpec,
-            [logger, timeSyncService, &testParticipant](IDataSubscriber* /*subscriber*/,
+            [timeSyncService, &testParticipant](IDataSubscriber* /*subscriber*/,
                                                 const DataMessageEvent& dataMessageEvent) {
                 auto participantId = dataMessageEvent.data[0];
 
@@ -384,12 +383,6 @@ protected:
                     return;
 
                 auto now = timeSyncService->Now();
-
-                //std::stringstream ss;
-                //ss << testParticipant.name << ": receive from " << participantNames[participantId]
-                //   << " at now=" << now.count() << " with timestamp=" << dataMessageEvent.timestamp.count();
-                //logger->Info(ss.str());
-
                 if (participantIsSync[participantId] && now >= 0ns)
                 {
                     auto delta = now - dataMessageEvent.timestamp;
@@ -413,11 +406,8 @@ protected:
             });
 
         timeSyncService->SetSimulationStepHandler(
-            [logger, &testParticipant, this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
+            [&testParticipant,this](std::chrono::nanoseconds now, std::chrono::nanoseconds /*duration*/) {
                 testParticipant.now = now;
-                //std::stringstream ss;
-                //ss << "now=" << now.count() / 1e9 << "s";
-                //logger->Info(ss.str());
                 testParticipant.publisher->Publish(std::vector<uint8_t>{testParticipant.id});
                 if (!testParticipant.simtimePassed && now > simtimeToPass)
                 {

@@ -61,9 +61,9 @@ add_silkit_test(ITest_Internals_ParticipantModes
     S_SilKitImpl
 )
 
-add_silkit_test(ITest_CommunicationReady
+add_silkit_test(ITest_CommunicationGuarantees
     SOURCES
-    ITest_CommunicationReady.cpp
+    ITest_CommunicationGuarantees.cpp
 
     LIBS
     SilKit

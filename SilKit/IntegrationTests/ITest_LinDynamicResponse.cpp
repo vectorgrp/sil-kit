@@ -655,8 +655,6 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
     auto participantNames = std::vector<std::string>{ "LinMaster", "LinSlave1" };
     auto simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
-    auto noActionTime = 1ms;
-
     LinFrame slaveResponseFrame;
     slaveResponseFrame.id = 34;
     slaveResponseFrame.checksumModel = LinChecksumModel::Enhanced;
@@ -733,7 +731,8 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
             });
 
         timeSyncService->SetSimulationStepHandler(
-            [lifecycleService, linController, &headerReceived, &slaveResponseFrame, &responseTimes, &maxResponses](auto now, auto /*duration*/) {
+            [lifecycleService, linController, &headerReceived, &slaveResponseFrame, &responseTimes, maxResponses](
+                auto now, auto /*duration*/) {
                 //Send response delayed by 2ms
                 if (now == ( headerReceived + 2ms))
                 {
@@ -1961,7 +1960,7 @@ TEST_F(ITest_LinDynamicResponse, normal_master_dynamic_slave_out_of_band_respons
         });
 
         timeSyncService->SetSimulationStepHandler(
-            [linController](auto now, auto /*duration*/) {
+            [](auto now, auto /*duration*/) {
                 Log() << "now=" << std::chrono::duration_cast<std::chrono::milliseconds>(now).count() << "ms";
             }, 1ms);
 
