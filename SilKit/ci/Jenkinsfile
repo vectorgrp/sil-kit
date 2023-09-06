@@ -394,7 +394,7 @@ def doBuild(Map config) {
                         def pypiMirror = readFile(file: PYPI_MIRROR).trim()
                         print("Using pipenv to install docs dependencies")
                         if(!isUnix()) {
-                            run("python -m pip install pipenv")
+                            run("python -m pip install pipenv==2022.9.8")
                         }
                         run("python -m pipenv install --pypi-mirror  ${pypiMirror} -r SilKit/ci/docker/docs_requirements.txt")
                     }
