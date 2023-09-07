@@ -176,7 +176,7 @@ def parseArgs():
             files.append(cpack)
     if len(files) != len(build_types):
         die(2, "sanity check failed: more cpack files than supported build types"
-        "given as argument (expected: {}".format(build_types))
+        " given as argument (expected: {}). arguments: {} ".format(build_types, files))
     if not isCompatibleCpack(files[0], files[1]):
         die(3, "incompatible cpack files (based on name schema) detected!")
 

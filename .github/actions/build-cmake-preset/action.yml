@@ -13,20 +13,56 @@ inputs:
   cmake-args:
     description: "Additional CMake arguments"
     required: false
-
+  do-package-symbols:
+    description: "In Debug builds, split symbols and provide a zip package"
+    required: false
+    type: boolean
+  do-package:
+    description: "Run `cmake --target package` and upload artifact"
+    required: false
+    type: boolean
+  run-tests:
+    description: "Run tests"
+    required: false
+    default: true
+    type: boolean
+  toolset:
+    type: string
+    default: '14.1'
+    description: "MSVC tool set to use"
+    required: false
+  build-arch:
+    type: string
+    default: "x64"
+    description: "MSVC build architecture to use"
+    required: false
+ 
+outputs:
+  package-name:
+    description: artifact name of the distribution zip
+    value: "${{ steps.cmake-package.outputs.package-name }}"
+  package-path:
+    description: file path of the distribution zip
+    value: "${{ steps.cmake-package.outputs.package-path }}"
+  symbols-package-path:
+    description: file path of the symbols zip
+    value: "${{ steps.cmake-package.outputs.symbols-package-path }}"
+  symbols-package-name:
+    description: artifact name of the symbols zip
+    value: "${{ steps.cmake-package.outputs.symbols-package-name }}"
+ 
 runs:
   using: composite
   steps:
 
     - name: Setup host
-      if: runner.os == 'Linux'
-      run: sudo apt install -y ninja-build doxygen clang-12 llvm-12
-      id: setup-host-linux
-      shell: bash
-
-    - name: Setup host
       if: runner.os == 'Windows'
-      run: choco install -y ninja
+      run: |
+        choco install -y ninja
+        choco install -y doxygen.install
+        pip install breathe==4.34.0
+        pip install sphinx==5.1.1
+        pip install sphinx-rtd-theme==1.0.0
       id: setup-host-windows
       shell: powershell
 
@@ -40,8 +76,8 @@ runs:
       if: runner.os == 'Windows'
       uses: ilammy/msvc-dev-cmd@v1.12.0
       with:
-        arch: x64
-        toolset: '14.1'
+        arch: ${{ inputs.build-arch }}
+        toolset: ${{ inputs.toolset }}
       id: setup-env-windows
 
     - name: Configure ${{ inputs.preset-name }}
@@ -55,13 +91,42 @@ runs:
       shell: bash
 
     - name: test ${{ inputs.preset-name }}
+      if: ${{ inputs.run-tests == 'true' }}
       id: ctests
       run: ctest --preset ${{ inputs.preset-name }} --output-on-failure -R '^(I|T)'
       shell: bash
 
     - name: stash test reports ${{ inputs.preset-name }}
-      if: ${{ inputs.upload-testlog }}
+      if: ${{ inputs.upload-testlog  == 'true' }}
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ inputs.preset-name }}
+        name: "${{ inputs.preset-name }}-test-results"
         path: '_build/**/*gtestresults.xml'
+
+    - name: create cmake package for ${{ inputs.preset-name }}
+      if: ${{ inputs.do-package  == 'true' }}
+      id: cmake-package
+      run: |
+        cmake --build --preset ${{ inputs.preset-name }} --target package
+        echo "package-name=$(basename _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*/)" >> $GITHUB_OUTPUT
+        # keep our original zip, otherwise the execute bits are lost
+        echo "package-path=$(echo _build/${{inputs.preset-name}}/_CPack_Packages/*/ZIP/SilKit-*-*.zip)" >> $GITHUB_OUTPUT
+        echo "symbols-package-name=$(basename _build/${{inputs.preset-name}}/SilKit-*-*-SYMBOLS.zip)" >> $GITHUB_OUTPUT
+        echo "symbols-package-path=$(echo _build/${{inputs.preset-name}}/SilKit-*-*-SYMBOLS.zip)" >> $GITHUB_OUTPUT
+      shell: bash
+
+    - name: upload package ${{ inputs.preset-name }}
+      if: ${{ inputs.do-package  == 'true' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.cmake-package.outputs.package-name }}
+        path: ${{ steps.cmake-package.outputs.package-path }}
+        if-no-files-found: 'error'
+
+    - name: upload symbols package ${{ inputs.preset-name }}
+      if: ${{ inputs.do-package-symbols  == 'true' }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ steps.cmake-package.outputs.symbols-package-name }}
+        path: ${{ steps.cmake-package.outputs.symbols-package-path}}
+        if-no-files-found: 'error'

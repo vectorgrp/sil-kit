@@ -1,0 +1,175 @@
+name: SIL Kit release packages
+on:
+  workflow_dispatch
+
+jobs:
+
+  gcc8-release:
+    environment: public-github-runners
+    runs-on: ubuntu-latest
+    container:
+      image: vectorgrp/sil-kit:ci-ubuntu-18.04
+    outputs:
+        package-name: ${{ steps.build.outputs.package-name}}
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: gcc8-release build
+      uses: ./.github/actions/build-cmake-preset
+      id: build
+      with:
+        preset-name: gcc8-release
+        cmake-args: -D SILKIT_INSTALL_SOURCE=ON
+        do-package: true
+        run-tests: true
+
+
+  gcc8-debug:
+    environment: public-github-runners
+    runs-on: ubuntu-latest
+    container:
+      image: vectorgrp/sil-kit:ci-ubuntu-18.04
+    outputs:
+        package-name: ${{ steps.build.outputs.package-name}}
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: gcc8-debug build
+      uses: ./.github/actions/build-cmake-preset
+      id: build
+      with:
+        preset-name: gcc8-debug
+        do-package: true
+        run-tests: false
+        do-package-symbols: true
+
+  gcc8-package:
+    needs: [ gcc8-release, gcc8-debug ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        sparse-checkout: |
+         .github
+         SilKit/ci/package.py
+    - uses: ./.github/actions/make-package
+      with:
+        debug-package-name: ${{needs.gcc8-debug.outputs.package-name}}
+        release-package-name: ${{needs.gcc8-release.outputs.package-name}}
+
+  vs141-x86-release:
+    environment: public-github-runners
+    runs-on: windows-latest
+    outputs:
+        package-name: ${{ steps.build.outputs.package-name}}
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: vs141-x86-release
+      uses: ./.github/actions/build-cmake-preset
+      id: build
+      with:
+        preset-name: vs141-x86-release
+        do-package: true
+        cmake-args: -D SILKIT_INSTALL_SOURCE=ON
+        run-tests: true
+        toolset: 14.1
+        build-arch: x86
+
+  vs141-x86-debug:
+    environment: public-github-runners
+    runs-on: windows-latest
+    outputs:
+        package-name: ${{ steps.build.outputs.package-name}}
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: vs141-x86-debug
+      uses: ./.github/actions/build-cmake-preset
+      id: build
+      with:
+        preset-name: vs141-x86-debug
+        do-package: true
+        do-package-symbols: true
+        run-tests: false
+        toolset: 14.1
+        build-arch: x86
+
+  vs141-x86-package:
+    needs: [ vs141-x86-release, vs141-x86-debug ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        sparse-checkout: |
+         .github
+         SilKit/ci/package.py
+    - uses: ./.github/actions/make-package
+      with:
+        debug-package-name: ${{needs.vs141-x86-debug.outputs.package-name}}
+        release-package-name: ${{needs.vs141-x86-release.outputs.package-name}}
+
+
+  vs141-x64-release:
+    environment: public-github-runners
+    runs-on: windows-latest
+    outputs:
+        package-name: ${{ steps.build.outputs.package-name}}
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: vs141-x64-release
+      uses: ./.github/actions/build-cmake-preset
+      id: build
+      with:
+        preset-name: vs141-x64-release
+        do-package: true
+        cmake-args: -D SILKIT_INSTALL_SOURCE=ON
+        run-tests: true
+        toolset: 14.1
+        build-arch: x64
+
+  vs141-x64-debug:
+    environment: public-github-runners
+    runs-on: windows-latest
+    outputs:
+        package-name: ${{ steps.build.outputs.package-name}}
+    steps:
+    - name: git checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+    - name: vs141-x64-debug
+      uses: ./.github/actions/build-cmake-preset
+      id: build
+      with:
+        preset-name: vs141-x64-debug
+        do-package: true
+        do-package-symbols: true
+        run-tests: false
+        toolset: 14.1
+        build-arch: x64
+
+  vs141-x64-package:
+    needs: [ vs141-x64-release, vs141-x64-debug ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        sparse-checkout: |
+         .github
+         SilKit/ci/package.py
+    - uses: ./.github/actions/make-package
+      with:
+        debug-package-name: ${{needs.vs141-x64-debug.outputs.package-name}}
+        release-package-name: ${{needs.vs141-x64-release.outputs.package-name}}
