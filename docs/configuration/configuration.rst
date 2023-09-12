@@ -172,7 +172,7 @@ The outline of a registry configuration file is as follows:
     SchemaVersion: 1
     Description: Sample registry configuration.
 
-    ListenUri: silkit://0.0.0.0:8501
+    ListenUri: silkit://localhost:8500
 
     Logging:
       Sinks:
@@ -181,6 +181,7 @@ The outline of a registry configuration file is as follows:
         - Type: File
           Level: Trace
           LogName: SampleRegistryLogFile
+    DashboardUri: http://localhost:8082
 
 .. _subsec:registry-config-overview:
 
@@ -217,6 +218,13 @@ Overview
 
        **NOTE** It is only possible to use the Sink types ``Stdout`` and
        ``File``. Using ``Remote`` will lead to an error during registry startup.
+
+   * - ``DashboardUri``
+     - The configured registry instance will send data to this address to show it on the dashboard
+       This field overrides the ``-d``, and ``--dashboard-uri`` command line
+       parameters.
+
+       **NOTE** The default URI to use for a local SIL Kit dashboard setup is http://localhost:8082.
 
 .. _subsec:registry-config-options:
 
