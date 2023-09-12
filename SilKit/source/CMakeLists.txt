@@ -237,8 +237,18 @@ if (MSVC)
     )
 elseif(UNIX AND NOT APPLE)
     #for reproducible builds
-    target_link_options(SilKit
+    if(SILKIT_BUILD_REPRODUCIBLE)
+        target_link_options(SilKit
         PRIVATE -Wl,--build-id=none)
+    endif()
+    if(SILKIT_LINK_LLD)
+        target_link_options(SilKit
+            PRIVATE -fuse-ld=lld)
+	    if(NOT SILKIT_BUILD_REPRODUCIBLE)
+		target_link_options(SilKit
+		    PRIVATE -Wl,--build-id=sha1)
+	    endif()
+    endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)

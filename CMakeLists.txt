@@ -44,6 +44,9 @@ option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" ON)
 option(SILKIT_BUILD_DASHBOARD "Build the SIL Kit Dashboard client." ON)
 option(SILKIT_ENABLE_TRACING_INSTRUMENTATION "Enable tracing instrumentation (_SILKIT_TRACE_CLASS_NAMES)." OFF)
+option(SILKIT_LINK_LLD "Use the lld linker for SIL KIT" OFF)
+option(SILKIT_USE_SYSTEM_LIBRARIES "Use the libraries installed on the system for third party dependencies" OFF)
+option(SILKIT_BUILD_REPRODUCIBLE "Creates a reproducible build by ommiting timestamps/unique build ids" ON)
 
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
