@@ -279,6 +279,8 @@ void LifecycleManagement::SetStateAndForwardIntent(ILifecycleState* newState,
 
 void LifecycleManagement::UpdateLifecycleState(ILifecycleState* newState)
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
+
     if (newState == GetAbortingState())
     {
         _lastBeforeAbortingState = _currentState;
@@ -293,6 +295,7 @@ void LifecycleManagement::UpdateParticipantState(std::string reason)
 
 ILifecycleState* LifecycleManagement::GetCurrentState()
 {
+    std::unique_lock<decltype(_mutex)> lock{_mutex};
     return _currentState;
 }
 

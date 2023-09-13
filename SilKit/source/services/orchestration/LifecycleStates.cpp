@@ -676,6 +676,11 @@ auto ShuttingDownState::GetParticipantState() -> ParticipantState
 // ShutdownState
 // ------------------------------------
 
+void ShutdownState::Initialize(std::string /*reason*/)
+{
+    // Ignore due to possible invalid transition between InvalidWorkflowConfig->Error->Abort->Shutdown and StartLifecycle->Initialize
+}
+
 void ShutdownState::ReadyToRun(std::string /*reason*/)
 {
     // Ignore due to possible race between SystemState update and AbortSimulation
@@ -689,6 +694,11 @@ void ShutdownState::CommunicationInitialized(std::string /*reason*/)
 void ShutdownState::StopSimulation(std::string /*reason*/)
 {
     // Ignore Stop() in ShutdownState
+}
+
+void ShutdownState::Error(std::string /*reason*/)
+{
+    // Ignore Error() in ShutdownState
 }
 
 void ShutdownState::ShutdownParticipant(std::string reason)
@@ -734,6 +744,11 @@ auto ShutdownState::GetParticipantState() -> ParticipantState
 // AbortingState
 // ------------------------------------
 
+void AbortingState::Initialize(std::string /*reason*/)
+{
+    // Ignore due to possible invalid transition between InvalidWorkflowConfig->Error->Abort->Shutdown and StartLifecycle->Initialize
+}
+
 void AbortingState::ShutdownParticipant(std::string reason)
 {
     _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetShutdownState(),
@@ -773,6 +788,11 @@ auto AbortingState::GetParticipantState() -> ParticipantState
 // ------------------------------------
 // ErrorState
 // ------------------------------------
+
+void ErrorState::Initialize(std::string /*reason*/)
+{
+  // Ignore due to possible invalid transition between InvalidWorkflowConfig->Error->Abort->Shutdown and StartLifecycle->Initialize
+}
 
 void ErrorState::RestartParticipant(std::string /*reason*/)
 {

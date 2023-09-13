@@ -261,10 +261,12 @@ public:
         : State(lifecycleManager)
     {
     }
-
+    void Initialize(std::string reason) override;
+    
     void CommunicationInitialized(std::string reason) override;
     void ReadyToRun(std::string reason) override;
     void StopSimulation(std::string reason) override;
+    void Error(std::string reason) override;
 
     void ShutdownParticipant(std::string reason) override;
 
@@ -281,6 +283,7 @@ public:
         : State(lifecycleManager)
     {
     }
+    void Initialize(std::string reason) override;
 
     void ShutdownParticipant(std::string reason) override;
 
@@ -297,6 +300,8 @@ public:
         : State(lifecycleManager)
     {
     }
+
+    void Initialize(std::string reason) override;
 
     void StopSimulation(std::string reason) override;
     void RestartParticipant(std::string reason) override;

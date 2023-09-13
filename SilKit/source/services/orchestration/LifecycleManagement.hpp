@@ -23,6 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <memory>
 #include <atomic>
+#include <mutex>
 
 #include "silkit/services/logging/ILogger.hpp"
 
@@ -151,6 +152,7 @@ private:
     LifecycleService* _lifecycleService;
 
     Services::Logging::ILogger* _logger;
+    std::recursive_mutex _mutex;
 };
 
 } // namespace Orchestration
