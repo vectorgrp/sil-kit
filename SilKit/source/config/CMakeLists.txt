@@ -24,9 +24,10 @@ add_library(I_SilKit_Config INTERFACE)
 target_include_directories(I_SilKit_Config
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}
 )
+
 target_link_libraries(I_SilKit_Config
     INTERFACE
-        YamlInterface
+        ${SILKIT_THIRD_PARTY_YAML_INTERFACE}
         I_SilKit_Util
 )
 

@@ -73,7 +73,9 @@ function(include_asio)
         message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
     endif()
 endfunction()
-include_asio()
+if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
+    include_asio()
+endif()
 
 # Third party YAML parsing 
 function(include_yamlcpp)
@@ -96,9 +98,17 @@ function(include_yamlcpp)
     add_library(YamlInterface INTERFACE)
     target_include_directories(YamlInterface
         INTERFACE $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
+    set(SILKIT_THIRD_PARTY_YAML_INTERFACE "YamlInterface" CACHE STRING "Name of the third party yaml interface target")
 
 endfunction()
-include_yamlcpp()
+
+if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
+    include_yamlcpp()
+    set(SILKIT_THIRD_PARTY_YAML_INTERFACE "YamlInterface" CACHE STRING "Name of the third party yaml interface target")
+else()
+    find_package(yaml-cpp)
+    set(SILKIT_THIRD_PARTY_YAML_INTERFACE "" CACHE STRING "Name of the third party yaml interface target")
+endif()
 
 # libfmt
 function(include_fmt)
@@ -113,7 +123,14 @@ function(include_fmt)
         EXCLUDE_FROM_ALL
     )
 endfunction()
-include_fmt()
+if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
+    include_fmt()
+    if(TARGET fmt-header-only)
+        set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt-header-only" CACHE STRING "Header only target for third party libfmt")
+    else()
+        set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "" CACHE STRING "Header only target for third party libfmt")
+    endif()
+endif()
 
 # spdlog
 function(include_spdlog)
@@ -136,7 +153,9 @@ function(include_spdlog)
     )
 endfunction()
 
-include_spdlog()
+if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
+    include_spdlog()
+endif()
 
 
 if(SILKIT_BUILD_DASHBOARD)
@@ -162,3 +181,19 @@ if(SILKIT_BUILD_DASHBOARD)
 
     include_oatpp()
 endif()
+
+function(find_third_party_packages)
+    if(SILKIT_USE_SYSTEM_LIBRARIES)
+        # Find yaml-cpp
+        find_package(yaml-cpp)
+        set(SILKIT_THIRD_PARTY_YAML_INTERFACE "yaml-cpp" CACHE STRING "Name of the third party yaml interface target")
+
+        # Find libfmt
+        find_package(fmt)
+        set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt")
+
+        # Find spdlog
+        find_package(spdlog)
+
+    endif()
+endfunction()

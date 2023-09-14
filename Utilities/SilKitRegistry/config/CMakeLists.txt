@@ -10,7 +10,7 @@ target_link_libraries(I_SilKitRegistry_Config
 
     INTERFACE I_SilKit_Config
 
-    INTERFACE YamlInterface
+    INTERFACE ${SILKIT_THIRD_PARTY_YAML_INTERFACE}
 )
 
 
@@ -19,6 +19,9 @@ add_library(O_SilKitRegistry_Config OBJECT
     RegistryYamlConversion.cpp
 )
 
+if(SILKIT_USE_SYSTEM_LIBRARIES)
+    find_package(fmt)
+endif()
 target_link_libraries(O_SilKitRegistry_Config
     PUBLIC I_SilKitRegistry_Config
 
