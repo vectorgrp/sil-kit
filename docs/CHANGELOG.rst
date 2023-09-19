@@ -7,8 +7,14 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.36] - Unreleased
+[4.0.36] - 2023-09-19
 ---------------------
+
+Added
+~~~~~
+
+- Documentation on ``DashboardUri``
+
 
 Fixed
 ~~~~~
@@ -20,6 +26,7 @@ Fixed
 Changed
 ~~~~~~~
 
+- Performance improvement of the interal serialization
 - The final state handling of the sil-kit-system-controller in interactive mode on user input has changed:
   - Old: The sil-kit-system-controller triggered AbortSimulation if the finalState was not received after 5s. 
   - New: The sil-kit-system-controller retries receiving the finalState 3x5s. If this fails, the sil-kit-system-controller triggers AbortSimulation (if not already happened) and tries receiving the finalState 3x5s again. If this fails, the sil-kit-system-controller just terminates.
