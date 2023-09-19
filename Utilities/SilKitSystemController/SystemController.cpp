@@ -53,53 +53,95 @@ std::ostream& operator<<(std::ostream& out, std::chrono::nanoseconds timestamp)
 class SilKitController
 {
 public:
-    SilKitController(SilKit::IParticipant* participant, std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
-                 const std::vector<std::string>& expectedParticipantNames)
+    SilKitController(SilKit::IParticipant* participant,
+                     std::shared_ptr<SilKit::Config::IParticipantConfiguration> config,
+                     const std::vector<std::string>& expectedParticipantNames)
         : _config{std::move(config)}
         , _expectedParticipantNames{expectedParticipantNames}
     {
         _controller = SilKit::Experimental::Participant::CreateSystemController(participant);
         _controller->SetWorkflowConfiguration({expectedParticipantNames});
-		_monitor = participant->CreateSystemMonitor();	
+        _monitor = participant->CreateSystemMonitor();
 
         _lifecycleService =
             participant->CreateLifecycleService({SilKit::Services::Orchestration::OperationMode::Coordinated});
         _finalStatePromise = _lifecycleService->StartLifecycle();
     }
 
-    void Shutdown()
+    void StopOrAbort()
     {
-        if (_monitor->SystemState() == SystemState::Running)
+        if (_monitor->SystemState() == SystemState::Running || _monitor->SystemState() == SystemState::Paused)
         {
+            std::cout << "Stopping the SIL Kit simulation..." << std::endl;
             _lifecycleService->Stop("Stop via interaction in sil-kit-system-controller");
         }
-        else if (_monitor->SystemState() != SystemState::Stopping || _monitor->SystemState() != SystemState::Stopped
-                 || _monitor->SystemState() != SystemState::ShuttingDown
-                 || _monitor->SystemState() != SystemState::Shutdown || _monitor->SystemState() != SystemState::Aborting
-                 || _monitor->SystemState() != SystemState::Error
-            )
+        else if (_monitor->SystemState() == SystemState::Aborting)
         {
-            std::cerr << "SilKit is not Running. Terminating Process without Stopping." << std::endl;
-            std::cout << "Sending SystemCommand::AbortSimulation" << std::endl;
+            std::cout << "SIL Kit simulation is already aborting..." << std::endl;
+            _aborted = true;
+        }
+        else if (_monitor->SystemState() == SystemState::Shutdown)
+        {
+            _externalShutdown = true;
+        }
+        else
+        {
+            std::cout << "SIL Kit SystemState is invalid. Sending AbortSimulation..." << std::endl;
             _controller->AbortSimulation();
-            std::this_thread::sleep_for(1s);
-            return;
+            _aborted = true;
+        }
+    }
+
+    void WaitForFinalStateWithRetries()
+    {
+        const int numRetries = 3;
+        for (int retries = 1; retries <= numRetries; retries++)
+        {
+            auto status = _finalStatePromise.wait_for(5s);
+            if (status == std::future_status::ready)
+            {
+                if (_aborted)
+                {
+                    std::cout << "SIL Kit simulation shut down after AbortSimulation." << std::endl;
+                }
+                else if (_externalShutdown)
+                {
+                    std::cout << "SIL Kit simulation was shut down externally." << std::endl;
+                }
+                else
+                {
+                    std::cout << "SIL Kit simulation shut down." << std::endl;
+                }
+                return;
+            }
+            else
+            {
+                std::cout << "SIL Kit simulation did not shut down in 5s... Retry " << retries << "/" << numRetries << std::endl;
+            }
         }
 
-        auto status = _finalStatePromise.wait_for(5s);
-        if (status != std::future_status::ready)
+        if (_aborted)
         {
-            std::cerr << "SilKit did not shut down in 5s... Sending AbortSimulation and Terminating Process." << std::endl;
-            _controller->AbortSimulation();
-            std::this_thread::sleep_for(1s);
+            std::cout << "SIL Kit simulation did not shut down after AbortSimulation. Terminating." << std::endl;
             return;
+        }
+        else
+        {
+            std::cout << "SIL Kit simulation did not shut down after Stop. Sending AbortSimulation..." << std::endl;
+            _aborted = true;
+            _controller->AbortSimulation();
+            WaitForFinalStateWithRetries();
         }
     }
 
     void WaitForExternalShutdown()
     {
         ParticipantState state = _finalStatePromise.get();
-        if (state != ParticipantState::Shutdown)
+        if (state == ParticipantState::Shutdown)
+        {
+            std::cout << "SIL Kit simulation was shut down externally." << std::endl;
+        }
+        else
         {
             std::cerr << "Warning: Exited with an unexpected participant state: " << state << std::endl;
         }
@@ -109,6 +151,8 @@ private:
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> _config;
     std::vector<std::string> _expectedParticipantNames;
 
+    bool _aborted = false;
+    bool _externalShutdown = false;
     SilKit::Experimental::Services::Orchestration::ISystemController* _controller;
     ISystemMonitor* _monitor;
     ILifecycleService* _lifecycleService;
@@ -119,10 +163,8 @@ int main(int argc, char** argv)
 {
     using namespace SilKit::Util;
     CommandlineParser commandlineParser;
-    commandlineParser.Add<CommandlineParser::Flag>("version", "v", "[--version]",
-        "-v, --version: Get version info.");
-    commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]",
-        "-h, --help: Get this help.");
+    commandlineParser.Add<CommandlineParser::Flag>("version", "v", "[--version]", "-v, --version: Get version info.");
+    commandlineParser.Add<CommandlineParser::Flag>("help", "h", "[--help]", "-h, --help: Get this help.");
     commandlineParser.Add<CommandlineParser::Flag>(
         "non-interactive", "ni", "[--non-interactive]",
         "--non-interactive: Run without awaiting any user interactions at any time.");
@@ -130,10 +172,14 @@ int main(int argc, char** argv)
         "connect-uri", "u", "silkit://localhost:8500", "[--connect-uri <silkitUri>]",
         "-u, --connect-uri <silkitUri>: The registry URI to connect to. Defaults to 'silkit://localhost:8500'.");
     commandlineParser.Add<CommandlineParser::Option>("name", "n", "SystemController", "[--name <participantName>]",
-        "-n, --name <participantName>: The participant name used to take part in the simulation. Defaults to 'SystemController'.");
-    commandlineParser.Add<CommandlineParser::Option>("configuration", "c", "", "[--configuration <configuration>]",
-        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. Note that the format was changed in v3.6.11.");
-    commandlineParser.Add<CommandlineParser::PositionalList>("participantNames", "<participantName1> [<participantName2> ...]",
+                                                     "-n, --name <participantName>: The participant name used to take "
+                                                     "part in the simulation. Defaults to 'SystemController'.");
+    commandlineParser.Add<CommandlineParser::Option>(
+        "configuration", "c", "", "[--configuration <configuration>]",
+        "-c, --configuration <configuration>: Path and filename of the Participant configuration YAML or JSON file. "
+        "Note that the format was changed in v3.6.11.");
+    commandlineParser.Add<CommandlineParser::PositionalList>(
+        "participantNames", "<participantName1> [<participantName2> ...]",
         "<participantName1>, <participantName2>, ...: Names of participants to wait for before starting simulation.");
 
     std::cout << "Vector SIL Kit -- System Controller, SIL Kit version: " << SilKit::Version::String() << std::endl
@@ -167,11 +213,10 @@ int main(int argc, char** argv)
 
     if (commandlineParser.Get<CommandlineParser::Flag>("version").Value())
     {
-        std::string hash{ SilKit::Version::GitHash() };
+        std::string hash{SilKit::Version::GitHash()};
         auto shortHash = hash.substr(0, 7);
-        std::cout
-            << "Version Info:" << std::endl
-            << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
+        std::cout << "Version Info:" << std::endl
+                  << " - Vector SilKit: " << SilKit::Version::String() << ", #" << shortHash << std::endl;
 
         return 0;
     }
@@ -184,22 +229,23 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto participantName{ commandlineParser.Get<CommandlineParser::Option>("name").Value() };
-    auto configurationFilename{ commandlineParser.Get<CommandlineParser::Option>("configuration").Value() };
+    auto participantName{commandlineParser.Get<CommandlineParser::Option>("name").Value()};
+    auto configurationFilename{commandlineParser.Get<CommandlineParser::Option>("configuration").Value()};
     auto expectedParticipantNames{
         commandlineParser.Get<CommandlineParser::PositionalList>("participantNames").Values()};
-    auto connectUri{ commandlineParser.Get<CommandlineParser::Option>("connect-uri").Value() };
+    auto connectUri{commandlineParser.Get<CommandlineParser::Option>("connect-uri").Value()};
 
     std::shared_ptr<SilKit::Config::IParticipantConfiguration> configuration;
     try
     {
-        configuration = !configurationFilename.empty() ?
-            SilKit::Config::ParticipantConfigurationFromFile(configurationFilename) :
-            SilKit::Config::ParticipantConfigurationFromString("");
+        configuration = !configurationFilename.empty()
+                            ? SilKit::Config::ParticipantConfigurationFromFile(configurationFilename)
+                            : SilKit::Config::ParticipantConfigurationFromString("");
     }
     catch (const SilKit::ConfigurationError& error)
     {
-        std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what() << std::endl;
+        std::cerr << "Error: Failed to load configuration '" << configurationFilename << "', " << error.what()
+                  << std::endl;
         std::cout << "Press enter to stop the process..." << std::endl;
         std::cin.ignore();
 
@@ -208,10 +254,8 @@ int main(int argc, char** argv)
 
     try
     {
-        std::cout
-            << "Creating participant '" << participantName
-            << "' with registry " << connectUri << ", expecting participant"
-            << (expectedParticipantNames.size() > 1 ? "s '" : " '");
+        std::cout << "Creating participant '" << participantName << "' with registry " << connectUri
+                  << ", expecting participant" << (expectedParticipantNames.size() > 1 ? "s '" : " '");
         std::copy(expectedParticipantNames.begin(), std::prev(expectedParticipantNames.end()),
                   std::ostream_iterator<std::string>(std::cout, "', '"));
         std::cout << expectedParticipantNames.back() << "'..." << std::endl;
@@ -230,10 +274,11 @@ int main(int argc, char** argv)
         }
         else
         {
-            std::cout << "Press enter to shutdown the SilKit..." << std::endl;
+            std::cout << "Press enter to stop the SIL Kit simulation..." << std::endl;
             std::cin.ignore();
 
-            controller.Shutdown();
+            controller.StopOrAbort();
+            controller.WaitForFinalStateWithRetries();
         }
     }
     catch (const std::exception& error)
