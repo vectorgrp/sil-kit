@@ -26,6 +26,7 @@ add_library(I_SilKit_Core_VAsio INTERFACE)
 
 target_include_directories(I_SilKit_Core_VAsio
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/io
 )
 
 target_link_libraries(I_SilKit_Core_VAsio
@@ -70,8 +71,8 @@ add_library(O_SilKit_Core_VAsio OBJECT
     VAsioReceiver.hpp
     VAsioRegistry.hpp
     VAsioRegistry.cpp
-    VAsioTcpPeer.hpp
-    VAsioTcpPeer.cpp
+    VAsioPeer.hpp
+    VAsioPeer.cpp
     VAsioTransmitter.hpp
 
     TransformAcceptorUris.hpp
@@ -90,6 +91,14 @@ add_library(O_SilKit_Core_VAsio OBJECT
 
     VAsioCapabilities.hpp
     VAsioCapabilities.cpp
+
+    io/impl/AsioCleanupEndpoint.cpp
+    io/impl/AsioFormatEndpoint.cpp
+    io/impl/AsioGenericRawByteStream.cpp
+    io/impl/AsioIoContext.cpp
+    io/impl/AsioTimer.cpp
+    io/impl/SetAsioSocketOptions.cpp
+    io/MakeAsioIoContext.cpp
 )
 
 target_link_libraries(O_SilKit_Core_VAsio
@@ -100,6 +109,7 @@ target_compile_definitions(O_SilKit_Core_VAsio PRIVATE ASIO_STANDALONE)
 
 target_include_directories(O_SilKit_Core_VAsio
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io
 )
 
 
@@ -124,3 +134,5 @@ add_silkit_test(Test_VAsioCapabilities SOURCES Test_VAsioCapabilities.cpp LIBS S
 # We instantiate a complete Participant<VAsioConnection> with a specific version
 # and do integration tests here
 add_silkit_test(ITest_ParticipantVersion SOURCES Test_ParticipantVersion.cpp LIBS S_SilKitImpl S_ITests_STH)
+
+add_silkit_test(Test_TracingMacrosDetails SOURCES io/util/Test_TracingMacrosDetails.cpp LIBS S_SilKitImpl)

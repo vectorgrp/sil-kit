@@ -43,6 +43,7 @@ option(SILKIT_ENABLE_COVERAGE "Enable coverage for builds (requires gcc, clang)"
 option(SILKIT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(SILKIT_PACKAGE_SYMBOLS "Add a post-build step to create PDB/Symbol archives" ON)
 option(SILKIT_BUILD_DASHBOARD "Build the SIL Kit Dashboard client." ON)
+option(SILKIT_ENABLE_TRACING_INSTRUMENTATION "Enable tracing instrumentation (_SILKIT_TRACE_CLASS_NAMES)." OFF)
 
 
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -66,6 +67,10 @@ enable_testing()
 if(MSVC)
     #make sure Release is built with debug PDBs
     add_compile_options(/Zi )
+endif()
+
+if(SILKIT_ENABLE_TRACING_INSTRUMENTATION)
+    add_compile_definitions(SILKIT_ENABLE_TRACING_INSTRUMENTATION=1)
 endif()
 
 # Configure build settings like warning and sanitizers

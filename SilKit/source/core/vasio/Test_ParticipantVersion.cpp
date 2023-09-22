@@ -133,7 +133,7 @@ protected:
     using ParticipantListT = std::vector<std::shared_ptr<IParticipantInternal>>;
     ParticipantListT _participants;
     std::shared_ptr<VAsioRegistry> _registry;
-    const std::string registryUri = "silkit://localhost:8500";
+    const std::string registryUri = "silkit://localhost:0";
 };
 
 TEST_F(ParticipantVersionTest, unsupported_version_connect_to_current)

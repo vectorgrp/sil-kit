@@ -176,10 +176,11 @@ protected:
     {
         _connection.SetLogger(&_dummyLogger);
     }
+
+    Tests::MockLogger _dummyLogger;
     Services::Orchestration::TimeProvider _timeProvider;
     VAsioConnection _connection;
     MockVAsioPeer _from;
-    Tests::MockLogger _dummyLogger;
 
     //we are a friend class
     // - allow selected access to private member

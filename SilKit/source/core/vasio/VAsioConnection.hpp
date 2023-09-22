@@ -65,12 +65,18 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "VAsioCapabilities.hpp"
 #include "WireLinMessages.hpp"
 
+#include "IIoContext.hpp"
+#include "MakeAsioIoContext.hpp"
+
 namespace SilKit {
 namespace Core {
 
-class VAsioTcpPeer; //fwd
+class VAsioPeer; //fwd
 
-class VAsioConnection : public IVAsioPeerConnection
+class VAsioConnection
+    : public IVAsioPeerConnection
+    , private IAcceptorListener
+    , private ITimerListener
 {
 public:
     // ----------------------------------------
@@ -113,7 +119,7 @@ public:
             _hasPendingAsyncSubscriptions = true;
         }
 
-        asio::post(_ioContext, [this, service]() {
+        _ioContext->Post([this, service]() {
             this->RegisterSilKitServiceImpl<SilKitServiceT>(service);
         });
 
@@ -159,7 +165,7 @@ public:
     void FlushSendBuffers() {}
     void ExecuteDeferred(std::function<void()> function)
     {
-        asio::post(_ioContext.get_executor(), std::move(function));
+        _ioContext->Post(std::move(function));
     }
 
     inline auto Config() const -> const SilKit::Config::ParticipantConfiguration& override
@@ -195,8 +201,8 @@ public:
     // Register handlers for completion of async service creation
     void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
-    size_t GetNumberOfConnectedParticipants() 
-    { 
+    size_t GetNumberOfConnectedParticipants()
+    {
         return _peers.size();
     };
 
@@ -213,11 +219,11 @@ public: //members
 private: // methods
     template<typename AcceptorT, typename EndpointT>
     auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
-    bool TryCreatingProxy(std::shared_ptr<VAsioTcpPeer>& directPeer,
+    bool TryCreatingProxy(std::shared_ptr<VAsioPeer>& directPeer,
                           std::shared_ptr<IVAsioConnectionPeer>& peer,
                           const VAsioPeerInfo& peerInfo,
                           const std::string& message);
-    bool TryRequestRemoteConnection(std::shared_ptr<VAsioTcpPeer>& directPeer,
+    bool TryRequestRemoteConnection(std::shared_ptr<VAsioPeer>& directPeer,
                           const VAsioPeerInfo& peerInfo,
                           const std::string& message);
 
@@ -416,7 +422,7 @@ private:
         }
         );
 
-        // We could have registered a receiver that only uses already acknowledged senders, thus no new handshake is 
+        // We could have registered a receiver that only uses already acknowledged senders, thus no new handshake is
         // triggered. In that case, the pending acks might be already empty and the subscription is completed.
         if (!SilKitServiceTraits<SilKitServiceT>::UseAsyncRegistration())
         {
@@ -466,11 +472,11 @@ private:
     template <typename... MethodArgs, typename... Args>
     inline void ExecuteOnIoThread(void (VAsioConnection::*method)(MethodArgs...), Args&&... args)
     {
-        asio::post(_ioContext.get_executor(), [=]() mutable { (this->*method)(std::move(args)...); });
+        _ioContext->Post([=]() mutable { (this->*method)(std::move(args)...); });
     }
     inline void ExecuteOnIoThread(std::function<void()> function)
     {
-        asio::post(_ioContext.get_executor(), std::move(function));
+        _ioContext->Post(std::move(function));
     }
 
     template <class SilKitServiceT>
@@ -480,8 +486,15 @@ private:
     }
 
     // Remote connection support:
-    void HandleExpiredConnection(const asio::error_code& ec);
+    void HandleExpiredConnection();
     void RemovePeerFromPendingLists(IVAsioPeer* peer);
+
+private: // IAcceptorListener
+    void OnAsyncAcceptSuccess(IAcceptor& acceptor, std::unique_ptr<IRawByteStream> stream) override;
+    void OnAsyncAcceptFailure(IAcceptor& acceptor) override;
+
+private: // ITimerListener
+    void OnTimerExpired(ITimer& timer) override;
 
 private:
     // ----------------------------------------
@@ -506,18 +519,15 @@ private:
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
     std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
 
-    // NB: The IO context must be listed before anything socket related.
-    asio::io_context _ioContext;
+    std::unique_ptr<IIoContext> _ioContext;
 
     // NB: peers and acceptors must be listed AFTER the io_context. Otherwise,
     // their destructor will crash!
     std::shared_ptr<IVAsioPeer> _registry{nullptr};
     std::vector<std::shared_ptr<IVAsioPeer>> _peers;
 
-    // We support IPv6, IPv4 and Local Domain sockets for incoming connections. The address of the acceptor objects
-    // must be stable, so either keep this a std::list, or turn it into a std::vector<std::unique_ptr<...>>.
-    std::list<asio::ip::tcp::acceptor> _tcpAcceptors;
-    std::list<asio::local::stream_protocol::acceptor> _localAcceptors;
+    std::mutex _acceptorsMutex;
+    std::vector<std::unique_ptr<IAcceptor>> _acceptors;
 
     // After receiving the list of known participants from the registry, we keep
     // track of the sent ParticipantAnnouncements and wait for the corresponding
@@ -568,20 +578,19 @@ private:
     {
     public:
         PendingRemoteConnection() = default;
-        PendingRemoteConnection(asio::io_context& ioContext, const VAsioPeerInfo& _peerInfo)
-            : timer{std::make_unique<asio::steady_timer>(ioContext)}
+        PendingRemoteConnection(IIoContext& ioContext, const VAsioPeerInfo& _peerInfo)
+            : timer{ioContext.MakeTimer()}
             , peerInfo{_peerInfo}
         {
         }
 
-        std::unique_ptr<asio::steady_timer> timer;
+        std::unique_ptr<ITimer> timer;
         std::promise<void> connected;
         VAsioPeerInfo peerInfo;
     };
 
     std::map<std::string /*participantName*/, PendingRemoteConnection> _pendingRemoteConnections;
     std::mutex _pendingRemoteMx;
-    std::unique_ptr<asio::steady_timer> _remoteReconnectTimer;
 
     // for debugging purposes:
     IParticipantInternal* _participant{nullptr};

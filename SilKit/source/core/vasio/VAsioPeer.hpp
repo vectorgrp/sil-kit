@@ -37,15 +37,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ProtocolVersion.hpp"
 #include "IVAsioConnectionPeer.hpp"
 
+#include "IIoContext.hpp"
+#include "IRawByteStream.hpp"
+
 
 namespace SilKit {
 namespace Core {
 
 class VAsioConnection;
 
-class VAsioTcpPeer
+class VAsioPeer
     : public IVAsioConnectionPeer
-    , public std::enable_shared_from_this<VAsioTcpPeer>
+    , public std::enable_shared_from_this<VAsioPeer>
+    , private IRawByteStreamListener
 {
 public:
     // ----------------------------------------
@@ -54,29 +58,35 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    VAsioTcpPeer() = delete;
-    VAsioTcpPeer(const VAsioTcpPeer& other) = delete;
-    VAsioTcpPeer(VAsioTcpPeer&& other) = delete; //clang warning: implicitly deleted because of mutex
+    VAsioPeer() = delete;
+    VAsioPeer(const VAsioPeer& other) = delete;
+    VAsioPeer(VAsioPeer&& other) = delete; //clang warning: implicitly deleted because of mutex
 
-    VAsioTcpPeer& operator=(const VAsioTcpPeer& other) = delete;
-    VAsioTcpPeer& operator=(VAsioTcpPeer&& other) = delete; //implicitly deleted because of mutex
-    ~VAsioTcpPeer();
+    VAsioPeer& operator=(const VAsioPeer& other) = delete;
+    VAsioPeer& operator=(VAsioPeer&& other) = delete; //implicitly deleted because of mutex
+    ~VAsioPeer() override;
 
 private:
     // ----------------------------------------
     // Private Constructors
-    VAsioTcpPeer(asio::any_io_executor executor, VAsioConnection* connection, Services::Logging::ILogger* logger);
+    VAsioPeer(IIoContext& ioContext, VAsioConnection* connection, Services::Logging::ILogger* logger);
+    VAsioPeer(std::unique_ptr<IRawByteStream> stream, VAsioConnection* connection, Services::Logging::ILogger* logger);
 
 public:
     // ----------------------------------------
     // Public Construction Function
 
     // VAsioTcpPeer must only be created as shared_prt to keep it alive in active Read/WriteSomeAsync callbacks during shutdown procedure
-    template<typename ExecutorT>
-    static auto Create(ExecutorT&& executor, VAsioConnection* connection,
-                              Services::Logging::ILogger* logger) -> std::shared_ptr<VAsioTcpPeer>
+    static auto Create(IIoContext& ioContext, VAsioConnection* connection, Services::Logging::ILogger* logger)
+        -> std::shared_ptr<VAsioPeer>
     {
-        return std::shared_ptr<VAsioTcpPeer>{new VAsioTcpPeer{std::forward<ExecutorT>(executor), connection, logger}};
+        return std::shared_ptr<VAsioPeer>{new VAsioPeer{ioContext, connection, logger}};
+    }
+
+    static auto Create(std::unique_ptr<IRawByteStream> stream, VAsioConnection* connection,
+                       Services::Logging::ILogger* logger) -> std::shared_ptr<VAsioPeer>
+    {
+        return std::shared_ptr<VAsioPeer>{new VAsioPeer{std::move(stream), connection, logger}};
     }
 
 public:
@@ -95,8 +105,6 @@ public:
                  std::stringstream& attemptedUris,
                  bool& success);
 
-    inline auto Socket() -> asio::generic::stream_protocol::socket& { return _socket; }
-
     void StartAsyncRead() override;
 
     // IServiceEndpoint
@@ -111,38 +119,44 @@ public:
 private:
     // ----------------------------------------
     // Private Methods
-    static bool IsErrorToTryAgain(const asio::error_code & ec);
     void StartAsyncWrite();
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
     void Shutdown();
     bool ConnectLocal(const std::string& path);
-    void ResetSocket();
-    void ResetTcpSocket(const std::string& host, uint16_t port, const std::string& message);
     bool ConnectTcp(const std::string& host, uint16_t port);
+
+private: // IRawByteStreamListener
+    void OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransferred) override;
+    void OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransferred) override;
+    void OnShutdown(IRawByteStream& stream) override;
 
 private:
     // ----------------------------------------
     // Private Members
     ProtocolVersion _protocolVersion{};
-    asio::generic::stream_protocol::socket _socket;
+    IIoContext* _ioContext{nullptr};
+    std::unique_ptr<IRawByteStream> _socket;
     VAsioConnection* _connection{nullptr};
     VAsioPeerInfo _info;
 
     Services::Logging::ILogger* _logger;
 
+    std::atomic_bool _isShuttingDown{false};
+
     // receiving
     std::atomic<uint32_t> _currentMsgSize{0u};
     std::vector<uint8_t> _msgBuffer;
     size_t _wPos{0};
+    MutableBuffer _currentReceivingBuffer;
 
     // sending
-    std::atomic_bool _isShuttingDown{false};
+    mutable std::mutex _sendingQueueMutex;
     std::deque<std::vector<uint8_t>> _sendingQueue;
-    asio::mutable_buffer _currentSendingBuffer;
+    ConstBuffer _currentSendingBuffer;
     std::vector<uint8_t> _currentSendingBufferData;
-    mutable std::mutex _sendingQueueLock;
+
     std::atomic_bool _sending{false};
     bool _enableQuickAck{false};
     Core::ServiceDescriptor _serviceDescriptor;
@@ -152,21 +166,21 @@ private:
 //  Inline Implementations
 // ================================================================================
 
-void VAsioTcpPeer::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
+void VAsioPeer::SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor)
 {
     _serviceDescriptor = serviceDescriptor;
 }
-auto VAsioTcpPeer::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
+auto VAsioPeer::GetServiceDescriptor() const -> const Core::ServiceDescriptor&
 {
     return _serviceDescriptor;
 }
 
-void VAsioTcpPeer::SetProtocolVersion(ProtocolVersion v)
+void VAsioPeer::SetProtocolVersion(ProtocolVersion v)
 {
     _protocolVersion = std::move(v);
 }
 
-auto VAsioTcpPeer::GetProtocolVersion() const -> ProtocolVersion
+auto VAsioPeer::GetProtocolVersion() const -> ProtocolVersion
 {
     return _protocolVersion;
 }

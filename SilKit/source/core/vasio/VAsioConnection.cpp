@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <map>
 
 #include "ILogger.hpp"
-#include "VAsioTcpPeer.hpp"
+#include "VAsioPeer.hpp"
 #include "VAsioProxyPeer.hpp"
 #include "Filesystem.hpp"
 #include "SetThreadName.hpp"
@@ -41,87 +41,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 #include "TransformAcceptorUris.hpp"
 
+#include "util/TracingMacros.hpp"
+
 using namespace std::chrono_literals;
 namespace fs = SilKit::Filesystem;
 
 namespace {
-
-// only TCP/IP need platform tweaks
-template<typename AcceptorT>
-void SetPlatformOptions(AcceptorT&)
-{
-}
-// local domain sockets on my WSL (Linux) require read/write permission for user
-template<typename EndpointT>
-void SetSocketPermissions(const EndpointT&)
-{
-}
-
-template<typename AcceptorT>
-void SetListenOptions(SilKit::Services::Logging::ILogger*,
-    AcceptorT&)
-{
-}
-
-// platform specific definitions of utilities
-#if defined(_WIN32)
-#   include <mstcpip.h>
-template<>
-void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
-{
-    using exclusive_addruse = asio::detail::socket_option::boolean<ASIO_OS_DEF(SOL_SOCKET), SO_EXCLUSIVEADDRUSE>;
-    acceptor.set_option(exclusive_addruse{true});
-}
-
-#   if !defined(__MINGW32__)
-template<>
-void SetListenOptions(SilKit::Services::Logging::ILogger* logger,
-    asio::ip::tcp::acceptor& acceptor)
-{
-    // This should improve loopback performance, and have no effect on remote TCP/IP
-    int enabled = 1;
-    DWORD numberOfBytes = 0;
-    auto result = WSAIoctl(acceptor.native_handle(),
-        SIO_LOOPBACK_FAST_PATH,
-        &enabled,
-        sizeof(enabled),
-        nullptr,
-        0,
-        &numberOfBytes,
-        0,
-        0);
-
-    if (result == SOCKET_ERROR)
-    {
-        auto lastError = ::GetLastError();
-        SilKit::Services::Logging::Warn(logger, "SetListenOptions: Setting Loopback FastPath failed: WSA IOCtl last error: {}", lastError);
-    }
-}
-#   endif //__MINGW32__
-#else
-
-template<>
-void SetPlatformOptions(asio::ip::tcp::acceptor& acceptor)
-{
-    // We enable the SO_REUSEADDR flag on POSIX, this allows reusing a socket's address more quickly.
-    acceptor.set_option(asio::ip::tcp::acceptor::reuse_address{true});
-}
-
-template<>
-void SetSocketPermissions(const asio::local::stream_protocol::endpoint& endpoint)
-{
-    const auto path = endpoint.path();
-    (void)chmod(path.c_str(), 0770);
-}
-
-template<>
-void SetListenOptions(SilKit::Services::Logging::ILogger* ,
-    asio::ip::tcp::acceptor& )
-{
-    // no op
-}
-
-#endif
 
 auto printableName(const std::string& participantName) -> std::string
 {
@@ -139,6 +64,7 @@ auto printableName(const std::string& participantName) -> std::string
     }
     return safeName;
 }
+
 //Debug  print of given peer infos
 auto printUris(const SilKit::Core::VAsioPeerInfo& info)
 {
@@ -184,23 +110,12 @@ auto makeLocalEndpoint(const std::string& participantName, const SilKit::Core::P
     return result;
 }
 
-
-
 // end point to string conversions
 auto fromAsioEndpoint(const asio::local::stream_protocol::endpoint& ep)
 {
     std::stringstream uri;
     const std::string localPrefix{ "local://" };
     uri << localPrefix << ep.path();
-    return SilKit::Core::Uri::Parse(uri.str());
-}
-
-// end point to string conversions
-auto fromAsioEndpoint(const asio::ip::tcp::endpoint& ep)
-{
-    std::stringstream uri;
-    const std::string tcpPrefix{ "tcp://" };
-    uri << tcpPrefix << ep; //will be "ipv4:port" or "[ipv6]:port"
     return SilKit::Core::Uri::Parse(uri.str());
 }
 
@@ -214,7 +129,7 @@ auto makeLocalPeerInfo(const std::string& name, SilKit::Core::ParticipantId id, 
     return pi;
 }
 
-bool connectWithRetry(SilKit::Core::VAsioTcpPeer* peer, const SilKit::Core::VAsioPeerInfo& pi, size_t connectAttempts)
+bool connectWithRetry(SilKit::Core::VAsioPeer* peer, const SilKit::Core::VAsioPeerInfo& pi, size_t connectAttempts)
 {
     for (auto i = 0u; i < connectAttempts; i++)
     {
@@ -228,16 +143,15 @@ bool connectWithRetry(SilKit::Core::VAsioTcpPeer* peer, const SilKit::Core::VAsi
     return false;
 }
 
-auto selectBestEndpointFromResolverResults(const asio::ip::tcp::resolver::results_type& resolverResults)
+auto selectBestEndpointFromResolverResults(const std::vector<asio::ip::tcp::endpoint>& resolverResults)
     -> asio::ip::tcp::endpoint
 {
     // NB: IPv4 should be preferred over IPv6
 
     std::multimap<int, asio::ip::tcp::endpoint> endpointsByPenalty;
 
-    for (const auto& result : resolverResults)
+    for (const auto& resolvedEndpoint : resolverResults)
     {
-        const auto resolvedEndpoint = result.endpoint();
         const auto resolvedEndpointAddress = resolvedEndpoint.address();
 
         if (resolvedEndpointAddress.is_v4())
@@ -338,40 +252,66 @@ VAsioConnection::VAsioConnection(
     , _participant{participant}
 {
     _hashToParticipantName.insert(std::pair<uint64_t, std::string>(SilKit::Util::Hash::Hash(_participantName), _participantName));
+
+    AsioSocketOptions socketOptions{};
+    socketOptions.tcp.quickAck = _config.middleware.tcpQuickAck;
+    socketOptions.tcp.noDelay = _config.middleware.tcpNoDelay;
+    socketOptions.tcp.sendBufferSize = _config.middleware.tcpSendBufferSize;
+    socketOptions.tcp.receiveBufferSize = _config.middleware.tcpReceiveBufferSize;
+
+    _ioContext = MakeAsioIoContext(socketOptions);
 }
 
 VAsioConnection::~VAsioConnection()
 {
     _isShuttingDown = true;
 
-    std::unique_lock<std::mutex> lock{_peersLock};
-    decltype(_peers) peers;
-    peers.swap(_peers);
-    for (auto peer : peers)
-    {
-        peer->DrainAllBuffers();
-    }
-    lock.unlock();
+    _ioContext->Post([this] {
+        {
+            std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+
+            for (const auto& acceptor : _acceptors)
+            {
+                acceptor->Shutdown();
+            }
+        }
+
+        {
+            std::unique_lock<decltype(_peersLock)> lock{_peersLock};
+
+            for (const auto& peer : _peers)
+            {
+                peer->DrainAllBuffers();
+            }
+        }
+
+        {
+            std::unique_lock<decltype(_pendingRemoteMx)> lock{_pendingRemoteMx};
+
+            for (const auto& connection : _pendingRemoteConnections)
+            {
+                connection.second.timer->Shutdown();
+            }
+        }
+
+        if (_registry != nullptr)
+        {
+            _registry->DrainAllBuffers();
+        }
+    });
+
+    StartIoWorker();
 
     if (_ioWorker.joinable())
     {
-        _ioContext.stop();
         _ioWorker.join();
-    }
-
-    // clean up local ipc sockets
-    for (const auto & acceptor : _localAcceptors)
-    {
-        if (acceptor.is_open())
-        {
-            (void)fs::remove(acceptor.local_endpoint().path());
-        }
     }
 }
 
 void VAsioConnection::SetLogger(Services::Logging::ILogger* logger)
 {
     _logger = logger;
+    _ioContext->SetLogger(*_logger);
 }
 
 auto VAsioConnection::PrepareAcceptorEndpointUris(const std::string & connectUri) -> std::vector<std::string>
@@ -404,34 +344,25 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string> & acceptor
             SilKit::Services::Logging::Debug(_logger, "Found TCP acceptor endpoint URI {} with host {} and port {}",
                                              uriString, uri.Host(), uri.Port());
 
-            for (const auto& result : ResolveHostAndPort(_ioContext.get_executor(), _logger, uri.Host(), uri.Port()))
+            for (const auto& host : _ioContext->Resolve(uri.Host()))
             {
-                const auto endpoint = result.endpoint();
-                const auto address = endpoint.address();
+                Services::Logging::Debug(_logger, "Accepting TCP connections on {}:{}", host, uri.Port());
 
-                if (address.is_v4() || address.is_v6())
+                try
                 {
-                    Services::Logging::Debug(_logger, "Accepting {} connections on {}:{}",
-                                             (address.is_v4() ? "TCPv4" : "TCPv6"), uri.Host(), uri.Port());
+                    auto acceptor{_ioContext->MakeTcpAcceptor(host, uri.Port())};
+                    acceptor->SetListener(*this);
+                    acceptor->AsyncAccept({});
 
-                    _tcpAcceptors.emplace_back(_ioContext);
-                    auto& acceptor = _tcpAcceptors.back();
-
-                    try
                     {
-                        AcceptConnectionsOn(acceptor, endpoint);
-                    }
-                    catch (const std::exception& exception)
-                    {
-                        Services::Logging::Error(_logger, "Unable to accept {} connections on {}:{}: {}",
-                                                 (address.is_v4() ? "TCPv4" : "TCPv6"), uri.Host(), uri.Port(),
-                                                 exception.what());
-                        _tcpAcceptors.pop_back();
+                        std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+                        _acceptors.emplace_back(std::move(acceptor));
                     }
                 }
-                else
+                catch (const std::exception& exception)
                 {
-                    Services::Logging::Debug(_logger, "Not accepting connection on {}", endpoint);
+                    Services::Logging::Error(_logger, "Unable to accept TCP connections on {}:{}: {}", host, uri.Port(),
+                                             exception.what());
                 }
             }
         }
@@ -447,7 +378,7 @@ void VAsioConnection::OpenTcpAcceptors(const std::vector<std::string> & acceptor
     }
 }
 
-void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string> & acceptorEndpointUris)
+void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& acceptorEndpointUris)
 {
     for (const auto& uriString : acceptorEndpointUris)
     {
@@ -458,23 +389,24 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string> & accept
             SilKit::Services::Logging::Debug(_logger, "Found local domain acceptor endpoint URI {} with path {}",
                                              uriString, uri.Path());
 
-            asio::local::stream_protocol::endpoint endpoint{uri.Path()};
-
             // file must not exist before we bind/listen on it
-            (void)fs::remove(endpoint.path());
-
-            _localAcceptors.emplace_back(_ioContext);
-            auto& acceptor = _localAcceptors.back();
+            (void)fs::remove(uri.Path());
 
             try
             {
-                AcceptConnectionsOn(acceptor, endpoint);
+                auto acceptor{_ioContext->MakeLocalAcceptor(uri.Path())};
+                acceptor->SetListener(*this);
+                acceptor->AsyncAccept({});
+
+                {
+                    std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+                    _acceptors.emplace_back(std::move(acceptor));
+                }
             }
             catch (const std::exception& exception)
             {
-                Services::Logging::Error(_logger, "Unable to accept local domain connections on {}:{}: {}", uri.Host(),
-                                         uri.Port(), exception.what());
-                _localAcceptors.pop_back();
+                Services::Logging::Error(_logger, "Unable to accept local domain connections on {}:{}: {}", uri.Path(),
+                                         exception.what());
             }
         }
         else if (uri.Type() == Uri::UriType::Tcp && uri.Scheme() == "tcp")
@@ -483,8 +415,7 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string> & accept
         }
         else
         {
-            SilKit::Services::Logging::Warn(
-                _logger, "OpenLocalAcceptors: Unused acceptor endpoint URI: {}", uriString);
+            SilKit::Services::Logging::Warn(_logger, "OpenLocalAcceptors: Unused acceptor endpoint URI: {}", uriString);
         }
     }
 }
@@ -503,13 +434,13 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     // Accept TCP connections on endpoints given by matching URIs
     OpenTcpAcceptors(acceptorEndpointUris);
 
-    if (_localAcceptors.empty() && _tcpAcceptors.empty())
+    if (_acceptors.empty())
     {
         SilKit::Services::Logging::Error(_logger, "JoinSimulation: no acceptors available");
         throw SilKitError{"JoinSimulation: no acceptors available"};
     }
 
-    auto registry = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
+    auto registry = VAsioPeer::Create(*_ioContext, this, _logger);
     bool ok = false;
 
     // NB: We attempt to connect multiple times. The registry might be a separate process
@@ -652,38 +583,42 @@ void VAsioConnection::SendParticipantAnnouncement(IVAsioPeer* peer)
     // URI encoded infos
     VAsioPeerInfo info{_participantName, _participantId, {}, GetCurrentCapabilities(_config)};
 
-    size_t openAcceptorCount = 0;
-
-    // Ensure that the local acceptors are the first entries in the acceptorUris
-    for (const auto& acceptor : _localAcceptors)
     {
-        if (acceptor.is_open())
-        {
-            ++openAcceptorCount;
+        std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
 
-            const auto epUri = fromAsioEndpoint(acceptor.local_endpoint());
-            info.acceptorUris.push_back(epUri.EncodedString());
-            Services::Logging::Trace(
-                _logger, "SendParticipantAnnouncement: Peer '{}': Local-Domain Acceptor Uri: {}",
-                peer->GetInfo().participantName, epUri.EncodedString());
+        // Ensure that the local acceptors are the first entries in the acceptorUris
+        for (const auto& acceptor : _acceptors)
+        {
+            Uri uri{acceptor->GetLocalEndpoint()};
+
+            if (uri.Type() != Uri::UriType::Local)
+            {
+                continue;
+            }
+
+            info.acceptorUris.emplace_back(uri.EncodedString());
+
+            Services::Logging::Trace(_logger, "SendParticipantAnnouncement: Peer '{}': Local-Domain Acceptor Uri: {}",
+                                     peer->GetInfo().participantName, uri.EncodedString());
+        }
+
+        for (const auto& acceptor : _acceptors)
+        {
+            Uri uri{acceptor->GetLocalEndpoint()};
+
+            if (uri.Type() != Uri::UriType::Tcp)
+            {
+                continue;
+            }
+
+            info.acceptorUris.emplace_back(uri.EncodedString());
+
+            Services::Logging::Trace(_logger, "SendParticipantAnnouncement: Peer '{}': TCP Acceptor Uri: {}",
+                                     peer->GetInfo().participantName, uri.EncodedString());
         }
     }
 
-    for (const auto& acceptor : _tcpAcceptors)
-    {
-        if (acceptor.is_open())
-        {
-            ++openAcceptorCount;
-
-            const auto epUri = fromAsioEndpoint(acceptor.local_endpoint());
-            info.acceptorUris.emplace_back(epUri.EncodedString());
-            Services::Logging::Trace(_logger,
-                                     "SendParticipantAnnouncement: Peer '{}': TCP Acceptor Uri: {}",
-                                     peer->GetInfo().participantName, epUri.EncodedString());
-        }
-    }
-
-    if (openAcceptorCount == 0)
+    if (info.acceptorUris.empty())
     {
         const auto message = "SendParticipantAnnouncement: Cannot send announcement: All acceptors "
                              "(both Local-Domain and TCP) are missing";
@@ -836,11 +771,11 @@ void VAsioConnection::ReceiveParticipantAnnouncementReply(IVAsioPeer* from, Seri
 
     Services::Logging::Debug(_logger, "Received participant announcement reply from {} protocol version {}",
                              from->GetInfo().participantName, remoteVersion);
-    
+
     RemovePeerFromPendingLists(from);
 }
 
-bool VAsioConnection::TryRequestRemoteConnection(std::shared_ptr<VAsioTcpPeer>& directPeer,
+bool VAsioConnection::TryRequestRemoteConnection(std::shared_ptr<VAsioPeer>& directPeer,
     const VAsioPeerInfo& peerInfo,
     const std::string& message)
 {
@@ -862,15 +797,13 @@ bool VAsioConnection::TryRequestRemoteConnection(std::shared_ptr<VAsioTcpPeer>& 
 
     {
         std::unique_lock<decltype(_pendingRemoteMx)> lock(_pendingRemoteMx);
-        PendingRemoteConnection remoteConn{_ioContext, peerInfo};
-        remoteConn.timer->expires_after(_remoteConnectionTimeout);
-        remoteConn.timer->async_wait([this](auto&& ec) {
-            return this->HandleExpiredConnection(ec);
-        });
+        PendingRemoteConnection remoteConn{*_ioContext, peerInfo};
+        remoteConn.timer->SetListener(*this);
+        remoteConn.timer->AsyncWaitFor(_remoteConnectionTimeout);
         _pendingRemoteConnections[peerInfo.participantName] = std::move(remoteConn);
     }
 
-    //send remote connection request to registry, which it will relay 
+    //send remote connection request to registry, which it will relay
 
     RemoteParticipantConnectRequest request{};
     request.connectTargetPeer = peerInfo;
@@ -883,7 +816,7 @@ bool VAsioConnection::TryRequestRemoteConnection(std::shared_ptr<VAsioTcpPeer>& 
     return true;
 }
 
-bool VAsioConnection::TryCreatingProxy(std::shared_ptr<VAsioTcpPeer>& directPeer,
+bool VAsioConnection::TryCreatingProxy(std::shared_ptr<VAsioPeer>& directPeer,
                                        std::shared_ptr<IVAsioConnectionPeer>& peer,
                                        const VAsioPeerInfo& peerInfo,
                                        const std::string& message)
@@ -1038,7 +971,7 @@ void VAsioConnection::ConnectPeer(const VAsioPeerInfo& peerInfo, bool connectDir
                              peerInfo.participantId, printUris(peerInfo));
 
     // Create the "direct-connection" peer
-    auto directPeer = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
+    auto directPeer = VAsioPeer::Create(*_ioContext, this, _logger);
 
     // Remember that we expect a reply from this peer
     _pendingParticipantReplies.push_back(directPeer);
@@ -1090,16 +1023,26 @@ void VAsioConnection::AssociateParticipantNameAndPeer(const std::string& partici
 
 void VAsioConnection::StartIoWorker()
 {
+    // do nothing if the worker thread is already running
+    if (_ioWorker.get_id() != std::thread::id{})
+    {
+        return;
+    }
+
     _ioWorker = std::thread{[this]() {
-        try
+        SilKit::Util::SetThreadName(("IO " + _participantName).substr(0, 15));
+
+        while (true)
         {
-            _ioContext.run();
-            return 0;
-        }
-        catch (const std::exception& error)
-        {
-            Services::Logging::Error(_logger, "SilKit-IOWorker: Something went wrong: {}", error.what());
-            return -1;
+            try
+            {
+                _ioContext->Run();
+                return;
+            }
+            catch (const std::exception& error)
+            {
+                Services::Logging::Error(_logger, "SilKit-IOWorker: Something went wrong: {}", error.what());
+            }
         }
     }};
 }
@@ -1111,107 +1054,77 @@ void VAsioConnection::AcceptLocalConnections(const std::string& uniqueId)
     // file must not exist before we bind/listen on it
     (void)fs::remove(localEndpoint.path());
 
-    _localAcceptors.emplace_back(_ioContext);
-    auto &acceptor = _localAcceptors.back();
+    try
+    {
+        auto acceptor{_ioContext->MakeLocalAcceptor(localEndpoint.path())};
+        acceptor->SetListener(*this);
+        acceptor->AsyncAccept({});
 
-    AcceptConnectionsOn(acceptor, localEndpoint);
+        Services::Logging::Debug(_logger, "SIL Kit is listening on {}", acceptor->GetLocalEndpoint());
+
+        {
+            std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+            _acceptors.emplace_back(std::move(acceptor));
+        }
+    }
+    catch (const std::exception& exception)
+    {
+        Services::Logging::Error(_logger, "SIL Kit failed to listening on {}: {}", localEndpoint.path(),
+                                 exception.what());
+        throw;
+    }
 }
 
 auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16_t port)
     -> std::pair<std::string, uint16_t>
 {
     // Default to TCP IPv4 catchallIp
-    tcp::endpoint endpoint(tcp::v4(), port);
+    asio::ip::tcp::endpoint endpoint(tcp::v4(), port);
 
-    auto isIpv4 = [](const auto endpoint) {
-        return endpoint.protocol().family() == asio::ip::tcp::v4().family();
-    };
-
-    if (! hostName.empty())
+    if (!hostName.empty())
     {
-        tcp::resolver::results_type resolverResults;
-        resolverResults = ResolveHostAndPort(_ioContext.get_executor(), _logger, hostName, port);
+        auto resolverResults{_ioContext->Resolve(hostName)};
+
         if (resolverResults.empty())
         {
-            Services::Logging::Error(_logger, "AcceptTcpConnectionsOn: Unable to resolve hostname"
-                "\"{}:{}\"", hostName, port);
+            Services::Logging::Error(_logger, "AcceptTcpConnectionsOn: Unable to resolve hostname\"{}:{}\"", hostName,
+                                     port);
             throw SilKit::StateError{"Unable to resolve hostname and service."};
         }
 
-        endpoint = selectBestEndpointFromResolverResults(resolverResults);
-
-        Services::Logging::Debug(_logger, "Accepting connections at {}:{} @{}",
-                       resolverResults->host_name(),
-                       resolverResults->service_name(),
-                       (isIpv4(endpoint) ? "TCPv4" : "TCPv6"));
-    }
-
-    _tcpAcceptors.emplace_back(_ioContext);
-    auto &acceptor = _tcpAcceptors.back();
-
-    const auto localEndpoint = AcceptConnectionsOn(acceptor, endpoint);
-    return std::make_pair(localEndpoint.address().to_string(), localEndpoint.port());
-}
-
-template<typename AcceptorT, typename EndpointT>
-auto VAsioConnection::AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT
-{
-    if (acceptor.is_open())
-    {
-        // we already have an acceptor for the given endpoint type
-        std::stringstream endpointName;
-        endpointName << endpoint;
-        throw LogicError{ "AcceptConnectionsOn: acceptor already open for endpoint type: "
-            + endpointName.str()};
-    }
-    try
-    {
-        acceptor.open(endpoint.protocol());
-        SetPlatformOptions(acceptor);
-        acceptor.bind(endpoint);
-        SetSocketPermissions(endpoint);
-        acceptor.listen();
-        SetListenOptions(_logger, acceptor);
-    }
-    catch (const std::exception& e)
-    {
-        Services::Logging::Error(_logger, "SIL Kit failed to listening on {}: {}", endpoint, e.what());
-        acceptor = AcceptorT{_ioContext}; // Reset socket
-        throw;
-    }
-
-    Services::Logging::Debug(_logger, "SIL Kit is listening on {}", acceptor.local_endpoint());
-
-    AcceptNextConnection(acceptor);
-
-    return acceptor.local_endpoint();
-}
-
-template<typename AcceptorT>
-void VAsioConnection::AcceptNextConnection(AcceptorT& acceptor)
-{
-    std::shared_ptr<VAsioTcpPeer> newConnection;
-    try
-    {
-        newConnection = VAsioTcpPeer::Create(_ioContext.get_executor(), this, _logger);
-    }
-    catch (const std::exception& e)
-    {
-        Services::Logging::Error(_logger, "SIL Kit cannot create listener socket: {}", e.what());
-        throw;
-    }
-
-    acceptor.async_accept(newConnection->Socket(),
-        [this, newConnection, &acceptor](const asio::error_code& error) mutable
+        std::vector<asio::ip::tcp::endpoint> endpoints;
+        for (const auto& address : resolverResults)
         {
-            if (!error)
-            {
-                Services::Logging::Debug(_logger, "New connection from {}", newConnection->Socket());
-                AddPeer(std::move(newConnection));
-            }
-            AcceptNextConnection(acceptor);
+            endpoints.emplace_back(asio::ip::make_address(address), port);
         }
-    );
+
+        endpoint = selectBestEndpointFromResolverResults(endpoints);
+
+        Services::Logging::Debug(_logger, "Accepting connections at {}:{} @{}", endpoint.address().to_string(),
+                                 endpoint.port(), (endpoint.address().is_v4() ? "TCPv4" : "TCPv6"));
+    }
+
+    try
+    {
+        auto acceptor{_ioContext->MakeTcpAcceptor(endpoint.address().to_string(), port)};
+        acceptor->SetListener(*this);
+        acceptor->AsyncAccept({});
+
+        Services::Logging::Debug(_logger, "SIL Kit is listening on {}", acceptor->GetLocalEndpoint());
+
+        {
+            std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+            _acceptors.emplace_back(std::move(acceptor));
+        }
+    }
+    catch (const std::exception& exception)
+    {
+        Services::Logging::Error(_logger, "SIL Kit failed to listening on {}:{}: {}", endpoint.address().to_string(),
+                                 endpoint.port(), exception.what());
+        throw;
+    }
+
+    return std::make_pair(endpoint.address().to_string(), endpoint.port());
 }
 
 void VAsioConnection::AddPeer(std::shared_ptr<IVAsioPeer> newPeer)
@@ -1317,24 +1230,18 @@ void VAsioConnection::RemovePeerFromConnection(IVAsioPeer* peer)
 {
     _participantNameToPeer.erase(peer->GetInfo().participantName);
 
-    auto it = std::find_if(_peers.begin(), _peers.end(), [peer](auto&& p) {
-        auto localPeerInfo = p->GetInfo();
-        auto peerToRemove = peer->GetInfo();
-        return localPeerInfo.participantId == peerToRemove.participantId;
-    });
+    auto it{std::find_if(_peers.begin(), _peers.end(), [needle = peer](const auto& hay) {
+        return hay.get() == needle;
+    })};
+
     if (it != _peers.end())
     {
         _peers.erase(it);
     }
 }
 
-void VAsioConnection::HandleExpiredConnection(const asio::error_code& ec)
+void VAsioConnection::HandleExpiredConnection()
 {
-    if (ec)
-    {
-        return;
-    }
-
     SilKit::Services::Logging::Debug(_logger, "Remote connection time out reached. Number of remote connections: {}", _pendingRemoteConnections.size());
 
     auto now = std::chrono::steady_clock::now();
@@ -1357,7 +1264,7 @@ void VAsioConnection::HandleExpiredConnection(const asio::error_code& ec)
         auto&& pendingParticipant = it->first;
         auto&& pendingRemoteConn = it->second;
 
-        if (now >= pendingRemoteConn.timer->expiry())
+        if (now >= pendingRemoteConn.timer->GetExpiry())
         {
             SilKit::Services::Logging::Trace(_logger, "Dropping pending remote connection to '{}'", pendingParticipant);
             it = _pendingRemoteConnections.erase(it++);
@@ -1393,7 +1300,7 @@ void VAsioConnection::RemovePeerFromPendingLists(IVAsioPeer* from)
 
     if (_participantId != RegistryParticipantId)
     {
-        // remove pending remote connection 
+        // remove pending remote connection
         std::unique_lock<decltype(_pendingRemoteMx)> lock(_pendingRemoteMx);
         auto pendingIt = _pendingRemoteConnections.find(from->GetInfo().participantName);
         if (pendingIt != _pendingRemoteConnections.end())
@@ -1402,7 +1309,7 @@ void VAsioConnection::RemovePeerFromPendingLists(IVAsioPeer* from)
             // established remote connection.
             SendParticipantAnnouncement(from);
             Services::Logging::Debug(_logger, "Remote connection to '{}' succeeded.", from->GetInfo().participantName);
-            _pendingRemoteConnections.erase(pendingIt);
+            pendingIt->second.timer->Shutdown();
         }
     }
 }
@@ -1737,7 +1644,7 @@ auto VAsioConnection::GetNumberOfRemoteReceivers(const IServiceEndpoint* service
             result = link->GetNumberOfRemoteReceivers();
         }
     });
-    
+
     return result;
 }
 
@@ -1800,6 +1707,62 @@ bool VAsioConnection::ParticiantHasCapability(const std::string& participantName
         return capabilities.HasCapability(capability);
     }
 }
+
+
+// IAcceptorListener
+
+
+void VAsioConnection::OnAsyncAcceptSuccess(IAcceptor& acceptor, std::unique_ptr<IRawByteStream> stream)
+{
+    SILKIT_TRACE_METHOD(_logger, "({})", static_cast<const void*>(&acceptor));
+
+    Services::Logging::Debug(_logger, "New connection from [local={}, remote={}]", stream->GetLocalEndpoint(), stream->GetRemoteEndpoint());
+
+    try
+    {
+        auto vAsioPeer{VAsioPeer::Create(std::move(stream), this, _logger)};
+        AddPeer(std::move(vAsioPeer));
+    }
+    catch (const std::exception& exception)
+    {
+        Services::Logging::Error(_logger, "SIL Kit cannot create listener socket: {}", exception.what());
+        throw;
+    }
+
+    acceptor.AsyncAccept({});
+}
+
+
+void VAsioConnection::OnAsyncAcceptFailure(IAcceptor& acceptor)
+{
+    SILKIT_TRACE_METHOD(_logger, "({})", static_cast<const void*>(&acceptor));
+
+    {
+        std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
+
+        auto it{std::find_if(_acceptors.begin(), _acceptors.end(), [needle = &acceptor](const auto& hay) {
+            return hay.get() == needle;
+        })};
+
+        if (it != _acceptors.end())
+        {
+            _acceptors.erase(it);
+        }
+    }
+}
+
+
+// ITimerListener
+
+
+void VAsioConnection::OnTimerExpired(ITimer& timer)
+{
+    SILKIT_UNUSED_ARG(timer);
+    SILKIT_TRACE_METHOD(_logger, "({})", static_cast<const void*>(&timer));
+
+    HandleExpiredConnection();
+}
+
 
 } // namespace Core
 } // namespace SilKit
