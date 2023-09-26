@@ -1110,12 +1110,16 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
         acceptor->SetListener(*this);
         acceptor->AsyncAccept({});
 
-        Services::Logging::Debug(_logger, "SIL Kit is listening on {}", acceptor->GetLocalEndpoint());
+        auto localEndpointUri{Uri::Parse(acceptor->GetLocalEndpoint())};
+
+        Services::Logging::Debug(_logger, "SIL Kit is listening on {}", localEndpointUri.EncodedString());
 
         {
             std::unique_lock<decltype(_acceptorsMutex)> lock{_acceptorsMutex};
             _acceptors.emplace_back(std::move(acceptor));
         }
+
+        return std::make_pair(localEndpointUri.Host(), localEndpointUri.Port());
     }
     catch (const std::exception& exception)
     {
@@ -1123,8 +1127,6 @@ auto VAsioConnection::AcceptTcpConnectionsOn(const std::string& hostName, uint16
                                  endpoint.port(), exception.what());
         throw;
     }
-
-    return std::make_pair(endpoint.address().to_string(), endpoint.port());
 }
 
 void VAsioConnection::AddPeer(std::shared_ptr<IVAsioPeer> newPeer)

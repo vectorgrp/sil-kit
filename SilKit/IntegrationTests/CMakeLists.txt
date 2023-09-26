@@ -185,6 +185,14 @@ add_silkit_test(ITest_SimTask
       SilKit
 )
 
+add_silkit_test(FTest_VendorVectorRegistry
+    SOURCES
+    FTest_VendorVectorRegistry.cpp
+
+    LIBS
+    SilKit
+)
+
 # Windows specific tests
 if(MSVC)
     add_silkit_test(ITest_CompatibilityWithWindowsHeaders
