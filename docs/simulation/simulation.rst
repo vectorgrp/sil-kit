@@ -202,11 +202,6 @@ The following first gives a general overview of a simulation run using the |Prod
 Afterwards, possibilities to configure the simulation step length of a simulation step and to define the simulation step that is being executed are introduced.
 The last part details what time information |ProductName| clients provide, depending on their synchronization mode.
 
-.. admonition:: Note
-
-    A mixed operation mode, where some participants operate synchronized and some unsynchronized,
-    is not supported. Therefore, all participants of a simulation must either be synchronized or unsynchronized.
-
 .. _subsec:sim-overview:
 
 Simulation Overview

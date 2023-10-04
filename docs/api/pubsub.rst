@@ -140,7 +140,7 @@ The interfaces for the publish/subscribe mechanism can be instantiated from an |
     // Participant1 (Publisher)
     // ------------------------
     SilKit::Services::PubSub::PubSubSpec pubDataSpec{"Topic1", "application/json"};
-    pubDataSpec.AddLabel("KeyA", "ValA");
+    pubDataSpec.AddLabel("KeyA", "ValA", SilKit::Services::MatchingLabel::Kind::Optional);
     auto* publisher = participant->CreateDataPublisher("PubCtrl1", pubDataSpec, 1);
     publisher->Publish(user_data);
 

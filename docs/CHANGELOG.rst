@@ -20,14 +20,16 @@ Fixed
 ~~~~~
 
 - Fixed misbehavior of the sil-kit-system-controller in interactive mode on user input:
+
   - The sil-kit-system-controller now triggers a Stop() in SystemState::Running or SystemState::Paused.
   - The sil-kit-system-controller only triggers AbortSimulation when not SystemState::Running, SystemState::Paused, SystemState::Shutdown or SystemState::Aborting.
 
 Changed
 ~~~~~~~
 
-- Performance improvement of the interal serialization
+- Performance improvement of the internal serialization
 - The final state handling of the sil-kit-system-controller in interactive mode on user input has changed:
+
   - Old: The sil-kit-system-controller triggered AbortSimulation if the finalState was not received after 5s. 
   - New: The sil-kit-system-controller retries receiving the finalState 3x5s. If this fails, the sil-kit-system-controller triggers AbortSimulation (if not already happened) and tries receiving the finalState 3x5s again. If this fails, the sil-kit-system-controller just terminates.
 
@@ -50,7 +52,7 @@ Fixed
 
 - Ensured that calling ``ISystemController::AbortSimulation()`` does not lead to the system controller terminating
   prior to other participants receiving its abort message.
-- Ensure that userContext field for external CanFrameTransmitEvents is allways null.
+- Ensure that userContext field for external CanFrameTransmitEvents is always null.
 - Fixed warning in VS2017 (x86) build  
 
 [4.0.34] - 2023-08-21
@@ -140,6 +142,7 @@ Added
 ~~~~~
 
 - Improved Lifecycle and TimeSyncService features:
+
   - Full support for Operation Mode Autonomous with TimeSyncService including hopping onto / leaving a running simulation
   - Abort simulation in case Coordinated participants want to join a running simulation
   - Abort simulation in case an Autonomous with TimeSyncService sees an incompatible participant 
