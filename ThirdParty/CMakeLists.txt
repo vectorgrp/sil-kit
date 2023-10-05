@@ -104,10 +104,6 @@ endfunction()
 
 if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
     include_yamlcpp()
-    set(SILKIT_THIRD_PARTY_YAML_INTERFACE "YamlInterface" CACHE STRING "Name of the third party yaml interface target")
-else()
-    find_package(yaml-cpp)
-    set(SILKIT_THIRD_PARTY_YAML_INTERFACE "" CACHE STRING "Name of the third party yaml interface target")
 endif()
 
 # libfmt
@@ -185,15 +181,15 @@ endif()
 function(find_third_party_packages)
     if(SILKIT_USE_SYSTEM_LIBRARIES)
         # Find yaml-cpp
-        find_package(yaml-cpp)
+        find_package(yaml-cpp REQUIRED)
         set(SILKIT_THIRD_PARTY_YAML_INTERFACE "yaml-cpp" CACHE STRING "Name of the third party yaml interface target")
 
         # Find libfmt
-        find_package(fmt)
+        find_package(fmt REQUIRED)
         set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt")
 
         # Find spdlog
-        find_package(spdlog)
+        find_package(spdlog REQUIRED)
 
     endif()
 endfunction()

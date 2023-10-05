@@ -86,15 +86,10 @@ add_library(O_SilKit_Util_Uri OBJECT
     Uri.cpp
 )
 
-set(FMT_HEADER_ONLY_TARGET "fmt-header-only")
-if(SILKIT_USE_SYSTEM_LIBRARIES)
-    find_package(fmt)
-    set(FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only")
-endif()
 target_link_libraries(O_SilKit_Util_Uri
     PUBLIC I_SilKit_Util_Uri
 
-    PRIVATE ${FMT_HEADER_ONLY_TARGET}
+    PRIVATE ${SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET}
 )
 target_include_directories(O_SilKit_Util_Uri INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
