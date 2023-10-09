@@ -72,6 +72,7 @@ function(include_asio)
     else()
         message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
     endif()
+    set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
 endfunction()
 if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
     include_asio()
@@ -190,6 +191,11 @@ function(find_third_party_packages)
 
         # Find spdlog
         find_package(spdlog REQUIRED)
+
+        # Test if ASIO is installed
+        include(SilKitTestAsio)
+        silkit_check_for_asio()
+        set(SILKIT_THIRD_PARTY_ASIO "" CACHE STRING "Name of the third party asio target")
 
     endif()
 endfunction()

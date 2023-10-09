@@ -29,10 +29,6 @@ target_include_directories(I_SilKit_Core_VAsio
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/io
 )
 
-set(ASIO_INTERFACE "asio")
-if(SILKIT_USE_SYSTEM_LIBRARIES)
-    set(ASIO_INTERFACE "")
-endif()
 target_link_libraries(I_SilKit_Core_VAsio
     INTERFACE SilKitInterface
 
@@ -52,7 +48,7 @@ target_link_libraries(I_SilKit_Core_VAsio
     INTERFACE I_SilKit_Util_Filesystem
     INTERFACE I_SilKit_Util_Uri
 
-    INTERFACE ${ASIO_INTERFACE}
+    INTERFACE ${SILKIT_THIRD_PARTY_ASIO}
     INTERFACE Threads::Threads
 )
 
