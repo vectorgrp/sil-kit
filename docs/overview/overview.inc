@@ -111,7 +111,7 @@ Terminology
    - A participant is a communication node in the distributed simulation that provides access to the |ProductName| services.
  * - :ref:`Services<sec:api-services>`
    - Participants interact with each other through the means of services.
-     These can be communication services, e.g., a :doc:`CAN Controller<../api/can>` and orchestration services, such as the the Life Cycle Service, Time Synchronization Service, and the Logging Service.
+     These can be communication services, e.g., a :doc:`CAN Controller<../api/can>` and orchestration services, such as the the Lifecycle Service, Time Synchronization Service, and the Logging Service.
  * - :doc:`Configuration<configuration/configuration>`
    - The optional participant configuration file allows easy configuration of a participant and its interconnection within the simulation.
      It can be used to change a participant's behavior without recompiling its sources.

@@ -481,7 +481,7 @@ void TimeSyncService::StartTime()
         SILKIT_ASSERT(timeSyncPolicy);
         if (_isSynchronizingVirtualTime)
         {
-            // Check if all synchronous participants have the neccessary capabilities
+            // Check if all synchronous participants have the necessary capabilities
             bool missingCapability = false;
             for (auto&& participantName : _timeConfiguration.GetSynchronizedParticipantNames())
             {

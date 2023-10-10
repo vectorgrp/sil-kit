@@ -95,7 +95,7 @@ One thread will act as a publisher by sending a test string to its subscribers:
    :lines: 33-69
 
 Initially, the simulation is joined by creating the participant called "PublisherParticipant".
-This properly initializes the |ProductName| library; enables the instantiation of :doc:`Services<../api/api>` and offers access to the :doc:`Life Cycle Service<../api/lifecycleService>`, which controls the orchestration of our simulation.
+This properly initializes the |ProductName| library; enables the instantiation of :doc:`Services<../api/api>` and offers access to the :doc:`Lifecycle Service<../api/lifecycleService>`, which controls the orchestration of our simulation.
 Next, we create a :cpp:class:`publisher<SilKit::Services::PubSub::IDataPublisher>` for the ``DataService`` topic.
 Later, we subscribe to the same topic name in our subscriber to enable communication between the participants.
 The actual simulation is performed in the simulation task.
