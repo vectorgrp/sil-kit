@@ -123,7 +123,6 @@ set(SILKIT_SYMBOLS_DIR "${SILKIT_SYMBOLS_DIR_BASE}/${SILKIT_SYMBOLS_DIR_NAME}")
 ###############################################################################
 # Dependencies
 add_subdirectory(ThirdParty)
-find_third_party_packages()
 
 # Globally set the warning compile options AFTER including ThirdParty
 silkit_enable_warnings(${SILKIT_WARNINGS_AS_ERRORS})
