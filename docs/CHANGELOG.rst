@@ -14,6 +14,7 @@ Changed
 ~~~~~~~
 
 - Reworked the documentation on Virtual Time Synchronization
+- The documentation of the demo section now refers to the pre built Vector SIL Kit packages and not to a source build.
 
 [4.0.36] - 2023-09-19
 ---------------------

@@ -7,18 +7,16 @@ included with the Vector SIL Kit project and what their
 expected output and or results are. All demo source code is located in
 the Git repository in the folder Demos.
 
-.. |UtilDir| replace:: build/Release
-.. |DemoDir| replace:: build/Release
+.. |UtilDir| replace:: ./SilKit/bin
+.. |DemoDir| replace:: ./SilKit/bin
 .. |Monitor| replace::  |UtilDir|/sil-kit-monitor
 .. |Registry| replace::  |UtilDir|/sil-kit-registry
 .. |SystemController| replace::  |UtilDir|/sil-kit-system-controller
 
 .. admonition:: Note
 
-   All paths on the following pages are relative to the top level of
-   the Git repository. Build artifacts are assumed to be located in a
-   ``build`` subdirectory.
-   For simplicity's sake all paths assume a Release configuration.
+   All paths on this page are relative to the top level of
+   the pre-built Vector SIL Kit packages.
 
 
 To build the demos, please refer to :ref:`sec:build-demos`.
@@ -29,12 +27,20 @@ To build the demos, please refer to :ref:`sec:build-demos`.
 Building the Demos
 ~~~~~~~~~~~~~~~~~~
 
-Building the demos from within the source tree is straight forward,
-just build the ``Demos`` CMake target::
-    
-    cmake --build . --target Demos
+This descriptions refers to the package structures as provided within the `pre-built Vector SIL Kit releases <https://github.com/vectorgrp/sil-kit/releases>`_.
+It is not directly applicable for building the demos from source.
 
-The individual demos are build as a dependency.
+For building the demos, cmake has to be installed on your system and a corresponding cpp compiler has to be available.
+
+Building the demos from a pre-built Vector SIL Kit is straight forward,
+just run the following commands from within the "SilKit-Demos" directory::
+    
+    mkdir build
+    cd build
+    cmake ..
+    cmake --build .
+
+The individual demos are then built into ./SilKit/bin in the root directory of the package.
 
 .. admonition:: Note
    
@@ -43,7 +49,7 @@ The individual demos are build as a dependency.
    This can be overridden by providing your own ``SilKit`` CMake target library,
    before the demos are configured by CMake.
    Or by changing the ``find_package(SilKit ... PATHS path/to/SilKit)`` statement directly
-   in the ``SilKit-Demos/CMakeLists.txt`` directory.
+   in the ``./SilKit-Demos/CMakeLists.txt`` directory.
 
 
 .. _sec:util-can-demo:
@@ -58,7 +64,7 @@ CAN Demo
    *  -  Abstract
       -  CAN Reader/Writer with or without network simulator
    *  -  Source location
-      -  Demos/Can
+      -  ./SilKit-Demos/Can
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -80,7 +86,7 @@ CAN Demo
       -  .. parsed-literal:: 
             
             # Creates a CAN Writer Process with the registry's default URI
-            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
    *  -  System Example
       - For synchronized execution:
 
@@ -93,10 +99,10 @@ CAN Demo
             |Monitor|
 
             # CAN Reader:
-            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanReader
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader
 
             # CAN Writer:
-            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter
 
             # System Controller:
             |SystemController| CanReader CanWriter 
@@ -109,10 +115,10 @@ CAN Demo
             |Registry|
 
             # CAN Reader:
-            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanReader --async
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanReader --async
 
             # CAN Writer:
-            |DemoDir|/SilKitDemoCan Demos/Can/DemoCan.silkit.yaml CanWriter --async
+            |DemoDir|/SilKitDemoCan ./SilKit-Demos/Can/DemoCan.silkit.yaml CanWriter --async
 
    *  -  Notes
       -  | \- The writer sends CAN frames at a fixed rate of one frame per simulation step (1ms).
@@ -128,7 +134,7 @@ Ethernet Demo
    *  -  Abstract
       -  Ethernet Reader / Writer with or without network simulator
    *  -  Source location
-      -  Demos/Ethernet
+      -  ./SilKit-Demos/Ethernet
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -150,7 +156,7 @@ Ethernet Demo
       -  .. parsed-literal:: 
 
             # Creates an Ethernet Writer Process with the registry's default URI:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
+            |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
    *  -  System Example
       - For synchronized execution:
 
@@ -163,10 +169,10 @@ Ethernet Demo
             |Monitor|
 
             # Ethernet Reader:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader
+            |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader
 
             # Ethernet Writer:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
+            |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter
 
             # System Controller:
             |SystemController| EthernetReader EthernetWriter
@@ -179,10 +185,10 @@ Ethernet Demo
             |Registry|
 
             # Ethernet Reader:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader --async
+            |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetReader --async
 
             # Ethernet Writer:
-            |DemoDir|/SilKitDemoEthernet Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter --async
+            |DemoDir|/SilKitDemoEthernet ./SilKit-Demos/Ethernet/DemoEthernet.silkit.yaml EthernetWriter --async
 
    *  -  Notes
       -  | \- The writer sends Ethernet frames at a fixed rate of one frame per simulation step (1ms).
@@ -199,7 +205,7 @@ LIN Demo
    *  -  Abstract
       -  LIN Master and Slave demo. The master sends and requests messages from a LIN slave.
    *  -  Source location
-      -  Demos/Lin
+      -  ./SilKit-Demos/Lin
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -221,7 +227,7 @@ LIN Demo
       -  .. parsed-literal:: 
 
             # Creates a LIN Master Process with the registry's default URI:
-            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster
+            |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinMaster
    *  -  System Example
       -  For synchronized execution:
 
@@ -234,10 +240,10 @@ LIN Demo
             |Monitor|
 
             # LIN Master:
-            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster
+            |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinMaster
 
             # LIN Slave:
-            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinSlave
+            |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinSlave
 
             # System Controller:
             |SystemController| LinSlave LinMaster
@@ -250,13 +256,13 @@ LIN Demo
             |Registry|
 
             # LIN Master:
-            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinMaster --async
+            |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinMaster --async
 
             # LIN Slave:
-            |DemoDir|/SilKitDemoLin Demos/Lin/DemoLin.silkit.yaml LinSlave --async
+            |DemoDir|/SilKitDemoLin ./SilKit-Demos/Lin/DemoLin.silkit.yaml LinSlave --async
 
    *  -  Notes
-      -  | Both Master and Slave sleep for 500 milliseconds per simulation step to slow down execution.
+      -  | Both Master and Slave sleep for a hort duration per simulation step to slow down execution.
 
 
 FlexRay Demo
@@ -269,7 +275,7 @@ FlexRay Demo
    *  -  Abstract
       -  FlexRay Demo for a FlexRay cluster containing two nodes
    *  -  Source location
-      -  Demos/FlexRay
+      -  ./SilKit-Demos/FlexRay
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
          * :ref:`sil-kit-system-controller<sec:util-system-controller>`
@@ -289,7 +295,7 @@ FlexRay Demo
       -  .. parsed-literal:: 
 
             # Creates a FlexRay Process for Node 0 with the registry's default URI:
-            |DemoDir|/SilKitDemoFlexRay Demos/FlexRayDemoFlexRay.silkit.yaml Node0
+            |DemoDir|/SilKitDemoFlexRay ./SilKit-Demos/FlexRay/DemoFlexRay.silkit.yaml Node0
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -297,16 +303,16 @@ FlexRay Demo
             |Registry|
 
             # Network Simulator (assumed to be in PATH, necessary):
-            sil-kit-network-simulator Demos/FlexRay/NetworkSimulatorConfig.yaml
+            sil-kit-network-simulator ./SilKit-Demos/FlexRay/NetworkSimulatorConfig.yaml
 
             # Monitor (optional):
             |Monitor|
 
             # Node 0:
-            |DemoDir|/SilKitDemoFlexRay Demos/FlexRay/DemoFlexRay.silkit.yaml Node0
+            |DemoDir|/SilKitDemoFlexRay ./SilKit-Demos/FlexRay/DemoFlexRay.silkit.yaml Node0
 
             # Node 1:
-            |DemoDir|/SilKitDemoFlexRay Demos/FlexRay/DemoFlexRay.silkit.yaml Node1
+            |DemoDir|/SilKitDemoFlexRay ./SilKit-Demos/FlexRay/DemoFlexRay.silkit.yaml Node1
 
             # System Controller:
             |SystemController| Node0 Node1 NetworkSimulator
@@ -327,7 +333,7 @@ Publish/Subscribe Demo
    *  -  Abstract
       -  Data Message Publish/Subscribe Demo for a set of Publishers/Subscribers
    *  -  Source location
-      -  Demos/PubSub
+      -  ./SilKit-Demos/PubSub
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -348,8 +354,8 @@ Publish/Subscribe Demo
    *  -  Parameter Example
       -  .. parsed-literal:: 
 
-            # Creates a combined publisher and subscriber with the registry's default URI:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher
+            # Creates a publisher with the registry's default URI:
+            |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Publisher
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -360,10 +366,10 @@ Publish/Subscribe Demo
             |Monitor|
 
             # Publisher:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher
+            |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Publisher
 
             # Subscriber:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Subscriber
+            |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Subscriber
 
             # System Controller:
             |SystemController| Publisher Subscriber
@@ -376,10 +382,10 @@ Publish/Subscribe Demo
             |Registry|
 
             # Publisher:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Publisher --async
+            |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Publisher --async
 
             # Subscriber:
-            |DemoDir|/SilKitDemoPubSub Demos/PubSub/DemoPubSub.silkit.yaml Subscriber --async
+            |DemoDir|/SilKitDemoPubSub ./SilKit-Demos/PubSub/DemoPubSub.silkit.yaml Subscriber --async
 
    *  -  Notes
       -  The publisher and subscriber show how to serialize/deserialize different kinds of data with the built-in :doc:`Data Serialization API</api/serdes>`.
@@ -395,7 +401,7 @@ RPC Demo
    *  -  Abstract
       -  Remote Procedure Call Demo. The client triggers remote procedure calls on the server.
    *  -  Source location
-      -  Demos/Rpc
+      -  ./SilKit-Demos/Rpc
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
          * :ref:`sil-kit-system-controller<sec:util-system-controller>` (not needed for unsynchronized execution)
@@ -417,7 +423,7 @@ RPC Demo
       -  .. parsed-literal:: 
 
             # Creates an RPC server process with the registry's default URI:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server
+            |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Server
    *  -  System Example
       -  .. parsed-literal:: 
 
@@ -428,10 +434,10 @@ RPC Demo
             |Monitor|
 
             # Server:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server
+            |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Server
 
             # Client:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Client
+            |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Client
 
             # System Controller:
             |SystemController| Server Client
@@ -444,10 +450,10 @@ RPC Demo
             |Registry|
 
             # Server:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Server --async
+            |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Server --async
 
             # Client:
-            |DemoDir|/SilKitDemoRpc Demos/Rpc/DemoRpc.silkit.yaml Client --async
+            |DemoDir|/SilKitDemoRpc ./SilKit-Demos/Rpc/DemoRpc.silkit.yaml Client --async
 
    *  -  Notes
       -  ``Client`` participant has two RPC clients which call the ``Add100`` and ``Sort`` functions on the ``Server`` participant's two RPC servers.
@@ -464,20 +470,20 @@ Benchmark Demo
    *  -  Abstract
       -  Benchmark Demo. Used for evaluating SIL Kit performance of publish/subscribe communication.
    *  -  Source location
-      -  Demos/Benchmark
+      -  ./SilKit-Demos/Benchmark
    *  -  Requirements
       -  None (The demo starts its own instance of the registry and system controller).
    *  -  Positional parameters
       -  [numberOfSimulationRuns]
            Sets the number of simulation runs to perform.
          [simulationDuration]
-           Sets the virtual simulation duration.
+           Sets the virtual simulation duration <S>.
          [numberOfParticipants]
-           Sets the number of simulation participants.
+           Sets the number of simulation participants <N>.
          [messageCount]
-           Sets the number of messages to be send in each simulation step.
+           Sets the number of messages <M> to be send in each simulation step.
          [messageSizeInBytes]
-           Sets the message size.
+           Sets the message size <B>.
          [registryURi] 
            The URI of the registry to start.
    *    - Optional parameters
@@ -486,34 +492,35 @@ Benchmark Demo
           --registry-uri
             The URI of the registry to start. Default: silkit://localhost:8500
           --message-size
-            Sets the message size. Default: 1000
+            Sets the message size <B> in bytes. Default: 1000
           --message-count
-            Sets the number of messages to be send in each simulation step. Default: 50
+            Sets the number of messages <M> to be send in each simulation step. Default: 50
           --number-participants
-            Sets the number of simulation participants. Default: 2
+            Sets the number of simulation participants <N>. Default: 2
           --number-simulation-runs
             Sets the number of simulation runs to perform. Default: 4
           --simulation-duration
-            Sets the simulation duration (virtual time). Default: 1s
+            Sets the simulation duration <S> (virtual time). Default: 1s
           --configuration 
             Path and filename of the participant configuration YAML file. Default: empty
           --write-csv
             Path and filename of CSV file with benchmark results. Default: empty
    *  -  Parameter Example
       -  .. parsed-literal:: 
-            # Launch the benchmark demo with positional arguments and a specified configuration file:
-            |DemoDir|/SilKitDemoBenchmark.exe 4 1 2 1 10 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
+            # Launch the benchmark demo with default arguments but 3 participants and a non default registry URI to avoid collisions:
+            |DemoDir|/SilKitDemoBenchmark --number-participants 3 --registry-uri silkit://localhost:8501
 
-            # Launch the benchmark demo with default arguments but 4 participants:
-            |DemoDir|/SilKitDemoBenchmark.exe --number-participants 4
+            # Launch the benchmark demo with positional arguments, a specified configuration file:
+            |DemoDir|/SilKitDemoBenchmark 4 1 2 1 10 --configuration ./SilKit-Demos/Benchmark/DemoBenchmarkDomainSocketsOff.silkit.yaml 
+
    *  -  Notes
-      -  | This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> of <B> bytes per simulation step with a fixed period of 1ms and run for <S> seconds (virtual time).
+      -  | This benchmark demo produces timings of a configurable simulation setup. <N> participants exchange <M> of <B> bytes per simulation step with a fixed simulation step size of 1ms and run for <S> seconds (virtual time).
          |
          | This simulation run is repeated <K> times and averages over all runs  are calculated. Results for average runtime, speedup (virtual time/runtime), throughput (data size/runtime), message rate (count/runtime) including the standard deviation are printed.
          |
          | The demo uses publish/subscribe controllers with the same topic for the message exchange, so each participant broadcasts the messages to all other participants. The configuration file ``DemoBenchmarkDomainSocketsOff.silkit.yaml`` can be used to disable domain socket usage for more realistic timings of TCP/IP traffic. With ``DemoBenchmarkTCPNagleOff.silkit.yaml``, Nagle's algorithm and domain sockets are switched off.
          |
-         | The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding different message sizes. See ``\Demos\Benchmark\msg-size-scaling\Readme.md`` and ``Demos\Benchmark\performance-diff\Readme.md`` for further information.
+         | The demo can be wrapped in helper scripts to run parameter scans, e.g., for performance analysis regarding different message sizes. See ``.\SilKit-Demos\Benchmark\msg-size-scaling\Readme.md`` and ``.\SilKit-Demos\Benchmark\performance-diff\Readme.md`` for further information.
 
 
 Latency Demo
@@ -526,7 +533,7 @@ Latency Demo
    *  -  Abstract
       -  Latency Demo. Used for evaluating SIL Kit performance of publish/subscribe communication.
    *  -  Source location
-      -  Demos/Latency
+      -  ./SilKit-Demos/Benchmark
    *  -  Requirements
       -  * :ref:`sil-kit-registry<sec:util-registry>`
    *  -  Positional parameters
@@ -553,8 +560,12 @@ Latency Demo
             Path and filename of csv file with benchmark results. Default: empty
    *  -  Parameter Example
       -  .. parsed-literal:: 
+            # Launch the two LatencyDemo instances with positional arguments and a specified configuration file:
+            |DemoDir|/SilKitDemoLatency 100 1000
+            |DemoDir|/SilKitDemoLatency 100 1000 --isReceiver
+
             # Launch the LatencyDemo with positional arguments and a specified configuration file:
-            |DemoDir|/SilKitDemoLatency.exe 100 1000 --configuration ./DemoBenchmarkDomainSocketsOff.silkit.yaml
+            |DemoDir|/SilKitDemoLatency 100 1000 --configuration ./SilKit-Demos/Benchmark/DemoBenchmarkDomainSocketsOff.silkit.yaml
    *  -  Notes
       -  | This latency demo produces timings of a configurable simulation setup. Two participants exchange <M> messages of <B> bytes without time synchronization.
          |
