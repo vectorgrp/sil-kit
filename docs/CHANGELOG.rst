@@ -7,7 +7,7 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
-[4.0.37] - Unreleased
+[4.0.37] - 2023-10-17
 ---------------------
 
 Changed
