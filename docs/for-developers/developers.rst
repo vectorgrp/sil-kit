@@ -27,7 +27,16 @@ The |ProductName| implements a layered architecture:
     :width: 800
 
 |
-|
+
+Prerequisites for Compilation
+-----------------------------
+
+* For Windows:
+    * Visual Studio 2017 (toolset v141) and higher
+* For Ubuntu 18.04 LTS:
+    * GCC 8 **or**
+    * Clang
+
 
 Writing your first |ProductName| application
 --------------------------------------------
