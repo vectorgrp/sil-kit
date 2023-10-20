@@ -649,11 +649,12 @@ protected:
 
 
 //! \brief Dynamically respond to a frame header event by sending a previously unconfigured response
-TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
+TEST_F(ITest_LinDynamicResponse, deferred_simstep_response)
 {
     auto registryUri = MakeTestRegistryUri();
     auto participantNames = std::vector<std::string>{ "LinMaster", "LinSlave1" };
-    auto simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
+
+    _simTestHarness = std::make_unique<SimTestHarness>(participantNames, registryUri, false);
 
     LinFrame slaveResponseFrame;
     slaveResponseFrame.id = 34;
@@ -680,10 +681,9 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
     } state{ State::Sending };
 
     {
-        auto&& participant = simTestHarness->GetParticipant("LinMaster")->Participant();
-        auto&& lifecycleService =
-            simTestHarness->GetParticipant("LinMaster")->GetOrCreateLifecycleService();
-        auto&& timeSyncService = simTestHarness->GetParticipant("LinMaster")->GetOrCreateTimeSyncService();
+        auto&& participant = _simTestHarness->GetParticipant("LinMaster")->Participant();
+        auto&& lifecycleService = _simTestHarness->GetParticipant("LinMaster")->GetOrCreateLifecycleService();
+        auto&& timeSyncService = _simTestHarness->GetParticipant("LinMaster")->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
         lifecycleService->SetCommunicationReadyHandler([linController]() {
@@ -719,10 +719,9 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
 
     std::chrono::nanoseconds headerReceived{0ms};
     {
-        auto&& participant = simTestHarness->GetParticipant("LinSlave1")->Participant();
-        auto&& lifecycleService =
-            simTestHarness->GetParticipant("LinSlave1")->GetOrCreateLifecycleService();
-        auto&& timeSyncService = simTestHarness->GetParticipant("LinSlave1")->GetOrCreateTimeSyncService();
+        auto&& participant = _simTestHarness->GetParticipant("LinSlave1")->Participant();
+        auto&& lifecycleService = _simTestHarness->GetParticipant("LinSlave1")->GetOrCreateLifecycleService();
+        auto&& timeSyncService = _simTestHarness->GetParticipant("LinSlave1")->GetOrCreateTimeSyncService();
         auto&& linController = participant->CreateLinController("LinController1", "LIN_1");
 
         lifecycleService->SetCommunicationReadyHandler([linController]() {
@@ -754,7 +753,7 @@ TEST(Test_LinDynamicResponse_Nofixture, deferred_simstep_response)
     }
 
     //Run the test
-    auto ok = simTestHarness->Run(5s);
+    auto ok = _simTestHarness->Run(5s);
     ASSERT_TRUE(ok) << "SimTestHarness should terminate without timeout";
 }
 

@@ -38,19 +38,16 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_HopOnHopOff
-    SOURCES ITest_Internals_HopOnHopOff.cpp
+    SOURCES ITest_HopOnHopOff.cpp
     LIBS S_SilKitImpl
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_Abort
-    SOURCES ITest_Internals_Abort.cpp
+    SOURCES ITest_Abort.cpp
     LIBS S_SilKitImpl
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_ParticipantModes
     SOURCES ITest_Internals_ParticipantModes.cpp
     LIBS S_SilKitImpl
 )
@@ -72,7 +69,6 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_TargetedMessaging
     SOURCES ITest_Internals_TargetedMessaging.cpp
     LIBS S_ITests_STH_Internals
 )
@@ -93,7 +89,6 @@ add_silkit_test_to_executable(SilKitIntegrationTests
     SilKit
 )
 
-# XXX Non-Internals Candidate
 add_silkit_test_to_executable(SilKitIntegrationTests
     SOURCES
     ITest_DifferentPeriods.cpp
@@ -119,32 +114,27 @@ add_silkit_test_to_executable(SilKitIntegrationTests
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_ServiceDiscovery
     SOURCES ITest_Internals_ServiceDiscovery.cpp
     LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_RequestReply
     SOURCES ITest_Internals_RequestReply.cpp
     LIBS S_SilKitImpl
 )
 
 add_silkit_test_to_executable(SilKitFunctionalTests
-    TESTSUITE_NAME FTest_ServiceDiscoveryPerf
-    SOURCES FTest_Internals_ServiceDiscoveryPerf.cpp
+    SOURCES FTest_ServiceDiscoveryPerf.cpp
     LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitIntegrationTests
-    TESTSUITE_NAME ITest_SystemMonitor
-    SOURCES ITest_Internals_SystemMonitor.cpp
+    SOURCES ITest_SystemMonitor.cpp
     LIBS S_ITests_STH_Internals
 )
 
 add_silkit_test_to_executable(SilKitFunctionalTests
-    TESTSUITE_NAME FTest_PubSubPerf
-    SOURCES FTest_Internals_PubSubPerf.cpp
+    SOURCES FTest_PubSubPerf.cpp
     LIBS S_ITests_STH
 )
 

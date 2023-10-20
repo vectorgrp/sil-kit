@@ -44,11 +44,10 @@ namespace {
 using namespace std::chrono_literals;
 using namespace SilKit::Core;
 
-class ITest_ServiceDiscovery : public testing::Test
+class ITest_Internals_ServiceDiscovery : public testing::Test
 {
 protected:
-
-    ITest_ServiceDiscovery()
+    ITest_Internals_ServiceDiscovery()
     {
     }
 
@@ -56,7 +55,7 @@ protected:
 
 // Tests that the service discovery handler fires for created services
 // All created should be removed as well if a participant leaves
-TEST_F(ITest_ServiceDiscovery, discover_services)
+TEST_F(ITest_Internals_ServiceDiscovery, discover_services)
 {
     auto registryUri = MakeTestRegistryUri();
     size_t numberOfServices = 5;
@@ -148,7 +147,7 @@ TEST_F(ITest_ServiceDiscovery, discover_services)
 
 // Tests that the specific service discovery handler fires for created services
 // All created should be removed as well if a participant leaves
-TEST_F(ITest_ServiceDiscovery, discover_specific_services)
+TEST_F(ITest_Internals_ServiceDiscovery, discover_specific_services)
 {
     auto registryUri = MakeTestRegistryUri();
     size_t numberOfServices = 5;

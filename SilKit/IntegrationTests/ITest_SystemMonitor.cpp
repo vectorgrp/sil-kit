@@ -30,7 +30,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "SimTestHarness.hpp"
 #include "GetTestPid.hpp"
 #include "ConfigurationTestUtils.hpp"
-#include "VAsioRegistry.hpp"
 #include "SyncDatatypeUtils.hpp"
 
 #include "gmock/gmock.h"

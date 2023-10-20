@@ -44,8 +44,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "silkit/services/pubsub/PubSubSpec.hpp"
 
 #include "ConfigurationTestUtils.hpp"
-#include "IParticipantInternal.hpp"
-#include "CreateParticipantImpl.hpp"
 #include "functional.hpp"
 #include "silkit/experimental/participant/ParticipantExtensions.hpp"
 
@@ -78,10 +76,10 @@ enum class TimeMode
     Sync
 };
 
-class ITest_Internals_MultiThreadedParticipants : public testing::Test
+class ITest_MultiThreadedParticipants : public testing::Test
 {
 protected:
-    ITest_Internals_MultiThreadedParticipants() {}
+    ITest_MultiThreadedParticipants() {}
 
     struct Callbacks
     {

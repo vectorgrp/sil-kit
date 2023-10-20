@@ -19,7 +19,7 @@ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#include "ITest_Internals_MultiThreadedParticipants.hpp"
+#include "ITest_MultiThreadedParticipants.hpp"
 
 #include <list>
 #include <vector>
@@ -29,7 +29,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 namespace {
 
-class ITest_HopOnHopOff : public ITest_Internals_MultiThreadedParticipants
+class ITest_HopOnHopOff : public ITest_MultiThreadedParticipants
 {
 };
 

@@ -158,7 +158,7 @@ TEST(Test_Logger, get_log_level)
     EXPECT_EQ(logger.GetLogLevel(), Level::Debug);
 }
 
-TEST(LogOnceFlag, check_setter)
+TEST(Test_Logger, LogOnceFlag_check_setter)
 {
     LogOnceFlag  once;
     EXPECT_EQ(once.WasCalled(), false);

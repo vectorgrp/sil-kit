@@ -69,10 +69,10 @@ enum class TimeMode
     Sync
 };
 
-class ITest_ParticipantModes : public testing::Test
+class ITest_Internals_ParticipantModes : public testing::Test
 {
 protected:
-    ITest_ParticipantModes() {}
+    ITest_Internals_ParticipantModes() {}
 
     struct TestParticipant
     {
@@ -699,7 +699,7 @@ protected:
 // Sync     Coordinated     NonReq      -> Disallowed: Coordinated must be required
 // Sync     Invalid         Req/NonReq  -> Disallowed
 
-TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
 {
     RunRegistry();
 
@@ -726,7 +726,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedNonReq_disallowed)
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, test_SyncCoordinatedNonReq_disallowed)
+TEST_F(ITest_Internals_ParticipantModes, test_SyncCoordinatedNonReq_disallowed)
 {
     RunRegistry();
 
@@ -753,7 +753,7 @@ TEST_F(ITest_ParticipantModes, test_SyncCoordinatedNonReq_disallowed)
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, test_SyncInvalid_disallowed)
+TEST_F(ITest_Internals_ParticipantModes, test_SyncInvalid_disallowed)
 {
     RunRegistry();
 
@@ -787,7 +787,7 @@ TEST_F(ITest_ParticipantModes, test_SyncInvalid_disallowed)
 // Sync     Coordinated     Req
 // Sync     Coordinated     NonReq      -> Disallowed
 
-TEST_F(ITest_ParticipantModes, test_AsyncInvalidNonReq)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncInvalidNonReq)
 {
     RunRegistry();
 
@@ -815,7 +815,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncInvalidNonReq)
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, test_AsyncAutonomousNonReq)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncAutonomousNonReq)
 {
     RunRegistry();
 
@@ -844,7 +844,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncAutonomousNonReq)
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, test_AsyncAutonomousReq)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncAutonomousReq)
 {
     RunRegistry();
 
@@ -881,7 +881,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncAutonomousReq)
     StopRegistry();
 }
 
-TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedReq)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncCoordinatedReq)
 {
     RunRegistry();
 
@@ -923,7 +923,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncCoordinatedReq)
 }
 
 
-TEST_F(ITest_ParticipantModes, test_SyncAutonomousNonReq)
+TEST_F(ITest_Internals_ParticipantModes, test_SyncAutonomousNonReq)
 {
     RunRegistry();
 
@@ -953,7 +953,7 @@ TEST_F(ITest_ParticipantModes, test_SyncAutonomousNonReq)
 }
 
 
-TEST_F(ITest_ParticipantModes, test_SyncAutonomousReq)
+TEST_F(ITest_Internals_ParticipantModes, test_SyncAutonomousReq)
 {
     RunRegistry();
 
@@ -992,7 +992,7 @@ TEST_F(ITest_ParticipantModes, test_SyncAutonomousReq)
 }
 
 
-TEST_F(ITest_ParticipantModes, test_SyncCoordinatedReq)
+TEST_F(ITest_Internals_ParticipantModes, test_SyncCoordinatedReq)
 {
     RunRegistry();
 
@@ -1033,7 +1033,7 @@ TEST_F(ITest_ParticipantModes, test_SyncCoordinatedReq)
 // -----------------
 // Mode combinations
 
-TEST_F(ITest_ParticipantModes, test_AsyncAutonomousReq_with_SyncCoordinated)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncAutonomousReq_with_SyncCoordinated)
 {
     RunRegistry();
 
@@ -1077,7 +1077,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncAutonomousReq_with_SyncCoordinated)
 }
 
 
-TEST_F(ITest_ParticipantModes, test_AsyncInvalid_with_SyncAutonomous)
+TEST_F(ITest_Internals_ParticipantModes, test_AsyncInvalid_with_SyncAutonomous)
 {
     RunRegistry();
 
@@ -1117,7 +1117,7 @@ TEST_F(ITest_ParticipantModes, test_AsyncInvalid_with_SyncAutonomous)
 // All combinations
 // ----------------
 
-TEST_F(ITest_ParticipantModes, test_Combinations)
+TEST_F(ITest_Internals_ParticipantModes, test_Combinations)
 {
     RunRegistry();
 

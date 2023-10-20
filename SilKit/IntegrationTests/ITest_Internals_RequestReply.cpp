@@ -44,17 +44,16 @@ namespace {
 using namespace std::chrono_literals;
 using namespace SilKit::Core;
 
-class ITest_RequestReply : public testing::Test
+class ITest_Internals_RequestReply : public testing::Test
 {
 protected:
-
-    ITest_RequestReply()
+    ITest_Internals_RequestReply()
     {
     }
 
 };
 
-TEST_F(ITest_RequestReply, participant_replies)
+TEST_F(ITest_Internals_RequestReply, participant_replies)
 {
     // Registry
     auto registryUri = MakeTestRegistryUri();
