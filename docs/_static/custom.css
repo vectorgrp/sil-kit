@@ -6,3 +6,19 @@
 .wy-nav-content {
     max-width: 1240px;
 }
+
+.rst-content code.literal {
+	position: relative;
+	top: -0.08rem;
+	color: #545454;
+	font-weight: 600;
+	background: none;
+}
+
+.rst-content code.xref {
+	position: relative;
+	top: -0.08rem;
+	color: #062873;
+	font-weight: 700;
+	background: none;
+}
