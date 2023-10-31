@@ -93,6 +93,8 @@ if(SILKIT_BUILD_DASHBOARD)
         CreateDashboard.cpp
         Dashboard.cpp
         Dashboard.hpp
+        DashboardParticipant.cpp
+        DashboardParticipant.hpp
         IDashboard.hpp
         OatppContext.cpp
         OatppContext.hpp

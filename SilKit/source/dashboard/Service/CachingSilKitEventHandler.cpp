@@ -129,9 +129,11 @@ CachingSilKitEventHandler::~CachingSilKitEventHandler()
 
 void CachingSilKitEventHandler::OnLastParticipantDisconnected()
 {
-    StartSimulationIfNeeded();
-    _eventQueue->Enqueue(SilKitEvent(SimulationEnd{GetCurrentTime()}));
-    _simulationRunning = false;
+    if (_simulationRunning)
+    {
+        _eventQueue->Enqueue(SilKitEvent(SimulationEnd{GetCurrentTime()}));
+        _simulationRunning = false;
+    }
 }
 
 void CachingSilKitEventHandler::OnParticipantConnected(
@@ -143,15 +145,19 @@ void CachingSilKitEventHandler::OnParticipantConnected(
 
 void CachingSilKitEventHandler::OnSystemStateChanged(Services::Orchestration::SystemState systemState)
 {
-    StartSimulationIfNeeded();
-    _eventQueue->Enqueue(SilKitEvent(systemState));
+    if (_simulationRunning)
+    {
+        _eventQueue->Enqueue(SilKitEvent(systemState));
+    }
 }
 
 void CachingSilKitEventHandler::OnParticipantStatusChanged(
     const Services::Orchestration::ParticipantStatus& participantStatus)
 {
-    StartSimulationIfNeeded();
-    _eventQueue->Enqueue(SilKitEvent(participantStatus));
+    if (_simulationRunning)
+    {
+        _eventQueue->Enqueue(SilKitEvent(participantStatus));
+    }
 }
 
 bool ShouldSkipServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
@@ -165,12 +171,14 @@ bool ShouldSkipServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Typ
 void CachingSilKitEventHandler::OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
                                                         const Core::ServiceDescriptor& serviceDescriptor)
 {
-    if (ShouldSkipServiceDiscoveryEvent(discoveryType, serviceDescriptor))
+    if (_simulationRunning)
     {
-        return;
+        if (ShouldSkipServiceDiscoveryEvent(discoveryType, serviceDescriptor))
+        {
+            return;
+        }
+        _eventQueue->Enqueue(SilKitEvent(ServiceData{discoveryType, serviceDescriptor}));
     }
-    StartSimulationIfNeeded();
-    _eventQueue->Enqueue(SilKitEvent(ServiceData{discoveryType, serviceDescriptor}));
 }
 
 void CachingSilKitEventHandler::StartSimulationIfNeeded()

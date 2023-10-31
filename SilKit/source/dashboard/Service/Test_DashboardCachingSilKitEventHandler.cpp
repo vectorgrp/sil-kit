@@ -201,37 +201,14 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnParticipantConnected_CreateSim
     ASSERT_EQ(actualInfo, participantConnectionInformation) << "Wrong ParticipantConnectionInformation!";
 }
 
-TEST_F(Test_DashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_CreateSimulationSuccess)
+TEST_F(Test_DashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_SimulationNotRunning)
 {
     // Arrange
-    EXPECT_CALL(*_mockEventQueue, Enqueue).Times(2);
     EXPECT_CALL(*_mockEventQueue, DequeueAllInto)
-        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            SimulationStart simulationStart{"silkit://localhost:8500", 123456};
-                            std::vector<SilKitEvent> events;
-                            events.emplace_back(simulationStart);
-                            evts.swap(events);
-                        }),
-                        Return(true)))
-        .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
-                            SimulationEnd simulationEnd{456789};
-                            std::vector<SilKitEvent> events;
-                            events.emplace_back(simulationEnd);
-                            evts.swap(events);
-                        }),
-                        Return(true)))
         .WillOnce(DoAll(WithArgs<0>([&](auto& evts) {
                             evts.clear();
                         }),
                         Return(false)));
-    ;
-    EXPECT_CALL(*_mockEventHandler, OnSimulationStart).WillOnce(Return(_simulationId));
-    uint64_t actualSimulationId = 0;
-    uint64_t actualTime = 0;
-    EXPECT_CALL(*_mockEventHandler, OnSimulationEnd).WillOnce(WithArgs<0, 1>([&](auto simulationId, auto time) {
-        actualSimulationId = simulationId;
-        actualTime = time;
-    }));
     EXPECT_CALL(*_mockEventQueue, Stop);
 
     // Act
@@ -241,8 +218,6 @@ TEST_F(Test_DashboardCachingSilKitEventHandler, OnLastParticipantDisconnected_Cr
     }
 
     // Assert
-    CheckSimulationId(actualSimulationId);
-    CheckTime(actualTime);
 }
 
 } // namespace Dashboard

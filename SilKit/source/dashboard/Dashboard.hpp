@@ -23,23 +23,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <future>
 
-#include "silkit/participant/IParticipant.hpp"
-#include "silkit/services/orchestration/all.hpp"
-#include "silkit/services/logging/ILogger.hpp"
-#include "ICachingSilKitEventHandler.hpp"
-
-//forwards
-namespace SilKit {
-namespace Core {
-class IParticipantInternal;
-namespace Discovery {
-class IServiceDiscovery;
-} // Discovery
-} // namespace Core
-namespace Config {
-class IParticipantConfiguration;
-} // namespace Config
-} // namespace SilKit
+#include "DashboardParticipant.hpp"
 
 namespace SilKit {
 namespace Dashboard {
@@ -54,35 +38,24 @@ public:
     ~Dashboard();
 
 private:
-    void OnParticipantConnected(
-        const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
-    void OnParticipantDisconnected(
-        const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
-    void OnParticipantStatusChanged(const Services::Orchestration::ParticipantStatus& participantStatus);
-    void OnSystemStateChanged(Services::Orchestration::SystemState systemState);
-    void OnServiceDiscoveryEvent(Core::Discovery::ServiceDiscoveryEvent::Type discoveryType,
-                                            const Core::ServiceDescriptor& serviceDescriptor);
-    bool LastParticipantDisconnected(
-        const Services::Orchestration::ParticipantConnectionInformation& participantInformation);
+    void Run();
+    void InitParticipant();
+    void ShutdownParticipantIfRunning();
+    void ResetParticipant();
 
 private:
-    std::unique_ptr<SilKit::IParticipant> _dashboardParticipant;
-    SilKit::Core::IParticipantInternal* _participantInternal{nullptr};
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> _participantConfig;
+    std::string _registryUri;
 
-    SilKit::Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
-    SilKit::Services::Orchestration::ISystemMonitor* _systemMonitor{ nullptr };
-    SilKit::Core::Discovery::IServiceDiscovery* _serviceDiscovery{ nullptr };
-    SilKit::Services::Logging::ILogger* _logger{ nullptr };
-    std::shared_ptr<DashboardRetryPolicy> _retryPolicy;
-    std::unique_ptr<ICachingSilKitEventHandler> _cachingEventHandler;
-    std::mutex _connectedParticipantsMx;
-    std::vector<std::string> _connectedParticipants;
+    std::future<void> _done;
+    std::atomic<bool> _retry{true};
 
-    SilKit::Util::HandlerId _participantStatusHandlerId{};
-    SilKit::Util::HandlerId _systemStateHandlerId{};
+    std::shared_ptr<oatpp::data::mapping::ObjectMapper> _objectMapper;
+    std::shared_ptr<DashboardSystemApiClient> _apiClient;
+    std::shared_ptr<ISilKitToOatppMapper> _silKitToOatppMapper;
 
-    std::future<SilKit::Services::Orchestration::ParticipantState> _lifecycleDone;
-    std::promise<void> _runningReachedPromise;
+    std::mutex _dashboardParticipantMx;
+    std::unique_ptr<DashboardParticipant> _dashboardParticipant;
 };
 
 } // namespace Dashboard
