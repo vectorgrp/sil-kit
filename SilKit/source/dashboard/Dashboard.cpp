@@ -22,8 +22,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Dashboard.hpp"
 
 #include "OatppHeaders.hpp"
-
+#include "ParticipantConfiguration.hpp"
 #include "SetThreadName.hpp"
+#include "Uri.hpp"
 
 #include "DashboardRetryPolicy.hpp"
 #include "SilKitToOatppMapper.hpp"
@@ -33,8 +34,8 @@ namespace Dashboard {
 
 Dashboard::Dashboard(std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig,
                      const std::string& registryUri)
-    : _participantConfig(participantConfig), _registryUri(registryUri)
 {
+    SetParticipantConfigAndRegistryUri(participantConfig, registryUri);
     Run();
 }
 
@@ -43,6 +44,36 @@ Dashboard::~Dashboard()
     _retry = false;
     ShutdownParticipantIfRunning();
     _done.wait();
+}
+
+void Dashboard::SetParticipantConfigAndRegistryUri(
+    std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig, const std::string& registryUri)
+{
+    auto participantConfiguration = std::dynamic_pointer_cast<Config::ParticipantConfiguration>(participantConfig);
+
+    SilKit::Core::Uri realRegistryUri(registryUri);
+    if (!participantConfiguration->middleware.registryUri.empty())
+    {
+        realRegistryUri = SilKit::Core::Uri(participantConfiguration->middleware.registryUri);
+    }
+
+    if (!participantConfiguration->middleware.enableDomainSockets)
+    {
+        SilKit::Core::Uri originalRegistryUri(registryUri);
+
+        if (originalRegistryUri.Host() == "0.0.0.0")
+        {
+            realRegistryUri = SilKit::Core::Uri("127.0.0.1", originalRegistryUri.Port());
+        }
+        if (originalRegistryUri.Host() == "[::]")
+        {
+            realRegistryUri = SilKit::Core::Uri("[::1]", originalRegistryUri.Port());
+        }
+    }
+
+    _registryUri = realRegistryUri.EncodedString();
+    participantConfiguration->middleware.registryUri = _registryUri;
+    _participantConfig = participantConfiguration;
 }
 
 void Dashboard::Run()

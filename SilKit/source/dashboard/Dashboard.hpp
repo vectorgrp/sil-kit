@@ -38,6 +38,8 @@ public:
     ~Dashboard();
 
 private:
+    void SetParticipantConfigAndRegistryUri(
+        std::shared_ptr<SilKit::Config::IParticipantConfiguration> participantConfig, const std::string& registryUri);
     void Run();
     void InitParticipant();
     void ShutdownParticipantIfRunning();

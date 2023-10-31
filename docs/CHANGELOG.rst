@@ -13,6 +13,7 @@ Fixed
 ~~~~~
 
 - The dashboard now handles AbortSimulation.
+- The dashboard resolves the registry IP address if needed.
 
 [4.0.38] - 2023-09-19
 ---------------------
