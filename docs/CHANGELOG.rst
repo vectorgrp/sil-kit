@@ -6,7 +6,8 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.39] - 
+
+[4.0.38] - 2023-11-02
 ---------------------
 
 Fixed
@@ -15,19 +16,17 @@ Fixed
 - The dashboard now handles AbortSimulation.
 - The dashboard resolves the registry IP address if needed.
 
-[4.0.38] - 2023-09-19
----------------------
-
-Changed
-~~~~~~~
-
-- Reworked the documentation on Participant Configuration
 
 Added
 ~~~~~
 
 - Reintroduced build requirements to documentation
-- Documentation for Includes section in Participant Configuration
+
+
+Changed
+~~~~~~~
+
+- Consolidate SIL Kit tests into four executables
 
 
 [4.0.37] - 2023-10-17
