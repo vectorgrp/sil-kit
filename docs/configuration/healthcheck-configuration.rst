@@ -1,3 +1,5 @@
+.. _sec:cfg-participant-healthcheck:
+
 ===================================================
 HealthCheck Configuration
 ===================================================
@@ -5,14 +7,8 @@ HealthCheck Configuration
 .. contents:: :local:
    :depth: 3
 
-
-.. _sec:cfg-healthcheck-configuration-overview:
-
 Overview
 ========================================
-
-
-.. _sec:cfg-participant-healthcheck:
        
 In the ``HealthCheck`` section of the participant configuration, it is possible to set soft and hard time limits for the execution of the individual
 simulation steps.

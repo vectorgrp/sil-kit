@@ -24,7 +24,6 @@ The following section describes the definitions for the named trace sinks and tr
 
     At the moment only ``PCAP`` tracing and replay is available in the SIL Kit library.
 
-
 .. _sec:cfg-participant-tracing:
 
 Tracing

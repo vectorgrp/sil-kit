@@ -18,10 +18,17 @@ Fixed
 [4.0.38] - 2023-09-19
 ---------------------
 
+Changed
+~~~~~~~
+
+- Reworked the documentation on Participant Configuration
+
 Added
 ~~~~~
 
 - Reintroduced build requirements to documentation
+- Documentation for Includes section in Participant Configuration
+
 
 [4.0.37] - 2023-10-17
 ---------------------
@@ -4788,7 +4795,7 @@ Removed
     - removed FastRtps specific integration tests.
     - API: removed deprecated `ib::CreateFastRtpsComAdapter` and `ib::CreateVAsioComAdapter`.
       Users should use the generic :cpp:func:`CreateComAdapter<ib::CreateComAdapter()>`,
-      refer to :ref:`changelog-outdated-reference` (``sec:mwcfg-vasio``).
+      refer to :ref:`changelog-outdated-reference`.
     - ConfigBuilder: removed FastRtps configuration mechanism: `ib::cfg::ConfigBuilder::ConfigureFastRtps`.
 
   
@@ -5048,10 +5055,10 @@ the removal of ``ComAdapter::SendIbMessage`` methods.
 Changed
 ~~~~~~~
 
-.. admonition:: Note: the FastRTPS middleware is now deprecated
-  
-   See :ref:`sec:mwcfg` for migration instructions.
+.. admonition:: Note:
 
+   The FastRTPS middleware is now deprecated
+  
 - The middleware `FastRTPS` is now marked as deprecated.
   This middleware will be removed in the future.
   The middleware specific `CreateFastRtpsComAdapter` API has been

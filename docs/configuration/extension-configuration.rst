@@ -1,12 +1,14 @@
+.. _sec:cfg-participant-extensions:
+
 ===================================================
 Extensions Configuration
 ===================================================
 
+.. |ProductName| replace:: SIL Kit
+
 .. contents:: :local:
    :depth: 3
 
-
-.. _sec:cfg-extension-configuration-overview:
 
 Overview
 ========================================
@@ -33,7 +35,8 @@ Configuration
    * - Property Name
      - Description
    * - SearchPathHints
-     - Optional search path hints which will be considered if an extension is loaded by the SIL Kit,
+     - Optional search path hints which will be considered if an extension is loaded by the |ProductName|,
        additionally to the default ones. A search path hint can contain the prefix ``ENV:``
-       to refer to an environment variable name. The default search paths are the 
+       to refer to an environment variable name. The default search paths are path given in the 
        environment variable ``SILKIT_EXTENSION_PATH`` and the current working directory.
+       Relative paths refer to the working directory of the process using the configuration.

@@ -34,7 +34,7 @@ Setup
 Is it possible to use statically configured ports for SIL Kit peer-to-peer communication between participants?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Since version 4.0.16 users can specify which port the participant opens for communication between participants by using the ``AcceptorUris`` field within the :ref:`Middeware section of the participant configuration<sec:mwcfg>`.
+Since version 4.0.16 users can specify which port the participant opens for communication between participants by using the ``AcceptorUris`` field within the :ref:`Middeware section of the participant configuration<sec:cfg-participant-middleware>`.
 By doing so, a firewall can be configured to allow these static ports for communication.
 The port used by the SIL Kit registry can be specified through its :ref:`CLI<sec:util-registry>`.
 

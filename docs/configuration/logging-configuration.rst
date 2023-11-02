@@ -1,3 +1,5 @@
+.. _sec:cfg-participant-logging:
+
 ===================================================
 Logging Configuration
 ===================================================
@@ -5,13 +7,8 @@ Logging Configuration
 .. contents:: :local:
    :depth: 3
 
-
-.. _sec:cfg-logging-configuration-overview:
-
 Overview
 ========================================
-
-.. _sec:cfg-participant-logging:
 
 Within the Vector SIL Kit, the Logger provides features for local and distributed logging on different log 
 levels.
@@ -28,12 +25,13 @@ logs to a file, the following configuration could be used:
 
     Logging:
       Sinks:
+      - Type: Stdout
+        Level: Info
       - Type: Remote
         Level: Debug
       - Type: File
         Level: Trace
         LogName: ParticipantLog
-
 
 
 .. _sec:cfg-participant-logger:

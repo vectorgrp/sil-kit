@@ -1,4 +1,4 @@
-.. _sec:mwcfg:
+.. _sec:cfg-participant-middleware:
 
 ===================================================
 Middleware Configuration
@@ -34,7 +34,9 @@ running on 'localhost' listening on port 8500. These values can be changed via t
       TcpSendBufferSize: 1024
       TcpReceiveBufferSize: 1024
       RegistryAsFallbackProxy: false
-
+      AcceptorUris:
+        - TODO: UriExample1
+        - TODO: UriExample2
 
 .. list-table:: Middleware Configuration
    :widths: 15 85
