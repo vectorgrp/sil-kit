@@ -55,7 +55,7 @@ This gives integrators the ability to run a simulation with multiple instances o
 
 A participant configuration file is written in YAML syntax according to a specified schema. 
 It starts with the ``SchemaVersion``, the ``Description`` for the configuration and the ``ParticipantName``. 
-This is followed by further sections for ``Includes``, ``Middleware``, ``Logging``, ``HealthCheck``, ``Tracing``, ``Extentions`` and sections for the different services of the |ProductName|.
+This is followed by further sections for ``Middleware``, ``Logging``, ``HealthCheck``, ``Tracing``, ``Extentions`` and sections for the different services of the |ProductName|.
 The outline of a participant configuration file is as follows:
 
 .. code-block:: yaml
@@ -72,10 +72,8 @@ The outline of a participant configuration file is as follows:
       ...
     Tracing:
       ...
-    Extensions: 
+    Extensions:
       ...
-    Includes: 
-      - ...
     CanControllers:
       - ...
     LinControllers: 
@@ -118,9 +116,6 @@ Overview
    * - ``ParticipantName``
      - The name of the simulation participant that joins the |ProductName| simulation. 
        Overrides a programmatically defined participant name.
-
-   * - :ref:`Includes<sec:cfg-participant-includes>`
-     - This can be used to include other participant configuration files.
 
    * - :ref:`Logging<sec:cfg-participant-logging>`
      - The logger configuration for this participant.
@@ -168,7 +163,6 @@ Configuration Options
    :maxdepth: 1
 
    services-configuration
-   includes-configuration
    logging-configuration
    healthcheck-configuration
    tracing-configuration
