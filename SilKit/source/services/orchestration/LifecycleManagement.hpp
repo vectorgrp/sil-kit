@@ -79,7 +79,7 @@ public: //CTors
     bool HandleAbort();
 
     // Wait for pending subscriptions before advancing from CommunicationInitializing to CommunicationInitialized
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
     // Abort handling
     void ResolveAbortSimulation(std::string reason);

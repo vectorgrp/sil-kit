@@ -57,6 +57,7 @@ public:
     auto Participant() const -> SilKit::IParticipant*;
     auto Result() -> FutureResult&;
     void Stop();
+    void Disconnect();
 
     // Helpers to circumvent one-time-only orchestration service creation
     auto GetOrCreateSystemMonitor() -> Services::Orchestration::ISystemMonitor*;
@@ -65,7 +66,8 @@ public:
                                          {SilKit::Services::Orchestration::OperationMode::Coordinated})
         -> Services::Orchestration::ILifecycleService*;
     auto GetOrCreateTimeSyncService() -> Services::Orchestration::ITimeSyncService*;
-    auto GetOrGetLogger() -> Services::Logging::ILogger*;
+    auto GetOrCreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator*;
+    auto GetLogger() -> Services::Logging::ILogger*;
 
 private:
     std::string _name;
@@ -76,6 +78,7 @@ private:
     Experimental::Services::Orchestration::ISystemController* _systemController{nullptr};
     Services::Orchestration::ILifecycleService* _lifecycleService{nullptr};
     Services::Orchestration::ITimeSyncService* _timeSyncService{nullptr};
+    Experimental::NetworkSimulation::INetworkSimulator* _networkSimulator{nullptr};
     Services::Logging::ILogger* _logger{nullptr};
 
     friend class SimTestHarness;
@@ -118,6 +121,10 @@ public:
     void CreateSystemController();
     //! \brief Run the simulation, return false if timeout is reached.
     bool Run(std::chrono::nanoseconds testRunTimeout = std::chrono::nanoseconds::min());
+    //! \brief Run the simulation for at most \p testRunTimeout and wait for all participants to shutdown, except the participants mentioned in \p keepAlive.
+    //! \return false if timeout is reached
+    bool Run(std::chrono::nanoseconds testRunTimeout, const std::vector<std::string>& keepAlive);
+
     //! \brief Get the SimParticipant by name
     SimParticipant* GetParticipant(const std::string& participantName);
     //! \brief Get the SimParticipant by name. If it does not exist yet, create a SimParticipant with the specified name and provide its ParticipantConfiguration as a string.

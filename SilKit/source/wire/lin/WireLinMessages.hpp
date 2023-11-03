@@ -52,16 +52,6 @@ struct LinSendFrameRequest
     LinFrameResponseType responseType; //!< Determines whether to provide a frame response or not.
 };
 
-/*! \brief Data type representing a request to perform an non-AUTOSAR send operation.
-*
-* Used internally.
-*/
-struct LinSendFrameHeaderRequest
-{
-    std::chrono::nanoseconds timestamp; //!< Time of the header request.
-    LinId id; //!< The LinId of the header to be transmitted
-};
-
 //! \brief Data type representing a LIN WakeUp pulse.
 struct LinWakeupPulse
 {

@@ -76,7 +76,7 @@ void DataPublisher::ReplayMessage(const SilKit::IReplayMessage* message)
     case SilKit::Services::TransmitDirection::RX:
         break;
     default:
-        throw SilKitError("CanController: replay message has undefined Direction");
+        throw SilKitError("DataPublisher: replay message has undefined Direction");
         break;
     }
 }

@@ -174,7 +174,7 @@ struct SilKit_LinFrame
     SilKit_LinId               id;            //!< LIN Identifier
     SilKit_LinChecksumModel    checksumModel; //!< Checksum Model
     SilKit_LinDataLength       dataLength;    //!< Data length
-    uint8_t                data[8];       //!< The actual payload
+    uint8_t                    data[8];       //!< The actual payload
 };
 typedef struct SilKit_LinFrame SilKit_LinFrame;
 
@@ -282,6 +282,14 @@ struct SilKit_Experimental_LinFrameHeaderEvent
     SilKit_LinId           id;           //!< LIN Identifier
 };
 typedef struct SilKit_Experimental_LinFrameHeaderEvent SilKit_Experimental_LinFrameHeaderEvent;
+
+struct SilKit_LinSendFrameHeaderRequest
+{
+    SilKit_StructHeader structHeader; //!< The interface id specifying which version of this struct was obtained
+    SilKit_NanosecondsTime timestamp; //!< Time of the event.
+    SilKit_LinId id; //!< LIN Identifier
+};
+typedef struct SilKit_LinSendFrameHeaderRequest SilKit_LinSendFrameHeaderRequest;
 
 /*!
  * The LIN controller can assume the role of a LIN master or a LIN

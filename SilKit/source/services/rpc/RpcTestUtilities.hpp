@@ -120,7 +120,7 @@ struct MockConnection
 
     void RegisterPeerShutdownCallback(std::function<void(SilKit::Core::IVAsioPeer* peer)> /*callback*/) {}
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/){};
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/){};
 
     void Test_SetTimeProvider(SilKit::Services::Orchestration::ITimeProvider* timeProvider)
     {

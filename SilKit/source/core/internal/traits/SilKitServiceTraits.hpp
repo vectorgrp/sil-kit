@@ -47,6 +47,11 @@ template <class SilKitServiceT> struct SilKitServiceTraits
 DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::PubSub, DataSubscriberInternal);
 DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::Rpc, RpcServerInternal);
 
+DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::Can, IMsgForCanSimulator);
+DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::Ethernet, IMsgForEthSimulator);
+DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::Flexray, IMsgForFlexraySimulator);
+DefineSilKitServiceTrait_UseAsyncRegistration(SilKit::Services::Lin, IMsgForLinSimulator);
+
 
 } // namespace Core
 } // namespace SilKit

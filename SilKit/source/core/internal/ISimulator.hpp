@@ -35,10 +35,10 @@ class ISimulator
     , public SilKit::Services::Ethernet::IMsgForEthSimulator
     , public SilKit::Services::Flexray::IMsgForFlexraySimulator
     , public SilKit::Services::Lin::IMsgForLinSimulator
+    , public Core::IServiceEndpoint
 {
 public:
     virtual ~ISimulator() = default;
-    virtual void SetReplayActive(SilKit::Config::NetworkType networkType, bool state) = 0;
 };
 
 }//Core

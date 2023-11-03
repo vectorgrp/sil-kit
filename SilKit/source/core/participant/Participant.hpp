@@ -83,6 +83,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 // utilities for CreateController
 #include "traits/SilKitServiceConfigTraits.hpp"
 
+#include "NetworkSimulatorInternal.hpp"
+
 using namespace std::chrono_literals;
 
 namespace SilKit {
@@ -162,6 +164,9 @@ public:
     auto GetLifecycleService() -> Services::Orchestration::ILifecycleService* override;
     auto CreateTimeSyncService(Services::Orchestration::LifecycleService* lifecycleService)
         -> Services::Orchestration::TimeSyncService* override;
+    
+    auto CreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator* override;
+
     auto GetParticipantName() const -> const std::string& override { return _participantConfig.participantName; }
     auto GetRegistryUri() const -> const std::string& override { return _participantConfig.middleware.registryUri; }
 
@@ -271,10 +276,13 @@ public:
     void FlushSendBuffers() override;
     void ExecuteDeferred(std::function<void()> callback) override;
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override;
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler) override;
 
     void SetIsSystemControllerCreated(bool isCreated) override;
     bool GetIsSystemControllerCreated() override;
+
+    void SetIsNetworkSimulatorCreated(bool isCreated) override;
+    bool GetIsNetworkSimulatorCreated() override;
 
     size_t GetNumberOfConnectedParticipants() override;
 
@@ -284,9 +292,14 @@ public:
 
     void NotifyShutdown() override;
 
-    void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork) override;
+    void RegisterReplayController(SilKit::Tracing::IReplayDataController* replayController,
+                                  const std::string& controllerName,
+                                  const SilKit::Config::SimulatedNetwork& simulatedNetwork) override;
     bool ParticipantHasCapability(const std::string& /*participantName*/,
                                   const std::string& /*capability*/) const override;
+
+    std::string GetServiceDescriptorString(
+        SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) override;
 
 public:
     // ----------------------------------------
@@ -353,10 +366,13 @@ private:
         -> ControllerT*;
 
 
-    void RegisterSimulator(ISimulator* busSim, const std::vector<Config::SimulatedNetwork>& networks) override;
+    void RegisterSimulator(ISimulator* busSim, std::string networkName,
+                           Experimental::NetworkSimulation::SimulatedNetworkType networkType) override;
+
+    void AddTraceSinksToSource(ITraceMessageSource* controller, SilKit::Config::SimulatedNetwork config) override;
 
     template<class ConfigT>
-    void AddTraceSinksToSource(ITraceMessageSource* controller, ConfigT config);
+    void AddTraceSinksToSourceInternal(ITraceMessageSource* controller, ConfigT config);
 
 private:
     // ----------------------------------------
@@ -394,6 +410,8 @@ private:
 
     std::atomic<EndpointId> _localEndpointId{ 0 };
 
+    std::unique_ptr <Experimental::NetworkSimulation::NetworkSimulatorInternal> _networkSimulatorInternal;
+
     std::tuple<
         Services::Can::IMsgForCanSimulator*,
         Services::Ethernet::IMsgForEthSimulator*,
@@ -408,6 +426,7 @@ private:
     std::atomic<bool> _isSystemControllerCreated{false};
     std::atomic<bool> _isLoggerCreated{false};
     std::atomic<bool> _isLifecycleServiceCreated{false};
+    std::atomic<bool> _isNetworkSimulatorCreated{false};
 };
 
 } // namespace Core

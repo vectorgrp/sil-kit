@@ -413,9 +413,9 @@ auto LifecycleService::Status() const -> const ParticipantStatus&
     return _returnValueForStatus;
 }
 
-void LifecycleService::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+void LifecycleService::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
 {
-    _participant->SetAsyncSubscriptionsCompletionHandler(std::move(handler));
+    _participant->AddAsyncSubscriptionsCompletionHandler(std::move(handler));
 }
 
 auto LifecycleService::GetTimeSyncService() -> ITimeSyncService*

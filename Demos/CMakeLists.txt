@@ -144,6 +144,7 @@ add_subdirectory(Lin)
 add_subdirectory(PubSub)
 add_subdirectory(Rpc)
 add_subdirectory(Benchmark)
+add_subdirectory(NetworkSimulator)
 
 message(STATUS "Demos available: ${demo_list}")
 #######################################################################################################################

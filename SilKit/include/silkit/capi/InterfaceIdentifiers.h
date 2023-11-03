@@ -45,7 +45,8 @@ typedef struct
 #define SK_ID_SERVICE_Data 5
 #define SK_ID_SERVICE_Rpc 6
 #define SK_ID_SERVICE_Participant 7
-#define SK_ID_SERVICE_END 8 //!< sentinel
+#define SK_ID_SERVICE_NetworkSimulation 8
+#define SK_ID_SERVICE_END 9 //!< sentinel
 
 #define SK_INVALID_DATATYPE_ID 0
 #define SK_INVALID_VERSION 0
@@ -201,6 +202,7 @@ typedef struct
 #define SilKit_Experimental_LinSlaveConfiguration_DATATYPE_ID 8
 #define SilKit_Experimental_LinControllerDynamicConfig_DATATYPE_ID 9
 #define SilKit_Experimental_LinFrameHeaderEvent_DATATYPE_ID 10
+#define SilKit_LinSendFrameHeaderRequest_DATATYPE_ID 11
 
 // LIN data type versions
 #define SilKit_LinFrame_VERSION 1
@@ -213,18 +215,20 @@ typedef struct
 #define SilKit_Experimental_LinSlaveConfiguration_VERSION 1
 #define SilKit_Experimental_LinControllerDynamicConfig_VERSION 1
 #define SilKit_Experimental_LinFrameHeaderEvent_VERSION 1
+#define SilKit_LinSendFrameHeaderRequest_VERSION 1
 
 // LIN make versioned IDs
-#define SilKit_LinFrame_STRUCT_VERSION                     SK_ID_MAKE(Lin, SilKit_LinFrame)
-#define SilKit_LinFrameResponse_STRUCT_VERSION             SK_ID_MAKE(Lin, SilKit_LinFrameResponse)
-#define SilKit_LinControllerConfig_STRUCT_VERSION          SK_ID_MAKE(Lin, SilKit_LinControllerConfig)
-#define SilKit_LinFrameStatusEvent_STRUCT_VERSION          SK_ID_MAKE(Lin, SilKit_LinFrameStatusEvent)
-#define SilKit_LinGoToSleepEvent_STRUCT_VERSION            SK_ID_MAKE(Lin, SilKit_LinGoToSleepEvent)
-#define SilKit_LinWakeupEvent_STRUCT_VERSION               SK_ID_MAKE(Lin, SilKit_LinWakeupEvent)
+#define SilKit_LinFrame_STRUCT_VERSION                                  SK_ID_MAKE(Lin, SilKit_LinFrame)
+#define SilKit_LinFrameResponse_STRUCT_VERSION                          SK_ID_MAKE(Lin, SilKit_LinFrameResponse)
+#define SilKit_LinControllerConfig_STRUCT_VERSION                       SK_ID_MAKE(Lin, SilKit_LinControllerConfig)
+#define SilKit_LinFrameStatusEvent_STRUCT_VERSION                       SK_ID_MAKE(Lin, SilKit_LinFrameStatusEvent)
+#define SilKit_LinGoToSleepEvent_STRUCT_VERSION                         SK_ID_MAKE(Lin, SilKit_LinGoToSleepEvent)
+#define SilKit_LinWakeupEvent_STRUCT_VERSION                            SK_ID_MAKE(Lin, SilKit_LinWakeupEvent)
 #define SilKit_Experimental_LinSlaveConfigurationEvent_STRUCT_VERSION   SK_ID_MAKE(Lin, SilKit_Experimental_LinSlaveConfigurationEvent)
 #define SilKit_Experimental_LinSlaveConfiguration_STRUCT_VERSION        SK_ID_MAKE(Lin, SilKit_Experimental_LinSlaveConfiguration)
 #define SilKit_Experimental_LinControllerDynamicConfig_STRUCT_VERSION   SK_ID_MAKE(Lin, SilKit_Experimental_LinControllerDynamicConfig)
 #define SilKit_Experimental_LinFrameHeaderEvent_STRUCT_VERSION          SK_ID_MAKE(Lin, SilKit_Experimental_LinFrameHeaderEvent)
+#define SilKit_LinSendFrameHeaderRequest_STRUCT_VERSION                 SK_ID_MAKE(Lin, SilKit_LinSendFrameHeaderRequest)
 
 // Data
 // Data data type IDs
@@ -273,5 +277,97 @@ typedef struct
 #define SilKit_LifecycleConfiguration_STRUCT_VERSION       SK_ID_MAKE(Participant, SilKit_LifecycleConfiguration)
 #define SilKit_WorkflowConfiguration_STRUCT_VERSION        SK_ID_MAKE(Participant, SilKit_WorkflowConfiguration)
 #define SilKit_ParticipantConnectionInformation_STRUCT_VERSION        SK_ID_MAKE(Participant, SilKit_ParticipantConnectionInformation)
+
+// NetworkSimulator
+
+// NetworkSimulator data type IDs
+#define SilKit_Experimental_EventReceivers_DATATYPE_ID 1
+#define SilKit_Experimental_SimulatedNetworkFunctions_DATATYPE_ID 2
+#define SilKit_Experimental_SimulatedCanControllerFunctions_DATATYPE_ID 3
+#define SilKit_Experimental_SimulatedFlexRayControllerFunctions_DATATYPE_ID 4
+#define SilKit_Experimental_SimulatedEthernetControllerFunctions_DATATYPE_ID 5
+#define SilKit_Experimental_SimulatedLinControllerFunctions_DATATYPE_ID 6
+#define SilKit_Experimental_NetSim_CanConfigureBaudrate_DATATYPE_ID 7
+#define SilKit_Experimental_NetSim_CanControllerMode_DATATYPE_ID 8
+#define SilKit_Experimental_NetSim_CanFrameRequest_DATATYPE_ID 9
+#define SilKit_Experimental_NetSim_FlexrayControllerConfig_DATATYPE_ID 10
+#define SilKit_Experimental_NetSim_FlexrayHostCommand_DATATYPE_ID 11
+#define SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate_DATATYPE_ID 12
+#define SilKit_Experimental_NetSim_FlexrayTxBufferUpdate_DATATYPE_ID 13
+#define SilKit_Experimental_NetSim_EthernetFrameRequest_DATATYPE_ID 14
+#define SilKit_Experimental_NetSim_EthernetControllerMode_DATATYPE_ID 15
+#define SilKit_Experimental_NetSim_LinFrameRequest_DATATYPE_ID 16
+#define SilKit_Experimental_NetSim_LinFrameHeaderRequest_DATATYPE_ID 17
+#define SilKit_Experimental_NetSim_LinWakeupPulse_DATATYPE_ID 18
+#define SilKit_Experimental_NetSim_LinControllerConfig_DATATYPE_ID 19
+#define SilKit_Experimental_NetSim_LinFrameResponseUpdate_DATATYPE_ID 20
+#define SilKit_Experimental_NetSim_LinControllerStatusUpdate_DATATYPE_ID 21
+
+// NetworkSimulator data type Versions
+#define SilKit_Experimental_EventReceivers_VERSION 1
+#define SilKit_Experimental_SimulatedNetworkFunctions_VERSION 1
+#define SilKit_Experimental_SimulatedCanControllerFunctions_VERSION 1
+#define SilKit_Experimental_SimulatedFlexRayControllerFunctions_VERSION 1
+#define SilKit_Experimental_SimulatedEthernetControllerFunctions_VERSION 1
+#define SilKit_Experimental_SimulatedLinControllerFunctions_VERSION 1
+#define SilKit_Experimental_NetSim_CanConfigureBaudrate_VERSION 1
+#define SilKit_Experimental_NetSim_CanControllerMode_VERSION 1
+#define SilKit_Experimental_NetSim_CanFrameRequest_VERSION 1
+#define SilKit_Experimental_NetSim_FlexrayControllerConfig_VERSION 1
+#define SilKit_Experimental_NetSim_FlexrayHostCommand_VERSION 1
+#define SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate_VERSION 1
+#define SilKit_Experimental_NetSim_FlexrayTxBufferUpdate_VERSION 1
+#define SilKit_Experimental_NetSim_EthernetFrameRequest_VERSION 1
+#define SilKit_Experimental_NetSim_EthernetControllerMode_VERSION 1
+#define SilKit_Experimental_NetSim_LinFrameRequest_VERSION 1
+#define SilKit_Experimental_NetSim_LinFrameHeaderRequest_VERSION 1
+#define SilKit_Experimental_NetSim_LinWakeupPulse_VERSION 1
+#define SilKit_Experimental_NetSim_LinControllerConfig_VERSION 1
+#define SilKit_Experimental_NetSim_LinFrameResponseUpdate_VERSION 1
+#define SilKit_Experimental_NetSim_LinControllerStatusUpdate_VERSION 1
+
+// NetworkSimulator public API IDs
+#define SilKit_Experimental_EventReceivers_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_EventReceivers)
+#define SilKit_Experimental_SimulatedNetworkFunctions_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_SimulatedNetworkFunctions)
+#define SilKit_Experimental_SimulatedCanControllerFunctions_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_SimulatedCanControllerFunctions)
+#define SilKit_Experimental_SimulatedFlexRayControllerFunctions_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_SimulatedFlexRayControllerFunctions)
+#define SilKit_Experimental_SimulatedEthernetControllerFunctions_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_SimulatedEthernetControllerFunctions)
+#define SilKit_Experimental_SimulatedLinControllerFunctions_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_SimulatedLinControllerFunctions)
+#define SilKit_Experimental_NetSim_CanConfigureBaudrate_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_CanConfigureBaudrate)
+#define SilKit_Experimental_NetSim_CanControllerMode_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_CanControllerMode)
+#define SilKit_Experimental_NetSim_CanFrameRequest_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_CanFrameRequest)
+#define SilKit_Experimental_NetSim_FlexrayControllerConfig_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_FlexrayControllerConfig)
+#define SilKit_Experimental_NetSim_FlexrayHostCommand_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_FlexrayHostCommand)
+#define SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_FlexrayTxBufferConfigUpdate)
+#define SilKit_Experimental_NetSim_FlexrayTxBufferUpdate_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_FlexrayTxBufferUpdate)
+#define SilKit_Experimental_NetSim_EthernetFrameRequest_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_EthernetFrameRequest)
+#define SilKit_Experimental_NetSim_EthernetControllerMode_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_EthernetControllerMode)
+#define SilKit_Experimental_NetSim_LinFrameRequest_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinFrameRequest)
+#define SilKit_Experimental_NetSim_LinFrameHeaderRequest_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinFrameHeaderRequest)
+#define SilKit_Experimental_NetSim_LinWakeupPulse_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinWakeupPulse)
+#define SilKit_Experimental_NetSim_LinControllerConfig_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinControllerConfig)
+#define SilKit_Experimental_NetSim_LinFrameResponseUpdate_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinFrameResponseUpdate)
+#define SilKit_Experimental_NetSim_LinControllerStatusUpdate_STRUCT_VERSION \
+    SK_ID_MAKE(NetworkSimulation, SilKit_Experimental_NetSim_LinControllerStatusUpdate)
 
 SILKIT_END_DECLS

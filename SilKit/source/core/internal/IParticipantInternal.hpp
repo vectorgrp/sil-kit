@@ -25,6 +25,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include "silkit/participant/IParticipant.hpp"
 #include "silkit/experimental/services/orchestration/ISystemController.hpp"
+#include "silkit/experimental/netsim/NetworkSimulatorDatatypes.hpp"
+
 
 #include "internal_fwd.hpp"
 #include "IServiceEndpoint.hpp"
@@ -32,6 +34,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RequestReplyDatatypes.hpp"
 #include "OrchestrationDatatypes.hpp"
 #include "LoggingDatatypesInternal.hpp"
+
 #include "WireCanMessages.hpp"
 #include "WireDataMessages.hpp"
 #include "WireEthernetMessages.hpp"
@@ -40,7 +43,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "WireRpcMessages.hpp"
 
 #include "ISimulator.hpp"
-
+#include "IReplayDataController.hpp"
+#include "ITraceMessageSource.hpp"
 
 // forwards
 namespace SilKit {
@@ -75,7 +79,10 @@ public:
     virtual void JoinSilKitSimulation() = 0;
 
     // For NetworkSimulator integration:
-    virtual void RegisterSimulator(ISimulator* busSim, const std::vector<Config::SimulatedNetwork>& networks) = 0 ;
+    virtual void RegisterSimulator(ISimulator* busSim, std::string networkName,
+                                   SilKit::Experimental::NetworkSimulation::SimulatedNetworkType networkType) = 0;
+
+    virtual void AddTraceSinksToSource(ITraceMessageSource* traceSource, SilKit::Config::SimulatedNetwork config) = 0; 
 
     // The SendMsgs are virtual functions so we can mock them in testing.
     // For performance reasons this may change in the future.
@@ -225,11 +232,16 @@ public:
     virtual auto CreateTimeSyncService(Services::Orchestration::LifecycleService* lifecycleService)
         -> Services::Orchestration::TimeSyncService* = 0;
 
+    virtual auto CreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator* = 0;
+
     // Register handlers for completion of async service creation
-    virtual void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler) = 0;
+    virtual void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler) = 0;
     
     virtual bool GetIsSystemControllerCreated() = 0;
     virtual void SetIsSystemControllerCreated(bool isCreated) = 0;
+
+    virtual bool GetIsNetworkSimulatorCreated() = 0;
+    virtual void SetIsNetworkSimulatorCreated(bool isCreated) = 0;
 
     virtual size_t GetNumberOfConnectedParticipants() = 0;
     virtual size_t GetNumberOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName) = 0;
@@ -238,8 +250,12 @@ public:
 
     virtual void NotifyShutdown() = 0;
 
-    virtual void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork ) = 0;
+    virtual void RegisterReplayController(SilKit::Tracing::IReplayDataController* replayController,
+                                          const std::string& controllerName,
+                                          const SilKit::Config::SimulatedNetwork& simulatedNetwork) = 0;
     virtual bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const = 0;
+
+    virtual std::string GetServiceDescriptorString(SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor) = 0;
 };
 
 } // namespace Core

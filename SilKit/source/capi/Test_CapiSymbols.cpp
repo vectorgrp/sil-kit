@@ -141,7 +141,10 @@ SilKit_HandlerId id;
 (void) SilKit_RpcClient_SetCallResultHandler(nullptr, nullptr, nullptr);
 (void) SilKit_ReturnCodeToString(nullptr, SilKit_ReturnCode_BADPARAMETER);
 (void) SilKit_Participant_GetLogger(nullptr, nullptr);
-(void)SilKit_GetLastErrorString();
+(void) SilKit_GetLastErrorString();
+(void) SilKit_Experimental_NetworkSimulator_Create(nullptr, nullptr);
+(void) SilKit_Experimental_NetworkSimulator_Start(nullptr);
+(void) SilKit_Experimental_NetworkSimulator_SimulateNetwork(nullptr, "", SilKit_NetworkType_Undefined, nullptr, nullptr);
 }
 
 }

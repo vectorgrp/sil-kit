@@ -224,7 +224,7 @@ void CommunicationInitializingState::CommunicationInitializing(std::string reaso
 {
     // Delay the next state until pending subscriptions of controllers are completed.
     // Applies to all controllers that are included in the trait UseAsyncRegistration().
-    _lifecycleManager->SetAsyncSubscriptionsCompletionHandler([reason, this]() {
+    _lifecycleManager->AddAsyncSubscriptionsCompletionHandler([reason, this]() {
         // If done, move forward to CommunicationInitializedState and call CommunicationInitializing
         _lifecycleManager->SetStateAndForwardIntent(_lifecycleManager->GetCommunicationInitializedState(),
                                              &ILifecycleState::CommunicationInitializing, reason);

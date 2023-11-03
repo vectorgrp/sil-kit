@@ -85,7 +85,7 @@ public:
     inline auto GetServiceName() const -> const std::string&;
     inline void SetServiceName(std::string val);
 
-    inline auto GetServiceId() const -> SilKit::Core::EndpointId ;
+    inline auto GetServiceId() const -> SilKit::Core::EndpointId;
     inline void SetServiceId(SilKit::Core::EndpointId val);
 
     inline auto GetSupplementalData() const -> SupplementalData;

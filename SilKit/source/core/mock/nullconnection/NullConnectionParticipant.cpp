@@ -64,7 +64,7 @@ struct NullConnection
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* /*peer*/, ParticipantAnnouncement)> /*callback*/) {}
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> /*callback*/) {}
 
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/) {}
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> /*completionHandler*/) {}
 
     size_t GetNumberOfConnectedParticipants() { return 0; }
 

@@ -42,15 +42,7 @@ class IMsgForEthSimulator
 {
 public:
     virtual ~IMsgForEthSimulator() = default;
-    
-    /* NB: there is no setter or getter for an EndpointAddress of the
-     * simulator, since the simulator manages multiple controllers
-     * with different endpoints. I.e., the simulator is aware of all
-     * the individual endpointIds.
-     */
-    //! \brief Setter and getter for the ParticipantID associated with this ethernetsimulator
-    virtual void SetParticipantId(SilKit::Core::ParticipantId participantId) = 0;
-    virtual auto GetParticipantId() const -> SilKit::Core::ParticipantId = 0;
+
 };
 
 } // namespace Ethernet

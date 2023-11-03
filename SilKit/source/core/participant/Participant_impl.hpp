@@ -33,6 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RpcClient.hpp"
 #include "RpcServer.hpp"
 #include "RpcServerInternal.hpp"
+#include "NetworkSimulatorDatatypesInternal.hpp"
+#include "silkit/experimental/netsim/string_utils.hpp"
 
 #include "LifecycleService.hpp"
 #include "SystemController.hpp"
@@ -46,6 +48,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "RequestReplyService.hpp"
 #include "ParticipantConfiguration.hpp"
 #include "YamlParser.hpp"
+#include "NetworkSimulatorInternal.hpp"
 
 #include "tuple_tools/bind.hpp"
 #include "tuple_tools/for_each.hpp"
@@ -61,6 +64,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Assert.hpp"
 
 #include "ILogger.hpp"
+
 
 namespace SilKit {
 namespace Core {
@@ -264,7 +268,7 @@ auto Participant<SilKitConnectionT>::CreateCanController(const std::string& cano
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {
-        AddTraceSinksToSource(traceSource, controllerConfig);
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
     }
 
     return controller;
@@ -300,7 +304,7 @@ auto Participant<SilKitConnectionT>::CreateEthernetController(const std::string&
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {
-        AddTraceSinksToSource(traceSource, controllerConfig);
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
     }
 
     return controller;
@@ -329,7 +333,7 @@ auto Participant<SilKitConnectionT>::CreateFlexrayController(const std::string& 
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {
-        AddTraceSinksToSource(traceSource, controllerConfig);
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
     }
 
     return controller;
@@ -365,7 +369,7 @@ auto Participant<SilKitConnectionT>::CreateLinController(const std::string& cano
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {
-        AddTraceSinksToSource(traceSource, controllerConfig);
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
     }
 
     return controller;
@@ -503,7 +507,7 @@ auto Participant<SilKitConnectionT>::CreateDataPublisher(const std::string& cano
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {
-        AddTraceSinksToSource(traceSource, controllerConfig);
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
     }
 
     if (_replayScheduler)
@@ -565,7 +569,7 @@ auto Participant<SilKitConnectionT>::CreateDataSubscriber(
     auto* traceSource = dynamic_cast<ITraceMessageSource*>(controller);
     if (traceSource)
     {
-        AddTraceSinksToSource(traceSource, controllerConfig);
+        AddTraceSinksToSourceInternal(traceSource, controllerConfig);
     }
 
     return controller;
@@ -738,6 +742,7 @@ auto Participant<SilKitConnectionT>::GetLifecycleService() -> Services::Orchestr
     return lifecycleService;
 }
 
+
 static inline auto FormatLifecycleConfigurationForLogging(
     const Services::Orchestration::LifecycleConfiguration& lifecycleConfiguration) -> std::string
 {
@@ -896,6 +901,19 @@ void Participant<SilKitConnectionT>::SetIsSystemControllerCreated(bool isCreated
 }
 
 template <class SilKitConnectionT>
+bool Participant<SilKitConnectionT>::GetIsNetworkSimulatorCreated()
+{
+    return _isNetworkSimulatorCreated;
+}
+
+template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::SetIsNetworkSimulatorCreated(bool isCreated)
+{
+    _isNetworkSimulatorCreated = isCreated;
+}
+
+
+template <class SilKitConnectionT>
 auto Participant<SilKitConnectionT>::GetSystemController() -> Experimental::Services::Orchestration::ISystemController*
 {
     auto* controller = GetController<Orchestration::SystemController>(SilKit::Core::Discovery::controllerTypeSystemController);
@@ -912,6 +930,19 @@ auto Participant<SilKitConnectionT>::GetSystemController() -> Experimental::Serv
             config, std::move(supplementalData), true);
     }
     return controller;
+}
+
+
+template <class SilKitConnectionT>
+auto Participant<SilKitConnectionT>::CreateNetworkSimulator() -> Experimental::NetworkSimulation::INetworkSimulator*
+{
+    if (_networkSimulatorInternal != nullptr)
+    {
+        throw SilKitError("You may not create the network simulator more than once.");
+    }
+
+    _networkSimulatorInternal = std::make_unique<Experimental::NetworkSimulation::NetworkSimulatorInternal>(this);
+    return _networkSimulatorInternal.get();
 }
 
 template <class SilKitConnectionT>
@@ -1515,8 +1546,15 @@ auto Participant<SilKitConnectionT>::CreateController(const SilKitServiceTraitCo
 }
 
 template <class SilKitConnectionT>
+void Participant<SilKitConnectionT>::AddTraceSinksToSource(ITraceMessageSource* traceSource,
+                                                           SilKit::Config::SimulatedNetwork config)
+{
+    AddTraceSinksToSourceInternal(traceSource, config);
+}
+
+template <class SilKitConnectionT>
 template <class ConfigT>
-void Participant<SilKitConnectionT>::AddTraceSinksToSource(ITraceMessageSource* traceSource, ConfigT config)
+void Participant<SilKitConnectionT>::AddTraceSinksToSourceInternal(ITraceMessageSource* traceSource, ConfigT config)
 {
     if (config.useTraceSinks.empty())
     {
@@ -1545,44 +1583,33 @@ void Participant<SilKitConnectionT>::AddTraceSinksToSource(ITraceMessageSource* 
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::RegisterSimulator(ISimulator* busSim, const std::vector<Config::SimulatedNetwork>& networks)
+void Participant<SilKitConnectionT>::RegisterSimulator(ISimulator* busSim, std::string networkName, Experimental::NetworkSimulation::SimulatedNetworkType networkType)
 {
-    auto& serviceEndpoint = dynamic_cast<Core::IServiceEndpoint&>(*busSim);
-    auto oldDescriptor = serviceEndpoint.GetServiceDescriptor();
-    // We temporarily overwrite the simulator's serviceEndpoint (not used internally) only for RegisterSilKitService
-    for (auto&& network: networks)
-    {
-        auto id = ServiceDescriptor{};
-        id.SetNetworkName(network.name);
-        id.SetServiceName(network.name);
-        id.SetNetworkType(network.type);
-        id.SetParticipantNameAndComputeId(GetParticipantName());
+    auto serviceDescriptor = ServiceDescriptor{};
+    serviceDescriptor.SetNetworkName(networkName);
+    serviceDescriptor.SetServiceName(networkName);
+    serviceDescriptor.SetNetworkType(ConvertNetworkTypeToConfig(networkType));
+    serviceDescriptor.SetParticipantNameAndComputeId(GetParticipantName());
+    busSim->SetServiceDescriptor(serviceDescriptor);
 
-        serviceEndpoint.SetServiceDescriptor(id);
-        // Tell the middleware we are interested in this named network of the given type
-        switch (network.type)
-        {
-        case Config::NetworkType::CAN:
-            _connection.RegisterSilKitService(dynamic_cast<Services::Can::IMsgForCanSimulator*>(busSim)); break;
-        case Config::NetworkType::FlexRay:
-            _connection.RegisterSilKitService(dynamic_cast<Services::Flexray::IMsgForFlexraySimulator*>(busSim)); break;
-        case Config::NetworkType::LIN:
-            _connection.RegisterSilKitService(dynamic_cast<Services::Lin::IMsgForLinSimulator*>(busSim)); break;
-        case Config::NetworkType::Ethernet:
-            _connection.RegisterSilKitService(dynamic_cast<Services::Ethernet::IMsgForEthSimulator*>(busSim)); break;
-        default:
-            throw SilKitError{ "RegisterSimulator: simulator does not support given network type: " + to_string(network.type) };
-        }
-    }
-    serviceEndpoint.SetServiceDescriptor(oldDescriptor); //restore
-
-    auto traceSource = dynamic_cast<ITraceMessageSource*>(busSim);
-    if (traceSource)
+    // Tell the middleware we are interested in this named network of the given type
+    switch (networkType)
     {
-        for (auto&& network: networks)
-        {
-            AddTraceSinksToSource(traceSource, network);
-        }
+    case Experimental::NetworkSimulation::SimulatedNetworkType::CAN:
+        _connection.RegisterSilKitService(dynamic_cast<Services::Can::IMsgForCanSimulator*>(busSim)); 
+        break;
+    case Experimental::NetworkSimulation::SimulatedNetworkType::FlexRay:
+        _connection.RegisterSilKitService(dynamic_cast<Services::Flexray::IMsgForFlexraySimulator*>(busSim)); 
+        break;
+    case Experimental::NetworkSimulation::SimulatedNetworkType::LIN:
+        _connection.RegisterSilKitService(dynamic_cast<Services::Lin::IMsgForLinSimulator*>(busSim)); 
+        break;
+    case Experimental::NetworkSimulation::SimulatedNetworkType::Ethernet:
+        _connection.RegisterSilKitService(dynamic_cast<Services::Ethernet::IMsgForEthSimulator*>(busSim)); 
+        break;
+    default:
+        throw SilKitError{"RegisterSimulator: simulator does not support given network type: "
+                          + to_string(networkType)};
     }
 }
 
@@ -1605,9 +1632,9 @@ void Participant<SilKitConnectionT>::ExecuteDeferred(std::function<void()> callb
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
+void Participant<SilKitConnectionT>::AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler)
 {
-    _connection.SetAsyncSubscriptionsCompletionHandler(std::move(handler));
+    _connection.AddAsyncSubscriptionsCompletionHandler(std::move(handler));
 }
 
 template <class SilKitConnectionT>
@@ -1653,7 +1680,9 @@ void Participant<SilKitConnectionT>::NotifyShutdown()
 }
 
 template <class SilKitConnectionT>
-void Participant<SilKitConnectionT>::RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& serviceDescriptor, const SilKit::Config::SimulatedNetwork& simulatedNetwork)
+void Participant<SilKitConnectionT>::RegisterReplayController(SilKit::Tracing::IReplayDataController* replayController,
+                                                              const std::string& controllerName,
+                                                              const SilKit::Config::SimulatedNetwork& simulatedNetwork)
 {
     if (! _replayScheduler)
     {
@@ -1661,15 +1690,13 @@ void Participant<SilKitConnectionT>::RegisterReplayController(ISimulator* simula
     }
     if(simulatedNetwork.replay.direction !=  SilKit::Config::Replay::Direction::Undefined)
     {
-        auto&& replayController = dynamic_cast<SilKit::Tracing::IReplayDataController*>(simulator);
         _replayScheduler->ConfigureController(
-            serviceDescriptor.GetServiceName(),
+            controllerName,
             replayController,
             simulatedNetwork.replay,
-            serviceDescriptor.GetNetworkName(),
-            serviceDescriptor.GetNetworkType()
+            simulatedNetwork.name,
+            simulatedNetwork.type
         );
-        simulator->SetReplayActive(serviceDescriptor.GetNetworkType(), true);
     }
 }
 
@@ -1679,6 +1706,19 @@ bool Participant<SilKitConnectionT>::ParticipantHasCapability(const std::string&
 {
     return _connection.ParticipantHasCapability(participantName, capability);
 }
+
+template <class SilKitConnectionT>
+std::string Participant<SilKitConnectionT>::GetServiceDescriptorString(
+    SilKit::Experimental::NetworkSimulation::ControllerDescriptor controllerDescriptor)
+{
+    if (!_networkSimulatorInternal)
+    {
+        Logging::Warn(GetLogger(), "GetServiceDescriptorString was queried, but no network simulator exists.");
+        return "";
+    }
+    return _networkSimulatorInternal->GetServiceDescriptorString(controllerDescriptor);
+}
+    
 
 
 } // namespace Core

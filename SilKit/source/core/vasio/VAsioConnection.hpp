@@ -204,7 +204,7 @@ public:
     void NotifyShutdown();
 
     // Register handlers for completion of async service creation
-    void SetAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
+    void AddAsyncSubscriptionsCompletionHandler(std::function<void()> handler);
 
     size_t GetNumberOfConnectedParticipants()
     {
@@ -564,7 +564,7 @@ private:
 
     // Subscriptions for internal services that use async registration
     std::vector<PendingAcksIdentifier> _pendingAsyncSubscriptionAcknowledges;
-    std::function<void()> _asyncSubscriptionsCompletionHandler;
+    Util::SynchronizedHandlers<std::function<void()>> _asyncSubscriptionsCompletionHandlers;
     std::atomic<bool> _hasPendingAsyncSubscriptions{false};
 
     // The worker thread should be the last members in this class. This ensures

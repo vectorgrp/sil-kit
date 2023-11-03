@@ -19,6 +19,8 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+add_subdirectory(netsim)
+
 add_library(I_SilKit_Experimental INTERFACE)
 
 target_include_directories(I_SilKit_Experimental

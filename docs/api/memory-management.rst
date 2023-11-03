@@ -39,6 +39,8 @@ As soon as these pointers are not referenced any more, the corresponding entitie
 For the C API Participants have to be cleaned up by the user by calling ``SilKit_Participant_Destroy``.
 ParticipantConfigurations are not modeled separately in the C API and therefore do not have to be considered in memory management.
 
+.. _sec:memory-man-span:
+
 SIL Kit Spans vs Vectors
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

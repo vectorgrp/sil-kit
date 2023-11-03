@@ -126,6 +126,16 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
     } \
     while (false)
 
+#define ASSERT_VALID_PLAIN_STRUCT_HEADER(p) \
+    do \
+    { \
+        if (!IsValidStructHeader(p)) \
+        { \
+            throw SilKit::CapiBadParameterError{"The parameter '" #p \
+                                                "' is not a valid SilKit_StructHeader."}; \
+        } \
+    } while (false)
+
 
 extern thread_local std::string SilKit_error_string;
 
@@ -158,3 +168,9 @@ bool HasValidStructHeader(const StructT* s, std::enable_if_t<detail::HasStructHe
 {
     return SK_ID_IS_VALID(SilKit_Struct_GetId(*s));
 }
+
+inline bool IsValidStructHeader(const SilKit_StructHeader* s)
+{
+    return SK_ID_IS_VALID(s->version);
+}
+
