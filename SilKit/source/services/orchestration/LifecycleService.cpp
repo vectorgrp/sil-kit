@@ -333,7 +333,9 @@ void LifecycleService::AbortSimulation(std::string reason)
         _abortedBeforeLifecycleStart = true;
         return;
     }
-    _lifecycleManager.AbortSimulation(reason);
+    _participant->ExecuteDeferred([this, reason] {
+        _lifecycleManager.AbortSimulation(reason);
+    });
 }
 
 bool LifecycleService::CheckForValidConfiguration()
