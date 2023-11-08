@@ -405,7 +405,7 @@ void VAsioConnection::OpenLocalAcceptors(const std::vector<std::string>& accepto
             }
             catch (const std::exception& exception)
             {
-                Services::Logging::Error(_logger, "Unable to accept local domain connections on {}:{}: {}", uri.Path(),
+                Services::Logging::Error(_logger, "Unable to accept local domain connections on '{}': {}", uri.Path(),
                                          exception.what());
             }
         }
