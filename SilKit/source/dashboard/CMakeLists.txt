@@ -35,7 +35,9 @@ if(SILKIT_BUILD_DASHBOARD)
     endfunction()
 
     add_silkit_test_executable(SilKitDashboardTests)
-    silkit_dashboard_target_compile_flags(SilKitDashboardTests)
+    if (${SILKIT_BUILD_TESTS})
+        silkit_dashboard_target_compile_flags(SilKitDashboardTests)
+    endif ()
 
     add_library(I_SilKit_Dashboard INTERFACE)
     target_include_directories(I_SilKit_Dashboard
