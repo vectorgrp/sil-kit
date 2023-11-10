@@ -1,5 +1,10 @@
 # Disable warnings in ThirdParty folder
 
+
+set(SILKIT_THIRD_PARTY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "" FORCE)
+set(SILKIT_THIRD_PARTY_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}" CACHE STRING "" FORCE)
+
+
 function(include_gtest)
     silkit_clean_default_compileflags()
 
@@ -29,8 +34,9 @@ function(include_gtest)
 
     #check the submodule tag for the current version.
     message(STATUS "Add subdirectory ThirdParty/googletest")
-    add_subdirectory(googletest
-        googletest
+    add_subdirectory(
+        "${SILKIT_THIRD_PARTY_SOURCE_DIR}/googletest"
+        "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_googletest"
         EXCLUDE_FROM_ALL
     )
 
@@ -53,28 +59,26 @@ function(include_gtest)
     set_property(TARGET gtest PROPERTY FOLDER "ThirdParty")
 endfunction()
 
-if(SILKIT_BUILD_TESTS)
-    include_gtest()
-endif()
 
 # NB: we use a standalone, bundled ASIO now.
 # the binary distribution lacks the Asio sources
 # but it should be included/deployed by our packaging tools
 function(include_asio)
     if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
-        silkit_clean_default_compileflags()
-        add_compile_options(-w)
-        add_library(asio INTERFACE)
-        target_include_directories(asio INTERFACE ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
-        set(ASIO_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/asio/asio/include)
+        set(ASIO_INCLUDE_DIR ${SILKIT_THIRD_PARTY_SOURCE_DIR}/asio/asio/include)
 
         if(NOT EXISTS ${ASIO_INCLUDE_DIR})
             message(FATAL_ERROR "Asio include directory not found: ${ASIO_INCLUDE_DIR}")
         else()
             message(STATUS "Asio include directory found:${ASIO_INCLUDE_DIR}")
         endif()
-        set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
 
+        silkit_clean_default_compileflags()
+        add_compile_options(-w)
+        add_library(asio INTERFACE)
+        target_include_directories(asio INTERFACE "${ASIO_INCLUDE_DIR}")
+
+        set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
     else()
         # Test if ASIO is installed
         include(SilKitTestAsio)
@@ -82,7 +86,6 @@ function(include_asio)
         set(SILKIT_THIRD_PARTY_ASIO "" CACHE STRING "Name of the third party asio target")
     endif()
 endfunction()
-include_asio()
 
 # Third party YAML parsing 
 function(include_yamlcpp)
@@ -97,8 +100,9 @@ function(include_yamlcpp)
             set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
         endif()
 
-        add_subdirectory(yaml-cpp
-            yaml-cpp
+        add_subdirectory(
+            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/yaml-cpp"
+            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_yaml-cpp"
             EXCLUDE_FROM_ALL
         )
         # yaml-cpp explicitly sets /W3
@@ -110,12 +114,11 @@ function(include_yamlcpp)
         set(SILKIT_THIRD_PARTY_YAML_INTERFACE "YamlInterface" CACHE STRING "Name of the third party yaml interface target")
     else()
         # Find yaml-cpp
-        find_package(yaml-cpp REQUIRED GLOBAL)
+        find_package(yaml-cpp REQUIRED)
         set(SILKIT_THIRD_PARTY_YAML_INTERFACE "yaml-cpp" CACHE STRING "Name of the third party yaml interface target")
     endif()
 
 endfunction()
-include_yamlcpp()
 
 # libfmt
 function(include_fmt)
@@ -126,8 +129,9 @@ function(include_fmt)
         add_compile_options(-w)
 
         message(STATUS "Add subdirectory ${CMAKE_CURRENT_LIST_DIR}/fmt")
-        add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/fmt
-            ${CMAKE_BINARY_DIR}/ThirdParty/fmt
+        add_subdirectory(
+            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/fmt"
+            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_fmt"
             EXCLUDE_FROM_ALL
         )
         if(TARGET fmt-header-only)
@@ -137,11 +141,10 @@ function(include_fmt)
         endif()
     else()
         # Find libfmt
-        find_package(fmt REQUIRED GLOBAL)
+        find_package(fmt REQUIRED)
         set(SILKIT_THIRD_PARTY_FMT_HEADER_ONLY_TARGET "fmt::fmt-header-only" CACHE STRING "Header only target for third party libfmt")
     endif()
 endfunction()
-include_fmt()
 
 # spdlog
 function(include_spdlog)
@@ -159,43 +162,57 @@ function(include_spdlog)
         message(STATUS "Add subdirectory ThirdParty/spdlog")
         set(SPDLOG_FMT_EXTERNAL_HO ON)
         add_subdirectory(
-            spdlog
-            ${CMAKE_BINARY_DIR}/ThirdParty/spdlog
+            "${SILKIT_THIRD_PARTY_SOURCE_DIR}/spdlog"
+            "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_spdlog"
             EXCLUDE_FROM_ALL
         )
     else()
         # Find spdlog
-        find_package(spdlog REQUIRED GLOBAL)
+        find_package(spdlog REQUIRED)
     endif()
 endfunction()
-include_spdlog()
 
 
-if(SILKIT_BUILD_DASHBOARD)
-    function(include_oatpp)
-        silkit_clean_default_compileflags()
+function(include_oatpp)
+    silkit_clean_default_compileflags()
 
-        set(OATPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-        set(OATPP_INSTALL OFF CACHE BOOL "" FORCE)
-        set(OATPP_ADD_LINK_LIBS OFF CACHE BOOL "" FORCE)
-        set(OATPP_LINK_ATOMIC OFF CACHE BOOL "" FORCE)
+    set(OATPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(OATPP_INSTALL OFF CACHE BOOL "" FORCE)
+    set(OATPP_ADD_LINK_LIBS OFF CACHE BOOL "" FORCE)
+    set(OATPP_LINK_ATOMIC OFF CACHE BOOL "" FORCE)
 
-        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-        set(CMAKE_C_VISIBILITY_PRESET hidden)
-        # work around old cmake in oatpp:
-        set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_C_VISIBILITY_PRESET hidden)
+    # work around old cmake in oatpp:
+    set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
 
-        add_subdirectory(oatpp)
-        silkit_target_clean_compileflags(oatpp)
+    add_subdirectory(
+        "${SILKIT_THIRD_PARTY_SOURCE_DIR}/oatpp"
+        "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_oatpp"
+        EXCLUDE_FROM_ALL
+    )
+    silkit_target_clean_compileflags(oatpp)
 
-        if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-            target_compile_options(oatpp PRIVATE "/wd4244")
-        endif ()
+    if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+        target_compile_options(oatpp PRIVATE "/wd4244")
+    endif ()
 
-        set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
-        set_property(TARGET oatpp PROPERTY VISIBILITY_INLINES_HIDDEN ON)
-    endfunction()
+    set_property(TARGET oatpp PROPERTY CXX_VISIBILITY_PRESET hidden)
+    set_property(TARGET oatpp PROPERTY VISIBILITY_INLINES_HIDDEN ON)
+endfunction()
 
-    include_oatpp()
-endif()
+function(silkit_add_third_party_packages)
+    if(SILKIT_BUILD_TESTS)
+        include_gtest()
+    endif()
+
+    include_asio()
+    include_yamlcpp()
+    include_fmt()
+    include_spdlog()
+
+    if (SILKIT_BUILD_DASHBOARD)
+        include_oatpp()
+    endif ()
+endfunction()
