@@ -238,12 +238,13 @@ void DeserializeV30(MessageBuffer& buffer, ParticipantAnnouncementReply& reply)
 {
     // need legacy support here, convert old format to current one
     protocol_3_0::ParticipantAnnouncementReply oldReply;
+    buffer >> oldReply;
+
     reply.remoteHeader.versionHigh = 3;
-    reply.remoteHeader.versionHigh = 0;
+    reply.remoteHeader.versionLow = 0;
     // Status was not part of  < v3.1
     reply.status = ParticipantAnnouncementReply::Status::Success;
     // subscribers is the same
-    buffer >> oldReply;
     for (const auto& subscriber : oldReply.subscribers)
     {
         VAsioMsgSubscriber newSubscriber;
@@ -275,6 +276,9 @@ void DeserializeV30(MessageBuffer& buffer, KnownParticipants& participants)
 {
     protocol_3_0::KnownParticipants oldParticipants;
     buffer >> oldParticipants;
+
+    participants.messageHeader.versionHigh = 3;
+    participants.messageHeader.versionLow = 0;
     for (const auto& peerUri : oldParticipants.peerUris)
     {
         SilKit::Core::VAsioPeerInfo info;

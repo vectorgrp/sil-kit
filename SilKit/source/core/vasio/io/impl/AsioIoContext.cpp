@@ -1,6 +1,7 @@
 #include "AsioIoContext.hpp"
 
 #include "AsioAcceptor.hpp"
+#include "AsioConnector.hpp"
 #include "AsioTimer.hpp"
 #include "SetAsioSocketOptions.hpp"
 
@@ -14,6 +15,13 @@
 #include <unordered_set>
 
 #include "asio.hpp"
+
+
+#if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioIoContext
+#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#else
+#    define SILKIT_TRACE_METHOD_(...)
+#endif
 
 
 namespace VSilKit {
@@ -122,33 +130,44 @@ void SetListenOptions(SilKit::Services::Logging::ILogger*, asio::ip::tcp::accept
 
 AsioIoContext::AsioIoContext(const AsioSocketOptions& socketOptions)
     : _socketOptions{socketOptions}
+    , _asioIoContext{std::make_shared<asio::io_context>()}
 {
 }
 
 
 AsioIoContext::~AsioIoContext()
 {
-    SILKIT_TRACE_METHOD(_logger, "(...)");
+    SILKIT_TRACE_METHOD_(_logger, "()");
 }
+
+
+// IIoContext
 
 
 void AsioIoContext::Run()
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
 
-    _ioContext.run();
+    if (_asioIoContext->stopped())
+    {
+        _asioIoContext->restart();
+    }
+
+    _asioIoContext->run();
 }
 
 
 void AsioIoContext::Post(std::function<void()> function)
 {
-    _ioContext.post(std::move(function));
+    SILKIT_TRACE_METHOD_(_logger, "(...)");
+    _asioIoContext->post(std::move(function));
 }
 
 
 void AsioIoContext::Dispatch(std::function<void()> function)
 {
-    _ioContext.dispatch(std::move(function));
+    SILKIT_TRACE_METHOD_(_logger, "(...)");
+    _asioIoContext->dispatch(std::move(function));
 }
 
 
@@ -190,103 +209,73 @@ void OpenAcceptor(AsioAcceptorType& acceptor, AsioEndpointType endpoint, SilKit:
 }
 
 
-auto AsioIoContext::ConnectTcp(const std::string& address, uint16_t port, std::error_code& errorCode)
-    -> std::unique_ptr<IRawByteStream>
-{
-    SILKIT_TRACE_METHOD(_logger, "({}, {})", address, port);
-
-    asio::ip::tcp::endpoint endpoint{asio::ip::address::from_string(address), port};
-    asio::ip::tcp::socket socket{_ioContext};
-
-    socket.open(endpoint.protocol(), errorCode);
-    if (errorCode)
-    {
-        SILKIT_TRACE_METHOD(_logger, "failed to open socket: {}", errorCode.message());
-        return nullptr;
-    }
-
-    SetConnectOptions(_logger, socket);
-
-    socket.connect(endpoint, errorCode);
-    if (errorCode)
-    {
-        SILKIT_TRACE_METHOD(_logger, "failed to connect socket: {}", errorCode.message());
-        return nullptr;
-    }
-
-    SetAsioSocketOptions(_logger, socket, _socketOptions, errorCode);
-    if (errorCode)
-    {
-        SILKIT_TRACE_METHOD(_logger, "failed to set socket options: {}", errorCode.message());
-        return nullptr;
-    }
-
-    AsioGenericRawByteStreamOptions options{};
-    options.tcp.quickAck = _socketOptions.tcp.quickAck;
-
-    return std::make_unique<AsioGenericRawByteStream>(*this, options, std::move(socket), *_logger);
-}
-
-
-auto AsioIoContext::ConnectLocal(const std::string& path, std::error_code& errorCode) -> std::unique_ptr<IRawByteStream>
-{
-    SILKIT_TRACE_METHOD(_logger, "({})", path);
-
-    asio::local::stream_protocol::endpoint endpoint{path};
-    asio::local::stream_protocol::socket socket{_ioContext};
-
-    socket.connect(endpoint, errorCode);
-    if (errorCode)
-    {
-        SILKIT_TRACE_METHOD(_logger, "failed to connect socket");
-        return nullptr;
-    }
-
-    AsioGenericRawByteStreamOptions options{};
-
-    return std::make_unique<AsioGenericRawByteStream>(*this, options, std::move(socket), *_logger);
-}
-
-
 auto AsioIoContext::MakeTcpAcceptor(const std::string& ipAddress, uint16_t port) -> std::unique_ptr<IAcceptor>
 {
-    SILKIT_TRACE_METHOD(_logger, "({}, {})", ipAddress, port);
+    SILKIT_TRACE_METHOD_(_logger, "({}, {})", ipAddress, port);
 
     auto address = CleanIpAddress(ipAddress);
     asio::ip::tcp::endpoint endpoint{asio::ip::make_address(address), port};
-    asio::ip::tcp::acceptor acceptor{_ioContext.get_executor()};
+    asio::ip::tcp::acceptor acceptor{_asioIoContext->get_executor()};
 
     OpenAcceptor(acceptor, endpoint, *_logger);
 
-    return std::make_unique<AsioAcceptor<decltype(acceptor)>>(*this, _socketOptions, std::move(acceptor), *_logger);
+    return std::make_unique<AsioAcceptor<decltype(acceptor)>>(_socketOptions, _asioIoContext, std::move(acceptor),
+                                                              *_logger);
 }
 
 
 auto AsioIoContext::MakeLocalAcceptor(const std::string& path) -> std::unique_ptr<IAcceptor>
 {
-    SILKIT_TRACE_METHOD(_logger, "({})", path);
+    SILKIT_TRACE_METHOD_(_logger, "({})", path);
 
     asio::local::stream_protocol::endpoint endpoint{path};
-    asio::local::stream_protocol::acceptor acceptor{_ioContext.get_executor()};
+    asio::local::stream_protocol::acceptor acceptor{_asioIoContext->get_executor()};
 
     OpenAcceptor(acceptor, endpoint, *_logger);
 
-    return std::make_unique<AsioAcceptor<decltype(acceptor)>>(*this, _socketOptions, std::move(acceptor), *_logger);
+    return std::make_unique<AsioAcceptor<decltype(acceptor)>>(_socketOptions, _asioIoContext, std::move(acceptor),
+                                                              *_logger);
+}
+
+
+auto AsioIoContext::MakeTcpConnector(const std::string& ipAddress, uint16_t port) -> std::unique_ptr<IConnector>
+{
+    SILKIT_TRACE_METHOD_(_logger, "({}, {})", ipAddress, port);
+
+    using AsioProtocolType = asio::ip::tcp;
+    using ConnectorType = AsioConnector<AsioProtocolType>;
+
+    auto address = CleanIpAddress(ipAddress);
+    AsioProtocolType::endpoint endpoint{asio::ip::make_address(address), port};
+
+    return std::make_unique<ConnectorType>(_asioIoContext, _socketOptions, endpoint, *_logger);
+}
+
+
+auto AsioIoContext::MakeLocalConnector(const std::string& path) -> std::unique_ptr<IConnector>
+{
+    SILKIT_TRACE_METHOD_(_logger, "({})", path);
+
+    using AsioProtocolType = asio::local::stream_protocol;
+    using ConnectorType = AsioConnector<AsioProtocolType>;
+
+    AsioProtocolType::endpoint endpoint{path};
+
+    return std::make_unique<ConnectorType>(_asioIoContext, _socketOptions, endpoint, *_logger);
 }
 
 
 auto AsioIoContext::MakeTimer() -> std::unique_ptr<ITimer>
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
 
-    asio::steady_timer timer{_ioContext.get_executor()};
-    return std::make_unique<AsioTimer>(std::move(timer));
+    return std::make_unique<AsioTimer>(_asioIoContext);
 }
 
 
 auto AsioIoContext::Resolve(const std::string& name) -> std::vector<std::string>
 {
-    SILKIT_TRACE_METHOD(_logger, "({})", name);
+    SILKIT_TRACE_METHOD_(_logger, "({})", name);
 
     std::vector<std::string> addresses;
 
@@ -296,7 +285,7 @@ auto AsioIoContext::Resolve(const std::string& name) -> std::vector<std::string>
         return addresses;
     }
 
-    asio::ip::tcp::resolver resolver{_ioContext.get_executor()};
+    asio::ip::tcp::resolver resolver{_asioIoContext->get_executor()};
     for (const auto& endpoint : resolver.resolve(name, ""))
     {
         addresses.emplace_back(endpoint.endpoint().address().to_string());
@@ -308,9 +297,12 @@ auto AsioIoContext::Resolve(const std::string& name) -> std::vector<std::string>
 
 void AsioIoContext::SetLogger(SilKit::Services::Logging::ILogger& logger)
 {
-    SILKIT_TRACE_METHOD(&logger, "({})", static_cast<const void*>(&logger));
+    SILKIT_TRACE_METHOD_(&logger, "({})", static_cast<const void*>(&logger));
     _logger = &logger;
 }
 
 
 } // namespace VSilKit
+
+
+#undef SILKIT_TRACE_METHOD_

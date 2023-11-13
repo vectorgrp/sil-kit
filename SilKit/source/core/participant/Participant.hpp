@@ -285,8 +285,8 @@ public:
     void NotifyShutdown() override;
 
     void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork) override;
-    bool ParticiantHasCapability(const std::string& /*participantName*/,
-                                 const std::string& /*capability*/) const override;
+    bool ParticipantHasCapability(const std::string& /*participantName*/,
+                                  const std::string& /*capability*/) const override;
 
 public:
     // ----------------------------------------

@@ -239,7 +239,7 @@ public:
     virtual void NotifyShutdown() = 0;
 
     virtual void RegisterReplayController(ISimulator* simulator, const SilKit::Core::ServiceDescriptor& service, const SilKit::Config::SimulatedNetwork& simulatedNetwork ) = 0;
-    virtual bool ParticiantHasCapability(const std::string& participantName, const std::string& capability) const = 0;
+    virtual bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const = 0;
 };
 
 } // namespace Core

@@ -31,6 +31,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILogger.hpp"
 #include "SynchronizedHandlers.hpp"
 #include "Assert.hpp"
+#include "VAsioCapabilities.hpp"
 
 using namespace std::chrono_literals;
 namespace SilKit {
@@ -512,9 +513,9 @@ auto TimeSyncService::GetTimeConfiguration() -> TimeConfiguration*
 
 bool TimeSyncService::ParticipantHasAutonomousSynchronousCapability(const std::string& participantName) const
 {
-    if ( _lifecycleService && _lifecycleService->GetOperationMode() == OperationMode::Autonomous && 
+    if ( _lifecycleService && _lifecycleService->GetOperationMode() == OperationMode::Autonomous &&
         _lifecycleService->IsTimeSyncActive() &&
-        !_participant->ParticiantHasCapability(participantName, "autonomous-synchronous"))
+        !_participant->ParticipantHasCapability(participantName, SilKit::Core::Capabilities::AutonomousSynchronous))
     {
         // We are a participant with autonomous lifecycle and virtual time sync.
         // The remote participant must support this, otherwise Hop-On / Hop-Off will fail.

@@ -77,7 +77,7 @@ struct NullConnection
         return {};
     };
 
-    bool ParticiantHasCapability(const std::string& /*participantName*/, const std::string& /*capability*/) const
+    bool ParticipantHasCapability(const std::string& /*participantName*/, const std::string& /*capability*/) const
     {
         return true;
     }

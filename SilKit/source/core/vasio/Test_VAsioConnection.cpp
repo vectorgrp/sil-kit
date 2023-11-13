@@ -97,7 +97,6 @@ struct MockSilKitMessageReceiver
 
 struct MockVAsioPeer
     : public IVAsioPeer
-    , public IServiceEndpoint
 {
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
@@ -121,7 +120,7 @@ struct MockVAsioPeer
         ON_CALL(*this, GetProtocolVersion()).WillByDefault(Return(_protocolVersion));
     }
 
-    // IVasioPeer
+    // IVAsioPeer
     MOCK_METHOD(void, SendSilKitMsg, (SerializedMessage), (override));
     MOCK_METHOD(void, Subscribe, (VAsioMsgSubscriber), (override));
     MOCK_METHOD(const VAsioPeerInfo&, GetInfo, (), (const, override));
@@ -131,9 +130,9 @@ struct MockVAsioPeer
     MOCK_METHOD(void, StartAsyncRead, (), (override));
     MOCK_METHOD(void, SetProtocolVersion, (ProtocolVersion), (override));
     MOCK_METHOD(ProtocolVersion, GetProtocolVersion, (), (const, override));
-    MOCK_METHOD(void, DrainAllBuffers, (), (override));
+    MOCK_METHOD(void, Shutdown, (), (override));
 
-    // IServiceEndpoint
+    // IServiceEndpoint (via IVAsioPeer)
     MOCK_METHOD(void, SetServiceDescriptor, (const ServiceDescriptor& serviceDescriptor), (override));
     MOCK_METHOD(const ServiceDescriptor&, GetServiceDescriptor, (), (override, const));
 };

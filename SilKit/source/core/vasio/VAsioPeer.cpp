@@ -34,25 +34,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "util/TracingMacros.hpp"
 
 
+#if SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioPeer
+#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#else
+#    define SILKIT_TRACE_METHOD_(...)
+#endif
+
+
 using namespace std::chrono_literals;
 
 
 namespace SilKit {
 namespace Core {
 
-// Private constructor
-VAsioPeer::VAsioPeer(IIoContext& ioContext, VAsioConnection* connection, Services::Logging::ILogger* logger)
-    : _ioContext{&ioContext}
-    , _connection{connection}
-    , _logger{logger}
-{
-}
-
-VAsioPeer::VAsioPeer(std::unique_ptr<IRawByteStream> stream, VAsioConnection* connection,
+VAsioPeer::VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
                      Services::Logging::ILogger* logger)
-    : _ioContext{&stream->GetIoContext()}
+    : _listener{listener}
+    , _ioContext{ioContext}
     , _socket{std::move(stream)}
-    , _connection{connection}
     , _logger{logger}
 {
     _socket->SetListener(*this);
@@ -60,16 +59,9 @@ VAsioPeer::VAsioPeer(std::unique_ptr<IRawByteStream> stream, VAsioConnection* co
 
 VAsioPeer::~VAsioPeer()
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
 }
 
-
-void VAsioPeer::DrainAllBuffers()
-{
-    _isShuttingDown = true;
-
-    Shutdown();
-}
 
 void VAsioPeer::Shutdown()
 {
@@ -103,116 +95,6 @@ auto VAsioPeer::GetRemoteAddress() const -> std::string
 auto VAsioPeer::GetLocalAddress() const -> std::string
 {
     return _socket->GetLocalEndpoint();
-}
-
-bool VAsioPeer::ConnectLocal(const std::string& socketPath)
-{
-    if (!_connection->Config().middleware.enableDomainSockets)
-    {
-        return false;
-    }
-
-    SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Connecting to {}", socketPath);
-
-    std::error_code errorCode;
-
-    _socket = _ioContext->ConnectLocal(socketPath, errorCode);
-    if (_socket == nullptr)
-    {
-        SilKit::Services::Logging::Debug(_logger, "ConnectLocal: Error while connecting to '{}': {}", socketPath,
-                                         errorCode.message());
-        return false;
-    }
-
-    _socket->SetListener(*this);
-
-    return true;
-}
-
-bool VAsioPeer::ConnectTcp(const std::string& host, uint16_t port)
-{
-    auto resolverResults = _ioContext->Resolve(host);
-    if (resolverResults.empty())
-    {
-        SilKit::Services::Logging::Warn(_logger, "Unable to resolve hostname \"{}:{}\"", host, port);
-        return false;
-    }
-
-    for (const auto& address : resolverResults)
-    {
-        SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Connecting to [{}]:{}", address, port);
-
-        std::error_code errorCode;
-
-        _socket = _ioContext->ConnectTcp(address, port, errorCode);
-        if (_socket == nullptr)
-        {
-            SilKit::Services::Logging::Debug(_logger, "ConnectTcp: Error while connecting to '{}:{}': {}", host, port,
-                                             errorCode.message());
-            continue;
-        }
-
-        _socket->SetListener(*this);
-
-        return true;
-    }
-
-    return false;
-}
-
-void VAsioPeer::Connect(VAsioPeerInfo peerInfo, std::stringstream& attemptedUris, bool& success)
-{
-    _info = std::move(peerInfo);
-
-    // parse endpoints into Uri objects
-    const auto& uriStrings = _info.acceptorUris;
-    std::vector<Uri> uris;
-    std::transform(uriStrings.begin(), uriStrings.end(), std::back_inserter(uris), [](const auto& uriStr) {
-        return Uri::Parse(uriStr);
-    });
-
-    success = true;
-
-    // Attempt connecting via local-domain socket first
-    if (_connection->Config().middleware.enableDomainSockets)
-    {
-        for (const auto& uri : uris)
-        {
-            if (uri.Type() != Uri::UriType::Local)
-            {
-                continue;
-            }
-
-            attemptedUris << uri.EncodedString() << ",";
-
-            if (ConnectLocal(uri.Path()))
-            {
-                return;
-            }
-        }
-    }
-
-    for (const auto& uri : uris)
-    {
-        if (uri.Type() != Uri::UriType::Tcp)
-        {
-            continue;
-        }
-
-        attemptedUris << uri.EncodedString() << ",";
-
-        if (ConnectTcp(uri.Host(), uri.Port()))
-        {
-            return;
-        }
-    }
-
-    if (_socket == nullptr)
-    {
-        SilKit::Services::Logging::Debug(_logger, "Tried the following URIs: {}", attemptedUris.str());
-    }
-
-    success = false;
 }
 
 void VAsioPeer::SendSilKitMsg(SerializedMessage buffer)
@@ -341,7 +223,7 @@ void VAsioPeer::DispatchBuffer()
         _msgBuffer.resize(msgSize);
         SerializedMessage message{std::move(_msgBuffer)};
         message.SetProtocolVersion(GetProtocolVersion());
-        _connection->OnSocketData(this, std::move(message));
+        _listener->OnSocketData(this, std::move(message));
 
         // keep trailing data in the buffer
         _msgBuffer = std::move(newBuffer);
@@ -359,7 +241,7 @@ void VAsioPeer::DispatchBuffer()
 void VAsioPeer::OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransferred)
 {
     SILKIT_UNUSED_ARG(stream);
-    SILKIT_TRACE_METHOD(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
+    SILKIT_TRACE_METHOD_(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
 
     _wPos += bytesTransferred;
     DispatchBuffer();
@@ -369,7 +251,7 @@ void VAsioPeer::OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransfer
 void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransferred)
 {
     SILKIT_UNUSED_ARG(stream);
-    SILKIT_TRACE_METHOD(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
+    SILKIT_TRACE_METHOD_(_logger, "({}, {})", static_cast<const void*>(&stream), bytesTransferred);
 
     if (bytesTransferred < _currentSendingBuffer.GetSize())
     {
@@ -386,11 +268,14 @@ void VAsioPeer::OnAsyncWriteSomeDone(IRawByteStream& stream, size_t bytesTransfe
 void VAsioPeer::OnShutdown(IRawByteStream& stream)
 {
     SILKIT_UNUSED_ARG(stream);
-    SILKIT_TRACE_METHOD(_logger, "({})", static_cast<const void*>(&stream));
+    SILKIT_TRACE_METHOD_(_logger, "({})", static_cast<const void*>(&stream));
 
-    _connection->OnPeerShutdown(this);
+    _listener->OnPeerShutdown(this);
 }
 
 
 } // namespace Core
 } // namespace SilKit
+
+
+#undef SILKIT_TRACE_METHOD_

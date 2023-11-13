@@ -17,11 +17,9 @@ struct IRawByteStream
 
     virtual void SetListener(IRawByteStreamListener& listener) = 0;
 
-    virtual auto GetIoContext() -> IIoContext& = 0;
+    virtual auto GetLocalEndpoint() const -> std::string = 0;
 
-    virtual auto GetLocalEndpoint() -> std::string = 0;
-
-    virtual auto GetRemoteEndpoint() -> std::string = 0;
+    virtual auto GetRemoteEndpoint() const -> std::string = 0;
 
     virtual void AsyncReadSome(MutableBufferSequence bufferSequence) = 0;
 

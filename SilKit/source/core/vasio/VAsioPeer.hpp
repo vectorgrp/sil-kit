@@ -27,15 +27,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <mutex>
 #include <sstream>
 
-#include "asio.hpp"
-
 #include "silkit/services/logging/ILogger.hpp"
 
+#include "IVAsioPeer.hpp"
 #include "EndpointAddress.hpp"
 #include "MessageBuffer.hpp"
 #include "VAsioPeerInfo.hpp"
 #include "ProtocolVersion.hpp"
-#include "IVAsioConnectionPeer.hpp"
 
 #include "IIoContext.hpp"
 #include "IRawByteStream.hpp"
@@ -44,11 +42,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 namespace SilKit {
 namespace Core {
 
-class VAsioConnection;
 
 class VAsioPeer
-    : public IVAsioConnectionPeer
-    , public std::enable_shared_from_this<VAsioPeer>
+    : public IVAsioPeer
     , private IRawByteStreamListener
 {
 public:
@@ -64,30 +60,11 @@ public:
 
     VAsioPeer& operator=(const VAsioPeer& other) = delete;
     VAsioPeer& operator=(VAsioPeer&& other) = delete; //implicitly deleted because of mutex
+
+    VAsioPeer(IVAsioPeerListener* listener, IIoContext* ioContext, std::unique_ptr<IRawByteStream> stream,
+              Services::Logging::ILogger* logger);
+
     ~VAsioPeer() override;
-
-private:
-    // ----------------------------------------
-    // Private Constructors
-    VAsioPeer(IIoContext& ioContext, VAsioConnection* connection, Services::Logging::ILogger* logger);
-    VAsioPeer(std::unique_ptr<IRawByteStream> stream, VAsioConnection* connection, Services::Logging::ILogger* logger);
-
-public:
-    // ----------------------------------------
-    // Public Construction Function
-
-    // VAsioTcpPeer must only be created as shared_prt to keep it alive in active Read/WriteSomeAsync callbacks during shutdown procedure
-    static auto Create(IIoContext& ioContext, VAsioConnection* connection, Services::Logging::ILogger* logger)
-        -> std::shared_ptr<VAsioPeer>
-    {
-        return std::shared_ptr<VAsioPeer>{new VAsioPeer{ioContext, connection, logger}};
-    }
-
-    static auto Create(std::unique_ptr<IRawByteStream> stream, VAsioConnection* connection,
-                       Services::Logging::ILogger* logger) -> std::shared_ptr<VAsioPeer>
-    {
-        return std::shared_ptr<VAsioPeer>{new VAsioPeer{std::move(stream), connection, logger}};
-    }
 
 public:
     // ----------------------------------------
@@ -101,10 +78,6 @@ public:
     auto GetRemoteAddress() const -> std::string override;
     auto GetLocalAddress() const -> std::string override;
 
-    void Connect(VAsioPeerInfo info,
-                 std::stringstream& attemptedUris,
-                 bool& success);
-
     void StartAsyncRead() override;
 
     // IServiceEndpoint
@@ -113,8 +86,8 @@ public:
 
     inline void SetProtocolVersion(ProtocolVersion v)  override;
     inline auto GetProtocolVersion() const -> ProtocolVersion  override;
-    
-    void DrainAllBuffers() override;
+
+    void Shutdown() override;
 
 private:
     // ----------------------------------------
@@ -123,9 +96,6 @@ private:
     void WriteSomeAsync();
     void ReadSomeAsync();
     void DispatchBuffer();
-    void Shutdown();
-    bool ConnectLocal(const std::string& path);
-    bool ConnectTcp(const std::string& host, uint16_t port);
 
 private: // IRawByteStreamListener
     void OnAsyncReadSomeDone(IRawByteStream& stream, size_t bytesTransferred) override;
@@ -136,9 +106,9 @@ private:
     // ----------------------------------------
     // Private Members
     ProtocolVersion _protocolVersion{};
+    IVAsioPeerListener* _listener{nullptr};
     IIoContext* _ioContext{nullptr};
     std::unique_ptr<IRawByteStream> _socket;
-    VAsioConnection* _connection{nullptr};
     VAsioPeerInfo _info;
 
     Services::Logging::ILogger* _logger;
@@ -158,7 +128,6 @@ private:
     std::vector<uint8_t> _currentSendingBufferData;
 
     std::atomic_bool _sending{false};
-    bool _enableQuickAck{false};
     Core::ServiceDescriptor _serviceDescriptor;
 };
 
@@ -184,6 +153,7 @@ auto VAsioPeer::GetProtocolVersion() const -> ProtocolVersion
 {
     return _protocolVersion;
 }
+
 
 } // namespace Core
 } // namespace SilKit

@@ -72,14 +72,14 @@ protected:
     void SetupRegistry(ProtocolVersion registryVersion)
     {
         _registry = MakeRegistry(registryVersion);
-        _registry->StartListening(registryUri);
+        _registryUri = _registry->StartListening("silkit://localhost:0");
     }
 
     void SetupParticipants(std::initializer_list<VersionedParticipant> participants)
     {
         for (auto&& p : participants)
         {
-            auto participant = MakeParticipant(p.name, registryUri, p.version);
+            auto participant = MakeParticipant(p.name, _registryUri, p.version);
             _participants.emplace_back(std::move(participant));
         }
     }
@@ -133,7 +133,7 @@ protected:
     using ParticipantListT = std::vector<std::shared_ptr<IParticipantInternal>>;
     ParticipantListT _participants;
     std::shared_ptr<VAsioRegistry> _registry;
-    const std::string registryUri = "silkit://localhost:0";
+    std::string _registryUri;
 };
 
 TEST_F(Test_ParticipantVersion, unsupported_version_connect_to_current)

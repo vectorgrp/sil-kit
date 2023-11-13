@@ -16,15 +16,6 @@ struct InvalidStateError : SilKit::SilKitError
 };
 
 
-struct NotImplementedError : SilKit::SilKitError
-{
-    NotImplementedError()
-        : SilKit::SilKitError{"operation is not implemented"}
-    {
-    }
-};
-
-
 struct InvalidAsioEndpointProtocolFamily : SilKit::SilKitError
 {
     InvalidAsioEndpointProtocolFamily()
@@ -40,7 +31,6 @@ struct InvalidAsioEndpointProtocolFamily : SilKit::SilKitError
 namespace SilKit {
 namespace Core {
 using VSilKit::InvalidStateError;
-using VSilKit::NotImplementedError;
 using VSilKit::InvalidAsioEndpointProtocolFamily;
 } // namespace Core
 } // namespace SilKit

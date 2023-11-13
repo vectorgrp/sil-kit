@@ -21,8 +21,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #pragma once
 
-#include "IVAsioConnectionPeer.hpp"
-#include "IVAsioPeerConnection.hpp"
+
+#include "IVAsioPeer.hpp"
+
 
 namespace SilKit {
 namespace Services {
@@ -36,17 +37,16 @@ class ILogger;
 namespace SilKit {
 namespace Core {
 
-class VAsioConnection;
 
 class VAsioProxyPeer
-    : public IVAsioConnectionPeer
-    , public IVAsioPeerConnection
+    : public IVAsioPeer
+    , public IVAsioPeerListener
 {
 public:
-    VAsioProxyPeer(IVAsioPeerConnection* connection, VAsioPeerInfo peerInfo, IVAsioPeer* peer,
+    VAsioProxyPeer(IVAsioPeerListener* listener, std::string participantName, VAsioPeerInfo peerInfo, IVAsioPeer* peer,
                    SilKit::Services::Logging::ILogger* logger);
 
-public: // IVAsioPeer via IVAsioConnectionPeer
+public: // IVAsioPeer
     void SendSilKitMsg(SerializedMessage buffer) override;
     void Subscribe(VAsioMsgSubscriber subscriber) override;
     auto GetInfo() const -> const VAsioPeerInfo& override;
@@ -54,17 +54,15 @@ public: // IVAsioPeer via IVAsioConnectionPeer
     auto GetRemoteAddress() const -> std::string override;
     auto GetLocalAddress() const -> std::string override;
     void StartAsyncRead() override;
-    void DrainAllBuffers() override;
+    void Shutdown() override;
     void SetProtocolVersion(ProtocolVersion v) override;
     auto GetProtocolVersion() const -> ProtocolVersion override;
 
-public: // IServiceEndpoint via IVAsioConnectionPeer
+public: // IVAsioPeer (IServiceEndpoint)
     void SetServiceDescriptor(const ServiceDescriptor& serviceDescriptor) override;
     auto GetServiceDescriptor() const -> const ServiceDescriptor& override;
 
-public: // IVAsioPeerConnection
-    auto GetParticipantName() const -> const std::string& override;
-    auto Config() const -> const SilKit::Config::ParticipantConfiguration& override;
+public: // IVAsioPeerListener
     void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
     void OnPeerShutdown(IVAsioPeer* peer) override;
 
@@ -72,13 +70,15 @@ public:
     auto GetPeer() const -> IVAsioPeer*;
 
 private:
-    IVAsioPeerConnection* _connection;
+    IVAsioPeerListener* _listener;
+    std::string _participantName;
     IVAsioPeer* _peer;
     VAsioPeerInfo _peerInfo;
     ServiceDescriptor _serviceDescriptor;
     SilKit::Services::Logging::ILogger* _logger;
     ProtocolVersion _protocolVersion;
 };
+
 
 } // namespace Core
 } // namespace SilKit

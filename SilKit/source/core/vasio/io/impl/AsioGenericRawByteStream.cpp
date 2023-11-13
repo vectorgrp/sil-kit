@@ -23,6 +23,13 @@
 #endif
 
 
+#if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioGenericRawByteStream
+#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#else
+#    define SILKIT_TRACE_METHOD_(...)
+#endif
+
+
 namespace {
 
 
@@ -44,15 +51,15 @@ auto IsErrorToTryAgain(const asio::error_code& ec) -> bool
 namespace VSilKit {
 
 
-AsioGenericRawByteStream::AsioGenericRawByteStream(IIoContext& ioContext,
-                                                   const AsioGenericRawByteStreamOptions& options, AsioSocket socket,
+AsioGenericRawByteStream::AsioGenericRawByteStream(const AsioGenericRawByteStreamOptions& options,
+                                                   std::shared_ptr<asio::io_context> asioIoContext, AsioSocket socket,
                                                    SilKit::Services::Logging::ILogger& logger)
-    : _ioContext{&ioContext}
-    , _options{options}
+    : _options{options}
+    , _asioIoContext{std::move(asioIoContext)}
     , _socket{std::move(socket)}
     , _logger{&logger}
 {
-    SILKIT_TRACE_METHOD(_logger, "({}, ...)", static_cast<const void*>(&ioContext));
+    SILKIT_TRACE_METHOD_(_logger, "(...)");
 
     EnableQuickAck();
 }
@@ -60,32 +67,26 @@ AsioGenericRawByteStream::AsioGenericRawByteStream(IIoContext& ioContext,
 
 AsioGenericRawByteStream::~AsioGenericRawByteStream()
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
 }
 
 
 void AsioGenericRawByteStream::SetListener(IRawByteStreamListener& listener)
 {
-    SILKIT_TRACE_METHOD(_logger, "({})", static_cast<const void*>(&listener));
+    SILKIT_TRACE_METHOD_(_logger, "({})", static_cast<const void*>(&listener));
 
     _listener = &listener;
 }
 
 
-auto AsioGenericRawByteStream::GetIoContext() -> IIoContext&
-{
-    return *_ioContext;
-}
-
-
-auto AsioGenericRawByteStream::GetLocalEndpoint() -> std::string
+auto AsioGenericRawByteStream::GetLocalEndpoint() const -> std::string
 {
     const auto endpoint{_socket.local_endpoint()};
     return FormatEndpoint(endpoint);
 }
 
 
-auto AsioGenericRawByteStream::GetRemoteEndpoint() -> std::string
+auto AsioGenericRawByteStream::GetRemoteEndpoint() const -> std::string
 {
     const auto endpoint{_socket.remote_endpoint()};
     return FormatEndpoint(endpoint);
@@ -94,14 +95,14 @@ auto AsioGenericRawByteStream::GetRemoteEndpoint() -> std::string
 
 void AsioGenericRawByteStream::AsyncReadSome(MutableBufferSequence bufferSequence)
 {
-    SILKIT_TRACE_METHOD(_logger, "(...)");
+    SILKIT_TRACE_METHOD_(_logger, "(...)");
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
 
         if (_shutdownPending)
         {
-            SILKIT_TRACE_METHOD(_logger, "ignored, already shutting down");
+            SILKIT_TRACE_METHOD_(_logger, "ignored, already shutting down");
             return;
         }
 
@@ -129,14 +130,14 @@ void AsioGenericRawByteStream::AsyncReadSome(MutableBufferSequence bufferSequenc
 
 void AsioGenericRawByteStream::AsyncWriteSome(ConstBufferSequence bufferSequence)
 {
-    SILKIT_TRACE_METHOD(_logger, "(...)");
+    SILKIT_TRACE_METHOD_(_logger, "(...)");
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
 
         if (_shutdownPending)
         {
-            SILKIT_TRACE_METHOD(_logger, "ignored, already shutting down");
+            SILKIT_TRACE_METHOD_(_logger, "ignored, already shutting down");
             return;
         }
 
@@ -164,7 +165,7 @@ void AsioGenericRawByteStream::AsyncWriteSome(ConstBufferSequence bufferSequence
 
 void AsioGenericRawByteStream::Shutdown()
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
@@ -175,7 +176,7 @@ void AsioGenericRawByteStream::Shutdown()
 
 void AsioGenericRawByteStream::OnAsioAsyncReadSomeComplete(asio::error_code const& errorCode, size_t bytesTransferred)
 {
-    SILKIT_TRACE_METHOD(_logger, "({}, {})", errorCode.message(), bytesTransferred);
+    SILKIT_TRACE_METHOD_(_logger, "({}, {})", errorCode.message(), bytesTransferred);
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
@@ -216,7 +217,7 @@ void AsioGenericRawByteStream::OnAsioAsyncReadSomeComplete(asio::error_code cons
 
 void AsioGenericRawByteStream::OnAsioAsyncWriteSomeComplete(asio::error_code const& errorCode, size_t bytesTransferred)
 {
-    SILKIT_TRACE_METHOD(_logger, "({}, {})", errorCode.message(), bytesTransferred);
+    SILKIT_TRACE_METHOD_(_logger, "({}, {})", errorCode.message(), bytesTransferred);
 
     {
         std::unique_lock<decltype(_mutex)> lock{_mutex};
@@ -255,7 +256,7 @@ void AsioGenericRawByteStream::OnAsioAsyncWriteSomeComplete(asio::error_code con
 
 void AsioGenericRawByteStream::HandleShutdownOrError()
 {
-    SILKIT_TRACE_METHOD(_logger, "() [shutdownPosted={}, shutdownPending={}, reading={}, writing={}]", _shutdownPending,
+    SILKIT_TRACE_METHOD_(_logger, "() [shutdownPosted={}, shutdownPending={}, reading={}, writing={}]", _shutdownPending,
                         _shutdownPosted, _reading, _writing);
 
     if (!_shutdownPending)
@@ -264,7 +265,7 @@ void AsioGenericRawByteStream::HandleShutdownOrError()
 
         asio::error_code errorCode;
 
-        SILKIT_TRACE_METHOD(_logger, "closing underlying socket");
+        SILKIT_TRACE_METHOD_(_logger, "closing underlying socket");
 
         _socket.close(errorCode);
         if (errorCode)
@@ -278,11 +279,11 @@ void AsioGenericRawByteStream::HandleShutdownOrError()
     {
         if (!_shutdownPosted)
         {
-            SILKIT_TRACE_METHOD(_logger, "posting shutdown on listener {}", static_cast<const void*>(_listener));
+            SILKIT_TRACE_METHOD_(_logger, "posting shutdown on listener {}", static_cast<const void*>(_listener));
 
             _shutdownPosted = true;
 
-            _ioContext->Post([this] {
+            _asioIoContext->post([this] {
                 _listener->OnShutdown(*this);
             });
         }
@@ -314,9 +315,15 @@ void AsioGenericRawByteStream::EnableQuickAck()
 
 #else
 
-void AsioGenericRawByteStream::EnableQuickAck() {}
+void AsioGenericRawByteStream::EnableQuickAck()
+{
+    SILKIT_UNUSED_ARG(_options);
+}
 
 #endif
 
 
 } // namespace VSilKit
+
+
+#undef SILKIT_TRACE_METHOD_

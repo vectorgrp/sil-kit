@@ -2,6 +2,7 @@
 
 
 #include "IAcceptor.hpp"
+#include "IConnector.hpp"
 #include "ITimer.hpp"
 
 #include "ILogger.hpp"
@@ -25,15 +26,13 @@ struct IIoContext
 
     virtual void Dispatch(std::function<void()> function) = 0;
 
-    virtual auto ConnectTcp(const std::string& address, uint16_t port, std::error_code& errorCode)
-        -> std::unique_ptr<IRawByteStream> = 0;
-
-    virtual auto ConnectLocal(const std::string& path, std::error_code& errorCode)
-        -> std::unique_ptr<IRawByteStream> = 0;
-
     virtual auto MakeTcpAcceptor(const std::string& address, uint16_t port) -> std::unique_ptr<IAcceptor> = 0;
 
     virtual auto MakeLocalAcceptor(const std::string& path) -> std::unique_ptr<IAcceptor> = 0;
+
+    virtual auto MakeTcpConnector(const std::string& address, uint16_t port) -> std::unique_ptr<IConnector> = 0;
+
+    virtual auto MakeLocalConnector(const std::string& path) -> std::unique_ptr<IConnector> = 0;
 
     virtual auto MakeTimer() -> std::unique_ptr<ITimer> = 0;
 

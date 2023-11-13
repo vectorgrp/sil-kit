@@ -49,9 +49,20 @@ auto VAsioCapabilities::HasCapability(const std::string& name) const -> bool
     return _capabilities.find(name) != _capabilities.end();
 }
 
+auto VAsioCapabilities::HasProxyMessageCapability() const -> bool
+{
+    return _hasProxyMessageCapability;
+}
+
+auto VAsioCapabilities::HasRequestParticipantConnectionCapability() const -> bool
+{
+    return _hasRequestParticipantConnectionCapability;
+}
+
 void VAsioCapabilities::AddCapability(const std::string& name)
 {
     _capabilities.insert(name);
+    UpdateCache();
 }
 
 auto VAsioCapabilities::ToCapabilitiesString() const -> std::string
@@ -122,6 +133,8 @@ void VAsioCapabilities::Parse(const std::string& string)
 
             AddCapability(name.Scalar());
         }
+
+        UpdateCache();
     }
     catch (const std::exception& exception)
     {
@@ -131,6 +144,12 @@ void VAsioCapabilities::Parse(const std::string& string)
     {
         throw SilKit::TypeConversionError{"failed to parse capabilities string due to unknown error"};
     }
+}
+
+void VAsioCapabilities::UpdateCache()
+{
+    _hasProxyMessageCapability = HasCapability(Capabilities::ProxyMessage);
+    _hasRequestParticipantConnectionCapability = HasCapability(Capabilities::RequestParticipantConnection);
 }
 
 } // namespace Core

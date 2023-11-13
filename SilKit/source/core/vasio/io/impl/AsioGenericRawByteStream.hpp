@@ -2,9 +2,9 @@
 
 
 #include "IRawByteStream.hpp"
+
 #include "AsioSocketOptions.hpp"
 #include "util/Atomic.hpp"
-#include "util/Ptr.hpp"
 
 #include "ILogger.hpp"
 
@@ -30,7 +30,6 @@ class AsioGenericRawByteStream final : public IRawByteStream
 {
     using AsioSocket = asio::generic::stream_protocol::socket;
 
-    IIoContext* _ioContext{nullptr};
     IRawByteStreamListener* _listener{nullptr};
 
     std::mutex _mutex;
@@ -44,20 +43,21 @@ class AsioGenericRawByteStream final : public IRawByteStream
 
     AsioGenericRawByteStreamOptions _options;
 
+    std::shared_ptr<asio::io_context> _asioIoContext;
     AsioSocket _socket;
 
     SilKit::Services::Logging::ILogger* _logger{nullptr};
 
 public:
-    AsioGenericRawByteStream(IIoContext& ioContext, const AsioGenericRawByteStreamOptions& options, AsioSocket socket,
+    AsioGenericRawByteStream(const AsioGenericRawByteStreamOptions& options,
+                             std::shared_ptr<asio::io_context> asioIoContext, AsioSocket socket,
                              SilKit::Services::Logging::ILogger& logger);
     ~AsioGenericRawByteStream() override;
 
 public: // IRawByteStream
     void SetListener(IRawByteStreamListener& listener) override;
-    auto GetIoContext() -> IIoContext& override;
-    auto GetLocalEndpoint() -> std::string override;
-    auto GetRemoteEndpoint() -> std::string override;
+    auto GetLocalEndpoint() const -> std::string override;
+    auto GetRemoteEndpoint() const -> std::string override;
     void AsyncReadSome(MutableBufferSequence bufferSequence) override;
     void AsyncWriteSome(ConstBufferSequence bufferSequence) override;
     void Shutdown() override;

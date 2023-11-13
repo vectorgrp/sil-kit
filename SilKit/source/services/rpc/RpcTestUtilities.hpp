@@ -154,7 +154,7 @@ struct MockConnection
         return {};
     };
 
-    bool ParticiantHasCapability(const std::string& /*participantName*/,
+    bool ParticipantHasCapability(const std::string& /*participantName*/,
         const std::string& /*capability*/) const
     {
         return true;

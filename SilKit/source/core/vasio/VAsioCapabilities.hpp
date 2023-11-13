@@ -26,6 +26,7 @@
 namespace SilKit {
 namespace Core {
 
+
 // Protocol Capability literals
 struct CapabilityLiteral
 {
@@ -44,11 +45,16 @@ struct CapabilityLiteral
   }
 };
 
+
 namespace Capabilities {
-const auto ProxyMessage = CapabilityLiteral{ "proxy-message" };
-const auto AutonomousSynchronous = CapabilityLiteral{ "autonomous-synchronous" };
-const auto RequestParticipantConnection = CapabilityLiteral{ "request-participant-connection" };
-}
+const auto ProxyMessage = CapabilityLiteral{"proxy-message"};
+const auto AutonomousSynchronous = CapabilityLiteral{"autonomous-synchronous"};
+const auto RequestParticipantConnection = CapabilityLiteral{"request-participant-connection-v2"};
+} // namespace Capabilities
+
+
+// Removed Capabilities (MUST NOT BE RE-USED):
+// - "request-participant-connection" replaced by "request-participant-connection-v2" in 4.0.39
 
 
 class VAsioCapabilities
@@ -62,16 +68,27 @@ public:
 
     auto HasCapability(const std::string& name) const -> bool;
 
+    void AddCapability(const std::string& name);
+
     auto ToCapabilitiesString() const -> std::string;
 
-    void AddCapability(const std::string& name);
+public:
+    /// Returns true if the Capabilities::ProxyMessage is enabled.
+    auto HasProxyMessageCapability() const -> bool;
+
+    /// Returns true if the Capabilities::RequestParticipantConnection is enabled.
+    auto HasRequestParticipantConnectionCapability() const -> bool;
 
 private:
     void Parse(const std::string& string);
+    void UpdateCache();
 
 private:
     std::unordered_set<std::string> _capabilities;
+    bool _hasProxyMessageCapability{false};
+    bool _hasRequestParticipantConnectionCapability{false};
 };
+
 
 } // namespace Core
 } // namespace SilKit

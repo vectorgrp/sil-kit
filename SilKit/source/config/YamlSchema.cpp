@@ -226,6 +226,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 {"EnableDomainSockets"},
                 {"AcceptorUris"},
                 {"RegistryAsFallbackProxy"},
+                {"ExperimentalRemoteParticipantConnection"},
             }
         }
     };

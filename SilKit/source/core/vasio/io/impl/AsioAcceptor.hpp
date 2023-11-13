@@ -11,7 +11,6 @@
 #include "AsioSocketOptions.hpp"
 #include "util/Atomic.hpp"
 #include "util/Exceptions.hpp"
-#include "util/Ptr.hpp"
 #include "util/TracingMacros.hpp"
 
 #include "ILogger.hpp"
@@ -19,6 +18,13 @@
 #include <memory>
 
 #include "asio.hpp"
+
+
+#if SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioAcceptor
+#    define SILKIT_TRACE_METHOD_(logger, ...) SILKIT_TRACE_METHOD(logger, __VA_ARGS__)
+#else
+#    define SILKIT_TRACE_METHOD_(...)
+#endif
 
 
 namespace VSilKit {
@@ -37,12 +43,13 @@ class AsioAcceptor final : public IAcceptor
         PENDING,
     };
 
-    IIoContext* _ioContext{nullptr};
     IAcceptorListener* _listener{nullptr};
 
     AtomicEnum<State> _state{IDLE};
 
     AsioSocketOptions _socketOptions;
+
+    std::shared_ptr<asio::io_context> _asioIoContext;
 
     AsioAcceptorType _acceptor;
     asio::cancellation_signal _acceptCancelSignal;
@@ -55,8 +62,8 @@ class AsioAcceptor final : public IAcceptor
     SilKit::Services::Logging::ILogger* _logger{nullptr};
 
 public:
-    AsioAcceptor(IIoContext& ioContext, const AsioSocketOptions& socketOptions, AsioAcceptorType acceptor,
-                 SilKit::Services::Logging::ILogger& logger);
+    AsioAcceptor(const AsioSocketOptions& socketOptions, std::shared_ptr<asio::io_context> asioIoContext,
+                 AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger);
     ~AsioAcceptor() override;
 
 public: // IAcceptor
@@ -72,23 +79,23 @@ private:
 
 
 template <typename T>
-AsioAcceptor<T>::AsioAcceptor(IIoContext& ioContext, const AsioSocketOptions& socketOptions, AsioAcceptorType acceptor,
-                              SilKit::Services::Logging::ILogger& logger)
-    : _ioContext{&ioContext}
-    , _socketOptions{socketOptions}
+AsioAcceptor<T>::AsioAcceptor(const AsioSocketOptions& socketOptions, std::shared_ptr<asio::io_context> asioIoContext,
+                              AsioAcceptorType acceptor, SilKit::Services::Logging::ILogger& logger)
+    : _socketOptions{socketOptions}
+    , _asioIoContext{std::move(asioIoContext)}
     , _acceptor{std::move(acceptor)}
     , _timeoutTimer{_acceptor.get_executor()}
     , _localEndpoint{_acceptor.local_endpoint()}
     , _logger{&logger}
 {
-    SILKIT_TRACE_METHOD(_logger, "({}, ...)", static_cast<const void*>(&ioContext));
+    SILKIT_TRACE_METHOD_(_logger, "(...)");
 }
 
 
 template <typename T>
 AsioAcceptor<T>::~AsioAcceptor()
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
     CleanupEndpoint(_localEndpoint);
 }
 
@@ -96,7 +103,7 @@ AsioAcceptor<T>::~AsioAcceptor()
 template <typename T>
 void AsioAcceptor<T>::SetListener(IAcceptorListener& listener)
 {
-    SILKIT_TRACE_METHOD(_logger, "({})", static_cast<const void*>(&listener));
+    SILKIT_TRACE_METHOD_(_logger, "({})", static_cast<const void*>(&listener));
 
     _listener = &listener;
 }
@@ -112,7 +119,7 @@ auto AsioAcceptor<T>::GetLocalEndpoint() const -> std::string
 template <typename T>
 void AsioAcceptor<T>::AsyncAccept(std::chrono::milliseconds timeout)
 {
-    SILKIT_TRACE_METHOD(_logger, "({})", timeout.count());
+    SILKIT_TRACE_METHOD_(_logger, "({})", timeout.count());
 
     if (!_state.ExchangeIfExpected(IDLE, PENDING))
     {
@@ -142,7 +149,7 @@ void AsioAcceptor<T>::AsyncAccept(std::chrono::milliseconds timeout)
 template <typename T>
 void AsioAcceptor<T>::Shutdown()
 {
-    SILKIT_TRACE_METHOD(_logger, "()");
+    SILKIT_TRACE_METHOD_(_logger, "()");
     _acceptor.close();
 }
 
@@ -150,7 +157,7 @@ void AsioAcceptor<T>::Shutdown()
 template <typename T>
 void AsioAcceptor<T>::OnAsioAsyncAcceptComplete(const asio::error_code& asioErrorCode, AsioSocketType socket)
 {
-    SILKIT_TRACE_METHOD(_logger, "({}, ...)", asioErrorCode.message());
+    SILKIT_TRACE_METHOD_(_logger, "({}, ...)", asioErrorCode.message());
 
     if (!_state.ExchangeIfExpected(PENDING, IDLE))
     {
@@ -168,7 +175,7 @@ void AsioAcceptor<T>::OnAsioAsyncAcceptComplete(const asio::error_code& asioErro
     SetAsioSocketOptions(_logger, socket, _socketOptions, errorCode);
     if (errorCode)
     {
-        SILKIT_TRACE_METHOD(_logger, "failed to set socket options: {}", errorCode.message());
+        SILKIT_TRACE_METHOD_(_logger, "failed to set socket options: {}", errorCode.message());
         _listener->OnAsyncAcceptFailure(*this);
         return;
     }
@@ -179,7 +186,7 @@ void AsioAcceptor<T>::OnAsioAsyncAcceptComplete(const asio::error_code& asioErro
     AsioGenericRawByteStreamOptions options{};
     options.tcp.quickAck = isTcp && _socketOptions.tcp.quickAck;
 
-    auto stream{std::make_unique<AsioGenericRawByteStream>(*_ioContext, options, std::move(socket), *_logger)};
+    auto stream{std::make_unique<AsioGenericRawByteStream>(options, _asioIoContext, std::move(socket), *_logger)};
 
     _timeoutCancelSignal.emit(asio::cancellation_type::total);
     _listener->OnAsyncAcceptSuccess(*this, std::move(stream));
@@ -189,20 +196,21 @@ void AsioAcceptor<T>::OnAsioAsyncAcceptComplete(const asio::error_code& asioErro
 template <typename T>
 void AsioAcceptor<T>::OnAsioAsyncWaitComplete(const asio::error_code& errorCode)
 {
-    SILKIT_TRACE_METHOD(_logger, "({})", errorCode.message());
-
-    if (!_state.ExchangeIfExpected(PENDING, IDLE))
-    {
-        throw InvalidStateError{};
-    }
+    SILKIT_TRACE_METHOD_(_logger, "({})", errorCode.message());
 
     if (errorCode)
     {
         return;
     }
 
-    _acceptCancelSignal.emit(asio::cancellation_type::total);
+    if (_state.Get() == PENDING)
+    {
+        _acceptCancelSignal.emit(asio::cancellation_type::total);
+    }
 }
 
 
 } // namespace VSilKit
+
+
+#undef SILKIT_TRACE_METHOD_

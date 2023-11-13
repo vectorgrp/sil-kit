@@ -16,8 +16,6 @@ struct ITimer
 
     virtual void SetListener(ITimerListener& listener) = 0;
 
-    virtual auto GetExpiry() const -> std::chrono::steady_clock::time_point = 0;
-
     virtual void AsyncWaitFor(std::chrono::nanoseconds duration) = 0;
 
     virtual void Shutdown() = 0;

@@ -82,15 +82,36 @@ private:
 };
 
 
-/// ! \brief SimTestHarness allows creating a synchronized simulation
-///          with multiple participants. 
+struct SimTestHarnessArgs
+{
+    std::vector<std::string> syncParticipantNames{};
+    std::vector<std::string> asyncParticipantNames{};
+
+    /// If true, the participants will be created when GetParticipant is called. If false, all participants are created
+    /// in the SimTestHarness constructor.
+    bool deferParticipantCreation{false};
+    /// If true, the system controller is only created if CreateSystemController is called. If false, it will be created
+    /// in the SimTestHarness constructor.
+    bool deferSystemControllerCreation{false};
+
+    struct {
+        std::string participantConfiguration{""};
+        std::string listenUri{"silkit://127.0.0.1:0"};
+    } registry;
+};
+
+
+/// SimTestHarness allows creating a synchronized simulation with multiple participants.
 class SimTestHarness
 {
 public:
-    //! when deferParticipantCreation is true, SimParticipants will be created in the GetParticipant calls instead of in the constructor.
+    explicit SimTestHarness(const SimTestHarnessArgs& args);
+
+    /// \deprecated Please use the single-argument constructor which takes a SimTestHarnessArgs object. Since the struct
+    ///             fields are named when assigned, the resulting code should be much more readable.
     SimTestHarness(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
-                   bool deferParticipantCreation = false, bool deferSystemControllerCreation = false,
-                   const std::vector<std::string>& asyncParticipantNames = std::vector<std::string>());
+        bool deferParticipantCreation = false, bool deferSystemControllerCreation = false,
+        const std::vector<std::string>& asyncParticipantNames = std::vector<std::string>());
 
     ~SimTestHarness();
 

@@ -27,7 +27,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "Optional.hpp"
 #include "TransformAcceptorUris.hpp"
 
-using asio::ip::tcp;
 
 namespace SilKit {
 namespace Core {
@@ -77,7 +76,15 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
     {
         try
         {
-            _connection.AcceptLocalConnections(listenUri);
+            // If we have opened a TCP socket, use the URI we're going to return to the caller. Otherwise, use the URI
+            // passed as the argument.
+            std::string uniqueId{listenUri};
+            if (hasTcpSocket)
+            {
+                uniqueId = uri.EncodedString();
+            }
+
+            _connection.AcceptLocalConnections(uniqueId);
 
             hasDomainSocket = true;
         }
@@ -180,7 +187,9 @@ void VAsioRegistry::OnParticipantAnnouncement(IVAsioPeer* from, const Participan
 
 void VAsioRegistry::SendKnownParticipants(IVAsioPeer* peer)
 {
-    Services::Logging::Info(GetLogger(), "Sending known participant message to {}", peer->GetInfo().participantName);
+    Services::Logging::Info(GetLogger(), "Sending known participant message to {}, protocol version {}.{}",
+                            peer->GetInfo().participantName, peer->GetProtocolVersion().major,
+                            peer->GetProtocolVersion().minor);
 
     KnownParticipants knownParticipantsMsg;
     knownParticipantsMsg.messageHeader = MakeRegistryMsgHeader(peer->GetProtocolVersion());

@@ -164,7 +164,6 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
     //Backward compatibility
     if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
     {
-        buffer.SetProtocolVersion({3,0});
         DeserializeV30(buffer, reply);
     }
     else
@@ -186,7 +185,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ParticipantAnnouncementR
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const KnownParticipants& participants)
 {
     //Backward compatibility with legacy peers
-    if (buffer.GetProtocolVersion() == ProtocolVersion{3,0})
+    if (buffer.GetProtocolVersion() == ProtocolVersion{3, 0})
     {
         SerializeV30(buffer, participants);
     }
@@ -286,17 +285,17 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessage& out)
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg)
 {
 	buffer
-		<< msg.peerUnableToConnect
-		<< msg.connectTargetPeer
-		;
+		<< msg.requestOrigin
+        << msg.requestTarget
+        << msg.status;
     return buffer;
 }
 inline MessageBuffer& operator>>(MessageBuffer& buffer, RemoteParticipantConnectRequest& out)
 {
 	buffer
-		>> out.peerUnableToConnect
-		>> out.connectTargetPeer
-		;
+		>> out.requestOrigin
+        >> out.requestTarget
+        >> out.status;
     return buffer;
 }
 

@@ -25,23 +25,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 
 namespace {
-using SilKit::Services::Logging::Debug;
-using SilKit::Services::Logging::Trace;
+namespace Log = SilKit::Services::Logging;
 } // namespace
 
 
 namespace SilKit {
 namespace Core {
 
-VAsioProxyPeer::VAsioProxyPeer(IVAsioPeerConnection *connection, VAsioPeerInfo peerInfo, IVAsioPeer *peer,
-                               SilKit::Services::Logging::ILogger *logger)
-    : _connection{connection}
+
+VAsioProxyPeer::VAsioProxyPeer(IVAsioPeerListener *listener, std::string participantName, VAsioPeerInfo peerInfo,
+                               IVAsioPeer *peer, SilKit::Services::Logging::ILogger *logger)
+    : _listener{listener}
+    , _participantName{std::move(participantName)}
     , _peer{peer}
     , _peerInfo{std::move(peerInfo)}
     , _logger{logger}
 {
-    Debug(_logger, "VAsioProxyPeer ({}): Created with proxy {}", _peerInfo.participantName,
-          _peer->GetInfo().participantName);
+    Log::Debug(_logger, "VAsioProxyPeer ({}): Created with proxy {}", _peerInfo.participantName,
+               _peer->GetInfo().participantName);
 }
 
 // ================================================================================
@@ -51,20 +52,19 @@ VAsioProxyPeer::VAsioProxyPeer(IVAsioPeerConnection *connection, VAsioPeerInfo p
 void VAsioProxyPeer::SendSilKitMsg(SerializedMessage buffer)
 {
     ProxyMessage msg{};
-    msg.source = GetParticipantName();
+    msg.source = _participantName;
     msg.destination = GetInfo().participantName;
     msg.payload = buffer.ReleaseStorage();
 
-    Trace(_logger, "VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName, msg.payload.size());
+    Log::Trace(_logger, "VAsioProxyPeer ({}): SendSilKitMsg({})", _peerInfo.participantName, msg.payload.size());
 
     _peer->SendSilKitMsg(SerializedMessage{msg});
 }
 
 void VAsioProxyPeer::Subscribe(VAsioMsgSubscriber subscriber)
 {
-    Services::Logging::Debug(_logger,
-                             "VAsioProxyPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
-                             subscriber.msgTypeName, subscriber.networkName, _peerInfo.participantName);
+    Log::Debug(_logger, "VAsioProxyPeer: Subscribing to messages of type '{}' on link '{}' from participant '{}'",
+               subscriber.msgTypeName, subscriber.networkName, _peerInfo.participantName);
 
     SendSilKitMsg(SerializedMessage{subscriber});
 }
@@ -91,23 +91,23 @@ auto VAsioProxyPeer::GetLocalAddress() const -> std::string
 
 void VAsioProxyPeer::StartAsyncRead()
 {
-    Debug(_logger, "VAsioProxyPeer ({}): StartAsyncRead: Ignored", _peerInfo.participantName);
+    Log::Debug(_logger, "VAsioProxyPeer ({}): StartAsyncRead: Ignored", _peerInfo.participantName);
 }
 
-void VAsioProxyPeer::DrainAllBuffers()
+void VAsioProxyPeer::Shutdown()
 {
-    Debug(_logger, "VAsioProxyPeer ({}): DrainAllBuffers: Ignored", _peerInfo.participantName);
+    Log::Debug(_logger, "VAsioProxyPeer ({}): Shutdown: Ignored", _peerInfo.participantName);
 }
 
 void VAsioProxyPeer::SetProtocolVersion(ProtocolVersion v)
 {
-    Debug(_logger, "VAsioProxyPeer ({}): SetProtocolVersion: {}.{}", _peerInfo.participantName, v.major, v.minor);
+    Log::Debug(_logger, "VAsioProxyPeer ({}): SetProtocolVersion: {}.{}", _peerInfo.participantName, v.major, v.minor);
     _protocolVersion = v;
 }
 
 auto VAsioProxyPeer::GetProtocolVersion() const -> ProtocolVersion
 {
-    Trace(_logger, "VAsioProxyPeer ({}): GetProtocolVersion: {}.{}", _peerInfo.participantName, _protocolVersion.major, _protocolVersion.minor);
+    Log::Trace(_logger, "VAsioProxyPeer ({}): GetProtocolVersion: {}.{}", _peerInfo.participantName, _protocolVersion.major, _protocolVersion.minor);
     return _protocolVersion;
 }
 
@@ -129,25 +129,19 @@ auto VAsioProxyPeer::GetServiceDescriptor() const -> ServiceDescriptor const &
 //  IVAsioPeerConnection
 // ================================================================================
 
-auto VAsioProxyPeer::GetParticipantName() const -> const std::string &
-{
-    return _connection->GetParticipantName();
-}
-
-auto VAsioProxyPeer::Config() const -> const SilKit::Config::ParticipantConfiguration &
-{
-    return _connection->Config();
-}
-
 void VAsioProxyPeer::OnSocketData(IVAsioPeer *from, SerializedMessage &&buffer)
 {
-    _connection->OnSocketData(from, std::move(buffer));
+    _listener->OnSocketData(from, std::move(buffer));
 }
 
 void VAsioProxyPeer::OnPeerShutdown(IVAsioPeer *peer)
 {
-    _connection->OnPeerShutdown(peer);
+    _listener->OnPeerShutdown(peer);
 }
+
+// ================================================================================
+//  VAsioProxyPeer
+// ================================================================================
 
 auto VAsioProxyPeer::GetPeer() const -> IVAsioPeer *
 {

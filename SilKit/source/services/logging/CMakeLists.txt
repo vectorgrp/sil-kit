@@ -88,7 +88,19 @@ if(UNIX)
     )
 endif()
 
-add_silkit_test_to_executable(SilKitUnitTests 
+
+if (SILKIT_BUILD_TESTS)
+    add_library(I_SilKit_Services_Logging_Testing INTERFACE
+        MockLogger.hpp
+    )
+
+    target_include_directories(I_SilKit_Services_Logging_Testing
+        INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+endif ()
+
+
+add_silkit_test_to_executable(SilKitUnitTests
     SOURCES Test_Logger.cpp 
     LIBS S_SilKitImpl I_SilKit_Core_Mock_Participant
 )

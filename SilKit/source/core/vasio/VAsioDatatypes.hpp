@@ -97,8 +97,20 @@ struct KnownParticipants
 
 struct RemoteParticipantConnectRequest
 {
-    SilKit::Core::VAsioPeerInfo peerUnableToConnect; //!< peer which attempted to connect.
-    SilKit::Core::VAsioPeerInfo connectTargetPeer; //!< connection target which should attempt to connect back.
+    enum Status : uint8_t
+    {
+        INVALID = 0,
+        REQUEST = 1,
+        CONNECTING = 2,
+        FAILED_TO_CONNECT = 3,
+        ANNOUNCEMENT = 4,
+    };
+
+    //! Peer that initially attempted to connect directly, but failed.
+    SilKit::Core::VAsioPeerInfo requestOrigin;
+    //! The peer that could not be connected to directly. This peer is instructed to initiate the remote connection.
+    SilKit::Core::VAsioPeerInfo requestTarget;
+    Status status{INVALID};
 };
 
 enum class RegistryMessageKind : uint8_t

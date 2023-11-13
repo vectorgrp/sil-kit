@@ -12,6 +12,7 @@
 #include <atomic>
 #include <mutex>
 #include <unordered_set>
+#include <memory>
 
 #include <cstdint>
 
@@ -22,7 +23,7 @@ namespace VSilKit {
 class AsioIoContext final : public IIoContext
 {
     AsioSocketOptions _socketOptions;
-    asio::io_context _ioContext;
+    std::shared_ptr<asio::io_context> _asioIoContext;
     SilKit::Services::Logging::ILogger* _logger{nullptr};
 
 public:
@@ -33,11 +34,10 @@ public: // IIoContext
     void Run() override;
     void Post(std::function<void()> function) override;
     void Dispatch(std::function<void()> function) override;
-    auto ConnectTcp(const std::string& address, uint16_t port, std::error_code& errorCode)
-        -> std::unique_ptr<IRawByteStream> override;
-    auto ConnectLocal(const std::string& path, std::error_code& errorCode) -> std::unique_ptr<IRawByteStream> override;
     auto MakeTcpAcceptor(const std::string& address, uint16_t port) -> std::unique_ptr<IAcceptor> override;
     auto MakeLocalAcceptor(const std::string& path) -> std::unique_ptr<IAcceptor> override;
+    auto MakeTcpConnector(const std::string& address, uint16_t port) -> std::unique_ptr<IConnector> override;
+    auto MakeLocalConnector(const std::string& path) -> std::unique_ptr<IConnector> override;
     auto MakeTimer() -> std::unique_ptr<ITimer> override;
     auto Resolve(const std::string& name) -> std::vector<std::string> override;
     void SetLogger(SilKit::Services::Logging::ILogger& logger) override;

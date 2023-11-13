@@ -19,6 +19,11 @@ template <typename... Args>
 void TraceEvent(SilKit::Services::Logging::ILogger *logger, fmt::string_view fileName, size_t line,
                 fmt::string_view function, const void *object, Args &&...args)
 {
+    if (logger == nullptr)
+    {
+        return;
+    }
+
     if ((logger->GetLogLevel() > SilKit::Services::Logging::Level::Trace))
     {
         return;
@@ -102,3 +107,14 @@ inline constexpr auto ExtractFileNameFromFileMacro(fmt::string_view s) -> fmt::s
 
 
 #define SILKIT_TRACE_METHOD(logger, ...) DETAILS_VSILKIT_TRACE_EVENT(logger, this, __VA_ARGS__)
+
+
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioAcceptor 0
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioConnector 0
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioIoContext 0
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_AsioGenericRawByteStream 0
+
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_ConnectPeer 0
+
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioConnection 0
+#define SILKIT_ENABLE_TRACING_INSTRUMENTATION_VAsioPeer 0

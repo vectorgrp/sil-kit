@@ -114,22 +114,44 @@ auto SimParticipant::GetOrGetLogger() -> Services::Logging::ILogger*
     return _logger;
 }
 
+
+static auto MakeSimTestHarnessArgs(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
+                                   bool deferParticipantCreation, bool deferSystemControllerCreation,
+                                   const std::vector<std::string>& asyncParticipantNames) -> SimTestHarnessArgs
+{
+    SimTestHarnessArgs args;
+    args.syncParticipantNames = syncParticipantNames;
+    args.asyncParticipantNames = asyncParticipantNames;
+    args.registry.listenUri = registryUri;
+    args.deferParticipantCreation = deferParticipantCreation;
+    args.deferSystemControllerCreation = deferSystemControllerCreation;
+    return args;
+}
+
+
 ////////////////////////////////////////
 // SimTestHarness
 ////////////////////////////////////////
+
 SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNames, const std::string& registryUri,
                                bool deferParticipantCreation, bool deferSystemControllerCreation,
                                const std::vector<std::string>& asyncParticipantNames)
-    : _syncParticipantNames{syncParticipantNames}
-    , _asyncParticipantNames{asyncParticipantNames}
-    , _registryUri{registryUri}
+    : SimTestHarness(MakeSimTestHarnessArgs(syncParticipantNames, registryUri, deferParticipantCreation,
+                                            deferSystemControllerCreation, asyncParticipantNames))
+{
+}
+
+SimTestHarness::SimTestHarness(const SilKit::Tests::SimTestHarnessArgs& args)
+    : _syncParticipantNames{args.syncParticipantNames}
+    , _asyncParticipantNames{args.asyncParticipantNames}
 {
     // start registry
-    _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(SilKit::Config::ParticipantConfigurationFromString(""));
-    _registry->StartListening(_registryUri);
+    _registry = SilKit::Vendor::Vector::CreateSilKitRegistry(
+        SilKit::Config::ParticipantConfigurationFromString(args.registry.participantConfiguration));
+    _registryUri = _registry->StartListening(args.registry.listenUri);
 
     // configure and add participants
-    if (!deferParticipantCreation)
+    if (!args.deferParticipantCreation)
     {
         for (auto&& name : _syncParticipantNames)
         {
@@ -137,7 +159,7 @@ SimTestHarness::SimTestHarness(const std::vector<std::string>& syncParticipantNa
         }
     }
 
-    if (!deferSystemControllerCreation)
+    if (!args.deferSystemControllerCreation)
     {
         CreateSystemController();
     }

@@ -1674,10 +1674,10 @@ void Participant<SilKitConnectionT>::RegisterReplayController(ISimulator* simula
 }
 
 template <class SilKitConnectionT>
-bool Participant<SilKitConnectionT>::ParticiantHasCapability(const std::string& participantName,
-                                                             const std::string& capability) const
+bool Participant<SilKitConnectionT>::ParticipantHasCapability(const std::string& participantName,
+                                                              const std::string& capability) const
 {
-    return _connection.ParticiantHasCapability(participantName, capability);
+    return _connection.ParticipantHasCapability(participantName, capability);
 }
 
 

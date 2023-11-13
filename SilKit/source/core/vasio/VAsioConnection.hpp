@@ -34,8 +34,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include <set>
 #include <condition_variable>
 
-#include "asio.hpp"
-
 #include "ParticipantConfiguration.hpp"
 
 #include "tuple_tools/for_each.hpp"
@@ -49,8 +47,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "IServiceEndpoint.hpp"
 #include "traits/SilKitMsgTraits.hpp"
 #include "traits/SilKitServiceTraits.hpp"
-#include "IVAsioPeerConnection.hpp"
-#include "IVAsioConnectionPeer.hpp"
 
 // private data types for unit testing support:
 #include "TestDataTraits.hpp"
@@ -64,19 +60,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 #include "ILogger.hpp"
 #include "VAsioCapabilities.hpp"
 #include "WireLinMessages.hpp"
+#include "Uri.hpp"
 
 #include "IIoContext.hpp"
+#include "IConnectionMethods.hpp"
+#include "IConnectPeer.hpp"
 #include "MakeAsioIoContext.hpp"
+#include "ConnectKnownParticipants.hpp"
+#include "RemoteConnectionManager.hpp"
+
 
 namespace SilKit {
 namespace Core {
 
-class VAsioPeer; //fwd
 
 class VAsioConnection
-    : public IVAsioPeerConnection
+    : public IVAsioPeerListener
     , private IAcceptorListener
-    , private ITimerListener
+    , private IConnectKnownParticipantsListener
+    , private IConnectionMethods
 {
 public:
     // ----------------------------------------
@@ -85,25 +87,35 @@ public:
 public:
     // ----------------------------------------
     // Constructors and Destructor
-    VAsioConnection(const VAsioConnection&) = delete; //clang warning: this is implicity deleted by asio::io_context
-    VAsioConnection(VAsioConnection&&) = delete; // ditto asio::io_context
+    VAsioConnection(const VAsioConnection&) = delete;
+    VAsioConnection(VAsioConnection&&) = delete;
     VAsioConnection(IParticipantInternal* participant, SilKit::Config::ParticipantConfiguration config, std::string participantName,
                     ParticipantId participantId, Services::Orchestration::ITimeProvider* timeProvider,
                     ProtocolVersion version = CurrentProtocolVersion());
-    ~VAsioConnection();
+    ~VAsioConnection() override;
 
 public:
     // ----------------------------------------
     // Operator Implementations
-    VAsioConnection& operator=(const VAsioConnection& other) = delete; // also implicitly deleted by asio::io_context
+    VAsioConnection& operator=(const VAsioConnection& other) = delete;
     VAsioConnection& operator=(VAsioConnection&& other) = delete;
 
 public:
     // ----------------------------------------
     // Public methods
     void SetLogger(Services::Logging::ILogger* logger);
+    auto GetLogger() -> SilKit::Services::Logging::ILogger*;
+
     void JoinSimulation(std::string registryUri);
 
+private: // JoinSimulation Helper Functions
+    void OpenParticipantAcceptors(const std::string& connectUri);
+    void ConnectParticipantToRegistryAndStartIoWorker(const std::string& connectUri);
+    void WaitForRegistryHandshakeToComplete(std::chrono::milliseconds timeout);
+    void ConnectToKnownParticipants();
+    void WaitForAllReplies(std::chrono::milliseconds timeout);
+
+public:
     template <class SilKitServiceT>
     void RegisterSilKitService(SilKitServiceT* service)
     {
@@ -168,19 +180,13 @@ public:
         _ioContext->Post(std::move(function));
     }
 
-    inline auto Config() const -> const SilKit::Config::ParticipantConfiguration& override
+    inline auto Config() const -> const SilKit::Config::ParticipantConfiguration&
     {
         return _config;
     }
 
-    inline auto GetParticipantName() const -> const std::string& override
-    {
-        return _participantName;
-    }
-
     // Temporary Helpers
     void RegisterMessageReceiver(std::function<void(IVAsioPeer* peer, ParticipantAnnouncement)> callback);
-    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
 
     // Prepare Acceptor Sockets (Local Domain and TCP)
     auto PrepareAcceptorEndpointUris(const std::string &connectUri) -> std::vector<std::string>;
@@ -194,7 +200,6 @@ public:
     void StartIoWorker();
 
     void RegisterPeerShutdownCallback(std::function<void(IVAsioPeer* peer)> callback);
-    void OnPeerShutdown(IVAsioPeer* peer) override;
 
     void NotifyShutdown();
 
@@ -210,30 +215,19 @@ public:
     auto GetParticipantNamesOfRemoteReceivers(const IServiceEndpoint* service, const std::string& msgTypeName)
         -> std::vector<std::string>;
 
-    bool ParticiantHasCapability(const std::string& participantName, const std::string& capability) const;
+    bool ParticipantHasCapability(const std::string& participantName, const std::string& capability) const;
 
+public: // IVAsioPeerListener
+    void OnSocketData(IVAsioPeer* from, SerializedMessage&& buffer) override;
+    void OnPeerShutdown(IVAsioPeer* peer) override;
 
 public: //members
     static constexpr const ParticipantId RegistryParticipantId { 0 };
 
-private: // methods
-    template<typename AcceptorT, typename EndpointT>
-    auto AcceptConnectionsOn(AcceptorT& acceptor, EndpointT endpoint) -> EndpointT;
-    bool TryCreatingProxy(std::shared_ptr<VAsioPeer>& directPeer,
-                          std::shared_ptr<IVAsioConnectionPeer>& peer,
-                          const VAsioPeerInfo& peerInfo,
-                          const std::string& message);
-    bool TryRequestRemoteConnection(std::shared_ptr<VAsioPeer>& directPeer,
-                          const VAsioPeerInfo& peerInfo,
-                          const std::string& message);
-
-    // ----------------------------------------
-    // private data types
+private: // data types
     template <class MsgT>
     using SilKitLinkMap = std::map<std::string, std::shared_ptr<SilKitLink<MsgT>>>;
 
-    template <class MsgT>
-    using SilKitServiceToReceiverMap = std::map<std::string, IMessageReceiver<MsgT>*>;
     template <class MsgT>
     using SilKitServiceToLinkMap = std::map<std::string, std::shared_ptr<SilKitLink<MsgT>>>;
 
@@ -305,17 +299,15 @@ private:
     void ReceiveParticipantAnnouncementReply(IVAsioPeer* from, SerializedMessage&& buffer);
 
     void ReceiveKnownParticpants(IVAsioPeer* peer, SerializedMessage&& buffer);
-    void ReceiveRemoteParticipantConnectRequest(SerializedMessage&& buffer);
-    void ConnectPeer(const VAsioPeerInfo& peerInfo, bool connectDirectly = false);
 
-    void NotifyNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
+    void ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, SerializedMessage&& buffer);
+    void ReceiveRemoteParticipantConnectRequest_Registry(IVAsioPeer* peer, RemoteParticipantConnectRequest msg);
+    void ReceiveRemoteParticipantConnectRequest_Participant(IVAsioPeer* peer, RemoteParticipantConnectRequest msg);
+
+    void LogAndPrintNetworkIncompatibility(const RegistryMsgHeader& other, const std::string& otherParticipantName);
 
     void AssociateParticipantNameAndPeer(const std::string& participantName, IVAsioPeer* peer);
-
-    // TCP Related
-    void AddPeer(std::shared_ptr<IVAsioPeer> peer);
-    template <typename AcceptorT>
-    void AcceptNextConnection(AcceptorT& acceptor);
+    auto FindPeerByName(const std::string& name) const -> IVAsioPeer*;
 
     // Subscriptions completed Helper
     void SyncSubscriptionsCompleted();
@@ -485,16 +477,34 @@ private:
         return dynamic_cast<IServiceEndpoint&>(*service).GetServiceDescriptor();
     }
 
-    // Remote connection support:
-    void HandleExpiredConnection();
-    void RemovePeerFromPendingLists(IVAsioPeer* peer);
+public:
+    auto GetIoContext() -> IIoContext*;
+
+private:
+    auto MakePeerInfo() -> VAsioPeerInfo;
+
+private: // IConnectionMethods
+    auto MakeConnectPeer(const VAsioPeerInfo& peerInfo) -> std::unique_ptr<IConnectPeer> override;
+    auto MakeVAsioPeer(std::unique_ptr<IRawByteStream> stream) -> std::unique_ptr<IVAsioPeer> override;
+
+    void HandleConnectedPeer(IVAsioPeer* peer) override;
+    void AddPeer(std::unique_ptr<IVAsioPeer> peer) override;
+
+    auto TryRemoteConnectRequest(const VAsioPeerInfo& peerInfo) -> bool override;
+    auto TryProxyConnect(const VAsioPeerInfo& peerInfo) -> bool override;
 
 private: // IAcceptorListener
     void OnAsyncAcceptSuccess(IAcceptor& acceptor, std::unique_ptr<IRawByteStream> stream) override;
     void OnAsyncAcceptFailure(IAcceptor& acceptor) override;
 
-private: // ITimerListener
-    void OnTimerExpired(ITimer& timer) override;
+private: // IConnectionManagerListener
+    void OnConnectKnownParticipantsFailure(ConnectKnownParticipants&) override;
+    void OnConnectKnownParticipantsWaitingForAllReplies(ConnectKnownParticipants&) override;
+    void OnConnectKnownParticipantsAllRepliesReceived(ConnectKnownParticipants&) override;
+
+private:
+    void OnRemoteConnectionSuccess(std::unique_ptr<SilKit::Core::IVAsioPeer> vAsioPeer);
+    void OnRemoteConnectionFailure(VAsioPeerInfo peerInfo);
 
 private:
     // ----------------------------------------
@@ -519,23 +529,34 @@ private:
     std::vector<ParticipantAnnouncementReceiver> _participantAnnouncementReceivers;
     std::vector<std::function<void(IVAsioPeer*)>> _peerShutdownCallbacks;
 
+    VAsioCapabilities _capabilities;
+
+    //! protects access to _registry and _peers
+    std::mutex _peersLock;
+
     std::unique_ptr<IIoContext> _ioContext;
 
-    // NB: peers and acceptors must be listed AFTER the io_context. Otherwise,
-    // their destructor will crash!
-    std::shared_ptr<IVAsioPeer> _registry{nullptr};
-    std::vector<std::shared_ptr<IVAsioPeer>> _peers;
+    std::unique_ptr<IVAsioPeer> _registry{nullptr};
+    std::vector<std::unique_ptr<IVAsioPeer>> _peers;
 
     std::mutex _acceptorsMutex;
     std::vector<std::unique_ptr<IAcceptor>> _acceptors;
 
-    // After receiving the list of known participants from the registry, we keep
-    // track of the sent ParticipantAnnouncements and wait for the corresponding
-    // replies.
-    std::vector<std::shared_ptr<IVAsioPeer>> _pendingParticipantReplies;
-    std::promise<void> _receivedAllParticipantReplies;
+    ConnectKnownParticipants _connectKnownParticipants;
+    RemoteConnectionManager _remoteConnectionManager;
 
-    std::atomic<bool> _hasReceivedKnownParticipants{false};
+    /// The promise is set when the registry connection handshake has been completed. An exception is set, if the
+    /// handshake failed.
+    std::promise<void> _registryHandshakeComplete;
+    /// The promise is set when all known participant connections are waiting for the handshake to complete. An
+    /// exception is set, if any connection attempt failed completely.
+    std::promise<void> _startWaitingForParticipantHandshakes;
+    /// The promise is set when all handshakes with all known participants have completed. An exception is set, if any
+    /// connection attempt failed completely.
+    std::promise<void> _allKnownParticipantHandshakesComplete;
+
+    /// Protects access to _participantNameToPeer
+    mutable std::mutex _mutex;
 
     // Keep track of the sent Subscriptions when Registering an SIL Kit Service
     std::vector<PendingAcksIdentifier> _pendingSubscriptionAcknowledges;
@@ -552,78 +573,26 @@ private:
 
     //We violate the strict layering architecture, so that we can cleanly shutdown without false error messages.
     std::atomic_bool _isShuttingDown{false};
-    // Lock access to _peers in ~VAsioConnection and (async) OnPeerShutdown
-    std::mutex _peersLock;
-
-    // Hold mapping from hash to participantName
-    std::map<uint64_t, std::string> _hashToParticipantName;
 
     // Hold mapping from participantName to peer
-    std::unordered_map<std::string, IVAsioPeer *> _participantNameToPeer;
+    std::unordered_map<std::string, IVAsioPeer*> _participantNameToPeer;
 
     // Hold mapping from proxy source to all proxy destinations (used by registry for shutdown information)
     std::unordered_map<std::string, std::unordered_set<std::string>> _proxySourceToDestinations;
 
     // Hold mapping from proxied peer to all proxy peers being served via the key.
-    std::unordered_map<IVAsioPeer *, std::unordered_set<IVAsioPeer *>> _peerToProxyPeers;
+    std::unordered_map<IVAsioPeer*, std::unordered_set<IVAsioPeer*>> _peerToProxyPeers;
 
     // unit testing support
     ProtocolVersion _version;
     friend class Test_VAsioConnection;
 
-    //Remote connection support
-    const std::chrono::nanoseconds _remoteConnectionTimeout{std::chrono::seconds{4}};
-
-    class PendingRemoteConnection
-    {
-    public:
-        PendingRemoteConnection() = default;
-        PendingRemoteConnection(IIoContext& ioContext, const VAsioPeerInfo& _peerInfo)
-            : timer{ioContext.MakeTimer()}
-            , peerInfo{_peerInfo}
-        {
-        }
-
-        std::unique_ptr<ITimer> timer;
-        std::promise<void> connected;
-        VAsioPeerInfo peerInfo;
-    };
-
-    std::map<std::string /*participantName*/, PendingRemoteConnection> _pendingRemoteConnections;
-    std::mutex _pendingRemoteMx;
-
     // for debugging purposes:
     IParticipantInternal* _participant{nullptr};
+
+    friend class ::SilKit::Core::RemoteConnectionManager;
 };
 
-inline auto ResolveHostAndPort(const asio::any_io_executor& executor, Services::Logging::ILogger* logger, const std::string& host, const uint16_t port)
-    -> asio::ip::tcp::resolver::results_type
-{
-    auto strippedHost = [host]() {
-        std::string value{host};
-        size_t it;
-        while((it = value.find_first_of("[]")) != value.npos)
-        {
-            value.erase(it, 1);
-        }
-
-        return value;
-    }();
-    asio::ip::tcp::resolver resolver(executor);
-    asio::ip::tcp::resolver::results_type results;
-
-    try
-    {
-        results = resolver.resolve(strippedHost, std::to_string(port));
-    }
-    catch (const asio::system_error& err)
-    {
-        Services::Logging::Warn(logger, "ResolveHostAndPort: Unable to resolve host \"{}:{}\": {}",
-                                strippedHost, port, err.what());
-    }
-
-    return results;
-}
 
 } // namespace Core
 } // namespace SilKit

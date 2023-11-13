@@ -8,9 +8,17 @@
 namespace VSilKit {
 
 
-AsioTimer::AsioTimer(asio::steady_timer timer)
-    : _timer{std::move(timer)}
+AsioTimer::AsioTimer(std::shared_ptr<asio::io_context> asioIoContext)
+    : _asioIoContext{std::move(asioIoContext)}
+    , _op{std::make_shared<Op>(*this)}
 {
+}
+
+
+AsioTimer::~AsioTimer()
+{
+    _op->Abandon();
+    _op->Shutdown();
 }
 
 
@@ -20,34 +28,60 @@ void AsioTimer::SetListener(ITimerListener& listener)
 }
 
 
-auto AsioTimer::GetExpiry() const -> std::chrono::steady_clock::time_point
-{
-    return _timer.expiry();
-}
-
-
 void AsioTimer::AsyncWaitFor(std::chrono::nanoseconds duration)
 {
-    _timer.expires_after(duration);
-    _timer.async_wait([this](const asio::error_code& e) {
-        OnAsioAsyncWaitComplete(e);
-    });
+    _op->Initiate(duration);
 }
 
 
 void AsioTimer::Shutdown()
 {
+    _op->Shutdown();
+}
+
+
+AsioTimer::Op::Op(VSilKit::AsioTimer& parent)
+    : _parent{&parent}
+    , _timer{*parent._asioIoContext}
+{
+}
+
+
+void AsioTimer::Op::Initiate(std::chrono::nanoseconds duration)
+{
+    _timer.expires_after(duration);
+    _timer.async_wait([self = this->shared_from_this()](const asio::error_code& e) {
+        self->OnAsioAsyncWaitComplete(e);
+    });
+}
+
+
+void AsioTimer::Op::Shutdown()
+{
     _timer.cancel();
 }
 
 
-void AsioTimer::OnAsioAsyncWaitComplete(const asio::error_code& errorCode)
+void AsioTimer::Op::Abandon()
 {
-    SILKIT_UNUSED_ARG(errorCode);
+    _parent = nullptr;
+}
 
-    asio::post(_timer.get_executor(), [&listener = *_listener, &self = *this] {
-        listener.OnTimerExpired(self);
-    });
+
+void AsioTimer::Op::OnAsioAsyncWaitComplete(const asio::error_code& errorCode)
+{
+    if (errorCode)
+    {
+        return;
+    }
+
+    auto parent = _parent.load();
+    if (parent == nullptr)
+    {
+        return;
+    }
+
+    parent->_listener->OnTimerExpired(*parent);
 }
 
 
