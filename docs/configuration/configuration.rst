@@ -23,11 +23,11 @@ The Participant Configuration File
 Participants are primarily configured by developers in source code using the |ProductName| API.
 However, the following scenarios are conceivable in which some flexibility is useful even after compile-time:
 
-- A simulation participant is distributed in binary form to integrators. 
-  In order to integrate such participants into simulations, an integrator must be able to post-configure some aspects of the participant to make it fit, particularly its properties, behavior and how it interconnects within a simulation.
+- A simulation participant is distributed in binary form to users. 
+  In order to integrate such participants into simulations, a user must be able to post-configure some aspects of the participant to make it fit, particularly its properties, behavior and how it interconnects within a simulation.
 - A simulation consists of multiple participants that share the same behavior. 
-  An integrator would have to ask developers to compile these participants from the same sources multiple times, with only the participant names differing.
-- Developers or integrators want to temporarily enable debugging features without the need or the ability to recompile the sources, for example logging, tracing, and health checking.
+  A user would have to ask developers to compile these participants from the same sources multiple times, with only the participant names differing.
+- Developers or users want to temporarily enable debugging features without the need or the ability to recompile the sources, for example logging, tracing, and health checking.
 
 To cover these scenarios, |ProductName| participants can be modified by *participant configuration files*. 
 This is done by creating a participant configuration object from a given file and passing the object as an argument when a participant is created:
@@ -40,7 +40,7 @@ This is done by creating a participant configuration object from a given file an
 Participant configuration files allow to override a subset of parameters which are configurable via the |ProductName| API.
 Configuration parameters that are specified within the participant configuration override corresponding programmatically defined values. 
 For example, the ``ParticipantName`` field overrides the participant name that is provided through the API when a participant is created, namely :cpp:func:`CreateParticipant(..., const std::string& participantName, ...)<SilKit::CreateParticipant()>`. 
-This gives integrators the ability to run a simulation with multiple instances of a participant from a single implementation.
+This gives users the ability to run a simulation with multiple instances of a participant from a single implementation.
 
 .. admonition:: Note
 
