@@ -106,6 +106,8 @@ struct RemoteParticipantConnectRequest
         ANNOUNCEMENT = 4,
     };
 
+    RegistryMsgHeader messageHeader;
+
     //! Peer that initially attempted to connect directly, but failed.
     SilKit::Core::VAsioPeerInfo requestOrigin;
     //! The peer that could not be connected to directly. This peer is instructed to initiate the remote connection.

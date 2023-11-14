@@ -829,6 +829,36 @@ void VAsioConnection::ReceiveRemoteParticipantConnectRequest(IVAsioPeer* peer, S
 {
     SILKIT_TRACE_METHOD_(_logger, "(...)");
 
+    const auto registryMsgHeader = buffer.GetRegistryMessageHeader();
+
+    // check if we support the remote peer's protocol version or signal a handshake failure
+    if (ProtocolVersionSupported(registryMsgHeader))
+    {
+        if (peer->GetInfo().participantId != RegistryParticipantId)
+        {
+            peer->SetProtocolVersion(ExtractProtocolVersion(registryMsgHeader));
+        }
+    }
+    else
+    {
+        Log::Warn(_logger,
+                  "Received RemoteParticipantConnectRequest from peer {} ({}) with unsupported protocol version {}.{}",
+                  peer->GetInfo().participantName, peer->GetRemoteAddress(), registryMsgHeader.versionHigh,
+                  registryMsgHeader.versionLow);
+
+        // ignore the request if it is sent via the registry (we cannot deserialize it anyway)
+        if (peer->GetInfo().participantId == RegistryParticipantId)
+        {
+            Log::Debug(_logger, "Dropping invalid RemoteParticipantConnectRequest from registry");
+            return;
+        }
+
+        // it is not safe to decode the RemoteParticipantConnectRequest
+        LogAndPrintNetworkIncompatibility(registryMsgHeader, peer->GetRemoteAddress());
+
+        return;
+    }
+
     auto msg{buffer.Deserialize<RemoteParticipantConnectRequest>()};
 
     if (!_capabilities.HasRequestParticipantConnectionCapability())
@@ -1826,6 +1856,7 @@ void VAsioConnection::OnRemoteConnectionSuccess(std::unique_ptr<SilKit::Core::IV
     SILKIT_TRACE_METHOD_(_logger, "({})", vAsioPeer->GetInfo().participantName);
 
     RemoteParticipantConnectRequest msg;
+    msg.messageHeader = MakeRegistryMsgHeader(_version);
     msg.requestOrigin = vAsioPeer->GetInfo();
     msg.requestTarget = MakePeerInfo();
     msg.status = RemoteParticipantConnectRequest::ANNOUNCEMENT;
@@ -1841,6 +1872,7 @@ void VAsioConnection::OnRemoteConnectionFailure(SilKit::Core::VAsioPeerInfo peer
     SILKIT_TRACE_METHOD_(_logger, "({})", peerInfo.participantName);
 
     RemoteParticipantConnectRequest msg;
+    msg.messageHeader = MakeRegistryMsgHeader(_version);
     msg.requestOrigin = std::move(peerInfo);
     msg.requestTarget = MakePeerInfo();
     msg.status = RemoteParticipantConnectRequest::FAILED_TO_CONNECT;
@@ -1890,6 +1922,7 @@ bool VAsioConnection::TryRemoteConnectRequest(VAsioPeerInfo const& peerInfo)
     }
 
     RemoteParticipantConnectRequest request;
+    request.messageHeader = MakeRegistryMsgHeader(_version);
     request.requestOrigin = MakePeerInfo();
     request.requestTarget = peerInfo;
     request.status = RemoteParticipantConnectRequest::REQUEST;

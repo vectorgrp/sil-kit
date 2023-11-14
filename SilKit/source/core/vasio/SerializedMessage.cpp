@@ -122,6 +122,7 @@ void SerializedMessage::ReadNetworkHeaders()
         {
         case RegistryMessageKind::ParticipantAnnouncement:
         case RegistryMessageKind::KnownParticipants:
+        case RegistryMessageKind::RemoteParticipantConnectRequest:
             _registryMessageHeader = PeekRegistryMessageHeader(_buffer);
             break;
         case RegistryMessageKind::ParticipantAnnouncementReply:
@@ -141,7 +142,6 @@ void SerializedMessage::ReadNetworkHeaders()
                 throw ProtocolError("SerializedMessage: Unsupported protocol version encountered during handshake");
             }
             break;
-        case RegistryMessageKind::RemoteParticipantConnectRequest: break; // nothing to do
         case RegistryMessageKind::Invalid:
             throw ProtocolError("SerializedMessage: ReadNetworkHeaders() encountered RegistryMessageKind::Invalid");
         }

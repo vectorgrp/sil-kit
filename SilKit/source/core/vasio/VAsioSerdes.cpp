@@ -285,6 +285,7 @@ inline MessageBuffer& operator>>(MessageBuffer& buffer, ProxyMessage& out)
 inline MessageBuffer& operator<<(MessageBuffer& buffer, const RemoteParticipantConnectRequest& msg)
 {
 	buffer
+        << msg.messageHeader
 		<< msg.requestOrigin
         << msg.requestTarget
         << msg.status;
@@ -293,6 +294,7 @@ inline MessageBuffer& operator<<(MessageBuffer& buffer, const RemoteParticipantC
 inline MessageBuffer& operator>>(MessageBuffer& buffer, RemoteParticipantConnectRequest& out)
 {
 	buffer
+        >> out.messageHeader
 		>> out.requestOrigin
         >> out.requestTarget
         >> out.status;
