@@ -63,6 +63,7 @@ struct RpcCallEvent
     Util::Span<const uint8_t> argumentData;
 };
 
+//! \brief The callback function invoked when a call is to be handled by the IRpcServer.
 using RpcCallHandler = std::function<void(IRpcServer* server, const RpcCallEvent& event)>;
 
 //! \brief An incoming rpc call result of a RpcServer containing result data and timestamp
@@ -78,6 +79,7 @@ struct RpcCallResultEvent
     Util::Span<const uint8_t> resultData;
 };
 
+//! \brief The callback function invoked when a call result is delivered to the IRpcClient.
 using RpcCallResultHandler = std::function<void(IRpcClient* client, const RpcCallResultEvent& event)>;
 
 } // namespace Rpc

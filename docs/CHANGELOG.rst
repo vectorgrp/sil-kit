@@ -14,6 +14,7 @@ Changed
 ~~~~~~~
 
 - Improved the documentation of Data Pub/Sub controllers
+- Improved the documentation of RPC controllers
 
 
 [4.0.39] - 2023-11-14
