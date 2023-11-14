@@ -6,21 +6,21 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.38] - UNRELEASED
----------------------
-
-Added
-~~~~~
-- Add usage examples for tracing and replay
-
-
-[4.0.39] - UNRELEASED
+[4.0.39] - 2023-11-14
 ---------------------
 
 Fixed
 ~~~~~
 
 - Replaced remaining mentions of integrators with users.
+
+Added
+~~~~~
+
+- Usage examples for tracing and replay.
+- Timeouts per connection attempt.
+- Two-sided connection establishment: Allow direct connections, even if connections are only possible in one direction.
+
 
 [4.0.38] - 2023-11-02
 ---------------------
