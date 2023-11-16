@@ -75,6 +75,17 @@ void ConnectPeer::Shutdown()
 }
 
 
+static auto IsIp4(const std::string& address) -> bool
+{
+    return (address.find('.') != std::string::npos) && (address.find(':') == std::string::npos);
+}
+
+static auto IsIp6(const std::string& address) -> bool
+{
+    return (address.find('.') == std::string::npos) && (address.find(':') != std::string::npos);
+}
+
+
 void ConnectPeer::UpdateUris()
 {
     std::vector<Uri> acceptorUris;
@@ -89,8 +100,20 @@ void ConnectPeer::UpdateUris()
             {
                 // resolve the host part in tcp:// URIs
 
-                for (const auto& address : _ioContext->Resolve(uri.Host()))
+                for (std::string address : _ioContext->Resolve(uri.Host()))
                 {
+                    if (IsIp6(address))
+                    {
+                        if (address.front() != '[')
+                        {
+                            address.insert(0, "[");
+                        }
+                        if (address.back() != ']')
+                        {
+                            address.push_back(']');
+                        }
+                    }
+
                     auto tcpUri{Uri::MakeTcp(address, uri.Port())};
                     acceptorUris.emplace_back(std::move(tcpUri));
                 }
@@ -118,9 +141,17 @@ void ConnectPeer::UpdateUris()
             case Uri::UriType::Local:
                 return 100;
             case Uri::UriType::Tcp:
-                return 200;
+                if (IsIp4(uri.Host()))
+                {
+                    return 200;
+                }
+                if (IsIp6(uri.Host()))
+                {
+                    return 300;
+                }
+                return 400;
             default:
-                return 300;
+                return 500;
             }
         }};
 
