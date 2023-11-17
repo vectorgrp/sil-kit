@@ -1,4 +1,6 @@
-// Copyright (c) Vector Informatik GmbH. All rights reserved.
+// SPDX-FileCopyrightText: 2023 Vector Informatik GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
