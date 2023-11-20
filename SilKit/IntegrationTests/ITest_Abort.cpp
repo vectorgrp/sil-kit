@@ -105,7 +105,7 @@ TEST_F(ITest_Abort, test_Abort_Paused_Simulation_Sync)
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
-    for (const auto& participant : monitorParticipants.front().participantStates)
+    for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
     {
         if (participant.first != "MonitorParticipant1")
         {
@@ -177,7 +177,7 @@ TEST_F(ITest_Abort, test_Abort_Running_Simulation_Sync)
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
-    for (const auto& participant : monitorParticipants.front().participantStates)
+    for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
     {
         if (participant.first != "MonitorParticipant1")
         {
@@ -260,7 +260,7 @@ TEST_F(ITest_Abort, test_Abort_Stopped_Simulation_Sync)
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
-    for (const auto& participant : monitorParticipants.front().participantStates)
+    for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
     {
         if (participant.first != "MonitorParticipant1")
         {
@@ -342,7 +342,7 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     JoinParticipantThreads(participantThreads_Sync_Coordinated);
 
     // Expect shutdown state, which should happen after the abort handlers are called.
-    for (const auto& participant : monitorParticipants.front().participantStates)
+    for (const auto& participant : monitorParticipants.front().CopyMonitoredParticipantStates())
     {
         if (participant.first != "MonitorParticipant1")
         {

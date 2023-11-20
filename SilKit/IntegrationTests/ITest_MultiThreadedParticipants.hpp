@@ -132,6 +132,7 @@ protected:
                 return *this;
             }
 
+            mutable std::mutex mutex;
             std::atomic<bool> allReceived{false};
             std::atomic<bool> runAsync{true};
             std::atomic<bool> stopRequested{false};
@@ -166,8 +167,9 @@ protected:
         TimeMode timeMode;
         OperationMode lifeCycleOperationMode;
         ILifecycleService* lifecycleService{nullptr};
+
         std::map<std::string, ParticipantState> participantStates;
-        
+
         void ResetReception()
         {
             receivedIds.clear();
@@ -227,6 +229,18 @@ protected:
             {
                 std::cout << ">> AwaitCommunicationInitialized of " << name << " done" << std ::endl;
             }
+        }
+
+        void SetMonitoredParticipantState(const std::string& participantName, ParticipantState participantState)
+        {
+            std::lock_guard<decltype(i.mutex)> lock{i.mutex};
+            participantStates[participantName] = participantState;
+        }
+
+        auto CopyMonitoredParticipantStates() const -> std::map<std::string, ParticipantState>
+        {
+            std::lock_guard<decltype(i.mutex)> lock{i.mutex};
+            return participantStates;
         }
     };
 
@@ -440,7 +454,7 @@ protected:
         }
         auto systemMonitor = testParticipant.participant->CreateSystemMonitor();
         systemMonitor->AddParticipantStatusHandler([&testParticipant, this](ParticipantStatus status) {
-            testParticipant.participantStates[status.participantName] = status.state;
+            testParticipant.SetMonitoredParticipantState(status.participantName, status.state);
             if (status.participantName != testParticipant.name)
             {
                 // we're only tracking the status of synchronized participants at the moment.
