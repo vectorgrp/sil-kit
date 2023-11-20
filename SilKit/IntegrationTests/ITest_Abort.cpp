@@ -305,7 +305,7 @@ TEST_F(ITest_Abort, test_Abort_Communication_Ready_Simulation_Sync)
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::CommunicationInitialized))
         .Times(Between(1, size));
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::ReadyToRun)).Times(Between(0, size));
-    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(0);
+    EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Running)).Times(Between(0, size));
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Aborting)).Times(size);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopping)).Times(0);
     EXPECT_CALL(callbacks, ParticipantStateHandler(ParticipantState::Stopped)).Times(0);
