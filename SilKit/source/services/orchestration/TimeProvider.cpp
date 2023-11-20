@@ -24,6 +24,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
 #include <mutex>
 
+
+namespace {
+
+// The 'default' value for timestamps on participants without time-sync is the minimum duration in nanoseconds.
+constexpr auto DEFAULT_NOW_TIMESTAMP_WITHOUT_SYNC = std::chrono::nanoseconds::min();
+
+} // namespace
+
+
 using namespace std::chrono_literals;
 namespace SilKit {
 namespace Services {
@@ -86,7 +95,7 @@ public:
     }
 
 protected:
-    std::chrono::nanoseconds _now{};
+    std::chrono::nanoseconds _now{DEFAULT_NOW_TIMESTAMP_WITHOUT_SYNC};
     std::string _name;
     bool _isSynchronizingVirtualTime{false};
     Util::SynchronizedHandlers<NextSimStepHandler> _handlers;
@@ -147,8 +156,7 @@ public:
 
     auto Now() const -> std::chrono::nanoseconds override
     {
-        // always return std::chrono::nanoseconds::min
-        return std::chrono::nanoseconds::duration::min();
+        return DEFAULT_NOW_TIMESTAMP_WITHOUT_SYNC;
     }
 
 
