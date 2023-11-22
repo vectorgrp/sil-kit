@@ -16,6 +16,11 @@ Changed
 - Improved the documentation of Data Pub/Sub controllers
 - Improved the documentation of RPC controllers
 
+Fixed
+~~~~~
+
+- The LIN demo does not skip the first entry (sending frame 16) on all but the first iteration through the schedule anymore.
+
 
 [4.0.39] - 2023-11-14
 ---------------------

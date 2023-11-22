@@ -60,14 +60,18 @@ public:
         _timeOut = std::chrono::nanoseconds::max();
         _action = std::function<void(std::chrono::nanoseconds)>{};
     }
-    void ExecuteAction(std::chrono::nanoseconds now)
+    auto ExecuteAction(std::chrono::nanoseconds now) -> bool
     {
         if (!_isActive || (now < _timeOut))
-            return;
+        {
+            return false;
+        }
 
         auto action = std::move(_action);
         Clear();
         action(now);
+
+        return true;
     }
 
 private:
@@ -95,6 +99,16 @@ public:
         ScheduleNextTask();
     }
 
+    void ExecuteTask(std::chrono::nanoseconds now)
+    {
+        _now = now;
+        if (_timer.ExecuteAction(now))
+        {
+            ScheduleNextTask();
+        }
+    }
+
+private:
     void ScheduleNextTask()
     {
         auto currentTask = _nextTask++;
@@ -106,13 +120,6 @@ public:
         _timer.Set(_now + currentTask->delay, currentTask->action);
     }
 
-    void ExecuteTask(std::chrono::nanoseconds now)
-    {
-        _now = now;
-        _timer.ExecuteAction(now);
-    }
-
-private:
     struct Task {
         Task(std::chrono::nanoseconds delay, std::function<void(std::chrono::nanoseconds)> action) : delay{delay}, action{action} {}
 
@@ -133,7 +140,7 @@ public:
         : controller{controller}
     {
         schedule = {
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
+            {15ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
             {5ms, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
             {5ms, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
             {5ms, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
@@ -227,7 +234,6 @@ public:
         }
 
         std::cout << ">> " << frameStatusEvent.frame << " status=" << frameStatusEvent.status << std::endl;
-        schedule.ScheduleNextTask();
     }
 
     void WakeupHandler(ILinController* linController, const LinWakeupEvent& wakeupEvent)
@@ -240,7 +246,6 @@ public:
 
         std::cout << ">> Wakeup pulse received; direction=" << wakeupEvent.direction << std::endl;
         linController->WakeupInternal();
-        schedule.ScheduleNextTask();
     }
 
 private:
