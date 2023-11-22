@@ -55,9 +55,16 @@ generic programming and interoperability tasks.
 
 .. toctree::
   :maxdepth: 1
-  
+
   pubsub
   rpc
+
+SIL Kit provides a recommended default serialization/deserialization API for Data Publish/Subscribe and RPC:
+
+.. toctree::
+  :maxdepth: 1
+
+  serdes
 
 State Handling and Synchronization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,14 +87,6 @@ Common Data Types
   :maxdepth: 1
 
   common
-
-Utilities
-~~~~~~~~~~~~~~~~~
-
-.. toctree::
-  :maxdepth: 1
-
-  serdes
 
 C API
 -----
