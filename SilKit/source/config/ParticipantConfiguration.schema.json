@@ -471,7 +471,7 @@
       "default": "",
       "examples": [ "./ParticipantConfiguration.schema.json" ]
     },
-    "schemaVersion": {
+    "SchemaVersion": {
       "anyOf": [
         { "type": "integer" },
         { "type": "string" }
@@ -738,6 +738,11 @@
         "EnableDomainSockets": {
           "type": "boolean",
           "default": true
+        },
+        "ConnectTimeoutSeconds": {
+            "type": "number",
+            "minimum": 0.0,
+            "default": 5.0
         }
       },
       "additionalProperties": false

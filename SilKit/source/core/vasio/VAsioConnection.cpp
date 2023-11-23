@@ -215,27 +215,45 @@ auto MakeAsioSocketOptionsFromConfiguration(const SilKit::Config::ParticipantCon
 }
 
 
-auto MakeConnectKnownParticipantsSettings()
+auto GetConnectTimeoutSeconds(const SilKit::Config::ParticipantConfiguration& config) -> std::chrono::milliseconds
+{
+    std::chrono::duration<double> seconds{config.middleware.connectTimeoutSeconds};
+    auto milliseconds{std::chrono::duration_cast<std::chrono::milliseconds>(seconds)};
+    return std::max(100ms, milliseconds);
+}
+
+
+auto GetRegistryConnectTimeout(const SilKit::Config::ParticipantConfiguration& config) -> std::chrono::milliseconds
+{
+    return GetConnectTimeoutSeconds(config);
+}
+
+auto GetRegistryHandshakeTimeout(const SilKit::Config::ParticipantConfiguration& config) -> std::chrono::milliseconds
+{
+    return GetConnectTimeoutSeconds(config);
+}
+
+auto GetParticipantHandshakeTimeout(const SilKit::Config::ParticipantConfiguration& config) -> std::chrono::milliseconds
+{
+    return GetConnectTimeoutSeconds(config);
+}
+
+auto MakeConnectKnownParticipantsSettings(const SilKit::Config::ParticipantConfiguration& config)
     -> SilKit::Core::ConnectKnownParticipantsSettings
 {
     SilKit::Core::ConnectKnownParticipantsSettings settings;
-    settings.directConnectTimeout = 5000ms;
-    settings.remoteConnectRequestTimeout = 5000ms;
+    settings.directConnectTimeout = GetConnectTimeoutSeconds(config);
+    settings.remoteConnectRequestTimeout = GetConnectTimeoutSeconds(config);
     return settings;
 }
 
-auto MakeRemoteConnectionManagerSettings()
+auto MakeRemoteConnectionManagerSettings(const SilKit::Config::ParticipantConfiguration& config)
     -> SilKit::Core::RemoteConnectionManagerSettings
 {
     SilKit::Core::RemoteConnectionManagerSettings settings;
-    settings.connectTimeout = 5000ms;
+    settings.connectTimeout = GetConnectTimeoutSeconds(config);
     return settings;
 }
-
-
-constexpr std::chrono::milliseconds REGISTRY_CONNECT_TIMEOUT{5000};
-constexpr std::chrono::milliseconds REGISTRY_HANDSHAKE_TIMEOUT{5000};
-constexpr std::chrono::milliseconds ALL_KNOWN_PARTICIPANT_REPLIED_TIMEOUT{5000};
 
 
 } // namespace
@@ -258,8 +276,8 @@ VAsioConnection::VAsioConnection(
     , _timeProvider{timeProvider}
     , _capabilities{MakeCapabilitiesFromConfiguration(_config)}
     , _ioContext{MakeAsioIoContext(MakeAsioSocketOptionsFromConfiguration(_config))}
-    , _connectKnownParticipants{*_ioContext, *this, *this, MakeConnectKnownParticipantsSettings()}
-    , _remoteConnectionManager{*this, MakeRemoteConnectionManagerSettings()}
+    , _connectKnownParticipants{*_ioContext, *this, *this, MakeConnectKnownParticipantsSettings(_config)}
+    , _remoteConnectionManager{*this, MakeRemoteConnectionManagerSettings(_config)}
     , _version{version}
     , _participant{participant}
 {
@@ -435,13 +453,13 @@ void VAsioConnection::JoinSimulation(std::string connectUri)
     ConnectParticipantToRegistryAndStartIoWorker(connectUri);
 
     // Wait for a fixed amount of time for the registry connection to complete.
-    WaitForRegistryHandshakeToComplete(REGISTRY_HANDSHAKE_TIMEOUT);
+    WaitForRegistryHandshakeToComplete(GetRegistryHandshakeTimeout(_config));
 
     // Start connecting and initiate the handshakes with all known participants.
     ConnectToKnownParticipants();
 
     // Wait for a fixed amount of time for all handshakes to complete.
-    WaitForAllReplies(ALL_KNOWN_PARTICIPANT_REPLIED_TIMEOUT);
+    WaitForAllReplies(GetParticipantHandshakeTimeout(_config));
 
     _logger->Debug("Connected to all known participants");
 }
@@ -501,7 +519,7 @@ void VAsioConnection::ConnectParticipantToRegistryAndStartIoWorker(const std::st
 
     auto connectRegistry{MakeConnectPeer(registryPeerInfo)};
     connectRegistry->SetListener(connectRegistryCallbacks);
-    connectRegistry->AsyncConnect(_config.middleware.connectAttempts, REGISTRY_CONNECT_TIMEOUT);
+    connectRegistry->AsyncConnect(_config.middleware.connectAttempts, GetRegistryConnectTimeout(_config));
 
     StartIoWorker();
 

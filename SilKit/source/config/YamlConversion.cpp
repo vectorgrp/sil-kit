@@ -958,6 +958,7 @@ Node Converter::encode(const Middleware& obj)
     non_default_encode(obj.acceptorUris, node, "acceptorUris", defaultObj.acceptorUris);
     non_default_encode(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy", defaultObj.registryAsFallbackProxy);
     non_default_encode(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection", defaultObj.experimentalRemoteParticipantConnection);
+    non_default_encode(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds", defaultObj.connectTimeoutSeconds);
     return node;
 }
 template<>
@@ -973,6 +974,7 @@ bool Converter::decode(const Node& node, Middleware& obj)
     optional_decode(obj.acceptorUris, node, "AcceptorUris");
     optional_decode(obj.registryAsFallbackProxy, node, "RegistryAsFallbackProxy");
     optional_decode(obj.experimentalRemoteParticipantConnection, node, "ExperimentalRemoteParticipantConnection");
+    optional_decode(obj.connectTimeoutSeconds, node, "ConnectTimeoutSeconds");
     return true;
 }
 

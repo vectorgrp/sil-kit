@@ -139,4 +139,30 @@ Logging:
     EXPECT_TRUE(warnings.str().size() > 0);
 }
 
+TEST_F(Test_YamlValidator, validate_full_participant_configuration)
+{
+    auto Validate = [](const std::string& path) {
+        auto ReadTextFile = [](const std::string& path) -> std::string {
+            std::ifstream file{path};
+            std::stringstream ss;
+            ss << file.rdbuf();
+            return ss.str();
+        };
+
+        auto text{ReadTextFile(path)};
+
+        std::stringstream warningsStream;
+
+        YamlValidator validator;
+        const bool valid{validator.Validate(text, warningsStream)};
+        EXPECT_TRUE(valid);
+
+        auto warnings{warningsStream.str()};
+        EXPECT_EQ(warnings, "");
+    };
+
+    Validate("ParticipantConfiguration_Full.json");
+    Validate("ParticipantConfiguration_Full.yaml");
+}
+
 } // anonymous namespace

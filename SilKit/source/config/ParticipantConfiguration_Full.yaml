@@ -1,6 +1,6 @@
 ---
 Description: Example configuration to test YAML Parser
-schemaVersion: 0
+SchemaVersion: 1
 ParticipantName: Node0
 CanControllers:
 - Name: CAN1
@@ -165,3 +165,5 @@ Middleware:
   EnableDomainSockets: false
   TcpSendBufferSize: 3456
   TcpReceiveBufferSize: 3456
+  RegistryAsFallbackProxy: false
+  ConnectTimeoutSeconds: 1.234

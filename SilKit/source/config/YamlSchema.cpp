@@ -154,6 +154,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
         // JSON schema, not interpreted by us:
         {"$schema"},
         {"SchemaVersion"},
+        {"schemaVersion"}, // should be removed in the future (deprecated)
         {"Description"},
         {"ParticipantName"},
         {"CanControllers", {
@@ -227,6 +228,7 @@ auto MakeYamlSchema() -> YamlSchemaElem
                 {"AcceptorUris"},
                 {"RegistryAsFallbackProxy"},
                 {"ExperimentalRemoteParticipantConnection"},
+                {"ConnectTimeoutSeconds"},
             }
         }
     };

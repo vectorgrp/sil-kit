@@ -10,6 +10,11 @@ The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <
 [4.0.40] - UNRELEASED
 ---------------------
 
+Added
+~~~~~
+
+- Allow configuration of the connection timeout (``Middleware/ConnectTimeoutSeconds``)
+
 Changed
 ~~~~~~~
 

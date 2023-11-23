@@ -36,6 +36,7 @@ running on 'localhost' listening on port 8500. These values can be changed via t
       TcpSendBufferSize: 1024
       TcpReceiveBufferSize: 1024
       RegistryAsFallbackProxy: false
+      ConnectTimeoutSeconds: 5.0
 
 .. list-table:: Middleware Configuration
    :widths: 15 85
@@ -78,4 +79,9 @@ running on 'localhost' listening on port 8500. These values can be changed via t
        communication as a fallback, if the direct connection attempts fail.
        The feature is enabled by default and can be disabled explicitly via this
        field.
+       |NormalOperationNotice|
+
+   * - ConnectTimeoutSeconds
+     - The timeout (in seconds) until a connection attempt is aborted or a handshake is considered failed.
+       This timeout applies to each attempt (TCP, Local-Domain) individually.
        |NormalOperationNotice|
