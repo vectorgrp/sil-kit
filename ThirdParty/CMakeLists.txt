@@ -74,10 +74,8 @@ function(include_asio)
         endif()
 
         silkit_clean_default_compileflags()
-        add_compile_options(-w)
         add_library(asio INTERFACE)
         target_include_directories(asio INTERFACE "${ASIO_INCLUDE_DIR}")
-
         set(SILKIT_THIRD_PARTY_ASIO "asio" CACHE STRING "Name of the third party asio target")
     else()
         # Test if ASIO is installed
@@ -93,7 +91,6 @@ function(include_yamlcpp)
     if(NOT SILKIT_USE_SYSTEM_LIBRARIES)
         set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "Disable because of gmock import conflict" FORCE)
         silkit_clean_default_compileflags()
-        add_compile_options(-w)
 
         # disable the IPO for GTest due to CMake policy CMP0069 changes
         if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -105,6 +102,9 @@ function(include_yamlcpp)
             "${SILKIT_THIRD_PARTY_BINARY_DIR}/_tp_yaml-cpp"
             EXCLUDE_FROM_ALL
         )
+        target_compile_options(yaml-cpp
+            PRIVATE "-w")
+
         # yaml-cpp explicitly sets /W3
         silkit_target_clean_compileflags(yaml-cpp)
 
@@ -126,7 +126,6 @@ function(include_fmt)
         # function() adds an additional scope
         #set(FMT_INSTALL ON CACHE BOOL "Make sure the fmt-header-only interface target is exported" FORCE)
         silkit_clean_default_compileflags()
-        add_compile_options(-w)
 
         message(STATUS "Add subdirectory ${CMAKE_CURRENT_LIST_DIR}/fmt")
         add_subdirectory(
@@ -153,7 +152,6 @@ function(include_spdlog)
         # Temporarily patch some CMake variables to trick spdlog's install commands into using our install-folder layout
 
         silkit_clean_default_compileflags()
-        add_compile_options(-w)
 
         set(CMAKE_INSTALL_LIBDIR "${INSTALL_LIB_DIR}")
         set(CMAKE_INSTALL_INCLUDEDIR  "${INSTALL_INCLUDE_DIR}")
