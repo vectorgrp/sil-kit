@@ -20,6 +20,7 @@ Fixed
 ~~~~~
 
 - The LIN demo does not skip the first entry (sending frame 16) on all but the first iteration through the schedule anymore.
+- The name of the domain-socket used by the registry will use the hostname passed in the listen URI, not the resolved IP address (if any), for generating the name of the domain-socket.
 
 
 [4.0.39] - 2023-11-14

@@ -59,7 +59,7 @@ auto VAsioRegistry::StartListening(const std::string& listenUri) -> std::string
         // Resolve the configured hostname and accept on the given port:
         auto tcpHostPort = _connection.AcceptTcpConnectionsOn(uri.Host(), uri.Port());
         // Update the URI to the actually used address and port:
-        uri = Uri{tcpHostPort.first, tcpHostPort.second};
+        uri = Uri{uri.Host(), tcpHostPort.second};
 
         hasTcpSocket = true;
     }
