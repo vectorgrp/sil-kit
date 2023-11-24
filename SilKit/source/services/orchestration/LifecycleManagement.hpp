@@ -83,7 +83,6 @@ public: //CTors
 
     // Abort handling
     void ResolveAbortSimulation(std::string reason);
-    void SetPausePromise();
 
     // Actions after Stop
     void RestartAfterStop(std::string reason);

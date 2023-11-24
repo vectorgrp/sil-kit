@@ -90,9 +90,6 @@ public:
     inline void SetServiceDescriptor(const Core::ServiceDescriptor& serviceDescriptor) override;
     inline auto GetServiceDescriptor() const -> const Core::ServiceDescriptor& override;
 
-    void SetPaused(std::future<void> pausedFuture);
-    void AwaitNotPaused();
-
     bool IsSynchronizingVirtualTime();
 
     // To add other participants in unit tests
@@ -102,6 +99,9 @@ public:
     bool AbortHopOnForCoordinatedParticipants() const;
 
     auto StopRequested() const -> bool;
+    auto PauseRequested() const -> bool;
+
+    void RequestNextStep();
 
 private:
     // ----------------------------------------
@@ -139,10 +139,6 @@ private:
     Util::PerformanceMonitor _waitTimeMonitor;
     WatchDog _watchDog;
 
-    // When pausing our participant, message processing is deferred
-    // until Continue()'  is called;
-    std::promise<void> _pauseDonePromise;
-    std::future<void> _pauseDone;
 };
 
 // ================================================================================

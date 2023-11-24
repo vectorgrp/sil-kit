@@ -209,37 +209,34 @@ void LifecycleService::ReportError(std::string errorMsg)
 
 void LifecycleService::Pause(std::string reason)
 {
+    _pauseRequested = true;
     _participant->ExecuteDeferred([this, reason] {
         if (State() != ParticipantState::Running)
         {
-            const std::string errorMessage{"TimeSyncService::Pause() was called in state ParticipantState::"
+            const std::string errorMessage{"LifecycleService::Pause() was called in state ParticipantState::"
                                            + to_string(State())};
             ReportError(errorMessage);
             throw SilKitError(errorMessage);
         }
-        _pauseDonePromise = decltype(_pauseDonePromise){};
-        _timeSyncService->SetPaused(_pauseDonePromise.get_future());
         _lifecycleManager.Pause(reason);
     });
 }
 
 void LifecycleService::Continue()
 {
-    if (State() != ParticipantState::Paused)
-    {
-        const std::string errorMessage{"TimeSyncService::Continue() was called in state ParticipantState::"
-                                       + to_string(State())};
-        ReportError(errorMessage);
-        throw SilKitError(errorMessage);
-    }
+    _pauseRequested = false;
+    _participant->ExecuteDeferred([this] {
+        if (State() != ParticipantState::Paused)
+        {
+            const std::string errorMessage{"LifecycleService::Continue() was called in state ParticipantState::"
+                                           + to_string(State())};
+            ReportError(errorMessage);
+            throw SilKitError(errorMessage);
+        }
 
-    _lifecycleManager.Continue("Pause finished");
-    SetPauseDonePromise();
-}
-
-void LifecycleService::SetPauseDonePromise()
-{
-    _pauseDonePromise.set_value();
+        _lifecycleManager.Continue("Pause finished");
+        _timeSyncService->RequestNextStep();
+    });
 }
 
 void LifecycleService::Stop(std::string reason)
@@ -388,6 +385,10 @@ auto LifecycleService::State() const -> ParticipantState
 auto LifecycleService::StopRequested() const -> bool
 {
     return _stopRequested;
+}
+auto LifecycleService::PauseRequested() const -> bool
+{
+    return _pauseRequested;
 }
 
 auto LifecycleService::Status() const -> const ParticipantStatus&

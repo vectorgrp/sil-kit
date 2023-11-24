@@ -123,8 +123,8 @@ public:
     OperationMode GetOperationMode() const;
 
     auto StopRequested() const -> bool;
+    auto PauseRequested() const -> bool;
     void SetFinalStatePromise();
-    void SetPauseDonePromise();
 
     void AbortSimulation(std::string reason);
 
@@ -191,9 +191,11 @@ private:
     mutable std::mutex _requiredParticipantNamesMx;
     std::vector<std::string> _requiredParticipantNames;
 
-    // The code path for setting the ParticipantState is deferred, this is to flag a call to Stop()
+    // The code path for setting the ParticipantState is deferred, these bools are to flag a call to Stop()/Pause()
     // for immediate checks (e.g., not to send out the NextSimTask after a stopping in the SimTaskHandler).
     std::atomic<bool> _stopRequested{false};
+    std::atomic<bool> _pauseRequested{false};
+    
 };
 
 // ================================================================================

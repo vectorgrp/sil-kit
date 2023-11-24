@@ -29,6 +29,7 @@ Fixed
 - When mixing autonomous participants without time-synchronization, and participants with time-synchronization,
   the timestamps for messages received before the virtual time is started, is now the 'invalid' timestamp value,
   normally used by participants without time-synchronization.
+- Reworked the pause/continue logic such that it pauses the virtual time synchronization without blocking the I/O thread.
 
 
 [4.0.39] - 2023-11-14

@@ -86,7 +86,8 @@ public:
     void RequestNextStep() override
     {
         if (_controller.State() == ParticipantState::Running
-            && !_controller.StopRequested()) // ensure that a call to Stop() in a SimTask won't send out a new step and eventually call the SimTask again
+            && !_controller.StopRequested()
+            && !_controller.PauseRequested()) // ensure that calls to Stop()/Pause() in a SimTask won't send out a new step and eventually call the SimTask again
         {
             _controller.SendMsg(_configuration->NextSimStep());
             // Bootstrap checked execution, in case there is no other participant.
@@ -150,14 +151,14 @@ private:
 
     bool IsTimeAdvancePossible()
     {
-        // Deferred execution of this callback was initiated, but simulation stopped in the meantime
+        // Deferred execution of this callback was initiated, but simulation stopped/paused in the meantime
         if (_controller.State() != ParticipantState::Running)
         {
             return false;
         }
 
         // State check is not enough is user called Stop() in the SimTask and directly receives a NextSimTask
-        if (_controller.StopRequested())
+        if (_controller.StopRequested() || _controller.PauseRequested())
         {
             return false;
         }
@@ -182,8 +183,12 @@ private:
     {
         AdvanceTimeAndExecuteSimStep();
 
-        // The synchronous SimStep API creates the nextSimTask message automatically after the callback
-        RequestNextStep();
+        // If paused, don't request the next sim step. This happens in LifecycleService::Continue()
+        if (!_controller.PauseRequested())
+        {
+            // The synchronous SimStep API creates the nextSimTask message automatically after the callback
+            RequestNextStep();
+        }
     }
 
     void AdvanceTimeSimStepAsync() 
@@ -223,8 +228,6 @@ private:
             // Execute the simulation step callback with the current simulation time
             auto currentStep = _configuration->CurrentSimStep();
             _controller.ExecuteSimStep(currentStep.timePoint, currentStep.duration);
-            // if the participant was paused, wait until it is unpaused
-            _controller.AwaitNotPaused();
         }
     }
 
@@ -339,6 +342,17 @@ auto TimeSyncService::StopRequested() const -> bool
 {
     return _lifecycleService->StopRequested();
 }
+auto TimeSyncService::PauseRequested() const -> bool
+{
+    return _lifecycleService->PauseRequested();
+}
+
+void TimeSyncService::RequestNextStep() 
+{
+    _participant->ExecuteDeferred([this] {
+        GetTimeSyncPolicy()->RequestNextStep();
+    });
+}
 
 void TimeSyncService::SetSimulationStepHandler(SimulationStepHandler task, std::chrono::nanoseconds initialStepSize)
 {
@@ -379,19 +393,6 @@ bool TimeSyncService::SetupTimeSyncPolicy(bool isSynchronizingVirtualTime)
     }
 
     return true;
-}
-
-void TimeSyncService::SetPaused(std::future<void> pausedFuture)
-{
-    _pauseDone = std::move(pausedFuture);
-}
-
-void TimeSyncService::AwaitNotPaused()
-{
-    if (_lifecycleService->State() == ParticipantState::Paused)
-    {
-        _pauseDone.wait();
-    }
 }
 
 void TimeSyncService::ReceiveMsg(const IServiceEndpoint* from, const NextSimTask& task)

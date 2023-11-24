@@ -512,7 +512,6 @@ void PausedState::AbortSimulation(std::string /*reason*/)
 {
     // TODO handle abort during executeSimStep
     // For now, just abort and hope for the best...
-    _lifecycleManager->SetPausePromise();
     ResolveAbortSimulation("Received abort simulation.");
 }
 
