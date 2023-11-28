@@ -106,8 +106,9 @@ auto TimeProvider::TimeProviderName() const -> const std::string&
 HandlerId TimeProvider::AddNextSimStepHandler(NextSimStepHandler handler)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
+    const auto handlerId{_handlers.Add(std::move(handler))};
     _currentProvider->OnHandlerAdded();
-    return _handlers.Add(std::move(handler));
+    return handlerId;
 }
 
 void TimeProvider::RemoveNextSimStepHandler(HandlerId handlerId)
