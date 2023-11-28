@@ -34,15 +34,31 @@ namespace SilKit {
 namespace Services {
 namespace Orchestration {
 
-namespace detail {
-class ITimeProviderInternal : public ITimeProvider
-{
-public:
-    virtual auto MutableNextSimStepHandlers() -> Util::SynchronizedHandlers<NextSimStepHandler> & = 0;
-};
-} // namespace detail
+struct ITimeProviderImplListener;
 
-class TimeProvider : public ITimeProvider
+struct ITimeProviderImpl
+{
+    virtual ~ITimeProviderImpl() = default;
+
+    virtual auto TimeProviderName() const -> const std::string& = 0;
+
+    virtual void SetActive(bool value) = 0;
+
+    virtual void OnHandlerAdded() = 0;
+
+    virtual auto Now() const -> std::chrono::nanoseconds = 0;
+
+    virtual void SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) = 0;
+};
+
+struct ITimeProviderImplListener
+{
+    virtual ~ITimeProviderImplListener() = default;
+
+    virtual void OnTick(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) = 0;
+};
+
+class TimeProvider : public ITimeProvider, private ITimeProviderImplListener
 {
 public:
     TimeProvider();
@@ -60,9 +76,14 @@ public:
 
     void ConfigureTimeProvider(Orchestration::TimeProviderKind timeProviderKind) override;
 
+private:
+    void OnTick(std::chrono::nanoseconds now, std::chrono::nanoseconds duration) final;
+
 private: //Members
     mutable std::recursive_mutex _mutex;
-    std::unique_ptr<detail::ITimeProviderInternal> _currentProvider;
+    Util::Handlers<NextSimStepHandler> _handlers;
+    bool _isSynchronizingVirtualTime{false};
+    std::unique_ptr<ITimeProviderImpl> _currentProvider;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -85,13 +106,14 @@ auto TimeProvider::TimeProviderName() const -> const std::string&
 HandlerId TimeProvider::AddNextSimStepHandler(NextSimStepHandler handler)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    return _currentProvider->AddNextSimStepHandler(std::move(handler));
+    _currentProvider->OnHandlerAdded();
+    return _handlers.Add(std::move(handler));
 }
 
 void TimeProvider::RemoveNextSimStepHandler(HandlerId handlerId)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    _currentProvider->RemoveNextSimStepHandler(handlerId);
+    _handlers.Remove(handlerId);
 }
 
 void TimeProvider::SetTime(std::chrono::nanoseconds now, std::chrono::nanoseconds duration)
@@ -103,13 +125,13 @@ void TimeProvider::SetTime(std::chrono::nanoseconds now, std::chrono::nanosecond
 void TimeProvider::SetSynchronizeVirtualTime(bool isSynchronizingVirtualTime)
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    _currentProvider->SetSynchronizeVirtualTime(isSynchronizingVirtualTime);
+    _isSynchronizingVirtualTime = isSynchronizingVirtualTime;
 }
 
 bool TimeProvider::IsSynchronizingVirtualTime() const
 {
     std::unique_lock<decltype(_mutex)> lock{_mutex};
-    return _currentProvider->IsSynchronizingVirtualTime();
+    return _isSynchronizingVirtualTime;
 }
 
 } // namespace Orchestration
