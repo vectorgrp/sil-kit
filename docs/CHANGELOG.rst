@@ -7,6 +7,15 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
 
+[4.0.41] - 2023-11-28
+---------------------
+
+Fixed
+~~~~~
+
+- Potential deadlock when switching to virtual time-synchronization while replay is in use
+
+
 [4.0.40] - 2023-11-27
 ---------------------
 
