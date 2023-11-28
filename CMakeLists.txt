@@ -283,6 +283,7 @@ set(CPACK_ARCHIVE_DOCS_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}
 set(CPACK_COMPONENT_UNSPECIFIED_DISABLED ON)
 set(CPACK_COMPONENTS_ALL "bin")
 list(APPEND CPACK_COMPONENTS_ALL "dev")
+list(APPEND CPACK_COMPONENTS_ALL "utils")
 
 
 if(SILKIT_BUILD_DOCS)
@@ -298,3 +299,4 @@ cpack_add_component(docs DISPLAY_NAME "SIL Kit Documentation")
 cpack_add_component(source DISPLAY_NAME "SIL Kit Sources")
 cpack_add_component(bin DISPLAY_NAME "SIL Kit Binaries")
 cpack_add_component(dev DISPLAY_NAME "SIL Kit Headers")
+cpack_add_component(utils DISPLAY_NAME "SIL Kit Utility Tools")

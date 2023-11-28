@@ -55,5 +55,5 @@ endif()
 
 install(TARGETS sil-kit-monitor
     RUNTIME DESTINATION ${INSTALL_BIN_DIR}
-    COMPONENT bin
+    COMPONENT utils
 )
