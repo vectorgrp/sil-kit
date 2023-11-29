@@ -140,20 +140,17 @@ public:
         : controller{controller}
     {
         schedule = {
-            {15ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
-            {5ms, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
-            {5ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
+            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_16(now); }},
+            {20ms, [this](std::chrono::nanoseconds now) { SendFrame_17(now); }},
+            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_18(now); }},
+            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_19(now); }},
+            {10ms, [this](std::chrono::nanoseconds now) { SendFrame_34(now); }},
+            {10ms, [this](std::chrono::nanoseconds /*now*/) { GoToSleep(); }}
         };
     }
 
     void DoAction(std::chrono::nanoseconds now)
     {
-        if (controller->Status() != LinControllerStatus::Operational)
-            return;
-
         schedule.ExecuteTask(now);
     }
 
@@ -165,10 +162,9 @@ public:
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1, 6, 1, 6, 1, 6, 1, 6};
 
-        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
-        std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
+        SendFrameIfOperational(frame, LinFrameResponseType::MasterResponse);
     }
-        
+
     void SendFrame_17(std::chrono::nanoseconds /*now*/)
     {
         LinFrame frame;
@@ -177,8 +173,7 @@ public:
         frame.dataLength = 6;
         frame.data = std::array<uint8_t, 8>{1,7,1,7,1,7,1,7};
 
-        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
-        std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
+        SendFrameIfOperational(frame, LinFrameResponseType::MasterResponse);
     }
 
     void SendFrame_18(std::chrono::nanoseconds /*now*/)
@@ -189,8 +184,7 @@ public:
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
-        std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
+        SendFrameIfOperational(frame, LinFrameResponseType::MasterResponse);
     }
 
     void SendFrame_19(std::chrono::nanoseconds /*now*/)
@@ -201,8 +195,7 @@ public:
         frame.dataLength = 8;
         frame.data = std::array<uint8_t, 8>{0};
 
-        controller->SendFrame(frame, LinFrameResponseType::MasterResponse);
-        std::cout << "<< LIN Frame sent with ID=" << static_cast<uint16_t>(frame.id) << std::endl;
+        SendFrameIfOperational(frame, LinFrameResponseType::MasterResponse);
     }
 
     void SendFrame_34(std::chrono::nanoseconds /*now*/)
@@ -212,8 +205,7 @@ public:
         frame.checksumModel = LinChecksumModel::Enhanced;
         frame.dataLength = 6;
 
-        controller->SendFrame(frame, LinFrameResponseType::SlaveResponse);
-        std::cout << "<< LIN Frame Header sent for ID=" << static_cast<unsigned int>(frame.id) << std::endl;
+        SendFrameIfOperational(frame, LinFrameResponseType::SlaveResponse);
     }
 
     void GoToSleep()
@@ -246,6 +238,30 @@ public:
 
         std::cout << ">> Wakeup pulse received; direction=" << wakeupEvent.direction << std::endl;
         linController->WakeupInternal();
+    }
+
+private:
+    void SendFrameIfOperational(const LinFrame& linFrame, LinFrameResponseType responseType)
+    {
+        const auto linId{static_cast<unsigned>(linFrame.id)};
+
+        if (controller->Status() != LinControllerStatus::Operational)
+        {
+            std::cout << "!! LIN Frame with ID=" << linId << " not sent, since the controller is not operational"
+                      << std::endl;
+            return;
+        }
+
+        controller->SendFrame(linFrame, responseType);
+
+        if (responseType == LinFrameResponseType::SlaveResponse)
+        {
+            std::cout << "<< LIN Frame Header sent for ID=" << linId << std::endl;
+        }
+        else
+        {
+            std::cout << "<< LIN Frame sent with ID=" << linId << std::endl;
+        }
     }
 
 private:
@@ -293,8 +309,8 @@ public:
     void GoToSleepHandler(ILinController* linController, const LinGoToSleepEvent& /*goToSleepEvent*/)
     {
         std::cout << "LIN Slave received go-to-sleep command; entering sleep mode." << std::endl;
-        // wakeup in 10 ms
-        timer.Set(now + 10ms,
+        // wakeup in 15 ms
+        timer.Set(now + 15ms,
             [linController](std::chrono::nanoseconds tnow) {
                 std::cout << "<< Wakeup pulse @" << tnow << std::endl;
                 linController->Wakeup();
@@ -465,6 +481,8 @@ int main(int argc, char** argv) try
                     std::cout << "now=" << nowMs.count() << "ms" << std::endl;
 
                     master.DoAction(now);
+
+                    std::this_thread::sleep_for(100ms);
                 },
                 1ms);
 
