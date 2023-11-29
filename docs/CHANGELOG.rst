@@ -6,6 +6,14 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
+[4.0.42] - 2023-11-29
+---------------------
+
+Changed
+~~~~~~~
+
+- LIN Demo: Adapted the schedule of the LIN Master and disallowed sending while in wrong controller state.
+
 
 [4.0.41] - 2023-11-28
 ---------------------
