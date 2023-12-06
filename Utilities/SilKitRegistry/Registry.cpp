@@ -143,7 +143,7 @@ void OverrideFromRegistryConfiguration(std::shared_ptr<SilKit::Config::IParticip
         config->logging.sinks = registryConfiguration.logging.sinks;
     }
 
-    enableDashboard = registryConfiguration.dashboardUri.has_value();
+    enableDashboard = enableDashboard || registryConfiguration.dashboardUri.has_value();
 
     if (registryConfiguration.dashboardUri.has_value())
     {
