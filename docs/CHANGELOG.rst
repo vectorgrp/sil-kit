@@ -6,13 +6,15 @@ All notable changes to the Vector SIL Kit project shall be documented in this fi
 
 The format is based on `Keep a Changelog (http://keepachangelog.com/en/1.0.0/) <http://keepachangelog.com/en/1.0.0/>`_.
 
-[4.0.43] - 
+[4.0.43] - 2023-12-12 
 ---------------------
 
 Fixed
 ~~~~~
 
 - Dashboard can be enabled using CLI arguments
+- Demos did not terminate when simulation is aborted (AbortSimulation)
+- Fix order of debug log message parameters
 
 
 [4.0.42] - 2023-11-29
@@ -22,15 +24,6 @@ Changed
 ~~~~~~~
 
 - LIN Demo: Adapted the schedule of the LIN Master and disallowed sending while in wrong controller state.
-
-
-[4.0.42] - UNRELEASED
----------------------
-
-Fixed
-~~~~~
-
-- Demos did not terminate when simulation is aborted (AbortSimulation)
 
 
 [4.0.41] - 2023-11-28
