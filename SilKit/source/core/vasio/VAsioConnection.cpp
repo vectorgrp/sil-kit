@@ -1527,7 +1527,7 @@ bool VAsioConnection::TryAddRemoteSubscriber(IVAsioPeer* from, const VAsioMsgSub
     if (wasAdded)
     {
         Services::Logging::Debug(_logger, "Messages of type '{}' on link '{}' will be sent to participant '{}'",
-                                 from->GetInfo().participantName, subscriber.msgTypeName, subscriber.networkName);
+                                 subscriber.msgTypeName, subscriber.networkName, from->GetInfo().participantName);
     }
     else
     {
